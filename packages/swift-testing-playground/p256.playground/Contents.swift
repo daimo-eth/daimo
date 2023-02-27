@@ -19,4 +19,5 @@ let privKey = try! SecureEnclave.P256.Signing.PrivateKey()
 let signature = try privKey.signature(for: data)
 print("sig", signature.rawRepresentation.hexEncodedString())
 print("data", data.hexEncodedString())
-print("pubkey", privKey.publicKey.rawRepresentation.hexEncodedString())
+
+print("pubkey", privKey.publicKey.compactRepresentation!.hexEncodedString())
