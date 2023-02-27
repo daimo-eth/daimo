@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:testlib/testlib.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ExpoEnclave.podspec">
+   </FileRef>
+   <FileRef
+      location = "group:ExpoEnclaveModule.swift">
+   </FileRef>
+   <FileRef
+      location = "group:KeyManagement.swift">
+   </FileRef>
+</Workspace>

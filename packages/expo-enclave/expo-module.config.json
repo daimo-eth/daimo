@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android"],
+  "ios": {
+    "modules": ["ExpoEnclaveModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.enclave.ExpoEnclaveModule"]
+  }
+}
