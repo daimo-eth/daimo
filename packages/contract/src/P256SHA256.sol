@@ -433,18 +433,11 @@ contract P256SHA256 {
         }
     }
 
-    function parseSignature(
+    function parseSignatureOrKey(
         bytes memory data
     ) internal pure returns (uint256[2] memory) {
-        require(data.length == 64, "Invalid p256 signature length");
+        require(data.length == 64, "Invalid p256 signature/key length");
         return [uint256(readBytes32(data, 0)), uint256(readBytes32(data, 32))];
-    }
-
-    function parseKey(
-        bytes memory data
-    ) internal pure returns (uint256[2] memory) {
-        require(data.length == 68, "Invalid p256 key length");
-        return [uint256(readBytes32(data, 4)), uint256(readBytes32(data, 36))];
     }
 
     /**
@@ -462,8 +455,8 @@ contract P256SHA256 {
         return
             validateSignature(
                 sha256(data),
-                parseSignature(signature),
-                parseKey(key)
+                parseSignatureOrKey(signature),
+                parseSignatureOrKey(key)
             );
     }
 }

@@ -12,9 +12,10 @@ contract P256SHA256Test is Test {
     }
 
     function testTrivialVerify() public {
-        bytes memory key = hex"0101030d1a88c88615d437fbb8bf9e1942a1929f28562706ae6c2bd399e7b1bfb6d1e9e75b92b4aa42917ae1c61b701ef035c3fe7be3009cbafe5a2f71316c902dcf0d00";
-        bytes memory data = hex"00010d0300000e104c88b1374c63c737d960076578616d706c65036e65740003777777076578616d706c65036e6574000001000100000e100004c0000201";
-        bytes memory signature = hex"ab1eb02d8aa687e97da0229337aa8873e6f0eb26be289f28333d183f5d3b7a95c0c869adfb748daee3c5286eed6682c12e5533186baced9c26c167a9ebae950b";
+        // Test signature from swift-testing-playground
+        bytes memory key = hex"761052180c3665204fc5c4312a28cd53bc2b1c013a2d8ea293d0c556790186a83ad45c65ff1c4809df7e1f807705dd3a9b04d3f9806717c061d38450833e0d76";
+        bytes memory data = hex"48656c6c6f2c20706c617967726f756e64";
+        bytes memory signature = hex"38fc4372726293377d9eb5a35cd521b9ddd603420735733979f06952c50fa08e300da1ce3f19e5f0fa90eabd473a2fd40bdb6cf3c37dc53bb07c82261c3d7be7";
         bool ret = verifier.verify(
             key,
             data,
