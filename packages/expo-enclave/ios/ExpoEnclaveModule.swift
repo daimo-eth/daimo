@@ -22,12 +22,7 @@ public class ExpoEnclaveModule: Module {
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") { () -> String in
       let pk = P256.Signing.PrivateKey()
-      let rawPubKey = pk.publicKey.compactRepresentation
-        if let pubKey = rawPubKey {
-            return pubKey.base64EncodedString()
-        } else {
-            return "broken"
-        }
+      return pk.dataRepresentation.base64EncodedString()
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code
@@ -39,4 +34,35 @@ public class ExpoEnclaveModule: Module {
       ])
     }
   }
+}
+
+/// Generates a SecureEnclave P256 key, then saves a (reference to) it to the
+/// keychain
+func generateAndSaveKey(account: String) throws -> SecureEnclave.P256.Signing.PrivateKey {
+    let key = SecureEnclave.P256.Signing.PrivateKey()
+    try saveKey(key, account: account)
+    return key
+}
+
+
+/// Reads a CryptoKit key from the keychain as a generic password.
+func readKey(account: String) throws -> SecureEnclave.P256.Signing.PrivateKey? {
+
+    // Seek a generic password with the given account.
+    let query = [
+        kSecClass: kSecClassGenericPassword,
+        kSecAttrAccount: KEYCHAIN_STORE_PREFIX + account,
+        kSecUseDataProtectionKeychain: true,
+        kSecReturnData: true
+    ] as [String: Any]
+    
+    // Find and cast the result as data.
+    var item: CFTypeRef?
+    switch SecItemCopyMatching(query as CFDictionary, &item) {
+    case errSecSuccess:
+        guard let data = item as? Data else { return nil }
+        return try SecureEnclave.P256.PrivateKey(rawRepresentation: data)
+    case errSecItemNotFound: return nil
+    case let status: throw KeyStoreError("Keychain read failed: \(status.message)")
+    }
 }

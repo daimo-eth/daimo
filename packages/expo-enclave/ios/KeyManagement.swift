@@ -1,10 +1,10 @@
 import CryptoKit
 
-public class KeyManagement {
-    public static func generateKeyPair() -> (privateKey: P256.Signing.PrivateKey, publicKey: P256.Signing.PublicKey) {
-        let privateKey = P256.Signing.PrivateKey()
-        let publicKey = privateKey.publicKey
-        return (privateKey, publicKey)
+public class KeyMgmt {
+
+    public static func generateKeyPair() -> String {
+        let privateKey = SecureEnclave.P256.Signing.PrivateKey()
+        return privateKey.dataRepresentation.base64EncodedString()
     }
     
     public static func sign(privateKey: P256.Signing.PrivateKey, data: Data) -> Data {

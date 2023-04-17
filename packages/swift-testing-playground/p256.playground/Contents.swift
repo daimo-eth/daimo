@@ -15,9 +15,13 @@ extension Data {
 
 let greeting = "Hello, playground"
 let data = greeting.data(using: .utf8)!
-let privKey = try! SecureEnclave.P256.Signing.PrivateKey()
-let signature = try privKey.signature(for: data)
-print("sig", signature.rawRepresentation.hexEncodedString())
 print("data", data.hexEncodedString())
 
+let privKey = try! SecureEnclave.P256.Signing.PrivateKey()
 print("pubkey", privKey.publicKey.compactRepresentation!.hexEncodedString())
+print("pk", privKey)
+print("pkrep", privKey.dataRepresentation.hexEncodedString())
+
+let signature = try privKey.signature(for: data)
+print("sig", signature.rawRepresentation.hexEncodedString())
+
