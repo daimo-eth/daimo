@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   ScrollView,
@@ -11,15 +11,22 @@ import {
   NativeScrollEvent,
 } from "react-native";
 import Spacer from "../shared/Spacer";
+import { Chain } from "../../logic/chain";
+import { useAccount } from "../../logic/account";
 
-export default function OnboardingScreen() {
+export default function OnboardingScreen({ chain }: { chain: Chain }) {
   const [pageIndex, setPageIndex] = useState(0);
-
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
     const page = Math.round(contentOffset.x / layoutMeasurement.width);
     setPageIndex(page);
   };
+
+  const [account, setAccount] = useAccount();
+  const createAccount = useCallback(async () => {
+    const account = await chain.createAccount();
+    setAccount(account);
+  }, [account]);
 
   return (
     <View style={styles.outerView}>
@@ -57,7 +64,7 @@ export default function OnboardingScreen() {
           />
         </ScrollView>
         <Spacer h={64} />
-        <Button title="Create account" />
+        <Button title="Create account" onPress={createAccount} />
         <Spacer h={8} />
         <Button title="Add device" />
       </View>
