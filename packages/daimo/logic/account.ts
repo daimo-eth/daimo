@@ -13,8 +13,9 @@ interface StoredModel {
 interface AccountV1 extends StoredModel {
   storageVersion: 1;
   address: string;
-  lastBalance: bigint;
-  lastNonce: bigint;
+  /** TODO: json-bignum */
+  lastBalance: number;
+  lastNonce: number;
   lastBlockTimestamp: number;
 }
 
@@ -32,14 +33,12 @@ export function useAccount(): [Account, (account: Account) => void] {
   return [account, setAccount];
 }
 
-function parseAccount(accountJSON: string): Account | null {
+function parseAccount(accountJSON?: string): Account | null {
+  if (!accountJSON) return null;
+
+  console.log(`Parsing account: ${accountJSON}`);
   const model = JSON.parse(accountJSON) as StoredModel;
 
   assert(model.storageVersion === latestStorageVersion);
   return model as Account;
-}
-
-function saveAccount(account: Account): void {
-  const accountJSON = JSON.stringify(account);
-  storage.set("account", accountJSON);
 }

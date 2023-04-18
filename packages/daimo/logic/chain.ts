@@ -32,8 +32,8 @@ export class StubChain implements Chain {
     return {
       storageVersion: 1,
       address: "0x123",
-      lastBalance: BigInt(0),
-      lastNonce: BigInt(0),
+      lastBalance: 0,
+      lastNonce: 0,
       lastBlockTimestamp: 0,
     };
   }
