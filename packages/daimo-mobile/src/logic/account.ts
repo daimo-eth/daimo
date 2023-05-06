@@ -1,5 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useMMKVString } from "react-native-mmkv";
+
 import { assert } from "./assert";
 
 export type Account = {

@@ -1,18 +1,19 @@
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useState } from "react";
 import {
-  View,
-  ScrollView,
   Button,
   Dimensions,
-  Text,
-  StyleSheet,
-  NativeSyntheticEvent,
   NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import Spacer from "../shared/Spacer";
-import { Chain } from "../../logic/chain";
+
 import { useAccount } from "../../logic/account";
+import { Chain } from "../../logic/chain";
+import Spacer from "../shared/Spacer";
 
 export default function OnboardingScreen({ chain }: { chain: Chain }) {
   const [pageIndex, setPageIndex] = useState(0);

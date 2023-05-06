@@ -1,7 +1,0 @@
-{
-  "include": ["**/*"],
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2017"
-  }
-}

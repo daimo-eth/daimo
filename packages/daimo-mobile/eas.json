@@ -5,6 +5,8 @@
   "build": {
     "sim": {
       "ios": {
+        "buildConfiguration": "Debug",
+        "resourceClass": "m-medium",
         "simulator": true
       }
     },

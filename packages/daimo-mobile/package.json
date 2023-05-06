@@ -1,18 +1,19 @@
 {
   "name": "daimo-mobile",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "start": "expo start --dev-client --tunnel",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "lint": "eslint . && tsc . --no-emit",
-    "test": "jest"
+    "lint": "eslint . && ts-unused-exports ./tsconfig.json && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen",
+    "test": "npm run lint && tsc --noEmit && jest"
   },
   "dependencies": {
-    "@babel/core": "^7.20.0",
     "@expo/ngrok": "^4.1.0",
     "@types/jest": "^29.5.1",
     "@types/react": "^18.0.36",
+    "depcheck": "^1.4.3",
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
     "expo": "~48.0.11",
@@ -24,10 +25,9 @@
     "react": "18.2.0",
     "react-native": "^0.71.7",
     "react-native-mmkv": "^2.8.0",
-    "ts-jest": "^29.1.0",
+    "ts-unused-exports": "^9.0.4",
     "typescript": "^5.0.4"
   },
-  "private": true,
   "eslintConfig": {
     "extends": "universe/native",
     "rules": {
@@ -36,9 +36,14 @@
         {
           "zones": [
             {
-              "target": "test/",
-              "from": "src/",
+              "target": "src/",
+              "from": "test/",
               "message": "Don't import test files."
+            },
+            {
+              "target": "src/logic",
+              "from": "src/view",
+              "message": "Don't import view/ files from logic/."
             }
           ]
         }

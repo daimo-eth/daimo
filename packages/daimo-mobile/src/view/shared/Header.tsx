@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { color } from "./constants";
+import { color } from "./style";
 
 export function Header() {
   return (

@@ -9,7 +9,7 @@ export interface Chain {
   // TODO: send transaction, add or remove device.
 }
 
-export interface ChainStatus {
+interface ChainStatus {
   status: "ok" | "error";
   blockHeight: number;
   blockTimestamp: number;
@@ -30,10 +30,9 @@ export class StubChain implements Chain {
 
   async createAccount(): Promise<Account> {
     return {
-      storageVersion: 1,
       address: "0x123",
-      lastBalance: 0,
-      lastNonce: 0,
+      lastBalance: BigInt(0),
+      lastNonce: BigInt(0),
       lastBlockTimestamp: 0,
     };
   }
