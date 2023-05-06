@@ -3,6 +3,11 @@
     "version": ">= 3.9.2"
   },
   "build": {
+    "sim": {
+      "ios": {
+        "simulator": true
+      }
+    },
     "development": {
       "distribution": "internal",
       "android": {
@@ -10,8 +15,7 @@
       },
       "ios": {
         "buildConfiguration": "Debug",
-        "resourceClass": "m-medium",
-        "simulator": true
+        "resourceClass": "m-medium"
       }
     },
     "preview": {
