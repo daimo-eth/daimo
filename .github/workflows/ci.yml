@@ -11,7 +11,7 @@ jobs:
     needs: test-mobile
     runs-on: ubuntu-latest
     steps:
-      - run: All tests passed
+      - run: echo All tests passed
 
   test-mobile:
     runs-on: ubuntu-latest
@@ -20,7 +20,13 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "20.x"
-      - run: npm ci
+      - id: cache
+        uses: actions/cache@v3
+        with:
+          path: ./packages/daimo-mobile/node_modules
+          key: modules-${{ hashFiles('package-lock.json') }}
+      - if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts
         working-directory: ./packages/daimo-mobile
       - run: npm test
         working-directory: ./packages/daimo-mobile
