@@ -1,9 +1,31 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 
-export default function OnboardingScreen() {
+import { Header } from "../shared/Header";
+import Spacer from "../shared/Spacer";
+
+export default function HomeScreen() {
   return (
     <View style={styles.outerView}>
-      <Text style={styles.title}>Coming soon</Text>
+      <Header />
+      <View>
+        <Text style={styles.title}>
+          <Text style={styles.titleSmall}>$</Text>0.00
+        </Text>
+        <Spacer h={16} />
+        <View style={styles.buttonRow}>
+          <Button title="Send" onPress={() => {}} />
+          <Button title="Receive" onPress={() => {}} />
+        </View>
+      </View>
+      <Footer />
+    </View>
+  );
+}
+
+function Footer() {
+  return (
+    <View>
+      <Text>coming soon</Text>
     </View>
   );
 }
@@ -13,11 +35,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    paddingTop: 48,
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  titleSmall: {
+    fontSize: 24,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 16,
   },
 });
