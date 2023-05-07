@@ -7,7 +7,7 @@ import "../src/P256SHA256.sol";
 import "../src/AccountFactory.sol";
 import "../src/Account.sol";
 
-import "account-abstraction/core/Entrypoint.sol";
+import "account-abstraction/core/EntryPoint.sol";
 
 contract EntrypointTest is Test {
     using UserOperationLib for UserOperation;
@@ -20,6 +20,10 @@ contract EntrypointTest is Test {
         verifier = new P256SHA256();
         entryPoint = new EntryPoint();
         factory = new AccountFactory(entryPoint, verifier);
+        console.log("verifier address:", address(verifier));
+        console.log("entryPoint address:", address(entryPoint));
+        console.log("factory address:", address(factory));
+
     }
 
     /***
@@ -38,7 +42,7 @@ contract EntrypointTest is Test {
     function testSimpleOp() public {
         // hardcoded from swift playground
         bytes memory ownerPK = hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e44a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437";
-        bytes memory ownerSig = hex"93dfb3f8d2af9e0f55067293dfcae5ae1bd480e6f8afd2617d160978511bb216a2ed2f7f77d9a7e8ff44bc47a4d8f6aee50340cc01dbb0843c39562dfa0d9ed5";
+        bytes memory ownerSig = hex"c6a8e819b7d64188487b7bb09f24e0e024b592d35a725e7dcc1199a2738731610d49b29d5573be70f40f54be1c942807e6d1648352af4fdd39572314aaf6ff3c";
 
         Account acc = factory.createAccount(ownerPK, 42);
         console.log("new account address:", address(acc));
