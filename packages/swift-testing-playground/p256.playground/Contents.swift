@@ -45,7 +45,7 @@ extension Data {
 
 // hex version of '\x19Ethereum Signed Message:\n32'
 let hexifiedPrefix = "19457468657265756d205369676e6564204d6573736167653a0a3332";
-let data = Data(fromHexEncodedString: hexifiedPrefix + "2744f50cad414ec44c0d7512569582d2c63b645ade52d5b031db022c4bad0b28")!
+let data = Data(fromHexEncodedString: hexifiedPrefix + "bc8e1db45e18d9c05414af997d07148e99448585916cd64cad356dff8dcea225")!
 print("data", data.hexEncodedString())
 
 let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
@@ -62,4 +62,4 @@ let emptiness: UInt8 = 0
 let signature = try privKey.signature(for: data)
 print("sig", signature.rawRepresentation.hexEncodedString())
 
-//  new account address: 0xB1bE2929CFa0DAA22C782B3D4E9c1C0E26CbD239
+//  new account address: 0xFC89f5049A1eCdBB52487be461e3C2aA81bd84A5

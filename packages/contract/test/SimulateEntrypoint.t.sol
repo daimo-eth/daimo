@@ -41,10 +41,10 @@ contract EntrypointTest is Test {
 
     function testSimpleOp() public {
         // hardcoded from swift playground
-        bytes memory ownerPK = hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e44a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437";
-        bytes memory ownerSig = hex"c6a8e819b7d64188487b7bb09f24e0e024b592d35a725e7dcc1199a2738731610d49b29d5573be70f40f54be1c942807e6d1648352af4fdd39572314aaf6ff3c";
+        bytes32[2] memory key = [bytes32(hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4"), bytes32(hex"4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437")];
+        bytes memory ownerSig = hex"b984834652808def0389d90b4c807efb126390f6a7bded0039b62a15d8e1972263a39161eca4f489803cec63756abe2ff15a884916d1f274e448663443e54659";
 
-        Account acc = factory.createAccount(ownerPK, 42);
+        Account acc = factory.createAccount(key, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 

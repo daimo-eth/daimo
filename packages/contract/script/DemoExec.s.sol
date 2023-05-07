@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "../src/AccountFactory.sol";
 
-contract TestExecuteScript is Script {
+contract DemoExecScript is Script {
     function setUp() public {}
 
     function run() public {

@@ -17,7 +17,7 @@ import "./P256SHA256.sol";
   * minimal account.
   *  this is sample minimal account.
   *  has execute, eth handling methods
-  *  has a single signer that can send requests through the entryPoint.
+  *  has many P256 account keys that can send requests through the entryPoint.
   */
 contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
@@ -26,18 +26,18 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     // the "Initializeble" class takes 2 bytes in the first slot
     bytes28 private _filler;
 
-    //explicit sizes of nonce, to fit a single storage cell with "owner"
+    //explicit sizes of nonce, to fit a single storage cell with account keys
     uint96 private _nonce;
-    bytes public owner; // P256 owner public key
+    bytes32[2][] public accountKeys; // list of P256 public keys that own the account
 
     IEntryPoint private immutable _entryPoint;
 
     P256SHA256 private immutable _sigVerifier;
 
-    event AccountInitialized(IEntryPoint indexed entryPoint, bytes indexed owner);
+    event AccountInitialized(IEntryPoint indexed entryPoint, bytes32[2] accountKeyHash);
 
     modifier onlyOwner() {
-        _onlyOwner();
+        _onlySelf();
         _;
     }
 
@@ -61,9 +61,9 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
         _disableInitializers();
     }
 
-    function _onlyOwner() internal view {
+    function _onlySelf() internal view {
         //through the account itself (which gets redirected through execute())
-        require(msg.sender == address(this), "only owner");
+        require(msg.sender == address(this), "only self");
     }
 
     /**
@@ -90,13 +90,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
       * the implementation by calling `upgradeTo()`
      */
-    function initialize(bytes memory anOwner) public virtual initializer {
-        _initialize(anOwner);
+    function initialize(bytes32[2] calldata accountKey) public virtual initializer {
+        _initialize(accountKey);
     }
 
-    function _initialize(bytes memory anOwner) internal virtual {
-        owner = anOwner;
-        emit AccountInitialized(_entryPoint, owner);
+    function _initialize(bytes32[2] calldata accountKey) internal virtual {
+        accountKeys.push(accountKey);
+        emit AccountInitialized(_entryPoint, accountKey);
     }
 
     /// implement template method of BaseAccount
@@ -107,10 +107,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     /// implement template method of BaseAccount
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
     internal override virtual returns (uint256 validationData) {
-        bytes memory prefixedHash = bytes.concat("\x19Ethereum Signed Message:\n32", userOpHash);
-        if (!_sigVerifier.verify(owner, prefixedHash, userOp.signature))
-            return SIG_VALIDATION_FAILED;
-        return 0;
+        bytes memory prefixedHash = bytes.concat("\x19Ethereum Signed Message:\n32", userOpHash); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
+        for (uint256 i = 0; i < accountKeys.length; i++) {
+            if (_sigVerifier.verify(accountKeys[i], prefixedHash, userOp.signature)) {
+                return 0;
+            }
+        }
+        return SIG_VALIDATION_FAILED;
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
@@ -147,6 +150,6 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     function _authorizeUpgrade(address newImplementation) internal view override {
         (newImplementation);
-        _onlyOwner();
+        _onlySelf();
     }
 }
