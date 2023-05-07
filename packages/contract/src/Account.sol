@@ -11,6 +11,8 @@ import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "account-abstraction/core/BaseAccount.sol";
 
+import "./P256SHA256.sol";
+
 /**
   * minimal account.
   *  this is sample minimal account.
@@ -26,11 +28,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     //explicit sizes of nonce, to fit a single storage cell with "owner"
     uint96 private _nonce;
-    address public owner;
+    bytes public owner; // P256 owner public key
 
     IEntryPoint private immutable _entryPoint;
 
-    event AccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+    P256SHA256 private immutable _sigVerifier;
+
+    event AccountInitialized(IEntryPoint indexed entryPoint, bytes indexed owner);
 
     modifier onlyOwner() {
         _onlyOwner();
@@ -51,21 +55,22 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPoint anEntryPoint, P256SHA256 aSigVerifier) {
         _entryPoint = anEntryPoint;
+        _sigVerifier = aSigVerifier;
         _disableInitializers();
     }
 
     function _onlyOwner() internal view {
-        //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == owner || msg.sender == address(this), "only owner");
+        //through the account itself (which gets redirected through execute())
+        require(msg.sender == address(this), "only owner");
     }
 
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
     function execute(address dest, uint256 value, bytes calldata func) external {
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPoint();
         _call(dest, value, func);
     }
 
@@ -73,7 +78,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * execute a sequence of transactions
      */
     function executeBatch(address[] calldata dest, bytes[] calldata func) external {
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPoint();
         require(dest.length == func.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
@@ -85,18 +90,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
       * the implementation by calling `upgradeTo()`
      */
-    function initialize(address anOwner) public virtual initializer {
+    function initialize(bytes memory anOwner) public virtual initializer {
         _initialize(anOwner);
     }
 
-    function _initialize(address anOwner) internal virtual {
+    function _initialize(bytes memory anOwner) internal virtual {
         owner = anOwner;
         emit AccountInitialized(_entryPoint, owner);
-    }
-
-    // Require the function call went through EntryPoint or owner
-    function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner, "account: not Owner or EntryPoint");
     }
 
     /// implement template method of BaseAccount
@@ -107,8 +107,8 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     /// implement template method of BaseAccount
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
     internal override virtual returns (uint256 validationData) {
-        bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner != hash.recover(userOp.signature))
+        bytes memory prefixedHash = bytes.concat("\x19Ethereum Signed Message:\n32", userOpHash);
+        if (!_sigVerifier.verify(owner, prefixedHash, userOp.signature))
             return SIG_VALIDATION_FAILED;
         return 0;
     }

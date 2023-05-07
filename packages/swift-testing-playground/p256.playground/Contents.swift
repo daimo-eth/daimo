@@ -11,17 +11,55 @@ extension Data {
         let format = options.contains(.upperCase) ? "%02hhX" : "%02hhx"
         return self.map { String(format: format, $0) }.joined()
     }
+    
+    init?(fromHexEncodedString string: String) {
+
+            // Convert 0 ... 9, a ... f, A ...F to their decimal value,
+            // return nil for all other input characters
+            func decodeNibble(u: UInt8) -> UInt8? {
+                switch(u) {
+                case 0x30 ... 0x39:
+                    return u - 0x30
+                case 0x41 ... 0x46:
+                    return u - 0x41 + 10
+                case 0x61 ... 0x66:
+                    return u - 0x61 + 10
+                default:
+                    return nil
+                }
+            }
+
+            self.init(capacity: string.utf8.count/2)
+            
+            var iter = string.utf8.makeIterator()
+            while let c1 = iter.next() {
+                guard
+                    let val1 = decodeNibble(u: c1),
+                    let c2 = iter.next(),
+                    let val2 = decodeNibble(u: c2)
+                else { return nil }
+                self.append(val1 << 4 + val2)
+            }
+        }
 }
 
-let greeting = "Hello, playground"
-let data = greeting.data(using: .utf8)!
+// hex version of '\x19Ethereum Signed Message:\n32'
+let hexifiedPrefix = "19457468657265756d205369676e6564204d6573736167653a0a3332";
+let data = Data(fromHexEncodedString: hexifiedPrefix + "dd0a63366691cce64d119a175ee05701a1ca42ec9bc0146c1c4815d97dcbdce6")!
 print("data", data.hexEncodedString())
 
-let privKey = try! SecureEnclave.P256.Signing.PrivateKey()
+let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
+
+let privKey = try! P256.Signing.PrivateKey(pemRepresentation: pemKeyString)
 print("pubkey", privKey.publicKey.compactRepresentation!.hexEncodedString())
-print("pk", privKey)
-print("pkrep", privKey.dataRepresentation.hexEncodedString())
+print("pubkey extended", privKey.publicKey.rawRepresentation.hexEncodedString())
+print("pk", privKey.pemRepresentation)
+//print("pkrep", privKey.dataRepresentation.hexEncodedString())
+
+let emptiness: UInt8 = 0
+
 
 let signature = try privKey.signature(for: data)
 print("sig", signature.rawRepresentation.hexEncodedString())
 
+//  new account address: 0xBb001D8A15364d0B7579bA6ccC1622871ED5B47E

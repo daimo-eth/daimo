@@ -15,8 +15,8 @@ import "./Account.sol";
 contract AccountFactory {
     Account public immutable accountImplementation;
 
-    constructor(IEntryPoint _entryPoint) {
-        accountImplementation = new Account(_entryPoint);
+    constructor(IEntryPoint _entryPoint, P256SHA256 _sigVerifier) {
+        accountImplementation = new Account(_entryPoint, _sigVerifier);
     }
 
     /**
@@ -25,7 +25,7 @@ contract AccountFactory {
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
-    function createAccount(address owner,uint256 salt) public returns (Account ret) {
+    function createAccount(bytes memory owner,uint256 salt) public returns (Account ret) {
         address addr = getAddress(owner, salt);
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
@@ -40,7 +40,7 @@ contract AccountFactory {
     /**
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
-    function getAddress(address owner,uint256 salt) public view returns (address) {
+    function getAddress(bytes memory owner,uint256 salt) public view returns (address) {
         return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
