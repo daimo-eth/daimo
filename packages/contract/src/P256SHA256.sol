@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
 
 /**
@@ -433,12 +434,16 @@ contract P256SHA256 {
         }
     }
 
-    function parseSignatureOrKey(
+    function parseSignature(
         bytes memory data
     ) internal pure returns (uint256[2] memory) {
-        require(data.length == 64, "Invalid p256 signature/key length");
+        require(data.length == 64, "Invalid P256 signature/key length");
         return [uint256(readBytes32(data, 0)), uint256(readBytes32(data, 32))];
     }
+
+    function parseKey(bytes32[2] memory data) internal pure returns (uint256[2] memory) {
+        return [uint256(data[0]), uint256(data[1])];
+    } 
 
     /**
      * @dev Verifies a signature.
@@ -448,15 +453,15 @@ contract P256SHA256 {
      * @return True iff the signature is valid.
      */
     function verify(
-        bytes calldata key,
+        bytes32[2] calldata key,
         bytes calldata data,
         bytes calldata signature
     ) external pure returns (bool) {
         return
             validateSignature(
                 sha256(data),
-                parseSignatureOrKey(signature),
-                parseSignatureOrKey(key)
+                parseSignature(signature),
+                parseKey(key)
             );
     }
 }

@@ -11,11 +11,13 @@ import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "account-abstraction/core/BaseAccount.sol";
 
+import "./P256SHA256.sol";
+
 /**
   * minimal account.
   *  this is sample minimal account.
   *  has execute, eth handling methods
-  *  has a single signer that can send requests through the entryPoint.
+  *  has many P256 account keys that can send requests through the entryPoint.
   */
 contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
@@ -24,16 +26,18 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     // the "Initializeble" class takes 2 bytes in the first slot
     bytes28 private _filler;
 
-    //explicit sizes of nonce, to fit a single storage cell with "owner"
+    //explicit sizes of nonce, to fit a single storage cell with account keys
     uint96 private _nonce;
-    address public owner;
+    bytes32[2][] public accountKeys; // list of P256 public keys that own the account
 
     IEntryPoint private immutable _entryPoint;
 
-    event AccountInitialized(IEntryPoint indexed entryPoint, address indexed owner);
+    P256SHA256 private immutable _sigVerifier;
+
+    event AccountInitialized(IEntryPoint indexed entryPoint, bytes32[2] accountKeyHash);
 
     modifier onlyOwner() {
-        _onlyOwner();
+        _onlySelf();
         _;
     }
 
@@ -51,21 +55,22 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPoint anEntryPoint, P256SHA256 aSigVerifier) {
         _entryPoint = anEntryPoint;
+        _sigVerifier = aSigVerifier;
         _disableInitializers();
     }
 
-    function _onlyOwner() internal view {
-        //directly from EOA owner, or through the account itself (which gets redirected through execute())
-        require(msg.sender == owner || msg.sender == address(this), "only owner");
+    function _onlySelf() internal view {
+        //through the account itself (which gets redirected through execute())
+        require(msg.sender == address(this), "only self");
     }
 
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
     function execute(address dest, uint256 value, bytes calldata func) external {
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPoint();
         _call(dest, value, func);
     }
 
@@ -73,7 +78,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * execute a sequence of transactions
      */
     function executeBatch(address[] calldata dest, bytes[] calldata func) external {
-        _requireFromEntryPointOrOwner();
+        _requireFromEntryPoint();
         require(dest.length == func.length, "wrong array lengths");
         for (uint256 i = 0; i < dest.length; i++) {
             _call(dest[i], 0, func[i]);
@@ -85,18 +90,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
       * the implementation by calling `upgradeTo()`
      */
-    function initialize(address anOwner) public virtual initializer {
-        _initialize(anOwner);
+    function initialize(bytes32[2] calldata accountKey) public virtual initializer {
+        _initialize(accountKey);
     }
 
-    function _initialize(address anOwner) internal virtual {
-        owner = anOwner;
-        emit AccountInitialized(_entryPoint, owner);
-    }
-
-    // Require the function call went through EntryPoint or owner
-    function _requireFromEntryPointOrOwner() internal view {
-        require(msg.sender == address(entryPoint()) || msg.sender == owner, "account: not Owner or EntryPoint");
+    function _initialize(bytes32[2] calldata accountKey) internal virtual {
+        accountKeys.push(accountKey);
+        emit AccountInitialized(_entryPoint, accountKey);
     }
 
     /// implement template method of BaseAccount
@@ -107,10 +107,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     /// implement template method of BaseAccount
     function _validateSignature(UserOperation calldata userOp, bytes32 userOpHash)
     internal override virtual returns (uint256 validationData) {
-        bytes32 hash = userOpHash.toEthSignedMessageHash();
-        if (owner != hash.recover(userOp.signature))
-            return SIG_VALIDATION_FAILED;
-        return 0;
+        bytes memory prefixedHash = bytes.concat("\x19Ethereum Signed Message:\n32", userOpHash); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
+        for (uint256 i = 0; i < accountKeys.length; i++) {
+            if (_sigVerifier.verify(accountKeys[i], prefixedHash, userOp.signature)) {
+                return 0;
+            }
+        }
+        return SIG_VALIDATION_FAILED;
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
@@ -147,6 +150,6 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     function _authorizeUpgrade(address newImplementation) internal view override {
         (newImplementation);
-        _onlyOwner();
+        _onlySelf();
     }
 }

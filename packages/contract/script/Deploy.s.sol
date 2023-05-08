@@ -10,9 +10,12 @@ contract DeployScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        IEntryPoint entryPoint = IEntryPoint(0x0F46c65C17AA6b4102046935F33301f0510B163A);
+        // From https://docs.stackup.sh/docs/entity-addresses#entrypoint
+        IEntryPoint entryPoint = IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
+
+        P256SHA256 verifier = new P256SHA256();
         
-        AccountFactory factory = new AccountFactory(entryPoint);
+        AccountFactory factory = new AccountFactory(entryPoint, verifier);
         console.log("factory address:", address(factory));
 
         vm.stopBroadcast();

@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  FOUNDRY_PROFILE: ci
+
 jobs:
   test:
-    needs: test-mobile
+    needs: [test-mobile, test-contract]
     runs-on: ubuntu-latest
     steps:
       - run: echo All tests passed
@@ -30,3 +33,31 @@ jobs:
         working-directory: ./packages/daimo-mobile
       - run: npm test
         working-directory: ./packages/daimo-mobile
+
+  test-contract:
+    strategy:
+      fail-fast: true
+    name: Test contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
+        id: build
+        working-directory: ./packages/contract
+
+      - name: Run Forge tests
+        run: |
+          forge test -vvv
+        id: test
+        working-directory: ./packages/contract
