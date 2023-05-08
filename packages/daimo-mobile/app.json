@@ -11,9 +11,8 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
+    "scheme": "daimo",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "eth.daimo"
