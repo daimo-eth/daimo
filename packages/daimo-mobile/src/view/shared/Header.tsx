@@ -1,29 +1,30 @@
-import { useContext, useState } from "react";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import { ReactNode, useCallback, useContext } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
-import { color } from "./style";
 import { ChainContext } from "../../logic/chain";
-import { ChainScreen } from "../screen/ChainScreen";
-import { UserScreen } from "../screen/UserScreen";
+import { HomeStackParamList } from "../HomeStack";
+import { color } from "./style";
 
 export function Header() {
-  // TODO: expo router
-  const [show, setShow] = useState<string>();
+  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const { name } = useRoute<RouteProp<HomeStackParamList>>();
+  const goHome = useCallback(() => nav.navigate("User"), [nav]);
+  const goToUser = useCallback(() => nav.navigate("User"), [nav]);
+  const goToChain = useCallback(() => nav.navigate("Chain"), [nav]);
 
   return (
     <>
       <View style={styles.header}>
-        <TouchableHighlight onPress={() => setShow(show ? undefined : "user")}>
+        <Button onPress={name === "User" ? goHome : goToUser}>
           <Text style={styles.headerText}>
             dcposch
             <Text style={styles.headerLight}>.daimo.eth</Text>
           </Text>
-        </TouchableHighlight>
-        <Indicator onPress={() => setShow(show ? undefined : "chain")} />
+        </Button>
+        <Indicator onPress={name === "Chain" ? goHome : goToChain} />
       </View>
-
-      {show === "user" && <UserScreen />}
-      {show === "chain" && <ChainScreen />}
     </>
   );
 }
@@ -44,19 +45,41 @@ function Indicator({ onPress }: { onPress?: () => void }) {
   })();
 
   return (
-    <TouchableHighlight onPress={onPress}>
+    <Button onPress={onPress}>
       <View style={[styles.indicator, { backgroundColor }]} />
+    </Button>
+  );
+}
+
+function Button({
+  children,
+  onPress,
+}: {
+  children: ReactNode;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableHighlight
+      onPress={onPress}
+      style={styles.button}
+      underlayColor={color.bg.blue}
+      activeOpacity={0.5}
+    >
+      {children}
     </TouchableHighlight>
   );
 }
 
 const styles = StyleSheet.create({
+  button: {
+    padding: 8,
+    borderRadius: 4,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    padding: 4,
   },
   headerText: {
     fontSize: 18,

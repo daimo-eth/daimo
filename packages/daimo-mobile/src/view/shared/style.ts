@@ -9,6 +9,9 @@ export const color = {
   black: "#000",
   gray: "#668",
   white: "#fff",
+  bg: {
+    blue: "#eef",
+  },
 };
 
 const textBase: TextStyle = {

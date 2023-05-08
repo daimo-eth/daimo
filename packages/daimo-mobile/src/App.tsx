@@ -1,10 +1,13 @@
+import { NavigationContainer } from "@react-navigation/native";
+import * as Linking from "expo-linking";
+import { StatusBar } from "expo-status-bar";
 import "fast-text-encoding";
 import { useEffect, useMemo, useState } from "react";
+import { Text } from "react-native";
 
 import { useAccount } from "./logic/account";
-import { ChainStatus, ChainContext, ViemChain, Chain } from "./logic/chain";
-import HomeScreen from "./view/screen/HomeScreen";
-import OnboardingScreen from "./view/screen/OnboardingScreen";
+import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
+import { HomeStackNav } from "./view/HomeStack";
 
 export default function App() {
   const [account, setAccount] = useAccount();
@@ -35,10 +38,14 @@ export default function App() {
 
   const cs = useMemo(() => ({ chain, status }), [chain, status]);
 
+  const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
+
   return (
-    <ChainContext.Provider value={cs}>
-      {!account && <OnboardingScreen />}
-      {account && <HomeScreen />}
-    </ChainContext.Provider>
+    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+      <ChainContext.Provider value={cs}>
+        <HomeStackNav />
+        <StatusBar style="auto" />
+      </ChainContext.Provider>
+    </NavigationContainer>
   );
 }
