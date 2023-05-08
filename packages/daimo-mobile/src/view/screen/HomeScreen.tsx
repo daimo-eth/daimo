@@ -1,15 +1,23 @@
 import { Button, StyleSheet, Text, View } from "react-native";
 
+import { useAccount } from "../../logic/account";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
 import { color } from "../shared/style";
 
 export default function HomeScreen() {
+  const [account] = useAccount();
+
   return (
     <View style={styles.outerView}>
       <Header />
       <View style={styles.amountAndButtons}>
-        <TitleAmount amount={1.234} />
+        <TitleAmount
+          symbol="Ξ"
+          balance={account.lastBalance}
+          decimals={18}
+          displayDecimals={3}
+        />
         <Spacer h={32} />
         <View style={styles.buttonRow}>
           <Button title="Send" onPress={() => {}} />
@@ -21,17 +29,28 @@ export default function HomeScreen() {
   );
 }
 
-function TitleAmount({ amount }: { amount: number }) {
-  if (!(amount >= 0)) throw new Error("Invalid amount");
+function TitleAmount({
+  symbol,
+  balance,
+  decimals,
+  displayDecimals,
+}: {
+  symbol: string;
+  balance: bigint;
+  decimals: number;
+  displayDecimals: number;
+}) {
+  if (!(balance >= 0)) throw new Error("Invalid amount");
 
-  const totalCents = Math.round(amount * 100);
-  const dollars = Math.floor(totalCents / 100);
-  const centsStr = "" + (totalCents + 100);
-  const cents = centsStr.substring(centsStr.length - 2);
+  balance = balance / BigInt(10 ** (decimals - displayDecimals));
+  const dispStr = balance.toString().padStart(displayDecimals + 1, "0");
+  const dollars = dispStr.slice(0, -displayDecimals);
+  const cents = dispStr.slice(-displayDecimals);
 
   return (
     <Text style={styles.title}>
-      <Text style={styles.titleSmall}>$</Text>
+      <Text style={styles.titleSmall}>{symbol}</Text>
+      <Spacer w={4} />
       {dollars}
       <Text style={styles.titleGray}>.{cents}</Text>
     </Text>
