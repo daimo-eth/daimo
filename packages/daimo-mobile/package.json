@@ -44,7 +44,7 @@
     "extends": "universe/native",
     "rules": {
       "import/order": [
-        "warning",
+        "error",
         {
           "groups": []
         }
