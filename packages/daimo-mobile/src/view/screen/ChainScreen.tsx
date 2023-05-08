@@ -10,13 +10,18 @@ export function ChainScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontWeight: "bold" }}>Status {status.status}</Text>
       {status.status === "ok" && (
         <>
-          <Text style={ss.text.h2}>L1</Text>
+          <Text style={ss.text.h2}>L1 · {status.l1.name}</Text>
           <TipInfo tip={status.l1} />
-          <Text style={ss.text.h2}>L2</Text>
+          <Text style={ss.text.h2}>L2 · {status.l2.name}</Text>
           <TipInfo tip={status.l2} />
+        </>
+      )}
+      {status.status === "error" && (
+        <>
+          <Text style={ss.text.h2}>{status.error.name}</Text>
+          <Text style={ss.text.body}>{status.error.message}</Text>
         </>
       )}
     </View>
@@ -27,17 +32,21 @@ function TipInfo({ tip }: { tip: ChainTip }) {
   const nowS = useTime();
   return (
     <>
-      <Text>Block #{tip.blockHeight}</Text>
-      <Text>Time ${timeAgo(tip.blockTimestamp, nowS)}</Text>
+      <Text style={ss.text.body}>
+        Block #{tip.blockHeight} · {timeAgo(tip.blockTimestamp, nowS)}
+      </Text>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: "stretch",
     flex: 1,
     flexDirection: "column",
-    padding: 16,
+    gap: 4,
+    padding: 4,
+    paddingVertical: 8,
     alignItems: "flex-start",
   },
 });
