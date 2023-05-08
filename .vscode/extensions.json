@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "remcohaszing.schemastore",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "juanblanco.solidity",
+    "pomdtr.excalidraw-editor"
+  ]
+}
