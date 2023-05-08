@@ -1,23 +1,35 @@
-import { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useContext, useState } from "react";
+import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { color } from "./style";
 import { ChainContext } from "../../logic/chain";
+import { ChainScreen } from "../screen/ChainScreen";
+import { UserScreen } from "../screen/UserScreen";
 
 export function Header() {
+  // TODO: expo router
+  const [show, setShow] = useState<string>();
+
   return (
-    <View style={styles.header}>
-      <Text style={styles.headerText}>
-        dcposch
-        <Text style={styles.headerLight}>.daimo.eth</Text>
-      </Text>
-      <Indicator />
-    </View>
+    <>
+      <View style={styles.header}>
+        <TouchableHighlight onPress={() => setShow(show ? undefined : "user")}>
+          <Text style={styles.headerText}>
+            dcposch
+            <Text style={styles.headerLight}>.daimo.eth</Text>
+          </Text>
+        </TouchableHighlight>
+        <Indicator onPress={() => setShow(show ? undefined : "chain")} />
+      </View>
+
+      {show === "user" && <UserScreen />}
+      {show === "chain" && <ChainScreen />}
+    </>
   );
 }
 
 /** Circle indicator, green if connected to the chain. */
-function Indicator() {
+function Indicator({ onPress }: { onPress?: () => void }) {
   const { status } = useContext(ChainContext);
   if (!status) return null;
 
@@ -32,7 +44,11 @@ function Indicator() {
     }
   })();
 
-  return <View style={[styles.indicator, { backgroundColor }]} />;
+  return (
+    <TouchableHighlight onPress={onPress}>
+      <View style={[styles.indicator, { backgroundColor }]} />
+    </TouchableHighlight>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -1,5 +1,5 @@
 /** Workaround  */
-export const baseGoerli: = {
+export const baseGoerli = {
   id: 84531,
   network: "base-goerli",
   name: "Base Goerli",

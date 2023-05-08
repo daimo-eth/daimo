@@ -12,13 +12,17 @@ export default function App() {
   const chain = useMemo<Chain>(() => new ViemChain(), []);
 
   const refreshAccount = async () => {
-    console.log(`[APP] Loading chain status...`);
-    const status = await chain.getStatus();
-    setStatus(status);
+    try {
+      console.log(`[APP] Loading chain status...`);
+      const status = await chain.getStatus();
+      setStatus(status);
 
-    if (!account || status.status !== "ok") return;
-    console.log(`[APP] Loading account ${account.address}...`);
-    setAccount(await chain.getAccount(account.address, status));
+      if (!account || status.status !== "ok") return;
+      console.log(`[APP] Loading account ${account.address}...`);
+      setAccount(await chain.getAccount(account.address, status));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Refresh whenever the account changes, then periodically

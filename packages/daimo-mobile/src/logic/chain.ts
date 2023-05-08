@@ -16,14 +16,18 @@ export interface Chain {
   // TODO: send transaction, add or remove device.
 }
 
+export interface ChainTip {
+  name: string;
+  blockHeight: number;
+  blockTimestamp: number;
+}
+
 export type ChainStatus =
   | { status: "loading" }
   | {
       status: "ok";
-      blockHeight: number;
-      blockTimestamp: number;
-      l1BlockHeight: number;
-      l1BlockTimestamp: number;
+      l1: ChainTip;
+      l2: ChainTip;
     }
   | { status: "error"; error: Error };
 
@@ -51,33 +55,39 @@ export class ViemChain implements Chain {
   clientL2 = createPublicClient({ chain: baseGoerli, transport: http() });
 
   async getStatus(): Promise<ChainStatus> {
-    const getLatestBlock = async (client: PublicClient) => {
+    const getChainTip = async (client: PublicClient): Promise<ChainTip> => {
       const bn = await client.getBlockNumber();
-      return await client.getBlock({ blockNumber: bn });
+      const block = await client.getBlock({ blockNumber: bn });
+      return {
+        name: client.chain.name,
+        blockHeight: Number(block.number),
+        blockTimestamp: Number(block.timestamp),
+      };
     };
-    const l1Block = await getLatestBlock(this.clientL1);
-    const l2Block = await getLatestBlock(this.clientL2);
 
-    return {
-      status: "ok",
-      blockHeight: Number(l2Block.number),
-      blockTimestamp: Number(l2Block.timestamp),
-      l1BlockHeight: Number(l1Block.number),
-      l1BlockTimestamp: Number(l1Block.timestamp),
-    };
+    try {
+      return {
+        status: "ok",
+        l1: await getChainTip(this.clientL1),
+        l2: await getChainTip(this.clientL2),
+      };
+    } catch (e: any) {
+      console.error(e);
+      return { status: "error", error: e as Error };
+    }
   }
 
   async getAccount(address: Address, status: ChainStatus): Promise<Account> {
     check(status.status === "ok", "Chain status is not ok");
 
-    const blockNumber = BigInt(status.blockHeight);
+    const blockNumber = BigInt(status.l2.blockHeight);
     const bal = await this.clientL2.getBalance({ address, blockNumber });
 
     return {
       address,
       lastBalance: bal,
       lastNonce: BigInt(0), // TODO
-      lastBlockTimestamp: status.blockTimestamp,
+      lastBlockTimestamp: status.l2.blockTimestamp,
     };
   }
 

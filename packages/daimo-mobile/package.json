@@ -14,6 +14,7 @@
     "@expo/ngrok": "^4.1.0",
     "@types/jest": "^29.5.1",
     "@types/react": "^18.0.36",
+    "abitype": "^0.8.2",
     "depcheck": "^1.4.3",
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
