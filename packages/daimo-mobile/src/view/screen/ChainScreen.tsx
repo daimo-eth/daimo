@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { ChainContext, ChainTip } from "../../logic/chain";
-import { ss } from "../shared/style";
+import { color, ss } from "../shared/style";
 import { timeAgo, useTime } from "../shared/time";
 
 export function ChainScreen() {
@@ -41,12 +41,12 @@ function TipInfo({ tip }: { tip: ChainTip }) {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: color.white,
     alignSelf: "stretch",
     flex: 1,
     flexDirection: "column",
     gap: 4,
-    padding: 4,
-    paddingVertical: 8,
+    padding: 16,
     alignItems: "flex-start",
   },
 });

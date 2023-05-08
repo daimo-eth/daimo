@@ -71,9 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    paddingTop: 64,
+    padding: 16,
   },
   amountAndButtons: {
     width: "100%",
