@@ -31,10 +31,9 @@ export function Header() {
 /** Circle indicator, green if connected to the chain. */
 function Indicator({ onPress }: { onPress?: () => void }) {
   const { status } = useContext(ChainContext);
-  if (!status) return null;
 
   const backgroundColor = (function () {
-    switch (status.status) {
+    switch (status?.status) {
       case "ok":
         return color.status.green;
       case "error":
