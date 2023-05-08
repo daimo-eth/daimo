@@ -27,37 +27,31 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./packages/daimo-mobile/node_modules
-          key: modules-${{ hashFiles('package-lock.json') }}
+          key: modules-${{ hashFiles('./packages/daimo-mobile/package-lock.json') }}
       - if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts
         working-directory: ./packages/daimo-mobile
-      - run: npm test
+      - run: npm run lint && npm test
         working-directory: ./packages/daimo-mobile
 
   test-contract:
-    strategy:
-      fail-fast: true
-    name: Test contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - name: Run Forge build
-        run: |
+      - run: |
           forge --version
           forge build --sizes
         id: build
         working-directory: ./packages/contract
 
-      - name: Run Forge tests
-        run: |
+      - run: |
           forge test -vvv
         id: test
         working-directory: ./packages/contract

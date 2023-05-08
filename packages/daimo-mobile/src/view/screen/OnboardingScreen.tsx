@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import {
   Button,
   Dimensions,
@@ -12,10 +12,12 @@ import {
 } from "react-native";
 
 import { useAccount } from "../../logic/account";
-import { Chain } from "../../logic/chain";
+import { ChainContext } from "../../logic/chain";
 import Spacer from "../shared/Spacer";
 
-export default function OnboardingScreen({ chain }: { chain: Chain }) {
+export default function OnboardingScreen() {
+  const { chain } = useContext(ChainContext);
+
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;

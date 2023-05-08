@@ -1,10 +1,11 @@
+import { Address } from "abitype";
 import { useCallback } from "react";
 import { useMMKVString } from "react-native-mmkv";
 
 import { assert } from "./assert";
 
 export type Account = {
-  address: string;
+  address: Address;
   lastBalance: bigint;
   lastNonce: bigint;
   lastBlockTimestamp: number;
@@ -26,13 +27,15 @@ interface AccountV1 extends StoredModel {
 
 let firstLoad = true;
 
-export function useAccount(): [Account, (account: Account) => void] {
+/** Loads Daimo user data from storage, provides callback to write. */
+export function useAccount(): [Account, (account: Account | null) => void] {
   const [accountJSON, setAccountJSON] = useMMKVString("account");
   const account = parse(accountJSON);
   const setAccount = useCallback(
-    (account: Account) => {
+    (account: Account | null) => {
       console.log("Saving account...");
-      setAccountJSON(serialize(account));
+      if (account) setAccountJSON(serialize(account));
+      else setAccountJSON("");
     },
     [setAccountJSON]
   );
@@ -55,7 +58,7 @@ export function parse(accountJSON?: string): Account | null {
   assert(model.storageVersion === latestStorageVersion);
   const a = model as AccountV1;
   return {
-    address: a.address,
+    address: a.address as Address,
     lastBalance: BigInt(a.lastBalance),
     lastNonce: BigInt(a.lastNonce),
     lastBlockTimestamp: a.lastBlockTimestamp,
