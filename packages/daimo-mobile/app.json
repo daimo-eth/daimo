@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "scheme": "daimo",
     "ios": {
       "supportsTablet": true,
@@ -28,6 +30,21 @@
       "eas": {
         "projectId": "1eff7c6e-e88b-4e35-8b31-eab7e6814904"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "targetSdkVersion": 31,
+            "buildToolsVersion": "31.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.0"
+          }
+        }
+      ]
+    ]
   }
 }

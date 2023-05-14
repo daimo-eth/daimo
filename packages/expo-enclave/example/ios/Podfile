@@ -6,6 +6,7 @@ require 'json'
 podfile_properties = JSON.parse(File.read(File.join(__dir__, 'Podfile.properties.json'))) rescue {}
 
 ENV['RCT_NEW_ARCH_ENABLED'] = podfile_properties['newArchEnabled'] == 'true' ? '1' : '0'
+ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = '1' if podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR'] == 'true'
 
 platform :ios, podfile_properties['ios.deploymentTarget'] || '13.0'
 install! 'cocoapods',
@@ -25,7 +26,7 @@ prepare_react_native_project!
 # }
 # ```
 flipper_config = FlipperConfiguration.disabled
-if ENV['NO_FLIPPER'] == "1" || ENV['CI'] then
+if ENV['NO_FLIPPER'] == '1' then
   # Explicitly disabled through environment variables
   flipper_config = FlipperConfiguration.disabled
 elsif podfile_properties.key?('ios.flipper') then
