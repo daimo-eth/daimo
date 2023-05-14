@@ -11,6 +11,18 @@
       location = "group:ExpoEnclaveModule.swift">
    </FileRef>
    <FileRef
-      location = "group:KeyManagement.swift">
+      location = "group:KeyManager.swift">
+   </FileRef>
+   <FileRef
+      location = "group:GenericPasswordStore.swift">
+   </FileRef>
+   <FileRef
+      location = "group:GenericPasswordConvertible.swift">
+   </FileRef>
+   <FileRef
+      location = "group:Data+Hex.swift">
+   </FileRef>
+   <FileRef
+      location = "group:KeyStoreError.swift">
    </FileRef>
 </Workspace>

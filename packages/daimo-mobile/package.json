@@ -7,7 +7,7 @@
     "start:tunnel": "expo start --dev-client --tunnel",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "lint": "eslint . && ts-unused-exports ./tsconfig.json && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen",
+    "lint": "eslint . && ts-unused-exports ./tsconfig.json && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-build-properties,@babel/core",
     "test": "tsc --noEmit && jest",
     "fix:deps": "npx expo install --fix",
     "fix:lint": "eslint --fix ."
@@ -23,7 +23,7 @@
     "depcheck": "^1.4.3",
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
-    "expo": "~48.0.11",
+    "expo": "~48.0.15",
     "expo-dev-client": "~2.2.1",
     "expo-linking": "^4.0.1",
     "expo-splash-screen": "~0.18.2",
@@ -38,7 +38,8 @@
     "react-native-screens": "~3.20.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^4.9.4",
-    "viem": "^0.3.18"
+    "viem": "^0.3.18",
+    "expo-build-properties": "~0.6.0"
   },
   "eslintConfig": {
     "extends": "universe/native",
@@ -67,5 +68,8 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
   }
 }
