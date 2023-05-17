@@ -1,3 +1,14 @@
+//
+//  FallbackKeyManager.swift
+//  Vespass
+//
+//  Created by Nalin Bhardwaj on 22/12/22.
+//  Copyright © 2022 Vespass. All rights reserved.
+//
+//  FallbackKeyManager is our interface to in-memory keys.
+//  It creates private keys which are stored in the keychain but 
+//  processed in memory for signing and verifying messages.
+
 import CryptoKit
 import LocalAuthentication
 
