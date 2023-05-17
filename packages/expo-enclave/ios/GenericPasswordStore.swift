@@ -52,6 +52,7 @@ struct GenericPasswordStore {
     }
     
     /// [Test] Stores a key in the keychain and then reads it back.
+    // TODO: Add a test file for this.
     func roundTripTest<T: GenericPasswordConvertible>(_ key: T) throws -> T {
         
         // An account name for the key in the keychain.

@@ -40,6 +40,8 @@ extension SecureEnclave.P256.Signing.PrivateKey: GenericPasswordConvertible {
     }
 }
 
+extension P256.Signing.PrivateKey: GenericPasswordConvertible {}
+
 extension ContiguousBytes {
     /// A Data instance created safely from the contiguous bytes without making any copies.
     var dataRepresentation: Data {

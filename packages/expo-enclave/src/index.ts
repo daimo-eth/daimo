@@ -9,7 +9,11 @@ import {
 import { ChangeEventPayload, ExpoEnclaveViewProps } from "./ExpoEnclave.types";
 import ExpoEnclaveModule from "./ExpoEnclaveModule";
 
-export function fetchPublicKey(accountName: string): string {
+export function isSecureEnclaveAvailable(): boolean {
+  return ExpoEnclaveModule.isSecureEnclaveAvailable();
+}
+
+export function fetchPublicKey(accountName: string): string | undefined {
   return ExpoEnclaveModule.fetchPublicKey(accountName);
 }
 
