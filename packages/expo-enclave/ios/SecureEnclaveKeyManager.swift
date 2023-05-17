@@ -1,3 +1,14 @@
+//
+//  SecureEnclaveKeyManager.swift
+//  Vespass
+//
+//  Created by Nalin Bhardwaj on 22/12/22.
+//  Copyright © 2022 Vespass. All rights reserved.
+//
+//  SecureEnclaveKeyManager is our interface to the Secure Enclave.
+//  It creates keypairs which will never leave the enclave
+//  and lets you sign and verify messages with them.
+
 import CryptoKit
 import LocalAuthentication
 
@@ -13,6 +24,8 @@ public class SecureEnclaveKeyManager : KeyManager {
 
     internal func getSigningPrivkeyWithContext(accountName: String, usage: String, duration: TimeInterval = 0) throws -> SecureEnclave.P256.Signing.PrivateKey {
         let readSigningPrivkey: SecureEnclave.P256.Signing.PrivateKey? = try self.store.readKey(account: accountName)
+        
+        /** signingPrivKey is an opaque object that represents the actual private key inside the enclave */
         guard let signingPrivkey = readSigningPrivkey else {
             throw KeyStoreError("Unable to read account private key")
         }
