@@ -10,6 +10,10 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <Text>
+        is secure enclave available?{" "}
+        {ExpoEnclave.isSecureEnclaveAvailable() ? "Yes" : "No"}
+      </Text>
       <TextInput onChangeText={setAccount} value={account} />
       <Button
         title="Create"

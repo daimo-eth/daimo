@@ -2,7 +2,11 @@ import ExpoModulesCore
 import CryptoKit
 
 public class ExpoEnclaveModule: Module {
-  let keyManager = KeyManager()
+  internal static func shouldUseSecureEnclave() -> Bool {
+    return TARGET_OS_SIMULATOR == 0 && SecureEnclave.isAvailable
+  }
+
+  let keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
 
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
@@ -13,7 +17,11 @@ public class ExpoEnclaveModule: Module {
     // The module will be accessible from `requireNativeModule('ExpoEnclave')` in JavaScript.
     Name("ExpoEnclave")
 
-    Function("fetchPublicKey") { (accountName: String) throws -> String in
+    Function("isSecureEnclaveAvailable") { () -> Bool in
+      return keyManager is SecureEnclaveKeyManager
+    }
+
+    Function("fetchPublicKey") { (accountName: String) throws -> String? in
       return try! self.keyManager.fetchPublicKey(accountName: accountName)
     }
 
