@@ -1,9 +1,9 @@
 //
 //  FallbackKeyManager.swift
-//  Vespass
+//  Daimo
 //
-//  Created by Nalin Bhardwaj on 22/12/22.
-//  Copyright © 2022 Vespass. All rights reserved.
+//  Created by Nalin Bhardwaj.
+//  Copyright © 2023 Daimo. All rights reserved.
 //
 //  FallbackKeyManager is our interface to in-memory keys.
 //  It creates private keys which are stored in the keychain but 

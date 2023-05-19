@@ -1,9 +1,9 @@
 //
 //  KeyStoreError.swift
-//  Vespass
+//  Daimo
 //
-//  Created by Nalin Bhardwaj on 22/12/22.
-//  Copyright © 2022 Vespass. All rights reserved.
+//  Created by Nalin Bhardwaj.
+//  Copyright © 2023 Daimo. All rights reserved.
 //
 //  Errors that can be generated as a result of attempting to store keys.
 

@@ -1,5 +1,11 @@
-import CryptoKit
-import LocalAuthentication
+//
+//  KeyManager.swift
+//  Daimo
+//
+//  Created by Nalin Bhardwaj.
+//  Copyright © 2023 Daimo. All rights reserved.
+//
+//  The common protocol for key management (creation, sign, verify, fetch etc.).
 
 typealias SecurityError = Unmanaged<CFError>
 
