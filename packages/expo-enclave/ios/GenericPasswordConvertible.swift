@@ -1,9 +1,9 @@
 //
 //  GenericPasswordConvertible.swift
-//  Vespass
+//  Daimo
 //
-//  Created by Nalin Bhardwaj on 22/12/22.
-//  Copyright © 2022 Vespass. All rights reserved.
+//  Created by Nalin Bhardwaj.
+//  Copyright © 2023 Daimo. All rights reserved.
 //
 //  The interface required for conversion to a generic password keychain item.
 

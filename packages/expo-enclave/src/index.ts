@@ -1,12 +1,5 @@
-import {
-  EventEmitter,
-  NativeModulesProxy,
-  Subscription,
-} from "expo-modules-core";
-
 // Import the native module. On web, it will be resolved to ExpoEnclave.web.ts
 // and on native platforms to ExpoEnclave.ts
-import { ChangeEventPayload, ExpoEnclaveViewProps } from "./ExpoEnclave.types";
 import ExpoEnclaveModule from "./ExpoEnclaveModule";
 
 export function isSecureEnclaveAvailable(): boolean {
@@ -32,5 +25,3 @@ export function verify(
 ): boolean {
   return ExpoEnclaveModule.verify(accountName, hexSignature, hexMessage);
 }
-
-export { ExpoEnclaveViewProps, ChangeEventPayload };

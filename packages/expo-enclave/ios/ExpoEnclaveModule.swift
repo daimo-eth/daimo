@@ -22,19 +22,19 @@ public class ExpoEnclaveModule: Module {
     }
 
     Function("fetchPublicKey") { (accountName: String) throws -> String? in
-      return try! self.keyManager.fetchPublicKey(accountName: accountName)
+      return try self.keyManager.fetchPublicKey(accountName: accountName)
     }
 
     Function("createKeyPair") { (accountName: String) throws -> String in
-      return try! self.keyManager.createKeyPair(accountName: accountName)
+      return try self.keyManager.createKeyPair(accountName: accountName)
     }
 
     Function("sign") { (accountName: String, hexMessage: String) throws -> String in
-      return try! self.keyManager.sign(accountName: accountName, hexMessage: hexMessage)
+      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage)
     }
 
     Function("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
-      return try! self.keyManager.verify(accountName: accountName, hexSignature: hexSignature, hexMessage: hexMessage)
+      return try self.keyManager.verify(accountName: accountName, hexSignature: hexSignature, hexMessage: hexMessage)
     }
   }
 }

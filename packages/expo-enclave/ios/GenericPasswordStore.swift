@@ -1,9 +1,9 @@
 //
 //  GenericPasswordStore.swift
-//  Vespass
+//  Daimo
 //
-//  Created by Nalin Bhardwaj on 22/12/22.
-//  Copyright © 2022 Vespass. All rights reserved.
+//  Created by Nalin Bhardwaj.
+//  Copyright © 2022 Daimo. All rights reserved.
 //
 //  Methods for storing generic password convertible items in the keychain.
 
@@ -11,7 +11,7 @@ import Foundation
 import CryptoKit
 import Security
 
-let KEYCHAIN_STORE_PREFIX = "com.nibnalin.daimo.keychain.demo."
+let KEYCHAIN_STORE_PREFIX = "com.daimoeth.daimo."
 
 struct GenericPasswordStore {
     /// Stores a CryptoKit key in the keychain as a generic password.
