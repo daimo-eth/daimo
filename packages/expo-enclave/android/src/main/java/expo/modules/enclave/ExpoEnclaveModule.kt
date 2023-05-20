@@ -4,6 +4,7 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 class ExpoEnclaveModule : Module() {
+  val keyManager = KeyManager()
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -13,35 +14,30 @@ class ExpoEnclaveModule : Module() {
     // The module will be accessible from `requireNativeModule('ExpoEnclave')` in JavaScript.
     Name("ExpoEnclave")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+    Function("isSecureEnclaveAvailable", this@ExpoEnclaveModule::isSecureEnclaveAvailable)
+    Function("fetchPublicKey", this@ExpoEnclaveModule::fetchPublicKey)
+    Function("createKeyPair", this@ExpoEnclaveModule::createKeyPair)
+    Function("sign", this@ExpoEnclaveModule::sign)
+    Function("verify", this@ExpoEnclaveModule::verify)
+  }
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+  private fun isSecureEnclaveAvailable(): Boolean {
+    return keyManager.isSecureEnclaveAvailable()
+  }
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
+  private fun fetchPublicKey(accountName: String): String? {
+    return keyManager.fetchPublicKey(accountName)
+  }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
+  private fun createKeyPair(accountName: String): String {
+    return keyManager.createKeyPair(accountName)
+  }
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ExpoEnclaveView::class) {
-      // Defines a setter for the `name` prop.
-      Prop("name") { view: ExpoEnclaveView, prop: String ->
-        println(prop)
-      }
-    }
+  private fun sign(accountName: String, message: String): String {
+    return keyManager.sign(accountName, message)
+  }
+
+  private fun verify(accountName: String, message: String, signature: String): Boolean {
+    return keyManager.verify(accountName, message, signature)
   }
 }

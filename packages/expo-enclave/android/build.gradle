@@ -87,5 +87,6 @@ repositories {
 
 dependencies {
   implementation project(':expo-modules-core')
+  implementation "org.bouncycastle:bcpkix-jdk15on:1.56"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
 }
