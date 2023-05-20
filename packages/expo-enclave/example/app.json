@@ -35,7 +35,8 @@
           "android": {
             "compileSdkVersion": 31,
             "targetSdkVersion": 31,
-            "buildToolsVersion": "31.0.0"
+            "buildToolsVersion": "31.0.0",
+            "kotlinVersion": "1.8.0"
           },
           "ios": {
             "deploymentTarget": "15.0"
