@@ -1,6 +1,7 @@
 {
   "name": "expo-enclave",
   "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "description": "Secure enclave access for key generation and signing.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -24,7 +25,6 @@
   "homepage": "https://github.com/dcposch/daimo#readme",
   "repository": "https://github.com/dcposch/daimo/tree/master/packages/expo-enclave",
   "author": "DC <dc@dcpos.ch>",
-  "license": "UNLICENSED",
   "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.0.25",

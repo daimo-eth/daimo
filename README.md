@@ -1,4 +1,3 @@
-
 > `EXPERIMENTAL`
 
 This is a prototype self-custody stablecoin wallet.
@@ -9,9 +8,8 @@ You can add multiple devices for safety, either your own or your friends' (socia
 
 L2 native. This wallet is designed to use a single L2 and a single stablecoin for an extremely simple experience, like Venmo or Zelle.
 
-
 ## Development
 
-- `packages/app` contains the Expo app
+- `packages/daimo-mobile` contains the Expo app
 - `packages/expo-enclave` contains the native module interfacing with the secure enclave
-- `packages/contracts` contains the wallet contract
+- `packages/contract` contains the wallet contract
