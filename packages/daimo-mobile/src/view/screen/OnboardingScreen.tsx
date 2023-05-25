@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useContext, useState } from "react";
 import {
-  Button,
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -13,6 +12,7 @@ import {
 
 import { useAccount } from "../../logic/account";
 import { ChainContext } from "../../logic/chain";
+import { ButtonBig, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 
 export default function OnboardingScreen() {
@@ -45,31 +45,30 @@ export default function OnboardingScreen() {
         >
           <IntroPage
             title="Welcome to Daimo"
-            body="Thank you for testing our alpha release. Daimo is experimental
+            body="Thanks for testing our alpha release. Daimo is experimental
             technology. Use at your own risk."
           />
           <IntroPage
-            title="Crypto dollars"
-            body="Daimo lets you send and receive money using Ethereum.
-            Specifically, it uses the Dai stablecoin. 1 DAI is $1. Learn how it
-            works here."
+            title="DAI"
+            body="Daimo lets you send and receive money using the DAI stablecoin.
+            1 DAI is $1. Learn how it works here."
           />
           <IntroPage
             title="Yours alone"
-            body="Daimo stores money via cryptographic secrets on your phone.
-            Transfers are irreversible. To protect your funds if you lose your
-            phone, you can add additional devices."
+            body="Daimo stores money via cryptographic secrets. There's no bank.
+            To protect your funds in case you lose your phone, you can add
+            additional devices."
           />
           <IntroPage
             title="On Ethereum"
-            body="Daimo runs on Base, an ethereum rollup. This lets you send
-            money securely and almost for free."
+            body="Daimo runs on Base, an Ethereum rollup. This lets you send
+            money securely, anywhere in the world, quickly, and at low cost."
           />
         </ScrollView>
         <Spacer h={64} />
-        <Button title="Create account" onPress={createAccount} />
+        <ButtonBig title="Create Account" onPress={createAccount} />
         <Spacer h={8} />
-        <Button title="Add device" />
+        <ButtonSmall title="Use existing" />
       </View>
       <StatusBar style="auto" />
     </View>
