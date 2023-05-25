@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
 /**
@@ -441,9 +441,11 @@ contract P256SHA256 {
         return [uint256(readBytes32(data, 0)), uint256(readBytes32(data, 32))];
     }
 
-    function parseKey(bytes32[2] memory data) internal pure returns (uint256[2] memory) {
+    function parseKey(
+        bytes32[2] memory data
+    ) internal pure returns (uint256[2] memory) {
         return [uint256(data[0]), uint256(data[1])];
-    } 
+    }
 
     /**
      * @dev Verifies a signature.

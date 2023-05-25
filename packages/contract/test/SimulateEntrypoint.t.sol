@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
@@ -23,7 +23,6 @@ contract EntrypointTest is Test {
         console.log("verifier address:", address(verifier));
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
-
     }
 
     /***
@@ -36,13 +35,28 @@ contract EntrypointTest is Test {
      * @param actualGasCost - actual amount paid (by account or paymaster) for this UserOperation.
      * @param actualGasUsed - total gas used by this UserOperation (including preVerification, creation, validation and execution).
      */
-    event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed);
-
+    event UserOperationEvent(
+        bytes32 indexed userOpHash,
+        address indexed sender,
+        address indexed paymaster,
+        uint256 nonce,
+        bool success,
+        uint256 actualGasCost,
+        uint256 actualGasUsed
+    );
 
     function testSimpleOp() public {
         // hardcoded from swift playground
-        bytes32[2] memory key = [bytes32(hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4"), bytes32(hex"4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437")];
-        bytes memory ownerSig = hex"b984834652808def0389d90b4c807efb126390f6a7bded0039b62a15d8e1972263a39161eca4f489803cec63756abe2ff15a884916d1f274e448663443e54659";
+        bytes32[2] memory key = [
+            bytes32(
+                hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4"
+            ),
+            bytes32(
+                hex"4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437"
+            )
+        ];
+        bytes
+            memory ownerSig = hex"b984834652808def0389d90b4c807efb126390f6a7bded0039b62a15d8e1972263a39161eca4f489803cec63756abe2ff15a884916d1f274e448663443e54659";
 
         Account acc = factory.createAccount(key, 42);
         console.log("new account address:", address(acc));
@@ -70,15 +84,24 @@ contract EntrypointTest is Test {
         op.maxFeePerGas = 3e9;
 
         bytes32 hash = entryPoint.getUserOpHash(op);
-        console2.log("op hash: "); console2.logBytes32(hash);
+        console2.log("op hash: ");
+        console2.logBytes32(hash);
 
         op.signature = ownerSig;
-        
+
         // vm.expectRevert(entryPoint.ValidationResult((1417770, 6663000000000000, true, 0, 281474976710655, 0x00), (0, 0), (0, 0), (0, 0)));
         UserOperation[] memory ops = new UserOperation[](1);
         ops[0] = op;
         vm.expectEmit(false, false, false, false);
-        emit UserOperationEvent(hash, address(acc), address(0), 42, false, 0, 0);
+        emit UserOperationEvent(
+            hash,
+            address(acc),
+            address(0),
+            42,
+            false,
+            0,
+            0
+        );
         entryPoint.handleOps(ops, payable(address(acc)));
     }
 }
