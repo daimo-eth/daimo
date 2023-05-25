@@ -1,14 +1,19 @@
-> `EXPERIMENTAL`
+<img width="1688" alt="screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/daea7438-f769-4bcd-8e52-df7b6f32437d">
 
-This is a prototype self-custody stablecoin wallet.
+### Daimo is a stablecoin wallet
 
-No seed phrases. Keys are generated in your phone's secure enclave and never leave.
+Daimo is minimalist. Single stablecoin, single rollup, payments only.
 
-You can add multiple devices for safety, either your own or your friends' (social recovery).
+No seed phrases. Keys are generated in your phone's secure enclave and never
+leave. You can add multiple devices to secure your account. Under the hood, it's
+a ERC-4337 contract wallet.
 
-L2 native. This wallet is designed to use a single L2 and a single stablecoin for an extremely simple experience, like Venmo or Zelle.
+The mission is to make an excellent experience. Payments should be fast, cheap,
+secure, and permissionless.
 
-## Development
+### Development
+
+**Daimo is in active development.** Coming soon to testnet and TestFlight.
 
 - `packages/daimo-mobile` contains the Expo app
 - `packages/expo-enclave` contains the native module interfacing with the secure enclave
