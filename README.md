@@ -1,4 +1,4 @@
-<img width="1688" alt="screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/daea7438-f769-4bcd-8e52-df7b6f32437d">
+<img width="1688" alt="screenshot" src="https://i.imgur.com/tR6urgF.png">
 
 ### Daimo is a stablecoin wallet
 
