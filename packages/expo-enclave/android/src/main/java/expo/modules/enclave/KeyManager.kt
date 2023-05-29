@@ -9,6 +9,21 @@ import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.Signature
 import org.bouncycastle.jce.ECPointUtil
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import java.util.concurrent.Executor
+import android.os.Bundle
+import androidx.fragment.app.FragmentActivity
+import android.content.Context
+import java.util.concurrent.Executors
+import expo.modules.core.ModuleRegistry
+import expo.modules.core.interfaces.ActivityProvider
+import android.app.Activity
+import expo.modules.core.interfaces.services.UIManager
+import expo.modules.core.Promise
+import android.os.Build
+import android.content.pm.PackageManager
+
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 fun String.decodeHex(): ByteArray {
@@ -19,18 +34,72 @@ fun String.decodeHex(): ByteArray {
         .toByteArray()
 }
 
-class KeyManager {
+class SigningCallback(_message: String) {
+  public val message = _message
+
+  fun invoke(readySignature: Signature?, promise: Promise) {
+    if (readySignature == null) {
+      return
+    }
+    readySignature.update(message.decodeHex())
+    promise.resolve(readySignature.sign().toHexString())
+  }
+}
+
+class KeyManager(_context: Context, _moduleRegistry: ModuleRegistry) {
   val KEYSTORE_PROVIDER = "AndroidKeyStore"
+  var context = _context
+  var moduleRegistry = _moduleRegistry
+  private val uiManager = moduleRegistry.getModule(UIManager::class.java)
+  var postBiometryResult = ""
+
+  private fun getCurrentActivity(): Activity? {
+    val activityProvider: ActivityProvider = moduleRegistry.getModule(ActivityProvider::class.java)
+    return activityProvider.currentActivity
+  }
+
+
+  internal fun authenticateAndRun(accountName: String, callback: SigningCallback, promise: Promise) {
+    val fragmentActivity = getCurrentActivity() as FragmentActivity?
+    val biometricPrompt = BiometricPrompt(
+      fragmentActivity!!, ContextCompat.getMainExecutor(context),
+      object : BiometricPrompt.AuthenticationCallback() {
+        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+          super.onAuthenticationError(errorCode, errString)
+        }
+
+        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+          callback.invoke(result.cryptoObject!!.getSignature(), promise)
+          super.onAuthenticationSucceeded(result)
+        }
+
+        override fun onAuthenticationFailed() {
+          super.onAuthenticationFailed()
+        }
+    })
+
+    val promptInfo = BiometricPrompt.PromptInfo.Builder()
+      .setTitle("Authorise transaction")
+      .setSubtitle("Sign transaction " + callback.message + " using your private key")
+      .setNegativeButtonText("Cancel")
+      .build()
+    
+    val privateKey = getSigningPrivkey(accountName).private
+    val signature = Signature.getInstance("SHA256withECDSA")
+    signature.initSign(privateKey)
+    uiManager.runOnUiQueueThread {
+      biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
+    }
+  }
+
 
   internal fun createSigningPrivkey(accountName: String) {
     var params = KeyGenParameterSpec.Builder(accountName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
       .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
       .setDigests(KeyProperties.DIGEST_SHA256)
-      // TODO:
-      // .setUserAuthenticationRequired(true)
-      // .setUserConfirmationRequired(true)
-      // .setUserPresenceRequired(true)
-      // .setIsStrongBoxBacked(true)
+      .setUserAuthenticationRequired(true)
+      .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
+      .setIsStrongBoxBacked(true)
       .build()
 
     var keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
@@ -51,7 +120,13 @@ class KeyManager {
   }
 
   public fun isSecureEnclaveAvailable(): Boolean {
-    return false
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        return context.packageManager.hasSystemFeature(
+            PackageManager.FEATURE_STRONGBOX_KEYSTORE
+        )
+    } else {
+      return false
+    }
   }
 
   public fun createKeyPair(accountName: String): String {
@@ -60,34 +135,20 @@ class KeyManager {
   }
 
   public fun fetchPublicKey(accountName: String): String? {
-    var publicKey = getSigningPrivkey(accountName).public.getY()
-    var publicKeyRaw = publicKey.getAffineX().toString(16) + publicKey.getAffineY().toString(16)
-    return publicKeyRaw
+    return getSigningPrivkey(accountName).public.encoded.toHexString()
   }
 
-  public fun sign(accountName: String, hexMessage: String): String {
-    val privateKey = getSigningPrivkey(accountName).private
-    val signature = Signature.getInstance("SHA256withECDSA").run {
-      initSign(privateKey)
-      update(hexMessage.decodeHex())
-      sign()
-    }
-    return signature.toHexString()
+  public fun sign(accountName: String, hexMessage: String, promise: Promise) {
+    val signingCallback = SigningCallback(hexMessage)
+    authenticateAndRun(accountName, signingCallback, promise)
   }
 
-  public fun verify(accountName: String, hexMessage: String, hexSignature: String): Boolean {
-    val privateKey = getSigningPrivkey(accountName).private
-    val signature = Signature.getInstance("SHA256withECDSA").run {
-      initSign(privateKey)
-      update(hexMessage.decodeHex())
-      sign()
-    }
-
+  public fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
     val publicKey = getSigningPrivkey(accountName).public
     val verified = Signature.getInstance("SHA256withECDSA").run {
       initVerify(publicKey)
       update(hexMessage.decodeHex())
-      verify(signature)
+      verify(hexSignature.decodeHex())
     }
     return verified
   }

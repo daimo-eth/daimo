@@ -2,42 +2,45 @@ package expo.modules.enclave
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import android.content.Context
+import expo.modules.core.interfaces.ExpoMethod
+import expo.modules.core.ModuleRegistry
+import expo.modules.core.ExportedModule
+import expo.modules.core.Promise
 
-class ExpoEnclaveModule : Module() {
-  val keyManager = KeyManager()
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoEnclave')` in JavaScript.
-    Name("ExpoEnclave")
+class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
+  lateinit var moduleRegistry: ModuleRegistry
+  lateinit var keyManager: KeyManager
 
-    Function("isSecureEnclaveAvailable", this@ExpoEnclaveModule::isSecureEnclaveAvailable)
-    Function("fetchPublicKey", this@ExpoEnclaveModule::fetchPublicKey)
-    Function("createKeyPair", this@ExpoEnclaveModule::createKeyPair)
-    Function("sign", this@ExpoEnclaveModule::sign)
-    Function("verify", this@ExpoEnclaveModule::verify)
+  override fun onCreate(_moduleRegistry: ModuleRegistry) {
+    moduleRegistry = _moduleRegistry
+    keyManager = KeyManager(context, moduleRegistry)
   }
 
-  private fun isSecureEnclaveAvailable(): Boolean {
-    return keyManager.isSecureEnclaveAvailable()
+  override fun getName() = "ExpoEnclave"
+
+  @ExpoMethod
+  fun isSecureEnclaveAvailable(promise: Promise) {
+    promise.resolve(keyManager.isSecureEnclaveAvailable())
   }
 
-  private fun fetchPublicKey(accountName: String): String? {
-    return keyManager.fetchPublicKey(accountName)
+  @ExpoMethod
+  fun fetchPublicKey(accountName: String, promise: Promise) {
+    promise.resolve(keyManager.fetchPublicKey(accountName))
   }
 
-  private fun createKeyPair(accountName: String): String {
-    return keyManager.createKeyPair(accountName)
+  @ExpoMethod
+  fun createKeyPair(accountName: String, promise: Promise) {
+    promise.resolve(keyManager.createKeyPair(accountName))
   }
 
-  private fun sign(accountName: String, message: String): String {
-    return keyManager.sign(accountName, message)
+  @ExpoMethod
+  fun sign(accountName: String, message: String, promise: Promise) {
+    keyManager.sign(accountName, message, promise)
   }
 
-  private fun verify(accountName: String, message: String, signature: String): Boolean {
-    return keyManager.verify(accountName, message, signature)
+  @ExpoMethod
+  fun verify(accountName: String, signature: String, message: String, promise: Promise) {
+    promise.resolve(keyManager.verify(accountName, signature, message))
   }
 }

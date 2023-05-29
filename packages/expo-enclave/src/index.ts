@@ -2,26 +2,31 @@
 // and on native platforms to ExpoEnclave.ts
 import ExpoEnclaveModule from "./ExpoEnclaveModule";
 
-export function isSecureEnclaveAvailable(): boolean {
+export async function isSecureEnclaveAvailable(): Promise<boolean> {
   return ExpoEnclaveModule.isSecureEnclaveAvailable();
 }
 
-export function fetchPublicKey(accountName: string): string | undefined {
+export async function fetchPublicKey(
+  accountName: string
+): Promise<string | undefined> {
   return ExpoEnclaveModule.fetchPublicKey(accountName);
 }
 
-export function createKeyPair(accountName: string): string {
+export async function createKeyPair(accountName: string): Promise<string> {
   return ExpoEnclaveModule.createKeyPair(accountName);
 }
 
-export function sign(accountName: string, hexMessage: string): string {
+export async function sign(
+  accountName: string,
+  hexMessage: string
+): Promise<string> {
   return ExpoEnclaveModule.sign(accountName, hexMessage);
 }
 
-export function verify(
+export async function verify(
   accountName: string,
   hexSignature: string,
   hexMessage: string
-): boolean {
+): Promise<boolean> {
   return ExpoEnclaveModule.verify(accountName, hexSignature, hexMessage);
 }
