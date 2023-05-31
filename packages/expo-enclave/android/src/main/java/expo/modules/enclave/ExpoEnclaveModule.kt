@@ -1,13 +1,19 @@
 package expo.modules.enclave
 
-import expo.modules.kotlin.modules.Module
-import expo.modules.kotlin.modules.ModuleDefinition
 import android.content.Context
 import expo.modules.core.interfaces.ExpoMethod
 import expo.modules.core.ModuleRegistry
 import expo.modules.core.ExportedModule
 import expo.modules.core.Promise
 
+// Note that this is a ExportedModule, not a Module as expo recommends.
+// This is because we need access to the application context to be able
+// to inject a BiometricPrompt instance. As far as I can tell, using a
+// ExportedModule is the only way to do this, as seen in the official 
+// [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)
+// and [expo-sensors](https://docs.expo.dev/versions/latest/sdk/sensors/) packages.
+// Unfortunately, ExportedModule is not documented well, so much of the
+// design of this module is modeled after those two packages.
 class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   lateinit var moduleRegistry: ModuleRegistry
   lateinit var keyManager: KeyManager
@@ -18,6 +24,17 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   override fun getName() = "ExpoEnclave"
+
+  internal fun hasStrongbox(): Boolean {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+      && context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
+  }
+
+  internal fun hasBiometrics(): Boolean {
+    val biometricManager = BiometricManager.from(context)
+    return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
+  }
+
 
   @ExpoMethod
   fun isSecureEnclaveAvailable(promise: Promise) {
