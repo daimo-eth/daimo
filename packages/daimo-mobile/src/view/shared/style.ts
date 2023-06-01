@@ -1,4 +1,4 @@
-import { StyleSheet, TextStyle } from "react-native";
+import { StyleSheet, TextStyle, Platform } from "react-native";
 
 export const color = {
   status: {
@@ -11,12 +11,17 @@ export const color = {
   white: "#fff",
   bg: {
     lightGray: "#eee",
-    blue: "#eef",
+    blue: "#cce5ff",
   },
 };
 
 const textBase: TextStyle = {
   fontVariant: ["tabular-nums"],
+};
+
+export const touchHighlightUnderlay = {
+  underlayColor: color.bg.blue,
+  activeOpacity: 0.9,
 };
 
 export const ss = {
@@ -39,6 +44,14 @@ export const ss = {
       ...textBase,
       fontSize: 16,
       fontWeight: "bold",
+    },
+    bodyGray: {
+      ...textBase,
+      fontSize: 16,
+      color: color.gray,
+    },
+    mono: {
+      fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
     },
   }),
 };

@@ -4,24 +4,32 @@ import { useAccount } from "../../logic/account";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
 import { color } from "../shared/style";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useCallback } from "react";
+import { HomeStackParamList } from "../HomeStack";
 
 export default function HomeScreen() {
   const [account] = useAccount();
+
+  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const goSend = useCallback(() => nav.navigate("Home"), [nav]); // TODO
+  const goReceive = useCallback(() => nav.navigate("Deposit"), [nav]);
 
   return (
     <View style={styles.outerView}>
       <Header />
       <View style={styles.amountAndButtons}>
         <TitleAmount
-          symbol="Ξ"
+          symbol="$"
           balance={account.lastBalance}
           decimals={18}
-          displayDecimals={3}
+          displayDecimals={2}
         />
         <Spacer h={32} />
         <View style={styles.buttonRow}>
-          <Button title="Send" onPress={() => {}} />
-          <Button title="Receive" onPress={() => {}} />
+          <Button title="Send" onPress={goSend} />
+          <Button title="Receive" onPress={goReceive} />
         </View>
       </View>
       <Footer />

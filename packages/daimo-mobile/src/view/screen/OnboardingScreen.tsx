@@ -49,9 +49,9 @@ export default function OnboardingScreen() {
             technology. Use at your own risk."
           />
           <IntroPage
-            title="DAI"
-            body="Daimo lets you send and receive money using the DAI stablecoin.
-            1 DAI is $1. Learn how it works here."
+            title="USDC"
+            body="Daimo lets you send and receive money using the USDC stablecoin.
+            1 USDC is $1. Learn how it works here."
           />
           <IntroPage
             title="Yours alone"

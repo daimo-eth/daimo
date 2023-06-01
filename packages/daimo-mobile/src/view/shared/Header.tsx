@@ -5,7 +5,7 @@ import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { ChainContext } from "../../logic/chain";
 import { HomeStackParamList } from "../HomeStack";
-import { color } from "./style";
+import { color, touchHighlightUnderlay } from "./style";
 
 export function Header() {
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
@@ -62,8 +62,7 @@ function Button({
     <TouchableHighlight
       onPress={onPress}
       style={styles.button}
-      underlayColor={color.bg.blue}
-      activeOpacity={0.5}
+      {...touchHighlightUnderlay}
     >
       {children}
     </TouchableHighlight>

@@ -4,6 +4,10 @@
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
+    "build:sim": "eas build -p ios --profile=sim --non-interactive",
+    "build:dev": "eas build -p ios --profile=development --non-interactive",
+    "build:pre": "eas build -p all --profile=preview --non-interactive",
+    "build:prod": "eas build -p all --non-interactive",
     "start": "expo start --dev-client",
     "start:tunnel": "expo start --dev-client --tunnel",
     "android": "expo run:android",
@@ -14,7 +18,9 @@
     "fix:lint": "eslint --fix ."
   },
   "dependencies": {
+    "@babel/core": "^7.20.0",
     "@expo/ngrok": "^4.1.0",
+    "@expo/vector-icons": "^13.0.0",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@react-navigation/stack": "^6.3.16",
@@ -25,6 +31,8 @@
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
     "expo": "~48.0.15",
+    "expo-build-properties": "~0.6.0",
+    "expo-clipboard": "^4.1.2",
     "expo-dev-client": "~2.2.1",
     "expo-linking": "^4.0.1",
     "expo-splash-screen": "~0.18.2",
@@ -39,8 +47,7 @@
     "react-native-screens": "~3.20.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^4.9.4",
-    "viem": "^0.3.18",
-    "expo-build-properties": "~0.6.0"
+    "viem": "^0.3.18"
   },
   "eslintConfig": {
     "extends": "universe/native",
@@ -69,8 +76,5 @@
         }
       ]
     }
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0"
   }
 }

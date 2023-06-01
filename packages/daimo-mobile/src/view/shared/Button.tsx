@@ -6,7 +6,7 @@ import {
   StyleProp,
   TextStyle,
 } from "react-native";
-import { color } from "./style";
+import { color, touchHighlightUnderlay } from "./style";
 
 interface ButtonProps {
   title: string;
@@ -30,8 +30,7 @@ function Button(
     <TouchableHighlight
       onPress={props.onPress}
       style={props.style.button}
-      underlayColor={color.bg.blue}
-      activeOpacity={0.5}
+      {...touchHighlightUnderlay}
     >
       <Text style={props.style.title}>{props.title}</Text>
     </TouchableHighlight>
