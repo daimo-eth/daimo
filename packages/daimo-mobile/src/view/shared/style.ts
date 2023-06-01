@@ -54,4 +54,27 @@ export const ss = {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
     },
   }),
+  spacer: StyleSheet.create({
+    w8: {
+      width: 8,
+    },
+    w16: {
+      width: 16,
+    },
+    w32: {
+      width: 32,
+    },
+    h8: {
+      height: 8,
+    },
+    h16: {
+      height: 16,
+    },
+    h32: {
+      height: 32,
+    },
+    h64: {
+      height: 64,
+    },
+  }),
 };

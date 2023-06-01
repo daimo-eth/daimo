@@ -14,14 +14,14 @@ interface ButtonProps {
 }
 
 export function ButtonBig(props: ButtonProps) {
-  return <Button {...props} style={styles.big} />;
+  return <Button {...props} style={buttonStyles.big} />;
 }
 
 export function ButtonSmall(props: ButtonProps) {
-  return <Button {...props} style={styles.small} />;
+  return <Button {...props} style={buttonStyles.small} />;
 }
 
-function Button(
+export function Button(
   props: ButtonProps & {
     style: { button: StyleProp<ViewStyle>; title: StyleProp<TextStyle> };
   }
@@ -37,7 +37,7 @@ function Button(
   );
 }
 
-const styles = {
+export const buttonStyles = {
   big: StyleSheet.create({
     button: {
       paddingHorizontal: 16,

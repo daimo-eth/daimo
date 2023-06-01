@@ -1,20 +1,21 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
+import { color, ss } from "../shared/style";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback } from "react";
 import { HomeStackParamList } from "../HomeStack";
+import { Button, buttonStyles } from "../shared/Button";
 
 export default function HomeScreen() {
   const [account] = useAccount();
 
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
   const goSend = useCallback(() => nav.navigate("Home"), [nav]); // TODO
-  const goReceive = useCallback(() => nav.navigate("Deposit"), [nav]);
+  const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
 
   return (
     <View style={styles.outerView}>
@@ -28,11 +29,11 @@ export default function HomeScreen() {
         />
         <Spacer h={32} />
         <View style={styles.buttonRow}>
-          <Button title="Send" onPress={goSend} />
-          <Button title="Receive" onPress={goReceive} />
+          <Button style={sendRecvButton} title="Send" onPress={goSend} />
+          <Button style={sendRecvButton} title="Receive" onPress={goReceive} />
         </View>
       </View>
-      <Footer />
+      <View style={ss.spacer.h32} />
     </View>
   );
 }
@@ -65,14 +66,6 @@ function TitleAmount({
   );
 }
 
-function Footer() {
-  return (
-    <View>
-      <Text>coming soon</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   outerView: {
     flex: 1,
@@ -99,6 +92,17 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 32,
+    gap: 24,
+  },
+});
+
+const sendRecvButton = StyleSheet.create({
+  button: {
+    ...buttonStyles.big.button,
+    width: 108,
+  },
+  title: {
+    ...buttonStyles.big.title,
+    textAlign: "center",
   },
 });

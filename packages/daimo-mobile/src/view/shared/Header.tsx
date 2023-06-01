@@ -18,10 +18,7 @@ export function Header() {
     <>
       <View style={styles.header}>
         <Button onPress={name === "User" ? goHome : goToUser}>
-          <Text style={styles.headerText}>
-            dcposch
-            <Text style={styles.headerLight}>.daimo.eth</Text>
-          </Text>
+          <Text style={styles.headerText}>dcposch</Text>
         </Button>
         <Indicator onPress={name === "Chain" ? goHome : goToChain} />
       </View>

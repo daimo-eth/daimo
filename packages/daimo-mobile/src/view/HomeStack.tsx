@@ -5,11 +5,13 @@ import OnboardingScreen from "./screen/OnboardingScreen";
 import { UserScreen } from "./screen/UserScreen";
 import { ChainScreen } from "./screen/ChainScreen";
 import DepositScreen from "./screen/DepositScreen";
+import ReceiveScreen from "./screen/ReceiveScreen";
 
 export type HomeStackParamList = {
   Home: undefined;
   User: undefined;
   Chain: undefined;
+  Receive: undefined;
   Deposit: undefined;
 };
 
@@ -20,11 +22,12 @@ export function HomeStackNav() {
     <HomeStack.Navigator initialRouteName="Home">
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={MainScreen} />
-        <HomeStack.Screen name="Deposit" component={DepositScreen} />
+        <HomeStack.Screen name="Receive" component={ReceiveScreen} />
       </HomeStack.Group>
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="User" component={UserScreen} />
         <HomeStack.Screen name="Chain" component={ChainScreen} />
+        <HomeStack.Screen name="Deposit" component={DepositScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );
