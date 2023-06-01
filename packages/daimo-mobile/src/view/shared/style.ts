@@ -11,6 +11,7 @@ export const color = {
   white: "#fff",
   bg: {
     lightGray: "#eee",
+    lightYellow: "#fffae6",
     blue: "#cce5ff",
   },
 };
@@ -39,16 +40,15 @@ export const ss = {
     body: {
       ...textBase,
       fontSize: 16,
+      lineHeight: 24,
     },
-    bodyBold: {
+    small: {
       ...textBase,
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    bodyGray: {
-      ...textBase,
-      fontSize: 16,
+      fontSize: 14,
       color: color.gray,
+    },
+    bold: {
+      fontWeight: "bold",
     },
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),

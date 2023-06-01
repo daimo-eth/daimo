@@ -40,13 +40,25 @@ export function Button(
 export const buttonStyles = {
   big: StyleSheet.create({
     button: {
-      paddingHorizontal: 16,
-      paddingVertical: 12,
+      paddingHorizontal: 24,
+      paddingVertical: 16,
       borderRadius: 8,
       backgroundColor: color.bg.lightGray,
     },
     title: {
       fontSize: 20,
+      fontWeight: "600",
+    },
+  }),
+  smallFill: StyleSheet.create({
+    button: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 8,
+      backgroundColor: color.bg.lightGray,
+    },
+    title: {
+      fontSize: 16,
       fontWeight: "600",
     },
   }),

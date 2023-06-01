@@ -4,18 +4,35 @@ import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { Button, buttonStyles } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { TextBody, TextBold, TextSmall } from "../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();
 
+  const requestFaucet = useCallback(() => console.log("TODO"), []);
+
   return (
-    <View style={styles.outerView}>
-      <Text style={ss.text.h2}>Deposit</Text>
-      <Text style={ss.text.body}>
-        <Text style={ss.text.bodyBold}>Deposit USDC on Base only.</Text> Use the
-        following address.
-      </Text>
+    <View style={styles.vertOuter}>
+      <View style={styles.warning}>
+        <TextBody>
+          <Octicons name="alert" size={16} color="black" />{" "}
+          <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
+          runs on Base Goerli.
+        </TextBody>
+        <View style={ss.spacer.h16} />
+        <Button
+          style={buttonStyles.smallFill}
+          title="Request $10 from faucet"
+          onPress={requestFaucet}
+        />
+      </View>
+      <View style={ss.spacer.h32} />
+      <TextBody>
+        <TextBold>Deposit USDC on Base Goerli only.</TextBold> Use the following
+        address.
+      </TextBody>
       <Address addr={account.address} />
     </View>
   );
@@ -43,15 +60,15 @@ function Address({ addr }: { addr: string }) {
           <Octicons name="copy" size={16} color="black" />
         </View>
       </TouchableHighlight>
-      <Text style={ss.text.bodyGray}>{justCopied ? "Copied" : " "}</Text>
+      <TextSmall>{justCopied ? "Copied" : " "}</TextSmall>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  outerView: {
+  vertOuter: {
+    backgroundColor: color.white,
     flex: 1,
-    backgroundColor: "#fff",
     padding: 32,
     gap: 16,
     overflow: "hidden",
@@ -74,5 +91,11 @@ const styles = StyleSheet.create({
   addressMono: {
     ...ss.text.mono,
     flexShrink: 1,
+  },
+  warning: {
+    backgroundColor: color.bg.lightYellow,
+    padding: 16,
+    marginHorizontal: -16,
+    borderRadius: 8,
   },
 });

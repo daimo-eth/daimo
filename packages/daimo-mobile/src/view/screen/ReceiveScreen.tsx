@@ -1,23 +1,23 @@
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
-import { Header } from "../shared/Header";
-import { ss } from "../shared/style";
-import QRCode from "react-native-qrcode-svg";
-import { ButtonBig } from "../shared/Button";
-import image from "../shared/image";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback } from "react";
+import QRCode from "react-native-qrcode-svg";
+import { useAccount } from "../../logic/account";
 import { HomeStackParamList } from "../HomeStack";
+import { ButtonBig } from "../shared/Button";
+import { Header } from "../shared/Header";
+import image from "../shared/image";
+import { TextSmall } from "../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();
-  const url = `https://google.com?q=${account.address}`;
+  const url = `daimo://request?recipient=${account.address}`;
 
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
   const sendRequest = useCallback(() => {
-    // TODO
+    // TODOe
   }, [nav]); // TODO
   const deposit = useCallback(() => nav.navigate("Deposit"), [nav]);
 
@@ -35,11 +35,11 @@ export default function DepositScreen() {
             logoBorderRadius={24}
             logoBackgroundColor="#fff"
           />
-          <Text style={ss.text.bodyGray}>Scan or tap</Text>
+          <TextSmall>Scan or tap</TextSmall>
         </View>
-        <Text style={ss.text.bodyGray}>or</Text>
+        <TextSmall>or</TextSmall>
         <View style={styles.horzButtons}>
-          <ButtonBig title="Send Request" onPress={sendRequest} />
+          <ButtonBig title="Request" onPress={sendRequest} />
           <ButtonBig title="Deposit" onPress={deposit} />
         </View>
       </View>
@@ -67,6 +67,6 @@ const styles = StyleSheet.create({
   },
   horzButtons: {
     flexDirection: "row",
-    gap: 16,
+    gap: 24,
   },
 });

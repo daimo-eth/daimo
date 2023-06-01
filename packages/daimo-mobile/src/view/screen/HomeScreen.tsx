@@ -80,12 +80,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "bold",
     textAlign: "center",
   },
   titleSmall: {
-    fontSize: 24,
+    fontSize: 30,
   },
   titleGray: {
     color: color.gray,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
 const sendRecvButton = StyleSheet.create({
   button: {
     ...buttonStyles.big.button,
-    width: 108,
+    width: 128,
   },
   title: {
     ...buttonStyles.big.title,

@@ -1,8 +1,9 @@
 import { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { ChainContext, ChainTip } from "../../logic/chain";
-import { color, ss } from "../shared/style";
+import { color } from "../shared/style";
+import { TextBody, TextH2 } from "../shared/text";
 import { timeAgo, useTime } from "../shared/time";
 
 export function ChainScreen() {
@@ -12,16 +13,16 @@ export function ChainScreen() {
     <View style={styles.container}>
       {status.status === "ok" && (
         <>
-          <Text style={ss.text.h2}>L1 · {status.l1.name}</Text>
+          <TextH2>L1 · {status.l1.name}</TextH2>
           <TipInfo tip={status.l1} />
-          <Text style={ss.text.h2}>L2 · {status.l2.name}</Text>
+          <TextH2>L2 · {status.l2.name}</TextH2>
           <TipInfo tip={status.l2} />
         </>
       )}
       {status.status === "error" && (
         <>
-          <Text style={ss.text.h2}>{status.error.name}</Text>
-          <Text style={ss.text.body}>{status.error.message}</Text>
+          <TextH2>{status.error.name}</TextH2>
+          <TextBody>{status.error.message}</TextBody>
         </>
       )}
     </View>
@@ -32,9 +33,9 @@ function TipInfo({ tip }: { tip: ChainTip }) {
   const nowS = useTime();
   return (
     <>
-      <Text style={ss.text.body}>
+      <TextBody>
         Block #{tip.blockHeight} · {timeAgo(tip.blockTimestamp, nowS)}
-      </Text>
+      </TextBody>
     </>
   );
 }
