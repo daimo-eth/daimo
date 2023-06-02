@@ -32,11 +32,13 @@ export const ss = {
       fontSize: 36,
       fontWeight: "bold",
       textAlign: "center",
+      lineHeight: 48,
     },
     h2: {
       ...textBase,
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: "bold",
+      lineHeight: 30,
     },
     body: {
       ...textBase,
@@ -45,7 +47,8 @@ export const ss = {
     },
     small: {
       ...textBase,
-      fontSize: 14,
+      fontSize: 16,
+      lineHeight: 20,
       color: color.gray,
     },
     bold: {

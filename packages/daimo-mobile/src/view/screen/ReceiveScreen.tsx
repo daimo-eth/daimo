@@ -16,9 +16,7 @@ export default function DepositScreen() {
   const url = `daimo://request?recipient=${account.address}`;
 
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
-  const sendRequest = useCallback(() => {
-    // TODOe
-  }, [nav]); // TODO
+  const request = useCallback(() => nav.navigate("Request"), [nav]);
   const deposit = useCallback(() => nav.navigate("Deposit"), [nav]);
 
   return (
@@ -39,7 +37,7 @@ export default function DepositScreen() {
         </View>
         <TextSmall>or</TextSmall>
         <View style={styles.horzButtons}>
-          <ButtonBig title="Request" onPress={sendRequest} />
+          <ButtonBig title="Request" onPress={request} />
           <ButtonBig title="Deposit" onPress={deposit} />
         </View>
       </View>

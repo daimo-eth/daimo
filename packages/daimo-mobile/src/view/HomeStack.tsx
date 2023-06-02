@@ -6,6 +6,7 @@ import { UserScreen } from "./screen/UserScreen";
 import { ChainScreen } from "./screen/ChainScreen";
 import DepositScreen from "./screen/DepositScreen";
 import ReceiveScreen from "./screen/ReceiveScreen";
+import RequestScreen from "./screen/RequestScreen";
 
 export type HomeStackParamList = {
   Home: undefined;
@@ -13,6 +14,7 @@ export type HomeStackParamList = {
   Chain: undefined;
   Receive: undefined;
   Deposit: undefined;
+  Request: undefined;
 };
 
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
@@ -28,6 +30,7 @@ export function HomeStackNav() {
         <HomeStack.Screen name="User" component={UserScreen} />
         <HomeStack.Screen name="Chain" component={ChainScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
+        <HomeStack.Screen name="Request" component={RequestScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

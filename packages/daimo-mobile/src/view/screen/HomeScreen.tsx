@@ -97,8 +97,5 @@ const sendRecvButton = StyleSheet.create({
     ...buttonStyles.big.button,
     width: 128,
   },
-  title: {
-    ...buttonStyles.big.title,
-    textAlign: "center",
-  },
+  title: buttonStyles.big.title,
 });
