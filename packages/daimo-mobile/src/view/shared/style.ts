@@ -11,7 +11,7 @@ export const color = {
   white: "#fff",
   bg: {
     lightGray: "#eee",
-    lightYellow: "#fffae6",
+    lightYellow: "#fff6e6",
     blue: "#cce5ff",
   },
 };
@@ -29,8 +29,9 @@ export const ss = {
   text: StyleSheet.create({
     h1: {
       ...textBase,
-      fontSize: 24,
+      fontSize: 36,
       fontWeight: "bold",
+      textAlign: "center",
     },
     h2: {
       ...textBase,

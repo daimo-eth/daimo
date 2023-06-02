@@ -23,7 +23,7 @@ export default function DepositScreen() {
         </TextBody>
         <View style={ss.spacer.h16} />
         <Button
-          style={buttonStyles.smallFill}
+          style={buttonStyles.med}
           title="Request $10 from faucet"
           onPress={requestFaucet}
         />
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.bg.lightYellow,
     padding: 16,
     marginHorizontal: -16,
-    borderRadius: 8,
+    borderRadius: 24,
   },
 });

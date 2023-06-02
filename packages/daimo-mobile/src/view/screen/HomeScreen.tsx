@@ -9,6 +9,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback } from "react";
 import { HomeStackParamList } from "../HomeStack";
 import { Button, buttonStyles } from "../shared/Button";
+import { TextH1 } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
@@ -57,12 +58,12 @@ function TitleAmount({
   const cents = dispStr.slice(-displayDecimals);
 
   return (
-    <Text style={styles.title}>
+    <TextH1>
       <Text style={styles.titleSmall}>{symbol}</Text>
       <Spacer w={4} />
       {dollars}
       <Text style={styles.titleGray}>.{cents}</Text>
-    </Text>
+    </TextH1>
   );
 }
 
@@ -78,11 +79,6 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     alignItems: "center",
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    textAlign: "center",
   },
   titleSmall: {
     fontSize: 30,

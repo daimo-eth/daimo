@@ -50,10 +50,10 @@ export const buttonStyles = {
       fontWeight: "600",
     },
   }),
-  smallFill: StyleSheet.create({
+  med: StyleSheet.create({
     button: {
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingVertical: 16,
       borderRadius: 8,
       backgroundColor: color.bg.lightGray,
     },
