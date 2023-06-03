@@ -27,7 +27,9 @@ export default function App() {
       <Button
         title="Create"
         onPress={() => {
-          ExpoEnclave.createKeyPair(account);
+          ExpoEnclave.createKeyPair(account).catch((e) => {
+            console.log("error already exists?", account, e);
+          });
         }}
       />
       <Button

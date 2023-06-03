@@ -59,25 +59,25 @@ public class SecureEnclaveKeyManager : KeyManager {
             return nil
         }
         let signingPrivkey = readSigningPrivkey!
-        return signingPrivkey.publicKey.rawRepresentation.hexEncodedString()
+        return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
     public func createKeyPair(accountName: String) throws -> String {
         try createSigningPrivkey(accountName: accountName)
         let signingPrivkey = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Create key pair" + accountName)
-        return signingPrivkey.publicKey.rawRepresentation.hexEncodedString()
+        return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
     public func sign(accountName: String, hexMessage: String) throws -> String {
         let message = Data(fromHexEncodedString: hexMessage)!
         let key = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Sign Daimo tx " + hexMessage)
         let signature = try key.signature(for: message)
-        return signature.rawRepresentation.hexEncodedString()
+        return signature.derRepresentation.hexEncodedString()
     }
 
     public func verify(accountName: String, hexSignature: String, hexMessage: String) throws -> Bool {
         let message = Data(fromHexEncodedString: hexMessage)!
-        let signature = try P256.Signing.ECDSASignature(rawRepresentation: Data(fromHexEncodedString: hexSignature)!)
+        let signature = try P256.Signing.ECDSASignature(derRepresentation: Data(fromHexEncodedString: hexSignature)!)
         let privKey = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Verify Daimo tx " + hexMessage)
         return privKey.publicKey.isValidSignature(signature, for: message)
     }

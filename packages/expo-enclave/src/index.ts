@@ -5,7 +5,7 @@ import ExpoEnclaveModule from "./ExpoEnclaveModule";
 export type HardwareSecurityLevel =
   | "SOFTWARE"
   | "TRUSTED_ENVIRONMENT"
-  | "STRONGBOX";
+  | "HARDWARE_ENCLAVE";
 
 export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
 

@@ -69,7 +69,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   @ExpoMethod
   fun getHardwareSecurityLevel(promise: Promise) {
     if (hasStrongbox()) {
-      promise.resolve(HardwareSecurityLevel.STRONGBOX.value)
+      promise.resolve(HardwareSecurityLevel.HARDWARE_ENCLAVE.value)
     } else if (hasTEE()) {
       promise.resolve(HardwareSecurityLevel.TRUSTED_ENVIRONMENT.value)
     } else {
@@ -110,7 +110,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 enum class HardwareSecurityLevel(val value: String) : Enumerable {
   SOFTWARE("SOFTWARE"),
   TRUSTED_ENVIRONMENT("TRUSTED_ENVIRONMENT"),
-  STRONGBOX("STRONGBOX"),
+  HARDWARE_ENCLAVE("HARDWARE_ENCLAVE"),
 }
 
 enum class BiometricSecurityLevel(val value: String) : Enumerable {
