@@ -28,10 +28,8 @@ export default function DepositScreen() {
             value={url}
             color="#333"
             size={192}
-            logo={{ uri: image.ethLogo }}
-            logoSize={48}
-            logoBorderRadius={24}
-            logoBackgroundColor="#fff"
+            logo={{ uri: image.qrLogo }}
+            logoSize={72}
           />
           <TextSmall>Scan or tap</TextSmall>
         </View>
