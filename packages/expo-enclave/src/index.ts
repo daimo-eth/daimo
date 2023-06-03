@@ -2,8 +2,19 @@
 // and on native platforms to ExpoEnclave.ts
 import ExpoEnclaveModule from "./ExpoEnclaveModule";
 
-export async function isSecureEnclaveAvailable(): Promise<boolean> {
-  return ExpoEnclaveModule.isSecureEnclaveAvailable();
+export type HardwareSecurityLevel =
+  | "SOFTWARE"
+  | "TRUSTED_ENVIRONMENT"
+  | "STRONGBOX";
+
+export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
+
+export async function getHardwareSecurityLevel(): Promise<HardwareSecurityLevel> {
+  return ExpoEnclaveModule.getHardwareSecurityLevel();
+}
+
+export async function getBiometricSecurityLevel(): Promise<BiometricSecurityLevel> {
+  return ExpoEnclaveModule.getBiometricSecurityLevel();
 }
 
 export async function fetchPublicKey(

@@ -7,15 +7,22 @@ export default function App() {
   const [pubkey, setPubkey] = useState<string | undefined>("");
   const [signature, setSignature] = useState<string>("");
   const [verification, setVerification] = useState<boolean>(false);
-  const [isAvailable, setIsAvailable] = useState<boolean>(false);
+  const [hardwareSecurityLevel, setHardwareSecurityLevel] =
+    useState<ExpoEnclave.HardwareSecurityLevel>("SOFTWARE");
+  const [biometricSecurityLevel, setBiometricSecurityLevel] =
+    useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
 
   (async () => {
-    setIsAvailable(await ExpoEnclave.isSecureEnclaveAvailable());
+    setHardwareSecurityLevel(await ExpoEnclave.getHardwareSecurityLevel());
+    setBiometricSecurityLevel(await ExpoEnclave.getBiometricSecurityLevel());
   })();
 
   return (
     <View style={styles.container}>
-      <Text>is secure enclave available? {isAvailable ? "Yes" : "No"}</Text>
+      <Text>
+        hardware security level: {hardwareSecurityLevel}, biometrics security
+        level: {biometricSecurityLevel}
+      </Text>
       <TextInput onChangeText={setAccount} value={account} />
       <Button
         title="Create"

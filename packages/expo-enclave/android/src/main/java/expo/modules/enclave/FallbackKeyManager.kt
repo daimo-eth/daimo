@@ -21,27 +21,7 @@ import expo.modules.core.Promise
 import android.os.Build
 import android.content.pm.PackageManager
 
-fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-fun String.decodeHex(): ByteArray {
-    check(length % 2 == 0) { "Must have an even length" }
-
-    return chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
-}
-
-// Callback invoked when the user has successfully authenticated with biometrics.
-fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
-  if (incompleteSignature == null) {
-    promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
-  }
-  incompleteSignature.update(message.decodeHex())
-  promise.resolve(incompleteSignature.sign().toHexString())
-}
-
-class FallbackKeyManager {
-  private val KEYSTORE_PROVIDER = "AndroidKeyStore"
-
+class FallbackKeyManager: KeyManager {
   internal fun createSigningPrivkey(accountName: String) {
     var params = KeyGenParameterSpec.Builder(accountName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
       .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
@@ -65,51 +45,26 @@ class FallbackKeyManager {
     return KeyPair(entry.certificate.publicKey, entry.privateKey)
   }
 
-  public fun createKeyPair(accountName: String): String {
+  override fun fetchPublicKey(accountName: String): String? {
+    return getSigningPrivkey(accountName).public.encoded.toHexString()
+  }
+
+  override fun createKeyPair(accountName: String): String {
     createSigningPrivkey(accountName)
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
+    return fetchPublicKey(accountName)!!
   }
 
-  public fun fetchPublicKey(accountName: String): String? {
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
-  }
-
-  public fun sign(accountName: String, hexMessage: String, promise: Promise) {
-    val fragmentActivity = getCurrentActivity() as FragmentActivity?
-    val biometricPrompt = BiometricPrompt(
-      fragmentActivity!!, ContextCompat.getMainExecutor(context),
-      object : BiometricPrompt.AuthenticationCallback() {
-        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-          super.onAuthenticationError(errorCode, errString)
-          promise.reject("ERR_BIOMETRIC_AUTHENTICATION_ERRORED", "Biometric authentication errored")
-        }
-
-        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-          super.onAuthenticationSucceeded(result)
-          completeSignature(result.cryptoObject!!.getSignature(), hexMessage, promise)
-        }
-
-        override fun onAuthenticationFailed() {
-          super.onAuthenticationFailed()
-          promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
-        }
-    })
-
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle("Authorise transaction")
-      .setSubtitle("Sign Daimo tx " + hexMessage)
-      .setNegativeButtonText("Cancel")
-      .build()
-    
+  override fun sign(accountName: String, hexMessage: String, promise: Promise) {
     val privateKey = getSigningPrivkey(accountName).private
-    val signature = Signature.getInstance("SHA256withECDSA")
-    signature.initSign(privateKey)
-    uiManager.runOnUiQueueThread {
-      biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
+    val signature = Signature.getInstance("SHA256withECDSA").run {
+      initSign(privateKey)
+      update(hexMessage.decodeHex())
+      sign()
     }
+    promise.resolve(signature.toHexString())
   }
 
-  public fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
+  override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
     val publicKey = getSigningPrivkey(accountName).public
     val verified = Signature.getInstance("SHA256withECDSA").run {
       initVerify(publicKey)

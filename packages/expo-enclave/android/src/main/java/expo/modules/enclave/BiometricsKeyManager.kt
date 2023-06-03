@@ -18,32 +18,22 @@ import expo.modules.core.interfaces.ActivityProvider
 import android.app.Activity
 import expo.modules.core.interfaces.services.UIManager
 import expo.modules.core.Promise
-import android.os.Build
-import android.content.pm.PackageManager
-
-fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-fun String.decodeHex(): ByteArray {
-    check(length % 2 == 0) { "Must have an even length" }
-
-    return chunked(2)
-        .map { it.toInt(16).toByte() }
-        .toByteArray()
-}
 
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
   if (incompleteSignature == null) {
     promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
+    return
   }
   incompleteSignature.update(message.decodeHex())
   promise.resolve(incompleteSignature.sign().toHexString())
 }
 
-class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry) {
-  private val KEYSTORE_PROVIDER = "AndroidKeyStore"
+class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
   private val context = _context
   private val moduleRegistry = _moduleRegistry
   private val uiManager = moduleRegistry.getModule(UIManager::class.java)
+  private val useStrongbox = _useStrongbox
 
   internal fun getCurrentActivity(): Activity? {
     val activityProvider: ActivityProvider = moduleRegistry.getModule(ActivityProvider::class.java)
@@ -56,12 +46,15 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry) {
       .setDigests(KeyProperties.DIGEST_SHA256)
       .setUserAuthenticationRequired(true)
       .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or KeyProperties.AUTH_DEVICE_CREDENTIAL)
-      .setIsStrongBoxBacked(true)
       .setInvalidatedByBiometricEnrollment(false)
-      .build()
 
+    if (useStrongbox) {
+      params.setIsStrongBoxBacked(true)
+    }
+
+    var generator = params.build()
     var keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
-    keyPairGenerator.initialize(params)
+    keyPairGenerator.initialize(generator)
     keyPairGenerator.generateKeyPair()
   }
 
@@ -77,16 +70,16 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry) {
     return KeyPair(entry.certificate.publicKey, entry.privateKey)
   }
 
-  public fun createKeyPair(accountName: String): String {
+  override fun fetchPublicKey(accountName: String): String? {
+    return getSigningPrivkey(accountName).public.encoded.toHexString()
+  }
+  
+  override fun createKeyPair(accountName: String): String {
     createSigningPrivkey(accountName)
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
+    return fetchPublicKey(accountName)!!
   }
 
-  public fun fetchPublicKey(accountName: String): String? {
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
-  }
-
-  public fun sign(accountName: String, hexMessage: String, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val biometricPrompt = BiometricPrompt(
       fragmentActivity!!, ContextCompat.getMainExecutor(context),
@@ -121,7 +114,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry) {
     }
   }
 
-  public fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
+  override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
     val publicKey = getSigningPrivkey(accountName).public
     val verified = Signature.getInstance("SHA256withECDSA").run {
       initVerify(publicKey)

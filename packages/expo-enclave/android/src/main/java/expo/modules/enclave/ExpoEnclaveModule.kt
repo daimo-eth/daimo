@@ -1,10 +1,20 @@
 package expo.modules.enclave
 
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import expo.modules.core.interfaces.ExpoMethod
 import expo.modules.core.ModuleRegistry
 import expo.modules.core.ExportedModule
 import expo.modules.core.Promise
+import java.security.spec.ECGenParameterSpec
+import java.security.KeyPairGenerator
+import androidx.biometric.BiometricManager
+import android.security.keystore.KeyInfo
+import java.security.KeyFactory
+import expo.modules.kotlin.types.Enumerable
 
 // Note that this is a ExportedModule, not a Module as expo recommends.
 // This is because we need access to the application context to be able
@@ -20,7 +30,11 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 
   override fun onCreate(_moduleRegistry: ModuleRegistry) {
     moduleRegistry = _moduleRegistry
-    keyManager = KeyManager(context, moduleRegistry)
+    if (hasBiometrics()) {
+      keyManager = BiometricsKeyManager(context, moduleRegistry, hasStrongbox())
+    } else {
+      keyManager = FallbackKeyManager()
+    }
   }
 
   override fun getName() = "ExpoEnclave"
@@ -30,15 +44,46 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
       && context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
   }
 
+  internal fun hasTEE(): Boolean {
+    // Create dummy key to test if TEE is available
+    var generator = KeyGenParameterSpec.Builder("hasTEE_TEST_KEY", KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
+      .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+      .setDigests(KeyProperties.DIGEST_SHA256)
+      .build()
+    
+    var keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
+    keyPairGenerator.initialize(generator)
+
+    var secretKey = keyPairGenerator.generateKeyPair().private
+    var keyFactory = KeyFactory.getInstance(secretKey.getAlgorithm(), KEYSTORE_PROVIDER)
+    var keyInfo = keyFactory.getKeySpec(secretKey, KeyInfo::class.java)
+    
+    return keyInfo.getSecurityLevel() == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT
+  }
+
   internal fun hasBiometrics(): Boolean {
     val biometricManager = BiometricManager.from(context)
     return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
   }
 
+  @ExpoMethod
+  fun getHardwareSecurityLevel(promise: Promise) {
+    if (hasStrongbox()) {
+      promise.resolve(HardwareSecurityLevel.STRONGBOX.value)
+    } else if (hasTEE()) {
+      promise.resolve(HardwareSecurityLevel.TRUSTED_ENVIRONMENT.value)
+    } else {
+      promise.resolve(HardwareSecurityLevel.SOFTWARE.value)
+    }
+  }
 
   @ExpoMethod
-  fun isSecureEnclaveAvailable(promise: Promise) {
-    promise.resolve(keyManager.isSecureEnclaveAvailable())
+  fun getBiometricSecurityLevel(promise: Promise) {
+    if (hasBiometrics()) {
+      promise.resolve(BiometricSecurityLevel.AVAILABLE.value)
+    } else {
+      promise.resolve(BiometricSecurityLevel.NONE.value)
+    }
   }
 
   @ExpoMethod
@@ -60,4 +105,15 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   fun verify(accountName: String, signature: String, message: String, promise: Promise) {
     promise.resolve(keyManager.verify(accountName, signature, message))
   }
+}
+
+enum class HardwareSecurityLevel(val value: String) : Enumerable {
+  SOFTWARE("SOFTWARE"),
+  TRUSTED_ENVIRONMENT("TRUSTED_ENVIRONMENT"),
+  STRONGBOX("STRONGBOX"),
+}
+
+enum class BiometricSecurityLevel(val value: String) : Enumerable {
+  NONE("NONE"),
+  AVAILABLE("AVAILABLE"),
 }
