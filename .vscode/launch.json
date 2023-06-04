@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/daimo-api/dist/daimo-api/src/index.js",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
