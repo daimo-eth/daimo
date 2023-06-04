@@ -1,30 +1,46 @@
 import * as ExpoEnclave from "expo-enclave";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Button, TextInput } from "react-native";
 
 export default function App() {
   const [account, setAccount] = useState<string>("testdaimo");
-  const [pubkey, setPubkey] = useState<string>("");
+  const [pubkey, setPubkey] = useState<string | undefined>("");
   const [signature, setSignature] = useState<string>("");
   const [verification, setVerification] = useState<boolean>(false);
+  const [hardwareSecurityLevel, setHardwareSecurityLevel] =
+    useState<ExpoEnclave.HardwareSecurityLevel>("SOFTWARE");
+  const [biometricSecurityLevel, setBiometricSecurityLevel] =
+    useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
+
+  const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
+    usageMessage: "Authorise transaction",
+    androidTitle: "Sign tx",
+  };
+
+  (async () => {
+    setHardwareSecurityLevel(await ExpoEnclave.getHardwareSecurityLevel());
+    setBiometricSecurityLevel(await ExpoEnclave.getBiometricSecurityLevel());
+  })();
 
   return (
     <View style={styles.container}>
       <Text>
-        is secure enclave available?{" "}
-        {ExpoEnclave.isSecureEnclaveAvailable() ? "Yes" : "No"}
+        hardware security level: {hardwareSecurityLevel}, biometrics security
+        level: {biometricSecurityLevel}
       </Text>
       <TextInput onChangeText={setAccount} value={account} />
       <Button
         title="Create"
         onPress={() => {
-          ExpoEnclave.createKeyPair(account);
+          ExpoEnclave.createKeyPair(account).catch((e) => {
+            console.log("error already exists?", account, e);
+          });
         }}
       />
       <Button
         title="Fetch Public key"
-        onPress={() => {
-          setPubkey(ExpoEnclave.fetchPublicKey(account));
+        onPress={async () => {
+          setPubkey(await ExpoEnclave.fetchPublicKey(account));
         }}
       />
       <Text>
@@ -32,15 +48,19 @@ export default function App() {
       </Text>
       <Button
         title="Sign Message"
-        onPress={() => {
-          setSignature(ExpoEnclave.sign(account, "deadbeef"));
+        onPress={async () => {
+          setSignature(
+            await ExpoEnclave.sign(account, "deadbeef", biometricPromptCopy)
+          );
         }}
       />
       <Text>Created signature is {signature} for message deadbeef</Text>
       <Button
         title="Verify signature"
-        onPress={() => {
-          setVerification(ExpoEnclave.verify(account, signature, "deadbeef"));
+        onPress={async () => {
+          setVerification(
+            await ExpoEnclave.verify(account, signature, "deadbeef")
+          );
         }}
       />
       <Text>Verification result is {verification.toString()}</Text>

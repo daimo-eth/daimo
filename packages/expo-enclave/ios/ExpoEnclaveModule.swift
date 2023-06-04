@@ -17,24 +17,55 @@ public class ExpoEnclaveModule: Module {
     // The module will be accessible from `requireNativeModule('ExpoEnclave')` in JavaScript.
     Name("ExpoEnclave")
 
-    Function("isSecureEnclaveAvailable") { () -> Bool in
-      return keyManager is SecureEnclaveKeyManager
+    AsyncFunction("getHardwareSecurityLevel") { () -> String in
+      if (keyManager is SecureEnclaveKeyManager) {
+        return HardwareSecurityLevel.HARDWARE_ENCLAVE.rawValue
+      } else {
+        return HardwareSecurityLevel.SOFTWARE.rawValue
+      }
     }
 
-    Function("fetchPublicKey") { (accountName: String) throws -> String? in
+    AsyncFunction("getBiometricSecurityLevel") { () -> String in
+      if (keyManager is SecureEnclaveKeyManager) {
+        return BiometricSecurityLevel.AVAILABLE.rawValue
+      } else {
+        return BiometricSecurityLevel.NONE.rawValue
+      }
+    }
+
+    AsyncFunction("fetchPublicKey") { (accountName: String) throws -> String? in
       return try self.keyManager.fetchPublicKey(accountName: accountName)
     }
 
-    Function("createKeyPair") { (accountName: String) throws -> String in
+    AsyncFunction("createKeyPair") { (accountName: String) throws -> String in
       return try self.keyManager.createKeyPair(accountName: accountName)
     }
 
-    Function("sign") { (accountName: String, hexMessage: String) throws -> String in
-      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage)
+    AsyncFunction("sign") { (accountName: String, hexMessage: String, biometricPromptCopy: BiometricPromptCopy) throws -> String in
+      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: biometricPromptCopy.usageMessage)
     }
 
-    Function("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
+    AsyncFunction("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
       return try self.keyManager.verify(accountName: accountName, hexSignature: hexSignature, hexMessage: hexMessage)
     }
   }
+}
+
+enum HardwareSecurityLevel: String, Enumerable {
+  case SOFTWARE
+  case TRUSTED_ENVIRONMENT
+  case HARDWARE_ENCLAVE
+}
+
+enum BiometricSecurityLevel: String, Enumerable {
+  case NONE
+  case AVAILABLE
+}
+
+internal struct BiometricPromptCopy: Record {
+  @Field
+  var usageMessage: String
+
+  @Field
+  var androidTitle: String
 }

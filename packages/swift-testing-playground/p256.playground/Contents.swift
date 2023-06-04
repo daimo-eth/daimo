@@ -66,3 +66,18 @@ let hexSignature = signature.rawRepresentation.hexEncodedString()
 let sig = try P256.Signing.ECDSASignature(rawRepresentation: Data(fromHexEncodedString: hexSignature)!)
 
 //  new account address: 0xFC89f5049A1eCdBB52487be461e3C2aA81bd84A5
+
+let keyData = Data(fromHexEncodedString:  "3059301306072a8648ce3d020106082a8648ce3d030107034200041bf24cd1fa3d0d0a0f96c63b63af690ca0c171172fa08ad9a976c4a2be7421daa54f11ccb62cb1909ffff628bac5f83ada775db4ab4d1326ff9fbdb6cd76ca43")
+
+
+// android testing, they're using DER sigh
+
+let androidKey = try P256.Signing.PublicKey(derRepresentation: keyData!)
+
+let messageData = Data(fromHexEncodedString: "deadbeef")!
+
+let sigData = Data(fromHexEncodedString: "30440220780a20ec08d3a9dba95b997b35fdc2f6c1d9adc8f88638375cb534d1c6ec6127022068081890c15b6954c080837ff1dde3677f6af64fd3c4255a8e1d6a1f960c401f")!
+
+print(androidKey.rawRepresentation.hexEncodedString())
+
+print(androidKey.isValidSignature(try P256.Signing.ECDSASignature(derRepresentation: sigData), for: messageData))
