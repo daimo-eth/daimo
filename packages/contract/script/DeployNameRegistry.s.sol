@@ -8,7 +8,8 @@ contract DeployNameRegistryScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        new NameRegistry();
+        // Use CREATE2
+        new NameRegistry{salt: 0}();
 
         vm.stopBroadcast();
     }

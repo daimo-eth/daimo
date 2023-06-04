@@ -100,4 +100,9 @@ export class ViemChain implements Chain {
       lastBlockTimestamp: 0,
     };
   }
+
+  async resolveName(name: string): Promise<Address> {
+    // TODO
+    return "0x0";
+  }
 }
