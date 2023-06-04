@@ -15,7 +15,9 @@ const appRouter = router({
     .input(z.object({ prefix: z.string() }))
     .query(async (opts) => {
       const { prefix } = opts.input;
-      return nameReg.search(prefix);
+      const ret = await nameReg.search(prefix);
+      console.log(`[API] search: ${ret.length} results for '${prefix}'`);
+      return ret;
     }),
 
   register: publicProcedure
@@ -27,7 +29,8 @@ const appRouter = router({
     )
     .mutation(async (opts) => {
       const { name, addr } = opts.input;
-      return nameReg.registerName(account, name, addr);
+      const receipt = await nameReg.registerName(account, name, addr);
+      return receipt.status;
     }),
 });
 

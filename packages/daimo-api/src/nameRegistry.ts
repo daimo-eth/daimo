@@ -36,16 +36,18 @@ export class NameRegistry {
     });
     console.log(`Got ${logs.length} logs`);
 
-    logs
+    const accounts = logs
       .map((l) => l.args)
       .filter((a): a is { name: Hex; addr: Hex } => !!(a.name && a.addr))
-      .map((a) => ({ name: hexToString(a.name), addr: a.addr }))
-      .filter((a) => isValidName(a.name))
-      .forEach((acc: NamedAccount) => {
-        this.nameToAddr.set(acc.name, acc.addr);
-        this.addrToName.set(acc.addr, acc.name);
-        this.accounts.push(acc);
-      });
+      .map((a) => ({ name: hexToString(a.name, { size: 32 }), addr: a.addr }))
+      .filter((a) => isValidName(a.name));
+    console.log(`Parsed ${accounts.length} named accounts`);
+
+    for (const acc of accounts) {
+      this.nameToAddr.set(acc.name, acc.addr);
+      this.addrToName.set(acc.addr, acc.name);
+      this.accounts.push(acc);
+    }
   }
 
   /** Find accounts whose names start with a prefix */
