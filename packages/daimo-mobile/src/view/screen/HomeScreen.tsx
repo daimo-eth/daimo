@@ -10,17 +10,27 @@ import { useCallback } from "react";
 import { HomeStackParamList } from "../HomeStack";
 import { Button, buttonStyles } from "../shared/Button";
 import { TextH1 } from "../shared/text";
+import { trpc } from "../../logic/trpc";
 
 export default function HomeScreen() {
   const [account] = useAccount();
 
+  const search = trpc.search.useQuery({ prefix: "" });
+
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
-  const goSend = useCallback(() => nav.navigate("Home"), [nav]); // TODO
+  const goSend = useCallback(() => {
+    search.refetch(); // TODO
+  }, [search]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
 
   return (
     <View style={styles.outerView}>
       <Header />
+      <Text>
+        {search.isFetching && "Fetching..."}
+        {search.isError && search.error.message}
+        {search.isSuccess && search.data.map((x) => x.name).join(", ")}
+      </Text>
       <View style={styles.amountAndButtons}>
         <TitleAmount
           symbol="$"

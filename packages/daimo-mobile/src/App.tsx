@@ -4,15 +4,26 @@ import { StatusBar } from "expo-status-bar";
 import "fast-text-encoding";
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
+import { httpBatchLink } from "@trpc/client";
 
 import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
 import { HomeStackNav } from "./view/HomeStack";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { trpc } from "./logic/trpc";
 
 export default function App() {
   const [account, setAccount] = useAccount();
   const [status, setStatus] = useState<ChainStatus>();
   const chain = useMemo<Chain>(() => new ViemChain(), []);
+
+  const [queryClient] = useState(() => new QueryClient());
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [httpBatchLink({ url: "http://localhost:3000" })],
+      transformer: undefined,
+    })
+  );
 
   const refreshAccount = async () => {
     try {
@@ -41,11 +52,18 @@ export default function App() {
   const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
 
   return (
-    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <ChainContext.Provider value={cs}>
-        <HomeStackNav />
-        <StatusBar style="auto" />
-      </ChainContext.Provider>
-    </NavigationContainer>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer
+          linking={linking}
+          fallback={<Text>Loading...</Text>}
+        >
+          <ChainContext.Provider value={cs}>
+            <HomeStackNav />
+            <StatusBar style="auto" />
+          </ChainContext.Provider>
+        </NavigationContainer>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
