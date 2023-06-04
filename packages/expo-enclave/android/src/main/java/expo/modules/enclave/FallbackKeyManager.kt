@@ -20,6 +20,7 @@ import expo.modules.core.interfaces.services.UIManager
 import expo.modules.core.Promise
 import android.os.Build
 import android.content.pm.PackageManager
+import expo.modules.core.arguments.ReadableArguments
 
 class FallbackKeyManager: KeyManager {
   internal fun createSigningPrivkey(accountName: String) {
@@ -54,7 +55,7 @@ class FallbackKeyManager: KeyManager {
     return fetchPublicKey(accountName)!!
   }
 
-  override fun sign(accountName: String, hexMessage: String, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
     val privateKey = getSigningPrivkey(accountName).private
     val signature = Signature.getInstance("SHA256withECDSA").run {
       initSign(privateKey)

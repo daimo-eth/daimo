@@ -9,6 +9,22 @@ export type HardwareSecurityLevel =
 
 export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
 
+export type BiometricPromptCopy = {
+  /**
+   * Message displayed when prompting for biometric authentication,
+   * rendered on both iOS and Android devices.
+   *
+   */
+  usageMessage: string;
+
+  /**
+   * Title of the biometric prompt, only rendered on Android
+   * devices.
+   *
+   */
+  androidTitle: string;
+};
+
 /**
  * Get key storage security level.
  * @return HardwareSecurityLevel
@@ -53,13 +69,15 @@ export async function createKeyPair(accountName: string): Promise<string> {
  *
  * @param accountName The account to use.
  * @param hexMessage Hex string of the message bytes to sign.
+ * @param promptCopy Message to display if prompting for biometrics.
  * @return Hex string of DER representation of the signature
  */
 export async function sign(
   accountName: string,
-  hexMessage: string
+  hexMessage: string,
+  promptCopy: BiometricPromptCopy
 ): Promise<string> {
-  return ExpoEnclaveModule.sign(accountName, hexMessage);
+  return ExpoEnclaveModule.sign(accountName, hexMessage, promptCopy);
 }
 
 /**

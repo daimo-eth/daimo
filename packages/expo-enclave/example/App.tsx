@@ -12,6 +12,11 @@ export default function App() {
   const [biometricSecurityLevel, setBiometricSecurityLevel] =
     useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
 
+  const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
+    usageMessage: "Authorise transaction",
+    androidTitle: "Sign tx",
+  };
+
   (async () => {
     setHardwareSecurityLevel(await ExpoEnclave.getHardwareSecurityLevel());
     setBiometricSecurityLevel(await ExpoEnclave.getBiometricSecurityLevel());
@@ -44,7 +49,9 @@ export default function App() {
       <Button
         title="Sign Message"
         onPress={async () => {
-          setSignature(await ExpoEnclave.sign(account, "deadbeef"));
+          setSignature(
+            await ExpoEnclave.sign(account, "deadbeef", biometricPromptCopy)
+          );
         }}
       />
       <Text>Created signature is {signature} for message deadbeef</Text>

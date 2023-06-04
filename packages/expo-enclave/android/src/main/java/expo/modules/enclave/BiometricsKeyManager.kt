@@ -18,6 +18,7 @@ import expo.modules.core.interfaces.ActivityProvider
 import android.app.Activity
 import expo.modules.core.interfaces.services.UIManager
 import expo.modules.core.Promise
+import expo.modules.core.arguments.ReadableArguments
 
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
@@ -79,7 +80,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     return fetchPublicKey(accountName)!!
   }
 
-  override fun sign(accountName: String, hexMessage: String, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val biometricPrompt = BiometricPrompt(
       fragmentActivity!!, ContextCompat.getMainExecutor(context),
@@ -101,8 +102,8 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     })
 
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle("Authorise transaction")
-      .setSubtitle("Sign Daimo tx " + hexMessage)
+      .setTitle(biometricPromptCopy.getString("androidTitle"))
+      .setSubtitle(biometricPromptCopy.getString("usageMessage"))
       .setNegativeButtonText("Cancel")
       .build()
     

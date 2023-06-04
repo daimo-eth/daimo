@@ -15,6 +15,7 @@ import androidx.biometric.BiometricManager
 import android.security.keystore.KeyInfo
 import java.security.KeyFactory
 import expo.modules.kotlin.types.Enumerable
+import expo.modules.core.arguments.ReadableArguments
 
 // Note that this is a ExportedModule, not a Module as expo recommends.
 // This is because we need access to the application context to be able
@@ -97,8 +98,8 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   @ExpoMethod
-  fun sign(accountName: String, message: String, promise: Promise) {
-    keyManager.sign(accountName, message, promise)
+  fun sign(accountName: String, message: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
+    keyManager.sign(accountName, message, biometricPromptCopy, promise)
   }
 
   @ExpoMethod

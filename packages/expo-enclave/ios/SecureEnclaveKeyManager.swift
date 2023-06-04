@@ -15,14 +15,14 @@ import LocalAuthentication
 public class SecureEnclaveKeyManager : KeyManager {
     let store = GenericPasswordStore()
 
-    internal func createContext(usage: String, duration: TimeInterval) -> LAContext {
+    internal func createContext(usage: String?, duration: TimeInterval) -> LAContext {
         let context = LAContext()
         context.touchIDAuthenticationAllowableReuseDuration = duration
-        context.localizedReason = usage
+        context.localizedReason = usage ?? "Unexpected usage"
         return context
     }
 
-    internal func getSigningPrivkeyWithContext(accountName: String, usage: String, duration: TimeInterval = 0) throws -> SecureEnclave.P256.Signing.PrivateKey {
+    internal func getSigningPrivkeyWithContext(accountName: String, usage: String?, duration: TimeInterval = 0) throws -> SecureEnclave.P256.Signing.PrivateKey {
         let readSigningPrivkey: SecureEnclave.P256.Signing.PrivateKey? = try self.store.readKey(account: accountName)
         
         /** signingPrivKey is an opaque object that represents the actual private key inside the enclave */
@@ -64,13 +64,13 @@ public class SecureEnclaveKeyManager : KeyManager {
 
     public func createKeyPair(accountName: String) throws -> String {
         try createSigningPrivkey(accountName: accountName)
-        let signingPrivkey = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Create key pair" + accountName)
+        let signingPrivkey = try getSigningPrivkeyWithContext(accountName: accountName, usage: nil)
         return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
-    public func sign(accountName: String, hexMessage: String) throws -> String {
+    public func sign(accountName: String, hexMessage: String, usageMessage: String) throws -> String {
         let message = Data(fromHexEncodedString: hexMessage)!
-        let key = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Sign Daimo tx " + hexMessage)
+        let key = try getSigningPrivkeyWithContext(accountName: accountName, usage: usageMessage)
         let signature = try key.signature(for: message)
         return signature.derRepresentation.hexEncodedString()
     }
@@ -78,7 +78,7 @@ public class SecureEnclaveKeyManager : KeyManager {
     public func verify(accountName: String, hexSignature: String, hexMessage: String) throws -> Bool {
         let message = Data(fromHexEncodedString: hexMessage)!
         let signature = try P256.Signing.ECDSASignature(derRepresentation: Data(fromHexEncodedString: hexSignature)!)
-        let privKey = try getSigningPrivkeyWithContext(accountName: accountName, usage: "Verify Daimo tx " + hexMessage)
+        let privKey = try getSigningPrivkeyWithContext(accountName: accountName, usage: nil)
         return privKey.publicKey.isValidSignature(signature, for: message)
     }
 }

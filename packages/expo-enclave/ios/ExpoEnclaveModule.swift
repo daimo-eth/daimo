@@ -41,8 +41,8 @@ public class ExpoEnclaveModule: Module {
       return try self.keyManager.createKeyPair(accountName: accountName)
     }
 
-    AsyncFunction("sign") { (accountName: String, hexMessage: String) throws -> String in
-      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage)
+    AsyncFunction("sign") { (accountName: String, hexMessage: String, biometricPromptCopy: BiometricPromptCopy) throws -> String in
+      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: biometricPromptCopy.usageMessage)
     }
 
     AsyncFunction("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
@@ -60,4 +60,12 @@ enum HardwareSecurityLevel: String, Enumerable {
 enum BiometricSecurityLevel: String, Enumerable {
   case NONE
   case AVAILABLE
+}
+
+internal struct BiometricPromptCopy: Record {
+  @Field
+  var usageMessage: String
+
+  @Field
+  var androidTitle: String
 }

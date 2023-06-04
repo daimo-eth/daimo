@@ -44,7 +44,7 @@ public class FallbackKeyManager : KeyManager {
         return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
-    public func sign(accountName: String, hexMessage: String) throws -> String {
+    public func sign(accountName: String, hexMessage: String, usageMessage: String) throws -> String {
         let message = Data(fromHexEncodedString: hexMessage)!
         let key = try getSigningPrivkey(accountName: accountName)
         let signature = try key.signature(for: message)
