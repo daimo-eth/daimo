@@ -9,24 +9,52 @@ export type HardwareSecurityLevel =
 
 export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
 
+/**
+ * Get key storage security level.
+ * @return HardwareSecurityLevel
+ */
 export async function getHardwareSecurityLevel(): Promise<HardwareSecurityLevel> {
   return ExpoEnclaveModule.getHardwareSecurityLevel();
 }
 
+/**
+ * Get key authenticaion biometrics security level.
+ * @return BiometricSecurityLevel
+ */
 export async function getBiometricSecurityLevel(): Promise<BiometricSecurityLevel> {
   return ExpoEnclaveModule.getBiometricSecurityLevel();
 }
 
+/**
+ * Fetch public key (DER representation) of key pair attached to accountName.
+ *
+ * @param accountName The account name to fetch the public key for.
+ * @return Hex string of DER representation of the public key, or undefined if
+ * no key pair is attached to accountName.
+ */
 export async function fetchPublicKey(
   accountName: string
 ): Promise<string | undefined> {
   return ExpoEnclaveModule.fetchPublicKey(accountName);
 }
 
+/**
+ * Create a new key pair and attach it to accountName.
+ *
+ * @param accountName The account name to attach the key pair to.
+ * @return Hex string of DER representation of the public key
+ */
 export async function createKeyPair(accountName: string): Promise<string> {
   return ExpoEnclaveModule.createKeyPair(accountName);
 }
 
+/**
+ * Sign a message using the key pair attached to accountName.
+ *
+ * @param accountName The account to use.
+ * @param hexMessage Hex string of the message bytes to sign.
+ * @return Hex string of DER representation of the signature
+ */
 export async function sign(
   accountName: string,
   hexMessage: string
@@ -34,6 +62,15 @@ export async function sign(
   return ExpoEnclaveModule.sign(accountName, hexMessage);
 }
 
+/**
+ * Verify a signature using the key pair attached to accountName.
+ *
+ * @param accountName The account to use.
+ * @param hexSignature Hex string of the DER representation of the
+ * signature to verify.
+ * @param hexMessage Hex string of the message bytes signed.
+ * @return boolean
+ */
 export async function verify(
   accountName: string,
   hexSignature: string,
