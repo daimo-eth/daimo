@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
-import { Button, buttonStyles } from "../shared/Button";
+import { ButtonMed } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBold, TextSmall } from "../shared/text";
 
@@ -22,11 +22,7 @@ export default function DepositScreen() {
           runs on Base Goerli.
         </TextBody>
         <View style={ss.spacer.h16} />
-        <Button
-          style={buttonStyles.med}
-          title="Request $10 from faucet"
-          onPress={requestFaucet}
-        />
+        <ButtonMed title="Request $10 from faucet" onPress={requestFaucet} />
       </View>
       <View style={ss.spacer.h32} />
       <TextBody>

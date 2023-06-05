@@ -1,36 +1,26 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
-import { Header } from "../shared/Header";
-import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback } from "react";
+import { useAccount } from "../../logic/account";
 import { HomeStackParamList } from "../HomeStack";
 import { Button, buttonStyles } from "../shared/Button";
+import { Header } from "../shared/Header";
+import Spacer from "../shared/Spacer";
+import { color, ss } from "../shared/style";
 import { TextH1 } from "../shared/text";
-import { trpc } from "../../logic/trpc";
 
 export default function HomeScreen() {
   const [account] = useAccount();
 
-  const search = trpc.search.useQuery({ prefix: "" });
-
   const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
-  const goSend = useCallback(() => {
-    search.refetch(); // TODO
-  }, [search]);
+  const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
 
   return (
     <View style={styles.outerView}>
       <Header />
-      <Text>
-        {search.isFetching && "Fetching..."}
-        {search.isError && search.error.message}
-        {search.isSuccess && search.data.map((x) => x.name).join(", ")}
-      </Text>
       <View style={styles.amountAndButtons}>
         <TitleAmount
           symbol="$"
