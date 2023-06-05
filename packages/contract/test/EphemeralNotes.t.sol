@@ -69,12 +69,13 @@ contract EphemeralNotesTest is Test {
         assertEq(token.balanceOf(address(notes)), 0);
     }
 
-    function testFailingFlow() public {
+    function testWrongFlow() public {
         // Alice approves token contract and creates a new note to ephemeralAddress
         createAliceNote();
 
         // Bob uses ephemeralAddress to sign wrong address and redeem the note
         vm.startPrank(BOB, BOB);
+        vm.expectRevert("EphemeralNotes: invalid signature and not creator");
         notes.claimNote(ephemeralAddress, createEphemeralSignature(address(0x789)));
         vm.stopPrank();
 
