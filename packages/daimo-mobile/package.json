@@ -36,6 +36,7 @@
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
     "expo": "~48.0.15",
+    "expo-barcode-scanner": "^12.3.2",
     "expo-build-properties": "~0.6.0",
     "expo-clipboard": "^4.1.2",
     "expo-dev-client": "~2.2.1",

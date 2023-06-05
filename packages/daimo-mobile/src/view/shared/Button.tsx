@@ -9,13 +9,18 @@ import {
 import { color, touchHighlightUnderlay } from "./style";
 
 interface ButtonProps {
-  title: string;
+  title?: string;
+  children?: React.ReactNode;
   onPress?: () => void;
   disabled?: boolean;
 }
 
 export function ButtonBig(props: ButtonProps) {
   return <Button {...props} style={buttonStyles.big} />;
+}
+
+export function ButtonMed(props: ButtonProps) {
+  return <Button {...props} style={buttonStyles.med} />;
 }
 
 export function ButtonSmall(props: ButtonProps) {
@@ -32,6 +37,12 @@ export function Button(
     [props.style.button]
   );
 
+  const child = props.title ? (
+    <Text style={props.style.title}>{props.title}</Text>
+  ) : (
+    props.children
+  );
+
   return (
     <TouchableHighlight
       onPress={props.onPress}
@@ -39,7 +50,7 @@ export function Button(
       disabled={props.disabled}
       {...touchHighlightUnderlay}
     >
-      <Text style={props.style.title}>{props.title}</Text>
+      {child}
     </TouchableHighlight>
   );
 }
