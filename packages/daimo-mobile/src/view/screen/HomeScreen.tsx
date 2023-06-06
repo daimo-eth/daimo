@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
 
   return (
-    <View style={styles.outerView}>
+    <View style={ss.container.outerStretch}>
       <Header />
       <View style={styles.amountAndButtons}>
         <TitleAmount
@@ -68,13 +68,6 @@ function TitleAmount({
 }
 
 const styles = StyleSheet.create({
-  outerView: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-  },
   amountAndButtons: {
     width: "100%",
     flexDirection: "column",

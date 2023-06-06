@@ -2,28 +2,36 @@ import { ScrollView, StyleSheet, View } from "react-native";
 
 import { Octicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { Recipient, useRecipientSearch } from "../../logic/search";
 import { HomeStackParamList } from "../HomeStack";
-import { ButtonBig, ButtonMed } from "../shared/Button";
+import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
-import { InputBig } from "../shared/Input";
-import { TextBody } from "../shared/text";
+import { AmountInput, InputBig } from "../shared/Input";
+import { ss } from "../shared/style";
+import { TextBody, TextBold, TextSmall } from "../shared/text";
 
-export default function SendScreen() {
+type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
+
+export default function SendScreen({ route }: Props) {
+  const { recipient } = route.params || {};
+
   const [showScan, setShowScan] = useState(false);
   const scan = useCallback(() => setShowScan(true), []);
   const hideScan = useCallback(() => setShowScan(false), []);
+
   return (
-    <View style={styles.outerView}>
+    <View style={ss.container.outerStretch}>
       <Header />
-      <View style={styles.vertMain}>
-        {showScan && <Scan hide={hideScan} />}
-        {!showScan && <ButtonMed title="Scan" onPress={scan} />}
-        {!showScan && <Search />}
-      </View>
+      <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
+        {recipient && <SendPayment recipient={recipient} />}
+        {!recipient && showScan && <Scan hide={hideScan} />}
+        {!recipient && !showScan && <ButtonSmall title="Scan" onPress={scan} />}
+        {!recipient && !showScan && <Search />}
+      </ScrollView>
       {/** TODO: Create Note */}
     </View>
   );
@@ -50,37 +58,46 @@ function Scan({ hide }: { hide: () => void }) {
     body = <TextBody>No access to camera</TextBody>;
   } else {
     body = (
-      <BarCodeScanner
-        onBarCodeScanned={handleBarCodeScanned}
-        style={StyleSheet.absoluteFillObject}
-        barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-      />
+      <View style={styles.cameraBox}>
+        <BarCodeScanner
+          onBarCodeScanned={handleBarCodeScanned}
+          style={StyleSheet.absoluteFillObject}
+          barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+        />
+      </View>
     );
   }
 
   return (
     <>
-      <View style={styles.headerRow}>
-        <ButtonMed onPress={hide}>
-          <Octicons name="x" size={16} color="gray" />
-        </ButtonMed>
-      </View>
+      <CancelRow title="Scan to pay" hide={hide} />
       {body}
     </>
   );
 }
 
+function CancelRow({ title, hide }: { title: string; hide: () => void }) {
+  return (
+    <View style={styles.headerRow}>
+      <TextBold>{title}</TextBold>
+      <ButtonSmall onPress={hide}>
+        <Octicons name="x" size={16} color="gray" />
+      </ButtonSmall>
+    </View>
+  );
+}
+
 function Search() {
   const [prefix, setPrefix] = useState("");
-  const results = useRecipientSearch(prefix);
+  const results = useRecipientSearch(prefix.trim().toLowerCase());
 
   return (
-    <ScrollView>
+    <>
       <InputBig icon="search" value={prefix} onChange={setPrefix} />
       {results.map((r) => (
-        <Result recipient={r} />
+        <Result key={r.account.addr} recipient={r} />
       ))}
-    </ScrollView>
+    </>
   );
 }
 
@@ -90,33 +107,41 @@ function Result({ recipient }: { recipient: Recipient }) {
   return <ButtonBig title={recipient.account.name} onPress={pay} />;
 }
 
+function SendPayment({ recipient }: { recipient: Recipient }) {
+  const [amount, setAmount] = useState(0);
+
+  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const hide = useCallback(() => nav.setParams({ recipient: undefined }), []);
+
+  const send = useCallback(() => {
+    console.log("TODO send");
+  }, []);
+
+  return (
+    <>
+      <CancelRow title={`Sending to ${recipient.account.name}`} hide={hide} />
+      <AmountInput value={amount} onChange={setAmount} />
+      <ButtonBig title="Send" onPress={send} />
+      <TextSmall>TODO show fees</TextSmall>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
-  outerView: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    padding: 16,
-  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "baseline",
+    paddingLeft: 8,
   },
   vertMain: {
-    borderWidth: 1,
-    borderColor: "#f00",
     alignSelf: "stretch",
     flexDirection: "column",
-    alignItems: "flex-end",
     paddingTop: 8,
     gap: 16,
   },
-  vertQR: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
-  },
-  horzButtons: {
-    flexDirection: "row",
-    gap: 24,
+  cameraBox: {
+    width: 300,
+    height: 300,
   },
 });

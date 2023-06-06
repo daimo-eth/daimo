@@ -10,6 +10,7 @@ import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
 import image from "../shared/image";
 import { TextSmall } from "../shared/text";
+import { ss } from "../shared/style";
 
 export default function DepositScreen() {
   const [account] = useAccount();
@@ -20,7 +21,7 @@ export default function DepositScreen() {
   const deposit = useCallback(() => nav.navigate("Deposit"), [nav]);
 
   return (
-    <View style={styles.outerView}>
+    <View style={ss.container.outerStretch}>
       <Header />
       <View style={styles.vertMain}>
         <View style={styles.vertQR}>
@@ -44,12 +45,6 @@ export default function DepositScreen() {
 }
 
 const styles = StyleSheet.create({
-  outerView: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    padding: 16,
-  },
   vertMain: {
     flexDirection: "column",
     alignItems: "center",
