@@ -26,6 +26,25 @@ export const touchHighlightUnderlay = {
 };
 
 export const ss = {
+  container: StyleSheet.create({
+    outerCenter: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    outerStretch: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: "#fff",
+      alignItems: "stretch",
+    },
+    debug: {
+      borderWidth: 1,
+      borderColor: "#f00",
+    },
+  }),
   text: StyleSheet.create({
     h1: {
       ...textBase,

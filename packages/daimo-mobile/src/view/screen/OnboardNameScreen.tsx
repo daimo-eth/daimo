@@ -5,6 +5,7 @@ import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { InputBig } from "../shared/Input";
 import { TextBody, TextH1, TextSmall } from "../shared/text";
+import { ss } from "../shared/style";
 
 export default function OnboardNameScreen() {
   const [name, setName] = useState("");
@@ -15,7 +16,7 @@ export default function OnboardNameScreen() {
   }, []);
 
   return (
-    <View style={styles.outerView}>
+    <View style={ss.container.outerStretch}>
       <Header />
       <View style={styles.vertMain}>
         <TextH1>Welcome</TextH1>
@@ -29,12 +30,6 @@ export default function OnboardNameScreen() {
 }
 
 const styles = StyleSheet.create({
-  outerView: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    padding: 16,
-  },
   vertMain: {
     flexDirection: "column",
     alignItems: "center",
