@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Address, PublicClient, createPublicClient, http } from "viem";
+import { PublicClient, createPublicClient, http } from "viem";
 
 import { Account } from "./account";
 import { baseGoerli, mainnet } from "./constants";
@@ -9,9 +9,9 @@ import { check } from "./validation";
 export interface Chain {
   getStatus(): Promise<ChainStatus>;
 
-  createAccount(): Promise<Account>;
+  createAccount(name: string): Promise<Account>;
 
-  getAccount(address: Address, status: ChainStatus): Promise<Account>;
+  updateAccount(account: Account, status: ChainStatus): Promise<Account>;
 
   // TODO: send transaction, add or remove device.
 }
@@ -40,7 +40,7 @@ class StubChain implements Chain {
     throw new Error("Disconnected");
   }
 
-  async getAccount(address: Address, status: ChainStatus): Promise<Account> {
+  async updateAccount(account: Account, status: ChainStatus): Promise<Account> {
     throw new Error("Disconnected");
   }
 }
@@ -77,32 +77,29 @@ export class ViemChain implements Chain {
     }
   }
 
-  async getAccount(address: Address, status: ChainStatus): Promise<Account> {
+  async updateAccount(account: Account, status: ChainStatus): Promise<Account> {
     check(status.status === "ok", "Chain status is not ok");
 
     const blockNumber = BigInt(status.l2.blockHeight);
+    const { address } = account;
     const bal = await this.clientL2.getBalance({ address, blockNumber });
 
     return {
-      address,
+      ...account,
       lastBalance: bal,
       lastNonce: BigInt(0), // TODO
       lastBlockTimestamp: status.l2.blockTimestamp,
     };
   }
 
-  async createAccount(): Promise<Account> {
+  async createAccount(name: string): Promise<Account> {
     // TODO
     return {
+      name,
       address: "0x165d1B95a852A09d8293Dd80b357ff5b81802f91",
       lastBalance: BigInt(0),
       lastNonce: BigInt(0),
       lastBlockTimestamp: 0,
     };
-  }
-
-  async resolveName(name: string): Promise<Address> {
-    // TODO
-    return "0x0";
   }
 }

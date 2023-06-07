@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "daimo",
     "name": "Daimo",
     "slug": "daimo",
     "version": "1.0.0",
@@ -11,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "scheme": "daimo",
     "ios": {
       "supportsTablet": true,

@@ -5,6 +5,8 @@ import { useMMKVString } from "react-native-mmkv";
 import { assert } from "./assert";
 
 export type Account = {
+  name: string;
+
   address: Address;
   lastBalance: bigint;
   lastNonce: bigint;
@@ -23,6 +25,8 @@ interface AccountV1 extends StoredModel {
   lastBalance: string;
   lastNonce: string;
   lastBlockTimestamp: number;
+
+  name: string;
 }
 
 let firstLoad = true;
@@ -58,6 +62,7 @@ export function parse(accountJSON?: string): Account | null {
   assert(model.storageVersion === latestStorageVersion);
   const a = model as AccountV1;
   return {
+    name: a.name,
     address: a.address as Address,
     lastBalance: BigInt(a.lastBalance),
     lastNonce: BigInt(a.lastNonce),
@@ -68,6 +73,7 @@ export function parse(accountJSON?: string): Account | null {
 export function serialize(account: Account): string {
   const model: AccountV1 = {
     storageVersion: latestStorageVersion,
+    name: account.name,
     address: account.address,
     lastBalance: account.lastBalance.toString(),
     lastNonce: account.lastNonce.toString(),

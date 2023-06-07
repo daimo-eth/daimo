@@ -1,6 +1,6 @@
 import { Alert, ScrollView, Share, StyleSheet } from "react-native";
-
 import { useCallback, useState } from "react";
+
 import { useAccount } from "../../logic/account";
 import { ButtonBig } from "../shared/Button";
 import { AmountInput } from "../shared/Input";

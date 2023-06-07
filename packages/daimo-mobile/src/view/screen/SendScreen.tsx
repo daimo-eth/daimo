@@ -1,16 +1,14 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-
 import { Octicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+
 import { Recipient, useRecipientSearch } from "../../logic/search";
-import { HomeStackParamList } from "../HomeStack";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { AmountInput, InputBig } from "../shared/Input";
+import { HomeStackParamList, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextBody, TextBold, TextSmall } from "../shared/text";
 
@@ -102,7 +100,7 @@ function Search() {
 }
 
 function Result({ recipient }: { recipient: Recipient }) {
-  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
   return <ButtonBig title={recipient.account.name} onPress={pay} />;
 }
@@ -110,7 +108,7 @@ function Result({ recipient }: { recipient: Recipient }) {
 function SendPayment({ recipient }: { recipient: Recipient }) {
   const [amount, setAmount] = useState(0);
 
-  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const nav = useNav();
   const hide = useCallback(() => nav.setParams({ recipient: undefined }), []);
 
   const send = useCallback(() => {

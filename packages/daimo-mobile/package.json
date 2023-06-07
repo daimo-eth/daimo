@@ -25,7 +25,6 @@
     "@expo/vector-icons": "^13.0.0",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
-    "@react-navigation/stack": "^6.3.16",
     "@tanstack/react-query": "^4.29.12",
     "@trpc/client": "^10.29.0",
     "@trpc/react-query": "^10.29.0",
@@ -63,7 +62,19 @@
       "import/order": [
         "error",
         {
-          "groups": []
+          "groups": [
+            [
+              "builtin",
+              "external"
+            ],
+            [
+              "internal",
+              "parent",
+              "sibling",
+              "index"
+            ]
+          ],
+          "newlines-between": "always"
         }
       ],
       "import/no-restricted-paths": [

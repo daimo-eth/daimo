@@ -32,7 +32,6 @@ export const ss = {
       padding: 16,
       backgroundColor: "#fff",
       alignItems: "center",
-      justifyContent: "space-between",
     },
     outerStretch: {
       flex: 1,
@@ -55,13 +54,13 @@ export const ss = {
     },
     h2: {
       ...textBase,
-      fontSize: 20,
+      fontSize: 24,
       fontWeight: "bold",
-      lineHeight: 30,
+      lineHeight: 32,
     },
     body: {
       ...textBase,
-      fontSize: 16,
+      fontSize: 18,
       lineHeight: 24,
     },
     small: {
@@ -69,6 +68,9 @@ export const ss = {
       fontSize: 16,
       lineHeight: 20,
       color: color.gray,
+    },
+    center: {
+      textAlign: "center",
     },
     bold: {
       fontWeight: "bold",

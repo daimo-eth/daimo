@@ -1,16 +1,16 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { httpBatchLink } from "@trpc/client";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import "fast-text-encoding";
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
-import { httpBatchLink } from "@trpc/client";
 
 import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
-import { HomeStackNav } from "./view/HomeStack";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc } from "./logic/trpc";
+import { HomeStackNav } from "./view/HomeStack";
 
 export default function App() {
   const [account, setAccount] = useAccount();
@@ -32,8 +32,8 @@ export default function App() {
       setStatus(status);
 
       if (!account || status.status !== "ok") return;
-      console.log(`[APP] Loading account ${account.address}...`);
-      setAccount(await chain.getAccount(account.address, status));
+      console.log(`[APP] Reloading account ${account.address}...`);
+      setAccount(await chain.updateAccount(account, status));
     } catch (e) {
       console.error(e);
     }

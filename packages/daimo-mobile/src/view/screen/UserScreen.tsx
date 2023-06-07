@@ -1,17 +1,15 @@
+import { useEffect } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { timeAgo, useTime } from "../shared/time";
-import { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { HomeStackParamList } from "../HomeStack";
 
 export function UserScreen() {
   const [account, setAccount] = useAccount();
   const nowS = useTime();
-  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const nav = useNav();
   useEffect(() => {
     if (account == null) nav.navigate("Home");
   }, [account, nav]);

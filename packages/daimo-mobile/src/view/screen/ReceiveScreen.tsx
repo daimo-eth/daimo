@@ -1,22 +1,20 @@
-import { StyleSheet, View } from "react-native";
-
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback } from "react";
+import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+
 import { useAccount } from "../../logic/account";
-import { HomeStackParamList } from "../HomeStack";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
 import image from "../shared/image";
-import { TextSmall } from "../shared/text";
+import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
+import { TextSmall } from "../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();
   const url = `daimo://request?recipient=${account.address}`;
 
-  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const nav = useNav();
   const request = useCallback(() => nav.navigate("Request"), [nav]);
   const deposit = useCallback(() => nav.navigate("Deposit"), [nav]);
 
