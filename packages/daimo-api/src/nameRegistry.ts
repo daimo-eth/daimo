@@ -1,6 +1,7 @@
 import {
   Account,
   Address,
+  BlockTag,
   Hex,
   TransactionReceipt,
   getAbiItem,
@@ -32,7 +33,7 @@ export class NameRegistry {
       address: nameRegistryAddress,
       event: getAbiItem({ abi: nameRegistryABI, name: "Registered" }),
       fromBlock: 0n,
-      toBlock: "latest",
+      toBlock: "latest" as BlockTag,
     });
     console.log(`Got ${logs.length} logs`);
 
@@ -69,7 +70,10 @@ export class NameRegistry {
     const bufName = Buffer.from(name.padEnd(32, "\0"));
     const args = [`0x${bufName.toString("hex")}`, address] as const;
 
-    const hash = await this.contract.write.register(args, { account });
+    const hash = await this.contract.write.register(args, {
+      account,
+      chain: null,
+    });
 
     const tx = await publicClient.waitForTransactionReceipt({ hash });
     return tx;

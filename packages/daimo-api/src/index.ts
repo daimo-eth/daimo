@@ -1,10 +1,10 @@
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { z } from "zod";
+
 import { createAccount } from "./chain";
 import { zAddress } from "./model";
-import { NameRegistry, isValidName } from "./nameRegistry";
+import { NameRegistry } from "./nameRegistry";
 import { publicProcedure, router } from "./trpc";
-
-import { z } from "zod";
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 const account = createAccount(process.env.PRIVATE_KEY);
 
