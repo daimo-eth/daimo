@@ -21,6 +21,7 @@ import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextCenter, TextH1, TextSmall } from "../shared/text";
+import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
   const { chain } = useContext(ChainContext);
@@ -98,7 +99,7 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
       <Spacer h={64} />
       <ButtonBig title="Create Account" onPress={onCreateAccount} />
       <Spacer h={8} />
-      <ButtonSmall title="Use existing" />
+      <ButtonSmall title="Use existing" onPress={comingSoon} />
     </View>
   );
 }

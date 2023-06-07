@@ -1,4 +1,5 @@
 import { registerRootComponent } from "expo";
+import "fast-text-encoding";
 
 import App from "./src/App";
 

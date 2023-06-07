@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import "fast-text-encoding";
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
 
@@ -17,10 +16,28 @@ export default function App() {
   const [status, setStatus] = useState<ChainStatus>();
   const chain = useMemo<Chain>(() => new ViemChain(), []);
 
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 2,
+            retryDelay: 500,
+          },
+        },
+      })
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
-      links: [httpBatchLink({ url: "http://localhost:3000" })],
+      links: [
+        httpBatchLink({
+          url: "http://localhost:3000",
+          fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+            console.log(`[APP] trpc fetching ${input}`);
+            return fetch(input, init);
+          },
+        }),
+      ],
       transformer: undefined,
     })
   );
