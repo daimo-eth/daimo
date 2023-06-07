@@ -22,3 +22,7 @@ export function TextSmall({ children }: { children: ReactNode }) {
 export function TextBold({ children }: { children: ReactNode }) {
   return <Text style={ss.text.bold}>{children}</Text>;
 }
+
+export function TextCenter({ children }: { children: ReactNode }) {
+  return <Text style={ss.text.center}>{children}</Text>;
+}

@@ -1,6 +1,6 @@
 import { createAccount } from "./chain";
 import { zAddress } from "./model";
-import { NameRegistry } from "./nameRegistry";
+import { NameRegistry, isValidName } from "./nameRegistry";
 import { publicProcedure, router } from "./trpc";
 
 import { z } from "zod";
@@ -18,6 +18,13 @@ const appRouter = router({
       const ret = await nameReg.search(prefix);
       console.log(`[API] search: ${ret.length} results for '${prefix}'`);
       return ret;
+    }),
+
+  resolveName: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async (opts) => {
+      const { name } = opts.input;
+      return await nameReg.resolveName(name);
     }),
 
   register: publicProcedure

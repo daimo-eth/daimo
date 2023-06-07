@@ -1,20 +1,19 @@
+import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { useCallback } from "react";
 import { useAccount } from "../../logic/account";
-import { HomeStackParamList } from "../HomeStack";
 import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
+import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextH1 } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
+  console.log(`[HOME] rendering with account ${account?.name}`);
 
-  const nav = useNavigation<StackNavigationProp<HomeStackParamList>>();
+  const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
 
@@ -72,6 +71,8 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "center",
+    flexGrow: 1,
   },
   titleSmall: {
     fontSize: 30,

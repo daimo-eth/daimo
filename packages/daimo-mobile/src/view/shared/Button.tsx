@@ -6,6 +6,7 @@ import {
   TouchableHighlight,
   ViewStyle,
 } from "react-native";
+
 import { color, touchHighlightUnderlay } from "./style";
 
 interface ButtonProps {

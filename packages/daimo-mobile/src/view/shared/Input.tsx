@@ -1,5 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
+import { useCallback, useState } from "react";
 import {
   NativeSyntheticEvent,
   StyleSheet,
@@ -7,8 +8,8 @@ import {
   TextInputFocusEventData,
   View,
 } from "react-native";
+
 import { color, ss } from "./style";
-import { useState, useCallback } from "react";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
 
@@ -17,11 +18,13 @@ export function InputBig({
   onChange,
   placeholder,
   icon,
+  center,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   icon?: OctName;
+  center?: boolean;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const onFocus = useCallback(() => setIsFocused(true), []);
@@ -34,7 +37,7 @@ export function InputBig({
         placeholderTextColor={color.gray}
         value={value}
         onChangeText={onChange}
-        style={styles.input}
+        style={center ? styles.inputCentered : styles.input}
         multiline
         numberOfLines={1}
         autoCapitalize="none"
@@ -115,9 +118,9 @@ const styles = StyleSheet.create({
     backgroundColor: color.bg.blue,
   },
   input,
-  inputFocused: {
+  inputCentered: {
     ...input,
-    backgroundColor: color.bg.blue,
+    textAlign: "center",
   },
   amountInput: {
     fontSize: 30,
