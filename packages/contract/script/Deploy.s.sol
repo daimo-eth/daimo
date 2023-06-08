@@ -15,9 +15,12 @@ contract DeployScript is Script {
             0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
         );
 
-        P256SHA256 verifier = new P256SHA256();
+        P256SHA256 verifier = new P256SHA256{salt: 0}();
 
-        AccountFactory factory = new AccountFactory(entryPoint, verifier);
+        AccountFactory factory = new AccountFactory{salt: 0}(
+            entryPoint,
+            verifier
+        );
         console.log("factory address:", address(factory));
 
         vm.stopBroadcast();
