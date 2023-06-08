@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 import { z } from "zod";
 
 export const zAddress = z
@@ -13,4 +13,7 @@ export const zNamedAccount = z.object({
 
 export type NamedAccount = z.infer<typeof zNamedAccount>;
 
-export type Hex = `0x${string}`;
+export const zHex = z
+  .string()
+  .regex(/^0x([0-9a-f]{2})*$/i)
+  .refine((s): s is Hex => true);

@@ -5,6 +5,7 @@ import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
+import PolyfillCrypto from "react-native-webview-crypto";
 
 import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
@@ -12,6 +13,7 @@ import { trpc } from "./logic/trpc";
 import { HomeStackNav } from "./view/HomeStack";
 
 export default function App() {
+  console.log("[APP] rendering\n\n");
   const [account, setAccount] = useAccount();
   const [status, setStatus] = useState<ChainStatus>();
   const chain = useMemo<Chain>(() => new ViemChain(), []);
@@ -76,6 +78,7 @@ export default function App() {
           fallback={<Text>Loading...</Text>}
         >
           <ChainContext.Provider value={cs}>
+            <PolyfillCrypto />
             <HomeStackNav />
             <StatusBar style="auto" />
           </ChainContext.Provider>

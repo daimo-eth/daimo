@@ -27,17 +27,16 @@ export const touchHighlightUnderlay = {
 
 export const ss = {
   container: StyleSheet.create({
-    outerCenter: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: "#fff",
-      alignItems: "center",
-    },
     outerStretch: {
       flex: 1,
       padding: 16,
       backgroundColor: "#fff",
       alignItems: "stretch",
+    },
+    center: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
     },
     debug: {
       borderWidth: 1,
@@ -89,6 +88,9 @@ export const ss = {
     w32: {
       width: 32,
     },
+    w64: {
+      width: 32,
+    },
     h8: {
       height: 8,
     },
@@ -100,6 +102,12 @@ export const ss = {
     },
     h64: {
       height: 64,
+    },
+    h128: {
+      height: 128,
+    },
+    h256: {
+      height: 256,
     },
   }),
 };

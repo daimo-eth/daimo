@@ -3,6 +3,7 @@ import {
   Address,
   BlockTag,
   Hex,
+  Log,
   TransactionReceipt,
   getAbiItem,
   getContract,
@@ -12,6 +13,14 @@ import {
 import { nameRegistryABI, nameRegistryAddress } from "../gen/contract";
 import { publicClient, walletClient } from "./chain";
 import { NamedAccount } from "./model";
+
+const registeredEvent = getAbiItem({
+  abi: nameRegistryABI,
+  name: "Registered",
+});
+type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
+
+// TODO: subscribe
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
@@ -35,21 +44,35 @@ export class NameRegistry {
       fromBlock: 0n,
       toBlock: "latest" as BlockTag,
     });
-    console.log(`Got ${logs.length} logs`);
+    console.log(`[NAME-REG] init, read ${logs.length} logs`);
+    this.parseLogs(logs);
 
+    const result = publicClient.watchContractEvent({
+      abi: nameRegistryABI,
+      address: nameRegistryAddress,
+      eventName: "Registered",
+      onLogs: (logs: RegisteredLog[]) => {
+        console.log(`[NAME-REG] subscribe, ${logs.length} new logs`);
+        this.parseLogs(logs);
+      },
+    });
+    console.log(`[NAME-REG] subscribe, ${result}`);
+  }
+
+  parseLogs = (logs: RegisteredLog[]) => {
     const accounts = logs
       .map((l) => l.args)
       .filter((a): a is { name: Hex; addr: Hex } => !!(a.name && a.addr))
       .map((a) => ({ name: hexToString(a.name, { size: 32 }), addr: a.addr }))
       .filter((a) => isValidName(a.name));
-    console.log(`Parsed ${accounts.length} named accounts`);
+    console.log(`Parsed ${accounts.length} named account(s)`);
 
     for (const acc of accounts) {
       this.nameToAddr.set(acc.name, acc.addr);
       this.addrToName.set(acc.addr, acc.name);
       this.accounts.push(acc);
     }
-  }
+  };
 
   /** Find accounts whose names start with a prefix */
   async search(prefix: string): Promise<NamedAccount[]> {

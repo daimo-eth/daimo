@@ -1,6 +1,7 @@
 import { Octicons } from "@expo/vector-icons";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Keyboard,
   KeyboardAvoidingView,
@@ -13,8 +14,7 @@ import {
   View,
 } from "react-native";
 
-import { useAccount } from "../../logic/account";
-import { ChainContext } from "../../logic/chain";
+import { useCreateAccount } from "../../logic/chain";
 import { trpc } from "../../logic/trpc";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
@@ -24,33 +24,13 @@ import { TextCenter, TextH1, TextSmall } from "../shared/text";
 import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
-  const { chain } = useContext(ChainContext);
-
-  const [account, setAccount] = useAccount();
-
   const [isConfiguring, setIsConfiguring] = useState(false);
   const configure = useCallback(() => setIsConfiguring(true), []);
-
-  const createAccount = useCallback(
-    async (name: string) => {
-      const account = await chain.createAccount(name);
-      setAccount(account);
-    },
-    [account]
-  );
 
   return (
     <View style={styles.onboardingScreen}>
       {!isConfiguring && <IntroPages onCreateAccount={configure} />}
-      {isConfiguring && (
-        <KeyboardAvoidingView behavior="padding">
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.onboardingScreen}>
-              <CreateAccountPage onCreateAccount={createAccount} />
-            </View>
-          </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
-      )}
+      {isConfiguring && <CreateAccountPage />}
     </View>
   );
 }
@@ -132,13 +112,44 @@ function PageBubble({ count, index }: { count: number; index: number }) {
   return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
 }
 
-function CreateAccountPage({
-  onCreateAccount,
-}: {
-  onCreateAccount: (name: string) => void;
-}) {
+function CreateAccountPage() {
+  const mutation = useCreateAccount();
+  const createAccount = useCallback(
+    (name: string) => {
+      if (mutation.isLoading) return;
+      mutation.createAccount(name);
+    },
+    [mutation]
+  );
+
+  return (
+    <KeyboardAvoidingView behavior="padding">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.onboardingScreen}>
+          <View style={styles.createAccountPage}>
+            <TextH1>Welcome</TextH1>
+            {mutation.isLoading && <NameSpinner />}
+            {!mutation.isLoading && <NamePicker onChoose={createAccount} />}
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
+}
+
+function NameSpinner() {
+  return (
+    <View style={ss.spacer.h256}>
+      <View style={ss.container.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    </View>
+  );
+}
+
+function NamePicker({ onChoose }: { onChoose: (name: string) => void }) {
   const [name, setName] = useState("");
-  const create = useCallback(() => onCreateAccount(name), [name]);
+  const create = useCallback(() => onChoose(name), [name]);
 
   let error = "";
   try {
@@ -178,8 +189,7 @@ function CreateAccountPage({
   })();
 
   return (
-    <View style={styles.createAccountPage}>
-      <TextH1>Welcome</TextH1>
+    <View style={ss.spacer.h256}>
       <View style={ss.spacer.h64} />
       <View>
         <InputBig
