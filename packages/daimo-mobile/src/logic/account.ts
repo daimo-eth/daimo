@@ -41,7 +41,10 @@ interface AccountV1 extends StoredModel {
 let firstLoad = true;
 
 /** Loads Daimo user data from storage, provides callback to write. */
-export function useAccount(): [Account, (account: Account | null) => void] {
+export function useAccount(): [
+  Account | null,
+  (account: Account | null) => void
+] {
   const [accountJSON, setAccountJSON] = useMMKVString("account");
   const account = useMemo(() => parse(accountJSON), [accountJSON]);
   const setAccount = useCallback(

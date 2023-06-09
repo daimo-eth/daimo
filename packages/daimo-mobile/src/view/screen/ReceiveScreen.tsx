@@ -9,9 +9,11 @@ import image from "../shared/image";
 import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextSmall } from "../shared/text";
+import { assert } from "../../logic/assert";
 
 export default function DepositScreen() {
   const [account] = useAccount();
+  assert(account != null);
   const url = `daimo://request?recipient=${account.address}`;
 
   const nav = useNav();

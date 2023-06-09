@@ -8,10 +8,12 @@ import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextH1 } from "../shared/text";
+import { assert } from "../../logic/assert";
 
 export default function HomeScreen() {
   const [account] = useAccount();
-  console.log(`[HOME] rendering with account ${account?.name}`);
+  assert(account != null);
+  console.log(`[HOME] rendering with account ${account.name}`);
 
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);

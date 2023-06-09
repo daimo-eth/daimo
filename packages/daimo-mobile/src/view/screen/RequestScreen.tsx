@@ -5,9 +5,11 @@ import { useAccount } from "../../logic/account";
 import { ButtonBig } from "../shared/Button";
 import { AmountInput } from "../shared/Input";
 import { color } from "../shared/style";
+import { assert } from "../../logic/assert";
 
 export default function RequestScreen() {
   const [account] = useAccount();
+  assert(account != null);
   const [amount, setAmount] = useState(0);
 
   const url = `daimo://request?recipient=${account.address}&amount=${amount}`;

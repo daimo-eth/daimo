@@ -53,7 +53,7 @@ function Button({
   onPress,
 }: {
   children: ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
     <TouchableHighlight

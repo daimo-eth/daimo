@@ -27,7 +27,7 @@ export function UserScreen() {
         <Text style={ss.text.body}>
           As of {timeAgo(account.lastBlockTimestamp, nowS)}
         </Text>
-        <Button title="Clear wallet" onPress={() => setAccount(undefined)} />
+        <Button title="Clear wallet" onPress={() => setAccount(null)} />
       </View>
     </>
   );
