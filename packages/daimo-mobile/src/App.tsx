@@ -15,7 +15,7 @@ import { HomeStackNav } from "./view/HomeStack";
 export default function App() {
   console.log("[APP] rendering\n\n");
   const [account, setAccount] = useAccount();
-  const [status, setStatus] = useState<ChainStatus>();
+  const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
   const chain = useMemo<Chain>(() => new ViemChain(), []);
 
   const [queryClient] = useState(

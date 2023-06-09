@@ -154,7 +154,7 @@ function NamePicker({ onChoose }: { onChoose: (name: string) => void }) {
   let error = "";
   try {
     validateName(name);
-  } catch (e) {
+  } catch (e: any) {
     error = e.message;
   }
   const result = trpc.resolveName.useQuery({ name }, { enabled: !error });

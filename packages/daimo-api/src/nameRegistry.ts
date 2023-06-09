@@ -99,6 +99,7 @@ export class NameRegistry {
     });
 
     const tx = await publicClient.waitForTransactionReceipt({ hash });
+    if (tx.status !== "success") throw new Error("Transaction failed");
     return tx;
   }
 

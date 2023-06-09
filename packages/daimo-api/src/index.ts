@@ -70,7 +70,7 @@ const appRouter = router({
       const salt = 0n;
       const deployTxHash = await accountFactoryContract.write.createAccount(
         [[key1, key2], salt],
-        { account }
+        { account, chain: null }
       );
       console.log(`[API] deploy transaction ${deployTxHash}`);
       const deployReceipt = await publicClient.waitForTransactionReceipt({

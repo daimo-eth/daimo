@@ -22,9 +22,9 @@
     "expo-enclave",
     "ExpoEnclave"
   ],
-  "homepage": "https://github.com/dcposch/daimo#readme",
-  "repository": "https://github.com/dcposch/daimo/tree/master/packages/expo-enclave",
-  "author": "DC <dc@dcpos.ch>",
+  "homepage": "https://github.com/daimo-eth/daimo#readme",
+  "repository": "https://github.com/daimo-eth/daimo/tree/master/packages/expo-enclave",
+  "author": "Daimo",
   "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.0.25",

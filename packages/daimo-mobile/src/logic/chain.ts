@@ -6,6 +6,7 @@ import { Account, useAccount } from "./account";
 import { baseGoerli, mainnet } from "./constants";
 import { trpc } from "./trpc";
 import { check } from "./validation";
+import { assert } from "./assert";
 
 // Reads chain state (L1 / L2 health) and Daimo account state from L2.
 export interface Chain {
@@ -56,6 +57,7 @@ export class ViemChain implements Chain {
 
   async getStatus(): Promise<ChainStatus> {
     const getChainTip = async (client: PublicClient): Promise<ChainTip> => {
+      assert(client.chain != null);
       const bn = await client.getBlockNumber();
       const block = await client.getBlock({ blockNumber: bn });
       return {
@@ -114,8 +116,8 @@ export function useCreateAccount() {
     if (!result.variables || !result.variables.name) return;
     const { name } = result.variables;
 
-    const { status, address } = result.data;
-    if (status !== "success") return;
+    if (result.data.status !== "success") return;
+    const { address } = result.data;
 
     console.log(`[CHAIN] created new account ${name} at ${address}`);
     setAccount({

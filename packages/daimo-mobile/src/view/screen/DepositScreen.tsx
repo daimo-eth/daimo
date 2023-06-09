@@ -7,9 +7,11 @@ import { useAccount } from "../../logic/account";
 import { ButtonMed } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBold, TextSmall } from "../shared/text";
+import { assert } from "../../logic/assert";
 
 export default function DepositScreen() {
   const [account] = useAccount();
+  assert(account != null);
 
   const requestFaucet = useCallback(() => console.log("TODO"), []);
 

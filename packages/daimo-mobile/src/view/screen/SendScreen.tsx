@@ -36,7 +36,7 @@ export default function SendScreen({ route }: Props) {
 }
 
 function Scan({ hide }: { hide: () => void }) {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
     BarCodeScanner.requestPermissionsAsync()

@@ -1,0 +1,14 @@
+{
+  "name": "daimo",
+  "version": "0.0.1",
+  "description": "Experimental stablecoin wallet",
+  "main": "package.json",
+  "scripts": {
+    "test": "turbo test"
+  },
+  "author": "Daimo",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "typescript": "^5.1.3"
+  }
+}
