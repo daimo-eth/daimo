@@ -1,113 +1,106 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
-import { Hex, getContract } from "viem";
-import { Contracts } from "daimo-contract-types";
 
-import { createAccount, publicClient, walletClient } from "./chain";
+import { getEnvWalletClient } from "./chain";
+import { AccountFactory } from "./contract/accountFactory";
+import { Faucet } from "./contract/faucet";
+import { NameRegistry } from "./contract/nameRegistry";
 import { zAddress, zHex } from "./model";
-import { NameRegistry } from "./nameRegistry";
 import { publicProcedure, router } from "./trpc";
 
-const account = createAccount(process.env.PRIVATE_KEY);
+function createRouter(
+  accountFactory: AccountFactory,
+  nameReg: NameRegistry,
+  faucet: Faucet
+) {
+  return router({
+    search: publicProcedure
+      .input(z.object({ prefix: z.string() }))
+      .query(async (opts) => {
+        const { prefix } = opts.input;
+        const ret = await nameReg.search(prefix);
+        console.log(`[API] search: ${ret.length} results for '${prefix}'`);
+        return ret;
+      }),
 
-const nameReg = new NameRegistry();
+    resolveName: publicProcedure
+      .input(z.object({ name: z.string() }))
+      .query(async (opts) => {
+        const { name } = opts.input;
+        return await nameReg.resolveName(name);
+      }),
 
-const accountFactoryContract = getContract({
-  abi: Contracts.accountFactoryABI,
-  address: Contracts.accountFactoryAddress,
-  publicClient,
-  walletClient,
-});
+    register: publicProcedure
+      .input(
+        z.object({
+          name: z.string(),
+          addr: zAddress,
+        })
+      )
+      .mutation(async (opts) => {
+        const { name, addr } = opts.input;
+        const receipt = await nameReg.registerName(name, addr);
+        return receipt.status;
+      }),
 
-const appRouter = router({
-  search: publicProcedure
-    .input(z.object({ prefix: z.string() }))
-    .query(async (opts) => {
-      const { prefix } = opts.input;
-      const ret = await nameReg.search(prefix);
-      console.log(`[API] search: ${ret.length} results for '${prefix}'`);
-      return ret;
-    }),
+    deployWallet: publicProcedure
+      .input(
+        z.object({
+          name: z.string(),
+          pubKeyHex: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const { name, pubKeyHex } = opts.input;
 
-  resolveName: publicProcedure
-    .input(z.object({ name: z.string() }))
-    .query(async (opts) => {
-      const { name } = opts.input;
-      return await nameReg.resolveName(name);
-    }),
+        // TODO: deploy and claim name in a single transaction
 
-  register: publicProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        addr: zAddress,
-      })
-    )
-    .mutation(async (opts) => {
-      const { name, addr } = opts.input;
-      const receipt = await nameReg.registerName(account, name, addr);
-      return receipt.status;
-    }),
+        // Deploy account
+        console.log(`[API] deploying account for ${name}, pubkey ${pubKeyHex}`);
+        const res = await accountFactory.deploy(pubKeyHex);
+        console.log(`[API] deploy result ${JSON.stringify(res)}`);
+        if (res.status !== "success") throw new Error("Deploy failed");
+        const { address } = res;
 
-  deployWallet: publicProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        pubKeyHex: zHex,
-      })
-    )
-    .mutation(async (opts) => {
-      const { name, pubKeyHex } = opts.input;
+        // Register name
+        const registerReceipt = await nameReg.registerName(name, address);
+        const { status } = registerReceipt;
+        console.log(`[API] register name ${name} at ${address}: ${status}`);
+        return { status, address };
+      }),
 
-      // Deploy account
-      const pubKey = Buffer.from(pubKeyHex.substring(2), "hex");
-      console.log(`[API] deploying account for ${name}, pubkey ${pubKeyHex}`);
-      if (pubKey.length !== 65 || pubKey[0] !== 0x04) {
-        throw new Error("Invalid public key");
-      }
-      const key1 = `0x${pubKey.subarray(1, 33).toString("hex")}` as Hex;
-      const key2 = `0x${pubKey.subarray(33).toString("hex")}` as Hex;
-      const salt = 0n;
-      const deployTxHash = await accountFactoryContract.write.createAccount(
-        [[key1, key2], salt],
-        { account, chain: null }
-      );
-      console.log(`[API] deploy transaction ${deployTxHash}`);
-      const deployReceipt = await publicClient.waitForTransactionReceipt({
-        hash: deployTxHash,
-      });
-      console.log(`[API] deploy transaction ${deployReceipt.status}`);
-      if (deployReceipt.status !== "success") {
-        return { status: "reverted" as const };
-      }
+    testnetFaucetStatus: publicProcedure
+      .input(z.object({ recipient: zAddress }))
+      .query(async (opts) => {
+        const { recipient } = opts.input;
+        return faucet.getStatus(recipient);
+      }),
 
-      // Compute CREATE2 deployment address
-      // TODO: would prefer to just execute, but viem does support return values
-      const addr = await accountFactoryContract.read.getAddress(
-        [[key1, key2], salt],
-        { account }
-      );
-      console.log(`[API] new address ${addr}`);
+    testnetRequestFaucet: publicProcedure
+      .input(z.object({ recipient: zAddress }))
+      .mutation(async (opts) => {
+        const { recipient } = opts.input;
+        return faucet.request(recipient);
+      }),
+  });
+}
 
-      // Register name
-      // TODO: do both in a single contract call
-      const registerReceipt = await nameReg.registerName(account, name, addr);
-      console.log(
-        `[API] register name ${name} at ${addr}: ${registerReceipt.status}`
-      );
-      return {
-        status: registerReceipt.status,
-        address: addr,
-      };
-    }),
-});
-
-export type AppRouter = typeof appRouter;
+export type AppRouter = ReturnType<typeof createRouter>;
 
 async function main() {
-  await nameReg.init();
+  console.log(`[API] starting...`);
+  const walletClient = getEnvWalletClient();
+  const nameReg = new NameRegistry(walletClient);
+  const faucet = new Faucet(walletClient);
+  const accountFactory = new AccountFactory(walletClient);
 
-  const server = createHTTPServer({ router: appRouter });
+  console.log(`[API] initializing indexers...`);
+  await nameReg.init();
+  await faucet.init();
+
+  console.log(`[API] listening...`);
+  const router = createRouter(accountFactory, nameReg, faucet);
+  const server = createHTTPServer({ router });
   server.listen(3000);
 }
 

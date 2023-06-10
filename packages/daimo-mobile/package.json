@@ -55,8 +55,9 @@
     "react-native-webview": "11.26.0",
     "react-native-webview-crypto": "^0.0.25",
     "ts-unused-exports": "^9.0.4",
-    "typescript": "^4.9.4",
-    "viem": "^0.3.18"
+    "typescript": "^5.1.3",
+    "viem": "^0.3.18",
+    "wagmi": "^1.1.1"
   },
   "eslintConfig": {
     "extends": "universe/native",

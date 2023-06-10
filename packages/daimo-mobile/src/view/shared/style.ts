@@ -9,6 +9,8 @@ export const color = {
   black: "#000",
   gray: "#668",
   white: "#fff",
+  primary: "#007aff",
+  danger: "#f35369",
   bg: {
     lightGray: "#eee",
     lightYellow: "#fff6e6",

@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "tape -r ts-node/register/transpile-only test/**/*.test.ts",
+    "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,tsx",
     "lint:style": "eslint ."
@@ -16,7 +16,7 @@
     "@trpc/server": "^10.29.0",
     "@tsconfig/node20": "^1.0.1",
     "@types/tape": "^5.6.0",
-    "@wagmi/chains": "^1.1.0",
+    "@wagmi/cli": "^1.1.0",
     "daimo-contract-types": "file:../contract-types",
     "eslint": "^8.42.0",
     "eslint-config-universe": "^11.2.0",

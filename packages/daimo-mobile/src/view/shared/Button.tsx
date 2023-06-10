@@ -14,23 +14,58 @@ interface ButtonProps {
   children?: React.ReactNode;
   onPress?: () => void;
   disabled?: boolean;
+  type?: "primary" | "default" | "danger";
 }
 
 export function ButtonBig(props: ButtonProps) {
-  return <Button {...props} style={buttonStyles.big} />;
+  return <Button {...props} style={useStyle(buttonStyles.big, props)} />;
 }
 
 export function ButtonMed(props: ButtonProps) {
-  return <Button {...props} style={buttonStyles.med} />;
+  return <Button {...props} style={useStyle(buttonStyles.med, props)} />;
 }
 
 export function ButtonSmall(props: ButtonProps) {
-  return <Button {...props} style={buttonStyles.small} />;
+  return <Button {...props} style={useStyle(buttonStyles.small, props)} />;
 }
+
+function useStyle(base: ButtonStyle, props: ButtonProps) {
+  const btnOverride = useMemo<ViewStyle>(() => {
+    switch (props.type) {
+      case "primary":
+        return { backgroundColor: color.primary };
+      case "danger":
+        return { backgroundColor: color.danger };
+      default:
+        return {};
+    }
+  }, [props.type]);
+
+  const titleOverride = useMemo<TextStyle>(() => {
+    switch (props.type) {
+      case "primary":
+      case "danger":
+        return { color: color.white };
+      default:
+        return {};
+    }
+  }, [props.type]);
+
+  const style = useMemo(
+    () => ({
+      button: { ...base.button, ...btnOverride },
+      title: { ...base.title, ...titleOverride },
+    }),
+    [base, btnOverride, titleOverride]
+  );
+  return style;
+}
+
+type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
 export function Button(
   props: ButtonProps & {
-    style: { button: ViewStyle; title: TextStyle };
+    style: ButtonStyle;
   }
 ) {
   const disabledStyle = useMemo(

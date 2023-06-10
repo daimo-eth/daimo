@@ -26,12 +26,17 @@ export default function HomeScreen() {
         <TitleAmount
           symbol="$"
           balance={account.lastBalance}
-          decimals={18}
+          decimals={6}
           displayDecimals={2}
         />
         <Spacer h={32} />
         <View style={styles.buttonRow}>
-          <Button style={sendRecvButton} title="Send" onPress={goSend} />
+          <Button
+            style={sendRecvButton}
+            title="Send"
+            onPress={goSend}
+            disabled={account.lastBalance === 0n}
+          />
           <Button style={sendRecvButton} title="Receive" onPress={goReceive} />
         </View>
       </View>

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert";
 
-import { validateName } from "../src/nameRegistry";
+import { validateName } from "../src/contract/nameRegistry";
 
 test("validateName", () => {
   validateName("daimo");
