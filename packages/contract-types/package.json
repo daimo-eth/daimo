@@ -1,7 +1,7 @@
 {
-  "name": "contract-types",
+  "name": "daimo-contract-types",
   "version": "1.0.0",
-  "description": "Typescript types for daimo contracts",
+  "description": "Typescript types and ABIs for daimo contracts",
   "main": "src/index.ts",
   "scripts": {
     "generate": "wagmi generate",

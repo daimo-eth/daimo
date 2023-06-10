@@ -9,7 +9,7 @@ import {
   getContract,
   hexToString,
 } from "viem";
-import { Contracts } from "contract-types";
+import { Contracts } from "daimo-contract-types";
 
 import { publicClient, walletClient } from "./chain";
 import { NamedAccount } from "./model";

@@ -1,7 +1,7 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
 import { Hex, getContract } from "viem";
-import { Contracts } from "contract-types";
+import { Contracts } from "daimo-contract-types";
 
 import { createAccount, publicClient, walletClient } from "./chain";
 import { zAddress, zHex } from "./model";
