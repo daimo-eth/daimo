@@ -1,8 +1,8 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
 import { Hex, getContract } from "viem";
+import { Contracts } from "contract-types";
 
-import { accountFactoryABI, accountFactoryAddress } from "../gen/contract";
 import { createAccount, publicClient, walletClient } from "./chain";
 import { zAddress, zHex } from "./model";
 import { NameRegistry } from "./nameRegistry";
@@ -13,8 +13,8 @@ const account = createAccount(process.env.PRIVATE_KEY);
 const nameReg = new NameRegistry();
 
 const accountFactoryContract = getContract({
-  abi: accountFactoryABI,
-  address: accountFactoryAddress,
+  abi: Contracts.accountFactoryABI,
+  address: Contracts.accountFactoryAddress,
   publicClient,
   walletClient,
 });

@@ -11,6 +11,6 @@ const deployments = Object.fromEntries(
 );
 
 export default defineConfig({
-  out: "gen/contract.ts",
+  out: "src/generated.ts",
   plugins: [foundry({ project: "../contract", deployments })],
 });
