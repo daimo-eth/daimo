@@ -9,13 +9,13 @@ import {
   getContract,
   hexToString,
 } from "viem";
+import { Contracts } from "contract-types";
 
-import { nameRegistryABI, nameRegistryAddress } from "../gen/contract";
 import { publicClient, walletClient } from "./chain";
 import { NamedAccount } from "./model";
 
 const registeredEvent = getAbiItem({
-  abi: nameRegistryABI,
+  abi: Contracts.nameRegistryABI,
   name: "Registered",
 });
 type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
@@ -30,8 +30,8 @@ export class NameRegistry {
   private accounts: NamedAccount[] = [];
 
   private contract = getContract({
-    abi: nameRegistryABI,
-    address: nameRegistryAddress,
+    abi: Contracts.nameRegistryABI,
+    address: Contracts.nameRegistryAddress,
     publicClient,
     walletClient,
   });
@@ -39,8 +39,8 @@ export class NameRegistry {
   /** Init: index logs from chain, get all names so far */
   async init() {
     const logs = await publicClient.getLogs({
-      address: nameRegistryAddress,
-      event: getAbiItem({ abi: nameRegistryABI, name: "Registered" }),
+      address: Contracts.nameRegistryAddress,
+      event: getAbiItem({ abi: Contracts.nameRegistryABI, name: "Registered" }),
       fromBlock: 0n,
       toBlock: "latest" as BlockTag,
     });
@@ -48,8 +48,8 @@ export class NameRegistry {
     this.parseLogs(logs);
 
     const result = publicClient.watchContractEvent({
-      abi: nameRegistryABI,
-      address: nameRegistryAddress,
+      abi: Contracts.nameRegistryABI,
+      address: Contracts.nameRegistryAddress,
       eventName: "Registered",
       onLogs: (logs: RegisteredLog[]) => {
         console.log(`[NAME-REG] subscribe, ${logs.length} new logs`);
