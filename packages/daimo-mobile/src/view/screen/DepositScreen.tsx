@@ -1,42 +1,105 @@
 import { Octicons } from "@expo/vector-icons";
+import { Address } from "abitype";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { assert } from "../../logic/assert";
+import { chainConfig } from "../../logic/chain";
+import { trpc } from "../../logic/trpc";
 import { ButtonMed } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBold, TextSmall } from "../shared/text";
-import { assert } from "../../logic/assert";
 
 export default function DepositScreen() {
   const [account] = useAccount();
   assert(account != null);
 
-  const requestFaucet = useCallback(() => console.log("TODO"), []);
-
   return (
     <View style={styles.vertOuter}>
-      <View style={styles.warning}>
-        <TextBody>
-          <Octicons name="alert" size={16} color="black" />{" "}
-          <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
-          runs on Base Goerli.
-        </TextBody>
-        <View style={ss.spacer.h16} />
-        <ButtonMed title="Request $10 from faucet" onPress={requestFaucet} />
-      </View>
+      {chainConfig.testnet && <TestnetFaucet recipient={account.address} />}
+      {!chainConfig.testnet && <OnrampStub />}
       <View style={ss.spacer.h32} />
       <TextBody>
         <TextBold>Deposit USDC on Base Goerli only.</TextBold> Use the following
         address.
       </TextBody>
-      <Address addr={account.address} />
+      <AddressCopier addr={account.address} />
     </View>
   );
 }
 
-function Address({ addr }: { addr: string }) {
+/** Request testUSDC from testnet faucet. */
+function TestnetFaucet({ recipient }: { recipient: Address }) {
+  const faucetStatus = trpc.testnetFaucetStatus.useQuery({ recipient });
+
+  const mutation = trpc.testnetRequestFaucet.useMutation();
+  const request = useCallback(() => {
+    mutation.mutate({ recipient });
+  }, [recipient]);
+
+  let canRequest = false;
+  let buttonType = "primary" as "primary" | "danger";
+  let message = "Request $10 from faucet";
+  if (mutation.isLoading) {
+    message = "Loading...";
+  } else if (mutation.isSuccess) {
+    message = "Sent";
+  } else if (mutation.isError) {
+    message = "Error";
+    buttonType = "danger";
+  } else if (faucetStatus.isError) {
+    message = "Faucet unavailable";
+  } else if (faucetStatus.isSuccess) {
+    switch (faucetStatus.data) {
+      case "unavailable":
+        message = "Faucet unavailable";
+        break;
+      case "alreadyRequested":
+        message = "Requested";
+        break;
+      case "alreadySent":
+        message = "Faucet payment sent";
+        break;
+      case "canRequest":
+        canRequest = true;
+        break;
+    }
+  }
+
+  return (
+    <View style={styles.callout}>
+      <TextBody>
+        <Octicons name="alert" size={16} color="black" />{" "}
+        <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
+        runs on Base Goerli.
+      </TextBody>
+      <View style={ss.spacer.h16} />
+      <ButtonMed
+        title={message}
+        onPress={request}
+        type={buttonType}
+        disabled={!canRequest}
+      />
+    </View>
+  );
+}
+
+/** Coming soon: onramp, eg Coinbase Pay */
+function OnrampStub() {
+  return (
+    <View style={styles.callout}>
+      <TextBody>
+        <Octicons name="alert" size={16} color="black" />{" "}
+        <TextBold>Onramp coming soon.</TextBold> You'll be able to buy USDC
+        directly in Daimo.
+      </TextBody>
+    </View>
+  );
+}
+
+function AddressCopier({ addr }: { addr: string }) {
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
     await Clipboard.setStringAsync(addr);
@@ -90,8 +153,8 @@ const styles = StyleSheet.create({
     ...ss.text.mono,
     flexShrink: 1,
   },
-  warning: {
-    backgroundColor: color.bg.lightYellow,
+  callout: {
+    backgroundColor: color.bg.lightGray,
     padding: 16,
     marginHorizontal: -16,
     borderRadius: 24,

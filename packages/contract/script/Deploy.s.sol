@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../src/AccountFactory.sol";
+import "../src/TestUSDC.sol";
 
 contract DeployScript is Script {
     function setUp() public {}

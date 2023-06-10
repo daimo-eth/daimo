@@ -2,25 +2,28 @@ import {
   Account,
   Address,
   BlockTag,
+  Chain,
   Hex,
   Log,
   TransactionReceipt,
+  Transport,
+  WalletClient,
   getAbiItem,
   getContract,
   hexToString,
 } from "viem";
 import { Contracts } from "daimo-contract-types";
 
-import { publicClient, walletClient } from "./chain";
-import { NamedAccount } from "./model";
+import { ClientsType, ContractType, getClients } from "../chain";
+import { NamedAccount } from "../model";
+
+const { nameRegistryConfig } = Contracts;
 
 const registeredEvent = getAbiItem({
-  abi: Contracts.nameRegistryABI,
+  abi: nameRegistryConfig.abi,
   name: "Registered",
 });
 type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
-
-// TODO: subscribe
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
@@ -29,36 +32,36 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: NamedAccount[] = [];
 
-  private contract = getContract({
-    abi: Contracts.nameRegistryABI,
-    address: Contracts.nameRegistryAddress,
-    publicClient,
-    walletClient,
-  });
+  clients: ClientsType;
+  contract: ContractType<typeof nameRegistryConfig.abi>;
+
+  constructor(walletClient: WalletClient<Transport, Chain, Account>) {
+    this.clients = getClients(walletClient);
+    this.contract = getContract({ ...nameRegistryConfig, ...this.clients });
+  }
 
   /** Init: index logs from chain, get all names so far */
   async init() {
-    const logs = await publicClient.getLogs({
-      address: Contracts.nameRegistryAddress,
-      event: getAbiItem({ abi: Contracts.nameRegistryABI, name: "Registered" }),
+    const logs = await this.clients.publicClient.getLogs({
+      address: nameRegistryConfig.address,
+      event: registeredEvent,
       fromBlock: 0n,
       toBlock: "latest" as BlockTag,
     });
     console.log(`[NAME-REG] init, read ${logs.length} logs`);
     this.parseLogs(logs);
 
-    const result = publicClient.watchContractEvent({
-      abi: Contracts.nameRegistryABI,
-      address: Contracts.nameRegistryAddress,
+    this.clients.publicClient.watchContractEvent({
+      ...nameRegistryConfig,
       eventName: "Registered",
       onLogs: (logs: RegisteredLog[]) => {
         console.log(`[NAME-REG] subscribe, ${logs.length} new logs`);
         this.parseLogs(logs);
       },
     });
-    console.log(`[NAME-REG] subscribe, ${result}`);
   }
 
+  /** Parses Registered event logs, first in init(), then on subscription. */
   parseLogs = (logs: RegisteredLog[]) => {
     const accounts = logs
       .map((l) => l.args)
@@ -85,7 +88,6 @@ export class NameRegistry {
 
   /** Registers a Daimo name to an address. */
   async registerName(
-    account: Account,
     name: string,
     address: Address
   ): Promise<TransactionReceipt> {
@@ -93,12 +95,11 @@ export class NameRegistry {
     const bufName = Buffer.from(name.padEnd(32, "\0"));
     const args = [`0x${bufName.toString("hex")}`, address] as const;
 
-    const hash = await this.contract.write.register(args, {
-      account,
-      chain: null,
-    });
+    const hash = await this.contract.write.register(args);
 
-    const tx = await publicClient.waitForTransactionReceipt({ hash });
+    const tx = await this.clients.publicClient.waitForTransactionReceipt({
+      hash,
+    });
     if (tx.status !== "success") throw new Error("Transaction failed");
     return tx;
   }
