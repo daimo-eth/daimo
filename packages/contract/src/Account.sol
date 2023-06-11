@@ -22,12 +22,6 @@ import "./P256SHA256.sol";
 contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
-    //filler member, to push the nonce and owner to the same slot
-    // the "Initializeble" class takes 2 bytes in the first slot
-    bytes28 private _filler;
-
-    //explicit sizes of nonce, to fit a single storage cell with account keys
-    uint96 private _nonce;
     bytes32[2][] public accountKeys; // list of P256 public keys that own the account
 
     IEntryPoint private immutable _entryPoint;
@@ -39,14 +33,9 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
         bytes32[2] accountKeyHash
     );
 
-    modifier onlyOwner() {
+    modifier onlySelf() {
         _onlySelf();
         _;
-    }
-
-    /// @inheritdoc BaseAccount
-    function nonce() public view virtual override returns (uint256) {
-        return _nonce;
     }
 
     /// @inheritdoc BaseAccount
@@ -111,13 +100,6 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     }
 
     /// implement template method of BaseAccount
-    function _validateAndUpdateNonce(
-        UserOperation calldata userOp
-    ) internal override {
-        require(_nonce++ == userOp.nonce, "account: invalid nonce");
-    }
-
-    /// implement template method of BaseAccount
     function _validateSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
@@ -171,7 +153,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     function withdrawDepositTo(
         address payable withdrawAddress,
         uint256 amount
-    ) public onlyOwner {
+    ) public onlySelf {
         entryPoint().withdrawTo(withdrawAddress, amount);
     }
 

@@ -45,7 +45,7 @@ extension Data {
 
 // hex version of '\x19Ethereum Signed Message:\n32'
 let hexifiedPrefix = "19457468657265756d205369676e6564204d6573736167653a0a3332";
-let data = Data(fromHexEncodedString: hexifiedPrefix + "bc8e1db45e18d9c05414af997d07148e99448585916cd64cad356dff8dcea225")!
+let data = Data(fromHexEncodedString: hexifiedPrefix + "adbf343afee6d983b619efadfd6b8caa1c3094f142d043a7353f0ce0bf7708cd")!
 print("data", data.hexEncodedString())
 
 let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
