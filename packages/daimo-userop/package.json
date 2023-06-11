@@ -1,0 +1,26 @@
+{
+  "name": "daimo-userop",
+  "version": "1.0.0",
+  "description": "userop.js for daimo account contracts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/node": "^20.3.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@ethersproject/shims": "^5.7.0",
+    "@noble/curves": "^1.1.0",
+    "@tsconfig/node20": "^1.0.1",
+    "daimo-contract-types": "file:../contract-types",
+    "text-encoding-polyfill": "^0.6.7",
+    "userop": "^0.3.0",
+    "viem": "^1.0.2"
+  }
+}

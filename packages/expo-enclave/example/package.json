@@ -9,6 +9,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "daimo-contract-types": "file:daimo-contract-types-1.0.0.tgz",
+    "daimo-userop": "file:daimo-userop-1.0.0.tgz",
     "eas-cli": "^3.12.0",
     "expo": "~48.0.15",
     "expo-build-properties": "~0.6.0",

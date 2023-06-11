@@ -45,16 +45,16 @@ extension Data {
 
 // hex version of '\x19Ethereum Signed Message:\n32'
 let hexifiedPrefix = "19457468657265756d205369676e6564204d6573736167653a0a3332";
-let data = Data(fromHexEncodedString: hexifiedPrefix + "adbf343afee6d983b619efadfd6b8caa1c3094f142d043a7353f0ce0bf7708cd")!
+let data = Data(fromHexEncodedString: hexifiedPrefix + "574cbb66939439ad212a0ed6c3f0046ed1568f86d383a28422ef722fc8481b0b")!
 print("data", data.hexEncodedString())
 
 let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
 
 let privKey = try! P256.Signing.PrivateKey(pemRepresentation: pemKeyString)
-print("pubkey", privKey.publicKey.compactRepresentation!.hexEncodedString())
+print("pubkey", privKey.publicKey.derRepresentation.hexEncodedString())
 print("pubkey extended", privKey.publicKey.rawRepresentation.hexEncodedString())
 print("pk", privKey.pemRepresentation)
-//print("pkrep", privKey.dataRepresentation.hexEncodedString())
+print("pkrep", privKey.rawRepresentation.hexEncodedString())
 
 let emptiness: UInt8 = 0
 
@@ -78,6 +78,16 @@ let messageData = Data(fromHexEncodedString: "deadbeef")!
 
 let sigData = Data(fromHexEncodedString: "30440220780a20ec08d3a9dba95b997b35fdc2f6c1d9adc8f88638375cb534d1c6ec6127022068081890c15b6954c080837ff1dde3677f6af64fd3c4255a8e1d6a1f960c401f")!
 
-print(androidKey.rawRepresentation.hexEncodedString())
+print("androidKey rawrepr", androidKey.rawRepresentation.hexEncodedString())
 
 print(androidKey.isValidSignature(try P256.Signing.ECDSASignature(derRepresentation: sigData), for: messageData))
+
+let sigData2 = Data(fromHexEncodedString: "304502206510013effa6ba1c7670c4f3d4372cd46d00d257144579f8536ebb329c49b6f5022100adacdbc7f5472d3039488a7350d7db39cba04e3d520a3639d225cb8ecd2ad8c1")!
+let sig2 = try P256.Signing.ECDSASignature(derRepresentation: sigData2)
+
+print("sigdata", sig2.rawRepresentation.hexEncodedString())
+
+let anotherKey = Data(fromHexEncodedString: "3059301306072a8648ce3d020106082a8648ce3d03010703420004fd0f9efcf440148115d805fce5ae1d4cf9f16e05128ed4b2fc0d3d1ce7fcfb4b40fbdb43428c7d3b1c067ded609c2e849fd4cfef406f06d0e0ae872e247e8d59")!
+
+let mainKey = try P256.Signing.PublicKey(derRepresentation: anotherKey)
+print("mainKey", mainKey.rawRepresentation.hexEncodedString())

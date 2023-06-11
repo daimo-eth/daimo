@@ -13,3 +13,6 @@ cast cd "execute(address,uint256,bytes)" 0xF05b5f04B7a77Ca549C0dE06beaF257f40C66
 
 # Deploy name registry
 forge script script/DeployNameRegistry.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+
+# Deploy Test USDC
+forge script script/DeployTestUSDC.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
