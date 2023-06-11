@@ -10,76 +10,40 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  test-mobile:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "20.x"
 
-      - id: cache
-        uses: actions/cache@v3
-        with:
-          path: ./packages/daimo-mobile/node_modules
-          key: modules-${{ hashFiles('./packages/daimo-mobile/package-lock.json') }}
-      - if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
-        working-directory: ./packages/daimo-mobile
-
-      - id: cache-api
-        uses: actions/cache@v3
-        with:
-          path: ./packages/daimo-api/node_modules
-          key: modules-${{ hashFiles('./packages/daimo-api/package-lock.json') }}
-      - if: steps.cache-api.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
-        working-directory: ./packages/daimo-api
-
-      - run: npm run lint && npm test
-        working-directory: ./packages/daimo-mobile
-
-  test-api:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "20.x"
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - id: cache
-        uses: actions/cache@v3
+      - uses: actions/setup-node@v3
         with:
-          path: ./packages/daimo-api/node_modules
-          key: modules-${{ hashFiles('./packages/daimo-api/package-lock.json') }}
-      - if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
-        working-directory: ./packages/daimo-api
+          node-version: "20.x"
 
-      - run: npm run lint && npm test
-        working-directory: ./packages/daimo-api
+      - run: npm ci && npm test
 
   test-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - run: |
-          forge --version
-          forge build --sizes
-        id: build
+      - run: forge test -vvv
         working-directory: ./packages/contract
 
-      - run: |
-          forge test -vvv
-        id: test
-        working-directory: ./packages/contract
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - run: npm ci && npm run lint

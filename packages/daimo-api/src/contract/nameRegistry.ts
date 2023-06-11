@@ -1,3 +1,4 @@
+import { nameRegistryConfig } from "@daimo/contract";
 import {
   Account,
   Address,
@@ -12,12 +13,9 @@ import {
   getContract,
   hexToString,
 } from "viem";
-import { Contracts } from "daimo-contract-types";
 
 import { ClientsType, ContractType, getClients } from "../chain";
 import { NamedAccount } from "../model";
-
-const { nameRegistryConfig } = Contracts;
 
 const registeredEvent = getAbiItem({
   abi: nameRegistryConfig.abi,

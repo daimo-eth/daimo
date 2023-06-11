@@ -1,4 +1,4 @@
-import { Contracts } from "daimo-contract-types";
+import { testUsdcConfig } from "@daimo/contract";
 import {
   Account,
   Address,
@@ -12,8 +12,6 @@ import {
 } from "viem";
 
 import { ClientsType, ContractType, getClients } from "../chain";
-
-const { testUsdcConfig } = Contracts;
 
 export type FaucetStatus =
   | "unavailable"

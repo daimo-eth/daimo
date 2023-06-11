@@ -1,0 +1,18 @@
+{
+  "name": "@daimo/contract",
+  "version": "1.0.0",
+  "description": "Daimo contracts, ABIs, and generated Typescript types",
+  "types": "./dist/generated.d.ts",
+  "main": "./dist/generated.js",
+  "scripts": {
+    "build": "wagmi generate && tsc",
+    "lint": "eslint ."
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@tsconfig/node20": "^1.0.1",
+    "@wagmi/cli": "^1.1.0",
+    "typescript": "^5.1.3"
+  }
+}

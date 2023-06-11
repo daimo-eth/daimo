@@ -1,14 +1,55 @@
 {
-  "name": "daimo",
+  "private": true,
+  "name": "@daimo/monorepo",
   "version": "0.0.1",
   "description": "Experimental stablecoin wallet",
   "main": "package.json",
   "scripts": {
-    "test": "turbo test"
+    "start": "turbo start",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint"
   },
   "author": "Daimo",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "eslint-config-universe": "^11.2.0",
+    "turbo": "^1.10.3",
     "typescript": "^5.1.3"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.7.0"
+  },
+  "eslintConfig": {
+    "extends": "universe/node",
+    "ignorePatterns": [
+      "dist",
+      "gen"
+    ],
+    "rules": {
+      "import/order": [
+        "error",
+        {
+          "groups": [
+            [
+              "builtin",
+              "external"
+            ],
+            [
+              "internal",
+              "parent",
+              "sibling",
+              "index"
+            ]
+          ],
+          "newlines-between": "always"
+        }
+      ]
+    }
   }
 }

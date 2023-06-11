@@ -1,4 +1,4 @@
-import { Contracts } from "daimo-contract-types";
+import { accountFactoryConfig } from "@daimo/contract";
 import {
   Account,
   Chain,
@@ -9,8 +9,6 @@ import {
 } from "viem";
 
 import { ClientsType, ContractType, getClients } from "../chain";
-
-const { accountFactoryConfig } = Contracts;
 
 /* Interface to the AccountFactory contract. Creates Daimo accounts. */
 export class AccountFactory {
