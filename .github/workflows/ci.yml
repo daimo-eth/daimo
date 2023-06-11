@@ -10,12 +10,6 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  test:
-    needs: [test-mobile, test-api, test-contract]
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo All tests passed
-
   test-mobile:
     runs-on: ubuntu-latest
     steps:
