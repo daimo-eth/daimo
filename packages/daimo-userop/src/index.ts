@@ -1,27 +1,38 @@
 import { Client, Presets } from "userop";
-import config from "../config.json";
-import { DaimoAccountBuilder } from "./daimoAccountBuilder";
 import { getContract, parseUnits, encodeFunctionData, parseEther } from "viem";
 import * as Contracts from "@daimo/contract";
+
+import config from "../config.json";
+import { DaimoAccountBuilder } from "./daimoAccountBuilder";
 import { publicClient, SigningCallback } from "./util";
-export { SigningCallback } from "./util";
+
+export { SigningCallback };
 
 export class DaimoAccount {
   private dryRun = false;
   private client: Client;
   private daimoAccountBuilder: DaimoAccountBuilder;
 
+  private tokenAddress: `0x${string}`;
+  private tokenDecimals: number;
+
   constructor(
     _dryRun: boolean,
     _client: Client,
-    _daimoAccountBuilder: DaimoAccountBuilder
+    _daimoAccountBuilder: DaimoAccountBuilder,
+    _tokenAddress: `0x${string}`,
+    _tokenDecimals: number
   ) {
     this.dryRun = _dryRun;
     this.client = _client;
     this.daimoAccountBuilder = _daimoAccountBuilder;
+
+    this.tokenAddress = _tokenAddress;
+    this.tokenDecimals = _tokenDecimals;
   }
 
   public static async init(
+    tokenAddress: `0x${string}`,
     derPublicKey: string,
     signer: SigningCallback,
     dryRun: boolean
@@ -49,7 +60,21 @@ export class DaimoAccount {
       signer
     );
 
-    return new DaimoAccount(dryRun, client, daimoBuilder);
+    const erc20 = getContract({
+      abi: Contracts.erc20ABI,
+      address: tokenAddress,
+      publicClient,
+    });
+
+    const tokenDecimals = await erc20.read.decimals();
+
+    return new DaimoAccount(
+      dryRun,
+      client,
+      daimoBuilder,
+      tokenAddress,
+      tokenDecimals
+    );
   }
 
   public getAddress(): `0x${string}` {
@@ -74,29 +99,15 @@ export class DaimoAccount {
     return ev?.transactionHash ?? undefined;
   }
 
-  private async parseErc20Amount(
-    amount: `${number}`,
-    tokenAddress: `0x${string}`
-  ): Promise<bigint> {
-    const erc20 = getContract({
-      abi: Contracts.erc20ABI,
-      address: tokenAddress,
-      publicClient,
-    });
-    const decimals = await erc20.read.decimals(); // TODO: Just hardcode for performance
-    return parseUnits(amount, decimals);
-  }
-
   public async erc20transfer(
-    tokenAddress: `0x${string}`,
     to: `0x${string}`,
     amount: `${number}` // in the native unit of the token
   ): Promise<string | undefined> {
-    const parsedAmount = await this.parseErc20Amount(amount, tokenAddress);
+    const parsedAmount = parseUnits(amount, this.tokenDecimals);
 
     const res = await this.client.sendUserOperation(
       this.daimoAccountBuilder.execute(
-        tokenAddress,
+        this.tokenAddress,
         0n,
         encodeFunctionData({
           abi: Contracts.erc20ABI,
@@ -116,15 +127,14 @@ export class DaimoAccount {
   }
 
   public async erc20approve(
-    tokenAddress: `0x${string}`,
     spender: `0x${string}`,
     amount: `${number}`
   ): Promise<string | undefined> {
-    const parsedAmount = await this.parseErc20Amount(amount, tokenAddress);
+    const parsedAmount = parseUnits(amount, this.tokenDecimals);
 
     const res = await this.client.sendUserOperation(
       this.daimoAccountBuilder.execute(
-        tokenAddress,
+        this.tokenAddress,
         0n,
         encodeFunctionData({
           abi: Contracts.erc20ABI,

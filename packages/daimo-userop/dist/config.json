@@ -1,8 +1,0 @@
-{
-    "rpcUrl": "https://goerli.base.org",
-    "bundlerRpcUrl": "https://api.pimlico.io/v1/base-goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07",
-    "paymaster": {
-        "rpcUrl": "",
-        "context": {}
-    }
-}

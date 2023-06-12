@@ -1,4 +1,5 @@
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
+import * as Contracts from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { useState } from "react";
 import {
@@ -32,27 +33,28 @@ export default function App() {
   })();
 
   const testTx = async () => {
-    const accName = "testdaimo";
+    const accName = "testdaimo123";
     const derPublicKey = (await ExpoEnclave.fetchPublicKey(accName)) as string;
     const signer: SigningCallback = async (message) => {
-      // hex version of '\x19Ethereum Signed Message:\n32'
-      const hexifiedPrefix =
-        "19457468657265756d205369676e6564204d6573736167653a0a3332";
       const signature = await ExpoEnclave.sign(
         accName,
-        hexifiedPrefix + message,
+        message,
         biometricPromptCopy
       );
       return signature;
     };
-    const account = await DaimoAccount.init(derPublicKey, signer, false);
+    const account = await DaimoAccount.init(
+      Contracts.testUsdcAddress,
+      derPublicKey,
+      signer,
+      false
+    );
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()
     );
 
     const hash = await account.erc20transfer(
-      "0xd730c829ba97FFeB78Dd64c477D0bE671b2767Fe",
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42"
     );

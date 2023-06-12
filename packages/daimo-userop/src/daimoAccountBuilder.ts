@@ -3,9 +3,9 @@ import {
   UserOperationBuilder,
   BundlerJsonRpcProvider,
   Presets,
+  UserOperationMiddlewareFn,
 } from "userop";
 import * as Contracts from "@daimo/contract";
-import { UserOperationMiddlewareFn } from "userop";
 import {
   BaseError,
   ContractFunctionRevertedError,
@@ -14,16 +14,20 @@ import {
   getAddress,
   getContract,
 } from "viem";
-import config from "../config.json";
 import { p256 } from "@noble/curves/p256";
+
+import config from "../config.json";
 import { publicClient, SigningCallback, dummySignature } from "./util";
 
 function getSigningMiddleware(
   signer: SigningCallback
 ): UserOperationMiddlewareFn {
   return async (ctx) => {
+    // hex version of '\x19Ethereum Signed Message:\n32'
+    const hexPrefix =
+      "19457468657265756d205369676e6564204d6573736167653a0a3332";
     const hexMessage = ctx.getUserOpHash().slice(2);
-    const signature = await signer(hexMessage);
+    const signature = await signer(hexPrefix + hexMessage);
     const parsedSignature = p256.Signature.fromDER(signature);
     ctx.op.signature = `0x${parsedSignature.toCompactHex()}`;
   };
@@ -99,7 +103,7 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
         verificationGasLimit: 2000000n,
       })
       .useMiddleware(instance.resolveAccount)
-      .useMiddleware(Presets.Middleware.getGasPrice(instance.provider))
+      .useMiddleware(instance.gasMiddleware)
       .useMiddleware(
         Presets.Middleware.estimateUserOperationGas(instance.provider)
       )
@@ -116,7 +120,7 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       getAddress(ctx.op.sender),
       0n, // "key", always 0 to represent s values are less than half
     ]);
-    ctx.op.initCode = ctx.op.nonce == 0n ? this.initCode : "0x";
+    ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };
 
   execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {
@@ -129,7 +133,7 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
     );
   }
 
-  executeBatch(to: Array<`0x${string}`>, data: Array<`0x${string}`>) {
+  executeBatch(to: `0x${string}`[], data: `0x${string}`[]) {
     return this.setCallData(
       encodeFunctionData({
         abi: Contracts.accountABI,

@@ -11,6 +11,7 @@
   "dependencies": {
     "@daimo/expo-enclave": "*",
     "@daimo/userop": "*",
+    "@daimo/contract": "*",
     "@ethersproject/shims": "^5.7.0",
     "expo": "~48.0.18",
     "expo-build-properties": "~0.6.0",
