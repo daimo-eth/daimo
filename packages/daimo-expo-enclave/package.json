@@ -7,6 +7,7 @@
   "types": "build/index.d.ts",
   "scripts": {
     "watch": "expo-module build",
+    "build": "expo-module build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "echo No tests yet",
@@ -25,7 +26,10 @@
   "homepage": "https://github.com/daimo-eth/daimo#readme",
   "repository": "https://github.com/daimo-eth/daimo/tree/master/packages/daimo-expo-enclave",
   "author": "Daimo",
-  "dependencies": {},
+  "dependencies": {
+    "@daimo/contract": "*",
+    "@daimo/userop": "*"
+  },
   "devDependencies": {
     "@types/react": "^18.0.25",
     "@types/react-native": "^0.70.6",

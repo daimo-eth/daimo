@@ -5,9 +5,6 @@ import { getContract, parseUnits, encodeFunctionData, parseEther } from "viem";
 import * as Contracts from "@daimo/contract";
 import { publicClient, SigningCallback } from "./util";
 export { SigningCallback } from "./util";
-// Polyfills for React Native
-import "@ethersproject/shims";
-import "text-encoding-polyfill";
 
 export class DaimoAccount {
   private dryRun = false;
