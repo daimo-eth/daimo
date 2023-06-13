@@ -14,6 +14,7 @@ export type AppRouter = ReturnType<typeof createRouter>;
 async function main() {
   console.log(`[API] starting...`);
   const walletClient = getEnvWalletClient();
+  console.log(`[API] using wallet ${walletClient.account.address}`);
   const nameReg = new NameRegistry(walletClient);
   const faucet = new Faucet(walletClient);
   const accountFactory = new AccountFactory(walletClient);

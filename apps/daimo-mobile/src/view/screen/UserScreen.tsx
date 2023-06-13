@@ -1,9 +1,12 @@
 import { useEffect } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { env } from "../../logic/env";
+import { ButtonMed } from "../shared/Button";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
+import { TextBold, TextSmall } from "../shared/text";
 import { timeAgo, useTime } from "../shared/time";
 
 export function UserScreen() {
@@ -27,7 +30,19 @@ export function UserScreen() {
         <Text style={ss.text.body}>
           As of {timeAgo(account.lastBlockTimestamp, nowS)}
         </Text>
-        <Button title="Clear wallet" onPress={() => setAccount(null)} />
+        <ButtonMed
+          type="danger"
+          title="Clear wallet"
+          onPress={() => setAccount(null)}
+        />
+
+        <View style={ss.spacer.h64} />
+        <TextSmall>
+          Build <TextBold>{env.gitHash}</TextBold>
+        </TextSmall>
+        <TextSmall>
+          Profile <TextBold>{env.buildProfile}</TextBold>
+        </TextSmall>
       </View>
     </>
   );

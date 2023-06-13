@@ -28,8 +28,7 @@
   "eslintConfig": {
     "extends": "universe/node",
     "ignorePatterns": [
-      "dist",
-      "gen"
+      "dist"
     ],
     "rules": {
       "import/order": [

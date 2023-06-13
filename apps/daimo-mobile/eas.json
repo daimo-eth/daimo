@@ -24,6 +24,9 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "env": {
+        "DAIMO_APP_API_URL": "https://daimo-api-stage.onrender.com"
       }
     },
     "production": {

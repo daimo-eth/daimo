@@ -11,6 +11,7 @@ import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
 import { trpc } from "./logic/trpc";
 import { HomeStackNav } from "./view/HomeStack";
+import { env } from "./logic/env";
 
 export default function App() {
   console.log("[APP] rendering\n\n");
@@ -33,7 +34,7 @@ export default function App() {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:3000",
+          url: env.apiUrl,
           fetch: (input: RequestInfo | URL, init?: RequestInit) => {
             console.log(`[APP] trpc fetching ${input}`);
             return fetch(input, init);
