@@ -5,7 +5,8 @@
   "types": "./dist/generated.d.ts",
   "main": "./dist/generated.js",
   "scripts": {
-    "build": "wagmi generate && tsc",
+    "codegen": "wagmi generate",
+    "build": "tsc",
     "lint": "eslint ."
   },
   "author": "",

@@ -6,6 +6,9 @@
       "cache": false,
       "persistent": true
     },
+    "codegen": {
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "node_modules/.cache/metro/**"],

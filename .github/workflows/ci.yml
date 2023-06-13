@@ -47,3 +47,5 @@ jobs:
           node-version: "20.x"
 
       - run: npm ci && npm run lint
+      # TODO: once https://github.com/wagmi-dev/wagmi/issues/2528 is fixed
+      #   ... run npm run codegen && git diff --exit-code
