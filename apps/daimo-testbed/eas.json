@@ -1,0 +1,38 @@
+{
+  "cli": {
+    "version": ">= 3.9.2"
+  },
+  "build": {
+    "sim": {
+      "ios": {
+        "buildConfiguration": "Debug",
+        "resourceClass": "m-medium",
+        "simulator": true
+      }
+    },
+    "development": {
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "ios": {
+        "buildConfiguration": "Debug",
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
