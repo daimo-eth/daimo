@@ -10,8 +10,8 @@
     "build:prod": "eas build -p all",
     "start": "expo start --dev-client -i",
     "start:tunnel": "expo start --dev-client --tunnel",
-    "start:android": "expo run:android",
-    "start:ios": "expo run:ios",
+    "run:android": "expo run:android",
+    "run:ios": "expo run:ios",
     "test": "tsc --noEmit && jest",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=gen '--ignoreFiles=.*.config.ts' && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-build-properties,@babel/core",
@@ -35,7 +35,7 @@
     "depcheck": "^1.4.3",
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
-    "expo": "~48.0.15",
+    "expo": "~48.0.18",
     "expo-barcode-scanner": "^12.3.2",
     "expo-build-properties": "~0.6.0",
     "expo-clipboard": "^4.1.2",
@@ -99,5 +99,8 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
   }
 }

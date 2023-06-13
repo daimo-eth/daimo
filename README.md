@@ -14,6 +14,11 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 ### Development
 
+**Daimo is under active development.** Coming soon to testnet and TestFlight.
+
+<details>
+<summary><strong>Quick start for developers</strong></summary>
+
 You'll need Node 20 and recent Xcode. Clone the repo, loading submodules.
 
 ```
@@ -23,7 +28,7 @@ git clone git@github.com:daimo-eth/daimo --recurse-submodules
 Install prerequisites.
 
 ```
-# Install Foundry, if you haven't yet.
+# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 # Reload your terminal, then run:
 foundryup
@@ -41,8 +46,19 @@ npm i
 npm run build
 ```
 
+Configure the API.
+- To run the API locally, configure the `DAIMO_API_*` env vars.
+- To use the testnet staging API, set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
+
 Finally, run the app in the iOS simulator.
+
+If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a>, you can download the latest base build from there.
+
+> Expo apps come in two layers: a native layer and a React Native (typescript) layer. Whenever you add a native module or update `@daimo/expo-enclave`, you must rebuild the native app. For details, see the `@daimo/mobile` package.
+
+Once the base app is installed in your simulator, you can run Daimo:
 
 ```
 npm start
 ```
+</details>
