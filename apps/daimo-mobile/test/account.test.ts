@@ -1,12 +1,7 @@
 import { Account, parse, serialize } from "../src/logic/account";
 import { assert } from "../src/logic/assert";
-import { importKeypair } from "../src/logic/crypto";
 
-const keypairJWK = `{"publicKey":{"key_ops":["verify"],"ext":true,"kty":"EC","x":"PQDLKmUDXezZH6ph8_4Hs3TGj6HkzjhALsvENzNNSOY","y":"VXe-awxy0lkyA8LJ5xTlmCV4ofjQXuNyQSZdrAfteMY","crv":"P-256"},"privateKey":{"key_ops":["sign"],"ext":true,"kty":"EC","x":"PQDLKmUDXezZH6ph8_4Hs3TGj6HkzjhALsvENzNNSOY","y":"VXe-awxy0lkyA8LJ5xTlmCV4ofjQXuNyQSZdrAfteMY","crv":"P-256","d":"ileqoElhqRTQLbGtS92QFKUV243UMA5PsecR2B3P6yg"}}`;
-const keypairPromise = importKeypair(keypairJWK);
-const correctSer = `{"storageVersion":1,"name":"test","address":"0x123","lastBalance":"123","lastNonce":"456","lastBlockTimestamp":789,"signingKeyJWK":${JSON.stringify(
-  keypairJWK
-)}}`;
+const correctSer = `{"storageVersion":1,"name":"test","address":"0x123","lastBalance":"123","lastNonce":"456","lastBlockTimestamp":789,"enclaveKeyName":"test"}`;
 
 describe("Account", () => {
   it("serializes", async () => {
@@ -16,7 +11,7 @@ describe("Account", () => {
       lastBalance: BigInt(123),
       lastNonce: BigInt(456),
       lastBlockTimestamp: 789,
-      keypair: keypairPromise,
+      enclaveKeyName: "test",
     };
     const ser = await serialize(a);
     expect(ser).toEqual(correctSer);
@@ -25,19 +20,13 @@ describe("Account", () => {
   it("deserializes", () => {
     const a = parse(correctSer);
     assert(a != null);
-    const { name, address, lastBalance, lastNonce, lastBlockTimestamp } = a;
-    expect({
-      name,
-      address,
-      lastBalance,
-      lastNonce,
-      lastBlockTimestamp,
-    }).toEqual({
+    expect(a).toEqual({
       name: "test",
       address: "0x123",
       lastBalance: BigInt(123),
       lastNonce: BigInt(456),
       lastBlockTimestamp: 789,
+      enclaveKeyName: "test",
     });
   });
 });

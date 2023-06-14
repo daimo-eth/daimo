@@ -77,7 +77,10 @@ export function AmountInput({
 
   const change = useCallback((text: string) => {
     setStrVal(text);
-    onChange(parseFloat(text));
+    const newVal = parseFloat(text);
+    // Handle invalid or entry, NaN etc
+    if (newVal > 0) onChange(newVal);
+    else onChange(0);
   }, []);
 
   return (

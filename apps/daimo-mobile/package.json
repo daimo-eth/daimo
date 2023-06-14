@@ -24,6 +24,7 @@
     "@daimo/api": "*",
     "@daimo/expo-enclave": "*",
     "@daimo/userop": "*",
+    "@ethersproject/shims": "^5.7.0",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
     "@react-navigation/native": "^6.1.6",

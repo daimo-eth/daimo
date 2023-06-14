@@ -2,8 +2,11 @@ import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
+import { useSendTransaction } from "../../action/useSendTransaction";
+import { useAccount } from "../../logic/account";
+import { assert } from "../../logic/assert";
 import { Recipient, useRecipientSearch } from "../../logic/search";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -124,24 +127,67 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
 }
 
 function SendPayment({ recipient }: { recipient: Recipient }) {
-  const [amount, setAmount] = useState(0);
+  const [dollars, setDollars] = useState(0);
 
   const nav = useNav();
   const hide = useCallback(() => nav.setParams({ recipient: undefined }), []);
 
-  const send = useCallback(() => {
-    console.log("TODO send");
-  }, []);
+  const [account] = useAccount();
+  assert(account != null);
+
+  const { status, message, exec } = useSendTransaction(
+    account.enclaveKeyName,
+    recipient.account.addr,
+    dollars
+  );
+
+  // TODO: load estimated fees
+  const fees = 0.05;
+  const totalDollars = dollars + fees;
+
+  const statusMessage = (function (): ReactNode {
+    switch (status) {
+      case "idle":
+        if (dollars === 0) return null;
+        return `Total incl. fees $${totalDollars.toFixed(2)}`;
+      case "loading":
+        return message;
+      case "error":
+        return <TextError>{message}</TextError>;
+      default:
+        return null;
+    }
+  })();
+
+  const button = (function () {
+    switch (status) {
+      case "idle":
+        return (
+          <ButtonBig
+            title={`Send to ${recipient.account.name}`}
+            onPress={exec}
+            type="primary"
+            disabled={dollars === 0}
+          />
+        );
+      case "loading":
+        return <ActivityIndicator size="large" />;
+      case "success":
+        return <ButtonBig title="Success" disabled />;
+      case "error":
+        return <ButtonBig title="Error" disabled />;
+    }
+  })();
 
   return (
     <>
       <CancelRow title={`Sending to ${recipient.account.name}`} hide={hide} />
       <View style={ss.spacer.h32} />
-      <AmountInput value={amount} onChange={setAmount} />
+      <AmountInput value={dollars} onChange={setDollars} />
       <View style={ss.spacer.h32} />
-      <ButtonBig title="Send $12.00 to nibnalin" onPress={send} />
+      {button}
       <TextSmall>
-        <TextCenter>Total incl. fees $42.69</TextCenter>
+        <TextCenter>{statusMessage}</TextCenter>
       </TextSmall>
     </>
   );

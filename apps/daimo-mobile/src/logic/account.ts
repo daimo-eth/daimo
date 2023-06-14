@@ -2,7 +2,6 @@ import { Address } from "abitype";
 import { useCallback, useMemo } from "react";
 import { useMMKVString } from "react-native-mmkv";
 
-import { KeyPair, exportKeypair, importKeypair } from "./crypto";
 import { assert } from "./assert";
 
 export type Account = {
@@ -16,7 +15,7 @@ export type Account = {
   lastBlockTimestamp: number;
 
   /** Local device signing key */
-  keypair: Promise<KeyPair>;
+  enclaveKeyName: string;
 };
 
 const latestStorageVersion = 1;
@@ -27,15 +26,15 @@ interface StoredModel {
 
 interface AccountV1 extends StoredModel {
   storageVersion: 1;
+
+  name: string;
+
   address: string;
   lastBalance: string;
   lastNonce: string;
   lastBlockTimestamp: number;
 
-  name: string;
-
-  /** TODO: replace with reference to key stored in enclave. */
-  signingKeyJWK: string;
+  enclaveKeyName: string;
 }
 
 let firstLoad = true;
@@ -71,8 +70,10 @@ export function parse(accountJSON?: string): Account | null {
   console.log(`[ACCOUNT] parsing, ${accountJSON.length} bytes`);
   const model = JSON.parse(accountJSON) as StoredModel;
 
-  assert(model.storageVersion === latestStorageVersion);
+  // If we ever need migrations, they can happen here.
+  assert(model.storageVersion === 1);
   const a = model as AccountV1;
+
   return {
     name: a.name,
 
@@ -81,7 +82,7 @@ export function parse(accountJSON?: string): Account | null {
     lastNonce: BigInt(a.lastNonce),
     lastBlockTimestamp: a.lastBlockTimestamp,
 
-    keypair: importKeypair(a.signingKeyJWK),
+    enclaveKeyName: a.enclaveKeyName || "daimo-0",
   };
 }
 
@@ -96,7 +97,7 @@ export async function serialize(account: Account): Promise<string> {
     lastNonce: account.lastNonce.toString(),
     lastBlockTimestamp: account.lastBlockTimestamp,
 
-    signingKeyJWK: await exportKeypair(await account.keypair),
+    enclaveKeyName: account.enclaveKeyName,
   };
   return JSON.stringify(model);
 }

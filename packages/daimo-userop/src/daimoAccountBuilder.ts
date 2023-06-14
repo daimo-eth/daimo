@@ -1,23 +1,25 @@
+import * as Contracts from "@daimo/contract";
+import { p256 } from "@noble/curves/p256";
 import {
-  Constants,
-  UserOperationBuilder,
   BundlerJsonRpcProvider,
+  Constants,
   Presets,
+  UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from "userop";
-import * as Contracts from "@daimo/contract";
 import {
   BaseError,
   ContractFunctionRevertedError,
+  GetContractReturnType,
+  PublicClient,
   concat,
   encodeFunctionData,
   getAddress,
   getContract,
 } from "viem";
-import { p256 } from "@noble/curves/p256";
 
 import config from "../config.json";
-import { publicClient, SigningCallback, dummySignature } from "./util";
+import { SigningCallback, dummySignature } from "./util";
 
 function getSigningMiddleware(
   signer: SigningCallback
@@ -34,22 +36,26 @@ function getSigningMiddleware(
 }
 
 export class DaimoAccountBuilder extends UserOperationBuilder {
+  /** Connection to the chain */
   private provider: BundlerJsonRpcProvider;
-  private entryPoint = getContract({
-    abi: Contracts.entryPointABI,
-    address: getAddress(Constants.ERC4337.EntryPoint),
-    publicClient,
-  });
-  private factory = getContract({
-    abi: Contracts.accountFactoryABI,
-    address: Contracts.accountFactoryAddress,
-    publicClient,
-  });
+
+  /** Interface to specific contracts */
+  private entryPoint: GetContractReturnType<
+    typeof Contracts.entryPointABI,
+    PublicClient
+  >;
+  private factory: GetContractReturnType<
+    typeof Contracts.accountFactoryABI,
+    PublicClient
+  >;
+
   private gasMiddleware: UserOperationMiddlewareFn;
   private initCode: `0x${string}`;
+
   address: `0x${string}`;
 
   private constructor(
+    _publicClient: PublicClient,
     _paymasterMiddleware: UserOperationMiddlewareFn | undefined
   ) {
     super();
@@ -61,14 +67,27 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
     this.gasMiddleware =
       _paymasterMiddleware ??
       Presets.Middleware.estimateUserOperationGas(this.provider);
+
+    // Initialize contract instances
+    this.entryPoint = getContract({
+      abi: Contracts.entryPointABI,
+      address: getAddress(Constants.ERC4337.EntryPoint),
+      publicClient: _publicClient,
+    });
+    this.factory = getContract({
+      abi: Contracts.accountFactoryABI,
+      address: Contracts.accountFactoryAddress,
+      publicClient: _publicClient,
+    });
   }
 
   public static async init(
+    publicClient: PublicClient,
     pubKey: [`0x${string}`, `0x${string}`],
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
   ): Promise<DaimoAccountBuilder> {
-    const instance = new DaimoAccountBuilder(paymasterMiddleware);
+    const instance = new DaimoAccountBuilder(publicClient, paymasterMiddleware);
 
     try {
       instance.initCode = await concat([
@@ -120,7 +139,11 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       getAddress(ctx.op.sender),
       0n, // "key", always 0 to represent s values are less than half
     ]);
-    ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
+
+    // Daimo accounts already created directly via AccountFactory
+    ctx.op.initCode = "0x";
+
+    // ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };
 
   execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {

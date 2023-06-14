@@ -1,15 +1,17 @@
-import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import * as Contracts from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
+import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import { useState } from "react";
 import {
+  Button,
+  Linking,
   StyleSheet,
   Text,
-  View,
-  Button,
   TextInput,
-  Linking,
+  View,
 } from "react-native";
+import { createPublicClient, http } from "viem";
+import { baseGoerli } from "viem/chains";
 
 export default function App() {
   const [account, setAccount] = useState<string>("testdaimo");
@@ -44,6 +46,10 @@ export default function App() {
       return signature;
     };
     const account = await DaimoAccount.init(
+      createPublicClient({
+        chain: baseGoerli,
+        transport: http(),
+      }),
       Contracts.testUsdcAddress,
       derPublicKey,
       signer,
@@ -71,7 +77,7 @@ export default function App() {
       <Button
         title="Create"
         onPress={() => {
-          ExpoEnclave.createKeyPair(account).catch((e) => {
+          ExpoEnclave.createKeyPair(account).catch((e: any) => {
             console.log("error already exists?", account, e);
           });
         }}

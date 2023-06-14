@@ -1,10 +1,16 @@
-import { Client, Presets } from "userop";
-import { getContract, parseUnits, encodeFunctionData, parseEther } from "viem";
 import * as Contracts from "@daimo/contract";
+import { Client, Presets } from "userop";
+import {
+  PublicClient,
+  encodeFunctionData,
+  getContract,
+  parseEther,
+  parseUnits,
+} from "viem";
 
 import config from "../config.json";
 import { DaimoAccountBuilder } from "./daimoAccountBuilder";
-import { publicClient, SigningCallback } from "./util";
+import { SigningCallback } from "./util";
 
 export { SigningCallback };
 
@@ -32,6 +38,7 @@ export class DaimoAccount {
   }
 
   public static async init(
+    publicClient: PublicClient,
     tokenAddress: `0x${string}`,
     derPublicKey: string,
     signer: SigningCallback,
@@ -55,6 +62,7 @@ export class DaimoAccount {
           )
         : undefined;
     const daimoBuilder = await DaimoAccountBuilder.init(
+      publicClient,
       contractFriendlyKey,
       paymasterMiddleware,
       signer
@@ -67,6 +75,9 @@ export class DaimoAccount {
     });
 
     const tokenDecimals = await erc20.read.decimals();
+    console.log(
+      `[USEROP] initialized account. token ${tokenAddress}, decimals ${tokenDecimals}`
+    );
 
     return new DaimoAccount(
       dryRun,
@@ -105,6 +116,9 @@ export class DaimoAccount {
   ): Promise<string | undefined> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
 
+    console.log(
+      `[USEROP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`
+    );
     const res = await this.client.sendUserOperation(
       this.daimoAccountBuilder.execute(
         this.tokenAddress,

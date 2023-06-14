@@ -6,6 +6,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "."
   }
 }

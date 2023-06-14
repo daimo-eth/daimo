@@ -1,4 +1,7 @@
 import { registerRootComponent } from "expo";
+
+// Polyfills for React Native
+import "@ethersproject/shims";
 import "fast-text-encoding";
 
 import App from "./src/App";

@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext } from "react";
 import {
   Address,
   Log,
@@ -11,18 +11,20 @@ import {
 import { baseGoerli, goerli } from "viem/chains";
 import { erc20ABI } from "wagmi";
 
-import { Account, useAccount } from "./account";
+import { Account } from "./account";
 import { assert } from "./assert";
-import { generateKeypair } from "./crypto";
 import { notify } from "./notify";
-import { trpc } from "./trpc";
 import { check } from "./validation";
 
 export const chainConfig = {
   testnet: true,
   l1: goerli,
   l2: baseGoerli,
-  coinContract: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf" as Address,
+};
+
+export const coin = {
+  address: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf" as Address,
+  decimals: 6,
 };
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
@@ -54,30 +56,12 @@ export type ChainStatus =
     }
   | { status: "error"; error: Error };
 
-class StubChain implements Chain {
-  async getStatus(): Promise<ChainStatus> {
-    throw new Error("Disconnected");
-  }
-
-  async createAccount(): Promise<Account> {
-    throw new Error("Disconnected");
-  }
-
-  async updateAccount(account: Account, status: ChainStatus): Promise<Account> {
-    throw new Error("Disconnected");
-  }
-
-  subscribeTransfers(address: Address): () => void {
-    throw new Error("Disconnected");
-  }
-}
-
 export const ChainContext = createContext<{
-  chain: Chain;
+  chain?: Chain;
   status: ChainStatus;
-}>({ chain: new StubChain(), status: { status: "loading" } });
+}>({ status: { status: "loading" } });
 
-export class ViemChain implements Chain {
+export class Chain implements Chain {
   clientL1 = createPublicClient({ chain: chainConfig.l1, transport: http() });
 
   clientL2 = createPublicClient({
@@ -94,7 +78,7 @@ export class ViemChain implements Chain {
 
   coinContract = getContract({
     abi: erc20ABI,
-    address: chainConfig.coinContract,
+    address: coin.address,
     publicClient: this.clientL2,
   });
 
@@ -153,7 +137,8 @@ export class ViemChain implements Chain {
           continue;
         }
 
-        const amount = (Number(log.args.value) / 1e6).toFixed(2);
+        const wei = 10 ** coin.decimals;
+        const amount = (Number(log.args.value) / wei).toFixed(2);
         if (log.args.from === address) {
           const recipient = log.args.to.substring(0, 8); // TODO
           notify(`Sent $${amount}`, `Sent USDC to ${recipient} successfully`);
@@ -181,47 +166,4 @@ export class ViemChain implements Chain {
       unwatchFns.forEach((fn) => fn());
     };
   }
-}
-
-/** Deploys a new contract wallet and registers it under a given username. */
-export function useCreateAccount() {
-  // Generate keypair
-  // TODO: integrate with secure enclave
-  const [keypairPromise] = useState(generateKeypair);
-
-  // Create contract onchain, claim name.
-  const result = trpc.deployWallet.useMutation();
-  const createAccount = async (name: string) => {
-    const pubKeyHex = `0x${(await keypairPromise).pubKeyHex}`;
-    result.mutate({ name, pubKeyHex });
-  };
-
-  // Once account creation succeeds, save the account
-  const [account, setAccount] = useAccount();
-  useEffect(() => {
-    if (account) return;
-    if (!result.isSuccess) return;
-    if (!result.variables || !result.variables.name) return;
-    const { name } = result.variables;
-
-    if (result.data.status !== "success") return;
-    const { address } = result.data;
-
-    console.log(`[CHAIN] created new account ${name} at ${address}`);
-    setAccount({
-      name,
-
-      address,
-      lastBalance: BigInt(0),
-      lastNonce: BigInt(0),
-      lastBlockTimestamp: 0,
-
-      keypair: keypairPromise,
-    });
-  }, [result.isSuccess]);
-
-  return {
-    ...result,
-    createAccount,
-  };
 }

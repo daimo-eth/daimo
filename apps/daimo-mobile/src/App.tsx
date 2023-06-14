@@ -8,7 +8,7 @@ import { Text } from "react-native";
 import PolyfillCrypto from "react-native-webview-crypto";
 
 import { useAccount } from "./logic/account";
-import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
+import { Chain, ChainContext, ChainStatus } from "./logic/chain";
 import { env } from "./logic/env";
 import { initNotify } from "./logic/notify";
 import { trpc } from "./logic/trpc";
@@ -77,7 +77,7 @@ function createTrpcClient() {
 function usePollChain() {
   const [account, setAccount] = useAccount();
   const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
-  const chain = useMemo<Chain>(() => new ViemChain(), []);
+  const chain = useMemo(() => new Chain(), []);
 
   const refreshAccount = async () => {
     try {

@@ -14,13 +14,13 @@ import {
   View,
 } from "react-native";
 
-import { useCreateAccount } from "../../logic/chain";
+import { useCreateAccount } from "../../action/useCreateAccount";
 import { trpc } from "../../logic/trpc";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
-import { TextCenter, TextH1, TextSmall } from "../shared/text";
+import { TextCenter, TextError, TextH1, TextSmall } from "../shared/text";
 import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
@@ -113,14 +113,9 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 }
 
 function CreateAccountPage() {
-  const mutation = useCreateAccount();
-  const createAccount = useCallback(
-    (name: string) => {
-      if (mutation.isLoading) return;
-      mutation.createAccount(name);
-    },
-    [mutation]
-  );
+  const [name, setName] = useState("");
+  const { exec, status, message } = useCreateAccount(name);
+  const createAccount = useCallback(() => status === "idle" && exec(), [exec]);
 
   return (
     <KeyboardAvoidingView behavior="padding">
@@ -128,8 +123,20 @@ function CreateAccountPage() {
         <View style={styles.onboardingScreen}>
           <View style={styles.createAccountPage}>
             <TextH1>Welcome</TextH1>
-            {mutation.isLoading && <NameSpinner />}
-            {!mutation.isLoading && <NamePicker onChoose={createAccount} />}
+            <View style={ss.spacer.h256}>
+              {status === "idle" && (
+                <NamePicker
+                  name={name}
+                  onChange={setName}
+                  onChoose={createAccount}
+                />
+              )}
+              {status === "loading" && <NameSpinner />}
+            </View>
+            <TextCenter>
+              {status === "error" && <TextError>{message}</TextError>}
+              {status !== "error" && <TextSmall>{message}</TextSmall>}
+            </TextCenter>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -139,18 +146,21 @@ function CreateAccountPage() {
 
 function NameSpinner() {
   return (
-    <View style={ss.spacer.h256}>
-      <View style={ss.container.center}>
-        <ActivityIndicator size="large" />
-      </View>
+    <View style={ss.container.center}>
+      <ActivityIndicator size="large" />
     </View>
   );
 }
 
-function NamePicker({ onChoose }: { onChoose: (name: string) => void }) {
-  const [name, setName] = useState("");
-  const create = useCallback(() => onChoose(name), [name]);
-
+function NamePicker({
+  name,
+  onChange,
+  onChoose,
+}: {
+  name: string;
+  onChange: (name: string) => void;
+  onChoose: () => void;
+}) {
   let error = "";
   try {
     validateName(name);
@@ -189,13 +199,13 @@ function NamePicker({ onChoose }: { onChoose: (name: string) => void }) {
   })();
 
   return (
-    <View style={ss.spacer.h256}>
+    <View>
       <View style={ss.spacer.h64} />
       <View>
         <InputBig
           placeholder="choose a name"
           value={name}
-          onChange={setName}
+          onChange={onChange}
           center
         />
         <View style={ss.spacer.h8} />
@@ -204,7 +214,7 @@ function NamePicker({ onChoose }: { onChoose: (name: string) => void }) {
         </TextSmall>
       </View>
       <View style={ss.spacer.h8} />
-      <ButtonBig title="Create" onPress={create} disabled={!isAvailable} />
+      <ButtonBig title="Create" onPress={onChoose} disabled={!isAvailable} />
     </View>
   );
 }
