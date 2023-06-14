@@ -1,10 +1,14 @@
+import * as Contracts from "@daimo/contract";
+import { DaimoAccount } from "@daimo/userop";
+import { createPublicClient, http } from "viem";
+import { baseGoerli } from "viem/chains";
 import { z } from "zod";
 
 import { AccountFactory } from "./contract/accountFactory";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
 import { zAddress, zHex } from "./model";
-import { router, publicProcedure } from "./trpc";
+import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
   accountFactory: AccountFactory,
@@ -54,11 +58,23 @@ export function createRouter(
         // TODO: deploy and claim name in a single transaction
 
         // Deploy account
-        console.log(`[API] deploying account for ${name}, pubkey ${pubKeyHex}`);
-        const res = await accountFactory.deploy(pubKeyHex);
-        console.log(`[API] deploy result ${JSON.stringify(res)}`);
-        if (res.status !== "success") throw new Error("Deploy failed");
-        const { address } = res;
+        console.log(
+          `[API] not deploying account for ${name}, pubkey ${pubKeyHex}`
+        );
+        // const res = await accountFactory.deploy(pubKeyHex);
+        // console.log(`[API] deploy result ${JSON.stringify(res)}`);
+        // if (res.status !== "success") throw new Error("Deploy failed");
+        const account = await DaimoAccount.init(
+          createPublicClient({
+            chain: baseGoerli,
+            transport: http(),
+          }),
+          Contracts.testUsdcAddress,
+          pubKeyHex,
+          signer,
+          false
+        );
+        const address = account.getAddress();
 
         // Register name
         const registerReceipt = await nameReg.registerName(name, address);
@@ -81,4 +97,7 @@ export function createRouter(
         return faucet.request(recipient);
       }),
   });
+}
+function signer(hexMessage: string): Promise<string> {
+  throw new Error("Function not implemented.");
 }

@@ -115,6 +115,8 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       }
     }
 
+    console.log(`[USEROP]: init address ${instance.address}`);
+
     const base = instance
       .useDefaults({
         sender: instance.address,
@@ -122,10 +124,8 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
         verificationGasLimit: 2000000n,
       })
       .useMiddleware(instance.resolveAccount)
+      .useMiddleware(Presets.Middleware.getGasPrice(instance.provider))
       .useMiddleware(instance.gasMiddleware)
-      .useMiddleware(
-        Presets.Middleware.estimateUserOperationGas(instance.provider)
-      )
       .useMiddleware(async (ctx) => {
         ctx.op.verificationGasLimit = 2000000n;
       })
@@ -141,9 +141,9 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
     ]);
 
     // Daimo accounts already created directly via AccountFactory
-    ctx.op.initCode = "0x";
+    // ctx.op.initCode = "0x";
 
-    // ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
+    ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };
 
   execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {
