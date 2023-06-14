@@ -26,3 +26,7 @@ export function TextBold({ children }: { children: ReactNode }) {
 export function TextCenter({ children }: { children: ReactNode }) {
   return <Text style={ss.text.center}>{children}</Text>;
 }
+
+export function TextError({ children }: { children: ReactNode }) {
+  return <Text style={ss.text.error}>{children}</Text>;
+}

@@ -41,6 +41,7 @@ export function InputBig({
         multiline
         numberOfLines={1}
         autoCapitalize="none"
+        autoCorrect={false}
         {...{ onFocus, onBlur }}
       />
       {icon && <Octicons name={icon} size={16} color="gray" />}
@@ -87,6 +88,7 @@ export function AmountInput({
       placeholderTextColor={color.gray}
       numberOfLines={1}
       selectTextOnFocus
+      enablesReturnKeyAutomatically
       value={strVal}
       onBlur={blur}
       onChangeText={change}

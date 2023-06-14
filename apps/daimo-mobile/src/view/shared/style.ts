@@ -1,4 +1,4 @@
-import { StyleSheet, TextStyle, Platform } from "react-native";
+import { Platform, StyleSheet, TextStyle } from "react-native";
 
 export const color = {
   status: {
@@ -69,6 +69,12 @@ export const ss = {
       fontSize: 16,
       lineHeight: 20,
       color: color.gray,
+    },
+    error: {
+      ...textBase,
+      fontSize: 16,
+      lineHeight: 20,
+      color: color.danger,
     },
     center: {
       textAlign: "center",

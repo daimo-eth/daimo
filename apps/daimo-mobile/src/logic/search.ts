@@ -9,12 +9,18 @@ export interface Recipient {
 
 export function useRecipientSearch(prefix: string) {
   // TODO: get past recipients from local storage
-  const ret: Recipient[] = [];
+  const recipients: Recipient[] = [];
 
-  const res = trpc.search.useQuery({ prefix }, { enabled: prefix.length > 1 });
+  const enabled = prefix.length >= 2; // TODO: >= 2
+  const res = trpc.search.useQuery({ prefix }, { enabled });
   if (res.data) {
-    ret.push(...res.data.map((a) => ({ account: a })));
+    recipients.push(...res.data.map((a) => ({ account: a })));
   }
 
-  return ret;
+  return {
+    isSearching: enabled,
+    recipients,
+    status: res.status,
+    error: res.error,
+  };
 }

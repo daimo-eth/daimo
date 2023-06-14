@@ -10,7 +10,7 @@ import { Header } from "../shared/Header";
 import { AmountInput, InputBig } from "../shared/Input";
 import { HomeStackParamList, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
-import { TextBody, TextBold, TextSmall } from "../shared/text";
+import { TextBody, TextCenter, TextError, TextSmall } from "../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
@@ -76,30 +76,48 @@ function Scan({ hide }: { hide: () => void }) {
 
 function CancelRow({ title, hide }: { title: string; hide: () => void }) {
   return (
-    <View style={styles.headerRow}>
-      <TextBold>{title}</TextBold>
-      <ButtonSmall onPress={hide}>
-        <Octicons name="x" size={16} color="gray" />
-      </ButtonSmall>
+    <View>
+      <View style={ss.spacer.h64} />
+      <View style={styles.headerRow}>
+        <View style={ss.spacer.w32} />
+        <TextSmall>{title}</TextSmall>
+        <ButtonSmall onPress={hide}>
+          <Octicons name="x" size={16} color="gray" />
+        </ButtonSmall>
+      </View>
     </View>
   );
 }
 
 function Search() {
   const [prefix, setPrefix] = useState("");
-  const results = useRecipientSearch(prefix.trim().toLowerCase());
+  const res = useRecipientSearch(prefix.trim().toLowerCase());
 
   return (
     <>
       <InputBig icon="search" value={prefix} onChange={setPrefix} />
-      {results.map((r) => (
-        <Result key={r.account.addr} recipient={r} />
+      {res.error && <ErrorRow error={res.error} />}
+      {res.recipients.map((r) => (
+        <RecipientRow key={r.account.addr} recipient={r} />
       ))}
+      {res.isSearching && res.recipients.length === 0 && (
+        <TextCenter>
+          <TextSmall>No results</TextSmall>
+        </TextCenter>
+      )}
     </>
   );
 }
 
-function Result({ recipient }: { recipient: Recipient }) {
+function ErrorRow({ error }: { error: { message: string } }) {
+  return (
+    <TextError>
+      <TextCenter>{error.message}</TextCenter>
+    </TextError>
+  );
+}
+
+function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
   return <ButtonBig title={recipient.account.name} onPress={pay} />;
@@ -118,9 +136,13 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
   return (
     <>
       <CancelRow title={`Sending to ${recipient.account.name}`} hide={hide} />
+      <View style={ss.spacer.h32} />
       <AmountInput value={amount} onChange={setAmount} />
-      <ButtonBig title="Send" onPress={send} />
-      <TextSmall>TODO show fees</TextSmall>
+      <View style={ss.spacer.h32} />
+      <ButtonBig title="Send $12.00 to nibnalin" onPress={send} />
+      <TextSmall>
+        <TextCenter>Total incl. fees $42.69</TextCenter>
+      </TextSmall>
     </>
   );
 }
@@ -139,7 +161,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   cameraBox: {
-    width: 300,
+    width: "100%",
     height: 300,
+    borderRadius: 16,
+    overflow: "hidden",
   },
 });
