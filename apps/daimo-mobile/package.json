@@ -1,6 +1,6 @@
 {
   "name": "@daimo/mobile",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
@@ -22,6 +22,8 @@
   "dependencies": {
     "@babel/core": "^7.20.0",
     "@daimo/api": "*",
+    "@daimo/expo-enclave": "*",
+    "@daimo/userop": "*",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
     "@react-navigation/native": "^6.1.6",

@@ -1,6 +1,6 @@
 {
   "name": "@daimo/testbed",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "scripts": {
     "start": "expo start --dev-client",
     "start:tunnel": "expo start --dev-client --tunnel",
