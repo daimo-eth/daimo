@@ -15,40 +15,69 @@ import { trpc } from "./logic/trpc";
 import { HomeStackNav } from "./view/HomeStack";
 
 export default function App() {
-  console.log("[APP] rendering\n\n");
+  console.log("[APP] rendering");
+
+  // Display notifications, listen for push notifications
+  useEffect(initNotify, []);
+
+  // Start polling chain status - L1 tip, L2 tip, account balance, transfers
+  const chainState = usePollChain();
+
+  // Connect to TRPC API - name lookups, account creation
+  const [queryClient] = useState(createQueryClient);
+  const [trpcClient] = useState(createTrpcClient);
+
+  // Set up link nav for incoming daimo:// deep links
+  const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
+
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer
+          linking={linking}
+          fallback={<Text>Loading...</Text>}
+        >
+          <ChainContext.Provider value={chainState}>
+            <PolyfillCrypto />
+            <HomeStackNav />
+            <StatusBar style="auto" />
+          </ChainContext.Provider>
+        </NavigationContainer>
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+}
+
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        retryDelay: 500,
+      },
+    },
+  });
+}
+
+function createTrpcClient() {
+  return trpc.createClient({
+    links: [
+      httpBatchLink({
+        url: env.apiUrl,
+        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+          console.log(`[APP] trpc fetching ${input}`);
+          return fetch(input, init);
+        },
+      }),
+    ],
+    transformer: undefined,
+  });
+}
+
+function usePollChain() {
   const [account, setAccount] = useAccount();
   const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
   const chain = useMemo<Chain>(() => new ViemChain(), []);
-
-  // Global initialization
-  useEffect(initApp, []);
-
-  // Connect to API
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: 2,
-            retryDelay: 500,
-          },
-        },
-      })
-  );
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: env.apiUrl,
-          fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-            console.log(`[APP] trpc fetching ${input}`);
-            return fetch(input, init);
-          },
-        }),
-      ],
-      transformer: undefined,
-    })
-  );
 
   const refreshAccount = async () => {
     try {
@@ -79,27 +108,5 @@ export default function App() {
   }, [address]);
 
   const cs = useMemo(() => ({ chain, status }), [chain, status]);
-
-  const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
-
-  return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer
-          linking={linking}
-          fallback={<Text>Loading...</Text>}
-        >
-          <ChainContext.Provider value={cs}>
-            <PolyfillCrypto />
-            <HomeStackNav />
-            <StatusBar style="auto" />
-          </ChainContext.Provider>
-        </NavigationContainer>
-      </QueryClientProvider>
-    </trpc.Provider>
-  );
-}
-
-function initApp() {
-  initNotify();
+  return cs;
 }
