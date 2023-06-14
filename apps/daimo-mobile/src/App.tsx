@@ -9,9 +9,10 @@ import PolyfillCrypto from "react-native-webview-crypto";
 
 import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus, ViemChain } from "./logic/chain";
+import { env } from "./logic/env";
+import { initNotify } from "./logic/notify";
 import { trpc } from "./logic/trpc";
 import { HomeStackNav } from "./view/HomeStack";
-import { env } from "./logic/env";
 
 export default function App() {
   console.log("[APP] rendering\n\n");
@@ -19,6 +20,10 @@ export default function App() {
   const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
   const chain = useMemo<Chain>(() => new ViemChain(), []);
 
+  // Global initialization
+  useEffect(initApp, []);
+
+  // Connect to API
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -60,12 +65,18 @@ export default function App() {
   };
 
   // Refresh whenever the account changes, then periodically
+  const address = account?.address;
   useEffect(() => {
     refreshAccount();
-    // TODO: subscribe for instant update
     const interval = setInterval(refreshAccount, 30000);
     return () => clearInterval(interval);
-  }, [account?.address]);
+  }, [address]);
+
+  // Listen for transfers
+  useEffect(() => {
+    if (!address) return undefined;
+    return chain.subscribeTransfers(address);
+  }, [address]);
 
   const cs = useMemo(() => ({ chain, status }), [chain, status]);
 
@@ -87,4 +98,8 @@ export default function App() {
       </QueryClientProvider>
     </trpc.Provider>
   );
+}
+
+function initApp() {
+  initNotify();
 }
