@@ -82,7 +82,7 @@ export function parse(accountJSON?: string): Account | null {
     lastNonce: BigInt(a.lastNonce),
     lastBlockTimestamp: a.lastBlockTimestamp,
 
-    enclaveKeyName: a.enclaveKeyName || "daimo-0",
+    enclaveKeyName: a.enclaveKeyName,
   };
 }
 

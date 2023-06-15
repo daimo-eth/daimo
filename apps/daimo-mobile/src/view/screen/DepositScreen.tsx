@@ -41,7 +41,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
 
   let canRequest = false;
   let buttonType = "primary" as "primary" | "danger";
-  let message = "Request $10 from faucet";
+  let message = "Request $50 from faucet";
   if (mutation.isLoading) {
     message = "Loading...";
   } else if (mutation.isSuccess) {

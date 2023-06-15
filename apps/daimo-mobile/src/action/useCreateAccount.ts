@@ -13,16 +13,20 @@ export function useCreateAccount(name: string): ActHandle {
   const [as, setAS] = useActStatus();
 
   // Create enclave key immediately, in the idle state
-  const [pubKeyHex, setPubKeyHex] = useState("");
+  const [key, setKey] = useState<{
+    enclaveKeyName: string;
+    pubKeyHex: Hex | null;
+  }>();
   useEffect(() => {
-    createEnclaveKey(setAS, setPubKeyHex);
+    createEnclaveKey(setAS).then(setKey);
   }, []);
 
   // On exec, create contract onchain, claiming name.
   const result = trpc.deployWallet.useMutation();
   const exec = async () => {
+    if (!key?.pubKeyHex) return;
     setAS("loading", "Deploying contract...");
-    result.mutate({ name, pubKeyHex });
+    result.mutate({ name, pubKeyHex: key.pubKeyHex });
   };
 
   // Once account creation succeeds, save the account
@@ -32,6 +36,7 @@ export function useCreateAccount(name: string): ActHandle {
     if (account) return;
     if (["idle", "loading"].includes(result.status)) return;
     if (!result.variables || !result.variables.name) return;
+    if (!key?.pubKeyHex) return;
 
     // RPC failed, offline?
     if (result.status === "error") {
@@ -59,7 +64,8 @@ export function useCreateAccount(name: string): ActHandle {
       lastNonce: BigInt(0),
       lastBlockTimestamp: 0,
 
-      enclaveKeyName: "daimo-0",
+      // TODO: delete enclave key on Clear Account, redirect to onboarding screen
+      enclaveKeyName: key.enclaveKeyName,
     });
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
@@ -80,21 +86,19 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   }
 }
 
-async function createEnclaveKey(
-  setAS: SetActStatus,
-  setPubKeyHex: (hex: Hex) => void
-) {
-  const enclaveKeyName = "daimo-0";
+async function createEnclaveKey(setAS: SetActStatus) {
+  const enclaveKeyName = "daimo-2";
+  let pubKeyHex = null;
 
   setAS("idle", "Creating enclave key...");
   try {
     const pubKey = await ExpoEnclave.createKeyPair(enclaveKeyName);
-    setPubKeyHex(`0x${pubKey}`);
+    pubKeyHex = `0x${pubKey}` as Hex;
   } catch (e: unknown) {
     // May already exist
     try {
       const pubKeyMaybe = await ExpoEnclave.fetchPublicKey(enclaveKeyName);
-      if (pubKeyMaybe) setPubKeyHex(`0x${pubKeyMaybe}`);
+      if (pubKeyMaybe) pubKeyHex = `0x${pubKeyMaybe}` as Hex;
       else setAS(e as Error);
     } catch {
       setAS(e as Error);
@@ -108,4 +112,6 @@ async function createEnclaveKey(
     console.warn("Error in getHardwareSecurityLevel", e);
     setAS("idle", "Couldn't get hardware security level");
   }
+
+  return { enclaveKeyName, pubKeyHex };
 }
