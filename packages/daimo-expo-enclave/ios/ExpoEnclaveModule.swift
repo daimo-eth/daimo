@@ -41,6 +41,10 @@ public class ExpoEnclaveModule: Module {
       return try self.keyManager.createKeyPair(accountName: accountName)
     }
 
+    AsyncFunction("deleteKeyPair") { (accountName: String) throws in
+      return try self.keyManager.deleteKeyPair(accountName: accountName)
+    }
+
     AsyncFunction("sign") { (accountName: String, hexMessage: String, biometricPromptCopy: BiometricPromptCopy) throws -> String in
       return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: biometricPromptCopy.usageMessage)
     }

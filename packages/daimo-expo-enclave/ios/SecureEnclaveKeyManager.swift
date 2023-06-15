@@ -68,6 +68,10 @@ public class SecureEnclaveKeyManager : KeyManager {
         return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
+    public func deleteKeyPair(accountName: String) throws {
+        self.store.deleteKey(account: accountName)
+    }
+
     public func sign(accountName: String, hexMessage: String, usageMessage: String) throws -> String {
         let message = Data(fromHexEncodedString: hexMessage)!
         let key = try getSigningPrivkeyWithContext(accountName: accountName, usage: usageMessage)

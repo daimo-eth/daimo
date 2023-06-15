@@ -9,7 +9,7 @@ import {
 } from "viem";
 
 import config from "../config.json";
-import { DaimoAccountBuilder } from "./daimoAccountBuilder";
+import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { SigningCallback } from "./util";
 
 export { SigningCallback };
@@ -21,7 +21,7 @@ export type UserOpHandle = Awaited<
 export class DaimoAccount {
   private dryRun = false;
   private client: Client;
-  private daimoAccountBuilder: DaimoAccountBuilder;
+  private opBuilder: DaimoOpBuilder;
 
   private tokenAddress: `0x${string}`;
   private tokenDecimals: number;
@@ -29,13 +29,13 @@ export class DaimoAccount {
   constructor(
     _dryRun: boolean,
     _client: Client,
-    _daimoAccountBuilder: DaimoAccountBuilder,
+    _opBuilder: DaimoOpBuilder,
     _tokenAddress: `0x${string}`,
     _tokenDecimals: number
   ) {
     this.dryRun = _dryRun;
     this.client = _client;
-    this.daimoAccountBuilder = _daimoAccountBuilder;
+    this.opBuilder = _opBuilder;
 
     this.tokenAddress = _tokenAddress;
     this.tokenDecimals = _tokenDecimals;
@@ -65,7 +65,7 @@ export class DaimoAccount {
             config.paymaster.context
           )
         : undefined;
-    const daimoBuilder = await DaimoAccountBuilder.init(
+    const daimoBuilder = await DaimoOpBuilder.init(
       publicClient,
       contractFriendlyKey,
       paymasterMiddleware,
@@ -91,11 +91,11 @@ export class DaimoAccount {
   }
 
   public getAddress(): `0x${string}` {
-    return this.daimoAccountBuilder.getSender() as `0x${string}`;
+    return this.opBuilder.getSender() as `0x${string}`;
   }
 
   /** Submits a user op to bundler. Returns userOpHash. */
-  public async sendUserOp(op: DaimoAccountBuilder) {
+  public async sendUserOp(op: DaimoOpBuilder) {
     const opts: ISendUserOperationOpts = {
       dryRun: this.dryRun,
       onBuild: (o) => console.log("[OP] Signed UserOperation:", o),
@@ -114,7 +114,7 @@ export class DaimoAccount {
     const ether = parseEther(amount);
     console.log(`[OP] transfer ${ether} wei to ${to}`);
 
-    const op = this.daimoAccountBuilder.execute(to, ether, "0x");
+    const op = this.opBuilder.execute(to, ether, "0x");
 
     return this.sendUserOp(op);
   }
@@ -127,7 +127,7 @@ export class DaimoAccount {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
 
-    const op = this.daimoAccountBuilder.execute(
+    const op = this.opBuilder.execute(
       this.tokenAddress,
       0n,
       encodeFunctionData({
@@ -150,7 +150,7 @@ export class DaimoAccount {
       `[OP] approve ${parsedAmount} ${this.tokenAddress} for ${spender}`
     );
 
-    const op = this.daimoAccountBuilder.execute(
+    const op = this.opBuilder.execute(
       this.tokenAddress,
       0n,
       encodeFunctionData({

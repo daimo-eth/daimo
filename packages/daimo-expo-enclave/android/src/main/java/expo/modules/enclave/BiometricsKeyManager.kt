@@ -79,6 +79,11 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     createSigningPrivkey(accountName)
     return fetchPublicKey(accountName)!!
   }
+  
+  override fun deleteKeyPair(accountName: String) {
+    val ks: KeyStore = KeyStore.getInstance(KEYSTORE_PROVIDER).apply { load(null) }
+    ks.deleteEntry(accountName)
+  }
 
   override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?

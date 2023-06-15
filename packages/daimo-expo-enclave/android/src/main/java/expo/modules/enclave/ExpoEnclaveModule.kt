@@ -98,6 +98,11 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   @ExpoMethod
+  fun deleteKeyPair(accountName: String) {
+    promise.resolve(keyManager.deleteKeyPair(accountName))
+  }
+
+  @ExpoMethod
   fun sign(accountName: String, message: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
     keyManager.sign(accountName, message, biometricPromptCopy, promise)
   }

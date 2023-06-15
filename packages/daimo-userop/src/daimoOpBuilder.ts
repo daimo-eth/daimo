@@ -21,6 +21,7 @@ import {
 import config from "../config.json";
 import { SigningCallback, dummySignature } from "./util";
 
+/** Signs userops. Signer can use the enclave, requesting user permission as needed. */
 function getSigningMiddleware(
   signer: SigningCallback
 ): UserOperationMiddlewareFn {
@@ -35,7 +36,8 @@ function getSigningMiddleware(
   };
 }
 
-export class DaimoAccountBuilder extends UserOperationBuilder {
+/** Creates userops from a Daimo account.  */
+export class DaimoOpBuilder extends UserOperationBuilder {
   /** Connection to the chain */
   private provider: BundlerJsonRpcProvider;
 
@@ -52,11 +54,12 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
   private gasMiddleware: UserOperationMiddlewareFn;
   private initCode: `0x${string}`;
 
+  /** Daimo account address */
   address: `0x${string}`;
 
   private constructor(
     _publicClient: PublicClient,
-    _paymasterMiddleware: UserOperationMiddlewareFn | undefined
+    _paymasterMiddleware?: UserOperationMiddlewareFn
   ) {
     super();
     this.provider = new BundlerJsonRpcProvider(config.rpcUrl).setBundlerRpc(
@@ -65,7 +68,7 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
     this.initCode = "0x";
     this.address = "0x";
     this.gasMiddleware =
-      _paymasterMiddleware ??
+      _paymasterMiddleware ||
       Presets.Middleware.estimateUserOperationGas(this.provider);
 
     // Initialize contract instances
@@ -81,16 +84,17 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
     });
   }
 
+  /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
     publicClient: PublicClient,
     pubKey: [`0x${string}`, `0x${string}`],
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
-  ): Promise<DaimoAccountBuilder> {
-    const instance = new DaimoAccountBuilder(publicClient, paymasterMiddleware);
+  ): Promise<DaimoOpBuilder> {
+    const instance = new DaimoOpBuilder(publicClient, paymasterMiddleware);
 
     try {
-      instance.initCode = await concat([
+      instance.initCode = concat([
         instance.factory.address,
         encodeFunctionData({
           abi: instance.factory.abi,
@@ -142,9 +146,6 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       getAddress(ctx.op.sender),
       0n, // "key", always 0 to represent s values are less than half
     ]);
-
-    // Daimo accounts already created directly via AccountFactory
-    // ctx.op.initCode = "0x";
 
     ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };

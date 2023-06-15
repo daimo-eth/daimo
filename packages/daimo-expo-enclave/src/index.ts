@@ -65,6 +65,15 @@ export async function createKeyPair(accountName: string): Promise<string> {
 }
 
 /**
+ * Delete the key pair associated with accountName.
+ *
+ * @param accountName The account name to remove.
+ */
+export async function deleteKeyPair(accountName: string): Promise<void> {
+  return ExpoEnclaveModule.deleteKeyPair(accountName);
+}
+
+/**
  * Sign a message using the key pair attached to accountName.
  *
  * @param accountName The account to use.
