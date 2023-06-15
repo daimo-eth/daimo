@@ -4,6 +4,7 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },
+  "editor.rulers": [80],
   "typescript.tsdk": "node_modules/typescript/lib",
   "json.schemas": [
     {

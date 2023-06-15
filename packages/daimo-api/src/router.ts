@@ -55,15 +55,10 @@ export function createRouter(
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
 
-        // TODO: deploy and claim name in a single transaction
-
-        // Deploy account
+        // Don't deploy the account; just get the counterfactual address
         console.log(
           `[API] not deploying account for ${name}, pubkey ${pubKeyHex}`
         );
-        // const res = await accountFactory.deploy(pubKeyHex);
-        // console.log(`[API] deploy result ${JSON.stringify(res)}`);
-        // if (res.status !== "success") throw new Error("Deploy failed");
         const account = await DaimoAccount.init(
           createPublicClient({
             chain: baseGoerli,
@@ -76,6 +71,9 @@ export function createRouter(
         );
         const address = account.getAddress();
 
+        // TODO: infinite approve the paymaster
+
+        // TODO: claim name thru the account (nonce 0, materializing the account).
         // Register name
         const registerReceipt = await nameReg.registerName(name, address);
         const { status } = registerReceipt;
