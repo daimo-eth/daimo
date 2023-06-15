@@ -12,30 +12,31 @@
     },
     "development": {
       "distribution": "internal",
+      "resourceClass": "large",
       "android": {
         "gradleCommand": ":app:assembleDebug"
       },
       "ios": {
-        "buildConfiguration": "Debug",
-        "resourceClass": "m-medium"
+        "buildConfiguration": "Debug"
       }
     },
     "preview": {
+      "resourceClass": "large",
       "distribution": "internal",
-      "ios": {
-        "resourceClass": "m-medium"
-      },
       "env": {
         "DAIMO_APP_API_URL": "https://daimo-api-stage.onrender.com"
       }
     },
     "stage": {
       "resourceClass": "large",
+      "autoIncrement": true,
+      "node": "20.3.0",
       "env": {
         "DAIMO_APP_API_URL": "https://daimo-api-stage.onrender.com"
       }
     },
     "prod": {
+      "autoIncrement": true,
       "resourceClass": "large"
     }
   },
