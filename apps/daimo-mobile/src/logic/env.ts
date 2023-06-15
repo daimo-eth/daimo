@@ -4,4 +4,4 @@ export const env = {
   gitHash: (process.env.EAS_BUILD_GIT_COMMIT_HASH || "unknown").substring(0, 8),
 };
 
-console.log(`environment ${JSON.stringify(env, null, 2)}`);
+console.log(`[APP] environment ${JSON.stringify(env, null, 2)}`);

@@ -60,10 +60,11 @@ export default function App() {
       account.getAddress()
     );
 
-    const hash = await account.erc20transfer(
+    const opHandle = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42"
     );
+    const hash = (await opHandle.wait())?.transactionHash;
     setTxHash(hash ?? "failed");
   };
 

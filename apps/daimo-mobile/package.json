@@ -7,7 +7,7 @@
     "build:sim": "eas build -p ios --profile=sim",
     "build:dev": "eas build -p ios --profile=development",
     "build:pre": "eas build -p all --profile=preview",
-    "build:stage": "eas build -p all --profile=preview",
+    "build:stage": "eas build -p all --profile=stage",
     "start": "expo start --dev-client -i",
     "start:tunnel": "expo start --dev-client --tunnel",
     "run:android": "expo run:android",

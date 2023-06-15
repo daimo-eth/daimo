@@ -45,8 +45,23 @@ async function main() {
   const signer: SigningCallback = async (msg: string) => {
     console.log(`Signing message: ${msg}`);
     const msgBuf = Buffer.from(msg, "hex");
-    const sig = await crypto.subtle.sign(p256, key.privateKey, msgBuf);
-    const sigHex = Buffer.from(sig).toString("hex");
+    const sigRaw = await crypto.subtle.sign(p256, key.privateKey, msgBuf);
+
+    // DER encode
+    const r = Buffer.from(sigRaw).subarray(0, 32);
+    const s = Buffer.from(sigRaw).subarray(32, 64);
+
+    function encodeInt(i: Buffer) {
+      if (i.length !== 32) throw new Error();
+      if (i[0] < 0x80) return Buffer.concat([Buffer.from([0x02, 32]), i]);
+      return Buffer.concat([Buffer.from([0x02, 33, 0x00]), i]);
+    }
+    const encR = encodeInt(r);
+    const encS = encodeInt(s);
+    const header = Buffer.from([0x30, encR.length + encS.length]);
+    const sigDer = Buffer.concat([header, encR, encS]);
+
+    const sigHex = Buffer.from(sigDer).toString("hex");
     console.log(`Signature: ${sigHex}`);
     return sigHex;
   };
@@ -95,8 +110,15 @@ async function main() {
   // Finally, we should be able to do a userop from our new Daimo account.
   // Send $0.50 USDC to nibnalin.eth
   const recipient = `0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB`;
-  const opHashApprove = await account.erc20transfer(recipient, "500000");
-  console.log(`Approve userop: ${opHashApprove}`);
+  const userOp = await account.erc20transfer(recipient, "0.1");
+  console.log("✅ userop accepted by bundler: ", userOp.userOpHash);
+
+  const bundleTxHash = (await userOp.wait())?.transactionHash;
+  if (!bundleTxHash) throw new Error("Bundle failed");
+  console.log(`✅ bundle submitted: ${bundleTxHash}`);
+
+  await waitForTx(publicClient, bundleTxHash as Hex);
+  console.log(`✅ bundle confirmed: ${bundleTxHash}`);
 }
 
 async function waitForTx(publicClient: PublicClient, hash: Hex) {

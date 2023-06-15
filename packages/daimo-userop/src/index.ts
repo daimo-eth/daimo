@@ -1,5 +1,5 @@
 import * as Contracts from "@daimo/contract";
-import { Client, Presets } from "userop";
+import { Client, ISendUserOperationOpts, Presets } from "userop";
 import {
   PublicClient,
   encodeFunctionData,
@@ -13,6 +13,10 @@ import { DaimoAccountBuilder } from "./daimoAccountBuilder";
 import { SigningCallback } from "./util";
 
 export { SigningCallback };
+
+export type UserOpHandle = Awaited<
+  ReturnType<typeof DaimoAccount.prototype.sendUserOp>
+>;
 
 export class DaimoAccount {
   private dryRun = false;
@@ -75,9 +79,7 @@ export class DaimoAccount {
     });
 
     const tokenDecimals = await erc20.read.decimals();
-    console.log(
-      `[USEROP] initialized account. token ${tokenAddress}, decimals ${tokenDecimals}`
-    );
+    console.log(`[OP] init. token ${tokenAddress}, decimals ${tokenDecimals}`);
 
     return new DaimoAccount(
       dryRun,
@@ -92,78 +94,72 @@ export class DaimoAccount {
     return this.daimoAccountBuilder.getSender() as `0x${string}`;
   }
 
+  /** Submits a user op to bundler. Returns userOpHash. */
+  public async sendUserOp(op: DaimoAccountBuilder) {
+    const opts: ISendUserOperationOpts = {
+      dryRun: this.dryRun,
+      onBuild: (o) => console.log("[OP] Signed UserOperation:", o),
+    };
+    const res = await this.client.sendUserOperation(op, opts);
+    console.log(`[OP] UserOpHash: ${res.userOpHash}`);
+
+    return res;
+  }
+
+  /** Sends eth. Returns userOpHash. */
   public async transfer(
     to: `0x${string}`,
     amount: `${number}`
-  ): Promise<string | undefined> {
+  ): Promise<UserOpHandle> {
     const ether = parseEther(amount);
-    const res = await this.client.sendUserOperation(
-      this.daimoAccountBuilder.execute(to, ether, "0x"),
-      {
-        dryRun: this.dryRun,
-        onBuild: (op) => console.log("[OP] Signed UserOperation:", op),
-      }
-    );
-    console.log(`UserOpHash: ${res.userOpHash}`);
+    console.log(`[OP] transfer ${ether} wei to ${to}`);
 
-    const ev = await res.wait();
-    return ev?.transactionHash ?? undefined;
+    const op = this.daimoAccountBuilder.execute(to, ether, "0x");
+
+    return this.sendUserOp(op);
   }
 
+  /** Sends an ERC20 transfer. Returns userOpHash. */
   public async erc20transfer(
     to: `0x${string}`,
     amount: `${number}` // in the native unit of the token
-  ): Promise<string | undefined> {
+  ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
+    console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
 
-    console.log(
-      `[USEROP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`
+    const op = this.daimoAccountBuilder.execute(
+      this.tokenAddress,
+      0n,
+      encodeFunctionData({
+        abi: Contracts.erc20ABI,
+        functionName: "transfer",
+        args: [to, parsedAmount],
+      })
     );
-    const res = await this.client.sendUserOperation(
-      this.daimoAccountBuilder.execute(
-        this.tokenAddress,
-        0n,
-        encodeFunctionData({
-          abi: Contracts.erc20ABI,
-          functionName: "transfer",
-          args: [to, parsedAmount],
-        })
-      ),
-      {
-        dryRun: this.dryRun,
-        onBuild: (op) => console.log("[OP] Signed UserOperation:", op),
-      }
-    );
-    console.log(`UserOpHash: ${res.userOpHash}`);
 
-    const ev = await res.wait(); // TODO: use getUserOperationStatus?
-    return ev?.transactionHash ?? undefined;
+    return this.sendUserOp(op);
   }
 
+  /** Sends an ERC20 approval. Returns userOpHash. */
   public async erc20approve(
     spender: `0x${string}`,
     amount: `${number}`
-  ): Promise<string | undefined> {
+  ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
-
-    const res = await this.client.sendUserOperation(
-      this.daimoAccountBuilder.execute(
-        this.tokenAddress,
-        0n,
-        encodeFunctionData({
-          abi: Contracts.erc20ABI,
-          functionName: "approve",
-          args: [spender, parsedAmount],
-        })
-      ),
-      {
-        dryRun: this.dryRun,
-        onBuild: (op) => console.log("[OP] Signed UserOperation:", op),
-      }
+    console.log(
+      `[OP] approve ${parsedAmount} ${this.tokenAddress} for ${spender}`
     );
-    console.log(`UserOpHash: ${res.userOpHash}`);
 
-    const ev = await res.wait(); // TODO: use getUserOperationStatus?
-    return ev?.transactionHash ?? undefined;
+    const op = this.daimoAccountBuilder.execute(
+      this.tokenAddress,
+      0n,
+      encodeFunctionData({
+        abi: Contracts.erc20ABI,
+        functionName: "approve",
+        args: [spender, parsedAmount],
+      })
+    );
+
+    return this.sendUserOp(op);
   }
 }

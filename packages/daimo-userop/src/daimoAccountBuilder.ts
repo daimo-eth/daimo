@@ -115,7 +115,7 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       }
     }
 
-    console.log(`[USEROP]: init address ${instance.address}`);
+    console.log(`[OP]: init address ${instance.address}`);
 
     const base = instance
       .useDefaults({
@@ -128,6 +128,9 @@ export class DaimoAccountBuilder extends UserOperationBuilder {
       .useMiddleware(instance.gasMiddleware)
       .useMiddleware(async (ctx) => {
         ctx.op.verificationGasLimit = 2000000n;
+
+        // Workaround: Pimlico gas price estimator seems to be too low
+        // ctx.op.callGasLimit = Math.floor(Number(ctx.op.callGasLimit) * 2);
       })
       .useMiddleware(getSigningMiddleware(signUserOperation));
 
