@@ -102,8 +102,7 @@ async function main() {
 async function waitForTx(publicClient: PublicClient, hash: Hex) {
   const receipt = await publicClient.waitForTransactionReceipt({
     hash,
-    pollingInterval: 1000,
-    timeout: 60000,
+    timeout: 30000,
   });
   console.log(`...status: ${receipt.status}`);
 }

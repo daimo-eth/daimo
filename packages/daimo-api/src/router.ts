@@ -4,14 +4,14 @@ import { createPublicClient, http } from "viem";
 import { baseGoerli } from "viem/chains";
 import { z } from "zod";
 
-import { AccountFactory } from "./contract/accountFactory";
+import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
 import { zAddress, zHex } from "./model";
 import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
-  accountFactory: AccountFactory,
+  entryPoint: EntryPoint,
   nameReg: NameRegistry,
   faucet: Faucet
 ) {
@@ -71,9 +71,9 @@ export function createRouter(
         );
         const address = account.getAddress();
 
-        // TODO: infinite approve the paymaster
+        // Prepay gas for the account
+        await entryPoint.prefundEth(address, BigInt(1e16)); // 0.1 ETH
 
-        // TODO: claim name thru the account (nonce 0, materializing the account).
         // Register name
         const registerReceipt = await nameReg.registerName(name, address);
         const { status } = registerReceipt;

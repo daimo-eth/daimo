@@ -87,7 +87,7 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
 }
 
 async function createEnclaveKey(setAS: SetActStatus) {
-  const enclaveKeyName = "daimo-2";
+  const enclaveKeyName = "daimo-5";
   let pubKeyHex = null;
 
   setAS("idle", "Creating enclave key...");
