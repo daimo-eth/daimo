@@ -2,8 +2,6 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "outDir": "dist"
+    "resolveJsonModule": true
   }
 }

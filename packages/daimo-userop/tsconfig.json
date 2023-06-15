@@ -6,7 +6,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true,
-    "baseUrl": "."
-  }
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*.ts"]
 }
