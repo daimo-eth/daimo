@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import ExpoEnclave from "@daimo/expo-enclave";
+import { useCallback, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
@@ -17,6 +18,20 @@ export function UserScreen() {
     if (account == null) nav.navigate("Home");
   }, [account, nav]);
 
+  const clearWallet = useCallback(() => {
+    // TODO: warn if any assets might be lost. Show a scary confirmation.
+    if (!account) return;
+    const { enclaveKeyName } = account;
+
+    (async function () {
+      console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
+      await ExpoEnclave.deleteKeyPair(enclaveKeyName);
+
+      setAccount(null);
+      nav.navigate("Home");
+    })();
+  }, []);
+
   if (!account) return null;
 
   return (
@@ -30,11 +45,7 @@ export function UserScreen() {
         <Text style={ss.text.body}>
           As of {timeAgo(account.lastBlockTimestamp, nowS)}
         </Text>
-        <ButtonMed
-          type="danger"
-          title="Clear wallet"
-          onPress={() => setAccount(null)}
-        />
+        <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
 
         <View style={ss.spacer.h64} />
         <TextSmall>

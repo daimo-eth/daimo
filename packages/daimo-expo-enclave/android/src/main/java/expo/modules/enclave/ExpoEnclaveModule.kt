@@ -98,7 +98,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   @ExpoMethod
-  fun deleteKeyPair(accountName: String) {
+  fun deleteKeyPair(accountName: String, promise: Promise) {
     promise.resolve(keyManager.deleteKeyPair(accountName))
   }
 
