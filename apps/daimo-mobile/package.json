@@ -5,8 +5,7 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "build:sim": "eas build -p ios --profile=sim",
-    "build:dev": "eas build -p ios --profile=development",
-    "build:pre": "eas build -p ios --profile=preview",
+    "build:dev": "eas build -p ios --profile=dev",
     "build:stage": "eas build -p ios --profile=stage",
     "submit:stage": "eas submit --platform ios --profile=stage",
     "start": "expo start --dev-client -i",

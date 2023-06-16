@@ -10,7 +10,7 @@
         "simulator": true
       }
     },
-    "development": {
+    "dev": {
       "distribution": "internal",
       "resourceClass": "large",
       "android": {
@@ -18,13 +18,6 @@
       },
       "ios": {
         "buildConfiguration": "Debug"
-      }
-    },
-    "preview": {
-      "resourceClass": "large",
-      "distribution": "internal",
-      "env": {
-        "DAIMO_APP_API_URL": "https://daimo-api-stage.onrender.com"
       }
     },
     "stage": {
