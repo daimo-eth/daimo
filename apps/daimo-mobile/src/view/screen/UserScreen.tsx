@@ -1,7 +1,7 @@
-import ExpoEnclave from "@daimo/expo-enclave";
+import * as ExpoEnclave from "@daimo/expo-enclave";
 import { Octicons } from "@expo/vector-icons";
-import { useCallback } from "react";
-import { Alert, Linking, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
 import { chainConfig } from "../../logic/chain";
@@ -77,25 +77,67 @@ export function UserScreen() {
         </View>
 
         <View style={ss.spacer.h64} />
-        <View style={styles.keyValueList}>
-          <TextH2>App info</TextH2>
-          <View style={ss.spacer.h8} />
-          <TextSmall>
-            Commit <TextBold>{env.gitHash}</TextBold>
-          </TextSmall>
-          <TextSmall>
-            Profile <TextBold>{env.buildProfile}</TextBold>
-          </TextSmall>
-          <TextSmall>
-            Native Version <TextBold>{env.nativeApplicationVersion}</TextBold>
-          </TextSmall>
-          <TextSmall>
-            Native Build <TextBold>{env.nativeBuildVersion}</TextBold>
-          </TextSmall>
-        </View>
+        <AppInfo />
       </View>
     </>
   );
+}
+
+function AppInfo() {
+  const [sec, setSec] = useState<Awaited<ReturnType<typeof getEnclaveSec>>>();
+
+  useEffect(() => {
+    getEnclaveSec().then(setSec);
+  }, []);
+
+  return (
+    <View style={styles.keyValueList}>
+      <TextH2>App and device</TextH2>
+      <View style={ss.spacer.h8} />
+      <TextSmall>
+        Commit <TextBold>{env.gitHash}</TextBold>
+      </TextSmall>
+      <TextSmall>
+        Profile <TextBold>{env.buildProfile}</TextBold>
+      </TextSmall>
+      <TextSmall>
+        Native Version <TextBold>{env.nativeApplicationVersion}</TextBold>
+      </TextSmall>
+      <TextSmall>
+        Native Build <TextBold>{env.nativeBuildVersion}</TextBold>
+      </TextSmall>
+      {sec && (
+        <>
+          <TextSmall>
+            Platform{" "}
+            <TextBold>
+              {Platform.OS} {Platform.Version}{" "}
+            </TextBold>
+          </TextSmall>
+          <TextSmall>
+            Biometric Security{" "}
+            <TextBold>{sec.biometricSecurityLevel.toLowerCase()}</TextBold>
+          </TextSmall>
+          <TextSmall>
+            Hardware Security{" "}
+            <TextBold>{sec.hardwareSecurityLevel.toLowerCase()}</TextBold>
+          </TextSmall>
+        </>
+      )}
+    </View>
+  );
+}
+
+async function getEnclaveSec() {
+  const promises = [
+    ExpoEnclave.getBiometricSecurityLevel(),
+    ExpoEnclave.getHardwareSecurityLevel(),
+  ] as const;
+  const results = await Promise.all(promises);
+  return {
+    biometricSecurityLevel: results[0],
+    hardwareSecurityLevel: results[1],
+  };
 }
 
 const styles = StyleSheet.create({
