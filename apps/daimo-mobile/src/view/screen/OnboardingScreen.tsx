@@ -21,17 +21,24 @@ import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
-import { TextCenter, TextError, TextH1, TextSmall } from "../shared/text";
+import {
+  TextBody,
+  TextCenter,
+  TextError,
+  TextH1,
+  TextSmall,
+} from "../shared/text";
 import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
-  const [isConfiguring, setIsConfiguring] = useState(false);
-  const configure = useCallback(() => setIsConfiguring(true), []);
+  const [page, setPage] = useState(1);
+  const next = useCallback(() => setPage(page + 1), [page]);
 
   return (
     <View style={styles.onboardingScreen}>
-      {!isConfiguring && <IntroPages onCreateAccount={configure} />}
-      {isConfiguring && <CreateAccountPage />}
+      {page === 1 && <IntroPages onCreateAccount={next} />}
+      {page === 2 && <AllowNotifications onNext={next} />}
+      {page === 3 && <CreateAccountPage />}
     </View>
   );
 }
@@ -111,6 +118,33 @@ function PageBubble({ count, index }: { count: number; index: number }) {
     );
   }
   return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
+}
+
+function AllowNotifications({ onNext }: { onNext: () => void }) {
+  const requestPermission = async () => {
+    window.alert("TODO");
+  };
+
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.createAccountPage}>
+        <TextH1>
+          <Octicons name="bell" size={64} />
+        </TextH1>
+        <View style={ss.spacer.h64} />
+        <TextBody>
+          <TextCenter>
+            Daimo will notify you when you receive money and any other activity
+            on your account.
+          </TextCenter>
+        </TextBody>
+        <View style={ss.spacer.h32} />
+        <ButtonBig title="Allow Notifications" onPress={requestPermission} />
+        <View style={ss.spacer.h16} />
+        <ButtonSmall title="Skip" onPress={onNext} />
+      </View>
+    </View>
+  );
 }
 
 function CreateAccountPage() {
