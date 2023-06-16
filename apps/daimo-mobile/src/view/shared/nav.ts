@@ -5,7 +5,7 @@ import { Recipient } from "../../logic/search";
 
 export type HomeStackParamList = {
   Home: undefined;
-  User: undefined;
+  Account: undefined;
   Chain: undefined;
   Send: undefined | { recipient: Recipient };
   Receive: undefined;

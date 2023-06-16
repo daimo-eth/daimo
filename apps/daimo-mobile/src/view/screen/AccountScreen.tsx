@@ -11,7 +11,7 @@ import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextBold, TextH2, TextSmall } from "../shared/text";
 
-export function UserScreen() {
+export function AccountScreen() {
   const [account, setAccount] = useAccount();
   const nav = useNav();
 

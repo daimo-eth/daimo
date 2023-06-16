@@ -1,27 +1,24 @@
-import { RouteProp, useRoute } from "@react-navigation/native";
 import { ReactNode, useCallback, useContext } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
 import { ChainContext } from "../../logic/chain";
-import { HomeStackParamList, useNav } from "./nav";
+import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
 
 export function Header() {
   const nav = useNav();
-  const { name } = useRoute<RouteProp<HomeStackParamList>>();
-  const goHome = useCallback(() => nav.navigate("User"), [nav]);
-  const goToUser = useCallback(() => nav.navigate("User"), [nav]);
+  const goToAccount = useCallback(() => nav.navigate("Account"), [nav]);
   const goToChain = useCallback(() => nav.navigate("Chain"), [nav]);
 
   const [account] = useAccount();
 
   return (
     <View style={styles.header}>
-      <Button onPress={name === "User" ? goHome : goToUser}>
+      <Button onPress={goToAccount}>
         <Text style={styles.headerText}>{account?.name || "⚠️"}</Text>
       </Button>
-      <Indicator onPress={name === "Chain" ? goHome : goToChain} />
+      <Indicator onPress={goToChain} />
     </View>
   );
 }
