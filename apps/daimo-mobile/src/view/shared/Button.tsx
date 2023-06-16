@@ -108,7 +108,7 @@ export const buttonStyles = {
   med: StyleSheet.create({
     button: {
       paddingHorizontal: 16,
-      paddingVertical: 16,
+      paddingVertical: 12,
       borderRadius: 8,
       backgroundColor: color.bg.lightGray,
     },

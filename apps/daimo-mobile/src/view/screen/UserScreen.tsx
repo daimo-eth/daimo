@@ -1,35 +1,45 @@
 import ExpoEnclave from "@daimo/expo-enclave";
-import { useCallback, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useCallback } from "react";
+import { Alert, StyleSheet, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
 import { env } from "../../logic/env";
 import { ButtonMed } from "../shared/Button";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
-import { TextBold, TextSmall } from "../shared/text";
-import { timeAgo, useTime } from "../shared/time";
+import { TextBold, TextH2, TextSmall } from "../shared/text";
 
 export function UserScreen() {
   const [account, setAccount] = useAccount();
-  const nowS = useTime();
   const nav = useNav();
-  useEffect(() => {
-    if (account == null) nav.navigate("Home");
-  }, [account, nav]);
 
   const clearWallet = useCallback(() => {
     // TODO: warn if any assets might be lost. Show a scary confirmation.
     if (!account) return;
     const { enclaveKeyName } = account;
 
-    (async function () {
+    Alert.alert(
+      "Clear wallet",
+      `Are you sure you want to clear your wallet? This can't be undone.`,
+      [
+        {
+          text: "Clear wallet",
+          onPress: clearWallet,
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+
+    async function clearWallet() {
       console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
       await ExpoEnclave.deleteKeyPair(enclaveKeyName);
 
       setAccount(null);
       nav.navigate("Home");
-    })();
+    }
   }, []);
 
   if (!account) return null;
@@ -37,22 +47,27 @@ export function UserScreen() {
   return (
     <>
       <View style={styles.container}>
-        <Text style={ss.text.h2}>Account</Text>
-        <Text style={ss.text.body} numberOfLines={1}>
-          {account.address}
-        </Text>
-        <Text style={ss.text.body}>Bal {"" + account.lastBalance}</Text>
-        <Text style={ss.text.body}>
-          As of {timeAgo(account.lastBlockTimestamp, nowS)}
-        </Text>
+        <View style={ss.spacer.h16} />
+        <TextH2>Account</TextH2>
+        <View style={ss.spacer.h8} />
+        <TextSmall>{account.address}</TextSmall>
+        <View style={ss.spacer.h16} />
         <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
 
         <View style={ss.spacer.h64} />
+        <TextH2>App info</TextH2>
+        <View style={ss.spacer.h8} />
         <TextSmall>
-          Build <TextBold>{env.gitHash}</TextBold>
+          Commit <TextBold>{env.gitHash}</TextBold>
         </TextSmall>
         <TextSmall>
           Profile <TextBold>{env.buildProfile}</TextBold>
+        </TextSmall>
+        <TextSmall>
+          Native Version <TextBold>{env.nativeApplicationVersion}</TextBold>
+        </TextSmall>
+        <TextSmall>
+          Native Build <TextBold>{env.nativeBuildVersion}</TextBold>
         </TextSmall>
       </View>
     </>
