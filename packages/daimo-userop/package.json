@@ -1,6 +1,7 @@
 {
   "name": "@daimo/userop",
   "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "description": "userop.js for daimo account contracts",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -8,8 +9,6 @@
     "build": "tsc",
     "test": "jest"
   },
-  "author": "",
-  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@daimo/contract": "*",
     "@noble/curves": "^1.1.0",

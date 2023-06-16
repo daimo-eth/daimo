@@ -1,31 +1,32 @@
 {
   "name": "@daimo/api",
   "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "description": "Daimo API for account creation and search",
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
     "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
-    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,tsx",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",
     "lint:style": "eslint ."
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
-  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@daimo/contract": "*",
     "@daimo/userop": "*",
     "@trpc/server": "^10.29.0",
+    "userop": "^0.3.0",
+    "viem": "^1.0.7",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
     "@tsconfig/node20": "^1.0.1",
     "@types/tape": "^5.6.0",
     "depcheck": "^1.4.3",
     "eslint": "^8.42.0",
     "tape": "^5.6.3",
     "ts-node": "^10.9.1",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.3",
-    "userop": "^0.3.0",
-    "viem": "^1.0.7",
-    "zod": "^3.21.4"
+    "typescript": "^5.1.3"
   }
 }

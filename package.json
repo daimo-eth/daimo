@@ -2,17 +2,13 @@
   "private": true,
   "name": "@daimo/monorepo",
   "version": "0.1.0",
-  "description": "Experimental stablecoin wallet",
-  "main": "package.json",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "start": "turbo start",
     "build": "turbo build",
     "test": "turbo test",
-    "lint": "turbo lint",
-    "eas-build-post-install": "echo EAS POSTINSTALL ROOT"
+    "lint": "turbo lint"
   },
-  "author": "Daimo",
-  "license": "GPL-3.0-or-later",
   "dependencies": {
     "eslint-config-universe": "^11.2.0",
     "turbo": "^1.10.3",

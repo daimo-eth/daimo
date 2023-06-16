@@ -1,8 +1,8 @@
 {
+  "private": true,
   "name": "@daimo/mobile",
   "version": "0.1.0",
   "license": "GPL-3.0-or-later",
-  "private": true,
   "scripts": {
     "build:sim": "eas build -p ios --profile=sim",
     "build:dev": "eas build -p ios --profile=development",
@@ -35,8 +35,9 @@
     "@trpc/client": "^10.29.0",
     "@trpc/react-query": "^10.29.0",
     "@types/jest": "^29.5.1",
-    "@types/react": "~18.0.27",
+    "@types/react": "18.2.0",
     "abitype": "0.8.1",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "depcheck": "^1.4.3",
     "eslint": "^8.38.0",
     "eslint-config-universe": "^11.2.0",
@@ -64,8 +65,7 @@
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.3",
     "viem": "^1.0.7",
-    "wagmi": "^1.1.1",
-    "expo-updates": "~0.16.4"
+    "wagmi": "^1.1.1"
   },
   "eslintConfig": {
     "extends": "universe/native",
@@ -106,9 +106,5 @@
         }
       ]
     }
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "babel-plugin-transform-inline-environment-variables": "^0.4.4"
   }
 }

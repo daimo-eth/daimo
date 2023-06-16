@@ -1,6 +1,8 @@
 {
+  "private": true,
   "name": "@daimo/testbed",
   "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "start": "expo start --dev-client",
     "start:tunnel": "expo start --dev-client --tunnel",
@@ -9,6 +11,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "18.2.0",
     "@daimo/expo-enclave": "*",
     "@daimo/userop": "*",
     "@daimo/contract": "*",
@@ -19,12 +23,7 @@
     "expo-status-bar": "~1.4.4",
     "fast-text-encoding": "^1.0.6",
     "react": "18.2.0",
-    "react-native": "0.71.8"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "@types/react": "~18.0.14",
+    "react-native": "0.71.8",
     "typescript": "^4.9.4"
-  },
-  "private": true
+  }
 }
