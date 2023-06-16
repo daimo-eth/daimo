@@ -13,12 +13,13 @@ import { TextH1 } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
-  assert(account != null);
-  console.log(`[HOME] rendering with account ${account.name}`);
+  console.log(`[HOME] rendering with account ${account?.name}`);
 
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
+
+  if (account == null) return null;
 
   return (
     <View style={ss.container.outerStretch}>
