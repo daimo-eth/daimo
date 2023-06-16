@@ -69,7 +69,7 @@ public class SecureEnclaveKeyManager : KeyManager {
     }
 
     public func deleteKeyPair(accountName: String) throws {
-        self.store.deleteKey(account: accountName)
+        try self.store.deleteKey(account: accountName)
     }
 
     public func sign(accountName: String, hexMessage: String, usageMessage: String) throws -> String {
