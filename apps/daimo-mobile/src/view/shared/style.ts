@@ -40,6 +40,9 @@ export const ss = {
       alignItems: "center",
       justifyContent: "center",
     },
+    ph16: {
+      paddingHorizontal: 16,
+    },
     debug: {
       borderWidth: 1,
       borderColor: "#f00",

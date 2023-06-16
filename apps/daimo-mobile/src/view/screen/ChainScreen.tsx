@@ -2,8 +2,8 @@ import { useContext } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ChainContext, ChainTip } from "../../logic/chain";
-import { color } from "../shared/style";
-import { TextBody, TextH2 } from "../shared/text";
+import { color, ss } from "../shared/style";
+import { TextBody, TextBold, TextH2, TextSmall } from "../shared/text";
 import { timeAgo, useTime } from "../shared/time";
 
 export function ChainScreen() {
@@ -13,10 +13,16 @@ export function ChainScreen() {
     <View style={styles.container}>
       {status.status === "ok" && (
         <>
-          <TextH2>L1 · {status.l1.name}</TextH2>
-          <TipInfo tip={status.l1} />
-          <TextH2>L2 · {status.l2.name}</TextH2>
-          <TipInfo tip={status.l2} />
+          <View style={ss.container.ph16}>
+            <View style={ss.spacer.h16} />
+            <TextH2>L1 · {status.l1.name}</TextH2>
+            <TipInfo tip={status.l1} />
+            <View style={ss.spacer.h32} />
+            <TextH2>L2 · {status.l2.name}</TextH2>
+            <TipInfo tip={status.l2} />
+          </View>
+          <View style={ss.spacer.h32} />
+          <LightClientInfo />
         </>
       )}
       {status.status === "error" && (
@@ -40,6 +46,21 @@ function TipInfo({ tip }: { tip: ChainTip }) {
   );
 }
 
+function LightClientInfo() {
+  const cs = useContext(ChainContext);
+  if (cs.chain == null) return null;
+
+  return (
+    <View style={styles.callout}>
+      <TextSmall>
+        <TextBold>Light client placeholder.</TextBold> We're considering adding
+        a built-in light client, like Helios. We'll show light client status
+        here.
+      </TextSmall>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: color.white,
@@ -49,5 +70,11 @@ const styles = StyleSheet.create({
     gap: 4,
     padding: 16,
     alignItems: "flex-start",
+  },
+  callout: {
+    backgroundColor: color.bg.lightGray,
+    padding: 16,
+    borderRadius: 24,
+    alignSelf: "stretch",
   },
 });
