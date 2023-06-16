@@ -8,7 +8,8 @@
     "start": "turbo start",
     "build": "turbo build",
     "test": "turbo test",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "eas-build-post-install": "echo EAS POSTINSTALL ROOT"
   },
   "author": "Daimo",
   "license": "GPL-3.0-or-later",

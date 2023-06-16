@@ -16,7 +16,8 @@
     "scheme": "daimo",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "eth.daimo"
+      "bundleIdentifier": "eth.daimo",
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {
