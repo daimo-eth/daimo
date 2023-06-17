@@ -8,12 +8,14 @@ import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
 import { zAddress, zHex } from "./model";
+import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
-  faucet: Faucet
+  faucet: Faucet,
+  notifier: PushNotifier
 ) {
   return router({
     search: publicProcedure
@@ -43,6 +45,20 @@ export function createRouter(
         const { name, addr } = opts.input;
         const receipt = await nameReg.registerName(name, addr);
         return receipt.status;
+      }),
+
+    registerPushToken: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          token: z.string(),
+        })
+      )
+      .mutation(async (opts) => {
+        // TODO: device attestation or validate token to avoid griefing
+        // Auth is not for privacy; anyone can watch an address onchain.
+        const { address, token } = opts.input;
+        notifier.register(address, token);
       }),
 
     deployWallet: publicProcedure

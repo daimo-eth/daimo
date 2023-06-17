@@ -1,6 +1,4 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
@@ -8,9 +6,8 @@ import { Text } from "react-native";
 import PolyfillCrypto from "react-native-webview-crypto";
 
 import { Chain, ChainContext, ChainStatus } from "./logic/chain";
-import { env } from "./logic/env";
-import { initNotify } from "./logic/notify";
-import { trpc } from "./logic/trpc";
+import { useInitNotifications } from "./logic/notify";
+import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { HomeStackNav } from "./view/HomeStack";
 
@@ -18,60 +15,25 @@ export default function App() {
   console.log("[APP] rendering");
 
   // Display notifications, listen for push notifications
-  useEffect(initNotify, []);
+  useInitNotifications();
 
   // Start polling chain status - L1 tip, L2 tip, account balance, transfers
   const chainState = usePollChain();
-
-  // Connect to TRPC API - name lookups, account creation
-  const [queryClient] = useState(createQueryClient);
-  const [trpcClient] = useState(createTrpcClient);
 
   // Set up link nav for incoming daimo:// deep links
   const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer
-          linking={linking}
-          fallback={<Text>Loading...</Text>}
-        >
-          <ChainContext.Provider value={chainState}>
-            <PolyfillCrypto />
-            <HomeStackNav />
-            <StatusBar style="auto" />
-          </ChainContext.Provider>
-        </NavigationContainer>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <RpcProvider>
+      <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+        <ChainContext.Provider value={chainState}>
+          <PolyfillCrypto />
+          <HomeStackNav />
+          <StatusBar style="auto" />
+        </ChainContext.Provider>
+      </NavigationContainer>
+    </RpcProvider>
   );
-}
-
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 2,
-        retryDelay: 500,
-      },
-    },
-  });
-}
-
-function createTrpcClient() {
-  return trpc.createClient({
-    links: [
-      httpBatchLink({
-        url: env.apiUrl,
-        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-          console.log(`[APP] trpc fetching ${input}`);
-          return fetch(input, init);
-        },
-      }),
-    ],
-    transformer: undefined,
-  });
 }
 
 function usePollChain() {

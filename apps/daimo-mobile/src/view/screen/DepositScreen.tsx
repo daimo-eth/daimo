@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { assert } from "../../logic/assert";
 import { chainConfig } from "../../logic/chain";
-import { trpc } from "../../logic/trpc";
+import { rpcHook } from "../../logic/trpc";
 import { useAccount } from "../../model/account";
 import { ButtonMed } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
@@ -33,9 +33,9 @@ export default function DepositScreen() {
 
 /** Request token from testnet faucet. */
 function TestnetFaucet({ recipient }: { recipient: Address }) {
-  const faucetStatus = trpc.testnetFaucetStatus.useQuery({ recipient });
+  const faucetStatus = rpcHook.testnetFaucetStatus.useQuery({ recipient });
 
-  const mutation = trpc.testnetRequestFaucet.useMutation();
+  const mutation = rpcHook.testnetRequestFaucet.useMutation();
   const request = useCallback(() => {
     mutation.mutate({ recipient });
   }, [recipient]);

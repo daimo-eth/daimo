@@ -1,7 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
-import { useAccount } from "../model/account";
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
 import DepositScreen from "./screen/DepositScreen";
@@ -11,6 +10,7 @@ import ReceiveScreen from "./screen/ReceiveScreen";
 import RequestScreen from "./screen/RequestScreen";
 import SendScreen from "./screen/SendScreen";
 import { HomeStackParamList } from "./shared/nav";
+import { useAccount } from "../model/account";
 
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 

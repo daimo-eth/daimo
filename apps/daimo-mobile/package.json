@@ -4,11 +4,11 @@
   "version": "0.1.0",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "build:sim": "eas build -p ios --profile=sim",
-    "build:dev": "eas build -p ios --profile=dev",
+    "build:sim": "eas build -p ios --profile=sim --non-interactive",
+    "build:dev": "eas build -p ios --profile=dev --non-interactive",
     "build:stage": "eas build -p ios --profile=stage",
     "submit:stage": "eas submit --platform ios --profile=stage",
-    "start": "expo start --dev-client -i",
+    "start": "expo start --dev-client --clear -i",
     "start:tunnel": "expo start --dev-client --tunnel",
     "run:android": "expo run:android",
     "run:ios": "expo run:ios",
@@ -70,26 +70,10 @@
     "wagmi": "^1.1.1"
   },
   "eslintConfig": {
-    "extends": "universe/native",
+    "extends": [
+      "universe/native"
+    ],
     "rules": {
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            [
-              "builtin",
-              "external"
-            ],
-            [
-              "internal",
-              "parent",
-              "sibling",
-              "index"
-            ]
-          ],
-          "newlines-between": "always"
-        }
-      ],
       "import/no-restricted-paths": [
         "error",
         {

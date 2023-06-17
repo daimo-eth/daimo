@@ -18,8 +18,7 @@ import {
 } from "react-native";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
-import { trpc } from "../../logic/trpc";
-import { useAccount } from "../../model/account";
+import { rpcHook } from "../../logic/trpc";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
@@ -124,9 +123,6 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 }
 
 function AllowNotifications({ onNext }: { onNext: () => void }) {
-  const [account, setAccount] = useAccount();
-  if (!account) return null;
-
   const requestPermission = async () => {
     if (!Device.isDevice) {
       window.alert("Push notifications unsupported in simulator.");
@@ -136,11 +132,6 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
     const status = await Notifications.requestPermissionsAsync();
     console.log(`[ONBOARDING] notifications request ${status.status}`);
     if (!status.granted) return;
-
-    // Save push token
-    const pushToken = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log(`[ONBOARDING] push token ${pushToken}`);
-    setAccount({ ...account, pushToken: pushToken || null });
 
     onNext();
   };
@@ -224,7 +215,7 @@ function NamePicker({
   } catch (e: any) {
     error = e.message;
   }
-  const result = trpc.resolveName.useQuery({ name }, { enabled: !error });
+  const result = rpcHook.resolveName.useQuery({ name }, { enabled: !error });
 
   const [debounce, setDebounce] = useState(false);
   useEffect(() => {

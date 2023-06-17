@@ -16,7 +16,42 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
 
+main()
+  .then(() => console.log("Done"))
+  .catch(console.error);
+
 async function main() {
+  const commands = [
+    { name: "ts", desc: tsDesc(), fn: ts },
+    { name: "create", desc: createAccountDesc(), fn: createAccount },
+  ];
+
+  const cmdName = process.argv[2];
+  const cmd = commands.find((c) => c.name === cmdName);
+  if (cmdName == null || cmdName === "help") {
+    console.log(`Usage: scratchpad <command>`);
+    commands.forEach((c) => console.log(`  ${c.name}: ${c.desc}`));
+  } else if (!cmd) {
+    console.error(`Unknown command: ${cmdName}. Try 'help'`);
+  } else {
+    const promise: Promise<void> = cmd.fn();
+    await promise;
+  }
+}
+
+function tsDesc() {
+  return `Typescript scratchpad`;
+}
+
+async function ts() {
+  console.log("Hello, world");
+}
+
+function createAccountDesc() {
+  return `Create a Daimo account. Fund with faucet. Send a test userop from that account.`;
+}
+
+async function createAccount() {
   // TODO: try paymaster once it supports Base Goerli.
   //
   // Pimlico paymaster, uses ethers
@@ -123,7 +158,3 @@ async function waitForTx(publicClient: PublicClient, hash: Hex) {
   });
   console.log(`...status: ${receipt.status}`);
 }
-
-main()
-  .then(() => console.log("Done"))
-  .catch(console.error);

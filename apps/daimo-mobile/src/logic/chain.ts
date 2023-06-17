@@ -12,10 +12,10 @@ import {
 import { baseGoerli, goerli } from "viem/chains";
 import { erc20ABI } from "wagmi";
 
-import { Account } from "../model/account";
 import { assert } from "./assert";
 import { notify } from "./notify";
 import { check } from "./validation";
+import { Account } from "../model/account";
 
 export const chainConfig = {
   testnet: true,

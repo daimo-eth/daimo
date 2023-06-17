@@ -1,10 +1,10 @@
 import { ReactNode, useCallback, useContext } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
-import { ChainContext } from "../../logic/chain";
-import { useAccount } from "../../model/account";
 import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
+import { ChainContext } from "../../logic/chain";
+import { useAccount } from "../../model/account";
 
 export function Header() {
   const nav = useNav();

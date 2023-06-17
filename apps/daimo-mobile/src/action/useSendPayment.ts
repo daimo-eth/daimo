@@ -4,10 +4,11 @@ import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import { useCallback, useContext } from "react";
 import { Address, Hex } from "viem";
 
-import { Chain, ChainContext } from "../logic/chain";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { Chain, ChainContext } from "../logic/chain";
 
-export function useSendTransaction(
+/** Send a payment user op. */
+export function useSendPayment(
   enclaveKeyName: string,
   recipient: Address,
   dollars: number

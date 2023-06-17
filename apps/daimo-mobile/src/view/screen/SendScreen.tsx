@@ -4,7 +4,7 @@ import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
-import { useSendTransaction } from "../../action/useSendTransaction";
+import { useSendPayment } from "../../action/useSendPayment";
 import { assert } from "../../logic/assert";
 import { Recipient, useRecipientSearch } from "../../logic/search";
 import { useAccount } from "../../model/account";
@@ -135,7 +135,7 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
   const [account] = useAccount();
   assert(account != null);
 
-  const { status, message, exec } = useSendTransaction(
+  const { status, message, exec } = useSendPayment(
     account.enclaveKeyName,
     recipient.account.addr,
     dollars

@@ -2,7 +2,8 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": false,
+    "source.fixAll": true
   },
   "editor.rulers": [80],
   "typescript.tsdk": "node_modules/typescript/lib",

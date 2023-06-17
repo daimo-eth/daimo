@@ -18,8 +18,8 @@ import {
   getContract,
 } from "viem";
 
-import config from "../config.json";
 import { SigningCallback, dummySignature } from "./util";
+import config from "../config.json";
 
 /** Signs userops. Signer can use the enclave, requesting user permission as needed. */
 function getSigningMiddleware(

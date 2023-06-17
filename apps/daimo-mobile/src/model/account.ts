@@ -2,8 +2,8 @@ import { Address } from "abitype";
 import { useCallback, useMemo } from "react";
 import { useMMKVString } from "react-native-mmkv";
 
-import { assert } from "../logic/assert";
 import { StoredModel, latestStorageVersion } from "./storedModel";
+import { assert } from "../logic/assert";
 
 export type Account = {
   /** Daimo name, registered onchain */

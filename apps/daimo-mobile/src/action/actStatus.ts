@@ -7,6 +7,7 @@ export type SetActStatus = (
   message?: string
 ) => void;
 
+/** Progress & outcome of a long-running user action. */
 export interface ActHandle {
   /** Action status */
   status: ActStatus;

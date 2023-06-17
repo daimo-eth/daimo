@@ -9,9 +9,9 @@ import {
   parseUnits,
 } from "viem";
 
-import config from "../config.json";
 import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { SigningCallback } from "./util";
+import config from "../config.json";
 
 export { SigningCallback };
 

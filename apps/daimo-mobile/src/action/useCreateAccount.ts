@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
-import { assert } from "../logic/assert";
-import { trpc } from "../logic/trpc";
-import { useAccount } from "../model/account";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { assert } from "../logic/assert";
+import { Log } from "../logic/log";
+import { rpcHook } from "../logic/trpc";
+import { useAccount } from "../model/account";
 
 /** Deploys a new contract wallet and registers it under a given username. */
 export function useCreateAccount(name: string): ActHandle {
@@ -18,11 +19,11 @@ export function useCreateAccount(name: string): ActHandle {
     pubKeyHex: Hex | null;
   }>();
   useEffect(() => {
-    createEnclaveKey(setAS).then(setKey);
+    Log.promise("createEnclaveKey", createEnclaveKey(setAS)).then(setKey);
   }, []);
 
   // On exec, create contract onchain, claiming name.
-  const result = trpc.deployWallet.useMutation();
+  const result = rpcHook.deployWallet.useMutation();
   const exec = async () => {
     if (!key?.pubKeyHex) return;
     setAS("loading", "Deploying contract...");
@@ -64,7 +65,6 @@ export function useCreateAccount(name: string): ActHandle {
       lastNonce: BigInt(0),
       lastBlockTimestamp: 0,
 
-      // TODO: delete enclave key on Clear Account, redirect to onboarding screen
       enclaveKeyName: key.enclaveKeyName,
 
       pushToken: null,
@@ -89,7 +89,7 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
 }
 
 async function createEnclaveKey(setAS: SetActStatus) {
-  const enclaveKeyName = "daimo-6";
+  const enclaveKeyName = "daimo-7";
   let pubKeyHex = null;
 
   setAS("idle", "Creating enclave key...");

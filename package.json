@@ -21,31 +21,5 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=9.7.0"
-  },
-  "eslintConfig": {
-    "extends": "universe/node",
-    "ignorePatterns": [
-      "dist"
-    ],
-    "rules": {
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            [
-              "builtin",
-              "external"
-            ],
-            [
-              "internal",
-              "parent",
-              "sibling",
-              "index"
-            ]
-          ],
-          "newlines-between": "always"
-        }
-      ]
-    }
   }
 }

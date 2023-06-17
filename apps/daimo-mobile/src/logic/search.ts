@@ -1,6 +1,6 @@
 import { NamedAccount } from "@daimo/api";
 
-import { trpc } from "./trpc";
+import { rpcHook } from "./trpc";
 
 export interface Recipient {
   account: NamedAccount;
@@ -12,7 +12,7 @@ export function useRecipientSearch(prefix: string) {
   const recipients: Recipient[] = [];
 
   const enabled = prefix.length >= 2; // TODO: >= 2
-  const res = trpc.search.useQuery({ prefix }, { enabled });
+  const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     recipients.push(...res.data.map((a) => ({ account: a })));
   }
