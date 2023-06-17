@@ -20,6 +20,10 @@ export class AccountFactory {
     this.contract = getContract({ ...accountFactoryConfig, ...this.clients });
   }
 
+  /**
+   * Takes a DER P256 public key.
+   * Deploys a new Daimo account with that as it's initial signing key.
+   */
   async deploy(pubKeyHex: string) {
     const derPrefix =
       "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004";

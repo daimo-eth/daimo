@@ -5,6 +5,13 @@ import { useMMKVString } from "react-native-mmkv";
 import { StoredModel, latestStorageVersion } from "./storedModel";
 import { assert } from "../logic/assert";
 
+/**
+ * Singleton account key.
+ * Will be a series if/when we support multiple accounts.
+ */
+export const defaultEnclaveKeyName = "daimo-7";
+
+/** Account data stored on device. */
 export type Account = {
   /** Daimo name, registered onchain */
   name: string;

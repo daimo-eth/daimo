@@ -40,5 +40,5 @@ async function main() {
 }
 
 main()
-  .then(() => console.log("Done"))
+  .then(() => console.log("[API] exiting"))
   .catch(console.error);

@@ -18,7 +18,12 @@ import {
 } from "react-native";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
+import {
+  useLoadAccountFromKey,
+  useLoadKeyFromEnclave,
+} from "../../logic/enclave";
 import { rpcHook } from "../../logic/trpc";
+import { useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
@@ -35,6 +40,12 @@ import { comingSoon } from "../shared/underConstruction";
 export default function OnboardingScreen() {
   const [page, setPage] = useState(1);
   const next = useCallback(() => setPage(page + 1), [page]);
+
+  // See if we already have a key in the enclave
+  const [, setAccount] = useAccount();
+  const pubKey = useLoadKeyFromEnclave();
+  const account = useLoadAccountFromKey(pubKey);
+  useEffect(() => account && setAccount(account), [account]);
 
   return (
     <View style={styles.onboardingScreen}>

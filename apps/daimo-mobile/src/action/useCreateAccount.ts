@@ -7,7 +7,7 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { assert } from "../logic/assert";
 import { Log } from "../logic/log";
 import { rpcHook } from "../logic/trpc";
-import { useAccount } from "../model/account";
+import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
 /** Deploys a new contract wallet and registers it under a given username. */
 export function useCreateAccount(name: string): ActHandle {
@@ -88,8 +88,10 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   }
 }
 
-async function createEnclaveKey(setAS: SetActStatus) {
-  const enclaveKeyName = "daimo-7";
+async function createEnclaveKey(
+  setAS: SetActStatus,
+  enclaveKeyName = defaultEnclaveKeyName
+) {
   let pubKeyHex = null;
 
   setAS("idle", "Creating enclave key...");
