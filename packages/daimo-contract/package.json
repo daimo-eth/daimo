@@ -2,10 +2,10 @@
   "name": "@daimo/contract",
   "version": "0.1.0",
   "description": "Daimo contracts, ABIs, and generated Typescript types",
-  "types": "./dist/generated.d.ts",
-  "main": "./dist/generated.js",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "scripts": {
-    "codegen": "wagmi generate",
+    "codegen": "wagmi generate && ts-node script/fetchTokenMetadata.ts",
     "build": "tsc"
   },
   "author": "",
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@tsconfig/node20": "^1.0.1",
     "@wagmi/cli": "^1.1.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "viem": "^1.0.7"
   }
 }

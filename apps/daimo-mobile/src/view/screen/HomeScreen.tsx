@@ -1,14 +1,15 @@
+import { tokenMetadata } from "@daimo/contract";
 import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { assert } from "../../logic/assert";
 import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextH1 } from "../shared/text";
-import { assert } from "../../logic/assert";
 
 export default function HomeScreen() {
   const [account] = useAccount();
@@ -26,7 +27,7 @@ export default function HomeScreen() {
         <TitleAmount
           symbol="$"
           balance={account.lastBalance}
-          decimals={6}
+          decimals={tokenMetadata.decimals}
           displayDecimals={2}
         />
         <Spacer h={32} />

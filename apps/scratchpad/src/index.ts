@@ -1,10 +1,6 @@
 // https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
 
-import {
-  entryPointABI,
-  testUsdcAddress,
-  testUsdcConfig,
-} from "@daimo/contract";
+import { entryPointABI, testUsdcConfig } from "@daimo/contract";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import crypto from "node:crypto";
 import { Constants } from "userop";
@@ -68,7 +64,6 @@ async function main() {
   const dryRun = false;
   const account = await DaimoAccount.init(
     publicClient,
-    testUsdcAddress,
     pubKeyHex,
     signer,
     dryRun

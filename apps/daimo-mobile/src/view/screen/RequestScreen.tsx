@@ -1,11 +1,12 @@
-import { Alert, ScrollView, Share, StyleSheet } from "react-native";
+import { tokenMetadata } from "@daimo/contract";
 import { useCallback, useState } from "react";
+import { Alert, ScrollView, Share, StyleSheet } from "react-native";
 
 import { useAccount } from "../../logic/account";
+import { assert } from "../../logic/assert";
 import { ButtonBig } from "../shared/Button";
 import { AmountInput } from "../shared/Input";
 import { color } from "../shared/style";
-import { assert } from "../../logic/assert";
 
 export default function RequestScreen() {
   const [account] = useAccount();
@@ -17,7 +18,9 @@ export default function RequestScreen() {
     try {
       const result = await Share.share({
         title: "Daimo Request" /* Android only */,
-        message: `dcposch is requesting ${amount.toFixed(2)} USDC`,
+        message: `dcposch is requesting ${amount.toFixed(2)} ${
+          tokenMetadata.symbol
+        }`,
         url,
       });
       console.log(`[REQUEST] action ${result.action}`);

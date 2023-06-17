@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { createContext } from "react";
 import {
   Address,
@@ -20,11 +21,6 @@ export const chainConfig = {
   testnet: true,
   l1: goerli,
   l2: baseGoerli,
-};
-
-export const coin = {
-  address: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf" as Address,
-  decimals: 6,
 };
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
@@ -78,7 +74,7 @@ export class Chain implements Chain {
 
   coinContract = getContract({
     abi: erc20ABI,
-    address: coin.address,
+    address: tokenMetadata.address,
     publicClient: this.clientL2,
   });
 
@@ -137,14 +133,20 @@ export class Chain implements Chain {
           continue;
         }
 
-        const wei = 10 ** coin.decimals;
+        const wei = 10 ** tokenMetadata.decimals;
         const amount = (Number(log.args.value) / wei).toFixed(2);
         if (log.args.from === address) {
           const recipient = log.args.to.substring(0, 8); // TODO
-          notify(`Sent $${amount}`, `Sent USDC to ${recipient} successfully`);
+          notify(
+            `Sent $${amount}`,
+            `Sent ${tokenMetadata.symbol} to ${recipient} successfully`
+          );
         } else {
           const sender = log.args.to.substring(0, 8); // TODO
-          notify(`Received $${amount}`, `Received USDC from ${sender}`);
+          notify(
+            `Received $${amount}`,
+            `Received ${tokenMetadata.symbol} from ${sender}`
+          );
         }
       }
     };

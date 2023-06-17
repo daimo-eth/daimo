@@ -1,4 +1,3 @@
-import * as Contracts from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import { useState } from "react";
@@ -50,7 +49,6 @@ export default function App() {
         chain: baseGoerli,
         transport: http(),
       }),
-      Contracts.testUsdcAddress,
       derPublicKey,
       signer,
       false
