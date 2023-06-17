@@ -1,4 +1,3 @@
-import * as Contracts from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { createPublicClient, http } from "viem";
 import { baseGoerli } from "viem/chains";
@@ -64,7 +63,6 @@ export function createRouter(
             chain: baseGoerli,
             transport: http(),
           }),
-          Contracts.testUsdcAddress,
           pubKeyHex,
           signer,
           false
@@ -96,6 +94,7 @@ export function createRouter(
       }),
   });
 }
+
 function signer(hexMessage: string): Promise<string> {
   throw new Error("Function not implemented.");
 }

@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import { Address } from "abitype";
 import * as Clipboard from "expo-clipboard";
@@ -22,15 +23,17 @@ export default function DepositScreen() {
       {!chainConfig.testnet && <OnrampStub />}
       <View style={ss.spacer.h32} />
       <TextBody>
-        <TextBold>Deposit USDC on Base Goerli only.</TextBold> Use the following
-        address.
+        <TextBold>
+          Deposit ${tokenMetadata.symbol} on Base Goerli only.
+        </TextBold>{" "}
+        Use the following address.
       </TextBody>
       <AddressCopier addr={account.address} />
     </View>
   );
 }
 
-/** Request testUSDC from testnet faucet. */
+/** Request token from testnet faucet. */
 function TestnetFaucet({ recipient }: { recipient: Address }) {
   const faucetStatus = trpc.testnetFaucetStatus.useQuery({ recipient });
 
@@ -92,7 +95,8 @@ function OnrampStub() {
     <View style={styles.callout}>
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
-        <TextBold>Onramp coming soon.</TextBold> You'll be able to buy USDC
+        <TextBold>Onramp coming soon.</TextBold> You'll be able to buy $
+        {tokenMetadata.symbol}
         directly in Daimo.
       </TextBody>
     </View>

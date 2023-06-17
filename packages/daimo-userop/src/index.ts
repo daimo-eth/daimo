@@ -1,12 +1,6 @@
 import * as Contracts from "@daimo/contract";
 import { Client, ISendUserOperationOpts, Presets } from "userop";
-import {
-  PublicClient,
-  encodeFunctionData,
-  getContract,
-  parseEther,
-  parseUnits,
-} from "viem";
+import { PublicClient, encodeFunctionData, parseEther, parseUnits } from "viem";
 
 import config from "../config.json";
 import { DaimoOpBuilder } from "./daimoOpBuilder";
@@ -43,7 +37,6 @@ export class DaimoAccount {
 
   public static async init(
     publicClient: PublicClient,
-    tokenAddress: `0x${string}`,
     derPublicKey: string,
     signer: SigningCallback,
     dryRun: boolean
@@ -72,21 +65,16 @@ export class DaimoAccount {
       signer
     );
 
-    const erc20 = getContract({
-      abi: Contracts.erc20ABI,
-      address: tokenAddress,
-      publicClient,
-    });
-
-    const tokenDecimals = await erc20.read.decimals();
-    console.log(`[OP] init. token ${tokenAddress}, decimals ${tokenDecimals}`);
+    console.log(
+      `[OP] init. token ${Contracts.tokenMetadata.address}, decimals ${Contracts.tokenMetadata.decimals}`
+    );
 
     return new DaimoAccount(
       dryRun,
       client,
       daimoBuilder,
-      tokenAddress,
-      tokenDecimals
+      Contracts.tokenMetadata.address,
+      Contracts.tokenMetadata.decimals
     );
   }
 

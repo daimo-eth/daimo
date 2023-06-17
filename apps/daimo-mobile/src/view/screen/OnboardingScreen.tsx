@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -60,9 +61,9 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
             technology. Use at your own risk."
         />
         <IntroPage
-          title="USDC"
-          body="Daimo lets you send and receive money using the USDC stablecoin.
-            1 USDC is $1. Learn how it works here."
+          title={tokenMetadata.symbol}
+          body={`Daimo lets you send and receive money using the ${tokenMetadata.symbol} stablecoin.
+            1 ${tokenMetadata.symbol} is $1. Learn how it works here.`}
         />
         <IntroPage
           title="Yours alone"

@@ -7,6 +7,6 @@
     "outDir": "dist",
     "declaration": true
   },
-  "include": ["src/generated.ts"],
+  "include": ["src/index.ts"],
   "exclude": []
 }
