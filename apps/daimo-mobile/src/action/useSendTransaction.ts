@@ -3,7 +3,7 @@ import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import { useCallback, useContext } from "react";
 import { Address, Hex } from "viem";
 
-import { Chain, ChainContext, coin } from "../logic/chain";
+import { Chain, ChainContext } from "../logic/chain";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 
 export function useSendTransaction(
@@ -47,7 +47,6 @@ async function sendAsync(
   try {
     const account = await DaimoAccount.init(
       chain.clientL2,
-      coin.address,
       derPublicKey,
       signer,
       false
