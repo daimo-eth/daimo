@@ -5,9 +5,9 @@ import { ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendTransaction } from "../../action/useSendTransaction";
-import { useAccount } from "../../logic/account";
 import { assert } from "../../logic/assert";
 import { Recipient, useRecipientSearch } from "../../logic/search";
+import { useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { AmountInput, InputBig } from "../shared/Input";

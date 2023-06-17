@@ -47,6 +47,7 @@
     "expo-build-properties": "~0.6.0",
     "expo-clipboard": "^4.1.2",
     "expo-dev-client": "~2.2.1",
+    "expo-device": "^5.2.1",
     "expo-linking": "^4.0.1",
     "expo-notifications": "^0.18.1",
     "expo-splash-screen": "~0.18.2",

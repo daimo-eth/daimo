@@ -7,11 +7,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
 import PolyfillCrypto from "react-native-webview-crypto";
 
-import { useAccount } from "./logic/account";
 import { Chain, ChainContext, ChainStatus } from "./logic/chain";
 import { env } from "./logic/env";
 import { initNotify } from "./logic/notify";
 import { trpc } from "./logic/trpc";
+import { useAccount } from "./model/account";
 import { HomeStackNav } from "./view/HomeStack";
 
 export default function App() {

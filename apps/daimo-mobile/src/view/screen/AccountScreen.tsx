@@ -3,9 +3,9 @@ import { Octicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
 import { chainConfig } from "../../logic/chain";
 import { env } from "../../logic/env";
+import { useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";

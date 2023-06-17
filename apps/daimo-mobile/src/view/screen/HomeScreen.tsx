@@ -2,8 +2,7 @@ import { tokenMetadata } from "@daimo/contract";
 import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
-import { assert } from "../../logic/assert";
+import { useAccount } from "../../model/account";
 import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";

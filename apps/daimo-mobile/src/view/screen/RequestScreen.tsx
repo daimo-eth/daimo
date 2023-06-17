@@ -2,8 +2,8 @@ import { tokenMetadata } from "@daimo/contract";
 import { useCallback, useState } from "react";
 import { Alert, ScrollView, Share, StyleSheet } from "react-native";
 
-import { useAccount } from "../../logic/account";
 import { assert } from "../../logic/assert";
+import { useAccount } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { AmountInput } from "../shared/Input";
 import { color } from "../shared/style";

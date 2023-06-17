@@ -1,5 +1,7 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +19,7 @@ import {
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { trpc } from "../../logic/trpc";
+import { useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
@@ -121,23 +124,42 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 }
 
 function AllowNotifications({ onNext }: { onNext: () => void }) {
+  const [account, setAccount] = useAccount();
+  if (!account) return null;
+
   const requestPermission = async () => {
-    window.alert("TODO");
+    if (!Device.isDevice) {
+      window.alert("Push notifications unsupported in simulator.");
+      return;
+    }
+
+    const status = await Notifications.requestPermissionsAsync();
+    console.log(`[ONBOARDING] notifications request ${status.status}`);
+    if (!status.granted) return;
+
+    // Save push token
+    const pushToken = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log(`[ONBOARDING] push token ${pushToken}`);
+    setAccount({ ...account, pushToken: pushToken || null });
+
+    onNext();
   };
 
   return (
     <View style={styles.onboardingScreen}>
       <View style={styles.createAccountPage}>
         <TextH1>
-          <Octicons name="bell" size={64} />
+          <Octicons name="bell" size={40} />
         </TextH1>
-        <View style={ss.spacer.h64} />
-        <TextBody>
-          <TextCenter>
-            Daimo will notify you when you receive money and any other activity
-            on your account.
-          </TextCenter>
-        </TextBody>
+        <View style={ss.spacer.h32} />
+        <View style={ss.container.ph16}>
+          <TextBody>
+            <TextCenter>
+              You'll be notified only for account activity. For example, when
+              you receive money.
+            </TextCenter>
+          </TextBody>
+        </View>
         <View style={ss.spacer.h32} />
         <ButtonBig title="Allow Notifications" onPress={requestPermission} />
         <View style={ss.spacer.h16} />

@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
-import { useAccount } from "../logic/account";
 import { assert } from "../logic/assert";
 import { trpc } from "../logic/trpc";
+import { useAccount } from "../model/account";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 
 /** Deploys a new contract wallet and registers it under a given username. */
@@ -66,6 +66,8 @@ export function useCreateAccount(name: string): ActHandle {
 
       // TODO: delete enclave key on Clear Account, redirect to onboarding screen
       enclaveKeyName: key.enclaveKeyName,
+
+      pushToken: null,
     });
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);

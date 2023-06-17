@@ -5,10 +5,10 @@ import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
 import { assert } from "../../logic/assert";
 import { chainConfig } from "../../logic/chain";
 import { trpc } from "../../logic/trpc";
+import { useAccount } from "../../model/account";
 import { ButtonMed } from "../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBold, TextSmall } from "../shared/text";

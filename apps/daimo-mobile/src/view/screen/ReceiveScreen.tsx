@@ -2,14 +2,14 @@ import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { useAccount } from "../../logic/account";
+import { assert } from "../../logic/assert";
+import { useAccount } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
 import image from "../shared/image";
 import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextSmall } from "../shared/text";
-import { assert } from "../../logic/assert";
 
 export default function DepositScreen() {
   const [account] = useAccount();

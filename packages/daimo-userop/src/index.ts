@@ -1,6 +1,13 @@
 import * as Contracts from "@daimo/contract";
 import { Client, ISendUserOperationOpts, Presets } from "userop";
-import { PublicClient, encodeFunctionData, parseEther, parseUnits } from "viem";
+import {
+  Address,
+  Hex,
+  PublicClient,
+  encodeFunctionData,
+  parseEther,
+  parseUnits,
+} from "viem";
 
 import config from "../config.json";
 import { DaimoOpBuilder } from "./daimoOpBuilder";
@@ -17,14 +24,14 @@ export class DaimoAccount {
   private client: Client;
   private opBuilder: DaimoOpBuilder;
 
-  private tokenAddress: `0x${string}`;
+  private tokenAddress: Address;
   private tokenDecimals: number;
 
   constructor(
     _dryRun: boolean,
     _client: Client,
     _opBuilder: DaimoOpBuilder,
-    _tokenAddress: `0x${string}`,
+    _tokenAddress: Address,
     _tokenDecimals: number
   ) {
     this.dryRun = _dryRun;
@@ -37,12 +44,13 @@ export class DaimoAccount {
 
   public static async init(
     publicClient: PublicClient,
+    tokenAddress: Address,
     derPublicKey: string,
     signer: SigningCallback,
     dryRun: boolean
   ): Promise<DaimoAccount> {
     const rawPublicKey = derPublicKey.slice(-128);
-    const contractFriendlyKey: [`0x${string}`, `0x${string}`] = [
+    const contractFriendlyKey: [Hex, Hex] = [
       `0x${rawPublicKey.slice(0, 64)}`,
       `0x${rawPublicKey.slice(64, 128)}`,
     ];
@@ -78,8 +86,8 @@ export class DaimoAccount {
     );
   }
 
-  public getAddress(): `0x${string}` {
-    return this.opBuilder.getSender() as `0x${string}`;
+  public getAddress(): Address {
+    return this.opBuilder.getSender() as Address;
   }
 
   /** Submits a user op to bundler. Returns userOpHash. */
@@ -96,7 +104,7 @@ export class DaimoAccount {
 
   /** Sends eth. Returns userOpHash. */
   public async transfer(
-    to: `0x${string}`,
+    to: Address,
     amount: `${number}`
   ): Promise<UserOpHandle> {
     const ether = parseEther(amount);
@@ -109,7 +117,7 @@ export class DaimoAccount {
 
   /** Sends an ERC20 transfer. Returns userOpHash. */
   public async erc20transfer(
-    to: `0x${string}`,
+    to: Address,
     amount: `${number}` // in the native unit of the token
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
@@ -130,7 +138,7 @@ export class DaimoAccount {
 
   /** Sends an ERC20 approval. Returns userOpHash. */
   public async erc20approve(
-    spender: `0x${string}`,
+    spender: Address,
     amount: `${number}`
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);

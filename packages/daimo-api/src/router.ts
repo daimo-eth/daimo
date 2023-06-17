@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { createPublicClient, http } from "viem";
 import { baseGoerli } from "viem/chains";
@@ -63,6 +64,7 @@ export function createRouter(
             chain: baseGoerli,
             transport: http(),
           }),
+          tokenMetadata.address,
           pubKeyHex,
           signer,
           false

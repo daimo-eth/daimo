@@ -1,8 +1,8 @@
 import { ReactNode, useCallback, useContext } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
-import { useAccount } from "../../logic/account";
 import { ChainContext } from "../../logic/chain";
+import { useAccount } from "../../model/account";
 import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
 

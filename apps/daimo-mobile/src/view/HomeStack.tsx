@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
-import { useAccount } from "../logic/account";
+import { useAccount } from "../model/account";
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
 import DepositScreen from "./screen/DepositScreen";

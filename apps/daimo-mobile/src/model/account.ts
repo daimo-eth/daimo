@@ -2,7 +2,8 @@ import { Address } from "abitype";
 import { useCallback, useMemo } from "react";
 import { useMMKVString } from "react-native-mmkv";
 
-import { assert } from "./assert";
+import { assert } from "../logic/assert";
+import { StoredModel, latestStorageVersion } from "./storedModel";
 
 export type Account = {
   /** Daimo name, registered onchain */
@@ -16,16 +17,14 @@ export type Account = {
 
   /** Local device signing key */
   enclaveKeyName: string;
+
+  /** Local device push token, if permission was granted. */
+  // TODO: move to a separate Device model if we ever need multiaccount.
+  pushToken: string | null;
 };
 
-const latestStorageVersion = 1;
-
-interface StoredModel {
-  storageVersion: number;
-}
-
-interface AccountV1 extends StoredModel {
-  storageVersion: 1;
+interface AccountV2 extends StoredModel {
+  storageVersion: 2;
 
   name: string;
 
@@ -35,6 +34,8 @@ interface AccountV1 extends StoredModel {
   lastBlockTimestamp: number;
 
   enclaveKeyName: string;
+
+  pushToken: string | null;
 }
 
 let firstLoad = true;
@@ -71,8 +72,17 @@ export function parse(accountJSON?: string): Account | null {
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // If we ever need migrations, they can happen here.
-  assert(model.storageVersion === 1);
-  const a = model as AccountV1;
+  assert(
+    model.storageVersion <= latestStorageVersion,
+    "Unknown storage version. Did you downgrade to an older version of the app?"
+  );
+
+  // Delete V1 testnet account. Re-onboard, ask for notifications permisison.
+  if (model.storageVersion === 1) return null;
+
+  assert(model.storageVersion === 2);
+
+  const a = model as AccountV2;
 
   return {
     name: a.name,
@@ -83,11 +93,13 @@ export function parse(accountJSON?: string): Account | null {
     lastBlockTimestamp: a.lastBlockTimestamp,
 
     enclaveKeyName: a.enclaveKeyName,
+
+    pushToken: a.pushToken,
   };
 }
 
 export async function serialize(account: Account): Promise<string> {
-  const model: AccountV1 = {
+  const model: AccountV2 = {
     storageVersion: latestStorageVersion,
 
     name: account.name,
@@ -98,6 +110,8 @@ export async function serialize(account: Account): Promise<string> {
     lastBlockTimestamp: account.lastBlockTimestamp,
 
     enclaveKeyName: account.enclaveKeyName,
+
+    pushToken: account.pushToken,
   };
   return JSON.stringify(model);
 }

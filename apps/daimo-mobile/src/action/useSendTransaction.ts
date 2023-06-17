@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import { useCallback, useContext } from "react";
@@ -47,6 +48,7 @@ async function sendAsync(
   try {
     const account = await DaimoAccount.init(
       chain.clientL2,
+      tokenMetadata.address,
       derPublicKey,
       signer,
       false
