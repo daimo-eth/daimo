@@ -94,10 +94,10 @@ export class DaimoAccount {
   public async sendUserOp(op: DaimoOpBuilder) {
     const opts: ISendUserOperationOpts = {
       dryRun: this.dryRun,
-      onBuild: (o) => console.log("[OP] Signed UserOperation:", o),
+      onBuild: (o) => console.log("[OP] signed userOp:", o),
     };
     const res = await this.client.sendUserOperation(op, opts);
-    console.log(`[OP] UserOpHash: ${res.userOpHash}`);
+    console.log(`[OP] userOpHash: ${res.userOpHash}`);
 
     return res;
   }

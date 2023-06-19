@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { assert } from "../../logic/assert";
 import { useAccount } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -11,14 +10,14 @@ import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextSmall } from "../shared/text";
 
-export default function DepositScreen() {
-  const [account] = useAccount();
-  assert(account != null);
-  const url = `daimo://request?recipient=${account.address}`;
-
+export default function ReceiveScreen() {
   const nav = useNav();
   const request = useCallback(() => nav.navigate("Request"), [nav]);
   const deposit = useCallback(() => nav.navigate("Deposit"), [nav]);
+
+  const [account] = useAccount();
+  if (account == null) return null;
+  const url = `daimo://request?recipient=${account.address}`;
 
   return (
     <View style={ss.container.outerStretch}>

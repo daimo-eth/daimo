@@ -43,12 +43,12 @@ function usePollChain() {
 
   const refreshAccount = async () => {
     try {
-      console.log(`[APP] Loading chain status...`);
+      console.log(`[APP] loading chain status...`);
       const status = await chain.getStatus();
       setStatus(status);
 
       if (!account || status.status !== "ok") return;
-      console.log(`[APP] Reloading account ${account.address}...`);
+      console.log(`[APP] reloading account ${account.address}...`);
       setAccount(await chain.updateAccount(account, status));
     } catch (e) {
       console.error(e);

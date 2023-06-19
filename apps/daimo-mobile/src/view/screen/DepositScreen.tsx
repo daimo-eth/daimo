@@ -5,7 +5,6 @@ import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
-import { assert } from "../../logic/assert";
 import { chainConfig } from "../../logic/chain";
 import { rpcHook } from "../../logic/trpc";
 import { useAccount } from "../../model/account";
@@ -15,7 +14,7 @@ import { TextBody, TextBold, TextSmall } from "../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();
-  assert(account != null);
+  if (account == null) return null;
 
   return (
     <View style={styles.vertOuter}>

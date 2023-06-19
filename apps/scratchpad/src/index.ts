@@ -1,17 +1,27 @@
 // https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
 
-import { entryPointABI, testUsdcConfig } from "@daimo/contract";
+import {
+  entryPointABI,
+  erc20ABI,
+  nameRegistryConfig,
+  testUsdcConfig,
+  tokenMetadata,
+} from "@daimo/contract";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
+import chalk from "chalk";
 import crypto from "node:crypto";
 import { Constants } from "userop";
 import {
+  Address,
   Hex,
   PublicClient,
   createPublicClient,
   createWalletClient,
+  formatUnits,
   getAddress,
   getContract,
   http,
+  stringToHex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
@@ -24,6 +34,7 @@ async function main() {
   const commands = [
     { name: "ts", desc: tsDesc(), fn: ts },
     { name: "create", desc: createAccountDesc(), fn: createAccount },
+    { name: "check", desc: checkAccountDesc(), fn: checkAccount },
   ];
 
   const cmdName = process.argv[2];
@@ -37,6 +48,63 @@ async function main() {
     const promise: Promise<void> = cmd.fn();
     await promise;
   }
+}
+
+function checkAccountDesc() {
+  return `Check the balance, nonce, etc of a Daimo account.`;
+}
+
+async function checkAccount() {
+  const input = process.argv[3];
+  if (!input) throw new Error("Usage: check <name or address>");
+
+  const chain = baseGoerli;
+  console.log(`Daimo account on ${chain.name}`);
+  console.log("");
+
+  // Resolve name or address
+  let name: string, addr: Address;
+
+  const publicClient = createPublicClient({ chain, transport: http() });
+  const nameReg = getContract({ ...nameRegistryConfig, publicClient });
+  if (input.startsWith("0x")) {
+    addr = input as Address;
+    name = await nameReg.read.resolveName([addr]);
+  } else {
+    name = input;
+    const nameHex = stringToHex(name, { size: 32 });
+    addr = await nameReg.read.resolveAddr([nameHex]);
+  }
+
+  console.log(`ADDR     - ${chalk.bold(addr)}`);
+  console.log(`NAME     - ${chalk.bold(name)}`);
+
+  // Get balance from coin contract
+  const coinContract = getContract({
+    abi: erc20ABI,
+    address: tokenMetadata.address,
+    publicClient,
+  });
+  const bal = await coinContract.read.balanceOf([addr]);
+  const { decimals, symbol } = tokenMetadata;
+  const balStr = formatUnits(bal, decimals) + " " + symbol;
+  console.log(`BAL      - ${chalk.bold(balStr)}`);
+
+  // Get account info from the EntryPoint contract
+  const entryPoint = getContract({
+    abi: entryPointABI,
+    address: getAddress(Constants.ERC4337.EntryPoint),
+    publicClient,
+  });
+  const prefundBal = await entryPoint.read.balanceOf([addr]);
+  const prefundStr = formatUnits(prefundBal, 18) + " ETH";
+  console.log(`PREFUND  - ${chalk.bold(prefundStr)}`);
+  console.log();
+
+  console.log(`...NameReg ${nameReg.address}`);
+  console.log(`...  ERC20 ${tokenMetadata.address}`);
+  console.log(`EntryPoint ${entryPoint.address}`);
+  console.log();
 }
 
 function tsDesc() {
@@ -99,6 +167,7 @@ async function createAccount() {
   const dryRun = false;
   const account = await DaimoAccount.init(
     publicClient,
+    tokenMetadata.address,
     pubKeyHex,
     signer,
     dryRun
