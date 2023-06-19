@@ -2,10 +2,8 @@ import { tokenMetadata } from "@daimo/contract";
 import { createContext } from "react";
 import {
   Address,
-  Log,
   PublicClient,
   createPublicClient,
-  getAbiItem,
   getContract,
   http,
 } from "viem";
@@ -13,7 +11,6 @@ import { baseGoerli, goerli } from "viem/chains";
 import { erc20ABI } from "wagmi";
 
 import { assert } from "./assert";
-import { notify } from "./notify";
 import { check } from "./validation";
 import { Account } from "../model/account";
 
@@ -22,9 +19,6 @@ export const chainConfig = {
   l1: goerli,
   l2: baseGoerli,
 };
-
-const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
-type TransferLog = Log<bigint, number, typeof transferEvent>;
 
 // Reads chain state (L1 / L2 health) and Daimo account state from L2.
 export interface Chain {
@@ -121,51 +115,6 @@ export class Chain implements Chain {
       lastBalance,
       lastNonce: BigInt(0), // TODO
       lastBlockTimestamp: status.l2.blockTimestamp,
-    };
-  }
-
-  subscribeTransfers(address: Address): () => void {
-    const onLogs = function (logs: TransferLog[]) {
-      console.log(`[CHAIN] got ${logs.length} transfers for ${address}`);
-      for (const log of logs) {
-        if (!log.args.from || !log.args.to || !log.args.value) {
-          console.warn(`[CHAIN] skipping invalid Tranfer log ${log}`);
-          continue;
-        }
-
-        const wei = 10 ** tokenMetadata.decimals;
-        const amount = (Number(log.args.value) / wei).toFixed(2);
-        if (log.args.from === address) {
-          const recipient = log.args.to.substring(0, 8); // TODO
-          notify(
-            `Sent $${amount}`,
-            `Sent ${tokenMetadata.symbol} to ${recipient} successfully`
-          );
-        } else {
-          const sender = log.args.to.substring(0, 8); // TODO
-          notify(
-            `Received $${amount}`,
-            `Received ${tokenMetadata.symbol} from ${sender}`
-          );
-        }
-      }
-    };
-
-    console.log(`[CHAIN] subscribing to transfers for ${address}`);
-    const unwatchFns = [
-      this.coinContract.watchEvent.Transfer(
-        { from: address },
-        { onLogs, pollingInterval: 5000 }
-      ),
-      this.coinContract.watchEvent.Transfer(
-        { to: address },
-        { onLogs, pollingInterval: 5000 }
-      ),
-    ];
-
-    return () => {
-      console.log(`[CHAIN] unsubscribing from transfers for ${address}`);
-      unwatchFns.forEach((fn) => fn());
     };
   }
 }

@@ -63,12 +63,6 @@ function usePollChain() {
     return () => clearInterval(interval);
   }, [address]);
 
-  // Listen for transfers
-  useEffect(() => {
-    if (!address) return undefined;
-    return chain.subscribeTransfers(address);
-  }, [address]);
-
   const cs = useMemo(() => ({ chain, status }), [chain, status]);
   return cs;
 }
