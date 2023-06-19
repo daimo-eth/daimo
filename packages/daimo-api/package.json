@@ -17,12 +17,14 @@
     "@daimo/userop": "*",
     "@trpc/server": "^10.29.0",
     "expo-server-sdk": "^3.7.0",
+    "pg": "^8.11.0",
     "userop": "^0.3.0",
     "viem": "^1.0.7",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@tsconfig/node20": "^1.0.1",
+    "@types/pg": "^8.10.2",
     "@types/tape": "^5.6.0",
     "depcheck": "^1.4.3",
     "eslint": "^8.42.0",

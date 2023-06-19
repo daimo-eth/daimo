@@ -16,11 +16,13 @@ import { Chain, baseGoerli } from "viem/chains";
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
  * This account sponsors gas for account creation (and a faucet, on testnet).
  */
-export function getEnvWalletClient() {
+export function getEnvClients() {
   const chain = baseGoerli; // TODO: DAIMO_API_CHAIN once mainnet is supported
   const account = getAccount(process.env.DAIMO_API_PRIVATE_KEY);
   const transport = http();
-  return createWalletClient({ chain, transport, account });
+  const walletClient = createWalletClient({ chain, transport, account });
+  const publicClient = createPublicClient({ chain, transport });
+  return { walletClient, publicClient };
 }
 
 export function getAccount(privateKey?: string) {
@@ -46,4 +48,9 @@ export type ContractType<TAbi extends Abi> = GetContractReturnType<
   TAbi,
   PublicClient<Transport, Chain>,
   WalletClient<Transport, Chain, Account>
+>;
+
+export type ReadOnlyContractType<TAbi extends Abi> = GetContractReturnType<
+  TAbi,
+  PublicClient<Transport, Chain>
 >;

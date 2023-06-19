@@ -1,11 +1,11 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { createPublicClient, http } from "viem";
 
-import { getEnvWalletClient } from "./chain";
+import { getEnvClients } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
+import { DB } from "./db/db";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 
@@ -17,7 +17,7 @@ export type AppRouter = ReturnType<typeof createRouter>;
 async function main() {
   console.log(`[API] starting...`);
 
-  const walletClient = getEnvWalletClient();
+  const { walletClient, publicClient } = getEnvClients();
   console.log(`[API] using wallet ${walletClient.account.address}`);
   const nameReg = new NameRegistry(walletClient);
   const faucet = new Faucet(walletClient);
@@ -27,11 +27,13 @@ async function main() {
   await nameReg.init();
   await faucet.init();
 
+  console.log(`[API] initializing db...`);
+  const db = new DB();
+  await db.createTables();
+
   console.log(`[API] initializing push notifications...`);
-  // TODO: connect to DB
-  const { chain } = walletClient;
-  const notifier = new PushNotifier();
-  await notifier.init(createPublicClient({ chain, transport: http() }));
+  const notifier = new PushNotifier(publicClient, db);
+  await notifier.init();
 
   console.log(`[API] listening...`);
   const router = createRouter(entryPoint, nameReg, faucet, notifier);

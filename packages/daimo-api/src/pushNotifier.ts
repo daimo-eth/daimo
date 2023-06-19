@@ -1,50 +1,111 @@
+import { erc20ABI, tokenMetadata } from "@daimo/contract";
 import { Expo } from "expo-server-sdk";
-import { Address, PublicClient } from "viem";
+import {
+  Address,
+  Hex,
+  Log,
+  PublicClient,
+  formatUnits,
+  getAbiItem,
+  getContract,
+} from "viem";
 
-interface PushAccount {
-  addr: Address;
-  pushTokens: string[];
-}
+import { ReadOnlyContractType } from "./chain";
+import { DB } from "./db/db";
 
+const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
+type TransferLog = Log<bigint, number, typeof transferEvent>;
+
+/**
+ * Subscribes to coin transfers onchain. Whenever a transfer affects a Daimo
+ * account, sends a push notification to each of the user's devices.
+ */
 export class PushNotifier {
-  // TODO: db
+  coinContract: ReadOnlyContractType<typeof erc20ABI>;
+  pushTokens = new Map<Address, string[]>();
+  expo = new Expo();
 
-  private accounts: PushAccount[] = [];
-
-  async init(publicClient: PublicClient) {
-    // TODO: subscribe to transfers
+  constructor(private publicClient: PublicClient, private db: DB) {
+    this.coinContract = getContract({
+      abi: erc20ABI,
+      address: tokenMetadata.address,
+      publicClient,
+    });
   }
 
-  /** Validates the push token, then subscribes to events affecting addr.  */
-  register(addr: Address, pushToken: string) {
-    if (!Expo.isExpoPushToken(pushToken)) {
-      throw new Error(`Invalid push token ${pushToken} for ${addr}`);
-    }
+  async init() {
+    // Subscribe to transfers
+    this.coinContract.watchEvent.Transfer(
+      {},
+      { batch: true, onLogs: this.handleTransfers }
+    );
+  }
 
-    const account = this.find(addr);
-    if (account == null) {
-      console.log(`[PUSH] registering ${addr} with push token ${pushToken}`);
-      this.accounts.push({ addr, pushTokens: [pushToken] });
-    } else if (account.pushTokens.includes(pushToken)) {
-      console.log(`[PUSH] token ${pushToken} already registered for ${addr}`);
-      return;
-    } else {
-      console.log(`[PUSH] adding push token ${pushToken} to ${addr}`);
-      account.pushTokens.push(pushToken);
-    }
+  private handleTransfers = async (logs: TransferLog[]) => {
+    console.log(`[PUSH] got ${logs.length} transfers`);
+    for (const log of logs) {
+      const { from, to, value } = log.args;
+      if (!from || !to || !value) {
+        console.warn(`[PUSH] invalid transfer log: ${JSON.stringify(log)}`);
+        continue;
+      }
+      if (log.transactionHash == null) {
+        console.warn(`[PUSH] skipping unconfirmed tx: ${JSON.stringify(log)}`);
+        continue;
+      }
 
-    //TODO
-    const expo = new Expo();
-    expo.sendPushNotificationsAsync([
+      this.maybeNotify(log.transactionHash, from, -value);
+      this.maybeNotify(log.transactionHash, to, value);
+    }
+  };
+
+  private maybeNotify(txHash: Hex, addr: Address, value: bigint) {
+    const pushTokens = this.pushTokens.get(addr);
+    if (!pushTokens) return;
+
+    const { decimals, symbol } = tokenMetadata;
+    const rawAmount = formatUnits(value, decimals);
+    const dollars = Math.abs(Number(rawAmount)).toFixed(2);
+    const verb = value < 0 ? "sent" : "received";
+    console.log(`[PUSH] notifying ${addr} they ${verb} ${dollars} ${symbol}`);
+
+    const title = value < 0 ? "Sent" : "Received";
+    const body = `You ${verb} ${dollars} ${symbol}`;
+    this.expo.sendPushNotificationsAsync([
       {
-        to: pushToken,
-        title: "Welcome to Daimo!",
-        body: "You'll get a notification when you receive a payment.",
+        to: pushTokens,
+        badge: 1,
+        title,
+        body,
+        data: { txHash },
       },
     ]);
   }
 
-  find(addr: Address): PushAccount | undefined {
-    return this.accounts.find((a) => a.addr === addr);
+  /** Validates the push token, then subscribes to events affecting addr.  */
+  async register(addr: Address, pushToken: string) {
+    if (!Expo.isExpoPushToken(pushToken)) {
+      throw new Error(`Invalid push token ${pushToken} for ${addr}`);
+    }
+
+    const tokens = this.pushTokens.get(addr) || [];
+    if (tokens.includes(pushToken)) {
+      console.log(`[PUSH] already registered ${pushToken} for ${addr}`);
+      return;
+    }
+
+    console.log(`[PUSH] registering ${pushToken} for ${addr}`);
+    this.pushTokens.set(addr, [...tokens, pushToken]);
+
+    await Promise.all([
+      this.db.savePushToken({ address: addr, pushToken }),
+      this.expo.sendPushNotificationsAsync([
+        {
+          to: pushToken,
+          title: "Welcome to Daimo",
+          body: "You'll get a notification when you receive a payment.",
+        },
+      ]),
+    ]);
   }
 }
