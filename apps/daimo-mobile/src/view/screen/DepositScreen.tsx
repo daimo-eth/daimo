@@ -1,9 +1,9 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
-import { Address } from "abitype";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { Address } from "viem";
 
 import { chainConfig } from "../../logic/chain";
 import { rpcHook } from "../../logic/trpc";

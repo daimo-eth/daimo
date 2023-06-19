@@ -7,12 +7,14 @@
     "start": "turbo start",
     "build": "turbo build",
     "test": "turbo test",
-    "lint": "turbo lint"
+    "lint": "turbo lint && syncpack list-mismatches",
+    "fix:deps": "syncpack fix-mismatches"
   },
   "dependencies": {
     "eslint-config-universe": "^11.2.0",
     "turbo": "^1.10.3",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "syncpack": "^10.6.1"
   },
   "workspaces": [
     "packages/*",

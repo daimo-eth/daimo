@@ -1,6 +1,6 @@
-import { Address } from "abitype";
 import { useCallback, useMemo } from "react";
 import { useMMKVString } from "react-native-mmkv";
+import { Address } from "viem";
 
 import { StoredModel, latestStorageVersion } from "./storedModel";
 import { assert } from "../logic/assert";
