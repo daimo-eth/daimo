@@ -8,9 +8,11 @@ import {
   formatUnits,
   getAbiItem,
   getContract,
+  hexToString,
 } from "viem";
 
 import { ReadOnlyContractType } from "./chain";
+import { NameRegistry } from "./contract/nameRegistry";
 import { DB } from "./db/db";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
@@ -25,7 +27,11 @@ export class PushNotifier {
   pushTokens = new Map<Address, string[]>();
   expo = new Expo();
 
-  constructor(private publicClient: PublicClient, private db: DB) {
+  constructor(
+    private publicClient: PublicClient,
+    private nameReg: NameRegistry,
+    private db: DB
+  ) {
     this.coinContract = getContract({
       abi: erc20ABI,
       address: tokenMetadata.address,
@@ -54,12 +60,17 @@ export class PushNotifier {
         continue;
       }
 
-      this.maybeNotify(log.transactionHash, from, -value);
-      this.maybeNotify(log.transactionHash, to, value);
+      this.maybeNotify(log.transactionHash, from, to, -value);
+      this.maybeNotify(log.transactionHash, to, from, value);
     }
   };
 
-  private maybeNotify(txHash: Hex, addr: Address, value: bigint) {
+  private async maybeNotify(
+    txHash: Hex,
+    addr: Address,
+    other: Address,
+    value: bigint
+  ) {
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens) return;
 
@@ -67,10 +78,20 @@ export class PushNotifier {
     const rawAmount = formatUnits(value, decimals);
     const dollars = Math.abs(Number(rawAmount)).toFixed(2);
     const verb = value < 0 ? "sent" : "received";
-    console.log(`[PUSH] notifying ${addr} they ${verb} ${dollars} ${symbol}`);
+    console.log(`[PUSH] notifying ${addr} ${verb} ${dollars} ${symbol}`);
 
-    const title = value < 0 ? "Sent" : "Received";
-    const body = `You ${verb} ${dollars} ${symbol}`;
+    // Get the other side
+    const otherNameHex = await this.nameReg.resolveName(other);
+    const otherName = otherNameHex
+      ? hexToString(otherNameHex)
+      : other.substring(0, 8) + "...";
+
+    const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
+    const body =
+      value < 0
+        ? `You sent ${dollars} ${symbol} to ${otherName}`
+        : `You received ${dollars} ${symbol} from ${otherName}`;
+
     this.expo.sendPushNotificationsAsync([
       {
         to: pushTokens,

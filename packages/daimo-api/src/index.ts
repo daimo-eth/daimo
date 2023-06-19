@@ -32,7 +32,7 @@ async function main() {
   await db.createTables();
 
   console.log(`[API] initializing push notifications...`);
-  const notifier = new PushNotifier(publicClient, db);
+  const notifier = new PushNotifier(publicClient, nameReg, db);
   await notifier.init();
 
   console.log(`[API] listening...`);

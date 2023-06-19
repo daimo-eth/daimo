@@ -20,6 +20,7 @@ import {
   formatUnits,
   getAddress,
   getContract,
+  hexToString,
   http,
   stringToHex,
 } from "viem";
@@ -69,7 +70,7 @@ async function checkAccount() {
   const nameReg = getContract({ ...nameRegistryConfig, publicClient });
   if (input.startsWith("0x")) {
     addr = input as Address;
-    name = await nameReg.read.resolveName([addr]);
+    name = hexToString(await nameReg.read.resolveName([addr]));
   } else {
     name = input;
     const nameHex = stringToHex(name, { size: 32 });

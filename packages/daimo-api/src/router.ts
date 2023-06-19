@@ -55,6 +55,14 @@ export function createRouter(
             name: "test",
             addr: "0xa3449c3f57af6d39bc9eb41d6e0b75d3723210cd",
           };
+        } else if (
+          opts.input.pubKeyHex ===
+          `0x3059301306072a8648ce3d020106082a8648ce3d03010703420004d604c7b9c8abbc407dce1b1b5fad0bbce26b296ab3b900ed8d80d66d4b6603d64b2e72ac68b002a3f19e597f6ba34999202d14d8a6394cf1ea51d37fa6e33d01`
+        ) {
+          ret = {
+            name: "test888",
+            addr: "0xFB0Bf0689aFbE1F7a078f681AAfb74785d2fB589",
+          };
         }
 
         console.log(
