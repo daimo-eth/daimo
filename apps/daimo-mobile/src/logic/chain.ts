@@ -6,6 +6,7 @@ import {
   createPublicClient,
   getContract,
   http,
+  webSocket,
 } from "viem";
 import { baseGoerli, goerli } from "viem/chains";
 import { erc20ABI } from "wagmi";
@@ -56,8 +57,7 @@ export class Chain implements Chain {
 
   clientL2 = createPublicClient({
     chain: chainConfig.l2,
-    transport: http(),
-    // TODO: webSocket("wss://base-goerli.public.blastapi.io")
+    transport: webSocket("wss://base-goerli.public.blastapi.io"),
     // See bug https://github.com/wagmi-dev/viem/issues/711
   });
 

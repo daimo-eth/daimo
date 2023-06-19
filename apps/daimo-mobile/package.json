@@ -9,7 +9,6 @@
     "build:stage": "eas build -p ios --profile=stage",
     "submit:stage": "eas submit --platform ios --profile=stage",
     "start": "expo start --dev-client --clear -i",
-    "start:tunnel": "expo start --dev-client --tunnel",
     "run:android": "expo run:android",
     "run:ios": "expo run:ios",
     "test": "tsc --noEmit && jest",
