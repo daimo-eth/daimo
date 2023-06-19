@@ -106,7 +106,7 @@ export function createRouter(
         const address = account.getAddress();
 
         // Prepay gas for the account
-        await entryPoint.prefundEth(address, BigInt(1e16)); // 0.1 ETH
+        await entryPoint.prefundEth(address, BigInt(5e16)); // 0.05 ETH
 
         // Register name
         const registerReceipt = await nameReg.registerName(name, address);

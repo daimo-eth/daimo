@@ -1,12 +1,12 @@
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 
-/** Credentials come from env.PGURL. */
+/** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {
   connectionString: process.env.PGURL,
   connectionTimeoutMillis: 5000,
   query_timeout: 5000,
   statement_timeout: 5000,
-  database: "daimo",
+  database: process.env.PGURL == null ? "daimo" : undefined,
 };
 
 const poolConfig: PoolConfig = {
