@@ -74,9 +74,8 @@ export class PushNotifier {
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens) return;
 
-    const { decimals, symbol } = tokenMetadata;
-    const rawAmount = formatUnits(value, decimals);
-    const dollars = Math.abs(Number(rawAmount)).toFixed(2);
+    const { symbol } = tokenMetadata;
+    const dollars = formatDollars(value);
     const verb = value < 0 ? "sent" : "received";
     console.log(`[PUSH] notifying ${addr} ${verb} ${dollars} ${symbol}`);
 

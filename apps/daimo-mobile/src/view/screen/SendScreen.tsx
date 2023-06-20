@@ -6,7 +6,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendPayment } from "../../action/useSendPayment";
 import { assert } from "../../logic/assert";
-import { Recipient, useRecipientSearch } from "../../logic/search";
+import { Recipient, useRecipientSearch } from "../../logic/recipient";
 import { useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";

@@ -47,6 +47,10 @@
           "ios": {
             "deploymentTarget": "15.0"
           }
+        },
+        "@config-plugins/react-native-branch",
+        {
+          "iosAppDomain": "dai.app.link"
         }
       ]
     ]
