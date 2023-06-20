@@ -34,6 +34,13 @@ export function createRouter(
         return await nameReg.resolveName(name);
       }),
 
+    resolveAddr: publicProcedure
+      .input(z.object({ addr: zAddress }))
+      .query(async (opts) => {
+        const { addr } = opts.input;
+        return await nameReg.resolveAddress(addr);
+      }),
+
     lookupAccountByKey: publicProcedure
       .input(
         z.object({

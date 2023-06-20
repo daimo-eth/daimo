@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import { formatDaimoLink } from "../../logic/link";
 import { useAccount } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -17,7 +18,8 @@ export default function ReceiveScreen() {
 
   const [account] = useAccount();
   if (account == null) return null;
-  const url = `daimo://request?recipient=${account.address}`;
+
+  const url = formatDaimoLink({ type: "receive", addr: account.address });
 
   return (
     <View style={ss.container.outerStretch}>

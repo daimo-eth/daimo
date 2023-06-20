@@ -13,7 +13,9 @@ export default function RequestScreen() {
   assert(account != null);
   const [amount, setAmount] = useState(0);
 
+  // TODO: use deep link
   const url = `daimo://request?recipient=${account.address}&amount=${amount}`;
+
   const sendRequest = useCallback(async () => {
     try {
       const result = await Share.share({

@@ -6,7 +6,12 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendPayment } from "../../action/useSendPayment";
 import { assert } from "../../logic/assert";
-import { Recipient, useRecipientSearch } from "../../logic/search";
+import { parseDaimoLink } from "../../logic/link";
+import {
+  Recipient,
+  getRecipient,
+  useRecipientSearch,
+} from "../../logic/recipient";
 import { useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -47,9 +52,25 @@ function Scan({ hide }: { hide: () => void }) {
       .catch((e) => console.error(e));
   }, []);
 
-  const handleBarCodeScanned: BarCodeScannedCallback = ({ data }) => {
-    // TODO: if data is a daimo:// link, then navigate to that
-    alert(data);
+  const [handled, setHandled] = useState(false);
+  const nav = useNav();
+
+  const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
+    if (handled) return;
+
+    const daimoLink = parseDaimoLink(data);
+    if (daimoLink == null) return;
+    setHandled(true);
+
+    switch (daimoLink.type) {
+      case "receive": {
+        const recipient = await getRecipient(daimoLink.addr);
+        nav.navigate("Send", { recipient });
+        break;
+      }
+      default:
+        throw new Error(`Unhandled daimo link type: ${daimoLink.type}`);
+    }
   };
 
   let body: ReactNode;
@@ -101,7 +122,7 @@ function Search() {
       <InputBig icon="search" value={prefix} onChange={setPrefix} />
       {res.error && <ErrorRow error={res.error} />}
       {res.recipients.map((r) => (
-        <RecipientRow key={r.account.addr} recipient={r} />
+        <RecipientRow key={r.addr} recipient={r} />
       ))}
       {res.isSearching && res.recipients.length === 0 && (
         <TextCenter>
@@ -123,7 +144,7 @@ function ErrorRow({ error }: { error: { message: string } }) {
 function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
-  return <ButtonBig title={recipient.account.name} onPress={pay} />;
+  return <ButtonBig title={recipient.name} onPress={pay} />;
 }
 
 function SendPayment({ recipient }: { recipient: Recipient }) {
@@ -137,7 +158,7 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
 
   const { status, message, exec } = useSendPayment(
     account.enclaveKeyName,
-    recipient.account.addr,
+    recipient.addr,
     dollars
   );
 
@@ -164,7 +185,7 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
       case "idle":
         return (
           <ButtonBig
-            title={`Send to ${recipient.account.name}`}
+            title={`Send to ${recipient.name}`}
             onPress={exec}
             type="primary"
             disabled={dollars === 0}
@@ -181,7 +202,7 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
 
   return (
     <>
-      <CancelRow title={`Sending to ${recipient.account.name}`} hide={hide} />
+      <CancelRow title={`Sending to ${recipient.name}`} hide={hide} />
       <View style={ss.spacer.h32} />
       <AmountInput value={dollars} onChange={setDollars} />
       <View style={ss.spacer.h32} />
