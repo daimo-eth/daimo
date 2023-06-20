@@ -1,25 +1,26 @@
 import { tokenMetadata } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import { DaimoAccount, SigningCallback } from "@daimo/userop";
+import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useContext } from "react";
-import { Address, Hex } from "viem";
+import { Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Chain, ChainContext } from "../logic/chain";
 
-/** Send a payment user op. */
-export function useSendPayment(
+/** Send a tx user op. */
+export type TxHandle = (account: DaimoAccount) => Promise<UserOpHandle>;
+
+export function useSendAsync(
   enclaveKeyName: string,
-  recipient: Address,
-  dollars: number
+  txHandle: TxHandle
 ): ActHandle {
   const [as, setAS] = useActStatus();
   const { chain } = useContext(ChainContext);
   if (chain == null) throw new Error("No chain context");
 
   const exec = useCallback(
-    () => sendAsync(chain, setAS, enclaveKeyName, recipient, dollars),
-    [enclaveKeyName, recipient, dollars]
+    () => sendAsync(chain, setAS, enclaveKeyName, txHandle),
+    [enclaveKeyName, txHandle]
   );
 
   return { ...as, exec };
@@ -29,8 +30,7 @@ async function sendAsync(
   chain: Chain,
   setAS: SetActStatus,
   enclaveKeyName: string,
-  recipient: Address,
-  dollars: number
+  txHandle: TxHandle
 ) {
   setAS("loading", "Loading account...");
 
@@ -55,8 +55,7 @@ async function sendAsync(
       false
     );
 
-    console.log(`[ACTION] sending $${dollars} to ${recipient}`);
-    const handle = await account.erc20transfer(recipient, `${dollars}`);
+    const handle = await txHandle(account);
     setAS("loading", "Accepted...");
 
     const event = await handle.wait();

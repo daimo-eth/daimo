@@ -1,15 +1,25 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "react-native";
-import PolyfillCrypto from "react-native-webview-crypto";
 
 import { Chain, ChainContext, ChainStatus } from "./logic/chain";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { HomeStackNav } from "./view/HomeStack";
+import { HomeStackParamList } from "./view/shared/nav";
+
+const prefix = Linking.createURL("/");
+const linking: LinkingOptions<HomeStackParamList> = {
+  prefixes: [prefix],
+  config: {
+    screens: {
+      Note: "note",
+    },
+  },
+};
 
 export default function App() {
   console.log("[APP] rendering");
@@ -20,14 +30,10 @@ export default function App() {
   // Start polling chain status - L1 tip, L2 tip, account balance, transfers
   const chainState = usePollChain();
 
-  // Set up link nav for incoming daimo:// deep links
-  const linking = useMemo(() => ({ prefixes: [Linking.createURL("/")] }), []);
-
   return (
     <RpcProvider>
       <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
         <ChainContext.Provider value={chainState}>
-          <PolyfillCrypto />
           <HomeStackNav />
           <StatusBar style="auto" />
         </ChainContext.Provider>

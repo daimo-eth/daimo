@@ -32,6 +32,7 @@ export const ss = {
     outerStretch: {
       flex: 1,
       padding: 16,
+      paddingBottom: 48,
       backgroundColor: "#fff",
       alignItems: "stretch",
     },

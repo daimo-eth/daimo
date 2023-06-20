@@ -126,6 +126,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         sender: instance.address,
         signature: dummySignature,
         verificationGasLimit: 2000000n,
+        callGasLimit: 1000000n,
       })
       .useMiddleware(instance.resolveAccount)
       .useMiddleware(Presets.Middleware.getGasPrice(instance.provider))
@@ -134,7 +135,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         ctx.op.verificationGasLimit = 2000000n;
 
         // Workaround: Pimlico gas price estimator seems to be too low
-        // ctx.op.callGasLimit = Math.floor(Number(ctx.op.callGasLimit) * 2);
+        // ctx.op.callGasLimit = Math.floor(Number(ctx.op.callGasLimit) * 10);
       })
       .useMiddleware(getSigningMiddleware(signUserOperation));
 
