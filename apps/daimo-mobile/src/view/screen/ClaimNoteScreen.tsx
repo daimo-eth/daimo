@@ -3,14 +3,17 @@ import { DaimoAccount } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { Address, createWalletClient, http, keccak256 } from "viem";
+import { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseGoerli } from "viem/chains";
 
 import { SendOpFn, useSendAsync } from "../../action/useSendAsync";
 import { assert } from "../../logic/assert";
 import { ChainContext } from "../../logic/chain";
-import { EphemeralNote, dummySignature, fetchNote } from "../../logic/note";
+import {
+  EphemeralNote,
+  useEphemeralSignature,
+  useFetchNote,
+} from "../../logic/note";
 import { rpcFunc } from "../../logic/trpc";
 import { useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
@@ -21,7 +24,7 @@ import { TextCenter, TextError, TextSmall } from "../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 
-export default function NoteScreen({ route }: Props) {
+export default function ClaimNoteScreen({ route }: Props) {
   const [account] = useAccount();
   assert(account != null);
   const { chain } = useContext(ChainContext);
@@ -34,20 +37,7 @@ export default function NoteScreen({ route }: Props) {
 
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const [loadState, setLoadState] = useState<"loading" | "loaded" | "error">(
-    "loading"
-  );
-  const [note, setNote] = useState<EphemeralNote | undefined>(undefined);
-
-  useEffect(() => {
-    (async () => {
-      const note = await fetchNote(chain.clientL2, ephemeralOwner);
-      console.log(`[NOTE] fetched note ${ephemeralOwner}: ${note?.amount}`);
-      setNote(note);
-      if (note) setLoadState("loaded");
-      else setLoadState("error");
-    })();
-  }, [ephemeralOwner]);
+  const [note, loadState] = useFetchNote(chain.clientL2, ephemeralOwner);
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
@@ -90,32 +80,13 @@ function NoteDisplay({
   const [account] = useAccount();
   assert(account != null);
 
-  const chain = useContext(ChainContext);
+  const { chain } = useContext(ChainContext);
   assert(chain != null);
 
-  const [ephemeralSignature, setEphemeralSignature] =
-    useState<`0x${string}`>("0x");
-
-  useEffect(() => {
-    (async () => {
-      if (!ephemeralPrivateKey) {
-        // Must be sender themselves reclaiming
-        setEphemeralSignature(dummySignature);
-        return;
-      }
-      const ephemeralAccount = privateKeyToAccount(ephemeralPrivateKey);
-      const ephemeralClient = createWalletClient({
-        account: ephemeralAccount,
-        chain: baseGoerli,
-        transport: http(),
-      });
-      const message = keccak256(account.address);
-      const signature = await ephemeralClient.signMessage({
-        message: { raw: message },
-      });
-      setEphemeralSignature(signature);
-    })();
-  }, [ephemeralPrivateKey, ephemeralNote]);
+  const ephemeralSignature = useEphemeralSignature(
+    ephemeralPrivateKey,
+    account.address
+  );
 
   const [senderName, setSenderName] = useState("");
 

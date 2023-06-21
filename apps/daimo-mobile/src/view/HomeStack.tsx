@@ -3,9 +3,9 @@ import { useMemo } from "react";
 
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
+import ClaimNoteScreen from "./screen/ClaimNoteScreen";
 import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
-import NoteScreen from "./screen/NoteScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
 import ReceiveScreen from "./screen/ReceiveScreen";
 import RequestScreen from "./screen/RequestScreen";
@@ -33,7 +33,7 @@ export function HomeStackNav() {
         <HomeStack.Screen name="Account" component={AccountScreen} />
         <HomeStack.Screen name="Chain" component={ChainScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
-        <HomeStack.Screen name="Note" component={NoteScreen} />
+        <HomeStack.Screen name="Note" component={ClaimNoteScreen} />
         <HomeStack.Screen name="Request" component={RequestScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
