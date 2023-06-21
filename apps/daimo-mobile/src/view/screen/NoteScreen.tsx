@@ -7,7 +7,7 @@ import { Address, createWalletClient, http, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
 
-import { TxHandle, useSendAsync } from "../../action/useSendAsync";
+import { SendOpFn, useSendAsync } from "../../action/useSendAsync";
 import { assert } from "../../logic/assert";
 import { ChainContext } from "../../logic/chain";
 import { EphemeralNote, dummySignature, fetchNote } from "../../logic/note";
@@ -127,10 +127,10 @@ function NoteDisplay({
     })();
   }, [ephemeralNote]);
 
-  const createTxHandle = (
+  const sendFn = (
     ephemeralOwner: Address,
     signature: `0x${string}`
-  ): TxHandle => {
+  ): SendOpFn => {
     return async (account: DaimoAccount) => {
       console.log(
         `[ACTION] claiming note ${ephemeralOwner} ${signature} ${account}`
@@ -141,7 +141,7 @@ function NoteDisplay({
 
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    createTxHandle(ephemeralNote.owner, ephemeralSignature)
+    sendFn(ephemeralNote.owner, ephemeralSignature)
   );
 
   // TODO: load estimated fees

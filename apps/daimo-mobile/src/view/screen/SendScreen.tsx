@@ -10,14 +10,11 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import {
-  Address,
-  generatePrivateKey,
-  privateKeyToAccount,
-} from "viem/accounts";
+import { Hex } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { TxHandle, useSendAsync } from "../../action/useSendAsync";
-import { assert } from "../../logic/assert";
+import { useSendAsync } from "../../action/useSendAsync";
+import { assert, assertNotNull } from "../../logic/assert";
 import { ChainContext } from "../../logic/chain";
 import { parseDaimoLink } from "../../logic/link";
 import { fetchNotesContractAllowance } from "../../logic/note";
@@ -190,16 +187,12 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
   const [account] = useAccount();
   assert(account != null);
 
-  const createTxHandle = (recipient: Address, dollars: number): TxHandle => {
-    return async (account: DaimoAccount) => {
-      console.log(`[ACTION] sending $${dollars} to ${recipient}`);
-      return account.erc20transfer(recipient, `${dollars}`);
-    };
-  };
-
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    createTxHandle(recipient.addr, dollars)
+    async (account: DaimoAccount) => {
+      console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
+      return account.erc20transfer(recipient.addr, `${dollars}`);
+    }
   );
 
   // TODO: load estimated fees
@@ -255,25 +248,22 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
 }
 
 function CreateNote({ hide }: { hide: () => void }) {
-  const [ephemeralPrivateKey, setEphemeralPrivateKey] =
-    useState<`0x${string}`>("0x");
+  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>("0x");
 
   const { chain } = useContext(ChainContext);
-  assert(chain != null);
+  const { clientL2 } = assertNotNull(chain);
 
   const [dollars, setDollars] = useState(0);
 
   const [account] = useAccount();
   assert(account != null);
+  const { address } = account;
 
   const [isNotesContractApproved, setIsNotesContractApproved] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const allowance = await fetchNotesContractAllowance(
-        chain.clientL2,
-        account.address
-      );
+      const allowance = await fetchNotesContractAllowance(clientL2, address);
       setIsNotesContractApproved(allowance > 0);
 
       const privKey = generatePrivateKey();
@@ -281,33 +271,16 @@ function CreateNote({ hide }: { hide: () => void }) {
     })();
   }, []);
 
-  const createTxHandle = (
-    ephemeralPrivateKey: `0x${string}`,
-    isNotesContractApproved: boolean,
-    dollars: number
-  ): TxHandle => {
-    return async (account: DaimoAccount) => {
-      const ephemeralOwner = privateKeyToAccount(ephemeralPrivateKey).address;
-      if (isNotesContractApproved) {
-        console.log(
-          `[ACTION] skipping approve, creating note worth $${dollars}`
-        );
-        return account.createEphemeralNote(ephemeralOwner, `${dollars}`);
-      } else {
-        console.log(
-          `[ACTION] approving notes contract to spend token and creating note worth $${dollars}`
-        );
-        return account.erc20approveAndCreateEphemeralNote(
-          ephemeralOwner,
-          `${dollars}`
-        );
-      }
-    };
-  };
-
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    createTxHandle(ephemeralPrivateKey, isNotesContractApproved, dollars)
+    async (account: DaimoAccount) => {
+      const ephemeralOwner = privateKeyToAccount(ephemeralPrivateKey).address;
+      return account.createEphemeralNote(
+        ephemeralOwner,
+        `${dollars}`,
+        !isNotesContractApproved
+      );
+    }
   );
 
   // TODO: load estimated fees
@@ -350,26 +323,26 @@ function CreateNote({ hide }: { hide: () => void }) {
 
   useEffect(() => {
     (async () => {
-      if (status === "success") {
-        // TODO: We can optimistically do this on loading rather than wait
-        // for success.
-        try {
-          const result = await Share.share({
-            message: `${account.name} paid you $${dollars}. Claim your money: daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
-          });
-          if (result.action === Share.sharedAction) {
-            console.log(
-              "[APP] Note shared with activity type ",
-              result.activityType || "unknown"
-            );
-          } else if (result.action === Share.dismissedAction) {
-            // Only on iOS
-            console.log("[APP] Note share reverted");
-            // TODO: Suggest revert or retry?
-          }
-        } catch (error: any) {
-          console.error("[APP] Note share error:", error);
+      if (status !== "success") return;
+      // TODO: We can optimistically do this on loading rather than wait
+      // for success.
+      try {
+        const result = await Share.share({
+          message: `${account.name} paid you $${dollars}. Claim your money: daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
+          url: `daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
+        });
+        if (result.action === Share.sharedAction) {
+          console.log(
+            "[APP] Note shared with activity type ",
+            result.activityType || "unknown"
+          );
+        } else if (result.action === Share.dismissedAction) {
+          // Only on iOS
+          console.log("[APP] Note share reverted");
+          // TODO: Suggest revert or retry?
         }
+      } catch (error: any) {
+        console.error("[APP] Note share error:", error);
       }
     })();
   }, [status]);

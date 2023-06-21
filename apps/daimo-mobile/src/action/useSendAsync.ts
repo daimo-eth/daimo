@@ -8,19 +8,19 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Chain, ChainContext } from "../logic/chain";
 
 /** Send a tx user op. */
-export type TxHandle = (account: DaimoAccount) => Promise<UserOpHandle>;
+export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 
 export function useSendAsync(
   enclaveKeyName: string,
-  txHandle: TxHandle
+  sendFn: SendOpFn
 ): ActHandle {
   const [as, setAS] = useActStatus();
   const { chain } = useContext(ChainContext);
   if (chain == null) throw new Error("No chain context");
 
   const exec = useCallback(
-    () => sendAsync(chain, setAS, enclaveKeyName, txHandle),
-    [enclaveKeyName, txHandle]
+    () => sendAsync(chain, setAS, enclaveKeyName, sendFn),
+    [enclaveKeyName, sendFn]
   );
 
   return { ...as, exec };
@@ -30,7 +30,7 @@ async function sendAsync(
   chain: Chain,
   setAS: SetActStatus,
   enclaveKeyName: string,
-  txHandle: TxHandle
+  sendFn: SendOpFn
 ) {
   setAS("loading", "Loading account...");
 
@@ -55,7 +55,7 @@ async function sendAsync(
       false
     );
 
-    const handle = await txHandle(account);
+    const handle = await sendFn(account);
     setAS("loading", "Accepted...");
 
     const event = await handle.wait();

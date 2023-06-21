@@ -165,59 +165,39 @@ export class DaimoAccount {
     return this.sendUserOp(op);
   }
 
-  /** Approves notes contract for spending infinite tokens and creates a note in the same tx. Returns userOpHash. */
-  public async erc20approveAndCreateEphemeralNote(
-    ephemeralOwner: `0x${string}`,
-    amount: `${number}`
-  ) {
-    const parsedAmount = parseUnits(amount, this.tokenDecimals);
-    console.log(
-      `[OP] approve ${amount} ${
-        this.tokenAddress
-      } for ${this.getAddress()}, then, create ephemeral note for ${ephemeralOwner} of ${parsedAmount}`
-    );
-
-    const op = this.opBuilder.executeBatch(
-      [this.tokenAddress, this.notesAddress],
-      [
-        encodeFunctionData({
-          abi: Contracts.erc20ABI,
-          functionName: "approve",
-          args: [
-            this.notesAddress,
-            BigInt(Contracts.tokenMetadata.totalSupply),
-          ],
-        }),
-        encodeFunctionData({
-          abi: Contracts.ephemeralNotesABI,
-          functionName: "createNote",
-          args: [ephemeralOwner, parsedAmount],
-        }),
-      ]
-    );
-
-    return this.sendUserOp(op);
-  }
-
   /** Creates an ephemeral note. Returns userOpHash. */
   public async createEphemeralNote(
     ephemeralOwner: `0x${string}`,
-    amount: `${number}`
+    amount: `${number}`,
+    approveFirst: boolean = false
   ) {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
-    console.log(
-      `[OP] create ephemeral note for ${ephemeralOwner} of ${parsedAmount}`
-    );
+    console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
 
-    const op = this.opBuilder.execute(
-      this.notesAddress,
-      0n,
+    const contracts: Address[] = [this.notesAddress];
+    const calls: Hex[] = [
       encodeFunctionData({
         abi: Contracts.ephemeralNotesABI,
         functionName: "createNote",
         args: [ephemeralOwner, parsedAmount],
-      })
-    );
+      }),
+    ];
+
+    if (approveFirst) {
+      // Infinite approve
+      console.log(`[OP] approving notes contract to spend coins`);
+      const maxUint256 = 2n ** 256n - 1n;
+      contracts.unshift(this.tokenAddress);
+      calls.unshift(
+        encodeFunctionData({
+          abi: Contracts.erc20ABI,
+          functionName: "approve",
+          args: [this.notesAddress, maxUint256],
+        })
+      );
+    }
+
+    const op = this.opBuilder.executeBatch(contracts, calls);
 
     return this.sendUserOp(op);
   }
