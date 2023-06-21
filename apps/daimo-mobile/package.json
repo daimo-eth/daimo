@@ -90,9 +90,5 @@
         }
       ]
     }
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "@types/react-native-get-random-values": "^1.8.0"
   }
 }

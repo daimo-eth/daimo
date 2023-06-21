@@ -42,6 +42,7 @@ export default function NoteScreen({ route }: Props) {
   useEffect(() => {
     (async () => {
       const note = await fetchNote(chain.clientL2, ephemeralOwner);
+      console.log(`[NOTE] fetched note ${ephemeralOwner}: ${note?.amount}`);
       setNote(note);
       if (note) setLoadState("loaded");
       else setLoadState("error");

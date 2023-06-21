@@ -1,4 +1,4 @@
-import { testUsdcConfig } from "@daimo/contract";
+import { erc20ABI, tokenMetadata } from "@daimo/contract";
 import {
   Account,
   Address,
@@ -19,7 +19,7 @@ export type FaucetStatus =
   | "alreadyRequested"
   | "alreadySent";
 
-const transferEvent = getAbiItem({ abi: testUsdcConfig.abi, name: "Transfer" });
+const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
 type TransferLog = Log<bigint, number, typeof transferEvent>;
 
 /** Testnet faucet. Drips testUSDC to any account not yet requested. */
@@ -27,16 +27,17 @@ export class Faucet {
   requested = new Set<Address>();
   sent = new Set<Address>();
   clients: ClientsType;
-  contract: ContractType<typeof testUsdcConfig.abi>;
+  contract: ContractType<typeof erc20ABI>;
 
   constructor(walletClient: WalletClient<Transport, Chain, Account>) {
     this.clients = getClients(walletClient);
-    this.contract = getContract({ ...testUsdcConfig, ...this.clients });
+    const { address } = tokenMetadata;
+    this.contract = getContract({ abi: erc20ABI, address, ...this.clients });
   }
 
   async init() {
     const logs = await this.clients.publicClient.getLogs({
-      ...testUsdcConfig,
+      address: tokenMetadata.address,
       event: transferEvent,
       fromBlock: 0n,
       toBlock: "latest" as BlockTag,

@@ -4,7 +4,6 @@ import {
   entryPointABI,
   erc20ABI,
   nameRegistryConfig,
-  testUsdcConfig,
   tokenMetadata,
 } from "@daimo/contract";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
@@ -186,7 +185,8 @@ async function createAccount() {
     transport: http(),
   });
   const testUSDC = getContract({
-    ...testUsdcConfig,
+    abi: erc20ABI,
+    address: tokenMetadata.address,
     publicClient,
     walletClient,
   });
