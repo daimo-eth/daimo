@@ -27,12 +27,15 @@ export class DaimoAccount {
   private tokenAddress: Address;
   private tokenDecimals: number;
 
+  private notesAddress: `0x${string}`;
+
   constructor(
     _dryRun: boolean,
     _client: Client,
     _opBuilder: DaimoOpBuilder,
-    _tokenAddress: Address,
-    _tokenDecimals: number
+    _tokenAddress: `0x${string}`,
+    _tokenDecimals: number,
+    _notesAddress: `0x${string}`
   ) {
     this.dryRun = _dryRun;
     this.client = _client;
@@ -40,6 +43,8 @@ export class DaimoAccount {
 
     this.tokenAddress = _tokenAddress;
     this.tokenDecimals = _tokenDecimals;
+
+    this.notesAddress = _notesAddress;
   }
 
   public static async init(
@@ -82,7 +87,8 @@ export class DaimoAccount {
       client,
       daimoBuilder,
       Contracts.tokenMetadata.address,
-      Contracts.tokenMetadata.decimals
+      Contracts.tokenMetadata.decimals,
+      Contracts.ephemeralNotesAddress
     );
   }
 
@@ -153,6 +159,63 @@ export class DaimoAccount {
         abi: Contracts.erc20ABI,
         functionName: "approve",
         args: [spender, parsedAmount],
+      })
+    );
+
+    return this.sendUserOp(op);
+  }
+
+  /** Creates an ephemeral note. Returns userOpHash. */
+  public async createEphemeralNote(
+    ephemeralOwner: `0x${string}`,
+    amount: `${number}`,
+    approveFirst: boolean = false
+  ) {
+    const parsedAmount = parseUnits(amount, this.tokenDecimals);
+    console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
+
+    const contracts: Address[] = [this.notesAddress];
+    const calls: Hex[] = [
+      encodeFunctionData({
+        abi: Contracts.ephemeralNotesABI,
+        functionName: "createNote",
+        args: [ephemeralOwner, parsedAmount],
+      }),
+    ];
+
+    if (approveFirst) {
+      // Infinite approve
+      console.log(`[OP] approving notes contract to spend coins`);
+      const maxUint256 = 2n ** 256n - 1n;
+      contracts.unshift(this.tokenAddress);
+      calls.unshift(
+        encodeFunctionData({
+          abi: Contracts.erc20ABI,
+          functionName: "approve",
+          args: [this.notesAddress, maxUint256],
+        })
+      );
+    }
+
+    const op = this.opBuilder.executeBatch(contracts, calls);
+
+    return this.sendUserOp(op);
+  }
+
+  /** Claims an ephemeral note. Returns userOpHash. */
+  public async claimEphemeralNote(
+    ephemeralOwner: `0x${string}`,
+    signature: `0x${string}`
+  ) {
+    console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
+
+    const op = this.opBuilder.execute(
+      this.notesAddress,
+      0n,
+      encodeFunctionData({
+        abi: Contracts.ephemeralNotesABI,
+        functionName: "claimNote",
+        args: [ephemeralOwner, signature],
       })
     );
 

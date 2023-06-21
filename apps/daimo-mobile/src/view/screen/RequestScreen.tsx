@@ -22,13 +22,13 @@ export default function RequestScreen() {
         title: "Daimo Request" /* Android only */,
         message: `dcposch is requesting ${amount.toFixed(2)} ${
           tokenMetadata.symbol
-        }`,
-        url,
+        }. Pay them using Daimo: ${url}`,
       });
       console.log(`[REQUEST] action ${result.action}`);
       if (result.action === Share.sharedAction) {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
       } else if (result.action === Share.dismissedAction) {
+        // Only on iOS
         console.log(`[REQUEST] share dismissed`);
       }
     } catch (error: any) {

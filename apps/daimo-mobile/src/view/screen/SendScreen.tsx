@@ -1,12 +1,23 @@
+import { DaimoAccount } from "@daimo/userop";
 import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
+import { Hex } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { useSendPayment } from "../../action/useSendPayment";
-import { assert } from "../../logic/assert";
+import { useSendAsync } from "../../action/useSendAsync";
+import { assert, assertNotNull } from "../../logic/assert";
+import { ChainContext } from "../../logic/chain";
 import { parseDaimoLink } from "../../logic/link";
+import { fetchNotesContractAllowance } from "../../logic/note";
 import {
   Recipient,
   getRecipient,
@@ -22,23 +33,43 @@ import { TextBody, TextCenter, TextError, TextSmall } from "../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
+type SendMethod = "recipient" | "scan" | "createNote" | "unknown";
+
 export default function SendScreen({ route }: Props) {
   const { recipient } = route.params || {};
 
-  const [showScan, setShowScan] = useState(false);
-  const scan = useCallback(() => setShowScan(true), []);
-  const hideScan = useCallback(() => setShowScan(false), []);
+  const [sendMethod, setSendMethod] = useState<SendMethod>("unknown");
+  const scan = useCallback(() => setSendMethod("scan"), []);
+  const createNote = useCallback(() => setSendMethod("createNote"), []);
+  const hideCurrentMethod = useCallback(() => setSendMethod("unknown"), []);
+
+  useEffect(() => {
+    if (recipient) setSendMethod("recipient");
+    else if (sendMethod === "recipient") setSendMethod("unknown");
+  }, [recipient]);
 
   return (
     <View style={ss.container.outerStretch}>
       <Header />
       <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
-        {recipient && <SendPayment recipient={recipient} />}
-        {!recipient && showScan && <Scan hide={hideScan} />}
-        {!recipient && !showScan && <ButtonSmall title="Scan" onPress={scan} />}
-        {!recipient && !showScan && <Search />}
+        {sendMethod === "recipient" && recipient && (
+          <SendPayment recipient={recipient} />
+        )}
+        {sendMethod === "scan" && <Scan hide={hideCurrentMethod} />}
+        {sendMethod === "createNote" && <CreateNote hide={hideCurrentMethod} />}
+        {sendMethod === "unknown" && (
+          <>
+            <ButtonSmall title="Scan" onPress={scan} />
+            <Search />
+          </>
+        )}
       </ScrollView>
-      {/** TODO: Create Note */}
+      {sendMethod === "unknown" && (
+        <View style={styles.vertCreateNote}>
+          <ButtonBig title="Create Note" onPress={createNote} />
+          <TextSmall>Send via WhatsApp, Signal, TG...</TextSmall>
+        </View>
+      )}
     </View>
   );
 }
@@ -156,10 +187,12 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
   const [account] = useAccount();
   assert(account != null);
 
-  const { status, message, exec } = useSendPayment(
+  const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    recipient.addr,
-    dollars
+    async (account: DaimoAccount) => {
+      console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
+      return account.erc20transfer(recipient.addr, `${dollars}`);
+    }
   );
 
   // TODO: load estimated fees
@@ -214,6 +247,120 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
   );
 }
 
+function CreateNote({ hide }: { hide: () => void }) {
+  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>("0x");
+
+  const { chain } = useContext(ChainContext);
+  const { clientL2 } = assertNotNull(chain);
+
+  const [dollars, setDollars] = useState(0);
+
+  const [account] = useAccount();
+  assert(account != null);
+  const { address } = account;
+
+  const [isNotesContractApproved, setIsNotesContractApproved] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const allowance = await fetchNotesContractAllowance(clientL2, address);
+      setIsNotesContractApproved(allowance > 0);
+
+      const privKey = generatePrivateKey();
+      setEphemeralPrivateKey(privKey);
+    })();
+  }, []);
+
+  const { status, message, exec } = useSendAsync(
+    account.enclaveKeyName,
+    async (account: DaimoAccount) => {
+      const ephemeralOwner = privateKeyToAccount(ephemeralPrivateKey).address;
+      return account.createEphemeralNote(
+        ephemeralOwner,
+        `${dollars}`,
+        !isNotesContractApproved
+      );
+    }
+  );
+
+  // TODO: load estimated fees
+  const fees = 0.05;
+  const totalDollars = dollars + fees;
+
+  const statusMessage = (function (): ReactNode {
+    switch (status) {
+      case "idle":
+        if (dollars === 0) return null;
+        return `Total incl. fees $${totalDollars.toFixed(2)}`;
+      case "loading":
+        return message;
+      case "error":
+        return <TextError>{message}</TextError>;
+      default:
+        return null;
+    }
+  })();
+
+  const button = (function () {
+    switch (status) {
+      case "idle":
+        return (
+          <ButtonBig
+            title="Create note"
+            onPress={exec}
+            type="primary"
+            disabled={dollars === 0}
+          />
+        );
+      case "loading":
+        return <ActivityIndicator size="large" />;
+      case "success":
+        return <ButtonBig title="Success" disabled />;
+      case "error":
+        return <ButtonBig title="Error" disabled />;
+    }
+  })();
+
+  useEffect(() => {
+    (async () => {
+      if (status !== "success") return;
+      // TODO: We can optimistically do this on loading rather than wait
+      // for success.
+      try {
+        const result = await Share.share({
+          message: `${account.name} paid you $${dollars}. Claim your money: daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
+          url: `daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
+        });
+        if (result.action === Share.sharedAction) {
+          console.log(
+            "[APP] Note shared with activity type ",
+            result.activityType || "unknown"
+          );
+        } else if (result.action === Share.dismissedAction) {
+          // Only on iOS
+          console.log("[APP] Note share reverted");
+          // TODO: Suggest revert or retry?
+        }
+      } catch (error: any) {
+        console.error("[APP] Note share error:", error);
+      }
+    })();
+  }, [status]);
+
+  return (
+    <>
+      <CancelRow title="Creating note" hide={hide} />
+      <View style={ss.spacer.h32} />
+      <AmountInput value={dollars} onChange={setDollars} />
+      <View style={ss.spacer.h32} />
+      {button}
+      <TextSmall>
+        <TextCenter>{statusMessage}</TextCenter>
+      </TextSmall>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
@@ -226,6 +373,11 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     paddingTop: 8,
     gap: 16,
+  },
+  vertCreateNote: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
   },
   cameraBox: {
     width: "100%",
