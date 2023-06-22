@@ -151,12 +151,7 @@ function NoteDisplay({
       <TextCenter>
         <TextSmall>{senderName} sent you</TextSmall>
       </TextCenter>
-      <TitleAmount
-        symbol="$"
-        amount={ephemeralNote.amount}
-        decimals={tokenMetadata.decimals}
-        displayDecimals={2}
-      />
+      <TitleAmount amount={ephemeralNote.amount} />
       {button}
       <TextSmall>
         <TextCenter>{statusMessage}</TextCenter>

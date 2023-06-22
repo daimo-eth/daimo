@@ -20,6 +20,7 @@ export const color = {
 
 const textBase: TextStyle = {
   fontVariant: ["tabular-nums"],
+  color: color.black,
 };
 
 export const touchHighlightUnderlay = {
@@ -62,6 +63,12 @@ export const ss = {
       fontSize: 24,
       fontWeight: "bold",
       lineHeight: 32,
+    },
+    h3: {
+      ...textBase,
+      fontSize: 18,
+      fontWeight: "bold",
+      lineHeight: 24,
     },
     body: {
       ...textBase,

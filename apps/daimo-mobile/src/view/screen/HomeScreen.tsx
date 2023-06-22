@@ -24,12 +24,7 @@ export default function HomeScreen() {
     <View style={ss.container.outerStretch}>
       <Header />
       <View style={styles.amountAndButtons}>
-        <TitleAmount
-          symbol="$"
-          amount={account.lastBalance}
-          decimals={tokenMetadata.decimals}
-          displayDecimals={2}
-        />
+        <TitleAmount amount={account.lastBalance} />
         <Spacer h={32} />
         <View style={styles.buttonRow}>
           <Button

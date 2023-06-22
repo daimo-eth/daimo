@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 
 import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
+import { TextH3 } from "./text";
 import { ChainContext } from "../../logic/chain";
 import { useAccount } from "../../model/account";
 
@@ -16,7 +17,7 @@ export function Header() {
   return (
     <View style={styles.header}>
       <Button onPress={goToAccount}>
-        <Text style={styles.headerText}>{account?.name || "⚠️"}</Text>
+        <TextH3>{account?.name || "⚠️"}</TextH3>
       </Button>
       <Indicator onPress={goToChain} />
     </View>
@@ -73,10 +74,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "bold",
   },
   headerLight: {
     color: color.gray,

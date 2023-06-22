@@ -8,7 +8,7 @@ export type HomeStackParamList = {
   Home: undefined;
   Account: undefined;
   Chain: undefined;
-  Send: undefined | { recipient: Recipient };
+  Send: undefined | { recipient: Recipient; dollars?: number };
   Receive: undefined;
   Deposit: undefined;
   Note:

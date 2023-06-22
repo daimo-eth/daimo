@@ -11,6 +11,10 @@ export function TextH2({ children }: { children: ReactNode }) {
   return <Text style={ss.text.h2}>{children}</Text>;
 }
 
+export function TextH3({ children }: { children: ReactNode }) {
+  return <Text style={ss.text.h3}>{children}</Text>;
+}
+
 export function TextBody({ children }: { children: ReactNode }) {
   return <Text style={ss.text.body}>{children}</Text>;
 }

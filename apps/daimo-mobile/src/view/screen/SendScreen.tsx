@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { Octicons } from "@expo/vector-icons";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
@@ -11,7 +12,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Hex } from "viem";
+import { Hex, parseUnits } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { useSendAsync } from "../../action/useSendAsync";
@@ -26,12 +27,19 @@ import {
   useRecipientSearch,
 } from "../../logic/recipient";
 import { useAccount } from "../../model/account";
+import { TitleAmount } from "../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { AmountInput, InputBig } from "../shared/Input";
 import { HomeStackParamList, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
-import { TextBody, TextCenter, TextError, TextSmall } from "../shared/text";
+import {
+  TextBody,
+  TextCenter,
+  TextError,
+  TextH2,
+  TextSmall,
+} from "../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
@@ -40,12 +48,16 @@ type SendTab = "search" | "scan" | "createNote";
 // Work around
 
 export default function SendScreen({ route }: Props) {
-  const { recipient } = route.params || {};
+  const { recipient, dollars } = route.params || {};
 
   const [tab, setTab] = useState<SendTab>("search");
   const [tabs] = useState(["Search", "Scan"]);
   const createNote = useCallback(() => setTab("createNote"), []);
   const search = useCallback(() => setTab("search"), []);
+  const setSegmentVal = useCallback(
+    (v: string) => setTab(v.toLowerCase() as SendTab),
+    []
+  );
 
   const [, sendViaAppStr] = useAvailMessagingApps();
 
@@ -53,25 +65,35 @@ export default function SendScreen({ route }: Props) {
     <View style={ss.container.outerStretch}>
       <Header />
       <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
-        {recipient && <SendPayment recipient={recipient} />}
+        {recipient && <SetAmount recipient={recipient} dollars={dollars} />}
         {!recipient && (
           <>
-            <SegmentedControl
-              values={tabs}
-              selectedIndex={tab === "scan" ? 1 : 0}
-              onValueChange={(value) => setTab(value.toLowerCase() as SendTab)}
-            />
+            {tab !== "createNote" && (
+              <SegmentedControl
+                values={tabs}
+                selectedIndex={tab === "scan" ? 1 : 0}
+                onValueChange={setSegmentVal}
+                fontStyle={{ fontSize: 16 }}
+                activeFontStyle={{ fontSize: 16 }}
+                style={{ height: 40 }}
+              />
+            )}
+            {tab !== "createNote" && <View style={ss.spacer.h16} />}
+            {tab === "search" && <Search />}
             {tab === "scan" && <Scan hide={search} />}
             {tab === "createNote" && <CreateNote hide={search} />}
-            {tab === "search" && <Search />}
           </>
         )}
       </ScrollView>
       {!recipient && tab === "search" && (
-        <View style={styles.vertCreateNote}>
+        <View style={ss.container.ph16}>
           <ButtonBig title="Create Note" onPress={createNote} />
+          <View style={ss.spacer.h16} />
           <TextSmall>{sendViaAppStr}</TextSmall>
         </View>
+      )}
+      {recipient && dollars && (
+        <SendButton recipient={recipient} dollars={dollars} />
       )}
     </View>
   );
@@ -126,24 +148,28 @@ function Scan({ hide }: { hide: () => void }) {
 
   return (
     <>
-      <CancelRow title="Scan to pay" hide={hide} />
+      <CancelRow hide={hide}>Scan to pay</CancelRow>
+      <View style={ss.spacer.h8} />
       {body}
     </>
   );
 }
 
-function CancelRow({ title, hide }: { title: string; hide: () => void }) {
+function CancelRow({
+  children,
+  hide,
+}: {
+  children: ReactNode;
+  hide: () => void;
+}) {
   return (
-    <View>
-      <View style={ss.spacer.h64} />
-      <View style={styles.headerRow}>
-        <View style={ss.spacer.w32} />
-        <TextSmall>{title}</TextSmall>
-        <ButtonSmall onPress={hide}>
-          <Octicons name="x" size={16} color="gray" />
-        </ButtonSmall>
+    <ButtonSmall onPress={hide}>
+      <View style={styles.cancelRow}>
+        <View style={ss.spacer.w8} />
+        <TextSmall>{children}</TextSmall>
+        <Octicons name="x" size={20} color="gray" />
       </View>
-    </View>
+    </ButtonSmall>
   );
 }
 
@@ -152,7 +178,7 @@ function Search() {
   const res = useRecipientSearch(prefix.trim().toLowerCase());
 
   return (
-    <>
+    <View style={styles.vertSearch}>
       <InputBig icon="search" value={prefix} onChange={setPrefix} />
       {res.error && <ErrorRow error={res.error} />}
       {res.recipients.map((r) => (
@@ -163,7 +189,7 @@ function Search() {
           <TextSmall>No results</TextSmall>
         </TextCenter>
       )}
-    </>
+    </View>
   );
 }
 
@@ -181,12 +207,61 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   return <ButtonBig title={recipient.name} onPress={pay} />;
 }
 
-function SendPayment({ recipient }: { recipient: Recipient }) {
-  const [dollars, setDollars] = useState(0);
-
+function SetAmount({
+  recipient,
+  dollars,
+}: {
+  recipient: Recipient;
+  dollars?: number;
+}) {
   const nav = useNav();
-  const hide = useCallback(() => nav.setParams({ recipient: undefined }), []);
+  const hide = () =>
+    nav.setParams({ recipient: undefined, dollars: undefined });
+  const clearDollars = () => nav.setParams({ dollars: undefined });
 
+  // Temporary dollar amount while typing
+  const [d, setD] = useState(0);
+  const submit = () => {
+    nav.setParams({ dollars: d });
+    setD(0);
+  };
+
+  // Exact amount in token units
+  const amount = parseUnits(`${dollars || 0}`, tokenMetadata.decimals);
+
+  return (
+    <>
+      <View style={ss.spacer.h128} />
+      <CancelRow hide={hide}>
+        <TextCenter>
+          Sending to{"\n"}
+          <TextH2>{recipient.name}</TextH2>
+        </TextCenter>
+      </CancelRow>
+      <View style={ss.spacer.h32} />
+      {dollars == null && (
+        <View style={ss.container.ph16}>
+          <AmountInput value={d} onChange={setD} onSubmitEditing={submit} />
+        </View>
+      )}
+      {dollars != null && (
+        <ButtonSmall onPress={clearDollars}>
+          <TextCenter>
+            <TitleAmount amount={amount} />
+          </TextCenter>
+        </ButtonSmall>
+      )}
+    </>
+  );
+}
+
+function SendButton({
+  recipient,
+  dollars,
+}: {
+  recipient: Recipient;
+  dollars: number;
+}) {
   const [account] = useAccount();
   assert(account != null);
 
@@ -197,24 +272,6 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
       return account.erc20transfer(recipient.addr, `${dollars}`);
     }
   );
-
-  // TODO: load estimated fees
-  const fees = 0.05;
-  const totalDollars = dollars + fees;
-
-  const statusMessage = (function (): ReactNode {
-    switch (status) {
-      case "idle":
-        if (dollars === 0) return null;
-        return `Total incl. fees $${totalDollars.toFixed(2)}`;
-      case "loading":
-        return message;
-      case "error":
-        return <TextError>{message}</TextError>;
-      default:
-        return null;
-    }
-  })();
 
   const button = (function () {
     switch (status) {
@@ -236,17 +293,32 @@ function SendPayment({ recipient }: { recipient: Recipient }) {
     }
   })();
 
+  // TODO: load estimated fees
+  const fees = 0.05;
+  const totalDollars = dollars + fees;
+
+  const statusMessage = (function (): ReactNode {
+    switch (status) {
+      case "idle":
+        if (dollars === 0) return null;
+        return `Total incl. fees $${totalDollars.toFixed(2)}`;
+      case "loading":
+        return message;
+      case "error":
+        return <TextError>{message}</TextError>;
+      default:
+        return null;
+    }
+  })();
+
   return (
-    <>
-      <CancelRow title={`Sending to ${recipient.name}`} hide={hide} />
-      <View style={ss.spacer.h32} />
-      <AmountInput value={dollars} onChange={setDollars} />
-      <View style={ss.spacer.h32} />
+    <View style={ss.container.ph16}>
       {button}
+      <View style={ss.spacer.h16} />
       <TextSmall>
         <TextCenter>{statusMessage}</TextCenter>
       </TextSmall>
-    </>
+    </View>
   );
 }
 
@@ -352,7 +424,7 @@ function CreateNote({ hide }: { hide: () => void }) {
 
   return (
     <>
-      <CancelRow title="Creating note" hide={hide} />
+      <CancelRow hide={hide}>Creating note</CancelRow>
       <View style={ss.spacer.h32} />
       <AmountInput value={dollars} onChange={setDollars} />
       <View style={ss.spacer.h32} />
@@ -365,21 +437,20 @@ function CreateNote({ hide }: { hide: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
+  cancelRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "baseline",
+    alignItems: "center",
     paddingLeft: 8,
   },
   vertMain: {
+    flexDirection: "column",
     alignSelf: "stretch",
-    flexDirection: "column",
     paddingTop: 8,
-    gap: 16,
   },
-  vertCreateNote: {
+  vertSearch: {
     flexDirection: "column",
-    alignItems: "center",
+    alignSelf: "stretch",
     gap: 8,
   },
   cameraBox: {

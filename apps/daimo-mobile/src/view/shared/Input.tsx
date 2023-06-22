@@ -52,9 +52,11 @@ export function InputBig({
 export function AmountInput({
   value,
   onChange,
+  onSubmitEditing,
 }: {
   value: number;
   onChange: (amount: number) => void;
+  onSubmitEditing?: () => void;
 }) {
   if (value < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -90,11 +92,13 @@ export function AmountInput({
       placeholder="0.00"
       placeholderTextColor={color.gray}
       numberOfLines={1}
-      selectTextOnFocus
-      enablesReturnKeyAutomatically
+      autoFocus
       value={strVal}
+      selectTextOnFocus
       onBlur={blur}
       onChangeText={change}
+      onSubmitEditing={onSubmitEditing}
+      returnKeyType="done"
     />
   );
 }
