@@ -29,6 +29,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
+    "@react-native-segmented-control/segmented-control": "^2.4.1",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@tanstack/react-query": "^4.29.12",

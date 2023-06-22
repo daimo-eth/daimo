@@ -1,5 +1,6 @@
 import { DaimoAccount } from "@daimo/userop";
 import { Octicons } from "@expo/vector-icons";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useCallback, useContext, useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import { useSendAsync } from "../../action/useSendAsync";
 import { assert, assertNotNull } from "../../logic/assert";
 import { ChainContext } from "../../logic/chain";
 import { parseDaimoLink } from "../../logic/link";
+import { useAvailMessagingApps } from "../../logic/messagingApps";
 import { fetchNotesContractAllowance } from "../../logic/note";
 import {
   Recipient,
@@ -33,41 +35,42 @@ import { TextBody, TextCenter, TextError, TextSmall } from "../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
-type SendMethod = "recipient" | "scan" | "createNote" | "unknown";
+type SendTab = "search" | "scan" | "createNote";
+
+// Work around
 
 export default function SendScreen({ route }: Props) {
   const { recipient } = route.params || {};
 
-  const [sendMethod, setSendMethod] = useState<SendMethod>("unknown");
-  const scan = useCallback(() => setSendMethod("scan"), []);
-  const createNote = useCallback(() => setSendMethod("createNote"), []);
-  const hideCurrentMethod = useCallback(() => setSendMethod("unknown"), []);
+  const [tab, setTab] = useState<SendTab>("search");
+  const [tabs] = useState(["Search", "Scan"]);
+  const createNote = useCallback(() => setTab("createNote"), []);
+  const search = useCallback(() => setTab("search"), []);
 
-  useEffect(() => {
-    if (recipient) setSendMethod("recipient");
-    else if (sendMethod === "recipient") setSendMethod("unknown");
-  }, [recipient]);
+  const [, sendViaAppStr] = useAvailMessagingApps();
 
   return (
     <View style={ss.container.outerStretch}>
       <Header />
       <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
-        {sendMethod === "recipient" && recipient && (
-          <SendPayment recipient={recipient} />
-        )}
-        {sendMethod === "scan" && <Scan hide={hideCurrentMethod} />}
-        {sendMethod === "createNote" && <CreateNote hide={hideCurrentMethod} />}
-        {sendMethod === "unknown" && (
+        {recipient && <SendPayment recipient={recipient} />}
+        {!recipient && (
           <>
-            <ButtonSmall title="Scan" onPress={scan} />
-            <Search />
+            <SegmentedControl
+              values={tabs}
+              selectedIndex={tab === "scan" ? 1 : 0}
+              onValueChange={(value) => setTab(value.toLowerCase() as SendTab)}
+            />
+            {tab === "scan" && <Scan hide={search} />}
+            {tab === "createNote" && <CreateNote hide={search} />}
+            {tab === "search" && <Search />}
           </>
         )}
       </ScrollView>
-      {sendMethod === "unknown" && (
+      {!recipient && tab === "search" && (
         <View style={styles.vertCreateNote}>
           <ButtonBig title="Create Note" onPress={createNote} />
-          <TextSmall>Send via WhatsApp, Signal, TG...</TextSmall>
+          <TextSmall>{sendViaAppStr}</TextSmall>
         </View>
       )}
     </View>

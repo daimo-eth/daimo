@@ -20,6 +20,9 @@
       "buildNumber": "6",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
       }
     },
     "android": {
