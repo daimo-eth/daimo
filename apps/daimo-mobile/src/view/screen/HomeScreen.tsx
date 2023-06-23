@@ -1,4 +1,3 @@
-import { tokenMetadata } from "@daimo/contract";
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -17,6 +16,8 @@ export default function HomeScreen() {
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
+  const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
+  const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
 
   if (account == null) return null;
 
@@ -35,7 +36,18 @@ export default function HomeScreen() {
           />
           <Button style={sendRecvButton} title="Receive" onPress={goReceive} />
         </View>
+        <Spacer h={8} />
+        <View style={styles.buttonRow}>
+          <Button
+            style={smallButton}
+            title="Withdraw"
+            onPress={goWithdraw}
+            disabled={account.lastBalance === 0n}
+          />
+          <Button style={smallButton} title="Deposit" onPress={goDeposit} />
+        </View>
       </View>
+
       <View style={ss.spacer.h32} />
     </View>
   );
@@ -61,4 +73,16 @@ const sendRecvButton = StyleSheet.create({
     width: 128,
   },
   title: buttonStyles.big.title,
+});
+
+const smallButton = StyleSheet.create({
+  button: {
+    ...buttonStyles.small.button,
+    width: 128,
+    height: 48,
+    justifyContent: "center",
+  },
+  title: {
+    ...buttonStyles.small.title,
+  },
 });

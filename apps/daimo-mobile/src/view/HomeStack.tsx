@@ -10,6 +10,7 @@ import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import RequestScreen from "./screen/receive/RequestScreen";
 import SendScreen from "./screen/send/SendScreen";
+import WithdrawScreen from "./screen/send/WithdrawScreen";
 import { HomeStackParamList } from "./shared/nav";
 import { useAccount } from "../model/account";
 
@@ -33,6 +34,7 @@ export function HomeStackNav() {
         <HomeStack.Screen name="Account" component={AccountScreen} />
         <HomeStack.Screen name="Chain" component={ChainScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
+        <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
         <HomeStack.Screen name="Note" component={ClaimNoteScreen} />
         <HomeStack.Screen name="Request" component={RequestScreen} />
       </HomeStack.Group>
