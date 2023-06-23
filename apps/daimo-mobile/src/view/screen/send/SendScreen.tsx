@@ -1,10 +1,8 @@
-import { tokenMetadata } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { parseUnits } from "viem";
 
 import { CancelHeader } from "./CancelHeader";
 import { CreateNoteTab } from "./CreateNodeTab";
@@ -12,6 +10,7 @@ import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { assert } from "../../../logic/assert";
+import { amountToDollars, dollarsToAmount } from "../../../logic/coin";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Recipient } from "../../../logic/recipient";
 import { useAccount } from "../../../model/account";
@@ -30,6 +29,7 @@ type SendTab = "search" | "scan" | "createNote";
 export default function SendScreen({ route }: Props) {
   const { recipient, dollars } = route.params || {};
 
+  // Navigation
   const [tab, setTab] = useState<SendTab>("search");
   const [tabs] = useState(["Search", "Scan"]);
   const createNote = useCallback(() => setTab("createNote"), []);
@@ -39,13 +39,16 @@ export default function SendScreen({ route }: Props) {
     []
   );
 
+  // Create Note shows available secure messaging apps
   const [, sendViaAppStr] = useAvailMessagingApps();
 
   return (
     <View style={ss.container.outerStretch}>
       <Header />
       <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
-        {recipient && <SetAmount recipient={recipient} dollars={dollars} />}
+        {recipient && (
+          <SetAmount recipient={recipient} dollars={dollars || 0} />
+        )}
         {!recipient && (
           <>
             {tab !== "createNote" && (
@@ -69,12 +72,12 @@ export default function SendScreen({ route }: Props) {
         <View style={ss.container.ph16}>
           <ButtonBig title="Create Note" onPress={createNote} />
           <View style={ss.spacer.h16} />
-          <TextSmall>{sendViaAppStr}</TextSmall>
+          <TextSmall>
+            <TextCenter>{sendViaAppStr}</TextCenter>
+          </TextSmall>
         </View>
       )}
-      {recipient && dollars && (
-        <SendButton recipient={recipient} dollars={dollars} />
-      )}
+      {recipient && <SendButton recipient={recipient} dollars={dollars || 0} />}
     </View>
   );
 }
@@ -84,7 +87,7 @@ function SetAmount({
   dollars,
 }: {
   recipient: Recipient;
-  dollars?: number;
+  dollars: number;
 }) {
   const nav = useNav();
   const hide = () =>
@@ -98,12 +101,15 @@ function SetAmount({
     setD(0);
   };
 
-  // Exact amount in token units
-  const amount = parseUnits(`${dollars || 0}`, tokenMetadata.decimals);
+  // Show how much we have available
+  const [account] = useAccount();
+  if (account == null) return null;
+  const bal = amountToDollars(account.lastBalance);
 
   return (
     <>
-      <View style={ss.spacer.h128} />
+      <View style={ss.spacer.h64} />
+      <View style={ss.spacer.h32} />
       <CancelHeader hide={hide}>
         <TextCenter>
           Sending to{"\n"}
@@ -111,15 +117,19 @@ function SetAmount({
         </TextCenter>
       </CancelHeader>
       <View style={ss.spacer.h32} />
-      {dollars == null && (
+      {dollars === 0 && (
         <View style={ss.container.ph16}>
           <AmountInput value={d} onChange={setD} onSubmitEditing={submit} />
+          <View style={ss.spacer.h16} />
+          <TextSmall>
+            <TextCenter>${bal} available</TextCenter>
+          </TextSmall>
         </View>
       )}
-      {dollars != null && (
+      {dollars > 0 && (
         <ButtonSmall onPress={clearDollars}>
           <TextCenter>
-            <TitleAmount amount={amount} />
+            <TitleAmount amount={dollarsToAmount(dollars)} />
           </TextCenter>
         </ButtonSmall>
       )}
@@ -136,42 +146,51 @@ function SendButton({
 }) {
   const [account] = useAccount();
   assert(account != null);
+  assert(dollars >= 0);
 
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
+      assert(dollars > 0);
       console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
       return account.erc20transfer(recipient.addr, `${dollars}`);
     }
   );
 
+  // TODO: load estimated fees
+  const fees = 0.05;
+  const totalDollars = dollars + fees;
+
+  const sendDisabledReason =
+    account.lastBalance < dollarsToAmount(totalDollars)
+      ? "Insufficient funds"
+      : undefined;
+  const disabled = sendDisabledReason != null || dollars === 0;
+
   const button = (function () {
     switch (status) {
       case "idle":
+      case "error":
         return (
           <ButtonBig
             title={`Send to ${recipient.name}`}
-            onPress={exec}
+            onPress={disabled ? undefined : exec}
             type="primary"
-            disabled={dollars === 0}
+            disabled={disabled}
           />
         );
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
-        return <ButtonBig title="Success" disabled />;
-      case "error":
-        return <ButtonBig title="Error" disabled />;
+        return null;
     }
   })();
-
-  // TODO: load estimated fees
-  const fees = 0.05;
-  const totalDollars = dollars + fees;
 
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
+        if (sendDisabledReason != null)
+          return <TextError>{sendDisabledReason}</TextError>;
         if (dollars === 0) return null;
         return `Total incl. fees $${totalDollars.toFixed(2)}`;
       case "loading":
@@ -182,6 +201,13 @@ function SendButton({
         return null;
     }
   })();
+
+  // On success, redirect to plain Send page
+  const nav = useNav();
+  useEffect(() => {
+    if (status !== "success") return;
+    nav.setParams({ recipient: undefined, dollars: undefined });
+  }, [status]);
 
   return (
     <View style={ss.container.ph16}>

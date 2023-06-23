@@ -5,7 +5,7 @@ import { assertNotNull } from "./assert";
 
 // Sending Notes carries a risk if the note is revealed to a third party.
 // Only suggest reasonably secure messaging apps, not email or SMS.
-export type MessagingApp = "WhatsApp" | "Telegram" | "Signal" | "iMessage";
+type MessagingApp = "WhatsApp" | "Telegram" | "Signal" | "iMessage";
 
 let promise: Promise<MessagingApp[]> | null = null;
 

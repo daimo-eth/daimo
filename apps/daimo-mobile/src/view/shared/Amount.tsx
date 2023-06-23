@@ -1,9 +1,8 @@
-import { tokenMetadata } from "@daimo/contract";
 import { StyleSheet, Text } from "react-native";
 
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
-import { TextH1 } from "./text";
+import { amountToDollars } from "../../logic/coin";
 
 export function TitleAmount({
   amount,
@@ -15,13 +14,7 @@ export function TitleAmount({
   if (!(amount >= 0)) throw new Error("Invalid amount");
 
   const symbol = "$";
-  const decimals = tokenMetadata.decimals;
-  const displayDecimals = 2;
-
-  amount = amount / BigInt(10 ** (decimals - displayDecimals));
-  const dispStr = amount.toString().padStart(displayDecimals + 1, "0");
-  const dollars = dispStr.slice(0, -displayDecimals);
-  const cents = dispStr.slice(-displayDecimals);
+  const [dollars, cents] = amountToDollars(amount).split(".");
 
   const [style, styleSym] = (() => {
     switch (size) {
