@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { useWarmCache } from "../../action/useSendAsync";
 import { useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
 import { Button, buttonStyles } from "../shared/Button";
@@ -12,6 +13,8 @@ import { ss } from "../shared/style";
 export default function HomeScreen() {
   const [account] = useAccount();
   console.log(`[HOME] rendering with account ${account?.name}`);
+
+  useWarmCache(account?.enclaveKeyName);
 
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
@@ -29,12 +32,12 @@ export default function HomeScreen() {
         <Spacer h={32} />
         <View style={styles.buttonRow}>
           <Button
-            style={sendRecvButton}
+            style={bigButton}
             title="Send"
             onPress={goSend}
             disabled={account.lastBalance === 0n}
           />
-          <Button style={sendRecvButton} title="Receive" onPress={goReceive} />
+          <Button style={bigButton} title="Receive" onPress={goReceive} />
         </View>
         <Spacer h={8} />
         <View style={styles.buttonRow}>
@@ -67,7 +70,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const sendRecvButton = StyleSheet.create({
+const bigButton = StyleSheet.create({
   button: {
     ...buttonStyles.big.button,
     width: 128,
@@ -82,7 +85,5 @@ const smallButton = StyleSheet.create({
     height: 48,
     justifyContent: "center",
   },
-  title: {
-    ...buttonStyles.small.title,
-  },
+  title: buttonStyles.small.title,
 });

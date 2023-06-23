@@ -1,4 +1,3 @@
-import { tokenMetadata } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { createPublicClient, http } from "viem";
 import { baseGoerli } from "viem/chains";
@@ -64,11 +63,11 @@ export function createRouter(
           };
         } else if (
           opts.input.pubKeyHex ===
-          `0x3059301306072a8648ce3d020106082a8648ce3d03010703420004d604c7b9c8abbc407dce1b1b5fad0bbce26b296ab3b900ed8d80d66d4b6603d64b2e72ac68b002a3f19e597f6ba34999202d14d8a6394cf1ea51d37fa6e33d01`
+          `0x3059301306072a8648ce3d020106082a8648ce3d0301070342000436dff9029e718c4c7da071077a53a987569ecc780f92203e26afc7b91e1362582ce0bfc65b7cef65dff64768978e691eca8576da6f9d387fe77c70eeaed26f33`
         ) {
           ret = {
-            name: "test888",
-            addr: "0xFB0Bf0689aFbE1F7a078f681AAfb74785d2fB589",
+            name: "jules",
+            addr: "0xbfbff790707f8a9bddae662985270df58011cd9c",
           };
         }
 
@@ -113,7 +112,6 @@ export function createRouter(
             chain: baseGoerli,
             transport: http(),
           }),
-          tokenMetadata.address,
           pubKeyHex,
           signer,
           false

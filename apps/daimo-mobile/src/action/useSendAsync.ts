@@ -1,15 +1,17 @@
-import { tokenMetadata } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { Hex } from "viem";
+import { PublicClient } from "wagmi";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Chain, ChainContext } from "../logic/chain";
+import { loadEnclaveKey } from "../logic/enclave";
 
 /** Send a tx user op. */
 export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 
+/** Send a user op, track status. */
 export function useSendAsync(
   enclaveKeyName: string,
   sendFn: SendOpFn
@@ -26,35 +28,49 @@ export function useSendAsync(
   return { ...as, exec };
 }
 
+/** Warm the DaimoAccount cache. */
+export function useWarmCache(enclaveKeyName?: string) {
+  const { chain } = useContext(ChainContext);
+  if (chain == null) throw new Error("No chain context");
+
+  useEffect(() => {
+    if (!enclaveKeyName) return;
+    loadAccount(chain.clientL2, enclaveKeyName);
+  }, [chain, enclaveKeyName]);
+}
+
+const accountCache: Map<string, Promise<DaimoAccount>> = new Map();
+
+function loadAccount(client: PublicClient, enclaveKeyName: string) {
+  let promise = accountCache.get(enclaveKeyName);
+  if (promise) return promise;
+
+  promise = (async () => {
+    console.info(`[USEROP] loading DaimoAccount ${enclaveKeyName}`);
+    const signer: SigningCallback = (hexTx: string) =>
+      requestEnclaveSignature(enclaveKeyName, hexTx);
+
+    const derPublicKey = await loadEnclaveKey(enclaveKeyName);
+    if (!derPublicKey) throw new Error(`Missing enclave key ${enclaveKeyName}`);
+
+    return await DaimoAccount.init(client, derPublicKey, signer, false);
+  })();
+  accountCache.set(enclaveKeyName, promise);
+
+  return promise;
+}
+
 async function sendAsync(
   chain: Chain,
   setAS: SetActStatus,
   enclaveKeyName: string,
   sendFn: SendOpFn
 ) {
-  setAS("loading", "Loading account...");
-
-  // Get our signing pubkey from the enclave
-  const derPublicKey = await ExpoEnclave.fetchPublicKey(enclaveKeyName);
-  if (derPublicKey == null) {
-    setAS("error", "Can't find key in enclave");
-    return;
-  }
-
-  const signer: SigningCallback = async (hexTx: string) => {
-    setAS("loading", "Signing transaction...");
-    return await requestEnclaveSignature(enclaveKeyName, hexTx);
-  };
-
   try {
-    const account = await DaimoAccount.init(
-      chain.clientL2,
-      tokenMetadata.address,
-      derPublicKey,
-      signer,
-      false
-    );
+    setAS("loading", "Loading account...");
+    const account = await loadAccount(chain.clientL2, enclaveKeyName);
 
+    setAS("loading", "Signing...");
     const handle = await sendFn(account);
     setAS("loading", "Accepted...");
 

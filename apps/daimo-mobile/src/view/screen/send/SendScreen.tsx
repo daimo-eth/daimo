@@ -32,12 +32,9 @@ export default function SendScreen({ route }: Props) {
   // Navigation
   const [tab, setTab] = useState<SendTab>("search");
   const [tabs] = useState(["Search", "Scan"]);
+  const setSegmentVal = (v: string) => setTab(v === "Scan" ? "scan" : "search");
   const createNote = useCallback(() => setTab("createNote"), []);
   const search = useCallback(() => setTab("search"), []);
-  const setSegmentVal = useCallback(
-    (v: string) => setTab(v.toLowerCase() as SendTab),
-    []
-  );
 
   // Create Note shows available secure messaging apps
   const [, sendViaAppStr] = useAvailMessagingApps();

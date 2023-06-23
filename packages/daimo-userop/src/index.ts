@@ -49,7 +49,6 @@ export class DaimoAccount {
 
   public static async init(
     publicClient: PublicClient,
-    tokenAddress: Address,
     derPublicKey: string,
     signer: SigningCallback,
     dryRun: boolean

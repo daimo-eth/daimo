@@ -5,7 +5,7 @@ import { Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { assert } from "../logic/assert";
-import { Log } from "../logic/log";
+import { createEnclaveKey } from "../logic/enclave";
 import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
@@ -14,20 +14,18 @@ export function useCreateAccount(name: string): ActHandle {
   const [as, setAS] = useActStatus();
 
   // Create enclave key immediately, in the idle state
-  const [key, setKey] = useState<{
-    enclaveKeyName: string;
-    pubKeyHex: Hex | null;
-  }>();
+  const enclaveKeyName = defaultEnclaveKeyName;
+  const [pubKeyHex, setPubKeyHex] = useState<Hex>();
   useEffect(() => {
-    Log.promise("createEnclaveKey", createEnclaveKey(setAS)).then(setKey);
+    createKey(setAS, enclaveKeyName).then(setPubKeyHex);
   }, []);
 
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
   const exec = async () => {
-    if (!key?.pubKeyHex) return;
+    if (!pubKeyHex) return;
     setAS("loading", "Deploying contract...");
-    result.mutate({ name, pubKeyHex: key.pubKeyHex });
+    result.mutate({ name, pubKeyHex });
   };
 
   // Once account creation succeeds, save the account
@@ -37,7 +35,7 @@ export function useCreateAccount(name: string): ActHandle {
     if (account) return;
     if (["idle", "loading"].includes(result.status)) return;
     if (!result.variables || !result.variables.name) return;
-    if (!key?.pubKeyHex) return;
+    if (!pubKeyHex) return;
 
     // RPC failed, offline?
     if (result.status === "error") {
@@ -65,7 +63,7 @@ export function useCreateAccount(name: string): ActHandle {
       lastNonce: BigInt(0),
       lastBlockTimestamp: 0,
 
-      enclaveKeyName: key.enclaveKeyName,
+      enclaveKeyName,
 
       pushToken: null,
     });
@@ -88,34 +86,15 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   }
 }
 
-async function createEnclaveKey(
-  setAS: SetActStatus,
-  enclaveKeyName = defaultEnclaveKeyName
-) {
-  let pubKeyHex = null;
-
+async function createKey(setAS: SetActStatus, enclaveKeyName: string) {
   setAS("idle", "Creating enclave key...");
   try {
-    const pubKey = await ExpoEnclave.createKeyPair(enclaveKeyName);
-    pubKeyHex = `0x${pubKey}` as Hex;
-  } catch (e: unknown) {
-    // May already exist
-    try {
-      const pubKeyMaybe = await ExpoEnclave.fetchPublicKey(enclaveKeyName);
-      if (pubKeyMaybe) pubKeyHex = `0x${pubKeyMaybe}` as Hex;
-      else setAS(e as Error);
-    } catch {
-      setAS(e as Error);
-    }
-  }
-
-  try {
-    const hwSecLevel = await ExpoEnclave.getHardwareSecurityLevel();
+    const { pubKeyHex, hwSecLevel } = await createEnclaveKey(enclaveKeyName);
     setAS("idle", getKeySecurityMessage(hwSecLevel));
-  } catch (e: unknown) {
-    console.warn("Error in getHardwareSecurityLevel", e);
-    setAS("idle", "Couldn't get hardware security level");
+    return pubKeyHex;
+  } catch (e: any) {
+    console.warn(`[ACCOUNT] ERROR: create key or get HW security level`, e);
+    setAS("error", e.message);
+    return undefined;
   }
-
-  return { enclaveKeyName, pubKeyHex };
 }

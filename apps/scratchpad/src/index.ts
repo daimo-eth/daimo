@@ -167,7 +167,6 @@ async function createAccount() {
   const dryRun = false;
   const account = await DaimoAccount.init(
     publicClient,
-    tokenMetadata.address,
     pubKeyHex,
     signer,
     dryRun

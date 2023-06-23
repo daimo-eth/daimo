@@ -17,10 +17,12 @@ import {
 import { ClientsType, ContractType, getClients } from "../chain";
 import { NamedAccount } from "../model";
 
+const registeredName = "Registered";
 const registeredEvent = getAbiItem({
   abi: nameRegistryConfig.abi,
-  name: "Registered",
+  name: registeredName,
 });
+
 type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
 
 /* Interface to the NameRegistry contract. */
@@ -51,7 +53,7 @@ export class NameRegistry {
 
     this.clients.publicClient.watchContractEvent({
       ...nameRegistryConfig,
-      eventName: "Registered",
+      eventName: registeredName,
       onLogs: (logs: RegisteredLog[]) => {
         console.log(`[NAME-REG] subscribe, ${logs.length} new logs`);
         this.parseLogs(logs);
@@ -68,11 +70,14 @@ export class NameRegistry {
       .filter((a) => isValidName(a.name));
     console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
 
-    for (const acc of accounts) {
-      this.nameToAddr.set(acc.name, acc.addr);
-      this.addrToName.set(acc.addr, acc.name);
-      this.accounts.push(acc);
-    }
+    accounts.forEach(this.cacheAccount);
+  };
+
+  /** Cache an account in memory. */
+  cacheAccount = (acc: NamedAccount) => {
+    this.nameToAddr.set(acc.name, acc.addr);
+    this.addrToName.set(acc.addr, acc.name);
+    this.accounts.push(acc);
   };
 
   /** Find accounts whose names start with a prefix */
@@ -99,6 +104,10 @@ export class NameRegistry {
       hash,
     });
     if (tx.status !== "success") throw new Error("Transaction failed");
+
+    // Cache
+    this.cacheAccount({ name, addr: address });
+
     return tx;
   }
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useMMKVString } from "react-native-mmkv";
 import { Address } from "viem";
 
@@ -53,10 +53,10 @@ export function useAccount(): [
   (account: Account | null) => void
 ] {
   const [accountJSON, setAccountJSON] = useMMKVString("account");
-  const account = useMemo(() => parse(accountJSON), [accountJSON]);
+  const account = parse(accountJSON);
   const setAccount = useCallback(
     async (account: Account | null) => {
-      console.log("[ACCOUNT] saving...");
+      console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
       if (account) setAccountJSON(await serialize(account));
       else setAccountJSON("");
     },
@@ -75,7 +75,6 @@ export function useAccount(): [
 export function parse(accountJSON?: string): Account | null {
   if (!accountJSON) return null;
 
-  console.log(`[ACCOUNT] parsing, ${accountJSON.length} bytes`);
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // If we ever need migrations, they can happen here.

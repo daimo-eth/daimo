@@ -1,7 +1,7 @@
 interface LogAction {
   type: string;
   startMs: number;
-  endMs: number;
+  elapsedMs: number;
   error?: string;
 }
 
@@ -15,10 +15,11 @@ export class Log {
     const startMs = Date.now();
     try {
       const ret = await promise;
-      this.log({ type, startMs, endMs: Date.now() });
+      this.log({ type, startMs, elapsedMs: Date.now() - startMs });
       return ret;
     } catch (e: any) {
-      this.log({ type, startMs, endMs: Date.now(), error: getErrMessage(e) });
+      const elapsedMs = Date.now() - startMs;
+      this.log({ type, startMs, elapsedMs, error: getErrMessage(e) });
       throw e;
     }
   }

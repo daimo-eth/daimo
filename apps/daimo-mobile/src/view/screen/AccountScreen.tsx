@@ -1,9 +1,9 @@
-import * as ExpoEnclave from "@daimo/expo-enclave";
 import { Octicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chain";
+import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
@@ -37,7 +37,7 @@ export function AccountScreen() {
 
     async function clearWallet() {
       console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
-      await ExpoEnclave.deleteKeyPair(enclaveKeyName);
+      await deleteEnclaveKey(enclaveKeyName);
 
       setAccount(null);
       nav.navigate("Home");
@@ -126,18 +126,6 @@ function AppInfo() {
       )}
     </View>
   );
-}
-
-async function getEnclaveSec() {
-  const promises = [
-    ExpoEnclave.getBiometricSecurityLevel(),
-    ExpoEnclave.getHardwareSecurityLevel(),
-  ] as const;
-  const results = await Promise.all(promises);
-  return {
-    biometricSecurityLevel: results[0],
-    hardwareSecurityLevel: results[1],
-  };
 }
 
 const styles = StyleSheet.create({
