@@ -5,12 +5,12 @@ import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
-import { chainConfig } from "../../logic/chain";
-import { rpcHook } from "../../logic/trpc";
-import { useAccount } from "../../model/account";
-import { ButtonMed } from "../shared/Button";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextBold, TextSmall } from "../shared/text";
+import { chainConfig } from "../../../logic/chain";
+import { rpcHook } from "../../../logic/trpc";
+import { useAccount } from "../../../model/account";
+import { ButtonMed } from "../../shared/Button";
+import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { TextBody, TextBold, TextSmall } from "../../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();

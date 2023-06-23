@@ -1,15 +1,15 @@
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
-import { formatDaimoLink } from "../../logic/link";
-import { useAccount } from "../../model/account";
-import { ButtonBig } from "../shared/Button";
-import { Header } from "../shared/Header";
-import image from "../shared/image";
-import { useNav } from "../shared/nav";
-import { ss } from "../shared/style";
-import { TextSmall } from "../shared/text";
+import { formatDaimoLink } from "../../../logic/link";
+import { useAccount } from "../../../model/account";
+import { ButtonBig } from "../../shared/Button";
+import { Header } from "../../shared/Header";
+import image from "../../shared/image";
+import { useNav } from "../../shared/nav";
+import { ss } from "../../shared/style";
+import { TextSmall } from "../../shared/text";
 
 export default function ReceiveScreen() {
   const nav = useNav();

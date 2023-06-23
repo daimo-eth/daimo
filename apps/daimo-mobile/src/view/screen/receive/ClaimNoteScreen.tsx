@@ -6,21 +6,21 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { SendOpFn, useSendAsync } from "../../action/useSendAsync";
-import { assert } from "../../logic/assert";
-import { ChainContext } from "../../logic/chain";
+import { SendOpFn, useSendAsync } from "../../../action/useSendAsync";
+import { assert } from "../../../logic/assert";
+import { ChainContext } from "../../../logic/chain";
 import {
   EphemeralNote,
   useEphemeralSignature,
   useFetchNote,
-} from "../../logic/note";
-import { rpcFunc } from "../../logic/trpc";
-import { useAccount } from "../../model/account";
-import { TitleAmount } from "../shared/Amount";
-import { ButtonBig } from "../shared/Button";
-import { HomeStackParamList } from "../shared/nav";
-import { color, ss } from "../shared/style";
-import { TextCenter, TextError, TextSmall } from "../shared/text";
+} from "../../../logic/note";
+import { rpcFunc } from "../../../logic/trpc";
+import { useAccount } from "../../../model/account";
+import { TitleAmount } from "../../shared/Amount";
+import { ButtonBig } from "../../shared/Button";
+import { HomeStackParamList } from "../../shared/nav";
+import { color, ss } from "../../shared/style";
+import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 

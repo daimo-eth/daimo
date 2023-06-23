@@ -3,13 +3,13 @@ import { useMemo } from "react";
 
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
-import ClaimNoteScreen from "./screen/ClaimNoteScreen";
-import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
-import ReceiveScreen from "./screen/ReceiveScreen";
-import RequestScreen from "./screen/RequestScreen";
-import SendScreen from "./screen/SendScreen";
+import ClaimNoteScreen from "./screen/receive/ClaimNoteScreen";
+import DepositScreen from "./screen/receive/DepositScreen";
+import ReceiveScreen from "./screen/receive/ReceiveScreen";
+import RequestScreen from "./screen/receive/RequestScreen";
+import SendScreen from "./screen/send/SendScreen";
 import { HomeStackParamList } from "./shared/nav";
 import { useAccount } from "../model/account";
 
