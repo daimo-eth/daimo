@@ -28,10 +28,9 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     P256SHA256 private immutable _sigVerifier;
 
-    event AccountInitialized(
-        IEntryPoint indexed entryPoint,
-        bytes32[2] accountKeyHash
-    );
+    event AccountInitialized(IEntryPoint indexed entryPoint);
+    event SigningKeyAdded(IAccount indexed account, bytes32[2] accountPubkey);
+    event SigningKeyRemoved(IAccount indexed account, bytes32[2] accountPubkey);
 
     modifier onlySelf() {
         _onlySelf();
@@ -96,7 +95,8 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
 
     function _initialize(bytes32[2] calldata accountKey) internal virtual {
         accountKeys.push(accountKey);
-        emit AccountInitialized(_entryPoint, accountKey);
+        emit AccountInitialized(_entryPoint);
+        emit SigningKeyAdded(this, accountKey);
     }
 
     /// implement template method of BaseAccount
@@ -162,5 +162,36 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     ) internal view override {
         (newImplementation);
         _onlySelf();
+    }
+
+    /**
+     * Add a signing key to the account
+     * @param accountPubKey the P256 public key to add
+     */
+    function addSigningKey(bytes32[2] calldata accountPubKey) public onlySelf {
+        accountKeys.push(accountPubKey);
+        emit SigningKeyAdded(this, accountPubKey);
+    }
+
+    /**
+     * Remove a signing key from the account
+     * @param accountPubKey the P256 public key to remove
+     */
+    function removeSigningKey(
+        bytes32[2] calldata accountPubKey
+    ) public onlySelf {
+        require(accountKeys.length > 1, "cannot remove singular key");
+        for (uint256 i = 0; i < accountKeys.length; i++) {
+            if (
+                accountKeys[i][0] == accountPubKey[0] &&
+                accountKeys[i][1] == accountPubKey[1]
+            ) {
+                accountKeys[i] = accountKeys[accountKeys.length - 1];
+                accountKeys.pop();
+                emit SigningKeyRemoved(this, accountPubKey);
+                return;
+            }
+        }
+        revert("key not found");
     }
 }

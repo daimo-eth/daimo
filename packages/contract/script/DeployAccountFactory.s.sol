@@ -16,7 +16,9 @@ contract DeployScript is Script {
             0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
         );
 
-        P256SHA256 verifier = new P256SHA256{salt: 0}();
+        P256SHA256 verifier = P256SHA256(
+            0x026CC12c4a97608EF025F36b427864F2F5be851A // From DeployP256SHA256
+        );
 
         AccountFactory factory = new AccountFactory{salt: 0}(
             entryPoint,

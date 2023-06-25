@@ -23,7 +23,9 @@
     "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
-    "eas-build-post-install": "cd ../.. && npm run build"
+    "eas-build-post-install": "cd ../.. && npm run build",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@daimo/api": "*",
@@ -102,5 +104,8 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
   }
 }

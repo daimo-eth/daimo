@@ -11,7 +11,7 @@ import {
 
 import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { DaimoNonce } from "./nonce";
-import { SigningCallback } from "./util";
+import { SigningCallback, derKeyToContractFriendlyKey } from "./util";
 import config from "../config.json";
 
 export { SigningCallback };
@@ -104,6 +104,42 @@ export class DaimoAccount {
     console.log(`[OP] userOpHash: ${res.userOpHash}`);
 
     return res;
+  }
+
+  /** Adds an account signing key. Returns userOpHash. */
+  public async addSigningKey(derPublicKey: string, nonce: DaimoNonce) {
+    const contractFriendlyKey = derKeyToContractFriendlyKey(derPublicKey);
+
+    const op = this.opBuilder.execute(
+      this.getAddress(),
+      0n,
+      encodeFunctionData({
+        abi: Contracts.accountABI,
+        functionName: "addSigningKey",
+        args: [contractFriendlyKey],
+      }),
+      nonce
+    );
+
+    return this.sendUserOp(op);
+  }
+
+  /** Removes an account signing key. Returns userOpHash. */
+  public async removeSigningKey(derPublicKey: string, nonce: DaimoNonce) {
+    const contractFriendlyKey = derKeyToContractFriendlyKey(derPublicKey);
+
+    const op = this.opBuilder.execute(
+      this.getAddress(),
+      0n,
+      encodeFunctionData({
+        abi: Contracts.accountABI,
+        functionName: "removeSigningKey",
+        args: [contractFriendlyKey],
+      }),
+      nonce
+    );
+
+    return this.sendUserOp(op);
   }
 
   /** Sends eth. Returns userOpHash. */
