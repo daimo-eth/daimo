@@ -15,6 +15,7 @@
     "@types/chalk": "^2.2.0",
     "@types/tape": "^5.6.0",
     "chalk": "^4.0.0",
+    "csvtojson": "^2.0.10",
     "depcheck": "^1.4.3",
     "eslint": "^8.42.0",
     "tape": "^5.6.3",
