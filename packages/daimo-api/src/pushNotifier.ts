@@ -28,7 +28,7 @@ export class PushNotifier {
   expo = new Expo();
 
   constructor(
-    private publicClient: PublicClient,
+    public publicClient: PublicClient,
     private nameReg: NameRegistry,
     private db: DB
   ) {

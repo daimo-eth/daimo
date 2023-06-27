@@ -17,3 +17,21 @@ export const zHex = z
   .string()
   .regex(/^0x([0-9a-f]{2})*$/i)
   .refine((s): s is Hex => true);
+
+export type BigIntStr = `${bigint}`;
+
+export const zBigIntStr = z
+  .string()
+  .regex(/^[0-9]+$/i)
+  .refine((s): s is BigIntStr => true);
+
+export const zTransferLog = z.object({
+  from: zAddress,
+  to: zAddress,
+  value: zBigIntStr,
+  blockHash: zHex,
+  blockNumber: z.number(),
+  logIndex: z.number(),
+});
+
+export type TransferLog = z.infer<typeof zTransferLog>;

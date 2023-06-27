@@ -35,6 +35,4 @@ async function main() {
   server.listen(3000);
 }
 
-main()
-  .then(() => console.log("[API] exiting"))
-  .catch(console.error);
+main().catch(console.error);

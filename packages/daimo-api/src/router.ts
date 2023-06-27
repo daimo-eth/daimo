@@ -1,12 +1,12 @@
 import { DaimoAccount } from "@daimo/userop";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, getAbiItem, http } from "viem";
 import { baseGoerli } from "viem/chains";
 import { z } from "zod";
 
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
-import { NamedAccount, zAddress, zHex } from "./model";
+import { NamedAccount, TransferLog, zAddress, zHex } from "./model";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
@@ -77,6 +77,52 @@ export function createRouter(
           }`
         );
         return ret;
+      }),
+
+    syncEvents: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          sinceBlockNum: z.number(),
+        })
+      )
+      .query(async (opts) => {
+        const { address, sinceBlockNum } = opts.input;
+
+        // TODO: hack
+        const { publicClient, coinContract } = notifier;
+        const event = getAbiItem({ abi: coinContract.abi, name: "Transfer" });
+
+        const logQuery = {
+          address: coinContract.address,
+          event,
+          fromBlock: BigInt(sinceBlockNum),
+          strict: true,
+        } as const;
+
+        const logs = await Promise.all([
+          publicClient.getLogs({ ...logQuery, args: { from: address } }),
+          publicClient.getLogs({ ...logQuery, args: { to: address } }),
+        ]);
+
+        return logs.flat().map((log) => {
+          const { blockNumber, blockHash, logIndex } = log;
+          const { from, to, value } = log.args;
+
+          // TODO: handle pending
+          if (blockNumber == null || blockHash == null || logIndex == null) {
+            throw new Error(`pending log ${JSON.stringify(log)}`);
+          }
+
+          return {
+            from,
+            to,
+            value: `${value}`,
+            blockNumber: Number(blockNumber),
+            blockHash,
+            logIndex,
+          } as TransferLog;
+        });
       }),
 
     registerPushToken: publicProcedure
