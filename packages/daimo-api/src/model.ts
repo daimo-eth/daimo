@@ -28,9 +28,10 @@ export const zBigIntStr = z
 export const zTransferLog = z.object({
   from: zAddress,
   to: zAddress,
-  value: zBigIntStr,
+  amount: zBigIntStr,
   blockHash: zHex,
-  blockNumber: z.number(),
+  blockNum: z.number(),
+  txHash: zHex,
   logIndex: z.number(),
 });
 

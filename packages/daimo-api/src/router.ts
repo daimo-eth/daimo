@@ -79,7 +79,7 @@ export function createRouter(
         return ret;
       }),
 
-    syncEvents: publicProcedure
+    getAccountHistory: publicProcedure
       .input(
         z.object({
           address: zAddress,
@@ -88,11 +88,15 @@ export function createRouter(
       )
       .query(async (opts) => {
         const { address, sinceBlockNum } = opts.input;
+        console.log(
+          `[API] getAccountHistory: ${address} since ${sinceBlockNum}`
+        );
 
         // TODO: hack
         const { publicClient, coinContract } = notifier;
         const event = getAbiItem({ abi: coinContract.abi, name: "Transfer" });
 
+        // Get log
         const logQuery = {
           address: coinContract.address,
           event,
@@ -100,29 +104,47 @@ export function createRouter(
           strict: true,
         } as const;
 
-        const logs = await Promise.all([
+        const results = await Promise.all([
+          publicClient.getBlock({ blockTag: "finalized" }),
           publicClient.getLogs({ ...logQuery, args: { from: address } }),
           publicClient.getLogs({ ...logQuery, args: { to: address } }),
-        ]);
+        ] as const);
 
-        return logs.flat().map((log) => {
-          const { blockNumber, blockHash, logIndex } = log;
+        const finBlock = results[0];
+        if (finBlock.number == null) throw new Error("No finalized block");
+
+        const rawLogs = [...results[1], ...results[2]];
+
+        const transferLogs = rawLogs.map((log) => {
+          const { blockNumber, blockHash, logIndex, transactionHash } = log;
           const { from, to, value } = log.args;
 
           // TODO: handle pending
-          if (blockNumber == null || blockHash == null || logIndex == null) {
+          if (
+            blockNumber == null ||
+            blockHash == null ||
+            logIndex == null ||
+            transactionHash == null
+          ) {
             throw new Error(`pending log ${JSON.stringify(log)}`);
           }
 
           return {
             from,
             to,
-            value: `${value}`,
-            blockNumber: Number(blockNumber),
+            amount: `${value}`,
+            blockNum: Number(blockNumber),
             blockHash,
+            txHash: transactionHash,
             logIndex,
           } as TransferLog;
         });
+
+        return {
+          address,
+          lastFinalizedBlock: Number(finBlock.number),
+          transferLogs,
+        };
       }),
 
     registerPushToken: publicProcedure

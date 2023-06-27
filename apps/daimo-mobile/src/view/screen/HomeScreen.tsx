@@ -1,14 +1,23 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
+import { Address, hexToBigInt } from "viem";
 
 import { useWarmCache } from "../../action/useSendAsync";
+import { assert } from "../../logic/assert";
+import { amountToDollars } from "../../logic/coin";
 import { useAccount } from "../../model/account";
+import {
+  AccountHistory,
+  Transfer,
+  useAccountHistory,
+} from "../../model/accountHistory";
 import { TitleAmount } from "../shared/Amount";
 import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
+import { TextBody, TextCenter, TextSmall } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
@@ -21,6 +30,8 @@ export default function HomeScreen() {
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
   const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
   const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
+
+  const [hist] = useAccountHistory(account?.address);
 
   if (account == null) return null;
 
@@ -51,7 +62,64 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      <View>
+        <RecentHistory hist={hist} />
+      </View>
+
       <View style={ss.spacer.h32} />
+    </View>
+  );
+}
+
+function RecentHistory({ hist }: { hist?: AccountHistory }) {
+  if (hist == null) return null;
+
+  const latest = hist.recentTransfers.slice().reverse().slice(0, 5);
+  if (latest.length === 0) {
+    return (
+      <View>
+        <TextCenter>
+          <TextSmall>No transactions yet</TextSmall>
+        </TextCenter>
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      {latest.map((t) => (
+        <TransferRow
+          key={`${t.timestamp}-${t.from}-${t.to}`}
+          transfer={t}
+          address={hist.address}
+        />
+      ))}
+    </View>
+  );
+}
+
+function TransferRow({
+  transfer,
+  address,
+}: {
+  transfer: Transfer;
+  address: Address;
+}) {
+  assert(transfer.amount > 0);
+  assert([transfer.from, transfer.to].includes(address));
+
+  const verb = transfer.from === address ? "Sent" : "Received";
+  const amount = amountToDollars(BigInt(transfer.amount));
+  const toFrom = transfer.from === address ? "to" : "from";
+  const otherAddr = transfer.from === address ? transfer.to : transfer.from;
+  // TODO: name lookup
+  const other = otherAddr.substring(0, 8) + "...";
+
+  return (
+    <View style={styles.transferRow}>
+      <TextBody>
+        {verb} ${amount} {toFrom} {other}
+      </TextBody>
     </View>
   );
 }
@@ -67,6 +135,9 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     gap: 24,
+  },
+  transferRow: {
+    padding: 8,
   },
 });
 
