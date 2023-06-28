@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "eth.daimo",
-      "buildNumber": "8",
+      "buildNumber": "9",
       "config": {
         "usesNonExemptEncryption": false
       },
