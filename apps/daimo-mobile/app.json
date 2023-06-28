@@ -12,17 +12,23 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "scheme": "daimo",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "eth.daimo",
-      "buildNumber": "6",
+      "buildNumber": "7",
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "sgnl",
+          "tg"
+        ]
       }
     },
     "android": {
