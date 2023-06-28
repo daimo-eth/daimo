@@ -1,6 +1,6 @@
 import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chain";
@@ -34,7 +34,9 @@ export function HistoryOpScreen({ route, navigation }: Props) {
     }
   })();
 
-  navigation.setOptions({ title });
+  useEffect(() => {
+    navigation.setOptions({ title });
+  }, [navigation, title]);
 
   return (
     <View style={ss.container.vertModal}>
@@ -78,6 +80,8 @@ function TransferBody({ op }: { op: TransferOp }) {
       <KVRow k="To" v={<AddrText addr={op.to} />} />
       <KVRow k="Amount" v={"$" + amountToDollars(op.amount)} />
       <KVRow k="Date" v={timeString(op.timestamp)} />
+      {op.opHash && <KVRow k="User op" v={op.opHash} />}
+      {op.blockNumber && <KVRow k="Block" v={op.blockNumber} />}
     </View>
   );
 }

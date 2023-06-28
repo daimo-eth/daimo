@@ -151,6 +151,14 @@ function SendButton({
       assert(dollars > 0);
       console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
       return account.erc20transfer(recipient.addr, `${dollars}`);
+    },
+    {
+      type: "transfer",
+      from: account.address,
+      to: recipient.addr,
+      amount: Number(dollarsToAmount(dollars)),
+      status: "pending",
+      timestamp: 0,
     }
   );
 
@@ -203,7 +211,9 @@ function SendButton({
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-    nav.setParams({ recipient: undefined, dollars: undefined });
+
+    // Go Home, show newly created transaction
+    nav.navigate("Home");
   }, [status]);
 
   return (

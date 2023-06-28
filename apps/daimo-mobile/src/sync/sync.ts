@@ -1,8 +1,8 @@
 import { NamedAccount, TransferLog } from "@daimo/api";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { assert } from "../logic/assert";
-import { chainConfig } from "../logic/chain";
+import { Chain, ChainStatus, chainConfig } from "../logic/chain";
 import { rpcFunc } from "../logic/trpc";
 import { useAccount } from "../model/account";
 import { AccountHistory, useAccountHistory } from "../model/accountHistory";
@@ -18,8 +18,18 @@ export function useSyncAccountHistory() {
     if (!hist) return;
     assert(hist.address === address);
 
-    syncAccountHistory(hist).then(setHist).catch(console.error);
+    resyncAccountHistory(hist, setHist);
   }, [hist?.address, hist?.lastFinalizedBlock]);
+}
+
+/** Gets latest history for this account, in the background. */
+export function resyncAccountHistory(
+  hist: AccountHistory,
+  setHist: (h: AccountHistory) => void
+) {
+  console.log(`[SYNC] RESYNC account balance and history for ${hist.address}`);
+  syncAccountHistory(hist).then(setHist).catch(console.error);
+  refreshAccount();
 }
 
 /** Loads all account history since the last finalized block as of the previous sync.
@@ -34,15 +44,36 @@ async function syncAccountHistory(hist: AccountHistory) {
   assert(result.lastFinalizedBlock >= hist.lastFinalizedBlock);
 
   // Sync in recent transfers
-  // Delete transfers that were potentially reverted to avoid dupes
+  // Start with finalized transfers only
   const oldFinalizedTransfers = hist.recentTransfers.filter(
-    (t) => t.blockNumber == null || t.blockNumber < hist.lastFinalizedBlock
+    (t) => t.blockNumber && t.blockNumber < hist.lastFinalizedBlock
   );
 
-  const recentTransfers = updateTransfers(
+  // Add newly onchain transfers
+  const recentTransfers = addTransfers(
     oldFinalizedTransfers,
     result.transferLogs
   );
+
+  // Mark finalized
+  for (const t of recentTransfers) {
+    if (t.blockNumber && t.blockNumber <= result.lastFinalizedBlock) {
+      t.status = "finalized";
+    }
+  }
+
+  // Better algorithm to match pending transfers
+  const oldPending = hist.recentTransfers.filter((t) => t.status === "pending");
+  const stillPending = oldPending.filter(
+    (t) =>
+      recentTransfers.find(
+        (r) =>
+          t.from.toLowerCase() === r.from.toLowerCase() &&
+          t.to.toLowerCase() === r.to.toLowerCase() &&
+          t.amount === r.amount
+      ) == null
+  );
+  recentTransfers.push(...stillPending);
 
   const contacts = updateContacts(hist.contacts, result.namedAddrs);
 
@@ -79,11 +110,10 @@ function updateContacts(old: Contact[], found: Contact[]): Contact[] {
   return ret;
 }
 
-/** Update transfer based on new Transfer logs */
-function updateTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
+/** Add transfers based on new Transfer event logs */
+function addTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
+  // Start with old, finalized transfers
   const ret = [...old];
-
-  // TODO: match existing pending transfers, update them
 
   // Add new transfers since previous lastFinalizedBlock
   for (const transfer of logs) {
@@ -103,8 +133,6 @@ function updateTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
     });
   }
 
-  // TODO: mark finalized
-
   return ret;
 }
 
@@ -115,4 +143,38 @@ function guessTimestampFromNum(blockNum: number) {
     default:
       throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
   }
+}
+
+// TODO: clean up
+let refreshAccount = () => {};
+
+export function usePollChain() {
+  const [account, setAccount] = useAccount();
+  const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
+  const chain = useMemo(() => new Chain(), []);
+
+  refreshAccount = async () => {
+    try {
+      console.log(`[APP] loading chain status...`);
+      const status = await chain.getStatus();
+      setStatus(status);
+
+      if (!account || status.status !== "ok") return;
+      console.log(`[APP] reloading account ${account.address}...`);
+      setAccount(await chain.updateAccount(account, status));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Refresh whenever the account changes, then periodically
+  const address = account?.address;
+  useEffect(() => {
+    refreshAccount();
+    const interval = setInterval(refreshAccount, 30000);
+    return () => clearInterval(interval);
+  }, [address]);
+
+  const cs = useMemo(() => ({ chain, status }), [chain, status]);
+  return cs;
 }

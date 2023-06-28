@@ -23,6 +23,7 @@ export function RecentHistory({ hist }: { hist?: AccountHistory }) {
   if (hist == null) return null;
 
   const latest = hist.recentTransfers.slice().reverse().slice(0, 5);
+
   if (latest.length === 0) {
     return (
       <View>

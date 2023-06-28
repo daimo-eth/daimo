@@ -25,6 +25,7 @@ export default function HomeScreen() {
   const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
 
   const [hist] = useAccountHistory(account?.address);
+  console.log(`[HOME] rendering with history ${hist?.recentTransfers.length}`);
 
   if (account == null) return null;
 

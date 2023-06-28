@@ -23,7 +23,7 @@ const mmkv = new MMKV();
 const historyCache = new Map<Address, AccountHistory>();
 const historyListeners = new Map<Address, ((h: AccountHistory) => void)[]>();
 
-export function useAccountHistory(address?: Address) {
+export function useAccountHistory(address: Address | undefined) {
   const cachedHist = address ? historyCache.get(address) : undefined;
   const [hist, setHist] = useState<AccountHistory | undefined>(cachedHist);
 

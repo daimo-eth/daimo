@@ -4,19 +4,19 @@ import { Address } from "viem";
 import { TextBold } from "./text";
 
 const specialAddrs: { [_: Address]: string } = {
-  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "FAUCET",
+  "0x2a6d311394184eeb6df8fbbf58626b085374ffe7": "FAUCET",
 };
 
 const nameCache = new Map<Address, string>();
 
 export function cacheName(addr: Address, name: string) {
-  nameCache.set(addr, name);
+  nameCache.set(addr.toLowerCase() as Address, name);
 }
 
 /** Shows a named Daimo account or an Ethereum address. */
 export function AddrText({ addr, name }: { addr: Address; name?: string }) {
   if (!name) {
-    name = nameCache.get(addr);
+    name = nameCache.get(addr.toLowerCase() as Address);
   }
   if (name) {
     return <TextBold>{name}</TextBold>;
