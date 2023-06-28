@@ -3,6 +3,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Address } from "viem";
 
 import { Recipient } from "../../logic/recipient";
+import { Op } from "../../model/op";
 
 export type HomeStackParamList = {
   Home: undefined;
@@ -19,6 +20,8 @@ export type HomeStackParamList = {
         ephemeralOwner: Address | undefined;
       };
   Request: undefined;
+  History: undefined;
+  HistoryOp: { op: Op };
 };
 
 export function useNav() {

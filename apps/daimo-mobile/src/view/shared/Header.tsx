@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useContext } from "react";
-import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
@@ -81,6 +81,6 @@ const styles = StyleSheet.create({
   indicator: {
     width: 18,
     height: 18,
-    borderRadius: 9,
+    borderRadius: 4,
   },
 });

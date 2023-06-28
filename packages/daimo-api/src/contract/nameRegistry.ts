@@ -117,7 +117,7 @@ export class NameRegistry {
   }
 
   /** Find Daimo name for a given wallet address, or null if not found. */
-  async resolveAddress(address: Address): Promise<string | null> {
+  resolveAddress(address: Address): string | null {
     return this.addrToName.get(address) || null;
   }
 }

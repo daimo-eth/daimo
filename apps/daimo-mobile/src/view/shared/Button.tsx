@@ -128,7 +128,7 @@ export const buttonStyles = {
       fontSize: 16,
       fontWeight: "600",
       textAlign: "center",
-      color: color.grayDark,
+      color: color.darkGray,
     },
   }),
 };

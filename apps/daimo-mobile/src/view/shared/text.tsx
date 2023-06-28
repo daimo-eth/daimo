@@ -1,36 +1,39 @@
-import { ReactNode } from "react";
-import { Text } from "react-native";
+import { Text, TextProps } from "react-native";
 
 import { ss } from "./style";
 
-export function TextH1({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.h1}>{children}</Text>;
+export function TextH1(props: TextProps) {
+  return <Text {...props} style={ss.text.h1} />;
 }
 
-export function TextH2({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.h2}>{children}</Text>;
+export function TextH2(props: TextProps) {
+  return <Text {...props} style={ss.text.h2} />;
 }
 
-export function TextH3({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.h3}>{children}</Text>;
+export function TextH3(props: TextProps) {
+  return <Text {...props} style={ss.text.h3} />;
 }
 
-export function TextBody({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.body}>{children}</Text>;
+export function TextBody(props: TextProps) {
+  return <Text {...props} style={ss.text.body} />;
 }
 
-export function TextSmall({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.small}>{children}</Text>;
+export function TextSmall(props: TextProps) {
+  return <Text {...props} style={ss.text.small} />;
 }
 
-export function TextBold({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.bold}>{children}</Text>;
+export function TextBold(props: TextProps) {
+  return <Text {...props} style={ss.text.bold} />;
 }
 
-export function TextCenter({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.center}>{children}</Text>;
+export function TextCenter(props: TextProps) {
+  return <Text {...props} style={ss.text.center} />;
 }
 
-export function TextError({ children }: { children: ReactNode }) {
-  return <Text style={ss.text.error}>{children}</Text>;
+export function TextRight(props: TextProps) {
+  return <Text {...props} style={ss.text.right} />;
+}
+
+export function TextError(props: TextProps) {
+  return <Text {...props} style={ss.text.error} />;
 }

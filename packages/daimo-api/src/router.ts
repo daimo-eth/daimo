@@ -1,5 +1,5 @@
 import { DaimoAccount } from "@daimo/userop";
-import { createPublicClient, getAbiItem, http } from "viem";
+import { Address, createPublicClient, getAbiItem, http } from "viem";
 import { baseGoerli } from "viem/chains";
 import { z } from "zod";
 
@@ -37,7 +37,7 @@ export function createRouter(
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
         const { addr } = opts.input;
-        return await nameReg.resolveAddress(addr);
+        return nameReg.resolveAddress(addr);
       }),
 
     lookupAccountByKey: publicProcedure
@@ -119,7 +119,6 @@ export function createRouter(
           const { blockNumber, blockHash, logIndex, transactionHash } = log;
           const { from, to, value } = log.args;
 
-          // TODO: handle pending
           if (
             blockNumber == null ||
             blockHash == null ||
@@ -140,10 +139,24 @@ export function createRouter(
           } as TransferLog;
         });
 
+        // Get named accounts
+        const addrs = new Set<Address>();
+        transferLogs.forEach((log) => {
+          addrs.add(log.from);
+          addrs.add(log.to);
+        });
+        const namedAddrs = [...addrs]
+          .map((addr) => ({
+            addr,
+            name: nameReg.resolveAddress(addr),
+          }))
+          .filter((na): na is NamedAccount => na.name != null);
+
         return {
           address,
           lastFinalizedBlock: Number(finBlock.number),
           transferLogs,
+          namedAddrs,
         };
       }),
 

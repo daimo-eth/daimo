@@ -8,7 +8,7 @@ export const color = {
   },
   black: "#000",
   gray: "#668",
-  grayDark: "#334",
+  darkGray: "#222",
   white: "#fff",
   primary: "#007aff",
   danger: "#f35369",
@@ -38,10 +38,20 @@ export const ss = {
       backgroundColor: "#fff",
       alignItems: "stretch",
     },
+    vertModal: {
+      flex: 1,
+      flexDirection: "column",
+      backgroundColor: color.white,
+      alignSelf: "stretch",
+      padding: 16,
+    },
     center: {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
+    },
+    ph8: {
+      paddingHorizontal: 8,
     },
     ph16: {
       paddingHorizontal: 16,
@@ -73,7 +83,7 @@ export const ss = {
     },
     body: {
       ...textBase,
-      fontSize: 18,
+      fontSize: 16,
       lineHeight: 24,
     },
     small: {
@@ -90,6 +100,9 @@ export const ss = {
     },
     center: {
       textAlign: "center",
+    },
+    right: {
+      textAlign: "right",
     },
     bold: {
       fontWeight: "bold",

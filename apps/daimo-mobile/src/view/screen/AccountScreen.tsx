@@ -8,7 +8,7 @@ import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import { useNav } from "../shared/nav";
-import { color, ss } from "../shared/style";
+import { ss } from "../shared/style";
 import { TextBold, TextH2, TextSmall } from "../shared/text";
 
 export function AccountScreen() {
@@ -55,7 +55,7 @@ export function AccountScreen() {
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={ss.container.vertModal}>
         <View style={ss.spacer.h16} />
         <View style={ss.container.ph16}>
           <TextH2>Account</TextH2>
@@ -129,14 +129,6 @@ function AppInfo() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    backgroundColor: color.white,
-    alignSelf: "stretch",
-    padding: 16,
-    alignItems: "flex-start",
-  },
   keyValueList: {
     ...ss.container.ph16,
     flex: 1,

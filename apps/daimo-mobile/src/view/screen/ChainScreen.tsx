@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { ChainContext, ChainTip } from "../../logic/chain";
 import { color, ss } from "../shared/style";
 import { TextBody, TextBold, TextH2, TextSmall } from "../shared/text";
-import { timeAgo, useTime } from "../shared/time";
+import { timeAgoS, useTime } from "../shared/time";
 
 export function ChainScreen() {
   const { status } = useContext(ChainContext);
@@ -40,7 +40,7 @@ function TipInfo({ tip }: { tip: ChainTip }) {
   return (
     <>
       <TextBody>
-        Block #{tip.blockHeight} · {timeAgo(tip.blockTimestamp, nowS)}
+        Block #{tip.blockHeight} · {timeAgoS(tip.blockTimestamp, nowS)}
       </TextBody>
     </>
   );

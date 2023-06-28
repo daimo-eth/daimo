@@ -78,11 +78,6 @@ export function parse(accountJSON?: string): Account | null {
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // If we ever need migrations, they can happen here.
-  assert(
-    model.storageVersion <= latestStorageVersion,
-    "Unknown storage version. Did you downgrade to an older version of the app?"
-  );
-
   // Delete V1 testnet account. Re-onboard, ask for notifications permisison.
   if (model.storageVersion === 1) return null;
 

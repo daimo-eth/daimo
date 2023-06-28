@@ -25,7 +25,7 @@ export function useRecipientSearch(prefix: string) {
   // TODO: get past recipients from local storage
   const recipients: Recipient[] = [];
 
-  const enabled = prefix.length >= 2; // TODO: >= 2
+  const enabled = prefix.length >= 1;
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     recipients.push(...res.data);

@@ -1,3 +1,4 @@
+import { NamedAccount, TransferLog } from "@daimo/api";
 import { useEffect } from "react";
 
 import { assert } from "../logic/assert";
@@ -5,6 +6,7 @@ import { chainConfig } from "../logic/chain";
 import { rpcFunc } from "../logic/trpc";
 import { useAccount } from "../model/account";
 import { AccountHistory, useAccountHistory } from "../model/accountHistory";
+import { TransferOp } from "../model/op";
 
 export function useSyncAccountHistory() {
   const [account] = useAccount();
@@ -33,30 +35,22 @@ async function syncAccountHistory(hist: AccountHistory) {
 
   // Sync in recent transfers
   // Delete transfers that were potentially reverted to avoid dupes
-  const recentTransfers = hist.recentTransfers.filter(
+  const oldFinalizedTransfers = hist.recentTransfers.filter(
     (t) => t.blockNumber == null || t.blockNumber < hist.lastFinalizedBlock
   );
 
-  // TODO: match existing pending transfers, update them
+  const recentTransfers = updateTransfers(
+    oldFinalizedTransfers,
+    result.transferLogs
+  );
 
-  // Add new transfers since previous lastFinalizedBlock
-  for (const transfer of result.transferLogs) {
-    recentTransfers.push({
-      from: transfer.from,
-      to: transfer.to,
-      amount: Number(transfer.amount),
-      timestamp: guessTimestampFromNum(transfer.blockNum),
-      txHash: transfer.txHash,
-      blockNumber: transfer.blockNum,
-      blockHash: transfer.blockHash,
-      logIndex: transfer.logIndex,
-    });
-  }
+  const contacts = updateContacts(hist.contacts, result.namedAddrs);
 
   const ret: AccountHistory = {
     address: result.address,
     lastFinalizedBlock: result.lastFinalizedBlock,
     recentTransfers,
+    contacts,
   };
 
   console.log(
@@ -65,10 +59,59 @@ async function syncAccountHistory(hist: AccountHistory) {
   return ret;
 }
 
+type Contact = NamedAccount;
+
+/** Update contacts based on recent interactions */
+function updateContacts(old: Contact[], found: Contact[]): Contact[] {
+  const ret = [...old];
+
+  // TODO: better algo
+  for (const na of found) {
+    if (na.name == null) continue;
+    if (ret.find((c) => c.addr === na.addr)) continue;
+    ret.push(na);
+  }
+
+  if (ret.length !== old.length) {
+    console.log(`[SYNC] added ${ret.length - old.length} new contacts`);
+  }
+
+  return ret;
+}
+
+/** Update transfer based on new Transfer logs */
+function updateTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
+  const ret = [...old];
+
+  // TODO: match existing pending transfers, update them
+
+  // Add new transfers since previous lastFinalizedBlock
+  for (const transfer of logs) {
+    ret.push({
+      type: "transfer",
+      status: "confirmed",
+
+      from: transfer.from,
+      to: transfer.to,
+      amount: Number(transfer.amount),
+
+      timestamp: guessTimestampFromNum(transfer.blockNum),
+      txHash: transfer.txHash,
+      blockNumber: transfer.blockNum,
+      blockHash: transfer.blockHash,
+      logIndex: transfer.logIndex,
+    });
+  }
+
+  // TODO: mark finalized
+
+  return ret;
+}
+
 function guessTimestampFromNum(blockNum: number) {
   switch (chainConfig.l2.network) {
     case "base-goerli":
-      return 1675218816 + blockNum * 2;
+      return 1675193616 + blockNum * 2;
     default:
       throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
   }

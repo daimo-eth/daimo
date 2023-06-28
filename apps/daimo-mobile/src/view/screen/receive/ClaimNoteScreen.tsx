@@ -1,4 +1,3 @@
-import { tokenMetadata } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useContext, useEffect, useState } from "react";

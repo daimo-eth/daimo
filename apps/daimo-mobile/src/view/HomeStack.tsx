@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
+import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
 import ClaimNoteScreen from "./screen/receive/ClaimNoteScreen";
@@ -37,6 +38,7 @@ export function HomeStackNav() {
         <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
         <HomeStack.Screen name="Note" component={ClaimNoteScreen} />
         <HomeStack.Screen name="Request" component={RequestScreen} />
+        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );
