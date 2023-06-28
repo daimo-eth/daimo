@@ -58,12 +58,15 @@ function TransferRow({
   address: Address;
 }) {
   assert(transfer.amount > 0);
-  assert([transfer.from, transfer.to].includes(address));
+  const from = transfer.from.toLowerCase() as Address;
+  const to = transfer.to.toLowerCase() as Address;
+  address = address.toLowerCase() as Address;
+  assert([from, to].includes(address));
 
-  const verb = transfer.from === address ? "Sent" : "Received";
+  const verb = from === address ? "Sent" : "Received";
   const amount = amountToDollars(BigInt(transfer.amount));
-  const toFrom = transfer.from === address ? "to" : "from";
-  const otherAddr = transfer.from === address ? transfer.to : transfer.from;
+  const toFrom = from === address ? "to" : "from";
+  const otherAddr = from === address ? to : from;
 
   const nowS = Date.now() / 1e3;
 

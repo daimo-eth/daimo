@@ -88,7 +88,10 @@ function parse(json?: string): AccountHistory | null {
 
   const model = JSON.parse(json) as StoredModel;
 
+  // TODO: remove this line once AccountHistory is stable
+  // Till then, we wipe storage on every app load.
   if (model.storageVersion < 2) return null;
+
   assert(model.storageVersion === 1, "Unsupported version");
 
   const stored = JSON.parse(json) as AccountHistoryV1;

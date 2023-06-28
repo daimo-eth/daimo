@@ -45,7 +45,9 @@ export default function OnboardingScreen() {
   const [, setAccount] = useAccount();
   const pubKey = useLoadKeyFromEnclave();
   const account = useLoadAccountFromKey(pubKey);
-  useEffect(() => account && setAccount(account), [account]);
+  useEffect(() => {
+    if (account != null) setAccount(account);
+  }, [account]);
 
   return (
     <View style={styles.onboardingScreen}>
