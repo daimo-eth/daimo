@@ -14,30 +14,34 @@ export function useLoadKeyFromEnclave(enclaveKeyName = defaultEnclaveKeyName) {
   const [pubKey, setPubKey] = useState<string>();
 
   useEffect(() => {
-    Log.promise(
-      "enclaveFetchPublicKey",
-      ExpoEnclave.fetchPublicKey(enclaveKeyName)
-    ).then(setPubKey);
+    loadEnclaveKey(enclaveKeyName).then(setPubKey);
   }, [enclaveKeyName]);
 
   return pubKey == null ? pubKey : (`0x${pubKey}` as Hex);
 }
 
-/** Looks up a Daimo account, given a public signing key.  */
+/** Looks up a Daimo account, given a public signing key. Null = none found. */
 export function useLoadAccountFromKey(pubKey: Hex | undefined) {
-  const [account, setAccount] = useState<Account>();
+  const [account, setAccount] = useState<Account | null>();
 
   const pubKeyHex = pubKey || "0x";
   const enabled = pubKey != null;
   const res = rpcHook.lookupAccountByKey.useQuery({ pubKeyHex }, { enabled });
 
   useEffect(() => {
-    if (!res.isSuccess || !res.data) return;
-    if (account) return;
+    if (!res.isSuccess) return;
+    if (account !== undefined) return;
 
+    // No account found for this signing key
+    if (!res.data) {
+      setAccount(null);
+      return;
+    }
+
+    // Account found
     const { name, addr } = res.data;
 
-    console.log(`[ACCOUNT] loaded account ${name} from enclave key ${pubKey}`);
+    console.log(`[ENCLAVE] loaded account ${name} from enclave key ${pubKey}`);
     setAccount({
       name,
       address: addr,
@@ -65,6 +69,8 @@ export async function createEnclaveKey(enclaveKeyName: string) {
   );
   const pubKeyHex = `0x${pubKey}` as Hex;
 
+  console.log(`[ENCLAVE] created ${enclaveKeyName} = ${pubKeyHex}`);
+
   return { enclaveKeyName, pubKeyHex, hwSecLevel };
 }
 
@@ -74,10 +80,12 @@ export async function createEnclaveKey(enclaveKeyName: string) {
  * Fetching from the enclave takes ~1 second on iPhone 13 Mini & iOS simulator.
  */
 export async function loadEnclaveKey(enclaveKeyName: string) {
-  return await Log.promise(
+  const ret = await Log.promise(
     "ExpoEnclave.fetchPublicKey",
     ExpoEnclave.fetchPublicKey(enclaveKeyName)
   );
+  console.log(`[ENCLAVE] loaded ${enclaveKeyName} = ${ret}`);
+  return ret;
 }
 
 /** Deletes a key from the enclave. */
@@ -86,6 +94,7 @@ export async function deleteEnclaveKey(enclaveKeyName: string) {
     "ExpoEnclave.deleteKeyPair",
     ExpoEnclave.deleteKeyPair(enclaveKeyName)
   );
+  console.log(`[ENCLAVE] deleted ${enclaveKeyName}`);
 }
 
 /** Gets detailed enclave security level */

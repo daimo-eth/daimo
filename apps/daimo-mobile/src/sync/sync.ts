@@ -62,7 +62,7 @@ async function syncAccountHistory(hist: AccountHistory) {
     }
   }
 
-  // Better algorithm to match pending transfers
+  // TODO: better algorithm to match pending transfers
   const oldPending = hist.recentTransfers.filter((t) => t.status === "pending");
   const stillPending = oldPending.filter(
     (t) =>
@@ -115,6 +115,12 @@ function addTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
   // Start with old, finalized transfers
   const ret = [...old];
 
+  // Sort new logs
+  logs = logs.sort((a, b) => {
+    if (a.blockNum !== b.blockNum) return a.blockNum - b.blockNum;
+    return a.logIndex - b.logIndex;
+  });
+
   // Add new transfers since previous lastFinalizedBlock
   for (const transfer of logs) {
     ret.push({
@@ -136,6 +142,7 @@ function addTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
   return ret;
 }
 
+/** On L2, timestamp can be a deterministic function of block number. */
 function guessTimestampFromNum(blockNum: number) {
   switch (chainConfig.l2.network) {
     case "base-goerli":

@@ -19,11 +19,12 @@ import {
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import {
+  deleteEnclaveKey,
   useLoadAccountFromKey,
   useLoadKeyFromEnclave,
 } from "../../logic/enclave";
 import { rpcHook } from "../../logic/trpc";
-import { useAccount } from "../../model/account";
+import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
@@ -47,6 +48,12 @@ export default function OnboardingScreen() {
   const account = useLoadAccountFromKey(pubKey);
   useEffect(() => {
     if (account != null) setAccount(account);
+
+    if (account === null) {
+      // Null, not undefined = no account found for this pubkey
+      // TODO: consider making this a UI to warn the user
+      deleteEnclaveKey(defaultEnclaveKeyName);
+    }
   }, [account]);
 
   return (

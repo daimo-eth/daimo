@@ -20,17 +20,6 @@ export const chainConfig = {
   l2: baseGoerli,
 };
 
-// Reads chain state (L1 / L2 health) and Daimo account state from L2.
-export interface Chain {
-  getStatus(): Promise<ChainStatus>;
-
-  updateAccount(account: Account, status: ChainStatus): Promise<Account>;
-
-  subscribeTransfers(address: Address): () => void;
-
-  // TODO: send transaction, add or remove device.
-}
-
 export interface ChainTip {
   name: string;
   blockHeight: number;
@@ -51,6 +40,8 @@ export const ChainContext = createContext<{
   status: ChainStatus;
 }>({ status: { status: "loading" } });
 
+// Reads chain state and Daimo account state from L2.
+// TODO: talk to the Daimo API, not directly to JSON RPCs.
 export class Chain implements Chain {
   clientL1 = createPublicClient({ chain: chainConfig.l1, transport: http() });
 

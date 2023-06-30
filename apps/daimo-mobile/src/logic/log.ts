@@ -27,7 +27,8 @@ export class Log {
   private static log(action: LogAction) {
     // TODO: save in local debug log
     // TODO: roll up per-type stats
-    console.log(`[LOG] ${JSON.stringify(action)}`);
+    if (action.error) console.error(`[LOG] ${JSON.stringify(action)}`);
+    else console.log(`[LOG] ${JSON.stringify(action)}`);
   }
 }
 
