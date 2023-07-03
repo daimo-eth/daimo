@@ -5,6 +5,7 @@ import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
+import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
@@ -18,7 +19,8 @@ async function main() {
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const coinIndexer = new CoinIndexer(vc);
-  const nameReg = new NameRegistry(vc);
+  const keyReg = new KeyRegistry(vc);
+  const nameReg = new NameRegistry(vc, keyReg);
   const noteIndexer = new NoteIndexer(vc, nameReg);
   const opIndexer = new OpIndexer(vc);
   const faucet = new Faucet(vc, coinIndexer);
@@ -29,7 +31,7 @@ async function main() {
   const db = new DB();
   await db.createTables();
 
-  const notifier = new PushNotifier(coinIndexer, nameReg, db);
+  const notifier = new PushNotifier(coinIndexer, nameReg, keyReg, db);
 
   // Initialize in background
   (async () => {
@@ -51,6 +53,7 @@ async function main() {
     opIndexer,
     entryPoint,
     nameReg,
+    keyReg,
     faucet,
     notifier,
     accountFactory

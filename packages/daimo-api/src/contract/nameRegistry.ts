@@ -9,6 +9,8 @@ import {
   hexToString,
 } from "viem";
 
+import { KeyRegistry } from "./keyRegistry";
+import { NamedAccount } from "../../../daimo-common/src/model";
 import { ViemClient } from "../chain";
 
 const registeredName = "Registered";
@@ -32,7 +34,11 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
 
-  constructor(private vc: ViemClient) {}
+  keyRegistry: KeyRegistry;
+
+  constructor(private vc: ViemClient, keyRegistry: KeyRegistry) {
+    this.keyRegistry = keyRegistry;
+  }
 
   /** Init: index logs from chain, get all names so far */
   async init() {
@@ -46,7 +52,7 @@ export class NameRegistry {
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
-  parseLogs = (logs: RegisteredLog[]) => {
+  parseLogs = async (logs: RegisteredLog[]) => {
     const accounts = logs
       .map((l) => l.args)
       .map((a) => ({
@@ -57,6 +63,9 @@ export class NameRegistry {
     console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
 
     accounts.forEach(this.cacheAccount);
+    for (const acc of accounts) {
+      this.keyRegistry.watchAccount(acc);
+    }
   };
 
   /** Cache an account in memory. */

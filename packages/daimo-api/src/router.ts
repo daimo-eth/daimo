@@ -18,6 +18,7 @@ import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
+import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
@@ -32,6 +33,7 @@ export function createRouter(
   opIndexer: OpIndexer,
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
+  keyReg: KeyRegistry,
   faucet: Faucet,
   notifier: PushNotifier,
   accountFactory: AccountFactory
@@ -162,14 +164,14 @@ export function createRouter(
         })
       )
       .query(async (opts) => {
-        const ret = null as DAccount | null;
-        // TODO: lookup account by signing key
-        console.log(
-          `[API] lookup found ${ret?.name || "<no account>"} for pubkey ${
-            opts.input.pubKeyHex
-          }`
-        );
-        return ret;
+        return await keyReg.resolveKey(opts.input.pubKeyHex);
+      }),
+
+    lookupAccountKeys: publicProcedure
+      .input(z.object({ addr: zAddress }))
+      .query(async (opts) => {
+        const { addr } = opts.input;
+        return await keyReg.resolveAddressKeys(addr);
       }),
 
     getAccountHistory: publicProcedure
