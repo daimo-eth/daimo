@@ -4,7 +4,7 @@ import { Address } from "viem";
 import { TextBold } from "./text";
 
 const specialAddrs: { [_: Address]: string } = {
-  "0x2a6d311394184eeb6df8fbbf58626b085374ffe7": "FAUCET",
+  "0x2a6d311394184eeb6df8fbbf58626b085374ffe7": "faucet",
 };
 
 const nameCache = new Map<Address, string>();

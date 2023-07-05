@@ -1,13 +1,15 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
 import { chainConfig } from "../../../logic/chain";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
+import { useAccountHistory } from "../../../model/accountHistory";
+import { resyncAccountHistory } from "../../../sync/sync";
 import { ButtonMed } from "../../shared/Button";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextSmall } from "../../shared/text";
@@ -39,13 +41,23 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
     mutation.mutate({ recipient });
   }, [recipient]);
 
+  // Show faucet payment in history promptly
+  // TODO: show pending faucet OpEvent?
+  const [hist, setHist] = useAccountHistory(recipient);
+  useEffect(() => {
+    if (!hist) return;
+    if (!mutation.isSuccess) return;
+    resyncAccountHistory(hist, setHist);
+  }, [mutation.isSuccess]);
+
+  // Display
   let canRequest = false;
   let buttonType = "primary" as "primary" | "danger";
   let message = "Request $50 from faucet";
   if (mutation.isLoading) {
     message = "Loading...";
   } else if (mutation.isSuccess) {
-    message = "Sent";
+    message = "Faucet payment sent";
   } else if (mutation.isError) {
     message = "Error";
     buttonType = "danger";

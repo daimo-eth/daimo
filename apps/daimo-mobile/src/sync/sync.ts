@@ -6,7 +6,7 @@ import { Chain, ChainStatus, chainConfig } from "../logic/chain";
 import { rpcFunc } from "../logic/trpc";
 import { useAccount } from "../model/account";
 import { AccountHistory, useAccountHistory } from "../model/accountHistory";
-import { TransferOp } from "../model/op";
+import { OpStatus, TransferOpEvent } from "../model/op";
 
 export function useSyncAccountHistory() {
   const [account] = useAccount();
@@ -58,7 +58,7 @@ async function syncAccountHistory(hist: AccountHistory) {
   // Mark finalized
   for (const t of recentTransfers) {
     if (t.blockNumber && t.blockNumber <= result.lastFinalizedBlock) {
-      t.status = "finalized";
+      t.status = OpStatus.finalized;
     }
   }
 
@@ -111,7 +111,10 @@ function updateContacts(old: Contact[], found: Contact[]): Contact[] {
 }
 
 /** Add transfers based on new Transfer event logs */
-function addTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
+function addTransfers(
+  old: TransferOpEvent[],
+  logs: TransferLog[]
+): TransferOpEvent[] {
   // Start with old, finalized transfers
   const ret = [...old];
 
@@ -125,7 +128,7 @@ function addTransfers(old: TransferOp[], logs: TransferLog[]): TransferOp[] {
   for (const transfer of logs) {
     ret.push({
       type: "transfer",
-      status: "confirmed",
+      status: OpStatus.confirmed,
 
       from: transfer.from,
       to: transfer.to,

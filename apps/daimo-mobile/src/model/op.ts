@@ -1,10 +1,22 @@
 import { Address } from "viem";
 
 /**
- * A Daimo operation. These are 1:1 with userops when done via Daimo, but can
- * also represent transfers from other sources.
+ * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
+ * corresponds to an Ethereum event log. Usually--but not always--it is also
+ * 1:1 with a Daimo userop.
+ *
+ * In the pending state, we don't have an event log yet--instead we have an
+ * opHash &/or a txHash, and a future event log which we're expecting.
+ *
+ * Examples:
+ *
+ * - Sending from a Daimo account (Transfer log, userop)
+ * - Receiving from elsewhere (Transfer log, may or may not be a userop)
+ * - Registering a name (Register log, userop)
+ * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
+ * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type Op = TransferOp;
+export type OpEvent = TransferOpEvent;
 
 /**
  * Represents a transfer of tokens from one address to another.
@@ -16,10 +28,10 @@ export type Op = TransferOp;
  *   yet onchain) to confirmed (bundle transaction onchain) to finalized
  *   (written to a finalized L1 block, and therefore guaranteed permanent).
  *
- *   (For an optimistic rollup, a userop is arguably not finalized till the
+ *   For an optimistic rollup, a userop is arguably not finalized till the
  *   challenge period is up; an L2 node can be 100% certain that a given op is
  *   final after ~6 minutes (valid L2 root included in finalized L1 block) but
- *   anyone not running an L2 node has to wait a ~week to be sure.)
+ *   anyone not running an L2 full node has to wait a ~week to be sure.
  *
  * - A transfer ends up `CONFIRMED`/`FINALIZED` or `FAILED` if the op reverted.
  *
@@ -35,7 +47,7 @@ export type Op = TransferOp;
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface TransferOp extends OpBase {
+export interface TransferOpEvent extends OpEventBase {
   type: "transfer";
 
   from: Address;
@@ -45,21 +57,34 @@ export interface TransferOp extends OpBase {
   amount: number;
 }
 
-interface OpBase {
-  /** Unix seconds. For PENDING, time of bundler accept. Then, block time. */
+interface OpEventBase {
+  /** Unix seconds. When pending, bundler accept time. Otherwise, block time. */
   timestamp: number;
 
-  /** Every transfer ends up "finalized" or "failed" */
+  /** An op can start out  ends up "finalized", "failed", or "expoi" */
   status: OpStatus;
 
   /* Only set for Daimo transfers */
   opHash?: string;
 
-  /* Below are only set once we have a Transfer event. */
+  /* Can be set when we're pre-notified of a non-userop tx, eg faucet send */
   txHash?: string;
+
+  /* Below are only set once we have a Transfer event. */
   blockNumber?: number;
   blockHash?: string;
   logIndex?: number;
 }
 
-export type OpStatus = "pending" | "confirmed" | "failed" | "finalized";
+export enum OpStatus {
+  /** Accepted by bundler &/or in mempool, but not yet onchain. */
+  pending = "pending",
+  /** Succeeded onchain. */
+  confirmed = "confirmed",
+  /** Succeeded onchain, & guaranteed via a finalized L1 block. */
+  finalized = "finalized",
+  /** Failed onchain. */
+  failed = "failed",
+  /** Pending too long, presumed dead. */
+  expired = "expired",
+}

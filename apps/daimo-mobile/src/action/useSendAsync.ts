@@ -8,7 +8,7 @@ import { Chain, ChainContext } from "../logic/chain";
 import { loadEnclaveKey } from "../logic/enclave";
 import { useAccount } from "../model/account";
 import { useAccountHistory } from "../model/accountHistory";
-import { Op } from "../model/op";
+import { OpEvent } from "../model/op";
 import { resyncAccountHistory } from "../sync/sync";
 
 /** Send a tx user op. */
@@ -18,7 +18,7 @@ export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 export function useSendAsync(
   enclaveKeyName: string,
   sendFn: SendOpFn,
-  pendingOp?: Op
+  pendingOp?: OpEvent
 ): ActHandle {
   const [as, setAS] = useActStatus();
   const { chain } = useContext(ChainContext);
