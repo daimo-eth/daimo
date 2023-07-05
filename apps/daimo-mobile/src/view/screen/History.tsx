@@ -4,7 +4,7 @@ import { Address } from "viem";
 import { assert } from "../../logic/assert";
 import { amountToDollars } from "../../logic/coin";
 import { AccountHistory } from "../../model/accountHistory";
-import { TransferOp } from "../../model/op";
+import { TransferOpEvent } from "../../model/op";
 import { AddrText } from "../shared/AddrText";
 import { ButtonSmall } from "../shared/Button";
 import { useNav } from "../shared/nav";
@@ -55,7 +55,7 @@ function TransferRow({
   transfer,
   address,
 }: {
-  transfer: TransferOp;
+  transfer: TransferOpEvent;
   address: Address;
 }) {
   assert(transfer.amount > 0);

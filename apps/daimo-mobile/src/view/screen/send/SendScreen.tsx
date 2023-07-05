@@ -14,6 +14,8 @@ import { amountToDollars, dollarsToAmount } from "../../../logic/coin";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Recipient } from "../../../logic/recipient";
 import { useAccount } from "../../../model/account";
+import { OpStatus } from "../../../model/op";
+import { cacheName } from "../../shared/AddrText";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
@@ -145,6 +147,12 @@ function SendButton({
   assert(account != null);
   assert(dollars >= 0);
 
+  // TODO: do this elsewhere
+  useEffect(() => {
+    if (recipient.name == null) return;
+    cacheName(recipient.addr, recipient.name);
+  }, [recipient]);
+
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
@@ -157,7 +165,7 @@ function SendButton({
       from: account.address,
       to: recipient.addr,
       amount: Number(dollarsToAmount(dollars)),
-      status: "pending",
+      status: OpStatus.pending,
       timestamp: 0,
     }
   );

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address } from "viem";
 
-import { TransferOp } from "./op";
+import { TransferOpEvent } from "./op";
 import { StoredModel } from "./storedModel";
 import { assert } from "../logic/assert";
 import { cacheName } from "../view/shared/AddrText";
@@ -14,7 +14,7 @@ export interface AccountHistory {
   /** The latest finalized block as of the most recent update. */
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
-  recentTransfers: TransferOp[];
+  recentTransfers: TransferOpEvent[];
   /** Names for Daimo accounts we've interacted with. */
   contacts: { addr: Address; name: string }[];
 }
@@ -79,7 +79,7 @@ interface AccountHistoryV1 extends StoredModel {
 
   address: Address;
   lastFinalizedBlock: number;
-  recentTransfers: TransferOp[];
+  recentTransfers: TransferOpEvent[];
   contacts: NamedAccount[];
 }
 

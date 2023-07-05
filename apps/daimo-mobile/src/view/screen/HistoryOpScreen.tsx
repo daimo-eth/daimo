@@ -5,7 +5,7 @@ import { Linking, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chain";
 import { amountToDollars } from "../../logic/coin";
-import { TransferOp } from "../../model/op";
+import { TransferOpEvent } from "../../model/op";
 import { AddrText } from "../shared/AddrText";
 import { ButtonSmall } from "../shared/Button";
 import { HomeStackParamList } from "../shared/nav";
@@ -73,7 +73,7 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
   );
 }
 
-function TransferBody({ op }: { op: TransferOp }) {
+function TransferBody({ op }: { op: TransferOpEvent }) {
   return (
     <View style={styles.kvList}>
       <KVRow k="From" v={<AddrText addr={op.from} />} />
