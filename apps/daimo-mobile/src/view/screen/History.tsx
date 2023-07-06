@@ -1,15 +1,18 @@
-import { StyleSheet, View } from "react-native";
+import { ReactNode } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { Address } from "viem";
 
 import { assert } from "../../logic/assert";
 import { amountToDollars } from "../../logic/coin";
-import { AccountHistory } from "../../model/accountHistory";
+import { useAccount } from "../../model/account";
+import { AccountHistory, useAccountHistory } from "../../model/accountHistory";
 import { TransferOpEvent } from "../../model/op";
 import { AddrText } from "../shared/AddrText";
 import { ButtonSmall } from "../shared/Button";
+import { Header } from "../shared/Header";
 import { useNav } from "../shared/nav";
 import { OpStatusIndicator } from "../shared/opStatus";
-import { ss } from "../shared/style";
+import { color, ss } from "../shared/style";
 import {
   TextBold,
   TextCenter,
@@ -19,12 +22,29 @@ import {
 } from "../shared/text";
 import { timeAgo } from "../shared/time";
 
-export function RecentHistory({ hist }: { hist?: AccountHistory }) {
+// TODO: replace this with a better custom scroll view on HomeScreen
+export function HistoryScreen() {
+  const [account] = useAccount();
+  const [hist] = useAccountHistory(account?.address);
+  return (
+    <View style={ss.container.vertModal}>
+      <HistoryList hist={hist} />
+    </View>
+  );
+}
+
+export function HistoryList({
+  hist,
+  maxToShow,
+}: {
+  hist?: AccountHistory;
+  maxToShow?: number;
+}) {
   if (hist == null) return null;
 
-  const latest = hist.recentTransfers.slice().reverse().slice(0, 5);
+  const ops = hist.recentTransfers.slice().reverse();
 
-  if (latest.length === 0) {
+  if (ops.length === 0) {
     return (
       <View>
         <TextCenter>
@@ -34,19 +54,51 @@ export function RecentHistory({ hist }: { hist?: AccountHistory }) {
     );
   }
 
-  return (
-    <View>
-      <View style={ss.container.ph16}>
-        <TextH3>History</TextH3>
+  const showDate = maxToShow == null;
+
+  const renderRow = (t: TransferOpEvent) => (
+    <TransferRow
+      key={`${t.timestamp}-${t.from}-${t.to}`}
+      transfer={t}
+      address={hist.address}
+      showDate={showDate}
+    />
+  );
+
+  if (maxToShow != null) {
+    return (
+      <View>
+        <HeaderRow key="h0" title="Recent transactions" />
+        {ops.slice(0, maxToShow).map(renderRow)}
       </View>
-      <View style={ss.spacer.h8} />
-      {latest.map((t) => (
-        <TransferRow
-          key={`${t.timestamp}-${t.from}-${t.to}`}
-          transfer={t}
-          address={hist.address}
-        />
-      ))}
+    );
+  }
+
+  const stickyIndices = [] as number[];
+  const rows: ReactNode[] = [];
+
+  // Render a HeaderRow for each month, and make it sticky
+  let lastMonth = "";
+  for (const t of ops) {
+    const month = new Date(t.timestamp * 1000).toLocaleString("default", {
+      year: "numeric",
+      month: "long",
+    });
+    if (month !== lastMonth) {
+      stickyIndices.push(rows.length);
+      rows.push(<HeaderRow key={month} title={month} />);
+      lastMonth = month;
+    }
+    rows.push(renderRow(t));
+  }
+
+  return <ScrollView stickyHeaderIndices={stickyIndices}>{rows}</ScrollView>;
+}
+
+function HeaderRow({ title }: { title: string }) {
+  return (
+    <View style={styles.rowHeader}>
+      <TextH3>{title}</TextH3>
     </View>
   );
 }
@@ -54,9 +106,11 @@ export function RecentHistory({ hist }: { hist?: AccountHistory }) {
 function TransferRow({
   transfer,
   address,
+  showDate,
 }: {
   transfer: TransferOpEvent;
   address: Address;
+  showDate?: boolean;
 }) {
   assert(transfer.amount > 0);
   const from = transfer.from.toLowerCase() as Address;
@@ -69,7 +123,16 @@ function TransferRow({
   const toFrom = from === address ? "to" : "from";
   const otherAddr = from === address ? to : from;
 
-  const nowS = Date.now() / 1e3;
+  let timeStr: string;
+  if (showDate) {
+    timeStr = new Date(transfer.timestamp * 1000).toLocaleString("default", {
+      month: "numeric",
+      day: "numeric",
+    });
+  } else {
+    const nowS = Date.now() / 1e3;
+    timeStr = timeAgo(transfer.timestamp, nowS);
+  }
 
   const nav = useNav();
   const viewOp = () => nav.navigate("HistoryOp", { op: transfer });
@@ -85,7 +148,7 @@ function TransferRow({
         </View>
         <View style={styles.colTime}>
           <TextSmall numberOfLines={1}>
-            <TextRight>{timeAgo(transfer.timestamp, nowS)}</TextRight>
+            <TextRight>{timeStr}</TextRight>
           </TextSmall>
         </View>
         <View style={styles.colStatus}>
@@ -97,6 +160,13 @@ function TransferRow({
 }
 
 const styles = StyleSheet.create({
+  rowHeader: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    backgroundColor: color.white,
+  },
   rowTransfer: {
     flexDirection: "row",
     alignItems: "center",

@@ -14,6 +14,7 @@ export const color = {
   danger: "#f35369",
   bg: {
     lightGray: "#eee",
+    midGray: "#ccc",
     lightYellow: "#fff6e6",
     blue: "#cce5ff",
   },

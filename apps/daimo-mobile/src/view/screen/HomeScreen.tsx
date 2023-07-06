@@ -1,9 +1,16 @@
 import { useCallback } from "react";
-import { StyleSheet, View } from "react-native";
+import {
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
-import { RecentHistory } from "./History";
+import { HistoryList } from "./History";
 import { useWarmCache } from "../../action/useSendAsync";
-import { useAccount } from "../../model/account";
+import { Account, useAccount } from "../../model/account";
 import { useAccountHistory } from "../../model/accountHistory";
 import { TitleAmount } from "../shared/Amount";
 import { Button, buttonStyles } from "../shared/Button";
@@ -18,52 +25,86 @@ export default function HomeScreen() {
 
   useWarmCache(account?.enclaveKeyName);
 
+  const [hist] = useAccountHistory(account?.address);
+  console.log(`[HOME] rendering with history ${hist?.recentTransfers.length}`);
+
+  const nav = useNav();
+
+  if (account == null) return null;
+
+  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset } = event.nativeEvent;
+    if (contentOffset.y > 32) {
+      // Show full-screen history
+      nav.navigate("History");
+    }
+  };
+
+  return (
+    <View style={ss.container.outerStretch}>
+      <Header />
+
+      <AmountAndButtons account={account} />
+
+      <ScrollView
+        style={styles.historyScroll}
+        onScroll={onScroll}
+        scrollEventThrottle={32}
+      >
+        <View style={styles.historyElem}>
+          <ScrollPellet />
+          <HistoryList hist={hist} maxToShow={5} />
+        </View>
+      </ScrollView>
+
+      <View style={ss.spacer.h128} />
+    </View>
+  );
+}
+
+function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
   const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
   const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
 
-  const [hist] = useAccountHistory(account?.address);
-  console.log(`[HOME] rendering with history ${hist?.recentTransfers.length}`);
-
-  if (account == null) return null;
-
   return (
-    <View style={ss.container.outerStretch}>
-      <Header />
-      <View style={styles.amountAndButtons}>
-        <TitleAmount amount={account.lastBalance} />
-        <Spacer h={32} />
-        <View style={styles.buttonRow}>
-          <Button
-            style={bigButton}
-            title="Send"
-            onPress={goSend}
-            disabled={account.lastBalance === 0n}
-          />
-          <Button style={bigButton} title="Receive" onPress={goReceive} />
-        </View>
-        <Spacer h={8} />
-        <View style={styles.buttonRow}>
-          <Button
-            style={smallButton}
-            title="Withdraw"
-            onPress={goWithdraw}
-            disabled={account.lastBalance === 0n}
-          />
-          <Button style={smallButton} title="Deposit" onPress={goDeposit} />
-        </View>
+    <View style={styles.amountAndButtons}>
+      <TitleAmount amount={account.lastBalance} />
+      <Spacer h={32} />
+      <View style={styles.buttonRow}>
+        <Button
+          style={bigButton}
+          title="Send"
+          onPress={goSend}
+          disabled={account.lastBalance === 0n}
+        />
+        <Button style={bigButton} title="Receive" onPress={goReceive} />
       </View>
-
-      <View>
-        <RecentHistory hist={hist} />
+      <Spacer h={8} />
+      <View style={styles.buttonRow}>
+        <Button
+          style={smallButton}
+          title="Withdraw"
+          onPress={goWithdraw}
+          disabled={account.lastBalance === 0n}
+        />
+        <Button style={smallButton} title="Deposit" onPress={goDeposit} />
       </View>
-
-      <View style={ss.spacer.h32} />
     </View>
   );
 }
+
+function ScrollPellet() {
+  return (
+    <View style={styles.scrollPelletRow}>
+      <View style={styles.scrollPellet} />
+    </View>
+  );
+}
+
+const screenDimensions = Dimensions.get("screen");
 
 const styles = StyleSheet.create({
   amountAndButtons: {
@@ -76,6 +117,28 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: "row",
     gap: 24,
+  },
+  historyScroll: {
+    position: "absolute",
+    top: 0,
+    left: 16,
+    paddingTop: screenDimensions.height - 300,
+    width: "100%",
+  },
+  historyElem: {
+    backgroundColor: color.white,
+    minHeight: screenDimensions.height,
+  },
+  scrollPelletRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 16,
+  },
+  scrollPellet: {
+    backgroundColor: color.bg.midGray,
+    width: 96,
+    height: 4,
+    borderRadius: 2,
   },
 });
 

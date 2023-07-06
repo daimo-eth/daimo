@@ -119,7 +119,7 @@ function addTransfers(
   const ret = [...old];
 
   // Sort new logs
-  logs = logs.sort((a, b) => {
+  logs.sort((a, b) => {
     if (a.blockNum !== b.blockNum) return a.blockNum - b.blockNum;
     return a.logIndex - b.logIndex;
   });

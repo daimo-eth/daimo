@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { AccountScreen } from "./screen/AccountScreen";
 import { ChainScreen } from "./screen/ChainScreen";
+import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
@@ -30,6 +31,11 @@ export function HomeStackNav() {
         />
         <HomeStack.Screen name="Send" component={SendScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreen} />
+        <HomeStack.Screen
+          name="History"
+          component={HistoryScreen}
+          options={useMemo(() => ({ animation: "slide_from_bottom" }), [])}
+        />
       </HomeStack.Group>
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="Account" component={AccountScreen} />
