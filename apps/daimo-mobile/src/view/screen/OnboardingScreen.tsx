@@ -2,7 +2,7 @@ import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -26,6 +26,7 @@ import {
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
+import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
@@ -84,27 +85,27 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
         onScroll={updatePageBubble}
         scrollEventThrottle={32}
       >
-        <IntroPage
-          title="Welcome to Daimo"
-          body="Thanks for testing our alpha release. Daimo is experimental
-            technology. Use at your own risk."
-        />
-        <IntroPage
-          title={tokenMetadata.symbol}
-          body={`Daimo lets you send and receive money using the ${tokenMetadata.symbol} stablecoin.
-            1 ${tokenMetadata.symbol} is $1. Learn how it works here.`}
-        />
-        <IntroPage
-          title="Yours alone"
-          body="Daimo stores money via cryptographic secrets. There's no bank.
-            To protect your funds in case you lose your phone, you can add
-            additional devices."
-        />
-        <IntroPage
-          title="On Ethereum"
-          body="Daimo runs on Base, an Ethereum rollup. This lets you send
-            money securely, anywhere in the world, quickly, and at low cost."
-        />
+        <IntroPage title="Welcome to Daimo">
+          Thanks for testing our alpha release. Daimo is experimental
+          technology. Use at your own risk.
+        </IntroPage>
+        <IntroPage title={tokenMetadata.symbol}>
+          Daimo lets you send and receive money using the $
+          {tokenMetadata.symbol} stablecoin. 1 {tokenMetadata.symbol} is $1.
+          <InfoLink
+            url="https://www.circle.com/en/usdc"
+            title="Learn how it works here"
+          />
+        </IntroPage>
+        <IntroPage title="Yours alone">
+          Daimo stores money via cryptographic secrets. There's no bank. To
+          protect your funds in case you lose your phone, you can add additional
+          devices.
+        </IntroPage>
+        <IntroPage title="On Ethereum">
+          Daimo runs on Base, an Ethereum rollup. This lets you send money
+          securely, anywhere in the world, quickly, and at low cost.
+        </IntroPage>
       </ScrollView>
       <Spacer h={64} />
       <ButtonBig title="Create Account" onPress={onCreateAccount} />
@@ -114,11 +115,17 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
   );
 }
 
-function IntroPage({ title, body }: { title: string; body: string }) {
+function IntroPage({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <View style={styles.introPage}>
       <TextH1>{title}</TextH1>
-      <Text style={styles.body}>{body}</Text>
+      <Text style={styles.body}>{children}</Text>
     </View>
   );
 }

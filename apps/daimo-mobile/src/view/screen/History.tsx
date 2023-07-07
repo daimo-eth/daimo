@@ -9,7 +9,6 @@ import { AccountHistory, useAccountHistory } from "../../model/accountHistory";
 import { TransferOpEvent } from "../../model/op";
 import { AddrText } from "../shared/AddrText";
 import { ButtonSmall } from "../shared/Button";
-import { Header } from "../shared/Header";
 import { useNav } from "../shared/nav";
 import { OpStatusIndicator } from "../shared/opStatus";
 import { color, ss } from "../shared/style";
