@@ -57,6 +57,9 @@ export const ss = {
     ph16: {
       paddingHorizontal: 16,
     },
+    mhn16: {
+      marginHorizontal: -16,
+    },
     debug: {
       borderWidth: 1,
       borderColor: "#f00",

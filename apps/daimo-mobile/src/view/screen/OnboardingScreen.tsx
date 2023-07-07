@@ -86,25 +86,33 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
         scrollEventThrottle={32}
       >
         <IntroPage title="Welcome to Daimo">
-          Thanks for testing our alpha release. Daimo is experimental
-          technology. Use at your own risk.
+          <TextBody>
+            Thanks for testing our alpha release. Daimo is experimental
+            technology. Use at your own risk.
+          </TextBody>
         </IntroPage>
         <IntroPage title={tokenMetadata.symbol}>
-          Daimo lets you send and receive money using the $
-          {tokenMetadata.symbol} stablecoin. 1 {tokenMetadata.symbol} is $1.
+          <TextBody>
+            Daimo lets you send and receive money using the{" "}
+            {tokenMetadata.symbol} stablecoin. 1 {tokenMetadata.symbol} is $1.
+          </TextBody>
           <InfoLink
             url="https://www.circle.com/en/usdc"
             title="Learn how it works here"
           />
         </IntroPage>
         <IntroPage title="Yours alone">
-          Daimo stores money via cryptographic secrets. There's no bank. To
-          protect your funds in case you lose your phone, you can add additional
-          devices.
+          <TextBody>
+            Daimo stores money via cryptographic secrets. There's no bank. To
+            protect your funds in case you lose your phone, you can add
+            additional devices.
+          </TextBody>
         </IntroPage>
         <IntroPage title="On Ethereum">
-          Daimo runs on Base, an Ethereum rollup. This lets you send money
-          securely, anywhere in the world, quickly, and at low cost.
+          <TextBody>
+            Daimo runs on Base, an Ethereum rollup. This lets you send money
+            securely, anywhere in the world, quickly, and at low cost.
+          </TextBody>
         </IntroPage>
       </ScrollView>
       <Spacer h={64} />
@@ -125,7 +133,7 @@ function IntroPage({
   return (
     <View style={styles.introPage}>
       <TextH1>{title}</TextH1>
-      <Text style={styles.body}>{children}</Text>
+      {children}
     </View>
   );
 }
