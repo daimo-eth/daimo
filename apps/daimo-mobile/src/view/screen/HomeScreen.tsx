@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import {
   Dimensions,
   NativeScrollEvent,
@@ -30,15 +30,22 @@ export default function HomeScreen() {
 
   const nav = useNav();
 
-  if (account == null) return null;
-
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    // event.
     const { contentOffset } = event.nativeEvent;
     if (contentOffset.y > 32) {
       // Show full-screen history
       nav.navigate("History");
     }
   };
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const onScrollEnd = () => {
+    if (scrollViewRef.current == null) return;
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
+  };
+
+  if (account == null) return null;
 
   return (
     <View style={ss.container.outerStretch}>
@@ -49,15 +56,15 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.historyScroll}
         onScroll={onScroll}
+        onScrollEndDrag={onScrollEnd}
         scrollEventThrottle={32}
+        ref={scrollViewRef}
       >
         <View style={styles.historyElem}>
           <ScrollPellet />
           <HistoryList hist={hist} maxToShow={5} />
         </View>
       </ScrollView>
-
-      <View style={ss.spacer.h128} />
     </View>
   );
 }
@@ -112,18 +119,14 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    flexGrow: 1,
+    height: 400,
   },
   buttonRow: {
     flexDirection: "row",
     gap: 24,
   },
   historyScroll: {
-    position: "absolute",
-    top: 0,
-    left: 16,
-    paddingTop: screenDimensions.height - 300,
-    width: "100%",
+    paddingTop: 32,
   },
   historyElem: {
     backgroundColor: color.white,
