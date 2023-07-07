@@ -113,6 +113,10 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
             Daimo runs on Base, an Ethereum rollup. This lets you send money
             securely, anywhere in the world, quickly, and at low cost.
           </TextBody>
+          <InfoLink
+            url="https://ethereum-magicians.org/t/a-rollup-centric-ethereum-roadmap/4698"
+            title="Learn more about rollups"
+          />
         </IntroPage>
       </ScrollView>
       <Spacer h={64} />
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   introPageScroll: {
-    flexBasis: 256,
+    flexBasis: 280,
     flexGrow: 0,
   },
   introPage: {
