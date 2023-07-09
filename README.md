@@ -48,6 +48,7 @@ npm run build
 
 Configure the API.
 - To run the API locally, configure the `DAIMO_API_*` env vars.
+  - Additionally, run a Postgres Server instance in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
 - To use the testnet staging API, set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
 
 Finally, run the app in the iOS simulator.
