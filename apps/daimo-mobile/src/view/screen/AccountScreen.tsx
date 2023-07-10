@@ -7,6 +7,7 @@ import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
+import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextBold, TextH2, TextSmall } from "../shared/text";
@@ -56,14 +57,14 @@ export function AccountScreen() {
   return (
     <>
       <View style={ss.container.vertModal}>
-        <View style={ss.spacer.h16} />
+        <Spacer h={16} />
         <View style={ss.container.ph16}>
           <TextH2>Account</TextH2>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
           <View>
             <TextSmall>{account.address}</TextSmall>
-            <View style={ss.spacer.h8} />
+            <Spacer h={8} />
             <TextSmall>
               <Octicons name="link-external" size={16} />
               {` \u00A0 `}
@@ -71,12 +72,12 @@ export function AccountScreen() {
             </TextSmall>
           </View>
         </ButtonSmall>
-        <View style={ss.spacer.h8} />
+        <Spacer h={8} />
         <View style={ss.container.ph16}>
           <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
         </View>
 
-        <View style={ss.spacer.h64} />
+        <Spacer h={64} />
         <AppInfo />
       </View>
     </>
@@ -93,7 +94,7 @@ function AppInfo() {
   return (
     <View style={styles.keyValueList}>
       <TextH2>App and device</TextH2>
-      <View style={ss.spacer.h8} />
+      <Spacer h={8} />
       <TextSmall>
         Commit <TextBold>{env.gitHash}</TextBold>
       </TextSmall>

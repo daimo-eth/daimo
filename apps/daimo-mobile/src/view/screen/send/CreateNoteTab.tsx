@@ -12,6 +12,7 @@ import { fetchNotesContractAllowance } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
+import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
@@ -118,9 +119,9 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   return (
     <>
       <CancelHeader hide={hide}>Creating note</CancelHeader>
-      <View style={ss.spacer.h32} />
+      <Spacer h={32} />
       <AmountInput value={dollars} onChange={setDollars} />
-      <View style={ss.spacer.h32} />
+      <Spacer h={32} />
       {button}
       <TextSmall>
         <TextCenter>{statusMessage}</TextCenter>

@@ -5,7 +5,7 @@ import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { CancelHeader } from "./CancelHeader";
-import { CreateNoteTab } from "./CreateNodeTab";
+import { CreateNoteTab } from "./CreateNoteTab";
 import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
 import { useSendAsync } from "../../../action/useSendAsync";
@@ -20,6 +20,7 @@ import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
 import { AmountInput } from "../../shared/Input";
+import Spacer from "../../shared/Spacer";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
@@ -60,7 +61,7 @@ export default function SendScreen({ route }: Props) {
                 style={{ height: 40 }}
               />
             )}
-            {tab !== "createNote" && <View style={ss.spacer.h16} />}
+            {tab !== "createNote" && <Spacer h={16} />}
             {tab === "search" && <SearchTab />}
             {tab === "scan" && <ScanTab hide={search} />}
             {tab === "createNote" && <CreateNoteTab hide={search} />}
@@ -70,7 +71,7 @@ export default function SendScreen({ route }: Props) {
       {!recipient && tab === "search" && (
         <View style={ss.container.ph16}>
           <ButtonBig title="Create Note" onPress={createNote} />
-          <View style={ss.spacer.h16} />
+          <Spacer h={16} />
           <TextSmall>
             <TextCenter>{sendViaAppStr}</TextCenter>
           </TextSmall>
@@ -107,19 +108,18 @@ function SetAmount({
 
   return (
     <>
-      <View style={ss.spacer.h64} />
-      <View style={ss.spacer.h32} />
+      <Spacer h={64} />
       <CancelHeader hide={hide}>
         <TextCenter>
           Sending to{"\n"}
           <TextH2>{recipient.name}</TextH2>
         </TextCenter>
       </CancelHeader>
-      <View style={ss.spacer.h32} />
+      <Spacer h={32} />
       {dollars === 0 && (
         <View style={ss.container.ph16}>
           <AmountInput value={d} onChange={setD} onSubmitEditing={submit} />
-          <View style={ss.spacer.h16} />
+          <Spacer h={16} />
           <TextSmall>
             <TextCenter>${bal} available</TextCenter>
           </TextSmall>
@@ -227,7 +227,7 @@ function SendButton({
   return (
     <View style={ss.container.ph16}>
       {button}
-      <View style={ss.spacer.h16} />
+      <Spacer h={16} />
       <TextSmall>
         <TextCenter>{statusMessage}</TextCenter>
       </TextSmall>

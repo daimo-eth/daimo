@@ -11,6 +11,7 @@ import { useAccount } from "../../../model/account";
 import { useAccountHistory } from "../../../model/accountHistory";
 import { resyncAccountHistory } from "../../../sync/sync";
 import { ButtonMed } from "../../shared/Button";
+import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextSmall } from "../../shared/text";
 
@@ -22,7 +23,7 @@ export default function DepositScreen() {
     <View style={styles.vertOuter}>
       {chainConfig.testnet && <TestnetFaucet recipient={account.address} />}
       {!chainConfig.testnet && <OnrampStub />}
-      <View style={ss.spacer.h32} />
+      <Spacer h={32} />
       <TextBody>
         <TextBold>Deposit {tokenMetadata.symbol} on Base Goerli only.</TextBold>{" "}
         Use the following address.
@@ -87,7 +88,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
         <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
         runs on Base Goerli.
       </TextBody>
-      <View style={ss.spacer.h16} />
+      <Spacer h={16} />
       <ButtonMed
         title={message}
         onPress={request}

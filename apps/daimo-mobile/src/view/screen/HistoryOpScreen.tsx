@@ -8,6 +8,7 @@ import { amountToDollars } from "../../logic/coin";
 import { TransferOpEvent } from "../../model/op";
 import { AddrText } from "../shared/AddrText";
 import { ButtonSmall } from "../shared/Button";
+import Spacer from "../shared/Spacer";
 import { HomeStackParamList } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
@@ -40,9 +41,9 @@ export function HistoryOpScreen({ route, navigation }: Props) {
 
   return (
     <View style={ss.container.vertModal}>
-      <View style={ss.spacer.h8} />
+      <Spacer h={8} />
       {body}
-      <View style={ss.spacer.h32} />
+      <Spacer h={32} />
       <View style={styles.statusRow}>
         <TextH3>
           <OpStatusName status={op.status} />

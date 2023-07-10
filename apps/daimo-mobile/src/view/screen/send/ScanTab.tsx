@@ -5,6 +5,7 @@ import { StyleSheet, View } from "react-native";
 import { CancelHeader } from "./CancelHeader";
 import { parseDaimoLink } from "../../../logic/link";
 import { getRecipient } from "../../../logic/recipient";
+import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextBody } from "../../shared/text";
@@ -60,7 +61,7 @@ export function ScanTab({ hide }: { hide: () => void }) {
   return (
     <>
       <CancelHeader hide={hide}>Scan to pay</CancelHeader>
-      <View style={ss.spacer.h8} />
+      <Spacer h={8} />
       {body}
     </>
   );

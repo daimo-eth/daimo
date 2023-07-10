@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ChainContext, ChainTip } from "../../logic/chain";
+import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBody, TextBold, TextH2, TextSmall } from "../shared/text";
 import { timeAgoS, useTime } from "../shared/time";
@@ -14,14 +15,14 @@ export function ChainScreen() {
       {status.status === "ok" && (
         <>
           <View style={ss.container.ph16}>
-            <View style={ss.spacer.h16} />
+            <Spacer h={16} />
             <TextH2>L1 · {status.l1.name}</TextH2>
             <TipInfo tip={status.l1} />
-            <View style={ss.spacer.h32} />
+            <Spacer h={32} />
             <TextH2>L2 · {status.l2.name}</TextH2>
             <TipInfo tip={status.l2} />
           </View>
-          <View style={ss.spacer.h32} />
+          <Spacer h={32} />
           <LightClientInfo />
         </>
       )}
