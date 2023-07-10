@@ -7,7 +7,6 @@ import { parseDaimoLink } from "../../../logic/link";
 import { getRecipient } from "../../../logic/recipient";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
-import { ss } from "../../shared/style";
 import { TextBody } from "../../shared/text";
 
 /** Scans a QR code to pay someone. */
