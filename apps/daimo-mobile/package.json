@@ -15,7 +15,7 @@
     "test": "tsc --noEmit && jest",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=gen '--ignoreFiles=.*.config.ts' && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-build-properties,@babel/core,babel-plugin-transform-inline-environment-variables",
-    "lint:style": "eslint .",
+    "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
     "eas-build-post-install": "cd ../.. && npm run build"

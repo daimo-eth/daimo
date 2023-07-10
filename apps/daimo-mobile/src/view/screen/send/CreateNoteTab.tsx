@@ -1,6 +1,6 @@
 import { DaimoAccount } from "@daimo/userop";
 import { ReactNode, useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Share, View } from "react-native";
+import { ActivityIndicator, Share } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
@@ -13,7 +13,6 @@ import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
 export function CreateNoteTab({ hide }: { hide: () => void }) {

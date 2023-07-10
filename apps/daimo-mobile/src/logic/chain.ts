@@ -1,12 +1,6 @@
 import { tokenMetadata } from "@daimo/contract";
 import { createContext } from "react";
-import {
-  Address,
-  PublicClient,
-  createPublicClient,
-  getContract,
-  http,
-} from "viem";
+import { PublicClient, createPublicClient, getContract, http } from "viem";
 import { baseGoerli, goerli } from "viem/chains";
 import { erc20ABI } from "wagmi";
 

@@ -7,7 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 
-import { color, ss, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "./style";
 
 interface ButtonProps {
   title?: string;

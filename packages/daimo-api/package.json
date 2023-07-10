@@ -9,7 +9,7 @@
     "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",
-    "lint:style": "eslint ."
+    "lint:style": "eslint . --max-warnings=0"
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
