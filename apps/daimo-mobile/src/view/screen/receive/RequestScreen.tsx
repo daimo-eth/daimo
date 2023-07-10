@@ -20,7 +20,7 @@ export default function RequestScreen() {
     try {
       const result = await Share.share({
         title: "Daimo Request" /* Android only */,
-        message: `dcposch is requesting ${amount.toFixed(2)} ${
+        message: `${account.name} is requesting ${amount.toFixed(2)} ${
           tokenMetadata.symbol
         }. Pay them using Daimo: ${url}`,
       });
