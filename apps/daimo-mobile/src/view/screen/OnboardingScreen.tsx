@@ -12,7 +12,6 @@ import {
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -113,10 +112,6 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
             Daimo runs on Base, an Ethereum rollup. This lets you send money
             securely, anywhere in the world, quickly, and at low cost.
           </TextBody>
-          <InfoLink
-            url="https://ethereum-magicians.org/t/a-rollup-centric-ethereum-roadmap/4698"
-            title="Learn more about rollups"
-          />
         </IntroPage>
       </ScrollView>
       <Spacer h={64} />
@@ -137,6 +132,7 @@ function IntroPage({
   return (
     <View style={styles.introPage}>
       <TextH1>{title}</TextH1>
+      <Spacer h={32} />
       {children}
     </View>
   );
@@ -181,7 +177,7 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
         <TextH1>
           <Octicons name="bell" size={40} />
         </TextH1>
-        <View style={ss.spacer.h32} />
+        <Spacer h={32} />
         <View style={ss.container.ph16}>
           <TextBody>
             <TextCenter>
@@ -190,9 +186,9 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
             </TextCenter>
           </TextBody>
         </View>
-        <View style={ss.spacer.h32} />
+        <Spacer h={32} />
         <ButtonBig title="Allow Notifications" onPress={requestPermission} />
-        <View style={ss.spacer.h16} />
+        <Spacer h={16} />
         <ButtonSmall title="Skip" onPress={onNext} />
       </View>
     </View>
@@ -210,7 +206,7 @@ function CreateAccountPage() {
         <View style={styles.onboardingScreen}>
           <View style={styles.createAccountPage}>
             <TextH1>Welcome</TextH1>
-            <View style={ss.spacer.h256}>
+            <View style={ss.container.h256}>
               {status === "idle" && (
                 <NamePicker
                   name={name}
@@ -287,7 +283,7 @@ function NamePicker({
 
   return (
     <View>
-      <View style={ss.spacer.h64} />
+      <Spacer h={64} />
       <View>
         <InputBig
           placeholder="choose a name"
@@ -295,12 +291,12 @@ function NamePicker({
           onChange={onChange}
           center
         />
-        <View style={ss.spacer.h8} />
+        <Spacer h={8} />
         <TextSmall>
           <TextCenter>{status}</TextCenter>
         </TextSmall>
       </View>
-      <View style={ss.spacer.h8} />
+      <Spacer h={8} />
       <ButtonBig title="Create" onPress={onChoose} disabled={!isAvailable} />
     </View>
   );
@@ -333,7 +329,6 @@ const styles = StyleSheet.create({
   },
   introPage: {
     width: screenDimensions.width,
-    gap: 32,
     padding: 32,
   },
   body: {

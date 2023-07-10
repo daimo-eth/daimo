@@ -60,6 +60,9 @@ export const ss = {
     mhn16: {
       marginHorizontal: -16,
     },
+    h256: {
+      height: 256,
+    },
     debug: {
       borderWidth: 1,
       borderColor: "#f00",
@@ -113,38 +116,6 @@ export const ss = {
     },
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
-    },
-  }),
-  spacer: StyleSheet.create({
-    w8: {
-      width: 8,
-    },
-    w16: {
-      width: 16,
-    },
-    w32: {
-      width: 32,
-    },
-    w64: {
-      width: 32,
-    },
-    h8: {
-      height: 8,
-    },
-    h16: {
-      height: 16,
-    },
-    h32: {
-      height: 32,
-    },
-    h64: {
-      height: 64,
-    },
-    h128: {
-      height: 128,
-    },
-    h256: {
-      height: 256,
     },
   }),
 };
