@@ -4,6 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
+import { getNameOrAddr } from "../../shared/addr";
 import { useNav } from "../../shared/nav";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
@@ -39,7 +40,7 @@ function ErrorRow({ error }: { error: { message: string } }) {
 function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
-  return <ButtonBig title={recipient.name} onPress={pay} />;
+  return <ButtonBig title={getNameOrAddr(recipient)} onPress={pay} />;
 }
 
 const styles = StyleSheet.create({

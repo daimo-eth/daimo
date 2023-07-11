@@ -15,12 +15,12 @@ import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { OpStatus } from "../../../model/op";
 import { Recipient } from "../../../sync/loadRecipients";
-import { cacheName } from "../../shared/AddrText";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
+import { cacheName, getNameOrAddr } from "../../shared/addr";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
@@ -94,6 +94,9 @@ function SetAmount({
     nav.setParams({ recipient: undefined, dollars: undefined });
   const clearDollars = () => nav.setParams({ dollars: undefined });
 
+  // Show who we're sending to
+  const disp = getNameOrAddr(recipient);
+
   // Temporary dollar amount while typing
   const [d, setD] = useState(0);
   const submit = () => {
@@ -112,7 +115,7 @@ function SetAmount({
       <CancelHeader hide={hide}>
         <TextCenter>
           Sending to{"\n"}
-          <TextH2>{recipient.name}</TextH2>
+          <TextH2>{disp}</TextH2>
         </TextCenter>
       </CancelHeader>
       <Spacer h={32} />
@@ -186,7 +189,7 @@ function SendButton({
       case "error":
         return (
           <ButtonBig
-            title={`Send to ${recipient.name}`}
+            title={`Send to ${getNameOrAddr(recipient)}`}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}

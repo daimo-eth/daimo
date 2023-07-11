@@ -6,7 +6,7 @@ import { Address } from "viem";
 import { TransferOpEvent } from "./op";
 import { StoredModel } from "./storedModel";
 import { assert } from "../logic/assert";
-import { cacheName } from "../view/shared/AddrText";
+import { cacheName } from "../view/shared/addr";
 
 export interface AccountHistory {
   /** Our own account address */
