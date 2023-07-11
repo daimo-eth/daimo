@@ -2,8 +2,8 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Address } from "viem";
 
-import { Recipient } from "../../logic/recipient";
 import { OpEvent } from "../../model/op";
+import { Recipient } from "../../sync/loadRecipients";
 
 export type HomeStackParamList = {
   Home: undefined;

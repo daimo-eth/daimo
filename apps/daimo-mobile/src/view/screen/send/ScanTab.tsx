@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 
 import { CancelHeader } from "./CancelHeader";
 import { parseDaimoLink } from "../../../logic/link";
-import { getRecipient } from "../../../logic/recipient";
+import { getRecipient } from "../../../sync/loadRecipients";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { TextBody } from "../../shared/text";

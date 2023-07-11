@@ -88,9 +88,6 @@ export function createRouter(
       )
       .query(async (opts) => {
         const { address, sinceBlockNum } = opts.input;
-        console.log(
-          `[API] getAccountHistory: ${address} since ${sinceBlockNum}`
-        );
 
         // TODO: hack
         const { publicClient, coinContract } = notifier;
@@ -114,6 +111,10 @@ export function createRouter(
         if (finBlock.number == null) throw new Error("No finalized block");
 
         const rawLogs = [...results[1], ...results[2]];
+
+        console.log(
+          `[API] getAccountHist: ${rawLogs.length} logs for ${address} since ${sinceBlockNum}`
+        );
 
         const transferLogs = rawLogs.map((log) => {
           const { blockNumber, blockHash, logIndex, transactionHash } = log;
@@ -145,7 +146,7 @@ export function createRouter(
           addrs.add(log.from);
           addrs.add(log.to);
         });
-        const namedAddrs = [...addrs]
+        const namedAccounts = [...addrs]
           .map((addr) => ({
             addr,
             name: nameReg.resolveAddress(addr),
@@ -156,7 +157,7 @@ export function createRouter(
           address,
           lastFinalizedBlock: Number(finBlock.number),
           transferLogs,
-          namedAddrs,
+          namedAccounts,
         };
       }),
 

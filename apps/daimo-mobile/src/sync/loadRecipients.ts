@@ -1,6 +1,6 @@
 import { Address } from "viem";
 
-import { rpcFunc, rpcHook } from "./trpc";
+import { rpcFunc, rpcHook } from "../logic/trpc";
 
 export interface Recipient {
   addr: Address;

@@ -62,7 +62,7 @@ async function syncAccountHistory(hist: AccountHistory) {
     }
   }
 
-  // TODO: better algorithm to match pending transfers
+  // Match pending transfers
   const oldPending = hist.recentTransfers.filter((t) => t.status === "pending");
   const stillPending = oldPending.filter(
     (t) =>
@@ -75,13 +75,16 @@ async function syncAccountHistory(hist: AccountHistory) {
   );
   recentTransfers.push(...stillPending);
 
-  const contacts = updateContacts(hist.contacts, result.namedAddrs);
+  const namedAccounts = addNamedAccounts(
+    hist.namedAccounts,
+    result.namedAccounts
+  );
 
   const ret: AccountHistory = {
     address: result.address,
     lastFinalizedBlock: result.lastFinalizedBlock,
     recentTransfers,
-    contacts,
+    namedAccounts,
   };
 
   console.log(
@@ -90,16 +93,18 @@ async function syncAccountHistory(hist: AccountHistory) {
   return ret;
 }
 
-type Contact = NamedAccount;
-
 /** Update contacts based on recent interactions */
-function updateContacts(old: Contact[], found: Contact[]): Contact[] {
+function addNamedAccounts(
+  old: NamedAccount[],
+  found: NamedAccount[]
+): NamedAccount[] {
   const ret = [...old];
+  const addrs = new Set(old.map((na) => na.addr.toLowerCase()));
 
-  // TODO: better algo
   for (const na of found) {
     if (na.name == null) continue;
-    if (ret.find((c) => c.addr === na.addr)) continue;
+    if (addrs.has(na.addr.toLowerCase())) continue;
+    addrs.add(na.addr.toLowerCase());
     ret.push(na);
   }
 

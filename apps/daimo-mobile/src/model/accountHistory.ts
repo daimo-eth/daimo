@@ -15,8 +15,8 @@ export interface AccountHistory {
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: TransferOpEvent[];
-  /** Names for Daimo accounts we've interacted with. */
-  contacts: { addr: Address; name: string }[];
+  /** Names for each Daimo account we've interacted with. */
+  namedAccounts: { addr: Address; name: string }[];
 }
 
 const mmkv = new MMKV();
@@ -35,7 +35,7 @@ export function useAccountHistory(address: Address | undefined) {
           mmkv.set(`history-${address}`, serialize(h));
           historyCache.set(address, h);
 
-          h.contacts.forEach((c) => cacheName(c.addr, c.name));
+          h.namedAccounts.forEach(({ addr, name }) => cacheName(addr, name));
 
           const listeners = historyListeners.get(address) || [];
           console.log(`[HIST] set ${address}, ${listeners.length} listeners`);
@@ -61,7 +61,7 @@ export function useAccountHistory(address: Address | undefined) {
         address,
         lastFinalizedBlock: 0,
         recentTransfers: [],
-        contacts: [],
+        namedAccounts: [],
       };
       setAll(history);
     }
@@ -80,7 +80,7 @@ interface AccountHistoryV1 extends StoredModel {
   address: Address;
   lastFinalizedBlock: number;
   recentTransfers: TransferOpEvent[];
-  contacts: NamedAccount[];
+  namedAccounts: NamedAccount[];
 }
 
 function parse(json?: string): AccountHistory | null {
@@ -105,7 +105,7 @@ function serialize(history: AccountHistory) {
     address: history.address,
     lastFinalizedBlock: history.lastFinalizedBlock,
     recentTransfers: history.recentTransfers,
-    contacts: history.contacts,
+    namedAccounts: history.namedAccounts,
   };
 
   return JSON.stringify(stored);

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { Recipient, useRecipientSearch } from "../../../logic/recipient";
+import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
 import { useNav } from "../../shared/nav";
