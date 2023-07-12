@@ -67,10 +67,7 @@ async function syncAccountHistory(hist: AccountHistory) {
   const stillPending = oldPending.filter(
     (t) =>
       recentTransfers.find(
-        (r) =>
-          t.from.toLowerCase() === r.from.toLowerCase() &&
-          t.to.toLowerCase() === r.to.toLowerCase() &&
-          t.amount === r.amount
+        (r) => t.from === r.from && t.to === r.to && t.amount === r.amount
       ) == null
   );
   recentTransfers.push(...stillPending);
@@ -99,12 +96,12 @@ function addNamedAccounts(
   found: NamedAccount[]
 ): NamedAccount[] {
   const ret = [...old];
-  const addrs = new Set(old.map((na) => na.addr.toLowerCase()));
+  const addrs = new Set(old.map((na) => na.addr));
 
   for (const na of found) {
     if (na.name == null) continue;
-    if (addrs.has(na.addr.toLowerCase())) continue;
-    addrs.add(na.addr.toLowerCase());
+    if (addrs.has(na.addr)) continue;
+    addrs.add(na.addr);
     ret.push(na);
   }
 

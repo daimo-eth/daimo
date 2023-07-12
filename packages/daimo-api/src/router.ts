@@ -1,5 +1,5 @@
 import { DaimoAccount } from "@daimo/userop";
-import { Address, PublicClient } from "viem";
+import { Address, PublicClient, getAddress } from "viem";
 import { z } from "zod";
 
 import { CoinIndexer } from "./contract/coinIndexer";
@@ -38,7 +38,7 @@ export function createRouter(
     resolveAddr: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
-        const { addr } = opts.input;
+        const addr = getAddress(opts.input.addr);
         return nameReg.resolveAddress(addr);
       }),
 
@@ -89,10 +89,16 @@ export function createRouter(
         })
       )
       .query(async (opts) => {
-        const { address, sinceBlockNum } = opts.input;
+        const { sinceBlockNum } = opts.input;
+        const address = getAddress(opts.input.address);
 
         const finBlock = await publicClient.getBlock({ blockTag: "finalized" });
         if (finBlock.number == null) throw new Error("No finalized block");
+        if (finBlock.number < sinceBlockNum) {
+          console.log(
+            `[API] getAccountHist: OLD final block ${finBlock.number} < ${sinceBlockNum}`
+          );
+        }
 
         const rawLogs = coinIndexer.filterTransfers({
           addr: address,
@@ -158,7 +164,8 @@ export function createRouter(
       .mutation(async (opts) => {
         // TODO: device attestation or validate token to avoid griefing
         // Auth is not for privacy; anyone can watch an address onchain.
-        const { address, token } = opts.input;
+        const { token } = opts.input;
+        const address = getAddress(opts.input.address);
         notifier.register(address, token);
       }),
 
@@ -197,14 +204,14 @@ export function createRouter(
     testnetFaucetStatus: publicProcedure
       .input(z.object({ recipient: zAddress }))
       .query(async (opts) => {
-        const { recipient } = opts.input;
+        const recipient = getAddress(opts.input.recipient);
         return faucet.getStatus(recipient);
       }),
 
     testnetRequestFaucet: publicProcedure
       .input(z.object({ recipient: zAddress }))
       .mutation(async (opts) => {
-        const { recipient } = opts.input;
+        const recipient = getAddress(opts.input.recipient);
         return faucet.request(recipient);
       }),
   });

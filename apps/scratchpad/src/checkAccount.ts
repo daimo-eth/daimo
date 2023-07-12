@@ -36,7 +36,7 @@ export async function checkAccount() {
   const publicClient = createPublicClient({ chain, transport: http() });
   const nameReg = getContract({ ...nameRegistryConfig, publicClient });
   if (input.startsWith("0x")) {
-    addr = input as Address;
+    addr = getAddress(input);
     name = hexToString(await nameReg.read.resolveName([addr]));
   } else {
     name = input;

@@ -5,6 +5,7 @@ import {
   Hex,
   PublicClient,
   encodeFunctionData,
+  getAddress,
   parseEther,
   parseUnits,
 } from "viem";
@@ -92,7 +93,7 @@ export class DaimoAccount {
   }
 
   public getAddress(): Address {
-    return this.opBuilder.getSender() as Address;
+    return getAddress(this.opBuilder.getSender());
   }
 
   /** Submits a user op to bundler. Returns userOpHash. */

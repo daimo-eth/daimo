@@ -51,7 +51,7 @@ export class ViemClient {
     // TODO: save in DB, dont load from scratch every time
     const step = 10000n;
     for (
-      let fromBlock = 6000000n;
+      let fromBlock = 5000000n;
       fromBlock < latest.number;
       fromBlock += step
     ) {

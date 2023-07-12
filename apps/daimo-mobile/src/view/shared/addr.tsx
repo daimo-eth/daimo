@@ -15,7 +15,7 @@ const specialAddrs: { [_: Address]: string } = {
 const nameCache = new Map<Address, string>();
 
 export function cacheName(addr: Address, name: string) {
-  nameCache.set(addr.toLowerCase() as Address, name);
+  nameCache.set(addr, name);
 }
 
 /** Gets a bare string name or 0x... address prefix */
@@ -33,7 +33,7 @@ export function getNameOrAddr({
 /** Shows a named Daimo account or an Ethereum address. */
 export function AddrText({ addr, name }: { addr: Address; name?: string }) {
   if (!name) {
-    name = nameCache.get(addr.toLowerCase() as Address);
+    name = nameCache.get(addr);
   }
   if (name) {
     return <TextBold>{name}</TextBold>;

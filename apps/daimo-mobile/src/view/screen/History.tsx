@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 import { assert } from "../../logic/assert";
 import { amountToDollars } from "../../logic/coin";
@@ -112,9 +112,8 @@ function TransferRow({
   showDate?: boolean;
 }) {
   assert(transfer.amount > 0);
-  const from = transfer.from.toLowerCase() as Address;
-  const to = transfer.to.toLowerCase() as Address;
-  address = address.toLowerCase() as Address;
+  const from = getAddress(transfer.from);
+  const to = getAddress(transfer.to);
   assert([from, to].includes(address));
 
   const verb = from === address ? "Sent" : "Received";

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useMMKVString } from "react-native-mmkv";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 import { StoredModel, latestStorageVersion } from "./storedModel";
 import { assert } from "../logic/assert";
@@ -88,7 +88,7 @@ export function parse(accountJSON?: string): Account | null {
   return {
     name: a.name,
 
-    address: a.address as Address,
+    address: getAddress(a.address),
     lastBalance: BigInt(a.lastBalance),
     lastNonce: BigInt(a.lastNonce),
     lastBlockTimestamp: a.lastBlockTimestamp,
