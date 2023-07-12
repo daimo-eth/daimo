@@ -25,7 +25,7 @@ export const zBigIntStr = z
   .regex(/^[0-9]+$/i)
   .refine((s): s is BigIntStr => true);
 
-export const zTransferLog = z.object({
+export const zTransferLogSummary = z.object({
   from: zAddress,
   to: zAddress,
   amount: zBigIntStr,
@@ -35,4 +35,4 @@ export const zTransferLog = z.object({
   logIndex: z.number(),
 });
 
-export type TransferLog = z.infer<typeof zTransferLog>;
+export type TransferLogSummary = z.infer<typeof zTransferLogSummary>;

@@ -16,6 +16,7 @@
     "@daimo/contract": "*",
     "@daimo/userop": "*",
     "@trpc/server": "^10.29.0",
+    "abitype": "^0.9.0",
     "expo-server-sdk": "^3.7.0",
     "pg": "^8.11.0",
     "userop": "^0.3.0",

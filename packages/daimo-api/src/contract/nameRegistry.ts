@@ -1,20 +1,15 @@
 import { nameRegistryConfig } from "@daimo/contract";
 import {
-  Account,
   Address,
-  BlockTag,
-  Chain,
   Hex,
   Log,
   TransactionReceipt,
-  Transport,
-  WalletClient,
   getAbiItem,
   getContract,
   hexToString,
 } from "viem";
 
-import { ClientsType, ContractType, getClients } from "../chain";
+import { ContractType, ViemClient } from "../chain";
 import { NamedAccount } from "../model";
 
 const registeredName = "Registered";
@@ -32,33 +27,21 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: NamedAccount[] = [];
 
-  clients: ClientsType;
   contract: ContractType<typeof nameRegistryConfig.abi>;
 
-  constructor(walletClient: WalletClient<Transport, Chain, Account>) {
-    this.clients = getClients(walletClient);
-    this.contract = getContract({ ...nameRegistryConfig, ...this.clients });
+  constructor(private vc: ViemClient) {
+    this.contract = getContract({ ...nameRegistryConfig, ...this.vc });
   }
 
   /** Init: index logs from chain, get all names so far */
   async init() {
-    const logs = await this.clients.publicClient.getLogs({
-      address: nameRegistryConfig.address,
-      event: registeredEvent,
-      fromBlock: 0n,
-      toBlock: "latest" as BlockTag,
-    });
-    console.log(`[NAME-REG] init, read ${logs.length} logs`);
-    this.parseLogs(logs);
-
-    this.clients.publicClient.watchContractEvent({
-      ...nameRegistryConfig,
-      eventName: registeredName,
-      onLogs: (logs: RegisteredLog[]) => {
-        console.log(`[NAME-REG] subscribe, ${logs.length} new logs`);
-        this.parseLogs(logs);
+    this.vc.pipeLogs(
+      {
+        address: nameRegistryConfig.address,
+        event: registeredEvent,
       },
-    });
+      this.parseLogs
+    );
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
@@ -100,7 +83,7 @@ export class NameRegistry {
 
     const hash = await this.contract.write.register(args);
 
-    const tx = await this.clients.publicClient.waitForTransactionReceipt({
+    const tx = await this.vc.publicClient.waitForTransactionReceipt({
       hash,
     });
     if (tx.status !== "success") throw new Error("Transaction failed");

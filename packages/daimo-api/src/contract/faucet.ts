@@ -1,17 +1,8 @@
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import {
-  Account,
-  Address,
-  BlockTag,
-  Chain,
-  Log,
-  Transport,
-  WalletClient,
-  getAbiItem,
-  getContract,
-} from "viem";
+import { Address, Log, getAbiItem, getContract } from "viem";
 
-import { ClientsType, ContractType, getClients } from "../chain";
+import { CoinIndexer } from "./coinIndexer";
+import { ContractType, ViemClient } from "../chain";
 
 export type FaucetStatus =
   | "unavailable"
@@ -24,40 +15,30 @@ type TransferLog = Log<bigint, number, typeof transferEvent>;
 
 /** Testnet faucet. Drips testUSDC to any account not yet requested. */
 export class Faucet {
-  requested = new Set<Address>();
-  sent = new Set<Address>();
-  clients: ClientsType;
-  contract: ContractType<typeof erc20ABI>;
+  private requested = new Set<Address>();
+  private sent = new Set<Address>();
+  private contract: ContractType<typeof erc20ABI>;
 
-  constructor(walletClient: WalletClient<Transport, Chain, Account>) {
-    this.clients = getClients(walletClient);
+  constructor(private vc: ViemClient, private coinIndexer: CoinIndexer) {
     const { address } = tokenMetadata;
-    this.contract = getContract({ abi: erc20ABI, address, ...this.clients });
+    this.contract = getContract({ abi: erc20ABI, address, ...this.vc });
   }
 
   async init() {
-    const logs = await this.clients.publicClient.getLogs({
-      address: tokenMetadata.address,
-      event: transferEvent,
-      fromBlock: 0n,
-      toBlock: "latest" as BlockTag,
-    });
-    console.log(`[FAUCET] init, read ${logs.length} logs`);
-
-    this.parseLogs(logs);
+    this.coinIndexer.pipeAllTransfers(this.parseLogs);
   }
 
-  parseLogs(logs: TransferLog[]) {
+  parseLogs = (logs: TransferLog[]) => {
     for (const log of logs) {
       const { from, to } = log.args;
-      if (to != null && from === this.clients.walletClient.account.address) {
+      if (to != null && from === this.vc.walletClient.account.address) {
         this.sent.add(to);
       }
     }
-  }
+  };
 
   getStatus(address: Address): FaucetStatus {
-    if (!this.clients.walletClient.chain.testnet) return "unavailable";
+    if (!this.vc.walletClient.chain.testnet) return "unavailable";
     if (this.sent.has(address)) return "alreadySent";
     if (this.requested.has(address)) return "alreadyRequested";
     return "canRequest";
@@ -73,7 +54,7 @@ export class Faucet {
     const hash = await this.contract.write.transfer([address, 50_000_000n]);
 
     // TODO: factor out transaction tracking. Track speed and reliability.
-    const { publicClient } = this.clients;
+    const { publicClient } = this.vc;
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     console.log(
       `[FAUCET] sent 50 testUSDC to ${address}. ${receipt.status}: ${hash}`

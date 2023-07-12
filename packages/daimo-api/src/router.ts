@@ -1,16 +1,18 @@
 import { DaimoAccount } from "@daimo/userop";
-import { Address, createPublicClient, getAbiItem, http } from "viem";
-import { baseGoerli } from "viem/chains";
+import { Address, PublicClient } from "viem";
 import { z } from "zod";
 
+import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
-import { NamedAccount, TransferLog, zAddress, zHex } from "./model";
+import { NamedAccount, TransferLogSummary, zAddress, zHex } from "./model";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
+  publicClient: PublicClient,
+  coinIndexer: CoinIndexer,
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
   faucet: Faucet,
@@ -89,28 +91,13 @@ export function createRouter(
       .query(async (opts) => {
         const { address, sinceBlockNum } = opts.input;
 
-        // TODO: hack
-        const { publicClient, coinContract } = notifier;
-        const event = getAbiItem({ abi: coinContract.abi, name: "Transfer" });
-
-        // Get log
-        const logQuery = {
-          address: coinContract.address,
-          event,
-          fromBlock: BigInt(sinceBlockNum),
-          strict: true,
-        } as const;
-
-        const results = await Promise.all([
-          publicClient.getBlock({ blockTag: "finalized" }),
-          publicClient.getLogs({ ...logQuery, args: { from: address } }),
-          publicClient.getLogs({ ...logQuery, args: { to: address } }),
-        ] as const);
-
-        const finBlock = results[0];
+        const finBlock = await publicClient.getBlock({ blockTag: "finalized" });
         if (finBlock.number == null) throw new Error("No finalized block");
 
-        const rawLogs = [...results[1], ...results[2]];
+        const rawLogs = coinIndexer.filterTransfers({
+          addr: address,
+          sinceBlockNum: BigInt(sinceBlockNum),
+        });
 
         console.log(
           `[API] getAccountHist: ${rawLogs.length} logs for ${address} since ${sinceBlockNum}`
@@ -137,7 +124,7 @@ export function createRouter(
             blockHash,
             txHash: transactionHash,
             logIndex,
-          } as TransferLog;
+          } as TransferLogSummary;
         });
 
         // Get named accounts
@@ -190,10 +177,7 @@ export function createRouter(
           `[API] not deploying account for ${name}, pubkey ${pubKeyHex}`
         );
         const account = await DaimoAccount.init(
-          createPublicClient({
-            chain: baseGoerli,
-            transport: http(),
-          }),
+          publicClient,
           pubKeyHex,
           signer,
           false

@@ -1,4 +1,4 @@
-import { NamedAccount, TransferLog } from "@daimo/api";
+import { NamedAccount, TransferLogSummary } from "@daimo/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { assert } from "../logic/assert";
@@ -118,7 +118,7 @@ function addNamedAccounts(
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
   old: TransferOpEvent[],
-  logs: TransferLog[]
+  logs: TransferLogSummary[]
 ): TransferOpEvent[] {
   // Start with old, finalized transfers
   const ret = [...old];

@@ -1,50 +1,27 @@
-import { erc20ABI, tokenMetadata } from "@daimo/contract";
+import { tokenMetadata } from "@daimo/contract";
 import { Expo } from "expo-server-sdk";
-import {
-  Address,
-  Hex,
-  Log,
-  PublicClient,
-  formatUnits,
-  getAbiItem,
-  getContract,
-  hexToString,
-} from "viem";
+import { Address, Hex, formatUnits, hexToString } from "viem";
 
-import { ReadOnlyContractType } from "./chain";
+import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
 import { DB } from "./db/db";
-
-const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
-type TransferLog = Log<bigint, number, typeof transferEvent>;
 
 /**
  * Subscribes to coin transfers onchain. Whenever a transfer affects a Daimo
  * account, sends a push notification to each of the user's devices.
  */
 export class PushNotifier {
-  coinContract: ReadOnlyContractType<typeof erc20ABI>;
   pushTokens = new Map<Address, string[]>();
   expo = new Expo();
 
   constructor(
-    public publicClient: PublicClient,
+    private coinIndexer: CoinIndexer,
     private nameReg: NameRegistry,
     private db: DB
-  ) {
-    this.coinContract = getContract({
-      abi: erc20ABI,
-      address: tokenMetadata.address,
-      publicClient,
-    });
-  }
+  ) {}
 
   async init() {
-    // Subscribe to transfers
-    this.coinContract.watchEvent.Transfer(
-      {},
-      { batch: true, onLogs: this.handleTransfers }
-    );
+    this.coinIndexer.addListener(this.handleTransfers);
   }
 
   private handleTransfers = async (logs: TransferLog[]) => {

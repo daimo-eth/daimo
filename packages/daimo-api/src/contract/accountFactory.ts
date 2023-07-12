@@ -1,23 +1,14 @@
 import { accountFactoryConfig } from "@daimo/contract";
-import {
-  Account,
-  Chain,
-  Hex,
-  Transport,
-  WalletClient,
-  getContract,
-} from "viem";
+import { Hex, getContract } from "viem";
 
-import { ClientsType, ContractType, getClients } from "../chain";
+import { ContractType, ViemClient } from "../chain";
 
 /* Interface to the AccountFactory contract. Creates Daimo accounts. */
 export class AccountFactory {
-  clients: ClientsType;
   contract: ContractType<typeof accountFactoryConfig.abi>;
 
-  constructor(walletClient: WalletClient<Transport, Chain, Account>) {
-    this.clients = getClients(walletClient);
-    this.contract = getContract({ ...accountFactoryConfig, ...this.clients });
+  constructor(private vc: ViemClient) {
+    this.contract = getContract({ ...accountFactoryConfig, ...this.vc });
   }
 
   /**
@@ -43,7 +34,7 @@ export class AccountFactory {
     const hash = await this.contract.write.createAccount(deployArgs);
     console.log(`[API] deploy transaction ${hash}`);
 
-    const { publicClient } = this.clients;
+    const { publicClient } = this.vc;
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
     console.log(`[API] deploy transaction ${receipt.status}`);
     if (receipt.status !== "success") {

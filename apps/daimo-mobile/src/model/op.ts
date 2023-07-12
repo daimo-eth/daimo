@@ -61,7 +61,7 @@ interface OpEventBase {
   /** Unix seconds. When pending, bundler accept time. Otherwise, block time. */
   timestamp: number;
 
-  /** An op can start out  ends up "finalized", "failed", or "expoi" */
+  /** Eg, "pending", "confirmed", or "failed" */
   status: OpStatus;
 
   /* Only set for Daimo transfers */
