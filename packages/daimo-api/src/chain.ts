@@ -60,12 +60,14 @@ export class ViemClient {
       console.log(
         `[CHAIN] loading ${fromBlock} to ${toBlock} for ${args.event.name}`
       );
-      const logs = await this.publicClient.getLogs({
-        ...args,
-        fromBlock,
-        toBlock,
-        strict: true,
-      });
+      const logs = await retryBackoff(`logs-${args.event.name}`, () =>
+        this.publicClient.getLogs({
+          ...args,
+          fromBlock,
+          toBlock,
+          strict: true,
+        })
+      );
       callback(logs);
     }
 
@@ -78,6 +80,22 @@ export class ViemClient {
       },
     });
   }
+}
+
+export async function retryBackoff<T>(
+  name: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  for (let i = 1; i <= 10; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      console.log(`[CHAIN] ${name} retry ${i} after error: ${e}`);
+      await new Promise((r) => setTimeout(r, 250 * 2 ** i));
+    }
+  }
+  // TODO: add performance logging
+  throw new Error(`too many retries: ${name}`);
 }
 
 export type ContractType<TAbi extends Abi> = GetContractReturnType<
