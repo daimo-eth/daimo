@@ -1,7 +1,7 @@
 import { NamedAccount } from "@daimo/api";
 import { useCallback, useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 import { TransferOpEvent } from "./op";
 import { StoredModel } from "./storedModel";
@@ -87,16 +87,15 @@ function parse(json?: string): AccountHistory | null {
   if (!json) return null;
 
   const model = JSON.parse(json) as StoredModel;
-
-  // TODO: remove this line once AccountHistory is stable
-  // Till then, we wipe storage on every app load.
-  if (model.storageVersion < 2) return null;
-
   assert(model.storageVersion === 1, "Unsupported version");
+  const stored = model as AccountHistoryV1;
 
-  const stored = JSON.parse(json) as AccountHistoryV1;
-
-  return stored;
+  return {
+    address: getAddress(stored.address),
+    lastFinalizedBlock: stored.lastFinalizedBlock,
+    recentTransfers: stored.recentTransfers,
+    namedAccounts: stored.namedAccounts,
+  };
 }
 
 function serialize(history: AccountHistory) {
