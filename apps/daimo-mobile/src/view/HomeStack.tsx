@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
@@ -9,8 +10,8 @@ import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
 import ClaimNoteScreen from "./screen/receive/ClaimNoteScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
-import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import RequestScreen from "./screen/receive/RequestScreen";
+import RequestSendScreen from "./screen/receive/RequestSendScreen";
 import SendScreen from "./screen/send/SendScreen";
 import WithdrawScreen from "./screen/send/WithdrawScreen";
 import { HomeStackParamList } from "./shared/nav";
@@ -30,7 +31,7 @@ export function HomeStackNav() {
           options={useMemo(() => ({ headerShown: !!account }), [account])}
         />
         <HomeStack.Screen name="Send" component={SendScreen} />
-        <HomeStack.Screen name="Receive" component={ReceiveScreen} />
+        <HomeStack.Screen name="Request" component={RequestScreen} />
         <HomeStack.Screen
           name="History"
           component={HistoryScreen}
@@ -43,7 +44,11 @@ export function HomeStackNav() {
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
         <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
         <HomeStack.Screen name="Note" component={ClaimNoteScreen} />
-        <HomeStack.Screen name="Request" component={RequestScreen} />
+        <HomeStack.Screen
+          name="RequestSend"
+          options={{ headerTitle: `Request ${tokenMetadata.symbol}` }}
+          component={RequestSendScreen}
+        />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>

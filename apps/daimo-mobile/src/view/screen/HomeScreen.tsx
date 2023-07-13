@@ -72,7 +72,7 @@ export default function HomeScreen() {
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
-  const goReceive = useCallback(() => nav.navigate("Receive"), [nav]);
+  const goRequest = useCallback(() => nav.navigate("Request"), [nav]);
   const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
   const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
 
@@ -87,7 +87,7 @@ function AmountAndButtons({ account }: { account: Account }) {
           onPress={goSend}
           disabled={account.lastBalance === 0n}
         />
-        <Button style={bigButton} title="Receive" onPress={goReceive} />
+        <Button style={bigButton} title="Request" onPress={goRequest} />
       </View>
       <Spacer h={8} />
       <View style={styles.buttonRow}>

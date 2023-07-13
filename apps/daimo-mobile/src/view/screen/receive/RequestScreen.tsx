@@ -1,60 +1,62 @@
-import { tokenMetadata } from "@daimo/contract";
-import { useCallback, useState } from "react";
-import { Alert, ScrollView, Share, StyleSheet } from "react-native";
+import React, { useCallback } from "react";
+import { StyleSheet, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
-import { assert } from "../../../logic/assert";
+import { formatDaimoLink } from "../../../logic/link";
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
-import { AmountInput } from "../../shared/Input";
-import { color } from "../../shared/style";
+import { Header } from "../../shared/Header";
+import image from "../../shared/image";
+import { useNav } from "../../shared/nav";
+import { ss } from "../../shared/style";
+import { TextSmall } from "../../shared/text";
 
 export default function RequestScreen() {
+  const nav = useNav();
+  const send = useCallback(() => nav.navigate("RequestSend"), [nav]);
+
   const [account] = useAccount();
-  assert(account != null);
-  const [amount, setAmount] = useState(0);
+  if (account == null) return null;
 
-  // TODO: use deep link
-  const url = `daimo://request?recipient=${account.address}&amount=${amount}`;
-
-  const sendRequest = useCallback(async () => {
-    try {
-      const result = await Share.share({
-        title: "Daimo Request" /* Android only */,
-        message: `${account.name} is requesting ${amount.toFixed(2)} ${
-          tokenMetadata.symbol
-        }. Pay them using Daimo: ${url}`,
-      });
-      console.log(`[REQUEST] action ${result.action}`);
-      if (result.action === Share.sharedAction) {
-        console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
-      } else if (result.action === Share.dismissedAction) {
-        // Only on iOS
-        console.log(`[REQUEST] share dismissed`);
-      }
-    } catch (error: any) {
-      Alert.alert(error.message);
-    }
-  }, [url]);
+  const url = formatDaimoLink({ type: "receive", addr: account.address });
 
   return (
-    <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
-      <AmountInput value={amount} onChange={setAmount} />
-      <ButtonBig
-        disabled={amount <= 0}
-        title="Send Request"
-        onPress={sendRequest}
-      />
-    </ScrollView>
+    <View style={ss.container.outerStretch}>
+      <Header />
+      <View style={styles.vertMain}>
+        <View style={styles.vertQR}>
+          <QRCode
+            value={url}
+            color="#333"
+            size={192}
+            logo={{ uri: image.qrLogo }}
+            logoSize={72}
+          />
+          <TextSmall>Scan or tap</TextSmall>
+        </View>
+        <TextSmall>or</TextSmall>
+        <View style={styles.horzButtons}>
+          <ButtonBig title="Send message" onPress={send} />
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  vertOuter: {
-    backgroundColor: color.white,
-    flex: 1,
-    padding: 32,
-    paddingTop: 64,
-    gap: 64,
-    overflow: "hidden",
+  vertMain: {
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: 32,
+    gap: 32,
+  },
+  vertQR: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
+  },
+  horzButtons: {
+    flexDirection: "row",
+    gap: 24,
   },
 });

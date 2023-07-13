@@ -11,7 +11,7 @@ export type HomeStackParamList = {
   Chain: undefined;
   Send: undefined | { recipient: Recipient; dollars?: number };
   Withdraw: undefined;
-  Receive: undefined;
+  Request: undefined;
   Deposit: undefined;
   Note:
     | undefined
@@ -19,7 +19,7 @@ export type HomeStackParamList = {
         ephemeralPrivateKey: `0x${string}` | undefined;
         ephemeralOwner: Address | undefined;
       };
-  Request: undefined;
+  RequestSend: undefined;
   History: undefined;
   HistoryOp: { op: OpEvent };
 };
