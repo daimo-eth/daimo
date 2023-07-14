@@ -36,7 +36,7 @@
     "@trpc/client": "^10.29.0",
     "@trpc/react-query": "^10.29.0",
     "@types/jest": "^29.5.2",
-    "@types/react": "18.2.0",
+    "@types/react": "^18.2.15",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "depcheck": "^1.4.3",
     "eslint": "^8.44.0",

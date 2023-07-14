@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.20.0",
-    "@types/react": "18.2.0",
+    "@types/react": "^18.2.15",
     "@daimo/expo-enclave": "*",
     "@daimo/userop": "*",
     "@daimo/contract": "*",
