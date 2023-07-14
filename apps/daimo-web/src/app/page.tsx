@@ -7,7 +7,7 @@ export default function HomePage() {
     <main>
       <center>
         <div className="h-4" />
-        <Image src="/logo-blue.png" alt="Daimo" width="200" height="200" />
+        <Image src="/logo-web.png" alt="Daimo" width="200" height="200" />
         <div className="h-4" />
         <H1>Daimo</H1>
         <div className="h-2" />

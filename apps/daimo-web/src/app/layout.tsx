@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Daimo",
   description: "Experimental stablecoin wallet",
   icons: {
-    icon: "/logo-blue-favicon.png",
+    icon: "/logo-web-favicon.png",
   },
 };
 

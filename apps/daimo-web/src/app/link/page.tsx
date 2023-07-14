@@ -8,9 +8,9 @@ export default function LinkPage() {
     <main className="max-w-sm mx-auto">
       <center>
         <div className="h-4" />
-        <Image src="/logo-blue.png" alt="Daimo" width="200" height="200" />
+        <Image src="/logo-web.png" alt="Daimo" width="200" height="200" />
 
-        <div className="h-6" />
+        <div className="h-8" />
         <div className="flex flex-row gap-4 justify-center">
           <AppStoreBadge platform="ios" />
           <AppStoreBadge platform="android" />
