@@ -5,6 +5,8 @@
     "esbenp.prettier-vscode",
     "juanblanco.solidity",
     "pomdtr.excalidraw-editor",
-    "github.vscode-github-actions"
+    "github.vscode-github-actions",
+    "bradlc.vscode-tailwindcss",
+    "austenc.tailwind-docs"
   ]
 }

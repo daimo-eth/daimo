@@ -1,12 +1,10 @@
 import { tokenMetadata } from "@daimo/contract";
-import { Ref, useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
-  ScrollView,
   Share,
   StyleSheet,
   TextInput,
-  Touchable,
   TouchableWithoutFeedback,
   View,
 } from "react-native";

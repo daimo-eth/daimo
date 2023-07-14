@@ -39,7 +39,7 @@
     "@types/react": "18.2.0",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "depcheck": "^1.4.3",
-    "eslint": "^8.42.0",
+    "eslint": "^8.44.0",
     "eslint-config-universe": "^11.2.0",
     "expo": "~48.0.18",
     "expo-application": "^5.1.1",
