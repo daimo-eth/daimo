@@ -1,6 +1,15 @@
 import { tokenMetadata } from "@daimo/contract";
-import { useCallback, useState } from "react";
-import { Alert, ScrollView, Share, StyleSheet } from "react-native";
+import { Ref, useCallback, useRef, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  TextInput,
+  Touchable,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 import { assert } from "../../../logic/assert";
 import { useAccount } from "../../../model/account";
@@ -36,15 +45,23 @@ export default function RequestSendScreen() {
     }
   }, [url]);
 
+  const inputRef = useRef<TextInput>(null);
+  const hideKeyboard = useCallback(() => {
+    if (inputRef.current == null) return;
+    inputRef.current.blur();
+  }, []);
+
   return (
-    <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
-      <AmountInput value={amount} onChange={setAmount} />
-      <ButtonBig
-        disabled={amount <= 0}
-        title="Send Request"
-        onPress={sendRequest}
-      />
-    </ScrollView>
+    <TouchableWithoutFeedback onPress={hideKeyboard}>
+      <View style={styles.vertOuter}>
+        <AmountInput value={amount} onChange={setAmount} innerRef={inputRef} />
+        <ButtonBig
+          disabled={amount <= 0}
+          title="Send Request"
+          onPress={sendRequest}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

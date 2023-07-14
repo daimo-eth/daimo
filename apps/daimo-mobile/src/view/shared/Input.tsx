@@ -53,10 +53,12 @@ export function AmountInput({
   value,
   onChange,
   onSubmitEditing,
+  innerRef,
 }: {
   value: number;
   onChange: (amount: number) => void;
   onSubmitEditing?: () => void;
+  innerRef?: React.Ref<TextInput>;
 }) {
   if (value < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -87,6 +89,7 @@ export function AmountInput({
 
   return (
     <TextInput
+      ref={innerRef}
       style={styles.amountInput}
       keyboardType="numeric"
       placeholder="0.00"
