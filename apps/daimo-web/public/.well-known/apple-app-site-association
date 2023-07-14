@@ -1,0 +1,28 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "8B472XLQW4.eth.daimo"
+        ],
+        "components": [
+          {
+            "/": "/link/*",
+            "comment": "Matches all /link URLs"
+          }
+        ]
+      }
+    ]
+  },
+  "activitycontinuation": {
+    "apps": [
+      "8B472XLQW4.eth.daimo"
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "8B472XLQW4.eth.daimo"
+    ]
+  }
+}
