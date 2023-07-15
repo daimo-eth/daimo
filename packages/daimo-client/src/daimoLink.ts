@@ -1,7 +1,6 @@
+import { zAmountStr, zHex } from "@daimo/api";
 import { Address } from "abitype";
 import { Hex, getAddress } from "viem";
-
-import { zAmountStr, zHex } from "./model";
 
 const domain =
   process.env.NEXT_PUBLIC_DOMAIN ||

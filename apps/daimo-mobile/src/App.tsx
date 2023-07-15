@@ -1,5 +1,4 @@
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import * as Linking from "expo-linking";
+import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { Text } from "react-native";
 
@@ -8,17 +7,17 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { usePollChain, useSyncAccountHistory } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
-import { HomeStackParamList } from "./view/shared/nav";
+import { useHandleNavLinks } from "./view/shared/nav";
 
-const prefix = Linking.createURL("/");
-const linking: LinkingOptions<HomeStackParamList> = {
-  prefixes: [prefix],
-  config: {
-    screens: {
-      Note: "note",
-    },
-  },
-};
+// const prefix = Linking.createURL("/");
+// const linking: LinkingOptions<HomeStackParamList> = {
+//   prefixes: [prefix],
+//   config: {
+//     screens: {
+//       Note: "note",
+//     },
+//   },
+// };
 
 export default function App() {
   console.log("[APP] rendering");
@@ -35,12 +34,23 @@ export default function App() {
 
   return (
     <RpcProvider>
-      <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+      <NavigationContainer fallback={<Text>Loading...</Text>}>
         <ChainContext.Provider value={chainState}>
-          <HomeStackNav />
-          <StatusBar style="auto" />
+          <AppBody />
         </ChainContext.Provider>
       </NavigationContainer>
     </RpcProvider>
+  );
+}
+
+function AppBody() {
+  // Handle incoming applinks
+  useHandleNavLinks();
+
+  return (
+    <>
+      <HomeStackNav />
+      <StatusBar style="auto" />
+    </>
   );
 }

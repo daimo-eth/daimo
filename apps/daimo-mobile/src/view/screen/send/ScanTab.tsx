@@ -1,12 +1,10 @@
+import { parseDaimoLink } from "@daimo/client";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 
 import { CancelHeader } from "./CancelHeader";
-import { parseDaimoLink } from "../../../logic/link";
-import { getRecipient } from "../../../sync/loadRecipients";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
 import { TextBody } from "../../shared/text";
 
 /** Scans a QR code to pay someone. */
@@ -20,7 +18,6 @@ export function ScanTab({ hide }: { hide: () => void }) {
   }, []);
 
   const [handled, setHandled] = useState(false);
-  const nav = useNav();
 
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
     if (handled) return;
@@ -29,15 +26,8 @@ export function ScanTab({ hide }: { hide: () => void }) {
     if (daimoLink == null) return;
     setHandled(true);
 
-    switch (daimoLink.type) {
-      case "receive": {
-        const recipient = await getRecipient(daimoLink.addr);
-        nav.navigate("Send", { recipient });
-        break;
-      }
-      default:
-        throw new Error(`Unhandled daimo link type: ${daimoLink.type}`);
-    }
+    console.log(`[SCAN] opening URL ${data}`);
+    Linking.openURL(data);
   };
 
   let body: ReactNode;

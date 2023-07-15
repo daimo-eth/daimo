@@ -1,4 +1,5 @@
-import { NamedAccount, daimoLinkBase, parseDaimoLink } from "@daimo/api";
+import { NamedAccount } from "@daimo/api";
+import { daimoLinkBase, parseDaimoLink } from "@daimo/client";
 import { Metadata } from "next";
 import Image from "next/image";
 
@@ -35,26 +36,25 @@ export default async function LinkPage(props: LinkProps) {
     <main className="max-w-sm mx-auto">
       <center>
         <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="200" height="200" />
+        <Image src="/logo-web.png" alt="Daimo" width="180" height="180" />
 
-        <div className="h-16" />
+        <div className="h-12" />
+
+        <H1>{title}</H1>
+        <div className="h-2" />
+        <H2>{description}</H2>
+        <div className="h-8" />
         <div className="flex flex-row gap-4 justify-center">
           <AppStoreBadge platform="ios" />
           <AppStoreBadge platform="android" />
         </div>
         <div className="h-8" />
 
-        <H1>{title}</H1>
-        <div className="h-2" />
-        <p>{description}</p>
-        <div className="h-8" />
-
-        <H2>App store coming soon</H2>
+        <H2>Coming to App Store soon</H2>
         <div className="h-4" />
         <p>
           Till then, message <strong>dcposch</strong> on Telegram
-          <br />
-          to try the TestFlight.
+          <br /> to try the TestFlight.
           <br />
         </p>
       </center>
@@ -129,8 +129,6 @@ function metadata(title: string, description: string): Metadata {
       images: [
         {
           url: `https://${domain}/logo-web.png`,
-          width: 200,
-          height: 200,
           alt: "Daimo",
         },
       ],

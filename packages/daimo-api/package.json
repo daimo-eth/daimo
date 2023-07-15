@@ -2,7 +2,7 @@
   "name": "@daimo/api",
   "version": "0.1.0",
   "license": "GPL-3.0-or-later",
-  "description": "Daimo API for account creation and search",
+  "description": "Daimo API for account creation, search, etc",
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/server.ts",
@@ -16,11 +16,11 @@
     "@daimo/contract": "*",
     "@daimo/userop": "*",
     "@trpc/server": "^10.29.0",
-    "abitype": "^0.9.0",
+    "abitype": "^0.9.2",
     "expo-server-sdk": "^3.7.0",
     "pg": "^8.11.0",
     "userop": "^0.3.0",
-    "viem": "^1.0.7",
+    "viem": "^1.2.15",
     "zod": "^3.21.4"
   },
   "devDependencies": {

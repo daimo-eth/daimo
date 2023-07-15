@@ -1,4 +1,4 @@
-import { tokenMetadata } from "@daimo/contract";
+import { formatDaimoLink } from "@daimo/client";
 import { useCallback, useRef, useState } from "react";
 import {
   Alert,
@@ -20,17 +20,15 @@ export default function RequestSendScreen() {
   assert(account != null);
   const [amount, setAmount] = useState(0);
 
-  // TODO: use deep link
-  const url = `daimo://request?recipient=${account.address}&amount=${amount}`;
+  const url = formatDaimoLink({
+    type: "request",
+    recipient: account.address,
+    amount: `${amount}` as const,
+  });
 
   const sendRequest = useCallback(async () => {
     try {
-      const result = await Share.share({
-        title: "Daimo Request" /* Android only */,
-        message: `${account.name} is requesting ${amount.toFixed(2)} ${
-          tokenMetadata.symbol
-        }. Pay them using Daimo: ${url}`,
-      });
+      const result = await Share.share({ url });
       console.log(`[REQUEST] action ${result.action}`);
       if (result.action === Share.sharedAction) {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
