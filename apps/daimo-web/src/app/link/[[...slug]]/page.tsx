@@ -3,20 +3,66 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 import { AppStoreBadge } from "../../../components/AppStoreBadge";
-import { H1 } from "../../../components/typography";
+import { H1, H2 } from "../../../components/typography";
 
-type LinkParams = {
+type LinkProps = {
   params: { slug?: string[] };
   searchParams: { [key: string]: string | string[] | undefined };
+};
+
+type TitleDesc = {
+  title: string;
+  description: string;
 };
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
 const defaultMeta = metadata("Daimo", "Experimental stablecoin wallet");
 
-export async function generateMetadata({
-  params,
-}: LinkParams): Promise<Metadata> {
+export async function generateMetadata(props: LinkProps): Promise<Metadata> {
+  const titleDesc = await loadTitleDesc(props);
+  if (titleDesc == null) return defaultMeta;
+  return metadata(titleDesc.title, titleDesc.description);
+}
+
+export default async function LinkPage(props: LinkProps) {
+  const { title, description } = (await loadTitleDesc(props)) || {
+    title: "Daimo",
+    description: "Experimental stablecoin wallet",
+  };
+
+  return (
+    <main className="max-w-sm mx-auto">
+      <center>
+        <div className="h-16" />
+        <Image src="/logo-web.png" alt="Daimo" width="200" height="200" />
+
+        <div className="h-16" />
+        <div className="flex flex-row gap-4 justify-center">
+          <AppStoreBadge platform="ios" />
+          <AppStoreBadge platform="android" />
+        </div>
+        <div className="h-8" />
+
+        <H1>{title}</H1>
+        <div className="h-2" />
+        <p>{description}</p>
+        <div className="h-8" />
+
+        <H2>App store coming soon</H2>
+        <div className="h-4" />
+        <p>
+          Till then, message <strong>dcposch</strong> on Telegram
+          <br />
+          to try the TestFlight.
+          <br />
+        </p>
+      </center>
+    </main>
+  );
+}
+
+async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
   const path = (params.slug || []).join("/");
   const url = `${daimoLinkBase}/${path}`;
 
@@ -25,29 +71,48 @@ export async function generateMetadata({
   switch (link?.type) {
     case "account": {
       const account = await loadNamedAccount(link.addr);
-      if (account == null) return defaultMeta;
-      return metadata(`${account.name}`, `Pay on Daimo: ${url}`);
+      if (account == null) return null;
+      return { title: `${account.name}`, description: `Pay on Daimo: ${url}` };
     }
     case "request": {
       const recipient = await loadNamedAccount(link.recipient);
-      if (recipient == null) return defaultMeta;
-      return metadata(
-        `${recipient.name} is requesting ${link.amount}`,
-        `Pay on Daimo: ${url}`
-      );
+      if (recipient == null) return null;
+      return {
+        title: `${recipient.name} is requesting $${link.amount}`,
+        description: `Pay via Daimo.`,
+      };
     }
     case "note": {
       const noteInfo = await loadNoteInfo(link.ephemeralOwner);
-      if (noteInfo == null) return defaultMeta;
-      return metadata(
-        `${noteInfo.sender.name} sent you $${noteInfo.amount}`,
-        `Claim on Daimo: ${url}`
-      );
+      if (noteInfo == null) return null;
+      return {
+        title: `${noteInfo.sender.name} sent you $${noteInfo.amount}`,
+        description: `Claim on Daimo.`,
+      };
     }
     default: {
-      return defaultMeta;
+      return null;
     }
   }
+}
+
+async function loadNoteInfo(ephemeralOwner: string) {
+  // TODO: load from TRPC
+  return {
+    amount: 1.23,
+    sender: {
+      name: "dcposch",
+      addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
+    },
+  };
+}
+
+async function loadNamedAccount(addr: string): Promise<NamedAccount | null> {
+  // TODO: load from TRPC
+  return {
+    name: "dcposch",
+    addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
+  };
 }
 
 function metadata(title: string, description: string): Metadata {
@@ -71,55 +136,5 @@ function metadata(title: string, description: string): Metadata {
       ],
       type: "website",
     },
-  };
-}
-
-export default function LinkPage({ params }: LinkParams) {
-  const path = (params.slug || []).join("/");
-
-  return (
-    <main className="max-w-sm mx-auto">
-      <center>
-        <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="200" height="200" />
-
-        <div className="h-16" />
-        <div className="flex flex-row gap-4 justify-center">
-          <AppStoreBadge platform="ios" />
-          <AppStoreBadge platform="android" />
-        </div>
-        <div className="h-8" />
-
-        <H1>App store coming soon</H1>
-        <div className="h-4" />
-        <p>
-          Till then, message <strong>dcposch</strong> on Telegram
-          <br />
-          to try the TestFlight.
-          <br />
-        </p>
-        <div className="h-4" />
-        <p className="text-sm font-mono rounded-sm bg-lightGray">{path}</p>
-      </center>
-    </main>
-  );
-}
-
-async function loadNoteInfo(ephemeralOwner: string) {
-  // TODO: load from TRPC
-  return {
-    amount: 1.23,
-    sender: {
-      name: "dcposch",
-      addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
-    },
-  };
-}
-
-async function loadNamedAccount(addr: string): Promise<NamedAccount | null> {
-  // TODO: load from TRPC
-  return {
-    name: "dcposch",
-    addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
   };
 }

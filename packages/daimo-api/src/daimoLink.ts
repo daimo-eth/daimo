@@ -3,10 +3,10 @@ import { Hex, getAddress } from "viem";
 
 import { zAmountStr, zHex } from "./model";
 
-const domain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
-if (domain == null || domain === "") {
-  throw new Error("Missing NEXT_PUBLIC_DOMAIN or DAIMO_DOMAIN");
-}
+const domain =
+  process.env.NEXT_PUBLIC_DOMAIN ||
+  process.env.DAIMO_DOMAIN ||
+  "localhost:3000";
 
 export const daimoLinkBase = `https://${domain}/link`;
 
