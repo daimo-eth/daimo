@@ -60,6 +60,7 @@ function metadata(title: string, description: string): Metadata {
     openGraph: {
       title,
       description,
+      siteName: title,
       images: [
         {
           url: `https://${domain}/logo-web.png`,
