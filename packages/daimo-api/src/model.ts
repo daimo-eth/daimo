@@ -18,12 +18,19 @@ export const zHex = z
   .regex(/^0x([0-9a-f]{2})*$/i)
   .refine((s): s is Hex => true);
 
-export type BigIntStr = `${bigint}`;
-
 export const zBigIntStr = z
   .string()
   .regex(/^[0-9]+$/i)
   .refine((s): s is BigIntStr => true);
+
+export type BigIntStr = `${bigint}`;
+
+export const zAmountStr = z
+  .string()
+  .regex(/^\d+(\.\d+)?$/i)
+  .refine((s): s is AmountStr => true);
+
+export type AmountStr = `${number}`;
 
 export const zTransferLogSummary = z.object({
   from: zAddress,

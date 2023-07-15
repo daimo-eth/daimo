@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     colors: {
       primary: "#007aff",
+      lightGray: "#cecccc",
     },
   },
   plugins: [],
