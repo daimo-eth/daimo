@@ -13,7 +13,7 @@
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
-    "@daimo/client": "*",
+    "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",
     "@trpc/server": "^10.34.0",

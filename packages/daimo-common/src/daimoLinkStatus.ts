@@ -1,6 +1,5 @@
-import { NamedAccount } from "@daimo/api";
-
 import { DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
+import { NamedAccount } from "./model";
 
 export type DaimoLinkStatus = DaimoRequestStatus | DaimoNoteStatus;
 

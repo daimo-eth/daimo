@@ -1,4 +1,4 @@
-import { formatDaimoLink } from "@daimo/client";
+import { formatDaimoLink } from "@daimo/common";
 import { useCallback, useRef, useState } from "react";
 import {
   Alert,

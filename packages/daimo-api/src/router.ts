@@ -2,7 +2,11 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   parseDaimoLink,
-} from "@daimo/client";
+  NamedAccount,
+  TransferLogSummary,
+  zAddress,
+  zHex,
+} from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, getAddress } from "viem";
 import { z } from "zod";
@@ -11,7 +15,6 @@ import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
-import { NamedAccount, TransferLogSummary, zAddress, zHex } from "./model";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 

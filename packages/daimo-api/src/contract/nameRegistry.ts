@@ -9,8 +9,8 @@ import {
   hexToString,
 } from "viem";
 
+import { NamedAccount } from "../../../daimo-common/src/model";
 import { ContractType, ViemClient } from "../chain";
-import { NamedAccount } from "../model";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({

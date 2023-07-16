@@ -1,11 +1,9 @@
-import { NamedAccount } from "@daimo/api";
 import {
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
   daimoLinkBase,
-  parseDaimoLink,
-} from "@daimo/client";
+} from "@daimo/common";
 import { Metadata } from "next";
 import Image from "next/image";
 

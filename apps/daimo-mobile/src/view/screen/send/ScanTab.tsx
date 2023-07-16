@@ -1,4 +1,4 @@
-import { parseDaimoLink } from "@daimo/client";
+import { parseDaimoLink } from "@daimo/common";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";

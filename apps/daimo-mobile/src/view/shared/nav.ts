@@ -1,4 +1,4 @@
-import { DaimoLink, parseDaimoLink } from "@daimo/client";
+import { DaimoLink, parseDaimoLink } from "@daimo/common";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useURL } from "expo-linking";

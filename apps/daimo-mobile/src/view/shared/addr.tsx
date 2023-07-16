@@ -1,5 +1,4 @@
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { special } from "depcheck";
 import { Text } from "react-native";
 import { Address } from "viem";
 

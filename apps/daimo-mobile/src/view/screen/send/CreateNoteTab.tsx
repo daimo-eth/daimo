@@ -1,4 +1,4 @@
-import { DaimoLink, formatDaimoLink } from "@daimo/client";
+import { DaimoLink, formatDaimoLink } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Share } from "react-native";

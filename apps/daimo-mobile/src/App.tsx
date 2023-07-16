@@ -9,16 +9,6 @@ import { usePollChain, useSyncAccountHistory } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
 import { useHandleNavLinks } from "./view/shared/nav";
 
-// const prefix = Linking.createURL("/");
-// const linking: LinkingOptions<HomeStackParamList> = {
-//   prefixes: [prefix],
-//   config: {
-//     screens: {
-//       Note: "note",
-//     },
-//   },
-// };
-
 export default function App() {
   console.log("[APP] rendering");
 
