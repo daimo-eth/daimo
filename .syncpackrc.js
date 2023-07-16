@@ -8,5 +8,11 @@ module.exports = {
       pinVersion: "*",
       label: "Peer dependencies of the re-usable enclave module.",
     },
+    {
+      packages: ["@daimo/*"],
+      dependencies: ["@daimo/*"],
+      isIgnored: true,
+      label: "Monorepo packages.",
+    }
   ],
 };

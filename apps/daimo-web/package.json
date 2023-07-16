@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@trpc/next": "^10.34.0",
+    "@daimo/api": "*",
+    "@daimo/common": "*",
+    "@trpc/client": "^10.34.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.4.14",
+    "depcheck": "^1.4.3",
     "eslint": "^8.44.0",
     "eslint-config-next": "^13.4.9",
     "next": "^13.4.9",
@@ -18,7 +21,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss && echo Re-enable once eslint-plugin-prettier fixes their crashing bug: next lint",
     "export": "next export"
   }
 }

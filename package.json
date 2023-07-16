@@ -11,10 +11,11 @@
     "fix:deps": "syncpack fix-mismatches"
   },
   "dependencies": {
-    "eslint-config-universe": "^11.2.0",
+    "eslint-config-universe": "^11.3.0",
+    "prettier": "^2.8.8",
+    "syncpack": "^10.6.1",
     "turbo": "^1.10.3",
-    "typescript": "^5.1.6",
-    "syncpack": "^10.6.1"
+    "typescript": "^5.1.6"
   },
   "workspaces": [
     "packages/*",
