@@ -1,5 +1,6 @@
+import { DaimoLink, formatDaimoLink } from "@daimo/client";
 import { DaimoAccount } from "@daimo/userop";
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Share } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -16,7 +17,15 @@ import Spacer from "../../shared/Spacer";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
 export function CreateNoteTab({ hide }: { hide: () => void }) {
-  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>("0x");
+  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>();
+
+  const ephemeralOwner = useMemo(
+    () =>
+      ephemeralPrivateKey
+        ? privateKeyToAccount(ephemeralPrivateKey).address
+        : null,
+    [ephemeralPrivateKey]
+  );
 
   const { chain } = useContext(ChainContext);
   const { clientL2 } = assertNotNull(chain);
@@ -42,7 +51,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
-      const ephemeralOwner = privateKeyToAccount(ephemeralPrivateKey).address;
+      if (ephemeralOwner == null) throw new Error("Note key not generated yet");
       return account.createEphemeralNote(
         ephemeralOwner,
         `${dollars}`,
@@ -92,13 +101,19 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   useEffect(() => {
     (async () => {
       if (status !== "success") return;
+      if (ephemeralOwner == null) return;
+
       // TODO: We can optimistically do this on loading rather than wait
       // for success.
       try {
-        const result = await Share.share({
-          message: `${account.name} paid you $${dollars}. Claim your money: daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
-          url: `daimo://note?ephemeralPrivateKey=${ephemeralPrivateKey}`,
-        });
+        const link: DaimoLink = {
+          type: "note",
+          ephemeralOwner,
+          ephemeralPrivateKey,
+        };
+        const url = formatDaimoLink(link);
+
+        const result = await Share.share({ url });
         if (result.action === Share.sharedAction) {
           console.log(
             "[APP] Note shared with activity type ",
