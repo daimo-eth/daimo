@@ -71,7 +71,10 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
     case "request": {
       if (parts.length !== 3) return null;
       const recipient = getAddress(parts[1]);
-      const amount = zAmountStr.parse(parts[2]);
+      const amountNum = parseFloat(zAmountStr.parse(parts[2]));
+      if (!(amountNum > 0)) return null;
+      const amount = amountNum.toFixed(2) as `${number}`;
+      if (amount === "0.00") return null;
       return { type: "request", recipient, amount };
     }
     case "note": {
