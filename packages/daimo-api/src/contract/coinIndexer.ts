@@ -13,8 +13,10 @@ export class CoinIndexer {
 
   private listeners: ((logs: TransferLog[]) => void)[] = [];
 
-  constructor(client: ViemClient) {
-    client.pipeLogs(
+  constructor(private client: ViemClient) {}
+
+  async init() {
+    await this.client.pipeLogs(
       {
         address: tokenMetadata.address,
         event: transferEvent,

@@ -20,7 +20,7 @@ async function main() {
   const entryPoint = new EntryPoint(vc);
 
   console.log(`[API] initializing indexers...`);
-  await nameReg.init();
+  await Promise.all([coinIndexer.init(), nameReg.init()]);
   await faucet.init();
 
   console.log(`[API] initializing db...`);

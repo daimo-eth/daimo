@@ -1,10 +1,12 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Expo } from "expo-server-sdk";
-import { Address, Hex, formatUnits, hexToString } from "viem";
+import { Address, Hex, formatUnits, getAddress, hexToString } from "viem";
 
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
 import { DB } from "./db/db";
+
+const pushEnabled = process.env.DAIMO_PUSH_ENABLED === "true";
 
 /**
  * Subscribes to coin transfers onchain. Whenever a transfer affects a Daimo
@@ -23,8 +25,10 @@ export class PushNotifier {
   async init() {
     this.coinIndexer.addListener(this.handleTransfers);
     const rows = await this.db.loadPushTokens();
+    console.log(`[PUSH] loaded ${rows.length} push tokens from DB`);
     for (const row of rows) {
-      row.
+      this.cachePushToken(getAddress(row.address), row.pushtoken);
+    }
   }
 
   private handleTransfers = async (logs: TransferLog[]) => {
@@ -52,13 +56,11 @@ export class PushNotifier {
     value: bigint
   ) {
     const pushTokens = this.pushTokens.get(addr);
-    if (!pushTokens) return;
+    if (!pushTokens || pushTokens.length === 0) return;
 
     const { decimals, symbol } = tokenMetadata;
     const rawAmount = formatUnits(value, decimals);
     const dollars = Math.abs(Number(rawAmount)).toFixed(2);
-    const verb = value < 0 ? "sent" : "received";
-    console.log(`[PUSH] notifying ${addr} ${verb} ${dollars} ${symbol}`);
 
     // Get the other side
     const otherNameHex = await this.nameReg.resolveName(other);
@@ -71,6 +73,11 @@ export class PushNotifier {
       value < 0
         ? `You sent ${dollars} ${symbol} to ${otherName}`
         : `You received ${dollars} ${symbol} from ${otherName}`;
+
+    // Log the notification. In local development, stop there.
+    const not = pushEnabled ? "" : "NOT ";
+    console.log(`[PUSH] ${not}notifying ${addr}: ${title}: ${body}`);
+    if (!pushEnabled) return;
 
     this.expo.sendPushNotificationsAsync([
       {
@@ -86,20 +93,14 @@ export class PushNotifier {
   /** Validates the push token, then subscribes to events affecting addr.  */
   async register(addr: Address, pushToken: string) {
     if (!Expo.isExpoPushToken(pushToken)) {
-      throw new Error(`Invalid push token ${pushToken} for ${addr}`);
-    }
-
-    const tokens = this.pushTokens.get(addr) || [];
-    if (tokens.includes(pushToken)) {
-      console.log(`[PUSH] already registered ${pushToken} for ${addr}`);
+      console.warn(`[PUSH] ignoring bad push token ${pushToken} for ${addr}`);
       return;
     }
 
-    console.log(`[PUSH] registering ${pushToken} for ${addr}`);
-    this.pushTokens.set(addr, [...tokens, pushToken]);
+    this.cachePushToken(addr, pushToken);
 
     await Promise.all([
-      this.db.savePushToken({ address: addr, pushToken }),
+      this.db.savePushToken({ address: addr, pushtoken: pushToken }),
       this.expo.sendPushNotificationsAsync([
         {
           to: pushToken,
@@ -108,5 +109,16 @@ export class PushNotifier {
         },
       ]),
     ]);
+  }
+
+  private cachePushToken(addr: Address, pushToken: string) {
+    const tokens = this.pushTokens.get(addr) || [];
+    if (tokens.includes(pushToken)) {
+      console.log(`[PUSH] already registered ${pushToken} for ${addr}`);
+      return;
+    }
+
+    console.log(`[PUSH] registering ${pushToken} for ${addr}`);
+    this.pushTokens.set(addr, [...tokens, pushToken]);
   }
 }

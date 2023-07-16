@@ -38,22 +38,24 @@ export class DB {
 
     console.log("[DB] connected, creating tables if necessary");
     await client.query(`
-          CREATE TABLE IF NOT EXISTS pushToken (
-              pushToken VARCHAR(64) PRIMARY KEY,
-              address CHAR(42) NOT NULL
+          CREATE TABLE IF NOT EXISTS pushtoken (
+            pushtoken VARCHAR(64) PRIMARY KEY,
+            address CHAR(42) NOT NULL
           );
-          CREATE INDEX IF NOT EXISTS pushToken_address ON pushToken (address);
+          CREATE INDEX IF NOT EXISTS pushtoken_address ON pushtoken (address);
       `);
     await client.end();
   }
 
   async loadPushTokens(): Promise<PushTokenRow[]> {
-    console.log(`[DB] loading auth tokens`);
+    console.log(`[DB] loading push tokens`);
     const client = await this.pool.connect();
-    const result = await client.query<PushTokenRow>(`SELECT * FROM pushToken`);
+    const result = await client.query<PushTokenRow>(
+      `SELECT address, pushtoken FROM pushtoken`
+    );
     client.release();
 
-    console.log(`[DB] ${result.rows.length} auth tokens`);
+    console.log(`[DB] ${result.rows.length} push tokens`);
     return result.rows;
   }
 
@@ -61,15 +63,15 @@ export class DB {
     console.log(`[DB] inserting auth token`);
     const client = await this.pool.connect();
     await client.query(
-      `INSERT INTO pushToken (pushToken, address) VALUES ($1, $2)
-       ON CONFLICT (pushToken) DO UPDATE SET address = $2`,
-      [token.pushToken, token.address]
+      `INSERT INTO pushtoken (pushtoken, address) VALUES ($1, $2)
+       ON CONFLICT (pushtoken) DO UPDATE SET address = $2`,
+      [token.pushtoken, token.address]
     );
     client.release();
   }
 }
 
 interface PushTokenRow {
-  pushToken: string;
+  pushtoken: string;
   address: string;
 }

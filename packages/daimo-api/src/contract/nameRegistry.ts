@@ -35,7 +35,7 @@ export class NameRegistry {
 
   /** Init: index logs from chain, get all names so far */
   async init() {
-    this.vc.pipeLogs(
+    await this.vc.pipeLogs(
       {
         address: nameRegistryConfig.address,
         event: registeredEvent,
