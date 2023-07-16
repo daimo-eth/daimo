@@ -45,7 +45,7 @@ export function useHandleNavLinks() {
 
     console.log(`[NAV] going to ${url}`);
     goTo(nav, link);
-  }, [url]);
+  }, [nav, url]);
 }
 
 async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
@@ -53,17 +53,17 @@ async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
   switch (type) {
     case "account": {
       const recipient = await getRecipient(link.addr);
-      nav.replace("Send", { recipient });
+      nav.navigate("Send", { recipient });
       break;
     }
     case "request": {
       const recipient = await getRecipient(link.recipient);
       const dollars = parseFloat(link.amount);
-      nav.replace("Send", { recipient, dollars });
+      nav.navigate("Send", { recipient, dollars });
       break;
     }
     case "note": {
-      nav.replace("Note", {
+      nav.navigate("Note", {
         ephemeralPrivateKey: link.ephemeralPrivateKey,
         ephemeralOwner: link.ephemeralOwner,
       });

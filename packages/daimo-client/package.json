@@ -1,7 +1,7 @@
 {
   "name": "@daimo/client",
   "version": "0.1.0",
-  "description": "Client library shared between web and mobile",
+  "description": "Shared between web and mobile",
   "main": "src/index.ts",
   "scripts": {
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
@@ -18,10 +18,9 @@
     "eslint": "^8.44.0",
     "tape": "^5.6.3",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@daimo/api": "*",
     "abitype": "^0.9.2",
     "viem": "^1.2.15"
   }

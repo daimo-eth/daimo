@@ -30,6 +30,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 type SendTab = "search" | "scan" | "createNote";
 
 export default function SendScreen({ route }: Props) {
+  console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
   const { recipient, dollars } = route.params || {};
 
   // Navigation

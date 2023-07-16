@@ -22,6 +22,9 @@ export class PushNotifier {
 
   async init() {
     this.coinIndexer.addListener(this.handleTransfers);
+    const rows = await this.db.loadPushTokens();
+    for (const row of rows) {
+      row.
   }
 
   private handleTransfers = async (logs: TransferLog[]) => {

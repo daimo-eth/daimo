@@ -2,12 +2,11 @@ import { zAmountStr, zHex } from "@daimo/api";
 import { Address } from "abitype";
 import { Hex, getAddress } from "viem";
 
-const domain =
-  process.env.NEXT_PUBLIC_DOMAIN ||
-  process.env.DAIMO_DOMAIN ||
-  "localhost:3000";
+const domain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
-export const daimoLinkBase = `https://${domain}/link`;
+export const daimoLinkBase = domain
+  ? `https://${domain}/link`
+  : "http://localhost:3001/link";
 
 /** Represents a Daimo app deep-link */
 export type DaimoLink = DaimoLinkAccount | DaimoLinkRequest | DaimoLinkNote;

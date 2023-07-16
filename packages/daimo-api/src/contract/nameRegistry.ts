@@ -51,7 +51,7 @@ export class NameRegistry {
       .filter((a): a is { name: Hex; addr: Hex } => !!(a.name && a.addr))
       .map((a) => ({ name: hexToString(a.name, { size: 32 }), addr: a.addr }))
       .filter((a) => isValidName(a.name));
-    console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
+    console.log(`[NAME-REG]  parsed ${accounts.length} named account(s)`);
 
     accounts.forEach(this.cacheAccount);
   };

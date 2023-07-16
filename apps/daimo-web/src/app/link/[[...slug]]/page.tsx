@@ -1,10 +1,17 @@
 import { NamedAccount } from "@daimo/api";
-import { daimoLinkBase, parseDaimoLink } from "@daimo/client";
+import {
+  DaimoLinkStatus,
+  DaimoNoteStatus,
+  DaimoRequestStatus,
+  daimoLinkBase,
+  parseDaimoLink,
+} from "@daimo/client";
 import { Metadata } from "next";
 import Image from "next/image";
 
 import { AppStoreBadge } from "../../../components/AppStoreBadge";
 import { H1, H2 } from "../../../components/typography";
+import { trpc } from "../../../utils/trpc";
 
 type LinkProps = {
   params: { slug?: string[] };
@@ -36,22 +43,21 @@ export default async function LinkPage(props: LinkProps) {
     <main className="max-w-sm mx-auto">
       <center>
         <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="180" height="180" />
+        <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
 
         <div className="h-12" />
 
         <H1>{title}</H1>
         <div className="h-2" />
         <H2>{description}</H2>
-        <div className="h-8" />
+        <div className="h-12" />
+        <H2>Coming soon to App Store</H2>
+        <div className="h-4" />
         <div className="flex flex-row gap-4 justify-center">
           <AppStoreBadge platform="ios" />
           <AppStoreBadge platform="android" />
         </div>
-        <div className="h-8" />
-
-        <H2>Coming to App Store soon</H2>
-        <div className="h-4" />
+        <div className="h-3" />
         <p>
           Till then, message <strong>dcposch</strong> on Telegram
           <br /> to try the TestFlight.
@@ -66,53 +72,36 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
   const path = (params.slug || []).join("/");
   const url = `${daimoLinkBase}/${path}`;
 
-  const link = parseDaimoLink(url);
+  let res: DaimoLinkStatus;
+  try {
+    res = await trpc.getLinkStatus.query({ url });
+  } catch (err) {
+    console.warn(`Error loading link status for ${url}`, err);
+    return {
+      title: "Daimo",
+      description: "Unrecognized link",
+    };
+  }
 
-  switch (link?.type) {
-    case "account": {
-      const account = await loadNamedAccount(link.addr);
-      if (account == null) return null;
-      return { title: `${account.name}`, description: `Pay on Daimo: ${url}` };
-    }
+  switch (res.link.type) {
     case "request": {
-      const recipient = await loadNamedAccount(link.recipient);
-      if (recipient == null) return null;
+      const { recipient } = res as DaimoRequestStatus;
       return {
-        title: `${recipient.name} is requesting $${link.amount}`,
-        description: `Pay via Daimo.`,
+        title: `${recipient.name} is requesting $${res.link.amount}`,
+        description: `Pay via Daimo or [to do: connect wallet]`,
       };
     }
     case "note": {
-      const noteInfo = await loadNoteInfo(link.ephemeralOwner);
-      if (noteInfo == null) return null;
+      const { amount, sender } = res as DaimoNoteStatus;
       return {
-        title: `${noteInfo.sender.name} sent you $${noteInfo.amount}`,
-        description: `Claim on Daimo.`,
+        title: `${sender.name} sent you $${amount}`,
+        description: `Claim on Daimo or [to do: connect wallet]`,
       };
     }
     default: {
       return null;
     }
   }
-}
-
-async function loadNoteInfo(ephemeralOwner: string) {
-  // TODO: load from TRPC
-  return {
-    amount: 1.23,
-    sender: {
-      name: "dcposch",
-      addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
-    },
-  };
-}
-
-async function loadNamedAccount(addr: string): Promise<NamedAccount | null> {
-  // TODO: load from TRPC
-  return {
-    name: "dcposch",
-    addr: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
-  };
 }
 
 function metadata(title: string, description: string): Metadata {

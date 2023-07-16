@@ -1,3 +1,5 @@
+import { ephemeralNotesAddress } from "@daimo/contract";
+import { special } from "depcheck";
 import { Text } from "react-native";
 import { Address } from "viem";
 
@@ -11,6 +13,7 @@ import { TextBold } from "./text";
 const specialAddrs: { [_: Address]: string } = {
   "0x2a6d311394184eeb6df8fbbf58626b085374ffe7": "faucet",
 };
+specialAddrs[ephemeralNotesAddress] = "note";
 
 const nameCache = new Map<Address, string>();
 

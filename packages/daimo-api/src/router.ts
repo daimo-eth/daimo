@@ -1,3 +1,8 @@
+import {
+  DaimoNoteStatus,
+  DaimoRequestStatus,
+  parseDaimoLink,
+} from "@daimo/client";
 import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, getAddress } from "viem";
 import { z } from "zod";
@@ -40,6 +45,49 @@ export function createRouter(
       .query(async (opts) => {
         const addr = getAddress(opts.input.addr);
         return nameReg.resolveAddress(addr);
+      }),
+
+    getLinkStatus: publicProcedure
+      .input(z.object({ url: z.string() }))
+      .query(async (opts) => {
+        const { url } = opts.input;
+
+        const link = parseDaimoLink(url);
+        if (link == null) {
+          throw new Error(`Invalid Daimo app link: ${url}`);
+        }
+
+        switch (link.type) {
+          case "request": {
+            const name = nameReg.resolveAddress(link.recipient);
+            if (name == null) throw new Error(`Not found: ${link.recipient}`);
+            const recipient = { addr: link.recipient, name };
+            const ret: DaimoRequestStatus = {
+              link,
+              recipient,
+            };
+            return ret;
+          }
+
+          case "note": {
+            // TODO
+            const amount = "1.23";
+            const sender = { addr: link.ephemeralOwner, name: "dcposch" };
+            const claimer = undefined;
+            const status = "pending";
+            const ret: DaimoNoteStatus = {
+              link,
+              amount,
+              sender,
+              claimer,
+              status,
+            };
+            return ret;
+          }
+
+          default:
+            throw new Error(`Invalid Daimo app link: ${url}`);
+        }
       }),
 
     lookupAccountByKey: publicProcedure
@@ -186,7 +234,9 @@ export function createRouter(
         const account = await DaimoAccount.init(
           publicClient,
           pubKeyHex,
-          signer,
+          () => {
+            throw new Error("No signer");
+          },
           false
         );
         const address = account.getAddress();
@@ -215,8 +265,4 @@ export function createRouter(
         return faucet.request(recipient);
       }),
   });
-}
-
-function signer(hexMessage: string): Promise<string> {
-  throw new Error("Function not implemented.");
 }

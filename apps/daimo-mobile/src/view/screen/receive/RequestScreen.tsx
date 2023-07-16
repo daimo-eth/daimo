@@ -36,7 +36,7 @@ export default function RequestScreen() {
         </View>
         <TextSmall>or</TextSmall>
         <View style={styles.horzButtons}>
-          <ButtonBig title="Send message" onPress={send} />
+          <ButtonBig type="primary" title="Send message" onPress={send} />
         </View>
       </View>
     </View>

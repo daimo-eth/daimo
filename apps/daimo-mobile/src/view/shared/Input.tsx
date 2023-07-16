@@ -54,11 +54,13 @@ export function AmountInput({
   onChange,
   onSubmitEditing,
   innerRef,
+  autoFocus,
 }: {
   value: number;
   onChange: (amount: number) => void;
   onSubmitEditing?: () => void;
   innerRef?: React.Ref<TextInput>;
+  autoFocus?: boolean;
 }) {
   if (value < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -95,7 +97,7 @@ export function AmountInput({
       placeholder="0.00"
       placeholderTextColor={color.gray}
       numberOfLines={1}
-      autoFocus
+      autoFocus={autoFocus == null ? true : autoFocus}
       value={strVal}
       selectTextOnFocus
       onBlur={blur}

@@ -68,7 +68,7 @@ export class ViemClient {
           strict: true,
         })
       );
-      callback(logs);
+      if (logs.length > 0) callback(logs);
     }
 
     this.publicClient.watchEvent({

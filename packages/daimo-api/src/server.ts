@@ -31,7 +31,7 @@ async function main() {
   const notifier = new PushNotifier(coinIndexer, nameReg, db);
   await notifier.init();
 
-  console.log(`[API] listening...`);
+  console.log(`[API] serving...`);
   const router = createRouter(
     vc.publicClient,
     coinIndexer,
@@ -41,7 +41,9 @@ async function main() {
     notifier
   );
   const server = createHTTPServer({ router });
-  server.listen(3000);
+  const { port } = server.listen(3000);
+
+  console.log(`[API] listening on port ${port}`);
 }
 
 main().catch(console.error);
