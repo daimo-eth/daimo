@@ -124,7 +124,8 @@ export class DaimoAccount {
   /** Sends an ERC20 transfer. Returns userOpHash. */
   public async erc20transfer(
     to: Address,
-    amount: `${number}` // in the native unit of the token
+    amount: `${number}`, // in the native unit of the token,
+    confirmation_code: byte[2] // 4 hex digits
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);

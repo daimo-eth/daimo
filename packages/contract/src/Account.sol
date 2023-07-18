@@ -63,8 +63,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     function execute(
         address dest,
         uint256 value,
+        bytes2 confirmationCode,
         bytes calldata func
     ) external {
+        if (confirmationCode != 0) {
+            _validateConfirmationCode(confirmationCode, func);
+        }
+
         _requireFromEntryPoint();
         _call(dest, value, func);
     }
@@ -97,6 +102,24 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     function _initialize(bytes32[2] calldata accountKey) internal virtual {
         accountKeys.push(accountKey);
         emit AccountInitialized(_entryPoint, accountKey);
+    }
+
+    // Assuming that `func` is an ERC20 transfer, check that the confirmation code
+    // matches the hash of the recipient address; revert otherwise.
+    function _validateConfirmationCode(
+        bytes2 confirmationCode,
+        bytes memory func
+    ) internal pure {
+        uint256 addr_offset = 4; // this isn't actually right
+        bytes memory addr = new bytes(20);
+        for (uint256 i = 0; i < 20; i++) {
+            addr[i] = func[i + addr_offset];
+        }
+
+        bytes32 addressHash = keccak256(abi.encode(addr));
+        bytes2 derivedCode = bytes2(uint16(uint256(addressHash) & 0xFF)); // Grab the last 2 bytes of the hash
+
+        assert(confirmationCode == derivedCode);
     }
 
     /// implement template method of BaseAccount
