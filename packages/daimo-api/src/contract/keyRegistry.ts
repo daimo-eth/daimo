@@ -15,7 +15,8 @@ import {
 } from "viem";
 
 import { contractFriendlyKeyToDER } from "./util";
-import { KeyData, NamedAccount } from "../model";
+import { KeyData, NamedAccount } from "../../../daimo-common/src/model";
+import { ViemClient } from "../chain";
 
 const signingKeyAddedEvent = getAbiItem({
   abi: accountABI,
@@ -32,73 +33,46 @@ type SigningKeyAddedOrRemovedLog = SigningKeyAddedLog | SigningKeyRemovedLog;
 
 export class KeyRegistry {
   /* In-memory indexer, for now. */
-  private keyToAccount = new Map<Hex, NamedAccount>();
+  private keyToAddr = new Map<Hex, Address>();
   private addrToLogs = new Map<Address, SigningKeyAddedOrRemovedLog[]>();
   private addrToKeyData = new Map<Address, KeyData[]>();
 
   constructor(private vc: ViemClient) {}
 
-  /** Init: index logs from chain, get all events so far */
-  async watchAccount(acc: NamedAccount) {
-    const addedLogs = await this.vc.publicClient.getLogs({
-      address: acc.addr,
-      event: signingKeyAddedEvent,
-      fromBlock: 0n,
-      toBlock: "latest" as BlockTag,
-    });
-    const removedLogs = await this.vc.publicClient.getLogs({
-      address: acc.addr,
-      event: signingKeyRemovedEvent,
-      fromBlock: 0n,
-      toBlock: "latest" as BlockTag,
-    });
-    console.log(
-      `[KEY-REG] watching ${acc.name}, read ${addedLogs.length} SigningKeyAdded logs, ${removedLogs.length} SigningKeyRemoved logs`
+  async init() {
+    await this.vc.pipeLogs(
+      {
+        event: signingKeyAddedEvent,
+      },
+      this.parseLogs
     );
 
-    const currentBlock = await this.vc.publicClient.getBlockNumber();
-    this.parseLogs(acc, currentBlock, [...addedLogs, ...removedLogs]);
-
-    this.vc.publicClient.watchContractEvent({
-      address: acc.addr,
-      abi: accountABI,
-      eventName: "SigningKeyAdded",
-      onLogs: async (logs: SigningKeyAddedLog[]) => {
-        console.log(
-          `[KEY-REG] subscribe ${acc.name}, ${logs.length} new SigningKeyAdded logs`
-        );
-        const currentBlock = await this.vc.publicClient.getBlockNumber();
-        this.parseLogs(acc, currentBlock, logs);
+    await this.vc.pipeLogs(
+      {
+        event: signingKeyRemovedEvent,
       },
-    });
-
-    this.vc.publicClient.watchContractEvent({
-      address: acc.addr,
-      abi: accountABI,
-      eventName: "SigningKeyRemoved",
-      onLogs: async (logs: SigningKeyRemovedLog[]) => {
-        console.log(
-          `[KEY-REG] subscribe ${acc.name}, ${logs.length} new SigningKeyRemoved logs`
-        );
-        const currentBlock = await this.vc.publicClient.getBlockNumber();
-        this.parseLogs(acc, currentBlock, logs);
-      },
-    });
+      this.parseLogs
+    );
+    console.log(`[KEY-REG] watching logs`);
   }
 
   /** Parses a particular account's event logs, first in name registries init(), then on subscription. */
-  parseLogs = (
-    acc: NamedAccount,
-    currentBlockNumber: bigint,
-    logs: SigningKeyAddedOrRemovedLog[]
-  ) => {
-    if (this.addrToLogs.get(acc.addr) === undefined) {
-      this.addrToLogs.set(acc.addr, []);
+  parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
+    const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO?
+    for (const log of logs) {
+      const addr = log.address;
+      if (this.addrToLogs.get(addr) === undefined) {
+        this.addrToLogs.set(addr, []);
+      }
+      this.addrToLogs.get(addr)!.push(...logs);
+      this.cacheAddressProperties(addr, currentBlockNumber);
     }
-    this.addrToLogs.get(acc.addr)!.push(...logs);
+  };
 
+  /** Cache an address's key properties in memory. */
+  cacheAddressProperties = (addr: Address, currentBlockNumber: bigint) => {
     // deterministically sort all logs
-    const sortedLogs = this.addrToLogs.get(acc.addr)!.sort((a, b) => {
+    const sortedLogs = this.addrToLogs.get(addr)!.sort((a, b) => {
       const aBlockNumber = a.blockNumber || currentBlockNumber + 1n;
       const bBlockNumber = b.blockNumber || currentBlockNumber + 1n;
       if (aBlockNumber < bBlockNumber) return -1;
@@ -112,14 +86,8 @@ export class KeyRegistry {
       }
     });
 
-    this.addrToLogs.set(acc.addr, sortedLogs);
-    this.cacheAccountProperties(acc, currentBlockNumber);
-  };
-
-  /** Cache an account's properties in memory. */
-  cacheAccountProperties = (acc: NamedAccount, currentBlockNumber: bigint) => {
     const currentKeyData: Map<string, KeyData> = new Map();
-    for (const log of this.addrToLogs.get(acc.addr)!) {
+    for (const log of sortedLogs) {
       if (!log.args.accountPubkey)
         throw new Error("[API] Invalid event, no accountPubkey");
       const derKey = contractFriendlyKeyToDER(log.args.accountPubkey);
@@ -136,16 +104,21 @@ export class KeyRegistry {
       }
     }
 
-    this.addrToKeyData.set(acc.addr, [...currentKeyData.values()]);
+    this.addrToKeyData.set(addr, [...currentKeyData.values()]);
 
     for (const keyData of currentKeyData.values()) {
-      this.keyToAccount.set(keyData.key, acc);
+      this.keyToAddr.set(keyData.key, addr);
     }
+    console.log(
+      `[KEY-REG] cached ${
+        this.addrToKeyData.get(addr)?.length
+      } key(s) for ${addr}`
+    );
   };
 
-  /** Find daimo account by DER key */
-  async resolveKey(key: Hex): Promise<NamedAccount | null> {
-    return this.keyToAccount.get(key) || null;
+  /** Find address by DER key */
+  async resolveKey(key: Hex): Promise<Address | null> {
+    return this.keyToAddr.get(key) || null;
   }
 
   /** Find all keys and metadata for a daimo account address */

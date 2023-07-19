@@ -49,6 +49,7 @@ export class NameRegistry {
       },
       this.parseLogs
     );
+    await this.keyRegistry.init();
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
@@ -63,9 +64,6 @@ export class NameRegistry {
     console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
 
     accounts.forEach(this.cacheAccount);
-    for (const acc of accounts) {
-      this.keyRegistry.watchAccount(acc);
-    }
   };
 
   /** Cache an account in memory. */

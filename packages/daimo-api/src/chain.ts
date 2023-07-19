@@ -50,7 +50,7 @@ export class ViemClient {
   ) {}
 
   async pipeLogs<E extends AbiEvent | undefined>(
-    args: { address: Address; event: E },
+    args: { address?: Address; event: E },
     callback: (
       logs: GetLogsReturnType<E, E extends AbiEvent ? [E] : undefined, true>
     ) => void

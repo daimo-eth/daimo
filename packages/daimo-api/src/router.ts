@@ -157,17 +157,18 @@ export function createRouter(
         }
       }),
 
-    lookupAccountByKey: publicProcedure
+    lookupNameByKey: publicProcedure
       .input(
         z.object({
           pubKeyHex: zHex,
         })
       )
       .query(async (opts) => {
-        return await keyReg.resolveKey(opts.input.pubKeyHex);
+        const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
+        return addr ? nameReg.resolveAddress(addr) : null;
       }),
 
-    lookupAccountKeys: publicProcedure
+    lookupAddressKeys: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
         const { addr } = opts.input;
