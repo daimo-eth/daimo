@@ -7,7 +7,9 @@ import {
 } from "@daimo/common";
 import { useEffect } from "react";
 
-import { chainConfig } from "../logic/chainConfig";
+import { assert } from "../logic/assert";
+import { Chain, ChainStatus, chainConfig } from "../logic/chain";
+import { guessTimestampFromNum } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";
 
@@ -256,14 +258,4 @@ function addTransfers(
   }
 
   return ret;
-}
-
-/** On L2, timestamp can be a deterministic function of block number. */
-function guessTimestampFromNum(blockNum: number) {
-  switch (chainConfig.l2.network) {
-    case "base-goerli":
-      return 1675193616 + blockNum * 2;
-    default:
-      throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
-  }
 }

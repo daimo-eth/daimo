@@ -78,3 +78,12 @@ export const zTrackedRequest = z.object({
 });
 
 export type TrackedRequest = z.infer<typeof zTrackedRequest>;
+
+export const zKeyData = z.object({
+  key: zHex, // DER Format
+  addedAt: z.number(),
+  removedAt: z.number().optional(),
+  // TODO lastUsedAt?: bigint;
+});
+
+export type KeyData = z.infer<typeof zKeyData>;

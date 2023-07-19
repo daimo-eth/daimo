@@ -15,15 +15,7 @@ import {
 } from "viem";
 
 import { contractFriendlyKeyToDER } from "./util";
-import { NamedAccount } from "../../../daimo-common/src/model";
-import { ViemClient } from "../chain";
-
-type KeyData = {
-  key: Hex; // DER format
-  addedAt: bigint;
-  removedAt?: bigint;
-  // TODO lastUsedAt?: bigint;
-};
+import { KeyData, NamedAccount } from "../model";
 
 const signingKeyAddedEvent = getAbiItem({
   abi: accountABI,
@@ -134,12 +126,12 @@ export class KeyRegistry {
       if (log.eventName === "SigningKeyAdded") {
         currentKeyData.set(derKey, {
           key: derKey,
-          addedAt: log.blockNumber || currentBlockNumber + 1n,
+          addedAt: Number(log.blockNumber || currentBlockNumber + 1n),
         });
       } else if (log.eventName === "SigningKeyRemoved") {
         currentKeyData.set(derKey, {
           ...currentKeyData.get(derKey)!,
-          removedAt: log.blockNumber || currentBlockNumber + 1n,
+          removedAt: Number(log.blockNumber || currentBlockNumber + 1n),
         });
       }
     }

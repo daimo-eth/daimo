@@ -15,6 +15,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import {
@@ -41,7 +42,17 @@ import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
   const [page, setPage] = useState(1);
+  const [accountFlowChoice, setAccountFlowChoice] = useState<
+    "create" | "existing"
+  >("create");
   const next = useCallback(() => setPage(page + 1), [page]);
+  const onFlowChoice = useCallback(
+    (choice: "create" | "existing") => {
+      setAccountFlowChoice(choice);
+      setPage(page + 1);
+    },
+    [page]
+  );
 
   // See if we already have a key in the enclave
   const [, setAccount] = useAccount();
@@ -59,14 +70,23 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.onboardingScreen}>
-      {page === 1 && <IntroPages onCreateAccount={next} />}
+      {page === 1 && <IntroPages onFlowChoice={onFlowChoice} />}
       {page === 2 && <AllowNotifications onNext={next} />}
-      {page === 3 && <CreateAccountPage />}
+      {page === 3 && // TODO: add back buttons, probably rearrange notifications to be after?
+        (accountFlowChoice === "create" ? (
+          <CreateAccountPage />
+        ) : (
+          <UseExistingPage />
+        ))}
     </View>
   );
 }
 
-function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
+function IntroPages({
+  onFlowChoice,
+}: {
+  onFlowChoice: (choice: "create" | "existing") => void;
+}) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
@@ -117,12 +137,18 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
       </ScrollView>
       <Spacer h={64} />
       <ButtonBig
-        type="primary"
         title="Create Account"
-        onPress={onCreateAccount}
+        onPress={() => {
+          onFlowChoice("create");
+        }}
       />
       <Spacer h={8} />
-      <ButtonSmall title="Use existing" onPress={comingSoon} />
+      <ButtonSmall
+        title="Use existing"
+        onPress={() => {
+          onFlowChoice("existing");
+        }}
+      />
     </View>
   );
 }
@@ -237,6 +263,44 @@ function CreateAccountPage() {
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
+  );
+}
+
+function UseExistingPage() {
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.createAccountPage}>
+        <TextH1>Welcome</TextH1>
+        <TextBody>test use existing</TextBody>
+        <QRCode
+          value={url}
+          color="#333"
+          size={192}
+          logo={{ uri: image.qrLogo }}
+          logoSize={72}
+        />
+      </View>
+    </View>
+
+    /* 
+    <View style={styles.vertMain}>
+        <View style={styles.vertQR}>
+          <QRCode
+            value={url}
+            color="#333"
+            size={192}
+            logo={{ uri: image.qrLogo }}
+            logoSize={72}
+          />
+          <TextSmall>Scan or tap</TextSmall>
+        </View>
+        <TextSmall>or</TextSmall>
+        <View style={styles.horzButtons}>
+          <ButtonBig title="Request" onPress={request} />
+          <ButtonBig title="Deposit" onPress={deposit} />
+        </View>
+      </View>
+    */
   );
 }
 

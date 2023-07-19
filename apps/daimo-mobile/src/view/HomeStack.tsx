@@ -52,6 +52,11 @@ export function HomeStackNav() {
           component={SendRequestScreen}
         />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
+        <HomeStack.Screen
+          name="AddDevice"
+          component={AddDeviceScreen}
+          options={{ title: "Add Device" }}
+        />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

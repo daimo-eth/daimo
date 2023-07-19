@@ -90,7 +90,7 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   }
 }
 
-async function createKey(setAS: SetActStatus, enclaveKeyName: string) {
+export async function createKey(setAS: SetActStatus, enclaveKeyName: string) {
   setAS("idle", "Creating enclave key...");
   try {
     const { pubKeyHex, hwSecLevel } = await createEnclaveKey(enclaveKeyName);
