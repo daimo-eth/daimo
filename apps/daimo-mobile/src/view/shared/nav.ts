@@ -31,7 +31,8 @@ export function useNav() {
   return useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
 }
 
-export function useHandleNavLinks() {
+/** Handle incoming app deep links. */
+export function useInitNavLinks() {
   const nav = useNav();
   const url = useURL();
 

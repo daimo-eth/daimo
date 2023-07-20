@@ -1,13 +1,11 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
-import { Text } from "react-native";
 
-import { ChainContext } from "./logic/chain";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
-import { usePollChain, useSyncAccountHistory } from "./sync/sync";
+import { useSyncChain } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
-import { useHandleNavLinks } from "./view/shared/nav";
+import { useInitNavLinks } from "./view/shared/nav";
 
 export default function App() {
   console.log("[APP] rendering");
@@ -15,19 +13,13 @@ export default function App() {
   // Display notifications, listen for push notifications
   useInitNotifications();
 
-  // Start polling chain status - L1 tip, L2 tip, account balance, transfers
-  const chainState = usePollChain();
-
-  // Sync account history
-  // TODO: combine with usePollChain into a unified sync
-  useSyncAccountHistory();
+  // Sync data from chain. Account balance, transfers, ...
+  useSyncChain();
 
   return (
     <RpcProvider>
-      <NavigationContainer fallback={<Text>Loading...</Text>}>
-        <ChainContext.Provider value={chainState}>
-          <AppBody />
-        </ChainContext.Provider>
+      <NavigationContainer>
+        <AppBody />
       </NavigationContainer>
     </RpcProvider>
   );
@@ -35,7 +27,7 @@ export default function App() {
 
 function AppBody() {
   // Handle incoming applinks
-  useHandleNavLinks();
+  useInitNavLinks();
 
   return (
     <>

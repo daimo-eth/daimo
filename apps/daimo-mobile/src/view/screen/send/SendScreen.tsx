@@ -1,3 +1,4 @@
+import { amountToDollars, assert, dollarsToAmount } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -9,8 +10,6 @@ import { CreateNoteTab } from "./CreateNoteTab";
 import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
 import { useSendAsync } from "../../../action/useSendAsync";
-import { assert } from "../../../logic/assert";
-import { amountToDollars, dollarsToAmount } from "../../../logic/coin";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { OpStatus } from "../../../model/op";
@@ -71,7 +70,7 @@ export default function SendScreen({ route }: Props) {
       </ScrollView>
       {!recipient && tab === "search" && (
         <View style={ss.container.ph16}>
-          <ButtonBig title="Create Note" onPress={createNote} />
+          <ButtonBig type="primary" title="Create Note" onPress={createNote} />
           <Spacer h={16} />
           <TextSmall>
             <TextCenter>{sendViaAppStr}</TextCenter>

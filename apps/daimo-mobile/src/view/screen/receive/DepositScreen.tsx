@@ -5,11 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
-import { chainConfig } from "../../../logic/chain";
+import { chainConfig } from "../../../logic/chainConfig";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
-import { useAccountHistory } from "../../../model/accountHistory";
-import { resyncAccountHistory } from "../../../sync/sync";
+import { resync } from "../../../sync/sync";
 import { ButtonMed } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
@@ -43,12 +42,10 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   }, [recipient]);
 
   // Show faucet payment in history promptly
-  // TODO: show pending faucet OpEvent?
-  const [hist, setHist] = useAccountHistory(recipient);
   useEffect(() => {
-    if (!hist) return;
     if (!mutation.isSuccess) return;
-    resyncAccountHistory(hist, setHist);
+    // TODO: show pending transaction instead
+    resync("faucet payment sent");
   }, [mutation.isSuccess]);
 
   // Display

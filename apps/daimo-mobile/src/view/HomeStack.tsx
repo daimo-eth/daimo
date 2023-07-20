@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
 import { AccountScreen } from "./screen/AccountScreen";
-import { ChainScreen } from "./screen/ChainScreen";
 import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
@@ -40,7 +39,6 @@ export function HomeStackNav() {
       </HomeStack.Group>
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="Account" component={AccountScreen} />
-        <HomeStack.Screen name="Chain" component={ChainScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
         <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
         <HomeStack.Screen name="Note" component={ClaimNoteScreen} />

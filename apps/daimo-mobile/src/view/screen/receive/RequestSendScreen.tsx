@@ -1,4 +1,4 @@
-import { formatDaimoLink } from "@daimo/common";
+import { assert, formatDaimoLink } from "@daimo/common";
 import { useCallback, useRef, useState } from "react";
 import {
   Alert,
@@ -9,7 +9,6 @@ import {
   View,
 } from "react-native";
 
-import { assert } from "../../../logic/assert";
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
@@ -64,6 +63,7 @@ export default function RequestSendScreen() {
           autoFocus={!sent}
         />
         <ButtonBig
+          type="primary"
           disabled={amount <= 0 || sent}
           title={sent ? "Sent" : "Send Request"}
           onPress={sendRequest}

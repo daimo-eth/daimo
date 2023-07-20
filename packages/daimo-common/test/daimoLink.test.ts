@@ -72,7 +72,15 @@ test("DaimoLink", () => {
   }
 });
 
-test("DaimoLinkNormalization", () => {
+test("DaimoLink from daimo:// direct app link", () => {
+  const url = "daimo://account/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
+  assert.deepStrictEqual(parseDaimoLink(url), {
+    type: "account",
+    addr: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+  });
+});
+
+test("DaimoLink normalization", () => {
   for (const [url, link] of testCases) {
     // Ensure addresses always end up checksummed
     assert.deepStrictEqual(parseDaimoLink(url.toLowerCase()), link);

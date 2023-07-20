@@ -1,10 +1,10 @@
+import { assert } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { assert } from "../logic/assert";
 import { createEnclaveKey } from "../logic/enclave";
 import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
@@ -56,14 +56,17 @@ export function useCreateAccount(name: string): ActHandle {
     const { address } = result.data;
     console.log(`[CHAIN] created new account ${name} at ${address}`);
     setAccount({
-      name,
-
-      address,
-      lastBalance: BigInt(0),
-      lastNonce: BigInt(0),
-      lastBlockTimestamp: 0,
-
       enclaveKeyName,
+      name,
+      address,
+
+      lastBalance: BigInt(0),
+      lastBlockTimestamp: 0,
+      lastBlock: 0,
+      lastFinalizedBlock: 0,
+
+      namedAccounts: [],
+      recentTransfers: [],
 
       pushToken: null,
     });

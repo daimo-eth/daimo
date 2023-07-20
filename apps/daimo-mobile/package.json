@@ -66,8 +66,7 @@
     "react-native-svg": "13.4.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.2.15",
-    "wagmi": "^1.1.1"
+    "viem": "^1.2.15"
   },
   "eslintConfig": {
     "extends": [

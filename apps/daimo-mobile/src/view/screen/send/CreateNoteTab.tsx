@@ -1,14 +1,12 @@
-import { DaimoLink, formatDaimoLink } from "@daimo/common";
+import { DaimoLink, assert, formatDaimoLink } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
-import { ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Share } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { CancelHeader } from "./CancelHeader";
 import { useSendAsync } from "../../../action/useSendAsync";
-import { assert, assertNotNull } from "../../../logic/assert";
-import { ChainContext } from "../../../logic/chain";
 import { fetchNotesContractAllowance } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
@@ -27,9 +25,6 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     [ephemeralPrivateKey]
   );
 
-  const { chain } = useContext(ChainContext);
-  const { clientL2 } = assertNotNull(chain);
-
   const [dollars, setDollars] = useState(0);
 
   const [account] = useAccount();
@@ -40,7 +35,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
 
   useEffect(() => {
     (async () => {
-      const allowance = await fetchNotesContractAllowance(clientL2, address);
+      const allowance = await fetchNotesContractAllowance(address);
       setIsNotesContractApproved(allowance > 0);
 
       const privKey = generatePrivateKey();
@@ -92,9 +87,9 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
-        return <ButtonBig title="Success" disabled />;
+        return <ButtonBig type="success" title="Success" disabled />;
       case "error":
-        return <ButtonBig title="Error" disabled />;
+        return <ButtonBig type="danger" title="Error" disabled />;
     }
   })();
 

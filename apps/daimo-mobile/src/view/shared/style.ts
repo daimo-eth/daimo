@@ -12,6 +12,7 @@ export const color = {
   white: "#fff",
   primary: "#007aff",
   danger: "#f35369",
+  success: "#4cd964",
   bg: {
     lightGray: "#eee",
     midGray: "#ccc",

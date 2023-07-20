@@ -1,26 +1,3 @@
-import { useEffect, useState } from "react";
-
-/** Returns the current time in Unix seconds. Ticks every second. */
-export function useTime() {
-  const [time, setTime] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return time / 1000;
-}
-
-/** Returns "just now", "4s", "1m", "2h", etc. */
-export function timeAgoS(sinceS: number, nowS: number) {
-  const seconds = Math.floor(nowS - sinceS);
-  if (seconds < -30) return "⚠️ future";
-  if (seconds < 1) return "just now";
-  if (seconds < 60) return `${seconds}s`;
-  return timeAgo(sinceS, nowS);
-}
-
 /** Returns "now", "1m", "2h", etc. */
 export function timeAgo(sinceS: number, nowS: number) {
   const seconds = Math.floor(nowS - sinceS);

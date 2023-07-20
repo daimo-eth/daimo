@@ -2,7 +2,7 @@ import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
-import { chainConfig } from "../../../logic/chain";
+import { chainConfig } from "../../../logic/chainConfig";
 import { useAccount } from "../../../model/account";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";

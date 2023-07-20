@@ -40,7 +40,9 @@ function ErrorRow({ error }: { error: { message: string } }) {
 function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
-  return <ButtonBig title={getNameOrAddr(recipient)} onPress={pay} />;
+  return (
+    <ButtonBig type="primary" title={getNameOrAddr(recipient)} onPress={pay} />
+  );
 }
 
 const styles = StyleSheet.create({

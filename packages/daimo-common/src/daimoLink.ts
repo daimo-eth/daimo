@@ -55,12 +55,16 @@ export function parseDaimoLink(link: string): DaimoLink | null {
 }
 
 function parseDaimoLinkInner(link: string): DaimoLink | null {
-  const prefix = `${daimoLinkBase}/`;
-  if (!link.startsWith(prefix)) {
-    return null;
+  let suffix: string | undefined;
+  const prefixes = [`${daimoLinkBase}/`, "daimo://"];
+  for (const prefix of prefixes) {
+    if (link.startsWith(prefix)) {
+      suffix = link.substring(prefix.length);
+    }
   }
+  if (suffix == null) return null;
 
-  const parts = link.substring(prefix.length).split("/");
+  const parts = suffix.split("/");
 
   switch (parts[0]) {
     case "account": {

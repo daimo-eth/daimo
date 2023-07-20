@@ -115,7 +115,11 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
         </IntroPage>
       </ScrollView>
       <Spacer h={64} />
-      <ButtonBig title="Create Account" onPress={onCreateAccount} />
+      <ButtonBig
+        type="primary"
+        title="Create Account"
+        onPress={onCreateAccount}
+      />
       <Spacer h={8} />
       <ButtonSmall title="Use existing" onPress={comingSoon} />
     </View>
@@ -187,7 +191,11 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
           </TextBody>
         </View>
         <Spacer h={32} />
-        <ButtonBig title="Allow Notifications" onPress={requestPermission} />
+        <ButtonBig
+          type="primary"
+          title="Allow Notifications"
+          onPress={requestPermission}
+        />
         <Spacer h={16} />
         <ButtonSmall title="Skip" onPress={onNext} />
       </View>
@@ -297,7 +305,12 @@ function NamePicker({
         </TextSmall>
       </View>
       <Spacer h={8} />
-      <ButtonBig title="Create" onPress={onChoose} disabled={!isAvailable} />
+      <ButtonBig
+        type="primary"
+        title="Create"
+        onPress={onChoose}
+        disabled={!isAvailable}
+      />
     </View>
   );
 }

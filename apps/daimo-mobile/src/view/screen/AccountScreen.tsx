@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 
-import { chainConfig } from "../../logic/chain";
+import { chainConfig } from "../../logic/chainConfig";
 import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";

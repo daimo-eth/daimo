@@ -1,3 +1,4 @@
+import { NamedAccount } from "@daimo/common";
 import { nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
@@ -9,7 +10,6 @@ import {
   hexToString,
 } from "viem";
 
-import { NamedAccount } from "../../../daimo-common/src/model";
 import { ContractType, ViemClient } from "../chain";
 
 const registeredName = "Registered";

@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { assertNotNull } from "@daimo/common";
+import { useEffect, useState } from "react";
 import { Linking, Platform } from "react-native";
-
-import { assertNotNull } from "./assert";
 
 // Sending Notes carries a risk if the note is revealed to a third party.
 // Only suggest reasonably secure messaging apps, not email or SMS.

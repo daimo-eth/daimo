@@ -11,7 +11,6 @@ import {
 import { HistoryList } from "./History";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
-import { useAccountHistory } from "../../model/accountHistory";
 import { TitleAmount } from "../shared/Amount";
 import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -24,9 +23,6 @@ export default function HomeScreen() {
   console.log(`[HOME] rendering with account ${account?.name}`);
 
   useWarmCache(account?.enclaveKeyName);
-
-  const [hist] = useAccountHistory(account?.address);
-  console.log(`[HOME] rendering with history ${hist?.recentTransfers.length}`);
 
   const nav = useNav();
 
@@ -62,7 +58,7 @@ export default function HomeScreen() {
       >
         <View style={styles.historyElem}>
           <ScrollPellet />
-          <HistoryList hist={hist} maxToShow={5} />
+          <HistoryList account={account} maxToShow={5} />
         </View>
       </ScrollView>
     </View>

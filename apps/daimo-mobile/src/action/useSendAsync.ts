@@ -1,15 +1,14 @@
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
-import { useCallback, useContext, useEffect } from "react";
-import { PublicClient } from "wagmi";
+import { useCallback, useEffect } from "react";
+import { createPublicClient, http } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { Chain, ChainContext } from "../logic/chain";
+import { chainConfig } from "../logic/chainConfig";
 import { loadEnclaveKey } from "../logic/enclave";
 import { useAccount } from "../model/account";
-import { useAccountHistory } from "../model/accountHistory";
 import { OpEvent } from "../model/op";
-import { resyncAccountHistory } from "../sync/sync";
+import { resync } from "../sync/sync";
 
 /** Send a tx user op. */
 export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
@@ -21,30 +20,22 @@ export function useSendAsync(
   pendingOp?: OpEvent
 ): ActHandle {
   const [as, setAS] = useActStatus();
-  const { chain } = useContext(ChainContext);
-  if (chain == null) throw new Error("No chain context");
 
-  const [account] = useAccount();
+  const [account, setAccount] = useAccount();
   if (!account) throw new Error("No account");
-  const { address } = account;
-  const [hist, setHist] = useAccountHistory(address);
-  if (!hist) throw new Error("No account history");
 
   const exec = useCallback(async () => {
-    const handle = await sendAsync(chain, setAS, enclaveKeyName, sendFn);
+    const handle = await sendAsync(setAS, enclaveKeyName, sendFn);
 
     if (pendingOp) {
       pendingOp.opHash = handle.userOpHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
-      hist.recentTransfers.push(pendingOp);
+      account.recentTransfers.push(pendingOp);
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
-      setHist(hist);
-
-      // TODO: disgusting hack
-      resyncAccountHistory(hist, setHist);
+      setAccount(account);
 
       // In the background, wait for the op to finish
-      handle.wait().then(() => resyncAccountHistory(hist, setHist));
+      handle.wait().then(() => resync(`op finished: ${pendingOp.opHash}`));
     }
   }, [enclaveKeyName, sendFn]);
 
@@ -53,18 +44,15 @@ export function useSendAsync(
 
 /** Warm the DaimoAccount cache. */
 export function useWarmCache(enclaveKeyName?: string) {
-  const { chain } = useContext(ChainContext);
-  if (chain == null) throw new Error("No chain context");
-
   useEffect(() => {
     if (!enclaveKeyName) return;
-    loadAccount(chain.clientL2, enclaveKeyName);
-  }, [chain, enclaveKeyName]);
+    loadAccount(enclaveKeyName);
+  }, [enclaveKeyName]);
 }
 
 const accountCache: Map<string, Promise<DaimoAccount>> = new Map();
 
-function loadAccount(client: PublicClient, enclaveKeyName: string) {
+function loadAccount(enclaveKeyName: string) {
   let promise = accountCache.get(enclaveKeyName);
   if (promise) return promise;
 
@@ -76,6 +64,14 @@ function loadAccount(client: PublicClient, enclaveKeyName: string) {
     const derPublicKey = await loadEnclaveKey(enclaveKeyName);
     if (!derPublicKey) throw new Error(`Missing enclave key ${enclaveKeyName}`);
 
+    // TODO: remove publicClient
+    // The only thing we're using it for is loading nonce.
+    // (Do we even need that at all, vs random nonce?)
+    // See https://github.com/daimo-eth/daimo/issues/100
+    const client = createPublicClient({
+      chain: chainConfig.l1,
+      transport: http(),
+    });
     return await DaimoAccount.init(client, derPublicKey, signer, false);
   })();
   accountCache.set(enclaveKeyName, promise);
@@ -84,50 +80,25 @@ function loadAccount(client: PublicClient, enclaveKeyName: string) {
 }
 
 async function sendAsync(
-  chain: Chain,
   setAS: SetActStatus,
   enclaveKeyName: string,
   sendFn: SendOpFn
 ) {
   try {
     setAS("loading", "Loading account...");
-    const account = await loadAccount(chain.clientL2, enclaveKeyName);
+    const account = await loadAccount(enclaveKeyName);
 
     setAS("loading", "Signing...");
     const handle = await sendFn(account);
-    setAS("success", "Sent");
+    setAS("success", "Accepted");
 
     return handle;
-
-    // setAS("loading", "Accepted...");
-
-    // const event = await handle.wait();
-    // // TODO: confirm that the user op succeeded
-    // if (event) setAS("loading", "Submitted...");
-    // else {
-    //   // TODO: clean error communication
-    //   setAS("error", "Bundle not found");
-    //   return;
-    // }
-
-    // const receipt = await waitForReceipt(chain, event.transactionHash as Hex);
-    // if (receipt.status === "success") setAS("success", "Sent");
-    // else setAS("error", "Bundle reverted");
   } catch (e: any) {
     console.error(e);
     setAS("error", e.message);
     throw e;
   }
 }
-
-// async function waitForReceipt(chain: Chain, txHash: Hex) {
-//   const receipt = await chain.clientL2.waitForTransactionReceipt({
-//     hash: txHash,
-//     timeout: 30000,
-//   });
-//   console.log(`[ACTION] tx ${receipt.status}: ${txHash}`);
-//   return receipt;
-// }
 
 async function requestEnclaveSignature(enclaveKeyName: string, hexTx: string) {
   const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {

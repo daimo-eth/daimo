@@ -9,12 +9,15 @@ import {
 
 import { color, touchHighlightUnderlay } from "./style";
 
-interface ButtonProps {
+interface ButtonPropsSmall {
   title?: string;
   children?: React.ReactNode;
   onPress?: () => void;
   disabled?: boolean;
-  type?: "primary" | "default" | "danger";
+}
+
+interface ButtonProps extends ButtonPropsSmall {
+  type: "primary" | "success" | "danger" | "text";
 }
 
 export function ButtonBig(props: ButtonProps) {
@@ -25,38 +28,42 @@ export function ButtonMed(props: ButtonProps) {
   return <Button {...props} style={useStyle(buttonStyles.med, props)} />;
 }
 
-export function ButtonSmall(props: ButtonProps) {
+export function ButtonSmall(props: ButtonPropsSmall) {
   return <Button {...props} style={useStyle(buttonStyles.small, props)} />;
 }
 
-function useStyle(base: ButtonStyle, props: ButtonProps) {
+function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
+  const { type } = props as ButtonProps;
   const btnOverride = useMemo<ViewStyle>(() => {
-    switch (props.type) {
+    switch (type) {
       case "primary":
         return { backgroundColor: color.primary };
       case "danger":
         return { backgroundColor: color.danger };
+      case "success":
+        return { backgroundColor: color.success };
       default:
         return {};
     }
-  }, [props.type]);
+  }, [type]);
 
-  const titleOverride = useMemo<TextStyle>(() => {
-    switch (props.type) {
+  const titleOverride = useMemo<ViewStyle>(() => {
+    switch (type) {
       case "primary":
       case "danger":
-        return { color: color.white };
+      case "success":
+        return { backgroundColor: color.white };
       default:
         return {};
     }
-  }, [props.type]);
+  }, [type]);
 
   const style = useMemo(
     () => ({
       button: { ...base.button, ...btnOverride },
       title: { ...base.title, ...titleOverride },
     }),
-    [base, btnOverride, titleOverride]
+    [base, btnOverride]
   );
   return style;
 }
@@ -64,7 +71,7 @@ function useStyle(base: ButtonStyle, props: ButtonProps) {
 type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
 export function Button(
-  props: ButtonProps & {
+  props: ButtonPropsSmall & {
     style: ButtonStyle;
   }
 ) {

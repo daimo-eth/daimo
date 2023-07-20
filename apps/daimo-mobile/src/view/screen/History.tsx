@@ -1,11 +1,10 @@
+import { assert } from "@daimo/common";
+import { amountToDollars } from "@daimo/common/src/coin";
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
-import { assert } from "../../logic/assert";
-import { amountToDollars } from "../../logic/coin";
-import { useAccount } from "../../model/account";
-import { AccountHistory, useAccountHistory } from "../../model/accountHistory";
+import { Account, useAccount } from "../../model/account";
 import { TransferOpEvent } from "../../model/op";
 import { ButtonSmall } from "../shared/Button";
 import { AddrText } from "../shared/addr";
@@ -24,24 +23,23 @@ import { timeAgo } from "../shared/time";
 // TODO: replace this with a better custom scroll view on HomeScreen
 export function HistoryScreen() {
   const [account] = useAccount();
-  const [hist] = useAccountHistory(account?.address);
+  if (account == null) return null;
+
   return (
     <View style={ss.container.vertModal}>
-      <HistoryList hist={hist} />
+      <HistoryList account={account} />
     </View>
   );
 }
 
 export function HistoryList({
-  hist,
+  account,
   maxToShow,
 }: {
-  hist?: AccountHistory;
+  account: Account;
   maxToShow?: number;
 }) {
-  if (hist == null) return null;
-
-  const ops = hist.recentTransfers.slice().reverse();
+  const ops = account.recentTransfers.slice().reverse();
 
   if (ops.length === 0) {
     return (
@@ -59,7 +57,7 @@ export function HistoryList({
     <TransferRow
       key={`${t.timestamp}-${t.from}-${t.to}`}
       transfer={t}
-      address={hist.address}
+      address={account.address}
       showDate={showDate}
     />
   );

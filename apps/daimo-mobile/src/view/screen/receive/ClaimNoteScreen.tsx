@@ -1,13 +1,12 @@
+import { assert } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { SendOpFn, useSendAsync } from "../../../action/useSendAsync";
-import { assert } from "../../../logic/assert";
-import { ChainContext } from "../../../logic/chain";
 import {
   EphemeralNote,
   useEphemeralSignature,
@@ -26,8 +25,6 @@ type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 export default function ClaimNoteScreen({ route }: Props) {
   const [account] = useAccount();
   assert(account != null);
-  const { chain } = useContext(ChainContext);
-  assert(chain != null);
 
   const { ephemeralPrivateKey, ephemeralOwner: passedEphemeralOwner } =
     route.params || {};
@@ -36,7 +33,7 @@ export default function ClaimNoteScreen({ route }: Props) {
 
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const [note, loadState] = useFetchNote(chain.clientL2, ephemeralOwner);
+  const [note, loadState] = useFetchNote(ephemeralOwner);
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
@@ -78,9 +75,6 @@ function NoteDisplay({
 }) {
   const [account] = useAccount();
   assert(account != null);
-
-  const { chain } = useContext(ChainContext);
-  assert(chain != null);
 
   const ephemeralSignature = useEphemeralSignature(
     ephemeralPrivateKey,
@@ -135,13 +129,13 @@ function NoteDisplay({
   const button = (function () {
     switch (status) {
       case "idle":
-        return <ButtonBig title="Claim money" onPress={exec} type="primary" />;
+        return <ButtonBig type="primary" title="Claim money" onPress={exec} />;
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
-        return <ButtonBig title="Success" disabled />;
+        return <ButtonBig type="success" title="Success" disabled />;
       case "error":
-        return <ButtonBig title="Error" disabled />;
+        return <ButtonBig type="danger" title="Error" disabled />;
     }
   })();
 

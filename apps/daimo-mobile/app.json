@@ -12,18 +12,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "scheme": "daimo",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "eth.daimo",
-      "buildNumber": "12",
-      "associatedDomains": ["applinks:daimo.onrender.com"],
+      "buildNumber": "13",
+      "associatedDomains": [
+        "applinks:daimo.onrender.com"
+      ],
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "sgnl",
+          "tg"
+        ]
       }
     },
     "android": {

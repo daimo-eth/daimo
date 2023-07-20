@@ -1,52 +1,98 @@
 import { NamedAccount, TransferLogSummary } from "@daimo/api";
-import { useEffect, useMemo, useState } from "react";
+import { assert, amountToDollars } from "@daimo/common";
+import { useEffect } from "react";
 
-import { assert } from "../logic/assert";
-import { Chain, ChainStatus, chainConfig } from "../logic/chain";
+import { chainConfig } from "../logic/chainConfig";
 import { rpcFunc } from "../logic/trpc";
-import { useAccount } from "../model/account";
-import { AccountHistory, useAccountHistory } from "../model/accountHistory";
+import { Account, useAccount } from "../model/account";
 import { OpStatus, TransferOpEvent } from "../model/op";
 
-export function useSyncAccountHistory() {
-  const [account] = useAccount();
-  const address = account?.address;
+// Sync strategy:
+// - On app load, load account from storage
+// - Then, sync from API
+// - After, sync from API:
+//   ...immediately on push notification
+//   ...frequently while there's a pending transaction
+//   ...occasionally otherwise
+//
+// TODO: better sync strategy:
+// - On app load, load account from storage
+// - Connect to API websocket. Listen for updates.
+export function useSyncChain() {
+  const [acc, setAcc] = useAccount();
+  account = acc;
+  setAccount = setAcc;
 
-  const [hist, setHist] = useAccountHistory(address);
-
+  // Sync on app load, then periodically after
   useEffect(() => {
-    if (!hist) return;
-    assert(hist.address === address);
-
-    resyncAccountHistory(hist, setHist);
-  }, [hist?.address, hist?.lastFinalizedBlock]);
+    console.log("[SYNC] APP LOAD, starting sync");
+    maybeSync();
+    const int = window.setInterval(maybeSync, 1_000);
+    return () => window.clearInterval(int);
+  }, []);
 }
 
-/** Gets latest history for this account, in the background. */
-export function resyncAccountHistory(
-  hist: AccountHistory,
-  setHist: (h: AccountHistory) => void
-) {
-  console.log(`[SYNC] RESYNC account balance and history for ${hist.address}`);
-  syncAccountHistory(hist).then(setHist).catch(console.error);
-  refreshAccount();
+let account = null as Account | null;
+let setAccount = (a: Account) => {};
+const lastSync = 0;
+
+function maybeSync() {
+  if (account == null) return;
+
+  // Synced recently? Wait first.
+  const nowS = Date.now() / 1e3;
+  let intervalS = 30_000;
+  if (account.recentTransfers.find((t) => t.status === "pending") != null) {
+    intervalS = 1_000;
+  }
+  if (lastSync + intervalS > nowS) {
+    console.log(`[SYNC] skipping sync, synced recently`);
+  }
+
+  resync(`interval ${intervalS}s`);
+}
+
+/** Gets latest balance & history for this account, in the background. */
+export function resync(reason: string) {
+  if (account == null) {
+    console.log(`[SYNC] SKIPPING RESYNC, no account: ${reason}`);
+    return;
+  }
+
+  console.log(`[SYNC] RESYNC ${account.name}, ${reason}`);
+  const acc = account;
+  syncAccount(acc)
+    .then((a: Account) => {
+      console.log(`[SYNC] SUCCEEDED ${acc.name}`);
+      setAccount(a);
+    })
+    .catch((e) => {
+      console.error(`[SYNC] FAILED ${acc.name}`, e);
+      setAccount({ ...acc });
+    });
 }
 
 /** Loads all account history since the last finalized block as of the previous sync.
  * This means we're guaranteed to see all events even if there were reorgs. */
-async function syncAccountHistory(hist: AccountHistory) {
+async function syncAccount(account: Account) {
   const result = await rpcFunc.getAccountHistory.query({
-    address: hist.address,
-    sinceBlockNum: hist.lastFinalizedBlock,
+    address: account.address,
+    sinceBlockNum: account.lastFinalizedBlock,
   });
 
-  assert(result.address === hist.address);
-  assert(result.lastFinalizedBlock >= hist.lastFinalizedBlock);
+  assert(result.address === account.address);
+  if (result.lastFinalizedBlock < account.lastFinalizedBlock) {
+    console.log(
+      `[SYNC] skipping sync result for ${account.address}. Server has finalized ` +
+        `block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`
+    );
+    return account;
+  }
 
   // Sync in recent transfers
   // Start with finalized transfers only
-  const oldFinalizedTransfers = hist.recentTransfers.filter(
-    (t) => t.blockNumber && t.blockNumber < hist.lastFinalizedBlock
+  const oldFinalizedTransfers = account.recentTransfers.filter(
+    (t) => t.blockNumber && t.blockNumber < account.lastFinalizedBlock
   );
 
   // Add newly onchain transfers
@@ -63,7 +109,9 @@ async function syncAccountHistory(hist: AccountHistory) {
   }
 
   // Match pending transfers
-  const oldPending = hist.recentTransfers.filter((t) => t.status === "pending");
+  const oldPending = account.recentTransfers.filter(
+    (t) => t.status === "pending"
+  );
   const stillPending = oldPending.filter(
     (t) =>
       recentTransfers.find(
@@ -73,19 +121,36 @@ async function syncAccountHistory(hist: AccountHistory) {
   recentTransfers.push(...stillPending);
 
   const namedAccounts = addNamedAccounts(
-    hist.namedAccounts,
+    account.namedAccounts,
     result.namedAccounts
   );
 
-  const ret: AccountHistory = {
-    address: result.address,
+  const ret: Account = {
+    ...account,
+
+    lastBalance: BigInt(result.lastBalance),
+    lastBlock: result.lastBlock,
+    lastBlockTimestamp: result.lastBlockTimestamp,
     lastFinalizedBlock: result.lastFinalizedBlock,
+
     recentTransfers,
     namedAccounts,
   };
 
   console.log(
-    `[SYNC] synced history for ${result.address}. Old: ${hist.recentTransfers.length} transfers, new: ${recentTransfers.length}`
+    `[SYNC] synced ${account.name} ${result.address}.\n` +
+      JSON.stringify(
+        {
+          oldBlock: account.lastBlock,
+          oldBalance: amountToDollars(account.lastBalance),
+          oldTransfers: account.recentTransfers.length,
+          newBlock: result.lastBlock,
+          newBalance: amountToDollars(BigInt(result.lastBalance)),
+          newTransfers: recentTransfers.length,
+        },
+        null,
+        2
+      )
   );
   return ret;
 }
@@ -155,38 +220,4 @@ function guessTimestampFromNum(blockNum: number) {
     default:
       throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
   }
-}
-
-// TODO: clean up
-let refreshAccount = () => {};
-
-export function usePollChain() {
-  const [account, setAccount] = useAccount();
-  const [status, setStatus] = useState<ChainStatus>({ status: "loading" });
-  const chain = useMemo(() => new Chain(), []);
-
-  refreshAccount = async () => {
-    try {
-      console.log(`[APP] loading chain status...`);
-      const status = await chain.getStatus();
-      setStatus(status);
-
-      if (!account || status.status !== "ok") return;
-      console.log(`[APP] reloading account ${account.address}...`);
-      setAccount(await chain.updateAccount(account, status));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  // Refresh whenever the account changes, then periodically
-  const address = account?.address;
-  useEffect(() => {
-    refreshAccount();
-    const interval = setInterval(refreshAccount, 30000);
-    return () => clearInterval(interval);
-  }, [address]);
-
-  const cs = useMemo(() => ({ chain, status }), [chain, status]);
-  return cs;
 }

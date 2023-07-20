@@ -143,6 +143,7 @@ export function createRouter(
         const { sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
 
+        // Get latest finalize block. Future account sync will be since that.
         const finBlock = await publicClient.getBlock({ blockTag: "finalized" });
         if (finBlock.number == null) throw new Error("No finalized block");
         if (finBlock.number < sinceBlockNum) {
@@ -150,6 +151,13 @@ export function createRouter(
             `[API] getAccountHist: OLD final block ${finBlock.number} < ${sinceBlockNum}`
           );
         }
+
+        // Get the latest block + current balance.
+        const lastBlk = await publicClient.getBlock({ blockTag: "latest" });
+        if (lastBlk.number == null) throw new Error("No latest block");
+        const lastBlock = Number(lastBlk.number);
+        const lastBlockTimestamp = Number(lastBlk.timestamp);
+        const lastBalance = coinIndexer.getBalanceAt(address, lastBlock);
 
         const rawLogs = coinIndexer.filterTransfers({
           addr: address,
@@ -199,7 +207,12 @@ export function createRouter(
 
         return {
           address,
+
           lastFinalizedBlock: Number(finBlock.number),
+          lastBlock,
+          lastBlockTimestamp,
+          lastBalance: String(lastBalance),
+
           transferLogs,
           namedAccounts,
         };

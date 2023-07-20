@@ -4,6 +4,7 @@ import {
   Address,
   Hex,
   PublicClient,
+  createPublicClient,
   createWalletClient,
   getContract,
   http,
@@ -11,6 +12,8 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
+
+import { chainConfig } from "./chainConfig";
 
 export type EphemeralNote = {
   owner: Address;
@@ -20,8 +23,17 @@ export type EphemeralNote = {
 
 type EphemeralNoteLoadState = "loading" | "error" | "loaded";
 
+// TODO: remove eth JSON RPC dependency
+// Notes can be loaded thru the API to miminize round trips
+let clientL2: PublicClient | undefined;
+function getClientL2() {
+  if (!clientL2) {
+    clientL2 = createPublicClient({ chain: chainConfig.l2, transport: http() });
+  }
+  return clientL2;
+}
+
 export function useFetchNote(
-  client: PublicClient,
   ephemeralOwner: `0x${string}`
 ): [EphemeralNote | undefined, EphemeralNoteLoadState] {
   const [note, setNote] = useState<EphemeralNote | undefined>(undefined);
@@ -29,7 +41,7 @@ export function useFetchNote(
 
   useEffect(() => {
     (async () => {
-      const note = await fetchNote(client, ephemeralOwner);
+      const note = await fetchNote(ephemeralOwner);
       console.log(`[NOTE] fetched note ${ephemeralOwner}: ${note?.amount}`);
       setNote(note);
       if (note) setLoadState("loaded");
@@ -41,13 +53,12 @@ export function useFetchNote(
 }
 
 async function fetchNote(
-  publicClient: PublicClient,
   ephemeralOwner: `0x${string}`
 ): Promise<EphemeralNote | undefined> {
   const notesContract = getContract({
     abi: Contracts.ephemeralNotesABI,
     address: Contracts.ephemeralNotesAddress,
-    publicClient,
+    publicClient: getClientL2(),
   });
 
   const res = await notesContract.read.notes([ephemeralOwner]);
@@ -63,13 +74,12 @@ async function fetchNote(
 }
 
 export async function fetchNotesContractAllowance(
-  publicClient: PublicClient,
   address: Address
 ): Promise<bigint> {
   const tokenContract = getContract({
     abi: Contracts.erc20ABI,
     address: Contracts.tokenMetadata.address,
-    publicClient,
+    publicClient: getClientL2(),
   });
 
   const allowance = await tokenContract.read.allowance([

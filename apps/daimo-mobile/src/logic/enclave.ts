@@ -1,8 +1,8 @@
+import { assert } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { useEffect, useState } from "react";
 import { Hex } from "viem";
 
-import { assert } from "./assert";
 import { Log } from "./log";
 import { rpcHook } from "./trpc";
 import { Account, defaultEnclaveKeyName } from "../model/account";
@@ -44,12 +44,16 @@ export function useLoadAccountFromKey(pubKey: Hex | undefined) {
     console.log(`[ENCLAVE] loaded account ${name} from enclave key ${pubKey}`);
     setAccount({
       name,
-      address: addr,
       enclaveKeyName: defaultEnclaveKeyName,
+      address: addr,
 
       lastBalance: 0n,
       lastBlockTimestamp: 0,
-      lastNonce: 0n,
+      lastBlock: 0,
+      lastFinalizedBlock: 0,
+
+      namedAccounts: [],
+      recentTransfers: [],
 
       pushToken: null,
     });
