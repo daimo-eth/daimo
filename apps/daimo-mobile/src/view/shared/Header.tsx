@@ -1,8 +1,8 @@
 import { ReactNode, useCallback } from "react";
-import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { StyleSheet, TouchableHighlight, View, Text } from "react-native";
 
 import { useNav } from "./nav";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextH3 } from "./text";
 import { useAccount } from "../../model/account";
 
@@ -13,10 +13,19 @@ export function Header() {
   const [account] = useAccount();
 
   return (
-    <View style={styles.header}>
-      <Button onPress={goToAccount}>
+    <Button onPress={goToAccount}>
+      <View style={styles.header}>
         <TextH3>{account?.name || "⚠️"}</TextH3>
-      </Button>
+        <StyleTBD />
+      </View>
+    </Button>
+  );
+}
+
+function StyleTBD() {
+  return (
+    <View style={styles.pellet}>
+      <Text style={styles.pelletText}>DESIGN TBD</Text>
     </View>
   );
 }
@@ -50,12 +59,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  headerLight: {
-    color: color.gray,
-  },
-  indicator: {
-    width: 18,
-    height: 18,
+  pellet: {
     borderRadius: 4,
+    backgroundColor: color.bg.lightGray,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  pelletText: {
+    ...ss.text.body,
+    fontWeight: "bold",
+    color: color.gray,
   },
 });
