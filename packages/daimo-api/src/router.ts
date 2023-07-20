@@ -157,7 +157,7 @@ export function createRouter(
         if (lastBlk.number == null) throw new Error("No latest block");
         const lastBlock = Number(lastBlk.number);
         const lastBlockTimestamp = Number(lastBlk.timestamp);
-        const lastBalance = coinIndexer.getBalanceAt(address, lastBlock);
+        const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
         const rawLogs = coinIndexer.filterTransfers({
           addr: address,

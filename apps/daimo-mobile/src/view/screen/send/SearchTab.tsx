@@ -41,7 +41,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
   return (
-    <ButtonBig type="primary" title={getNameOrAddr(recipient)} onPress={pay} />
+    <ButtonBig type="subtle" title={getNameOrAddr(recipient)} onPress={pay} />
   );
 }
 

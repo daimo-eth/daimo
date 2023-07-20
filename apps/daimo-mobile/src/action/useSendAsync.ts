@@ -1,3 +1,4 @@
+import { OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -7,7 +8,6 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { chainConfig } from "../logic/chainConfig";
 import { loadEnclaveKey } from "../logic/enclave";
 import { useAccount } from "../model/account";
-import { OpEvent } from "../model/op";
 import { resync } from "../sync/sync";
 
 /** Send a tx user op. */
@@ -95,7 +95,7 @@ async function sendAsync(
     return handle;
   } catch (e: any) {
     console.error(e);
-    setAS("error", e.message);
+    setAS("error", "Error sending transaction");
     throw e;
   }
 }

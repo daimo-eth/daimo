@@ -10,7 +10,7 @@ import { TextBold } from "./text";
 // - The rest display as 0x... addresses.
 
 const specialAddrs: { [_: Address]: string } = {
-  "0x2a6d311394184eeb6df8fbbf58626b085374ffe7": "faucet",
+  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
 };
 specialAddrs[ephemeralNotesAddress] = "note";
 

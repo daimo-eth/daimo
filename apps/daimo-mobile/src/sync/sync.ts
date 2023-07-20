@@ -1,11 +1,15 @@
 import { NamedAccount, TransferLogSummary } from "@daimo/api";
-import { assert, amountToDollars } from "@daimo/common";
+import {
+  amountToDollars,
+  assert,
+  OpStatus,
+  TransferOpEvent,
+} from "@daimo/common";
 import { useEffect } from "react";
 
 import { chainConfig } from "../logic/chainConfig";
 import { rpcFunc } from "../logic/trpc";
-import { Account, useAccount } from "../model/account";
-import { OpStatus, TransferOpEvent } from "../model/op";
+import { Account, getAccountManager } from "../model/account";
 
 // Sync strategy:
 // - On app load, load account from storage
@@ -19,10 +23,6 @@ import { OpStatus, TransferOpEvent } from "../model/op";
 // - On app load, load account from storage
 // - Connect to API websocket. Listen for updates.
 export function useSyncChain() {
-  const [acc, setAcc] = useAccount();
-  account = acc;
-  setAccount = setAcc;
-
   // Sync on app load, then periodically after
   useEffect(() => {
     console.log("[SYNC] APP LOAD, starting sync");
@@ -32,43 +32,43 @@ export function useSyncChain() {
   }, []);
 }
 
-let account = null as Account | null;
-let setAccount = (a: Account) => {};
-const lastSync = 0;
+let lastSyncS = 0;
 
 function maybeSync() {
-  if (account == null) return;
+  const manager = getAccountManager();
+  if (manager.currentAccount == null) return;
+  const account = manager.currentAccount;
 
   // Synced recently? Wait first.
   const nowS = Date.now() / 1e3;
-  let intervalS = 30_000;
+  let intervalS = 30;
   if (account.recentTransfers.find((t) => t.status === "pending") != null) {
-    intervalS = 1_000;
+    intervalS = 1;
   }
-  if (lastSync + intervalS > nowS) {
-    console.log(`[SYNC] skipping sync, synced recently`);
+  if (lastSyncS + intervalS > nowS) {
+    console.log(`[SYNC] skipping sync, attempted sync recently`);
+  } else {
+    resync(`interval ${intervalS}s`);
   }
-
-  resync(`interval ${intervalS}s`);
 }
 
 /** Gets latest balance & history for this account, in the background. */
 export function resync(reason: string) {
-  if (account == null) {
-    console.log(`[SYNC] SKIPPING RESYNC, no account: ${reason}`);
-    return;
-  }
+  const { currentAccount, setCurrentAccount } = getAccountManager();
+  assert(currentAccount != null, "no account");
 
-  console.log(`[SYNC] RESYNC ${account.name}, ${reason}`);
-  const acc = account;
+  console.log(`[SYNC] RESYNC ${currentAccount.name}, ${reason}`);
+  lastSyncS = Date.now() / 1e3;
+
+  const acc = currentAccount;
   syncAccount(acc)
     .then((a: Account) => {
       console.log(`[SYNC] SUCCEEDED ${acc.name}`);
-      setAccount(a);
+      setCurrentAccount(a);
     })
     .catch((e) => {
       console.error(`[SYNC] FAILED ${acc.name}`, e);
-      setAccount({ ...acc });
+      setCurrentAccount({ ...acc });
     });
 }
 
@@ -79,6 +79,7 @@ async function syncAccount(account: Account) {
     address: account.address,
     sinceBlockNum: account.lastFinalizedBlock,
   });
+  console.log(`[SYNC] got account update for ${account.name}`, result);
 
   assert(result.address === account.address);
   if (result.lastFinalizedBlock < account.lastFinalizedBlock) {

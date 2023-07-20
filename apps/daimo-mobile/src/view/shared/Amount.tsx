@@ -1,8 +1,8 @@
+import { amountToDollars } from "@daimo/common";
 import { StyleSheet, Text } from "react-native";
 
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
-import { amountToDollars } from "@daimo/common/src/coin";
 
 export function TitleAmount({
   amount,

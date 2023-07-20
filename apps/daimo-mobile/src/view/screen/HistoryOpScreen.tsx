@@ -1,11 +1,10 @@
-import { amountToDollars } from "@daimo/common";
+import { amountToDollars, TransferOpEvent } from "@daimo/common";
 import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
-import { TransferOpEvent } from "../../model/op";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";

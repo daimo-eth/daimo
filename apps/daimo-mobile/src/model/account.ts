@@ -1,9 +1,8 @@
-import { NamedAccount, assert } from "@daimo/common";
-import { useCallback, useEffect, useState } from "react";
+import { NamedAccount, assert, TransferOpEvent } from "@daimo/common";
+import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
 
-import { TransferOpEvent } from "./op";
 import { StoredModel } from "./storedModel";
 
 /**
@@ -70,42 +69,69 @@ interface AccountV3 extends StoredModel {
   pushToken: string | null;
 }
 
-const mmkv = new MMKV();
-const cachedAccount = null as Account | null;
-const listeners = new Set<(a: Account | null) => void>();
-let firstLoad = true;
+/** Loads and saves Daimo account data from storage. Notifies listeners. */
+export function getAccountManager(): AccountManager {
+  if (_accountManager == null) {
+    _accountManager = new AccountManager();
+  }
+  return _accountManager;
+}
+
+let _accountManager: AccountManager | null = null;
+
+/** Loads and saves Daimo account data from storage. Notifies listeners. */
+class AccountManager {
+  currentAccount: Account | null;
+  private mmkv = new MMKV();
+  private listeners = new Set<(a: Account | null) => void>();
+
+  constructor() {
+    // On first load, load+save to ensure latest serialization version.
+    this.currentAccount = parse(this.mmkv.getString("account"));
+    this.mmkv.set("account", serialize(this.currentAccount));
+  }
+
+  addListener(listener: (a: Account | null) => void) {
+    this.listeners.add(listener);
+  }
+
+  removeListener(listener: (a: Account | null) => void) {
+    this.listeners.delete(listener);
+  }
+
+  addPendingOp(op: TransferOpEvent) {
+    if (!this.currentAccount) return;
+    this.currentAccount.recentTransfers.push(op);
+    this.setCurrentAccount(this.currentAccount);
+  }
+
+  setCurrentAccount = (account: Account | null) => {
+    console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
+    this.currentAccount = account;
+    this.mmkv.set("account", serialize(account));
+    for (const listener of this.listeners) {
+      listener(account);
+    }
+  };
+}
 
 /** Loads Daimo user data from storage, provides callback to write. */
 export function useAccount(): [
   Account | null,
   (account: Account | null) => void
 ] {
-  if (firstLoad) {
-    // On first load, load+save to ensure latest serialization version.
-    firstLoad = false;
-    parse(mmkv.getString("account"));
-    mmkv.set("account", serialize(cachedAccount));
-  }
+  const manager = getAccountManager();
 
   // State + listeners pattern
-  const [accState, setAccState] = useState<Account | null>(cachedAccount);
+  const [accState, setAccState] = useState<Account | null>(
+    manager.currentAccount
+  );
   useEffect(() => {
-    listeners.add(setAccState);
-    return () => {
-      listeners.delete(setAccState);
-    };
+    manager.addListener(setAccState);
+    return () => manager.removeListener(setAccState);
   }, []);
 
-  // Set account, call setState here and in all other listeners.
-  const setAccount = useCallback(async (account: Account | null) => {
-    console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
-    mmkv.set("account", serialize(account));
-    for (const listener of listeners) {
-      listener(account);
-    }
-  }, []);
-
-  return [accState, setAccount];
+  return [accState, manager.setCurrentAccount];
 }
 
 export function parse(accountJSON?: string): Account | null {

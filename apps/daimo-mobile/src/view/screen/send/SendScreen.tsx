@@ -1,4 +1,9 @@
-import { amountToDollars, assert, dollarsToAmount } from "@daimo/common";
+import {
+  amountToDollars,
+  assert,
+  dollarsToAmount,
+  OpStatus,
+} from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -12,7 +17,6 @@ import { SearchTab } from "./SearchTab";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
-import { OpStatus } from "../../../model/op";
 import { Recipient } from "../../../sync/loadRecipients";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
@@ -27,6 +31,9 @@ import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
 type SendTab = "search" | "scan" | "createNote";
+
+// TODO: remove after upgrading react/expo to fix typescript error
+const SegmentedControlFixed = SegmentedControl as any;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
@@ -52,7 +59,7 @@ export default function SendScreen({ route }: Props) {
         {!recipient && (
           <>
             {tab !== "createNote" && (
-              <SegmentedControl
+              <SegmentedControlFixed
                 values={tabs}
                 selectedIndex={tab === "scan" ? 1 : 0}
                 onValueChange={setSegmentVal}

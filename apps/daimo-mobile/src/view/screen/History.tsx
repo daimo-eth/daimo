@@ -1,11 +1,9 @@
-import { assert } from "@daimo/common";
-import { amountToDollars } from "@daimo/common/src/coin";
+import { assert, amountToDollars, TransferOpEvent } from "@daimo/common";
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
 import { Account, useAccount } from "../../model/account";
-import { TransferOpEvent } from "../../model/op";
 import { ButtonSmall } from "../shared/Button";
 import { AddrText } from "../shared/addr";
 import { useNav } from "../shared/nav";

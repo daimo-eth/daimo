@@ -1,11 +1,10 @@
-import { DaimoLink, parseDaimoLink } from "@daimo/common";
+import { DaimoLink, parseDaimoLink, OpEvent } from "@daimo/common";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useURL } from "expo-linking";
 import { useEffect } from "react";
 import { Address } from "viem";
 
-import { OpEvent } from "../../model/op";
 import { Recipient, getRecipient } from "../../sync/loadRecipients";
 
 export type HomeStackParamList = {

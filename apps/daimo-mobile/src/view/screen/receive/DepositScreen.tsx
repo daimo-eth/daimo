@@ -7,8 +7,7 @@ import { Address } from "viem";
 
 import { chainConfig } from "../../../logic/chainConfig";
 import { rpcHook } from "../../../logic/trpc";
-import { useAccount } from "../../../model/account";
-import { resync } from "../../../sync/sync";
+import { getAccountManager, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
@@ -44,8 +43,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   // Show faucet payment in history promptly
   useEffect(() => {
     if (!mutation.isSuccess) return;
-    // TODO: show pending transaction instead
-    resync("faucet payment sent");
+    getAccountManager().addPendingOp(mutation.data);
   }, [mutation.isSuccess]);
 
   // Display

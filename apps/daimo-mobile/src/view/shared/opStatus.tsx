@@ -1,7 +1,6 @@
+import { OpStatus } from "@daimo/common";
 import { Octicons } from "@expo/vector-icons";
 import { Text } from "react-native";
-
-import { OpStatus } from "../../model/op";
 
 export function OpStatusIndicator({
   status,

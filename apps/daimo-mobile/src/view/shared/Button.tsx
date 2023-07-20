@@ -17,7 +17,7 @@ interface ButtonPropsSmall {
 }
 
 interface ButtonProps extends ButtonPropsSmall {
-  type: "primary" | "success" | "danger" | "text";
+  type: "primary" | "success" | "danger" | "subtle";
 }
 
 export function ButtonBig(props: ButtonProps) {
@@ -47,12 +47,12 @@ function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
     }
   }, [type]);
 
-  const titleOverride = useMemo<ViewStyle>(() => {
+  const titleOverride = useMemo<TextStyle>(() => {
     switch (type) {
       case "primary":
       case "danger":
       case "success":
-        return { backgroundColor: color.white };
+        return { color: color.white };
       default:
         return {};
     }
