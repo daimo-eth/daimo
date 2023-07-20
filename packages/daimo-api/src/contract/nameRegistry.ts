@@ -1,11 +1,12 @@
 import { NamedAccount } from "@daimo/common";
-import { nameRegistryConfig } from "@daimo/contract";
+import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
   Hex,
   Log,
   TransactionReceipt,
   getAbiItem,
+  getAddress,
   getContract,
   hexToString,
 } from "viem";
@@ -42,6 +43,13 @@ export class NameRegistry {
       },
       this.parseLogs
     );
+
+    // Also name a few special addresses
+    this.cacheAccount({
+      name: "faucet",
+      addr: "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
+    });
+    this.cacheAccount({ name: "note", addr: ephemeralNotesAddress });
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
@@ -49,15 +57,19 @@ export class NameRegistry {
     const accounts = logs
       .map((l) => l.args)
       .filter((a): a is { name: Hex; addr: Hex } => !!(a.name && a.addr))
-      .map((a) => ({ name: hexToString(a.name, { size: 32 }), addr: a.addr }))
+      .map((a) => ({
+        name: hexToString(a.name, { size: 32 }),
+        addr: getAddress(a.addr),
+      }))
       .filter((a) => isValidName(a.name));
-    console.log(`[NAME-REG]  parsed ${accounts.length} named account(s)`);
+    console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
 
     accounts.forEach(this.cacheAccount);
   };
 
   /** Cache an account in memory. */
   cacheAccount = (acc: NamedAccount) => {
+    console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
     this.nameToAddr.set(acc.name, acc.addr);
     this.addrToName.set(acc.addr, acc.name);
     this.accounts.push(acc);

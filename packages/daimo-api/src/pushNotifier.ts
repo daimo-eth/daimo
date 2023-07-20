@@ -1,6 +1,6 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Expo } from "expo-server-sdk";
-import { Address, Hex, formatUnits, getAddress, hexToString } from "viem";
+import { Address, Hex, formatUnits, getAddress } from "viem";
 
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
@@ -63,16 +63,14 @@ export class PushNotifier {
     const dollars = Math.abs(Number(rawAmount)).toFixed(2);
 
     // Get the other side
-    const otherNameHex = await this.nameReg.resolveName(other);
-    const otherName = otherNameHex
-      ? hexToString(otherNameHex)
-      : other.substring(0, 8) + "...";
+    const otherName = await this.nameReg.resolveAddress(other);
+    const otherStr = otherName || other.substring(0, 8) + "...";
 
     const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
     const body =
       value < 0
-        ? `You sent ${dollars} ${symbol} to ${otherName}`
-        : `You received ${dollars} ${symbol} from ${otherName}`;
+        ? `You sent ${dollars} ${symbol} to ${otherStr}`
+        : `You received ${dollars} ${symbol} from ${otherStr}`;
 
     // Log the notification. In local development, stop there.
     const not = pushEnabled ? "" : "NOT ";

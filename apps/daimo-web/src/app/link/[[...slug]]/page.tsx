@@ -86,14 +86,14 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       const { recipient } = res as DaimoRequestStatus;
       return {
         title: `${recipient.name} is requesting $${res.link.amount}`,
-        description: `Pay via Daimo or [to do: connect wallet]`,
+        description: `Pay via Daimo`,
       };
     }
     case "note": {
       const { amount, sender } = res as DaimoNoteStatus;
       return {
         title: `${sender.name} sent you $${amount}`,
-        description: `Claim on Daimo or [to do: connect wallet]`,
+        description: `Claim on Daimo`,
       };
     }
     default: {
