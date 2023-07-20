@@ -1,4 +1,4 @@
-import { OpEvent } from "@daimo/common";
+import { NamedAccount, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -17,7 +17,8 @@ export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 export function useSendAsync(
   enclaveKeyName: string,
   sendFn: SendOpFn,
-  pendingOp?: OpEvent
+  pendingOp?: OpEvent,
+  namedAccounts?: NamedAccount[]
 ): ActHandle {
   const [as, setAS] = useActStatus();
 
@@ -31,7 +32,9 @@ export function useSendAsync(
       pendingOp.opHash = handle.userOpHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       account.recentTransfers.push(pendingOp);
+      account.namedAccounts.push(...(namedAccounts || []));
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
+
       setAccount(account);
 
       // In the background, wait for the op to finish
@@ -69,7 +72,7 @@ function loadAccount(enclaveKeyName: string) {
     // (Do we even need that at all, vs random nonce?)
     // See https://github.com/daimo-eth/daimo/issues/100
     const client = createPublicClient({
-      chain: chainConfig.l1,
+      chain: chainConfig.l2,
       transport: http(),
     });
     return await DaimoAccount.init(client, derPublicKey, signer, false);

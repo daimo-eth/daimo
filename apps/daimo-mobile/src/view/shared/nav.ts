@@ -39,7 +39,6 @@ export function useInitNavLinks() {
     if (url == null) return;
     const link = parseDaimoLink(url);
     if (link == null) {
-      console.warn(`[NAV] ignoring link ${url}`);
       return;
     }
 

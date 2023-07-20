@@ -44,6 +44,11 @@ export function formatDaimoLink(link: DaimoLink) {
 }
 
 export function parseDaimoLink(link: string): DaimoLink | null {
+  if (link.startsWith("exp+daimo://")) {
+    // Ignore Expo development URLs
+    return null;
+  }
+
   try {
     const ret = parseDaimoLinkInner(link);
     if (ret == null) console.warn(`[LINK] ignoring invalid Daimo link`, link);

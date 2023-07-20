@@ -1,7 +1,14 @@
 import { DaimoLink, assert, formatDaimoLink } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Share } from "react-native";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ActivityIndicator, Share, TextInput } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
@@ -14,6 +21,7 @@ import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
+/** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function CreateNoteTab({ hide }: { hide: () => void }) {
   const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>();
 
@@ -35,6 +43,8 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
 
   useEffect(() => {
     (async () => {
+      // TODO: pull this logic out of the UI.
+      // + automatically approve Notes contract on account creation
       const allowance = await fetchNotesContractAllowance(address);
       setIsNotesContractApproved(allowance > 0);
 
@@ -73,14 +83,21 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     }
   })();
 
+  const amountRef = useRef<TextInput>(null);
+
+  const onCreateNote = useCallback(() => {
+    if (amountRef.current) amountRef.current.blur();
+    exec();
+  }, [exec]);
+
   const button = (function () {
     switch (status) {
       case "idle":
         return (
           <ButtonBig
-            title="Create note"
-            onPress={exec}
             type="primary"
+            title="Create note"
+            onPress={onCreateNote}
             disabled={dollars === 0}
           />
         );
@@ -98,8 +115,6 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       if (status !== "success") return;
       if (ephemeralOwner == null) return;
 
-      // TODO: We can optimistically do this on loading rather than wait
-      // for success.
       try {
         const link: DaimoLink = {
           type: "note",
@@ -129,7 +144,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     <>
       <CancelHeader hide={hide}>Creating note</CancelHeader>
       <Spacer h={32} />
-      <AmountInput value={dollars} onChange={setDollars} />
+      <AmountInput value={dollars} onChange={setDollars} innerRef={amountRef} />
       <Spacer h={32} />
       {button}
       <TextSmall>

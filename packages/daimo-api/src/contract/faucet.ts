@@ -64,15 +64,5 @@ export class Faucet {
       status: OpStatus.pending,
       txHash: hash,
     };
-
-    // TODO: factor out transaction tracking. Track speed and reliability.
-    // const { publicClient } = this.vc;
-    // const receipt = await publicClient.waitForTransactionReceipt({ hash });
-    // console.log(
-    //   `[FAUCET] sent 50 testUSDC to ${address}. ${receipt.status}: ${hash}`
-    // );
-
-    // if (receipt.status === "success") this.sent.add(address);
-    // else throw new Error(`transfer reverted: ${hash}`);
   }
 }

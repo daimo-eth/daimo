@@ -2,6 +2,7 @@ import {
   amountToDollars,
   assert,
   dollarsToAmount,
+  NamedAccount,
   OpStatus,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
@@ -23,7 +24,7 @@ import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
-import { cacheName, getNameOrAddr } from "../../shared/addr";
+import { getNameOrAddr } from "../../shared/addr";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
@@ -52,7 +53,11 @@ export default function SendScreen({ route }: Props) {
   return (
     <View style={ss.container.outerStretch}>
       <Header />
-      <ScrollView contentContainerStyle={styles.vertMain} bounces={false}>
+      <ScrollView
+        contentContainerStyle={styles.vertMain}
+        bounces={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {recipient && (
           <SetAmount recipient={recipient} dollars={dollars || 0} />
         )}
@@ -157,12 +162,6 @@ function SendButton({
   assert(account != null);
   assert(dollars >= 0);
 
-  // TODO: do this elsewhere
-  useEffect(() => {
-    if (recipient.name == null) return;
-    cacheName(recipient.addr, recipient.name);
-  }, [recipient]);
-
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
@@ -177,7 +176,8 @@ function SendButton({
       amount: Number(dollarsToAmount(dollars)),
       status: OpStatus.pending,
       timestamp: 0,
-    }
+    },
+    recipient.name ? [recipient as NamedAccount] : []
   );
 
   // TODO: load estimated fees
