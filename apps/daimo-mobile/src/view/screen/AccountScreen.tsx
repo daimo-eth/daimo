@@ -1,11 +1,13 @@
 import { Octicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
 import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
-import { useAccount } from "../../model/account";
+import { getPushNotificationManager } from "../../logic/notify";
+import { Account, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -78,18 +80,23 @@ export function AccountScreen() {
         </View>
 
         <Spacer h={64} />
-        <AppInfo />
+        <AppInfo {...{ account }} />
       </View>
     </>
   );
 }
 
-function AppInfo() {
+function AppInfo({ account }: { account: Account }) {
   const [sec, setSec] = useState<Awaited<ReturnType<typeof getEnclaveSec>>>();
 
   useEffect(() => {
     getEnclaveSec().then(setSec);
   }, []);
+
+  const enableNotifications = async () => {
+    await Notifications.requestPermissionsAsync();
+    getPushNotificationManager().maybeSavePushTokenForAccount();
+  };
 
   return (
     <View style={styles.keyValueList}>
@@ -124,6 +131,16 @@ function AppInfo() {
             <TextBold>{sec.hardwareSecurityLevel.toLowerCase()}</TextBold>
           </TextSmall>
         </>
+      )}
+      <TextSmall>
+        Notifications <TextBold>{account.pushToken || "disabled"}</TextBold>
+      </TextSmall>
+      {!account.pushToken && (
+        <ButtonMed
+          type="primary"
+          title="Enable notifications"
+          onPress={enableNotifications}
+        />
       )}
     </View>
   );

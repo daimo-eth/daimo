@@ -1,11 +1,10 @@
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { AppState } from "react-native";
-import { Address } from "viem";
 
 import { Log } from "./log";
 import { rpcFunc } from "./trpc";
-import { useAccount } from "../model/account";
+import { getAccountManager, useAccount } from "../model/account";
 
 /** Registers push notifications, if we have permission & haven't already. */
 export function useInitNotifications() {
@@ -15,6 +14,9 @@ export function useInitNotifications() {
   useEffect(() => {
     if (address == null) return;
 
+    // Register push token for account, if we haven't already
+    getPushNotificationManager().maybeSavePushTokenForAccount();
+
     // Show notifications (but badge stays cleared) even when app is open
     Notifications.setNotificationHandler({
       handleNotification: async (n: Notifications.Notification) => {
@@ -22,15 +24,11 @@ export function useInitNotifications() {
         console.log(`[NOTIFY] handling push ${title} - ${body}`);
         return {
           shouldShowAlert: true,
-          shouldPlaySound: false,
+          shouldPlaySound: true,
           shouldSetBadge: false,
         };
       },
     });
-
-    // TODO: re-request permissions if necessary, if we haven't asked recently
-    // and an incoming payment just arrived
-    maybeRegisterPushToken(address);
 
     // Always clear the badge when app foregrounds
     Notifications.setBadgeCountAsync(0);
@@ -43,17 +41,38 @@ export function useInitNotifications() {
   }, [address]);
 }
 
-async function maybeRegisterPushToken(address: Address) {
-  const permission = await Notifications.getPermissionsAsync();
-  if (!permission.granted) return;
+let pushNotitificationManager = null as null | PushNotificationManager;
 
-  const token = await Log.promise(
-    "getExpoPushTokenAsync",
-    Notifications.getExpoPushTokenAsync()
-  );
+export function getPushNotificationManager() {
+  if (pushNotitificationManager == null) {
+    pushNotitificationManager = new PushNotificationManager();
+  }
+  return pushNotitificationManager;
+}
 
-  await Log.promise(
-    "registerPushToken",
-    rpcFunc.registerPushToken.mutate({ address, token: token.data })
-  );
+class PushNotificationManager {
+  accountManager = getAccountManager();
+
+  maybeSavePushTokenForAccount = async () => {
+    const permission = await Notifications.getPermissionsAsync();
+    if (!permission.granted) return;
+    if (this.accountManager.currentAccount == null) return;
+
+    const token = await Notifications.getExpoPushTokenAsync();
+    if (token.data === this.accountManager.currentAccount.pushToken) {
+      console.log(`[NOTIFY] push token ${token} already saved`);
+      return;
+    }
+
+    const { name } = this.accountManager.currentAccount;
+    console.log(`[NOTIFY] saving push token ${token} for account ${name}`);
+    const { address } = this.accountManager.currentAccount;
+    await Log.promise(
+      "registerPushToken",
+      rpcFunc.registerPushToken.mutate({ address, token: token.data })
+    );
+
+    const acc = this.accountManager.currentAccount;
+    this.accountManager.setCurrentAccount({ ...acc, pushToken: token.data });
+  };
 }

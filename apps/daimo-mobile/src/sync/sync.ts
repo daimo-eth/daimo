@@ -1,16 +1,15 @@
 import { NamedAccount, TransferLogSummary } from "@daimo/api";
 import {
-  amountToDollars,
-  assert,
   OpStatus,
   TransferOpEvent,
+  amountToDollars,
+  assert,
 } from "@daimo/common";
 import { useEffect } from "react";
 
 import { chainConfig } from "../logic/chainConfig";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";
-import { cacheName } from "../view/shared/addr";
 
 // Sync strategy:
 // - On app load, load account from storage
