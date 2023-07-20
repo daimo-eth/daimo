@@ -1,4 +1,4 @@
-import { parseDaimoLink } from "@daimo/common";
+import { daimoLinkBase, parseDaimoLink } from "@daimo/common";
 import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
@@ -26,8 +26,15 @@ export function ScanTab({ hide }: { hide: () => void }) {
     if (daimoLink == null) return;
     setHandled(true);
 
-    console.log(`[SCAN] opening URL ${data}`);
-    Linking.openURL(data);
+    let directLink: string;
+    if (data.startsWith(daimoLinkBase + "/")) {
+      directLink = "daimo://" + data.substring(daimoLinkBase.length + 1);
+    } else {
+      directLink = data;
+    }
+
+    console.log(`[SCAN] opening URL ${directLink}`);
+    Linking.openURL(directLink);
   };
 
   let body: ReactNode;

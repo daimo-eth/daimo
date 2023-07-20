@@ -73,7 +73,6 @@ export function createRouter(
           }
 
           case "note": {
-            // TODO
             const amount = "1.23";
             const sender = { addr: link.ephemeralOwner, name: "dcposch" };
             const claimer = undefined;
