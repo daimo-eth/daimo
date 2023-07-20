@@ -18,7 +18,7 @@
     "tailwindcss": "^3.3.3"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss && echo Re-enable once eslint-plugin-prettier fixes their crashing bug: next lint",

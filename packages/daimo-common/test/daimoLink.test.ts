@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 
-import { parseDaimoLink, formatDaimoLink, DaimoLink } from "../src/daimoLink";
+import { DaimoLink, formatDaimoLink, parseDaimoLink } from "../src/daimoLink";
 
 const testCases: [string, DaimoLink | null][] = [
   [
@@ -13,7 +13,7 @@ const testCases: [string, DaimoLink | null][] = [
     {
       type: "request",
       recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-      amount: "1.23",
+      dollars: "1.23",
     },
   ],
   [

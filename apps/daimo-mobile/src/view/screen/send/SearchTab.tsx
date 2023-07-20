@@ -1,10 +1,10 @@
+import { getAccountName } from "@daimo/common";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
-import { getNameOrAddr } from "../../shared/addr";
 import { useNav } from "../../shared/nav";
 import { TextCenter, TextError, TextSmall } from "../../shared/text";
 
@@ -41,7 +41,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
   return (
-    <ButtonBig type="subtle" title={getNameOrAddr(recipient)} onPress={pay} />
+    <ButtonBig type="subtle" title={getAccountName(recipient)} onPress={pay} />
   );
 }
 

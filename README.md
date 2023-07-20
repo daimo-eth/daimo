@@ -47,6 +47,7 @@ npm run build
 ```
 
 Configure the API.
+
 - To run the API locally, configure the `DAIMO_API_*` env vars.
   - Additionally, run a Postgres Server instance in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
 - To use the testnet staging API, set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
@@ -60,6 +61,17 @@ If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a
 Once the base app is installed in your simulator, you can run Daimo:
 
 ```
-npm start
+npm run dev
 ```
+
+## Running the backend
+
+`daimo-mobile` and `daimo-web` both rely on `daimo-api`.
+
+By default:
+
+- `daimo-mobile` runs the Expo incremental build server on localhost:8080
+- `daimo-web` runs the web app, including fallback deeplinks, on localhost:3001
+- `daimo-api` runs the TRPC API on localhost:3000
+
 </details>

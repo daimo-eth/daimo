@@ -2,7 +2,10 @@ import {
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
+  assert,
   daimoLinkBase,
+  getAccountName,
+  parseDaimoLink,
 } from "@daimo/common";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -75,26 +78,66 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     res = await trpc.getLinkStatus.query({ url });
   } catch (err) {
     console.warn(`Error loading link status for ${url}`, err);
-    return {
-      title: "Daimo",
-      description: "Unrecognized link",
-    };
+    const link = parseDaimoLink(url);
+    if (link == null) {
+      return {
+        title: "Daimo",
+        description: "Unrecognized link",
+      };
+    } else if (link.type === "account") {
+      return {
+        title: getAccountName({ addr: link.addr }),
+        description: "Couldn't load account name",
+      };
+    } else if (link.type === "request") {
+      return {
+        title: `Request for $${link.dollars}`,
+        description: "Couldn't load request status",
+      };
+    } else {
+      assert(link.type === "note");
+      return {
+        title: `Note ${getAccountName({ addr: link.ephemeralOwner })}`,
+        description: "Couldn't load note status",
+      };
+    }
   }
 
   switch (res.link.type) {
     case "request": {
       const { recipient } = res as DaimoRequestStatus;
+      const name = getAccountName(recipient);
       return {
-        title: `${recipient.name} is requesting $${res.link.amount}`,
+        title: `${name} is requesting $${res.link.dollars}`,
         description: `Pay via Daimo`,
       };
     }
     case "note": {
-      const { amount, sender } = res as DaimoNoteStatus;
-      return {
-        title: `${sender.name} sent you $${amount}`,
-        description: `Claim on Daimo`,
-      };
+      const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
+      switch (status) {
+        case "pending": {
+          return {
+            title: `${getAccountName(sender)} sent you $${dollars}`,
+            description: `Claim on Daimo`,
+          };
+        }
+        case "claimed": {
+          const claim = claimer ? getAccountName(claimer) : "(missing claimer)";
+          return {
+            title: `${getAccountName(sender)} sent $${dollars}`,
+            description: `Claimed by ${claim}`,
+          };
+        }
+        case "cancelled": {
+          return {
+            title: `Cancelled send: $${dollars}`,
+            description: `Cancelled by ${getAccountName(sender)}`,
+          };
+        }
+        default: {
+          throw new Error(`unexpected DaimoNoteStatus ${status}`);
+        }
+      }
     }
     default: {
       return null;

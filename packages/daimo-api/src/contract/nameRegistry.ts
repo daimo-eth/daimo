@@ -1,4 +1,4 @@
-import { NamedAccount } from "@daimo/common";
+import { NamedAccount, NamedDaimoAccount } from "@daimo/common";
 import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
@@ -26,7 +26,7 @@ export class NameRegistry {
   /* In-memory indexer, for now. */
   private nameToAddr = new Map<string, Address>();
   private addrToName = new Map<Address, string>();
-  private accounts: NamedAccount[] = [];
+  private accounts: NamedDaimoAccount[] = [];
 
   contract: ContractType<typeof nameRegistryConfig.abi>;
 
@@ -68,7 +68,7 @@ export class NameRegistry {
   };
 
   /** Cache an account in memory. */
-  cacheAccount = (acc: NamedAccount) => {
+  private cacheAccount = (acc: NamedDaimoAccount) => {
     console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
     this.nameToAddr.set(acc.name, acc.addr);
     this.addrToName.set(acc.addr, acc.name);
@@ -76,7 +76,7 @@ export class NameRegistry {
   };
 
   /** Find accounts whose names start with a prefix */
-  async search(prefix: string): Promise<NamedAccount[]> {
+  async search(prefix: string): Promise<NamedDaimoAccount[]> {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
       .filter((a) => a.name.startsWith(prefix))
@@ -107,13 +107,20 @@ export class NameRegistry {
   }
 
   /** Find wallet address for a given Daimo name, or null if not found. */
-  async resolveName(name: string): Promise<Address | null> {
-    return this.nameToAddr.get(name) || null;
+  resolveName(name: string): Address | undefined {
+    return this.nameToAddr.get(name);
   }
 
   /** Find Daimo name for a given wallet address, or null if not found. */
-  resolveAddress(address: Address): string | null {
-    return this.addrToName.get(address) || null;
+  resolveAddress(address: Address): string | undefined {
+    return this.addrToName.get(address);
+  }
+
+  /** Gets name for a given address, if it has one. */
+  async getNamedAccount(address: Address): Promise<NamedAccount> {
+    const name = await this.resolveAddress(address);
+    // TODO: ENS reverse lookup
+    return { addr: address, name };
   }
 }
 

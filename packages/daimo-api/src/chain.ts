@@ -41,26 +41,27 @@ export class ViemClient {
     public walletClient: WalletClient<Transport, Chain, Account>
   ) {}
 
-  async pipeLogs<E extends AbiEvent>(
+  async pipeLogs<E extends AbiEvent | undefined>(
     args: { address: Address; event: E },
     callback: (logs: GetLogsReturnType<E, true>) => void
   ) {
     const latest = await this.publicClient.getBlock({ blockTag: "latest" });
     if (latest.number == null) throw new Error("Missing block number");
 
+    const pipeName = args.event?.name || args.address.substring(0, 8);
+
     // TODO: save in DB, dont load from scratch every time
+    // TODO: hack for faster startup
+    let fromBlock = 0n;
+    if (this.publicClient.chain.id === baseGoerli.id) {
+      fromBlock = args.event == null ? 7000000n : 6000000n;
+    }
     const step = 10000n;
-    for (
-      let fromBlock = 5000000n;
-      fromBlock < latest.number;
-      fromBlock += step
-    ) {
+    for (; fromBlock < latest.number; fromBlock += step) {
       let toBlock = (fromBlock + step) as BlockTag | bigint;
       if ((toBlock as bigint) > latest.number) toBlock = "latest";
-      console.log(
-        `[CHAIN] loading ${fromBlock} to ${toBlock} for ${args.event.name}`
-      );
-      const logs = await retryBackoff(`logs-${args.event.name}`, () =>
+      console.log(`[CHAIN] loading ${fromBlock} to ${toBlock} for ${pipeName}`);
+      const logs = await retryBackoff(`logs-${pipeName}`, () =>
         this.publicClient.getLogs({
           ...args,
           fromBlock,
@@ -75,7 +76,7 @@ export class ViemClient {
       ...args,
       strict: true,
       onLogs: (logs) => {
-        console.log(`[CHAIN] pipe ${args.event.name}, ${logs.length} logs`);
+        console.log(`[CHAIN] pipe ${pipeName}, ${logs.length} logs`);
         callback(logs);
       },
     });

@@ -22,7 +22,7 @@ contract EphemeralNotes {
   IERC20 public immutable token;
   
   event NoteCreated(Note note);
-  event NoteRedeemed(Note note);
+  event NoteRedeemed(Note note, address redeemer);
 
   constructor(IERC20 _token) {
     token = _token;
@@ -60,7 +60,7 @@ contract EphemeralNotes {
     address signer = ECDSA.recover(message, _signature);
     require(signer == _ephemeralOwner || msg.sender == note.from, "EphemeralNotes: invalid signature and not creator");
 
-    emit NoteRedeemed(note);
+    emit NoteRedeemed(note, msg.sender);
     delete notes[_ephemeralOwner];
     token.transfer(msg.sender, note.amount);
   }

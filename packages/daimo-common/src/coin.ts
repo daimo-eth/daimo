@@ -7,7 +7,7 @@ export function dollarsToAmount(dollars: number) {
 }
 
 /** Returns eg "6.00" for 6000000 USDC units. */
-export function amountToDollars(amount: bigint | number): string {
+export function amountToDollars(amount: bigint | number): `${number}` {
   const dispDecimals = 2;
   const { decimals } = tokenMetadata;
 
@@ -16,5 +16,5 @@ export function amountToDollars(amount: bigint | number): string {
   const dollars = dispStr.slice(0, -dispDecimals);
   const cents = dispStr.slice(-dispDecimals);
 
-  return `${dollars}.${cents}`;
+  return `${dollars}.${cents}` as `${number}`;
 }

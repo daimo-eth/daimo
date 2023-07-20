@@ -25,5 +25,5 @@ export type DaimoNoteStatus = {
   status: "pending" | "claimed" | "cancelled";
   sender: NamedAccount;
   claimer?: NamedAccount;
-  amount: `${number}`;
+  dollars: `${number}`;
 };

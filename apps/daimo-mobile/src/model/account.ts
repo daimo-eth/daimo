@@ -32,7 +32,7 @@ export type Account = {
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: TransferOpEvent[];
   /** Names for each Daimo account we've interacted with. */
-  namedAccounts: { addr: Address; name: string }[];
+  namedAccounts: NamedAccount[];
 
   /** Local device push token, if permission was granted. */
   pushToken: string | null;

@@ -2,6 +2,7 @@ import {
   amountToDollars,
   assert,
   dollarsToAmount,
+  getAccountName,
   NamedAccount,
   OpStatus,
 } from "@daimo/common";
@@ -24,7 +25,6 @@ import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
-import { getNameOrAddr } from "../../shared/addr";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
@@ -107,7 +107,7 @@ function SetAmount({
   const clearDollars = () => nav.setParams({ dollars: undefined });
 
   // Show who we're sending to
-  const disp = getNameOrAddr(recipient);
+  const disp = getAccountName(recipient);
 
   // Temporary dollar amount while typing
   const [d, setD] = useState(0);
@@ -196,7 +196,7 @@ function SendButton({
       case "error":
         return (
           <ButtonBig
-            title={`Send to ${getNameOrAddr(recipient)}`}
+            title={`Send to ${getAccountName(recipient)}`}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}

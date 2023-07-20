@@ -1,9 +1,8 @@
 import {
-  DaimoNoteStatus,
   DaimoRequestStatus,
-  parseDaimoLink,
-  NamedAccount,
+  NamedDaimoAccount,
   TransferLogSummary,
+  parseDaimoLink,
   zAddress,
   zHex,
 } from "@daimo/common";
@@ -15,12 +14,14 @@ import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
+import { NoteIndexer } from "./contract/noteIndexer";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
   publicClient: PublicClient,
   coinIndexer: CoinIndexer,
+  noteIndexer: NoteIndexer,
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
   faucet: Faucet,
@@ -40,14 +41,14 @@ export function createRouter(
       .input(z.object({ name: z.string() }))
       .query(async (opts) => {
         const { name } = opts.input;
-        return await nameReg.resolveName(name);
+        return nameReg.resolveName(name) || null;
       }),
 
     resolveAddr: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
         const addr = getAddress(opts.input.addr);
-        return nameReg.resolveAddress(addr);
+        return nameReg.resolveAddress(addr) || null;
       }),
 
     getLinkStatus: publicProcedure
@@ -73,17 +74,7 @@ export function createRouter(
           }
 
           case "note": {
-            const amount = "1.23";
-            const sender = { addr: link.ephemeralOwner, name: "dcposch" };
-            const claimer = undefined;
-            const status = "pending";
-            const ret: DaimoNoteStatus = {
-              link,
-              amount,
-              sender,
-              claimer,
-              status,
-            };
+            const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
             return ret;
           }
 
@@ -102,7 +93,7 @@ export function createRouter(
         // TODO: lookup account by signing key
         // Doing this efficiently likely requires an AddKey event
         // Alternately, an indexer contract thru which all accounts are deployed
-        let ret = null as NamedAccount | null;
+        let ret = null as NamedDaimoAccount | null;
 
         // Stub to test client
         if (
@@ -202,7 +193,7 @@ export function createRouter(
             addr,
             name: nameReg.resolveAddress(addr),
           }))
-          .filter((na): na is NamedAccount => na.name != null);
+          .filter((na): na is NamedDaimoAccount => na.name != null);
 
         return {
           address,

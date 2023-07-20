@@ -5,6 +5,7 @@ import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
+import { NoteIndexer } from "./contract/noteIndexer";
 import { DB } from "./db/db";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
@@ -16,12 +17,13 @@ async function main() {
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const coinIndexer = new CoinIndexer(vc);
   const nameReg = new NameRegistry(vc);
+  const noteIndexer = new NoteIndexer(vc, nameReg);
   const faucet = new Faucet(vc, coinIndexer);
   const entryPoint = new EntryPoint(vc);
 
   console.log(`[API] initializing indexers...`);
   await Promise.all([coinIndexer.init(), nameReg.init()]);
-  await faucet.init();
+  await Promise.all([faucet.init(), noteIndexer.init()]);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
@@ -35,6 +37,7 @@ async function main() {
   const router = createRouter(
     vc.publicClient,
     coinIndexer,
+    noteIndexer,
     entryPoint,
     nameReg,
     faucet,

@@ -7,11 +7,27 @@ export const zAddress = z
   .refine((s): s is Address => true);
 
 export const zNamedAccount = z.object({
-  name: z.string(),
   addr: zAddress,
+  name: z.string().optional(),
+  // TODO: add optional reverse-lookup ENS name
+  // ensName: z.string().optional()
 });
 
+/** NamedAccount represents any Ethereum address + onchain display name(s). */
 export type NamedAccount = z.infer<typeof zNamedAccount>;
+
+/** Subset of NamedAccount for Daimo accounts, which always have a name. */
+export interface NamedDaimoAccount {
+  addr: Address;
+  name: string;
+}
+
+/** Gets a bare string name or 0x... address contraction. */
+export function getAccountName(acc: NamedAccount): string {
+  if (acc.name) return acc.name;
+  const { addr } = acc;
+  return addr.slice(0, 6) + "…" + addr.slice(-4);
+}
 
 export const zHex = z
   .string()
@@ -25,12 +41,12 @@ export const zBigIntStr = z
 
 export type BigIntStr = `${bigint}`;
 
-export const zAmountStr = z
+export const zDollarStr = z
   .string()
   .regex(/^\d+(\.\d+)?$/i)
-  .refine((s): s is AmountStr => true);
+  .refine((s): s is DollarStr => true);
 
-export type AmountStr = `${number}`;
+export type DollarStr = `${number}`;
 
 export const zTransferLogSummary = z.object({
   from: zAddress,

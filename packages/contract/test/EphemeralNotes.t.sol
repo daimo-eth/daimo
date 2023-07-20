@@ -24,7 +24,7 @@ contract EphemeralNotesTest is Test {
     address constant BOB = address(0x456);
 
     event NoteCreated(Note note);
-    event NoteRedeemed(Note note);
+    event NoteRedeemed(Note note, address redeemer);
 
     function setUp() public {
         token = new TestDAI("TestDAI", "DAI");
@@ -50,6 +50,13 @@ contract EphemeralNotesTest is Test {
 
         vm.startPrank(ALICE, ALICE);
         token.approve(address(notes), 501);
+        vm.expectEmit(false, false, false, false);
+        Note memory expectedNote = Note({
+            ephemeralOwner: ephemeralAddress,
+            from: ALICE,
+            amount: 500
+        });
+        emit NoteCreated(expectedNote);
         notes.createNote(ephemeralAddress, 500);
         vm.stopPrank();
     }
@@ -60,6 +67,13 @@ contract EphemeralNotesTest is Test {
 
         // Bob uses ephemeralAddress to sign his own address and redeem the note
         vm.startPrank(BOB, BOB);
+        vm.expectEmit(false, false, false, false);
+        Note memory expectedNote = Note({
+            ephemeralOwner: ephemeralAddress,
+            from: ALICE,
+            amount: 500
+        });
+        emit NoteRedeemed(expectedNote, BOB);
         notes.claimNote(ephemeralAddress, createEphemeralSignature(BOB));
         vm.stopPrank();
 

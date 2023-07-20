@@ -1,5 +1,5 @@
 import { assert, formatDaimoLink } from "@daimo/common";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Share,
@@ -18,17 +18,21 @@ import { color } from "../../shared/style";
 export default function RequestSendScreen() {
   const [account] = useAccount();
   assert(account != null);
-  const [amount, setAmount] = useState(0);
+  const [dollars, setDollars] = useState(0);
 
   // On successful send, show a toast and go home
   const [sent, setSent] = useState(false);
   const nav = useNav();
 
-  const url = formatDaimoLink({
-    type: "request",
-    recipient: account.address,
-    amount: `${amount}` as const,
-  });
+  const url = useMemo(
+    () =>
+      formatDaimoLink({
+        type: "request",
+        recipient: account.address,
+        dollars: `${dollars}`,
+      }),
+    [account.address, dollars]
+  );
 
   const sendRequest = useCallback(async () => {
     try {
@@ -57,14 +61,14 @@ export default function RequestSendScreen() {
     <TouchableWithoutFeedback onPress={hideKeyboard}>
       <View style={styles.vertOuter}>
         <AmountInput
-          value={amount}
-          onChange={setAmount}
+          value={dollars}
+          onChange={setDollars}
           innerRef={inputRef}
           autoFocus={!sent}
         />
         <ButtonBig
           type="primary"
-          disabled={amount <= 0 || sent}
+          disabled={dollars <= 0 || sent}
           title={sent ? "Sent" : "Send Request"}
           onPress={sendRequest}
         />

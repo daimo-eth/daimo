@@ -1,4 +1,4 @@
-import { NamedAccount } from "@daimo/common";
+import { NamedAccount, getAccountName } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
 import { useEffect } from "react";
 import { Text } from "react-native";
@@ -14,10 +14,11 @@ import { Account, getAccountManager } from "../../model/account";
 
 const specialAddrs: { [_: Address]: string } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
+  "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": "note", // Old Notes contract
 };
 specialAddrs[ephemeralNotesAddress] = "note";
 
-const nameCache = new Map<Address, string>();
+const nameCache = new Map<Address, NamedAccount>();
 
 export function useNameCache() {
   useEffect(() => {
@@ -30,32 +31,22 @@ export function useNameCache() {
 }
 
 function cacheNames(namedAccounts: NamedAccount[]) {
-  for (const { addr, name } of namedAccounts) {
-    nameCache.set(addr, name);
+  for (const account of namedAccounts) {
+    nameCache.set(account.addr, account);
   }
-}
-
-/** Gets a bare string name or 0x... address prefix */
-export function getNameOrAddr({
-  addr,
-  name,
-}: {
-  addr: Address;
-  name?: string;
-}): string {
-  if (name) return name;
-  return addr.slice(0, 6) + "…" + addr.slice(-4);
 }
 
 /** Shows a named Daimo account or an Ethereum address. */
-export function AddrText({ addr, name }: { addr: Address; name?: string }) {
-  if (!name) {
-    name = nameCache.get(addr);
-  }
-  if (name) {
-    return <TextBold>{name}</TextBold>;
+export function AddrText({ addr }: { addr: Address }) {
+  const acc = nameCache.get(addr);
+  if (acc) {
+    return <TextBold>{getAccountName(acc)}</TextBold>;
   }
 
   const special = specialAddrs[addr];
-  return <Text>{special || addr}</Text>;
+  if (special) {
+    return <Text>{special}</Text>; // Not bold
+  }
+
+  return <Text>{getAccountName({ addr })}</Text>;
 }

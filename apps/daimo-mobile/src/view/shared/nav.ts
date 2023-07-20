@@ -57,7 +57,7 @@ async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
     }
     case "request": {
       const recipient = await getRecipient(link.recipient);
-      const dollars = parseFloat(link.amount);
+      const dollars = parseFloat(link.dollars);
       nav.navigate("Send", { recipient, dollars });
       break;
     }

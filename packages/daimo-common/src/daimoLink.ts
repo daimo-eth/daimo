@@ -1,7 +1,7 @@
 import { Address } from "abitype";
 import { Hex, getAddress } from "viem";
 
-import { zAmountStr, zHex } from "./model";
+import { zDollarStr, zHex } from "./model";
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
@@ -20,7 +20,7 @@ export type DaimoLinkAccount = {
 export type DaimoLinkRequest = {
   type: "request";
   recipient: Address;
-  amount: `${number}`;
+  dollars: `${number}`;
 };
 
 export type DaimoLinkNote = {
@@ -34,7 +34,7 @@ export function formatDaimoLink(link: DaimoLink) {
     case "account":
       return `${daimoLinkBase}/account/${link.addr}`;
     case "request":
-      return `${daimoLinkBase}/request/${link.recipient}/${link.amount}`;
+      return `${daimoLinkBase}/request/${link.recipient}/${link.dollars}`;
     case "note":
       if (link.ephemeralPrivateKey == null) {
         return `${daimoLinkBase}/note/${link.ephemeralOwner}`;
@@ -80,11 +80,11 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
     case "request": {
       if (parts.length !== 3) return null;
       const recipient = getAddress(parts[1]);
-      const amountNum = parseFloat(zAmountStr.parse(parts[2]));
-      if (!(amountNum > 0)) return null;
-      const amount = amountNum.toFixed(2) as `${number}`;
-      if (amount === "0.00") return null;
-      return { type: "request", recipient, amount };
+      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
+      if (!(dollarNum > 0)) return null;
+      const dollars = dollarNum.toFixed(2) as `${number}`;
+      if (dollars === "0.00") return null;
+      return { type: "request", recipient, dollars };
     }
     case "note": {
       if (parts.length !== 2) return null;
