@@ -11,6 +11,7 @@ const accountFromV2: Account = {
   name: "test",
   address: "0x0000000000000000000000000000000000000123",
 
+  isDeployed: true,
   lastBalance: BigInt(123),
   lastBlockTimestamp: 789,
   lastBlock: 0,
@@ -22,13 +23,14 @@ const accountFromV2: Account = {
   pushToken: null,
 };
 
-const correctSerV3 = `{"storageVersion":3,"enclaveKeyName":"test","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"pushToken":null}`;
+const correctSerV4 = `{"storageVersion":4,"enclaveKeyName":"test","name":"test","address":"0x0000000000000000000000000000000000000123","isDeployed":false,"lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"pushToken":null}`;
 
 const account: Account = {
   enclaveKeyName: "test",
   name: "test",
   address: "0x0000000000000000000000000000000000000123",
 
+  isDeployed: false,
   lastBalance: BigInt(123),
   lastBlockTimestamp: 789,
   lastBlock: 101,
@@ -43,11 +45,11 @@ const account: Account = {
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV3);
+    expect(ser).toEqual(correctSerV4);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV3);
+    const a = parseAccount(correctSerV4);
     expect(a).toEqual(account);
   });
 

@@ -47,6 +47,7 @@ export function useLoadAccountFromKey(pubKey: Hex | undefined) {
       enclaveKeyName: defaultEnclaveKeyName,
       address: addr,
 
+      isDeployed: false,
       lastBalance: 0n,
       lastBlockTimestamp: 0,
       lastBlock: 0,

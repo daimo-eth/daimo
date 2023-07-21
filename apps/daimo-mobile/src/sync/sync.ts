@@ -5,6 +5,7 @@ import {
   amountToDollars,
   assert,
 } from "@daimo/common";
+import { ephemeralNotesAddress } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { chainConfig } from "../logic/chainConfig";
@@ -160,6 +161,11 @@ async function syncAccount(
     );
   }
 
+  const isDeployed =
+    recentTransfers.find(
+      (t) => t.from === account.address || t.from === ephemeralNotesAddress
+    ) != null;
+
   const ret: Account = {
     ...account,
 
@@ -168,6 +174,7 @@ async function syncAccount(
     lastBlockTimestamp: result.lastBlockTimestamp,
     lastFinalizedBlock: result.lastFinalizedBlock,
 
+    isDeployed,
     recentTransfers,
     namedAccounts,
   };

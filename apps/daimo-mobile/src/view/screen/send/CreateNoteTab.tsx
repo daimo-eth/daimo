@@ -6,7 +6,7 @@ import {
   formatDaimoLink,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { DaimoAccount } from "@daimo/userop";
+import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import {
   ReactNode,
   useCallback,
@@ -67,6 +67,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     })();
   }, []);
 
+  const nonce = new DaimoNonce(new DaimoNonceMetadata(!account.isDeployed));
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
@@ -74,6 +75,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       return account.createEphemeralNote(
         ephemeralOwner,
         `${dollars}`,
+        nonce,
         !isNotesContractApproved
       );
     },

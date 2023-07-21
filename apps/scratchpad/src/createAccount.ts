@@ -4,7 +4,12 @@ import {
   erc20ABI,
   tokenMetadata,
 } from "@daimo/contract";
-import { DaimoAccount, SigningCallback } from "@daimo/userop";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  SigningCallback,
+} from "@daimo/userop";
 import crypto from "node:crypto";
 import { Constants } from "userop";
 import {
@@ -137,7 +142,8 @@ export async function createAccount() {
   // Finally, we should be able to do a userop from our new Daimo account.
   // Send $0.50 USDC to nibnalin.eth
   const recipient = `0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB`;
-  const userOp = await account.erc20transfer(recipient, "0.1");
+  const nonce = new DaimoNonce(new DaimoNonceMetadata(true));
+  const userOp = await account.erc20transfer(recipient, "0.1", nonce);
   console.log("✅ userop accepted by bundler: ", userOp.userOpHash);
 
   const bundleTxHash = (await userOp.wait())?.transactionHash;

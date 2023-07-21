@@ -1,4 +1,5 @@
 import { EAccount, assert, TransferOpEvent } from "@daimo/common";
+import { ephemeralNotesAddress } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
@@ -21,6 +22,8 @@ export type Account = {
   /** Contract wallet address */
   address: Address;
 
+  /** Whether the account contract has been deployed */
+  isDeployed: boolean;
   /** Latest sync block number */
   lastBlock: number;
   /** Latest sync time */
@@ -60,6 +63,24 @@ interface AccountV3 extends StoredModel {
   name: string;
   address: string;
 
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  namedAccounts: EAccount[];
+
+  pushToken: string | null;
+}
+
+interface AccountV4 extends StoredModel {
+  storageVersion: 4;
+
+  enclaveKeyName: string;
+  name: string;
+  address: string;
+
+  isDeployed: boolean;
   lastBlock: number;
   lastBlockTimestamp: number;
   lastBalance: string;
@@ -156,6 +177,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       name: a.name,
       address: getAddress(a.address),
 
+      isDeployed: true, // TODO: is this okay to assume?
       lastBalance: BigInt(a.lastBalance),
       lastBlock: 0,
       lastBlockTimestamp: a.lastBlockTimestamp,
@@ -168,13 +190,41 @@ export function parseAccount(accountJSON?: string): Account | null {
     };
   }
 
-  assert(model.storageVersion === 3);
-  const a = model as AccountV3;
+  if (model.storageVersion === 3) {
+    const a = model as AccountV3;
+
+    const isDeployed =
+      a.recentTransfers.find(
+        (t) =>
+          t.from === getAddress(a.address) || t.from === ephemeralNotesAddress
+      ) != null;
+
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      name: a.name,
+      address: getAddress(a.address),
+
+      isDeployed,
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      namedAccounts: a.namedAccounts,
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 4);
+  const a = model as AccountV4;
   return {
     enclaveKeyName: a.enclaveKeyName,
     name: a.name,
     address: getAddress(a.address),
 
+    isDeployed: a.isDeployed,
     lastBalance: BigInt(a.lastBalance),
     lastBlock: a.lastBlock,
     lastBlockTimestamp: a.lastBlockTimestamp,
@@ -190,13 +240,14 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV3 = {
-    storageVersion: 3,
+  const model: AccountV4 = {
+    storageVersion: 4,
 
     enclaveKeyName: account.enclaveKeyName,
     name: account.name,
     address: account.address,
 
+    isDeployed: account.isDeployed,
     lastBalance: account.lastBalance.toString(),
     lastBlock: account.lastBlock,
     lastBlockTimestamp: account.lastBlockTimestamp,
