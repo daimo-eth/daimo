@@ -16,6 +16,7 @@ import {
 } from "viem";
 import { baseGoerli } from "viem/chains";
 
+import { DaimoNonce } from "./nonce";
 import { SigningCallback, dummySignature } from "./util";
 import config from "../config.json";
 
@@ -77,7 +78,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         verificationGasLimit: 2000000n,
         callGasLimit: 1000000n,
       })
-      .useMiddleware(instance.resolveAccount)
       .useMiddleware(Presets.Middleware.getGasPrice(instance.provider))
       .useMiddleware(instance.gasMiddleware)
       .useMiddleware(async (ctx) => {
@@ -91,17 +91,13 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     return base;
   }
 
-  private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.publicClient.readContract({
-      address: Constants.ERC4337.EntryPoint as Address,
-      abi: entryPointABI,
-      functionName: "getNonce",
-      args: [getAddress(ctx.op.sender), 0n], // salt, always 0 for Daimo Accounts
-    });
-  };
-
-  execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {
-    return this.setCallData(
+  execute(
+    to: `0x${string}`,
+    value: bigint,
+    data: `0x${string}`,
+    nonce: DaimoNonce
+  ) {
+    return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
         abi: accountABI,
         functionName: "execute",
@@ -110,8 +106,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     );
   }
 
-  executeBatch(to: `0x${string}`[], data: `0x${string}`[]) {
-    return this.setCallData(
+  executeBatch(to: `0x${string}`[], data: `0x${string}`[], nonce: DaimoNonce) {
+    return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
         abi: accountABI,
         functionName: "executeBatch",

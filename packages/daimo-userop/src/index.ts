@@ -13,10 +13,12 @@ import {
 import { baseGoerli } from "viem/chains";
 
 import { DaimoOpBuilder } from "./daimoOpBuilder";
+import { DaimoNonce } from "./nonce";
 import { SigningCallback } from "./util";
 import config from "../config.json";
 
 export { SigningCallback };
+export { DaimoNonce, DaimoNonceMetadata } from "./nonce";
 
 export type UserOpHandle = Awaited<
   ReturnType<typeof DaimoAccount.prototype.sendUserOp>
@@ -107,12 +109,13 @@ export class DaimoAccount {
   /** Sends eth. Returns userOpHash. */
   public async transfer(
     to: Address,
-    amount: `${number}`
+    amount: `${number}`,
+    nonce: DaimoNonce
   ): Promise<UserOpHandle> {
     const ether = parseEther(amount);
     console.log(`[OP] transfer ${ether} wei to ${to}`);
 
-    const op = this.opBuilder.execute(to, ether, "0x");
+    const op = this.opBuilder.execute(to, ether, "0x", nonce);
 
     return this.sendUserOp(op);
   }
@@ -120,7 +123,8 @@ export class DaimoAccount {
   /** Sends an ERC20 transfer. Returns userOpHash. */
   public async erc20transfer(
     to: Address,
-    amount: `${number}` // in the native unit of the token
+    amount: `${number}`, // in the native unit of the token
+    nonce: DaimoNonce
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
@@ -132,7 +136,8 @@ export class DaimoAccount {
         abi: Contracts.erc20ABI,
         functionName: "transfer",
         args: [to, parsedAmount],
-      })
+      }),
+      nonce
     );
 
     return this.sendUserOp(op);
@@ -141,7 +146,8 @@ export class DaimoAccount {
   /** Sends an ERC20 approval. Returns userOpHash. */
   public async erc20approve(
     spender: Address,
-    amount: `${number}`
+    amount: `${number}`,
+    nonce: DaimoNonce
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(
@@ -155,7 +161,8 @@ export class DaimoAccount {
         abi: Contracts.erc20ABI,
         functionName: "approve",
         args: [spender, parsedAmount],
-      })
+      }),
+      nonce
     );
 
     return this.sendUserOp(op);
@@ -165,6 +172,7 @@ export class DaimoAccount {
   public async createEphemeralNote(
     ephemeralOwner: `0x${string}`,
     amount: `${number}`,
+    nonce: DaimoNonce,
     approveFirst: boolean = false
   ) {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
@@ -193,7 +201,7 @@ export class DaimoAccount {
       );
     }
 
-    const op = this.opBuilder.executeBatch(contracts, calls);
+    const op = this.opBuilder.executeBatch(contracts, calls, nonce);
 
     return this.sendUserOp(op);
   }
@@ -201,7 +209,8 @@ export class DaimoAccount {
   /** Claims an ephemeral note. Returns userOpHash. */
   public async claimEphemeralNote(
     ephemeralOwner: `0x${string}`,
-    signature: `0x${string}`
+    signature: `0x${string}`,
+    nonce: DaimoNonce
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
 
@@ -212,7 +221,8 @@ export class DaimoAccount {
         abi: Contracts.ephemeralNotesABI,
         functionName: "claimNote",
         args: [ephemeralOwner, signature],
-      })
+      }),
+      nonce
     );
 
     return this.sendUserOp(op);

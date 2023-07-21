@@ -5,7 +5,7 @@ import {
   hasAccountName,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { DaimoAccount } from "@daimo/userop";
+import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
@@ -84,6 +84,7 @@ function NoteDisplay({
   );
 
   const [senderName, setSenderName] = useState("");
+  const nonce = new DaimoNonce(new DaimoNonceMetadata(!account.isDeployed));
 
   useEffect(() => {
     (async () => {
@@ -104,7 +105,7 @@ function NoteDisplay({
       console.log(
         `[ACTION] claiming note ${ephemeralOwner} ${signature} ${account}`
       );
-      return account.claimEphemeralNote(ephemeralOwner, signature);
+      return account.claimEphemeralNote(ephemeralOwner, signature, nonce);
     };
   };
 

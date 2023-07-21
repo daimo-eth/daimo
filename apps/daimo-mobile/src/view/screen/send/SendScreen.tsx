@@ -5,7 +5,7 @@ import {
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import { DaimoAccount } from "@daimo/userop";
+import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
@@ -161,12 +161,13 @@ function SendButton({
   assert(account != null);
   assert(dollars >= 0);
 
+  const nonce = new DaimoNonce(new DaimoNonceMetadata(!account.isDeployed));
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
       assert(dollars > 0);
       console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
-      return account.erc20transfer(recipient.addr, `${dollars}`);
+      return account.erc20transfer(recipient.addr, `${dollars}`, nonce);
     },
     {
       type: "transfer",

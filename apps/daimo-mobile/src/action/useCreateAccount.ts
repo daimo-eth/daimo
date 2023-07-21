@@ -24,7 +24,7 @@ export function useCreateAccount(name: string): ActHandle {
   const result = rpcHook.deployWallet.useMutation();
   const exec = async () => {
     if (!pubKeyHex) return;
-    setAS("loading", "Deploying contract...");
+    setAS("loading", "Registering name...");
     result.mutate({ name, pubKeyHex });
   };
 
@@ -60,6 +60,7 @@ export function useCreateAccount(name: string): ActHandle {
       name,
       address,
 
+      isDeployed: false,
       lastBalance: BigInt(0),
       lastBlockTimestamp: 0,
       lastBlock: 0,

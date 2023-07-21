@@ -35,6 +35,7 @@ export function useSendAsync(
     if (pendingOp) {
       pendingOp.opHash = handle.userOpHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
+      account.isDeployed = true;
       account.recentTransfers.push(pendingOp);
       account.namedAccounts.push(...(namedAccounts || []));
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
