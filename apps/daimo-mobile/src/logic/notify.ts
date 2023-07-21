@@ -5,6 +5,7 @@ import { AppState } from "react-native";
 import { Log } from "./log";
 import { rpcFunc } from "./trpc";
 import { getAccountManager, useAccount } from "../model/account";
+import { syncAfterPushNotification } from "../sync/sync";
 
 /** Registers push notifications, if we have permission & haven't already. */
 export function useInitNotifications() {
@@ -22,6 +23,7 @@ export function useInitNotifications() {
       handleNotification: async (n: Notifications.Notification) => {
         const { title, body } = n.request.content;
         console.log(`[NOTIFY] handling push ${title} - ${body}`);
+        syncAfterPushNotification();
         return {
           shouldShowAlert: true,
           shouldPlaySound: true,
@@ -32,10 +34,15 @@ export function useInitNotifications() {
 
     // Always clear the badge when app foregrounds
     Notifications.setBadgeCountAsync(0);
-    const sub = AppState.addEventListener("change", (state) => {
+    const sub = AppState.addEventListener("change", async (state) => {
       if (state !== "active") return;
       console.log("[NOTIFY] app in foreground, clearing badge");
-      Notifications.setBadgeCountAsync(0);
+      const count = await Notifications.getBadgeCountAsync();
+      if (count > 0) {
+        console.log("[NOTIFY] app opened with badge, syncing");
+        syncAfterPushNotification();
+      }
+      await Notifications.setBadgeCountAsync(0);
     });
     return () => sub.remove();
   }, [address]);

@@ -33,6 +33,11 @@ export function useSyncChain() {
 }
 
 let lastSyncS = 0;
+let lastPushNotificationS = 0;
+
+export function syncAfterPushNotification() {
+  lastPushNotificationS = Date.now() / 1e3;
+}
 
 function maybeSync() {
   const manager = getAccountManager();
@@ -47,6 +52,8 @@ function maybeSync() {
   }
   if (lastSyncS + intervalS > nowS) {
     console.log(`[SYNC] skipping sync, attempted sync recently`);
+  } else if (lastPushNotificationS + 10 > nowS) {
+    resync(`push notification ${nowS - lastPushNotificationS}s ago`);
   } else {
     resync(`interval ${intervalS}s`);
   }
