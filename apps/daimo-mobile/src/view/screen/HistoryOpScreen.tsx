@@ -88,7 +88,7 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
   return (
     <View>
       <TitleAmount amount={BigInt(op.amount)} />
-      <Spacer h={16} />
+      <Spacer h={32} />
       <Text style={styles.h2Small}>
         <Text>{directionSymbol}</Text>
         <Spacer w={8} />
