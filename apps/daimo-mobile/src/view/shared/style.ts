@@ -43,14 +43,23 @@ export const touchHighlightUnderlay = {
   },
 };
 
+const styleOuterStretch = {
+  flex: 1,
+  padding: 16,
+  paddingBottom: 0,
+  backgroundColor: "#fff",
+  alignItems: "stretch",
+} as const;
+
 export const ss = {
   container: StyleSheet.create({
     outerStretch: {
-      flex: 1,
-      padding: 16,
+      ...styleOuterStretch,
       paddingBottom: 48,
-      backgroundColor: "#fff",
-      alignItems: "stretch",
+    },
+    outerStretchScroll: {
+      ...styleOuterStretch,
+      paddingBottom: 0,
     },
     vertModal: {
       flex: 1,

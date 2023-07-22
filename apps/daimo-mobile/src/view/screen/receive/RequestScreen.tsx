@@ -40,7 +40,7 @@ export default function RequestScreen() {
         <TextLight>or</TextLight>
         <Spacer h={32} />
         <View style={styles.horzButtons}>
-          <ButtonBig type="primary" title="Send message" onPress={send} />
+          <ButtonBig type="primary" title="Send Request" onPress={send} />
         </View>
       </View>
     </View>

@@ -80,15 +80,16 @@ async function mailingList() {
 
   const json = await csv().fromFile(csvPath);
 
+  console.log("RECIPIENTS");
   const recipients = json
     .filter((row) => row["Email"].includes("@"))
     .map((row) => {
       const name = row["Name"];
       const email = row["Email"];
-      return `${name} <${email}>`;
+      console.log(`${name} <${email}>`);
+      return email;
     });
-
-  console.log(`RECIPIENTS\n${recipients.slice().sort().join("\n")}\n\n`);
+  console.log("");
 
   console.log(`BCC ONLY\n${recipients.join(", ")}\n\n`);
 }

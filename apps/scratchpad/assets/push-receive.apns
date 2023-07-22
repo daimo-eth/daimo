@@ -1,0 +1,10 @@
+{
+  "aps": {
+    "alert": {
+      "title": "Received $43.37",
+      "body": "You received 43.37 USDC from nalin"
+    },
+    "sound": "default",
+  },
+  "Simulator Target Bundle" : "eth.daimo"
+}
