@@ -14,7 +14,7 @@ import {
   TextCenter,
   TextH3,
   TextRight,
-  TextSmall,
+  TextLight,
 } from "../shared/text";
 import { timeAgo } from "../shared/time";
 
@@ -43,7 +43,7 @@ export function HistoryList({
     return (
       <View>
         <TextCenter>
-          <TextSmall>No transactions yet</TextSmall>
+          <TextLight>No transactions yet</TextLight>
         </TextCenter>
       </View>
     );
@@ -135,15 +135,15 @@ function TransferRow({
     <ButtonSmall onPress={viewOp}>
       <View style={styles.rowTransfer}>
         <View style={styles.colDesc}>
-          <TextSmall numberOfLines={1}>
+          <TextLight numberOfLines={1}>
             {verb} <TextBold>${amount}</TextBold> {toFrom}{" "}
             <AddrText addr={otherAddr} />
-          </TextSmall>
+          </TextLight>
         </View>
         <View style={styles.colTime}>
-          <TextSmall numberOfLines={1}>
+          <TextLight numberOfLines={1}>
             <TextRight>{timeStr}</TextRight>
-          </TextSmall>
+          </TextLight>
         </View>
         <View style={styles.colStatus}>
           <OpStatusIndicator status={transfer.status} />

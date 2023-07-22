@@ -6,7 +6,7 @@ import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
 import { useNav } from "../../shared/nav";
-import { TextCenter, TextError, TextSmall } from "../../shared/text";
+import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Find someone you've already paid, or any Daimo account by name. */
 export function SearchTab() {
@@ -22,7 +22,7 @@ export function SearchTab() {
       ))}
       {res.isSearching && res.recipients.length === 0 && (
         <TextCenter>
-          <TextSmall>No results</TextSmall>
+          <TextLight>No results</TextLight>
         </TextCenter>
       )}
     </View>

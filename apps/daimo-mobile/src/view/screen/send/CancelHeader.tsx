@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 
 import { ButtonSmall } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { TextSmall } from "../../shared/text";
+import { TextLight } from "../../shared/text";
 
 export function CancelHeader({
   children,
@@ -17,7 +17,7 @@ export function CancelHeader({
     <ButtonSmall onPress={hide}>
       <View style={styles.cancelHeader}>
         <Spacer h={8} />
-        <TextSmall>{children}</TextSmall>
+        <TextLight>{children}</TextLight>
         <Octicons name="x" size={20} color="gray" />
       </View>
     </ButtonSmall>

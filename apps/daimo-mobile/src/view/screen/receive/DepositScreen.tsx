@@ -11,7 +11,7 @@ import { getAccountManager, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import { TextBody, TextBold, TextSmall } from "../../shared/text";
+import { TextBody, TextBold, TextLight } from "../../shared/text";
 
 export default function DepositScreen() {
   const [account] = useAccount();
@@ -20,12 +20,16 @@ export default function DepositScreen() {
   return (
     <View style={styles.vertOuter}>
       {chainConfig.testnet && <TestnetFaucet recipient={account.address} />}
-      {!chainConfig.testnet && <OnrampStub />}
+      {chainConfig.testnet && <Spacer h={32} />}
+      <OnrampStub />
       <Spacer h={32} />
       <TextBody>
-        <TextBold>Deposit {tokenMetadata.symbol} on Base Goerli only.</TextBold>{" "}
+        <TextBold>
+          Deposit {tokenMetadata.symbol} on {chainConfig.l2.name} only.
+        </TextBold>{" "}
         Use the following address.
       </TextBody>
+      <Spacer h={16} />
       <AddressCopier addr={account.address} />
     </View>
   );
@@ -81,7 +85,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
-        runs on Base Goerli.
+        runs on {chainConfig.l2.name}.
       </TextBody>
       <Spacer h={16} />
       <ButtonMed
@@ -97,14 +101,10 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
 /** Coming soon: onramp, eg Coinbase Pay */
 function OnrampStub() {
   return (
-    <View style={styles.callout}>
-      <TextBody>
-        <Octicons name="alert" size={16} color="black" />{" "}
-        <TextBold>Onramp coming soon.</TextBold> You'll be able to buy
-        {tokenMetadata.symbol}
-        directly in Daimo.
-      </TextBody>
-    </View>
+    <TextBody>
+      <TextBold>On-ramp goes here.</TextBold> Soon, we'll link to exchanges like
+      Coinbase so that you can deposit money from a bank account.
+    </TextBody>
   );
 }
 
@@ -121,7 +121,7 @@ function AddressCopier({ addr }: { addr: string }) {
       <TouchableHighlight
         style={styles.addressButton}
         onPress={copy}
-        {...touchHighlightUnderlay}
+        {...touchHighlightUnderlay.blue}
       >
         <View style={styles.addressView}>
           <Text style={styles.addressMono} numberOfLines={1}>
@@ -130,7 +130,7 @@ function AddressCopier({ addr }: { addr: string }) {
           <Octicons name="copy" size={16} color="black" />
         </View>
       </TouchableHighlight>
-      <TextSmall>{justCopied ? "Copied" : " "}</TextSmall>
+      <TextLight>{justCopied ? "Copied" : " "}</TextLight>
     </View>
   );
 }
@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     flex: 1,
     padding: 32,
-    gap: 16,
     overflow: "hidden",
   },
   address: {

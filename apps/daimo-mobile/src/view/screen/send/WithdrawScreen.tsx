@@ -28,7 +28,7 @@ function TestnetWarning() {
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
-        runs on Base Goerli.
+        runs on {chainConfig.l2.name}.
       </TextBody>
     </View>
   );
@@ -40,8 +40,7 @@ function OfframpStub() {
   return (
     <TextBody>
       <TextBold>Off-ramp goes here.</TextBold> Soon, we'll link to exchanges
-      like Coinbase so that you can withdraw {symbol} to a bank account
-      smoothly.
+      like Coinbase so that you can withdraw {symbol} to a bank account.
     </TextBody>
   );
 }

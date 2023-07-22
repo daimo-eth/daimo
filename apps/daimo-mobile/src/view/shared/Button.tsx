@@ -21,11 +21,23 @@ interface ButtonProps extends ButtonPropsSmall {
 }
 
 export function ButtonBig(props: ButtonProps) {
-  return <Button {...props} style={useStyle(buttonStyles.big, props)} />;
+  return (
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.big, props)}
+      touchUnderlay={useTouchUnderlay(props.type)}
+    />
+  );
 }
 
 export function ButtonMed(props: ButtonProps) {
-  return <Button {...props} style={useStyle(buttonStyles.med, props)} />;
+  return (
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.med, props)}
+      touchUnderlay={useTouchUnderlay(props.type)}
+    />
+  );
 }
 
 export function ButtonSmall(props: ButtonPropsSmall) {
@@ -68,11 +80,27 @@ function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
   return style;
 }
 
+function useTouchUnderlay(type: ButtonProps["type"]) {
+  return useMemo(() => {
+    switch (type) {
+      case "success":
+        return touchHighlightUnderlay.success;
+      case "danger":
+        return touchHighlightUnderlay.danger;
+      case "primary":
+      case "subtle":
+      default:
+        return touchHighlightUnderlay.blue;
+    }
+  }, [type]);
+}
+
 type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
 export function Button(
   props: ButtonPropsSmall & {
     style: ButtonStyle;
+    touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
   }
 ) {
   const disabledStyle = useMemo(
@@ -91,7 +119,7 @@ export function Button(
       onPress={props.onPress}
       style={props.disabled ? disabledStyle : props.style.button}
       disabled={props.disabled}
-      {...touchHighlightUnderlay}
+      {...(props.touchUnderlay || touchHighlightUnderlay.blue)}
     >
       {child}
     </TouchableHighlight>
@@ -104,7 +132,7 @@ export const buttonStyles = {
       paddingHorizontal: 24,
       paddingVertical: 16,
       borderRadius: 8,
-      backgroundColor: color.bg.lightGray,
+      backgroundColor: color.bg.lightBlue,
     },
     title: {
       fontSize: 20,
@@ -117,7 +145,7 @@ export const buttonStyles = {
       paddingHorizontal: 16,
       paddingVertical: 12,
       borderRadius: 8,
-      backgroundColor: color.bg.lightGray,
+      backgroundColor: color.bg.lightBlue,
     },
     title: {
       fontSize: 16,

@@ -27,7 +27,7 @@ import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextCenter, TextError, TextH2, TextSmall } from "../../shared/text";
+import { TextCenter, TextError, TextH2, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
@@ -84,9 +84,9 @@ export default function SendScreen({ route }: Props) {
         <View style={ss.container.ph16}>
           <ButtonBig type="primary" title="Create Note" onPress={createNote} />
           <Spacer h={16} />
-          <TextSmall>
+          <TextLight>
             <TextCenter>{sendViaAppStr}</TextCenter>
-          </TextSmall>
+          </TextLight>
         </View>
       )}
       {recipient && <SendButton recipient={recipient} dollars={dollars || 0} />}
@@ -135,9 +135,9 @@ function SetAmount({
         <View style={ss.container.ph16}>
           <AmountInput value={d} onChange={setD} onSubmitEditing={submit} />
           <Spacer h={16} />
-          <TextSmall>
+          <TextLight>
             <TextCenter>${bal} available</TextCenter>
-          </TextSmall>
+          </TextLight>
         </View>
       )}
       {dollars > 0 && (
@@ -238,9 +238,9 @@ function SendButton({
     <View style={ss.container.ph16}>
       {button}
       <Spacer h={16} />
-      <TextSmall>
+      <TextLight>
         <TextCenter>{statusMessage}</TextCenter>
-      </TextSmall>
+      </TextLight>
     </View>
   );
 }

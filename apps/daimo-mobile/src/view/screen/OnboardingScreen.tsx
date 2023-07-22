@@ -35,7 +35,7 @@ import {
   TextCenter,
   TextError,
   TextH1,
-  TextSmall,
+  TextLight,
 } from "../shared/text";
 import { comingSoon } from "../shared/underConstruction";
 
@@ -229,7 +229,7 @@ function CreateAccountPage() {
             </View>
             <TextCenter>
               {status === "error" && <TextError>{message}</TextError>}
-              {status !== "error" && <TextSmall>{message}</TextSmall>}
+              {status !== "error" && <TextLight>{message}</TextLight>}
             </TextCenter>
           </View>
         </View>
@@ -303,9 +303,9 @@ function NamePicker({
           center
         />
         <Spacer h={8} />
-        <TextSmall>
+        <TextLight>
           <TextCenter>{status}</TextCenter>
-        </TextSmall>
+        </TextLight>
       </View>
       <Spacer h={8} />
       <ButtonBig

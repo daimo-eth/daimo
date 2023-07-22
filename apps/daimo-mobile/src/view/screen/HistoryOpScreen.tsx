@@ -1,10 +1,11 @@
-import { amountToDollars, TransferOpEvent } from "@daimo/common";
+import { TransferOpEvent } from "@daimo/common";
 import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
+import { TitleAmount } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
@@ -16,7 +17,7 @@ import {
   TextBold,
   TextCenter,
   TextH3,
-  TextSmall,
+  TextLight,
 } from "../shared/text";
 import { timeString } from "../shared/time";
 
@@ -62,26 +63,30 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
 
   return (
     <ButtonSmall onPress={openURL}>
-      <TextSmall numberOfLines={1}>
+      <TextLight numberOfLines={1}>
         <TextCenter>
           <Octicons name="link-external" size={16} />
           {` \u00A0 `}
           View on {explorer.name}
         </TextCenter>
-      </TextSmall>
+      </TextLight>
     </ButtonSmall>
   );
 }
 
 function TransferBody({ op }: { op: TransferOpEvent }) {
   return (
-    <View style={styles.kvList}>
-      <KVRow k="From" v={<AddrText addr={op.from} />} />
-      <KVRow k="To" v={<AddrText addr={op.to} />} />
-      <KVRow k="Amount" v={"$" + amountToDollars(op.amount)} />
-      <KVRow k="Date" v={timeString(op.timestamp)} />
-      {op.opHash && <KVRow k="User op" v={op.opHash} />}
-      {op.blockNumber && <KVRow k="Block" v={op.blockNumber} />}
+    <View>
+      <Spacer h={32} />
+      <TitleAmount amount={BigInt(op.amount)} />
+      <Spacer h={24} />
+      <View style={styles.kvList}>
+        <KVRow k="From" v={<AddrText addr={op.from} />} />
+        <KVRow k="To" v={<AddrText addr={op.to} />} />
+        <KVRow k="Date" v={timeString(op.timestamp)} />
+        {op.opHash && <KVRow k="User op" v={op.opHash} />}
+        {op.blockNumber && <KVRow k="Block" v={op.blockNumber} />}
+      </View>
     </View>
   );
 }
@@ -90,7 +95,7 @@ function KVRow({ k, v }: { k: string; v: React.ReactNode }) {
   return (
     <View style={styles.kvRow}>
       <View style={styles.kvKey}>
-        <TextSmall numberOfLines={1}>{k}</TextSmall>
+        <TextLight numberOfLines={1}>{k}</TextLight>
       </View>
       <View style={styles.kvVal}>
         <TextBody numberOfLines={1}>

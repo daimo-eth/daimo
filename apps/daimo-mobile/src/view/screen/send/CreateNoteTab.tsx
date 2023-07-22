@@ -19,7 +19,7 @@ import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
-import { TextCenter, TextError, TextSmall } from "../../shared/text";
+import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function CreateNoteTab({ hide }: { hide: () => void }) {
@@ -147,9 +147,9 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       <AmountInput value={dollars} onChange={setDollars} innerRef={amountRef} />
       <Spacer h={32} />
       {button}
-      <TextSmall>
+      <TextLight>
         <TextCenter>{statusMessage}</TextCenter>
-      </TextSmall>
+      </TextLight>
     </>
   );
 }

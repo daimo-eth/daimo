@@ -1,8 +1,10 @@
-import { ReactNode, useCallback } from "react";
-import { StyleSheet, TouchableHighlight, View, Text } from "react-native";
+import { useCallback, useRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
+import { Button } from "./Button";
+import Spacer from "./Spacer";
 import { useNav } from "./nav";
-import { color, ss, touchHighlightUnderlay } from "./style";
+import { color, ss } from "./style";
 import { TextH3 } from "./text";
 import { useAccount } from "../../model/account";
 
@@ -12,10 +14,15 @@ export function Header() {
 
   const [account] = useAccount();
 
+  const buttonStyle = useRef({ button: styles.button, title: {} });
+
   return (
-    <Button onPress={goToAccount}>
+    <Button onPress={goToAccount} style={buttonStyle.current}>
       <View style={styles.header}>
-        <TextH3>{account?.name || "⚠️"}</TextH3>
+        <TextH3>
+          <Spacer w={8} />
+          {account?.name || "⚠️"}
+        </TextH3>
         <StyleTBD />
       </View>
     </Button>
@@ -30,28 +37,10 @@ function StyleTBD() {
   );
 }
 
-function Button({
-  children,
-  onPress,
-}: {
-  children: ReactNode;
-  onPress?: () => void;
-}) {
-  return (
-    <TouchableHighlight
-      onPress={onPress}
-      style={styles.button}
-      {...touchHighlightUnderlay}
-    >
-      {children}
-    </TouchableHighlight>
-  );
-}
-
 const styles = StyleSheet.create({
   button: {
     padding: 8,
-    borderRadius: 4,
+    borderRadius: 8,
   },
   header: {
     flexDirection: "row",

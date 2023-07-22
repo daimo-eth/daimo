@@ -1,7 +1,15 @@
 import { Octicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Linking, Platform, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  Platform,
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
 import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
@@ -11,8 +19,8 @@ import { Account, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
-import { ss } from "../shared/style";
-import { TextBold, TextH2, TextSmall } from "../shared/text";
+import { color, ss } from "../shared/style";
+import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
 
 export function AccountScreen() {
   const [account, setAccount] = useAccount();
@@ -25,7 +33,8 @@ export function AccountScreen() {
 
     Alert.alert(
       "Clear wallet",
-      `Are you sure you want to clear your wallet? This can't be undone.`,
+      `Are you sure you want to clear your wallet? This can't be undone.\n\n` +
+        `If this is the only device on your account, you'll lose your account.`,
       [
         {
           text: "Clear wallet",
@@ -58,30 +67,44 @@ export function AccountScreen() {
 
   return (
     <>
-      <View style={ss.container.vertModal}>
-        <Spacer h={16} />
+      <ScrollView contentContainerStyle={ss.container.vertModal}>
+        <Spacer h={8} />
         <View style={ss.container.ph16}>
           <TextH2>Account</TextH2>
+          <Spacer h={8} />
+          <TextH3>{account.name}</TextH3>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
           <View>
-            <TextSmall>{account.address}</TextSmall>
-            <Spacer h={8} />
-            <TextSmall>
+            <TextLight>
+              {account.address}
+              {` \u00A0 `}
               <Octicons name="link-external" size={16} />
               {` \u00A0 `}
               View on {explorer.name}
-            </TextSmall>
+            </TextLight>
           </View>
         </ButtonSmall>
         <Spacer h={8} />
-        <View style={ss.container.ph16}>
-          <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
+        <View style={styles.callout}>
+          <TextBody>
+            <Octicons name="alert" size={16} color="black" />{" "}
+            <TextBold>Add or remove device coming soon.</TextBold> This lets you
+            use your Daimo account from another phone or laptop. Secure your
+            account by adding a second device.
+          </TextBody>
         </View>
 
-        <Spacer h={64} />
+        <Spacer h={24} />
         <AppInfo {...{ account }} />
-      </View>
+
+        <Spacer h={32} />
+        <View style={ss.container.ph16}>
+          <TextH2>Danger zone</TextH2>
+          <Spacer h={8} />
+          <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
+        </View>
+      </ScrollView>
     </>
   );
 }
@@ -98,43 +121,36 @@ function AppInfo({ account }: { account: Account }) {
     getPushNotificationManager().maybeSavePushTokenForAccount();
   };
 
+  const sendDebugLog = () => {
+    alert("Coming soon");
+  };
+
   return (
-    <View style={styles.keyValueList}>
+    <View style={ss.container.ph16}>
       <TextH2>App and device</TextH2>
-      <Spacer h={8} />
-      <TextSmall>
-        Commit <TextBold>{env.gitHash}</TextBold>
-      </TextSmall>
-      <TextSmall>
-        Profile <TextBold>{env.buildProfile}</TextBold>
-      </TextSmall>
-      <TextSmall>
-        Native Version <TextBold>{env.nativeApplicationVersion}</TextBold>
-      </TextSmall>
-      <TextSmall>
-        Native Build <TextBold>{env.nativeBuildVersion}</TextBold>
-      </TextSmall>
+      <Spacer h={16} />
+      <KV label="Commit" value={env.gitHash} />
+      <KV label="Profile" value={env.buildProfile} />
+      <KV label="Native Version" value={env.nativeApplicationVersion} />
+      <KV label="Native Build" value={env.nativeBuildVersion} />
       {sec && (
         <>
-          <TextSmall>
-            Platform{" "}
-            <TextBold>
-              {Platform.OS} {Platform.Version}{" "}
-            </TextBold>
-          </TextSmall>
-          <TextSmall>
-            Biometric Security{" "}
-            <TextBold>{sec.biometricSecurityLevel.toLowerCase()}</TextBold>
-          </TextSmall>
-          <TextSmall>
-            Hardware Security{" "}
-            <TextBold>{sec.hardwareSecurityLevel.toLowerCase()}</TextBold>
-          </TextSmall>
+          <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
+          <KV
+            label="Biometric Security"
+            value={sec.biometricSecurityLevel.toLowerCase()}
+          />
+          <KV
+            label="Hardware Security"
+            value={sec.hardwareSecurityLevel.toLowerCase()}
+          />
         </>
       )}
-      <TextSmall>
-        Notifications <TextBold>{account.pushToken || "disabled"}</TextBold>
-      </TextSmall>
+      <KV
+        label="Notifications"
+        value={account.pushToken ? "enabled" : "disabled"}
+      />
+      {!account.pushToken && <Spacer h={8} />}
       {!account.pushToken && (
         <ButtonMed
           type="primary"
@@ -142,15 +158,31 @@ function AppInfo({ account }: { account: Account }) {
           onPress={enableNotifications}
         />
       )}
+
+      <Spacer h={8} />
+      <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
+    </View>
+  );
+}
+
+function KV({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <View>
+      <TextBody>
+        <TextLight>{label}</TextLight>
+        {` \u00A0 `}
+        {value && <TextBold>{value}</TextBold>}
+        {!value && <Text>none</Text>}
+      </TextBody>
+      <Spacer h={8} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  keyValueList: {
-    ...ss.container.ph16,
-    flex: 1,
-    flexDirection: "column",
-    gap: 8,
+  callout: {
+    backgroundColor: color.bg.lightGray,
+    padding: 16,
+    borderRadius: 24,
   },
 });

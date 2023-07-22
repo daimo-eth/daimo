@@ -18,7 +18,7 @@ import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { HomeStackParamList } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
-import { TextCenter, TextError, TextSmall } from "../../shared/text";
+import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 
@@ -142,13 +142,13 @@ function NoteDisplay({
   return (
     <>
       <TextCenter>
-        <TextSmall>{senderName} sent you</TextSmall>
+        <TextLight>{senderName} sent you</TextLight>
       </TextCenter>
       <TitleAmount amount={ephemeralNote.amount} />
       {button}
-      <TextSmall>
+      <TextLight>
         <TextCenter>{statusMessage}</TextCenter>
-      </TextSmall>
+      </TextLight>
     </>
   );
 }

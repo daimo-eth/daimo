@@ -14,8 +14,10 @@ export const color = {
   danger: "#f35369",
   success: "#4cd964",
   bg: {
-    lightGray: "#eee",
+    lightGray: "#eef0f4",
     midGray: "#ccc",
+    /** Slightly darker than the TouchableHighlight blue tap color: D1E4FD. */
+    lightBlue: "#d1e4fd",
     lightYellow: "#fff6e6",
     blue: "#cce5ff",
   },
@@ -27,8 +29,18 @@ const textBase: TextStyle = {
 };
 
 export const touchHighlightUnderlay = {
-  underlayColor: color.bg.blue,
-  activeOpacity: 0.9,
+  blue: {
+    activeOpacity: 0.9,
+    underlayColor: color.bg.blue,
+  },
+  danger: {
+    activeOpacity: 0.9,
+    underlayColor: color.danger,
+  },
+  success: {
+    activeOpacity: 0.9,
+    underlayColor: color.success,
+  },
 };
 
 export const ss = {
