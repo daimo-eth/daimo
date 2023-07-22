@@ -22,6 +22,7 @@ type LinkProps = {
 type TitleDesc = {
   title: string;
   description: string;
+  walletAction?: boolean;
 };
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN;
@@ -35,38 +36,68 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function LinkPage(props: LinkProps) {
-  const { title, description } = (await loadTitleDesc(props)) || {
+  const { title, description, walletAction } = (await loadTitleDesc(props)) || {
     title: "Daimo",
     description: "Experimental stablecoin wallet",
   };
 
   return (
-    <main className="max-w-sm mx-auto">
-      <center>
-        <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
+    <center>
+      <div className="h-16" />
+      <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
 
-        <div className="h-12" />
+      <div className="h-12" />
 
-        <H1>{title}</H1>
-        <div className="h-2" />
-        <H2>{description}</H2>
-        <div className="h-12" />
-        <H2>Coming soon to App Store</H2>
-        <div className="h-4" />
-        <div className="flex flex-row gap-4 justify-center">
-          <AppStoreBadge platform="ios" />
-          <AppStoreBadge platform="android" />
-        </div>
-        <div className="h-3" />
-        <p>
-          Till then, message <strong>dcposch</strong> on Telegram
-          <br /> to try the TestFlight.
-          <br />
-        </p>
-      </center>
-    </main>
+      <H1>{title}</H1>
+      <div className="h-4" />
+      <H2>{description}</H2>
+      {walletAction && <OrConnectWalletStub />}
+      <div className="h-12" />
+      <H2>Coming soon to App Store</H2>
+      <div className="h-4" />
+      <div className="flex flex-row gap-4 justify-center">
+        <AppStoreBadge platform="ios" />
+        <AppStoreBadge platform="android" />
+      </div>
+      <div className="h-3" />
+      <p>
+        Till then, message <strong>dcposch</strong> on Telegram
+        <br /> to try the TestFlight.
+        <br />
+      </p>
+    </center>
   );
+}
+
+function OrConnectWalletStub() {
+  return (
+    // eslint-disable-next-line no-script-url
+    <a className="text-primary text-sm" href="javascript:alert('Coming soon')">
+      or with any Ethereum wallet
+    </a>
+  );
+}
+
+function metadata(title: string, description: string): Metadata {
+  return {
+    title,
+    description,
+    icons: {
+      icon: "/logo-web-favicon.png",
+    },
+    openGraph: {
+      title,
+      description,
+      siteName: title,
+      images: [
+        {
+          url: `https://${domain}/logo-web.png`,
+          alt: "Daimo",
+        },
+      ],
+      type: "website",
+    },
+  };
 }
 
 async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
@@ -110,6 +141,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       return {
         title: `${name} is requesting $${res.link.dollars}`,
         description: `Pay via Daimo`,
+        walletAction: true,
       };
     }
     case "note": {
@@ -119,6 +151,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
           return {
             title: `${getAccountName(sender)} sent you $${dollars}`,
             description: `Claim on Daimo`,
+            walletAction: true,
           };
         }
         case "claimed": {
@@ -143,26 +176,4 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       return null;
     }
   }
-}
-
-function metadata(title: string, description: string): Metadata {
-  return {
-    title,
-    description,
-    icons: {
-      icon: "/logo-web-favicon.png",
-    },
-    openGraph: {
-      title,
-      description,
-      siteName: title,
-      images: [
-        {
-          url: `https://${domain}/logo-web.png`,
-          alt: "Daimo",
-        },
-      ],
-      type: "website",
-    },
-  };
 }

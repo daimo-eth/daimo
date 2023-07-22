@@ -54,7 +54,7 @@ export class ViemClient {
     // TODO: hack for faster startup
     let fromBlock = 0n;
     if (this.publicClient.chain.id === baseGoerli.id) {
-      fromBlock = args.event == null ? 7000000n : 6000000n;
+      fromBlock = args.event == null ? 7000000n : 5000000n;
     }
     const step = 10000n;
     for (; fromBlock < latest.number; fromBlock += step) {
