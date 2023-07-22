@@ -1,10 +1,11 @@
-import { TransferOpEvent } from "@daimo/common";
+import { assert, TransferOpEvent } from "@daimo/common";
 import { Octicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View, Text } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
+import { useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -12,13 +13,7 @@ import { AddrText } from "../shared/addr";
 import { HomeStackParamList } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import {
-  TextBody,
-  TextBold,
-  TextCenter,
-  TextH3,
-  TextLight,
-} from "../shared/text";
+import { TextCenter, TextH3, TextLight } from "../shared/text";
 import { timeString } from "../shared/time";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "HistoryOp">;
@@ -43,13 +38,7 @@ export function HistoryOpScreen({ route, navigation }: Props) {
     <View style={ss.container.vertModal}>
       <Spacer h={8} />
       {body}
-      <Spacer h={32} />
-      <View style={styles.statusRow}>
-        <TextH3>
-          <OpStatusName status={op.status} />
-        </TextH3>
-        <OpStatusIndicator status={op.status} size={24} />
-      </View>
+      <Spacer h={8} />
       {op.txHash && <LinkToExplorer txHash={op.txHash} />}
     </View>
   );
@@ -75,32 +64,46 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
 }
 
 function TransferBody({ op }: { op: TransferOpEvent }) {
+  const [account] = useAccount();
+  assert(account != null);
+
+  const [directionSymbol, directionText] = (() => {
+    if (op.from === account.address) {
+      return [
+        "↗",
+        <>
+          to <AddrText addr={op.to} />
+        </>,
+      ];
+    } else {
+      return [
+        "↘",
+        <>
+          from <AddrText addr={op.from} />
+        </>,
+      ];
+    }
+  })();
+
   return (
     <View>
-      <Spacer h={32} />
       <TitleAmount amount={BigInt(op.amount)} />
-      <Spacer h={24} />
-      <View style={styles.kvList}>
-        <KVRow k="From" v={<AddrText addr={op.from} />} />
-        <KVRow k="To" v={<AddrText addr={op.to} />} />
-        <KVRow k="Date" v={timeString(op.timestamp)} />
-        {op.opHash && <KVRow k="User op" v={op.opHash} />}
-        {op.blockNumber && <KVRow k="Block" v={op.blockNumber} />}
-      </View>
-    </View>
-  );
-}
-
-function KVRow({ k, v }: { k: string; v: React.ReactNode }) {
-  return (
-    <View style={styles.kvRow}>
-      <View style={styles.kvKey}>
-        <TextLight numberOfLines={1}>{k}</TextLight>
-      </View>
-      <View style={styles.kvVal}>
-        <TextBody numberOfLines={1}>
-          <TextBold>{v}</TextBold>
-        </TextBody>
+      <Spacer h={16} />
+      <Text style={styles.h2Small}>
+        <Text>{directionSymbol}</Text>
+        <Spacer w={8} />
+        <Text>{directionText}</Text>
+      </Text>
+      <Spacer h={16} />
+      <Text style={styles.h3Small}>
+        <Text>{timeString(op.timestamp)}</Text>
+      </Text>
+      <Spacer h={16} />
+      <View style={styles.statusRow}>
+        <OpStatusIndicator status={op.status} size={24} />
+        <TextH3>
+          <OpStatusName status={op.status} />
+        </TextH3>
       </View>
     </View>
   );
@@ -113,20 +116,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 16,
   },
-  kvList: {
-    flexDirection: "column",
-    gap: 8,
+  h2Small: {
+    fontSize: 20,
+    textAlign: "center",
   },
-  kvRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  kvKey: {
-    flex: 0,
-    width: 64,
-  },
-  kvVal: {
-    flex: 1,
+  h3Small: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });

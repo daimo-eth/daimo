@@ -13,5 +13,11 @@ export function timeAgo(sinceS: number, nowS: number) {
 /** Returns eg "Aug 4 2023, 4:00pm" */
 export function timeString(s: number) {
   const date = new Date(s * 1000);
-  return date.toLocaleString();
+  return date.toLocaleString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
