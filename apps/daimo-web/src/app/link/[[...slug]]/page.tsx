@@ -72,7 +72,7 @@ export default async function LinkPage(props: LinkProps) {
 function OrConnectWalletStub() {
   return (
     // eslint-disable-next-line no-script-url
-    <a className="text-primary text-sm" href="javascript:alert('Coming soon')">
+    <a className="text-primary" href="javascript:alert('Coming soon')">
       or with any Ethereum wallet
     </a>
   );
