@@ -19,6 +19,7 @@ import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
+import { useNav } from "../../shared/nav";
 import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
@@ -90,13 +91,44 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     exec();
   }, [exec]);
 
+  const nav = useNav();
+
+  const sendNote = useCallback(async () => {
+    if (status !== "success") return;
+    if (ephemeralOwner == null) return;
+
+    try {
+      const link: DaimoLink = {
+        type: "note",
+        ephemeralOwner,
+        ephemeralPrivateKey,
+      };
+      const url = formatDaimoLink(link);
+
+      const result = await Share.share({ url });
+      if (result.action === Share.sharedAction) {
+        console.log(
+          "[APP] Note shared with activity type ",
+          result.activityType || "unknown"
+        );
+        nav.navigate("Home");
+      } else if (result.action === Share.dismissedAction) {
+        // Only on iOS
+        console.log("[APP] Note share reverted");
+        // TODO: Suggest revert or retry?
+      }
+    } catch (error: any) {
+      console.error("[APP] Note share error:", error);
+    }
+  }, [ephemeralOwner, ephemeralPrivateKey, status]);
+
   const button = (function () {
     switch (status) {
       case "idle":
         return (
           <ButtonBig
             type="primary"
-            title="Create note"
+            title="Create Note"
             onPress={onCreateNote}
             disabled={dollars === 0}
           />
@@ -104,41 +136,13 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
-        return <ButtonBig type="success" title="Success" disabled />;
+        return (
+          <ButtonBig type="success" title="Send Note" onPress={sendNote} />
+        );
       case "error":
         return <ButtonBig type="danger" title="Error" disabled />;
     }
   })();
-
-  useEffect(() => {
-    (async () => {
-      if (status !== "success") return;
-      if (ephemeralOwner == null) return;
-
-      try {
-        const link: DaimoLink = {
-          type: "note",
-          ephemeralOwner,
-          ephemeralPrivateKey,
-        };
-        const url = formatDaimoLink(link);
-
-        const result = await Share.share({ url });
-        if (result.action === Share.sharedAction) {
-          console.log(
-            "[APP] Note shared with activity type ",
-            result.activityType || "unknown"
-          );
-        } else if (result.action === Share.dismissedAction) {
-          // Only on iOS
-          console.log("[APP] Note share reverted");
-          // TODO: Suggest revert or retry?
-        }
-      } catch (error: any) {
-        console.error("[APP] Note share error:", error);
-      }
-    })();
-  }, [status]);
 
   return (
     <>

@@ -44,7 +44,7 @@ export default function HomeScreen() {
   if (account == null) return null;
 
   return (
-    <View style={ss.container.outerStretch}>
+    <View style={ss.container.outerStretchScroll}>
       <Header />
 
       <AmountAndButtons account={account} />

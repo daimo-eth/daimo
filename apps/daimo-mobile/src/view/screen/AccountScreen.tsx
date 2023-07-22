@@ -71,7 +71,7 @@ export function AccountScreen() {
         <Spacer h={8} />
         <View style={ss.container.ph16}>
           <TextH2>Account</TextH2>
-          <Spacer h={8} />
+          <Spacer h={16} />
           <TextH3>{account.name}</TextH3>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
@@ -85,17 +85,16 @@ export function AccountScreen() {
             </TextLight>
           </View>
         </ButtonSmall>
-        <Spacer h={8} />
+        <Spacer h={16} />
         <View style={styles.callout}>
           <TextBody>
             <Octicons name="alert" size={16} color="black" />{" "}
-            <TextBold>Add or remove device coming soon.</TextBold> This lets you
-            use your Daimo account from another phone or laptop. Secure your
-            account by adding a second device.
+            <TextBold>Add or remove device coming soon.</TextBold> Secure your
+            account by adding a second phone or laptop.
           </TextBody>
         </View>
 
-        <Spacer h={24} />
+        <Spacer h={32} />
         <AppInfo {...{ account }} />
 
         <Spacer h={32} />
