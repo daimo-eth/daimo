@@ -13,6 +13,11 @@ module.exports = {
       dependencies: ["@daimo/*"],
       isIgnored: true,
       label: "Monorepo packages.",
-    }
+    },
+    {
+      packages: ["*"],
+      dependencies: ["@tanstack/react-query"],
+      pinVersion: "4.29.25",
+    },
   ],
 };

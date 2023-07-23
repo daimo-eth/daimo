@@ -33,7 +33,7 @@
     "@react-native-segmented-control/segmented-control": "^2.4.1",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
-    "@tanstack/react-query": "^4.32.0",
+    "@tanstack/react-query": "4.29.25",
     "@trpc/client": "^10.34.0",
     "@trpc/react-query": "^10.34.0",
     "@types/jest": "^29.5.2",

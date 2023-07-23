@@ -1,6 +1,7 @@
 "use client";
 
 import { getAccountName } from "@daimo/common";
+import { SearchIcon } from "@primer/octicons-react";
 import {
   QueryClient,
   QueryClientProvider,
@@ -42,15 +43,19 @@ function SearchAndResults() {
   );
 
   return (
-    <div>
+    <div className="relative">
       <input
         type="text"
-        className="bg-blue-100 rounded-md px-4 py-2 w-full"
+        className="bg-blue-100 rounded-md pl-9 pr-4 py-2 w-full"
         placeholder="0x..."
         onFocus={onFocus}
         onChange={onChange}
       />
-      {result.data && <div>{result.data.length} results</div>}
+      <SearchIcon className="absolute top-3 left-3" size="small" fill="#999" />
+      {result.data && <div className="h-2" />}
+      {result.data && !result.data.length && (
+        <div className="px-2 text-gray-800">No results</div>
+      )}
       {result.data && <ResultList results={result.data} />}
       {result.error != null && (
         <div className="text-red-700">{String(result.error)}</div>

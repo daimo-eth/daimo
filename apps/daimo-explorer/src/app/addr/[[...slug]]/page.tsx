@@ -1,9 +1,9 @@
 import { assert } from "@daimo/common";
-import { erc4337_userops, erc4337_useropsPayload } from "@prisma/client";
-import { Hex, hexToBytes, isAddress, isHex, toHex } from "viem";
+import { erc4337_userops } from "@prisma/client";
+import { Hex, hexToBytes, isAddress, toHex } from "viem";
 
 import { Header } from "../../../components/Header";
-import { H1, H2, TextBody } from "../../../components/typography";
+import { H1 } from "../../../components/typography";
 import { prisma } from "../../../lib/prisma";
 import { prettifyHex } from "../../../lib/utils";
 

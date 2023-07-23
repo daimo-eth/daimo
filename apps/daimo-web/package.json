@@ -11,7 +11,7 @@
     "autoprefixer": "^10.4.14",
     "depcheck": "^1.4.3",
     "eslint": "^8.44.0",
-    "eslint-config-next": "^13.4.9",
+    "eslint-config-next": "^13.4.12",
     "next": "^13.4.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -21,7 +21,7 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss && echo Re-enable once eslint-plugin-prettier fixes their crashing bug: next lint",
+    "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss && next lint",
     "export": "next export"
   }
 }
