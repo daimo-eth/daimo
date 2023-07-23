@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource e2pg_db {
+  provider = "postgresql"
+  url      = env("E2PG_DB_URL")
+}
+
+model e2pg_migrations {
+  idx         Int
+  hash        Bytes
+  inserted_at DateTime @default(now()) @e2pg_db.Timestamptz(6)
+
+  @@id([idx, hash])
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model erc20_transfers {
+  contract          Bytes?
+  f                 Bytes?
+  t                 Bytes?
+  value             Decimal? @e2pg_db.Decimal
+  tx_sender         Bytes?
+  eth               Decimal? @e2pg_db.Decimal
+  task_id           Decimal? @e2pg_db.Decimal
+  chain_id          Decimal? @e2pg_db.Decimal
+  block_hash        Bytes?
+  block_number      Decimal? @e2pg_db.Decimal
+  transaction_hash  Bytes?
+  transaction_index Decimal? @e2pg_db.Decimal
+  log_index         Decimal? @e2pg_db.Decimal
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model erc4337_userops {
+  contract           Bytes?
+  op_hash            Bytes?
+  op_sender          Bytes?
+  op_paymaster       Bytes?
+  op_nonce           Decimal? @e2pg_db.Decimal
+  op_success         Boolean?
+  op_actual_gas_cost Decimal? @e2pg_db.Decimal
+  op_actual_gas_used Decimal? @e2pg_db.Decimal
+  tx_sender          Bytes?
+  eth                Decimal? @e2pg_db.Decimal
+  task_id            Decimal? @e2pg_db.Decimal
+  chain_id           Decimal? @e2pg_db.Decimal
+  block_hash         Bytes?
+  block_number       Decimal? @e2pg_db.Decimal
+  transaction_hash   Bytes?
+  transaction_index  Decimal? @e2pg_db.Decimal
+  log_index          Decimal? @e2pg_db.Decimal
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model nft_transfers {
+  contract          Bytes?
+  token_id          Decimal? @e2pg_db.Decimal
+  quantity          Decimal? @e2pg_db.Decimal
+  f                 Bytes?
+  t                 Bytes?
+  tx_sender         Bytes?
+  eth               Decimal? @e2pg_db.Decimal
+  task_id           Decimal? @e2pg_db.Decimal
+  chain_id          Decimal? @e2pg_db.Decimal
+  block_hash        Bytes?
+  block_number      Decimal? @e2pg_db.Decimal
+  transaction_hash  Bytes?
+  transaction_index Decimal? @e2pg_db.Decimal
+  log_index         Decimal? @e2pg_db.Decimal
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model task {
+  id        Int       @e2pg_db.SmallInt
+  number    BigInt?
+  hash      Bytes?
+  insert_at DateTime? @default(now()) @e2pg_db.Timestamptz(6)
+
+  @@ignore
+}

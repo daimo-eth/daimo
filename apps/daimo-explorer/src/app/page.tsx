@@ -1,7 +1,10 @@
 import { Header } from "../components/Header";
 import { H1, H2, TextBody } from "../components/typography";
+import { prisma } from "../lib/prisma";
 
-export default function Home() {
+export default async function Home() {
+  const latestBlock = await prisma.e2pg_migrations.count();
+
   return (
     <>
       <Header />
@@ -9,7 +12,7 @@ export default function Home() {
       <main className="px-4">
         <H1>Hello world</H1>
         <div className="h-2" />
-        <H2>Second header</H2>
+        <H2>Testing 123</H2>
         <div className="h-2" />
         <TextBody>
           The concept of decentralized digital currency, as well as alternative
@@ -20,6 +23,8 @@ export default function Home() {
           largely failed to gain traction because of their reliance on a
           centralized intermediary.
         </TextBody>
+        <div className="h-2" />
+        <div className="text-bold">Last block {latestBlock}</div>
       </main>
     </>
   );

@@ -1,0 +1,23 @@
+[
+  {
+    "name": "mainnet",
+    "id": 1,
+    "chain": 1,
+    "concurrency": 8,
+    "batch": 128,
+    "eth": "https://1.rlps.indexsupply.net",
+    "pg": "postgresql:///e2pg",
+    "integrations": ["erc4337", "erc20"]
+  },
+  {
+    "name": "goerli",
+    "id": 2,
+    "chain": 5,
+    "concurrency": 8,
+    "batch": 128,
+    "begin": 9200000,
+    "eth": "https://5.rlps.indexsupply.net",
+    "pg": "postgresql:///e2pg",
+    "integrations": ["erc4337", "erc20"]
+  }
+]

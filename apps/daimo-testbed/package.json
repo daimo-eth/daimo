@@ -22,7 +22,7 @@
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
     "fast-text-encoding": "^1.0.6",
-    "react": "18.2.0",
+    "react": "^18.2.0",
     "react-native": "0.71.8",
     "typescript": "^5.1.6"
   }
