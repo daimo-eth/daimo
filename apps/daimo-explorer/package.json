@@ -10,10 +10,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@daimo/common": "*",
     "@prisma/client": "^5.0.0",
     "next": "^13.4.12",
     "prisma": "^5.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "viem": "^1.4.1"
   }
 }
