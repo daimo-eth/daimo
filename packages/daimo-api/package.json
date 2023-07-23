@@ -22,7 +22,7 @@
     "expo-server-sdk": "^3.7.0",
     "pg": "^8.11.0",
     "userop": "^0.3.0",
-    "viem": "^1.2.15",
+    "viem": "^1.4.1",
     "zod": "^3.21.4"
   },
   "devDependencies": {

@@ -15,7 +15,7 @@
     "@noble/curves": "^1.1.0",
     "text-encoding-polyfill": "^0.6.7",
     "userop": "^0.3.0",
-    "viem": "^1.2.15"
+    "viem": "^1.4.1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^1.0.1",

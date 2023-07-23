@@ -1,30 +1,24 @@
+"use client";
+
 import { Header } from "../components/Header";
+import { SearchBar } from "../components/SearchBar";
 import { H1, H2, TextBody } from "../components/typography";
-import { prisma } from "../lib/prisma";
 
-export default async function Home() {
-  const latestBlock = await prisma.e2pg_migrations.count();
-
+export default function Home() {
   return (
     <>
       <Header />
       <div className="h-4" />
       <main className="px-4">
-        <H1>Hello world</H1>
-        <div className="h-2" />
-        <H2>Testing 123</H2>
+        <H2>View activity on Ethereum</H2>
         <div className="h-2" />
         <TextBody>
-          The concept of decentralized digital currency, as well as alternative
-          applications like property registries, has been around for decades.
-          The anonymous e-cash protocols of the 1980s and the 1990s, mostly
-          reliant on a cryptographic primitive known as Chaumian blinding,
-          provided a currency with a high degree of privacy, but the protocols
-          largely failed to gain traction because of their reliance on a
-          centralized intermediary.
+          <strong>⚠️ Daimo Explorer is a work in progress.</strong> Today, we
+          support 4337 userops and addresses on Ethereum mainnet and the Goerli
+          testnet.
         </TextBody>
-        <div className="h-2" />
-        <div className="text-bold">Last block {latestBlock}</div>
+        <div className="h-4" />
+        <SearchBar />
       </main>
     </>
   );
