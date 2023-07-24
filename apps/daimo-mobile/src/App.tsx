@@ -1,5 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
+import { useRef } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -21,11 +23,13 @@ export default function App() {
   useNameCache();
 
   return (
-    <RpcProvider>
-      <NavigationContainer>
-        <AppBody />
-      </NavigationContainer>
-    </RpcProvider>
+    <GestureHandlerRootView style={useRef({ flex: 1 }).current}>
+      <RpcProvider>
+        <NavigationContainer>
+          <AppBody />
+        </NavigationContainer>
+      </RpcProvider>
+    </GestureHandlerRootView>
   );
 }
 
