@@ -1,4 +1,5 @@
-import { useCallback, useRef } from "react";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { useCallback, useMemo, useRef } from "react";
 import {
   Dimensions,
   NativeScrollEvent,
@@ -24,22 +25,28 @@ export default function HomeScreen() {
 
   useWarmCache(account?.enclaveKeyName);
 
-  const nav = useNav();
+  // const nav = useNav();
 
-  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // event.
-    const { contentOffset } = event.nativeEvent;
-    if (contentOffset.y > 32) {
-      // Show full-screen history
-      nav.navigate("History");
-    }
-  };
+  // const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   // event.
+  //   const { contentOffset } = event.nativeEvent;
+  //   if (contentOffset.y > 32) {
+  //     // Show full-screen history
+  //     nav.navigate("History");
+  //   }
+  // };
 
-  const scrollViewRef = useRef<ScrollView>(null);
-  const onScrollEnd = () => {
-    if (scrollViewRef.current == null) return;
-    scrollViewRef.current.scrollTo({ y: 0, animated: true });
-  };
+  // const scrollViewRef = useRef<ScrollView>(null);
+  // const onScrollEnd = () => {
+  //   if (scrollViewRef.current == null) return;
+  //   scrollViewRef.current.scrollTo({ y: 0, animated: true });
+  // };
+
+  const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+
+  const handleSheetChange = useCallback((index: number) => {
+    console.log("handleSheetChange", index);
+  }, []);
 
   if (account == null) return null;
 
@@ -49,7 +56,14 @@ export default function HomeScreen() {
 
       <AmountAndButtons account={account} />
 
-      <ScrollView
+      <BottomSheet snapPoints={snapPoints} onChange={handleSheetChange}>
+        <BottomSheetView style={styles.historyElem}>
+          <ScrollPellet />
+          <HistoryList account={account} maxToShow={5} />
+        </BottomSheetView>
+      </BottomSheet>
+
+      {/* <ScrollView
         style={styles.historyScroll}
         onScroll={onScroll}
         onScrollEndDrag={onScrollEnd}
@@ -60,7 +74,7 @@ export default function HomeScreen() {
           <ScrollPellet />
           <HistoryList account={account} maxToShow={5} />
         </View>
-      </ScrollView>
+      </ScrollView> */}
     </View>
   );
 }
