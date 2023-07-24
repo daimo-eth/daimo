@@ -1,10 +1,8 @@
-<img width="1688" alt="screenshot" src="https://i.imgur.com/tR6urgF.png">
-
-_The choice of DAI and Base is a guess._
+<img width="2110" alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/09a716ba-4ed2-4332-b10f-c0eeeec16b71">
 
 ### Daimo is a stablecoin wallet
 
-Daimo is minimalist. Single stablecoin, single rollup, payments only.
+We're starting minimalist. Single stablecoin, single rollup, payments only.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
 leave. You can add multiple devices to secure your account. Under the hood, it's
@@ -19,13 +17,18 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 <details>
 <summary><strong>Quick start for developers</strong></summary>
 
-You'll need Node 20 and recent Xcode. Clone the repo, loading submodules.
+Clone the repo, loading submodules.
 
 ```
 git clone git@github.com:daimo-eth/daimo --recurse-submodules
 ```
 
 Install prerequisites.
+
+```
+# You'll need Node 20+
+node --version
+```
 
 ```
 # Install Foundry
@@ -49,8 +52,8 @@ npm run build
 Configure the API.
 
 - To run the API locally, configure the `DAIMO_API_*` env vars.
-  - Additionally, run a Postgres Server instance in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
-- To use the testnet staging API, set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
+  - You can run a Postgres instance in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+- To use the testnet staging API, just set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
 
 Finally, run the app in the iOS simulator.
 
