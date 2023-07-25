@@ -53,18 +53,10 @@ export default async function LinkPage(props: LinkProps) {
       <H2>{description}</H2>
       {walletAction && <OrConnectWalletStub />}
       <div className="h-12" />
-      <H2>Coming soon to App Store</H2>
-      <div className="h-4" />
       <div className="flex flex-row gap-4 justify-center">
         <AppStoreBadge platform="ios" />
         <AppStoreBadge platform="android" />
       </div>
-      <div className="h-3" />
-      <p>
-        Till then, message <strong>dcposch</strong> on Telegram
-        <br /> to try the TestFlight.
-        <br />
-      </p>
     </center>
   );
 }
