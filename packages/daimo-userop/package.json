@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "lint": "echo Re-enable once eslint/prettier fixes their crashing bug: eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0"
   },
   "dependencies": {
     "@daimo/contract": "*",
@@ -18,7 +18,7 @@
     "viem": "^1.2.15"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^1.0.1",
+    "@tsconfig/node20": "^20.1.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.0",
     "jest": "^29.5.0",

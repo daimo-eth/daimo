@@ -12,7 +12,7 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@tsconfig/node20": "^1.0.1",
+    "@tsconfig/node20": "^20.1.0",
     "@types/tape": "^5.6.0",
     "depcheck": "^1.4.3",
     "eslint": "^8.44.0",

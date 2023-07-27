@@ -4,7 +4,6 @@ import {
   nameRegistryConfig,
   tokenMetadata,
 } from "@daimo/contract";
-import chalk from "chalk";
 import { Constants } from "userop";
 import {
   Address,
@@ -44,8 +43,8 @@ export async function checkAccount() {
     addr = await nameReg.read.resolveAddr([nameHex]);
   }
 
-  console.log(`ADDR     - ${chalk.bold(addr)}`);
-  console.log(`NAME     - ${chalk.bold(name)}`);
+  console.log(`ADDR     - ${addr}`);
+  console.log(`NAME     - ${name}`);
 
   // Get balance from coin contract
   const coinContract = getContract({
@@ -56,7 +55,7 @@ export async function checkAccount() {
   const bal = await coinContract.read.balanceOf([addr]);
   const { decimals, symbol } = tokenMetadata;
   const balStr = formatUnits(bal, decimals) + " " + symbol;
-  console.log(`BAL      - ${chalk.bold(balStr)}`);
+  console.log(`BAL      - ${balStr}`);
 
   // Get account info from the EntryPoint contract
   const entryPoint = getContract({
@@ -66,7 +65,7 @@ export async function checkAccount() {
   });
   const prefundBal = await entryPoint.read.balanceOf([addr]);
   const prefundStr = formatUnits(prefundBal, 18) + " ETH";
-  console.log(`PREFUND  - ${chalk.bold(prefundStr)}`);
+  console.log(`PREFUND  - ${prefundStr}`);
   console.log();
 
   console.log(`...NameReg ${nameReg.address}`);

@@ -11,7 +11,7 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@tsconfig/node20": "^1.0.1",
+    "@tsconfig/node20": "^20.1.0",
     "@wagmi/cli": "^1.1.0",
     "typescript": "^5.1.6",
     "viem": "^1.2.15"
