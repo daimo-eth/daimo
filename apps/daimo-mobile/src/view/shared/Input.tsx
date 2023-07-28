@@ -70,7 +70,7 @@ export function AmountInput({
   const blur = useCallback(
     (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
       const value = e.nativeEvent.text;
-      let newVal = parseFloat(value);
+      let newVal = parseLocalFloat(value);
       if (!(newVal >= 0)) {
         newVal = 0;
       }
@@ -83,7 +83,7 @@ export function AmountInput({
 
   const change = useCallback((text: string) => {
     setStrVal(text);
-    const newVal = parseFloat(text);
+    const newVal = parseLocalFloat(text);
     // Handle invalid or entry, NaN etc
     if (newVal > 0) onChange(newVal);
     else onChange(0);
@@ -144,3 +144,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
 });
+
+// Parse both 1.23 and 1,23
+function parseLocalFloat(str: string) {
+  return parseFloat(str.replace(",", "."));
+}
