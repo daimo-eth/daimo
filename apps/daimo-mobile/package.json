@@ -6,7 +6,7 @@
   "scripts": {
     "build:sim": "eas build -p ios --profile=sim --non-interactive",
     "build:dev": "eas build -p ios --profile=dev --non-interactive",
-    "build:stage": "eas build -p ios --profile=stage",
+    "build:stage": "eas build -p ios --profile=stage --auto-submit --non-interactive",
     "submit:stage": "eas submit --platform ios --profile=stage",
     "dev": "expo start --dev-client --clear -i",
     "dev:tunnel": "expo start --dev-client --tunnel",

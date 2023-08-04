@@ -41,7 +41,11 @@
     }
   },
   "submit": {
-    "stage": {},
+    "stage": {
+      "ios": {
+        "ascAppId": "6450241809"
+      }
+    },
     "prod": {}
   }
 }
