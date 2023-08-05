@@ -5,17 +5,19 @@ import {
   Alert,
   Linking,
   Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
   Text,
   View,
-  StyleSheet,
-  ScrollView,
 } from "react-native";
 
+import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
 import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
-import { Account, useAccount } from "../../model/account";
+import { Account, serializeAccount, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -121,7 +123,17 @@ function AppInfo({ account }: { account: Account }) {
   };
 
   const sendDebugLog = () => {
-    alert("Coming soon");
+    const accountInfo = serializeAccount(account);
+    const debugLog = getDebugLog();
+    Share.share(
+      {
+        title: "Send Debug Log",
+        message: `# Daimo Debug Log\n\n${accountInfo}\n\n${debugLog}`,
+      },
+      {
+        subject: "Daimo Debug Log",
+      }
+    );
   };
 
   return (

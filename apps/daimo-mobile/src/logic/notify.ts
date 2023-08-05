@@ -67,7 +67,7 @@ class PushNotificationManager {
 
     const token = await Notifications.getExpoPushTokenAsync();
     if (token.data === this.accountManager.currentAccount.pushToken) {
-      console.log(`[NOTIFY] push token ${token} already saved`);
+      console.log(`[NOTIFY] push token ${token.data} already saved`);
       return;
     }
 

@@ -87,8 +87,8 @@ class AccountManager {
 
   constructor() {
     // On first load, load+save to ensure latest serialization version.
-    this.currentAccount = parse(this.mmkv.getString("account"));
-    this.mmkv.set("account", serialize(this.currentAccount));
+    this.currentAccount = parseAccount(this.mmkv.getString("account"));
+    this.mmkv.set("account", serializeAccount(this.currentAccount));
   }
 
   addListener(listener: (a: Account | null) => void) {
@@ -108,7 +108,7 @@ class AccountManager {
   setCurrentAccount = (account: Account | null) => {
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
     this.currentAccount = account;
-    this.mmkv.set("account", serialize(account));
+    this.mmkv.set("account", serializeAccount(account));
     for (const listener of this.listeners) {
       listener(account);
     }
@@ -134,7 +134,7 @@ export function useAccount(): [
   return [accState, manager.setCurrentAccount];
 }
 
-export function parse(accountJSON?: string): Account | null {
+export function parseAccount(accountJSON?: string): Account | null {
   if (!accountJSON) return null;
 
   const model = JSON.parse(accountJSON) as StoredModel;
@@ -181,7 +181,7 @@ export function parse(accountJSON?: string): Account | null {
   };
 }
 
-export function serialize(account: Account | null): string {
+export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
   const model: AccountV3 = {

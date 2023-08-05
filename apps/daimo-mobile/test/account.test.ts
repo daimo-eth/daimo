@@ -1,4 +1,4 @@
-import { Account, parse, serialize } from "../src/model/account";
+import { Account, parseAccount, serializeAccount } from "../src/model/account";
 
 const correctSerV1 = `{"storageVersion":1,"name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastNonce":"456","lastBlockTimestamp":789,"enclaveKeyName":"test"}`;
 
@@ -42,29 +42,29 @@ const account: Account = {
 
 describe("Account", () => {
   it("serializes", async () => {
-    const ser = serialize(account);
+    const ser = serializeAccount(account);
     expect(ser).toEqual(correctSerV3);
   });
 
   it("deserializes", () => {
-    const a = parse(correctSerV3);
+    const a = parseAccount(correctSerV3);
     expect(a).toEqual(account);
   });
 
   it("fixes address checksum", () => {
-    const a = parse(lowercaseAddrV2);
+    const a = parseAccount(lowercaseAddrV2);
     expect(a?.address).toEqual("0xEf4396d9FF8107086d215a1c9f8866C54795D7c7");
   });
 
   it("migrates V1", () => {
     // Drop V1 accounts, testnet users re-onboard.
-    const a = parse(correctSerV1);
+    const a = parseAccount(correctSerV1);
     expect(a).toBeNull();
   });
 
   it("migrates V2", () => {
     // Migrate V2 accounts.
-    const a = parse(correctSerV2);
+    const a = parseAccount(correctSerV2);
     expect(a).toEqual(accountFromV2);
   });
 });
