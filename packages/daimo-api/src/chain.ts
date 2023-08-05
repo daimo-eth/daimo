@@ -11,7 +11,7 @@ import {
   WalletClient,
   createPublicClient,
   createWalletClient,
-  http,
+  webSocket,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain, baseGoerli } from "viem/chains";
@@ -23,7 +23,7 @@ import { Chain, baseGoerli } from "viem/chains";
 export function getViemClientFromEnv() {
   const chain = baseGoerli; // TODO: DAIMO_API_CHAIN once mainnet is supported
   const account = getAccount(process.env.DAIMO_API_PRIVATE_KEY);
-  const transport = http(process.env.DAIMO_API_L2_RPC_URL);
+  const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
 
@@ -56,7 +56,7 @@ export class ViemClient {
     if (this.publicClient.chain.id === baseGoerli.id) {
       fromBlock = args.event == null ? 7000000n : 5000000n;
     }
-    const step = 10000n;
+    const step = 5000n;
     for (; fromBlock < latest.number; fromBlock += step) {
       let toBlock = (fromBlock + step) as BlockTag | bigint;
       if ((toBlock as bigint) > latest.number) toBlock = "latest";
@@ -78,6 +78,9 @@ export class ViemClient {
       onLogs: (logs) => {
         console.log(`[CHAIN] pipe ${pipeName}, ${logs.length} logs`);
         callback(logs);
+      },
+      onError: (e: Error) => {
+        console.error(`[CHAIN] pipe error ${pipeName}`, e);
       },
     });
   }

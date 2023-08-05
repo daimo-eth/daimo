@@ -1,8 +1,11 @@
 // https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
 
 import { AppRouter } from "@daimo/api";
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import { nameRegistryConfig } from "@daimo/contract";
+import { createTRPCProxyClient, httpBatchLink, wsLink } from "@trpc/client";
 import csv from "csvtojson";
+import { createPublicClient, getContract, http, webSocket } from "viem";
+import { baseGoerli } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
@@ -39,6 +42,14 @@ function tsDesc() {
 
 async function ts() {
   console.log("Hello, world");
+
+  const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
+  const publicClient = createPublicClient({ transport, chain: baseGoerli });
+  const blk = await publicClient.getBlockNumber();
+
+  console.log(`Connected   : ${publicClient.transport.name}`);
+  console.log(`Chain       : ${publicClient.chain.name}`);
+  console.log(`Latest block: ${blk}`);
 }
 
 function trpcDesc() {
