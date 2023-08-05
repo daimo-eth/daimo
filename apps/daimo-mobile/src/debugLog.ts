@@ -3,8 +3,13 @@ const logs: string[] = [];
 
 // Hooks console.log, saves a rolling log of the last n lines.
 export function initDebugLog() {
-  const oldLog = console.log;
-  console.log = (...args) => {
+  console.log = createLogFunc("log", console.log);
+  console.warn = createLogFunc("WRN", console.warn);
+  console.error = createLogFunc("ERR", console.error);
+}
+
+function createLogFunc(type: string, oldLog: (...args: any[]) => void) {
+  return (...args: any[]) => {
     // Print to console in local development.
     oldLog(...args);
 
@@ -12,13 +17,16 @@ export function initDebugLog() {
     const timestamp = new Date().toISOString();
     const parts = args.map((a) => {
       if (typeof a === "string") return a;
+      if (a instanceof Error) return a.stack || a.toString();
       try {
         return JSON.stringify(a);
       } catch {
         return "" + a;
       }
     });
-    logs.push([timestamp, ...parts].join(" "));
+    let line = [timestamp, type, ...parts].join(" ");
+    if (line.length > 500) line = line.slice(0, 500) + "...";
+    logs.push(line);
 
     // Don't let the buffer get too long
     if (logs.length > n) logs.shift();
