@@ -14,20 +14,27 @@ import {
   webSocket,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Chain, baseGoerli } from "viem/chains";
+import { Chain, baseGoerli, mainnet } from "viem/chains";
 
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
  * This account sponsors gas for account creation (and a faucet, on testnet).
  */
 export function getViemClientFromEnv() {
+  // Connect to L1
+  const l1Client = createPublicClient({
+    chain: mainnet,
+    transport: webSocket(process.env.DAIMO_API_L1_RPC_WS),
+  });
+
+  // Connect to L2
   const chain = baseGoerli; // TODO: DAIMO_API_CHAIN once mainnet is supported
   const account = getAccount(process.env.DAIMO_API_PRIVATE_KEY);
   const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
 
-  return new ViemClient(publicClient, walletClient);
+  return new ViemClient(l1Client, publicClient, walletClient);
 }
 
 export function getAccount(privateKey?: string) {
@@ -37,6 +44,7 @@ export function getAccount(privateKey?: string) {
 
 export class ViemClient {
   constructor(
+    public l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
     public walletClient: WalletClient<Transport, Chain, Account>
   ) {}

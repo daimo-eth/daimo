@@ -5,7 +5,7 @@ import { useURL } from "expo-linking";
 import { useEffect } from "react";
 import { Address } from "viem";
 
-import { Recipient, getRecipient } from "../../sync/loadRecipients";
+import { Recipient, getRecipient } from "../../sync/recipients";
 
 export type HomeStackParamList = {
   Home: undefined;

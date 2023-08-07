@@ -19,7 +19,7 @@ import { SearchTab } from "./SearchTab";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
-import { Recipient } from "../../../sync/loadRecipients";
+import { Recipient } from "../../../sync/recipients";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";

@@ -21,20 +21,25 @@ async function main() {
   const faucet = new Faucet(vc, coinIndexer);
   const entryPoint = new EntryPoint(vc);
 
-  console.log(`[API] initializing indexers...`);
-  await Promise.all([coinIndexer.init(), nameReg.init()]);
-  await Promise.all([faucet.init(), noteIndexer.init()]);
-
   console.log(`[API] initializing db...`);
   const db = new DB();
   await db.createTables();
 
-  console.log(`[API] initializing push notifications...`);
   const notifier = new PushNotifier(coinIndexer, nameReg, db);
-  await notifier.init();
+
+  // Initialize in background
+  (async () => {
+    console.log(`[API] initializing indexers...`);
+    await Promise.all([coinIndexer.init(), nameReg.init()]);
+    await Promise.all([faucet.init(), noteIndexer.init()]);
+
+    console.log(`[API] initializing push notifications...`);
+    await notifier.init();
+  })();
 
   console.log(`[API] serving...`);
   const router = createRouter(
+    vc.l1Client,
     vc.publicClient,
     coinIndexer,
     noteIndexer,

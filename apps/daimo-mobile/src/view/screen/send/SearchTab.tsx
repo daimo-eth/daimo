@@ -2,7 +2,7 @@ import { getAccountName } from "@daimo/common";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
+import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
 import { useNav } from "../../shared/nav";

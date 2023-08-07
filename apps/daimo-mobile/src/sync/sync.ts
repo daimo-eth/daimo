@@ -147,18 +147,14 @@ async function syncAccount(account: Account) {
 
   console.log(
     `[SYNC] synced ${account.name} ${result.address}.\n` +
-      JSON.stringify(
-        {
-          oldBlock: account.lastBlock,
-          oldBalance: amountToDollars(account.lastBalance),
-          oldTransfers: account.recentTransfers.length,
-          newBlock: result.lastBlock,
-          newBalance: amountToDollars(BigInt(result.lastBalance)),
-          newTransfers: recentTransfers.length,
-        },
-        null,
-        2
-      )
+      JSON.stringify({
+        oldBlock: account.lastBlock,
+        oldBalance: amountToDollars(account.lastBalance),
+        oldTransfers: account.recentTransfers.length,
+        newBlock: result.lastBlock,
+        newBalance: amountToDollars(BigInt(result.lastBalance)),
+        newTransfers: recentTransfers.length,
+      })
   );
   return ret;
 }

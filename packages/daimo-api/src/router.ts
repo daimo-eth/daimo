@@ -8,6 +8,7 @@ import {
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, getAddress } from "viem";
+import { normalize } from "viem/ens";
 import { z } from "zod";
 
 import { CoinIndexer } from "./contract/coinIndexer";
@@ -19,7 +20,8 @@ import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
-  publicClient: PublicClient,
+  l1Client: PublicClient,
+  l2Client: PublicClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   entryPoint: EntryPoint,
@@ -32,7 +34,22 @@ export function createRouter(
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
         const { prefix } = opts.input;
-        const ret = await nameReg.search(prefix);
+
+        // TODO: replace "NamedDaimoAccount" with EAccount/DAccount
+        const ensName = normalize(prefix + ".eth");
+        const [ret, ensAddr] = await Promise.all([
+          nameReg.search(prefix),
+          l1Client.getEnsAddress({ name: ensName }),
+        ]);
+        if (ensAddr) {
+          let insertAt = 0;
+          if (ret[0] && ret[0].name === prefix) insertAt = 1;
+          ret.splice(insertAt, 0, {
+            addr: ensAddr,
+            name: ensName,
+          } as NamedDaimoAccount); // TODO: EAccount
+        }
+
         console.log(`[API] search: ${ret.length} results for '${prefix}'`);
         return ret;
       }),
@@ -134,7 +151,7 @@ export function createRouter(
         const address = getAddress(opts.input.address);
 
         // Get latest finalize block. Future account sync will be since that.
-        const finBlock = await publicClient.getBlock({ blockTag: "finalized" });
+        const finBlock = await l2Client.getBlock({ blockTag: "finalized" });
         if (finBlock.number == null) throw new Error("No finalized block");
         if (finBlock.number < sinceBlockNum) {
           console.log(
@@ -143,7 +160,7 @@ export function createRouter(
         }
 
         // Get the latest block + current balance.
-        const lastBlk = await publicClient.getBlock({ blockTag: "latest" });
+        const lastBlk = await l2Client.getBlock({ blockTag: "latest" });
         if (lastBlk.number == null) throw new Error("No latest block");
         const lastBlock = Number(lastBlk.number);
         const lastBlockTimestamp = Number(lastBlk.timestamp);
@@ -238,7 +255,7 @@ export function createRouter(
           `[API] not deploying account for ${name}, pubkey ${pubKeyHex}`
         );
         const account = await DaimoAccount.init(
-          publicClient,
+          l2Client,
           pubKeyHex,
           () => {
             throw new Error("No signer");

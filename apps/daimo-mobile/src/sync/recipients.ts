@@ -1,7 +1,8 @@
+import { assertNotNull } from "@daimo/common";
 import { Address } from "viem";
 
 import { rpcFunc, rpcHook } from "../logic/trpc";
-import { useAccount } from "../model/account";
+import { getAccountManager, useAccount } from "../model/account";
 import { getCachedName } from "../view/shared/addr";
 
 export interface Recipient {
@@ -19,14 +20,20 @@ export interface Recipient {
 export async function getRecipient(addr: Address): Promise<Recipient> {
   const name = await rpcFunc.resolveAddr.query({ addr });
 
-  // TODO: load last send time
-  return { addr, name: name || undefined };
+  const { currentAccount } = assertNotNull(getAccountManager());
+  const lastSend = (currentAccount?.recentTransfers || []).find(
+    (t) => t.to === addr
+  );
+  const lastSendTime = lastSend?.timestamp;
+
+  return { addr, name: name || undefined, lastSendTime };
 }
 
 export function useRecipientSearch(prefix: string) {
-  const [account] = useAccount();
+  prefix = prefix.toLowerCase();
 
   // Load recent recipients
+  const [account] = useAccount();
   const recents = [] as Recipient[];
   const recentsByAddr = new Map<Address, Recipient>();
   const transfersNewToOld = (account?.recentTransfers || []).slice().reverse();
@@ -42,7 +49,19 @@ export function useRecipientSearch(prefix: string) {
     recentsByAddr.set(other, r);
   }
 
+  // Always show recent recipients first
   const recipients: Recipient[] = [];
+  const looseMatchRecents: Recipient[] = [];
+  for (const r of recents) {
+    if (prefix === "") {
+      recipients.push(r); // Show ALL recent recipients
+    } else if (r.name && r.name.startsWith(prefix)) {
+      recipients.push(r); // Show matching-name recent recipients
+    } else if (prefix.length >= 3 && r.name && r.name.includes(prefix)) {
+      looseMatchRecents.push(r); // Show matching-name recent recipients
+    }
+  }
+  if (recipients.length === 0) recipients.push(...looseMatchRecents);
 
   // Search if we have a prefix. Anyone we've already sent to appears first.
   // Otherwise, just show recent recipients.
@@ -50,6 +69,9 @@ export function useRecipientSearch(prefix: string) {
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     for (const account of res.data) {
+      if (recipients.find((r) => r.addr === account.addr)) continue;
+
+      // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);
       if (recent) {
         recipients.push({ ...account, lastSendTime: recent.lastSendTime });
@@ -59,8 +81,6 @@ export function useRecipientSearch(prefix: string) {
     }
     const sortKey = (r: Recipient) => r.lastSendTime || 0;
     recipients.sort((a, b) => sortKey(b) - sortKey(a));
-  } else if (prefix === "") {
-    recipients.push(...recents);
   }
 
   return {
