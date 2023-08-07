@@ -1,8 +1,7 @@
-import { EAccount, DAccount } from "@daimo/common";
+import { DAccount, EAccount } from "@daimo/common";
 import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
-  Hex,
   Log,
   TransactionReceipt,
   getAbiItem,
@@ -19,7 +18,7 @@ const registeredEvent = getAbiItem({
   name: registeredName,
 });
 
-type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
+type RegisteredLog = Log<bigint, number, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: string } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
@@ -55,7 +54,6 @@ export class NameRegistry {
   parseLogs = (logs: RegisteredLog[]) => {
     const accounts = logs
       .map((l) => l.args)
-      .filter((a): a is { name: Hex; addr: Hex } => !!(a.name && a.addr))
       .map((a) => ({
         name: hexToString(a.name, { size: 32 }),
         addr: getAddress(a.addr),

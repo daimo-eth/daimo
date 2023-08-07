@@ -61,19 +61,34 @@ class PushNotificationManager {
   accountManager = getAccountManager();
 
   maybeSavePushTokenForAccount = async () => {
-    const permission = await Notifications.getPermissionsAsync();
-    if (!permission.granted) return;
-    if (this.accountManager.currentAccount == null) return;
+    try {
+      await this.savePushTokenForAccount();
+    } catch (e) {
+      console.error(`[NOTIFY] failed to save push token`, e);
+    }
+  };
 
-    const token = await Notifications.getExpoPushTokenAsync();
+  savePushTokenForAccount = async () => {
+    const permission = await Notifications.getPermissionsAsync();
+    if (!permission.granted) {
+      throw new Error(
+        "Notifications pemission denied. You can change this in Settings."
+      );
+    }
+    if (this.accountManager.currentAccount == null) {
+      throw new Error("No account");
+    }
+
+    const token = await Notifications.getExpoPushTokenAsync({
+      projectId: "1eff7c6e-e88b-4e35-8b31-eab7e6814904",
+    });
     if (token.data === this.accountManager.currentAccount.pushToken) {
       console.log(`[NOTIFY] push token ${token.data} already saved`);
       return;
     }
 
-    const { name } = this.accountManager.currentAccount;
-    console.log(`[NOTIFY] saving push token ${token} for account ${name}`);
-    const { address } = this.accountManager.currentAccount;
+    const { address, name } = this.accountManager.currentAccount;
+    console.log(`[NOTIFY] saving push token ${token.data} for account ${name}`);
     await Log.promise(
       "registerPushToken",
       rpcFunc.registerPushToken.mutate({ address, token: token.data })

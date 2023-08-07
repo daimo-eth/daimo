@@ -119,7 +119,12 @@ function AppInfo({ account }: { account: Account }) {
 
   const enableNotifications = async () => {
     await Notifications.requestPermissionsAsync();
-    getPushNotificationManager().maybeSavePushTokenForAccount();
+    try {
+      getPushNotificationManager().savePushTokenForAccount();
+    } catch (e: any) {
+      console.error(e);
+      window.alert(e.message);
+    }
   };
 
   const sendDebugLog = () => {
