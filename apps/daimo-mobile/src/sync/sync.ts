@@ -205,7 +205,6 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
   const addrs = new Set(old.map((na) => na.addr));
 
   for (const na of found) {
-    if (na.name == null) continue;
     if (addrs.has(na.addr)) continue;
     addrs.add(na.addr);
     ret.push(na);
