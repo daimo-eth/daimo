@@ -7,7 +7,7 @@ export const zAddress = z
   .refine((s): s is Address => true);
 
 // TODO: renamed to EAccount = superset of Daimo accounts, DAccount
-export const zNamedAccount = z.object({
+export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
   name: z.string().optional(),
@@ -17,17 +17,17 @@ export const zNamedAccount = z.object({
   ensName: z.string().optional(),
 });
 
-/** NamedAccount represents any Ethereum address + onchain display name(s). */
-export type NamedAccount = z.infer<typeof zNamedAccount>;
+/** EAccount represents any Ethereum address + display name(s). */
+export type EAccount = z.infer<typeof zEAccount>;
 
-/** Subset of NamedAccount for Daimo accounts, which always have a name. */
+/** Subset of EAccount for Daimo accounts, which always have a name. */
 export interface DAccount {
   addr: Address;
   name: string;
 }
 
 /** Gets a display name or 0x... address contraction. */
-export function getAccountName(acc: NamedAccount): string {
+export function getAccountName(acc: EAccount): string {
   const str = acc.name || acc.label || acc.ensName;
   if (str) return str;
 
@@ -36,7 +36,7 @@ export function getAccountName(acc: NamedAccount): string {
 }
 
 /** True if account has a display name, false if bare address. */
-export function hasAccountName(acc: NamedAccount): boolean {
+export function hasAccountName(acc: EAccount): boolean {
   return !!(acc.name || acc.label || acc.ensName);
 }
 

@@ -1,4 +1,4 @@
-import { NamedAccount, OpEvent } from "@daimo/common";
+import { EAccount, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -18,7 +18,7 @@ export function useSendAsync(
   enclaveKeyName: string,
   sendFn: SendOpFn,
   pendingOp?: OpEvent,
-  namedAccounts?: NamedAccount[]
+  namedAccounts?: EAccount[]
 ): ActHandle {
   const [as, setAS] = useActStatus();
 

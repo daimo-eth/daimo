@@ -3,7 +3,7 @@ import {
   assert,
   dollarsToAmount,
   getAccountName,
-  NamedAccount,
+  EAccount,
   OpStatus,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
@@ -177,7 +177,7 @@ function SendButton({
       status: OpStatus.pending,
       timestamp: 0,
     },
-    recipient.name ? [recipient as NamedAccount] : []
+    recipient.name ? [recipient as EAccount] : []
   );
 
   // TODO: load estimated fees

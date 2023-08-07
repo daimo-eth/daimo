@@ -1,4 +1,4 @@
-import { NamedAccount, assert, TransferOpEvent } from "@daimo/common";
+import { EAccount, assert, TransferOpEvent } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
@@ -32,7 +32,7 @@ export type Account = {
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: TransferOpEvent[];
   /** Names for each Daimo account we've interacted with. */
-  namedAccounts: NamedAccount[];
+  namedAccounts: EAccount[];
 
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
@@ -64,7 +64,7 @@ interface AccountV3 extends StoredModel {
   lastBalance: string;
   lastFinalizedBlock: number;
   recentTransfers: TransferOpEvent[];
-  namedAccounts: NamedAccount[];
+  namedAccounts: EAccount[];
 
   pushToken: string | null;
 }

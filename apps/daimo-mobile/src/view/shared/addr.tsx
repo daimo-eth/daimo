@@ -1,4 +1,4 @@
-import { NamedAccount, getAccountName } from "@daimo/common";
+import { EAccount, getAccountName } from "@daimo/common";
 import { useEffect } from "react";
 import { Text } from "react-native";
 import { Address } from "viem";
@@ -6,7 +6,7 @@ import { Address } from "viem";
 import { TextBold } from "./text";
 import { Account, getAccountManager } from "../../model/account";
 
-const nameCache = new Map<Address, NamedAccount>();
+const nameCache = new Map<Address, EAccount>();
 
 export function useEAccountCache() {
   const accountManager = getAccountManager();
@@ -20,13 +20,13 @@ export function useEAccountCache() {
   }, []);
 }
 
-function cacheEAccounts(accounts: NamedAccount[]) {
+function cacheEAccounts(accounts: EAccount[]) {
   for (const account of accounts) {
     nameCache.set(account.addr, account);
   }
 }
 
-export function getCachedEAccount(addr: Address): NamedAccount {
+export function getCachedEAccount(addr: Address): EAccount {
   return nameCache.get(addr) || { addr };
 }
 

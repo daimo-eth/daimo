@@ -1,4 +1,4 @@
-import { NamedAccount, TransferLogSummary } from "@daimo/api";
+import { EAccount, TransferLogSummary } from "@daimo/api";
 import {
   OpStatus,
   TransferOpEvent,
@@ -138,7 +138,7 @@ async function syncAccount(
   const oldPending = account.recentTransfers.filter(
     (t) => t.status === "pending"
   );
-  let namedAccounts: NamedAccount[];
+  let namedAccounts: EAccount[];
   if (sinceBlockNum === 0) {
     // If resyncing from scratch, clear pending transfers & reset named accounts
     namedAccounts = result.namedAccounts;
@@ -199,10 +199,7 @@ export function syncFindSameOp(
 }
 
 /** Update contacts based on recent interactions */
-function addNamedAccounts(
-  old: NamedAccount[],
-  found: NamedAccount[]
-): NamedAccount[] {
+function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
   const ret = [...old];
   const addrs = new Set(old.map((na) => na.addr));
 

@@ -1,5 +1,5 @@
 import { DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
-import { NamedAccount } from "./model";
+import { EAccount } from "./model";
 
 export type DaimoLinkStatus = DaimoRequestStatus | DaimoNoteStatus;
 
@@ -10,7 +10,7 @@ export type DaimoLinkStatus = DaimoRequestStatus | DaimoNoteStatus;
 export type DaimoRequestStatus = {
   link: DaimoLinkRequest;
 
-  recipient: NamedAccount;
+  recipient: EAccount;
   // TODO: track whether the request is paid
   // https://github.com/daimo-eth/daimo/issues/97
 };
@@ -23,7 +23,7 @@ export type DaimoNoteStatus = {
   link: DaimoLinkNote;
 
   status: "pending" | "claimed" | "cancelled";
-  sender: NamedAccount;
-  claimer?: NamedAccount;
+  sender: EAccount;
+  claimer?: EAccount;
   dollars: `${number}`;
 };

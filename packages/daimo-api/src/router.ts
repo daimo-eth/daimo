@@ -221,7 +221,7 @@ export function createRouter(
           addrs.add(log.from);
           addrs.add(log.to);
         });
-        const eAccounts = (
+        const namedAccounts = (
           await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
         ).filter((acc) => hasAccountName(acc));
 
@@ -234,7 +234,7 @@ export function createRouter(
           lastBalance: String(lastBalance),
 
           transferLogs,
-          namedAccounts: eAccounts,
+          namedAccounts,
         };
       }),
 

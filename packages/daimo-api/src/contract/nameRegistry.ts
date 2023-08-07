@@ -1,4 +1,4 @@
-import { NamedAccount, DAccount } from "@daimo/common";
+import { EAccount, DAccount } from "@daimo/common";
 import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
@@ -111,7 +111,7 @@ export class NameRegistry {
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */
-  async getEAccount(address: Address): Promise<NamedAccount> {
+  async getEAccount(address: Address): Promise<EAccount> {
     // First, look for a Daimo name
     const name = this.addrToName.get(address);
     if (name) return { addr: address, name };
