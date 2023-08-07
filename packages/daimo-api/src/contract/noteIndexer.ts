@@ -69,7 +69,7 @@ export class NoteIndexer {
           status: "pending",
           dollars: amountToDollars(amount),
           link: { type: "note", ephemeralOwner },
-          sender: await this.nameReg.getNamedAccount(from),
+          sender: await this.nameReg.getEAccount(from),
         });
       } else if (selector === redeemEventSelector) {
         const nr = decodeEventLog({ ...args, eventName: "NoteRedeemed" });
@@ -94,7 +94,7 @@ export class NoteIndexer {
 
         // Mark as redeemed
         note.status = redeemer === from ? "cancelled" : "claimed";
-        note.claimer = await this.nameReg.getNamedAccount(redeemer);
+        note.claimer = await this.nameReg.getEAccount(redeemer);
       } else {
         throw new Error(`unexpected event selector: ${selector}`);
       }

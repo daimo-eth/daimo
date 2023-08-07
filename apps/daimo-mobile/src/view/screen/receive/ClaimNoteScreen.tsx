@@ -1,4 +1,4 @@
-import { assert } from "@daimo/common";
+import { assert, getAccountName, hasAccountName } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useState } from "react";
@@ -85,10 +85,12 @@ function NoteDisplay({
 
   useEffect(() => {
     (async () => {
-      const name = await rpcFunc.resolveAddr.query({
+      const acc = await rpcFunc.getEthereumAccount.query({
         addr: ephemeralNote.from,
       });
-      if (name) setSenderName(name);
+      if (hasAccountName(acc)) {
+        setSenderName(getAccountName(acc));
+      }
     })();
   }, [ephemeralNote]);
 

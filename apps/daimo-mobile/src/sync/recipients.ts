@@ -3,7 +3,7 @@ import { Address } from "viem";
 
 import { rpcFunc, rpcHook } from "../logic/trpc";
 import { getAccountManager, useAccount } from "../model/account";
-import { getCachedName } from "../view/shared/addr";
+import { getCachedEAccount } from "../view/shared/addr";
 
 export interface Recipient {
   addr: Address;
@@ -18,7 +18,7 @@ export interface Recipient {
  * provide the correct name.
  */
 export async function getRecipient(addr: Address): Promise<Recipient> {
-  const name = await rpcFunc.resolveAddr.query({ addr });
+  const account = await rpcFunc.getEthereumAccount.query({ addr });
 
   const { currentAccount } = assertNotNull(getAccountManager());
   const lastSend = (currentAccount?.recentTransfers || []).find(
@@ -26,7 +26,7 @@ export async function getRecipient(addr: Address): Promise<Recipient> {
   );
   const lastSendTime = lastSend?.timestamp;
 
-  return { addr, name: name || undefined, lastSendTime };
+  return { ...account, lastSendTime };
 }
 
 export function useRecipientSearch(prefix: string) {
@@ -42,8 +42,8 @@ export function useRecipientSearch(prefix: string) {
     const other = t.to;
     if (recentsByAddr.has(other)) continue;
 
-    const name = getCachedName(other);
-    const r: Recipient = { addr: other, name, lastSendTime: t.timestamp };
+    const acc = getCachedEAccount(other);
+    const r: Recipient = { ...acc, lastSendTime: t.timestamp };
 
     recents.push(r);
     recentsByAddr.set(other, r);

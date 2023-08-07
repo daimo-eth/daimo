@@ -1,10 +1,11 @@
 import {
   DaimoRequestStatus,
-  NamedDaimoAccount,
+  DAccount,
   TransferLogSummary,
   parseDaimoLink,
   zAddress,
   zHex,
+  hasAccountName,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, getAddress } from "viem";
@@ -35,19 +36,33 @@ export function createRouter(
       .query(async (opts) => {
         const { prefix } = opts.input;
 
-        // TODO: replace "NamedDaimoAccount" with EAccount/DAccount
-        const ensName = normalize(prefix + ".eth");
-        const [ret, ensAddr] = await Promise.all([
+        // TODO: replace "DAccount" with EAccount/DAccount
+        // Search for "vitalik" or "vitalik.eth" matches vitalik.eth
+        // Search for "jesse.cb.id" matches jesse.cb.id
+        async function tryGetEnsAddr() {
+          if (prefix.length < 3) return null;
+          try {
+            const ensName = normalize(
+              prefix.includes(".") ? prefix : prefix + ".eth"
+            );
+            return {
+              name: ensName,
+              addr: await l1Client.getEnsAddress({ name: ensName }),
+            } as DAccount; // TODO: EAccount
+          } catch (e) {
+            console.log(`[API] ens lookup '{ensName}' failed: ${e}`);
+            return null;
+          }
+        }
+
+        const [ret, ens] = await Promise.all([
           nameReg.search(prefix),
-          l1Client.getEnsAddress({ name: ensName }),
+          tryGetEnsAddr(),
         ]);
-        if (ensAddr) {
+        if (ens) {
           let insertAt = 0;
           if (ret[0] && ret[0].name === prefix) insertAt = 1;
-          ret.splice(insertAt, 0, {
-            addr: ensAddr,
-            name: ensName,
-          } as NamedDaimoAccount); // TODO: EAccount
+          ret.splice(insertAt, 0, ens);
         }
 
         console.log(`[API] search: ${ret.length} results for '${prefix}'`);
@@ -61,11 +76,11 @@ export function createRouter(
         return nameReg.resolveName(name) || null;
       }),
 
-    resolveAddr: publicProcedure
+    getEthereumAccount: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
         const addr = getAddress(opts.input.addr);
-        return nameReg.resolveAddress(addr) || null;
+        return nameReg.getEAccount(addr) || null;
       }),
 
     getLinkStatus: publicProcedure
@@ -80,12 +95,13 @@ export function createRouter(
 
         switch (link.type) {
           case "request": {
-            const name = nameReg.resolveAddress(link.recipient);
-            if (name == null) throw new Error(`Not found: ${link.recipient}`);
-            const recipient = { addr: link.recipient, name };
+            const acc = await nameReg.getEAccount(link.recipient);
+            if (acc.name == null) {
+              throw new Error(`Not found: ${link.recipient}`);
+            }
             const ret: DaimoRequestStatus = {
               link,
-              recipient,
+              recipient: acc,
             };
             return ret;
           }
@@ -110,7 +126,7 @@ export function createRouter(
         // TODO: lookup account by signing key
         // Doing this efficiently likely requires an AddKey event
         // Alternately, an indexer contract thru which all accounts are deployed
-        let ret = null as NamedDaimoAccount | null;
+        let ret = null as DAccount | null;
 
         // Stub to test client
         if (
@@ -205,12 +221,9 @@ export function createRouter(
           addrs.add(log.from);
           addrs.add(log.to);
         });
-        const namedAccounts = [...addrs]
-          .map((addr) => ({
-            addr,
-            name: nameReg.resolveAddress(addr),
-          }))
-          .filter((na): na is NamedDaimoAccount => na.name != null);
+        const eAccounts = (
+          await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
+        ).filter((acc) => hasAccountName(acc));
 
         return {
           address,
@@ -221,7 +234,7 @@ export function createRouter(
           lastBalance: String(lastBalance),
 
           transferLogs,
-          namedAccounts,
+          namedAccounts: eAccounts,
         };
       }),
 

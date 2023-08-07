@@ -1,4 +1,4 @@
-import { NamedAccount, NamedDaimoAccount } from "@daimo/common";
+import { NamedAccount, DAccount } from "@daimo/common";
 import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
 import {
   Address,
@@ -21,12 +21,18 @@ const registeredEvent = getAbiItem({
 
 type RegisteredLog = Log<bigint, number, typeof registeredEvent>;
 
+const specialAddrLabels: { [_: Address]: string } = {
+  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
+  "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": "note", // Old Notes contract
+};
+specialAddrLabels[ephemeralNotesAddress] = "note";
+
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
   /* In-memory indexer, for now. */
   private nameToAddr = new Map<string, Address>();
   private addrToName = new Map<Address, string>();
-  private accounts: NamedDaimoAccount[] = [];
+  private accounts: DAccount[] = [];
 
   contract: ContractType<typeof nameRegistryConfig.abi>;
 
@@ -43,13 +49,6 @@ export class NameRegistry {
       },
       this.parseLogs
     );
-
-    // Also name a few special addresses
-    this.cacheAccount({
-      name: "faucet",
-      addr: "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
-    });
-    this.cacheAccount({ name: "note", addr: ephemeralNotesAddress });
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
@@ -68,7 +67,7 @@ export class NameRegistry {
   };
 
   /** Cache an account in memory. */
-  private cacheAccount = (acc: NamedDaimoAccount) => {
+  private cacheAccount = (acc: DAccount) => {
     console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
     this.nameToAddr.set(acc.name, acc.addr);
     this.addrToName.set(acc.addr, acc.name);
@@ -76,7 +75,7 @@ export class NameRegistry {
   };
 
   /** Find accounts whose names start with a prefix */
-  async search(prefix: string): Promise<NamedDaimoAccount[]> {
+  async search(prefix: string): Promise<DAccount[]> {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
       .filter((a) => a.name.startsWith(prefix))
@@ -111,16 +110,28 @@ export class NameRegistry {
     return this.nameToAddr.get(name);
   }
 
-  /** Find Daimo name for a given wallet address, or null if not found. */
-  resolveAddress(address: Address): string | undefined {
-    return this.addrToName.get(address);
-  }
+  /** Gets an Ethereum account, including name, ENS, label if available. */
+  async getEAccount(address: Address): Promise<NamedAccount> {
+    // First, look for a Daimo name
+    const name = this.addrToName.get(address);
+    if (name) return { addr: address, name };
 
-  /** Gets name for a given address, if it has one. */
-  async getNamedAccount(address: Address): Promise<NamedAccount> {
-    const name = await this.resolveAddress(address);
-    // TODO: ENS reverse lookup
-    return { addr: address, name };
+    // Then, a special labelled address, e.g. faucet
+    const label = specialAddrLabels[address];
+    if (label) return { addr: address, label };
+
+    // Finally, ENS reverse lookup
+    let ensName: string | undefined = undefined;
+    try {
+      console.log(`[NAME-REG] looking up ENS name for ${address}`);
+      ensName = (await this.vc.l1Client.getEnsName({ address })) || undefined;
+      console.log(`[NAME-REG] ENS name for ${address}: ${ensName}`);
+    } catch (e) {
+      console.log(`[NAME-REG] ENS lookup failed for ${address}: ${e}`);
+    }
+
+    // Bare addresses are fine too, ensName can be undefined
+    return { addr: address, ensName };
   }
 }
 

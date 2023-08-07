@@ -1,10 +1,9 @@
 // https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
 
 import { AppRouter } from "@daimo/api";
-import { nameRegistryConfig } from "@daimo/contract";
-import { createTRPCProxyClient, httpBatchLink, wsLink } from "@trpc/client";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import csv from "csvtojson";
-import { createPublicClient, getContract, http, webSocket } from "viem";
+import { createPublicClient, webSocket } from "viem";
 import { baseGoerli } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
@@ -68,10 +67,12 @@ async function trpc() {
   console.log(JSON.stringify(searchResults));
 
   console.log(`\n\nTRPC resolveAddr`);
-  const addr = "0x4aEC6307cc5E6Ac7A9a939125D3e2b58B38E6368";
-  const name = await trpc.resolveAddr.query({ addr });
+  const addr = "0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D";
+  const acc = await trpc.getEthereumAccount.query({ addr });
   console.log("Addr", addr);
-  console.log("Name", name);
+  if (acc.name) console.log("Name", acc.name);
+  if (acc.label) console.log("Label", acc.label);
+  if (acc.ensName) console.log("ENS", acc.ensName);
 
   console.log(`\n\nTRPC getLinkStatus`);
   const status = await trpc.getLinkStatus.query({

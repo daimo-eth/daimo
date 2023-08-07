@@ -5,7 +5,7 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
-import { useNameCache } from "./view/shared/addr";
+import { useEAccountCache } from "./view/shared/addr";
 import { useInitNavLinks } from "./view/shared/nav";
 
 export default function App() {
@@ -18,7 +18,7 @@ export default function App() {
   useSyncChain();
 
   // Track names for known addresses
-  useNameCache();
+  useEAccountCache();
 
   return (
     <RpcProvider>

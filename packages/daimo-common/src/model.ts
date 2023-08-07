@@ -6,27 +6,38 @@ export const zAddress = z
   .regex(/^0x[0-9a-f]{40}$/i)
   .refine((s): s is Address => true);
 
+// TODO: renamed to EAccount = superset of Daimo accounts, DAccount
 export const zNamedAccount = z.object({
   addr: zAddress,
+  /** Daimo account name */
   name: z.string().optional(),
-  // TODO: add optional reverse-lookup ENS name
-  // ensName: z.string().optional()
+  /** Label for special addresse like the faucet */
+  label: z.string().optional(),
+  /** ENS name */
+  ensName: z.string().optional(),
 });
 
 /** NamedAccount represents any Ethereum address + onchain display name(s). */
 export type NamedAccount = z.infer<typeof zNamedAccount>;
 
 /** Subset of NamedAccount for Daimo accounts, which always have a name. */
-export interface NamedDaimoAccount {
+export interface DAccount {
   addr: Address;
   name: string;
 }
 
-/** Gets a bare string name or 0x... address contraction. */
+/** Gets a display name or 0x... address contraction. */
 export function getAccountName(acc: NamedAccount): string {
-  if (acc.name) return acc.name;
+  const str = acc.name || acc.label || acc.ensName;
+  if (str) return str;
+
   const { addr } = acc;
   return addr.slice(0, 6) + "…" + addr.slice(-4);
+}
+
+/** True if account has a display name, false if bare address. */
+export function hasAccountName(acc: NamedAccount): boolean {
+  return !!(acc.name || acc.label || acc.ensName);
 }
 
 export const zHex = z

@@ -6,6 +6,7 @@ import { Linking, StyleSheet, View, Text } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
 import { useAccount } from "../../model/account";
+import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -19,7 +20,11 @@ import { timeString } from "../shared/time";
 type Props = NativeStackScreenProps<HomeStackParamList, "HistoryOp">;
 
 export function HistoryOpScreen({ route, navigation }: Props) {
-  const { op } = route.params;
+  // Load the latest version of this op. If the user opens the detail screen
+  // while the op is pending, and it confirms, the screen should update.
+  const [account] = useAccount();
+  let { op } = route.params;
+  op = syncFindSameOp(op, account?.recentTransfers || []) || op;
 
   const [title, body] = (() => {
     switch (op.type) {

@@ -2,6 +2,7 @@ import { tokenMetadata } from "@daimo/contract";
 import { Expo } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
+import { getAccountName } from ".";
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
 import { DB } from "./db/db";
@@ -63,8 +64,8 @@ export class PushNotifier {
     const dollars = Math.abs(Number(rawAmount)).toFixed(2);
 
     // Get the other side
-    const otherName = await this.nameReg.resolveAddress(other);
-    const otherStr = otherName || other.substring(0, 8) + "...";
+    const otherAcc = await this.nameReg.getEAccount(other);
+    const otherStr = getAccountName(otherAcc);
 
     const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
     const body =
