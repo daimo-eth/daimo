@@ -76,6 +76,14 @@ export function createRouter(
         return nameReg.resolveName(name) || null;
       }),
 
+    // DEPRECATED
+    resolveAddr: publicProcedure
+      .input(z.object({ addr: zAddress }))
+      .query(async (opts) => {
+        const addr = getAddress(opts.input.addr);
+        return (await nameReg.getEAccount(addr)).name || null;
+      }),
+
     getEthereumAccount: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {

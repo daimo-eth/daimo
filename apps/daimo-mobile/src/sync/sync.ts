@@ -176,6 +176,7 @@ async function syncAccount(
         newBlock: result.lastBlock,
         newBalance: amountToDollars(BigInt(result.lastBalance)),
         newTransfers: recentTransfers.length,
+        nPending: recentTransfers.filter((t) => t.status === "pending").length,
       })
   );
   return ret;

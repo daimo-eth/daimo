@@ -4,6 +4,7 @@ import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
+import { cacheEAccounts } from "../view/shared/addr";
 
 /**
  * Singleton account key.
@@ -107,6 +108,11 @@ class AccountManager {
 
   setCurrentAccount = (account: Account | null) => {
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
+
+    // Cache accounts so that addresses show up with correct display names.
+    // Would be cleaner use a listener, but must run first.
+    if (account) cacheEAccounts(account.namedAccounts);
+
     this.currentAccount = account;
     this.mmkv.set("account", serializeAccount(account));
     for (const listener of this.listeners) {

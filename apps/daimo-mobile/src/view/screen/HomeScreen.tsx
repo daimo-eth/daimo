@@ -20,7 +20,9 @@ import { color, ss } from "../shared/style";
 
 export default function HomeScreen() {
   const [account] = useAccount();
-  console.log(`[HOME] rendering with account ${account?.name}`);
+  console.log(
+    `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
+  );
 
   useWarmCache(account?.enclaveKeyName);
 
