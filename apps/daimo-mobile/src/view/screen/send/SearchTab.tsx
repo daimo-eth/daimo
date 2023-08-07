@@ -6,9 +6,10 @@ import { Recipient, useRecipientSearch } from "../../../sync/loadRecipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/Input";
 import { useNav } from "../../shared/nav";
-import { TextCenter, TextError, TextLight } from "../../shared/text";
+import { TextCenter, TextError, TextH3, TextLight } from "../../shared/text";
+import { timeAgo } from "../../shared/time";
 
-/** Find someone you've already paid, or any Daimo account by name. */
+/** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {
   const [prefix, setPrefix] = useState("");
   const res = useRecipientSearch(prefix.trim().toLowerCase());
@@ -40,8 +41,20 @@ function ErrorRow({ error }: { error: { message: string } }) {
 function RecipientRow({ recipient }: { recipient: Recipient }) {
   const nav = useNav();
   const pay = useCallback(() => nav.setParams({ recipient }), []);
+
+  const name = getAccountName(recipient);
+  const nowS = Date.now() / 1e3;
+  const lastSendStr =
+    recipient.lastSendTime &&
+    `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
+
   return (
-    <ButtonBig type="subtle" title={getAccountName(recipient)} onPress={pay} />
+    <ButtonBig type="subtle" onPress={pay}>
+      <View style={styles.recipientRow}>
+        <TextH3>{name}</TextH3>
+        <TextLight>{lastSendStr}</TextLight>
+      </View>
+    </ButtonBig>
   );
 }
 
@@ -50,5 +63,10 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignSelf: "stretch",
     gap: 8,
+  },
+  recipientRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
   },
 });

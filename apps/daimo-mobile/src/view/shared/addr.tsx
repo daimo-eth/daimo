@@ -36,6 +36,10 @@ function cacheNames(namedAccounts: NamedAccount[]) {
   }
 }
 
+export function getCachedName(addr: Address): string | undefined {
+  return nameCache.get(addr)?.name;
+}
+
 /** Shows a named Daimo account or an Ethereum address. */
 export function AddrText({ addr }: { addr: Address }) {
   const acc = nameCache.get(addr);
