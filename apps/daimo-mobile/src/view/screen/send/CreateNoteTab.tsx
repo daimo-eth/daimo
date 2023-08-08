@@ -1,4 +1,11 @@
-import { DaimoLink, assert, formatDaimoLink } from "@daimo/common";
+import {
+  DaimoLink,
+  OpStatus,
+  assert,
+  dollarsToAmount,
+  formatDaimoLink,
+} from "@daimo/common";
+import { ephemeralNotesAddress } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import {
   ReactNode,
@@ -63,6 +70,14 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
         `${dollars}`,
         !isNotesContractApproved
       );
+    },
+    {
+      type: "transfer",
+      status: OpStatus.pending,
+      from: account.address,
+      to: ephemeralNotesAddress,
+      amount: Number(dollarsToAmount(dollars)),
+      timestamp: Date.now() / 1e3,
     }
   );
 

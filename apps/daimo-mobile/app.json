@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "eth.daimo",
-      "buildNumber": "25",
+      "buildNumber": "27",
       "associatedDomains": [
         "applinks:daimo.onrender.com"
       ],

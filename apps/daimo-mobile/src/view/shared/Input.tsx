@@ -93,15 +93,15 @@ export function AmountInput({
     const newVal = parseLocalFloat(text);
 
     // Handle invalid or entry, NaN etc
-    if (newVal <= 0) {
+    if (!(newVal > 0)) {
       onChange(0);
       return;
     }
 
     // Update number
     onChange(newVal);
-    const fullLength = newVal.toFixed(2).length;
-    if (text.length === fullLength && text.length > strVal.length) {
+    const nEnteredDecimals = (text.split(amountSeparator)[1] || "").length;
+    if (nEnteredDecimals === 2 && text.length > strVal.length) {
       // User just typed in the full amount, down to the cent. Submit.
       if (innerRef?.current) innerRef.current.blur();
       if (onSubmitEditing) onSubmitEditing(newVal);

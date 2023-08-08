@@ -1,4 +1,10 @@
-import { assert, getAccountName, hasAccountName } from "@daimo/common";
+import {
+  OpStatus,
+  assert,
+  getAccountName,
+  hasAccountName,
+} from "@daimo/common";
+import { ephemeralNotesAddress } from "@daimo/contract";
 import { DaimoAccount } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useState } from "react";
@@ -108,7 +114,15 @@ function NoteDisplay({
 
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    sendFn(ephemeralNote.owner, ephemeralSignature)
+    sendFn(ephemeralNote.owner, ephemeralSignature),
+    {
+      type: "transfer",
+      status: OpStatus.pending,
+      from: ephemeralNotesAddress,
+      to: account.address,
+      amount: Number(ephemeralNote.amount),
+      timestamp: Date.now() / 1e3,
+    }
   );
 
   // TODO: load estimated fees

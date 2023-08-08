@@ -43,6 +43,10 @@ export function useRecipientSearch(prefix: string) {
     if (recentsByAddr.has(other)) continue;
 
     const acc = getCachedEAccount(other);
+    // Hack: don't show Note contract as a recipient
+    // TODO: show note claimer as recipient.
+    if (acc.label === "note") continue;
+
     const r: Recipient = { ...acc, lastSendTime: t.timestamp };
 
     recents.push(r);

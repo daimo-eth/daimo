@@ -3,13 +3,14 @@ import { Octicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 import { chainConfig } from "../../../logic/chainConfig";
 import { rpcHook } from "../../../logic/trpc";
 import { getAccountManager, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
+import { cacheEAccounts } from "../../shared/addr";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
 
@@ -48,6 +49,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   useEffect(() => {
     if (!mutation.isSuccess) return;
     getAccountManager().addPendingOp(mutation.data);
+    cacheEAccounts([{ addr: getAddress(mutation.data.from), label: "faucet" }]);
   }, [mutation.isSuccess]);
 
   // Display

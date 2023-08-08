@@ -22,7 +22,7 @@ import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
-import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
+import { TextBody, TextBold, TextH2, TextLight } from "../shared/text";
 
 export function AccountScreen() {
   const [account, setAccount] = useAccount();
@@ -72,9 +72,7 @@ export function AccountScreen() {
       <ScrollView contentContainerStyle={ss.container.vertModal}>
         <Spacer h={8} />
         <View style={ss.container.ph16}>
-          <TextH2>Account</TextH2>
-          <Spacer h={16} />
-          <TextH3>{account.name}</TextH3>
+          <TextH2>{account.name}</TextH2>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
           <View>
@@ -87,7 +85,11 @@ export function AccountScreen() {
             </TextLight>
           </View>
         </ButtonSmall>
-        <Spacer h={16} />
+        <Spacer h={32} />
+        <View style={ss.container.ph16}>
+          <TextH2>Devices</TextH2>
+        </View>
+        <Spacer h={8} />
         <View style={styles.callout}>
           <TextBody>
             <Octicons name="alert" size={16} color="black" />{" "}
@@ -143,15 +145,16 @@ function AppInfo({ account }: { account: Account }) {
 
   return (
     <View style={ss.container.ph16}>
-      <TextH2>App and device</TextH2>
+      <TextH2>Details</TextH2>
       <Spacer h={16} />
-      <KV label="Commit" value={env.gitHash} />
-      <KV label="Profile" value={env.buildProfile} />
-      <KV label="Native Version" value={env.nativeApplicationVersion} />
-      <KV label="Native Build" value={env.nativeBuildVersion} />
+      <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
+      <KV
+        label="Version"
+        value={`${env.nativeApplicationVersion} #${env.nativeBuildVersion}`}
+      />
+      <KV label="Commit" value={`${env.gitHash} ${env.buildProfile}`} />
       {sec && (
         <>
-          <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
           <KV
             label="Biometric Security"
             value={sec.biometricSecurityLevel.toLowerCase()}

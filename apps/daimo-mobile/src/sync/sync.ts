@@ -138,17 +138,22 @@ async function syncAccount(
   const oldPending = account.recentTransfers.filter(
     (t) => t.status === "pending"
   );
+
+  // Match pending transfers
+  const nowS = Date.now() / 1e3;
+  const maxPendingAgeS = 5 * 60; // 5 mins
+  const stillPending = oldPending.filter(
+    (t) =>
+      syncFindSameOp(t, recentTransfers) == null &&
+      nowS - t.timestamp < maxPendingAgeS
+  );
+  recentTransfers.push(...stillPending);
+
   let namedAccounts: EAccount[];
   if (sinceBlockNum === 0) {
-    // If resyncing from scratch, clear pending transfers & reset named accounts
+    // If resyncing from scratch,  reset named accounts
     namedAccounts = result.namedAccounts;
   } else {
-    // Otherwise, match pending transfers & add named accounts
-    const stillPending = oldPending.filter(
-      (t) => syncFindSameOp(t, recentTransfers) == null
-    );
-    recentTransfers.push(...stillPending);
-
     namedAccounts = addNamedAccounts(
       account.namedAccounts,
       result.namedAccounts
