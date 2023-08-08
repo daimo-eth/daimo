@@ -1,10 +1,9 @@
 import {
-  amountToDollars,
+  EAccount,
+  OpStatus,
   assert,
   dollarsToAmount,
   getAccountName,
-  EAccount,
-  OpStatus,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
@@ -20,7 +19,7 @@ import { useSendAsync } from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
-import { TitleAmount } from "../../shared/Amount";
+import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig, ButtonSmall } from "../../shared/Button";
 import { Header } from "../../shared/Header";
 import { AmountInput } from "../../shared/Input";
@@ -111,15 +110,17 @@ function SetAmount({
 
   // Temporary dollar amount while typing
   const [d, setD] = useState(0);
-  const submit = () => {
-    nav.setParams({ dollars: d });
+  const submit = (newD: number) => {
+    nav.setParams({ dollars: newD });
     setD(0);
   };
 
   // Show how much we have available
   const [account] = useAccount();
   if (account == null) return null;
-  const bal = amountToDollars(account.lastBalance);
+  const dollarStr = getAmountText({ amount: account.lastBalance });
+
+  console.log(`WTF sendscreen render ${d}`);
 
   return (
     <>
@@ -133,10 +134,10 @@ function SetAmount({
       <Spacer h={32} />
       {dollars === 0 && (
         <View style={ss.container.ph16}>
-          <AmountInput value={d} onChange={setD} onSubmitEditing={submit} />
+          <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
           <Spacer h={16} />
           <TextLight>
-            <TextCenter>${bal} available</TextCenter>
+            <TextCenter>{dollarStr} available</TextCenter>
           </TextLight>
         </View>
       )}

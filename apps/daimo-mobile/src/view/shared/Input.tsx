@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { amountSeparator, getAmountText } from "./Amount";
 import { color, ss } from "./style";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
@@ -50,21 +51,24 @@ export function InputBig({
 }
 
 export function AmountInput({
-  value,
+  dollars,
   onChange,
   onSubmitEditing,
   innerRef,
   autoFocus,
 }: {
-  value: number;
-  onChange: (amount: number) => void;
-  onSubmitEditing?: () => void;
-  innerRef?: React.Ref<TextInput>;
+  dollars: number;
+  onChange: (dollars: number) => void;
+  onSubmitEditing?: (dollars: number) => void;
+  innerRef?: React.RefObject<TextInput>;
   autoFocus?: boolean;
 }) {
-  if (value < 0) throw new Error("AmountPicker value can't be negative");
+  if (dollars < 0) throw new Error("AmountPicker value can't be negative");
 
-  const [strVal, setStrVal] = useState(value === 0 ? "" : value.toFixed(2));
+  const fmt = (dollars: number) =>
+    getAmountText({ dollars: dollars.toFixed(2) as `${number}`, symbol: "" });
+
+  const [strVal, setStrVal] = useState(dollars <= 0 ? "" : fmt(dollars));
 
   // On blur, round value to 2 decimal places
   const blur = useCallback(
@@ -74,9 +78,12 @@ export function AmountInput({
       if (!(newVal >= 0)) {
         newVal = 0;
       }
-      const newStrVal = newVal.toFixed(2);
+      const newStrVal = fmt(newVal);
       setStrVal(newVal > 0 ? newStrVal : "");
-      onChange(parseFloat(newStrVal));
+
+      const truncated = parseLocalFloat(newStrVal);
+      onChange(truncated);
+      if (onSubmitEditing) onSubmitEditing(truncated);
     },
     []
   );
@@ -84,17 +91,33 @@ export function AmountInput({
   const change = useCallback((text: string) => {
     setStrVal(text);
     const newVal = parseLocalFloat(text);
+
     // Handle invalid or entry, NaN etc
-    if (newVal > 0) onChange(newVal);
-    else onChange(0);
+    if (newVal <= 0) {
+      onChange(0);
+      return;
+    }
+
+    // Update number
+    onChange(newVal);
+    const fullLength = newVal.toFixed(2).length;
+    if (text.length === fullLength && text.length > strVal.length) {
+      // User just typed in the full amount, down to the cent. Submit.
+      if (innerRef?.current) innerRef.current.blur();
+      if (onSubmitEditing) onSubmitEditing(newVal);
+    }
   }, []);
+
+  const onSubmit = useCallback(() => {
+    if (onSubmitEditing) onSubmitEditing(dollars);
+  }, [dollars]);
 
   return (
     <TextInput
       ref={innerRef}
       style={styles.amountInput}
       keyboardType="numeric"
-      placeholder="0.00"
+      placeholder={`0${amountSeparator}00`}
       placeholderTextColor={color.gray}
       numberOfLines={1}
       autoFocus={autoFocus == null ? true : autoFocus}
@@ -102,7 +125,7 @@ export function AmountInput({
       selectTextOnFocus
       onBlur={blur}
       onChangeText={change}
-      onSubmitEditing={onSubmitEditing}
+      onSubmitEditing={onSubmit}
       returnKeyType="done"
     />
   );

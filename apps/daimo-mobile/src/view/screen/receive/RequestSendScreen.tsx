@@ -61,7 +61,7 @@ export default function RequestSendScreen() {
     <TouchableWithoutFeedback onPress={hideKeyboard}>
       <View style={styles.vertOuter}>
         <AmountInput
-          value={dollars}
+          dollars={dollars}
           onChange={setDollars}
           innerRef={inputRef}
           autoFocus={!sent}

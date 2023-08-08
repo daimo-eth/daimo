@@ -148,7 +148,11 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     <>
       <CancelHeader hide={hide}>Creating note</CancelHeader>
       <Spacer h={32} />
-      <AmountInput value={dollars} onChange={setDollars} innerRef={amountRef} />
+      <AmountInput
+        dollars={dollars}
+        onChange={setDollars}
+        innerRef={amountRef}
+      />
       <Spacer h={32} />
       {button}
       <TextLight>

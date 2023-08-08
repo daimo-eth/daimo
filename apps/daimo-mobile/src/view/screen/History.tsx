@@ -1,9 +1,10 @@
-import { assert, amountToDollars, TransferOpEvent } from "@daimo/common";
+import { TransferOpEvent, assert } from "@daimo/common";
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
 import { Account, useAccount } from "../../model/account";
+import { getAmountText } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import { AddrText } from "../shared/addr";
 import { useNav } from "../shared/nav";
@@ -13,8 +14,8 @@ import {
   TextBold,
   TextCenter,
   TextH3,
-  TextRight,
   TextLight,
+  TextRight,
 } from "../shared/text";
 import { timeAgo } from "../shared/time";
 
@@ -113,7 +114,7 @@ function TransferRow({
   assert([from, to].includes(address));
 
   const verb = from === address ? "Sent" : "Received";
-  const amount = amountToDollars(BigInt(transfer.amount));
+  const dollarStr = getAmountText({ amount: BigInt(transfer.amount) });
   const toFrom = from === address ? "to" : "from";
   const otherAddr = from === address ? to : from;
 
@@ -136,7 +137,7 @@ function TransferRow({
       <View style={styles.rowTransfer}>
         <View style={styles.colDesc}>
           <TextLight numberOfLines={1}>
-            {verb} <TextBold>${amount}</TextBold> {toFrom}{" "}
+            {verb} <TextBold>{dollarStr}</TextBold> {toFrom}{" "}
             <AddrText addr={otherAddr} />
           </TextLight>
         </View>
