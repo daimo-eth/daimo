@@ -120,8 +120,6 @@ function SetAmount({
   if (account == null) return null;
   const dollarStr = getAmountText({ amount: account.lastBalance });
 
-  console.log(`WTF sendscreen render ${d}`);
-
   return (
     <>
       <Spacer h={64} />

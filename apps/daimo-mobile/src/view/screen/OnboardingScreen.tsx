@@ -22,7 +22,6 @@ import {
   useLoadAccountFromKey,
   useLoadKeyFromEnclave,
 } from "../../logic/enclave";
-import { getPushNotificationManager } from "../../logic/notify";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
@@ -172,8 +171,6 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
     const status = await Notifications.requestPermissionsAsync();
     console.log(`[ONBOARDING] notifications request ${status.status}`);
     if (!status.granted) return;
-
-    getPushNotificationManager().maybeSavePushTokenForAccount();
 
     onNext();
   };
