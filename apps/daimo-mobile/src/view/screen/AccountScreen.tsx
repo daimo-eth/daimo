@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -22,7 +23,7 @@ import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
-import { TextBody, TextBold, TextH2, TextLight } from "../shared/text";
+import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
 
 export function AccountScreen() {
   const [account, setAccount] = useAccount();
@@ -70,9 +71,15 @@ export function AccountScreen() {
   return (
     <>
       <ScrollView contentContainerStyle={ss.container.vertModal}>
-        <Spacer h={8} />
+        <Spacer h={4} />
         <View style={ss.container.ph16}>
-          <TextH2>{account.name}</TextH2>
+          <TextH2>
+            {account.name}
+            <TextLight>
+              {` \u00A0 `}
+              {tokenMetadata.name} · {chainConfig.l2.name} · {}
+            </TextLight>
+          </TextH2>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
           <View>
@@ -87,7 +94,7 @@ export function AccountScreen() {
         </ButtonSmall>
         <Spacer h={32} />
         <View style={ss.container.ph16}>
-          <TextH2>Devices</TextH2>
+          <TextH3>Devices</TextH3>
         </View>
         <Spacer h={8} />
         <View style={styles.callout}>
@@ -103,8 +110,8 @@ export function AccountScreen() {
 
         <Spacer h={32} />
         <View style={ss.container.ph16}>
-          <TextH2>Danger zone</TextH2>
-          <Spacer h={8} />
+          <TextH3>Danger zone</TextH3>
+          <Spacer h={4} />
           <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
         </View>
       </ScrollView>
@@ -145,7 +152,7 @@ function AppInfo({ account }: { account: Account }) {
 
   return (
     <View style={ss.container.ph16}>
-      <TextH2>Details</TextH2>
+      <TextH3>Details</TextH3>
       <Spacer h={16} />
       <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
       <KV
