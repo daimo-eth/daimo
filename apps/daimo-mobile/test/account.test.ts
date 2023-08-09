@@ -10,6 +10,9 @@ const accountFromV2: Account = {
   enclaveKeyName: "test",
   name: "test",
   address: "0x0000000000000000000000000000000000000123",
+  createdAt: 1690000000,
+  homeCoin: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf",
+  homeChainID: 84531,
 
   lastBalance: BigInt(123),
   lastBlockTimestamp: 789,
@@ -24,10 +27,13 @@ const accountFromV2: Account = {
 
 const correctSerV3 = `{"storageVersion":3,"enclaveKeyName":"test","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"pushToken":null}`;
 
-const account: Account = {
+const accountFromV3: Account = {
   enclaveKeyName: "test",
   name: "test",
   address: "0x0000000000000000000000000000000000000123",
+  createdAt: 1690000000,
+  homeCoin: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf",
+  homeChainID: 84531,
 
   lastBalance: BigInt(123),
   lastBlockTimestamp: 789,
@@ -40,14 +46,21 @@ const account: Account = {
   pushToken: null,
 };
 
+const correctSerV4 = `{"storageVersion":4,"enclaveKeyName":"test","name":"test","address":"0x0000000000000000000000000000000000000123","createdAt":1700000000,"homeCoin":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","homeChainID":84531,"lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"pushToken":null}`;
+
+const account: Account = {
+  ...accountFromV3,
+  createdAt: 1700000000,
+};
+
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV3);
+    expect(ser).toEqual(correctSerV4);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV3);
+    const a = parseAccount(correctSerV4);
     expect(a).toEqual(account);
   });
 
@@ -56,15 +69,19 @@ describe("Account", () => {
     expect(a?.address).toEqual("0xEf4396d9FF8107086d215a1c9f8866C54795D7c7");
   });
 
-  it("migrates V1", () => {
+  it("drops V1", () => {
     // Drop V1 accounts, testnet users re-onboard.
     const a = parseAccount(correctSerV1);
     expect(a).toBeNull();
   });
 
   it("migrates V2", () => {
-    // Migrate V2 accounts.
     const a = parseAccount(correctSerV2);
     expect(a).toEqual(accountFromV2);
+  });
+
+  it("migrates V3", () => {
+    const a = parseAccount(correctSerV3);
+    expect(a).toEqual(accountFromV3);
   });
 });

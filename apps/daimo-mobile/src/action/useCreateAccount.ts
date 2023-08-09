@@ -1,10 +1,12 @@
 import { assert } from "@daimo/common";
+import { tokenMetadata } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { chainConfig } from "../logic/chainConfig";
 import { createEnclaveKey } from "../logic/enclave";
 import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
@@ -59,6 +61,9 @@ export function useCreateAccount(name: string): ActHandle {
       enclaveKeyName,
       name,
       address,
+      createdAt: Date.now() / 1e3,
+      homeCoin: tokenMetadata.address,
+      homeChainID: chainConfig.l2.id,
 
       lastBalance: BigInt(0),
       lastBlockTimestamp: 0,

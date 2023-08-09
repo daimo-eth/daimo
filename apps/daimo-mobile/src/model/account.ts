@@ -1,9 +1,11 @@
 import { EAccount, assert, TransferOpEvent } from "@daimo/common";
+import { tokenMetadata } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
+import { chainConfig } from "../logic/chainConfig";
 import { cacheEAccounts } from "../view/shared/addr";
 
 /**
@@ -20,6 +22,12 @@ export type Account = {
   name: string;
   /** Contract wallet address */
   address: Address;
+  /** Account deployment timestamp */
+  createdAt: number;
+  /** Primary balance token address */
+  homeCoin: Address;
+  /** Primary balance chain ID */
+  homeChainID: number;
 
   /** Latest sync block number */
   lastBlock: number;
@@ -59,6 +67,26 @@ interface AccountV3 extends StoredModel {
   enclaveKeyName: string;
   name: string;
   address: string;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  namedAccounts: EAccount[];
+
+  pushToken: string | null;
+}
+
+interface AccountV4 extends StoredModel {
+  storageVersion: 4;
+
+  enclaveKeyName: string;
+  name: string;
+  address: string;
+  createdAt: number;
+  homeCoin: string;
+  homeChainID: number;
 
   lastBlock: number;
   lastBlockTimestamp: number;
@@ -151,10 +179,14 @@ export function parseAccount(accountJSON?: string): Account | null {
 
   if (model.storageVersion === 2) {
     const a = model as AccountV2;
+    console.log(`[ACCOUNT] MIGRATE from v2: ${accountJSON}`);
     return {
       enclaveKeyName: a.enclaveKeyName,
       name: a.name,
       address: getAddress(a.address),
+      createdAt: 1690000000 /** Old account, Jul 2023 */,
+      homeCoin: tokenMetadata.address,
+      homeChainID: chainConfig.l2.id,
 
       lastBalance: BigInt(a.lastBalance),
       lastBlock: 0,
@@ -168,12 +200,38 @@ export function parseAccount(accountJSON?: string): Account | null {
     };
   }
 
-  assert(model.storageVersion === 3);
-  const a = model as AccountV3;
+  if (model.storageVersion === 3) {
+    console.log(`[ACCOUNT] MIGRATE from v3: ${accountJSON}`);
+    const a = model as AccountV3;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      name: a.name,
+      address: getAddress(a.address),
+      createdAt: 1690000000 /** Old account, Jul 2023 */,
+      homeCoin: tokenMetadata.address,
+      homeChainID: chainConfig.l2.id,
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      namedAccounts: a.namedAccounts,
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 4);
+  const a = model as AccountV4;
   return {
     enclaveKeyName: a.enclaveKeyName,
     name: a.name,
     address: getAddress(a.address),
+    createdAt: a.createdAt,
+    homeCoin: getAddress(a.homeCoin),
+    homeChainID: a.homeChainID,
 
     lastBalance: BigInt(a.lastBalance),
     lastBlock: a.lastBlock,
@@ -190,12 +248,15 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV3 = {
-    storageVersion: 3,
+  const model: AccountV4 = {
+    storageVersion: 4,
 
     enclaveKeyName: account.enclaveKeyName,
     name: account.name,
     address: account.address,
+    createdAt: account.createdAt,
+    homeCoin: account.homeCoin,
+    homeChainID: account.homeChainID,
 
     lastBalance: account.lastBalance.toString(),
     lastBlock: account.lastBlock,

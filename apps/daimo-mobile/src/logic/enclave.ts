@@ -1,8 +1,10 @@
 import { assert } from "@daimo/common";
+import { tokenMetadata } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { useEffect, useState } from "react";
 import { Hex } from "viem";
 
+import { chainConfig } from "./chainConfig";
 import { Log } from "./log";
 import { rpcHook } from "./trpc";
 import { Account, defaultEnclaveKeyName } from "../model/account";
@@ -46,6 +48,9 @@ export function useLoadAccountFromKey(pubKey: Hex | undefined) {
       name,
       enclaveKeyName: defaultEnclaveKeyName,
       address: addr,
+      createdAt: Date.now() / 1e3, // TODO: lookup from RPC
+      homeCoin: tokenMetadata.address,
+      homeChainID: chainConfig.l2.id,
 
       lastBalance: 0n,
       lastBlockTimestamp: 0,
