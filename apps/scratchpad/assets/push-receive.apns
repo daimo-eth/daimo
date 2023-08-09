@@ -6,5 +6,5 @@
     },
     "sound": "default",
   },
-  "Simulator Target Bundle" : "eth.daimo"
+  "Simulator Target Bundle" : "com.daimo"
 }

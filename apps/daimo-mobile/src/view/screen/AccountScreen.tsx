@@ -190,7 +190,16 @@ function AppInfo({ account }: { account: Account }) {
 
 function getKeySecDescription(sec: EnclaveSecSummary) {
   const bio = sec.biometricSecurityLevel === "AVAILABLE" ? "biometrics" : "PIN";
-  return `${sec.hardwareSecurityLevel.toLowerCase()} key, ${bio}`;
+  switch (sec.hardwareSecurityLevel) {
+    case "SOFTWARE":
+      return `software key, ${bio}`;
+    case "TRUSTED_ENVIRONMENT":
+      return `Android TEE, ${bio}`;
+    case "HARDWARE_ENCLAVE":
+      return `secure enclave, ${bio}`;
+    default:
+      return `${sec.hardwareSecurityLevel}, ${bio}}`;
+  }
 }
 
 function KV({ label, value }: { label: string; value: string }) {
