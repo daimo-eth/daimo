@@ -101,8 +101,13 @@ export async function deleteEnclaveKey(enclaveKeyName: string) {
   console.log(`[ENCLAVE] deleted ${enclaveKeyName}`);
 }
 
+export interface EnclaveSecSummary {
+  biometricSecurityLevel: ExpoEnclave.BiometricSecurityLevel;
+  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel;
+}
+
 /** Gets detailed enclave security level */
-export async function getEnclaveSec() {
+export async function getEnclaveSec(): Promise<EnclaveSecSummary> {
   const promises = [
     ExpoEnclave.getBiometricSecurityLevel(),
     ExpoEnclave.getHardwareSecurityLevel(),

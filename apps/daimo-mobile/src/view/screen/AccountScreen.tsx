@@ -1,3 +1,4 @@
+import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +15,11 @@ import {
 
 import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
-import { deleteEnclaveKey, getEnclaveSec } from "../../logic/enclave";
+import {
+  EnclaveSecSummary,
+  deleteEnclaveKey,
+  getEnclaveSec,
+} from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { Account, serializeAccount, useAccount } from "../../model/account";
@@ -22,7 +27,7 @@ import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
-import { TextBody, TextBold, TextH2, TextLight } from "../shared/text";
+import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
 
 export function AccountScreen() {
   const [account, setAccount] = useAccount();
@@ -70,9 +75,15 @@ export function AccountScreen() {
   return (
     <>
       <ScrollView contentContainerStyle={ss.container.vertModal}>
-        <Spacer h={8} />
+        <Spacer h={4} />
         <View style={ss.container.ph16}>
-          <TextH2>{account.name}</TextH2>
+          <TextH2>
+            {account.name}
+            <TextBody>
+              {` \u00A0 `}
+              {tokenMetadata.name} · {chainConfig.l2.name}
+            </TextBody>
+          </TextH2>
         </View>
         <ButtonSmall onPress={linkToExplorer}>
           <View>
@@ -85,9 +96,10 @@ export function AccountScreen() {
             </TextLight>
           </View>
         </ButtonSmall>
-        <Spacer h={32} />
+        <Spacer h={24} />
+
         <View style={ss.container.ph16}>
-          <TextH2>Devices</TextH2>
+          <TextH3>Devices</TextH3>
         </View>
         <Spacer h={8} />
         <View style={styles.callout}>
@@ -97,14 +109,14 @@ export function AccountScreen() {
             account by adding a second phone or laptop.
           </TextBody>
         </View>
-
         <Spacer h={32} />
+
         <AppInfo {...{ account }} />
-
         <Spacer h={32} />
+
         <View style={ss.container.ph16}>
-          <TextH2>Danger zone</TextH2>
-          <Spacer h={8} />
+          <TextH3>Danger zone</TextH3>
+          <Spacer h={4} />
           <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
         </View>
       </ScrollView>
@@ -145,7 +157,7 @@ function AppInfo({ account }: { account: Account }) {
 
   return (
     <View style={ss.container.ph16}>
-      <TextH2>Details</TextH2>
+      <TextH3>Details</TextH3>
       <Spacer h={16} />
       <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
       <KV
@@ -153,18 +165,7 @@ function AppInfo({ account }: { account: Account }) {
         value={`${env.nativeApplicationVersion} #${env.nativeBuildVersion}`}
       />
       <KV label="Commit" value={`${env.gitHash} ${env.buildProfile}`} />
-      {sec && (
-        <>
-          <KV
-            label="Biometric Security"
-            value={sec.biometricSecurityLevel.toLowerCase()}
-          />
-          <KV
-            label="Hardware Security"
-            value={sec.hardwareSecurityLevel.toLowerCase()}
-          />
-        </>
-      )}
+      {sec && <KV label="Key Security" value={getKeySecDescription(sec)} />}
       <KV
         label="Notifications"
         value={account.pushToken ? "enabled" : "disabled"}
@@ -182,6 +183,11 @@ function AppInfo({ account }: { account: Account }) {
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
     </View>
   );
+}
+
+function getKeySecDescription(sec: EnclaveSecSummary) {
+  const bio = sec.biometricSecurityLevel === "AVAILABLE" ? "biometrics" : "PIN";
+  return `${sec.hardwareSecurityLevel.toLowerCase()} key, ${bio}`;
 }
 
 function KV({ label, value }: { label: string; value?: string | null }) {
