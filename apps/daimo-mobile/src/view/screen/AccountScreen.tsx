@@ -116,7 +116,7 @@ export function AccountScreen() {
 
         <View style={ss.container.ph16}>
           <TextH3>Danger zone</TextH3>
-          <Spacer h={4} />
+          <Spacer h={8} />
           <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
         </View>
       </ScrollView>
@@ -141,13 +141,24 @@ function AppInfo({ account }: { account: Account }) {
     }
   };
 
+  const envKV: Record<string, string> = {
+    Platform: `${Platform.OS} ${Platform.Version}`,
+    Version: `${env.nativeApplicationVersion} #${env.nativeBuildVersion}`,
+    Commit: `${env.gitHash} ${env.buildProfile}`,
+    Notifications: account.pushToken ? "enabled" : "disabled",
+  };
+  if (sec) {
+    envKV["Key Security"] = getKeySecDescription(sec);
+  }
+
   const sendDebugLog = () => {
-    const accountInfo = serializeAccount(account);
+    const env = JSON.stringify(envKV, null, 2);
+    const accountJSON = serializeAccount(account);
     const debugLog = getDebugLog();
     Share.share(
       {
         title: "Send Debug Log",
-        message: `# Daimo Debug Log\n\n${accountInfo}\n\n${debugLog}`,
+        message: `# Daimo Debug Log\n\n${env}\n\n${accountJSON}\n\n${debugLog}`,
       },
       {
         subject: "Daimo Debug Log",
@@ -158,18 +169,10 @@ function AppInfo({ account }: { account: Account }) {
   return (
     <View style={ss.container.ph16}>
       <TextH3>Details</TextH3>
-      <Spacer h={16} />
-      <KV label="Platform" value={`${Platform.OS} ${Platform.Version}`} />
-      <KV
-        label="Version"
-        value={`${env.nativeApplicationVersion} #${env.nativeBuildVersion}`}
-      />
-      <KV label="Commit" value={`${env.gitHash} ${env.buildProfile}`} />
-      {sec && <KV label="Key Security" value={getKeySecDescription(sec)} />}
-      <KV
-        label="Notifications"
-        value={account.pushToken ? "enabled" : "disabled"}
-      />
+      <Spacer h={8} />
+      {Object.entries(envKV).map(([k, v]) => (
+        <KV key={k} label={k} value={v} />
+      ))}
       {!account.pushToken && <Spacer h={8} />}
       {!account.pushToken && (
         <ButtonMed
@@ -190,14 +193,13 @@ function getKeySecDescription(sec: EnclaveSecSummary) {
   return `${sec.hardwareSecurityLevel.toLowerCase()} key, ${bio}`;
 }
 
-function KV({ label, value }: { label: string; value?: string | null }) {
+function KV({ label, value }: { label: string; value: string }) {
   return (
     <View>
       <TextBody>
         <TextLight>{label}</TextLight>
         {` \u00A0 `}
-        {value && <TextBold>{value}</TextBold>}
-        {!value && <Text>none</Text>}
+        <Text>{value}</Text>
       </TextBody>
       <Spacer h={8} />
     </View>
