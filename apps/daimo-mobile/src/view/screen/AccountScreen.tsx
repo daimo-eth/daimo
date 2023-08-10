@@ -1,5 +1,6 @@
 import { tokenMetadata } from "@daimo/contract";
 import { Octicons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -166,6 +167,13 @@ function AppInfo({ account }: { account: Account }) {
     );
   };
 
+  const testAuth = async () => {
+    const res = await LocalAuthentication.authenticateAsync({
+      promptMessage: "Test Daimo auth",
+    });
+    window.prompt("Auth result: " + JSON.stringify(res));
+  };
+
   return (
     <View style={ss.container.ph16}>
       <TextH3>Details</TextH3>
@@ -180,6 +188,9 @@ function AppInfo({ account }: { account: Account }) {
           title="Enable notifications"
           onPress={enableNotifications}
         />
+      )}
+      {account.pushToken && (
+        <ButtonMed type="primary" title="Test Auth" onPress={testAuth} />
       )}
 
       <Spacer h={8} />

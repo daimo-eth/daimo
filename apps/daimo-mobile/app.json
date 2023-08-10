@@ -52,6 +52,12 @@
             "deploymentTarget": "15.0"
           }
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Protect Daimo using Face ID."
+        }
       ]
     ]
   }

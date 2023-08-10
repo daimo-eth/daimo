@@ -67,7 +67,8 @@
     "react-native-svg": "13.9.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.2.15"
+    "viem": "^1.2.15",
+    "expo-local-authentication": "~13.4.1"
   },
   "eslintConfig": {
     "extends": [
