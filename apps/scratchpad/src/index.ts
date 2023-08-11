@@ -8,6 +8,7 @@ import { baseGoerli } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
+import { pushNotify, pushNotifyDesc } from "./pushNotify";
 
 main()
   .then(() => console.log("Done"))
@@ -20,6 +21,7 @@ async function main() {
     { name: "create", desc: createAccountDesc(), fn: createAccount },
     { name: "check", desc: checkAccountDesc(), fn: checkAccount },
     { name: "mailing-list", desc: mailingListDesc(), fn: mailingList },
+    { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
   ];
 
   const cmdName = process.argv[2];

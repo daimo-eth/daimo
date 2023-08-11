@@ -14,10 +14,13 @@
     },
     "assetBundlePatterns": ["**/*"],
     "scheme": "daimo",
+    "notification": {
+      "iosDisplayInForeground": true
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "27",
+      "buildNumber": "28",
       "associatedDomains": ["applinks:daimo.onrender.com"],
       "config": {
         "usesNonExemptEncryption": false

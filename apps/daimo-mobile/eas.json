@@ -43,7 +43,8 @@
   "submit": {
     "stage": {
       "ios": {
-        "ascAppId": "6450241809"
+        "ascAppId": "6459700343",
+        "companyName": "Daimo, Inc"
       }
     },
     "prod": {}

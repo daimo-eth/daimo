@@ -2,7 +2,7 @@
   "aps": {
     "alert": {
       "title": "Received $15.00",
-      "body": "You received 15.00 USDC from dc3"
+      "body": "You received 15.00 USDC from nalin"
     },
     "sound": "default",
   },
