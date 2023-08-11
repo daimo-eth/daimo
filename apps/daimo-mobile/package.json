@@ -14,7 +14,7 @@
     "run:ios": "expo run:ios",
     "test": "tsc --noEmit && jest",
     "lint": "npm run lint:deps && npm run lint:style",
-    "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=gen '--ignoreFiles=.*.config.ts' && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-build-properties,@babel/core,babel-plugin-transform-inline-environment-variables",
+    "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=gen '--ignoreFiles=.*.config.ts' && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-build-properties,expo-local-authentication,@babel/core,babel-plugin-transform-inline-environment-variables",
     "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
