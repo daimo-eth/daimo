@@ -25,7 +25,7 @@ function createLogFunc(type: string, oldLog: (...args: any[]) => void) {
       }
     });
     let line = [timestamp, type, ...parts].join(" ");
-    if (line.length > 500) line = line.slice(0, 500) + "...";
+    if (line.length > 5000) line = line.slice(0, 5000) + "...";
     logs.push(line);
 
     // Don't let the buffer get too long
