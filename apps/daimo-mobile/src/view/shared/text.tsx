@@ -1,3 +1,5 @@
+import { Octicons } from "@expo/vector-icons";
+import { ReactNode } from "react";
 import { Text, TextProps } from "react-native";
 
 import { ss } from "./style";
@@ -36,4 +38,28 @@ export function TextRight(props: TextProps) {
 
 export function TextError(props: TextProps) {
   return <Text {...props} style={ss.text.error} />;
+}
+
+type OcticonName = React.ComponentProps<typeof Octicons>["name"];
+
+const emojiToOcticon: Record<string, OcticonName> = {
+  "🔒": "lock",
+};
+
+export function EmojiToOcticon({ text, size }: { text: string; size: number }) {
+  // Split by emoji
+  const regex = new RegExp(Object.keys(emojiToOcticon).join("|"), "g");
+
+  // Replace certain emojis with octicons
+  const parts: ReactNode[] = [];
+  let match, last;
+  for (last = 0; (match = regex.exec(text)) != null; last = regex.lastIndex) {
+    const joiningPart = text.substring(last, match.index);
+    parts.push(<Text key={last}>{joiningPart}</Text>);
+    const octiconName = emojiToOcticon[match[0]];
+    parts.push(<Octicons key={last + 1} size={size} name={octiconName} />);
+  }
+  parts.push(<Text key={last}>{text.substring(last)}</Text>);
+
+  return <>{parts}</>;
 }

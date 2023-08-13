@@ -30,6 +30,7 @@ import { InputBig, OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import {
+  EmojiToOcticon,
   TextBody,
   TextCenter,
   TextError,
@@ -226,7 +227,11 @@ function CreateAccountPage() {
             </View>
             <TextCenter>
               {status === "error" && <TextError>{message}</TextError>}
-              {status !== "error" && <TextLight>{message}</TextLight>}
+              {status !== "error" && (
+                <TextLight>
+                  <EmojiToOcticon size={16} text={message} />
+                </TextLight>
+              )}
             </TextCenter>
           </View>
         </View>
@@ -292,18 +297,16 @@ function NamePicker({
   return (
     <View>
       <Spacer h={64} />
-      <View>
-        <InputBig
-          placeholder="choose a name"
-          value={name}
-          onChange={onChange}
-          center
-        />
-        <Spacer h={8} />
-        <TextLight>
-          <TextCenter>{status}</TextCenter>
-        </TextLight>
-      </View>
+      <InputBig
+        placeholder="choose a name"
+        value={name}
+        onChange={onChange}
+        center
+      />
+      <Spacer h={8} />
+      <TextLight>
+        <TextCenter>{status}</TextCenter>
+      </TextLight>
       <Spacer h={8} />
       <ButtonBig
         type="primary"

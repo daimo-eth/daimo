@@ -79,13 +79,13 @@ export function useCreateAccount(name: string): ActHandle {
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
     case "SOFTWARE":
-      return "Key generated";
+      return "🔒  Key generated in Secure Enclave";
     case "TRUSTED_ENVIRONMENT":
       return "Key generarated in trusted hardware";
     case "HARDWARE_ENCLAVE":
       return Platform.OS === "ios"
-        ? "☑ Key generated in Secure Enclave"
-        : "☑ Key generated in Secure Element";
+        ? "🔒  Key generated in Secure Enclave"
+        : "🔒  Key generated in hardware enclave";
   }
 }
 
