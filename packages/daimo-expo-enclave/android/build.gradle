@@ -37,7 +37,7 @@ buildscript {
 
 // Creating sources with comments
 task androidSourcesJar(type: Jar) {
-  classifier = 'sources'
+  archiveClassifier.set('sources') // Use archiveClassifier to set the classifier
   from android.sourceSets.main.java.srcDirs
 }
 
