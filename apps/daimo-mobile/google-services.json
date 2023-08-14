@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "164379879968",
+    "project_id": "daimo-98c63",
+    "storage_bucket": "daimo-98c63.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:164379879968:android:1216763d816c9fb415ea45",
+        "android_client_info": {
+          "package_name": "com.daimo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "164379879968-880052k97498msnjgt01mmomc4c88h5n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.daimo",
+            "certificate_hash": "b8e599c58d3d7f8d63bb85fe384a8d33646cb173"
+          }
+        },
+        {
+          "client_id": "164379879968-dq1o458rsqhhmngmiqfvhprv44gddqe9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD50vaXhZblHdtzPwiX8TpcgKS5LnpTH6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "164379879968-dq1o458rsqhhmngmiqfvhprv44gddqe9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
