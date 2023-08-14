@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
 });
 
 // Parse both 1.23 and 1,23
-function parseLocalFloat(str: string) {
-  if (str === undefined) return 0;
+function parseLocalFloat(str?: string) {
+  if (str == null) return 0;
   return parseFloat(str.replace(",", "."));
 }
