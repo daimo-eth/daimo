@@ -30,11 +30,36 @@
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true,
+      "intentFilters": [
+        {
+          "action": "android.intent.action.VIEW",
+          "category": ["android.intent.category.DEFAULT", "android.intent.category.BROWSABLE"],
+          "data": [
+            {
+              "scheme": "daimo"
+            },
+            {
+              "scheme": "com.daimo"
+            },
+            {
+              "scheme": "exp+daimo"
+            },
+            {
+              "scheme": "https",
+              "host": "daimo.onrender.com",
+              "pathPrefix": "/link"
+            }
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.daimo"
+      "package": "com.daimo",
+      "versionCode": 9
     },
     "extra": {
       "eas": {
@@ -46,9 +71,9 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 31,
-            "targetSdkVersion": 31,
-            "buildToolsVersion": "31.0.0",
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "buildToolsVersion": "33.0.0",
             "kotlinVersion": "1.8.0"
           },
           "ios": {
@@ -61,7 +86,8 @@
         {
           "faceIDPermission": "Protect Daimo using Face ID."
         }
-      ]
+      ],
+      "@react-native-firebase/app"
     ]
   }
 }
