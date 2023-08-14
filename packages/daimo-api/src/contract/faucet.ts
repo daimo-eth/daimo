@@ -1,9 +1,9 @@
 import { OpStatus, TransferOpEvent } from "@daimo/common";
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import { Address, Log, getAbiItem, getContract } from "viem";
+import { Address, Log, getAbiItem } from "viem";
 
 import { CoinIndexer } from "./coinIndexer";
-import { ContractType, ViemClient } from "../chain";
+import { ViemClient } from "../chain";
 
 export type FaucetStatus =
   | "unavailable"
@@ -12,18 +12,14 @@ export type FaucetStatus =
   | "alreadySent";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
-type TransferLog = Log<bigint, number, typeof transferEvent>;
+type TransferLog = Log<bigint, number, false, typeof transferEvent>;
 
 /** Testnet faucet. Drips testUSDC to any account not yet requested. */
 export class Faucet {
   private requested = new Set<Address>();
   private sent = new Set<Address>();
-  private contract: ContractType<typeof erc20ABI>;
 
-  constructor(private vc: ViemClient, private coinIndexer: CoinIndexer) {
-    const { address } = tokenMetadata;
-    this.contract = getContract({ abi: erc20ABI, address, ...this.vc });
-  }
+  constructor(private vc: ViemClient, private coinIndexer: CoinIndexer) {}
 
   async init() {
     this.coinIndexer.pipeAllTransfers(this.parseLogs);
@@ -53,7 +49,12 @@ export class Faucet {
 
     console.log(`[FAUCET] sending 50 testUSDC to ${address}`);
     const amount = 50_000_000n;
-    const hash = await this.contract.write.transfer([address, amount]);
+    const hash = await this.vc.walletClient.writeContract({
+      abi: erc20ABI,
+      address: tokenMetadata.address,
+      functionName: "transfer",
+      args: [address, amount],
+    });
 
     return {
       type: "transfer",

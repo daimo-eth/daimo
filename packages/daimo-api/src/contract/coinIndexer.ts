@@ -1,24 +1,24 @@
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import { Address, Log, getAbiItem, getContract } from "viem";
+import { Address, Log, getAbiItem } from "viem";
 
-import { ContractType, ViemClient } from "../chain";
+import { ViemClient } from "../chain";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
-export type TransferLog = Log<bigint, number, typeof transferEvent, true>;
+export type TransferLog = Log<
+  bigint,
+  number,
+  false,
+  typeof transferEvent,
+  true
+>;
 
 /* USDC or testUSDC stablecoin contract. Tracks transfers. */
 export class CoinIndexer {
-  // TODO: index to database
   private allTransfers: TransferLog[] = [];
 
   private listeners: ((logs: TransferLog[]) => void)[] = [];
 
-  private contract: ContractType<typeof erc20ABI>;
-
-  constructor(private client: ViemClient) {
-    const { address } = tokenMetadata;
-    this.contract = getContract({ abi: erc20ABI, address, ...this.client });
-  }
+  constructor(private client: ViemClient) {}
 
   async init() {
     await this.client.pipeLogs(
@@ -39,7 +39,13 @@ export class CoinIndexer {
   /** Get balance as of a block height. */
   async getBalanceAt(addr: Address, blockNum: number) {
     const blockNumber = BigInt(blockNum);
-    return this.contract.read.balanceOf([addr], { blockNumber });
+    return this.client.publicClient.readContract({
+      abi: erc20ABI,
+      address: tokenMetadata.address,
+      functionName: "balanceOf",
+      args: [addr],
+      blockNumber,
+    });
   }
 
   /** Listener invoked for all past coin transfers, then for new ones. */
