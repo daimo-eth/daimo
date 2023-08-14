@@ -1,11 +1,11 @@
 import {
-  DaimoRequestStatus,
   DAccount,
+  DaimoRequestStatus,
   TransferLogSummary,
+  hasAccountName,
   parseDaimoLink,
   zAddress,
   zHex,
-  hasAccountName,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, Transport, getAddress } from "viem";
@@ -132,30 +132,8 @@ export function createRouter(
         })
       )
       .query(async (opts) => {
+        const ret = null as DAccount | null;
         // TODO: lookup account by signing key
-        // Doing this efficiently likely requires an AddKey event
-        // Alternately, an indexer contract thru which all accounts are deployed
-        let ret = null as DAccount | null;
-
-        // Stub to test client
-        if (
-          opts.input.pubKeyHex ===
-          "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004fea4465280cfcb1e1b77a91525ca90dfdd213705b6eac7bc7a79931af4e0cfe7464564a11e15252f840d73da0d34fddb74ebe806e93840f3c208e68d620d7376"
-        ) {
-          ret = {
-            name: "test",
-            addr: "0xa3449c3f57af6d39bc9eb41d6e0b75d3723210cd",
-          };
-        } else if (
-          opts.input.pubKeyHex ===
-          `0x3059301306072a8648ce3d020106082a8648ce3d0301070342000436dff9029e718c4c7da071077a53a987569ecc780f92203e26afc7b91e1362582ce0bfc65b7cef65dff64768978e691eca8576da6f9d387fe77c70eeaed26f33`
-        ) {
-          ret = {
-            name: "jules",
-            addr: "0xbfbff790707f8a9bddae662985270df58011cd9c",
-          };
-        }
-
         console.log(
           `[API] lookup found ${ret?.name || "<no account>"} for pubkey ${
             opts.input.pubKeyHex

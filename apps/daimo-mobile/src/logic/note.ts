@@ -103,7 +103,6 @@ export function useEphemeralSignature(
         account: ephemeralAccount,
         chain: baseGoerli,
         transport: http(),
-        // TODO: webSocket("wss://base-goerli.public.blastapi.io")
       });
       const message = keccak256(recipient);
       const signature = await ephemeralClient.signMessage({

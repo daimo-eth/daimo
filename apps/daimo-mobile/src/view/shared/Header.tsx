@@ -10,7 +10,7 @@ import { useAccount } from "../../model/account";
 
 export function Header() {
   const nav = useNav();
-  const goToAccount = useCallback(() => nav.navigate("Account"), [nav]);
+  const goToAccount = useCallback(() => nav.navigate("Settings"), [nav]);
 
   const [account] = useAccount();
 

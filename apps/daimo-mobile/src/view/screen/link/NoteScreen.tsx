@@ -10,7 +10,6 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Address } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 
 import { SendOpFn, useSendAsync } from "../../../action/useSendAsync";
 import {
@@ -28,17 +27,14 @@ import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 
-export default function ClaimNoteScreen({ route }: Props) {
+export default function NoteScreen({ route }: Props) {
   const [account] = useAccount();
   assert(account != null);
 
-  const { ephemeralPrivateKey, ephemeralOwner: passedEphemeralOwner } =
-    route.params || {};
-  const ephemeralOwner =
-    passedEphemeralOwner || privateKeyToAccount(ephemeralPrivateKey!).address;
-
+  const { ephemeralPrivateKey, ephemeralOwner } = route.params;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
+  // TODO: delete useFetchNote etc, use rpcFunc.getLinkStatus
   const [note, loadState] = useFetchNote(ephemeralOwner);
 
   return (

@@ -15,7 +15,7 @@ import { AmountInput } from "../../shared/Input";
 import { useNav } from "../../shared/nav";
 import { color } from "../../shared/style";
 
-export default function RequestSendScreen() {
+export default function SendRequestScreen() {
   const [account] = useAccount();
   assert(account != null);
   const [dollars, setDollars] = useState(0);

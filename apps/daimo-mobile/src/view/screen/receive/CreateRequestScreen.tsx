@@ -12,7 +12,7 @@ import { useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextLight } from "../../shared/text";
 
-export default function RequestScreen() {
+export default function CreateRequestScreen() {
   const nav = useNav();
   const send = useCallback(() => nav.navigate("RequestSend"), [nav]);
 

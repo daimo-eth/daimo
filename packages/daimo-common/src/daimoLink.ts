@@ -31,15 +31,17 @@ export type DaimoLinkNote = {
 
 export function formatDaimoLink(link: DaimoLink) {
   switch (link.type) {
-    case "account":
+    case "account": {
       return `${daimoLinkBase}/account/${link.addr}`;
-    case "request":
+    }
+    case "request": {
       return `${daimoLinkBase}/request/${link.recipient}/${link.dollars}`;
-    case "note":
-      if (link.ephemeralPrivateKey == null) {
-        return `${daimoLinkBase}/note/${link.ephemeralOwner}`;
-      }
-      return `${daimoLinkBase}/note/${link.ephemeralOwner}#${link.ephemeralPrivateKey}`;
+    }
+    case "note": {
+      const base = `${daimoLinkBase}/note/${link.ephemeralOwner}`;
+      const hash = link.ephemeralPrivateKey && `#${link.ephemeralPrivateKey}`;
+      return `${base}${hash || ""}`;
+    }
   }
 }
 

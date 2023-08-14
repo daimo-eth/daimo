@@ -1,26 +1,25 @@
-import { DaimoLink, parseDaimoLink, OpEvent } from "@daimo/common";
+import {
+  DaimoLink,
+  DaimoLinkNote,
+  OpEvent,
+  parseDaimoLink,
+} from "@daimo/common";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useURL } from "expo-linking";
 import { useEffect } from "react";
-import { Address } from "viem";
 
 import { Recipient, getRecipient } from "../../sync/recipients";
 
 export type HomeStackParamList = {
   Home: undefined;
-  Account: undefined;
+  Settings: undefined;
   Chain: undefined;
   Send: undefined | { recipient: Recipient; dollars?: number };
   Withdraw: undefined;
   Request: undefined;
   Deposit: undefined;
-  Note:
-    | undefined
-    | {
-        ephemeralPrivateKey: `0x${string}` | undefined;
-        ephemeralOwner: Address | undefined;
-      };
+  Note: DaimoLinkNote;
   RequestSend: undefined;
   History: undefined;
   HistoryOp: { op: OpEvent };
@@ -62,10 +61,7 @@ async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
       break;
     }
     case "note": {
-      nav.navigate("Note", {
-        ephemeralPrivateKey: link.ephemeralPrivateKey,
-        ephemeralOwner: link.ephemeralOwner,
-      });
+      nav.navigate("Note", link);
       break;
     }
     default:

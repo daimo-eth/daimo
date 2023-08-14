@@ -29,7 +29,7 @@ import { useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
 
-export function AccountScreen() {
+export function SettingsScreen() {
   const [account, setAccount] = useAccount();
   const nav = useNav();
 

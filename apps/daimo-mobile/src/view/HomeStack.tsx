@@ -2,15 +2,15 @@ import { tokenMetadata } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
-import { AccountScreen } from "./screen/AccountScreen";
 import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
-import ClaimNoteScreen from "./screen/receive/ClaimNoteScreen";
+import { SettingsScreen } from "./screen/SettingsScreen";
+import NoteScreen from "./screen/link/NoteScreen";
+import CreateRequestScreen from "./screen/receive/CreateRequestScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
-import RequestScreen from "./screen/receive/RequestScreen";
-import RequestSendScreen from "./screen/receive/RequestSendScreen";
+import SendRequestScreen from "./screen/receive/SendRequestScreen";
 import SendScreen from "./screen/send/SendScreen";
 import WithdrawScreen from "./screen/send/WithdrawScreen";
 import { HomeStackParamList } from "./shared/nav";
@@ -30,7 +30,7 @@ export function HomeStackNav() {
           options={useMemo(() => ({ headerShown: !!account }), [account])}
         />
         <HomeStack.Screen name="Send" component={SendScreen} />
-        <HomeStack.Screen name="Request" component={RequestScreen} />
+        <HomeStack.Screen name="Request" component={CreateRequestScreen} />
         <HomeStack.Screen
           name="History"
           component={HistoryScreen}
@@ -38,14 +38,14 @@ export function HomeStackNav() {
         />
       </HomeStack.Group>
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
-        <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="Settings" component={SettingsScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
         <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
-        <HomeStack.Screen name="Note" component={ClaimNoteScreen} />
+        <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen
           name="RequestSend"
           options={{ headerTitle: `Request ${tokenMetadata.symbol}` }}
-          component={RequestSendScreen}
+          component={SendRequestScreen}
         />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
