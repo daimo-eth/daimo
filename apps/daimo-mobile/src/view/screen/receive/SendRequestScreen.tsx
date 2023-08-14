@@ -36,7 +36,7 @@ export default function SendRequestScreen() {
 
   const sendRequest = useCallback(async () => {
     try {
-      const result = await Share.share({ url });
+      const result = await Share.share({ message: url });
       console.log(`[REQUEST] action ${result.action}`);
       if (result.action === Share.sharedAction) {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
