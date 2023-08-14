@@ -1,11 +1,13 @@
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import { Log } from "./log";
 import { rpcFunc } from "./trpc";
 import { getAccountManager, useAccount } from "../model/account";
 import { syncAfterPushNotification } from "../sync/sync";
+import { FirebaseOptions, initializeApp } from 'firebase/app'
+import googleServicesConfig from '../../google-services.json'
 
 /** Registers push notifications, if we have permission & haven't already. */
 export function useInitNotifications() {
@@ -14,6 +16,7 @@ export function useInitNotifications() {
 
   useEffect(() => {
     if (address == null) return;
+
 
     // Register push token for account, if we haven't already
     getPushNotificationManager().maybeSavePushTokenForAccount();
@@ -62,6 +65,30 @@ class PushNotificationManager {
 
   maybeSavePushTokenForAccount = async () => {
     try {
+      if (Platform.OS === "android") {
+        // Android specific setup
+        await Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+
+        const firebaseConfig = {
+          apiKey: googleServicesConfig.client[0].api_key[0].current_key,
+          authDomain: "daimo-98c63.firebaseapp.com",
+          projectId: googleServicesConfig.project_info.project_id,
+          storageBucket: googleServicesConfig.project_info.storage_bucket,
+          messagingSenderId: "164379879968",
+          appId: googleServicesConfig.client[0].client_info.mobilesdk_app_id,
+        };
+
+        console.log('Firebase config:', firebaseConfig)
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        console.log('Firebase initialized:', app.name);
+      }
       await this.savePushTokenForAccount();
     } catch (e) {
       console.error(`[NOTIFY] failed to save push token`, e);
