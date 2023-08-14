@@ -120,7 +120,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       };
       const url = formatDaimoLink(link);
 
-      const result = await Share.share({ url });
+      const result = await Share.share({ message: url });
       if (result.action === Share.sharedAction) {
         console.log(
           "[APP] Note shared with activity type ",
