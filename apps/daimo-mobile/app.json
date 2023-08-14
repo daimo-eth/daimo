@@ -31,7 +31,6 @@
     },
     "android": {
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true,
       "intentFilters": [
         {
           "action": "android.intent.action.VIEW",
