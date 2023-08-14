@@ -76,10 +76,10 @@ class PushNotificationManager {
 
         const firebaseConfig = {
           apiKey: googleServicesConfig.client[0].api_key[0].current_key,
-          authDomain: "daimo-98c63.firebaseapp.com",
+          authDomain: googleServicesConfig.project_info.project_id + ".firebaseapp.com",
           projectId: googleServicesConfig.project_info.project_id,
           storageBucket: googleServicesConfig.project_info.storage_bucket,
-          messagingSenderId: "164379879968",
+          messagingSenderId: googleServicesConfig.project_info.project_number,
           appId: googleServicesConfig.client[0].client_info.mobilesdk_app_id,
         };
 
