@@ -161,7 +161,7 @@ function SendButton({
   assert(account != null);
   assert(dollars >= 0);
 
-  const nonce = new DaimoNonce(new DaimoNonceMetadata(!account.isDeployed));
+  const nonce = new DaimoNonce(new DaimoNonceMetadata());
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {

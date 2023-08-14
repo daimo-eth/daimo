@@ -2,10 +2,9 @@ import { EAccount, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
-import { Address, createPublicClient, http } from "viem";
+import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { chainConfig } from "../logic/chainConfig";
 import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
@@ -35,7 +34,6 @@ export function useSendAsync(
     if (pendingOp) {
       pendingOp.opHash = handle.userOpHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
-      account.isDeployed = true;
       account.recentTransfers.push(pendingOp);
       account.namedAccounts.push(...(namedAccounts || []));
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
@@ -69,15 +67,7 @@ function loadAccount(enclaveKeyName: string, address: Address) {
     const signer: SigningCallback = (hexTx: string) =>
       requestEnclaveSignature(enclaveKeyName, hexTx);
 
-    // TODO: remove publicClient
-    // The only thing we're using it for is loading nonce.
-    // (Do we even need that at all, vs random nonce?)
-    // See https://github.com/daimo-eth/daimo/issues/100
-    const client = createPublicClient({
-      chain: chainConfig.l2,
-      transport: http(),
-    });
-    return await DaimoAccount.init(client, address, signer, false);
+    return await DaimoAccount.init(address, signer, false);
   })();
   accountCache.set(enclaveKeyName, promise);
 

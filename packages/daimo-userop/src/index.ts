@@ -53,7 +53,6 @@ export class DaimoAccount {
   }
 
   public static async init(
-    publicClient: PublicClient<Transport, typeof baseGoerli>,
     deployedAddress: Address,
     signer: SigningCallback,
     dryRun: boolean
@@ -70,7 +69,6 @@ export class DaimoAccount {
           )
         : undefined;
     const daimoBuilder = await DaimoOpBuilder.init(
-      publicClient,
       deployedAddress,
       paymasterMiddleware,
       signer

@@ -36,21 +36,17 @@ export class DaimoNonce {
 }
 
 export class DaimoNonceMetadata {
-  public requiresInit: number;
-  public constructor(requiresInit: boolean) {
-    this.requiresInit = requiresInit ? 1 : 0;
-  }
-
   public static fromHex(hexMetadata: Hex): DaimoNonceMetadata {
-    return new DaimoNonceMetadata((hexToNumber(hexMetadata) & 1) === 1);
+    assert(hexMetadata.length === 16 + 2);
+    return new DaimoNonceMetadata();
   }
 
   public toHex(): Hex {
-    return numberToHex(this.requiresInit, { size: 8 });
+    return numberToHex(0, { size: 8 });
   }
 }
 
 // TODO: add more metadata to track requests for transfers
-class DaimoTransferMetadata extends DaimoNonceMetadata {}
+// class DaimoTransferMetadata extends DaimoNonceMetadata {}
 
-class DaimoNoteMetadata extends DaimoNonceMetadata {}
+// class DaimoNoteMetadata extends DaimoNonceMetadata {}
