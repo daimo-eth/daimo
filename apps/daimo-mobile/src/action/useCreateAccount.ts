@@ -60,7 +60,6 @@ export function useCreateAccount(name: string): ActHandle {
       name,
       address,
 
-      isDeployed: false,
       lastBalance: BigInt(0),
       lastBlockTimestamp: 0,
       lastBlock: 0,

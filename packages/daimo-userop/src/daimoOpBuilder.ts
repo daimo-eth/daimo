@@ -2,18 +2,11 @@ import { accountABI, entryPointABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
-  Constants,
   Presets,
   UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from "userop";
-import {
-  Address,
-  PublicClient,
-  Transport,
-  encodeFunctionData,
-  getAddress,
-} from "viem";
+import { Address, PublicClient, Transport, encodeFunctionData } from "viem";
 import { baseGoerli } from "viem/chains";
 
 import { DaimoNonce } from "./nonce";
@@ -45,11 +38,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Daimo account address */
   address: `0x${string}`;
 
-  private constructor(
-    // TODO: remove JSON RPC dependency
-    private publicClient: PublicClient<Transport, typeof baseGoerli>,
-    _paymasterMiddleware?: UserOperationMiddlewareFn
-  ) {
+  private constructor(_paymasterMiddleware?: UserOperationMiddlewareFn) {
     super();
     this.provider = new BundlerJsonRpcProvider(config.rpcUrl).setBundlerRpc(
       config.bundlerRpcUrl
@@ -62,12 +51,11 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
-    publicClient: PublicClient<Transport, typeof baseGoerli>,
     deployedAddress: Address,
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(publicClient, paymasterMiddleware);
+    const instance = new DaimoOpBuilder(paymasterMiddleware);
     instance.address = deployedAddress;
 
     console.log(`[OP]: init address ${instance.address}`);

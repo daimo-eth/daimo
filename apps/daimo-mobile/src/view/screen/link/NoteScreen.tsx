@@ -84,7 +84,7 @@ function NoteDisplay({
   );
 
   const [senderName, setSenderName] = useState("");
-  const nonce = new DaimoNonce(new DaimoNonceMetadata(!account.isDeployed));
+  const nonce = new DaimoNonce(new DaimoNonceMetadata());
 
   useEffect(() => {
     (async () => {
