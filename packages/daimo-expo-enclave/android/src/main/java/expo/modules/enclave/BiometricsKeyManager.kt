@@ -19,6 +19,7 @@ import android.app.Activity
 import expo.modules.core.interfaces.services.UIManager
 import expo.modules.core.Promise
 import expo.modules.core.arguments.ReadableArguments
+import java.util.concurrent.atomic.AtomicInteger
 
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
@@ -87,6 +88,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
 
   override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
+    val failedAttempts = AtomicInteger(0)
     val biometricPrompt = BiometricPrompt(
       fragmentActivity!!, ContextCompat.getMainExecutor(context),
       object : BiometricPrompt.AuthenticationCallback() {
@@ -102,7 +104,10 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
 
         override fun onAuthenticationFailed() {
           super.onAuthenticationFailed()
-          promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
+          val currentFailedAttempts = failedAttempts.incrementAndGet()
+          if (currentFailedAttempts >= 5) {
+            promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
+          }
         }
     })
 
