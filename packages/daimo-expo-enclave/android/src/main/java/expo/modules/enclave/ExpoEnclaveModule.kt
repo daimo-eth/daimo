@@ -102,7 +102,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
     try {
       keyManager.deleteKeyPair(accountName)
     } catch (e: Exception) {
-      promise.reject("ERR_ENCLAVE_DELETE_KEYPAIR", e.getMessage())
+      promise.reject("ERR_ENCLAVE_DELETE_KEYPAIR", e.toString())
     }
     promise.resolve("")
   }
