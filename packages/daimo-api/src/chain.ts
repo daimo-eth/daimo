@@ -9,6 +9,7 @@ import {
   PublicClient,
   Transport,
   WalletClient,
+  WebSocketTransport,
   createPublicClient,
   createWalletClient,
   webSocket,
@@ -45,13 +46,15 @@ export function getAccount(privateKey?: string) {
 export class ViemClient {
   constructor(
     public l1Client: PublicClient<Transport, Chain>,
-    public publicClient: PublicClient<Transport, Chain>,
+    public publicClient: PublicClient<WebSocketTransport, typeof baseGoerli>,
     public walletClient: WalletClient<Transport, Chain, Account>
   ) {}
 
   async pipeLogs<E extends AbiEvent | undefined>(
     args: { address: Address; event: E },
-    callback: (logs: GetLogsReturnType<E, true>) => void
+    callback: (
+      logs: GetLogsReturnType<E, E extends AbiEvent ? [E] : undefined, true>
+    ) => void
   ) {
     const latest = await this.publicClient.getBlock({ blockTag: "latest" });
     if (latest.number == null) throw new Error("Missing block number");
@@ -70,7 +73,11 @@ export class ViemClient {
       if ((toBlock as bigint) > latest.number) toBlock = "latest";
       console.log(`[CHAIN] loading ${fromBlock} to ${toBlock} for ${pipeName}`);
       const logs = await retryBackoff(`logs-${pipeName}`, () =>
-        this.publicClient.getLogs({
+        this.publicClient.getLogs<
+          E,
+          E extends AbiEvent ? [E] : undefined,
+          true
+        >({
           ...args,
           fromBlock,
           toBlock,

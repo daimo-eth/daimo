@@ -1,9 +1,9 @@
 import { DaimoNoteStatus, amountToDollars } from "@daimo/common";
-import { ephemeralNotesABI, ephemeralNotesAddress } from "@daimo/contract";
-import { Address, Log, decodeEventLog, getAbiItem, getContract } from "viem";
+import { ephemeralNotesABI, ephemeralNotesConfig } from "@daimo/contract";
+import { Address, Log, decodeEventLog, getAbiItem } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
-import { ContractType, ViemClient } from "../chain";
+import { ViemClient } from "../chain";
 
 const createEvent = getAbiItem({ abi: ephemeralNotesABI, name: "NoteCreated" });
 const redeemEvent = getAbiItem({
@@ -20,27 +20,31 @@ const redeemEvent = getAbiItem({
 const createEventSelector = `0xedafcff52f9510e3fee14034ebd5cb6c302432e2b233738af47ce5596a5bbeed`;
 const redeemEventSelector = `0xb45f3215e68b9bc29811df32d4910e77331ed2a01d8556bea2012566efa32920`;
 
-export type NoteCreateLog = Log<bigint, number, typeof createEvent, true>;
-export type NoteRedeemLog = Log<bigint, number, typeof redeemEvent, true>;
+export type NoteCreateLog = Log<
+  bigint,
+  number,
+  false,
+  typeof createEvent,
+  true
+>;
+export type NoteRedeemLog = Log<
+  bigint,
+  number,
+  false,
+  typeof redeemEvent,
+  true
+>;
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
-  private contract: ContractType<typeof ephemeralNotesABI>;
-
   private notes: Map<Address, DaimoNoteStatus> = new Map();
 
-  constructor(private client: ViemClient, private nameReg: NameRegistry) {
-    this.contract = getContract({
-      abi: ephemeralNotesABI,
-      address: ephemeralNotesAddress,
-      ...this.client,
-    });
-  }
+  constructor(private client: ViemClient, private nameReg: NameRegistry) {}
 
   async init() {
     await this.client.pipeLogs(
       {
-        address: this.contract.address,
+        address: ephemeralNotesConfig.address,
         event: undefined,
       },
       this.parseLogs

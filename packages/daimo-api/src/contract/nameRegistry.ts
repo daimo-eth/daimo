@@ -6,11 +6,10 @@ import {
   TransactionReceipt,
   getAbiItem,
   getAddress,
-  getContract,
   hexToString,
 } from "viem";
 
-import { ContractType, ViemClient } from "../chain";
+import { ViemClient } from "../chain";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({
@@ -18,7 +17,7 @@ const registeredEvent = getAbiItem({
   name: registeredName,
 });
 
-type RegisteredLog = Log<bigint, number, typeof registeredEvent, true>;
+type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: string } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
@@ -33,11 +32,7 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
 
-  contract: ContractType<typeof nameRegistryConfig.abi>;
-
-  constructor(private vc: ViemClient) {
-    this.contract = getContract({ ...nameRegistryConfig, ...this.vc });
-  }
+  constructor(private vc: ViemClient) {}
 
   /** Init: index logs from chain, get all names so far */
   async init() {
@@ -87,17 +82,17 @@ export class NameRegistry {
     address: Address
   ): Promise<TransactionReceipt> {
     validateName(name);
-    const bufName = Buffer.from(name.padEnd(32, "\0"));
-    const args = [`0x${bufName.toString("hex")}`, address] as const;
+    const nameHex = Buffer.from(name.padEnd(32, "\0")).toString("hex");
 
-    const hash = await this.contract.write.register(args);
-
-    const tx = await this.vc.publicClient.waitForTransactionReceipt({
-      hash,
+    const hash = await this.vc.walletClient.writeContract({
+      ...nameRegistryConfig,
+      functionName: "register",
+      args: [`0x${nameHex}`, address],
     });
+
+    const tx = await this.vc.publicClient.waitForTransactionReceipt({ hash });
     if (tx.status !== "success") throw new Error("Transaction failed");
 
-    // Cache
     this.cacheAccount({ name, addr: address });
 
     return tx;
