@@ -4,9 +4,9 @@ import {
   Address,
   Hex,
   PublicClient,
+  Transport,
   createPublicClient,
   createWalletClient,
-  getContract,
   http,
   keccak256,
 } from "viem";
@@ -25,7 +25,7 @@ type EphemeralNoteLoadState = "loading" | "error" | "loaded";
 
 // TODO: remove eth JSON RPC dependency
 // Notes can be loaded thru the API to miminize round trips
-let clientL2: PublicClient | undefined;
+let clientL2: PublicClient<Transport, typeof baseGoerli> | undefined;
 function getClientL2() {
   if (!clientL2) {
     clientL2 = createPublicClient({ chain: chainConfig.l2, transport: http() });
@@ -55,13 +55,12 @@ export function useFetchNote(
 async function fetchNote(
   ephemeralOwner: `0x${string}`
 ): Promise<EphemeralNote | undefined> {
-  const notesContract = getContract({
-    abi: Contracts.ephemeralNotesABI,
-    address: Contracts.ephemeralNotesAddress,
-    publicClient: getClientL2(),
+  const res = await getClientL2().readContract({
+    ...Contracts.ephemeralNotesConfig,
+    functionName: "notes",
+    args: [ephemeralOwner],
   });
 
-  const res = await notesContract.read.notes([ephemeralOwner]);
   if (res[0] !== ephemeralOwner) {
     return undefined;
   } else {
@@ -76,16 +75,13 @@ async function fetchNote(
 export async function fetchNotesContractAllowance(
   address: Address
 ): Promise<bigint> {
-  const tokenContract = getContract({
+  const allowance = await getClientL2().readContract({
     abi: Contracts.erc20ABI,
     address: Contracts.tokenMetadata.address,
-    publicClient: getClientL2(),
+    functionName: "allowance",
+    args: [address, Contracts.ephemeralNotesAddress],
   });
 
-  const allowance = await tokenContract.read.allowance([
-    address,
-    Contracts.ephemeralNotesAddress,
-  ]);
   return allowance;
 }
 

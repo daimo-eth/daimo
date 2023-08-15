@@ -9,7 +9,6 @@ import {
   PublicClient,
   Transport,
   WalletClient,
-  WebSocketTransport,
   createPublicClient,
   createWalletClient,
   webSocket,
@@ -45,9 +44,9 @@ export function getAccount(privateKey?: string) {
 
 export class ViemClient {
   constructor(
-    public l1Client: PublicClient<Transport, Chain>,
-    public publicClient: PublicClient<WebSocketTransport, typeof baseGoerli>,
-    public walletClient: WalletClient<Transport, Chain, Account>
+    public l1Client: PublicClient<Transport, typeof mainnet>,
+    public publicClient: PublicClient<Transport, typeof baseGoerli>,
+    public walletClient: WalletClient<Transport, typeof baseGoerli, Account>
   ) {}
 
   async pipeLogs<E extends AbiEvent | undefined>(

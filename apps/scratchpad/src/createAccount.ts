@@ -5,10 +5,10 @@ import { Constants } from "userop";
 import {
   Hex,
   PublicClient,
+  Transport,
   createPublicClient,
   createWalletClient,
   getAddress,
-  getContract,
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -82,24 +82,20 @@ export async function createAccount() {
     chain,
     transport: http(),
   });
-  const testUSDC = getContract({
+  const usdcTxHash = await walletClient.writeContract({
     abi: erc20ABI,
     address: tokenMetadata.address,
-    publicClient,
-    walletClient,
+    functionName: "transfer",
+    args: [addr, 1000000n],
   });
-  const usdcTxHash = await testUSDC.write.transfer([addr, 1000000n]);
   console.log(`Faucet sent USDC to Daimo account: ${usdcTxHash}`);
   await waitForTx(publicClient, usdcTxHash);
 
-  // Get the entrypoint contract
-  const entrypoint = getContract({
+  const depositTxHash = await walletClient.writeContract({
     address: getAddress(Constants.ERC4337.EntryPoint),
     abi: entryPointABI,
-    publicClient,
-    walletClient,
-  });
-  const depositTxHash = await entrypoint.write.depositTo([addr], {
+    functionName: "depositTo",
+    args: [addr],
     value: 10n ** 16n, // 0.01 ETH
   });
   console.log(`Faucet deposited prefund: ${depositTxHash}`);
@@ -119,7 +115,10 @@ export async function createAccount() {
   console.log(`✅ bundle confirmed: ${bundleTxHash}`);
 }
 
-async function waitForTx(publicClient: PublicClient, hash: Hex) {
+async function waitForTx(
+  publicClient: PublicClient<Transport, typeof baseGoerli>,
+  hash: Hex
+) {
   const receipt = await publicClient.waitForTransactionReceipt({
     hash,
     timeout: 30000,

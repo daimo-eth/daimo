@@ -50,6 +50,7 @@
     "expo-dev-client": "~2.4.6",
     "expo-device": "^5.2.1",
     "expo-linking": "~5.0.2",
+    "expo-local-authentication": "~13.4.1",
     "expo-localization": "^14.3.0",
     "expo-notifications": "^0.20.1",
     "expo-splash-screen": "~0.20.5",
@@ -67,8 +68,7 @@
     "react-native-svg": "13.9.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.2.15",
-    "expo-local-authentication": "~13.4.1"
+    "viem": "^1.6.0"
   },
   "eslintConfig": {
     "extends": [

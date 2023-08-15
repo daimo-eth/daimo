@@ -10,7 +10,6 @@ import {
   createPublicClient,
   formatUnits,
   getAddress,
-  getContract,
   hexToString,
   http,
   stringToHex,
@@ -33,43 +32,51 @@ export async function checkAccount() {
   let name: string, addr: Address;
 
   const publicClient = createPublicClient({ chain, transport: http() });
-  const nameReg = getContract({ ...nameRegistryConfig, publicClient });
   if (input.startsWith("0x")) {
     addr = getAddress(input);
-    name = hexToString(await nameReg.read.resolveName([addr]));
+    const nameHex = await publicClient.readContract({
+      ...nameRegistryConfig,
+      functionName: "resolveName",
+      args: [addr],
+    });
+    name = hexToString(nameHex);
   } else {
     name = input;
     const nameHex = stringToHex(name, { size: 32 });
-    addr = await nameReg.read.resolveAddr([nameHex]);
+    addr = await publicClient.readContract({
+      ...nameRegistryConfig,
+      functionName: "resolveAddr",
+      args: [nameHex],
+    });
   }
 
   console.log(`ADDR     - ${addr}`);
   console.log(`NAME     - ${name}`);
 
   // Get balance from coin contract
-  const coinContract = getContract({
+  const bal = await publicClient.readContract({
     abi: erc20ABI,
     address: tokenMetadata.address,
-    publicClient,
+    functionName: "balanceOf",
+    args: [addr],
   });
-  const bal = await coinContract.read.balanceOf([addr]);
   const { decimals, symbol } = tokenMetadata;
   const balStr = formatUnits(bal, decimals) + " " + symbol;
   console.log(`BAL      - ${balStr}`);
 
   // Get account info from the EntryPoint contract
-  const entryPoint = getContract({
+  const prefundBal = await publicClient.readContract({
     abi: entryPointABI,
     address: getAddress(Constants.ERC4337.EntryPoint),
-    publicClient,
+    functionName: "balanceOf",
+    args: [addr],
   });
-  const prefundBal = await entryPoint.read.balanceOf([addr]);
   const prefundStr = formatUnits(prefundBal, 18) + " ETH";
   console.log(`PREFUND  - ${prefundStr}`);
   console.log();
 
-  console.log(`...NameReg ${nameReg.address}`);
+  console.log(`...NameReg ${nameRegistryConfig.address}`);
   console.log(`...  ERC20 ${tokenMetadata.address}`);
-  console.log(`EntryPoint ${entryPoint.address}`);
+  console.log(`EntryPoint ${Constants.ERC4337.EntryPoint}`);
   console.log();
 }

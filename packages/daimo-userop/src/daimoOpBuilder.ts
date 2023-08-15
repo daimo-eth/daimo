@@ -1,4 +1,9 @@
-import * as Contracts from "@daimo/contract";
+import {
+  accountABI,
+  accountFactoryABI,
+  accountFactoryAddress,
+  entryPointABI,
+} from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
@@ -8,15 +13,16 @@ import {
   UserOperationMiddlewareFn,
 } from "userop";
 import {
+  Address,
   BaseError,
   ContractFunctionRevertedError,
-  GetContractReturnType,
   PublicClient,
+  Transport,
   concat,
   encodeFunctionData,
   getAddress,
-  getContract,
 } from "viem";
+import { baseGoerli } from "viem/chains";
 
 import { SigningCallback, dummySignature } from "./util";
 import config from "../config.json";
@@ -41,16 +47,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Connection to the chain */
   private provider: BundlerJsonRpcProvider;
 
-  /** Interface to specific contracts */
-  private entryPoint: GetContractReturnType<
-    typeof Contracts.entryPointABI,
-    PublicClient
-  >;
-  private factory: GetContractReturnType<
-    typeof Contracts.accountFactoryABI,
-    PublicClient
-  >;
-
   private gasMiddleware: UserOperationMiddlewareFn;
   private initCode: `0x${string}`;
 
@@ -58,7 +54,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   address: `0x${string}`;
 
   private constructor(
-    _publicClient: PublicClient,
+    // TODO: remove JSON RPC dependency
+    private publicClient: PublicClient<Transport, typeof baseGoerli>,
     _paymasterMiddleware?: UserOperationMiddlewareFn
   ) {
     super();
@@ -70,23 +67,11 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     this.gasMiddleware =
       _paymasterMiddleware ||
       Presets.Middleware.estimateUserOperationGas(this.provider);
-
-    // Initialize contract instances
-    this.entryPoint = getContract({
-      abi: Contracts.entryPointABI,
-      address: getAddress(Constants.ERC4337.EntryPoint),
-      publicClient: _publicClient,
-    });
-    this.factory = getContract({
-      abi: Contracts.accountFactoryABI,
-      address: Contracts.accountFactoryAddress,
-      publicClient: _publicClient,
-    });
   }
 
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
-    publicClient: PublicClient,
+    publicClient: PublicClient<Transport, typeof baseGoerli>,
     pubKey: [`0x${string}`, `0x${string}`],
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
@@ -95,15 +80,21 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
     try {
       instance.initCode = concat([
-        instance.factory.address,
+        accountFactoryAddress,
         encodeFunctionData({
-          abi: instance.factory.abi,
+          abi: accountFactoryABI,
           functionName: "createAccount",
           args: [pubKey, 0n], // 0n = salt
         }),
       ]);
 
-      await instance.entryPoint.simulate.getSenderAddress([instance.initCode]);
+      // TODO: call keccak directly
+      await publicClient.simulateContract({
+        address: Constants.ERC4337.EntryPoint as Address,
+        abi: entryPointABI,
+        functionName: "getSenderAddress",
+        args: [instance.initCode],
+      });
 
       throw new Error("getSenderAddress: unexpected result");
     } catch (err: unknown) {
@@ -143,10 +134,12 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   }
 
   private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.entryPoint.read.getNonce([
-      getAddress(ctx.op.sender),
-      0n, // "key", always 0 to represent s values are less than half
-    ]);
+    ctx.op.nonce = await this.publicClient.readContract({
+      address: Constants.ERC4337.EntryPoint as Address,
+      abi: entryPointABI,
+      functionName: "getNonce",
+      args: [getAddress(ctx.op.sender), 0n],
+    });
 
     ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };
@@ -154,7 +147,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {
     return this.setCallData(
       encodeFunctionData({
-        abi: Contracts.accountABI,
+        abi: accountABI,
         functionName: "execute",
         args: [to, value, data],
       })
@@ -164,7 +157,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   executeBatch(to: `0x${string}`[], data: `0x${string}`[]) {
     return this.setCallData(
       encodeFunctionData({
-        abi: Contracts.accountABI,
+        abi: accountABI,
         functionName: "executeBatch",
         args: [to, data],
       })
