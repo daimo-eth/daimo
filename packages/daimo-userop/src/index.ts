@@ -4,11 +4,13 @@ import {
   Address,
   Hex,
   PublicClient,
+  Transport,
   encodeFunctionData,
   getAddress,
   parseEther,
   parseUnits,
 } from "viem";
+import { baseGoerli } from "viem/chains";
 
 import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { SigningCallback } from "./util";
@@ -49,7 +51,7 @@ export class DaimoAccount {
   }
 
   public static async init(
-    publicClient: PublicClient,
+    publicClient: PublicClient<Transport, typeof baseGoerli>,
     derPublicKey: string,
     signer: SigningCallback,
     dryRun: boolean

@@ -8,7 +8,8 @@ import {
   hasAccountName,
 } from "@daimo/common";
 import { DaimoAccount } from "@daimo/userop";
-import { Address, PublicClient, getAddress } from "viem";
+import { Address, PublicClient, Transport, getAddress } from "viem";
+import { baseGoerli } from "viem/chains";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
@@ -22,7 +23,7 @@ import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
   l1Client: PublicClient,
-  l2Client: PublicClient,
+  l2Client: PublicClient<Transport, typeof baseGoerli>,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   entryPoint: EntryPoint,
