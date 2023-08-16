@@ -1,5 +1,5 @@
 import { tokenMetadata } from "@daimo/contract";
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {

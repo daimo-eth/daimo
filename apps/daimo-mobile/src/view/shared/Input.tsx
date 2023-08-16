@@ -1,13 +1,7 @@
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
 import { useCallback, useState } from "react";
-import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  TextInput,
-  TextInputFocusEventData,
-  View,
-} from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 
 import { amountSeparator, getAmountText } from "./Amount";
 import { color, ss } from "./style";
@@ -43,8 +37,8 @@ export function InputBig({
         numberOfLines={1}
         autoCapitalize="none"
         autoCorrect={false}
-        secureTextEntry={true}
-        keyboardType={"visible-password"}
+        secureTextEntry
+        keyboardType="visible-password"
         {...{ onFocus, onBlur }}
       />
       {icon && <Octicons name={icon} size={16} color="gray" />}
@@ -73,7 +67,7 @@ export function AmountInput({
   const [strVal, setStrVal] = useState(dollars <= 0 ? "" : fmt(dollars));
 
   // On end editing, round value to 2 decimal places
-  const onEndEditing = (e) => {
+  const onEndEditing = (e: { nativeEvent: { text: string } }) => {
     const value = e.nativeEvent.text;
     let newVal = parseLocalFloat(value);
     if (!(newVal >= 0)) {
@@ -86,8 +80,6 @@ export function AmountInput({
     onChange(truncated);
     if (onSubmitEditing) onSubmitEditing(truncated);
   };
-
-
 
   const change = useCallback((text: string) => {
     setStrVal(text);

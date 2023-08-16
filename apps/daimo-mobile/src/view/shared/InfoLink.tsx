@@ -1,4 +1,4 @@
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { Linking, View } from "react-native";
 
 import { ButtonSmall } from "./Button";

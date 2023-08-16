@@ -6,8 +6,6 @@ import { Log } from "./log";
 import { rpcFunc } from "./trpc";
 import { getAccountManager, useAccount } from "../model/account";
 import { syncAfterPushNotification } from "../sync/sync";
-import { FirebaseOptions, initializeApp } from 'firebase/app'
-import googleServicesConfig from '../../google-services.json'
 
 /** Registers push notifications, if we have permission & haven't already. */
 export function useInitNotifications() {
@@ -16,7 +14,6 @@ export function useInitNotifications() {
 
   useEffect(() => {
     if (address == null) return;
-
 
     // Register push token for account, if we haven't already
     getPushNotificationManager().maybeSavePushTokenForAccount();
@@ -67,27 +64,12 @@ class PushNotificationManager {
     try {
       if (Platform.OS === "android") {
         // Android specific setup
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
+          lightColor: "#FF231F7C",
         });
-
-        const firebaseConfig = {
-          apiKey: googleServicesConfig.client[0].api_key[0].current_key,
-          authDomain: googleServicesConfig.project_info.project_id + ".firebaseapp.com",
-          projectId: googleServicesConfig.project_info.project_id,
-          storageBucket: googleServicesConfig.project_info.storage_bucket,
-          messagingSenderId: googleServicesConfig.project_info.project_number,
-          appId: googleServicesConfig.client[0].client_info.mobilesdk_app_id,
-        };
-
-        console.log('Firebase config:', firebaseConfig)
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        console.log('Firebase initialized:', app.name);
       }
       await this.savePushTokenForAccount();
     } catch (e) {

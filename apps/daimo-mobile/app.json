@@ -12,7 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": ["assets/*"],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "30",
+      "buildNumber": "31",
       "associatedDomains": ["applinks:daimo.onrender.com"],
       "config": {
         "usesNonExemptEncryption": false
@@ -33,8 +33,12 @@
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {
+          "autoVerify": true,
           "action": "android.intent.action.VIEW",
-          "category": ["android.intent.category.DEFAULT", "android.intent.category.BROWSABLE"],
+          "category": [
+            "android.intent.category.DEFAULT",
+            "android.intent.category.BROWSABLE"
+          ],
           "data": [
             {
               "scheme": "daimo"
@@ -58,7 +62,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 9
+      "versionCode": 11
     },
     "extra": {
       "eas": {
@@ -86,7 +90,7 @@
           "faceIDPermission": "Protect Daimo using Face ID."
         }
       ],
-      "@react-native-firebase/app"
+      ["expo-notifications"]
     ]
   }
 }
