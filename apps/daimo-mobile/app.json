@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["assets/*"],
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -21,12 +23,18 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
       "buildNumber": "31",
-      "associatedDomains": ["applinks:daimo.onrender.com"],
+      "associatedDomains": [
+        "applinks:daimo.onrender.com"
+      ],
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "sgnl",
+          "tg"
+        ]
       }
     },
     "android": {
@@ -62,7 +70,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 11
+      "versionCode": 12
     },
     "extra": {
       "eas": {
@@ -90,7 +98,9 @@
           "faceIDPermission": "Protect Daimo using Face ID."
         }
       ],
-      ["expo-notifications"]
+      [
+        "expo-notifications"
+      ]
     ]
   }
 }
