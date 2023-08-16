@@ -1,4 +1,4 @@
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
 import { useCallback, useState } from "react";
 import {
@@ -86,8 +86,6 @@ export function AmountInput({
     onChange(truncated);
     if (onSubmitEditing) onSubmitEditing(truncated);
   };
-
-
 
   const change = useCallback((text: string) => {
     setStrVal(text);

@@ -1,5 +1,8 @@
+import Octicons from "@expo/vector-icons/Octicons";
 import { NavigationContainer } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -7,7 +10,6 @@ import { useSyncChain } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
 import { useEAccountCache } from "./view/shared/addr";
 import { useInitNavLinks } from "./view/shared/nav";
-import { useFonts } from 'expo-font';
 
 export default function App() {
   console.log("[APP] rendering");
@@ -21,10 +23,8 @@ export default function App() {
   // Track names for known addresses
   useEAccountCache();
 
-  // Load font to fix icons on android
-  useFonts({
-    'Octicons': require('../assets/Octicons.ttf'),
-  });
+  // Load font to fix icons on Android
+  useFonts({ Octicons: require("../assets/Octicons.ttf") });
 
   return (
     <RpcProvider>

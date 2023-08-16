@@ -12,7 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": ["assets/*"],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -34,7 +34,10 @@
       "intentFilters": [
         {
           "action": "android.intent.action.VIEW",
-          "category": ["android.intent.category.DEFAULT", "android.intent.category.BROWSABLE"],
+          "category": [
+            "android.intent.category.DEFAULT",
+            "android.intent.category.BROWSABLE"
+          ],
           "data": [
             {
               "scheme": "daimo"

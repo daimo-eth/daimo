@@ -1,5 +1,5 @@
 import { tokenMetadata } from "@daimo/contract";
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";

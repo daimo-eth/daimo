@@ -1,5 +1,5 @@
 import { assert, TransferOpEvent } from "@daimo/common";
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View, Text } from "react-native";
