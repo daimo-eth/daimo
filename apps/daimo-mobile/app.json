@@ -33,6 +33,7 @@
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {
+          "autoVerify": true,
           "action": "android.intent.action.VIEW",
           "category": [
             "android.intent.category.DEFAULT",
@@ -89,7 +90,7 @@
           "faceIDPermission": "Protect Daimo using Face ID."
         }
       ],
-      "@react-native-firebase/app"
+      ["expo-notifications"]
     ]
   }
 }
