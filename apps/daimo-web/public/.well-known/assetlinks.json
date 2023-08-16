@@ -1,13 +1,13 @@
 [
-    {
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "com.daimo",
-        "sha256_cert_fingerprints": [
-          "7C:1D:F7:A7:F4:85:A4:25:4C:FF:4D:B8:EF:0C:07:9F:1B:E3:CB:D3:DE:17:82:6C:A8:F4:3F:7D:58:A7:A8:D2"
-        ]
-      }
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.daimo",
+      "sha256_cert_fingerprints": [
+        "7C:1D:F7:A7:F4:85:A4:25:4C:FF:4D:B8:EF:0C:07:9F:1B:E3:CB:D3:DE:17:82:6C:A8:F4:3F:7D:58:A7:A8:D2",
+        "EA:BE:E7:05:E7:FD:D0:40:2D:11:C2:1D:0D:8C:56:E7:44:7B:6F:BD:7E:73:69:38:CC:3A:63:74:A7:1B:81:CA"
+      ]
     }
-  ]
-  
+  }
+]
