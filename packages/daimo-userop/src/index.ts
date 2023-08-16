@@ -3,14 +3,11 @@ import { Client, ISendUserOperationOpts, Presets } from "userop";
 import {
   Address,
   Hex,
-  PublicClient,
-  Transport,
   encodeFunctionData,
   getAddress,
   parseEther,
   parseUnits,
 } from "viem";
-import { baseGoerli } from "viem/chains";
 
 import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { DaimoNonce } from "./nonce";

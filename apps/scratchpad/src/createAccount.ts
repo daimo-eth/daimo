@@ -110,12 +110,7 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoAccount.init(
-    publicClient,
-    address,
-    signer,
-    dryRun
-  );
+  const account = await DaimoAccount.init(address, signer, dryRun);
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 
@@ -142,7 +137,7 @@ export async function createAccount() {
   // Finally, we should be able to do a userop from our new Daimo account.
   // Send $0.50 USDC to nibnalin.eth
   const recipient = `0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB`;
-  const nonce = new DaimoNonce(new DaimoNonceMetadata(true));
+  const nonce = new DaimoNonce(new DaimoNonceMetadata());
   const userOp = await account.erc20transfer(recipient, "0.1", nonce);
   console.log("✅ userop accepted by bundler: ", userOp.userOpHash);
 

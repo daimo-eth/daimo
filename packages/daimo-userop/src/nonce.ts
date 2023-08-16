@@ -1,5 +1,5 @@
 import { assert } from "@daimo/common";
-import { Hex, hexToNumber, numberToHex } from "viem";
+import { Hex, numberToHex } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 
 /*
@@ -12,15 +12,15 @@ export class DaimoNonce {
   public metadata: DaimoNonceMetadata;
   public key: Hex;
 
-  public constructor(metadata: DaimoNonceMetadata) {
-    const key = generatePrivateKey().slice(32 + 2) as Hex; // Uses secure random.
+  public constructor(metadata: DaimoNonceMetadata, passedKey?: Hex) {
+    const key = passedKey ?? (generatePrivateKey().slice(0, 2 + 32) as Hex); // Uses secure random.
     this.metadata = metadata;
     this.key = key;
   }
 
   public toHex(): Hex {
     const hexMetadata = this.metadata.toHex();
-    assert(hexMetadata.length === 16 + 2);
+    assert(hexMetadata.length === 2 + 16);
     const nonce = (hexMetadata + this.key.slice(2) + "0000000000000000") as Hex;
     console.log(
       `[OP]: Nonce for metadata = ${hexMetadata}, key = ${this.key}: nonce = ${nonce}`
@@ -29,9 +29,10 @@ export class DaimoNonce {
   }
 
   public static fromHex(nonce: Hex): DaimoNonce {
-    const hexMetadata = nonce.slice(0, 16 + 2) as Hex;
+    const hexMetadata = nonce.slice(0, 2 + 16) as Hex;
     const metadata = DaimoNonceMetadata.fromHex(hexMetadata);
-    return new DaimoNonce(metadata);
+    const key = `0x${nonce.slice(2 + 16, 2 + 16 + 32)}` as Hex;
+    return new DaimoNonce(metadata, key);
   }
 }
 
@@ -45,8 +46,3 @@ export class DaimoNonceMetadata {
     return numberToHex(0, { size: 8 });
   }
 }
-
-// TODO: add more metadata to track requests for transfers
-// class DaimoTransferMetadata extends DaimoNonceMetadata {}
-
-// class DaimoNoteMetadata extends DaimoNonceMetadata {}

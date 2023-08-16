@@ -251,24 +251,33 @@ export function createRouter(
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
 
-        // Deploy the account and get the address
+        const address = await accountFactory.getAddress(pubKeyHex);
+
+        // TODO: Should be able to batch these in a single tx for perf.
+        // Promise.all awaiting doesn't work because nonces go out of sync.
+
         console.log(`[API] Deploying account for ${name}, pubkey ${pubKeyHex}`);
-        const { status: deployStatus, address } = await accountFactory.deploy(
-          pubKeyHex
-        );
+        const deployReceipt = await accountFactory.deploy(pubKeyHex); // Deploy account
 
-        if (deployStatus !== "success") {
-          return { status: deployStatus, address: undefined };
+        console.log(`[API] Registering name ${name} at ${address}`);
+        const registerReceipt = await nameReg.registerName(name, address); // Register name
+
+        console.log(`[API] Prefunding ${address}`);
+        const prefundReceipt = await entryPoint.prefundEth(
+          address,
+          BigInt(5e16)
+        ); // Prepay gas, 0.05 ETH
+
+        if (deployReceipt.status !== "success") {
+          return { status: deployReceipt.status, address: undefined };
         }
-
-        // Prepay gas for the account
-        await entryPoint.prefundEth(address, BigInt(5e16)); // 0.05 ETH
-
-        // Register name
-        const registerReceipt = await nameReg.registerName(name, address);
-        const { status } = registerReceipt;
-        console.log(`[API] register name ${name} at ${address}: ${status}`);
-        return { status, address };
+        if (registerReceipt.status !== "success") {
+          return { status: registerReceipt.status, address: undefined };
+        }
+        if (prefundReceipt.status !== "success") {
+          return { status: prefundReceipt.status, address: undefined };
+        }
+        return { status: "success", address };
       }),
 
     testnetFaucetStatus: publicProcedure
