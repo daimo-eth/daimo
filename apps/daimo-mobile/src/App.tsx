@@ -24,7 +24,7 @@ export default function App() {
   useEAccountCache();
 
   // Load font to fix icons on Android
-  useFonts({ Octicons: require("../assets/Octicons.ttf") });
+  useFonts({ Octicons: require("../assets/octicons.ttf") });
 
   return (
     <RpcProvider>
