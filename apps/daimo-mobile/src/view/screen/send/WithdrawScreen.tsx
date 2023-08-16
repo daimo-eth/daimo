@@ -1,5 +1,5 @@
 import { tokenMetadata } from "@daimo/contract";
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { StyleSheet, View } from "react-native";
 
 import { chainConfig } from "../../../logic/chainConfig";

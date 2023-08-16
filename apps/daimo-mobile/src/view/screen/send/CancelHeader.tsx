@@ -1,4 +1,4 @@
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 
