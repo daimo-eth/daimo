@@ -83,7 +83,7 @@ export async function createEnclaveKey(enclaveKeyName: string) {
  *
  * Fetching from the enclave takes ~1 second on iPhone 13 Mini & iOS simulator.
  */
-export async function loadEnclaveKey(enclaveKeyName: string) {
+async function loadEnclaveKey(enclaveKeyName: string) {
   const ret = await Log.promise(
     "ExpoEnclave.fetchPublicKey",
     ExpoEnclave.fetchPublicKey(enclaveKeyName)

@@ -1,6 +1,6 @@
 import { entryPointABI } from "@daimo/contract";
 import { Constants } from "userop";
-import { Hex } from "viem";
+import { Hex, TransactionReceipt } from "viem";
 
 import { ViemClient } from "../chain";
 
@@ -11,7 +11,7 @@ export class EntryPoint {
   constructor(private vc: ViemClient) {}
 
   /** Prefunds an account's gas, depositing ETH with the EntryPoint. */
-  async prefundEth(address: Hex, value: bigint) {
+  async prefundEth(address: Hex, value: bigint): Promise<TransactionReceipt> {
     const depositTxHash = await this.vc.walletClient.writeContract({
       abi: entryPointABI,
       address: entryPointAddr,
@@ -23,8 +23,8 @@ export class EntryPoint {
 
     const receipt = await this.vc.publicClient.waitForTransactionReceipt({
       hash: depositTxHash,
-      timeout: 30000,
     });
     console.log(`[API] faucet prefund ${receipt.status}`);
+    return receipt;
   }
 }

@@ -1,6 +1,7 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
 import { getViemClientFromEnv } from "./chain";
+import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
@@ -19,6 +20,7 @@ async function main() {
   const nameReg = new NameRegistry(vc);
   const noteIndexer = new NoteIndexer(vc, nameReg);
   const faucet = new Faucet(vc, coinIndexer);
+  const accountFactory = new AccountFactory(vc);
   const entryPoint = new EntryPoint(vc);
 
   console.log(`[API] initializing db...`);
@@ -46,7 +48,8 @@ async function main() {
     entryPoint,
     nameReg,
     faucet,
-    notifier
+    notifier,
+    accountFactory
   );
   const server = createHTTPServer({ router });
   const { port } = server.listen(3000);

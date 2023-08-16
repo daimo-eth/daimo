@@ -52,16 +52,10 @@ export class DaimoAccount {
 
   public static async init(
     publicClient: PublicClient<Transport, typeof baseGoerli>,
-    derPublicKey: string,
+    deployedAddress: Address,
     signer: SigningCallback,
     dryRun: boolean
   ): Promise<DaimoAccount> {
-    const rawPublicKey = derPublicKey.slice(-128);
-    const contractFriendlyKey: [Hex, Hex] = [
-      `0x${rawPublicKey.slice(0, 64)}`,
-      `0x${rawPublicKey.slice(64, 128)}`,
-    ];
-
     const client = await Client.init(config.rpcUrl, {
       overrideBundlerRpc: config.bundlerRpcUrl,
     });
@@ -75,7 +69,7 @@ export class DaimoAccount {
         : undefined;
     const daimoBuilder = await DaimoOpBuilder.init(
       publicClient,
-      contractFriendlyKey,
+      deployedAddress,
       paymasterMiddleware,
       signer
     );

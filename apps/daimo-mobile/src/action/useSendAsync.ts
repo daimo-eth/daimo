@@ -2,11 +2,10 @@ import { EAccount, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
-import { createPublicClient, http } from "viem";
+import { Address, createPublicClient, http } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { chainConfig } from "../logic/chainConfig";
-import { loadEnclaveKey } from "../logic/enclave";
 import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
@@ -26,7 +25,12 @@ export function useSendAsync(
   if (!account) throw new Error("No account");
 
   const exec = useCallback(async () => {
-    const handle = await sendAsync(setAS, enclaveKeyName, sendFn);
+    const handle = await sendAsync(
+      setAS,
+      enclaveKeyName,
+      account.address,
+      sendFn
+    );
 
     if (pendingOp) {
       pendingOp.opHash = handle.userOpHash;
@@ -46,16 +50,16 @@ export function useSendAsync(
 }
 
 /** Warm the DaimoAccount cache. */
-export function useWarmCache(enclaveKeyName?: string) {
+export function useWarmCache(enclaveKeyName?: string, address?: Address) {
   useEffect(() => {
-    if (!enclaveKeyName) return;
-    loadAccount(enclaveKeyName);
+    if (!enclaveKeyName || !address) return;
+    loadAccount(enclaveKeyName, address);
   }, [enclaveKeyName]);
 }
 
 const accountCache: Map<string, Promise<DaimoAccount>> = new Map();
 
-function loadAccount(enclaveKeyName: string) {
+function loadAccount(enclaveKeyName: string, address: Address) {
   let promise = accountCache.get(enclaveKeyName);
   if (promise) return promise;
 
@@ -63,9 +67,6 @@ function loadAccount(enclaveKeyName: string) {
     console.info(`[SEND] loading DaimoAccount ${enclaveKeyName}`);
     const signer: SigningCallback = (hexTx: string) =>
       requestEnclaveSignature(enclaveKeyName, hexTx);
-
-    const derPublicKey = await loadEnclaveKey(enclaveKeyName);
-    if (!derPublicKey) throw new Error(`Missing enclave key ${enclaveKeyName}`);
 
     // TODO: remove publicClient
     // The only thing we're using it for is loading nonce.
@@ -75,7 +76,7 @@ function loadAccount(enclaveKeyName: string) {
       chain: chainConfig.l2,
       transport: http(),
     });
-    return await DaimoAccount.init(client, derPublicKey, signer, false);
+    return await DaimoAccount.init(client, address, signer, false);
   })();
   accountCache.set(enclaveKeyName, promise);
 
@@ -85,11 +86,12 @@ function loadAccount(enclaveKeyName: string) {
 async function sendAsync(
   setAS: SetActStatus,
   enclaveKeyName: string,
+  address: Address,
   sendFn: SendOpFn
 ) {
   try {
     setAS("loading", "Loading account...");
-    const account = await loadAccount(enclaveKeyName);
+    const account = await loadAccount(enclaveKeyName, address);
 
     setAS("loading", "Signing...");
     const handle = await sendFn(account);

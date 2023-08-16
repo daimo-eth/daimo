@@ -1,4 +1,9 @@
-import { entryPointABI, erc20ABI, tokenMetadata } from "@daimo/contract";
+import {
+  accountFactoryConfig,
+  entryPointABI,
+  erc20ABI,
+  tokenMetadata,
+} from "@daimo/contract";
 import { DaimoAccount, SigningCallback } from "@daimo/userop";
 import crypto from "node:crypto";
 import { Constants } from "userop";
@@ -64,9 +69,45 @@ export async function createAccount() {
     return sigHex;
   };
   const dryRun = false;
+
+  const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
+  if (pubKey.length !== 64) {
+    throw new Error("Invalid public key, wrong length");
+  }
+
+  const key1 = `0x${pubKey.subarray(0, 32).toString("hex")}` as Hex;
+  const key2 = `0x${pubKey.subarray(32).toString("hex")}` as Hex;
+  const salt = 0n;
+  const args = [[key1, key2], salt] as const;
+
+  const address = await publicClient.readContract({
+    ...accountFactoryConfig,
+    functionName: "getAddress",
+    args,
+  });
+
+  const funderPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
+  const funderAccount = privateKeyToAccount(funderPrivKey);
+  console.log(`Faucet account: ${funderAccount.address}`);
+  const walletClient = createWalletClient({
+    account: funderAccount,
+    chain,
+    transport: http(),
+  });
+
+  // Deploy account
+  const hash = await walletClient.writeContract({
+    ...accountFactoryConfig,
+    functionName: "createAccount",
+    args,
+  });
+  console.log(`[API] deploy transaction ${hash}`);
+  const tx = await publicClient.waitForTransactionReceipt({ hash });
+  console.log(`[API] deploy transaction ${tx.status}`);
+
   const account = await DaimoAccount.init(
     publicClient,
-    pubKeyHex,
+    address,
     signer,
     dryRun
   );
@@ -74,14 +115,6 @@ export async function createAccount() {
   console.log(`Burner Daimo account: ${addr}`);
 
   // Fund it from the faucet
-  const faucetPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
-  const faucetAccount = privateKeyToAccount(faucetPrivKey);
-  console.log(`Faucet account: ${faucetAccount.address}`);
-  const walletClient = createWalletClient({
-    account: faucetAccount,
-    chain,
-    transport: http(),
-  });
   const usdcTxHash = await walletClient.writeContract({
     abi: erc20ABI,
     address: tokenMetadata.address,
