@@ -1,4 +1,4 @@
-import { accountABI, entryPointABI } from "@daimo/contract";
+import { accountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
@@ -6,8 +6,7 @@ import {
   UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from "userop";
-import { Address, PublicClient, Transport, encodeFunctionData } from "viem";
-import { baseGoerli } from "viem/chains";
+import { Address, encodeFunctionData } from "viem";
 
 import { DaimoNonce } from "./nonce";
 import { SigningCallback, dummySignature } from "./util";
