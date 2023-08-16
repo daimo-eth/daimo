@@ -17,5 +17,5 @@ web-build/
 .metro-health-check*
 
 # Expo local iOS and Android builds
-./ios/
-./android/
+/ios/
+/android/
