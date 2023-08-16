@@ -1,8 +1,6 @@
-import Octicons from "@expo/vector-icons/Octicons";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
