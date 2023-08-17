@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
-import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
+import { HistoryScreen } from "./screen/HistoryScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";

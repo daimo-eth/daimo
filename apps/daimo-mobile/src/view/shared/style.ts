@@ -61,6 +61,11 @@ export const ss = {
       ...styleOuterStretch,
       paddingBottom: 0,
     },
+    homeContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
     vertModal: {
       flexDirection: "column",
       backgroundColor: color.white,

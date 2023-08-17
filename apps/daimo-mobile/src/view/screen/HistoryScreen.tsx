@@ -7,6 +7,7 @@ import { timeAgo } from "../../logic/time";
 import { Account, useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
+import ScrollPellet from "../shared/ScrollPellet";
 import { AddrText } from "../shared/addr";
 import { useNav } from "../shared/nav";
 import { OpStatusIndicator } from "../shared/opStatus";
@@ -19,13 +20,13 @@ import {
   TextRight,
 } from "../shared/text";
 
-// TODO: replace this with a better custom scroll view on HomeScreen
 export function HistoryScreen() {
   const [account] = useAccount();
   if (account == null) return null;
 
   return (
     <View style={ss.container.vertModal}>
+      <ScrollPellet />
       <HistoryList account={account} />
     </View>
   );

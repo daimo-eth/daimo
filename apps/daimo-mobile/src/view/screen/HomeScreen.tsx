@@ -1,22 +1,17 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useRef } from "react";
-import {
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useCallback, useState } from "react";
+import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
+import SwipeUpDown from "react-native-swipe-up-down";
 
-import { HistoryList } from "./History";
+import { HistoryList, HistoryScreen } from "./HistoryScreen";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { OctName } from "../shared/InputBig";
+import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
@@ -32,44 +27,46 @@ export default function HomeScreen() {
     (keyData) => keyData.pubKey === account?.enclavePubKey
   )?.slot;
   useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
-  const nav = useNav();
 
-  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // event.
-    const { contentOffset } = event.nativeEvent;
-    if (contentOffset.y > 32) {
-      // Show full-screen history
-      nav.navigate("History");
-    }
-  };
+  const headerHeight = useHeaderHeight();
 
-  const scrollViewRef = useRef<ScrollView>(null);
-  const onScrollEnd = () => {
-    if (scrollViewRef.current == null) return;
-    scrollViewRef.current.scrollTo({ y: 0, animated: true });
-  };
+  const [isHistoryOpened, setIsHistoryOpened] = useState(false);
+
+  const addTopOffset = isHistoryOpened ? 0 : headerHeight;
 
   if (account == null) return null;
 
   return (
-    <View style={ss.container.outerStretchScroll}>
-      <Header />
+    <View
+      style={{
+        ...ss.container.homeContainer,
+        top: -addTopOffset,
+        paddingTop: addTopOffset,
+      }}
+    >
+      <View style={styles.headerContainer}>
+        <Header />
+      </View>
 
-      <AmountAndButtons account={account} />
-
-      <ScrollView
-        style={styles.historyScroll}
-        onScroll={onScroll}
-        onScrollEndDrag={onScrollEnd}
-        scrollEventThrottle={32}
-        showsVerticalScrollIndicator={false}
-        ref={scrollViewRef}
-      >
-        <View style={styles.historyElem}>
-          <ScrollPellet />
-          <HistoryList account={account} maxToShow={5} />
-        </View>
-      </ScrollView>
+      <View style={styles.amountAndButtonsContainer}>
+        <AmountAndButtons account={account} />
+      </View>
+      <SwipeUpDown
+        itemMini={
+          <View style={styles.historyElem}>
+            <ScrollPellet />
+            <HistoryList account={account} maxToShow={5} />
+          </View>
+        }
+        itemFull={<HistoryScreen />}
+        onShowMini={() => setIsHistoryOpened(false)}
+        onShowFull={() => setIsHistoryOpened(true)}
+        animation="spring"
+        disableSwipeIcon
+        extraMarginTop={0}
+        swipeHeight={300}
+        style={styles.swipeUpDownRoot}
+      />
     </View>
   );
 }
@@ -138,14 +135,6 @@ function IconButton({
   );
 }
 
-function ScrollPellet() {
-  return (
-    <View style={styles.scrollPelletRow}>
-      <View style={styles.scrollPellet} />
-    </View>
-  );
-}
-
 const screenDimensions = Dimensions.get("screen");
 
 const styles = StyleSheet.create({
@@ -171,15 +160,15 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     minHeight: screenDimensions.height,
   },
-  scrollPelletRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: 16,
+  headerContainer: {
+    paddingLeft: 50,
+    paddingRight: 50,
   },
-  scrollPellet: {
-    backgroundColor: color.bg.midGray,
-    width: 96,
-    height: 4,
-    borderRadius: 2,
+  amountAndButtonsContainer: {
+    flex: 1,
+    alignItems: "stretch",
+  },
+  swipeUpDownRoot: {
+    backgroundColor: "#fff",
   },
 });
