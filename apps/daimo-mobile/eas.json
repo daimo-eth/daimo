@@ -35,6 +35,9 @@
       "env": {
         "DAIMO_APP_API_URL": "https://daimo-api-stage.onrender.com",
         "NEXT_PUBLIC_DOMAIN": "daimo.onrender.com"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "prod": {
