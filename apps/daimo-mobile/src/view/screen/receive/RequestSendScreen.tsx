@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  Platform,
+  ShareAction,
 } from "react-native";
 
 import { useAccount } from "../../../model/account";
@@ -36,7 +38,15 @@ export default function RequestSendScreen() {
 
   const sendRequest = useCallback(async () => {
     try {
-      const result = await Share.share({ message: url });
+
+      let result: ShareAction;
+      if (Platform.OS === "android") {        
+        result = await Share.share({ message: url });
+
+      } else {
+        result = await Share.share({ url }); // Default behavior for iOS
+      }
+
       console.log(`[REQUEST] action ${result.action}`);
       if (result.action === Share.sharedAction) {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
