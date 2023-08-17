@@ -41,27 +41,18 @@
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {
+          "action": "VIEW",
           "autoVerify": true,
-          "action": "android.intent.action.VIEW",
-          "category": [
-            "android.intent.category.DEFAULT",
-            "android.intent.category.BROWSABLE"
-          ],
           "data": [
-            {
-              "scheme": "daimo"
-            },
-            {
-              "scheme": "com.daimo"
-            },
-            {
-              "scheme": "exp+daimo"
-            },
             {
               "scheme": "https",
               "host": "daimo.onrender.com",
               "pathPrefix": "/link"
             }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
           ]
         }
       ],
@@ -70,7 +61,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 12
+      "versionCode": 24
     },
     "extra": {
       "eas": {
