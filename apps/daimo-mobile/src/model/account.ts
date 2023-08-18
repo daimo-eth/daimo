@@ -170,6 +170,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
   assert(model.storageVersion === 3);
   const a = model as AccountV3;
+
   return {
     enclaveKeyName: a.enclaveKeyName,
     name: a.name,

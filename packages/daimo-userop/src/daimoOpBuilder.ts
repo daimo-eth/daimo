@@ -1,21 +1,14 @@
-import { accountABI, entryPointABI } from "@daimo/contract";
+import { accountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
-  Constants,
   Presets,
   UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from "userop";
-import {
-  Address,
-  PublicClient,
-  Transport,
-  encodeFunctionData,
-  getAddress,
-} from "viem";
-import { baseGoerli } from "viem/chains";
+import { Address, encodeFunctionData } from "viem";
 
+import { DaimoNonce } from "./nonce";
 import { SigningCallback, dummySignature } from "./util";
 import config from "../config.json";
 
@@ -44,11 +37,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Daimo account address */
   address: `0x${string}`;
 
-  private constructor(
-    // TODO: remove JSON RPC dependency
-    private publicClient: PublicClient<Transport, typeof baseGoerli>,
-    _paymasterMiddleware?: UserOperationMiddlewareFn
-  ) {
+  private constructor(_paymasterMiddleware?: UserOperationMiddlewareFn) {
     super();
     this.provider = new BundlerJsonRpcProvider(config.rpcUrl).setBundlerRpc(
       config.bundlerRpcUrl
@@ -61,12 +50,11 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
-    publicClient: PublicClient<Transport, typeof baseGoerli>,
     deployedAddress: Address,
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(publicClient, paymasterMiddleware);
+    const instance = new DaimoOpBuilder(paymasterMiddleware);
     instance.address = deployedAddress;
 
     console.log(`[OP]: init address ${instance.address}`);
@@ -77,7 +65,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         verificationGasLimit: 2000000n,
         callGasLimit: 1000000n,
       })
-      .useMiddleware(instance.resolveAccount)
       .useMiddleware(Presets.Middleware.getGasPrice(instance.provider))
       .useMiddleware(instance.gasMiddleware)
       .useMiddleware(async (ctx) => {
@@ -91,17 +78,13 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     return base;
   }
 
-  private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.publicClient.readContract({
-      address: Constants.ERC4337.EntryPoint as Address,
-      abi: entryPointABI,
-      functionName: "getNonce",
-      args: [getAddress(ctx.op.sender), 0n], // salt, always 0 for Daimo Accounts
-    });
-  };
-
-  execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {
-    return this.setCallData(
+  execute(
+    to: `0x${string}`,
+    value: bigint,
+    data: `0x${string}`,
+    nonce: DaimoNonce
+  ) {
+    return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
         abi: accountABI,
         functionName: "execute",
@@ -110,8 +93,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     );
   }
 
-  executeBatch(to: `0x${string}`[], data: `0x${string}`[]) {
-    return this.setCallData(
+  executeBatch(to: `0x${string}`[], data: `0x${string}`[], nonce: DaimoNonce) {
+    return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
         abi: accountABI,
         functionName: "executeBatch",
