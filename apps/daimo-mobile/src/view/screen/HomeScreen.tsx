@@ -24,7 +24,7 @@ export default function HomeScreen() {
     `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
   );
 
-  useWarmCache(account?.enclaveKeyName);
+  useWarmCache(account?.enclaveKeyName, account?.address);
 
   const nav = useNav();
 

@@ -1,9 +1,4 @@
-import {
-  accountABI,
-  accountFactoryABI,
-  accountFactoryAddress,
-  entryPointABI,
-} from "@daimo/contract";
+import { accountABI, entryPointABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
@@ -14,11 +9,8 @@ import {
 } from "userop";
 import {
   Address,
-  BaseError,
-  ContractFunctionRevertedError,
   PublicClient,
   Transport,
-  concat,
   encodeFunctionData,
   getAddress,
 } from "viem";
@@ -48,7 +40,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   private provider: BundlerJsonRpcProvider;
 
   private gasMiddleware: UserOperationMiddlewareFn;
-  private initCode: `0x${string}`;
 
   /** Daimo account address */
   address: `0x${string}`;
@@ -62,7 +53,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     this.provider = new BundlerJsonRpcProvider(config.rpcUrl).setBundlerRpc(
       config.bundlerRpcUrl
     );
-    this.initCode = "0x";
     this.address = "0x";
     this.gasMiddleware =
       _paymasterMiddleware ||
@@ -72,46 +62,14 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
     publicClient: PublicClient<Transport, typeof baseGoerli>,
-    pubKey: [`0x${string}`, `0x${string}`],
+    deployedAddress: Address,
     paymasterMiddleware: UserOperationMiddlewareFn | undefined,
     signUserOperation: SigningCallback
   ): Promise<DaimoOpBuilder> {
     const instance = new DaimoOpBuilder(publicClient, paymasterMiddleware);
-
-    try {
-      instance.initCode = concat([
-        accountFactoryAddress,
-        encodeFunctionData({
-          abi: accountFactoryABI,
-          functionName: "createAccount",
-          args: [pubKey, 0n], // 0n = salt
-        }),
-      ]);
-
-      // TODO: call keccak directly
-      await publicClient.simulateContract({
-        address: Constants.ERC4337.EntryPoint as Address,
-        abi: entryPointABI,
-        functionName: "getSenderAddress",
-        args: [instance.initCode],
-      });
-
-      throw new Error("getSenderAddress: unexpected result");
-    } catch (err: unknown) {
-      if (
-        err instanceof BaseError &&
-        err.cause instanceof ContractFunctionRevertedError
-      ) {
-        const cause: ContractFunctionRevertedError = err.cause;
-        const sender = cause.data?.args?.[0] as string;
-        instance.address = getAddress(sender);
-      } else {
-        throw err;
-      }
-    }
+    instance.address = deployedAddress;
 
     console.log(`[OP]: init address ${instance.address}`);
-
     const base = instance
       .useDefaults({
         sender: instance.address,
@@ -138,10 +96,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       address: Constants.ERC4337.EntryPoint as Address,
       abi: entryPointABI,
       functionName: "getNonce",
-      args: [getAddress(ctx.op.sender), 0n],
+      args: [getAddress(ctx.op.sender), 0n], // salt, always 0 for Daimo Accounts
     });
-
-    ctx.op.initCode = ctx.op.nonce === 0n ? this.initCode : "0x";
   };
 
   execute(to: `0x${string}`, value: bigint, data: `0x${string}`) {

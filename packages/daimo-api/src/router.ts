@@ -7,12 +7,12 @@ import {
   zAddress,
   zHex,
 } from "@daimo/common";
-import { DaimoAccount } from "@daimo/userop";
 import { Address, PublicClient, Transport, getAddress } from "viem";
 import { baseGoerli } from "viem/chains";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
+import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
@@ -29,7 +29,8 @@ export function createRouter(
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
   faucet: Faucet,
-  notifier: PushNotifier
+  notifier: PushNotifier,
+  accountFactory: AccountFactory
 ) {
   return router({
     search: publicProcedure
@@ -250,28 +251,33 @@ export function createRouter(
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
 
-        // Don't deploy the account; just get the counterfactual address
-        console.log(
-          `[API] not deploying account for ${name}, pubkey ${pubKeyHex}`
-        );
-        const account = await DaimoAccount.init(
-          l2Client,
-          pubKeyHex,
-          () => {
-            throw new Error("No signer");
-          },
-          false
-        );
-        const address = account.getAddress();
+        const address = await accountFactory.getAddress(pubKeyHex);
 
-        // Prepay gas for the account
-        await entryPoint.prefundEth(address, BigInt(5e16)); // 0.05 ETH
+        // TODO: Should be able to batch these in a single tx for perf.
+        // Promise.all awaiting doesn't work because nonces go out of sync.
 
-        // Register name
-        const registerReceipt = await nameReg.registerName(name, address);
-        const { status } = registerReceipt;
-        console.log(`[API] register name ${name} at ${address}: ${status}`);
-        return { status, address };
+        console.log(`[API] Deploying account for ${name}, pubkey ${pubKeyHex}`);
+        const deployReceipt = await accountFactory.deploy(pubKeyHex); // Deploy account
+
+        console.log(`[API] Registering name ${name} at ${address}`);
+        const registerReceipt = await nameReg.registerName(name, address); // Register name
+
+        console.log(`[API] Prefunding ${address}`);
+        const prefundReceipt = await entryPoint.prefundEth(
+          address,
+          BigInt(5e16)
+        ); // Prepay gas, 0.05 ETH
+
+        if (deployReceipt.status !== "success") {
+          return { status: deployReceipt.status, address: undefined };
+        }
+        if (registerReceipt.status !== "success") {
+          return { status: registerReceipt.status, address: undefined };
+        }
+        if (prefundReceipt.status !== "success") {
+          return { status: prefundReceipt.status, address: undefined };
+        }
+        return { status: "success", address };
       }),
 
     testnetFaucetStatus: publicProcedure

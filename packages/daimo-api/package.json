@@ -16,12 +16,11 @@
   "dependencies": {
     "@daimo/common": "*",
     "@daimo/contract": "*",
-    "@daimo/userop": "*",
     "@trpc/server": "^10.34.0",
     "abitype": "^0.9.2",
     "expo-server-sdk": "^3.7.0",
     "pg": "^8.11.0",
-    "userop": "^0.3.0",
+    "userop": "^0.3.2",
     "viem": "^1.6.0",
     "zod": "^3.21.4"
   },
