@@ -67,6 +67,18 @@ Once the base app is installed in your simulator, you can run Daimo:
 npm run dev
 ```
 
+<details>
+<summary><strong>Setup for android</strong></summary>
+
+- Install Android Studio, and create an emulator.
+- Download latest Android internal distribution build from Expo, and install it in the emulator.
+- Lastly, go to `apps/daimo-mobile` and run `npm run dev`.
+
+**Note**
+- You need the correct java version. Version 20 doesn't work, Java 17 works.
+- You need to set the `ANDROID_HOME` environment variable, pointing to the local Android Sdk.
+</details>
+
 ## Running the backend
 
 `daimo-mobile` and `daimo-web` both rely on `daimo-api`.
