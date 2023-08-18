@@ -27,7 +27,6 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { CancelHeader } from "./CancelHeader";
 import { useSendAsync } from "../../../action/useSendAsync";
-import { fetchNotesContractAllowance } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
@@ -37,35 +36,21 @@ import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function CreateNoteTab({ hide }: { hide: () => void }) {
-  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState<Hex>();
+  const [ephemeralPrivKey, setEphemeralPrivKey] = useState<Hex>();
 
   const ephemeralOwner = useMemo(
-    () =>
-      ephemeralPrivateKey
-        ? privateKeyToAccount(ephemeralPrivateKey).address
-        : null,
-    [ephemeralPrivateKey]
+    () => ephemeralPrivKey && privateKeyToAccount(ephemeralPrivKey).address,
+    [ephemeralPrivKey]
   );
 
   const [dollars, setDollars] = useState(0);
 
   const [account] = useAccount();
   assert(account != null);
-  const { address } = account;
 
-  const [isNotesContractApproved, setIsNotesContractApproved] = useState(false);
+  useEffect(() => setEphemeralPrivKey(generatePrivateKey()));
 
-  useEffect(() => {
-    (async () => {
-      // TODO: pull this logic out of the UI.
-      // + automatically approve Notes contract on account creation
-      const allowance = await fetchNotesContractAllowance(address);
-      setIsNotesContractApproved(allowance > 0);
-
-      const privKey = generatePrivateKey();
-      setEphemeralPrivateKey(privKey);
-    })();
-  }, []);
+  const approveFirst = false; // TODO: account.approvedSpenders.includes(ephemeralNotesAddress);
 
   const nonce = new DaimoNonce(new DaimoNonceMetadata());
   const { status, message, exec } = useSendAsync(
@@ -76,7 +61,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
         ephemeralOwner,
         `${dollars}`,
         nonce,
-        !isNotesContractApproved
+        approveFirst
       );
     },
     {
@@ -124,7 +109,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       const link: DaimoLink = {
         type: "note",
         ephemeralOwner,
-        ephemeralPrivateKey,
+        ephemeralPrivateKey: ephemeralPrivKey,
       };
       const url = formatDaimoLink(link);
 
@@ -149,7 +134,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     } catch (error: any) {
       console.error("[APP] Note share error:", error);
     }
-  }, [ephemeralOwner, ephemeralPrivateKey, status]);
+  }, [ephemeralOwner, ephemeralPrivKey, status]);
 
   const button = (function () {
     switch (status) {
