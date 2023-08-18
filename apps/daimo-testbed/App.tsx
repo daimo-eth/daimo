@@ -1,5 +1,10 @@
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import { DaimoAccount, SigningCallback } from "@daimo/userop";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  SigningCallback,
+} from "@daimo/userop";
 import { useState } from "react";
 import {
   Button,
@@ -35,6 +40,7 @@ export default function App() {
 
   const testTx = async () => {
     const accName = "testdaimo123";
+    const accAddress = "0x4E8FBb345Ba703c84D29c4D531f23CFb3BBCc14d";
     const derPublicKey = (await ExpoEnclave.fetchPublicKey(accName)) as string;
     const signer: SigningCallback = async (message) => {
       const signature = await ExpoEnclave.sign(
@@ -44,23 +50,21 @@ export default function App() {
       );
       return signature;
     };
-    const account = await DaimoAccount.init(
-      createPublicClient({
-        chain: baseGoerli,
-        transport: http(),
-      }),
-      derPublicKey,
-      signer,
-      false
+    console.log(
+      "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
+      derPublicKey
     );
+    const account = await DaimoAccount.init(accAddress, signer, false);
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()
     );
 
+    const nonce = new DaimoNonce(new DaimoNonceMetadata());
     const opHandle = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
-      "42"
+      "42",
+      nonce
     );
     const hash = (await opHandle.wait())?.transactionHash;
     setTxHash(hash ?? "failed");
