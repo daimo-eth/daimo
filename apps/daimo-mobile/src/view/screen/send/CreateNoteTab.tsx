@@ -15,7 +15,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Share, TextInput, Platform, ShareAction } from "react-native";
+import {
+  ActivityIndicator, 
+  Share, 
+  TextInput, 
+  Platform, 
+  ShareAction,
+} from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
@@ -121,7 +127,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       const url = formatDaimoLink(link);
 
       let result: ShareAction;
-      if (Platform.OS === "android") {   
+      if (Platform.OS === "android") {
         result = await Share.share({ message: url });
       } else {
         result = await Share.share({ url }); // Default behavior for iOS

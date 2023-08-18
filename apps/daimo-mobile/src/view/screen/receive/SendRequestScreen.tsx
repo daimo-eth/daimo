@@ -38,11 +38,9 @@ export default function SendRequestScreen() {
 
   const sendRequest = useCallback(async () => {
     try {
-
       let result: ShareAction;
-      if (Platform.OS === "android") {        
+      if (Platform.OS === "android") {
         result = await Share.share({ message: url });
-
       } else {
         result = await Share.share({ url }); // Default behavior for iOS
       }
