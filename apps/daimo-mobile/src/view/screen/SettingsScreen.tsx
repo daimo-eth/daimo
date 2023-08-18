@@ -117,7 +117,11 @@ export function SettingsScreen() {
         <View style={ss.container.ph16}>
           <TextH3>Danger zone</TextH3>
           <Spacer h={8} />
-          <ButtonMed type="danger" title="Clear wallet" onPress={clearWallet} />
+          <ButtonMed
+            type="danger"
+            title="Delete Device"
+            onPress={clearWallet}
+          />
         </View>
       </ScrollView>
     </>

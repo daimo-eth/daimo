@@ -167,7 +167,11 @@ export class DaimoAccount {
     return this.sendUserOp(op);
   }
 
-  /** Creates an ephemeral note. Returns userOpHash. */
+  /**
+   * Creates an ephemeral note with given value.
+   * Infinite-approves the notes contract first, if necessary.
+   * Returns userOpHash.
+   **/
   public async createEphemeralNote(
     ephemeralOwner: `0x${string}`,
     amount: `${number}`,
