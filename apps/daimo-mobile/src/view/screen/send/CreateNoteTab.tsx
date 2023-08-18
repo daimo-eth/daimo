@@ -16,10 +16,10 @@ import {
   useState,
 } from "react";
 import {
-  ActivityIndicator, 
-  Share, 
-  TextInput, 
-  Platform, 
+  ActivityIndicator,
+  Share,
+  TextInput,
+  Platform,
   ShareAction,
 } from "react-native";
 import { Hex } from "viem";
