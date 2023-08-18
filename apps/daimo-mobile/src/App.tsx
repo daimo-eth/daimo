@@ -1,4 +1,5 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 
 import { useInitNotifications } from "./logic/notify";
@@ -19,6 +20,9 @@ export default function App() {
 
   // Track names for known addresses
   useEAccountCache();
+
+  // Load font to fix icons on Android
+  useFonts({ Octicons: require("../assets/octicons.ttf") });
 
   return (
     <RpcProvider>

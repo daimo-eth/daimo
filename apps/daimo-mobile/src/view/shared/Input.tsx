@@ -1,13 +1,7 @@
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
 import { useCallback, useState } from "react";
-import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  TextInput,
-  TextInputFocusEventData,
-  View,
-} from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 
 import { amountSeparator, getAmountText } from "./Amount";
 import { color, ss } from "./style";
@@ -43,6 +37,8 @@ export function InputBig({
         numberOfLines={1}
         autoCapitalize="none"
         autoCorrect={false}
+        secureTextEntry
+        keyboardType="visible-password"
         {...{ onFocus, onBlur }}
       />
       {icon && <Octicons name={icon} size={16} color="gray" />}
@@ -70,23 +66,20 @@ export function AmountInput({
 
   const [strVal, setStrVal] = useState(dollars <= 0 ? "" : fmt(dollars));
 
-  // On blur, round value to 2 decimal places
-  const blur = useCallback(
-    (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
-      const value = e.nativeEvent.text;
-      let newVal = parseLocalFloat(value);
-      if (!(newVal >= 0)) {
-        newVal = 0;
-      }
-      const newStrVal = fmt(newVal);
-      setStrVal(newVal > 0 ? newStrVal : "");
+  // On end editing, round value to 2 decimal places
+  const onEndEditing = (e: { nativeEvent: { text: string } }) => {
+    const value = e.nativeEvent.text;
+    let newVal = parseLocalFloat(value);
+    if (!(newVal >= 0)) {
+      newVal = 0;
+    }
+    const newStrVal = fmt(newVal);
+    setStrVal(newVal > 0 ? newStrVal : "");
 
-      const truncated = parseLocalFloat(newStrVal);
-      onChange(truncated);
-      if (onSubmitEditing) onSubmitEditing(truncated);
-    },
-    []
-  );
+    const truncated = parseLocalFloat(newStrVal);
+    onChange(truncated);
+    if (onSubmitEditing) onSubmitEditing(truncated);
+  };
 
   const change = useCallback((text: string) => {
     setStrVal(text);
@@ -119,14 +112,15 @@ export function AmountInput({
       keyboardType="numeric"
       placeholder={`0${amountSeparator}00`}
       placeholderTextColor={color.gray}
+      multiline
       numberOfLines={1}
       autoFocus={autoFocus == null ? true : autoFocus}
       value={strVal}
       selectTextOnFocus
-      onBlur={blur}
       onChangeText={change}
       onSubmitEditing={onSubmit}
       returnKeyType="done"
+      onEndEditing={onEndEditing}
     />
   );
 }
@@ -169,6 +163,7 @@ const styles = StyleSheet.create({
 });
 
 // Parse both 1.23 and 1,23
-function parseLocalFloat(str: string) {
+function parseLocalFloat(str?: string) {
+  if (str == null) return 0;
   return parseFloat(str.replace(",", "."));
 }

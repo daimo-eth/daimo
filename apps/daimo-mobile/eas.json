@@ -4,6 +4,7 @@
   },
   "build": {
     "sim": {
+      "node": "20.3.0",
       "ios": {
         "buildConfiguration": "Debug",
         "resourceClass": "large",
@@ -16,6 +17,7 @@
     "dev": {
       "distribution": "internal",
       "resourceClass": "large",
+      "node": "20.3.0",
       "android": {
         "gradleCommand": ":app:assembleDebug"
       },
@@ -45,6 +47,10 @@
       "ios": {
         "ascAppId": "6459700343",
         "companyName": "Daimo, Inc"
+      },
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
       }
     },
     "prod": {}

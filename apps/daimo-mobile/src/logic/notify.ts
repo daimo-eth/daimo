@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import { Log } from "./log";
 import { rpcFunc } from "./trpc";
@@ -62,6 +62,15 @@ class PushNotificationManager {
 
   maybeSavePushTokenForAccount = async () => {
     try {
+      if (Platform.OS === "android") {
+        // Android specific setup
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#FF231F7C",
+        });
+      }
       await this.savePushTokenForAccount();
     } catch (e) {
       console.error(`[NOTIFY] failed to save push token`, e);

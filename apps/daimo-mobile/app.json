@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -20,21 +22,46 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "30",
-      "associatedDomains": ["applinks:daimo.onrender.com"],
+      "buildNumber": "31",
+      "associatedDomains": [
+        "applinks:daimo.onrender.com"
+      ],
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "sgnl",
+          "tg"
+        ]
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "daimo.onrender.com",
+              "pathPrefix": "/link"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.daimo"
+      "package": "com.daimo",
+      "versionCode": 26
     },
     "extra": {
       "eas": {
@@ -46,9 +73,9 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 31,
-            "targetSdkVersion": 31,
-            "buildToolsVersion": "31.0.0",
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "buildToolsVersion": "33.0.0",
             "kotlinVersion": "1.8.0"
           },
           "ios": {
@@ -61,6 +88,9 @@
         {
           "faceIDPermission": "Protect Daimo using Face ID."
         }
+      ],
+      [
+        "expo-notifications"
       ]
     ]
   }

@@ -1,5 +1,5 @@
 import { OpStatus } from "@daimo/common";
-import { Octicons } from "@expo/vector-icons";
+import Octicons from "@expo/vector-icons/Octicons";
 import { Text } from "react-native";
 
 export function OpStatusIndicator({
