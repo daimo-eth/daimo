@@ -2,8 +2,11 @@ import { tokenMetadata } from "@daimo/contract";
 import { parseUnits } from "viem";
 
 /** Returns token units, 6000000 for $6 USDC */
-export function dollarsToAmount(dollars: number) {
-  return parseUnits(`${dollars}`, tokenMetadata.decimals);
+export function dollarsToAmount(dollars: number | string) {
+  if (typeof dollars === "number") {
+    dollars = `${dollars}`;
+  }
+  return parseUnits(dollars, tokenMetadata.decimals);
 }
 
 /** Returns eg "6.00" for 6000000 USDC units. */

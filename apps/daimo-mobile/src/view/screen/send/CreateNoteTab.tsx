@@ -7,20 +7,13 @@ import {
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
 import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Share,
-  TextInput,
   Platform,
+  Share,
   ShareAction,
+  TextInput,
 } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -36,8 +29,7 @@ import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function CreateNoteTab({ hide }: { hide: () => void }) {
-  const [ephemeralPrivKey, setEphemeralPrivKey] = useState<Hex>();
-
+  const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
   const ephemeralOwner = useMemo(
     () => ephemeralPrivKey && privateKeyToAccount(ephemeralPrivKey).address,
     [ephemeralPrivKey]
@@ -48,9 +40,9 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   const [account] = useAccount();
   assert(account != null);
 
-  useEffect(() => setEphemeralPrivKey(generatePrivateKey()));
-
-  const approveFirst = false; // TODO: account.approvedSpenders.includes(ephemeralNotesAddress);
+  // TODO: load and cache
+  // Minor optimization. Approving unconditionally costs a bit more gas.
+  const approveFirst = true;
 
   const nonce = new DaimoNonce(new DaimoNonceMetadata());
   const { status, message, exec } = useSendAsync(

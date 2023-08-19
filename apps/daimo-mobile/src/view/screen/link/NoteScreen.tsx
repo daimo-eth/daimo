@@ -1,29 +1,24 @@
 import {
+  DaimoNoteStatus,
   OpStatus,
   assert,
+  dollarsToAmount,
   getAccountName,
-  hasAccountName,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
 import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-import { Address } from "viem";
 
-import { SendOpFn, useSendAsync } from "../../../action/useSendAsync";
-import {
-  EphemeralNote,
-  useEphemeralSignature,
-  useFetchNote,
-} from "../../../logic/note";
-import { rpcFunc } from "../../../logic/trpc";
+import { useSendAsync } from "../../../action/useSendAsync";
+import { useEphemeralSignature, useFetchNote } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { HomeStackParamList } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
-import { TextCenter, TextError, TextLight } from "../../shared/text";
+import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
 
@@ -34,16 +29,15 @@ export default function NoteScreen({ route }: Props) {
   const { ephemeralPrivateKey, ephemeralOwner } = route.params;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  // TODO: delete useFetchNote etc, use rpcFunc.getLinkStatus
-  const [note, loadState] = useFetchNote(ephemeralOwner);
+  const res = useFetchNote(ephemeralOwner);
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
-      {loadState === "loading" && <Spinner />}
-      {loadState === "error" && <ErrorDisplay />}
-      {loadState === "loaded" && note && (
+      {res.isFetching && <Spinner />}
+      {res.error && <TextError>{res.error.message}</TextError>}
+      {res.data && (
         <NoteDisplay
-          ephemeralNote={note}
+          noteStatus={res.data as DaimoNoteStatus}
           ephemeralPrivateKey={ephemeralPrivateKey}
         />
       )}
@@ -59,65 +53,48 @@ function Spinner() {
   );
 }
 
-function ErrorDisplay() {
-  return (
-    <>
-      {/** TODO: improve message and reporting */}
-      <TextError>Invalid note. May have been claimed already.</TextError>
-    </>
-  );
-}
-
 function NoteDisplay({
-  ephemeralNote,
+  noteStatus,
   ephemeralPrivateKey,
 }: {
-  ephemeralNote: EphemeralNote;
+  noteStatus: DaimoNoteStatus;
   ephemeralPrivateKey: `0x${string}` | undefined;
 }) {
   const [account] = useAccount();
   assert(account != null);
 
+  // Where the note came from
+  const senderName = getAccountName(noteStatus.sender);
+
+  // The note itself
+  const { ephemeralOwner } = noteStatus.link;
+
+  // Signature to claim the note
   const ephemeralSignature = useEphemeralSignature(
     ephemeralPrivateKey,
     account.address
   );
 
-  const [senderName, setSenderName] = useState("");
-  const nonce = new DaimoNonce(new DaimoNonceMetadata());
+  const [nonce] = useState(() => new DaimoNonce(new DaimoNonceMetadata()));
 
-  useEffect(() => {
-    (async () => {
-      const acc = await rpcFunc.getEthereumAccount.query({
-        addr: ephemeralNote.from,
-      });
-      if (hasAccountName(acc)) {
-        setSenderName(getAccountName(acc));
-      }
-    })();
-  }, [ephemeralNote]);
-
-  const sendFn = (
-    ephemeralOwner: Address,
-    signature: `0x${string}`
-  ): SendOpFn => {
-    return async (account: DaimoAccount) => {
-      console.log(
-        `[ACTION] claiming note ${ephemeralOwner} ${signature} ${account}`
-      );
-      return account.claimEphemeralNote(ephemeralOwner, signature, nonce);
-    };
+  const sendFn = async (account: DaimoAccount) => {
+    console.log(`[ACTION] claiming note ${ephemeralOwner}`);
+    return account.claimEphemeralNote(
+      ephemeralOwner,
+      ephemeralSignature,
+      nonce
+    );
   };
 
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
-    sendFn(ephemeralNote.owner, ephemeralSignature),
+    sendFn,
     {
       type: "transfer",
       status: OpStatus.pending,
       from: ephemeralNotesAddress,
       to: account.address,
-      amount: Number(ephemeralNote.amount),
+      amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,
     }
   );
@@ -127,6 +104,16 @@ function NoteDisplay({
   const fees = 0.05;
 
   const statusMessage = (function (): ReactNode {
+    switch (noteStatus.status) {
+      case "claimed":
+        return (
+          <TextBold>Claimed by {getAccountName(noteStatus.claimer!)}</TextBold>
+        );
+      case "cancelled":
+        return <TextError>Cancelled by sender</TextError>;
+      default:
+      // Pending note, available to claim
+    }
     switch (status) {
       case "idle":
         return `Claim fee: $${fees.toFixed(2)}`;
@@ -140,9 +127,22 @@ function NoteDisplay({
   })();
 
   const button = (function () {
+    switch (noteStatus.status) {
+      case "claimed":
+      case "cancelled":
+        return null;
+      default:
+      // Pending note, available to claim
+    }
     switch (status) {
       case "idle":
-        return <ButtonBig type="primary" title="Claim money" onPress={exec} />;
+        if (noteStatus.sender.addr === account.address) {
+          return <ButtonBig type="primary" title="Cancel" onPress={exec} />;
+        } else {
+          return (
+            <ButtonBig type="primary" title="Claim money" onPress={exec} />
+          );
+        }
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
@@ -155,9 +155,9 @@ function NoteDisplay({
   return (
     <>
       <TextCenter>
-        <TextLight>{senderName} sent you</TextLight>
+        <TextLight>{senderName} sent</TextLight>
       </TextCenter>
-      <TitleAmount amount={ephemeralNote.amount} />
+      <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
       {button}
       <TextLight>
         <TextCenter>{statusMessage}</TextCenter>

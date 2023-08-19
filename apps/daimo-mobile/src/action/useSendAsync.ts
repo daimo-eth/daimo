@@ -9,7 +9,7 @@ import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
 /** Send a tx user op. */
-export type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
+type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 
 /** Send a user op, track status. */
 export function useSendAsync(
