@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 
 /**
  * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
@@ -55,6 +55,7 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
   amount: number;
+  nonceMetadata?: Hex;
 }
 
 interface OpEventBase {

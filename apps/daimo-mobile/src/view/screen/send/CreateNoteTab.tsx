@@ -6,7 +6,12 @@ import {
   formatDaimoLink,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+} from "@daimo/userop";
 import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -44,7 +49,9 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   // Minor optimization. Approving unconditionally costs a bit more gas.
   const approveFirst = true;
 
-  const nonce = new DaimoNonce(new DaimoNonceMetadata());
+  const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.CreateNote);
+  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [nonceMetadata]);
+
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
@@ -64,6 +71,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       to: ephemeralNotesAddress,
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
+      nonceMetadata: nonceMetadata.toHex(),
     }
   );
 

@@ -15,7 +15,9 @@ export type HomeStackParamList = {
   Home: undefined;
   Settings: undefined;
   Chain: undefined;
-  Send: undefined | { recipient: Recipient; dollars?: number };
+  Send:
+    | undefined
+    | { recipient: Recipient; dollars?: number; requestId?: `${bigint}` };
   Withdraw: undefined;
   Request: undefined;
   Deposit: undefined;
@@ -58,7 +60,7 @@ async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
     case "request": {
       const recipient = await getRecipient(link.recipient);
       const dollars = parseFloat(link.dollars);
-      nav.navigate("Send", { recipient, dollars });
+      nav.navigate("Send", { recipient, dollars, requestId: link.requestId });
       break;
     }
     case "note": {

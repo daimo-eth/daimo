@@ -54,6 +54,7 @@ export function useLoadAccountFromKey(pubKey: Hex | undefined) {
 
       namedAccounts: [],
       recentTransfers: [],
+      trackedRequests: [],
 
       pushToken: null,
     });

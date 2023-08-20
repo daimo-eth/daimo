@@ -15,7 +15,11 @@ import { SigningCallback } from "./util";
 import config from "../config.json";
 
 export { SigningCallback };
-export { DaimoNonce, DaimoNonceMetadata } from "./nonce";
+export {
+  DaimoNonce,
+  DaimoNonceMetadata,
+  MAX_NONCE_ID_SIZE_BITS,
+} from "./nonce";
 
 export type UserOpHandle = Awaited<
   ReturnType<typeof DaimoAccount.prototype.sendUserOp>

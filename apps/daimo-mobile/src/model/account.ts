@@ -1,4 +1,9 @@
-import { EAccount, assert, TransferOpEvent } from "@daimo/common";
+import {
+  EAccount,
+  assert,
+  TransferOpEvent,
+  TrackedRequest,
+} from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress } from "viem";
@@ -32,6 +37,8 @@ export type Account = {
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: TransferOpEvent[];
+  /** Requests sent from this account. */
+  trackedRequests: TrackedRequest[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
 
@@ -65,6 +72,24 @@ interface AccountV3 extends StoredModel {
   lastBalance: string;
   lastFinalizedBlock: number;
   recentTransfers: TransferOpEvent[];
+  namedAccounts: EAccount[];
+
+  pushToken: string | null;
+}
+
+interface AccountV4 extends StoredModel {
+  storageVersion: 4;
+
+  enclaveKeyName: string;
+  name: string;
+  address: string;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
   namedAccounts: EAccount[];
 
   pushToken: string | null;
@@ -162,14 +187,35 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: 0,
 
       recentTransfers: [],
+      trackedRequests: [],
       namedAccounts: [],
 
       pushToken: a.pushToken,
     };
   }
 
-  assert(model.storageVersion === 3);
-  const a = model as AccountV3;
+  if (model.storageVersion === 3) {
+    const a = model as AccountV3;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      name: a.name,
+      address: getAddress(a.address),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: [],
+      namedAccounts: a.namedAccounts,
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 4);
+  const a = model as AccountV4;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -182,6 +228,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     lastFinalizedBlock: a.lastFinalizedBlock,
 
     recentTransfers: a.recentTransfers,
+    trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
 
     pushToken: a.pushToken,
@@ -191,8 +238,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV3 = {
-    storageVersion: 3,
+  const model: AccountV4 = {
+    storageVersion: 4,
 
     enclaveKeyName: account.enclaveKeyName,
     name: account.name,
@@ -204,6 +251,7 @@ export function serializeAccount(account: Account | null): string {
     lastFinalizedBlock: account.lastFinalizedBlock,
 
     recentTransfers: account.recentTransfers,
+    trackedRequests: account.trackedRequests,
     namedAccounts: account.namedAccounts,
 
     pushToken: account.pushToken,

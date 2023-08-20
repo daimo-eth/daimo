@@ -11,8 +11,8 @@ export type DaimoRequestStatus = {
   link: DaimoLinkRequest;
 
   recipient: EAccount;
-  // TODO: track whether the request is paid
-  // https://github.com/daimo-eth/daimo/issues/97
+  requestId: `${bigint}`;
+  fulfilledBy?: EAccount;
 };
 
 /**

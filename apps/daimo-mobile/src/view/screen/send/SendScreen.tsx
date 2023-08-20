@@ -6,9 +6,16 @@ import {
   getAccountName,
 } from "@daimo/common";
 import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
+import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { CancelHeader } from "./CancelHeader";
@@ -37,7 +44,7 @@ const SegmentedControlFixed = SegmentedControl as any;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { recipient, dollars } = route.params || {};
+  const { recipient, dollars, requestId } = route.params || {};
 
   // Navigation
   const [tab, setTab] = useState<SendTab>("search");
@@ -92,7 +99,13 @@ export default function SendScreen({ route }: Props) {
           </TextLight>
         </View>
       )}
-      {recipient && <SendButton recipient={recipient} dollars={dollars || 0} />}
+      {recipient && (
+        <SendButton
+          recipient={recipient}
+          dollars={dollars || 0}
+          requestId={requestId}
+        />
+      )}
     </View>
   );
 }
@@ -157,15 +170,25 @@ function SetAmount({
 function SendButton({
   recipient,
   dollars,
+  requestId,
 }: {
   recipient: Recipient;
   dollars: number;
+  requestId?: `${bigint}`;
 }) {
+  console.log(`[SEND] rendering SendButton ${dollars} ${requestId}`);
   const [account] = useAccount();
   assert(account != null);
   assert(dollars >= 0);
 
-  const nonce = new DaimoNonce(new DaimoNonceMetadata());
+  const nonceMetadata = requestId
+    ? new DaimoNonceMetadata(DaimoNonceType.RequestResponse, BigInt(requestId))
+    : new DaimoNonceMetadata(DaimoNonceType.Send);
+
+  const nonce = useMemo(
+    () => new DaimoNonce(nonceMetadata),
+    [nonceMetadata, requestId]
+  );
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
@@ -180,6 +203,7 @@ function SendButton({
       amount: Number(dollarsToAmount(dollars)),
       status: OpStatus.pending,
       timestamp: 0,
+      nonceMetadata: nonceMetadata.toHex(),
     },
     recipient.name ? [recipient as EAccount] : []
   );

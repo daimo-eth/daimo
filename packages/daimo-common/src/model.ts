@@ -67,6 +67,14 @@ export const zTransferLogSummary = z.object({
   blockNum: z.number(),
   txHash: zHex,
   logIndex: z.number(),
+  nonceMetadata: zHex,
 });
 
 export type TransferLogSummary = z.infer<typeof zTransferLogSummary>;
+
+export const zTrackedRequest = z.object({
+  requestId: zBigIntStr,
+  amount: zBigIntStr,
+});
+
+export type TrackedRequest = z.infer<typeof zTrackedRequest>;

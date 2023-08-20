@@ -7,6 +7,7 @@ import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
+import { OpIndexer } from "./contract/opIndexer";
 import { DB } from "./db/db";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
@@ -19,6 +20,7 @@ async function main() {
   const coinIndexer = new CoinIndexer(vc);
   const nameReg = new NameRegistry(vc);
   const noteIndexer = new NoteIndexer(vc, nameReg);
+  const opIndexer = new OpIndexer(vc);
   const faucet = new Faucet(vc, coinIndexer);
   const accountFactory = new AccountFactory(vc);
   const entryPoint = new EntryPoint(vc);
@@ -34,6 +36,7 @@ async function main() {
     console.log(`[API] initializing indexers...`);
     await Promise.all([coinIndexer.init(), nameReg.init()]);
     await Promise.all([faucet.init(), noteIndexer.init()]);
+    await Promise.all([opIndexer.init()]);
 
     console.log(`[API] initializing push notifications...`);
     await notifier.init();
@@ -45,6 +48,7 @@ async function main() {
     vc.publicClient,
     coinIndexer,
     noteIndexer,
+    opIndexer,
     entryPoint,
     nameReg,
     faucet,

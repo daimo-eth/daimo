@@ -1,4 +1,5 @@
-import { assert, formatDaimoLink } from "@daimo/common";
+import { assert, dollarsToAmount, formatDaimoLink } from "@daimo/common";
+import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -10,6 +11,8 @@ import {
   Platform,
   ShareAction,
 } from "react-native";
+import { Hex } from "viem";
+import { generatePrivateKey } from "viem/accounts";
 
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
@@ -18,7 +21,7 @@ import { useNav } from "../../shared/nav";
 import { color } from "../../shared/style";
 
 export default function SendRequestScreen() {
-  const [account] = useAccount();
+  const [account, setAccount] = useAccount();
   assert(account != null);
   const [dollars, setDollars] = useState(0);
 
@@ -26,15 +29,26 @@ export default function SendRequestScreen() {
   const [sent, setSent] = useState(false);
   const nav = useNav();
 
+  const requestId = generateRequestID();
+
   const url = useMemo(
     () =>
       formatDaimoLink({
         type: "request",
         recipient: account.address,
         dollars: `${dollars}`,
+        requestId,
       }),
     [account.address, dollars]
   );
+
+  const trackRequest = () => {
+    account.trackedRequests.push({
+      requestId,
+      amount: `${dollarsToAmount(dollars)}`,
+    });
+    setAccount(account);
+  };
 
   const sendRequest = useCallback(async () => {
     try {
@@ -48,6 +62,7 @@ export default function SendRequestScreen() {
       console.log(`[REQUEST] action ${result.action}`);
       if (result.action === Share.sharedAction) {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
+        trackRequest();
         setSent(true);
         setTimeout(() => nav.navigate("Home"), 500);
       } else if (result.action === Share.dismissedAction) {
@@ -83,6 +98,14 @@ export default function SendRequestScreen() {
       </View>
     </TouchableWithoutFeedback>
   );
+}
+
+function generateRequestID() {
+  const hexRandomString = generatePrivateKey().slice(
+    0,
+    2 + Number(MAX_NONCE_ID_SIZE_BITS / 4n) // One hex is 4 bits
+  ) as Hex; // Uses secure random.
+  return `${BigInt(hexRandomString)}` as `${bigint}`;
 }
 
 const styles = StyleSheet.create({
