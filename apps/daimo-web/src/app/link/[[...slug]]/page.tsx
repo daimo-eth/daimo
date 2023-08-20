@@ -120,8 +120,8 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     } else {
       assert(link.type === "note");
       return {
-        title: `Note ${getAccountName({ addr: link.ephemeralOwner })}`,
-        description: "Couldn't load note status",
+        title: `Payment ${getAccountName({ addr: link.ephemeralOwner })}`,
+        description: "Couldn't load Payment Link status",
       };
     }
   }

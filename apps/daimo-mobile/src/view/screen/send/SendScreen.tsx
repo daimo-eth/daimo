@@ -81,7 +81,11 @@ export default function SendScreen({ route }: Props) {
       </ScrollView>
       {!recipient && tab === "search" && (
         <View style={ss.container.ph16}>
-          <ButtonBig type="primary" title="Create Note" onPress={createNote} />
+          <ButtonBig
+            type="primary"
+            title="Create Payment Link"
+            onPress={createNote}
+          />
           <Spacer h={16} />
           <TextLight>
             <TextCenter>{sendViaAppStr}</TextCenter>
@@ -225,12 +229,10 @@ function SendButton({
     }
   })();
 
-  // On success, redirect to plain Send page
+  // On success, go home, show newly created transaction
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-
-    // Go Home, show newly created transaction
     nav.navigate("Home");
   }, [status]);
 

@@ -8,7 +8,7 @@ import {
 import { ephemeralNotesAddress } from "@daimo/contract";
 import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
@@ -16,7 +16,7 @@ import { useEphemeralSignature, useFetchNote } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import { HomeStackParamList } from "../../shared/nav";
+import { HomeStackParamList, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
 
@@ -86,6 +86,7 @@ function NoteDisplay({
     );
   };
 
+  // Add pending transaction immmmediately
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     sendFn,
@@ -98,6 +99,13 @@ function NoteDisplay({
       timestamp: Date.now() / 1e3,
     }
   );
+
+  // On success, go home, show newly created transaction
+  const nav = useNav();
+  useEffect(() => {
+    if (status !== "success") return;
+    nav.navigate("Home");
+  }, [status]);
 
   // TODO: load estimated fees
   // NOTE: These fees seem difficult to communicate to user, think about it.

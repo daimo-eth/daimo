@@ -42,6 +42,6 @@ export function useEphemeralSignature(
   return ephemeralSignature;
 }
 
-// TODO: remove after we migrate to EIP-7212 contract
+// TODO: remove once EphemeralNote contract no longer requires it.
 // Dummy signature of correct length and valid r/s values (so ECDSA.sol doesn't revert)
 const dummySignature: `0x${string}` = `0x001d2a4239a139c1e44088f0a2e8e0c9aa66755573b4c24da5828d77d80bafb0495101dbf6304da3cacd7eaf3a8a11ec8f291a6945a46715f35a9182c5ec55521c`;

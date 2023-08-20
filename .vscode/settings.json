@@ -12,5 +12,8 @@
       "fileMatch": ["eas.json"],
       "url": "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json"
     }
-  ]
+  ],
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  }
 }

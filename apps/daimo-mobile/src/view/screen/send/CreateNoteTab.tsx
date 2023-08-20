@@ -48,7 +48,8 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   const { status, message, exec } = useSendAsync(
     account.enclaveKeyName,
     async (account: DaimoAccount) => {
-      if (ephemeralOwner == null) throw new Error("Note key not generated yet");
+      if (ephemeralOwner == null)
+        throw new Error("Payment Link key not generated yet");
       return account.createEphemeralNote(
         ephemeralOwner,
         `${dollars}`,
@@ -134,7 +135,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
         return (
           <ButtonBig
             type="primary"
-            title="Create Note"
+            title="Create Payment Link"
             onPress={onCreateNote}
             disabled={dollars === 0}
           />
@@ -143,7 +144,11 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
         return <ActivityIndicator size="large" />;
       case "success":
         return (
-          <ButtonBig type="success" title="Send Note" onPress={sendNote} />
+          <ButtonBig
+            type="success"
+            title="Send Payment Link"
+            onPress={sendNote}
+          />
         );
       case "error":
         return <ButtonBig type="danger" title="Error" disabled />;

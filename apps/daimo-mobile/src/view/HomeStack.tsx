@@ -41,7 +41,11 @@ export function HomeStackNav() {
         <HomeStack.Screen name="Settings" component={SettingsScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
         <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
-        <HomeStack.Screen name="Note" component={NoteScreen} />
+        <HomeStack.Screen
+          name="Note"
+          options={{ headerTitle: "Payment Link" }}
+          component={NoteScreen}
+        />
         <HomeStack.Screen
           name="RequestSend"
           options={{ headerTitle: `Request ${tokenMetadata.symbol}` }}
