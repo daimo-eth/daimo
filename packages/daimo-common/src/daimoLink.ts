@@ -19,6 +19,7 @@ export type DaimoLinkAccount = {
 
 export type DaimoLinkRequest = {
   type: "request";
+  requestId: `${bigint}`;
   recipient: Address;
   dollars: `${number}`;
 };
@@ -35,7 +36,9 @@ export function formatDaimoLink(link: DaimoLink) {
       return `${daimoLinkBase}/account/${link.addr}`;
     }
     case "request": {
-      return `${daimoLinkBase}/request/${link.recipient}/${link.dollars}`;
+      return `${daimoLinkBase}/request/${link.requestId.toString()}/${
+        link.recipient
+      }/${link.dollars}`;
     }
     case "note": {
       const base = `${daimoLinkBase}/note/${link.ephemeralOwner}`;
@@ -80,13 +83,14 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       return { type: "account", addr };
     }
     case "request": {
-      if (parts.length !== 3) return null;
-      const recipient = getAddress(parts[1]);
-      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
+      if (parts.length !== 4) return null;
+      const requestId = `${BigInt(parts[1])}` as `${bigint}`;
+      const recipient = getAddress(parts[2]);
+      const dollarNum = parseFloat(zDollarStr.parse(parts[3]));
       if (!(dollarNum > 0)) return null;
       const dollars = dollarNum.toFixed(2) as `${number}`;
       if (dollars === "0.00") return null;
-      return { type: "request", recipient, dollars };
+      return { type: "request", requestId, recipient, dollars };
     }
     case "note": {
       if (parts.length !== 2) return null;

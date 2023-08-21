@@ -245,6 +245,7 @@ function addTransfers(
       from: transfer.from,
       to: transfer.to,
       amount: Number(transfer.amount),
+      nonceMetadata: transfer.nonceMetadata,
 
       timestamp: guessTimestampFromNum(transfer.blockNum),
       txHash: transfer.txHash,

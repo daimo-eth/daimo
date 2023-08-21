@@ -1,5 +1,5 @@
 import { assert } from "@daimo/common";
-import { Hex, numberToHex } from "viem";
+import { Hex, bytesToHex, hexToBytes, numberToHex } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 
 /*
@@ -13,6 +13,7 @@ export class DaimoNonce {
   public key: Hex;
 
   public constructor(metadata: DaimoNonceMetadata, passedKey?: Hex) {
+    assert(passedKey === undefined || passedKey.length === 2 + 32);
     const key = passedKey ?? (generatePrivateKey().slice(0, 2 + 32) as Hex); // Uses secure random.
     this.metadata = metadata;
     this.key = key;
@@ -29,20 +30,46 @@ export class DaimoNonce {
   }
 
   public static fromHex(nonce: Hex): DaimoNonce {
-    const hexMetadata = nonce.slice(0, 2 + 16) as Hex;
+    const paddedNonce = bytesToHex(hexToBytes(nonce), { size: 64 });
+    const hexMetadata = paddedNonce.slice(0, 2 + 16) as Hex;
     const metadata = DaimoNonceMetadata.fromHex(hexMetadata);
-    const key = `0x${nonce.slice(2 + 16, 2 + 16 + 32)}` as Hex;
+    const key = `0x${paddedNonce.slice(2 + 16, 2 + 16 + 32)}` as Hex;
     return new DaimoNonce(metadata, key);
   }
 }
 
+export enum DaimoNonceType {
+  Send = 0,
+  CreateNote = 1,
+  ClaimNote = 2,
+  RequestResponse = 3,
+  MAX = 255, // At most one byte
+}
+
+export const MAX_NONCE_ID_SIZE_BITS = 56n;
+const MAX_NONCE_IDENTIFIER = 2n ** MAX_NONCE_ID_SIZE_BITS - 1n;
+
+// 1 byte for type, 7 for an optional ID used for indexing.
 export class DaimoNonceMetadata {
+  public nonceType: DaimoNonceType;
+  public identifier: bigint;
+
+  public constructor(nonceType: DaimoNonceType, identifier = 0n) {
+    this.nonceType = nonceType;
+    assert(identifier <= MAX_NONCE_IDENTIFIER);
+    this.identifier = identifier;
+  }
+
   public static fromHex(hexMetadata: Hex): DaimoNonceMetadata {
     assert(hexMetadata.length === 16 + 2);
-    return new DaimoNonceMetadata();
+    const nonceType = parseInt(hexMetadata.slice(2, 4), 16);
+    const identifier = BigInt("0x" + hexMetadata.slice(4)) as bigint;
+    return new DaimoNonceMetadata(nonceType, identifier);
   }
 
   public toHex(): Hex {
-    return numberToHex(0, { size: 8 });
+    const hexNonceType = numberToHex(this.nonceType, { size: 1 });
+    const hexIdentifier = numberToHex(this.identifier, { size: 7 }).slice(2);
+    return (hexNonceType + hexIdentifier) as Hex;
   }
 }

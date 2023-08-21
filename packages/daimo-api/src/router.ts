@@ -2,11 +2,13 @@ import {
   DAccount,
   DaimoRequestStatus,
   TransferLogSummary,
+  dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
   zAddress,
   zHex,
 } from "@daimo/common";
+import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Address, PublicClient, Transport, getAddress } from "viem";
 import { baseGoerli } from "viem/chains";
 import { normalize } from "viem/ens";
@@ -18,6 +20,7 @@ import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
+import { OpIndexer } from "./contract/opIndexer";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
@@ -26,6 +29,7 @@ export function createRouter(
   l2Client: PublicClient<Transport, typeof baseGoerli>,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
+  opIndexer: OpIndexer,
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
   faucet: Faucet,
@@ -109,9 +113,34 @@ export function createRouter(
             if (acc.name == null) {
               throw new Error(`Not found: ${link.recipient}`);
             }
+
+            // Check if fulfilled
+            const fulfilledNonceMetadata = new DaimoNonceMetadata(
+              DaimoNonceType.RequestResponse,
+              BigInt(link.requestId)
+            );
+            const potentialFulfillTxes = opIndexer.fetchTxHashes(
+              fulfilledNonceMetadata
+            );
+            const relevantTransfers = coinIndexer.filterTransfers({
+              addr: link.recipient,
+              txHashes: potentialFulfillTxes,
+            });
+            const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
+            const fulfillTxes = relevantTransfers.filter(
+              (t) =>
+                t.args.to === link.recipient && t.args.value === expectedAmount
+            );
+            const fulfilledBy =
+              fulfillTxes.length > 0
+                ? await nameReg.getEAccount(fulfillTxes[0].args.from)
+                : undefined;
+
             const ret: DaimoRequestStatus = {
               link,
               recipient: acc,
+              requestId: link.requestId,
+              fulfilledBy,
             };
             return ret;
           }
@@ -182,6 +211,7 @@ export function createRouter(
         const transferLogs = rawLogs.map((log) => {
           const { blockNumber, blockHash, logIndex, transactionHash } = log;
           const { from, to, value } = log.args;
+          const nonceMetadata = opIndexer.fetchNonceMetadata(transactionHash);
 
           if (
             blockNumber == null ||
@@ -200,6 +230,7 @@ export function createRouter(
             blockHash,
             txHash: transactionHash,
             logIndex,
+            nonceMetadata,
           } as TransferLogSummary;
         });
 

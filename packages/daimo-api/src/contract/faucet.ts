@@ -64,6 +64,7 @@ export class Faucet {
       timestamp: Math.floor(Date.now() / 1e3),
       status: OpStatus.pending,
       txHash: hash,
+      nonceMetadata: undefined,
     };
   }
 }

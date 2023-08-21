@@ -7,7 +7,7 @@
   "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "eslint . --max-warnings=0"
   },
   "dependencies": {

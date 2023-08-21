@@ -4,6 +4,7 @@ import {
   DaimoNonce,
   DaimoNonceMetadata,
   SigningCallback,
+  DaimoNonceType,
 } from "@daimo/userop";
 import { useState } from "react";
 import {
@@ -60,7 +61,7 @@ export default function App() {
       account.getAddress()
     );
 
-    const nonce = new DaimoNonce(new DaimoNonceMetadata());
+    const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
     const opHandle = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42",

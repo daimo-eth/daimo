@@ -9,11 +9,12 @@ const testCases: [string, DaimoLink | null][] = [
     { type: "account", addr: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93" },
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.23",
+    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.23",
     {
       type: "request",
       recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
       dollars: "1.23",
+      requestId: "123",
     },
   ],
   [
@@ -40,15 +41,19 @@ const testCases: [string, DaimoLink | null][] = [
   ["https://example.com/link/request/", null],
   ["https://example.com/link/request/0x0", null],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1",
+    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1",
     null,
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12",
+    "https://example.com/link/request///0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1",
     null,
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001",
+    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12",
+    null,
+  ],
+  [
+    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001",
     null,
   ],
   ["https://example.com/link/note/", null],
@@ -87,12 +92,12 @@ test("DaimoLink normalization", () => {
 
     // Ensure that amount is normalized
     const variants = [
-      "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001",
-      "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0",
-      "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1",
+      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001",
+      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0",
+      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1",
     ];
     const correct =
-      "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00";
+      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00";
 
     for (const variant of variants) {
       const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);

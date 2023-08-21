@@ -1,5 +1,5 @@
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import { Address, Log, getAbiItem } from "viem";
+import { Address, Hex, Log, getAbiItem } from "viem";
 
 import { ViemClient } from "../chain";
 
@@ -68,15 +68,20 @@ export class CoinIndexer {
   filterTransfers({
     addr,
     sinceBlockNum,
+    txHashes,
   }: {
     addr: Address;
     sinceBlockNum?: bigint;
+    txHashes?: Hex[];
   }): TransferLog[] {
     let ret = this.allTransfers.filter(
       (log) => log.args.from === addr || log.args.to === addr
     );
     if (sinceBlockNum) {
       ret = ret.filter((log) => (log.blockNumber || 0n) >= sinceBlockNum);
+    }
+    if (txHashes !== undefined) {
+      ret = ret.filter((log) => txHashes.includes(log.transactionHash));
     }
     return ret;
   }

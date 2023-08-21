@@ -6,9 +6,14 @@ import {
   getAccountName,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+} from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
@@ -75,7 +80,11 @@ function NoteDisplay({
     account.address
   );
 
-  const [nonce] = useState(() => new DaimoNonce(new DaimoNonceMetadata()));
+  const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);
+  const nonce = useMemo(
+    () => new DaimoNonce(nonceMetadata),
+    [nonceMetadata, ephemeralOwner, ephemeralPrivateKey]
+  );
 
   const sendFn = async (account: DaimoAccount) => {
     console.log(`[ACTION] claiming note ${ephemeralOwner}`);
@@ -97,6 +106,7 @@ function NoteDisplay({
       to: account.address,
       amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,
+      nonceMetadata: nonceMetadata.toHex(),
     }
   );
 

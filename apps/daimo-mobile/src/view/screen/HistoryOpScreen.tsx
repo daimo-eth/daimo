@@ -1,4 +1,5 @@
 import { assert, TransferOpEvent } from "@daimo/common";
+import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
@@ -72,6 +73,16 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
   const [account] = useAccount();
   assert(account != null);
 
+  const opRequestId = op.nonceMetadata
+    ? DaimoNonceMetadata.fromHex(op.nonceMetadata).identifier.toString()
+    : undefined;
+  const matchingTrackedRequest = account.trackedRequests.find(
+    (req) =>
+      req.requestId === opRequestId &&
+      req.amount === `${op.amount}` &&
+      op.to === account.address
+  );
+
   const [directionSymbol, directionText] = (() => {
     if (op.from === account.address) {
       return [
@@ -103,6 +114,14 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
       <Text style={styles.h3Small}>
         <Text>{timeString(op.timestamp)}</Text>
       </Text>
+      <Spacer h={16} />
+      {matchingTrackedRequest !== undefined && (
+        <Text style={styles.h3Small}>
+          <Text>
+            Your request was fulfilled by <AddrText addr={op.from} />
+          </Text>
+        </Text>
+      )}
       <Spacer h={16} />
       <View style={styles.statusRow}>
         <OpStatusIndicator status={op.status} size={24} />

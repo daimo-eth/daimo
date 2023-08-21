@@ -128,13 +128,22 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
 
   switch (res.link.type) {
     case "request": {
-      const { recipient } = res as DaimoRequestStatus;
+      const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
-      return {
-        title: `${name} is requesting $${res.link.dollars}`,
-        description: `Pay via Daimo`,
-        walletAction: true,
-      };
+      if (fulfilledBy === undefined) {
+        return {
+          title: `${name} is requesting $${res.link.dollars}`,
+          description: "Pay via Daimo",
+          walletAction: true,
+        };
+      } else {
+        return {
+          title: `${name} requested $${res.link.dollars} from ${getAccountName(
+            fulfilledBy
+          )}`,
+          description: `Paid by ${getAccountName(fulfilledBy)}`,
+        };
+      }
     }
     case "note": {
       const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
