@@ -165,7 +165,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
 
   return (
     <>
-      <CancelHeader hide={hide}>Creating note</CancelHeader>
+      <CancelHeader hide={hide}>Creating payment link</CancelHeader>
       <Spacer h={32} />
       <AmountInput
         dollars={dollars}

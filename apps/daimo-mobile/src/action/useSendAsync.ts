@@ -59,17 +59,17 @@ export function useWarmCache(enclaveKeyName?: string, address?: Address) {
 const accountCache: Map<string, Promise<DaimoAccount>> = new Map();
 
 function loadAccount(enclaveKeyName: string, address: Address) {
-  let promise = accountCache.get(enclaveKeyName);
+  let promise = accountCache.get(address);
   if (promise) return promise;
 
   promise = (async () => {
-    console.info(`[SEND] loading DaimoAccount ${enclaveKeyName}`);
+    console.info(`[SEND] loading DaimoAccount ${address} ${enclaveKeyName}`);
     const signer: SigningCallback = (hexTx: string) =>
       requestEnclaveSignature(enclaveKeyName, hexTx);
 
     return await DaimoAccount.init(address, signer, false);
   })();
-  accountCache.set(enclaveKeyName, promise);
+  accountCache.set(address, promise);
 
   return promise;
 }
