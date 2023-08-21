@@ -189,18 +189,17 @@ function SendButton({
     ? new DaimoNonceMetadata(DaimoNonceType.RequestResponse, BigInt(requestId))
     : new DaimoNonceMetadata(DaimoNonceType.Send);
 
-  const nonce = useMemo(
-    () => new DaimoNonce(nonceMetadata),
-    [nonceMetadata, requestId]
-  );
-  const { status, message, exec } = useSendAsync(
-    account.enclaveKeyName,
-    async (account: DaimoAccount) => {
+  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [requestId]);
+
+  const { status, message, cost, exec } = useSendAsync({
+    enclaveKeyName: account.enclaveKeyName,
+    dollarsToSend: dollars,
+    sendFn: async (account: DaimoAccount) => {
       assert(dollars > 0);
       console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
       return account.erc20transfer(recipient.addr, `${dollars}`, nonce);
     },
-    {
+    pendingOp: {
       type: "transfer",
       from: account.address,
       to: recipient.addr,
@@ -209,15 +208,11 @@ function SendButton({
       timestamp: 0,
       nonceMetadata: nonceMetadata.toHex(),
     },
-    recipient.name ? [recipient as EAccount] : []
-  );
-
-  // TODO: load estimated fees
-  const fees = 0.05;
-  const totalDollars = dollars + fees;
+    namedAccounts: recipient.name ? [recipient as EAccount] : [],
+  });
 
   const sendDisabledReason =
-    account.lastBalance < dollarsToAmount(totalDollars)
+    account.lastBalance < dollarsToAmount(cost.totalDollars)
       ? "Insufficient funds"
       : undefined;
   const disabled = sendDisabledReason != null || dollars === 0;
@@ -247,7 +242,9 @@ function SendButton({
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
         if (dollars === 0) return null;
-        return `Total incl. fees $${totalDollars.toFixed(2)}`;
+        return `Total incl. fees ${getAmountText({
+          dollars: cost.totalDollars,
+        })}`;
       case "loading":
         return message;
       case "error":

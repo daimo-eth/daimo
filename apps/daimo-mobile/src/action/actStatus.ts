@@ -11,6 +11,8 @@ export type SetActStatus = (
 export interface ActHandle {
   /** Action status */
   status: ActStatus;
+  /** Action costs, including fees and total. */
+  cost: { feeDollars: number; totalDollars: number };
   /** Empty when idle. Describes progress, success, or failure. */
   message: string;
   /** Should be called only when status is 'idle' */

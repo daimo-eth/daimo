@@ -12,16 +12,28 @@ import { resync } from "../sync/sync";
 type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 
 /** Send a user op, track status. */
-export function useSendAsync(
-  enclaveKeyName: string,
-  sendFn: SendOpFn,
-  pendingOp?: OpEvent,
-  namedAccounts?: EAccount[]
-): ActHandle {
+export function useSendAsync({
+  enclaveKeyName,
+  dollarsToSend,
+  sendFn,
+  pendingOp,
+  namedAccounts,
+}: {
+  enclaveKeyName: string;
+  dollarsToSend: number;
+  sendFn: SendOpFn;
+  pendingOp?: OpEvent;
+  namedAccounts?: EAccount[];
+}): ActHandle {
   const [as, setAS] = useActStatus();
 
   const [account, setAccount] = useAccount();
   if (!account) throw new Error("No account");
+
+  // TODO: use history to immediately estimate fees
+  // Async load fee estimation from API to add precision
+  const feeDollars = 0.05;
+  const cost = { feeDollars, totalDollars: dollarsToSend + feeDollars };
 
   const exec = useCallback(async () => {
     const handle = await sendAsync(
@@ -31,6 +43,7 @@ export function useSendAsync(
       sendFn
     );
 
+    // Add pending op and named accounts to history
     if (pendingOp) {
       pendingOp.opHash = handle.userOpHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
@@ -45,7 +58,7 @@ export function useSendAsync(
     }
   }, [enclaveKeyName, sendFn]);
 
-  return { ...as, exec };
+  return { ...as, exec, cost };
 }
 
 /** Warm the DaimoAccount cache. */
@@ -56,7 +69,7 @@ export function useWarmCache(enclaveKeyName?: string, address?: Address) {
   }, [enclaveKeyName]);
 }
 
-const accountCache: Map<string, Promise<DaimoAccount>> = new Map();
+const accountCache: Map<Address, Promise<DaimoAccount>> = new Map();
 
 function loadAccount(enclaveKeyName: string, address: Address) {
   let promise = accountCache.get(address);

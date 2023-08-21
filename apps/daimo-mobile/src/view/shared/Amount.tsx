@@ -8,28 +8,37 @@ import { color, ss } from "./style";
 /** 1.23 or 1,23 depending on user locale */
 export const amountSeparator = getLocales()[0].decimalSeparator || ".";
 
-/** Returns eg "$1.23" or "$1,23" */
+/** Returns eg "$1.00" or "$1,23" or "$1.2345" */
 export function getAmountText({
   dollars,
   amount,
   symbol,
+  fullPrecision,
 }: {
-  dollars?: `${number}`;
+  dollars?: `${number}` | number;
   amount?: bigint;
   symbol?: string;
+  fullPrecision?: boolean;
 }) {
   if (dollars == null) {
     if (amount == null) throw new Error("Missing amount");
+    // Amount specified, calculate dollars string
     dollars = amountToDollars(amount);
+  } else if (amount == null) {
+    // Dollars specified, normalize to string
+    if (typeof dollars === "number") {
+      dollars = dollars.toFixed(2) as `${number}`;
+    }
   } else {
-    if (amount != null) throw new Error("Specify amount or dollars, not both");
+    throw new Error("Specify amount or dollars, not both");
   }
 
   if (symbol == null) {
     symbol = "$";
   }
   const [wholeDollars, cents] = dollars.split(".");
-  return `${symbol}${wholeDollars}${amountSeparator}${cents}`;
+  const dispCents = fullPrecision ? cents : cents.slice(0, 2);
+  return `${symbol}${wholeDollars}${amountSeparator}${dispCents}`;
 }
 
 /** Displays eg "$1.23" or "$1,23" as H1 or H2. */

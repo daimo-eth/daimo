@@ -74,7 +74,7 @@ export function useCreateAccount(name: string): ActHandle {
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
 
-  return { ...as, exec };
+  return { ...as, exec, cost: { feeDollars: 0, totalDollars: 0 } };
 }
 
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {

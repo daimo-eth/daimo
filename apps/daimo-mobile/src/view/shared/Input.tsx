@@ -61,14 +61,15 @@ export function AmountInput({
 }) {
   if (dollars < 0) throw new Error("AmountPicker value can't be negative");
 
-  const fmt = (dollars: number) =>
-    getAmountText({ dollars: dollars.toFixed(2) as `${number}`, symbol: "" });
+  const fmt = (dollars: number) => getAmountText({ dollars, symbol: "" });
 
   const [strVal, setStrVal] = useState(dollars <= 0 ? "" : fmt(dollars));
 
   // On end editing, round value to 2 decimal places
   const onEndEditing = (e: { nativeEvent: { text: string } }) => {
     const value = e.nativeEvent.text;
+    console.log(`[INPUT] onEndEditing ${value}`);
+
     let newVal = parseLocalFloat(value);
     if (!(newVal >= 0)) {
       newVal = 0;
@@ -102,6 +103,7 @@ export function AmountInput({
   }, []);
 
   const onSubmit = useCallback(() => {
+    console.log(`[INPUT] onSubmitEditing ${dollars}`);
     if (onSubmitEditing) onSubmitEditing(dollars);
   }, [dollars]);
 
@@ -112,7 +114,6 @@ export function AmountInput({
       keyboardType="numeric"
       placeholder={`0${amountSeparator}00`}
       placeholderTextColor={color.gray}
-      multiline
       numberOfLines={1}
       autoFocus={autoFocus == null ? true : autoFocus}
       value={strVal}

@@ -26,6 +26,7 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { CancelHeader } from "./CancelHeader";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAccount } from "../../../model/account";
+import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
@@ -50,13 +51,12 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   const approveFirst = true;
 
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.CreateNote);
-  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [nonceMetadata]);
+  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), []);
 
-  const { status, message, exec } = useSendAsync(
-    account.enclaveKeyName,
-    async (account: DaimoAccount) => {
-      if (ephemeralOwner == null)
-        throw new Error("Payment Link key not generated yet");
+  const { status, message, cost, exec } = useSendAsync({
+    enclaveKeyName: account.enclaveKeyName,
+    dollarsToSend: dollars,
+    sendFn: async (account: DaimoAccount) => {
       return account.createEphemeralNote(
         ephemeralOwner,
         `${dollars}`,
@@ -64,7 +64,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
         approveFirst
       );
     },
-    {
+    pendingOp: {
       type: "transfer",
       status: OpStatus.pending,
       from: account.address,
@@ -72,18 +72,18 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonceMetadata.toHex(),
-    }
-  );
-
-  // TODO: load estimated fees
-  const fees = 0.05;
-  const totalDollars = dollars + fees;
+    },
+  });
 
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        if (dollars === 0) return null;
-        return `Total incl. fees $${totalDollars.toFixed(2)}`;
+        if (dollars === 0) {
+          return "Works like cash, redeemable by recipient";
+        }
+        return `Total incl. fees ${getAmountText({
+          dollars: cost.totalDollars,
+        })}`;
       case "loading":
         return message;
       case "error":
@@ -174,6 +174,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
       />
       <Spacer h={32} />
       {button}
+      <Spacer h={8} />
       <TextLight>
         <TextCenter>{statusMessage}</TextCenter>
       </TextLight>

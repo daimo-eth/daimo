@@ -19,7 +19,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useEphemeralSignature, useFetchNote } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
-import { TitleAmount } from "../../shared/Amount";
+import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
@@ -83,7 +83,7 @@ function NoteDisplay({
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);
   const nonce = useMemo(
     () => new DaimoNonce(nonceMetadata),
-    [nonceMetadata, ephemeralOwner, ephemeralPrivateKey]
+    [ephemeralOwner, ephemeralPrivateKey]
   );
 
   const sendFn = async (account: DaimoAccount) => {
@@ -96,10 +96,11 @@ function NoteDisplay({
   };
 
   // Add pending transaction immmmediately
-  const { status, message, exec } = useSendAsync(
-    account.enclaveKeyName,
+  const { status, message, cost, exec } = useSendAsync({
+    enclaveKeyName: account.enclaveKeyName,
+    dollarsToSend: 0,
     sendFn,
-    {
+    pendingOp: {
       type: "transfer",
       status: OpStatus.pending,
       from: ephemeralNotesAddress,
@@ -107,8 +108,8 @@ function NoteDisplay({
       amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonceMetadata.toHex(),
-    }
-  );
+    },
+  });
 
   // On success, go home, show newly created transaction
   const nav = useNav();
@@ -116,10 +117,6 @@ function NoteDisplay({
     if (status !== "success") return;
     nav.navigate("Home");
   }, [status]);
-
-  // TODO: load estimated fees
-  // NOTE: These fees seem difficult to communicate to user, think about it.
-  const fees = 0.05;
 
   const statusMessage = (function (): ReactNode {
     switch (noteStatus.status) {
@@ -134,7 +131,7 @@ function NoteDisplay({
     }
     switch (status) {
       case "idle":
-        return `Claim fee: $${fees.toFixed(2)}`;
+        return `Claim fee: ${getAmountText({ dollars: cost.totalDollars })}`;
       case "loading":
         return message;
       case "error":
