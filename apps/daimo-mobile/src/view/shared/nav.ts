@@ -38,6 +38,7 @@ export function useInitNavLinks() {
     if (url == null) return;
     const link = parseDaimoLink(url);
     if (link == null) {
+      console.log(`[NAV] skipping unparseable link ${url}`);
       return;
     }
 

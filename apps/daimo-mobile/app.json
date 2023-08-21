@@ -22,7 +22,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "31",
+      "buildNumber": "32",
       "associatedDomains": [
         "applinks:daimo.onrender.com"
       ],
@@ -61,7 +61,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 26
+      "versionCode": 28
     },
     "extra": {
       "eas": {
