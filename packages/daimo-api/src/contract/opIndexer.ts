@@ -1,6 +1,5 @@
 import { entryPointABI } from "@daimo/contract";
-import { DaimoNonce } from "@daimo/userop";
-import { DaimoNonceMetadata } from "@daimo/userop/dist/src/nonce";
+import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { Constants } from "userop";
 import { Hex, Log, getAbiItem, toHex } from "viem";
 

@@ -4,8 +4,8 @@ import {
   DaimoNonce,
   DaimoNonceMetadata,
   SigningCallback,
+  DaimoNonceType,
 } from "@daimo/userop";
-import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
 import { useState } from "react";
 import {
   Button,

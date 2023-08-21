@@ -77,7 +77,10 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
     ? DaimoNonceMetadata.fromHex(op.nonceMetadata).identifier.toString()
     : undefined;
   const matchingTrackedRequest = account.trackedRequests.find(
-    (req) => req.requestId === opRequestId && req.amount === `${op.amount}`
+    (req) =>
+      req.requestId === opRequestId &&
+      req.amount === `${op.amount}` &&
+      op.to === account.address
   );
 
   const [directionSymbol, directionText] = (() => {

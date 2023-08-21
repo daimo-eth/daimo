@@ -13,6 +13,7 @@ export class DaimoNonce {
   public key: Hex;
 
   public constructor(metadata: DaimoNonceMetadata, passedKey?: Hex) {
+    assert(passedKey === undefined || passedKey.length === 2 + 32);
     const key = passedKey ?? (generatePrivateKey().slice(0, 2 + 32) as Hex); // Uses secure random.
     this.metadata = metadata;
     this.key = key;

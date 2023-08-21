@@ -6,8 +6,12 @@ import {
   getAccountName,
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
-import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
-import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+} from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";

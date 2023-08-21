@@ -8,8 +8,7 @@ import {
   zAddress,
   zHex,
 } from "@daimo/common";
-import { DaimoNonceMetadata } from "@daimo/userop";
-import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
+import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Address, PublicClient, Transport, getAddress } from "viem";
 import { baseGoerli } from "viem/chains";
 import { normalize } from "viem/ens";

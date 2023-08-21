@@ -19,6 +19,7 @@ export {
   DaimoNonce,
   DaimoNonceMetadata,
   MAX_NONCE_ID_SIZE_BITS,
+  DaimoNonceType,
 } from "./nonce";
 
 export type UserOpHandle = Awaited<

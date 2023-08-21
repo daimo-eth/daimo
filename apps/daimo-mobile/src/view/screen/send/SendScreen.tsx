@@ -5,8 +5,12 @@ import {
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
-import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+} from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, {

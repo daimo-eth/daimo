@@ -9,8 +9,8 @@ import {
   DaimoNonce,
   DaimoNonceMetadata,
   SigningCallback,
+  DaimoNonceType,
 } from "@daimo/userop";
-import { DaimoNonceType } from "@daimo/userop/dist/src/nonce";
 import crypto from "node:crypto";
 import { Constants } from "userop";
 import {
