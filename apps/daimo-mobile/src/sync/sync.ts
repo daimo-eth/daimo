@@ -7,8 +7,6 @@ import {
 } from "@daimo/common";
 import { useEffect } from "react";
 
-import { assert } from "../logic/assert";
-import { Chain, ChainStatus, chainConfig } from "../logic/chain";
 import { guessTimestampFromNum } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";

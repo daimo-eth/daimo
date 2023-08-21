@@ -20,7 +20,7 @@ async function main() {
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const coinIndexer = new CoinIndexer(vc);
   const keyReg = new KeyRegistry(vc);
-  const nameReg = new NameRegistry(vc, keyReg);
+  const nameReg = new NameRegistry(vc);
   const noteIndexer = new NoteIndexer(vc, nameReg);
   const opIndexer = new OpIndexer(vc);
   const faucet = new Faucet(vc, coinIndexer);
@@ -38,7 +38,7 @@ async function main() {
     console.log(`[API] initializing indexers...`);
     await Promise.all([coinIndexer.init(), nameReg.init()]);
     await Promise.all([faucet.init(), noteIndexer.init()]);
-    await Promise.all([opIndexer.init()]);
+    await Promise.all([opIndexer.init(), keyReg.init()]);
 
     console.log(`[API] initializing push notifications...`);
     await notifier.init();

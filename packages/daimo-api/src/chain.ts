@@ -58,7 +58,8 @@ export class ViemClient {
     const latest = await this.publicClient.getBlock({ blockTag: "latest" });
     if (latest.number == null) throw new Error("Missing block number");
 
-    const pipeName = args.event?.name || args.address.substring(0, 8);
+    const pipeName =
+      args.event?.name || args.address?.substring(0, 8) || "unknown";
 
     // TODO: save in DB, dont load from scratch every time
     // TODO: hack for faster startup
@@ -66,6 +67,7 @@ export class ViemClient {
     if (this.publicClient.chain.id === baseGoerli.id) {
       fromBlock = args.event == null ? 7000000n : 5000000n;
     }
+    fromBlock = 8300000n;
     const step = 5000n;
     for (; fromBlock < latest.number; fromBlock += step) {
       let toBlock = (fromBlock + step) as BlockTag | bigint;

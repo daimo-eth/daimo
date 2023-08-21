@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { chainConfig } from "./chain";
+import { chainConfig } from "./chainConfig";
 
 /** Returns the current time in Unix seconds. Ticks every second. */
 export function useTime() {

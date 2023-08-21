@@ -26,14 +26,17 @@ export function useLoadAccountFromKey(pubKey: Hex | undefined) {
 
   const pubKeyHex = pubKey || "0x";
   const enabled = pubKey != null;
-  const res = rpcHook.lookupAccountByKey.useQuery({ pubKeyHex }, { enabled });
+  const res = rpcHook.lookupEthereumAccountByKey.useQuery(
+    { pubKeyHex },
+    { enabled }
+  );
 
   useEffect(() => {
     if (!res.isSuccess) return;
     if (account !== undefined) return;
 
-    // No account found for this signing key
-    if (!res.data) {
+    // No account with name found for this signing key
+    if (!res.data || !res.data.name) {
       setAccount(null);
       return;
     }

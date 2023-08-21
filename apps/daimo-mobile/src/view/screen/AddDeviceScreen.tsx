@@ -1,5 +1,4 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect } from "react";
 import { View } from "react-native";
 
 import { Header } from "../shared/Header";

@@ -1,21 +1,8 @@
+import { KeyData } from "@daimo/common";
 import { accountABI } from "@daimo/contract";
-import {
-  Account,
-  Address,
-  BlockTag,
-  Chain,
-  Hex,
-  Log,
-  TransactionReceipt,
-  Transport,
-  WalletClient,
-  getAbiItem,
-  getContract,
-  hexToString,
-} from "viem";
+import { Address, Hex, Log, getAbiItem } from "viem";
 
 import { contractFriendlyKeyToDER } from "./util";
-import { KeyData, NamedAccount } from "../../../daimo-common/src/model";
 import { ViemClient } from "../chain";
 
 const signingKeyAddedEvent = getAbiItem({
@@ -27,8 +14,20 @@ const signingKeyRemovedEvent = getAbiItem({
   name: "SigningKeyRemoved",
 });
 
-type SigningKeyAddedLog = Log<bigint, number, typeof signingKeyAddedEvent>;
-type SigningKeyRemovedLog = Log<bigint, number, typeof signingKeyRemovedEvent>;
+type SigningKeyAddedLog = Log<
+  bigint,
+  number,
+  false,
+  typeof signingKeyAddedEvent,
+  true
+>;
+type SigningKeyRemovedLog = Log<
+  bigint,
+  number,
+  false,
+  typeof signingKeyRemovedEvent,
+  true
+>;
 type SigningKeyAddedOrRemovedLog = SigningKeyAddedLog | SigningKeyRemovedLog;
 
 export class KeyRegistry {
@@ -56,7 +55,7 @@ export class KeyRegistry {
     console.log(`[KEY-REG] watching logs`);
   }
 
-  /** Parses a particular account's event logs, first in name registries init(), then on subscription. */
+  /** Parses account key add/remove logs, first on init() and then on subscription. */
   parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
     const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO?
     for (const log of logs) {

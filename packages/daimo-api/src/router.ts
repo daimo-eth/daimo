@@ -157,7 +157,7 @@ export function createRouter(
         }
       }),
 
-    lookupNameByKey: publicProcedure
+    lookupEthereumAccountByKey: publicProcedure
       .input(
         z.object({
           pubKeyHex: zHex,
@@ -165,7 +165,7 @@ export function createRouter(
       )
       .query(async (opts) => {
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
-        return addr ? nameReg.resolveAddress(addr) : null;
+        return addr ? await nameReg.getEAccount(addr) : null;
       }),
 
     lookupAddressKeys: publicProcedure

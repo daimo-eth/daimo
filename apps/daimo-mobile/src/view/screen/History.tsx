@@ -3,11 +3,8 @@ import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
-import { assert } from "../../logic/assert";
-import { amountToDollars } from "../../logic/coin";
 import { timeAgo } from "../../logic/time";
 import { Account, useAccount } from "../../model/account";
-import { useAccountHistory, AccountHistory } from "../../model/accountHistory";
 import { getAmountText } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import { AddrText } from "../shared/addr";

@@ -2,6 +2,7 @@ import { tokenMetadata } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
+import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";

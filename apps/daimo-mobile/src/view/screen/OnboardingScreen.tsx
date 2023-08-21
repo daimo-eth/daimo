@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+// import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import {
@@ -38,7 +38,6 @@ import {
   TextH1,
   TextLight,
 } from "../shared/text";
-import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
   const [page, setPage] = useState(1);
@@ -137,6 +136,7 @@ function IntroPages({
       </ScrollView>
       <Spacer h={64} />
       <ButtonBig
+        type="primary"
         title="Create Account"
         onPress={() => {
           onFlowChoice("create");
@@ -272,13 +272,13 @@ function UseExistingPage() {
       <View style={styles.createAccountPage}>
         <TextH1>Welcome</TextH1>
         <TextBody>test use existing</TextBody>
-        <QRCode
+        {/* <QRCode
           value={url}
           color="#333"
           size={192}
           logo={{ uri: image.qrLogo }}
           logoSize={72}
-        />
+        /> */}
       </View>
     </View>
 
