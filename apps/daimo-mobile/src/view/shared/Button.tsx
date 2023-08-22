@@ -126,7 +126,7 @@ export function Button(
   );
 }
 
-export const buttonStyles = {
+const buttonStyles = {
   big: StyleSheet.create({
     button: {
       paddingHorizontal: 24,
