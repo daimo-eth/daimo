@@ -11,14 +11,15 @@ export function CancelHeader({
   hide,
 }: {
   children: ReactNode;
-  hide: () => void;
+  hide?: () => void;
 }) {
   return (
     <ButtonSmall onPress={hide}>
       <View style={styles.cancelHeader}>
         <Spacer h={8} />
         <TextLight>{children}</TextLight>
-        <Octicons name="x" size={20} color="gray" />
+        {hide && <Octicons name="x" size={20} color="gray" />}
+        {!hide && <Spacer h={8} />}
       </View>
     </ButtonSmall>
   );

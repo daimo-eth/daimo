@@ -16,7 +16,7 @@ import { generatePrivateKey } from "viem/accounts";
 
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
-import { AmountInput } from "../../shared/Input";
+import { AmountInput } from "../../shared/InputBig";
 import { useNav } from "../../shared/nav";
 import { color } from "../../shared/style";
 

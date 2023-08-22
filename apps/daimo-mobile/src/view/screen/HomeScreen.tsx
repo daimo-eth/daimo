@@ -16,7 +16,7 @@ import { Account, useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
-import { OctName } from "../shared/Input";
+import { OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";

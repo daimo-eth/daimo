@@ -1,50 +1,14 @@
-import Octicons from "@expo/vector-icons/Octicons";
-import { Icon } from "@expo/vector-icons/build/createIconSet";
-import { useCallback, useState } from "react";
+import { dollarsToAmount } from "@daimo/common";
+import { ReactNode, useCallback, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
-import { amountSeparator, getAmountText } from "./Amount";
+import { TitleAmount, amountSeparator, getAmountText } from "./Amount";
+import { ButtonSmall } from "./Button";
+import Spacer from "./Spacer";
 import { color, ss } from "./style";
-
-export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
-
-export function InputBig({
-  value,
-  onChange,
-  placeholder,
-  icon,
-  center,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  icon?: OctName;
-  center?: boolean;
-}) {
-  const [isFocused, setIsFocused] = useState(false);
-  const onFocus = useCallback(() => setIsFocused(true), []);
-  const onBlur = useCallback(() => setIsFocused(false), []);
-
-  return (
-    <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
-      <TextInput
-        placeholder={placeholder}
-        placeholderTextColor={color.gray}
-        value={value}
-        onChangeText={onChange}
-        style={center ? styles.inputCentered : styles.input}
-        multiline
-        numberOfLines={1}
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry
-        keyboardType="visible-password"
-        {...{ onFocus, onBlur }}
-      />
-      {icon && <Octicons name={icon} size={16} color="gray" />}
-    </View>
-  );
-}
+import { TextLight, TextCenter } from "./text";
+import { useAccount } from "../../model/account";
+import { CancelHeader } from "../screen/send/CancelHeader";
 
 export function AmountInput({
   dollars,
@@ -126,34 +90,58 @@ export function AmountInput({
   );
 }
 
-const inputRow = {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 8,
-  backgroundColor: color.bg.lightGray,
-  borderRadius: 8,
-  paddingHorizontal: 16,
-  paddingVertical: 12,
-} as const;
+export function SendAmountChooser({
+  actionDesc,
+  onCancel,
+  dollars,
+  onSetDollars,
+}: {
+  actionDesc: ReactNode;
+  onCancel?: () => void;
+  dollars: number;
+  onSetDollars?: (dollars: number) => void;
+}) {
+  // Temporary dollar amount while typing
+  const [d, setD] = useState(0);
+  const submit =
+    onSetDollars &&
+    ((newD: number) => {
+      onSetDollars(newD);
+      setD(0);
+    });
+  const clearDollars = onSetDollars && (() => onSetDollars(0));
 
-const input = {
-  ...ss.text.body,
-  flexGrow: 1,
-  paddingTop: 0,
-  paddingVertical: 0,
-} as const;
+  // Show how much we have available
+  const [account] = useAccount();
+  if (account == null) return null;
+  const dollarStr = getAmountText({ amount: account.lastBalance });
+
+  return (
+    <>
+      <Spacer h={64} />
+      <CancelHeader hide={onCancel}>{actionDesc}</CancelHeader>
+      <Spacer h={32} />
+      {dollars === 0 && (
+        <View style={ss.container.ph16}>
+          <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
+          <Spacer h={16} />
+          <TextLight>
+            <TextCenter>{dollarStr} available</TextCenter>
+          </TextLight>
+        </View>
+      )}
+      {dollars > 0 && (
+        <ButtonSmall onPress={clearDollars}>
+          <TextCenter>
+            <TitleAmount amount={dollarsToAmount(dollars)} />
+          </TextCenter>
+        </ButtonSmall>
+      )}
+    </>
+  );
+}
 
 const styles = StyleSheet.create({
-  inputRow,
-  inputRowFocused: {
-    ...inputRow,
-    backgroundColor: color.bg.blue,
-  },
-  input,
-  inputCentered: {
-    ...input,
-    textAlign: "center",
-  },
   amountInput: {
     fontSize: 30,
     fontWeight: "bold",

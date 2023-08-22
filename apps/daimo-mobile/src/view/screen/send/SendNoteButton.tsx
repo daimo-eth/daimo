@@ -12,36 +12,39 @@ import {
   DaimoNonceMetadata,
   DaimoNonceType,
 } from "@daimo/userop";
-import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
   Share,
   ShareAction,
-  TextInput,
+  View,
 } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { CancelHeader } from "./CancelHeader";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAccount } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
+import { ss } from "../../shared/style";
 import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
-export function CreateNoteTab({ hide }: { hide: () => void }) {
+export function SendNoteButton({
+  dollars,
+  onCreated,
+}: {
+  dollars: number;
+  onCreated: () => void;
+}) {
   const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
   const ephemeralOwner = useMemo(
     () => ephemeralPrivKey && privateKeyToAccount(ephemeralPrivKey).address,
     [ephemeralPrivKey]
   );
-
-  const [dollars, setDollars] = useState(0);
 
   const [account] = useAccount();
   assert(account != null);
@@ -78,27 +81,23 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        if (dollars === 0) {
-          return "Works like cash, redeemable by recipient";
-        }
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
+        return `Works like cash, redeemable by recipient\n${
+          dollars <= 0
+            ? ""
+            : `Total incl. fees ${getAmountText({
+                dollars: cost.totalDollars,
+              })}`
+        }`;
       case "loading":
         return message;
       case "error":
         return <TextError>{message}</TextError>;
+      case "success":
+        return "Works like cash, redeemable by recipient";
       default:
         return null;
     }
   })();
-
-  const amountRef = useRef<TextInput>(null);
-
-  const onCreateNote = useCallback(() => {
-    if (amountRef.current) amountRef.current.blur();
-    exec();
-  }, [exec]);
 
   const nav = useNav();
 
@@ -144,7 +143,7 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
           <ButtonBig
             type="primary"
             title="Create Payment Link"
-            onPress={onCreateNote}
+            onPress={exec}
             disabled={dollars === 0}
           />
         );
@@ -163,21 +162,17 @@ export function CreateNoteTab({ hide }: { hide: () => void }) {
     }
   })();
 
+  useEffect(() => {
+    if (status === "success") onCreated();
+  }, [status]);
+
   return (
-    <>
-      <CancelHeader hide={hide}>Creating payment link</CancelHeader>
-      <Spacer h={32} />
-      <AmountInput
-        dollars={dollars}
-        onChange={setDollars}
-        innerRef={amountRef}
-      />
-      <Spacer h={32} />
+    <View style={ss.container.ph16}>
       {button}
       <Spacer h={8} />
       <TextLight>
         <TextCenter>{statusMessage}</TextCenter>
       </TextLight>
-    </>
+    </View>
   );
 }

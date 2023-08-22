@@ -26,7 +26,7 @@ import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
-import { InputBig, OctName } from "../shared/Input";
+import { InputBig, OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import {

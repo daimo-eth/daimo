@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { ButtonBig } from "../../shared/Button";
-import { InputBig } from "../../shared/Input";
+import { InputBig } from "../../shared/InputBig";
 import { useNav } from "../../shared/nav";
 import { TextCenter, TextError, TextH3, TextLight } from "../../shared/text";
 import { timeAgo } from "../../shared/time";

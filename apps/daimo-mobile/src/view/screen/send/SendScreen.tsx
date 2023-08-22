@@ -22,18 +22,17 @@ import React, {
 } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
-import { CancelHeader } from "./CancelHeader";
-import { CreateNoteTab } from "./CreateNoteTab";
 import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
+import { SendNoteButton } from "./SendNoteButton";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
-import { TitleAmount, getAmountText } from "../../shared/Amount";
-import { ButtonBig, ButtonSmall } from "../../shared/Button";
+import { getAmountText } from "../../shared/Amount";
+import { SendAmountChooser } from "../../shared/AmountInput";
+import { ButtonBig } from "../../shared/Button";
 import { Header } from "../../shared/Header";
-import { AmountInput } from "../../shared/Input";
 import Spacer from "../../shared/Spacer";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
@@ -59,12 +58,15 @@ export default function SendScreen({ route }: Props) {
 
   // Create Note shows available secure messaging apps
   const [, sendViaAppStr] = useAvailMessagingApps();
+  const [noteDollars, setNoteDollars] = useState(0);
+  const [noteCreated, setNoteCreated] = useState(false);
+  const onNoteCreated = useCallback(() => setNoteCreated(true), []);
 
   return (
     <View style={ss.container.outerStretch}>
       <Header />
       <ScrollView
-        contentContainerStyle={styles.vertMain}
+        contentContainerStyle={styles.vertStretch}
         bounces={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -86,7 +88,16 @@ export default function SendScreen({ route }: Props) {
             {tab !== "createNote" && <Spacer h={16} />}
             {tab === "search" && <SearchTab />}
             {tab === "scan" && <ScanTab hide={search} />}
-            {tab === "createNote" && <CreateNoteTab hide={search} />}
+            {tab === "createNote" && (
+              <SendAmountChooser
+                actionDesc={
+                  noteCreated ? "Payment link created" : "Creating payment link"
+                }
+                dollars={noteDollars}
+                onSetDollars={noteCreated ? undefined : setNoteDollars}
+                onCancel={noteCreated ? undefined : search}
+              />
+            )}
           </>
         )}
       </ScrollView>
@@ -102,6 +113,9 @@ export default function SendScreen({ route }: Props) {
             <TextCenter>{sendViaAppStr}</TextCenter>
           </TextLight>
         </View>
+      )}
+      {!recipient && tab === "createNote" && (
+        <SendNoteButton dollars={noteDollars} onCreated={onNoteCreated} />
       )}
       {recipient && (
         <SendButton
@@ -121,53 +135,30 @@ function SetAmount({
   recipient: Recipient;
   dollars: number;
 }) {
-  const nav = useNav();
-  const hide = () =>
-    nav.setParams({ recipient: undefined, dollars: undefined });
-  const clearDollars = () => nav.setParams({ dollars: undefined });
-
   // Show who we're sending to
   const disp = getAccountName(recipient);
 
-  // Temporary dollar amount while typing
-  const [d, setD] = useState(0);
-  const submit = (newD: number) => {
-    nav.setParams({ dollars: newD });
-    setD(0);
-  };
+  // Show how much
+  const nav = useNav();
+  const hide = () =>
+    nav.setParams({ recipient: undefined, dollars: undefined });
+  const setDollars = (newD: number) =>
+    nav.setParams({ dollars: newD > 0 ? newD : undefined });
 
-  // Show how much we have available
-  const [account] = useAccount();
-  if (account == null) return null;
-  const dollarStr = getAmountText({ amount: account.lastBalance });
+  const actionDesc = (
+    <TextCenter>
+      Sending to{"\n"}
+      <TextH2>{disp}</TextH2>
+    </TextCenter>
+  );
 
   return (
-    <>
-      <Spacer h={64} />
-      <CancelHeader hide={hide}>
-        <TextCenter>
-          Sending to{"\n"}
-          <TextH2>{disp}</TextH2>
-        </TextCenter>
-      </CancelHeader>
-      <Spacer h={32} />
-      {dollars === 0 && (
-        <View style={ss.container.ph16}>
-          <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
-          <Spacer h={16} />
-          <TextLight>
-            <TextCenter>{dollarStr} available</TextCenter>
-          </TextLight>
-        </View>
-      )}
-      {dollars > 0 && (
-        <ButtonSmall onPress={clearDollars}>
-          <TextCenter>
-            <TitleAmount amount={dollarsToAmount(dollars)} />
-          </TextCenter>
-        </ButtonSmall>
-      )}
-    </>
+    <SendAmountChooser
+      actionDesc={actionDesc}
+      onCancel={hide}
+      dollars={dollars}
+      onSetDollars={setDollars}
+    />
   );
 }
 
@@ -273,9 +264,8 @@ function SendButton({
 }
 
 const styles = StyleSheet.create({
-  vertMain: {
+  vertStretch: {
     flexDirection: "column",
     alignSelf: "stretch",
-    paddingTop: 8,
   },
 });
