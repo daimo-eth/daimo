@@ -3,20 +3,20 @@ import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Alert,
+  Platform,
   Share,
+  ShareAction,
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
   View,
-  Platform,
-  ShareAction,
 } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 
 import { useAccount } from "../../../model/account";
+import { AmountInput } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { AmountInput } from "../../shared/InputBig";
 import { useNav } from "../../shared/nav";
 import { color } from "../../shared/style";
 
