@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { chainConfig } from "./chainConfig";
 
 /** Returns the current time in Unix seconds. Ticks every second. */
-export function useTime() {
+export function useTime(secs: number = 1) {
   const [time, setTime] = useState(Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(Date.now()), 1000);
+    const interval = setInterval(() => setTime(Date.now()), secs * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  return time / 1000;
+  return Math.floor(time / 1000);
 }
 
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */

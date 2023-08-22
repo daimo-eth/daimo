@@ -26,7 +26,6 @@ export type HomeStackParamList = {
   History: undefined;
   HistoryOp: { op: OpEvent };
   AddDevice: undefined;
-  UseExisting: undefined;
 };
 
 export function useNav() {

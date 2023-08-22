@@ -72,6 +72,8 @@ export function SettingsScreen() {
 
   if (!account) return null;
 
+  const addDevice = () => nav.navigate("AddDevice");
+
   return (
     <>
       <ScrollView contentContainerStyle={ss.container.vertModal}>
@@ -103,11 +105,7 @@ export function SettingsScreen() {
         </View>
         <Spacer h={8} />
         <View style={styles.callout}>
-          <TextBody>
-            <Octicons name="alert" size={16} color="black" />{" "}
-            <TextBold>Add or remove device coming soon.</TextBold> Secure your
-            account by adding a second phone or laptop.
-          </TextBody>
+          <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
         </View>
         <Spacer h={32} />
 

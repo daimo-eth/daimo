@@ -15,9 +15,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-// import QRCode from "react-native-qrcode-svg";
+import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
+import { useExistingAccount } from "../../action/useExistingAccount";
+import { createAddKeyString } from "../../logic/device";
 import {
   deleteEnclaveKey,
   useLoadAccountFromKey,
@@ -29,6 +31,7 @@ import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
+import image from "../shared/image";
 import { color, ss } from "../shared/style";
 import {
   EmojiToOcticon,
@@ -67,16 +70,18 @@ export default function OnboardingScreen() {
     }
   }, [account]);
 
+  // TODO: add back buttons?
   return (
     <View style={styles.onboardingScreen}>
       {page === 1 && <IntroPages onFlowChoice={onFlowChoice} />}
-      {page === 2 && <AllowNotifications onNext={next} />}
-      {page === 3 && // TODO: add back buttons, probably rearrange notifications to be after?
-        (accountFlowChoice === "create" ? (
-          <CreateAccountPage />
-        ) : (
-          <UseExistingPage />
-        ))}
+      {accountFlowChoice === "create" && page === 2 && (
+        <AllowNotifications onNext={next} />
+      )}
+      {accountFlowChoice === "create" && page === 3 && <CreateAccountPage />}
+      {accountFlowChoice === "existing" && page === 2 && <UseExistingPage />}
+      {accountFlowChoice === "existing" && page === 3 && (
+        <AllowNotifications onNext={next} />
+      )}
     </View>
   );
 }
@@ -267,40 +272,33 @@ function CreateAccountPage() {
 }
 
 function UseExistingPage() {
+  const { status, message, pubKeyHex } = useExistingAccount();
+
   return (
     <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
+      <View style={styles.useExistingPage}>
         <TextH1>Welcome</TextH1>
-        <TextBody>test use existing</TextBody>
-        {/* <QRCode
-          value={url}
-          color="#333"
-          size={192}
-          logo={{ uri: image.qrLogo }}
-          logoSize={72}
-        /> */}
+        <TextBody>Scan QR code from existing device's Settings page</TextBody>
+        {pubKeyHex !== undefined && (
+          <View style={styles.vertQR}>
+            <QRCode
+              value={createAddKeyString(pubKeyHex)}
+              color="#333"
+              size={192}
+              logo={{ uri: image.qrLogo }}
+              logoSize={72}
+            />
+          </View>
+        )}
+        <TextCenter>
+          {status !== "error" && (
+            <TextLight>
+              <EmojiToOcticon size={16} text={message} />
+            </TextLight>
+          )}
+        </TextCenter>
       </View>
     </View>
-
-    /* 
-    <View style={styles.vertMain}>
-        <View style={styles.vertQR}>
-          <QRCode
-            value={url}
-            color="#333"
-            size={192}
-            logo={{ uri: image.qrLogo }}
-            logoSize={72}
-          />
-          <TextSmall>Scan or tap</TextSmall>
-        </View>
-        <TextSmall>or</TextSmall>
-        <View style={styles.horzButtons}>
-          <ButtonBig title="Request" onPress={request} />
-          <ButtonBig title="Deposit" onPress={deposit} />
-        </View>
-      </View>
-    */
   );
 }
 
@@ -418,6 +416,16 @@ const styles = StyleSheet.create({
   },
   createAccountPage: {
     width: screenDimensions.width,
+    padding: 32,
+  },
+  useExistingPage: {
+    width: screenDimensions.width,
+    padding: 32,
+  },
+  vertQR: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
     padding: 32,
   },
 });
