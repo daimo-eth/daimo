@@ -3,14 +3,8 @@ import { Text } from "react-native";
 import { Address } from "viem";
 
 import { TextBold } from "./text";
-import { getAccountManager } from "../../model/account";
 
 const nameCache = new Map<Address, EAccount>();
-
-export function useEAccountCache() {
-  const accountManager = getAccountManager();
-  cacheEAccounts(accountManager.currentAccount?.namedAccounts || []);
-}
 
 export function cacheEAccounts(accounts: EAccount[]) {
   for (const account of accounts) {

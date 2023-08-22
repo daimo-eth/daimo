@@ -114,7 +114,7 @@ class AccountManager {
   constructor() {
     // On first load, load+save to ensure latest serialization version.
     this.currentAccount = parseAccount(this.mmkv.getString("account"));
-    this.mmkv.set("account", serializeAccount(this.currentAccount));
+    this.setCurrentAccount(this.currentAccount);
   }
 
   addListener(listener: (a: Account | null) => void) {

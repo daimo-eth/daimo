@@ -1,3 +1,4 @@
+import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useRef } from "react";
 import {
   Dimensions,
@@ -5,6 +6,7 @@ import {
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
+  TouchableHighlight,
   View,
 } from "react-native";
 
@@ -12,11 +14,13 @@ import { HistoryList } from "./History";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
-import { Button, buttonStyles } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
+import { OctName } from "../shared/Input";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
-import { color, ss } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { TextBody, TextCenter, TextLight } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
@@ -56,6 +60,7 @@ export default function HomeScreen() {
         onScroll={onScroll}
         onScrollEndDrag={onScrollEnd}
         scrollEventThrottle={32}
+        showsVerticalScrollIndicator={false}
         ref={scrollViewRef}
       >
         <View style={styles.historyElem}>
@@ -72,32 +77,62 @@ function AmountAndButtons({ account }: { account: Account }) {
   const goSend = useCallback(() => nav.navigate("Send"), [nav]);
   const goRequest = useCallback(() => nav.navigate("Request"), [nav]);
   const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
-  const goWithdraw = useCallback(() => nav.navigate("Withdraw"), [nav]);
+
+  const isEmpty = account.lastBalance === 0n;
 
   return (
     <View style={styles.amountAndButtons}>
       <TitleAmount amount={account.lastBalance} />
       <Spacer h={32} />
       <View style={styles.buttonRow}>
-        <Button
-          style={bigButton}
-          title="Send"
-          onPress={goSend}
-          disabled={account.lastBalance === 0n}
-        />
-        <Button style={bigButton} title="Request" onPress={goRequest} />
-      </View>
-      <Spacer h={8} />
-      <View style={styles.buttonRow}>
-        <Button
-          style={smallButton}
-          title="Withdraw"
-          onPress={goWithdraw}
-          disabled={account.lastBalance === 0n}
-        />
-        <Button style={smallButton} title="Deposit" onPress={goDeposit} />
+        <IconButton title="Deposit" onPress={goDeposit} />
+        <IconButton title="Request" onPress={goRequest} />
+        <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
       </View>
     </View>
+  );
+}
+
+function IconButton({
+  title,
+  onPress,
+  disabled,
+}: {
+  title: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  const name: OctName = (function () {
+    switch (title) {
+      case "Send":
+        return "paper-airplane";
+      case "Request":
+        return "apps";
+      case "Deposit":
+        return "download";
+      default:
+        return "question";
+    }
+  })();
+
+  const icon = <Octicons name={name} size={24} color={color.white} />;
+  const titleText = <TextCenter>{title}</TextCenter>;
+  const handlePress = disabled ? undefined : onPress;
+  return (
+    <TouchableHighlight
+      onPress={handlePress}
+      {...touchHighlightUnderlay.blue}
+      style={styles.iconButton}
+    >
+      <View>
+        <ButtonBig type="primary" disabled={disabled} onPress={handlePress}>
+          <TextCenter>{icon}</TextCenter>
+        </ButtonBig>
+        <Spacer h={8} />
+        {disabled && <TextLight>{titleText}</TextLight>}
+        {!disabled && <TextBody>{titleText}</TextBody>}
+      </View>
+    </TouchableHighlight>
   );
 }
 
@@ -121,7 +156,11 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 24,
+  },
+  iconButton: {
+    flexGrow: 1,
+    borderRadius: 16,
+    padding: 16,
   },
   historyScroll: {
     paddingTop: 32,
@@ -141,26 +180,4 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
   },
-});
-
-const bigButton = StyleSheet.create({
-  button: {
-    ...buttonStyles.big.button,
-    width: 128,
-    backgroundColor: color.primary,
-  },
-  title: {
-    ...buttonStyles.big.title,
-    color: color.white,
-  },
-});
-
-const smallButton = StyleSheet.create({
-  button: {
-    ...buttonStyles.small.button,
-    width: 128,
-    height: 48,
-    justifyContent: "center",
-  },
-  title: buttonStyles.small.title,
 });

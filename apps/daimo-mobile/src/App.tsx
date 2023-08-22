@@ -6,7 +6,6 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
-import { useEAccountCache } from "./view/shared/addr";
 import { useInitNavLinks } from "./view/shared/nav";
 
 export default function App() {
@@ -17,9 +16,6 @@ export default function App() {
 
   // Sync data from chain. Account balance, transfers, ...
   useSyncChain();
-
-  // Track names for known addresses
-  useEAccountCache();
 
   // Load font to fix icons on Android
   useFonts({ Octicons: require("../assets/octicons.ttf") });
