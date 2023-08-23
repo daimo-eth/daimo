@@ -1,5 +1,5 @@
 import { isDERPubKey, assert } from "@daimo/common";
-import { Hex, keccak256 } from "viem";
+import { Hex, isHex, keccak256 } from "viem";
 
 const emojis = ["🍇", "🍈", "🍉", "🍊", "🍋", "🍌"];
 
@@ -13,9 +13,9 @@ export function createAddKeyString(pubKey: Hex): string {
 }
 
 export function parseAddKeyString(addString: string): Hex {
-  const [prefix, givenPubKey] = addString.split(":");
+  const [prefix, pubKey] = addString.split(":");
   assert(prefix === "addkey");
-  const pubKey = `0x${givenPubKey}` as Hex;
+  assert(isHex(pubKey));
   assert(isDERPubKey(pubKey));
   return pubKey;
 }

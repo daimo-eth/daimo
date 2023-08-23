@@ -1,3 +1,4 @@
+import { DERKeytoContractFriendlyKey } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
 import { Client, ISendUserOperationOpts, Presets } from "userop";
 import {
@@ -11,7 +12,7 @@ import {
 
 import { DaimoOpBuilder } from "./daimoOpBuilder";
 import { DaimoNonce } from "./nonce";
-import { SigningCallback, derKeyToContractFriendlyKey } from "./util";
+import { SigningCallback } from "./util";
 import config from "../config.json";
 
 export { SigningCallback };
@@ -107,8 +108,8 @@ export class DaimoAccount {
   }
 
   /** Adds an account signing key. Returns userOpHash. */
-  public async addSigningKey(derPublicKey: string, nonce: DaimoNonce) {
-    const contractFriendlyKey = derKeyToContractFriendlyKey(derPublicKey);
+  public async addSigningKey(derPublicKey: Hex, nonce: DaimoNonce) {
+    const contractFriendlyKey = DERKeytoContractFriendlyKey(derPublicKey);
 
     const op = this.opBuilder.execute(
       this.getAddress(),
@@ -125,8 +126,8 @@ export class DaimoAccount {
   }
 
   /** Removes an account signing key. Returns userOpHash. */
-  public async removeSigningKey(derPublicKey: string, nonce: DaimoNonce) {
-    const contractFriendlyKey = derKeyToContractFriendlyKey(derPublicKey);
+  public async removeSigningKey(derPublicKey: Hex, nonce: DaimoNonce) {
+    const contractFriendlyKey = DERKeytoContractFriendlyKey(derPublicKey);
 
     const op = this.opBuilder.execute(
       this.getAddress(),

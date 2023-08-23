@@ -21,6 +21,7 @@ export function useExistingAccount() {
     createKey(setAS, enclaveKeyName).then(setPubKeyHex);
   }, []);
 
+  // TODO: Does TRPC have a better way to "watch" an endpoint?
   useEffect(() => {
     (async () => {
       if (account || !pubKeyHex) return; // Either hasn't started or already loaded

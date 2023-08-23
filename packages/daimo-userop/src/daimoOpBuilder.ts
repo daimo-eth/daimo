@@ -23,7 +23,7 @@ function getSigningMiddleware(
     const hexMessage = ctx.getUserOpHash().slice(2);
     const signature = await signer(hexPrefix + hexMessage);
     const parsedSignature = p256.Signature.fromDER(signature);
-    ctx.op.signature = `0x${parsedSignature.toCompactHex()}`;
+    ctx.op.signature = `0x00${parsedSignature.toCompactHex()}`; // TODO keyIdx
   };
 }
 

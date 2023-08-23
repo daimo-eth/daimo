@@ -16,11 +16,11 @@ export function DERKeytoContractFriendlyKey(pubKeyHex: Hex): [Hex, Hex] {
     throw new Error("Invalid public key format");
   }
 
-  const pubKey = Buffer.from(pubKeyHex.substring(derPrefix.length), "hex");
-  assert(pubKey.length === 64);
+  const pubKey = pubKeyHex.substring(derPrefix.length);
+  assert(pubKey.length === 128);
 
-  const key1 = `0x${pubKey.subarray(0, 32).toString("hex")}` as Hex;
-  const key2 = `0x${pubKey.subarray(32).toString("hex")}` as Hex;
+  const key1 = `0x${pubKey.substring(0, 64)}` as Hex;
+  const key2 = `0x${pubKey.substring(64)}` as Hex;
   return [key1, key2];
 }
 

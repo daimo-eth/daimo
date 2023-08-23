@@ -1,6 +1,6 @@
 import { KeyData, contractFriendlyKeyToDER } from "@daimo/common";
 import { accountABI } from "@daimo/contract";
-import { Address, Hex, Log, getAbiItem } from "viem";
+import { Address, Hex, Log, getAbiItem, getAddress } from "viem";
 
 import { ViemClient } from "../chain";
 
@@ -58,7 +58,7 @@ export class KeyRegistry {
   parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
     const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO?
     for (const log of logs) {
-      const addr = log.address;
+      const addr = getAddress(log.address);
       if (this.addrToLogs.get(addr) === undefined) {
         this.addrToLogs.set(addr, []);
       }

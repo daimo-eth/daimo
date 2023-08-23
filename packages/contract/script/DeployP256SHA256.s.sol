@@ -10,7 +10,7 @@ contract DeployScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        P256SHA256 verifier = new P256SHA256{salt: bytes32(uint256(1))}();
+        P256SHA256 verifier = new P256SHA256{salt: bytes32(uint256(2))}();
 
         console.log("verifier address:", address(verifier));
 

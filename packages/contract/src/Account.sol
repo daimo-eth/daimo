@@ -108,16 +108,16 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
             "\x19Ethereum Signed Message:\n32",
             userOpHash
         ); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
-        for (uint256 i = 0; i < accountKeys.length; i++) {
-            if (
-                _sigVerifier.verify(
-                    accountKeys[i],
-                    prefixedHash,
-                    userOp.signature
-                )
-            ) {
-                return 0;
-            }
+        uint8 keyIdx = uint8(userOp.signature[0]);
+        require(keyIdx < accountKeys.length, "invalid key index");
+        if (
+            _sigVerifier.verify(
+                accountKeys[keyIdx],
+                prefixedHash,
+                userOp.signature[1:]
+            )
+        ) {
+            return 0;
         }
         return SIG_VALIDATION_FAILED;
     }
@@ -169,6 +169,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * @param accountPubKey the P256 public key to add
      */
     function addSigningKey(bytes32[2] calldata accountPubKey) public onlySelf {
+        require(accountKeys.length < 255, "too many keys");
         accountKeys.push(accountPubKey);
         emit SigningKeyAdded(this, accountPubKey);
     }
