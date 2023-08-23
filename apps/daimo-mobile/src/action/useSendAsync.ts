@@ -30,9 +30,9 @@ export function useSendAsync({
   const [account, setAccount] = useAccount();
   if (!account) throw new Error("No account");
 
-  const keyIdx =
-    account.accountKeys.find((keyData) => keyData.key === account.enclavePubKey)
-      ?.keyIndex || 0;
+  const keyIdx = account.accountKeys.find(
+    (keyData) => keyData.key === account.enclavePubKey
+  )?.keyIndex;
 
   // TODO: use history to immediately estimate fees
   // Async load fee estimation from API to add precision
@@ -107,10 +107,11 @@ async function sendAsync(
   setAS: SetActStatus,
   enclaveKeyName: string,
   address: Address,
-  keyIdx: number,
+  keyIdx: number | undefined,
   sendFn: SendOpFn
 ) {
   try {
+    if (keyIdx === undefined) throw new Error("No key index");
     setAS("loading", "Loading account...");
     const account = await loadAccount(enclaveKeyName, address, keyIdx);
 
@@ -121,7 +122,8 @@ async function sendAsync(
     return handle;
   } catch (e: any) {
     console.error(e);
-    setAS("error", "Error sending transaction");
+    if (keyIdx === undefined) setAS("error", "Device removed from account");
+    else setAS("error", "Error sending transaction");
     throw e;
   }
 }

@@ -76,47 +76,41 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <>
-      <ScrollView contentContainerStyle={ss.container.vertModal}>
-        <Spacer h={4} />
-        <View style={ss.container.ph16}>
-          <TextH2>
-            {account.name}
-            <TextBody>
-              {` \u00A0 `}
-              {tokenMetadata.name} · {chainConfig.l2.name}
-            </TextBody>
-          </TextH2>
+    <ScrollView contentContainerStyle={ss.container.vertModal}>
+      <Spacer h={4} />
+      <View style={ss.container.ph16}>
+        <TextH2>
+          {account.name}
+          <TextBody>
+            {` \u00A0 `}
+            {tokenMetadata.name} · {chainConfig.l2.name}
+          </TextBody>
+        </TextH2>
+      </View>
+      <ButtonSmall onPress={linkToExplorer}>
+        <View>
+          <TextLight>
+            {account.address}
+            {` \u00A0 `}
+            <Octicons name="link-external" size={16} />
+            {` \u00A0 `}
+            View on {explorer.name}
+          </TextLight>
         </View>
-        <ButtonSmall onPress={linkToExplorer}>
-          <View>
-            <TextLight>
-              {account.address}
-              {` \u00A0 `}
-              <Octicons name="link-external" size={16} />
-              {` \u00A0 `}
-              View on {explorer.name}
-            </TextLight>
-          </View>
-        </ButtonSmall>
-        <Spacer h={32} />
-        <DevicesInfo {...{ account }} />
-        <Spacer h={32} />
+      </ButtonSmall>
+      <Spacer h={32} />
+      <DevicesInfo {...{ account }} />
+      <Spacer h={32} />
 
-        <AppInfo {...{ account }} />
-        <Spacer h={32} />
+      <AppInfo {...{ account }} />
+      <Spacer h={32} />
 
-        <View style={ss.container.ph16}>
-          <TextH3>Danger zone</TextH3>
-          <Spacer h={8} />
-          <ButtonMed
-            type="danger"
-            title="Delete Device"
-            onPress={clearWallet}
-          />
-        </View>
-      </ScrollView>
-    </>
+      <View style={ss.container.ph16}>
+        <TextH3>Danger zone</TextH3>
+        <Spacer h={8} />
+        <ButtonMed type="danger" title="Delete Device" onPress={clearWallet} />
+      </View>
+    </ScrollView>
   );
 }
 
@@ -124,6 +118,8 @@ function DevicesInfo({ account }: { account: Account }) {
   const nav = useNav();
 
   const addDevice = () => nav.navigate("AddDevice");
+
+  console.log(`[NALIN DEBUG] accountKeys`, JSON.stringify(account.accountKeys));
 
   return (
     <>

@@ -67,7 +67,6 @@ export class ViemClient {
     if (this.publicClient.chain.id === baseGoerli.id) {
       fromBlock = args.event == null ? 7000000n : 5000000n;
     }
-    fromBlock = 8765000n; // TODO this commit only works with fresh accounts, force people to upgrade
     const step = 5000n;
     for (; fromBlock < latest.number; fromBlock += step) {
       let toBlock = (fromBlock + step) as BlockTag | bigint;

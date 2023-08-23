@@ -38,9 +38,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const nav = useNav();
 
   const { pubKey: devicePubkey } = route.params;
-  const device = account.accountKeys.find(
-    (k) => k.key === account.enclavePubKey
-  )!;
+  const device = account.accountKeys.find((k) => k.key === devicePubkey)!;
 
   const deviceName = "Device " + pubKeyToEmoji(device.key);
 

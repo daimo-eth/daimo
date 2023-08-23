@@ -74,13 +74,24 @@ export class KeyRegistry {
 
   /** Parses account key add/remove logs, first on init() and then on subscription. */
   parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
-    const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO?
+    const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO: remove?
+
+    const addrToNewLogs: Map<Address, SigningKeyAddedOrRemovedLog[]> =
+      new Map();
     for (const log of logs) {
       const addr = getAddress(log.address);
+      if (addrToNewLogs.get(addr) === undefined) {
+        addrToNewLogs.set(addr, []);
+      }
+      addrToNewLogs.get(addr)!.push(log);
+    }
+
+    for (const addr of addrToNewLogs.keys()) {
+      const newLogs = addrToNewLogs.get(addr)!;
       if (this.addrToLogs.get(addr) === undefined) {
         this.addrToLogs.set(addr, []);
       }
-      this.addrToLogs.get(addr)!.push(...logs);
+      this.addrToLogs.get(addr)!.push(...newLogs);
 
       const onChainKeys = (await this.getKeys(addr)).map(
         contractFriendlyKeyToDER

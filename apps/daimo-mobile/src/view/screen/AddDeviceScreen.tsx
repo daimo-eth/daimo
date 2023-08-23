@@ -29,17 +29,24 @@ export function AddDeviceScreen() {
   const [account] = useAccount();
   assert(account != null);
 
-  const [handled, setHandled] = useState(false);
   const [newPubKey, setNewPubKey] = useState<Hex>("0x");
+  const [barCodeStatus, setBarCodeStatus] = useState<
+    "idle" | "error" | "scanned"
+  >("idle");
 
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
-    if (handled) return;
+    if (barCodeStatus !== "idle") return;
 
-    const pubkeyHex = parseAddKeyString(data); // TODO: handle errors gracefully
-    setHandled(true);
+    try {
+      const pubkeyHex = parseAddKeyString(data);
+      setBarCodeStatus("scanned");
 
-    console.log(`[SCAN] got key ${pubkeyHex}`);
-    setNewPubKey(pubkeyHex);
+      console.log(`[SCAN] got key ${pubkeyHex}`);
+      setNewPubKey(pubkeyHex);
+    } catch (e) {
+      console.error(`[SCAN] error parsing QR code: ${e}`);
+      setBarCodeStatus("error");
+    }
   };
 
   const nonce = useMemo(
@@ -86,8 +93,15 @@ export function AddDeviceScreen() {
 
   return (
     <View style={styles.vertOuter}>
-      {!handled && <Scanner handleBarCodeScanned={handleBarCodeScanned} />}
-      {handled && (
+      {barCodeStatus === "idle" && (
+        <Scanner handleBarCodeScanned={handleBarCodeScanned} />
+      )}
+      {barCodeStatus === "error" && (
+        <TextCenter>
+          <TextH2>Error Parsing QR Code</TextH2>
+        </TextCenter>
+      )}
+      {barCodeStatus === "scanned" && (
         <>
           <TextCenter>
             <TextH2>

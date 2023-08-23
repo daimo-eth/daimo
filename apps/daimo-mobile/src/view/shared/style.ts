@@ -62,11 +62,11 @@ export const ss = {
       paddingBottom: 0,
     },
     vertModal: {
-      flex: 1,
       flexDirection: "column",
       backgroundColor: color.white,
       alignSelf: "stretch",
       padding: 16,
+      flexGrow: 1,
     },
     center: {
       flex: 1,

@@ -28,10 +28,9 @@ export default function HomeScreen() {
     `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
   );
 
-  const keyIdx =
-    account?.accountKeys.find(
-      (keyData) => keyData.key === account?.enclavePubKey
-    )?.keyIndex || 0;
+  const keyIdx = account?.accountKeys.find(
+    (keyData) => keyData.key === account?.enclavePubKey
+  )?.keyIndex;
   useWarmCache(account?.enclaveKeyName, account?.address, keyIdx);
   const nav = useNav();
 
