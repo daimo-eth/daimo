@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { Hex } from "viem";
+import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
-import { createKey } from "./useCreateAccount";
+import { useLoadOrCreateEnclaveKey } from "./key";
 import { useTime } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
@@ -10,29 +9,28 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 export function useExistingAccount() {
   const [as, setAS] = useActStatus();
 
-  // Create enclave key immediately, in the idle state
   const enclaveKeyName = defaultEnclaveKeyName;
-  const [pubKeyHex, setPubKeyHex] = useState<Hex>();
+  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
+
   const ts = useTime(2);
 
-  // Once account creation succeeds, save the account
+  // Once account is found, save the account
   const [account, setAccount] = useAccount();
-  useEffect(() => {
-    createKey(setAS, enclaveKeyName).then(setPubKeyHex);
-  }, []);
 
   // TODO: Does TRPC have a better way to "watch" an endpoint?
   useEffect(() => {
     (async () => {
       if (account || !pubKeyHex) return; // Either hasn't started or already loaded
+
       const result = await rpcFunc.lookupEthereumAccountByKey.query({
         pubKeyHex,
       });
 
       if (result && result.name) {
-        console.log(`[CHAIN] loaded account ${result.name} at ${result.addr}`);
+        console.log(`[ACTION] loaded account ${result.name} at ${result.addr}`);
         setAccount({
           enclaveKeyName,
+          enclavePubKey: pubKeyHex,
           name: result.name,
           address: result.addr,
 

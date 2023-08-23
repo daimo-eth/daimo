@@ -1,7 +1,7 @@
 import { daimoLinkBase, parseDaimoLink } from "@daimo/common";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { useState } from "react";
-import { Linking, StyleSheet } from "react-native";
+import { Linking } from "react-native";
 
 import { CancelHeader } from "./CancelHeader";
 import { Scanner } from "../../shared/Scanner";
@@ -37,12 +37,3 @@ export function ScanTab({ hide }: { hide: () => void }) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  cameraBox: {
-    width: "100%",
-    height: 300,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-});

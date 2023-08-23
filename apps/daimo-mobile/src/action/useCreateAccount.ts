@@ -1,11 +1,8 @@
 import { assert } from "@daimo/common";
-import * as ExpoEnclave from "@daimo/expo-enclave";
-import { useEffect, useState } from "react";
-import { Platform } from "react-native";
-import { Hex } from "viem";
+import { useEffect } from "react";
 
-import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { createEnclaveKey } from "../logic/enclave";
+import { ActHandle, useActStatus } from "./actStatus";
+import { useLoadOrCreateEnclaveKey } from "./key";
 import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
@@ -13,12 +10,8 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 export function useCreateAccount(name: string): ActHandle {
   const [as, setAS] = useActStatus();
 
-  // Create enclave key immediately, in the idle state
   const enclaveKeyName = defaultEnclaveKeyName;
-  const [pubKeyHex, setPubKeyHex] = useState<Hex>();
-  useEffect(() => {
-    createKey(setAS, enclaveKeyName).then(setPubKeyHex);
-  }, []);
+  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
 
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
@@ -57,6 +50,7 @@ export function useCreateAccount(name: string): ActHandle {
     console.log(`[CHAIN] created new account ${name} at ${address}`);
     setAccount({
       enclaveKeyName,
+      enclavePubKey: pubKeyHex,
       name,
       address,
 
@@ -76,30 +70,4 @@ export function useCreateAccount(name: string): ActHandle {
   }, [result.isSuccess, result.isError]);
 
   return { ...as, exec, cost: { feeDollars: 0, totalDollars: 0 } };
-}
-
-function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
-  switch (hwSecLevel) {
-    case "SOFTWARE":
-      return "🔒  Key generated in Secure Enclave";
-    case "TRUSTED_ENVIRONMENT":
-      return "Key generated in trusted hardware";
-    case "HARDWARE_ENCLAVE":
-      return Platform.OS === "ios"
-        ? "🔒  Key generated in Secure Enclave"
-        : "🔒  Key generated in hardware enclave";
-  }
-}
-
-export async function createKey(setAS: SetActStatus, enclaveKeyName: string) {
-  setAS("idle", "Creating enclave key...");
-  try {
-    const { pubKeyHex, hwSecLevel } = await createEnclaveKey(enclaveKeyName);
-    setAS("idle", getKeySecurityMessage(hwSecLevel));
-    return pubKeyHex;
-  } catch (e: any) {
-    console.warn(`[ACCOUNT] ERROR: create key or get HW security level`, e);
-    setAS("error", e.message);
-    return undefined;
-  }
 }

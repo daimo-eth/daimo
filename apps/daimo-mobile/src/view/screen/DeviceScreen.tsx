@@ -11,7 +11,7 @@ import { View, Alert, ActivityIndicator } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { pubKeyToEmoji } from "../../logic/device";
-import { deleteEnclaveKey, useLoadKeyFromEnclave } from "../../logic/enclave";
+import { deleteEnclaveKey } from "../../logic/enclave";
 import { guessTimestampFromNum, timeString } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
@@ -37,10 +37,10 @@ export function DeviceScreen({ route, navigation }: Props) {
   assert(account != null);
   const nav = useNav();
 
-  const selfPubkey = useLoadKeyFromEnclave(account.enclaveKeyName);
-
   const { pubKey: devicePubkey } = route.params;
-  const device = account.accountKeys.find((k) => k.key === devicePubkey)!;
+  const device = account.accountKeys.find(
+    (k) => k.key === account.enclavePubKey
+  )!;
 
   const deviceName = "Device " + pubKeyToEmoji(device.key);
 
@@ -65,7 +65,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   });
 
   const removeDevice = useCallback(() => {
-    const { enclaveKeyName } = account;
+    const { enclaveKeyName, enclavePubKey } = account;
 
     Alert.alert(
       "Remove " + deviceName + "\n",
@@ -87,7 +87,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       console.log(`[DEVICE] Removing device ${devicePubkey}`);
       exec();
 
-      if (devicePubkey === selfPubkey) {
+      if (devicePubkey === enclavePubKey) {
         console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
         await deleteEnclaveKey(enclaveKeyName);
 
@@ -134,7 +134,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       <Spacer h={16} />
       <TextH1>{deviceName}</TextH1>
       <Spacer h={16} />
-      {devicePubkey === selfPubkey && (
+      {devicePubkey === account.enclavePubKey && (
         <>
           <TextCenter>
             <TextH2>Current Device</TextH2>

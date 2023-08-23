@@ -5,7 +5,6 @@ import { useCallback, useEffect } from "react";
 import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { useLoadKeyFromEnclave } from "../logic/enclave";
 import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
@@ -31,9 +30,8 @@ export function useSendAsync({
   const [account, setAccount] = useAccount();
   if (!account) throw new Error("No account");
 
-  const selfPubkey = useLoadKeyFromEnclave(enclaveKeyName);
   const keyIdx =
-    account.accountKeys.find((keyData) => keyData.key === selfPubkey)
+    account.accountKeys.find((keyData) => keyData.key === account.enclavePubKey)
       ?.keyIndex || 0;
 
   // TODO: use history to immediately estimate fees
@@ -91,8 +89,11 @@ function loadAccount(enclaveKeyName: string, address: Address, keyIdx: number) {
     console.info(
       `[SEND] loading DaimoAccount ${address} ${enclaveKeyName} ${keyIdx}`
     );
-    const signer: SigningCallback = (hexTx: string) => {
-      return { derSig: requestEnclaveSignature(enclaveKeyName, hexTx), keyIdx };
+    const signer: SigningCallback = async (hexTx: string) => {
+      return {
+        derSig: await requestEnclaveSignature(enclaveKeyName, hexTx),
+        keyIdx,
+      };
     };
 
     return await DaimoAccount.init(address, signer, false);

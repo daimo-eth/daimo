@@ -21,7 +21,6 @@ import {
   EnclaveSecSummary,
   deleteEnclaveKey,
   getEnclaveSec,
-  useLoadKeyFromEnclave,
 } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
@@ -124,8 +123,6 @@ export function SettingsScreen() {
 function DevicesInfo({ account }: { account: Account }) {
   const nav = useNav();
 
-  const selfPubkey = useLoadKeyFromEnclave(account.enclaveKeyName);
-
   const addDevice = () => nav.navigate("AddDevice");
 
   return (
@@ -139,7 +136,7 @@ function DevicesInfo({ account }: { account: Account }) {
             <DeviceRow
               key={keyData.key}
               keyData={keyData}
-              isCurrentDevice={keyData.key === selfPubkey}
+              isCurrentDevice={keyData.key === account.enclavePubKey}
             />
           ))}
       </View>

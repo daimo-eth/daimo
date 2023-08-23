@@ -2,7 +2,6 @@
 export const dummySignature =
   "0x00deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
 
-export type SigningCallback = (hexMessage: string) => {
-  derSig: Promise<string>;
-  keyIdx: number;
-};
+export type SigningCallback = (
+  hexMessage: string
+) => Promise<{ derSig: string; keyIdx: number }>;

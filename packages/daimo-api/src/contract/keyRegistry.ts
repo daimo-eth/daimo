@@ -63,6 +63,7 @@ export class KeyRegistry {
         functionName: "getSigningKeys",
       });
     } catch (e: unknown) {
+      // Old Account, just ignore.
       console.error(
         `[API] Failed to get keys for ${addr}, probably an old account?`,
         e

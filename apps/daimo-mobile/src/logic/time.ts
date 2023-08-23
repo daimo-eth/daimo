@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { chainConfig } from "./chainConfig";
 
-/** Returns the current time in Unix seconds. Ticks every second. */
+/** Returns the current time in Unix seconds. Ticks every `secs`. */
 export function useTime(secs: number = 1) {
   const [time, setTime] = useState(Date.now());
 

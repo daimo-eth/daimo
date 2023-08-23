@@ -20,13 +20,7 @@ import QRCode from "react-native-qrcode-svg";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { createAddKeyString, pubKeyToEmoji } from "../../logic/device";
-import {
-  deleteEnclaveKey,
-  useLoadAccountFromKey,
-  useLoadKeyFromEnclave,
-} from "../../logic/enclave";
 import { rpcHook } from "../../logic/trpc";
-import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
@@ -55,20 +49,6 @@ export default function OnboardingScreen() {
     },
     [page]
   );
-
-  // See if we already have a key in the enclave
-  const [, setAccount] = useAccount();
-  const pubKey = useLoadKeyFromEnclave();
-  const account = useLoadAccountFromKey(pubKey);
-  useEffect(() => {
-    if (account != null) setAccount(account);
-
-    if (account === null) {
-      // Null, not undefined = no account found for this pubkey
-      // TODO: consider making this a UI to warn the user
-      deleteEnclaveKey(defaultEnclaveKeyName);
-    }
-  }, [account]);
 
   // TODO: add back buttons?
   return (
