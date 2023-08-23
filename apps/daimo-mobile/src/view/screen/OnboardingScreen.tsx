@@ -19,7 +19,7 @@ import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
-import { createAddKeyString } from "../../logic/device";
+import { createAddKeyString, pubKeyToEmoji } from "../../logic/device";
 import {
   deleteEnclaveKey,
   useLoadAccountFromKey,
@@ -74,14 +74,9 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.onboardingScreen}>
       {page === 1 && <IntroPages onFlowChoice={onFlowChoice} />}
-      {accountFlowChoice === "create" && page === 2 && (
-        <AllowNotifications onNext={next} />
-      )}
+      {page === 2 && <AllowNotifications onNext={next} />}
       {accountFlowChoice === "create" && page === 3 && <CreateAccountPage />}
-      {accountFlowChoice === "existing" && page === 2 && <UseExistingPage />}
-      {accountFlowChoice === "existing" && page === 3 && (
-        <AllowNotifications onNext={next} />
-      )}
+      {accountFlowChoice === "existing" && page === 3 && <UseExistingPage />}
     </View>
   );
 }
@@ -273,23 +268,33 @@ function CreateAccountPage() {
 
 function UseExistingPage() {
   const { status, message, pubKeyHex } = useExistingAccount();
+  if (pubKeyHex === undefined) return null;
 
   return (
     <View style={styles.onboardingScreen}>
       <View style={styles.useExistingPage}>
         <TextH1>Welcome</TextH1>
-        <TextBody>Scan QR code from existing device's Settings page</TextBody>
-        {pubKeyHex !== undefined && (
-          <View style={styles.vertQR}>
-            <QRCode
-              value={createAddKeyString(pubKeyHex)}
-              color="#333"
-              size={192}
-              logo={{ uri: image.qrLogo }}
-              logoSize={72}
-            />
-          </View>
-        )}
+        <Spacer h={32} />
+        <TextBody>
+          <TextCenter>
+            Scan QR code from the Settings page of existing device
+          </TextCenter>
+        </TextBody>
+        <Spacer h={32} />
+        <View style={styles.vertQR}>
+          <QRCode
+            value={createAddKeyString(pubKeyHex)}
+            color="#333"
+            size={256}
+            logo={{ uri: image.qrLogo }}
+            logoSize={72}
+          />
+        </View>
+        <Spacer h={32} />
+        <TextBody>
+          <TextCenter>Device {pubKeyToEmoji(pubKeyHex)}</TextCenter>
+        </TextBody>
+        <Spacer h={16} />
         <TextCenter>
           {status !== "error" && (
             <TextLight>
@@ -426,6 +431,5 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     gap: 8,
-    padding: 32,
   },
 });

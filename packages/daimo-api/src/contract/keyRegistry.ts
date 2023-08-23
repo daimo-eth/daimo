@@ -54,6 +54,23 @@ export class KeyRegistry {
     console.log(`[KEY-REG] watching logs`);
   }
 
+  /** Get current keys of an address. */
+  async getKeys(addr: Address) {
+    try {
+      return await this.vc.publicClient.readContract({
+        abi: accountABI,
+        address: addr,
+        functionName: "getSigningKeys",
+      });
+    } catch (e: unknown) {
+      console.error(
+        `[API] Failed to get keys for ${addr}, probably an old account?`,
+        e
+      );
+      return [];
+    }
+  }
+
   /** Parses account key add/remove logs, first on init() and then on subscription. */
   parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
     const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO?
@@ -63,12 +80,21 @@ export class KeyRegistry {
         this.addrToLogs.set(addr, []);
       }
       this.addrToLogs.get(addr)!.push(...logs);
-      this.cacheAddressProperties(addr, currentBlockNumber);
+
+      const onChainKeys = (await this.getKeys(addr)).map(
+        contractFriendlyKeyToDER
+      );
+
+      this.cacheAddressProperties(addr, onChainKeys, currentBlockNumber);
     }
   };
 
   /** Cache an address's key properties in memory. */
-  cacheAddressProperties = (addr: Address, currentBlockNumber: bigint) => {
+  cacheAddressProperties = (
+    addr: Address,
+    currentKeySet: Hex[],
+    currentBlockNumber: bigint
+  ) => {
     // deterministically sort all logs
     const sortedLogs = this.addrToLogs.get(addr)!.sort((a, b) => {
       const aBlockNumber = a.blockNumber || currentBlockNumber + 1n;
@@ -89,10 +115,12 @@ export class KeyRegistry {
       if (!log.args.accountPubkey)
         throw new Error("[API] Invalid event, no accountPubkey");
       const derKey = contractFriendlyKeyToDER(log.args.accountPubkey);
+      const keyIdx = currentKeySet.indexOf(derKey);
       if (log.eventName === "SigningKeyAdded") {
         currentKeyData.set(derKey, {
           key: derKey,
           addedAt: Number(log.blockNumber || currentBlockNumber + 1n),
+          keyIndex: keyIdx === -1 ? undefined : keyIdx,
         });
       } else if (log.eventName === "SigningKeyRemoved") {
         currentKeyData.set(derKey, {

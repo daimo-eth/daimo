@@ -1,7 +1,8 @@
-import { Hex } from "viem";
-
-// Random signature of correct length
+// Random "signature" input of correct length
 export const dummySignature =
   "0x00deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
 
-export type SigningCallback = (hexMessage: string) => Promise<string>;
+export type SigningCallback = (hexMessage: string) => {
+  derSig: Promise<string>;
+  keyIdx: number;
+};

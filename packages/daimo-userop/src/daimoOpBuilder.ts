@@ -6,7 +6,7 @@ import {
   UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from "userop";
-import { Address, encodeFunctionData } from "viem";
+import { Address, encodeFunctionData, numberToHex } from "viem";
 
 import { DaimoNonce } from "./nonce";
 import { SigningCallback, dummySignature } from "./util";
@@ -21,9 +21,11 @@ function getSigningMiddleware(
     const hexPrefix =
       "19457468657265756d205369676e6564204d6573736167653a0a3332";
     const hexMessage = ctx.getUserOpHash().slice(2);
-    const signature = await signer(hexPrefix + hexMessage);
-    const parsedSignature = p256.Signature.fromDER(signature);
-    ctx.op.signature = `0x00${parsedSignature.toCompactHex()}`; // TODO keyIdx
+    const { derSig, keyIdx } = signer(hexPrefix + hexMessage);
+    const parsedSignature = p256.Signature.fromDER(await derSig);
+    ctx.op.signature = `${numberToHex(keyIdx, {
+      size: 1,
+    })}${parsedSignature.toCompactHex()}`; // TODO keyIdx
   };
 }
 

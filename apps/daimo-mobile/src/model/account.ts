@@ -3,10 +3,11 @@ import {
   assert,
   TransferOpEvent,
   TrackedRequest,
+  KeyData,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
-import { Address, getAddress } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { cacheEAccounts } from "../view/shared/addr";
@@ -41,6 +42,8 @@ export type Account = {
   trackedRequests: TrackedRequest[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
+  /** P-256 keys authorised by the Daimo account, in DER format */
+  accountKeys: KeyData[];
 
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
@@ -91,6 +94,25 @@ interface AccountV4 extends StoredModel {
   recentTransfers: TransferOpEvent[];
   trackedRequests: TrackedRequest[];
   namedAccounts: EAccount[];
+
+  pushToken: string | null;
+}
+
+interface AccountV5 extends StoredModel {
+  storageVersion: 5;
+
+  enclaveKeyName: string;
+  name: string;
+  address: string;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
 
   pushToken: string | null;
 }
@@ -189,6 +211,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       recentTransfers: [],
       trackedRequests: [],
       namedAccounts: [],
+      accountKeys: [],
 
       pushToken: a.pushToken,
     };
@@ -209,13 +232,35 @@ export function parseAccount(accountJSON?: string): Account | null {
       recentTransfers: a.recentTransfers,
       trackedRequests: [],
       namedAccounts: a.namedAccounts,
+      accountKeys: [],
 
       pushToken: a.pushToken,
     };
   }
 
-  assert(model.storageVersion === 4);
-  const a = model as AccountV4;
+  if (model.storageVersion === 4) {
+    const a = model as AccountV4;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      name: a.name,
+      address: getAddress(a.address),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: [],
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 5);
+  const a = model as AccountV5;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -230,6 +275,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     recentTransfers: a.recentTransfers,
     trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
+    accountKeys: a.accountKeys,
 
     pushToken: a.pushToken,
   };
@@ -238,8 +284,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV4 = {
-    storageVersion: 4,
+  const model: AccountV5 = {
+    storageVersion: 5,
 
     enclaveKeyName: account.enclaveKeyName,
     name: account.name,
@@ -253,6 +299,7 @@ export function serializeAccount(account: Account | null): string {
     recentTransfers: account.recentTransfers,
     trackedRequests: account.trackedRequests,
     namedAccounts: account.namedAccounts,
+    accountKeys: account.accountKeys,
 
     pushToken: account.pushToken,
   };

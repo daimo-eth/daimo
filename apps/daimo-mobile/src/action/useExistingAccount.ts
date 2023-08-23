@@ -44,6 +44,8 @@ export function useExistingAccount() {
 
           namedAccounts: [],
           recentTransfers: [],
+          trackedRequests: [],
+          accountKeys: [],
 
           pushToken: null,
         });

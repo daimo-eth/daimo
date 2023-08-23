@@ -247,6 +247,9 @@ export function createRouter(
           await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
         ).filter((acc) => hasAccountName(acc));
 
+        // Get account keys
+        const accountKeys = await keyReg.resolveAddressKeys(address);
+
         return {
           address,
 
@@ -257,6 +260,7 @@ export function createRouter(
 
           transferLogs,
           namedAccounts,
+          accountKeys,
         };
       }),
 

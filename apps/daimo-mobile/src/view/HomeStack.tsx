@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useMemo } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
+import { DeviceScreen } from "./screen/DeviceScreen";
 import { HistoryScreen } from "./screen/History";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
@@ -58,6 +59,7 @@ export function HomeStackNav() {
           component={AddDeviceScreen}
           options={{ title: "Add Device" }}
         />
+        <HomeStack.Screen name="Device" component={DeviceScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

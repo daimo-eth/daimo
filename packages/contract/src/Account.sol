@@ -165,6 +165,13 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     }
 
     /**
+     * Fetch all current signing keys
+     */
+    function getSigningKeys() public view returns (bytes32[2][] memory) {
+        return accountKeys;
+    }
+
+    /**
      * Add a signing key to the account
      * @param accountPubKey the P256 public key to add
      */
@@ -187,7 +194,9 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
                 accountKeys[i][0] == accountPubKey[0] &&
                 accountKeys[i][1] == accountPubKey[1]
             ) {
-                accountKeys[i] = accountKeys[accountKeys.length - 1];
+                for (uint256 j = i;j < accountKeys.length - 1; j++) {
+                    accountKeys[j] = accountKeys[j + 1];
+                }
                 accountKeys.pop();
                 emit SigningKeyRemoved(this, accountPubKey);
                 return;

@@ -103,6 +103,7 @@ async function syncAccount(
     lastBalance: result.lastBalance,
     numTransfers: result.transferLogs.length,
     numNamedAccounts: result.namedAccounts.length,
+    numAccountKeys: result.accountKeys?.length,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -170,6 +171,7 @@ async function syncAccount(
 
     recentTransfers,
     namedAccounts,
+    accountKeys: result.accountKeys || [],
   };
 
   console.log(

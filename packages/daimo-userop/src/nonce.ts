@@ -43,6 +43,8 @@ export enum DaimoNonceType {
   CreateNote = 1,
   ClaimNote = 2,
   RequestResponse = 3,
+  AddKey = 4,
+  RemoveKey = 5,
   MAX = 255, // At most one byte
 }
 

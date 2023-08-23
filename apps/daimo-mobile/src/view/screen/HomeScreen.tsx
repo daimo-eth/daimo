@@ -12,6 +12,7 @@ import {
 
 import { HistoryList } from "./History";
 import { useWarmCache } from "../../action/useSendAsync";
+import { useLoadKeyFromEnclave } from "../../logic/enclave";
 import { Account, useAccount } from "../../model/account";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -28,8 +29,11 @@ export default function HomeScreen() {
     `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
   );
 
-  useWarmCache(account?.enclaveKeyName, account?.address);
-
+  const selfPubkey = useLoadKeyFromEnclave(account?.enclaveKeyName);
+  const keyIdx =
+    account?.accountKeys.find((keyData) => keyData.key === selfPubkey)
+      ?.keyIndex || 0;
+  useWarmCache(account?.enclaveKeyName, account?.address, keyIdx);
   const nav = useNav();
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {

@@ -83,6 +83,7 @@ export const zKeyData = z.object({
   key: zHex, // DER Format
   addedAt: z.number(),
   removedAt: z.number().optional(),
+  keyIndex: z.number().optional(),
   // TODO lastUsedAt?: bigint;
 });
 

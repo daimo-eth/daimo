@@ -1,3 +1,4 @@
+import { KeyData } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
@@ -15,13 +16,16 @@ import {
 
 import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
+import { pubKeyToEmoji } from "../../logic/device";
 import {
   EnclaveSecSummary,
   deleteEnclaveKey,
   getEnclaveSec,
+  useLoadKeyFromEnclave,
 } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
+import { guessTimestampFromNum, timeAgo, useTime } from "../../logic/time";
 import { Account, serializeAccount, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -72,8 +76,6 @@ export function SettingsScreen() {
 
   if (!account) return null;
 
-  const addDevice = () => nav.navigate("AddDevice");
-
   return (
     <>
       <ScrollView contentContainerStyle={ss.container.vertModal}>
@@ -98,15 +100,8 @@ export function SettingsScreen() {
             </TextLight>
           </View>
         </ButtonSmall>
-        <Spacer h={24} />
-
-        <View style={ss.container.ph16}>
-          <TextH3>Devices</TextH3>
-        </View>
-        <Spacer h={8} />
-        <View style={styles.callout}>
-          <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
-        </View>
+        <Spacer h={32} />
+        <DevicesInfo {...{ account }} />
         <Spacer h={32} />
 
         <AppInfo {...{ account }} />
@@ -123,6 +118,63 @@ export function SettingsScreen() {
         </View>
       </ScrollView>
     </>
+  );
+}
+
+function DevicesInfo({ account }: { account: Account }) {
+  const nav = useNav();
+
+  const selfPubkey = useLoadKeyFromEnclave(account.enclaveKeyName);
+
+  const addDevice = () => nav.navigate("AddDevice");
+
+  return (
+    <>
+      <View style={styles.keyValueList}>
+        <TextH3>Devices</TextH3>
+        <Spacer h={8} />
+        {account.accountKeys
+          .filter((k) => k.removedAt === undefined)
+          .map((keyData) => (
+            <DeviceRow
+              key={keyData.key}
+              keyData={keyData}
+              isCurrentDevice={keyData.key === selfPubkey}
+            />
+          ))}
+      </View>
+      <Spacer h={16} />
+      <View style={ss.container.ph16}>
+        <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
+      </View>
+    </>
+  );
+}
+
+function DeviceRow({
+  keyData,
+  isCurrentDevice,
+}: {
+  keyData: KeyData;
+  isCurrentDevice: boolean;
+}) {
+  const nowS = useTime();
+  const nav = useNav();
+
+  const viewDevice = () => nav.navigate("Device", { pubKey: keyData.key });
+
+  return (
+    <ButtonSmall onPress={viewDevice}>
+      <View style={styles.deviceDataRow}>
+        <TextBold>
+          Device {pubKeyToEmoji(keyData.key)}
+          {isCurrentDevice ? " (Current device)" : " "}
+        </TextBold>
+        <TextBold>
+          {timeAgo(guessTimestampFromNum(keyData.addedAt), nowS)}
+        </TextBold>
+      </View>
+    </ButtonSmall>
   );
 }
 
@@ -221,5 +273,17 @@ const styles = StyleSheet.create({
     backgroundColor: color.bg.lightGray,
     padding: 16,
     borderRadius: 24,
+  },
+  keyValueList: {
+    ...ss.container.ph16,
+    flex: 1,
+    flexDirection: "column",
+    gap: 8,
+  },
+  deviceDataRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
 });

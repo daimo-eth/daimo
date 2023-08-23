@@ -68,6 +68,7 @@ export function useCreateAccount(name: string): ActHandle {
       namedAccounts: [],
       recentTransfers: [],
       trackedRequests: [],
+      accountKeys: [],
 
       pushToken: null,
     });
@@ -82,7 +83,7 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
     case "SOFTWARE":
       return "🔒  Key generated in Secure Enclave";
     case "TRUSTED_ENVIRONMENT":
-      return "Key generarated in trusted hardware";
+      return "Key generated in trusted hardware";
     case "HARDWARE_ENCLAVE":
       return Platform.OS === "ios"
         ? "🔒  Key generated in Secure Enclave"

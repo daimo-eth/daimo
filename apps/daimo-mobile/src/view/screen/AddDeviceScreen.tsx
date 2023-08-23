@@ -1,20 +1,29 @@
-import { OpStatus, assert } from "@daimo/common";
-import { DaimoAccount, DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { assert } from "@daimo/common";
+import {
+  DaimoAccount,
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+} from "@daimo/userop";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
-import { ReactNode, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ReactNode, useMemo, useState } from "react";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { parseAddKeyString } from "../../logic/device";
+import { parseAddKeyString, pubKeyToEmoji } from "../../logic/device";
 import { useAccount } from "../../model/account";
+import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
-import { Header } from "../shared/Header";
 import { Scanner } from "../shared/Scanner";
-import { HomeStackParamList } from "../shared/nav";
-import { ss } from "../shared/style";
-import { TextCenter, TextError, TextLight } from "../shared/text";
+import Spacer from "../shared/Spacer";
+import {
+  TextBold,
+  TextCenter,
+  TextError,
+  TextH2,
+  TextLight,
+} from "../shared/text";
 
 export function AddDeviceScreen() {
   const [account] = useAccount();
@@ -33,25 +42,26 @@ export function AddDeviceScreen() {
     setNewPubKey(pubkeyHex);
   };
 
-  const [nonce] = useState(() => new DaimoNonce(new DaimoNonceMetadata())); // TODO rebase
+  const nonce = useMemo(
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
+    [newPubKey]
+  );
 
   const sendFn = async (account: DaimoAccount) => {
     console.log(`[ACTION] adding device ${newPubKey}`);
     return account.addSigningKey(newPubKey, nonce);
   };
 
-  const { status, message, exec } = useSendAsync(
-    account.enclaveKeyName,
-    sendFn
-  );
-
-  // TODO: load estimated fees
-  const fees = 0.05;
+  const { status, message, cost, exec } = useSendAsync({
+    enclaveKeyName: account.enclaveKeyName,
+    dollarsToSend: 0,
+    sendFn,
+  });
 
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        return `Add fee: $${fees.toFixed(2)}`;
+        return `Add fee: ${getAmountText({ dollars: cost.totalDollars })}`;
       case "loading":
         return message;
       case "error":
@@ -64,7 +74,7 @@ export function AddDeviceScreen() {
   const button = (function () {
     switch (status) {
       case "idle":
-        return <ButtonBig type="primary" title="Add Key" onPress={exec} />;
+        return <ButtonBig type="primary" title="Add Device" onPress={exec} />;
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
@@ -75,14 +85,18 @@ export function AddDeviceScreen() {
   })();
 
   return (
-    <View style={ss.container.vertModal}>
-      <Header />
+    <View style={styles.vertOuter}>
       {!handled && <Scanner handleBarCodeScanned={handleBarCodeScanned} />}
       {handled && (
         <>
-          <TextCenter>Scanned key: {newPubKey}</TextCenter>
           <TextCenter>
-            {button}
+            <TextH2>
+              Scanned <TextBold>Device {pubKeyToEmoji(newPubKey)}</TextBold>
+            </TextH2>
+          </TextCenter>
+          <Spacer h={16} />
+          {button}
+          <TextCenter>
             <TextLight>
               <TextCenter>{statusMessage}</TextCenter>
             </TextLight>
@@ -92,3 +106,12 @@ export function AddDeviceScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  vertOuter: {
+    flex: 1,
+    padding: 32,
+    gap: 16,
+    overflow: "hidden",
+  },
+});
