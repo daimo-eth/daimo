@@ -12,7 +12,8 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 ### Development
 
-**Daimo is under active development.** Coming soon to testnet and TestFlight.
+**Daimo is under active development.** Now on testnet, TestFlight, and in Play
+Store open testing.
 
 <details>
 <summary><strong>Quick start for developers</strong></summary>
@@ -31,14 +32,14 @@ node --version
 ```
 
 ```
-# Install Foundry
+# (Optional) for contract development, install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 # Reload your terminal, then run:
 foundryup
 ```
 
 ```
-# Install Expo EAS
+# (Optional) for mobile development, install Expo EAS
 npm i -g eas-cli
 ```
 
@@ -49,37 +50,32 @@ npm i
 npm run build
 ```
 
-Configure the API.
+Finally, run the app in the iOS simulator, Android simulator, or on your phone.
 
-- To run the API locally, configure the `DAIMO_API_*` env vars.
-  - You can run a Postgres instance in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
-- To use the testnet staging API, just set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`.
+If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a>, you can download the latest development build from there.
 
-Finally, run the app in the iOS simulator.
+> Expo apps come in two layers: a native layer and a React Native (typescript) layer. Whenever you add a native module or update `@daimo/expo-enclave`, you must rebuild the native app. For details, see `apps/daimo-mobile`.
 
-If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a>, you can download the latest base build from there.
-
-> Expo apps come in two layers: a native layer and a React Native (typescript) layer. Whenever you add a native module or update `@daimo/expo-enclave`, you must rebuild the native app. For details, see the `@daimo/mobile` package.
-
-Once the base app is installed in your simulator, you can run Daimo:
+Once the base app is installed in your simulator, you can run Daimo.
 
 ```
+# Run mobile app, local API server, and web app (for deep links) simultaneously.
+# Requires Postgres, see API Setup below.
 npm run dev
 ```
 
+Running `npm run dev` in the root directory is equivalent to running it concurrently in each `apps/...` and `packages/...` directory.
+
+```
+# Alternatively, to run JUST the mobile app.
+cd apps/daimo-mobile
+DAIMO_DOMAIN=daimo.onrender.com DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com npm run dev
+```
+
+Either way, you get hot reloading.
+
 <details>
-<summary><strong>Setup for android</strong></summary>
-
-- Install Android Studio, and create an emulator.
-- Download latest Android internal distribution build from Expo, and install it in the emulator.
-- Lastly, go to `apps/daimo-mobile` and run `npm run dev`.
-
-**Note**
-- You need the correct java version. Version 20 doesn't work, Java 17 works.
-- You need to set the `ANDROID_HOME` environment variable, pointing to the local Android Sdk.
-</details>
-
-## Running the backend
+<summary><strong>API Setup</strong></summary>
 
 `daimo-mobile` and `daimo-web` both rely on `daimo-api`.
 
@@ -88,5 +84,47 @@ By default:
 - `daimo-mobile` runs the Expo incremental build server on localhost:8080
 - `daimo-web` runs the web app, including fallback deeplinks, on localhost:3001
 - `daimo-api` runs the TRPC API on localhost:3000
+
+You'll need to either use the hosted Daimo API or run one locally.
+
+- To run the API locally, configure the `DAIMO_API_*` secrets, then run `npm run dev`.
+- You can run Postgres in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+- To use the testnet staging API, just set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`. You can run both the mobile and web app this way.
+</details>
+
+<details>
+<summary><strong>Setup for android</strong></summary>
+
+- **Ensure you have the correct Java version.** Version 20 doesn't work, Java 17 works.
+- You need to `ANDROID_HOME` to the local Android SDK.
+- Install Android Studio, and create an emulator.
+- Download latest Android internal distribution build from Expo, and install it in the emulator.
+- Lastly, go to `apps/daimo-mobile` and run `npm run dev:android`.
+</details>
+
+</details>
+
+<details>
+<summary><strong>Release instructions</strong></summary>
+
+Start from latest `master` with green CI. Create a release candidate for each platform.
+
+```
+cd apps/daimo-mobile
+npm run build:stage
+npm run build:stage-android
+```
+
+The last two run concurrently and submit automatically within ~10 minutes. Build
+versions increment automatically, creating a diff.
+
+While you wait, update the API and webapp.
+
+- Make a release PR stating the new, incremented build version.
+- Push to `stage`. PR into `master` remains open.
+- Complete the API and webapp checklist in the PR. Roll back if necessary.
+- By now, builds should be done. Install on Android. Install on iOS.
+- Complete app release testing checklist. You've now shipped a new public TestFlight and Play Store test release
+- Finally, merge the PR.
 
 </details>
