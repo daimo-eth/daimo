@@ -43,9 +43,11 @@ export function useRecipientSearch(prefix: string) {
     if (recentsByAddr.has(other)) continue;
 
     const acc = getCachedEAccount(other);
-    // Hack: don't show Note contract as a recipient
+
+    // HACK: ignore transfers to specially labelled addresses like "payment link"
+    // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
     // TODO: show note claimer as recipient.
-    if (acc.label === "note") continue;
+    if (acc.label != null) continue;
 
     const r: Recipient = { ...acc, lastSendTime: t.timestamp };
 
