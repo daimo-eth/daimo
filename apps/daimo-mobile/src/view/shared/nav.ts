@@ -6,7 +6,7 @@ import {
 } from "@daimo/common";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useURL } from "expo-linking";
+import { addEventListener } from "expo-linking";
 import { useEffect } from "react";
 import { Hex } from "viem";
 
@@ -37,19 +37,19 @@ export function useNav() {
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
   const nav = useNav();
-  const url = useURL();
 
   useEffect(() => {
-    if (url == null) return;
-    const link = parseDaimoLink(url);
-    if (link == null) {
-      console.log(`[NAV] skipping unparseable link ${url}`);
-      return;
-    }
+    addEventListener("url", ({ url }) => {
+      const link = parseDaimoLink(url);
+      if (link == null) {
+        console.log(`[NAV] skipping unparseable link ${url}`);
+        return;
+      }
 
-    console.log(`[NAV] going to ${url}`);
-    goTo(nav, link);
-  }, [nav, url]);
+      console.log(`[NAV] going to ${url}`);
+      goTo(nav, link);
+    });
+  }, []);
 }
 
 async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
