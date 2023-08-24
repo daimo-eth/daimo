@@ -34,10 +34,10 @@ class FallbackKeyManager: KeyManager {
     keyPairGenerator.generateKeyPair()
   }
 
-  internal fun getSigningPrivkey(accountName: String): KeyPair {
+  internal fun getSigningPrivkey(accountName: String): KeyPair? {
     val ks: KeyStore = KeyStore.getInstance(KEYSTORE_PROVIDER).apply { load(null) }
     if (!ks.containsAlias(accountName)) {
-      throw KeyStoreException("Unable to read account private key")
+      return null
     }
     val entry = ks.getEntry(accountName, null)
     if (entry !is KeyStore.PrivateKeyEntry) {
@@ -47,7 +47,7 @@ class FallbackKeyManager: KeyManager {
   }
 
   override fun fetchPublicKey(accountName: String): String? {
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
+    return getSigningPrivkey(accountName)?.public?.encoded?.toHexString()
   }
 
   override fun createKeyPair(accountName: String): String {
@@ -61,7 +61,7 @@ class FallbackKeyManager: KeyManager {
   }
 
   override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
-    val privateKey = getSigningPrivkey(accountName).private
+    val privateKey = getSigningPrivkey(accountName)!!.private
     val signature = Signature.getInstance("SHA256withECDSA").run {
       initSign(privateKey)
       update(hexMessage.decodeHex())
@@ -71,7 +71,7 @@ class FallbackKeyManager: KeyManager {
   }
 
   override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
-    val publicKey = getSigningPrivkey(accountName).public
+    val publicKey = getSigningPrivkey(accountName)!!.public
     val verified = Signature.getInstance("SHA256withECDSA").run {
       initVerify(publicKey)
       update(hexMessage.decodeHex())

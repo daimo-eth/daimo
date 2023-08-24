@@ -51,17 +51,7 @@ export async function getBiometricSecurityLevel(): Promise<BiometricSecurityLeve
 export async function fetchPublicKey(
   accountName: string
 ): Promise<string | undefined> {
-  try {
-    return ExpoEnclaveModule.fetchPublicKey(accountName);
-  } catch (e) {
-    const message: string = e.message || "";
-    if (message.startsWith("Unable to read account")) {
-      // TODO: consider updating native code to return null instead of throwing.
-      return undefined;
-    } else {
-      throw e;
-    }
-  }
+  return ExpoEnclaveModule.fetchPublicKey(accountName);
 }
 
 /**
