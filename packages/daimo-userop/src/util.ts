@@ -1,5 +1,7 @@
-// Random signature of correct length
+// Random "signature" input of correct length
 export const dummySignature =
-  "0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
+  "0x00deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead";
 
-export type SigningCallback = (hexMessage: string) => Promise<string>;
+export type SigningCallback = (
+  hexMessage: string
+) => Promise<{ derSig: string; keySlot: number }>;

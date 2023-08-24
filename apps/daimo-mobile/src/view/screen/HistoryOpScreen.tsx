@@ -6,6 +6,7 @@ import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View, Text } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
+import { timeString } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
@@ -16,7 +17,6 @@ import { HomeStackParamList } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
-import { timeString } from "../shared/time";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "HistoryOp">;
 

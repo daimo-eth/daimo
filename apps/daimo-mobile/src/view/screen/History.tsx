@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
+import { timeAgo } from "../../logic/time";
 import { Account, useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
@@ -17,7 +18,6 @@ import {
   TextLight,
   TextRight,
 } from "../shared/text";
-import { timeAgo } from "../shared/time";
 
 // TODO: replace this with a better custom scroll view on HomeScreen
 export function HistoryScreen() {

@@ -15,19 +15,17 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
-import {
-  deleteEnclaveKey,
-  useLoadAccountFromKey,
-  useLoadKeyFromEnclave,
-} from "../../logic/enclave";
+import { useExistingAccount } from "../../action/useExistingAccount";
+import { createAddDeviceString } from "../../logic/device";
 import { rpcHook } from "../../logic/trpc";
-import { defaultEnclaveKeyName, useAccount } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
+import image from "../shared/image";
 import { color, ss } from "../shared/style";
 import {
   EmojiToOcticon,
@@ -37,36 +35,37 @@ import {
   TextH1,
   TextLight,
 } from "../shared/text";
-import { comingSoon } from "../shared/underConstruction";
 
 export default function OnboardingScreen() {
   const [page, setPage] = useState(1);
+  const [accountFlowChoice, setAccountFlowChoice] = useState<
+    "create" | "existing"
+  >("create");
   const next = useCallback(() => setPage(page + 1), [page]);
+  const onFlowChoice = useCallback(
+    (choice: "create" | "existing") => {
+      setAccountFlowChoice(choice);
+      setPage(page + 1);
+    },
+    [page]
+  );
 
-  // See if we already have a key in the enclave
-  const [, setAccount] = useAccount();
-  const pubKey = useLoadKeyFromEnclave();
-  const account = useLoadAccountFromKey(pubKey);
-  useEffect(() => {
-    if (account != null) setAccount(account);
-
-    if (account === null) {
-      // Null, not undefined = no account found for this pubkey
-      // TODO: consider making this a UI to warn the user
-      deleteEnclaveKey(defaultEnclaveKeyName);
-    }
-  }, [account]);
-
+  // TODO: add back buttons?
   return (
     <View style={styles.onboardingScreen}>
-      {page === 1 && <IntroPages onCreateAccount={next} />}
+      {page === 1 && <IntroPages onFlowChoice={onFlowChoice} />}
       {page === 2 && <AllowNotifications onNext={next} />}
-      {page === 3 && <CreateAccountPage />}
+      {accountFlowChoice === "create" && page === 3 && <CreateAccountPage />}
+      {accountFlowChoice === "existing" && page === 3 && <UseExistingPage />}
     </View>
   );
 }
 
-function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
+function IntroPages({
+  onFlowChoice,
+}: {
+  onFlowChoice: (choice: "create" | "existing") => void;
+}) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
@@ -119,10 +118,17 @@ function IntroPages({ onCreateAccount }: { onCreateAccount: () => void }) {
       <ButtonBig
         type="primary"
         title="Create Account"
-        onPress={onCreateAccount}
+        onPress={() => {
+          onFlowChoice("create");
+        }}
       />
       <Spacer h={8} />
-      <ButtonSmall title="Use existing" onPress={comingSoon} />
+      <ButtonSmall
+        title="Use existing"
+        onPress={() => {
+          onFlowChoice("existing");
+        }}
+      />
     </View>
   );
 }
@@ -237,6 +243,43 @@ function CreateAccountPage() {
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
+  );
+}
+
+function UseExistingPage() {
+  const { status, message, pubKeyHex } = useExistingAccount();
+  if (pubKeyHex === undefined) return null;
+
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.useExistingPage}>
+        <TextH1>Welcome</TextH1>
+        <Spacer h={32} />
+        <TextBody>
+          <TextCenter>
+            Scan QR code from the Settings page of existing device
+          </TextCenter>
+        </TextBody>
+        <Spacer h={32} />
+        <View style={styles.vertQR}>
+          <QRCode
+            value={createAddDeviceString(pubKeyHex)}
+            color="#333"
+            size={256}
+            logo={{ uri: image.qrLogo }}
+            logoSize={72}
+          />
+        </View>
+        <Spacer h={16} />
+        <TextCenter>
+          {status !== "error" && (
+            <TextLight>
+              <EmojiToOcticon size={16} text={message} />
+            </TextLight>
+          )}
+        </TextCenter>
+      </View>
+    </View>
   );
 }
 
@@ -355,5 +398,14 @@ const styles = StyleSheet.create({
   createAccountPage: {
     width: screenDimensions.width,
     padding: 32,
+  },
+  useExistingPage: {
+    width: screenDimensions.width,
+    padding: 32,
+  },
+  vertQR: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
   },
 });

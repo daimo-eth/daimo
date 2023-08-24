@@ -46,7 +46,7 @@ export class NameRegistry {
   }
 
   /** Parses Registered event logs, first in init(), then on subscription. */
-  parseLogs = (logs: RegisteredLog[]) => {
+  parseLogs = async (logs: RegisteredLog[]) => {
     const accounts = logs
       .map((l) => l.args)
       .map((a) => ({

@@ -1,3 +1,4 @@
+import { KeyData } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
@@ -15,6 +16,7 @@ import {
 
 import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
+import { keySlotToDeviceIdentifier } from "../../logic/device";
 import {
   EnclaveSecSummary,
   deleteEnclaveKey,
@@ -22,6 +24,7 @@ import {
 } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
+import { guessTimestampFromNum, timeAgo, useTime } from "../../logic/time";
 import { Account, serializeAccount, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -73,58 +76,96 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <>
-      <ScrollView contentContainerStyle={ss.container.vertModal}>
-        <Spacer h={4} />
-        <View style={ss.container.ph16}>
-          <TextH2>
-            {account.name}
-            <TextBody>
-              {` \u00A0 `}
-              {tokenMetadata.name} · {chainConfig.l2.name}
-            </TextBody>
-          </TextH2>
-        </View>
-        <ButtonSmall onPress={linkToExplorer}>
-          <View>
-            <TextLight>
-              {account.address}
-              {` \u00A0 `}
-              <Octicons name="link-external" size={16} />
-              {` \u00A0 `}
-              View on {explorer.name}
-            </TextLight>
-          </View>
-        </ButtonSmall>
-        <Spacer h={24} />
-
-        <View style={ss.container.ph16}>
-          <TextH3>Devices</TextH3>
-        </View>
-        <Spacer h={8} />
-        <View style={styles.callout}>
+    <ScrollView contentContainerStyle={ss.container.vertModal}>
+      <Spacer h={4} />
+      <View style={ss.container.ph16}>
+        <TextH2>
+          {account.name}
           <TextBody>
-            <Octicons name="alert" size={16} color="black" />{" "}
-            <TextBold>Add or remove device coming soon.</TextBold> Secure your
-            account by adding a second phone or laptop.
+            {` \u00A0 `}
+            {tokenMetadata.name} · {chainConfig.l2.name}
           </TextBody>
+        </TextH2>
+      </View>
+      <ButtonSmall onPress={linkToExplorer}>
+        <View>
+          <TextLight>
+            {account.address}
+            {` \u00A0 `}
+            <Octicons name="link-external" size={16} />
+            {` \u00A0 `}
+            View on {explorer.name}
+          </TextLight>
         </View>
-        <Spacer h={32} />
+      </ButtonSmall>
+      <Spacer h={32} />
+      <DevicesInfo {...{ account }} />
+      <Spacer h={32} />
 
-        <AppInfo {...{ account }} />
-        <Spacer h={32} />
+      <AppInfo {...{ account }} />
+      <Spacer h={32} />
 
-        <View style={ss.container.ph16}>
-          <TextH3>Danger zone</TextH3>
-          <Spacer h={8} />
-          <ButtonMed
-            type="danger"
-            title="Delete Device"
-            onPress={clearWallet}
-          />
-        </View>
-      </ScrollView>
+      <View style={ss.container.ph16}>
+        <TextH3>Danger zone</TextH3>
+        <Spacer h={8} />
+        <ButtonMed type="danger" title="Delete Device" onPress={clearWallet} />
+      </View>
+    </ScrollView>
+  );
+}
+
+function DevicesInfo({ account }: { account: Account }) {
+  const nav = useNav();
+
+  const addDevice = () => nav.navigate("AddDevice");
+
+  return (
+    <>
+      <View style={styles.keyValueList}>
+        <TextH3>Devices</TextH3>
+        <Spacer h={8} />
+        {account.accountKeys
+          .filter((k) => k.removedAt === undefined)
+          .map((keyData) => (
+            <DeviceRow
+              key={keyData.pubKey}
+              keyData={keyData}
+              isCurrentDevice={keyData.pubKey === account.enclavePubKey}
+            />
+          ))}
+      </View>
+      <Spacer h={16} />
+      <View style={ss.container.ph16}>
+        <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
+      </View>
     </>
+  );
+}
+
+function DeviceRow({
+  keyData,
+  isCurrentDevice,
+}: {
+  keyData: KeyData;
+  isCurrentDevice: boolean;
+}) {
+  const nowS = useTime();
+  const nav = useNav();
+
+  const viewDevice = () => nav.navigate("Device", { pubKey: keyData.pubKey });
+
+  return (
+    <ButtonSmall onPress={viewDevice}>
+      <View style={styles.deviceDataRow}>
+        <TextBold>
+          Device {keySlotToDeviceIdentifier(keyData.slot)}
+          {isCurrentDevice ? " (Current device)" : " "}
+        </TextBold>
+        <TextBold>
+          {timeAgo(guessTimestampFromNum(keyData.addedAt), nowS)}
+        </TextBold>
+      </View>
+    </ButtonSmall>
   );
 }
 
@@ -223,5 +264,17 @@ const styles = StyleSheet.create({
     backgroundColor: color.bg.lightGray,
     padding: 16,
     borderRadius: 24,
+  },
+  keyValueList: {
+    ...ss.container.ph16,
+    flex: 1,
+    flexDirection: "column",
+    gap: 8,
+  },
+  deviceDataRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
   },
 });

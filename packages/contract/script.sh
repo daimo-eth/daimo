@@ -1,9 +1,9 @@
 # Build
 forge build
-# Deploy
-forge script script/Deploy.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
-# Verify
-forge script script/Deploy.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY
+# Deploy P256SHA256 singleton
+forge script script/DeployP256SHA256.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+# Deploy Account factory
+forge script script/DeployAccountFactory.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 # New Account
 forge script script/NewAccount.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 # Testing script

@@ -4,6 +4,7 @@ import { Address, Hex, formatUnits, getAddress } from "viem";
 
 import { getAccountName } from ".";
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
+import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { DB } from "./db/db";
 
@@ -20,6 +21,7 @@ export class PushNotifier {
   constructor(
     private coinIndexer: CoinIndexer,
     private nameReg: NameRegistry,
+    private keyReg: KeyRegistry, // TODO: notify devices on key add/remove
     private db: DB
   ) {}
 

@@ -2,12 +2,12 @@ import { getAccountName } from "@daimo/common";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { timeAgo } from "../../../logic/time";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
 import { useNav } from "../../shared/nav";
 import { TextCenter, TextError, TextH3, TextLight } from "../../shared/text";
-import { timeAgo } from "../../shared/time";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {

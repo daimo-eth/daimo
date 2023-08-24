@@ -1,3 +1,19 @@
+import { useEffect, useState } from "react";
+
+import { chainConfig } from "./chainConfig";
+
+/** Returns the current time in Unix seconds. Ticks every `secs`. */
+export function useTime(secs: number = 1) {
+  const [time, setTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(Date.now()), secs * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return Math.floor(time / 1000);
+}
+
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */
 export function timeAgo(sinceS: number, nowS: number, long?: boolean) {
   const seconds = Math.floor(nowS - sinceS);
@@ -20,4 +36,13 @@ export function timeString(s: number) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+export function guessTimestampFromNum(blockNum: number) {
+  switch (chainConfig.l2.network) {
+    case "base-goerli":
+      return 1675193616 + blockNum * 2;
+    default:
+      throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
+  }
 }

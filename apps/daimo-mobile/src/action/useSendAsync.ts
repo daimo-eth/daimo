@@ -30,6 +30,10 @@ export function useSendAsync({
   const [account, setAccount] = useAccount();
   if (!account) throw new Error("No account");
 
+  const keySlot = account.accountKeys.find(
+    (keyData) => keyData.pubKey === account.enclavePubKey
+  )?.slot;
+
   // TODO: use history to immediately estimate fees
   // Async load fee estimation from API to add precision
   const feeDollars = 0.05;
@@ -40,6 +44,7 @@ export function useSendAsync({
       setAS,
       enclaveKeyName,
       account.address,
+      keySlot,
       sendFn
     );
 
@@ -49,6 +54,7 @@ export function useSendAsync({
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       account.recentTransfers.push(pendingOp);
       account.namedAccounts.push(...(namedAccounts || []));
+      // TODO: add pending device add/removes
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
 
       setAccount(account);
@@ -56,33 +62,47 @@ export function useSendAsync({
       // In the background, wait for the op to finish
       handle.wait().then(() => resync(`op finished: ${pendingOp.opHash}`));
     }
-  }, [enclaveKeyName, sendFn]);
+  }, [enclaveKeyName, keySlot, sendFn]);
 
   return { ...as, exec, cost };
 }
 
 /** Warm the DaimoAccount cache. */
-export function useWarmCache(enclaveKeyName?: string, address?: Address) {
+export function useWarmCache(
+  enclaveKeyName?: string,
+  address?: Address,
+  keySlot?: number
+) {
   useEffect(() => {
-    if (!enclaveKeyName || !address) return;
-    loadAccount(enclaveKeyName, address);
-  }, [enclaveKeyName]);
+    if (!enclaveKeyName || !address || !keySlot) return;
+    loadAccount(enclaveKeyName, address, keySlot);
+  }, [enclaveKeyName, address, keySlot]);
 }
 
-const accountCache: Map<Address, Promise<DaimoAccount>> = new Map();
+const accountCache: Map<[Address, number], Promise<DaimoAccount>> = new Map();
 
-function loadAccount(enclaveKeyName: string, address: Address) {
-  let promise = accountCache.get(address);
+function loadAccount(
+  enclaveKeyName: string,
+  address: Address,
+  keySlot: number
+) {
+  let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
   promise = (async () => {
-    console.info(`[SEND] loading DaimoAccount ${address} ${enclaveKeyName}`);
-    const signer: SigningCallback = (hexTx: string) =>
-      requestEnclaveSignature(enclaveKeyName, hexTx);
+    console.info(
+      `[SEND] loading DaimoAccount ${address} ${enclaveKeyName} ${keySlot}`
+    );
+    const signer: SigningCallback = async (hexTx: string) => {
+      return {
+        derSig: await requestEnclaveSignature(enclaveKeyName, hexTx),
+        keySlot,
+      };
+    };
 
     return await DaimoAccount.init(address, signer, false);
   })();
-  accountCache.set(address, promise);
+  accountCache.set([address, keySlot], promise);
 
   return promise;
 }
@@ -91,11 +111,13 @@ async function sendAsync(
   setAS: SetActStatus,
   enclaveKeyName: string,
   address: Address,
+  keySlot: number | undefined,
   sendFn: SendOpFn
 ) {
   try {
+    if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const account = await loadAccount(enclaveKeyName, address);
+    const account = await loadAccount(enclaveKeyName, address, keySlot);
 
     setAS("loading", "Signing...");
     const handle = await sendFn(account);
@@ -104,7 +126,8 @@ async function sendAsync(
     return handle;
   } catch (e: any) {
     console.error(e);
-    setAS("error", "Error sending transaction");
+    if (keySlot === undefined) setAS("error", "Device removed from account");
+    else setAS("error", "Error sending transaction");
     throw e;
   }
 }

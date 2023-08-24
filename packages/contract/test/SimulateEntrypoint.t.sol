@@ -56,7 +56,7 @@ contract EntrypointTest is Test {
             )
         ];
         bytes
-            memory ownerSig = hex"f8227717d82ad9ba5b583bac31e2aa52e87f17e4769f0abfc95a847989e46c855e875e4d59e993277b6816f7b55bc0f3d71d6be6349fa14d8bfb3cd112fe8ec5";
+            memory ownerSig = hex"00f8227717d82ad9ba5b583bac31e2aa52e87f17e4769f0abfc95a847989e46c855e875e4d59e993277b6816f7b55bc0f3d71d6be6349fa14d8bfb3cd112fe8ec5";
 
         Account acc = factory.createAccount(key, 42);
         console.log("new account address:", address(acc));

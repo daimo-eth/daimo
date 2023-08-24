@@ -8,6 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useURL } from "expo-linking";
 import { useEffect } from "react";
+import { Hex } from "viem";
 
 import { Recipient, getRecipient } from "../../sync/recipients";
 
@@ -25,6 +26,8 @@ export type HomeStackParamList = {
   RequestSend: undefined;
   History: undefined;
   HistoryOp: { op: OpEvent };
+  AddDevice: undefined;
+  Device: { pubKey: Hex };
 };
 
 export function useNav() {

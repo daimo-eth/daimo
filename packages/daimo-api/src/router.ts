@@ -18,6 +18,7 @@ import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
+import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
@@ -32,6 +33,7 @@ export function createRouter(
   opIndexer: OpIndexer,
   entryPoint: EntryPoint,
   nameReg: NameRegistry,
+  keyReg: KeyRegistry,
   faucet: Faucet,
   notifier: PushNotifier,
   accountFactory: AccountFactory
@@ -155,21 +157,22 @@ export function createRouter(
         }
       }),
 
-    lookupAccountByKey: publicProcedure
+    lookupEthereumAccountByKey: publicProcedure
       .input(
         z.object({
           pubKeyHex: zHex,
         })
       )
       .query(async (opts) => {
-        const ret = null as DAccount | null;
-        // TODO: lookup account by signing key
-        console.log(
-          `[API] lookup found ${ret?.name || "<no account>"} for pubkey ${
-            opts.input.pubKeyHex
-          }`
-        );
-        return ret;
+        const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
+        return addr ? await nameReg.getEAccount(addr) : null;
+      }),
+
+    lookupAddressKeys: publicProcedure
+      .input(z.object({ addr: zAddress }))
+      .query(async (opts) => {
+        const { addr } = opts.input;
+        return await keyReg.resolveAddressKeys(addr);
       }),
 
     getAccountHistory: publicProcedure
@@ -244,6 +247,9 @@ export function createRouter(
           await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
         ).filter((acc) => hasAccountName(acc));
 
+        // Get account keys
+        const accountKeys = await keyReg.resolveAddressKeys(address);
+
         return {
           address,
 
@@ -254,6 +260,7 @@ export function createRouter(
 
           transferLogs,
           namedAccounts,
+          accountKeys,
         };
       }),
 

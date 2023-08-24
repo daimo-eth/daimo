@@ -7,7 +7,7 @@ import {
 } from "@daimo/common";
 import { useEffect } from "react";
 
-import { chainConfig } from "../logic/chainConfig";
+import { guessTimestampFromNum } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";
 
@@ -103,6 +103,7 @@ async function syncAccount(
     lastBalance: result.lastBalance,
     numTransfers: result.transferLogs.length,
     numNamedAccounts: result.namedAccounts.length,
+    numAccountKeys: result.accountKeys?.length,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -170,6 +171,7 @@ async function syncAccount(
 
     recentTransfers,
     namedAccounts,
+    accountKeys: result.accountKeys || [],
   };
 
   console.log(
@@ -256,14 +258,4 @@ function addTransfers(
   }
 
   return ret;
-}
-
-/** On L2, timestamp can be a deterministic function of block number. */
-function guessTimestampFromNum(blockNum: number) {
-  switch (chainConfig.l2.network) {
-    case "base-goerli":
-      return 1675193616 + blockNum * 2;
-    default:
-      throw new Error(`Unsupported network: ${chainConfig.l2.network}`);
-  }
 }
