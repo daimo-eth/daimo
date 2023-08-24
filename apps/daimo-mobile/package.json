@@ -23,7 +23,7 @@
     "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
-    "eas-build-post-install": "cd ../.. && npm run build"
+    "eas-build-post-install": "cd ../.. && npm run build:mobile"
   },
   "dependencies": {
     "@daimo/api": "*",
