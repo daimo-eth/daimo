@@ -10,7 +10,7 @@ import { defaultEnclaveKeyName } from "../model/account";
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
     case "SOFTWARE":
-      return "🔒  Key generated in software";
+      return "Key generated in software";
     case "TRUSTED_ENVIRONMENT":
       return "Key generated in trusted hardware";
     case "HARDWARE_ENCLAVE":
