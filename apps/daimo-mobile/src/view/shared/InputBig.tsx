@@ -1,7 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
 import { useCallback, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Platform, StyleSheet, TextInput, View } from "react-native";
 
 import { color, ss } from "./style";
 
@@ -24,6 +24,9 @@ export function InputBig({
   const onFocus = useCallback(() => setIsFocused(true), []);
   const onBlur = useCallback(() => setIsFocused(false), []);
 
+  // Android text input incorrectly autocapitalizes. Fix via password input.
+  const needsAndroidWorkaround = Platform.OS === "android";
+
   return (
     <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
       <TextInput
@@ -36,8 +39,8 @@ export function InputBig({
         numberOfLines={1}
         autoCapitalize="none"
         autoCorrect={false}
-        secureTextEntry
-        keyboardType="visible-password"
+        secureTextEntry={needsAndroidWorkaround}
+        keyboardType={needsAndroidWorkaround ? "visible-password" : "default"}
         {...{ onFocus, onBlur }}
       />
       {icon && <Octicons name={icon} size={16} color="gray" />}
