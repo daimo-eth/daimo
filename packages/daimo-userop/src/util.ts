@@ -4,4 +4,4 @@ export const dummySignature =
 
 export type SigningCallback = (
   hexMessage: string
-) => Promise<{ derSig: string; keyIdx: number }>;
+) => Promise<{ derSig: string; keySlot: number }>;

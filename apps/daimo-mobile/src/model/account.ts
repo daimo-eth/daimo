@@ -51,55 +51,6 @@ export type Account = {
   pushToken: string | null;
 };
 
-// interface AccountV2 extends StoredModel {
-//   storageVersion: 2;
-
-//   enclaveKeyName: string;
-//   name: string;
-//   address: string;
-
-//   lastBalance: string;
-//   lastNonce: string;
-//   lastBlockTimestamp: number;
-
-//   pushToken: string | null;
-// }
-
-// interface AccountV3 extends StoredModel {
-//   storageVersion: 3;
-
-//   enclaveKeyName: string;
-//   name: string;
-//   address: string;
-
-//   lastBlock: number;
-//   lastBlockTimestamp: number;
-//   lastBalance: string;
-//   lastFinalizedBlock: number;
-//   recentTransfers: TransferOpEvent[];
-//   namedAccounts: EAccount[];
-
-//   pushToken: string | null;
-// }
-
-// interface AccountV4 extends StoredModel {
-//   storageVersion: 4;
-
-//   enclaveKeyName: string;
-//   name: string;
-//   address: string;
-
-//   lastBlock: number;
-//   lastBlockTimestamp: number;
-//   lastBalance: string;
-//   lastFinalizedBlock: number;
-//   recentTransfers: TransferOpEvent[];
-//   trackedRequests: TrackedRequest[];
-//   namedAccounts: EAccount[];
-
-//   pushToken: string | null;
-// }
-
 interface AccountV5 extends StoredModel {
   storageVersion: 5;
 

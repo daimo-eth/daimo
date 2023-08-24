@@ -19,7 +19,7 @@ import QRCode from "react-native-qrcode-svg";
 
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
-import { createAddKeyString, pubKeyToEmoji } from "../../logic/device";
+import { createAddDeviceString } from "../../logic/device";
 import { rpcHook } from "../../logic/trpc";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
@@ -263,17 +263,13 @@ function UseExistingPage() {
         <Spacer h={32} />
         <View style={styles.vertQR}>
           <QRCode
-            value={createAddKeyString(pubKeyHex)}
+            value={createAddDeviceString(pubKeyHex)}
             color="#333"
             size={256}
             logo={{ uri: image.qrLogo }}
             logoSize={72}
           />
         </View>
-        <Spacer h={32} />
-        <TextBody>
-          <TextCenter>Device {pubKeyToEmoji(pubKeyHex)}</TextCenter>
-        </TextBody>
         <Spacer h={16} />
         <TextCenter>
           {status !== "error" && (

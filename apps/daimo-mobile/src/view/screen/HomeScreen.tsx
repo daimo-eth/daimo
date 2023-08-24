@@ -28,10 +28,10 @@ export default function HomeScreen() {
     `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
   );
 
-  const keyIdx = account?.accountKeys.find(
-    (keyData) => keyData.key === account?.enclavePubKey
-  )?.keyIndex;
-  useWarmCache(account?.enclaveKeyName, account?.address, keyIdx);
+  const keySlot = account?.accountKeys.find(
+    (keyData) => keyData.pubKey === account?.enclavePubKey
+  )?.slot;
+  useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
   const nav = useNav();
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {

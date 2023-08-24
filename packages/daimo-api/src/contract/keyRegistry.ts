@@ -54,36 +54,14 @@ export class KeyRegistry {
     console.log(`[KEY-REG] watching logs`);
   }
 
-  /** Get current keys of an address. */
-  async getKeys(addr: Address) {
-    try {
-      return await this.vc.publicClient.readContract({
-        abi: accountABI,
-        address: addr,
-        functionName: "getSigningKeys",
-      });
-    } catch (e: unknown) {
-      // Old Account, just ignore.
-      console.error(
-        `[API] Failed to get keys for ${addr}, probably an old account?`,
-        e
-      );
-      return [];
-    }
-  }
-
   /** Parses account key add/remove logs, first on init() and then on subscription. */
-  parseLogs = async (logs: SigningKeyAddedOrRemovedLog[]) => {
-    const currentBlockNumber = await this.vc.publicClient.getBlockNumber(); // TODO: remove?
-
+  parseLogs = (logs: SigningKeyAddedOrRemovedLog[]) => {
     const addrToNewLogs: Map<Address, SigningKeyAddedOrRemovedLog[]> =
       new Map();
     for (const log of logs) {
       const addr = getAddress(log.address);
-      if (addrToNewLogs.get(addr) === undefined) {
-        addrToNewLogs.set(addr, []);
-      }
-      addrToNewLogs.get(addr)!.push(log);
+      const logs = addrToNewLogs.get(addr) || [];
+      addrToNewLogs.set(addr, logs.concat([log]));
     }
 
     for (const addr of addrToNewLogs.keys()) {
@@ -93,51 +71,35 @@ export class KeyRegistry {
       }
       this.addrToLogs.get(addr)!.push(...newLogs);
 
-      const onChainKeys = (await this.getKeys(addr)).map(
-        contractFriendlyKeyToDER
-      );
-
-      this.cacheAddressProperties(addr, onChainKeys, currentBlockNumber);
+      this.cacheAddressProperties(addr);
     }
   };
 
   /** Cache an address's key properties in memory. */
-  cacheAddressProperties = (
-    addr: Address,
-    currentKeySet: Hex[],
-    currentBlockNumber: bigint
-  ) => {
+  cacheAddressProperties = (addr: Address) => {
     // deterministically sort all logs
     const sortedLogs = this.addrToLogs.get(addr)!.sort((a, b) => {
-      const aBlockNumber = a.blockNumber || currentBlockNumber + 1n;
-      const bBlockNumber = b.blockNumber || currentBlockNumber + 1n;
-      if (aBlockNumber < bBlockNumber) return -1;
-      if (aBlockNumber > bBlockNumber) return 1;
-      else {
-        const aLogIndex = a.logIndex || Infinity;
-        const bLogIndex = b.logIndex || Infinity;
-        if (aLogIndex < bLogIndex) return -1;
-        if (aLogIndex > bLogIndex) return 1;
-        else return 0;
-      }
+      const diff = a.blockNumber - b.blockNumber;
+      if (diff !== 0n) return Number(diff);
+      return a.logIndex - b.logIndex;
     });
 
     const currentKeyData: Map<string, KeyData> = new Map();
     for (const log of sortedLogs) {
-      if (!log.args.accountPubkey)
-        throw new Error("[API] Invalid event, no accountPubkey");
-      const derKey = contractFriendlyKeyToDER(log.args.accountPubkey);
-      const keyIdx = currentKeySet.indexOf(derKey);
+      if (!log.args.key) throw new Error("[API] Invalid event, no key");
+      const slot = log.args.keySlot;
+      const derKey = contractFriendlyKeyToDER(log.args.key);
+
       if (log.eventName === "SigningKeyAdded") {
         currentKeyData.set(derKey, {
-          key: derKey,
-          addedAt: Number(log.blockNumber || currentBlockNumber + 1n),
-          keyIndex: keyIdx === -1 ? undefined : keyIdx,
+          pubKey: derKey,
+          addedAt: Number(log.blockNumber),
+          slot,
         });
       } else if (log.eventName === "SigningKeyRemoved") {
         currentKeyData.set(derKey, {
           ...currentKeyData.get(derKey)!,
-          removedAt: Number(log.blockNumber || currentBlockNumber + 1n),
+          removedAt: Number(log.blockNumber),
         });
       }
     }
@@ -145,7 +107,7 @@ export class KeyRegistry {
     this.addrToKeyData.set(addr, [...currentKeyData.values()]);
 
     for (const keyData of currentKeyData.values()) {
-      this.keyToAddr.set(keyData.key, addr);
+      this.keyToAddr.set(keyData.pubKey, addr);
     }
     console.log(
       `[KEY-REG] cached ${

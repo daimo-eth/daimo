@@ -11,7 +11,7 @@ export function isDERPubKey(pubKeyHex: Hex): boolean {
   );
 }
 
-export function DERKeytoContractFriendlyKey(pubKeyHex: Hex): [Hex, Hex] {
+export function derKeytoContractFriendlyKey(pubKeyHex: Hex): [Hex, Hex] {
   if (!isDERPubKey(pubKeyHex)) {
     throw new Error("Invalid public key format");
   }

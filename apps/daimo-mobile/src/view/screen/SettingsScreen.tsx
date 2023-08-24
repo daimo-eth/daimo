@@ -16,7 +16,7 @@ import {
 
 import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
-import { pubKeyToEmoji } from "../../logic/device";
+import { keySlotToDeviceIdentifier } from "../../logic/device";
 import {
   EnclaveSecSummary,
   deleteEnclaveKey,
@@ -119,8 +119,6 @@ function DevicesInfo({ account }: { account: Account }) {
 
   const addDevice = () => nav.navigate("AddDevice");
 
-  console.log(`[NALIN DEBUG] accountKeys`, JSON.stringify(account.accountKeys));
-
   return (
     <>
       <View style={styles.keyValueList}>
@@ -130,9 +128,9 @@ function DevicesInfo({ account }: { account: Account }) {
           .filter((k) => k.removedAt === undefined)
           .map((keyData) => (
             <DeviceRow
-              key={keyData.key}
+              key={keyData.pubKey}
               keyData={keyData}
-              isCurrentDevice={keyData.key === account.enclavePubKey}
+              isCurrentDevice={keyData.pubKey === account.enclavePubKey}
             />
           ))}
       </View>
@@ -154,13 +152,13 @@ function DeviceRow({
   const nowS = useTime();
   const nav = useNav();
 
-  const viewDevice = () => nav.navigate("Device", { pubKey: keyData.key });
+  const viewDevice = () => nav.navigate("Device", { pubKey: keyData.pubKey });
 
   return (
     <ButtonSmall onPress={viewDevice}>
       <View style={styles.deviceDataRow}>
         <TextBold>
-          Device {pubKeyToEmoji(keyData.key)}
+          Device {keySlotToDeviceIdentifier(keyData.slot)}
           {isCurrentDevice ? " (Current device)" : " "}
         </TextBold>
         <TextBold>

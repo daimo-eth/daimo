@@ -22,8 +22,8 @@ contract SigningKeysTest is Test {
         factory = new AccountFactory(entryPoint, verifier);
     }
 
-    event SigningKeyAdded(IAccount indexed account, bytes32[2] accountPubkey);
-    event SigningKeyRemoved(IAccount indexed account, bytes32[2] accountPubkey);
+    event SigningKeyAdded(IAccount indexed account, uint8 keySlot, bytes32[2] key);
+    event SigningKeyRemoved(IAccount indexed account, uint8 keySlot, bytes32[2] key);
 
     function testAddingAndRemovingKeys() public {
         // hardcoded from swift playground
@@ -47,25 +47,28 @@ contract SigningKeysTest is Test {
 
         Account acc = factory.createAccount(key1, 42);
         console.log("new account address:", address(acc));
+        assertTrue(acc.numActiveKeys() == uint8(1));
 
         vm.expectRevert("only self");
-        acc.addSigningKey(key2);
+        acc.addSigningKey(1, key2);
 
         vm.startPrank(address(acc));
 
         // add key2
         vm.expectEmit(true, true, true, false);
-        emit SigningKeyAdded(acc, key2);
-        acc.addSigningKey(key2);
+        emit SigningKeyAdded(acc, 1, key2);
+        acc.addSigningKey(1, key2);
+        assertTrue(acc.numActiveKeys() == uint8(2));
 
         // remove key1
         vm.expectEmit(true, true, true, false);
-        emit SigningKeyRemoved(acc, key1);
-        acc.removeSigningKey(key1);
+        emit SigningKeyRemoved(acc, 0, key1);
+        acc.removeSigningKey(0);
+        assertTrue(acc.numActiveKeys() == uint8(1));
 
         // remove key2
         vm.expectRevert("cannot remove singular key");
-        acc.removeSigningKey(key2);
+        acc.removeSigningKey(1);
 
         vm.stopPrank();
     }

@@ -10,7 +10,7 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { View, Alert, ActivityIndicator } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { pubKeyToEmoji } from "../../logic/device";
+import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey } from "../../logic/enclave";
 import { guessTimestampFromNum, timeString } from "../../logic/time";
 import { useAccount } from "../../model/account";
@@ -31,16 +31,14 @@ import {
 type Props = NativeStackScreenProps<HomeStackParamList, "Device">;
 
 export function DeviceScreen({ route, navigation }: Props) {
-  // Load the latest version of this op. If the user opens the detail screen
-  // while the op is pending, and it confirms, the screen should update.
   const [account, setAccount] = useAccount();
   assert(account != null);
   const nav = useNav();
 
   const { pubKey: devicePubkey } = route.params;
-  const device = account.accountKeys.find((k) => k.key === devicePubkey)!;
+  const device = account.accountKeys.find((k) => k.pubKey === devicePubkey)!;
 
-  const deviceName = "Device " + pubKeyToEmoji(device.key);
+  const deviceName = "Device " + keySlotToDeviceIdentifier(device.slot);
 
   useEffect(() => {
     navigation.setOptions({ title: deviceName });
@@ -52,8 +50,8 @@ export function DeviceScreen({ route, navigation }: Props) {
   );
 
   const sendFn = async (account: DaimoAccount) => {
-    console.log(`[ACTION] removing device ${devicePubkey}`);
-    return account.removeSigningKey(devicePubkey, nonce);
+    console.log(`[ACTION] removing device ${device.slot}`);
+    return account.removeSigningKey(device.slot, nonce);
   };
 
   const { status, message, cost, exec } = useSendAsync({
@@ -98,7 +96,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        return `Remove fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+        return `Fee: ${getAmountText({ dollars: cost.totalDollars })}`;
       case "loading":
         return message;
       case "error":
@@ -146,7 +144,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         </TextCenter>
       </TextBody>
       <Spacer h={16} />
-      <TextCenter>Last used at unknown</TextCenter>
+      {/* <TextCenter>Last used at ??? (TODO)</TextCenter> */}
       <Spacer h={16} />
       {button}
       <Spacer h={16} />

@@ -11,7 +11,11 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { parseAddKeyString, pubKeyToEmoji } from "../../logic/device";
+import {
+  findUnusedSlot,
+  keySlotToDeviceIdentifier,
+  parseAddDeviceString,
+} from "../../logic/device";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -29,7 +33,8 @@ export function AddDeviceScreen() {
   const [account] = useAccount();
   assert(account != null);
 
-  const [newPubKey, setNewPubKey] = useState<Hex>("0x");
+  const [newKey, setNewKey] = useState<Hex>();
+  const nextSlot = findUnusedSlot(account.accountKeys.map((k) => k.slot));
   const [barCodeStatus, setBarCodeStatus] = useState<
     "idle" | "error" | "scanned"
   >("idle");
@@ -38,11 +43,11 @@ export function AddDeviceScreen() {
     if (barCodeStatus !== "idle") return;
 
     try {
-      const pubkeyHex = parseAddKeyString(data);
+      const parsedKey = parseAddDeviceString(data);
       setBarCodeStatus("scanned");
 
-      console.log(`[SCAN] got key ${pubkeyHex}`);
-      setNewPubKey(pubkeyHex);
+      console.log(`[SCAN] got key ${parsedKey}`);
+      setNewKey(parsedKey);
     } catch (e) {
       console.error(`[SCAN] error parsing QR code: ${e}`);
       setBarCodeStatus("error");
@@ -51,12 +56,13 @@ export function AddDeviceScreen() {
 
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
-    [newPubKey]
+    [newKey]
   );
 
   const sendFn = async (account: DaimoAccount) => {
-    console.log(`[ACTION] adding device ${newPubKey}`);
-    return account.addSigningKey(newPubKey, nonce);
+    if (!newKey) throw new Error("no key?");
+    console.log(`[ACTION] adding device ${newKey}`);
+    return account.addSigningKey(nextSlot, newKey, nonce);
   };
 
   const { status, message, cost, exec } = useSendAsync({
@@ -68,7 +74,7 @@ export function AddDeviceScreen() {
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        return `Add fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+        return `Fee: ${getAmountText({ dollars: cost.totalDollars })}`;
       case "loading":
         return message;
       case "error":
@@ -101,15 +107,17 @@ export function AddDeviceScreen() {
           <TextH2>Error Parsing QR Code</TextH2>
         </TextCenter>
       )}
-      {barCodeStatus === "scanned" && (
+      {barCodeStatus === "scanned" && newKey && (
         <>
           <TextCenter>
             <TextH2>
-              Scanned <TextBold>Device {pubKeyToEmoji(newPubKey)}</TextBold>
+              Scanned{" "}
+              <TextBold>Device {keySlotToDeviceIdentifier(nextSlot)}</TextBold>
             </TextH2>
           </TextCenter>
-          <Spacer h={16} />
+          <Spacer h={32} />
           {button}
+          <Spacer h={32} />
           <TextCenter>
             <TextLight>
               <TextCenter>{statusMessage}</TextCenter>
@@ -125,7 +133,6 @@ const styles = StyleSheet.create({
   vertOuter: {
     flex: 1,
     padding: 32,
-    gap: 16,
     overflow: "hidden",
   },
 });

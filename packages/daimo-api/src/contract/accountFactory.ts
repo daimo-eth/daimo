@@ -1,4 +1,4 @@
-import { DERKeytoContractFriendlyKey } from "@daimo/common";
+import { derKeytoContractFriendlyKey } from "@daimo/common";
 import { accountFactoryConfig } from "@daimo/contract";
 import { Hex, TransactionReceipt } from "viem";
 
@@ -20,7 +20,7 @@ export class AccountFactory {
     const address = await this.vc.publicClient.readContract({
       ...accountFactoryConfig,
       functionName: "getAddress",
-      args: [DERKeytoContractFriendlyKey(pubKeyHex), SALT],
+      args: [derKeytoContractFriendlyKey(pubKeyHex), SALT],
     });
     return address;
   }
@@ -33,7 +33,7 @@ export class AccountFactory {
     const hash = await this.vc.walletClient.writeContract({
       ...accountFactoryConfig,
       functionName: "createAccount",
-      args: [DERKeytoContractFriendlyKey(pubKeyHex), SALT],
+      args: [derKeytoContractFriendlyKey(pubKeyHex), SALT],
     });
     console.log(`[API] deploy transaction ${hash}`);
     const receipt = await this.vc.publicClient.waitForTransactionReceipt({

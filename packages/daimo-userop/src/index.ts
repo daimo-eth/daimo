@@ -1,4 +1,4 @@
-import { DERKeytoContractFriendlyKey } from "@daimo/common";
+import { derKeytoContractFriendlyKey } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
 import { Client, ISendUserOperationOpts, Presets } from "userop";
 import {
@@ -108,8 +108,12 @@ export class DaimoAccount {
   }
 
   /** Adds an account signing key. Returns userOpHash. */
-  public async addSigningKey(derPublicKey: Hex, nonce: DaimoNonce) {
-    const contractFriendlyKey = DERKeytoContractFriendlyKey(derPublicKey);
+  public async addSigningKey(
+    slot: number,
+    derPublicKey: Hex,
+    nonce: DaimoNonce
+  ) {
+    const contractFriendlyKey = derKeytoContractFriendlyKey(derPublicKey);
 
     const op = this.opBuilder.execute(
       this.getAddress(),
@@ -117,7 +121,7 @@ export class DaimoAccount {
       encodeFunctionData({
         abi: Contracts.accountABI,
         functionName: "addSigningKey",
-        args: [contractFriendlyKey],
+        args: [slot, contractFriendlyKey],
       }),
       nonce
     );
@@ -126,16 +130,14 @@ export class DaimoAccount {
   }
 
   /** Removes an account signing key. Returns userOpHash. */
-  public async removeSigningKey(derPublicKey: Hex, nonce: DaimoNonce) {
-    const contractFriendlyKey = DERKeytoContractFriendlyKey(derPublicKey);
-
+  public async removeSigningKey(slot: number, nonce: DaimoNonce) {
     const op = this.opBuilder.execute(
       this.getAddress(),
       0n,
       encodeFunctionData({
         abi: Contracts.accountABI,
         functionName: "removeSigningKey",
-        args: [contractFriendlyKey],
+        args: [slot],
       }),
       nonce
     );

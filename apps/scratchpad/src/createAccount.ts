@@ -72,7 +72,7 @@ export async function createAccount() {
 
     const sigHex = Buffer.from(sigDer).toString("hex");
     console.log(`Signature: ${sigHex}`);
-    return { derSig: sigHex, keyIdx: 0 };
+    return { derSig: sigHex, keySlot: 0 };
   };
   const dryRun = false;
 
