@@ -1,3 +1,4 @@
+import { DaimoAccountCall } from "@daimo/common";
 import { accountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
@@ -80,27 +81,12 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     return base;
   }
 
-  execute(
-    to: `0x${string}`,
-    value: bigint,
-    data: `0x${string}`,
-    nonce: DaimoNonce
-  ) {
-    return this.setNonce(nonce.toHex()).setCallData(
-      encodeFunctionData({
-        abi: accountABI,
-        functionName: "execute",
-        args: [to, value, data],
-      })
-    );
-  }
-
-  executeBatch(to: `0x${string}`[], data: `0x${string}`[], nonce: DaimoNonce) {
+  executeBatch(calls: DaimoAccountCall[], nonce: DaimoNonce) {
     return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
         abi: accountABI,
         functionName: "executeBatch",
-        args: [to, data],
+        args: [calls],
       })
     );
   }

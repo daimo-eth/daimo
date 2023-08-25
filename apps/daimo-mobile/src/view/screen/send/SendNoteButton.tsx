@@ -49,10 +49,6 @@ export function SendNoteButton({
   const [account] = useAccount();
   assert(account != null);
 
-  // TODO: load and cache
-  // Minor optimization. Approving unconditionally costs a bit more gas.
-  const approveFirst = true;
-
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.CreateNote);
   const nonce = useMemo(() => new DaimoNonce(nonceMetadata), []);
 
@@ -60,12 +56,7 @@ export function SendNoteButton({
     enclaveKeyName: account.enclaveKeyName,
     dollarsToSend: dollars,
     sendFn: async (account: DaimoAccount) => {
-      return account.createEphemeralNote(
-        ephemeralOwner,
-        `${dollars}`,
-        nonce,
-        approveFirst
-      );
+      return account.createEphemeralNote(ephemeralOwner, `${dollars}`, nonce);
     },
     pendingOp: {
       type: "transfer",

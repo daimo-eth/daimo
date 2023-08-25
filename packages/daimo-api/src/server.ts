@@ -3,7 +3,6 @@ import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { getViemClientFromEnv } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
-import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
@@ -25,7 +24,6 @@ async function main() {
   const opIndexer = new OpIndexer(vc);
   const faucet = new Faucet(vc, coinIndexer);
   const accountFactory = new AccountFactory(vc);
-  const entryPoint = new EntryPoint(vc);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
@@ -51,7 +49,6 @@ async function main() {
     coinIndexer,
     noteIndexer,
     opIndexer,
-    entryPoint,
     nameReg,
     keyReg,
     faucet,

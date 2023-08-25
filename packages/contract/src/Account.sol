@@ -13,13 +13,18 @@ import "account-abstraction/core/BaseAccount.sol";
 
 import "./P256SHA256.sol";
 
+struct Call {
+    address dest;
+    uint256 value;
+    bytes data;
+}
+
 /**
  * Daimo account.
  *  has execute, eth handling methods
  *  has many P256 account keys that can send requests through the entryPoint.
  */
 contract Account is BaseAccount, UUPSUpgradeable, Initializable {
-
     uint8 public numActiveKeys;
     mapping(uint8 => bytes32[2]) public keys; // map of P256 slots -> public keys that own the account
 
@@ -28,8 +33,16 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     P256SHA256 private immutable _sigVerifier;
 
     event AccountInitialized(IEntryPoint indexed entryPoint);
-    event SigningKeyAdded(IAccount indexed account, uint8 keySlot, bytes32[2] key);
-    event SigningKeyRemoved(IAccount indexed account, uint8 keySlot, bytes32[2] key);
+    event SigningKeyAdded(
+        IAccount indexed account,
+        uint8 keySlot,
+        bytes32[2] key
+    );
+    event SigningKeyRemoved(
+        IAccount indexed account,
+        uint8 keySlot,
+        bytes32[2] key
+    );
 
     modifier onlySelf() {
         _onlySelf();
@@ -56,28 +69,12 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     }
 
     /**
-     * execute a transaction (called directly from owner, or by entryPoint)
-     */
-    function execute(
-        address dest,
-        uint256 value,
-        bytes calldata func
-    ) external {
-        _requireFromEntryPoint();
-        _call(dest, value, func);
-    }
-
-    /**
      * execute a sequence of transactions
      */
-    function executeBatch(
-        address[] calldata dest,
-        bytes[] calldata func
-    ) external {
+    function executeBatch(Call[] calldata calls) external {
         _requireFromEntryPoint();
-        require(dest.length == func.length, "wrong array lengths");
-        for (uint256 i = 0; i < dest.length; i++) {
-            _call(dest[i], 0, func[i]);
+        for (uint256 i = 0; i < calls.length; i++) {
+            _call(calls[i].dest, calls[i].value, calls[i].data);
         }
     }
 
@@ -87,16 +84,27 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * the implementation by calling `upgradeTo()`
      */
     function initialize(
-        bytes32[2] calldata key
+        uint8 slot,
+        bytes32[2] calldata key,
+        Call[] calldata initCalls
     ) public virtual initializer {
-        _initialize(key);
+        _initialize(slot, key, initCalls);
     }
 
-    function _initialize(bytes32[2] calldata key) internal virtual {
-        keys[0] = key;
+    function _initialize(
+        uint8 slot,
+        bytes32[2] calldata key,
+        Call[] calldata initCalls
+    ) internal virtual {
+        keys[slot] = key;
         numActiveKeys = 1;
+
+        for (uint256 i = 0; i < initCalls.length; i++) {
+            _call(initCalls[i].dest, initCalls[i].value, initCalls[i].data);
+        }
+
         emit AccountInitialized(_entryPoint);
-        emit SigningKeyAdded(this, 0, key);
+        emit SigningKeyAdded(this, slot, key);
     }
 
     /// implement template method of BaseAccount
@@ -109,7 +117,10 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
             userOpHash
         ); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
         uint8 keySlot = uint8(userOp.signature[0]);
-        require(keys[keySlot][0] != bytes32(0) && keys[keySlot][1] != bytes32(0), "invalid key slot");
+        require(
+            keys[keySlot][0] != bytes32(0) && keys[keySlot][1] != bytes32(0),
+            "invalid key slot"
+        );
         if (
             _sigVerifier.verify(
                 keys[keySlot],
@@ -167,7 +178,14 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     /**
      * Fetch all current signing keys
      */
-    function getActiveSigningKeys() public view returns (bytes32[2][] memory activeSigningKeys, uint8[] memory activeSigningKeySlots) {
+    function getActiveSigningKeys()
+        public
+        view
+        returns (
+            bytes32[2][] memory activeSigningKeys,
+            uint8[] memory activeSigningKeySlots
+        )
+    {
         activeSigningKeys = new bytes32[2][](numActiveKeys);
         activeSigningKeySlots = new uint8[](numActiveKeys);
         uint activeKeyIdx = 0;
@@ -186,7 +204,10 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * @param key the P256 public key to add
      */
     function addSigningKey(uint8 slot, bytes32[2] memory key) public onlySelf {
-        require(keys[slot][0] == bytes32(0) && keys[slot][1] == bytes32(0), "key already exists");
+        require(
+            keys[slot][0] == bytes32(0) && keys[slot][1] == bytes32(0),
+            "key already exists"
+        );
         require(numActiveKeys < 255, "too many keys");
         require(slot < 255, "invalid slot");
         keys[slot] = key;
@@ -198,10 +219,11 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * Remove a signing key from the account
      * @param slot the slot of the key to remove
      */
-    function removeSigningKey(
-        uint8 slot
-    ) public onlySelf {
-        require(keys[slot][0] != bytes32(0) && keys[slot][1] != bytes32(0), "key does not exist");
+    function removeSigningKey(uint8 slot) public onlySelf {
+        require(
+            keys[slot][0] != bytes32(0) && keys[slot][1] != bytes32(0),
+            "key does not exist"
+        );
         require(numActiveKeys > 1, "cannot remove singular key");
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];

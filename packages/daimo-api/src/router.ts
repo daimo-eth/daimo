@@ -7,23 +7,34 @@ import {
   parseDaimoLink,
   zAddress,
   zHex,
+  DaimoAccountCall,
 } from "@daimo/common";
+import {
+  ephemeralNotesAddress,
+  erc20ABI,
+  tokenMetadata,
+} from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { Address, PublicClient, Transport, getAddress } from "viem";
+import {
+  Address,
+  PublicClient,
+  Transport,
+  encodeFunctionData,
+  getAddress,
+} from "viem";
 import { baseGoerli } from "viem/chains";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
-import { EntryPoint } from "./contract/entryPoint";
 import { Faucet } from "./contract/faucet";
 import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { PushNotifier } from "./pushNotifier";
-import { publicProcedure, router } from "./trpc";
+import { publicProcedure, router, timedProcedure } from "./trpc";
 
 export function createRouter(
   l1Client: PublicClient,
@@ -31,7 +42,6 @@ export function createRouter(
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   opIndexer: OpIndexer,
-  entryPoint: EntryPoint,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   faucet: Faucet,
@@ -279,7 +289,7 @@ export function createRouter(
         notifier.register(address, token);
       }),
 
-    deployWallet: publicProcedure
+    deployWallet: timedProcedure
       .input(
         z.object({
           name: z.string(),
@@ -289,32 +299,39 @@ export function createRouter(
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
 
-        const address = await accountFactory.getAddress(pubKeyHex);
+        const maxUint256 = 2n ** 256n - 1n;
+        const initCalls: DaimoAccountCall[] = [
+          {
+            // Approve notes contract infinite spending on behalf of the account
+            dest: tokenMetadata.address,
+            value: 0n,
+            data: encodeFunctionData({
+              abi: erc20ABI,
+              functionName: "approve",
+              args: [ephemeralNotesAddress, maxUint256],
+            }),
+          },
+          nameReg.getRegisterNameCall(name), // Register name
+        ];
 
-        // TODO: Should be able to batch these in a single tx for perf.
-        // Promise.all awaiting doesn't work because nonces go out of sync.
+        // TODO: put a check for the counterfactual address on client side so the server is not trusted.
+        const address = await accountFactory.getAddress(pubKeyHex, initCalls);
 
-        console.log(`[API] Deploying account for ${name}, pubkey ${pubKeyHex}`);
-        const deployReceipt = await accountFactory.deploy(pubKeyHex); // Deploy account
+        // For testnet, prepay gas, 0.05 ETH
+        const value = BigInt(5e16);
 
-        console.log(`[API] Registering name ${name} at ${address}`);
-        const registerReceipt = await nameReg.registerName(name, address); // Register name
-
-        console.log(`[API] Prefunding ${address}`);
-        const prefundReceipt = await entryPoint.prefundEth(
-          address,
-          BigInt(5e16)
-        ); // Prepay gas, 0.05 ETH
+        console.log(`[API] Deploying account for ${name}, address ${address}`);
+        const deployReceipt = await accountFactory.deploy(
+          pubKeyHex,
+          initCalls,
+          value
+        ); // Deploy account
 
         if (deployReceipt.status !== "success") {
           return { status: deployReceipt.status, address: undefined };
         }
-        if (registerReceipt.status !== "success") {
-          return { status: registerReceipt.status, address: undefined };
-        }
-        if (prefundReceipt.status !== "success") {
-          return { status: prefundReceipt.status, address: undefined };
-        }
+
+        nameReg.onSuccessfulRegister(name, address);
         return { status: "success", address };
       }),
 

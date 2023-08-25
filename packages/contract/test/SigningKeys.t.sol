@@ -22,8 +22,16 @@ contract SigningKeysTest is Test {
         factory = new AccountFactory(entryPoint, verifier);
     }
 
-    event SigningKeyAdded(IAccount indexed account, uint8 keySlot, bytes32[2] key);
-    event SigningKeyRemoved(IAccount indexed account, uint8 keySlot, bytes32[2] key);
+    event SigningKeyAdded(
+        IAccount indexed account,
+        uint8 keySlot,
+        bytes32[2] key
+    );
+    event SigningKeyRemoved(
+        IAccount indexed account,
+        uint8 keySlot,
+        bytes32[2] key
+    );
 
     function testAddingAndRemovingKeys() public {
         // hardcoded from swift playground
@@ -45,7 +53,8 @@ contract SigningKeysTest is Test {
             )
         ];
 
-        Account acc = factory.createAccount(key1, 42);
+        Call[] memory calls = new Call[](0);
+        Account acc = factory.createAccount(0, key1, calls, 42);
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 

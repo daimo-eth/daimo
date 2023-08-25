@@ -115,14 +115,18 @@ export class DaimoAccount {
   ) {
     const contractFriendlyKey = derKeytoContractFriendlyKey(derPublicKey);
 
-    const op = this.opBuilder.execute(
-      this.getAddress(),
-      0n,
-      encodeFunctionData({
-        abi: Contracts.accountABI,
-        functionName: "addSigningKey",
-        args: [slot, contractFriendlyKey],
-      }),
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.getAddress(),
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.accountABI,
+            functionName: "addSigningKey",
+            args: [slot, contractFriendlyKey],
+          }),
+        },
+      ],
       nonce
     );
 
@@ -131,14 +135,18 @@ export class DaimoAccount {
 
   /** Removes an account signing key. Returns userOpHash. */
   public async removeSigningKey(slot: number, nonce: DaimoNonce) {
-    const op = this.opBuilder.execute(
-      this.getAddress(),
-      0n,
-      encodeFunctionData({
-        abi: Contracts.accountABI,
-        functionName: "removeSigningKey",
-        args: [slot],
-      }),
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.getAddress(),
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.accountABI,
+            functionName: "removeSigningKey",
+            args: [slot],
+          }),
+        },
+      ],
       nonce
     );
 
@@ -154,7 +162,10 @@ export class DaimoAccount {
     const ether = parseEther(amount);
     console.log(`[OP] transfer ${ether} wei to ${to}`);
 
-    const op = this.opBuilder.execute(to, ether, "0x", nonce);
+    const op = this.opBuilder.executeBatch(
+      [{ dest: to, value: ether, data: "0x" }],
+      nonce
+    );
 
     return this.sendUserOp(op);
   }
@@ -168,14 +179,18 @@ export class DaimoAccount {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
 
-    const op = this.opBuilder.execute(
-      this.tokenAddress,
-      0n,
-      encodeFunctionData({
-        abi: Contracts.erc20ABI,
-        functionName: "transfer",
-        args: [to, parsedAmount],
-      }),
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.tokenAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.erc20ABI,
+            functionName: "transfer",
+            args: [to, parsedAmount],
+          }),
+        },
+      ],
       nonce
     );
 
@@ -193,14 +208,18 @@ export class DaimoAccount {
       `[OP] approve ${parsedAmount} ${this.tokenAddress} for ${spender}`
     );
 
-    const op = this.opBuilder.execute(
-      this.tokenAddress,
-      0n,
-      encodeFunctionData({
-        abi: Contracts.erc20ABI,
-        functionName: "approve",
-        args: [spender, parsedAmount],
-      }),
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.tokenAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.erc20ABI,
+            functionName: "approve",
+            args: [spender, parsedAmount],
+          }),
+        },
+      ],
       nonce
     );
 
@@ -215,36 +234,25 @@ export class DaimoAccount {
   public async createEphemeralNote(
     ephemeralOwner: `0x${string}`,
     amount: `${number}`,
-    nonce: DaimoNonce,
-    approveFirst: boolean = false
+    nonce: DaimoNonce
   ) {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
 
-    const contracts: Address[] = [this.notesAddress];
-    const calls: Hex[] = [
-      encodeFunctionData({
-        abi: Contracts.ephemeralNotesABI,
-        functionName: "createNote",
-        args: [ephemeralOwner, parsedAmount],
-      }),
-    ];
-
-    if (approveFirst) {
-      // Infinite approve
-      console.log(`[OP] approving notes contract to spend coins`);
-      const maxUint256 = 2n ** 256n - 1n;
-      contracts.unshift(this.tokenAddress);
-      calls.unshift(
-        encodeFunctionData({
-          abi: Contracts.erc20ABI,
-          functionName: "approve",
-          args: [this.notesAddress, maxUint256],
-        })
-      );
-    }
-
-    const op = this.opBuilder.executeBatch(contracts, calls, nonce);
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.notesAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.ephemeralNotesABI,
+            functionName: "createNote",
+            args: [ephemeralOwner, parsedAmount],
+          }),
+        },
+      ],
+      nonce
+    );
 
     return this.sendUserOp(op);
   }
@@ -257,14 +265,18 @@ export class DaimoAccount {
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
 
-    const op = this.opBuilder.execute(
-      this.notesAddress,
-      0n,
-      encodeFunctionData({
-        abi: Contracts.ephemeralNotesABI,
-        functionName: "claimNote",
-        args: [ephemeralOwner, signature],
-      }),
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.notesAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.ephemeralNotesABI,
+            functionName: "claimNote",
+            args: [ephemeralOwner, signature],
+          }),
+        },
+      ],
       nonce
     );
 

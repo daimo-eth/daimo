@@ -89,3 +89,9 @@ export enum OpStatus {
   /** Pending too long, presumed dead. */
   expired = "expired",
 }
+
+export type DaimoAccountCall = {
+  dest: Address;
+  value: bigint;
+  data: Hex;
+};
