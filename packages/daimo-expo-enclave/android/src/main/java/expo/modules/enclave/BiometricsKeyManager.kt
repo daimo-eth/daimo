@@ -60,10 +60,10 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     keyPairGenerator.generateKeyPair()
   }
 
-  internal fun getSigningPrivkey(accountName: String): KeyPair {
+  internal fun getSigningPrivkey(accountName: String): KeyPair? {
     val ks: KeyStore = KeyStore.getInstance(KEYSTORE_PROVIDER).apply { load(null) }
     if (!ks.containsAlias(accountName)) {
-      throw KeyStoreException("Unable to read account private key")
+      return null
     }
     val entry = ks.getEntry(accountName, null)
     if (entry !is KeyStore.PrivateKeyEntry) {
@@ -73,7 +73,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
   }
 
   override fun fetchPublicKey(accountName: String): String? {
-    return getSigningPrivkey(accountName).public.encoded.toHexString()
+    return getSigningPrivkey(accountName)?.public?.encoded?.toHexString()
   }
   
   override fun createKeyPair(accountName: String): String {
@@ -117,7 +117,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
       .setNegativeButtonText("Cancel")
       .build()
     
-    val privateKey = getSigningPrivkey(accountName).private
+    val privateKey = getSigningPrivkey(accountName)!!.private
     val signature = Signature.getInstance("SHA256withECDSA")
     signature.initSign(privateKey)
     uiManager.runOnUiQueueThread {
@@ -126,7 +126,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
   }
 
   override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
-    val publicKey = getSigningPrivkey(accountName).public
+    val publicKey = getSigningPrivkey(accountName)!!.public
     val verified = Signature.getInstance("SHA256withECDSA").run {
       initVerify(publicKey)
       update(hexMessage.decodeHex())
