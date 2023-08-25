@@ -341,7 +341,7 @@ function NamePicker({
     <View>
       <Spacer h={64} />
       <InputBig
-        placeholder="choose a name"
+        placeholder="choose a username"
         value={name}
         onChange={onChange}
         center

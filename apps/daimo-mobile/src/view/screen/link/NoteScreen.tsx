@@ -111,6 +111,10 @@ function NoteDisplay({
     },
   });
 
+  const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);
+  const netDollarsReceivedStr = getAmountText({ dollars: netRecv });
+  const isOwnSentNote = noteStatus.sender.addr === account.address;
+
   // On success, go home, show newly created transaction
   const nav = useNav();
   useEffect(() => {
@@ -131,7 +135,13 @@ function NoteDisplay({
     }
     switch (status) {
       case "idle":
-        return `Claim fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+        if (netRecv === 0) {
+          return `Gas too high to claim`;
+        } else if (isOwnSentNote) {
+          return `Cancel this link, reclaiming ${netDollarsReceivedStr}`;
+        } else {
+          return `Claim this link, receiving ${netDollarsReceivedStr}`;
+        }
       case "loading":
         return message;
       case "error":
@@ -151,11 +161,23 @@ function NoteDisplay({
     }
     switch (status) {
       case "idle":
-        if (noteStatus.sender.addr === account.address) {
-          return <ButtonBig type="primary" title="Cancel" onPress={exec} />;
+        if (isOwnSentNote) {
+          return (
+            <ButtonBig
+              type="primary"
+              title="Reclaim"
+              onPress={exec}
+              disabled={netRecv === 0}
+            />
+          );
         } else {
           return (
-            <ButtonBig type="primary" title="Claim money" onPress={exec} />
+            <ButtonBig
+              type="primary"
+              title="Claim"
+              onPress={exec}
+              disabled={netRecv === 0}
+            />
           );
         }
       case "loading":
