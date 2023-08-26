@@ -1,4 +1,10 @@
-import { DAccount, EAccount, DaimoAccountCall } from "@daimo/common";
+import {
+  DAccount,
+  EAccount,
+  DaimoAccountCall,
+  isValidName,
+  validateName,
+} from "@daimo/common";
 import {
   ephemeralNotesAddress,
   nameRegistryABI,
@@ -130,15 +136,4 @@ export class NameRegistry {
     // Bare addresses are fine too, ensName can be undefined
     return { addr: address, ensName };
   }
-}
-
-export function isValidName(name: string): boolean {
-  return /^[a-z][a-z0-9]{2,31}$/.test(name);
-}
-
-export function validateName(name: string): string {
-  if (name.length < 3) throw new Error("Too short");
-  if (name.length > 32) throw new Error("Too long");
-  if (!isValidName(name)) throw new Error("Lowercase letters and numbers only");
-  return name;
 }

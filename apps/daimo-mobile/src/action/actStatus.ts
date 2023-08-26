@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-type ActStatus = "idle" | "loading" | "success" | "error";
+export type ActStatus = "idle" | "loading" | "success" | "error";
 
 export type SetActStatus = (
   status: ActStatus | Error,
@@ -23,7 +23,7 @@ export interface ActHandle {
 export function useActStatus() {
   const [as, set] = useState({ status: "idle" as ActStatus, message: "" });
 
-  let startTime = 0;
+  const startTime = useRef(0);
 
   // TODO: track timing and reliability
   const setAS: SetActStatus = useCallback(
@@ -35,16 +35,16 @@ export function useActStatus() {
       if (message == null) message = "";
 
       // Basic performance tracking, console only for now
+      // TODO: ensure valid state transitions
       if (status === "loading") {
-        if (startTime === 0) startTime = Date.now();
+        if (as.status !== "loading") startTime.current = Date.now();
       }
-      if (startTime) {
-        const elapsedMs = Date.now() - startTime;
-        console.log(`[ACTION] ${elapsedMs}ms: ${status} ${message}`);
-        if (status !== "loading") {
-          startTime = 0;
-          console.log(`[ACTION] ${status}, total time ${elapsedMs}ms`);
-        }
+      const elapsedMs = Date.now() - startTime.current;
+      console.log(
+        `[ACTION] ${elapsedMs}ms: ${as.status} > ${status} ${message}`
+      );
+      if (status !== "loading") {
+        console.log(`[ACTION] ${status}, total time ${elapsedMs}ms`);
       }
 
       set({ status, message });

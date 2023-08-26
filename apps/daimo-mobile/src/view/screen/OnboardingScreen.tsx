@@ -1,3 +1,4 @@
+import { assertNotNull, validateName } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Device from "expo-device";
@@ -17,6 +18,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { createAddDeviceString } from "../../logic/device";
@@ -36,35 +38,93 @@ import {
   TextLight,
 } from "../shared/text";
 
-export default function OnboardingScreen() {
-  const [page, setPage] = useState(1);
-  const [accountFlowChoice, setAccountFlowChoice] = useState<
-    "create" | "existing"
-  >("create");
-  const next = useCallback(() => setPage(page + 1), [page]);
-  const onFlowChoice = useCallback(
-    (choice: "create" | "existing") => {
-      setAccountFlowChoice(choice);
-      setPage(page + 1);
+type OnboardPage =
+  | "intro"
+  | "create"
+  | "existing"
+  | "new-allow-notifications"
+  | "existing-allow-notifications"
+  | "new-loading";
+
+export default function OnboardingScreen({
+  onOnboardingComplete,
+}: {
+  onOnboardingComplete: () => void;
+}) {
+  const [page, setPage] = useState<OnboardPage>("intro");
+
+  const next = useCallback(
+    (choice?: "create" | "existing") => {
+      setPage(
+        (function () {
+          switch (page) {
+            case "intro":
+              return assertNotNull(choice);
+            case "create":
+              return "new-allow-notifications";
+            case "existing":
+              return "existing-allow-notifications";
+            case "new-allow-notifications":
+              return "new-loading";
+            case "existing-allow-notifications":
+            case "new-loading":
+              onOnboardingComplete();
+              return page;
+            default:
+              throw new Error(`unreachable ${page}`);
+          }
+        })()
+      );
     },
     [page]
   );
 
-  // TODO: add back buttons?
+  // TODO: add back buttons on create and existing pages
+  const prev = useCallback(() => {}, []);
+
+  const [name, setName] = useState("");
+  const {
+    exec: createExec,
+    status: createStatus,
+    message: createMessage,
+  } = useCreateAccount(name);
+
   return (
     <View style={styles.onboardingScreen}>
-      {page === 1 && <IntroPages onFlowChoice={onFlowChoice} />}
-      {page === 2 && <AllowNotifications onNext={next} />}
-      {accountFlowChoice === "create" && page === 3 && <CreateAccountPage />}
-      {accountFlowChoice === "existing" && page === 3 && <UseExistingPage />}
+      {page === "intro" && <IntroPages onNext={next} />}
+      {page === "create" && (
+        <CreateAccountPage
+          onNext={next}
+          onPrev={prev}
+          name={name}
+          setName={setName}
+          exec={createExec}
+          status={createStatus}
+          message={createMessage}
+        />
+      )}
+      {page === "existing" && <UseExistingPage onNext={next} onPrev={prev} />}
+      {page === "new-allow-notifications" && (
+        <AllowNotifications onNext={next} />
+      )}
+      {page === "existing-allow-notifications" && (
+        <AllowNotifications onNext={next} />
+      )}
+      {page === "new-loading" && (
+        <LoadingScreen
+          loadingStatus={createStatus}
+          loadingMessage={createMessage}
+          onNext={next}
+        />
+      )}
     </View>
   );
 }
 
 function IntroPages({
-  onFlowChoice,
+  onNext,
 }: {
-  onFlowChoice: (choice: "create" | "existing") => void;
+  onNext: (choice: "create" | "existing") => void;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -119,14 +179,14 @@ function IntroPages({
         type="primary"
         title="Create Account"
         onPress={() => {
-          onFlowChoice("create");
+          onNext("create");
         }}
       />
       <Spacer h={8} />
       <ButtonSmall
         title="Use existing"
         onPress={() => {
-          onFlowChoice("existing");
+          onNext("existing");
         }}
       />
     </View>
@@ -210,10 +270,30 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
   );
 }
 
-function CreateAccountPage() {
-  const [name, setName] = useState("");
-  const { exec, status, message } = useCreateAccount(name);
-  const createAccount = useCallback(() => status === "idle" && exec(), [exec]);
+function CreateAccountPage({
+  onNext,
+  onPrev,
+  name,
+  setName,
+  exec,
+  status,
+  message,
+}: {
+  onNext: () => void;
+  onPrev: () => void;
+  name: string;
+  setName: (name: string) => void;
+  exec: () => void;
+  status: ActStatus;
+  message: string;
+}) {
+  const createAccount = useCallback(() => {
+    if (status === "idle") {
+      exec();
+      console.log(`[ONBOARDING] create account ${name} ${status} ${message}`);
+      onNext();
+    }
+  }, [exec]);
 
   return (
     <KeyboardAvoidingView behavior="padding">
@@ -229,7 +309,6 @@ function CreateAccountPage() {
                   onChoose={createAccount}
                 />
               )}
-              {status === "loading" && <NameSpinner />}
             </View>
             <TextCenter>
               {status === "error" && <TextError>{message}</TextError>}
@@ -246,8 +325,19 @@ function CreateAccountPage() {
   );
 }
 
-function UseExistingPage() {
+function UseExistingPage({
+  onNext,
+  onPrev,
+}: {
+  onNext: () => void;
+  onPrev: () => void;
+}) {
   const { status, message, pubKeyHex } = useExistingAccount();
+
+  useEffect(() => {
+    if (status === "success") onNext();
+  }, [status]);
+
   if (pubKeyHex === undefined) return null;
 
   return (
@@ -279,14 +369,6 @@ function UseExistingPage() {
           )}
         </TextCenter>
       </View>
-    </View>
-  );
-}
-
-function NameSpinner() {
-  return (
-    <View style={ss.container.center}>
-      <ActivityIndicator size="large" />
     </View>
   );
 }
@@ -361,13 +443,34 @@ function NamePicker({
   );
 }
 
-// TODO: import, use turborepo
-function validateName(name: string): string {
-  if (name.length < 3) throw new Error("Too short");
-  if (name.length > 32) throw new Error("Too long");
-  if (!/^[a-z][a-z0-9]{2,31}$/.test(name))
-    throw new Error("Lowercase letters and numbers only");
-  return name;
+function LoadingScreen({
+  loadingStatus,
+  loadingMessage,
+  onNext,
+}: {
+  loadingStatus: ActStatus;
+  loadingMessage: string;
+  onNext: () => void;
+}) {
+  useEffect(() => {
+    console.log(`[ONBOARDING] loading status ${loadingStatus}`);
+    if (loadingStatus === "success") onNext();
+  }, [loadingStatus]);
+
+  return (
+    <View style={ss.container.center}>
+      <ActivityIndicator size="large" />
+      <Spacer h={32} />
+      <TextCenter>
+        {loadingStatus === "error" && <TextError>{loadingMessage}</TextError>}
+        {loadingStatus !== "error" && (
+          <TextLight>
+            <EmojiToOcticon size={16} text={loadingMessage} />
+          </TextLight>
+        )}
+      </TextCenter>
+    </View>
+  );
 }
 
 const screenDimensions = Dimensions.get("screen");
