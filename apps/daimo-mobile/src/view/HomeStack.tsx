@@ -1,6 +1,6 @@
 import { tokenMetadata } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -67,6 +67,9 @@ export function HomeStackNav() {
 
 function MainScreen() {
   const [account] = useAccount();
-  if (account) return <HomeScreen />;
-  return <OnboardingScreen />;
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(account === null);
+  const onOnboardingComplete = () => setIsOnboarding(false);
+
+  if (account && !isOnboarding) return <HomeScreen />;
+  return <OnboardingScreen onOnboardingComplete={onOnboardingComplete} />;
 }

@@ -5,3 +5,4 @@ export * from "./model";
 export * from "./assert";
 export * from "./op";
 export * from "./key";
+export * from "./name";
