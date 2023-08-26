@@ -117,10 +117,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
             userOpHash
         ); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
         uint8 keySlot = uint8(userOp.signature[0]);
-        require(
-            keys[keySlot][0] != bytes32(0) && keys[keySlot][1] != bytes32(0),
-            "invalid key slot"
-        );
+        require(keys[keySlot][0] != bytes32(0), "invalid key slot");
         if (
             _sigVerifier.verify(
                 keys[keySlot],
@@ -190,7 +187,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
         activeSigningKeySlots = new uint8[](numActiveKeys);
         uint activeKeyIdx = 0;
         for (uint8 i = 0; i < 255; i++) {
-            if (keys[i][0] != bytes32(0) && keys[i][1] != bytes32(0)) {
+            if (keys[i][0] != bytes32(0)) {
                 activeSigningKeys[activeKeyIdx] = keys[i];
                 activeSigningKeySlots[activeKeyIdx] = i;
                 activeKeyIdx++;
@@ -204,10 +201,8 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * @param key the P256 public key to add
      */
     function addSigningKey(uint8 slot, bytes32[2] memory key) public onlySelf {
-        require(
-            keys[slot][0] == bytes32(0) && keys[slot][1] == bytes32(0),
-            "key already exists"
-        );
+        require(keys[slot][0] == bytes32(0), "key already exists");
+        require(key[0] != bytes32(0), "new key cannot be 0");
         require(numActiveKeys < 255, "too many keys");
         require(slot < 255, "invalid slot");
         keys[slot] = key;
@@ -220,10 +215,7 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
      * @param slot the slot of the key to remove
      */
     function removeSigningKey(uint8 slot) public onlySelf {
-        require(
-            keys[slot][0] != bytes32(0) && keys[slot][1] != bytes32(0),
-            "key does not exist"
-        );
+        require(keys[slot][0] != bytes32(0), "key does not exist");
         require(numActiveKeys > 1, "cannot remove singular key");
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];

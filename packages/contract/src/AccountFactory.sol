@@ -40,7 +40,7 @@ contract AccountFactory {
         }
 
         // Prefund the account with msg.value
-        entryPoint.depositTo{value: msg.value}(addr);
+        if (msg.value > 0) entryPoint.depositTo{value: msg.value}(addr);
 
         ret = Account(
             payable(
