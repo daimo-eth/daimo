@@ -64,8 +64,7 @@ export default function HomeScreen() {
         animation="spring"
         disableSwipeIcon
         extraMarginTop={0}
-        swipeHeight={300}
-        style={styles.swipeUpDownRoot}
+        swipeHeight={192}
       />
     </View>
   );
@@ -167,8 +166,5 @@ const styles = StyleSheet.create({
   amountAndButtonsContainer: {
     flex: 1,
     alignItems: "stretch",
-  },
-  swipeUpDownRoot: {
-    backgroundColor: "#fff",
   },
 });

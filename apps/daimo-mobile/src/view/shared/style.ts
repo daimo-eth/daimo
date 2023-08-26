@@ -65,6 +65,7 @@ export const ss = {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
+      backgroundColor: color.white,
     },
     vertModal: {
       flexDirection: "column",

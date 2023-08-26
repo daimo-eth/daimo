@@ -402,14 +402,18 @@ function NamePicker({
     <Octicons {...{ name, color }} size={14} />
   );
   const status = (function () {
-    if (error === "Too short" || debounce) {
+    if (name.length === 0 || debounce) {
       return " "; // no error
     } else if (error) {
-      return error; // entered an invalid username
+      return (
+        <>
+          {oct("alert")} {error.toLowerCase()}
+        </>
+      ); // invalid name
     } else if (result.isLoading) {
       return "..."; // name valid, loading
     } else if (result.error) {
-      return <>{oct("alert")} offline?</>; // name valid, error
+      return <>{oct("alert")} offline?</>; // name valid, other error
     } else if (result.isSuccess && result.data) {
       return <>{oct("alert")} sorry, that name is taken</>; // name taken
     } else if (result.isSuccess && result.data === null) {
