@@ -24,6 +24,10 @@ contract NameRegistry {
         emit Registered(name, addr);
     }
 
+    function registerSelf(bytes32 name) external {
+        this.register(name, msg.sender);
+    }
+
     function resolveAddr(bytes32 name) external view returns (address) {
         return _addrs[name];
     }

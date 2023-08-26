@@ -14,8 +14,10 @@ import "./Account.sol";
  */
 contract AccountFactory {
     Account public immutable accountImplementation;
+    IEntryPoint public immutable entryPoint;
 
     constructor(IEntryPoint _entryPoint, P256SHA256 _sigVerifier) {
+        entryPoint = _entryPoint;
         accountImplementation = new Account(_entryPoint, _sigVerifier);
     }
 
@@ -26,19 +28,25 @@ contract AccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        bytes32[2] memory accountKey,
+        uint8 slot,
+        bytes32[2] memory key,
+        Call[] calldata initCalls,
         uint256 salt
-    ) public returns (Account ret) {
-        address addr = getAddress(accountKey, salt);
+    ) public payable returns (Account ret) {
+        address addr = getAddress(slot, key, initCalls, salt);
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
             return Account(payable(addr));
         }
+
+        // Prefund the account with msg.value
+        if (msg.value > 0) entryPoint.depositTo{value: msg.value}(addr);
+
         ret = Account(
             payable(
                 new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
-                    abi.encodeCall(Account.initialize, (accountKey))
+                    abi.encodeCall(Account.initialize, (slot, key, initCalls))
                 )
             )
         );
@@ -48,7 +56,9 @@ contract AccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAddress(
-        bytes32[2] memory accountKey,
+        uint8 slot,
+        bytes32[2] memory key,
+        Call[] calldata initCalls,
         uint256 salt
     ) public view returns (address) {
         return
@@ -59,7 +69,10 @@ contract AccountFactory {
                         type(ERC1967Proxy).creationCode,
                         abi.encode(
                             address(accountImplementation),
-                            abi.encodeCall(Account.initialize, (accountKey))
+                            abi.encodeCall(
+                                Account.initialize,
+                                (slot, key, initCalls)
+                            )
                         )
                     )
                 )

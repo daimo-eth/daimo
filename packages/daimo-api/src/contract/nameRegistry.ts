@@ -1,9 +1,14 @@
-import { DAccount, EAccount } from "@daimo/common";
-import { ephemeralNotesAddress, nameRegistryConfig } from "@daimo/contract";
+import { DAccount, EAccount, DaimoAccountCall } from "@daimo/common";
+import {
+  ephemeralNotesAddress,
+  nameRegistryABI,
+  nameRegistryAddress,
+  nameRegistryConfig,
+} from "@daimo/contract";
 import {
   Address,
   Log,
-  TransactionReceipt,
+  encodeFunctionData,
   getAbiItem,
   getAddress,
   hexToString,
@@ -76,27 +81,26 @@ export class NameRegistry {
       .slice(0, 10);
   }
 
-  /** Registers a Daimo name to an address. */
-  async registerName(
-    name: string,
-    address: Address
-  ): Promise<TransactionReceipt> {
+  /** Get call for registering a Daimo name to an address. */
+  getRegisterNameCall(name: string): DaimoAccountCall {
     validateName(name);
     const nameHex = Buffer.from(name.padEnd(32, "\0")).toString("hex");
 
-    const hash = await this.vc.walletClient.writeContract({
-      ...nameRegistryConfig,
-      functionName: "register",
-      args: [`0x${nameHex}`, address],
-    });
-
-    const tx = await this.vc.publicClient.waitForTransactionReceipt({ hash });
-    if (tx.status !== "success") throw new Error("Transaction failed");
-
-    this.cacheAccount({ name, addr: address });
-
-    return tx;
+    return {
+      dest: nameRegistryAddress,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: nameRegistryABI,
+        functionName: "registerSelf",
+        args: [`0x${nameHex}`],
+      }),
+    };
   }
+
+  /** On successfully registering a name, cache it. */
+  onSuccessfulRegister = (name: string, address: Address) => {
+    this.cacheAccount({ name, addr: address });
+  };
 
   /** Find wallet address for a given Daimo name, or null if not found. */
   resolveName(name: string): Address | undefined {

@@ -56,9 +56,10 @@ contract EntrypointTest is Test {
             )
         ];
         bytes
-            memory ownerSig = hex"00f8227717d82ad9ba5b583bac31e2aa52e87f17e4769f0abfc95a847989e46c855e875e4d59e993277b6816f7b55bc0f3d71d6be6349fa14d8bfb3cd112fe8ec5";
+            memory ownerSig = hex"001d8192eac426bd39b83163aca9332ee373b88e6259b4b5ea9bd2657e9da010d4a0f4abe964a8e4a58fab0cffd45d9930efb0c400bbb939334753433a2cc6ad81";
 
-        Account acc = factory.createAccount(key, 42);
+        Call[] memory calls = new Call[](0);
+        Account acc = factory.createAccount(0, key, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
