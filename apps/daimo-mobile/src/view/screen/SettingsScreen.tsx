@@ -76,9 +76,9 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <ScrollView contentContainerStyle={ss.container.vertModal}>
+    <ScrollView contentContainerStyle={ss.container.fullWidthModal}>
       <Spacer h={4} />
-      <View style={ss.container.ph16}>
+      <View style={ss.container.padH16}>
         <TextH2>
           {account.name}
           <TextBody>
@@ -105,7 +105,7 @@ export function SettingsScreen() {
       <AppInfo {...{ account }} />
       <Spacer h={32} />
 
-      <View style={ss.container.ph16}>
+      <View style={ss.container.padH16}>
         <TextH3>Danger zone</TextH3>
         <Spacer h={8} />
         <ButtonMed type="danger" title="Delete Device" onPress={clearWallet} />
@@ -135,7 +135,7 @@ function DevicesInfo({ account }: { account: Account }) {
           ))}
       </View>
       <Spacer h={16} />
-      <View style={ss.container.ph16}>
+      <View style={ss.container.padH16}>
         <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
       </View>
     </>
@@ -212,7 +212,7 @@ function AppInfo({ account }: { account: Account }) {
   };
 
   return (
-    <View style={ss.container.ph16}>
+    <View style={ss.container.padH16}>
       <TextH3>Details</TextH3>
       <Spacer h={8} />
       {Object.entries(envKV).map(([k, v]) => (
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   keyValueList: {
-    ...ss.container.ph16,
+    ...ss.container.padH16,
     flex: 1,
     flexDirection: "column",
     gap: 8,

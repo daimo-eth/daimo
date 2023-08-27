@@ -249,7 +249,7 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
           <Octicons name="bell" size={40} />
         </TextH1>
         <Spacer h={32} />
-        <View style={ss.container.ph16}>
+        <View style={ss.container.padH16}>
           <TextBody>
             <TextCenter>
               You'll be notified only for account activity. For example, when
@@ -301,7 +301,7 @@ function CreateAccountPage({
         <View style={styles.onboardingScreen}>
           <View style={styles.createAccountPage}>
             <TextH1>Welcome</TextH1>
-            <View style={ss.container.h256}>
+            <View style={styles.namePickerWrap}>
               {status === "idle" && (
                 <NamePicker
                   name={name}
@@ -505,6 +505,9 @@ const styles = StyleSheet.create({
   createAccountPage: {
     width: screenDimensions.width,
     padding: 32,
+  },
+  namePickerWrap: {
+    height: 256,
   },
   useExistingPage: {
     width: screenDimensions.width,

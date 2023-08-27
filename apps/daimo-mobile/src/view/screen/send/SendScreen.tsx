@@ -57,7 +57,7 @@ export default function SendScreen({ route }: Props) {
   const onNoteCreated = useCallback(() => setNoteCreated(true), []);
 
   return (
-    <View style={ss.container.outerStretch}>
+    <View style={ss.container.fullWidthSinglePage}>
       <Header />
       <ScrollView
         contentContainerStyle={styles.vertStretch}
@@ -96,7 +96,7 @@ export default function SendScreen({ route }: Props) {
         )}
       </ScrollView>
       {!recipient && tab === "search" && (
-        <View style={ss.container.ph16}>
+        <View style={ss.container.padH16}>
           <ButtonBig
             type="primary"
             title="Create Payment Link"
@@ -247,7 +247,7 @@ function SendButton({
   }, [status]);
 
   return (
-    <View style={ss.container.ph16}>
+    <View style={ss.container.padH16}>
       {button}
       <Spacer h={16} />
       <TextLight>

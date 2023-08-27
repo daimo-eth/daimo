@@ -25,7 +25,7 @@ export function HistoryScreen() {
   if (account == null) return null;
 
   return (
-    <View style={ss.container.vertModal}>
+    <View style={ss.container.fullWidthModal}>
       <ScrollPellet />
       <HistoryList account={account} />
     </View>

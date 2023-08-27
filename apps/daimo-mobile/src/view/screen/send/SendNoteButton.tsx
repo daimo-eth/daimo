@@ -158,7 +158,7 @@ export function SendNoteButton({
   }, [status]);
 
   return (
-    <View style={ss.container.ph16}>
+    <View style={ss.container.padH16}>
       {button}
       <Spacer h={8} />
       <TextLight>

@@ -26,14 +26,7 @@
 // SOFTWARE.
 //
 
-import React, {
-  ReactNode,
-  Ref,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import {
   Dimensions,
   LayoutAnimation,
@@ -48,7 +41,7 @@ import {
 const MARGIN_TOP = Platform.OS === "ios" ? 24 : 0;
 const DEVICE_HEIGHT = Dimensions.get("window").height - MARGIN_TOP;
 
-const CustomAnimation = {
+const springAnimation = {
   duration: 300,
   create: {
     type: LayoutAnimation.Types.spring,
@@ -72,113 +65,79 @@ interface SwipeUpDownProps {
   animation?: "linear" | "spring" | "easeInEaseOut";
 }
 
-const SwipeUpDown = (
-  {
-    swipeHeight = 60,
-    extraMarginTop = MARGIN_TOP,
-    itemMini,
-    itemFull,
-    style,
-    onShowMini,
-    onShowFull,
-    animation = "spring",
-  }: SwipeUpDownProps,
-  ref: Ref<any>
-) => {
+export function SwipeUpDown({
+  swipeHeight = 60,
+  extraMarginTop = MARGIN_TOP,
+  itemMini,
+  itemFull,
+  style,
+  onShowMini,
+  onShowFull,
+  animation = "spring",
+}: SwipeUpDownProps) {
   const maxHeight = DEVICE_HEIGHT - extraMarginTop;
-  const MINI_POSITION = maxHeight - swipeHeight;
+  const posYMini = maxHeight - swipeHeight;
+  const posYFull = extraMarginTop;
   const customStyle = {
     style: {
       bottom: 0,
-      top: MINI_POSITION,
+      top: posYMini,
     } as { bottom: number; top: number; height?: number },
   };
-  const checkCollapsed = useRef(true);
+
   const viewRef = useRef<View>(null);
-  const [collapsed, setCollapsed] = useState(true);
+  const [isMini, setIsMini] = useState(true);
 
   const onPanResponderMove = (
     _: unknown,
     gestureState: PanResponderGestureState
   ) => {
-    if (gestureState.dy > 0 && !checkCollapsed.current) {
-      // SWIPE DOWN
-      customStyle.style.top = gestureState.dy;
-      if (customStyle.style.height! <= DEVICE_HEIGHT / 3) {
-        if (itemMini) {
-          setCollapsed(true);
-        }
-      }
-      updateNativeProps();
-    } else if (checkCollapsed.current && gestureState.dy < -swipeHeight) {
-      // SWIPE UP
-      customStyle.style.top = DEVICE_HEIGHT + gestureState.dy;
-      if (customStyle.style.top <= DEVICE_HEIGHT / 2) {
-        setCollapsed(false);
-      }
-      updateNativeProps();
-    }
+    const baseY = isMini ? posYMini : posYFull;
+    const newY = baseY + gestureState.dy;
+    updatePosY(newY);
   };
 
   const onPanResponderRelease = (
     _: unknown,
     gestureState: PanResponderGestureState
   ) => {
-    if (gestureState.dy < -100 || gestureState.dy < 100) {
-      showFull();
+    console.log(`[SWIPE] release ${isMini} ${gestureState.dy}`);
+    const threshold = isMini ? -64 : 64;
+    if (gestureState.dy > threshold) {
+      showMini(); // Swiped down (or not far up enough), show mini view
     } else {
-      showMini();
+      showFull(); // Swiped up (or not far down enough), show full view
     }
   };
 
-  const panResponder = React.useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (ev, g) => true,
-      onPanResponderMove,
-      onPanResponderRelease,
-    })
-  ).current;
+  const panResponder = React.useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: (ev, g) => true,
+        onPanResponderMove,
+        onPanResponderRelease,
+      }),
+    [isMini]
+  );
 
   const showFull = () => {
-    customStyle.style.top = extraMarginTop;
-    updateNativeProps();
-    setCollapsed(false);
-    checkCollapsed.current = false;
+    console.log(`[SWIPE] showFull ${posYFull}`);
+    updatePosY(posYFull);
+    setIsMini(false);
     onShowFull?.();
   };
 
   const showMini = () => {
-    customStyle.style.top = MINI_POSITION;
-    updateNativeProps();
-    setCollapsed(true);
-    checkCollapsed.current = true;
+    console.log(`[SWIPE] showFull ${posYMini}`);
+    updatePosY(posYMini);
+    setIsMini(true);
     onShowMini?.();
   };
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      showFull,
-      showMini,
-    }),
-    []
-  );
-
-  const updateNativeProps = () => {
-    switch (animation) {
-      case "linear":
-        LayoutAnimation.linear();
-        break;
-      case "spring":
-        LayoutAnimation.configureNext(CustomAnimation);
-        break;
-      case "easeInEaseOut":
-        LayoutAnimation.easeInEaseOut();
-        break;
-      default:
-        break;
-    }
-    // viewRef.current?.setNativeProps(customStyle);
+  const updatePosY = (y: number) => {
+    customStyle.style.top = y;
+    LayoutAnimation.configureNext(springAnimation);
+    viewRef.current?.setNativeProps(customStyle);
   };
 
   return (
@@ -192,21 +151,18 @@ const SwipeUpDown = (
           height: maxHeight,
           marginTop: extraMarginTop,
         },
-        !itemMini && collapsed && { marginBottom: -swipeHeight },
         style,
       ]}
     >
-      {collapsed ? itemMini : itemFull}
+      {isMini ? itemMini : itemFull}
     </View>
   );
-};
-
-export default forwardRef(SwipeUpDown);
+}
 
 const styles = StyleSheet.create({
   wrapSwipe: {
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     position: "absolute",
     bottom: 0,
     left: 0,

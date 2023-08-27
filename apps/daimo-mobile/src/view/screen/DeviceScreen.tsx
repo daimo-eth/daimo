@@ -126,7 +126,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   })();
 
   return (
-    <View style={ss.container.vertModal}>
+    <View style={ss.container.fullWidthModal}>
       <Spacer h={16} />
       <TextH1>{deviceName}</TextH1>
       <Spacer h={16} />

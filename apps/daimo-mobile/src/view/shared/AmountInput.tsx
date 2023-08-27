@@ -122,7 +122,7 @@ export function SendAmountChooser({
       <CancelHeader hide={onCancel}>{actionDesc}</CancelHeader>
       <Spacer h={32} />
       {dollars === 0 && (
-        <View style={ss.container.ph16}>
+        <View style={ss.container.padH16}>
           <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
           <Spacer h={16} />
           <TextLight>

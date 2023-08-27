@@ -22,7 +22,7 @@ export default function CreateRequestScreen() {
   const url = formatDaimoLink({ type: "account", addr: account.address });
 
   return (
-    <View style={ss.container.outerStretch}>
+    <View style={ss.container.fullWidthSinglePage}>
       <Header />
       <Spacer h={64} />
       <View style={styles.vertMain}>

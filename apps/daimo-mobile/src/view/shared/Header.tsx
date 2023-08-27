@@ -1,8 +1,7 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Button } from "./Button";
-import Spacer from "./Spacer";
+import { ButtonSmall } from "./Button";
 import { useNav } from "./nav";
 import { color, ss } from "./style";
 import { TextH3 } from "./text";
@@ -13,19 +12,15 @@ export function Header() {
   const goToAccount = useCallback(() => nav.navigate("Settings"), [nav]);
 
   const [account] = useAccount();
-
-  const buttonStyle = useRef({ button: styles.button, title: {} });
+  const accountName = account?.name || "⚠️";
 
   return (
-    <Button onPress={goToAccount} style={buttonStyle.current}>
+    <ButtonSmall onPress={goToAccount}>
       <View style={styles.header}>
-        <TextH3>
-          <Spacer w={8} />
-          {account?.name || "⚠️"}
-        </TextH3>
+        <TextH3>{accountName}</TextH3>
         <StyleTBD />
       </View>
-    </Button>
+    </ButtonSmall>
   );
 }
 
@@ -38,10 +33,6 @@ function StyleTBD() {
 }
 
 const styles = StyleSheet.create({
-  button: {
-    padding: 8,
-    borderRadius: 8,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

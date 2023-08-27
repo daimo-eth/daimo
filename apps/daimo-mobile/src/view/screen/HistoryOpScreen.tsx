@@ -41,7 +41,7 @@ export function HistoryOpScreen({ route, navigation }: Props) {
   }, [navigation, title]);
 
   return (
-    <View style={ss.container.vertModal}>
+    <View style={ss.container.fullWidthModal}>
       <Spacer h={8} />
       {body}
       <Spacer h={8} />

@@ -1,12 +1,11 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
-import SwipeUpDown from "react-native-swipe-up-down";
 
 import { HistoryList, HistoryScreen } from "./HistoryScreen";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
+import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Header } from "../shared/Header";
@@ -28,23 +27,16 @@ export default function HomeScreen() {
   )?.slot;
   useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
 
-  const headerHeight = useHeaderHeight();
-
-  const [isHistoryOpened, setIsHistoryOpened] = useState(false);
-
-  const addTopOffset = isHistoryOpened ? 0 : headerHeight;
+  const nav = useNav();
+  const setIsHistoryOpened = useCallback((isOpened: boolean) => {
+    nav.setOptions({ title: isOpened ? "History" : "Home" });
+  }, []);
 
   if (account == null) return null;
 
   return (
-    <View
-      style={{
-        ...ss.container.homeContainer,
-        top: -addTopOffset,
-        paddingTop: addTopOffset,
-      }}
-    >
-      <View style={styles.headerContainer}>
+    <View style={ss.container.fullWidthScroll}>
+      <View style={ss.container.marginHNeg16}>
         <Header />
       </View>
 
@@ -62,7 +54,6 @@ export default function HomeScreen() {
         onShowMini={() => setIsHistoryOpened(false)}
         onShowFull={() => setIsHistoryOpened(true)}
         animation="spring"
-        disableSwipeIcon
         extraMarginTop={0}
         swipeHeight={192}
       />
@@ -146,11 +137,12 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
+    paddingHorizontal: 20,
   },
   iconButton: {
     flexGrow: 1,
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
   },
   historyScroll: {
     paddingTop: 32,
@@ -158,10 +150,6 @@ const styles = StyleSheet.create({
   historyElem: {
     backgroundColor: color.white,
     minHeight: screenDimensions.height,
-  },
-  headerContainer: {
-    paddingLeft: 50,
-    paddingRight: 50,
   },
   amountAndButtonsContainer: {
     flex: 1,

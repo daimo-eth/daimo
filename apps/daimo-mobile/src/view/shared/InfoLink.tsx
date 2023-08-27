@@ -7,7 +7,7 @@ import { TextLight } from "./text";
 
 export function InfoLink({ url, title }: { url: string; title: string }) {
   return (
-    <View style={ss.container.mhn16}>
+    <View style={ss.container.marginHNeg16}>
       <ButtonSmall onPress={() => Linking.openURL(url)}>
         <TextLight>
           <Octicons name="info" size={16} color={color.gray} />

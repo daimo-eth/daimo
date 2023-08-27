@@ -43,35 +43,27 @@ export const touchHighlightUnderlay = {
   },
 };
 
-const styleOuterStretch = {
+const styleFullWidth = {
   flex: 1,
+  flexDirection: "column",
   padding: 16,
-  paddingBottom: 0,
-  backgroundColor: "#fff",
+  backgroundColor: color.white,
   alignItems: "stretch",
 } as const;
 
 export const ss = {
   container: StyleSheet.create({
-    outerStretch: {
-      ...styleOuterStretch,
+    fullWidthSinglePage: {
+      ...styleFullWidth,
       paddingBottom: 48,
     },
-    outerStretchScroll: {
-      ...styleOuterStretch,
+    fullWidthScroll: {
+      ...styleFullWidth,
       paddingBottom: 0,
     },
-    homeContainer: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: color.white,
-    },
-    vertModal: {
-      flexDirection: "column",
-      backgroundColor: color.white,
+    fullWidthModal: {
+      ...styleFullWidth,
       alignSelf: "stretch",
-      padding: 16,
       flexGrow: 1,
     },
     center: {
@@ -79,17 +71,11 @@ export const ss = {
       alignItems: "center",
       justifyContent: "center",
     },
-    ph8: {
-      paddingHorizontal: 8,
-    },
-    ph16: {
+    padH16: {
       paddingHorizontal: 16,
     },
-    mhn16: {
+    marginHNeg16: {
       marginHorizontal: -16,
-    },
-    h256: {
-      height: 256,
     },
     debug: {
       borderWidth: 1,
