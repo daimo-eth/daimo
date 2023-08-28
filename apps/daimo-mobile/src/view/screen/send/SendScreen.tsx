@@ -14,7 +14,13 @@ import {
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  View,
+  KeyboardAvoidingView,
+} from "react-native";
 
 import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
@@ -64,36 +70,40 @@ export default function SendScreen({ route }: Props) {
         bounces={false}
         keyboardShouldPersistTaps="handled"
       >
-        {recipient && (
-          <SetAmount recipient={recipient} dollars={dollars || 0} />
-        )}
-        {!recipient && (
-          <>
-            {tab !== "createNote" && (
-              <SegmentedControlFixed
-                values={tabs}
-                selectedIndex={tab === "scan" ? 1 : 0}
-                onValueChange={setSegmentVal}
-                fontStyle={{ fontSize: 16 }}
-                activeFontStyle={{ fontSize: 16 }}
-                style={{ height: 40 }}
-              />
-            )}
-            {tab !== "createNote" && <Spacer h={16} />}
-            {tab === "search" && <SearchTab />}
-            {tab === "scan" && <ScanTab hide={search} />}
-            {tab === "createNote" && (
-              <SendAmountChooser
-                actionDesc={
-                  noteCreated ? "Payment link created" : "Creating payment link"
-                }
-                dollars={noteDollars}
-                onSetDollars={noteCreated ? undefined : setNoteDollars}
-                onCancel={noteCreated ? undefined : search}
-              />
-            )}
-          </>
-        )}
+        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={128}>
+          {recipient && (
+            <SetAmount recipient={recipient} dollars={dollars || 0} />
+          )}
+          {!recipient && (
+            <>
+              {tab !== "createNote" && (
+                <SegmentedControlFixed
+                  values={tabs}
+                  selectedIndex={tab === "scan" ? 1 : 0}
+                  onValueChange={setSegmentVal}
+                  fontStyle={{ fontSize: 16 }}
+                  activeFontStyle={{ fontSize: 16 }}
+                  style={{ height: 40 }}
+                />
+              )}
+              {tab !== "createNote" && <Spacer h={16} />}
+              {tab === "search" && <SearchTab />}
+              {tab === "scan" && <ScanTab hide={search} />}
+              {tab === "createNote" && (
+                <SendAmountChooser
+                  actionDesc={
+                    noteCreated
+                      ? "Payment link created"
+                      : "Creating payment link"
+                  }
+                  dollars={noteDollars}
+                  onSetDollars={noteCreated ? undefined : setNoteDollars}
+                  onCancel={noteCreated ? undefined : search}
+                />
+              )}
+            </>
+          )}
+        </KeyboardAvoidingView>
       </ScrollView>
       {!recipient && tab === "search" && (
         <View style={ss.container.padH16}>
