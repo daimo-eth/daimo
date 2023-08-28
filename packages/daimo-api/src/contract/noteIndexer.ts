@@ -66,6 +66,7 @@ export class NoteIndexer {
       if (selector === createEventSelector) {
         const nc = decodeEventLog({ ...args, eventName: "NoteCreated" });
         const { ephemeralOwner, from, amount } = nc.args.note;
+        console.log(`[NOTE] NoteCreated ${ephemeralOwner}`);
         if (this.notes.get(ephemeralOwner) != null) {
           throw new Error(`dupe NoteCreated: ${ephemeralOwner} ${logInfo()}`);
         }
@@ -79,6 +80,7 @@ export class NoteIndexer {
         const nr = decodeEventLog({ ...args, eventName: "NoteRedeemed" });
         const { ephemeralOwner, from, amount } = nr.args.note;
         const { redeemer } = nr.args;
+        console.log(`[NOTE] NoteRedeemed ${ephemeralOwner}`);
 
         // Find and sanity check the Note that was redeemed
         const note = this.notes.get(ephemeralOwner);

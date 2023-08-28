@@ -3,7 +3,7 @@
 import { AppRouter } from "@daimo/api";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import csv from "csvtojson";
-import { createPublicClient, webSocket } from "viem";
+import { createPublicClient, numberToHex, webSocket } from "viem";
 import { baseGoerli } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
@@ -44,13 +44,11 @@ function tsDesc() {
 async function ts() {
   console.log("Hello, world");
 
-  const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
-  const publicClient = createPublicClient({ transport, chain: baseGoerli });
-  const blk = await publicClient.getBlockNumber();
-
-  console.log(`Connected   : ${publicClient.transport.name}`);
-  console.log(`Chain       : ${publicClient.chain.name}`);
-  console.log(`Latest block: ${blk}`);
+  const num =
+    23658957077183673623975163142370986705703709099221578179586031616n;
+  console.log(`Hex length: ` + num.toString(16).length);
+  console.log(`toHex() length: ` + numberToHex(num).length);
+  console.log(`toHex(64) length: ` + numberToHex(num, { size: 64 }).length);
 }
 
 function trpcDesc() {

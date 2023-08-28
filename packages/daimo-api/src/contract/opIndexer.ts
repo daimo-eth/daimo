@@ -1,7 +1,7 @@
 import { entryPointABI } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { Constants } from "userop";
-import { Hex, Log, getAbiItem, toHex } from "viem";
+import { Hex, Log, getAbiItem, numberToHex } from "viem";
 
 import { ViemClient } from "../chain";
 
@@ -40,7 +40,7 @@ export class OpIndexer {
         this.txHashToUserOp.set(log.transactionHash, log);
 
         const nonceMetadata = DaimoNonce.fromHex(
-          toHex(log.args.nonce)
+          numberToHex(log.args.nonce)
         ).metadata.toHex();
         const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
         const newTxes = curTxes
@@ -58,9 +58,9 @@ export class OpIndexer {
     const log = this.txHashToUserOp.get(txHash);
 
     if (!log) return undefined;
-    const nonceMetadata = DaimoNonce.fromHex(toHex(log.args.nonce)).metadata;
+    const nonce = DaimoNonce.fromHex(numberToHex(log.args.nonce));
 
-    return nonceMetadata.toHex();
+    return nonce.metadata.toHex();
   }
 
   /**

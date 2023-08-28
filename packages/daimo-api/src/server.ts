@@ -15,6 +15,7 @@ import { createRouter } from "./router";
 async function main() {
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv();
+  await vc.init();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const coinIndexer = new CoinIndexer(vc);
@@ -40,6 +41,9 @@ async function main() {
 
     console.log(`[API] initializing push notifications...`);
     await notifier.init();
+
+    console.log(`[API] polling logs...`);
+    setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
 
   console.log(`[API] serving...`);
