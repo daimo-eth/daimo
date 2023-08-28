@@ -24,7 +24,6 @@
   "homepage": "https://github.com/daimo-eth/daimo#readme",
   "repository": "https://github.com/daimo-eth/daimo/tree/master/packages/daimo-expo-enclave",
   "author": "Daimo",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "^18.2.15",
     "@types/react-native": "^0.72.2",
