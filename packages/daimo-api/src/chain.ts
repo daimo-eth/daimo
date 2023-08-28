@@ -63,13 +63,22 @@ type LogCallback<E extends AbiEvent | undefined> = (
   logs: LogsList<E>
 ) => void | Promise<void>;
 
+/**
+ * All access to the chain goes thru this client. A ViemClient lets you read L1,
+ * read L2, and post transactions to L2.
+ */
 export class ViemClient {
+  // Last block seen by the indexer.
   private lastBlock: { number: bigint; timestamp: bigint } = {
     number: 0n,
     timestamp: 0n,
   };
+  // List of log filters to process initially + on each new block.
   private logFilters: LogFilter<any>[] = [];
+  // Local cache of logs to avoid re-fetching them on restart.
   private logCacheDir = path.join(os.homedir(), ".daimo", "logs");
+  // Lock to prevent concurrent or duplicate log ingestion.
+  private lockLogProcessing = true;
 
   constructor(
     public l1Client: PublicClient<Transport, typeof mainnet>,
@@ -79,8 +88,10 @@ export class ViemClient {
     fs.mkdir(this.logCacheDir, { recursive: true });
   }
 
+  /** Loads the most recent block. After this, we're ready to process logs. */
   async init() {
     this.lastBlock = await this.loadLastBlock();
+    this.lockLogProcessing = false;
   }
 
   getLastBlock() {
@@ -94,21 +105,36 @@ export class ViemClient {
   }
 
   async processLogsToLatestBlock() {
+    if (this.lockLogProcessing) {
+      console.log("[CHAIN] SKIPPING, logs processing locked");
+    }
+    this.lockLogProcessing = true;
+
+    try {
+      await this.tryProcessLogsToLatestBlock();
+    } catch (e) {
+      console.log("[CHAIN] error processing logs", e);
+    } finally {
+      this.lockLogProcessing = false;
+    }
+  }
+
+  private async tryProcessLogsToLatestBlock() {
     const oldTipNum = this.lastBlock.number;
     const newTip = await this.loadLastBlock();
     const newTipNum = newTip.number;
-    if (newTipNum === oldTipNum) {
+    if (newTipNum <= oldTipNum) {
       console.log(`[CHAIN] logs already caught up to ${newTipNum}`);
       return;
     }
-    console.log(`[CHAIN] processing logs ${oldTipNum}-${newTipNum}`);
+    console.log(`[CHAIN] processing logs ${oldTipNum + 1n}-${newTipNum}`);
 
     const promises = this.logFilters.map((filter) =>
-      this.processLogs(filter, oldTipNum, newTipNum)
+      this.processLogs(filter, oldTipNum + 1n, newTipNum)
     );
     await Promise.all(promises);
 
-    console.log(`[CHAIN] logs caught up to ${newTip}`);
+    console.log(`[CHAIN] logs caught up to ${newTipNum}`);
     this.lastBlock = newTip;
   }
 

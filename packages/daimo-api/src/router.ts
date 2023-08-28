@@ -188,6 +188,7 @@ export function createRouter(
       .query(async (opts) => {
         const { sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
+        console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
 
         // Get latest finalized block. Future account sync will be since that.
         const finBlock = await vc.publicClient.getBlock({
@@ -203,7 +204,7 @@ export function createRouter(
         // Get the latest block + current balance.
         const lastBlk = vc.getLastBlock();
         if (lastBlk == null) throw new Error("No latest block");
-        const lastBlock = Number(lastBlk);
+        const lastBlock = Number(lastBlk.number);
         const lastBlockTimestamp = Number(lastBlk.timestamp);
         const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 

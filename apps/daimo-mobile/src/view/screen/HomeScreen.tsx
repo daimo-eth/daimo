@@ -55,7 +55,7 @@ export default function HomeScreen() {
         onShowFull={() => setIsHistoryOpened(true)}
         animation="spring"
         extraMarginTop={0}
-        swipeHeight={192}
+        swipeHeight={256}
       />
     </View>
   );
