@@ -48,8 +48,7 @@ async function main() {
 
   console.log(`[API] serving...`);
   const router = createRouter(
-    vc.l1Client,
-    vc.publicClient,
+    vc,
     coinIndexer,
     noteIndexer,
     opIndexer,

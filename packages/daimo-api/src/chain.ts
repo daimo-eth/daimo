@@ -64,7 +64,10 @@ type LogCallback<E extends AbiEvent | undefined> = (
 ) => void | Promise<void>;
 
 export class ViemClient {
-  private lastBlockNum = 0n;
+  private lastBlock: { number: bigint; timestamp: bigint } = {
+    number: 0n,
+    timestamp: 0n,
+  };
   private logFilters: LogFilter<any>[] = [];
   private logCacheDir = path.join(os.homedir(), ".daimo", "logs");
 
@@ -77,30 +80,36 @@ export class ViemClient {
   }
 
   async init() {
-    this.lastBlockNum = await this.getTipNumber();
+    this.lastBlock = await this.loadLastBlock();
   }
 
-  private async getTipNumber() {
+  getLastBlock() {
+    return this.lastBlock;
+  }
+
+  private async loadLastBlock() {
     const latest = await this.publicClient.getBlock({ blockTag: "latest" });
     if (latest.number == null) throw new Error("Missing block number");
-    return latest.number;
+    return latest;
   }
 
   async processLogsToLatestBlock() {
-    const newTip = await this.getTipNumber();
-    if (newTip === this.lastBlockNum) {
-      console.log(`[CHAIN] logs already caught up to ${newTip}`);
+    const oldTipNum = this.lastBlock.number;
+    const newTip = await this.loadLastBlock();
+    const newTipNum = newTip.number;
+    if (newTipNum === oldTipNum) {
+      console.log(`[CHAIN] logs already caught up to ${newTipNum}`);
       return;
     }
-    console.log(`[CHAIN] processing logs ${this.lastBlockNum}-${newTip}`);
+    console.log(`[CHAIN] processing logs ${oldTipNum}-${newTipNum}`);
 
     const promises = this.logFilters.map((filter) =>
-      this.processLogs(filter, this.lastBlockNum, newTip)
+      this.processLogs(filter, oldTipNum, newTipNum)
     );
     await Promise.all(promises);
 
     console.log(`[CHAIN] logs caught up to ${newTip}`);
-    this.lastBlockNum = newTip;
+    this.lastBlock = newTip;
   }
 
   async loadLogs<E extends AbiEvent | undefined>(
@@ -111,7 +120,7 @@ export class ViemClient {
     const id = `logs-${getFilterName(filter)}-${fromBlock}-${toBlock}`;
 
     // Cache old logs
-    const blocksBehind = this.lastBlockNum - toBlock;
+    const blocksBehind = this.lastBlock.number - toBlock;
     const shouldCache = blocksBehind > 1000;
     if (shouldCache) {
       try {
@@ -157,24 +166,38 @@ export class ViemClient {
     }
   }
 
+  /**
+   * Pipes all onchain event logs matching a given filter to a callback.
+   *
+   * The promise resolves after the initial sync up to the current lastBlock.
+   *
+   * The callback will keep being called on each new block with matching logs.
+   */
   async pipeLogs<E extends AbiEvent | undefined>(
     args: { address?: Address; event: E },
     callback: (
       logs: GetLogsReturnType<E, E extends AbiEvent ? [E] : undefined, true>
     ) => void | Promise<void>
   ) {
-    const filter = { ...args, callback };
+    const filter: LogFilter<E> = { ...args, callback };
 
-    let fromBlock = 0n;
-    if (this.publicClient.chain.id === baseGoerli.id) {
-      fromBlock = args.event == null ? 7000000n : 5000000n;
-    }
+    // Catch up to latest block
+    const isTestnet = this.publicClient.chain.id === baseGoerli.id;
+    const startBlock = isTestnet ? 8750000n : 0n;
+    const lastBlockNum = this.lastBlock.number;
     const step = 5000n;
-    for (; fromBlock < this.lastBlockNum; fromBlock += step) {
+    for (
+      let fromBlock = startBlock;
+      fromBlock < lastBlockNum;
+      fromBlock += step
+    ) {
       let toBlock = fromBlock + step;
-      if (toBlock > this.lastBlockNum) toBlock = this.lastBlockNum;
+      if (toBlock > lastBlockNum) toBlock = lastBlockNum;
       await this.processLogs(filter, fromBlock, toBlock);
     }
+
+    // Follow future blocks
+    this.logFilters.push(filter);
   }
 }
 

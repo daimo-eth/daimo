@@ -1,13 +1,13 @@
 import {
-  DAccount,
+  DaimoAccountCall,
   DaimoRequestStatus,
+  EAccount,
   TransferLogSummary,
   dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
   zAddress,
   zHex,
-  DaimoAccountCall,
 } from "@daimo/common";
 import {
   ephemeralNotesAddress,
@@ -15,17 +15,11 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import {
-  Address,
-  PublicClient,
-  Transport,
-  encodeFunctionData,
-  getAddress,
-} from "viem";
-import { baseGoerli } from "viem/chains";
+import { Address, encodeFunctionData, getAddress } from "viem";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
+import { ViemClient } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -37,8 +31,7 @@ import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router, timedProcedure } from "./trpc";
 
 export function createRouter(
-  l1Client: PublicClient,
-  l2Client: PublicClient<Transport, typeof baseGoerli>,
+  vc: ViemClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   opIndexer: OpIndexer,
@@ -54,7 +47,6 @@ export function createRouter(
       .query(async (opts) => {
         const { prefix } = opts.input;
 
-        // TODO: replace "DAccount" with EAccount/DAccount
         // Search for "vitalik" or "vitalik.eth" matches vitalik.eth
         // Search for "jesse.cb.id" matches jesse.cb.id
         async function tryGetEnsAddr() {
@@ -63,24 +55,25 @@ export function createRouter(
             const ensName = normalize(
               prefix.includes(".") ? prefix : prefix + ".eth"
             );
-            return {
-              name: ensName,
-              addr: await l1Client.getEnsAddress({ name: ensName }),
-            } as DAccount; // TODO: EAccount
+            const addr = await vc.l1Client.getEnsAddress({ name: ensName });
+            if (addr == null) return null;
+            return { ensName, addr } as EAccount;
           } catch (e) {
             console.log(`[API] ens lookup '{ensName}' failed: ${e}`);
             return null;
           }
         }
 
-        const [ret, ens] = await Promise.all([
+        const ret: EAccount[] = [];
+        const [daimoAccounts, ensAccount] = await Promise.all([
           nameReg.search(prefix),
           tryGetEnsAddr(),
         ]);
-        if (ens) {
+        ret.push(...daimoAccounts);
+        if (ensAccount) {
           let insertAt = 0;
           if (ret[0] && ret[0].name === prefix) insertAt = 1;
-          ret.splice(insertAt, 0, ens);
+          ret.splice(insertAt, 0, ensAccount);
         }
 
         console.log(`[API] search: ${ret.length} results for '${prefix}'`);
@@ -196,8 +189,10 @@ export function createRouter(
         const { sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
 
-        // Get latest finalize block. Future account sync will be since that.
-        const finBlock = await l2Client.getBlock({ blockTag: "finalized" });
+        // Get latest finalized block. Future account sync will be since that.
+        const finBlock = await vc.publicClient.getBlock({
+          blockTag: "finalized",
+        });
         if (finBlock.number == null) throw new Error("No finalized block");
         if (finBlock.number < sinceBlockNum) {
           console.log(
@@ -206,9 +201,9 @@ export function createRouter(
         }
 
         // Get the latest block + current balance.
-        const lastBlk = await l2Client.getBlock({ blockTag: "latest" });
-        if (lastBlk.number == null) throw new Error("No latest block");
-        const lastBlock = Number(lastBlk.number);
+        const lastBlk = vc.getLastBlock();
+        if (lastBlk == null) throw new Error("No latest block");
+        const lastBlock = Number(lastBlk);
         const lastBlockTimestamp = Number(lastBlk.timestamp);
         const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
