@@ -15,3 +15,6 @@ forge script script/DeployNameRegistry.s.sol --fork-url $RPC_URL --private-key $
 
 # Deploy Ephemeral Notes using Test USDC
 forge script script/DeployEphemeralNotes.s.sol --sig "run(address)" "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+
+# Deploy test Account and verify it on Etherscan
+forge script script/DeployTestAccount.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
