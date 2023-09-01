@@ -49,8 +49,9 @@ export function SendNoteButton({
   const [account] = useAccount();
   assert(account != null);
 
-  const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.CreateNote);
-  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), []);
+  const [nonce] = useState(
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
+  );
 
   const { status, message, cost, exec } = useSendAsync({
     enclaveKeyName: account.enclaveKeyName,
@@ -65,13 +66,22 @@ export function SendNoteButton({
       to: ephemeralNotesAddress,
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
-      nonceMetadata: nonceMetadata.toHex(),
+      nonceMetadata: nonce.metadata.toHex(),
     },
   });
+
+  const sendDisabledReason =
+    account.lastBalance < dollarsToAmount(cost.totalDollars)
+      ? "Insufficient funds"
+      : undefined;
+  const sendDisabled = sendDisabledReason != null || dollars === 0;
 
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
+        if (sendDisabledReason != null) {
+          return <TextError>{sendDisabledReason}</TextError>;
+        }
         return `Works like cash, redeemable by recipient\n${
           dollars <= 0
             ? ""
@@ -135,7 +145,7 @@ export function SendNoteButton({
             type="primary"
             title="Create Payment Link"
             onPress={exec}
-            disabled={dollars === 0}
+            disabled={sendDisabled}
           />
         );
       case "loading":
