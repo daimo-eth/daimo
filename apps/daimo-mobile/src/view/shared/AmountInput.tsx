@@ -76,7 +76,7 @@ export function AmountInput({
       ref={innerRef}
       style={styles.amountInput}
       keyboardType="numeric"
-      placeholder={`0${amountSeparator}00`}
+      placeholder="0"
       placeholderTextColor={color.gray}
       numberOfLines={1}
       autoFocus={autoFocus == null ? true : autoFocus}

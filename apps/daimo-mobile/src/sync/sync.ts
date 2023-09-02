@@ -64,7 +64,7 @@ function maybeSync(fromScratch?: boolean) {
 /** Gets latest balance & history for this account, in the background. */
 export function resync(reason: string, fromScratch?: boolean) {
   const { currentAccount, setCurrentAccount } = getAccountManager();
-  assert(currentAccount != null, "no account");
+  assert(currentAccount != null, `no account, skipping sync: ${reason}`);
 
   console.log(`[SYNC] RESYNC ${currentAccount.name}, ${reason}`);
   lastSyncS = Date.now() / 1e3;
