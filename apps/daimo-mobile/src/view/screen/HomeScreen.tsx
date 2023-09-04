@@ -105,7 +105,7 @@ function IconButton({
   })();
 
   const icon = <Octicons name={name} size={24} color={color.white} />;
-  const titleText = <TextCenter>{title}</TextCenter>;
+  const titleText = <TextCenter numberOfLines={1}>{title}</TextCenter>;
   const handlePress = disabled ? undefined : onPress;
   return (
     <TouchableHighlight

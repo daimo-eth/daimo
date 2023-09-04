@@ -11,6 +11,7 @@ import {
   Share,
   StyleSheet,
   Text,
+  TextStyle,
   View,
 } from "react-native";
 
@@ -91,10 +92,11 @@ export function SettingsScreen() {
         <View>
           <TextLight>
             {account.address}
-            {` \u00A0 `}
+            {`\u00A0\u00A0`}
             <Octicons name="link-external" size={16} />
-            {` \u00A0 `}
-            View on {explorer.name}
+            {`\u00A0\u00A0`}
+            View{`\u00A0`}on{`\u00a0`}
+            {explorer.name}
           </TextLight>
         </View>
       </ButtonSmall>
@@ -121,9 +123,8 @@ function DevicesInfo({ account }: { account: Account }) {
 
   return (
     <>
-      <View style={styles.keyValueList}>
+      <View style={ss.container.padH16}>
         <TextH3>Devices</TextH3>
-        <Spacer h={8} />
         {account.accountKeys
           .filter((k) => k.removedAt === undefined)
           .map((keyData) => (
@@ -134,7 +135,7 @@ function DevicesInfo({ account }: { account: Account }) {
             />
           ))}
       </View>
-      <Spacer h={16} />
+      <Spacer h={8} />
       <View style={ss.container.padH16}>
         <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
       </View>
@@ -157,13 +158,14 @@ function DeviceRow({
   return (
     <ButtonSmall onPress={viewDevice}>
       <View style={styles.deviceDataRow}>
-        <TextBold>
-          Device {keySlotToDeviceIdentifier(keyData.slot)}
-          {isCurrentDevice ? " (Current device)" : " "}
-        </TextBold>
-        <TextBold>
+        <TextBody>
+          <TextBold>Device {keySlotToDeviceIdentifier(keyData.slot)}</TextBold>
+          {isCurrentDevice && <TextBody>{"\u00A0"} current device</TextBody>}
+        </TextBody>
+
+        <TextBody>
           {timeAgo(guessTimestampFromNum(keyData.addedAt), nowS)}
-        </TextBold>
+        </TextBody>
       </View>
     </ButtonSmall>
   );
@@ -272,9 +274,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   deviceDataRow: {
+    marginHorizontal: -16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8,
   },
 });
