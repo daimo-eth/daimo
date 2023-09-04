@@ -190,7 +190,7 @@ export function createRouter(
         const address = getAddress(opts.input.address);
         console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
 
-        // Get latest finalized block. Future account sync will be since that.
+        // Get latest finalized block. Next account sync, fetch since this block.
         const finBlock = await vc.publicClient.getBlock({
           blockTag: "finalized",
         });
@@ -208,6 +208,9 @@ export function createRouter(
         const lastBlockTimestamp = Number(lastBlk.timestamp);
         const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
+        // TODO: get userops, including reverted ones. Show failed sends.
+
+        // Get successful transfers since sinceBlockNum
         const rawLogs = coinIndexer.filterTransfers({
           addr: address,
           sinceBlockNum: BigInt(sinceBlockNum),
