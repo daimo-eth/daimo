@@ -16,10 +16,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   View,
-  KeyboardAvoidingView,
 } from "react-native";
 
 import { ScanTab } from "./ScanTab";
@@ -32,11 +32,12 @@ import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { SendAmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
+import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { Header } from "../../shared/Header";
 import Spacer from "../../shared/Spacer";
 import { HomeStackParamList, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextCenter, TextError, TextH2, TextLight } from "../../shared/text";
+import { TextCenter, TextError, TextH2 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
 
@@ -106,17 +107,16 @@ export default function SendScreen({ route }: Props) {
         </KeyboardAvoidingView>
       </ScrollView>
       {!recipient && tab === "search" && (
-        <View style={ss.container.padH16}>
-          <ButtonBig
-            type="primary"
-            title="Create Payment Link"
-            onPress={createNote}
-          />
-          <Spacer h={16} />
-          <TextLight>
-            <TextCenter>{sendViaAppStr}</TextCenter>
-          </TextLight>
-        </View>
+        <ButtonWithStatus
+          button={
+            <ButtonBig
+              type="primary"
+              title="Create Payment Link"
+              onPress={createNote}
+            />
+          }
+          status={sendViaAppStr}
+        />
       )}
       {!recipient && tab === "createNote" && (
         <SendNoteButton dollars={noteDollars} onCreated={onNoteCreated} />
@@ -256,15 +256,7 @@ function SendButton({
     nav.navigate("Home");
   }, [status]);
 
-  return (
-    <View style={ss.container.padH16}>
-      {button}
-      <Spacer h={16} />
-      <TextLight>
-        <TextCenter>{statusMessage}</TextCenter>
-      </TextLight>
-    </View>
-  );
+  return <ButtonWithStatus button={button} status={statusMessage} />;
 }
 
 const styles = StyleSheet.create({

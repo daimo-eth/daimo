@@ -7,7 +7,7 @@ import {
 } from "@daimo/userop";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { ReactNode, useMemo, useState } from "react";
-import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
@@ -119,9 +119,7 @@ export function AddDeviceScreen() {
           {button}
           <Spacer h={32} />
           <TextCenter>
-            <TextLight>
-              <TextCenter>{statusMessage}</TextCenter>
-            </TextLight>
+            <TextLight>{statusMessage}</TextLight>
           </TextCenter>
         </>
       )}

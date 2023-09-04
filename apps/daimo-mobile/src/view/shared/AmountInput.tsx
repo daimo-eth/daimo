@@ -125,9 +125,9 @@ export function SendAmountChooser({
         <View style={ss.container.padH16}>
           <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
           <Spacer h={16} />
-          <TextLight>
-            <TextCenter>{dollarStr} available</TextCenter>
-          </TextLight>
+          <TextCenter>
+            <TextLight>{dollarStr} available</TextLight>
+          </TextCenter>
         </View>
       )}
       {dollars > 0 && (

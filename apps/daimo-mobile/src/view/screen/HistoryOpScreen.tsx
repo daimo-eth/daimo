@@ -3,7 +3,7 @@ import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
-import { Linking, StyleSheet, View, Text } from "react-native";
+import { Linking, StyleSheet, Text, View } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
 import { timeString } from "../../logic/time";
@@ -58,13 +58,13 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
 
   return (
     <ButtonSmall onPress={openURL}>
-      <TextLight numberOfLines={1}>
-        <TextCenter>
+      <TextCenter>
+        <TextLight>
           <Octicons name="link-external" size={16} />
           {` \u00A0 `}
           View on {explorer.name}
-        </TextCenter>
-      </TextLight>
+        </TextLight>
+      </TextCenter>
     </ButtonSmall>
   );
 }

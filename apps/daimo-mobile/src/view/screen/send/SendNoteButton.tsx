@@ -13,13 +13,7 @@ import {
   DaimoNonceType,
 } from "@daimo/userop";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Share,
-  ShareAction,
-  View,
-} from "react-native";
+import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
@@ -27,10 +21,9 @@ import { useSendAsync } from "../../../action/useSendAsync";
 import { useAccount } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import Spacer from "../../shared/Spacer";
+import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useNav } from "../../shared/nav";
-import { ss } from "../../shared/style";
-import { TextCenter, TextError, TextLight } from "../../shared/text";
+import { TextError } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function SendNoteButton({
@@ -167,13 +160,5 @@ export function SendNoteButton({
     if (status === "success") onCreated();
   }, [status]);
 
-  return (
-    <View style={ss.container.padH16}>
-      {button}
-      <Spacer h={8} />
-      <TextLight>
-        <TextCenter>{statusMessage}</TextCenter>
-      </TextLight>
-    </View>
-  );
+  return <ButtonWithStatus button={button} status={statusMessage} />;
 }

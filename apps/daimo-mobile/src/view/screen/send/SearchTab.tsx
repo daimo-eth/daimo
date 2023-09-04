@@ -32,9 +32,9 @@ export function SearchTab() {
 
 function ErrorRow({ error }: { error: { message: string } }) {
   return (
-    <TextError>
-      <TextCenter>{error.message}</TextCenter>
-    </TextError>
+    <TextCenter>
+      <TextError>{error.message}</TextError>
+    </TextCenter>
   );
 }
 

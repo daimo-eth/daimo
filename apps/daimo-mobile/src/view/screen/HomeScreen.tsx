@@ -105,21 +105,22 @@ function IconButton({
   })();
 
   const icon = <Octicons name={name} size={24} color={color.white} />;
-  const titleText = <TextCenter numberOfLines={1}>{title}</TextCenter>;
   const handlePress = disabled ? undefined : onPress;
   return (
     <TouchableHighlight
       onPress={handlePress}
       {...touchHighlightUnderlay.blue}
-      style={styles.iconButton}
+      style={styles.iconButtonHighlight}
     >
       <View>
         <ButtonBig type="primary" disabled={disabled} onPress={handlePress}>
           <TextCenter>{icon}</TextCenter>
         </ButtonBig>
         <Spacer h={8} />
-        {disabled && <TextLight>{titleText}</TextLight>}
-        {!disabled && <TextBody>{titleText}</TextBody>}
+        <View style={styles.iconButtonLabel}>
+          {disabled && <TextLight>{title}</TextLight>}
+          {!disabled && <TextBody>{title}</TextBody>}
+        </View>
       </View>
     </TouchableHighlight>
   );
@@ -139,10 +140,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 20,
   },
-  iconButton: {
-    flexGrow: 1,
+  iconButtonHighlight: {
     borderRadius: 16,
     padding: 12,
+    width: 112,
+  },
+  iconButtonLabel: {
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   historyScroll: {
     paddingTop: 32,

@@ -250,12 +250,12 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
         </TextH1>
         <Spacer h={32} />
         <View style={ss.container.padH16}>
-          <TextBody>
-            <TextCenter>
+          <TextCenter>
+            <TextBody>
               You'll be notified only for account activity. For example, when
               you receive money.
-            </TextCenter>
-          </TextBody>
+            </TextBody>
+          </TextCenter>
         </View>
         <Spacer h={32} />
         <ButtonBig
@@ -345,11 +345,11 @@ function UseExistingPage({
       <View style={styles.useExistingPage}>
         <TextH1>Welcome</TextH1>
         <Spacer h={32} />
-        <TextBody>
-          <TextCenter>
+        <TextCenter>
+          <TextBody>
             Scan QR code from the Settings page of existing device
-          </TextCenter>
-        </TextBody>
+          </TextBody>
+        </TextCenter>
         <Spacer h={32} />
         <View style={styles.vertQR}>
           <QRCode
@@ -433,9 +433,9 @@ function NamePicker({
         center
       />
       <Spacer h={8} />
-      <TextLight>
-        <TextCenter>{status}</TextCenter>
-      </TextLight>
+      <TextCenter>
+        <TextLight>{status}</TextLight>
+      </TextCenter>
       <Spacer h={8} />
       <ButtonBig
         type="primary"

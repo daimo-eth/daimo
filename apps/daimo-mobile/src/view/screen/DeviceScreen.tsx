@@ -7,7 +7,7 @@ import {
 } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
-import { View, Alert, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
@@ -138,20 +138,16 @@ export function DeviceScreen({ route, navigation }: Props) {
           <Spacer h={16} />
         </>
       )}
-      <TextBody>
-        <TextCenter>
+      <TextCenter>
+        <TextBody>
           Added at {timeString(guessTimestampFromNum(device.addedAt))}
-        </TextCenter>
-      </TextBody>
-      <Spacer h={16} />
-      {/* <TextCenter>Last used at ??? (TODO)</TextCenter> */}
+        </TextBody>
+      </TextCenter>
       <Spacer h={16} />
       {button}
       <Spacer h={16} />
       <TextCenter>
-        <TextLight>
-          <TextCenter>{statusMessage}</TextCenter>
-        </TextLight>
+        <TextLight>{statusMessage}</TextLight>
       </TextCenter>
     </View>
   );

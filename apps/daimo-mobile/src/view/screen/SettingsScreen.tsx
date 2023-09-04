@@ -11,7 +11,6 @@ import {
   Share,
   StyleSheet,
   Text,
-  TextStyle,
   View,
 } from "react-native";
 

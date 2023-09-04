@@ -196,9 +196,9 @@ function NoteDisplay({
       </TextCenter>
       <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
       {button}
-      <TextLight>
-        <TextCenter>{statusMessage}</TextCenter>
-      </TextLight>
+      <TextCenter>
+        <TextLight>{statusMessage}</TextLight>
+      </TextCenter>
     </>
   );
 }
