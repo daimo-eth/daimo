@@ -6,7 +6,6 @@ export const zAddress = z
   .regex(/^0x[0-9a-f]{40}$/i)
   .refine((s): s is Address => true);
 
-// TODO: renamed to EAccount = superset of Daimo accounts, DAccount
 export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
@@ -57,6 +56,7 @@ export const zDollarStr = z
   .regex(/^\d+(\.\d+)?$/i)
   .refine((s): s is DollarStr => true);
 
+// TODO: use this in place of string / `${number}` everywhere applicable
 export type DollarStr = `${number}`;
 
 export const zTransferLogSummary = z.object({

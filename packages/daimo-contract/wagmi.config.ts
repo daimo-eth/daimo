@@ -19,5 +19,7 @@ const deployments = Object.fromEntries(
 
 export default defineConfig({
   out: "src/generated.ts",
-  plugins: [foundry({ project: "../contract", deployments })],
+  plugins: [
+    foundry({ project: "../contract", deployments, exclude: ["test"] }),
+  ],
 });

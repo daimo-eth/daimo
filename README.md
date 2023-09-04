@@ -16,6 +16,22 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 Store open testing.
 
 <details>
+<summary><strong>Architecture</strong></summary>
+<img src="/doc/architecture.excalidraw.svg" />
+
+**READMEs for each app and package.**
+
+- [apps/daimo-mobile](apps/daimo-mobile) mobile app. Typescript + Expo
+- [apps/daimo-web](apps/daimo-web) web app, including deep links. Typescript + NextJS
+- [packages/contract](packages/contract) contracts, Solidity + Forge
+- [packages/daimo-api](packages/daimo-api) API, including indexer. Typescript + Node
+- [packages/daimo-common](packages/daimo-common) data models common to clients and API. Typescript
+- [packages/daimo-expo-enclave](packages/daimo-expo-enclave) hardware enclave interface. Typescript, Kotlin, Swift + Expo native module
+- [packages/daimo-userop](packages/daimo-userop) account abstraction interface. Typescript
+
+</details>
+
+<details>
 <summary><strong>Quick start for developers</strong></summary>
 
 Clone the repo, loading submodules.

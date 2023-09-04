@@ -15,5 +15,8 @@
   ],
   "[solidity]": {
     "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "[kotlin]": {
+    "editor.defaultFormatter": "esafirm.kotlin-formatter"
   }
 }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
+// TODO: delete, use real fake Base Goerli USDC for paymaster compatibility
 contract TestUSDC is ERC20 {
     constructor() ERC20("testUSDC", "USDC") {
         _mint(msg.sender, 1e12); // $1,000,000

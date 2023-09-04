@@ -13,14 +13,12 @@ export type BiometricPromptCopy = {
   /**
    * Message displayed when prompting for biometric authentication,
    * rendered on both iOS and Android devices.
-   *
    */
   usageMessage: string;
 
   /**
    * Title of the biometric prompt, only rendered on Android
    * devices.
-   *
    */
   androidTitle: string;
 };

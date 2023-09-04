@@ -28,7 +28,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { PushNotifier } from "./pushNotifier";
-import { publicProcedure, router, timedProcedure } from "./trpc";
+import { publicProcedure, router } from "./trpc";
 
 export function createRouter(
   vc: ViemClient,
@@ -288,7 +288,7 @@ export function createRouter(
         notifier.register(address, token);
       }),
 
-    deployWallet: timedProcedure
+    deployWallet: publicProcedure
       .input(
         z.object({
           name: z.string(),

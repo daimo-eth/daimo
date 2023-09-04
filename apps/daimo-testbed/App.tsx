@@ -3,8 +3,8 @@ import {
   DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
-  SigningCallback,
   DaimoNonceType,
+  SigningCallback,
 } from "@daimo/userop";
 import { useState } from "react";
 import {
@@ -15,8 +15,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { createPublicClient, http } from "viem";
-import { baseGoerli } from "viem/chains";
 
 export default function App() {
   const [account, setAccount] = useState<string>("testdaimo");
@@ -49,7 +47,10 @@ export default function App() {
         message,
         biometricPromptCopy
       );
-      return signature;
+      return {
+        derSig: signature,
+        keySlot: 0,
+      };
     };
     console.log(
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",

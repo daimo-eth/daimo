@@ -11,6 +11,7 @@ import Foundation
 import CryptoKit
 import Security
 
+// TODO: change when we update the account contract? just com.daimo
 let KEYCHAIN_STORE_PREFIX = "com.daimoeth.daimo."
 
 struct GenericPasswordStore {

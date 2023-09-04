@@ -21,5 +21,4 @@ const timerMiddleware = t.middleware(async (opts) => {
   return result;
 });
 
-export const publicProcedure = t.procedure;
-export const timedProcedure = publicProcedure.use(timerMiddleware);
+export const publicProcedure = t.procedure.use(timerMiddleware);

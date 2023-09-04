@@ -88,6 +88,7 @@ class PushNotificationManager {
       throw new Error("No account");
     }
 
+    // TODO: environment variable
     const token = await Notifications.getExpoPushTokenAsync({
       projectId: "1eff7c6e-e88b-4e35-8b31-eab7e6814904",
     });

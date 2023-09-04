@@ -23,6 +23,9 @@ struct Call {
  * Daimo account.
  *  has execute, eth handling methods
  *  has many P256 account keys that can send requests through the entryPoint.
+ *
+ * TODO: doc comments
+ * TODO: _authorizeUpgrade
  */
 contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     uint8 public numActiveKeys;

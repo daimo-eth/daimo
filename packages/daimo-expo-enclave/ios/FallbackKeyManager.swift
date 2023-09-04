@@ -8,6 +8,9 @@
 //  FallbackKeyManager is our interface to in-memory keys.
 //  It creates private keys which are stored in the keychain but 
 //  processed in memory for signing and verifying messages.
+//
+// TODO: key lives in keychain. How do we make sure other apps can't access?
+// TODO: show system auth prompt when signing
 
 import CryptoKit
 import LocalAuthentication

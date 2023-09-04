@@ -5,6 +5,7 @@ apply plugin: 'maven-publish'
 group = 'expo.modules.enclave'
 version = '0.1.0'
 
+// TODO: doc comments. why do we need this?
 buildscript {
   def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
   if (expoModulesCorePlugin.exists()) {

@@ -22,6 +22,8 @@ import android.os.Build
 import android.content.pm.PackageManager
 import expo.modules.core.arguments.ReadableArguments
 
+// TODO: key lives in non-HW keystore. How do we make sure other apps can't access?
+// TODO: show system auth prompt when signing
 class FallbackKeyManager: KeyManager {
   internal fun createSigningPrivkey(accountName: String) {
     var params = KeyGenParameterSpec.Builder(accountName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)

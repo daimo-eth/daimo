@@ -1,6 +1,7 @@
 import ExpoModulesCore
 import CryptoKit
 
+// TODO: doc comments
 public class ExpoEnclaveModule: Module {
   internal static func shouldUseSecureEnclave() -> Bool {
     return TARGET_OS_SIMULATOR == 0 && SecureEnclave.isAvailable

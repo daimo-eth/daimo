@@ -21,6 +21,7 @@ import expo.modules.core.Promise
 import expo.modules.core.arguments.ReadableArguments
 import java.util.concurrent.atomic.AtomicInteger
 
+// TODO: doc comments
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
   if (incompleteSignature == null) {

@@ -8,8 +8,8 @@ import {
   DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
-  SigningCallback,
   DaimoNonceType,
+  SigningCallback,
 } from "@daimo/userop";
 import crypto from "node:crypto";
 import { Constants } from "userop";

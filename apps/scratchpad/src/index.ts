@@ -3,8 +3,7 @@
 import { AppRouter } from "@daimo/api";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import csv from "csvtojson";
-import { createPublicClient, numberToHex, webSocket } from "viem";
-import { baseGoerli } from "viem/chains";
+import { numberToHex } from "viem";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";

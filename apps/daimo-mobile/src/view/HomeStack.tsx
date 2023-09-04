@@ -14,7 +14,6 @@ import CreateRequestScreen from "./screen/receive/CreateRequestScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
 import SendRequestScreen from "./screen/receive/SendRequestScreen";
 import SendScreen from "./screen/send/SendScreen";
-import WithdrawScreen from "./screen/send/WithdrawScreen";
 import { HomeStackParamList } from "./shared/nav";
 import { useAccount } from "../model/account";
 
@@ -42,7 +41,6 @@ export function HomeStackNav() {
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="Settings" component={SettingsScreen} />
         <HomeStack.Screen name="Deposit" component={DepositScreen} />
-        <HomeStack.Screen name="Withdraw" component={WithdrawScreen} />
         <HomeStack.Screen
           name="Note"
           options={{ headerTitle: "Payment Link" }}

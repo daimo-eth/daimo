@@ -27,6 +27,7 @@ export type UserOpHandle = Awaited<
   ReturnType<typeof DaimoAccount.prototype.sendUserOp>
 >;
 
+// TODO: consider renaming?
 export class DaimoAccount {
   private dryRun = false;
   private client: Client;
@@ -55,6 +56,7 @@ export class DaimoAccount {
     this.notesAddress = _notesAddress;
   }
 
+  // TODO: pass in RPC URLs
   public static async init(
     deployedAddress: Address,
     signer: SigningCallback,

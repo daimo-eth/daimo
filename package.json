@@ -10,6 +10,7 @@
     "build:mobile": "turbo run build --filter @daimo/mobile",
     "test": "turbo test",
     "lint": "turbo lint && syncpack list-mismatches",
+    "codegen": "turbo codegen",
     "fix:deps": "syncpack fix-mismatches"
   },
   "dependencies": {
