@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/P256SHA256.sol";
+import "../src/DaimoP256SHA256.sol";
 
 contract DeployScript is Script {
     function setUp() public {}

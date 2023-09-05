@@ -3,9 +3,9 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/P256SHA256.sol";
-import "../src/AccountFactory.sol";
-import "../src/Account.sol";
+import "../src/DaimoP256SHA256.sol";
+import "../src/DaimoAccountFactory.sol";
+import "../src/DaimoAccount.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 

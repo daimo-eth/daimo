@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/NameRegistry.sol";
+import "../src/DaimoNameRegistry.sol";
 
 contract DeployNameRegistryScript is Script {
     function run() public {

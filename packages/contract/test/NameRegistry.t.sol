@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/NameRegistry.sol";
+import "../src/DaimoNameRegistry.sol";
 
 contract NameRegistryTest is Test {
     NameRegistry public registry;

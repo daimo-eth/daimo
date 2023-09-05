@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/TestUSDC.sol";
+import "../src/DaimoTestUSDC.sol";
 
 contract DeployTestUSDCScript is Script {
     function run() public {

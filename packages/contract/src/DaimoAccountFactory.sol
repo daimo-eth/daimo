@@ -4,7 +4,7 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/utils/Create2.sol";
 import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import "./Account.sol";
+import "./DaimoAccount.sol";
 
 /**
  * A sample factory contract for Account

@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/P256SHA256.sol";
+import "../src/DaimoP256SHA256.sol";
 
 contract P256SHA256Test is Test {
     P256SHA256 public verifier;

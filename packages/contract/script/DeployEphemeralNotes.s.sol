@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/EphemeralNotes.sol";
+import "../src/DaimoEphemeralNotes.sol";
 
 contract DeployEphemeralNotesScript is Script {
     function run(IERC20 token) public {

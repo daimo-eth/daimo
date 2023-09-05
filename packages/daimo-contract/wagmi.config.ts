@@ -20,6 +20,10 @@ const deployments = Object.fromEntries(
 export default defineConfig({
   out: "src/generated.ts",
   plugins: [
-    foundry({ project: "../contract", deployments, exclude: ["test"] }),
+    foundry({
+      project: "../contract",
+      deployments,
+      include: ["Daimo*.sol/*", "ERC*.sol/*", "EntryPoint.sol/*"],
+    }),
   ],
 });

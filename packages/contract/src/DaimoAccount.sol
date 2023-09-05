@@ -11,7 +11,7 @@ import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "account-abstraction/core/BaseAccount.sol";
 
-import "./P256SHA256.sol";
+import "./DaimoP256SHA256.sol";
 
 struct Call {
     address dest;
