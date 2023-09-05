@@ -58,8 +58,13 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
     var secretKey = keyPairGenerator.generateKeyPair().private
     var keyFactory = KeyFactory.getInstance(secretKey.getAlgorithm(), KEYSTORE_PROVIDER)
     var keyInfo = keyFactory.getKeySpec(secretKey, KeyInfo::class.java)
-    
-    return keyInfo.getSecurityLevel() == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      // isInsideSecureHardware is deprecated by API Level 31 (S)
+      return keyInfo.getSecurityLevel() == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT    
+    } else {
+      return keyInfo.isInsideSecureHardware()
+    }
   }
 
   internal fun hasBiometrics(): Boolean {
