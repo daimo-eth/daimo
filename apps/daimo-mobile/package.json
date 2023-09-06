@@ -1,7 +1,6 @@
 {
   "private": true,
   "name": "@daimo/mobile",
-  "version": "0.1.0",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "build:sim": "eas build -p ios --profile=sim --non-interactive",
