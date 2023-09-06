@@ -30,7 +30,13 @@ async function main() {
   const db = new DB();
   await db.createTables();
 
-  const notifier = new PushNotifier(coinIndexer, nameReg, keyReg, db);
+  const notifier = new PushNotifier(
+    coinIndexer,
+    nameReg,
+    noteIndexer,
+    keyReg,
+    db
+  );
 
   // Initialize in background
   (async () => {

@@ -1,4 +1,4 @@
-import { DaimoNoteStatus, amountToDollars } from "@daimo/common";
+import { DaimoNoteStatus, amountToDollars, assert } from "@daimo/common";
 import { ephemeralNotesABI, ephemeralNotesConfig } from "@daimo/contract";
 import { Address, Log, decodeEventLog, getAbiItem } from "viem";
 
@@ -35,9 +35,23 @@ export type NoteRedeemLog = Log<
   true
 >;
 
+export type NoteOpLog =
+  | {
+      type: "create";
+      noteStatus: DaimoNoteStatus;
+    }
+  | {
+      type: "claim";
+      noteStatus: DaimoNoteStatus;
+    };
+
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
   private notes: Map<Address, DaimoNoteStatus> = new Map();
+
+  private listeners: ((logs: NoteOpLog[]) => void)[] = [];
+
+  private isInitialized = false;
 
   constructor(private client: ViemClient, private nameReg: NameRegistry) {}
 
@@ -49,11 +63,19 @@ export class NoteIndexer {
       },
       this.parseLogs
     );
+    this.isInitialized = true;
+  }
+
+  addListener(listener: (log: NoteOpLog[]) => void) {
+    assert(this.isInitialized, "NoteIndexer not initialized");
+    this.listeners.push(listener);
   }
 
   private parseLogs = async (logs: Log[]) => {
     if (logs.length === 0) return;
     console.log(`[NOTE] parsing ${logs.length} logs`);
+
+    const opLogs: NoteOpLog[] = [];
 
     for (const log of logs) {
       const { topics, data } = log;
@@ -70,12 +92,15 @@ export class NoteIndexer {
         if (this.notes.get(ephemeralOwner) != null) {
           throw new Error(`dupe NoteCreated: ${ephemeralOwner} ${logInfo()}`);
         }
-        this.notes.set(ephemeralOwner, {
+        const newNote: DaimoNoteStatus = {
           status: "pending",
           dollars: amountToDollars(amount),
           link: { type: "note", ephemeralOwner },
           sender: await this.nameReg.getEAccount(from),
-        });
+        };
+        this.notes.set(ephemeralOwner, newNote);
+
+        opLogs.push({ type: "create", noteStatus: newNote });
       } else if (selector === redeemEventSelector) {
         const nr = decodeEventLog({ ...args, eventName: "NoteRedeemed" });
         const { ephemeralOwner, from, amount } = nr.args.note;
@@ -101,10 +126,17 @@ export class NoteIndexer {
         // Mark as redeemed
         note.status = redeemer === from ? "cancelled" : "claimed";
         note.claimer = await this.nameReg.getEAccount(redeemer);
+
+        opLogs.push({ type: "claim", noteStatus: { ...note } });
       } else {
         throw new Error(`unexpected event selector: ${selector}`);
       }
     }
+
+    // Finally, invoke listeners to send notifications etc.
+    const ls = this.listeners;
+    console.log(`[NOTE] ${opLogs.length} logs for ${ls.length} listeners`);
+    ls.forEach((l) => l(opLogs));
   };
 
   /** Gets unclaimed note amount, or 0 if note is claimed. */
