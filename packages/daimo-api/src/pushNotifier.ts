@@ -51,7 +51,7 @@ export class PushNotifier {
   private handleTransfers = async (logs: TransferOpEvent[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
-    this.expo.sendPushNotificationsAsync(messages);
+    this.maybeSendNotifications(messages);
   };
 
   async maybeSendNotifications(messages: ExpoPushMessage[]) {
@@ -117,7 +117,7 @@ export class PushNotifier {
 
     await Promise.all([
       this.db.savePushToken({ address: addr, pushtoken: pushToken }),
-      this.expo.sendPushNotificationsAsync([
+      this.maybeSendNotifications([
         {
           to: pushToken,
           title: "Welcome to Daimo",

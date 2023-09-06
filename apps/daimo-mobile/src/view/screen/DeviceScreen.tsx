@@ -126,7 +126,10 @@ export function DeviceScreen({ route, navigation }: Props) {
     }
   })();
 
-  const addedAtS = guessTimestampFromNum(device.slot, chainConfig.l2.network);
+  const addedAtS = guessTimestampFromNum(
+    device.addedAt,
+    chainConfig.l2.network
+  );
 
   return (
     <View style={ss.container.fullWidthModal}>
