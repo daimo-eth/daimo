@@ -4,8 +4,11 @@ import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { SetActStatus } from "./actStatus";
-import { createEnclaveKey, loadEnclaveKey } from "../logic/enclave";
-import { defaultEnclaveKeyName } from "../model/account";
+import {
+  createEnclaveKey,
+  forceWeakerKeyUsage,
+  loadEnclaveKey,
+} from "../logic/enclave";
 
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
@@ -23,10 +26,12 @@ function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
 async function createKey(
   setAS: SetActStatus,
   enclaveKeyName: string,
-  hwSecLevel: ExpoEnclave.HardwareSecurityLevel
+  hwSecLevel: ExpoEnclave.HardwareSecurityLevel,
+  forceWeakerKeys: boolean
 ) {
   setAS("idle", "Creating enclave key...");
   try {
+    if (forceWeakerKeys) await forceWeakerKeyUsage();
     const pubKeyHex = await createEnclaveKey(enclaveKeyName);
     setAS("idle", getKeySecurityMessage(hwSecLevel));
     return pubKeyHex;
@@ -37,9 +42,14 @@ async function createKey(
   }
 }
 
-async function loadKey(setAS: SetActStatus, enclaveKeyName: string) {
+async function loadKey(
+  setAS: SetActStatus,
+  enclaveKeyName: string,
+  forceWeakerKeys: boolean
+) {
   setAS("idle", "Loading enclave key...");
   try {
+    if (forceWeakerKeys) await forceWeakerKeyUsage();
     const ret = await loadEnclaveKey(enclaveKeyName);
     setAS("idle", getKeySecurityMessage(ret.hwSecLevel));
     return ret;
@@ -52,24 +62,28 @@ async function loadKey(setAS: SetActStatus, enclaveKeyName: string) {
 
 export function useLoadOrCreateEnclaveKey(
   setAS: SetActStatus,
-  enclaveKeyName = defaultEnclaveKeyName
+  enclaveKeyName: string,
+  forceWeakerKeys: boolean
 ) {
   const [pubKeyHex, setPubKeyHex] = useState<Hex>();
 
   // Load or create enclave key immediately, in the idle state
   useEffect(() => {
-    loadKey(setAS, enclaveKeyName).then((loadedKey) => {
+    loadKey(setAS, enclaveKeyName, forceWeakerKeys).then((loadedKey) => {
       console.log(`[ACTION] loaded public key ${JSON.stringify(loadedKey)}`);
       if (loadedKey && !loadedKey.pubKeyHex) {
-        createKey(setAS, enclaveKeyName, loadedKey.hwSecLevel).then(
-          (newPublicKey) => {
-            console.log(`[ACTION] created public key ${newPublicKey}`);
-            setPubKeyHex(newPublicKey);
-          }
-        );
+        createKey(
+          setAS,
+          enclaveKeyName,
+          loadedKey.hwSecLevel,
+          forceWeakerKeys
+        ).then((newPublicKey) => {
+          console.log(`[ACTION] created public key ${newPublicKey}`);
+          setPubKeyHex(newPublicKey);
+        });
       } else setPubKeyHex(loadedKey?.pubKeyHex);
     });
-  }, []);
+  }, [enclaveKeyName, forceWeakerKeys]);
 
   return pubKeyHex;
 }
