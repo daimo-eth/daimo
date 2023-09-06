@@ -10,6 +10,7 @@ import { addEventListener, getInitialURL } from "expo-linking";
 import { useEffect } from "react";
 import { Hex } from "viem";
 
+import { useAccount } from "../../model/account";
 import { Recipient, getRecipient } from "../../sync/recipients";
 
 export type HomeStackParamList = {
@@ -37,11 +38,16 @@ export function useNav() {
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
   const nav = useNav();
+  const [account] = useAccount();
+  const accountNotNull = account != null;
 
   useEffect(() => {
-    getInitialURL().then((url) => url && handleDeepLink(nav, url));
-    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
-  }, []);
+    if (accountNotNull) {
+      console.log(`[NAV] listening for deep links ${account}`);
+      getInitialURL().then((url) => url && handleDeepLink(nav, url));
+      addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    }
+  }, [accountNotNull]);
 }
 
 function handleDeepLink(
