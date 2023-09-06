@@ -2,7 +2,6 @@ import {
   DaimoAccountCall,
   DaimoRequestStatus,
   EAccount,
-  TransferLogSummary,
   dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
@@ -134,11 +133,11 @@ export function createRouter(
             const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
             const fulfillTxes = relevantTransfers.filter(
               (t) =>
-                t.args.to === link.recipient && t.args.value === expectedAmount
+                t.to === link.recipient && BigInt(t.amount) === expectedAmount
             );
             const fulfilledBy =
               fulfillTxes.length > 0
-                ? await nameReg.getEAccount(fulfillTxes[0].args.from)
+                ? await nameReg.getEAccount(fulfillTxes[0].from)
                 : undefined;
 
             const ret: DaimoRequestStatus = {
@@ -211,43 +210,14 @@ export function createRouter(
         // TODO: get userops, including reverted ones. Show failed sends.
 
         // Get successful transfers since sinceBlockNum
-        const rawLogs = coinIndexer.filterTransfers({
+        const transferLogs = coinIndexer.filterTransfers({
           addr: address,
           sinceBlockNum: BigInt(sinceBlockNum),
         });
 
         console.log(
-          `[API] getAccountHist: ${rawLogs.length} logs for ${address} since ${sinceBlockNum}`
+          `[API] getAccountHist: ${transferLogs.length} logs for ${address} since ${sinceBlockNum}`
         );
-
-        const transferLogs = rawLogs.map((log) => {
-          const { blockNumber, blockHash, logIndex, transactionHash } = log;
-          const { from, to, value } = log.args;
-          const nonceMetadata = opIndexer.fetchNonceMetadata(
-            transactionHash,
-            log.logIndex
-          );
-
-          if (
-            blockNumber == null ||
-            blockHash == null ||
-            logIndex == null ||
-            transactionHash == null
-          ) {
-            throw new Error(`pending log ${JSON.stringify(log)}`);
-          }
-
-          return {
-            from,
-            to,
-            amount: `${value}`,
-            blockNum: Number(blockNumber),
-            blockHash,
-            txHash: transactionHash,
-            logIndex,
-            nonceMetadata,
-          } as TransferLogSummary;
-        });
 
         // Get named accounts
         const addrs = new Set<Address>();

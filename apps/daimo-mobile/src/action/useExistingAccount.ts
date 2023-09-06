@@ -2,8 +2,8 @@ import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
-import { useTime } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
+import { useTime } from "../logic/useTime";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
 export function useExistingAccount(forceWeakerKeys: boolean) {

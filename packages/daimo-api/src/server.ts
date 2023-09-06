@@ -18,11 +18,11 @@ async function main() {
   await vc.init();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
-  const coinIndexer = new CoinIndexer(vc);
   const keyReg = new KeyRegistry(vc);
   const nameReg = new NameRegistry(vc);
-  const noteIndexer = new NoteIndexer(vc, nameReg);
   const opIndexer = new OpIndexer(vc);
+  const coinIndexer = new CoinIndexer(vc, opIndexer);
+  const noteIndexer = new NoteIndexer(vc, nameReg);
   const faucet = new Faucet(vc, coinIndexer);
   const accountFactory = new AccountFactory(vc);
 
@@ -41,12 +41,11 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    await Promise.all([coinIndexer.init(), nameReg.init()]);
-    await Promise.all([faucet.init(), noteIndexer.init()]);
-    await Promise.all([opIndexer.init(), keyReg.init()]);
+    await Promise.all([keyReg.init(), nameReg.init(), opIndexer.init()]);
+    await Promise.all([coinIndexer.init(), noteIndexer.init()]);
 
     console.log(`[API] initializing push notifications...`);
-    await notifier.init();
+    await Promise.all([notifier.init(), faucet.init()]);
 
     console.log(`[API] polling logs...`);
     setInterval(() => vc.processLogsToLatestBlock(), 1000);

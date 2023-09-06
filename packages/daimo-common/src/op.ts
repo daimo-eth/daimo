@@ -55,6 +55,8 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
   amount: number;
+
+  /** Userop nonce, if this transfer occurred in a userop */
   nonceMetadata?: Hex;
 }
 
@@ -65,11 +67,11 @@ interface OpEventBase {
   /** Eg, "pending", "confirmed", or "failed" */
   status: OpStatus;
 
-  /* Only set for Daimo transfers */
-  opHash?: string;
+  /* Set for transactions part of a userop */
+  opHash?: Hex;
 
   /* Can be set when we're pre-notified of a non-userop tx, eg faucet send */
-  txHash?: string;
+  txHash?: Hex;
 
   /* Below are only set once we have a Transfer event. */
   blockNumber?: number;

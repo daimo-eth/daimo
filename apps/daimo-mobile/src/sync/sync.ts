@@ -1,13 +1,14 @@
-import { EAccount, TransferLogSummary } from "@daimo/api";
+import { EAccount } from "@daimo/api";
 import {
   OpStatus,
   TransferOpEvent,
   amountToDollars,
   assert,
+  guessTimestampFromNum,
 } from "@daimo/common";
 import { useEffect } from "react";
 
-import { guessTimestampFromNum } from "../logic/time";
+import { chainConfig } from "../logic/chainConfig";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";
 
@@ -227,15 +228,15 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
   old: TransferOpEvent[],
-  logs: TransferLogSummary[]
+  logs: TransferOpEvent[]
 ): TransferOpEvent[] {
   // Start with old, finalized transfers
   const ret = [...old];
 
   // Sort new logs
   logs.sort((a, b) => {
-    if (a.blockNum !== b.blockNum) return a.blockNum - b.blockNum;
-    return a.logIndex - b.logIndex;
+    if (a.blockNumber !== b.blockNumber) return a.blockNumber! - b.blockNumber!;
+    return a.logIndex! - b.logIndex!;
   });
 
   // Add new transfers since previous lastFinalizedBlock
@@ -249,9 +250,12 @@ function addTransfers(
       amount: Number(transfer.amount),
       nonceMetadata: transfer.nonceMetadata,
 
-      timestamp: guessTimestampFromNum(transfer.blockNum),
+      timestamp: guessTimestampFromNum(
+        transfer.blockNumber!,
+        chainConfig.l2.network
+      ),
       txHash: transfer.txHash,
-      blockNumber: transfer.blockNum,
+      blockNumber: transfer.blockNumber,
       blockHash: transfer.blockHash,
       logIndex: transfer.logIndex,
     });

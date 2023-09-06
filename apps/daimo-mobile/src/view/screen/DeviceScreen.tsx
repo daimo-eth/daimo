@@ -1,4 +1,4 @@
-import { assert } from "@daimo/common";
+import { assert, guessTimestampFromNum, timeString } from "@daimo/common";
 import {
   DaimoAccount,
   DaimoNonce,
@@ -10,9 +10,9 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
+import { chainConfig } from "../../logic/chainConfig";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey } from "../../logic/enclave";
-import { guessTimestampFromNum, timeString } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -126,6 +126,8 @@ export function DeviceScreen({ route, navigation }: Props) {
     }
   })();
 
+  const addedAtS = guessTimestampFromNum(device.slot, chainConfig.l2.network);
+
   return (
     <View style={ss.container.fullWidthModal}>
       <Spacer h={16} />
@@ -140,9 +142,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         </>
       )}
       <TextCenter>
-        <TextBody>
-          Added at {timeString(guessTimestampFromNum(device.addedAt))}
-        </TextBody>
+        <TextBody>Added at {timeString(addedAtS)}</TextBody>
       </TextCenter>
       <Spacer h={16} />
       {button}

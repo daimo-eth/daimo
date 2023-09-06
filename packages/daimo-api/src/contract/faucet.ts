@@ -1,6 +1,6 @@
 import { OpStatus, TransferOpEvent } from "@daimo/common";
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import { Address, Log, getAbiItem } from "viem";
+import { Address } from "viem";
 
 import { CoinIndexer } from "./coinIndexer";
 import { ViemClient } from "../chain";
@@ -10,9 +10,6 @@ export type FaucetStatus =
   | "canRequest"
   | "alreadyRequested"
   | "alreadySent";
-
-const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
-type TransferLog = Log<bigint, number, false, typeof transferEvent>;
 
 /** Testnet faucet. Drips testUSDC to any account not yet requested. */
 export class Faucet {
@@ -25,9 +22,9 @@ export class Faucet {
     this.coinIndexer.pipeAllTransfers(this.parseLogs);
   }
 
-  parseLogs = (logs: TransferLog[]) => {
+  parseLogs = (logs: TransferOpEvent[]) => {
     for (const log of logs) {
-      const { from, to } = log.args;
+      const { from, to } = log;
       if (to != null && from === this.vc.walletClient.account.address) {
         this.sent.add(to);
       }

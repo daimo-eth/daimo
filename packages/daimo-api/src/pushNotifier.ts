@@ -1,10 +1,11 @@
-import { assert, assertNotNull } from "@daimo/common";
+import { TransferOpEvent, assert, assertNotNull } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
+import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
 import { AddrLabel, getAccountName } from ".";
-import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
+import { CoinIndexer } from "./contract/coinIndexer";
 import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer, NoteOpLog } from "./contract/noteIndexer";
@@ -47,7 +48,7 @@ export class PushNotifier {
     this.maybeSendNotifications(messages);
   };
 
-  private handleTransfers = async (logs: TransferLog[]) => {
+  private handleTransfers = async (logs: TransferOpEvent[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
     this.expo.sendPushNotificationsAsync(messages);
@@ -66,22 +67,39 @@ export class PushNotifier {
     }
   }
 
-  async getPushMessagesFromTransfers(logs: TransferLog[]) {
+  async getPushMessagesFromTransfers(logs: TransferOpEvent[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      const { from, to, value } = log.args;
-      if (!from || !to || !value) {
+      const { from, to, amount } = log;
+      if (!from || !to || !amount) {
         console.warn(`[PUSH] invalid transfer log: ${JSON.stringify(log)}`);
         continue;
       }
-      if (log.transactionHash == null) {
+      if (log.txHash == null) {
         console.warn(`[PUSH] skipping unconfirmed tx: ${JSON.stringify(log)}`);
         continue;
       }
 
+      const receivingRequestedMoney =
+        log.nonceMetadata != null &&
+        DaimoNonceMetadata.fromHex(log.nonceMetadata).nonceType ===
+          DaimoNonceType.RequestResponse;
+
       const [a, b] = await Promise.all([
-        this.getPushMessagesFromTransfer(log.transactionHash, from, to, -value),
-        this.getPushMessagesFromTransfer(log.transactionHash, to, from, value),
+        this.getPushMessagesFromTransfer(
+          log.txHash,
+          from,
+          to,
+          -BigInt(amount),
+          false
+        ),
+        this.getPushMessagesFromTransfer(
+          log.txHash,
+          to,
+          from,
+          BigInt(amount),
+          receivingRequestedMoney
+        ),
       ]);
       messages.push(...a, ...b);
     }
@@ -124,7 +142,8 @@ export class PushNotifier {
     txHash: Hex,
     addr: Address,
     other: Address,
-    value: bigint
+    value: bigint,
+    receivingRequestedMoney: boolean
   ): Promise<ExpoPushMessage[]> {
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens || pushTokens.length === 0) return [];
@@ -142,10 +161,14 @@ export class PushNotifier {
     const otherStr = getAccountName(otherAcc);
 
     const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
-    const body =
-      value < 0
-        ? `You sent ${dollars} ${symbol} to ${otherStr}`
-        : `You received ${dollars} ${symbol} from ${otherStr}`;
+    let body;
+    if (value < 0) {
+      body = `You sent ${dollars} ${symbol} to ${otherStr}`;
+    } else if (receivingRequestedMoney) {
+      body = `${otherStr} accepted your ${dollars} ${symbol} request`;
+    } else {
+      body = `You received ${dollars} ${symbol} from ${otherStr}`;
+    }
 
     return [
       {

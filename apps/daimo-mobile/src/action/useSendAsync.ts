@@ -2,7 +2,7 @@ import { EAccount, EnclaveKeyInfo, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Log } from "../logic/log";
@@ -49,7 +49,7 @@ export function useSendAsync({
 
     // Add pending op and named accounts to history
     if (pendingOp) {
-      pendingOp.opHash = handle.userOpHash;
+      pendingOp.opHash = handle.userOpHash as Hex;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       account.recentTransfers.push(pendingOp);
       account.namedAccounts.push(...(namedAccounts || []));

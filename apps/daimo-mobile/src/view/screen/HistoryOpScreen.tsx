@@ -1,4 +1,4 @@
-import { assert, TransferOpEvent } from "@daimo/common";
+import { assert, timeString, TransferOpEvent } from "@daimo/common";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -6,7 +6,6 @@ import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 
 import { chainConfig } from "../../logic/chainConfig";
-import { timeString } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";

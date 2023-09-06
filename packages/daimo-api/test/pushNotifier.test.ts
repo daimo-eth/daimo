@@ -1,9 +1,9 @@
-import { EAccount } from "@daimo/common";
+import { EAccount, OpStatus, TransferOpEvent } from "@daimo/common";
+import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 
-import { TransferLog } from "../src/contract/coinIndexer";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteOpLog } from "../src/contract/noteIndexer";
 import { PushNotifier } from "../src/pushNotifier";
@@ -16,8 +16,8 @@ test("PushNotifier", async () => {
   const pn = createNotifierAliceBob();
 
   await test("transfer between two Daimo accounts", async () => {
-    const input: TransferLog[] = [
-      createTransferLog({ from: addrAlice, to: addrBob, value: 1000000n }),
+    const input: TransferOpEvent[] = [
+      createTransfer({ from: addrAlice, to: addrBob, value: 1000000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
 
@@ -32,8 +32,8 @@ test("PushNotifier", async () => {
   });
 
   await test("transfer to external address", async () => {
-    const input: TransferLog[] = [
-      createTransferLog({ from: addrAlice, to: addrCharlie, value: 690000n }),
+    const input: TransferOpEvent[] = [
+      createTransfer({ from: addrAlice, to: addrCharlie, value: 690000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
 
@@ -41,6 +41,28 @@ test("PushNotifier", async () => {
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
     assert.strictEqual(output[0].title, "Sent $0.69");
     assert.strictEqual(output[0].body, "You sent 0.69 USDC to charlie.eth");
+  });
+
+  await test("transfer fulfilling request", async () => {
+    const input: TransferOpEvent[] = [
+      createTransfer({
+        from: addrCharlie,
+        to: addrAlice,
+        value: 5000000n,
+        nonceMetadata: new DaimoNonceMetadata(
+          DaimoNonceType.RequestResponse
+        ).toHex(),
+      }),
+    ];
+    const output = await pn.getPushMessagesFromTransfers(input);
+
+    assert.strictEqual(output.length, 1);
+    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
+    assert.strictEqual(output[0].title, "Received $5.00");
+    assert.strictEqual(
+      output[0].body,
+      "charlie.eth accepted your 5.00 USDC request"
+    );
   });
 
   await test("send payment link", async () => {
@@ -133,22 +155,24 @@ function createNotifierAliceBob() {
   return pn;
 }
 
-function createTransferLog(args: {
+function createTransfer(args: {
   from: Address;
   to: Address;
   value: bigint;
-}): TransferLog {
+  nonceMetadata?: Hex;
+}): TransferOpEvent {
   return {
-    eventName: "Transfer",
-    args,
-    address: "0x0",
+    type: "transfer",
+    status: OpStatus.confirmed,
+    amount: Number(args.value),
+    from: args.from,
+    to: args.to,
+    timestamp: 0,
     blockHash: "0x0",
-    blockNumber: 0n,
-    data: "0x0",
+    blockNumber: 0,
     logIndex: 0,
-    removed: false,
-    topics: ["0x0", "0x0", "0x0"],
-    transactionHash: "0x0",
-    transactionIndex: 0,
+    txHash: "0x0",
+    opHash: "0x0",
+    nonceMetadata: args.nonceMetadata,
   };
 }

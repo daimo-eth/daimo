@@ -1,6 +1,12 @@
+import {
+  OpStatus,
+  TransferOpEvent,
+  guessTimestampFromNum,
+} from "@daimo/common";
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
 import { Address, Hex, Log, getAbiItem } from "viem";
 
+import { OpIndexer } from "./opIndexer";
 import { ViemClient } from "../chain";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
@@ -14,11 +20,11 @@ export type TransferLog = Log<
 
 /* USDC or testUSDC stablecoin contract. Tracks transfers. */
 export class CoinIndexer {
-  private allTransfers: TransferLog[] = [];
+  private allTransfers: TransferOpEvent[] = [];
 
-  private listeners: ((logs: TransferLog[]) => void)[] = [];
+  private listeners: ((logs: TransferOpEvent[]) => void)[] = [];
 
-  constructor(private client: ViemClient) {}
+  constructor(private client: ViemClient, private opIndexer: OpIndexer) {}
 
   async init() {
     await this.client.pipeLogs(
@@ -32,8 +38,10 @@ export class CoinIndexer {
 
   private parseLogs = (logs: TransferLog[]) => {
     if (logs.length === 0) return;
-    this.allTransfers.push(...logs);
-    this.listeners.forEach((l) => l(logs));
+
+    const ops = logs.map((log) => this.logToTransferOp(log));
+    this.allTransfers.push(...ops);
+    this.listeners.forEach((l) => l(ops));
   };
 
   /** Get balance as of a block height. */
@@ -49,18 +57,18 @@ export class CoinIndexer {
   }
 
   /** Listener invoked for all past coin transfers, then for new ones. */
-  pipeAllTransfers(listener: (logs: TransferLog[]) => void) {
+  pipeAllTransfers(listener: (logs: TransferOpEvent[]) => void) {
     listener(this.allTransfers);
     this.addListener(listener);
   }
 
   /** Listener is invoked for all new coin transfers. */
-  addListener(listener: (logs: TransferLog[]) => void) {
+  addListener(listener: (logs: TransferOpEvent[]) => void) {
     this.listeners.push(listener);
   }
 
   /** Unsubscribe from new coin transfers. */
-  removeListener(listener: (logs: TransferLog[]) => void) {
+  removeListener(listener: (logs: TransferOpEvent[]) => void) {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
@@ -73,16 +81,49 @@ export class CoinIndexer {
     addr: Address;
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
-  }): TransferLog[] {
+  }): TransferOpEvent[] {
     let ret = this.allTransfers.filter(
-      (log) => log.args.from === addr || log.args.to === addr
+      (log) => log.from === addr || log.to === addr
     );
     if (sinceBlockNum) {
       ret = ret.filter((log) => (log.blockNumber || 0n) >= sinceBlockNum);
     }
     if (txHashes !== undefined) {
-      ret = ret.filter((log) => txHashes.includes(log.transactionHash));
+      ret = ret.filter((log) => txHashes.includes(log.txHash || "0x"));
     }
     return ret;
+  }
+
+  private logToTransferOp(log: TransferLog): TransferOpEvent {
+    const { blockNumber, blockHash, logIndex, transactionHash } = log;
+    const { from, to, value } = log.args;
+    const nonceMetadata = this.opIndexer.fetchNonceMetadata(
+      transactionHash,
+      logIndex
+    );
+
+    if (
+      blockNumber == null ||
+      blockHash == null ||
+      logIndex == null ||
+      transactionHash == null
+    ) {
+      throw new Error(`pending log ${JSON.stringify(log)}`);
+    }
+
+    return {
+      type: "transfer",
+      status: OpStatus.confirmed,
+      timestamp: guessTimestampFromNum(Number(blockNumber), "base-goerli"),
+      from,
+      to,
+      amount: Number(value),
+      blockNumber: Number(blockNumber),
+
+      blockHash,
+      txHash: transactionHash,
+      logIndex,
+      nonceMetadata,
+    };
   }
 }

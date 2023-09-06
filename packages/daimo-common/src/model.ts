@@ -64,19 +64,6 @@ export const zDollarStr = z
 // TODO: use this in place of string / `${number}` everywhere applicable
 export type DollarStr = `${number}`;
 
-export const zTransferLogSummary = z.object({
-  from: zAddress,
-  to: zAddress,
-  amount: zBigIntStr,
-  blockHash: zHex,
-  blockNum: z.number(),
-  txHash: zHex,
-  logIndex: z.number(),
-  nonceMetadata: zHex,
-});
-
-export type TransferLogSummary = z.infer<typeof zTransferLogSummary>;
-
 export const zTrackedRequest = z.object({
   requestId: zBigIntStr,
   amount: zBigIntStr,

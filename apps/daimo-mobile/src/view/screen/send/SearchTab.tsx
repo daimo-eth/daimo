@@ -1,8 +1,7 @@
-import { getAccountName } from "@daimo/common";
+import { getAccountName, timeAgo } from "@daimo/common";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { timeAgo } from "../../../logic/time";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";

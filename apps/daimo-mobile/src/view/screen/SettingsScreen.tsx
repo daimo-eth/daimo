@@ -1,4 +1,4 @@
-import { KeyData } from "@daimo/common";
+import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
@@ -24,7 +24,7 @@ import {
 } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
-import { guessTimestampFromNum, timeAgo, useTime } from "../../logic/time";
+import { useTime } from "../../logic/useTime";
 import { Account, serializeAccount, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -156,6 +156,8 @@ function DeviceRow({
 
   const viewDevice = () => nav.navigate("Device", { pubKey: keyData.pubKey });
 
+  const addAtS = guessTimestampFromNum(keyData.addedAt, chainConfig.l2.network);
+
   return (
     <ButtonSmall onPress={viewDevice}>
       <View style={styles.deviceDataRow}>
@@ -164,9 +166,7 @@ function DeviceRow({
           {isCurrentDevice && <TextBody>{"\u00A0"} current device</TextBody>}
         </TextBody>
 
-        <TextBody>
-          {timeAgo(guessTimestampFromNum(keyData.addedAt), nowS)}
-        </TextBody>
+        <TextBody>{timeAgo(addAtS, nowS)}</TextBody>
       </View>
     </ButtonSmall>
   );

@@ -1,9 +1,8 @@
-import { TransferOpEvent, assert } from "@daimo/common";
+import { TransferOpEvent, assert, timeAgo } from "@daimo/common";
 import { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Address, getAddress } from "viem";
 
-import { timeAgo } from "../../logic/time";
 import { Account, useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
