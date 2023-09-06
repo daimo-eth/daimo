@@ -6,10 +6,13 @@ const lowercaseAddrV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePub
 
 const correctSerV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
 
-const correctSerV6 = `{"storageVersion":6,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null,"forceWeakerKeys":false}`;
+const correctSerV6 = `{"storageVersion":6,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
 
 const account: Account = {
-  enclaveKeyName: "test",
+  enclaveKeyInfo: {
+    name: "test",
+    forceWeakerKeys: false,
+  },
   enclavePubKey:
     "0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456",
   name: "test",
@@ -26,7 +29,6 @@ const account: Account = {
   accountKeys: [],
 
   pushToken: null,
-  forceWeakerKeys: false,
 };
 
 describe("Account", () => {

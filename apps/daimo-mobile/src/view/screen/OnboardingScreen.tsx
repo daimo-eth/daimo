@@ -271,7 +271,6 @@ function TryEnclave({
   forceWeakerKeys: boolean;
   setForceWeakerKeys: (force: boolean) => void;
 }) {
-  const enclaveKeyName = defaultEnclaveKeyName;
   const [loading, setLoading] = useState(false);
   const [askWeak, setAskWeak] = useState(false);
   const [error, setError] = useState("");
@@ -287,10 +286,12 @@ function TryEnclave({
     setForceWeakerKeys(tryWeaker);
     try {
       await requestEnclaveSignature(
-        enclaveKeyName,
+        {
+          name: defaultEnclaveKeyName,
+          forceWeakerKeys: tryWeaker,
+        },
         "dead",
-        "Create key",
-        tryWeaker
+        "Create key"
       );
 
       console.log(`[ONBOARDING] enclave signature trial success`);
@@ -315,7 +316,7 @@ function TryEnclave({
     <View style={styles.onboardingScreen}>
       <View style={styles.createAccountPage}>
         <TextH1>
-          <Octicons name="unlock" size={40} color={askWeak ? "red" : "black"} />
+          <Octicons name={askWeak ? "unlock" : "lock"} size={40} />
         </TextH1>
         <Spacer h={32} />
         <View style={ss.container.padH16}>
@@ -328,8 +329,8 @@ function TryEnclave({
             )}
             {askWeak && (
               <TextBody>
-                Failed to create a hardware enclave authenticated key. Use
-                software key?
+                Failed to create hardware authenticated key. This can happen on
+                older Android devices. Use regular key?
               </TextBody>
             )}
           </TextCenter>
@@ -352,7 +353,7 @@ function TryEnclave({
             <Spacer h={16} />
             <ButtonBig
               type="primary"
-              title="Use software key"
+              title="Use regular key"
               onPress={() => {
                 trySignatureGeneration(true);
               }}

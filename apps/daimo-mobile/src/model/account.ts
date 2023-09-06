@@ -4,6 +4,7 @@ import {
   TransferOpEvent,
   TrackedRequest,
   KeyData,
+  EnclaveKeyInfo,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -20,8 +21,8 @@ export const defaultEnclaveKeyName = "daimo-8";
 
 /** Account data stored on device. */
 export type Account = {
-  /** Local device signing key name */
-  enclaveKeyName: string;
+  /** Local device signing key info */
+  enclaveKeyInfo: EnclaveKeyInfo;
   /** Local device signing DER pubkey */
   enclavePubKey: Hex;
   /** Daimo name, registered onchain */
@@ -49,8 +50,6 @@ export type Account = {
 
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
-  /** Whether the device needs to be forced to use non-secure enclave keys */
-  forceWeakerKeys: boolean;
 };
 
 interface AccountV5 extends StoredModel {
@@ -76,7 +75,7 @@ interface AccountV5 extends StoredModel {
 interface AccountV6 extends StoredModel {
   storageVersion: 6;
 
-  enclaveKeyName: string;
+  enclaveKeyInfo: EnclaveKeyInfo;
   enclavePubKey: Hex;
   name: string;
   address: string;
@@ -91,7 +90,6 @@ interface AccountV6 extends StoredModel {
   accountKeys: KeyData[];
 
   pushToken: string | null;
-  forceWeakerKeys: boolean;
 }
 
 /** Loads and saves Daimo account data from storage. Notifies listeners. */
@@ -176,7 +174,10 @@ export function parseAccount(accountJSON?: string): Account | null {
   if (model.storageVersion === 5) {
     const a = model as AccountV5;
     return {
-      enclaveKeyName: a.enclaveKeyName,
+      enclaveKeyInfo: {
+        name: a.enclaveKeyName,
+        forceWeakerKeys: false,
+      },
       enclavePubKey: a.enclavePubKey,
       name: a.name,
       address: getAddress(a.address),
@@ -192,7 +193,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       accountKeys: a.accountKeys,
 
       pushToken: a.pushToken,
-      forceWeakerKeys: false,
     };
   }
 
@@ -200,7 +200,7 @@ export function parseAccount(accountJSON?: string): Account | null {
   const a = model as AccountV6;
 
   return {
-    enclaveKeyName: a.enclaveKeyName,
+    enclaveKeyInfo: a.enclaveKeyInfo,
     enclavePubKey: a.enclavePubKey,
     name: a.name,
     address: getAddress(a.address),
@@ -216,7 +216,6 @@ export function parseAccount(accountJSON?: string): Account | null {
     accountKeys: a.accountKeys,
 
     pushToken: a.pushToken,
-    forceWeakerKeys: a.forceWeakerKeys,
   };
 }
 
@@ -226,7 +225,7 @@ export function serializeAccount(account: Account | null): string {
   const model: AccountV6 = {
     storageVersion: 6,
 
-    enclaveKeyName: account.enclaveKeyName,
+    enclaveKeyInfo: account.enclaveKeyInfo,
     enclavePubKey: account.enclavePubKey,
     name: account.name,
     address: account.address,
@@ -242,7 +241,6 @@ export function serializeAccount(account: Account | null): string {
     accountKeys: account.accountKeys,
 
     pushToken: account.pushToken,
-    forceWeakerKeys: account.forceWeakerKeys,
   };
 
   return JSON.stringify(model);

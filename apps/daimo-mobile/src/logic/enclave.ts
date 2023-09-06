@@ -3,7 +3,7 @@ import { Hex } from "viem";
 
 import { Log } from "./log";
 
-export async function forceWeakerKeyUsage() {
+export async function forceWeakerFallbackKeyUsage() {
   await Log.promise("forceFallbackUsage", ExpoEnclave.forceFallbackUsage());
   console.log(`[ENCLAVE] forceFallbackUsage done`);
 }

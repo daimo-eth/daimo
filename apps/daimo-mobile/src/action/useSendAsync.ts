@@ -1,4 +1,4 @@
-import { EAccount, OpEvent } from "@daimo/common";
+import { EAccount, EnclaveKeyInfo, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -14,13 +14,11 @@ type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
 
 /** Send a user op, track status. */
 export function useSendAsync({
-  enclaveKeyName,
   dollarsToSend,
   sendFn,
   pendingOp,
   namedAccounts,
 }: {
-  enclaveKeyName: string;
   dollarsToSend: number;
   sendFn: SendOpFn;
   pendingOp?: OpEvent;
@@ -43,10 +41,9 @@ export function useSendAsync({
   const exec = useCallback(async () => {
     const handle = await sendAsync(
       setAS,
-      enclaveKeyName,
+      account.enclaveKeyInfo,
       account.address,
       keySlot,
-      account.forceWeakerKeys,
       sendFn
     );
 
@@ -64,52 +61,43 @@ export function useSendAsync({
       // In the background, wait for the op to finish
       handle.wait().then(() => resync(`op finished: ${pendingOp.opHash}`));
     }
-  }, [enclaveKeyName, keySlot, sendFn]);
+  }, [account.enclaveKeyInfo, keySlot, sendFn]);
 
   return { ...as, exec, cost };
 }
 
 /** Warm the DaimoAccount cache. */
 export function useWarmCache(
-  enclaveKeyName?: string,
+  enclaveKeyInfo?: EnclaveKeyInfo,
   address?: Address,
-  keySlot?: number,
-  forceWeakerKeys?: boolean
+  keySlot?: number
 ) {
   useEffect(() => {
-    if (
-      !enclaveKeyName ||
-      !address ||
-      !keySlot ||
-      forceWeakerKeys === undefined
-    )
-      return;
-    loadAccount(enclaveKeyName, address, keySlot, forceWeakerKeys);
-  }, [enclaveKeyName, address, keySlot, forceWeakerKeys]);
+    if (!enclaveKeyInfo || !address || !keySlot) return;
+    loadAccount(enclaveKeyInfo, address, keySlot);
+  }, [enclaveKeyInfo?.name, enclaveKeyInfo?.forceWeakerKeys, address, keySlot]);
 }
 
 const accountCache: Map<[Address, number], Promise<DaimoAccount>> = new Map();
 
 function loadAccount(
-  enclaveKeyName: string,
+  enclaveKeyInfo: EnclaveKeyInfo,
   address: Address,
-  keySlot: number,
-  forceWeakerKeys: boolean
+  keySlot: number
 ) {
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
   promise = (async () => {
     console.info(
-      `[SEND] loading DaimoAccount ${address} ${enclaveKeyName} ${keySlot}`
+      `[SEND] loading DaimoAccount ${address} ${enclaveKeyInfo.name} ${keySlot}`
     );
     const signer: SigningCallback = async (hexTx: string) => {
       return {
         derSig: await requestEnclaveSignature(
-          enclaveKeyName,
+          enclaveKeyInfo,
           hexTx,
-          "Authorize transaction",
-          forceWeakerKeys
+          "Authorize transaction"
         ),
         keySlot,
       };
@@ -124,21 +112,15 @@ function loadAccount(
 
 async function sendAsync(
   setAS: SetActStatus,
-  enclaveKeyName: string,
+  enclaveKeyInfo: EnclaveKeyInfo,
   address: Address,
   keySlot: number | undefined,
-  forceWeakerKeys: boolean,
   sendFn: SendOpFn
 ) {
   try {
     if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const account = await loadAccount(
-      enclaveKeyName,
-      address,
-      keySlot,
-      forceWeakerKeys
-    );
+    const account = await loadAccount(enclaveKeyInfo, address, keySlot);
 
     setAS("loading", "Signing...");
     const handle = await sendFn(account);
@@ -154,17 +136,16 @@ async function sendAsync(
 }
 
 export async function requestEnclaveSignature(
-  enclaveKeyName: string,
+  enclaveKeyInfo: EnclaveKeyInfo,
   hexTx: string,
-  usageMessage: string,
-  forceWeakerKeys: boolean
+  usageMessage: string
 ) {
   const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
     usageMessage,
     androidTitle: "Daimo",
   };
 
-  if (forceWeakerKeys) {
+  if (enclaveKeyInfo.forceWeakerKeys) {
     await Log.promise(
       "ExpoEnclaveForceFallbackUsage",
       ExpoEnclave.forceFallbackUsage()
@@ -173,7 +154,7 @@ export async function requestEnclaveSignature(
 
   const signature = await Log.promise(
     "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyName, hexTx, biometricPromptCopy)
+    ExpoEnclave.sign(enclaveKeyInfo.name, hexTx, biometricPromptCopy)
   );
 
   return signature;

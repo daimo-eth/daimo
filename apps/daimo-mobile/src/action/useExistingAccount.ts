@@ -9,12 +9,11 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 export function useExistingAccount(forceWeakerKeys: boolean) {
   const [as, setAS] = useActStatus();
 
-  const enclaveKeyName = defaultEnclaveKeyName;
-  const pubKeyHex = useLoadOrCreateEnclaveKey(
-    setAS,
-    enclaveKeyName,
-    forceWeakerKeys
-  );
+  const enclaveKeyInfo = {
+    name: defaultEnclaveKeyName,
+    forceWeakerKeys,
+  };
+  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyInfo);
 
   const ts = useTime(2);
 
@@ -33,7 +32,7 @@ export function useExistingAccount(forceWeakerKeys: boolean) {
       if (result && result.name) {
         console.log(`[ACTION] loaded account ${result.name} at ${result.addr}`);
         setAccount({
-          enclaveKeyName,
+          enclaveKeyInfo,
           enclavePubKey: pubKeyHex,
           name: result.name,
           address: result.addr,
@@ -50,7 +49,6 @@ export function useExistingAccount(forceWeakerKeys: boolean) {
           accountKeys: [],
 
           pushToken: null,
-          forceWeakerKeys,
         });
         setAS("success", "Found account");
       }

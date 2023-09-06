@@ -13,12 +13,11 @@ export function useCreateAccount(
 ): ActHandle {
   const [as, setAS] = useActStatus();
 
-  const enclaveKeyName = defaultEnclaveKeyName;
-  const pubKeyHex = useLoadOrCreateEnclaveKey(
-    setAS,
-    enclaveKeyName,
-    forceWeakerKeys
-  );
+  const enclaveKeyInfo = {
+    name: defaultEnclaveKeyName,
+    forceWeakerKeys,
+  };
+  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyInfo);
 
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
@@ -56,7 +55,7 @@ export function useCreateAccount(
     const { address } = result.data;
     console.log(`[CHAIN] created new account ${name} at ${address}`);
     setAccount({
-      enclaveKeyName,
+      enclaveKeyInfo,
       enclavePubKey: pubKeyHex,
       name,
       address,
@@ -72,7 +71,6 @@ export function useCreateAccount(
       accountKeys: [],
 
       pushToken: null,
-      forceWeakerKeys,
     });
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
