@@ -19,7 +19,7 @@ export type userOperationLog = Log<
 
 /* User operation indexer. Used to track fulfilled requests. */
 export class OpIndexer {
-  private txHashToUserOp: Map<Hex, userOperationLog> = new Map();
+  private txHashToSortedUserOps: Map<Hex, userOperationLog[]> = new Map();
   private nonceMetadataToTxes: Map<Hex, Hex[]> = new Map();
 
   constructor(private client: ViemClient) {}
@@ -37,7 +37,12 @@ export class OpIndexer {
   private parseLogs = (logs: userOperationLog[]) => {
     for (const log of logs) {
       if (log.transactionHash) {
-        this.txHashToUserOp.set(log.transactionHash, log);
+        const curLogs = this.txHashToSortedUserOps.get(log.transactionHash);
+        const newLogs = curLogs ? [...curLogs, log] : [log];
+        this.txHashToSortedUserOps.set(
+          log.transactionHash,
+          newLogs.sort((a, b) => a.logIndex - b.logIndex)
+        );
 
         const nonceMetadata = DaimoNonce.fromHex(
           numberToHex(log.args.nonce)
@@ -52,15 +57,16 @@ export class OpIndexer {
   };
 
   /**
-   * Interpret a transaction as a Daimo Account userop and fetch the nonce metadata of it.
+   * Interpret a (txHash, queryLogIndex) as having originated from a Daimo Account userop and fetch the nonce metadata of it.
    */
-  fetchNonceMetadata(txHash: Hex): Hex | undefined {
-    const log = this.txHashToUserOp.get(txHash);
-
-    if (!log) return undefined;
-    const nonce = DaimoNonce.fromHex(numberToHex(log.args.nonce));
-
-    return nonce.metadata.toHex();
+  fetchNonceMetadata(txHash: Hex, queryLogIndex: number): Hex | undefined {
+    const possibleLogs = this.txHashToSortedUserOps.get(txHash) || [];
+    for (const log of possibleLogs) {
+      if (log.logIndex > queryLogIndex) {
+        return DaimoNonce.fromHex(numberToHex(log.args.nonce)).metadata.toHex();
+      }
+    }
+    return undefined;
   }
 
   /**

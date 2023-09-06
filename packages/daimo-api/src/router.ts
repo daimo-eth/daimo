@@ -223,7 +223,10 @@ export function createRouter(
         const transferLogs = rawLogs.map((log) => {
           const { blockNumber, blockHash, logIndex, transactionHash } = log;
           const { from, to, value } = log.args;
-          const nonceMetadata = opIndexer.fetchNonceMetadata(transactionHash);
+          const nonceMetadata = opIndexer.fetchNonceMetadata(
+            transactionHash,
+            log.logIndex
+          );
 
           if (
             blockNumber == null ||
