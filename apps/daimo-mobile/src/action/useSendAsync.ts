@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { Log } from "../logic/log";
 import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
@@ -45,6 +46,7 @@ export function useSendAsync({
       enclaveKeyName,
       account.address,
       keySlot,
+      account.forceWeakerKeys,
       sendFn
     );
 
@@ -71,12 +73,19 @@ export function useSendAsync({
 export function useWarmCache(
   enclaveKeyName?: string,
   address?: Address,
-  keySlot?: number
+  keySlot?: number,
+  forceWeakerKeys?: boolean
 ) {
   useEffect(() => {
-    if (!enclaveKeyName || !address || !keySlot) return;
-    loadAccount(enclaveKeyName, address, keySlot);
-  }, [enclaveKeyName, address, keySlot]);
+    if (
+      !enclaveKeyName ||
+      !address ||
+      !keySlot ||
+      forceWeakerKeys === undefined
+    )
+      return;
+    loadAccount(enclaveKeyName, address, keySlot, forceWeakerKeys);
+  }, [enclaveKeyName, address, keySlot, forceWeakerKeys]);
 }
 
 const accountCache: Map<[Address, number], Promise<DaimoAccount>> = new Map();
@@ -84,7 +93,8 @@ const accountCache: Map<[Address, number], Promise<DaimoAccount>> = new Map();
 function loadAccount(
   enclaveKeyName: string,
   address: Address,
-  keySlot: number
+  keySlot: number,
+  forceWeakerKeys: boolean
 ) {
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
@@ -95,7 +105,12 @@ function loadAccount(
     );
     const signer: SigningCallback = async (hexTx: string) => {
       return {
-        derSig: await requestEnclaveSignature(enclaveKeyName, hexTx),
+        derSig: await requestEnclaveSignature(
+          enclaveKeyName,
+          hexTx,
+          "Authorize transaction",
+          forceWeakerKeys
+        ),
         keySlot,
       };
     };
@@ -112,12 +127,18 @@ async function sendAsync(
   enclaveKeyName: string,
   address: Address,
   keySlot: number | undefined,
+  forceWeakerKeys: boolean,
   sendFn: SendOpFn
 ) {
   try {
     if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const account = await loadAccount(enclaveKeyName, address, keySlot);
+    const account = await loadAccount(
+      enclaveKeyName,
+      address,
+      keySlot,
+      forceWeakerKeys
+    );
 
     setAS("loading", "Signing...");
     const handle = await sendFn(account);
@@ -132,16 +153,27 @@ async function sendAsync(
   }
 }
 
-async function requestEnclaveSignature(enclaveKeyName: string, hexTx: string) {
+export async function requestEnclaveSignature(
+  enclaveKeyName: string,
+  hexTx: string,
+  usageMessage: string,
+  forceWeakerKeys: boolean
+) {
   const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
-    usageMessage: "Authorize transaction",
+    usageMessage,
     androidTitle: "Daimo",
   };
 
-  const signature = await ExpoEnclave.sign(
-    enclaveKeyName,
-    hexTx,
-    biometricPromptCopy
+  if (forceWeakerKeys) {
+    await Log.promise(
+      "ExpoEnclaveForceFallbackUsage",
+      ExpoEnclave.forceFallbackUsage()
+    );
+  }
+
+  const signature = await Log.promise(
+    "ExpoEnclaveSign",
+    ExpoEnclave.sign(enclaveKeyName, hexTx, biometricPromptCopy)
   );
 
   return signature;

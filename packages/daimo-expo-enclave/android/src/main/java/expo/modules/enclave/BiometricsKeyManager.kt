@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
   if (incompleteSignature == null) {
-    promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
+    promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed: Incomplete signature")
     return
   }
   incompleteSignature.update(message.decodeHex())
@@ -95,7 +95,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
       object : BiometricPrompt.AuthenticationCallback() {
         override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
           super.onAuthenticationError(errorCode, errString)
-          promise.reject("ERR_BIOMETRIC_AUTHENTICATION_ERRORED", "Biometric authentication errored")
+          promise.reject("ERR_BIOMETRIC_AUTHENTICATION_ERRORED", "Biometric authentication errored: " + errorCode.toString() + " " + errString.toString())
         }
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -107,7 +107,7 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
           super.onAuthenticationFailed()
           val currentFailedAttempts = failedAttempts.incrementAndGet()
           if (currentFailedAttempts >= 5) {
-            promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed")
+            promise.reject("ERR_BIOMETRIC_AUTHENTICATION_FAILED", "Biometric authentication failed: Too many failed attempts")
           }
         }
     })

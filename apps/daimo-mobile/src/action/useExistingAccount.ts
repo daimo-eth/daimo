@@ -6,11 +6,15 @@ import { useTime } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
-export function useExistingAccount() {
+export function useExistingAccount(forceWeakerKeys: boolean) {
   const [as, setAS] = useActStatus();
 
   const enclaveKeyName = defaultEnclaveKeyName;
-  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
+  const pubKeyHex = useLoadOrCreateEnclaveKey(
+    setAS,
+    enclaveKeyName,
+    forceWeakerKeys
+  );
 
   const ts = useTime(2);
 
@@ -46,6 +50,7 @@ export function useExistingAccount() {
           accountKeys: [],
 
           pushToken: null,
+          forceWeakerKeys,
         });
         setAS("success", "Found account");
       }

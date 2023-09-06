@@ -3,6 +3,11 @@ import { Hex } from "viem";
 
 import { Log } from "./log";
 
+export async function forceWeakerKeyUsage() {
+  await Log.promise("forceFallbackUsage", ExpoEnclave.forceFallbackUsage());
+  console.log(`[ENCLAVE] forceFallbackUsage done`);
+}
+
 /** Create a new key in the secure enclave. */
 export async function createEnclaveKey(enclaveKeyName: string) {
   const pubKey = await Log.promise(
