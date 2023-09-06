@@ -53,10 +53,7 @@ export default async function LinkPage(props: LinkProps) {
       <H2>{description}</H2>
       {walletAction && <OrConnectWalletStub />}
       <div className="h-12" />
-      <div className="flex flex-row gap-4 justify-center">
-        <AppStoreBadge platform="ios" />
-        <AppStoreBadge platform="android" />
-      </div>
+      <AppStoreBadge />
     </center>
   );
 }
