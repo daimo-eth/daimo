@@ -1,7 +1,8 @@
 import {
+  AddrLabel,
   DAccount,
-  EAccount,
   DaimoAccountCall,
+  EAccount,
   isValidName,
   validateName,
 } from "@daimo/common";
@@ -30,11 +31,11 @@ const registeredEvent = getAbiItem({
 
 type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
-const specialAddrLabels: { [_: Address]: string } = {
-  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": "faucet",
-  "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": "payment link",
+const specialAddrLabels: { [_: Address]: AddrLabel } = {
+  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
+  "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
 };
-specialAddrLabels[ephemeralNotesAddress] = "payment link";
+specialAddrLabels[ephemeralNotesAddress] = AddrLabel.PaymentLink;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {

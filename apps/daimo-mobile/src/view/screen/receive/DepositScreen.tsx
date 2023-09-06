@@ -1,3 +1,4 @@
+import { AddrLabel } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
@@ -49,7 +50,9 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   useEffect(() => {
     if (!mutation.isSuccess) return;
     getAccountManager().addPendingOp(mutation.data);
-    cacheEAccounts([{ addr: getAddress(mutation.data.from), label: "faucet" }]);
+    cacheEAccounts([
+      { addr: getAddress(mutation.data.from), label: AddrLabel.Faucet },
+    ]);
   }, [mutation.isSuccess]);
 
   // Display

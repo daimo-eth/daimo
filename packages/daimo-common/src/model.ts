@@ -6,12 +6,17 @@ export const zAddress = z
   .regex(/^0x[0-9a-f]{40}$/i)
   .refine((s): s is Address => true);
 
+export enum AddrLabel {
+  Faucet = "faucet",
+  PaymentLink = "payment link",
+}
+
 export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
   name: z.string().optional(),
-  /** Label for special addresse like the faucet */
-  label: z.string().optional(),
+  /** Label for special addresses like the faucet */
+  label: z.nativeEnum(AddrLabel).optional(),
   /** ENS name */
   ensName: z.string().optional(),
 });
