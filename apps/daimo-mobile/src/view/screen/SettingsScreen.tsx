@@ -39,7 +39,7 @@ export function SettingsScreen() {
   const clearWallet = useCallback(() => {
     // TODO: warn if any assets might be lost. Show a scary confirmation.
     if (!account) return;
-    const { enclaveKeyName } = account;
+    const { enclaveKeyInfo } = account;
 
     Alert.alert(
       "Clear wallet",
@@ -58,8 +58,10 @@ export function SettingsScreen() {
     );
 
     async function clearWallet() {
-      console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
-      await deleteEnclaveKey(enclaveKeyName);
+      console.log(
+        `[USER] deleting account; deleting key ${enclaveKeyInfo.name}`
+      );
+      await deleteEnclaveKey(enclaveKeyInfo.name);
 
       setAccount(null);
       nav.navigate("Home");

@@ -187,7 +187,6 @@ function SendButton({
   const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [requestId]);
 
   const { status, message, cost, exec } = useSendAsync({
-    enclaveKeyName: account.enclaveKeyName,
     dollarsToSend: dollars,
     sendFn: async (account: DaimoAccount) => {
       assert(dollars > 0);

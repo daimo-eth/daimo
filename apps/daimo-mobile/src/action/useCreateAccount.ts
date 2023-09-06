@@ -7,11 +7,17 @@ import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
 /** Deploys a new contract wallet and registers it under a given username. */
-export function useCreateAccount(name: string): ActHandle {
+export function useCreateAccount(
+  name: string,
+  forceWeakerKeys: boolean
+): ActHandle {
   const [as, setAS] = useActStatus();
 
-  const enclaveKeyName = defaultEnclaveKeyName;
-  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
+  const enclaveKeyInfo = {
+    name: defaultEnclaveKeyName,
+    forceWeakerKeys,
+  };
+  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyInfo);
 
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
@@ -49,7 +55,7 @@ export function useCreateAccount(name: string): ActHandle {
     const { address } = result.data;
     console.log(`[CHAIN] created new account ${name} at ${address}`);
     setAccount({
-      enclaveKeyName,
+      enclaveKeyInfo,
       enclavePubKey: pubKeyHex,
       name,
       address,

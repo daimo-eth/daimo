@@ -7,7 +7,7 @@ public class ExpoEnclaveModule: Module {
     return TARGET_OS_SIMULATOR == 0 && SecureEnclave.isAvailable
   }
 
-  let keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
+  var keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
 
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
@@ -32,6 +32,10 @@ public class ExpoEnclaveModule: Module {
       } else {
         return BiometricSecurityLevel.NONE.rawValue
       }
+    }
+
+    AsyncFunction("forceFallbackUsage") { () in
+      keyManager = FallbackKeyManager()
     }
 
     AsyncFunction("fetchPublicKey") { (accountName: String) throws -> String? in

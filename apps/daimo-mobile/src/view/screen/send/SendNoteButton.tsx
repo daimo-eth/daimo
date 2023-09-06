@@ -47,7 +47,6 @@ export function SendNoteButton({
   );
 
   const { status, message, cost, exec } = useSendAsync({
-    enclaveKeyName: account.enclaveKeyName,
     dollarsToSend: dollars,
     sendFn: async (account: DaimoAccount) => {
       return account.createEphemeralNote(ephemeralOwner, `${dollars}`, nonce);

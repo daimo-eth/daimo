@@ -40,6 +40,15 @@ export async function getBiometricSecurityLevel(): Promise<BiometricSecurityLeve
 }
 
 /**
+ * Forcibly use software (non-hardware backed) keys.
+ * Old Android devices can be unreliable about secure enclave operations, so we
+ * use this to fallback to software keys if usage of the secure enclave fails.
+ */
+export async function forceFallbackUsage() {
+  ExpoEnclaveModule.forceFallbackUsage();
+}
+
+/**
  * Fetch public key (DER representation) of key pair attached to accountName.
  *
  * @param accountName The account name to fetch the public key for.

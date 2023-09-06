@@ -31,3 +31,11 @@ export function contractFriendlyKeyToDER(
     accountPubkey[0].substring(2) +
     accountPubkey[1].substring(2)) as Hex;
 }
+
+export interface EnclaveKeyInfo {
+  /** Name of the local signing key on device. */
+  name: string;
+  /** Whether device needs to be forced to use weaker software keys.
+   * Used on old Android devices where Secure Enclave keys can fail erratically.  */
+  forceWeakerKeys: boolean;
+}

@@ -27,6 +27,7 @@ import expo.modules.core.arguments.ReadableArguments
 // design of this module is modeled after those two packages.
 class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   lateinit var moduleRegistry: ModuleRegistry
+  var forcedFallbackKeyManager: Boolean = false
   lateinit var keyManager: KeyManager
 
   override fun onCreate(_moduleRegistry: ModuleRegistry) {
@@ -74,6 +75,11 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 
   @ExpoMethod
   fun getHardwareSecurityLevel(promise: Promise) {
+    if (forcedFallbackKeyManager) {
+      promise.resolve(HardwareSecurityLevel.SOFTWARE.value)
+      return
+    }
+
     if (hasStrongbox()) {
       promise.resolve(HardwareSecurityLevel.HARDWARE_ENCLAVE.value)
     } else if (hasTEE()) {
@@ -85,11 +91,22 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 
   @ExpoMethod
   fun getBiometricSecurityLevel(promise: Promise) {
+    if (forcedFallbackKeyManager) {
+      promise.resolve(BiometricSecurityLevel.NONE.value)
+      return
+    }
+
     if (hasBiometrics()) {
       promise.resolve(BiometricSecurityLevel.AVAILABLE.value)
     } else {
       promise.resolve(BiometricSecurityLevel.NONE.value)
     }
+  }
+
+  @ExpoMethod
+  fun forceFallbackUsage(promise: Promise) {
+    forcedFallbackKeyManager = true
+    keyManager = FallbackKeyManager()
   }
 
   @ExpoMethod

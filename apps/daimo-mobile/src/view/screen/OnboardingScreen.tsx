@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   ScrollView,
   StyleSheet,
   TouchableWithoutFeedback,
@@ -21,8 +22,10 @@ import QRCode from "react-native-qrcode-svg";
 import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
+import { requestEnclaveSignature } from "../../action/useSendAsync";
 import { createAddDeviceString } from "../../logic/device";
 import { rpcHook } from "../../logic/trpc";
+import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
@@ -40,6 +43,8 @@ import {
 
 type OnboardPage =
   | "intro"
+  | "create-try-enclave"
+  | "existing-try-enclave"
   | "create"
   | "existing"
   | "new-allow-notifications"
@@ -59,7 +64,17 @@ export default function OnboardingScreen({
         (function () {
           switch (page) {
             case "intro":
+              if (Platform.OS === "android") {
+                // Android goes through an extra onboarding step
+                return assertNotNull(choice) === "create"
+                  ? "create-try-enclave"
+                  : "existing-try-enclave";
+              }
               return assertNotNull(choice);
+            case "create-try-enclave":
+              return "create";
+            case "existing-try-enclave":
+              return "existing";
             case "create":
               return "new-allow-notifications";
             case "existing":
@@ -83,15 +98,26 @@ export default function OnboardingScreen({
   const prev = useCallback(() => {}, []);
 
   const [name, setName] = useState("");
+
+  const [forceWeakerKeys, setForceWeakerKeys] = useState(false);
+
   const {
     exec: createExec,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name);
+  } = useCreateAccount(name, forceWeakerKeys);
 
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
+      {(page === "create-try-enclave" || page === "existing-try-enclave") && (
+        <TryEnclave
+          onNext={next}
+          createStatus={createStatus}
+          forceWeakerKeys={forceWeakerKeys}
+          setForceWeakerKeys={setForceWeakerKeys}
+        />
+      )}
       {page === "create" && (
         <CreateAccountPage
           onNext={next}
@@ -103,7 +129,13 @@ export default function OnboardingScreen({
           message={createMessage}
         />
       )}
-      {page === "existing" && <UseExistingPage onNext={next} onPrev={prev} />}
+      {page === "existing" && (
+        <UseExistingPage
+          forceWeakerKeys={forceWeakerKeys}
+          onNext={next}
+          onPrev={prev}
+        />
+      )}
       {page === "new-allow-notifications" && (
         <AllowNotifications onNext={next} />
       )}
@@ -228,6 +260,131 @@ function PageBubble({ count, index }: { count: number; index: number }) {
   return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
 }
 
+function TryEnclave({
+  onNext,
+  createStatus,
+  forceWeakerKeys,
+  setForceWeakerKeys,
+}: {
+  onNext: () => void;
+  createStatus: ActStatus;
+  forceWeakerKeys: boolean;
+  setForceWeakerKeys: (force: boolean) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [askWeak, setAskWeak] = useState(false);
+  const [error, setError] = useState("");
+
+  // If we've failed in loading or creating the key already without force even
+  // before getting to this screen, force weaker keys now
+  useEffect(() => {
+    if (createStatus === "error" && !forceWeakerKeys) setForceWeakerKeys(true);
+  }, [createStatus]);
+
+  const trySignatureGeneration = async (tryWeaker: boolean) => {
+    setLoading(true);
+    setForceWeakerKeys(tryWeaker);
+    try {
+      await requestEnclaveSignature(
+        {
+          name: defaultEnclaveKeyName,
+          forceWeakerKeys: tryWeaker,
+        },
+        "dead",
+        "Create key"
+      );
+
+      console.log(`[ONBOARDING] enclave signature trial success`);
+      onNext();
+    } catch (e: any) {
+      console.error(e);
+      if (!tryWeaker) {
+        console.error(
+          `[ONBOARDING] enclave signature trial error, asking to downgrade to weaker keys`
+        );
+        setAskWeak(true);
+      } else {
+        const err = `[ONBOARDING] Failed with weaker keys too, giving up`;
+        setError(err);
+        console.error(err);
+      }
+    }
+    setLoading(false);
+  };
+
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.createAccountPage}>
+        <TextH1>
+          <Octicons name={askWeak ? "unlock" : "lock"} size={40} />
+        </TextH1>
+        <Spacer h={32} />
+        <View style={ss.container.padH16}>
+          <TextCenter>
+            {!askWeak && (
+              <TextBody>
+                Create a cryptographic key on-device that will authorize your
+                account. This makes your money yours alone.
+              </TextBody>
+            )}
+            {askWeak && (
+              <TextBody>
+                Failed to create hardware authenticated key. This can happen on
+                older Android devices. Use regular key?
+              </TextBody>
+            )}
+          </TextCenter>
+        </View>
+        <Spacer h={32} />
+        {(loading || createStatus === "loading") && (
+          <ActivityIndicator size="large" />
+        )}
+        {!loading && !askWeak && createStatus !== "loading" && (
+          <ButtonBig
+            type="primary"
+            title="Generate"
+            onPress={() => {
+              trySignatureGeneration(false);
+            }}
+          />
+        )}
+        {askWeak && (
+          <>
+            <Spacer h={16} />
+            <ButtonBig
+              type="primary"
+              title="Use regular key"
+              onPress={() => {
+                trySignatureGeneration(true);
+              }}
+            />
+          </>
+        )}
+        {askWeak && (
+          <>
+            <Spacer h={16} />
+            <ButtonBig
+              type="subtle"
+              title="Try again"
+              onPress={() => {
+                trySignatureGeneration(false);
+              }}
+            />
+          </>
+        )}
+        {error && (
+          <>
+            <Spacer h={16} />
+            <TextCenter>
+              <TextError>{error}</TextError>
+            </TextCenter>
+          </>
+        )}
+      </View>
+    </View>
+  );
+}
+
 function AllowNotifications({ onNext }: { onNext: () => void }) {
   const requestPermission = async () => {
     if (!Device.isDevice) {
@@ -326,13 +483,15 @@ function CreateAccountPage({
 }
 
 function UseExistingPage({
+  forceWeakerKeys,
   onNext,
   onPrev,
 }: {
+  forceWeakerKeys: boolean;
   onNext: () => void;
   onPrev: () => void;
 }) {
-  const { status, message, pubKeyHex } = useExistingAccount();
+  const { status, message, pubKeyHex } = useExistingAccount(forceWeakerKeys);
 
   useEffect(() => {
     if (status === "success") onNext();

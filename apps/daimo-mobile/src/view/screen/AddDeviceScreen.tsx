@@ -66,7 +66,6 @@ export function AddDeviceScreen() {
   };
 
   const { status, message, cost, exec } = useSendAsync({
-    enclaveKeyName: account.enclaveKeyName,
     dollarsToSend: 0,
     sendFn,
   });

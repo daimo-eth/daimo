@@ -4,6 +4,7 @@ import {
   TransferOpEvent,
   TrackedRequest,
   KeyData,
+  EnclaveKeyInfo,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -20,8 +21,8 @@ export const defaultEnclaveKeyName = "daimo-8";
 
 /** Account data stored on device. */
 export type Account = {
-  /** Local device signing key name */
-  enclaveKeyName: string;
+  /** Local device signing key info */
+  enclaveKeyInfo: EnclaveKeyInfo;
   /** Local device signing DER pubkey */
   enclavePubKey: Hex;
   /** Daimo name, registered onchain */
@@ -55,6 +56,26 @@ interface AccountV5 extends StoredModel {
   storageVersion: 5;
 
   enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+
+  pushToken: string | null;
+}
+
+interface AccountV6 extends StoredModel {
+  storageVersion: 6;
+
+  enclaveKeyInfo: EnclaveKeyInfo;
   enclavePubKey: Hex;
   name: string;
   address: string;
@@ -150,11 +171,36 @@ export function parseAccount(accountJSON?: string): Account | null {
   // Delete V1-4 testnet accounts. Re-onboard to accounts with multi-key support.
   if (model.storageVersion < 5) return null;
 
-  assert(model.storageVersion === 5);
-  const a = model as AccountV5;
+  if (model.storageVersion === 5) {
+    const a = model as AccountV5;
+    return {
+      enclaveKeyInfo: {
+        name: a.enclaveKeyName,
+        forceWeakerKeys: false,
+      },
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 6);
+  const a = model as AccountV6;
 
   return {
-    enclaveKeyName: a.enclaveKeyName,
+    enclaveKeyInfo: a.enclaveKeyInfo,
     enclavePubKey: a.enclavePubKey,
     name: a.name,
     address: getAddress(a.address),
@@ -176,10 +222,10 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV5 = {
-    storageVersion: 5,
+  const model: AccountV6 = {
+    storageVersion: 6,
 
-    enclaveKeyName: account.enclaveKeyName,
+    enclaveKeyInfo: account.enclaveKeyInfo,
     enclavePubKey: account.enclavePubKey,
     name: account.name,
     address: account.address,
