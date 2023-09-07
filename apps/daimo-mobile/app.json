@@ -22,7 +22,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "41",
+      "buildNumber": "42",
       "associatedDomains": [
         "applinks:daimo.onrender.com"
       ],
@@ -61,7 +61,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 41
+      "versionCode": 42
     },
     "extra": {
       "eas": {
@@ -75,6 +75,7 @@
           "android": {
             "compileSdkVersion": 33,
             "targetSdkVersion": 33,
+            "minSdkVersion": 28,
             "buildToolsVersion": "33.0.0",
             "kotlinVersion": "1.8.0"
           },
