@@ -30,7 +30,7 @@ jobs:
         with:
           version: nightly
 
-      - run: forge test -vvv
+      - run: forge test -vvv && forge coverage --report lcov && git diff --exit-code
         working-directory: ./packages/contract
 
   lint:

@@ -18,5 +18,7 @@
   },
   "[kotlin]": {
     "editor.defaultFormatter": "esafirm.kotlin-formatter"
-  }
+  },
+  "coverage-gutters.coverageBaseDir": "packages/contract",
+  "coverage-gutters.coverageFileNames": ["lcov.info"]
 }
