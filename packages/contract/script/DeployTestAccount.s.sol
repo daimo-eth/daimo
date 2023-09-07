@@ -32,4 +32,7 @@ contract DeployScript is Script {
 
         vm.stopBroadcast();
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }

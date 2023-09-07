@@ -13,6 +13,9 @@ contract TestDAI is ERC20 {
     function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }
 
 contract EphemeralNotesTest is Test {

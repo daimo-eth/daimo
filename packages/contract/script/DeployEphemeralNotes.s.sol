@@ -10,4 +10,7 @@ contract DeployEphemeralNotesScript is Script {
         new EphemeralNotes(token);
         vm.stopBroadcast();
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }

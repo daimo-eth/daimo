@@ -13,4 +13,7 @@ contract DeployNameRegistryScript is Script {
 
         vm.stopBroadcast();
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }
