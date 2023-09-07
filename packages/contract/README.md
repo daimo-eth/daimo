@@ -22,4 +22,5 @@ Before making a PR, update detailed coverage:
 forge coverage --report lcov
 ```
 
-You can see line-by-line coverage in VSCode using the recommended extension.
+You can see line-by-line coverage in VSCode using the recommended extension. Run
+`Cmd+Shift+P` > `Coverage Gutters: Display Coverage`.

@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../src/DaimoAccountFactory.sol";
-import "../src/DaimoTestUSDC.sol";
 
 contract DeployScript is Script {
     function setUp() public {}

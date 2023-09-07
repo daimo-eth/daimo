@@ -34,13 +34,17 @@ contract AccountFactory {
         uint256 salt
     ) public payable returns (Account ret) {
         address addr = getAddress(slot, key, initCalls, salt);
+
+        // Prefund the account with msg.value
+        if (msg.value > 0) {
+            entryPoint.depositTo{value: msg.value}(addr);
+        }
+
+        // Otherwise, no-op if the account is already deployed
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
             return Account(payable(addr));
         }
-
-        // Prefund the account with msg.value
-        if (msg.value > 0) entryPoint.depositTo{value: msg.value}(addr);
 
         ret = Account(
             payable(

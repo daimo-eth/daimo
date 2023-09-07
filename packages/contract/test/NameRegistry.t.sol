@@ -19,6 +19,16 @@ contract NameRegistryTest is Test {
         assertEq(registry.resolveName(addr), name);
     }
 
+    function testRegisterSelf() public {
+        bytes32 name = "bar";
+        address addr = address(0x12345);
+        vm.startPrank(addr);
+        registry.registerSelf(name);
+        vm.stopPrank();
+        assertEq(registry.resolveAddr(name), addr);
+        assertEq(registry.resolveName(addr), name);
+    }
+
     function testDuplicateName() public {
         registry.register("foo", address(0x1234));
         vm.expectRevert("NameRegistry: name taken");
