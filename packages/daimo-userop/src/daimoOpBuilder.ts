@@ -1,5 +1,5 @@
 import { DaimoAccountCall } from "@daimo/common";
-import { accountABI } from "@daimo/contract";
+import { daimoAccountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
@@ -84,7 +84,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   executeBatch(calls: DaimoAccountCall[], nonce: DaimoNonce) {
     return this.setNonce(nonce.toHex()).setCallData(
       encodeFunctionData({
-        abi: accountABI,
+        abi: daimoAccountABI,
         functionName: "executeBatch",
         args: [calls],
       })

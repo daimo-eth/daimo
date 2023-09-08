@@ -9,7 +9,7 @@ import "../src/DaimoAccount.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 
-contract EntrypointTest is Test {
+contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
 
     P256SHA256 public verifier;
@@ -56,10 +56,10 @@ contract EntrypointTest is Test {
             )
         ];
         bytes
-            memory ownerSig = hex"001d8192eac426bd39b83163aca9332ee373b88e6259b4b5ea9bd2657e9da010d4a0f4abe964a8e4a58fab0cffd45d9930efb0c400bbb939334753433a2cc6ad81";
+            memory ownerSig = hex"0001655c1753db6b61a9717e4ccc5d6c4bf7681623dd54c2d6babc55125756661cf073023b6de130f18510af41f64f067c39adccd59f8789a55dbbe822b0ea2317";
 
         Call[] memory calls = new Call[](0);
-        Account acc = factory.createAccount(0, key, calls, 42);
+        DaimoAccount acc = factory.createAccount(key, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 

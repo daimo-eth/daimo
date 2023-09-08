@@ -9,7 +9,8 @@ import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "account-abstraction/core/BaseAccount.sol";
+import "account-abstraction/interfaces/IAccount.sol";
+import "account-abstraction/interfaces/IEntryPoint.sol";
 
 import "./DaimoP256SHA256.sol";
 
@@ -20,27 +21,38 @@ struct Call {
 }
 
 /**
- * Daimo account.
- *  has execute, eth handling methods
- *  has many P256 account keys that can send requests through the entryPoint.
+ * Daimo ERC-4337 contract account.
  *
- * TODO: doc comments
- * TODO: _authorizeUpgrade
+ * Implements a 1-of-n multisig with P256 keys. Supports key rotation.
  */
-contract Account is BaseAccount, UUPSUpgradeable, Initializable {
+contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
+    /// Number of keys. 1-of-n multisig, n = numActiveKeys
     uint8 public numActiveKeys;
-    mapping(uint8 => bytes32[2]) public keys; // map of P256 slots -> public keys that own the account
+    /// Map of slot to key. Invariant: exactly n slots are nonzero.
+    mapping(uint8 => bytes32[2]) public keys;
 
-    IEntryPoint private immutable _entryPoint;
+    /// The ERC-4337 entry point singleton
+    IEntryPoint public immutable entryPoint;
+    /// P256 (secp256r1) signature verifier
+    P256SHA256 public immutable sigVerifier;
+    /// Maximum number of signing keys
+    uint8 public immutable maxKeys = 20;
 
-    P256SHA256 private immutable _sigVerifier;
+    // Return value in case of signature failure, with no time-range.
+    // Equivalent to _packValidationData(true,0,0)
+    uint256 private constant _SIG_VALIDATION_FAILED = 1;
 
+    /// Emitted during initialization = on upgradeTo() this implementation.
     event AccountInitialized(IEntryPoint indexed entryPoint);
+
+    /// Emitted after adding a new signing key (add device).
     event SigningKeyAdded(
         IAccount indexed account,
         uint8 keySlot,
         bytes32[2] key
     );
+
+    /// Emitted after removing a signing key (remove device).
     event SigningKeyRemoved(
         IAccount indexed account,
         uint8 keySlot,
@@ -48,57 +60,32 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
     );
 
     modifier onlySelf() {
-        _onlySelf();
+        require(msg.sender == address(this), "only self");
         _;
     }
 
-    /// @inheritdoc BaseAccount
-    function entryPoint() public view virtual override returns (IEntryPoint) {
-        return _entryPoint;
+    modifier onlyEntryPoint() {
+        require(msg.sender == address(entryPoint), "only entry point");
+        _;
     }
 
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
+    /// Runs at deploy time. Implementation contract = no init, no state.
+    /// All other methods are called via proxy = initialized once, has state.
     constructor(IEntryPoint anEntryPoint, P256SHA256 aSigVerifier) {
-        _entryPoint = anEntryPoint;
-        _sigVerifier = aSigVerifier;
+        entryPoint = anEntryPoint;
+        sigVerifier = aSigVerifier;
         _disableInitializers();
     }
 
-    function _onlySelf() internal view {
-        // through the account itself (which gets redirected through execute())
-        require(msg.sender == address(this), "only self");
-    }
-
-    /**
-     * execute a sequence of transactions
-     */
-    function executeBatch(Call[] calldata calls) external {
-        _requireFromEntryPoint();
-        for (uint256 i = 0; i < calls.length; i++) {
-            _call(calls[i].dest, calls[i].value, calls[i].data);
-        }
-    }
-
-    /**
-     * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
-     * a new implementation of Account must be deployed with the new EntryPoint address, then upgrading
-     * the implementation by calling `upgradeTo()`
-     */
+    /// Initialize proxy contract storage.
     function initialize(
-        uint8 slot,
         bytes32[2] calldata key,
         Call[] calldata initCalls
     ) public virtual initializer {
-        _initialize(slot, key, initCalls);
-    }
-
-    function _initialize(
-        uint8 slot,
-        bytes32[2] calldata key,
-        Call[] calldata initCalls
-    ) internal virtual {
+        uint8 slot = 0;
         keys[slot] = key;
         numActiveKeys = 1;
 
@@ -106,33 +93,60 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
             _call(initCalls[i].dest, initCalls[i].value, initCalls[i].data);
         }
 
-        emit AccountInitialized(_entryPoint);
+        emit AccountInitialized(entryPoint);
         emit SigningKeyAdded(this, slot, key);
     }
 
-    /// implement template method of BaseAccount
+    /// Execute multiple transactions atomically.
+    function executeBatch(Call[] calldata calls) external onlyEntryPoint {
+        for (uint256 i = 0; i < calls.length; i++) {
+            _call(calls[i].dest, calls[i].value, calls[i].data);
+        }
+    }
+
+    /// Check that the P256 signature is valid for this user operation.
+    function validateUserOp(
+        UserOperation calldata userOp,
+        bytes32 userOpHash,
+        uint256 missingAccountFunds
+    )
+        external
+        virtual
+        override
+        onlyEntryPoint
+        returns (uint256 validationData)
+    {
+        validationData = _validateSignature(userOp, userOpHash);
+        _payPrefund(missingAccountFunds);
+    }
+
+    /// Validate userop by verifying a P256 signature.
     function _validateSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
-    ) internal virtual override returns (uint256 validationData) {
-        bytes memory prefixedHash = bytes.concat(
-            "\x19Ethereum Signed Message:\n32",
-            userOpHash
-        ); // Emulate EIP-712 signing: https://eips.ethereum.org/EIPS/eip-712
+    ) private view returns (uint256 validationData) {
         uint8 keySlot = uint8(userOp.signature[0]);
         require(keys[keySlot][0] != bytes32(0), "invalid key slot");
-        if (
-            _sigVerifier.verify(
-                keys[keySlot],
-                prefixedHash,
-                userOp.signature[1:]
-            )
-        ) {
+        bytes memory opHash = abi.encodePacked(userOpHash);
+        if (sigVerifier.verify(keys[keySlot], opHash, userOp.signature[1:])) {
+            // TODO: validUntil?
             return 0;
         }
-        return SIG_VALIDATION_FAILED;
+        return _SIG_VALIDATION_FAILED;
     }
 
+    /// Prefund the entrypoint (msg.sender) gas for this transaction.
+    function _payPrefund(uint256 missingAccountFunds) private {
+        if (missingAccountFunds != 0) {
+            (bool success, ) = payable(msg.sender).call{
+                value: missingAccountFunds,
+                gas: type(uint256).max
+            }("");
+            (success); // no-op; silence unused variable warning
+        }
+    }
+
+    /// All account actions originate from here.
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
@@ -142,28 +156,14 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
         }
     }
 
-    /**
-     * withdraw value from the account's deposit
-     * @param withdrawAddress target to send to
-     * @param amount to withdraw
-     */
-    function withdrawDepositTo(
-        address payable withdrawAddress,
-        uint256 amount
-    ) public onlySelf {
-        entryPoint().withdrawTo(withdrawAddress, amount);
-    }
-
+    /// UUPSUpsgradeable: only allow self-upgrade.
     function _authorizeUpgrade(
         address newImplementation
-    ) internal view override {
-        (newImplementation);
-        _onlySelf();
+    ) internal view override onlySelf {
+        (newImplementation); // No-op; silence unused parameter warning
     }
 
-    /**
-     * Fetch all current signing keys
-     */
+    /// Fetch all current signing keys (current devices).
     function getActiveSigningKeys()
         public
         view
@@ -175,37 +175,33 @@ contract Account is BaseAccount, UUPSUpgradeable, Initializable {
         activeSigningKeys = new bytes32[2][](numActiveKeys);
         activeSigningKeySlots = new uint8[](numActiveKeys);
         uint activeKeyIdx = 0;
-        for (uint8 i = 0; i < 255; i++) {
+        for (uint8 i = 0; i < maxKeys; i++) {
             if (keys[i][0] != bytes32(0)) {
                 activeSigningKeys[activeKeyIdx] = keys[i];
                 activeSigningKeySlots[activeKeyIdx] = i;
                 activeKeyIdx++;
             }
         }
+        assert(activeKeyIdx == numActiveKeys);
     }
 
-    /**
-     * Add a signing key to the account
-     * @param slot the slot index to use for this key
-     * @param key the P256 public key to add
-     */
+    /// Add a signing key to the account
+    /// @param slot the empty slot index to use for this key
+    /// @param key the P256 public key to add
     function addSigningKey(uint8 slot, bytes32[2] memory key) public onlySelf {
         require(keys[slot][0] == bytes32(0), "key already exists");
         require(key[0] != bytes32(0), "new key cannot be 0");
-        require(numActiveKeys < 255, "too many keys");
-        require(slot < 255, "invalid slot");
+        require(slot < maxKeys, "invalid slot");
         keys[slot] = key;
         numActiveKeys++;
         emit SigningKeyAdded(this, slot, key);
     }
 
-    /**
-     * Remove a signing key from the account
-     * @param slot the slot of the key to remove
-     */
+    /// Remove a signing key from the account
+    /// @param slot the slot of the key to remove
     function removeSigningKey(uint8 slot) public onlySelf {
         require(keys[slot][0] != bytes32(0), "key does not exist");
-        require(numActiveKeys > 1, "cannot remove singular key");
+        require(numActiveKeys > 1, "cannot remove only signing key");
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];
         numActiveKeys--;

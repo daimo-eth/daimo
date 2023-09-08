@@ -13,12 +13,12 @@ import "./DaimoAccount.sol";
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract AccountFactory {
-    Account public immutable accountImplementation;
+    DaimoAccount public immutable accountImplementation;
     IEntryPoint public immutable entryPoint;
 
     constructor(IEntryPoint _entryPoint, P256SHA256 _sigVerifier) {
         entryPoint = _entryPoint;
-        accountImplementation = new Account(_entryPoint, _sigVerifier);
+        accountImplementation = new DaimoAccount(_entryPoint, _sigVerifier);
     }
 
     /**
@@ -28,12 +28,11 @@ contract AccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        uint8 slot,
         bytes32[2] memory key,
         Call[] calldata initCalls,
         uint256 salt
-    ) public payable returns (Account ret) {
-        address addr = getAddress(slot, key, initCalls, salt);
+    ) public payable returns (DaimoAccount ret) {
+        address addr = getAddress(key, initCalls, salt);
 
         // Prefund the account with msg.value
         if (msg.value > 0) {
@@ -43,14 +42,14 @@ contract AccountFactory {
         // Otherwise, no-op if the account is already deployed
         uint codeSize = addr.code.length;
         if (codeSize > 0) {
-            return Account(payable(addr));
+            return DaimoAccount(payable(addr));
         }
 
-        ret = Account(
+        ret = DaimoAccount(
             payable(
                 new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
-                    abi.encodeCall(Account.initialize, (slot, key, initCalls))
+                    abi.encodeCall(DaimoAccount.initialize, (key, initCalls))
                 )
             )
         );
@@ -60,7 +59,6 @@ contract AccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAddress(
-        uint8 slot,
         bytes32[2] memory key,
         Call[] calldata initCalls,
         uint256 salt
@@ -74,8 +72,8 @@ contract AccountFactory {
                         abi.encode(
                             address(accountImplementation),
                             abi.encodeCall(
-                                Account.initialize,
-                                (slot, key, initCalls)
+                                DaimoAccount.initialize,
+                                (key, initCalls)
                             )
                         )
                     )

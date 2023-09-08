@@ -123,7 +123,7 @@ export class DaimoAccount {
           dest: this.getAddress(),
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.accountABI,
+            abi: Contracts.daimoAccountABI,
             functionName: "addSigningKey",
             args: [slot, contractFriendlyKey],
           }),
@@ -143,7 +143,7 @@ export class DaimoAccount {
           dest: this.getAddress(),
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.accountABI,
+            abi: Contracts.daimoAccountABI,
             functionName: "removeSigningKey",
             args: [slot],
           }),

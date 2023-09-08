@@ -9,7 +9,7 @@ import "../src/DaimoAccount.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 
-contract SigningKeysTest is Test {
+contract AccountSigningKeysTest is Test {
     using UserOperationLib for UserOperation;
 
     P256SHA256 public verifier;
@@ -54,7 +54,7 @@ contract SigningKeysTest is Test {
         ];
 
         Call[] memory calls = new Call[](0);
-        Account acc = factory.createAccount(0, key1, calls, 42);
+        DaimoAccount acc = factory.createAccount(key1, calls, 42);
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
@@ -76,7 +76,7 @@ contract SigningKeysTest is Test {
         assertTrue(acc.numActiveKeys() == uint8(1));
 
         // remove key2
-        vm.expectRevert("cannot remove singular key");
+        vm.expectRevert("cannot remove only signing key");
         acc.removeSigningKey(1);
 
         vm.stopPrank();

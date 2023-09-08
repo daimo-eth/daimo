@@ -1,8 +1,99 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Account
+// AccountFactory
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const accountABI = [
+export const accountFactoryABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+      {
+        name: '_sigVerifier',
+        internalType: 'contract P256SHA256',
+        type: 'address',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'accountImplementation',
+    outputs: [
+      { name: '', internalType: 'contract DaimoAccount', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      {
+        name: 'initCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'dest', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'createAccount',
+    outputs: [
+      { name: 'ret', internalType: 'contract DaimoAccount', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'entryPoint',
+    outputs: [
+      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      {
+        name: 'initCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'dest', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getAddress',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+] as const
+
+export const accountFactoryAddress =
+  '0x153BE6528F5722a5e3033f26b4FC5148f4af5364' as const
+
+export const accountFactoryConfig = {
+  address: accountFactoryAddress,
+  abi: accountFactoryABI,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoAccount
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoAccountABI = [
   {
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -181,17 +272,9 @@ export const accountABI = [
     ],
   },
   {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'getNonce',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-  },
-  {
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
-      { name: 'slot', internalType: 'uint8', type: 'uint8' },
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
@@ -221,6 +304,13 @@ export const accountABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [],
+    name: 'maxKeys',
+    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
     name: 'numActiveKeys',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
   },
@@ -237,6 +327,15 @@ export const accountABI = [
     inputs: [{ name: 'slot', internalType: 'uint8', type: 'uint8' }],
     name: 'removeSigningKey',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'sigVerifier',
+    outputs: [
+      { name: '', internalType: 'contract P256SHA256', type: 'address' },
+    ],
   },
   {
     stateMutability: 'nonpayable',
@@ -299,113 +398,8 @@ export const accountABI = [
       { name: 'validationData', internalType: 'uint256', type: 'uint256' },
     ],
   },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      {
-        name: 'withdrawAddress',
-        internalType: 'address payable',
-        type: 'address',
-      },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'withdrawDepositTo',
-    outputs: [],
-  },
   { stateMutability: 'payable', type: 'receive' },
 ] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// AccountFactory
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const accountFactoryABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_entryPoint',
-        internalType: 'contract IEntryPoint',
-        type: 'address',
-      },
-      {
-        name: '_sigVerifier',
-        internalType: 'contract P256SHA256',
-        type: 'address',
-      },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'accountImplementation',
-    outputs: [{ name: '', internalType: 'contract Account', type: 'address' }],
-  },
-  {
-    stateMutability: 'payable',
-    type: 'function',
-    inputs: [
-      { name: 'slot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      {
-        name: 'initCalls',
-        internalType: 'struct Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'salt', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'createAccount',
-    outputs: [
-      { name: 'ret', internalType: 'contract Account', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'entryPoint',
-    outputs: [
-      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'slot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      {
-        name: 'initCalls',
-        internalType: 'struct Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'salt', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getAddress',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-  },
-] as const
-
-export const accountFactoryAddress =
-  '0x153BE6528F5722a5e3033f26b4FC5148f4af5364' as const
-
-export const accountFactoryConfig = {
-  address: accountFactoryAddress,
-  abi: accountFactoryABI,
-} as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC1967Proxy

@@ -27,7 +27,7 @@ contract DeployScript is Script {
 
         Call[] memory calls = new Call[](0);
 
-        factory.createAccount(0, key, calls, 0);
+        factory.createAccount(key, calls, 0);
 
         vm.stopBroadcast();
     }

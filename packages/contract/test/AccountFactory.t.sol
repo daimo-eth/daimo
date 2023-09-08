@@ -9,7 +9,7 @@ import "../src/DaimoAccount.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 
-contract SigningKeysTest is Test {
+contract AccountFactoryTest is Test {
     using UserOperationLib for UserOperation;
 
     P256SHA256 public verifier;
@@ -28,19 +28,19 @@ contract SigningKeysTest is Test {
 
         // deploy account
         Call[] memory calls = new Call[](0);
-        Account acc = factory.createAccount{value: 0}(0, key1, calls, 42);
+        DaimoAccount acc = factory.createAccount{value: 0}(key1, calls, 42);
         console.log("new account address:", address(acc));
         assertEq(acc.numActiveKeys(), uint8(1));
 
         // deploy again = just returns the existing address
         // prefund still goes thru to the entrypoint contract
         assertEq(entryPoint.getDepositInfo(address(acc)).deposit, 0);
-        Account acc2 = factory.createAccount{value: 999}(0, key1, calls, 42);
+        DaimoAccount acc2 = factory.createAccount{value: 999}(key1, calls, 42);
         assertEq(address(acc), address(acc2));
         assertEq(entryPoint.getDepositInfo(address(acc)).deposit, 999);
 
         // get the counterfactual address, should be same
-        address counterfactual = factory.getAddress(0, key1, calls, 42);
+        address counterfactual = factory.getAddress(key1, calls, 42);
         assertEq(address(acc), counterfactual);
     }
 }

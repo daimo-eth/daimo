@@ -84,7 +84,7 @@ export async function createAccount() {
   const key1 = `0x${pubKey.subarray(0, 32).toString("hex")}` as Hex;
   const key2 = `0x${pubKey.subarray(32).toString("hex")}` as Hex;
   const salt = 0n;
-  const args = [0, [key1, key2], [], salt] as const;
+  const args = [[key1, key2], [], salt] as const;
 
   const address = await publicClient.readContract({
     ...accountFactoryConfig,
