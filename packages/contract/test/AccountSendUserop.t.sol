@@ -108,7 +108,7 @@ contract AccountSendUseropTest is Test {
         vm.store(address(a2), 0, 0); // set _initialized = 0
         a2.initialize(key, calls);
         vm.prank(address(entryPoint));
-        uint256 validationData = a2.testValidateUserOp(op, hash, 0);
+        uint256 validationData = a2.validateUserOp(op, hash, 0);
         assertEq(validationData, 0);
     }
 }

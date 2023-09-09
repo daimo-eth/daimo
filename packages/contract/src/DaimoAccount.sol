@@ -8,6 +8,7 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 
 import "account-abstraction/interfaces/IAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
@@ -25,7 +26,7 @@ struct Call {
  *
  * Implements a 1-of-n multisig with P256 keys. Supports key rotation.
  */
-contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
+contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     /// Number of keys. 1-of-n multisig, n = numActiveKeys
     uint8 public numActiveKeys;
     /// Map of slot to key. Invariant: exactly n slots are nonzero.
@@ -128,7 +129,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
     //                     :::::::::::::::::::::::::::::::::::::::::::::
     //                     OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
     //
-    /// Check that the P256 signature is valid for this user operation.
+    /// ERC4337: validate userop by verifying a P256 signature.
     function validateUserOp(
         UserOperation calldata userOp,
         bytes32 userOpHash,
@@ -140,26 +141,49 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
         onlyEntryPoint
         returns (uint256 validationData)
     {
-        validationData = _validateSignature(userOp, userOpHash);
+        // Note: `forge coverage` incorrectly marks this function and downstream
+        // as non-covered.
+        validationData = _validateUseropSignature(userOp, userOpHash);
         _payPrefund(missingAccountFunds);
     }
 
-    /// Validate userop by verifying a P256 signature.
+    /// ERC1271: validate a user signature, verifying P256.
+    function isValidSignature(
+        bytes32 hash,
+        bytes calldata signature
+    ) external view override returns (bytes4 magicValue) {
+        if (_validateSignature(hash, signature)) {
+            return IERC1271(this).isValidSignature.selector;
+        }
+        return 0xffffffff;
+    }
+
+    // Signature structure: [uint8 keySlot, uint256 r, s]
+    // - keySlot identifies the signing public key to verify against
+    // - r, s are the P256 signature components
+    /// Validate any P256 signature, whether for a userop or ERC1271 user sig.
     function _validateSignature(
+        bytes32 hash,
+        bytes calldata signature
+    ) private view returns (bool) {
+        uint8 keySlot = uint8(signature[0]);
+        require(keys[keySlot][0] != bytes32(0), "invalid key slot");
+        bytes memory sig = signature[1:];
+        return sigVerifier.verify(keys[keySlot], abi.encodePacked(hash), sig);
+    }
+
+    /// Validate userop by verifying a P256 signature.
+    function _validateUseropSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) private view returns (uint256 validationData) {
-        uint8 keySlot = uint8(userOp.signature[0]);
-        require(keys[keySlot][0] != bytes32(0), "invalid key slot");
-        bytes memory opHash = abi.encodePacked(userOpHash);
-
         // TODO: to allow key rotation replay across chains
         // Special case userOp.callData calling `executeKeyRotation`
-        // Require nonce key = 0, so that nonce sequence forces order/
+        // Require nonce key = magic val, so that nonce sequence forces order
         // Calculate a replacement userOpHash excluding chainID.
 
-        if (sigVerifier.verify(keys[keySlot], opHash, userOp.signature[1:])) {
-            // TODO: validUntil
+        if (_validateSignature(userOpHash, userOp.signature)) {
+            // TODO: return a validUntil
             return 0;
         }
         return _SIG_VALIDATION_FAILED;
