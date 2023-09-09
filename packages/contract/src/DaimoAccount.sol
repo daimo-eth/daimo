@@ -104,6 +104,30 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
         }
     }
 
+    //               _.------------------.
+    //             .'____________________|
+    //             //    _||||  | |  | | |
+    //      ______//_\__j_|||"--" "--" | |  _
+    //     /-----+-|p  ==,|||__________|_|-|W|
+    //    _j,====. |b_____|||  _____     | |W|
+    //   |_) ,---.`.`------'|.',---.`.___|_|W|
+    //     `/ .-. \\`======__// .-. \`-----'""
+    //      \ `-' / """""""   \ `-' /
+    //       `---'             `---'
+    //                     * * * * * * * * * * OOOOOOOOOOOOOOOOOOOOOOOOO
+    //   4 TPG              * * * * * * * * *  :::::::::::::::::::::::::
+    //                     * * * * * * * * * * OOOOOOOOOOOOOOOOOOOOOOOOO
+    //   4 transfers        * * * * * * * * *  :::::::::::::::::::::::::
+    //   per million gas   * * * * * * * * * * OOOOOOOOOOOOOOOOOOOOOOOOO
+    //                      * * * * * * * * *  ::::::::::::::::::::;::::
+    //   Cheap gas on L2,  * * * * * * * * * * OOOOOOOOOOOOOOOOOOOOOOOOO
+    //   land of the free  :::::::::::::::::::::::::::::::::::::::::::::
+    //                     OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+    //                     :::::::::::::::::::::::::::::::::::::::::::::
+    //                     OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+    //                     :::::::::::::::::::::::::::::::::::::::::::::
+    //                     OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+    //
     /// Check that the P256 signature is valid for this user operation.
     function validateUserOp(
         UserOperation calldata userOp,
@@ -128,8 +152,14 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable {
         uint8 keySlot = uint8(userOp.signature[0]);
         require(keys[keySlot][0] != bytes32(0), "invalid key slot");
         bytes memory opHash = abi.encodePacked(userOpHash);
+
+        // TODO: to allow key rotation replay across chains
+        // Special case userOp.callData calling `executeKeyRotation`
+        // Require nonce key = 0, so that nonce sequence forces order/
+        // Calculate a replacement userOpHash excluding chainID.
+
         if (sigVerifier.verify(keys[keySlot], opHash, userOp.signature[1:])) {
-            // TODO: validUntil?
+            // TODO: validUntil
             return 0;
         }
         return _SIG_VALIDATION_FAILED;
