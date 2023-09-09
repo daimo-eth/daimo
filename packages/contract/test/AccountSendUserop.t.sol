@@ -47,14 +47,11 @@ contract AccountSendUseropTest is Test {
 
     function testSimpleOp() public {
         // hardcoded from swift playground
-        bytes32[2] memory key = [
-            bytes32(
-                hex"65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4"
-            ),
-            bytes32(
-                hex"4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437"
-            )
+        uint256[2] memory key1u = [
+            0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
+            0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
+        bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes
             memory ownerSig = hex"0001655c1753db6b61a9717e4ccc5d6c4bf7681623dd54c2d6babc55125756661cf073023b6de130f18510af41f64f067c39adccd59f8789a55dbbe822b0ea2317";
 
@@ -90,7 +87,7 @@ contract AccountSendUseropTest is Test {
 
         op.signature = ownerSig;
 
-        // vm.expectRevert(entryPoint.ValidationResult((1417770, 6663000000000000, true, 0, 281474976710655, 0x00), (0, 0), (0, 0), (0, 0)));
+        // expect a valid but reverting op
         UserOperation[] memory ops = new UserOperation[](1);
         ops[0] = op;
         vm.expectEmit(false, false, false, false);
@@ -104,5 +101,14 @@ contract AccountSendUseropTest is Test {
             0
         );
         entryPoint.handleOps(ops, payable(address(acc)));
+
+        // code coverage can't handle indirect calls
+        // call validateUserOp directly
+        DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.sigVerifier());
+        vm.store(address(a2), 0, 0); // set _initialized = 0
+        a2.initialize(key, calls);
+        vm.prank(address(entryPoint));
+        uint256 validationData = a2.testValidateUserOp(op, hash, 0);
+        assertEq(validationData, 0);
     }
 }
