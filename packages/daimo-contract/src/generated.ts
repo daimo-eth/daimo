@@ -32,6 +32,7 @@ export const accountFactoryABI = [
     stateMutability: 'payable',
     type: 'function',
     inputs: [
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
@@ -63,6 +64,7 @@ export const accountFactoryABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
@@ -275,6 +277,7 @@ export const daimoAccountABI = [
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
+      { name: 'slot', internalType: 'uint8', type: 'uint8' },
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
@@ -289,6 +292,16 @@ export const daimoAccountABI = [
     ],
     name: 'initialize',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'hash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'signature', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'isValidSignature',
+    outputs: [{ name: 'magicValue', internalType: 'bytes4', type: 'bytes4' }],
   },
   {
     stateMutability: 'view',

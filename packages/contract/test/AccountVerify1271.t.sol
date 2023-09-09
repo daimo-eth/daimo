@@ -34,7 +34,7 @@ contract AccountVerify1271Test is Test {
         bytes
             memory sig = hex"0001655c1753db6b61a9717e4ccc5d6c4bf7681623dd54c2d6babc55125756661cf073023b6de130f18510af41f64f067c39adccd59f8789a55dbbe822b0ea2317";
 
-        DaimoAccount acc = factory.createAccount(key, new Call[](0), 0);
+        DaimoAccount acc = factory.createAccount(0, key, new Call[](0), 0);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 

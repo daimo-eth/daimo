@@ -48,7 +48,7 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
         Call[] memory calls = new Call[](0);
-        DaimoAccount acc = factory.createAccount(key1, calls, 42);
+        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
@@ -89,7 +89,7 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
         Call[] memory calls = new Call[](0);
-        DaimoAccount acc = factory.createAccount(key1, calls, 42);
+        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
         assertTrue(acc.numActiveKeys() == uint8(1));
 
         // ensure initial key retrieves correctly

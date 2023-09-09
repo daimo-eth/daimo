@@ -20,7 +20,7 @@ export class AccountFactory {
     const address = await this.vc.publicClient.readContract({
       ...accountFactoryConfig,
       functionName: "getAddress",
-      args: [derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
+      args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
     });
     return address;
   }
@@ -37,7 +37,7 @@ export class AccountFactory {
     const hash = await this.vc.walletClient.writeContract({
       ...accountFactoryConfig,
       functionName: "createAccount",
-      args: [derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
+      args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
       value,
     });
     console.log(`[API] deploy transaction ${hash}`);

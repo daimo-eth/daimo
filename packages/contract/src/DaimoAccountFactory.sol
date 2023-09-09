@@ -28,11 +28,12 @@ contract AccountFactory {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
+        uint8 keySlot,
         bytes32[2] memory key,
         Call[] calldata initCalls,
         uint256 salt
     ) public payable returns (DaimoAccount ret) {
-        address addr = getAddress(key, initCalls, salt);
+        address addr = getAddress(keySlot, key, initCalls, salt);
 
         // Prefund the account with msg.value
         if (msg.value > 0) {
@@ -49,7 +50,10 @@ contract AccountFactory {
             payable(
                 new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
-                    abi.encodeCall(DaimoAccount.initialize, (key, initCalls))
+                    abi.encodeCall(
+                        DaimoAccount.initialize,
+                        (keySlot, key, initCalls)
+                    )
                 )
             )
         );
@@ -59,6 +63,7 @@ contract AccountFactory {
      * calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAddress(
+        uint8 keySlot,
         bytes32[2] memory key,
         Call[] calldata initCalls,
         uint256 salt
@@ -73,7 +78,7 @@ contract AccountFactory {
                             address(accountImplementation),
                             abi.encodeCall(
                                 DaimoAccount.initialize,
-                                (key, initCalls)
+                                (keySlot, key, initCalls)
                             )
                         )
                     )

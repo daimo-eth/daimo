@@ -53,10 +53,10 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes
-            memory ownerSig = hex"0001655c1753db6b61a9717e4ccc5d6c4bf7681623dd54c2d6babc55125756661cf073023b6de130f18510af41f64f067c39adccd59f8789a55dbbe822b0ea2317";
+            memory ownerSig = hex"001707799ed7f06d12657ff65245b8cbbea8d0a65ad35a5459e33dec58c09fb40a48654b88aa4fec231ab2a4741b8eab6ec85840c076cc76de78cf8c2ce33d68cd";
 
         Call[] memory calls = new Call[](0);
-        DaimoAccount acc = factory.createAccount(key, calls, 42);
+        DaimoAccount acc = factory.createAccount(0, key, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
@@ -106,7 +106,7 @@ contract AccountSendUseropTest is Test {
         // call validateUserOp directly
         DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.sigVerifier());
         vm.store(address(a2), 0, 0); // set _initialized = 0
-        a2.initialize(key, calls);
+        a2.initialize(0, key, calls);
         vm.prank(address(entryPoint));
         uint256 validationData = a2.validateUserOp(op, hash, 0);
         assertEq(validationData, 0);

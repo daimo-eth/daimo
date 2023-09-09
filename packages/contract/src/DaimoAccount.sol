@@ -82,11 +82,14 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     }
 
     /// Initialize proxy contract storage.
+    /// @param slot the empty slot to use. Settable in case we need to use slot to signal key type.
+    /// @param key the initial signing key. All future calls and key rotations must be signed.
+    /// @param initCalls contract calls to execute during initialization.
     function initialize(
+        uint8 slot,
         bytes32[2] calldata key,
         Call[] calldata initCalls
     ) public virtual initializer {
-        uint8 slot = 0;
         keys[slot] = key;
         numActiveKeys = 1;
 
