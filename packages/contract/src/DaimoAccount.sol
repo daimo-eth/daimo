@@ -232,10 +232,11 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         activeSigningKeys = new bytes32[2][](numActiveKeys);
         activeSigningKeySlots = new uint8[](numActiveKeys);
         uint activeKeyIdx = 0;
-        for (uint8 i = 0; i < maxKeys; i++) {
-            if (keys[i][0] != bytes32(0)) {
-                activeSigningKeys[activeKeyIdx] = keys[i];
-                activeSigningKeySlots[activeKeyIdx] = i;
+        for (uint256 i = 0; i < 256; i++) {
+            uint8 slot = uint8(i);
+            if (keys[slot][0] != bytes32(0)) {
+                activeSigningKeys[activeKeyIdx] = keys[slot];
+                activeSigningKeySlots[activeKeyIdx] = slot;
                 activeKeyIdx++;
             }
         }
@@ -248,7 +249,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     function addSigningKey(uint8 slot, bytes32[2] memory key) public onlySelf {
         require(keys[slot][0] == bytes32(0), "key already exists");
         require(key[0] != bytes32(0), "new key cannot be 0");
-        require(slot < maxKeys, "invalid slot");
+        require(numActiveKeys < maxKeys, "max keys reached");
         keys[slot] = key;
         numActiveKeys++;
         emit SigningKeyAdded(this, slot, key);

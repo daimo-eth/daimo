@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { createPublicClient, getContract, http } from "viem";
+import { createPublicClient, http } from "viem";
 import { baseGoerli } from "viem/chains";
 
 import * as Contracts from "../src/generated";
@@ -42,7 +42,7 @@ export const tokenMetadata = {
   address: "${address}",
   decimals: ${tokenDecimals},
   symbol: "${tokenSymbol}",
-  name: "${tokenName}"
+  name: "${tokenName}",
 } as const;
 `;
 

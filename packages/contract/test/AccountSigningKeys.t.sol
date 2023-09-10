@@ -58,10 +58,16 @@ contract AccountSigningKeysTest is Test {
         vm.startPrank(address(acc));
 
         // add key2
+        // use a high slot, higher than maxKeys, to ensure that works
         vm.expectEmit(true, true, true, false);
-        emit SigningKeyAdded(acc, 1, key2);
-        acc.addSigningKey(1, key2);
+        emit SigningKeyAdded(acc, 200, key2);
+        acc.addSigningKey(200, key2);
         assertTrue(acc.numActiveKeys() == uint8(2));
+
+        // add zero key
+        bytes32[2] memory keyZero = [bytes32(0), bytes32(0)];
+        vm.expectRevert("new key cannot be 0");
+        acc.addSigningKey(1, keyZero);
 
         // remove key1
         vm.expectEmit(true, true, true, false);
@@ -69,9 +75,13 @@ contract AccountSigningKeysTest is Test {
         acc.removeSigningKey(0);
         assertTrue(acc.numActiveKeys() == uint8(1));
 
+        // remove nonexistent key
+        vm.expectRevert("key does not exist");
+        acc.removeSigningKey(199);
+
         // remove key2
         vm.expectRevert("cannot remove only signing key");
-        acc.removeSigningKey(1);
+        acc.removeSigningKey(200);
 
         vm.stopPrank();
     }
