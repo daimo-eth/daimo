@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
+import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
+
 /**
  * Basic name registry.
  * Uniquely and permanently associates addresses with a short name.
  */
-contract NameRegistry {
+contract NameRegistry is UUPSUpgradeable, Ownable {
     mapping(bytes32 => address) private _addrs;
     mapping(address => bytes32) private _names;
 
@@ -34,5 +37,12 @@ contract NameRegistry {
 
     function resolveName(address addr) external view returns (bytes32) {
         return _names[addr];
+    }
+
+    /// UUPSUpsgradeable: only allow owner upgrade.
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override onlyOwner {
+        (newImplementation); // No-op; silence unused parameter warning
     }
 }
