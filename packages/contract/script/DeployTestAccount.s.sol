@@ -12,7 +12,7 @@ contract DeployScript is Script {
 
         // From DeployAccountFactory.s.sol
         AccountFactory factory = AccountFactory(
-            0x153BE6528F5722a5e3033f26b4FC5148f4af5364
+            0x692A2E6eA43A1fAB2f9f68393F5cB5dcaf9C67B9
         );
 
         // hardcoded from swift playground

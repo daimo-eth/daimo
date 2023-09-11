@@ -1,4 +1,4 @@
-import { DaimoAccountCall } from "@daimo/common";
+import { DaimoAccountCall, assert } from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
@@ -18,11 +18,10 @@ function getSigningMiddleware(
   signer: SigningCallback
 ): UserOperationMiddlewareFn {
   return async (ctx) => {
-    // hex version of '\x19Ethereum Signed Message:\n32'
-    const hexPrefix =
-      "19457468657265756d205369676e6564204d6573736167653a0a3332";
-    const hexMessage = ctx.getUserOpHash().slice(2);
-    const { derSig, keySlot } = await signer(hexPrefix + hexMessage);
+    const userOpHash = ctx.getUserOpHash();
+    assert(userOpHash.startsWith("0x"));
+    const { derSig, keySlot } = await signer(userOpHash.slice(2));
+
     const parsedSignature = p256.Signature.fromDER(derSig);
     ctx.op.signature = `${numberToHex(keySlot, {
       size: 1,
