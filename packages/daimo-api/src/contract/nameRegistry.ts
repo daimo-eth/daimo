@@ -8,9 +8,7 @@ import {
 } from "@daimo/common";
 import {
   ephemeralNotesAddress,
-  nameRegistryABI,
-  nameRegistryAddress,
-  nameRegistryConfig,
+  nameRegistryProxyConfig,
   tokenMetadata,
 } from "@daimo/contract";
 import {
@@ -26,7 +24,7 @@ import { ViemClient } from "../chain";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({
-  abi: nameRegistryConfig.abi,
+  abi: nameRegistryProxyConfig.abi,
   name: registeredName,
 });
 
@@ -52,7 +50,7 @@ export class NameRegistry {
   async init() {
     await this.vc.pipeLogs(
       {
-        address: nameRegistryConfig.address,
+        address: nameRegistryProxyConfig.address,
         event: registeredEvent,
       },
       this.parseLogs
@@ -96,10 +94,10 @@ export class NameRegistry {
     const nameHex = Buffer.from(name.padEnd(32, "\0")).toString("hex");
 
     return {
-      dest: nameRegistryAddress,
+      dest: nameRegistryProxyConfig.address,
       value: 0n,
       data: encodeFunctionData({
-        abi: nameRegistryABI,
+        abi: nameRegistryProxyConfig.abi,
         functionName: "registerSelf",
         args: [`0x${nameHex}`],
       }),
