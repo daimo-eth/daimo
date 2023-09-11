@@ -15,9 +15,8 @@ contract DeployScript is Script {
             0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
         );
 
-        P256SHA256 verifier = P256SHA256(
-            0xc9841f04bDD61aA0f466FeE841c261A92c87aA9c // From DeployP256SHA256
-        );
+        // From https://github.com/daimo-eth/eip-7212
+        address verifier = 0xA77aB3533750B0C4b229e441fEe37f13c65A2b1F;
 
         AccountFactory factory = new AccountFactory{salt: 0}(
             entryPoint,

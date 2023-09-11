@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
+import "eip-7212/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoP256SHA256.sol";
 import "../src/DaimoAccountFactory.sol";
 import "../src/DaimoAccount.sol";
 
@@ -12,12 +12,12 @@ import "account-abstraction/core/EntryPoint.sol";
 contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
 
-    P256SHA256 public verifier;
+    address public verifier;
     EntryPoint public entryPoint;
     AccountFactory public factory;
 
     function setUp() public {
-        verifier = new P256SHA256();
+        verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
         factory = new AccountFactory(entryPoint, verifier);
         console.log("verifier address:", address(verifier));
@@ -53,7 +53,7 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes
-            memory ownerSig = hex"001707799ed7f06d12657ff65245b8cbbea8d0a65ad35a5459e33dec58c09fb40a48654b88aa4fec231ab2a4741b8eab6ec85840c076cc76de78cf8c2ce33d68cd";
+            memory ownerSig = hex"00729c35d38c6d3585bf71779a9507b1b6b7a96fdee9c56fc8f7f0b49b44fbfa8512c83b62e118029d022f91fd87c905d31831b15500f523f72a12704326ae5889";
 
         Call[] memory calls = new Call[](0);
         DaimoAccount acc = factory.createAccount(0, key, calls, 42);

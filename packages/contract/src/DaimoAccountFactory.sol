@@ -16,7 +16,7 @@ contract AccountFactory {
     DaimoAccount public immutable accountImplementation;
     IEntryPoint public immutable entryPoint;
 
-    constructor(IEntryPoint _entryPoint, P256SHA256 _sigVerifier) {
+    constructor(IEntryPoint _entryPoint, address _sigVerifier) {
         entryPoint = _entryPoint;
         accountImplementation = new DaimoAccount(_entryPoint, _sigVerifier);
     }

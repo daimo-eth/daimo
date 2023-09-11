@@ -12,11 +12,7 @@ export const accountFactoryABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      {
-        name: '_sigVerifier',
-        internalType: 'contract P256SHA256',
-        type: 'address',
-      },
+      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -101,15 +97,11 @@ export const daimoAccountABI = [
     type: 'constructor',
     inputs: [
       {
-        name: 'anEntryPoint',
+        name: '_entryPoint',
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      {
-        name: 'aSigVerifier',
-        internalType: 'contract P256SHA256',
-        type: 'address',
-      },
+      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -346,9 +338,7 @@ export const daimoAccountABI = [
     type: 'function',
     inputs: [],
     name: 'sigVerifier',
-    outputs: [
-      { name: '', internalType: 'contract P256SHA256', type: 'address' },
-    ],
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -1637,32 +1627,6 @@ export const nameRegistryAddress =
 export const nameRegistryConfig = {
   address: nameRegistryAddress,
   abi: nameRegistryABI,
-} as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// P256SHA256
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const p256Sha256ABI = [
-  {
-    stateMutability: 'pure',
-    type: 'function',
-    inputs: [
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      { name: 'data', internalType: 'bytes', type: 'bytes' },
-      { name: 'signature', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'verify',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-] as const
-
-export const p256Sha256Address =
-  '0xc9841f04bDD61aA0f466FeE841c261A92c87aA9c' as const
-
-export const p256Sha256Config = {
-  address: p256Sha256Address,
-  abi: p256Sha256ABI,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

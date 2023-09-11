@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
+import "eip-7212/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoP256SHA256.sol";
 import "../src/DaimoAccountFactory.sol";
 import "../src/DaimoAccount.sol";
 
@@ -12,12 +12,12 @@ import "account-abstraction/core/EntryPoint.sol";
 contract AccountSigningKeysTest is Test {
     using UserOperationLib for UserOperation;
 
-    P256SHA256 public verifier;
+    address public verifier;
     EntryPoint public entryPoint;
     AccountFactory public factory;
 
     function setUp() public {
-        verifier = new P256SHA256();
+        verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
         factory = new AccountFactory(entryPoint, verifier);
     }

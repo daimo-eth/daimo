@@ -43,8 +43,9 @@ extension Data {
         }
 }
 
-let data = Data(fromHexEncodedString: "fae0417c547468482531aad9b9f6e8b6b9cccd9ede1d9f1088d28eb819512379")!
+let data = Data(fromHexEncodedString: "92b1049038ae73f977b79f53af26a3966bfdfb20d7dfbce21990e91d9b656015")!
 print("data", data.hexEncodedString())
+print("hash", SHA256.hash(data: data))
 
 let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
 

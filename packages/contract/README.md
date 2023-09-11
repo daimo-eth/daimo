@@ -13,13 +13,12 @@ See also the EIP-7212 [P256Verifier](https://github.com/daimo-eth/eip-7212) cont
 
 ```
 forge test
-forge coverage
 ```
 
 Before making a PR, update detailed coverage:
 
 ```
-forge coverage --report lcov
+forge coverage --via-ir --ir-minimum --report lcov
 ```
 
 You can see line-by-line coverage in VSCode using the recommended extension. Run

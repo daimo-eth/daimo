@@ -13,8 +13,6 @@ import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 import "account-abstraction/interfaces/IAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 
-import "./DaimoP256SHA256.sol";
-
 struct Call {
     address dest;
     uint256 value;
@@ -34,8 +32,8 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// The ERC-4337 entry point singleton
     IEntryPoint public immutable entryPoint;
-    /// P256 (secp256r1) signature verifier
-    P256SHA256 public immutable sigVerifier;
+    /// P256 (secp256r1) signature verifier matching EIP-7212 precompile spec
+    address public immutable sigVerifier;
     /// Maximum number of signing keys
     uint8 public immutable maxKeys = 20;
 
@@ -75,9 +73,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// Runs at deploy time. Implementation contract = no init, no state.
     /// All other methods are called via proxy = initialized once, has state.
-    constructor(IEntryPoint anEntryPoint, P256SHA256 aSigVerifier) {
-        entryPoint = anEntryPoint;
-        sigVerifier = aSigVerifier;
+    constructor(IEntryPoint _entryPoint, address _sigVerifier) {
+        entryPoint = _entryPoint;
+        sigVerifier = _sigVerifier;
         _disableInitializers();
     }
 
@@ -166,13 +164,30 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     // - r, s are the P256 signature components
     /// Validate any P256 signature, whether for a userop or ERC1271 user sig.
     function _validateSignature(
-        bytes32 hash,
+        bytes32 messageHash,
         bytes calldata signature
     ) private view returns (bool) {
+        // P256-SHA256: hash the messageHash again
+        // not strictly necessary, but makes it easier to produce signatures
+        // since many P256 libraries integrate hashing. small gas overhead.
+        bytes32 hash = sha256(abi.encodePacked(messageHash));
+
+        // signature
+        uint256 r = uint256(bytes32(signature[1:33]));
+        uint256 s = uint256(bytes32(signature[33:65]));
+
+        // public key to verify against
         uint8 keySlot = uint8(signature[0]);
         require(keys[keySlot][0] != bytes32(0), "invalid key slot");
-        bytes memory sig = signature[1:];
-        return sigVerifier.verify(keys[keySlot], abi.encodePacked(hash), sig);
+        uint256 x = uint256(keys[keySlot][0]);
+        uint256 y = uint256(keys[keySlot][1]);
+
+        // call EIP-7212 precompile or P256Verifier fallback contract
+        bytes memory args = abi.encode(hash, r, s, x, y);
+        (bool success, bytes memory ret) = sigVerifier.staticcall(args);
+        assert(success);
+
+        return abi.decode(ret, (uint256)) == 1;
     }
 
     /// Validate userop by verifying a P256 signature.
