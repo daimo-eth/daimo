@@ -168,8 +168,8 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         bytes calldata signature
     ) private view returns (bool) {
         // P256-SHA256: hash the messageHash again
-        // not strictly necessary, but makes it easier to produce signatures
-        // since many P256 libraries integrate hashing. small gas overhead.
+        // Necessary since many P256 libraries integrate hashing, including iOS
+        // Secure Enclave and Android Keystore.
         bytes32 hash = sha256(abi.encodePacked(messageHash));
 
         // signature

@@ -1,7 +1,7 @@
 import {
   entryPointABI,
   erc20ABI,
-  nameRegistryConfig,
+  nameRegistryProxyConfig,
   tokenMetadata,
 } from "@daimo/contract";
 import { Constants } from "userop";
@@ -35,7 +35,7 @@ export async function checkAccount() {
   if (input.startsWith("0x")) {
     addr = getAddress(input);
     const nameHex = await publicClient.readContract({
-      ...nameRegistryConfig,
+      ...nameRegistryProxyConfig,
       functionName: "resolveName",
       args: [addr],
     });
@@ -44,7 +44,7 @@ export async function checkAccount() {
     name = input;
     const nameHex = stringToHex(name, { size: 32 });
     addr = await publicClient.readContract({
-      ...nameRegistryConfig,
+      ...nameRegistryProxyConfig,
       functionName: "resolveAddr",
       args: [nameHex],
     });
@@ -75,7 +75,7 @@ export async function checkAccount() {
   console.log(`PREFUND  - ${prefundStr}`);
   console.log();
 
-  console.log(`...NameReg ${nameRegistryConfig.address}`);
+  console.log(`...NameReg ${nameRegistryProxyConfig.address}`);
   console.log(`...  ERC20 ${tokenMetadata.address}`);
   console.log(`EntryPoint ${Constants.ERC4337.EntryPoint}`);
   console.log();
