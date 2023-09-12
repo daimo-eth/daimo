@@ -56,46 +56,6 @@ export type Account = {
   pushToken: string | null;
 };
 
-interface AccountV5 extends StoredModel {
-  storageVersion: 5;
-
-  enclaveKeyName: string;
-  enclavePubKey: Hex;
-  name: string;
-  address: string;
-
-  lastBlock: number;
-  lastBlockTimestamp: number;
-  lastBalance: string;
-  lastFinalizedBlock: number;
-  recentTransfers: TransferOpEvent[];
-  trackedRequests: TrackedRequest[];
-  namedAccounts: EAccount[];
-  accountKeys: KeyData[];
-
-  pushToken: string | null;
-}
-
-interface AccountV6 extends StoredModel {
-  storageVersion: 6;
-
-  enclaveKeyInfo: EnclaveKeyInfo;
-  enclavePubKey: Hex;
-  name: string;
-  address: string;
-
-  lastBlock: number;
-  lastBlockTimestamp: number;
-  lastBalance: string;
-  lastFinalizedBlock: number;
-  recentTransfers: TransferOpEvent[];
-  trackedRequests: TrackedRequest[];
-  namedAccounts: EAccount[];
-  accountKeys: KeyData[];
-
-  pushToken: string | null;
-}
-
 interface AccountV7 extends StoredModel {
   storageVersion: 7;
 
@@ -194,69 +154,8 @@ export function parseAccount(accountJSON?: string): Account | null {
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // Migrations
-  // Delete V1-4 testnet accounts. Re-onboard to accounts with multi-key support.
-  if (model.storageVersion < 5) return null;
-
-  if (model.storageVersion === 5) {
-    const a = model as AccountV5;
-    return {
-      enclaveKeyInfo: {
-        name: a.enclaveKeyName,
-        forceWeakerKeys: false,
-      },
-      enclavePubKey: a.enclavePubKey,
-      name: a.name,
-      address: getAddress(a.address),
-
-      lastBalance: BigInt(a.lastBalance),
-      lastBlock: a.lastBlock,
-      lastBlockTimestamp: a.lastBlockTimestamp,
-      lastFinalizedBlock: a.lastFinalizedBlock,
-
-      recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
-      namedAccounts: a.namedAccounts,
-      accountKeys: a.accountKeys,
-
-      chainGasConstants: {
-        // Filled on next server sync
-        paymasterAndData: "0x",
-        maxFeePerGas: "0",
-        maxPriorityFeePerGas: "0",
-      },
-
-      pushToken: a.pushToken,
-    };
-  }
-
-  if (model.storageVersion === 6) {
-    const a = model as AccountV6;
-    return {
-      enclaveKeyInfo: a.enclaveKeyInfo,
-      enclavePubKey: a.enclavePubKey,
-      name: a.name,
-      address: getAddress(a.address),
-
-      lastBalance: BigInt(a.lastBalance),
-      lastBlock: a.lastBlock,
-      lastBlockTimestamp: a.lastBlockTimestamp,
-      lastFinalizedBlock: a.lastFinalizedBlock,
-
-      recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
-      namedAccounts: a.namedAccounts,
-      accountKeys: a.accountKeys,
-
-      chainGasConstants: {
-        // Filled on next server sync
-        paymasterAndData: "0x",
-        maxFeePerGas: "0",
-        maxPriorityFeePerGas: "0",
-      },
-
-      pushToken: a.pushToken,
-    };
-  }
+  // Delete V1-7 testnet accounts. Re-onboard to latest account with paymasters.
+  if (model.storageVersion < 7) return null;
 
   assert(model.storageVersion === 7);
   const a = model as AccountV7;

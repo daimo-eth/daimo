@@ -23,7 +23,7 @@ export class Paymaster {
   private priceMarkup: bigint = 0n;
   private previousPrice: bigint = 0n;
 
-  private lastFetchDT: Date = new Date(0);
+  private lastFetchTs = 0;
 
   constructor(private vc: ViemClient) {}
 
@@ -35,8 +35,8 @@ export class Paymaster {
     // Do not fetch more than once per 5 minute for now.
     // todo: Ask Pimlico to change contract to emit events on updates
     // todo: fetch fees seperately on higher frequency
-    if (new Date().getTime() - this.lastFetchDT.getTime() < 5 * 60 * 1000)
-      return;
+    if (Date.now() - this.lastFetchTs < 5 * 60 * 1000) return;
+    this.lastFetchTs = Date.now();
 
     const priceMarkup = await this.vc.publicClient.readContract({
       abi: pimlicoPaymasterAbi,
@@ -53,7 +53,6 @@ export class Paymaster {
     const maxPriorityFeePerGas =
       await this.vc.publicClient.estimateMaxPriorityFeePerGas(); // Assumes we're on an EIP-1559 chain
 
-    this.lastFetchDT = new Date();
     this.priceMarkup = BigInt(priceMarkup);
     this.previousPrice = previousPrice;
     this.maxFeePerGas = maxFeePerGas;

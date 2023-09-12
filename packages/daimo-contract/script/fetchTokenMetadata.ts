@@ -47,8 +47,6 @@ async function main() {
   const oracle_address = ORACLE_ADDRESS[baseGoerli.id]["USDC"];
   const nativeAssetOracle =
     ORACLE_ADDRESS[baseGoerli.id][NATIVE_ASSET[baseGoerli.id]];
-  console.log("oracle_address", oracle_address);
-  console.log("nativeAssetOracle", nativeAssetOracle);
 
   const paymasterAddress = await calculateERC20PaymasterAddress({
     tokenAddress: address,
