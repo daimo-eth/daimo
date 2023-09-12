@@ -7,7 +7,7 @@ Our main contracts:
 - DaimoEphemeralNotes - stores notes aka Payment Links, used to pay people who don't yet have an account
 - DaimoNameRegistry - maps account names to addresses
 
-See also the EIP-7212 [P256Verifier](https://github.com/daimo-eth/eip-7212) contract.
+See also the EIP-7212 [P256Verifier](https://github.com/daimo-eth/p256-verifier) contract.
 
 ### Testing
 
