@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
-import "eip-7212/P256Verifier.sol";
+import "p256-verifier/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccountFactory.sol";
