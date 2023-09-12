@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
-import "eip-7212/P256Verifier.sol";
+import "p256-verifier/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccountFactory.sol";
@@ -53,7 +53,7 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes
-            memory ownerSig = hex"00729c35d38c6d3585bf71779a9507b1b6b7a96fdee9c56fc8f7f0b49b44fbfa8512c83b62e118029d022f91fd87c905d31831b15500f523f72a12704326ae5889";
+            memory ownerSig = hex"008e41b7285ca1efb89b3ee64e8f3886dda01789ddeb2289a6f9e26f2ab61ff8d17ed303d371abeddaceed701a61e7ffb1c9aae93d6781aeffab0902dba4d5f7b8";
 
         Call[] memory calls = new Call[](0);
         DaimoAccount acc = factory.createAccount(0, key, calls, 42);

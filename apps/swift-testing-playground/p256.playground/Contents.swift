@@ -43,7 +43,7 @@ extension Data {
         }
 }
 
-let data = Data(fromHexEncodedString: "92b1049038ae73f977b79f53af26a3966bfdfb20d7dfbce21990e91d9b656015")!
+let data = Data(fromHexEncodedString: "916adb449278f1d8bb4ed06b0b5b71f14c350863c9451ff8f782bcc124f0bec7")!
 print("data", data.hexEncodedString())
 print("hash", SHA256.hash(data: data))
 
