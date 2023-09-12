@@ -37,7 +37,7 @@ export function useExistingAccount(forceWeakerKeys: boolean) {
           name: result.name,
           address: result.addr,
 
-          // These populate on resync with server
+          // These populate on sync with server
           lastBalance: BigInt(0),
           lastBlockTimestamp: 0,
           lastBlock: 0,
@@ -47,6 +47,12 @@ export function useExistingAccount(forceWeakerKeys: boolean) {
           recentTransfers: [],
           trackedRequests: [],
           accountKeys: [],
+
+          chainGasConstants: {
+            maxPriorityFeePerGas: "0",
+            maxFeePerGas: "0",
+            paymasterAndData: "0x",
+          },
 
           pushToken: null,
         });

@@ -1,6 +1,6 @@
 import { derKeytoContractFriendlyKey } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
-import { Client, ISendUserOperationOpts, Presets } from "userop";
+import { Client, ISendUserOperationOpts } from "userop";
 import {
   Address,
   Hex,
@@ -10,8 +10,7 @@ import {
   parseUnits,
 } from "viem";
 
-import { DaimoOpBuilder } from "./daimoOpBuilder";
-import { DaimoNonce } from "./nonce";
+import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./util";
 import config from "../config.json";
 
@@ -24,11 +23,12 @@ export {
 } from "./nonce";
 
 export type UserOpHandle = Awaited<
-  ReturnType<typeof DaimoAccount.prototype.sendUserOp>
+  ReturnType<typeof DaimoOpSender.prototype.sendUserOp>
 >;
 
-// TODO: consider renaming?
-export class DaimoAccount {
+// TODO: use the right RPC
+// DaimoOpSender is a wrapper that simplifies making user ops on behalf of a Daimo account.
+export class DaimoOpSender {
   private dryRun = false;
   private client: Client;
   private opBuilder: DaimoOpBuilder;
@@ -60,30 +60,24 @@ export class DaimoAccount {
   public static async init(
     deployedAddress: Address,
     signer: SigningCallback,
+    rpcUrl: string,
     dryRun: boolean
-  ): Promise<DaimoAccount> {
-    const client = await Client.init(config.rpcUrl, {
+  ): Promise<DaimoOpSender> {
+    const client = await Client.init(rpcUrl, {
       overrideBundlerRpc: config.bundlerRpcUrl,
     });
 
-    const paymasterMiddleware =
-      config.paymaster.rpcUrl.length > 0
-        ? Presets.Middleware.verifyingPaymaster(
-            config.paymaster.rpcUrl,
-            config.paymaster.context
-          )
-        : undefined;
     const daimoBuilder = await DaimoOpBuilder.init(
       deployedAddress,
-      paymasterMiddleware,
-      signer
+      signer,
+      rpcUrl
     );
 
     console.log(
       `[OP] init. token ${Contracts.tokenMetadata.address}, decimals ${Contracts.tokenMetadata.decimals}`
     );
 
-    return new DaimoAccount(
+    return new DaimoOpSender(
       dryRun,
       client,
       daimoBuilder,
@@ -113,7 +107,7 @@ export class DaimoAccount {
   public async addSigningKey(
     slot: number,
     derPublicKey: Hex,
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ) {
     const contractFriendlyKey = derKeytoContractFriendlyKey(derPublicKey);
 
@@ -129,14 +123,14 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
   }
 
   /** Removes an account signing key. Returns userOpHash. */
-  public async removeSigningKey(slot: number, nonce: DaimoNonce) {
+  public async removeSigningKey(slot: number, opMetadata: DaimoOpMetadata) {
     const op = this.opBuilder.executeBatch(
       [
         {
@@ -149,7 +143,7 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -159,14 +153,14 @@ export class DaimoAccount {
   public async transfer(
     to: Address,
     amount: `${number}`,
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ): Promise<UserOpHandle> {
     const ether = parseEther(amount);
     console.log(`[OP] transfer ${ether} wei to ${to}`);
 
     const op = this.opBuilder.executeBatch(
       [{ dest: to, value: ether, data: "0x" }],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -176,7 +170,7 @@ export class DaimoAccount {
   public async erc20transfer(
     to: Address,
     amount: `${number}`, // in the native unit of the token
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
@@ -193,7 +187,7 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -203,7 +197,7 @@ export class DaimoAccount {
   public async erc20approve(
     spender: Address,
     amount: `${number}`,
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ): Promise<UserOpHandle> {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(
@@ -222,7 +216,7 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -236,7 +230,7 @@ export class DaimoAccount {
   public async createEphemeralNote(
     ephemeralOwner: `0x${string}`,
     amount: `${number}`,
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ) {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
@@ -253,7 +247,7 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -263,7 +257,7 @@ export class DaimoAccount {
   public async claimEphemeralNote(
     ephemeralOwner: `0x${string}`,
     signature: `0x${string}`,
-    nonce: DaimoNonce
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
 
@@ -279,7 +273,7 @@ export class DaimoAccount {
           }),
         },
       ],
-      nonce
+      opMetadata
     );
 
     return this.sendUserOp(op);

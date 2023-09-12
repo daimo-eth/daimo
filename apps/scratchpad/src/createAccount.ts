@@ -5,7 +5,7 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import {
-  DaimoAccount,
+  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
@@ -21,6 +21,7 @@ import {
   createWalletClient,
   getAddress,
   http,
+  parseAbi,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
@@ -112,7 +113,12 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoAccount.init(address, signer, dryRun);
+  const account = await DaimoOpSender.init(
+    address,
+    signer,
+    chain.rpcUrls.public.http[0],
+    dryRun
+  );
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 
@@ -140,7 +146,16 @@ export async function createAccount() {
   // Send $0.50 USDC to nibnalin.eth
   const recipient = `0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB`;
   const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
-  const userOp = await account.erc20transfer(recipient, "0.1", nonce);
+  const userOp = await account.erc20transfer(recipient, "0.1", {
+    nonce,
+    chainGasConstants: {
+      // TODO: works for now but we should properly query this rather than hardcode
+      paymasterAndData:
+        "0x13f490FafBb206440F25760A10C21A6220017fFa0000000000000000000000000000000000000000000000000000000000129aa2",
+      maxPriorityFeePerGas: "1000000",
+      maxFeePerGas: "100000050",
+    },
+  });
   console.log("✅ userop accepted by bundler: ", userOp.userOpHash);
 
   const bundleTxHash = (await userOp.wait())?.transactionHash;

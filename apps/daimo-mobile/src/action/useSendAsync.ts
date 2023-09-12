@@ -1,16 +1,17 @@
 import { EAccount, EnclaveKeyInfo, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import { DaimoAccount, SigningCallback, UserOpHandle } from "@daimo/userop";
+import { DaimoOpSender, SigningCallback, UserOpHandle } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { chainConfig } from "../logic/chainConfig";
 import { Log } from "../logic/log";
 import { useAccount } from "../model/account";
 import { resync } from "../sync/sync";
 
 /** Send a tx user op. */
-type SendOpFn = (account: DaimoAccount) => Promise<UserOpHandle>;
+type SendOpFn = (opSender: DaimoOpSender) => Promise<UserOpHandle>;
 
 /** Send a user op, track status. */
 export function useSendAsync({
@@ -66,7 +67,7 @@ export function useSendAsync({
   return { ...as, exec, cost };
 }
 
-/** Warm the DaimoAccount cache. */
+/** Warm the DaimoOpSender cache. */
 export function useWarmCache(
   enclaveKeyInfo?: EnclaveKeyInfo,
   address?: Address,
@@ -78,7 +79,7 @@ export function useWarmCache(
   }, [enclaveKeyInfo?.name, enclaveKeyInfo?.forceWeakerKeys, address, keySlot]);
 }
 
-const accountCache: Map<[Address, number], Promise<DaimoAccount>> = new Map();
+const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 
 function loadAccount(
   enclaveKeyInfo: EnclaveKeyInfo,
@@ -90,7 +91,7 @@ function loadAccount(
 
   promise = (async () => {
     console.info(
-      `[SEND] loading DaimoAccount ${address} ${enclaveKeyInfo.name} ${keySlot}`
+      `[SEND] loading DaimoOpSender ${address} ${enclaveKeyInfo.name} ${keySlot}`
     );
     const signer: SigningCallback = async (hexTx: string) => {
       return {
@@ -103,7 +104,12 @@ function loadAccount(
       };
     };
 
-    return await DaimoAccount.init(address, signer, false);
+    return await DaimoOpSender.init(
+      address,
+      signer,
+      chainConfig.l2.rpcUrls.public.http[0],
+      false
+    );
   })();
   accountCache.set([address, keySlot], promise);
 

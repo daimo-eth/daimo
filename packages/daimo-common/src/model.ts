@@ -9,6 +9,7 @@ export const zAddress = z
 export enum AddrLabel {
   Faucet = "faucet",
   PaymentLink = "payment link",
+  Paymaster = "fee",
 }
 
 export const zEAccount = z.object({

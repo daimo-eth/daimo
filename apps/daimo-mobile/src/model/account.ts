@@ -5,6 +5,7 @@ import {
   TrackedRequest,
   KeyData,
   EnclaveKeyInfo,
+  ChainGasConstants,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -17,7 +18,7 @@ import { cacheEAccounts } from "../view/shared/addr";
  * Singleton account key.
  * Will be a series if/when we support multiple accounts.
  */
-export const defaultEnclaveKeyName = "daimo-8";
+export const defaultEnclaveKeyName = "daimo-10";
 
 /** Account data stored on device. */
 export type Account = {
@@ -48,32 +49,15 @@ export type Account = {
   /** P-256 keys authorised by the Daimo account, in DER format */
   accountKeys: KeyData[];
 
+  /** Current gas and paymaster related constants */
+  chainGasConstants: ChainGasConstants;
+
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
 };
 
-interface AccountV5 extends StoredModel {
-  storageVersion: 5;
-
-  enclaveKeyName: string;
-  enclavePubKey: Hex;
-  name: string;
-  address: string;
-
-  lastBlock: number;
-  lastBlockTimestamp: number;
-  lastBalance: string;
-  lastFinalizedBlock: number;
-  recentTransfers: TransferOpEvent[];
-  trackedRequests: TrackedRequest[];
-  namedAccounts: EAccount[];
-  accountKeys: KeyData[];
-
-  pushToken: string | null;
-}
-
-interface AccountV6 extends StoredModel {
-  storageVersion: 6;
+interface AccountV7 extends StoredModel {
+  storageVersion: 7;
 
   enclaveKeyInfo: EnclaveKeyInfo;
   enclavePubKey: Hex;
@@ -88,6 +72,8 @@ interface AccountV6 extends StoredModel {
   trackedRequests: TrackedRequest[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
+
+  chainGasConstants: ChainGasConstants;
 
   pushToken: string | null;
 }
@@ -168,36 +154,11 @@ export function parseAccount(accountJSON?: string): Account | null {
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // Migrations
-  // Delete V1-4 testnet accounts. Re-onboard to accounts with multi-key support.
-  if (model.storageVersion < 5) return null;
+  // Delete V1-7 testnet accounts. Re-onboard to latest account with paymasters.
+  if (model.storageVersion < 7) return null;
 
-  if (model.storageVersion === 5) {
-    const a = model as AccountV5;
-    return {
-      enclaveKeyInfo: {
-        name: a.enclaveKeyName,
-        forceWeakerKeys: false,
-      },
-      enclavePubKey: a.enclavePubKey,
-      name: a.name,
-      address: getAddress(a.address),
-
-      lastBalance: BigInt(a.lastBalance),
-      lastBlock: a.lastBlock,
-      lastBlockTimestamp: a.lastBlockTimestamp,
-      lastFinalizedBlock: a.lastFinalizedBlock,
-
-      recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
-      namedAccounts: a.namedAccounts,
-      accountKeys: a.accountKeys,
-
-      pushToken: a.pushToken,
-    };
-  }
-
-  assert(model.storageVersion === 6);
-  const a = model as AccountV6;
+  assert(model.storageVersion === 7);
+  const a = model as AccountV7;
 
   return {
     enclaveKeyInfo: a.enclaveKeyInfo,
@@ -215,6 +176,8 @@ export function parseAccount(accountJSON?: string): Account | null {
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
 
+    chainGasConstants: a.chainGasConstants,
+
     pushToken: a.pushToken,
   };
 }
@@ -222,8 +185,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV6 = {
-    storageVersion: 6,
+  const model: AccountV7 = {
+    storageVersion: 7,
 
     enclaveKeyInfo: account.enclaveKeyInfo,
     enclavePubKey: account.enclavePubKey,
@@ -239,6 +202,8 @@ export function serializeAccount(account: Account | null): string {
     trackedRequests: account.trackedRequests,
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
+
+    chainGasConstants: account.chainGasConstants,
 
     pushToken: account.pushToken,
   };

@@ -70,6 +70,12 @@ export function useCreateAccount(
       trackedRequests: [],
       accountKeys: [],
 
+      chainGasConstants: {
+        maxPriorityFeePerGas: "0",
+        maxFeePerGas: "0",
+        paymasterAndData: "0x",
+      },
+
       pushToken: null,
     });
     setAS("success", "Account created");

@@ -7,10 +7,10 @@ import {
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
 import {
-  DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
 } from "@daimo/userop";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
@@ -48,8 +48,11 @@ export function SendNoteButton({
 
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
-    sendFn: async (account: DaimoAccount) => {
-      return account.createEphemeralNote(ephemeralOwner, `${dollars}`, nonce);
+    sendFn: async (opSender: DaimoOpSender) => {
+      return opSender.createEphemeralNote(ephemeralOwner, `${dollars}`, {
+        nonce,
+        chainGasConstants: account.chainGasConstants,
+      });
     },
     pendingOp: {
       type: "transfer",

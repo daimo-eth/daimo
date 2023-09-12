@@ -6,10 +6,10 @@ import {
   getAccountName,
 } from "@daimo/common";
 import {
-  DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
 } from "@daimo/userop";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -188,10 +188,13 @@ function SendButton({
 
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
-    sendFn: async (account: DaimoAccount) => {
+    sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
       console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
-      return account.erc20transfer(recipient.addr, `${dollars}`, nonce);
+      return opSender.erc20transfer(recipient.addr, `${dollars}`, {
+        nonce,
+        chainGasConstants: account.chainGasConstants,
+      });
     },
     pendingOp: {
       type: "transfer",

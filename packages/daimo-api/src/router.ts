@@ -26,6 +26,7 @@ import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
+import { Paymaster } from "./contract/paymaster";
 import { PushNotifier } from "./pushNotifier";
 import { publicProcedure, router } from "./trpc";
 
@@ -36,6 +37,7 @@ export function createRouter(
   opIndexer: OpIndexer,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
+  paymaster: Paymaster,
   faucet: Faucet,
   notifier: PushNotifier,
   accountFactory: AccountFactory
@@ -232,6 +234,8 @@ export function createRouter(
         // Get account keys
         const accountKeys = await keyReg.resolveAddressKeys(address);
 
+        const chainGasConstants = await paymaster.calculateChainGasConstants();
+
         return {
           address,
 
@@ -239,6 +243,8 @@ export function createRouter(
           lastBlock,
           lastBlockTimestamp,
           lastBalance: String(lastBalance),
+
+          chainGasConstants,
 
           transferLogs,
           namedAccounts,
@@ -283,14 +289,25 @@ export function createRouter(
               args: [ephemeralNotesAddress, maxUint256],
             }),
           },
+          {
+            // Approve paymaster contract infinite spending on behalf of the account
+            dest: tokenMetadata.address,
+            value: 0n,
+            data: encodeFunctionData({
+              abi: erc20ABI,
+              functionName: "approve",
+              args: [tokenMetadata.paymasterAddress, maxUint256],
+            }),
+          },
           nameReg.getRegisterNameCall(name), // Register name
         ];
 
         // TODO: put a check for the counterfactual address on client side so the server is not trusted.
         const address = await accountFactory.getAddress(pubKeyHex, initCalls);
 
-        // For testnet, prepay gas, 0.05 ETH
-        const value = BigInt(5e16);
+        // We use paymaster now, not needed.
+        // TODO: delete code.
+        const value = 0n;
 
         console.log(`[API] Deploying account for ${name}, address ${address}`);
         const deployReceipt = await accountFactory.deploy(

@@ -157,6 +157,9 @@ export class PushNotifier {
     if (otherAcc.label === AddrLabel.PaymentLink) {
       // Handled separately, see maybeNotifyPaymentLink
       return [];
+    } else if (otherAcc.label === AddrLabel.Paymaster) {
+      // ignore paymaster transfers
+      return [];
     }
     const otherStr = getAccountName(otherAcc);
 

@@ -2,11 +2,11 @@ import { Account, parseAccount, serializeAccount } from "../src/model/account";
 
 const correctSerV2 = `{"storageVersion":2,"name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastNonce":"456","lastBlockTimestamp":789,"enclaveKeyName":"test","pushToken":null}`;
 
-const lowercaseAddrV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0xef4396d9ff8107086d215a1c9f8866c54795d7c7","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
+const lowercaseAddrV7 = `{"storageVersion":7,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0xef4396d9ff8107086d215a1c9f8866c54795d7c7","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"paymasterAndData":"0x","maxPriorityFeePerGas":"0","maxFeePerGas":"0"},"pushToken":null}`;
 
 const correctSerV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
 
-const correctSerV6 = `{"storageVersion":6,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
+const correctSerV7 = `{"storageVersion":7,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"paymasterAndData":"0x","maxPriorityFeePerGas":"0","maxFeePerGas":"0"},"pushToken":null}`;
 
 const account: Account = {
   enclaveKeyInfo: {
@@ -28,22 +28,28 @@ const account: Account = {
   trackedRequests: [],
   accountKeys: [],
 
+  chainGasConstants: {
+    paymasterAndData: "0x",
+    maxPriorityFeePerGas: "0",
+    maxFeePerGas: "0",
+  },
+
   pushToken: null,
 };
 
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV6);
+    expect(ser).toEqual(correctSerV7);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV6);
+    const a = parseAccount(correctSerV7);
     expect(a).toEqual(account);
   });
 
   it("fixes address checksum", () => {
-    const a = parseAccount(lowercaseAddrV5);
+    const a = parseAccount(lowercaseAddrV7);
     expect(a?.address).toEqual("0xEf4396d9FF8107086d215a1c9f8866C54795D7c7");
   });
 
@@ -56,6 +62,6 @@ describe("Account", () => {
   it("migrates V5", () => {
     // Migrate V5 accounts.
     const a = parseAccount(correctSerV5);
-    expect(a).toEqual(account);
+    expect(a).toBeNull();
   });
 });

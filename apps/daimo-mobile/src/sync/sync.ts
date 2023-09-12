@@ -105,6 +105,7 @@ async function syncAccount(
     numTransfers: result.transferLogs.length,
     numNamedAccounts: result.namedAccounts.length,
     numAccountKeys: result.accountKeys?.length,
+    chainGasConstants: result.chainGasConstants,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -169,6 +170,8 @@ async function syncAccount(
     lastBlock: result.lastBlock,
     lastBlockTimestamp: result.lastBlockTimestamp,
     lastFinalizedBlock: result.lastFinalizedBlock,
+
+    chainGasConstants: result.chainGasConstants,
 
     recentTransfers,
     namedAccounts,
