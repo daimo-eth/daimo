@@ -1,6 +1,6 @@
 import { assert, guessTimestampFromNum, timeString } from "@daimo/common";
 import {
-  DaimoAccount,
+  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
@@ -49,9 +49,12 @@ export function DeviceScreen({ route, navigation }: Props) {
     [devicePubkey]
   );
 
-  const sendFn = async (account: DaimoAccount) => {
+  const sendFn = async (opSender: DaimoOpSender) => {
     console.log(`[ACTION] removing device ${device.slot}`);
-    return account.removeSigningKey(device.slot, nonce);
+    return opSender.removeSigningKey(device.slot, {
+      nonce,
+      chainGasConstants: account.chainGasConstants,
+    });
   };
 
   const { status, message, cost, exec } = useSendAsync({

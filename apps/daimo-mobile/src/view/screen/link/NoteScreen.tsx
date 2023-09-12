@@ -7,10 +7,10 @@ import {
 } from "@daimo/common";
 import { ephemeralNotesAddress } from "@daimo/contract";
 import {
-  DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
 } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useMemo } from "react";
@@ -86,13 +86,12 @@ function NoteDisplay({
     [ephemeralOwner, ephemeralPrivateKey]
   );
 
-  const sendFn = async (account: DaimoAccount) => {
+  const sendFn = async (opSender: DaimoOpSender) => {
     console.log(`[ACTION] claiming note ${ephemeralOwner}`);
-    return account.claimEphemeralNote(
-      ephemeralOwner,
-      ephemeralSignature,
-      nonce
-    );
+    return opSender.claimEphemeralNote(ephemeralOwner, ephemeralSignature, {
+      nonce,
+      chainGasConstants: account.chainGasConstants,
+    });
   };
 
   // Add pending transaction immmmediately

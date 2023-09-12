@@ -1,6 +1,6 @@
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import {
-  DaimoAccount,
+  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
@@ -56,7 +56,12 @@ export default function App() {
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
       derPublicKey
     );
-    const account = await DaimoAccount.init(accAddress, signer, false);
+    const account = await DaimoOpSender.init(
+      accAddress,
+      signer,
+      "https://goerli.base.org",
+      false
+    );
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()
@@ -66,7 +71,16 @@ export default function App() {
     const opHandle = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42",
-      nonce
+      {
+        nonce,
+        chainGasConstants: {
+          // TODO: works for now but we should properly query this rather than hardcode
+          paymasterAndData:
+            "0x13f490FafBb206440F25760A10C21A6220017fFa0000000000000000000000000000000000000000000000000000000000129aa2",
+          maxPriorityFeePerGas: "1000000",
+          maxFeePerGas: "100000050",
+        },
+      }
     );
     const hash = (await opHandle.wait())?.transactionHash;
     setTxHash(hash ?? "failed");

@@ -91,6 +91,14 @@ export class CoinIndexer {
     if (txHashes !== undefined) {
       ret = ret.filter((log) => txHashes.includes(log.txHash || "0x"));
     }
+    // HACK: Ignore paymaster transfers for now
+    // TODO: Stop doing that and show them in UI
+    ret = ret.filter(
+      (log) =>
+        log.from !== tokenMetadata.paymasterAddress &&
+        log.to !== tokenMetadata.paymasterAddress
+    );
+
     return ret;
   }
 

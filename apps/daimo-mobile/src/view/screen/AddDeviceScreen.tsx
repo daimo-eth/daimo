@@ -1,9 +1,9 @@
 import { assert } from "@daimo/common";
 import {
-  DaimoAccount,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
 } from "@daimo/userop";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { ReactNode, useMemo, useState } from "react";
@@ -59,10 +59,13 @@ export function AddDeviceScreen() {
     [newKey]
   );
 
-  const sendFn = async (account: DaimoAccount) => {
+  const sendFn = async (opSender: DaimoOpSender) => {
     if (!newKey) throw new Error("no key?");
     console.log(`[ACTION] adding device ${newKey}`);
-    return account.addSigningKey(nextSlot, newKey, nonce);
+    return opSender.addSigningKey(nextSlot, newKey, {
+      nonce,
+      chainGasConstants: account.chainGasConstants,
+    });
   };
 
   const { status, message, cost, exec } = useSendAsync({

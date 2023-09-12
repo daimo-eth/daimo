@@ -6,7 +6,7 @@ const lowercaseAddrV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePub
 
 const correctSerV5 = `{"storageVersion":5,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
 
-const correctSerV6 = `{"storageVersion":6,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"pushToken":null}`;
+const correctSerV7 = `{"storageVersion":7,"enclaveKeyInfo":{"name":"test","forceWeakerKeys":false},"enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"paymasterAndData":"0x","maxPriorityFeePerGas":"0","maxFeePerGas":"0"},"pushToken":null}`;
 
 const account: Account = {
   enclaveKeyInfo: {
@@ -28,17 +28,23 @@ const account: Account = {
   trackedRequests: [],
   accountKeys: [],
 
+  chainGasConstants: {
+    paymasterAndData: "0x",
+    maxPriorityFeePerGas: "0",
+    maxFeePerGas: "0",
+  },
+
   pushToken: null,
 };
 
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV6);
+    expect(ser).toEqual(correctSerV7);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV6);
+    const a = parseAccount(correctSerV7);
     expect(a).toEqual(account);
   });
 

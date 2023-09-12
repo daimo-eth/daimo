@@ -11,6 +11,7 @@ import {
   nameRegistryABI,
   nameRegistryAddress,
   nameRegistryConfig,
+  tokenMetadata,
 } from "@daimo/contract";
 import {
   Address,
@@ -36,6 +37,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
 };
 specialAddrLabels[ephemeralNotesAddress] = AddrLabel.PaymentLink;
+specialAddrLabels[tokenMetadata.address] = AddrLabel.Paymaster;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {

@@ -11,9 +11,11 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@pimlico/erc20-paymaster": "^0.1.1",
     "@tsconfig/node20": "^20.1.0",
     "@wagmi/cli": "^1.4.1",
     "typescript": "^5.1.6",
+    "userop": "^0.3.2",
     "viem": "^1.6.0"
   }
 }
