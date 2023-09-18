@@ -78,6 +78,7 @@ export function AmountInput({
       keyboardType="numeric"
       placeholder="0"
       placeholderTextColor={color.gray}
+      multiline
       numberOfLines={1}
       autoFocus={autoFocus == null ? true : autoFocus}
       value={strVal}
