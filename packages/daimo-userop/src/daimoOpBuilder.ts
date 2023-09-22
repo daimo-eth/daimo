@@ -37,20 +37,17 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Execution deadline */
   private validUntil = 0;
 
-  private constructor(rpcUrl: string, private signer: SigningCallback) {
+  private constructor(private signer: SigningCallback) {
     super();
-    this.provider = new BundlerJsonRpcProvider(rpcUrl).setBundlerRpc(
-      config.bundlerRpcUrl
-    );
+    this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
   }
 
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
     deployedAddress: Address,
-    signUserOperation: SigningCallback,
-    rpcUrl: string
+    signUserOperation: SigningCallback
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(rpcUrl, signUserOperation);
+    const instance = new DaimoOpBuilder(signUserOperation);
     instance.address = deployedAddress;
 
     console.log(`[OP]: init address ${instance.address}`);

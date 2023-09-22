@@ -1,30 +1,17 @@
 import { derKeytoContractFriendlyKey } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
-import { Client, ISendUserOperationOpts } from "userop";
-import type { UserOperationEventEvent } from "userop/dist/typechain/EntryPoint";
-import {
-  Address,
-  Hex,
-  encodeFunctionData,
-  getAddress,
-  parseEther,
-  parseUnits,
-} from "viem";
+import { BundlerJsonRpcProvider, Constants, Utils } from "userop";
+import { Address, Hex, encodeFunctionData, getAddress, parseUnits } from "viem";
 
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./signingCallback";
 import config from "../config.json";
 
-export interface UserOpHandle {
-  userOpHash: string;
-  wait: () => Promise<UserOperationEventEvent | null>;
-}
-
-// TODO: use the right RPC
 // DaimoOpSender is a wrapper that simplifies making user ops on behalf of a Daimo account.
 export class DaimoOpSender {
-  private dryRun = false;
-  private client: Client;
+  /** Connection to the chain */
+  private provider: BundlerJsonRpcProvider;
+
   private opBuilder: DaimoOpBuilder;
 
   private tokenAddress: Address;
@@ -33,15 +20,12 @@ export class DaimoOpSender {
   private notesAddress: `0x${string}`;
 
   constructor(
-    _dryRun: boolean,
-    _client: Client,
     _opBuilder: DaimoOpBuilder,
     _tokenAddress: `0x${string}`,
     _tokenDecimals: number,
     _notesAddress: `0x${string}`
   ) {
-    this.dryRun = _dryRun;
-    this.client = _client;
+    this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
     this.opBuilder = _opBuilder;
 
     this.tokenAddress = _tokenAddress;
@@ -50,30 +34,17 @@ export class DaimoOpSender {
     this.notesAddress = _notesAddress;
   }
 
-  // TODO: pass in RPC URLs
   public static async init(
     deployedAddress: Address,
-    signer: SigningCallback,
-    rpcUrl: string,
-    dryRun: boolean
+    signer: SigningCallback
   ): Promise<DaimoOpSender> {
-    const client = await Client.init(rpcUrl, {
-      overrideBundlerRpc: config.bundlerRpcUrl,
-    });
-
-    const daimoBuilder = await DaimoOpBuilder.init(
-      deployedAddress,
-      signer,
-      rpcUrl
-    );
+    const daimoBuilder = await DaimoOpBuilder.init(deployedAddress, signer);
 
     console.log(
       `[OP] init. token ${Contracts.tokenMetadata.address}, decimals ${Contracts.tokenMetadata.decimals}`
     );
 
     return new DaimoOpSender(
-      dryRun,
-      client,
       daimoBuilder,
       Contracts.tokenMetadata.address,
       Contracts.tokenMetadata.decimals,
@@ -86,13 +57,20 @@ export class DaimoOpSender {
   }
 
   /** Submits a user op to bundler. Returns userOpHash. */
-  private async sendUserOp(op: DaimoOpBuilder) {
-    const opts: ISendUserOperationOpts = {
-      dryRun: this.dryRun,
-      onBuild: (o) => console.log("[OP] signed userOp:", o),
-    };
-    const res = await this.client.sendUserOperation(op, opts);
-    console.log(`[OP] userOpHash: ${res.userOpHash}`);
+  public async sendUserOp(opBuilder: DaimoOpBuilder) {
+    const builtOp = await opBuilder.buildOp(
+      Constants.ERC4337.EntryPoint,
+      Contracts.tokenMetadata.chainId
+    );
+
+    console.log("[OP] built userOp:", builtOp);
+
+    const res: string = await this.provider.send("eth_sendUserOperation", [
+      Utils.OpToJSON(builtOp),
+      Constants.ERC4337.EntryPoint,
+    ]);
+
+    console.log(`[OP] submitted userOpHash: ${res}`);
 
     return res;
   }
@@ -143,29 +121,12 @@ export class DaimoOpSender {
     return this.sendUserOp(op);
   }
 
-  /** Sends eth. Returns userOpHash. */
-  public async transfer(
-    to: Address,
-    amount: `${number}`,
-    opMetadata: DaimoOpMetadata
-  ): Promise<UserOpHandle> {
-    const ether = parseEther(amount);
-    console.log(`[OP] transfer ${ether} wei to ${to}`);
-
-    const op = this.opBuilder.executeBatch(
-      [{ dest: to, value: ether, data: "0x" }],
-      opMetadata
-    );
-
-    return this.sendUserOp(op);
-  }
-
   /** Sends an ERC20 transfer. Returns userOpHash. */
   public async erc20transfer(
     to: Address,
     amount: `${number}`, // in the native unit of the token
     opMetadata: DaimoOpMetadata
-  ): Promise<UserOpHandle> {
+  ) {
     const parsedAmount = parseUnits(amount, this.tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
 
@@ -178,35 +139,6 @@ export class DaimoOpSender {
             abi: Contracts.erc20ABI,
             functionName: "transfer",
             args: [to, parsedAmount],
-          }),
-        },
-      ],
-      opMetadata
-    );
-
-    return this.sendUserOp(op);
-  }
-
-  /** Sends an ERC20 approval. Returns userOpHash. */
-  public async erc20approve(
-    spender: Address,
-    amount: `${number}`,
-    opMetadata: DaimoOpMetadata
-  ): Promise<UserOpHandle> {
-    const parsedAmount = parseUnits(amount, this.tokenDecimals);
-    console.log(
-      `[OP] approve ${parsedAmount} ${this.tokenAddress} for ${spender}`
-    );
-
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: this.tokenAddress,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.erc20ABI,
-            functionName: "approve",
-            args: [spender, parsedAmount],
           }),
         },
       ],

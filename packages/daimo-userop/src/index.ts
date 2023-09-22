@@ -1,4 +1,4 @@
-export { DaimoOpSender, UserOpHandle } from "./daimoOpSender";
+export { DaimoOpSender } from "./daimoOpSender";
 export {
   DaimoNonce,
   DaimoNonceMetadata,

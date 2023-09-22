@@ -1,17 +1,15 @@
 import { EAccount, EnclaveKeyInfo, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import { DaimoOpSender, SigningCallback, UserOpHandle } from "@daimo/userop";
+import { DaimoOpSender, SigningCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { chainConfig } from "../logic/chainConfig";
 import { Log } from "../logic/log";
 import { useAccount } from "../model/account";
-import { resync } from "../sync/sync";
 
 /** Send a tx user op. */
-type SendOpFn = (opSender: DaimoOpSender) => Promise<UserOpHandle>;
+type SendOpFn = (opSender: DaimoOpSender) => Promise<string>;
 
 /** Send a user op, track status. */
 export function useSendAsync({
@@ -50,7 +48,7 @@ export function useSendAsync({
 
     // Add pending op and named accounts to history
     if (pendingOp) {
-      pendingOp.opHash = handle.userOpHash as Hex;
+      pendingOp.opHash = handle as Hex;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       account.recentTransfers.push(pendingOp);
       account.namedAccounts.push(...(namedAccounts || []));
@@ -58,9 +56,6 @@ export function useSendAsync({
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
 
       setAccount(account);
-
-      // In the background, wait for the op to finish
-      handle.wait().then(() => resync(`op finished: ${pendingOp.opHash}`));
     }
   }, [account.enclaveKeyInfo, keySlot, sendFn]);
 
@@ -106,12 +101,7 @@ function loadOpSender(
       };
     };
 
-    return await DaimoOpSender.init(
-      address,
-      signer,
-      chainConfig.l2.rpcUrls.public.http[0],
-      false
-    );
+    return await DaimoOpSender.init(address, signer);
   })();
   accountCache.set([address, keySlot], promise);
 

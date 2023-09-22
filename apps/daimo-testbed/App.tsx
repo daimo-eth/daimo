@@ -7,14 +7,7 @@ import {
   SigningCallback,
 } from "@daimo/userop";
 import { useState } from "react";
-import {
-  Button,
-  Linking,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function App() {
   const [account, setAccount] = useState<string>("testdaimo");
@@ -25,7 +18,7 @@ export default function App() {
     useState<ExpoEnclave.HardwareSecurityLevel>("SOFTWARE");
   const [biometricSecurityLevel, setBiometricSecurityLevel] =
     useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
-  const [txHash, setTxHash] = useState<string>("");
+  const [opHash, setOpHash] = useState<string>("");
 
   const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
     usageMessage: "Authorise transaction",
@@ -56,19 +49,14 @@ export default function App() {
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
       derPublicKey
     );
-    const account = await DaimoOpSender.init(
-      accAddress,
-      signer,
-      "https://goerli.base.org",
-      false
-    );
+    const account = await DaimoOpSender.init(accAddress, signer);
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()
     );
 
     const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
-    const opHandle = await account.erc20transfer(
+    const opHash = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42",
       {
@@ -82,8 +70,7 @@ export default function App() {
         },
       }
     );
-    const hash = (await opHandle.wait())?.transactionHash;
-    setTxHash(hash ?? "failed");
+    setOpHash(opHash ?? "failed");
   };
 
   return (
@@ -130,15 +117,8 @@ export default function App() {
       <Text>Verification result is {verification.toString()}</Text>
       <Button title="Test Tx" onPress={testTx} />
       <Text>
-        Test tx hash is{" "}
-        <Text
-          style={{ color: "blue" }}
-          onPress={() =>
-            Linking.openURL(`https://goerli.basescan.org/tx/${txHash}`)
-          }
-        >
-          {txHash}
-        </Text>
+        Test op hash is
+        {opHash}
       </Text>
     </View>
   );
