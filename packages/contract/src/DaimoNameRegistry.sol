@@ -15,6 +15,10 @@ contract DaimoNameRegistry is OwnableUpgradeable, UUPSUpgradeable {
 
     event Registered(bytes32 indexed name, address indexed addr);
 
+    constructor() {
+        _disableInitializers();
+    }
+
     /// On proxy deployment, deployer becomes the owner.
     function init() public initializer {
         __Ownable_init();

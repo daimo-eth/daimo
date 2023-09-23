@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "../src/DaimoNameRegistry.sol";
+import "../src/DaimoNameRegistryProxy.sol";
 
 // Does nothing. Used to test upgradability.
 contract Brick {
@@ -13,6 +13,9 @@ contract Brick {
         (name); // silence warning
         return address(0xdead);
     }
+
+    /// Test contract, exclude from coverage
+    function test() public {}
 }
 
 contract UpgradeableBrick is UUPSUpgradeable, OwnableUpgradeable {
@@ -27,6 +30,9 @@ contract UpgradeableBrick is UUPSUpgradeable, OwnableUpgradeable {
         (name); // silence warning
         return address(0xdead);
     }
+
+    /// Test contract, exclude from coverage
+    function test() public {}
 }
 
 contract NameRegistryTest is Test {
@@ -99,7 +105,7 @@ contract NameRegistryTest is Test {
 
     function testUpgrade() public {
         // Construct proxy, same mechanism as the deploy script
-        ERC1967Proxy proxy = new ERC1967Proxy{salt: 0}(
+        DaimoNameRegistryProxy proxy = new DaimoNameRegistryProxy{salt: 0}(
             address(registry), // implementation
             abi.encodeWithSelector(DaimoNameRegistry.init.selector, hex"")
         );
