@@ -1,5 +1,4 @@
 import type { AbiEvent } from "abitype";
-import jsonBigInt from "json-bigint";
 import fs from "node:fs/promises";
 import os from "os";
 import path from "path";
@@ -19,7 +18,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { Chain, baseGoerli, mainnet } from "viem/chains";
 
-const jsonBig = jsonBigInt({ useNativeBigInt: true });
+import { jsonBigParse, jsonBigStringify } from "./jsonBig";
 
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
@@ -152,7 +151,7 @@ export class ViemClient {
       try {
         const cachePath = path.join(this.logCacheDir, id);
         const cache = await fs.readFile(cachePath, "utf-8");
-        const ret = jsonBig.parse(cache);
+        const ret = jsonBigParse(cache);
         if (ret.length > 0) {
           console.log(`[CHAIN] loaded ${ret.length} cached logs ${id}`);
         }
@@ -175,7 +174,7 @@ export class ViemClient {
     );
     if (shouldCache) {
       const cachePath = path.join(this.logCacheDir, id);
-      await fs.writeFile(cachePath, jsonBig.stringify(logs));
+      await fs.writeFile(cachePath, jsonBigStringify(logs));
     }
     return logs;
   }
@@ -210,7 +209,7 @@ export class ViemClient {
     // Catch up to latest block
     const isTestnet = this.publicClient.chain.id === baseGoerli.id;
     const startBlock = isTestnet ? 8750000n : 0n;
-    const lastBlockNum = this.lastBlock.number;
+    const lastBlockNum = BigInt(this.lastBlock.number);
     const step = 5000n;
     for (
       let fromBlock = startBlock;
