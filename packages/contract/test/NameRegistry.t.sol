@@ -55,6 +55,13 @@ contract NameRegistryTest is Test {
         registry.register("newname", address(0x1234));
     }
 
+    function testNullAddrOrName() public {
+        vm.expectRevert("NameRegistry: empty name");
+        registry.register("", address(0x1234));
+        vm.expectRevert("NameRegistry: empty addr");
+        registry.register("foo", address(0));
+    }
+
     function testForceRegister() public {
         registry.register("foo", address(0x123));
         assertEq(registry.resolveName(address(0x123)), bytes32(bytes("foo")));

@@ -24,6 +24,9 @@ contract DaimoNameRegistry is Ownable, Initializable {
     /// validates names both for claiming and lookup, so there's no advantage
     /// to registering an invalid name onchain (will be ignored / unusable).
     function register(bytes32 name, address addr) public {
+        require(name != bytes32(0), "NameRegistry: empty name");
+        require(addr != address(0), "NameRegistry: empty addr");
+
         require(_addrs[name] == address(0), "NameRegistry: name taken");
         require(_names[addr] == bytes32(0), "NameRegistry: addr taken");
         _addrs[name] = addr;
@@ -33,7 +36,7 @@ contract DaimoNameRegistry is Ownable, Initializable {
 
     /// Registers msg.sender under a given name.
     function registerSelf(bytes32 name) external {
-        this.register(name, msg.sender);
+        register(name, msg.sender);
     }
 
     /// Looks up the address for a given name, or address(0) if missing.
