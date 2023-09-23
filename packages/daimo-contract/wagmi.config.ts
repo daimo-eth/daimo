@@ -23,12 +23,7 @@ export default defineConfig({
     foundry({
       project: "../contract",
       deployments,
-      include: [
-        "Daimo*.sol/*",
-        "ERC*.sol/*",
-        "EntryPoint.sol/*",
-        "TransparentUpgradeableProxy.sol/*",
-      ],
+      include: ["Daimo*.sol/*", "ERC*.sol/*", "EntryPoint.sol/*"],
     }),
   ],
 });

@@ -58,8 +58,8 @@ contract AccountSendUseropTest is Test {
             uint8(1), // version
             uint48(0), // validUntil forever
             uint8(0), // keySlot, r, s
-            hex"bc866887f06fd162a467958c9577b4aaf77e28f975697b38bb8664b75781f24d"
-            hex"af3b1dab5532b21db1144495f118921e0f346d8c1218e6daca179e266212b7eb"
+            hex"163a15b584a65087b209a1ed91ea0f95cd8dbaedadb8735249989ed766bbf56b"
+            hex"3141eccf9c1b0b890196efc9df55cd0ac3769df6961fa0de376c581982120c4d"
         );
 
         Call[] memory calls = new Call[](0);
@@ -68,7 +68,7 @@ contract AccountSendUseropTest is Test {
         vm.deal(address(acc), 1 ether);
 
         // base cost of a Daimo userop
-        uint256 expectedOpCost = 455744;
+        uint256 expectedOpCost = 471463;
 
         // dummy op
         UserOperation memory op = UserOperation({
@@ -98,7 +98,6 @@ contract AccountSendUseropTest is Test {
         op.signature = ownerSig;
 
         // expect a valid but reverting op
-
         UserOperation[] memory ops = new UserOperation[](1);
         ops[0] = op;
         vm.expectEmit(true, true, true, true);
@@ -137,8 +136,8 @@ contract AccountSendUseropTest is Test {
             uint8(1), // version
             validUntil,
             uint8(0), // keySlot, r, s
-            hex"6d7570b4d5197d779ea880bd45c9e060c272e7a5133ce9fc27edf5bef640f293"
-            hex"5fb0860d1347f3c4dbc413aa2f1fd1903e490b587a9c01801651ddb2176c773e"
+            hex"12f3774bf8ecd018bfc2e3ef77b4542839b3d22db3e077525e7be774a9bcd741"
+            hex"c72c4adf29d4db151daef6cbd9d4b8589de00261dba2180f0720b39ebb6f6756"
         );
 
         Call[] memory calls = new Call[](0);
