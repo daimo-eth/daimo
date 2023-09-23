@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 /// Basic name registry.
 /// Uniquely and permanently associates addresses with a short name.
-contract DaimoNameRegistry is Ownable, Initializable {
+contract DaimoNameRegistry is OwnableUpgradeable, UUPSUpgradeable {
     // APPEND-ONLY storage slots.
     // This contract is used with upgradeable proxies. Future versions may add
     // new storage items at the end, but cannot change existing ones.
@@ -15,9 +15,21 @@ contract DaimoNameRegistry is Ownable, Initializable {
 
     event Registered(bytes32 indexed name, address indexed addr);
 
-    /// On TransparentUpgradeableProxy deployment, owner becomes the deployer.
+    /// On proxy deployment, deployer becomes the owner.
     function init() public initializer {
-        _transferOwnership(msg.sender);
+        __Ownable_init();
+    }
+
+    /// UUPSUpsgradeable: only allow owner to upgrade
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override onlyOwner {
+        (newImplementation); // No-op; silence unused parameter warning
+    }
+
+    /// UUPSUpgradeable: expose implementation
+    function implementation() public view returns (address) {
+        return _getImplementation();
     }
 
     /// Enforces uniqueness. Doesn't do any validation on name. The app
