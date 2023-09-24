@@ -10,31 +10,15 @@ import { daimoAccountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
+  IUserOperationMiddlewareCtx,
   Presets,
   UserOperationBuilder,
-  UserOperationMiddlewareFn,
 } from "userop";
 import { Address, encodeFunctionData, numberToHex } from "viem";
 
 import { DaimoNonce } from "./nonce";
-import { SigningCallback, dummySignature } from "./util";
+import { SigningCallback } from "./signingCallback";
 import config from "../config.json";
-
-/** Signs userops. Signer can use the enclave, requesting user permission as needed. */
-function getSigningMiddleware(
-  signer: SigningCallback
-): UserOperationMiddlewareFn {
-  return async (ctx) => {
-    const userOpHash = ctx.getUserOpHash();
-    assert(userOpHash.startsWith("0x"));
-    const { derSig, keySlot } = await signer(userOpHash.slice(2));
-
-    const parsedSignature = p256.Signature.fromDER(derSig);
-    ctx.op.signature = `${numberToHex(keySlot, {
-      size: 1,
-    })}${parsedSignature.toCompactHex()}`;
-  };
-}
 
 // Metadata for a userop: nonce and paymaster constant.
 export type DaimoOpMetadata = {
@@ -48,9 +32,12 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   private provider: BundlerJsonRpcProvider;
 
   /** Daimo account address */
-  address: `0x${string}` = "0x";
+  private address: `0x${string}` = "0x";
 
-  private constructor(rpcUrl: string) {
+  /** Execution deadline */
+  private validUntil = 0;
+
+  private constructor(rpcUrl: string, private signer: SigningCallback) {
     super();
     this.provider = new BundlerJsonRpcProvider(rpcUrl).setBundlerRpc(
       config.bundlerRpcUrl
@@ -63,14 +50,13 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     signUserOperation: SigningCallback,
     rpcUrl: string
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(rpcUrl);
+    const instance = new DaimoOpBuilder(rpcUrl, signUserOperation);
     instance.address = deployedAddress;
 
     console.log(`[OP]: init address ${instance.address}`);
     const base = instance
       .useDefaults({
         sender: instance.address,
-        signature: dummySignature,
         verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
         callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
         preVerificationGas: DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT,
@@ -78,11 +64,31 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       .useMiddleware(
         Presets.Middleware.estimateUserOperationGas(instance.provider)
       )
-      .useMiddleware(getSigningMiddleware(signUserOperation));
+      .useMiddleware(instance.signingCallback);
 
     return base;
   }
 
+  /** Signs userops. Signer can use the enclave, requesting user permission as needed. */
+  private signingCallback = async (ctx: IUserOperationMiddlewareCtx) => {
+    const userOpHash = ctx.getUserOpHash();
+    assert(userOpHash.startsWith("0x"));
+
+    const hexVersion = "01";
+    const hexValidUntil = numberToHex(this.validUntil, { size: 6 });
+    const hexTx = userOpHash.slice(2);
+    const hexMsg = [hexVersion, hexValidUntil, hexTx].join("");
+    const { derSig, keySlot } = await this.signer(hexMsg);
+
+    const parsedSignature = p256.Signature.fromDER(derSig);
+
+    const hexKeySlot = numberToHex(keySlot, { size: 1 });
+    const hexSig = parsedSignature.toCompactHex();
+
+    ctx.op.signature = [hexVersion, hexValidUntil, hexKeySlot, hexSig].join("");
+  };
+
+  /** Sets user-op nonce and fee payment metadata. */
   setOpMetadata(opMetadata: DaimoOpMetadata) {
     return this.setNonce(opMetadata.nonce.toHex())
       .setPaymasterAndData(opMetadata.chainGasConstants.paymasterAndData)
@@ -90,6 +96,11 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       .setMaxPriorityFeePerGas(
         opMetadata.chainGasConstants.maxPriorityFeePerGas
       );
+  }
+
+  /** Sets a deadline for this userop to execute. */
+  setValidUntil(validUntil: number) {
+    this.validUntil = validUntil;
   }
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {

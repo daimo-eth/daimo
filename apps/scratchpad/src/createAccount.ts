@@ -5,10 +5,10 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import {
-  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
   SigningCallback,
 } from "@daimo/userop";
 import crypto from "node:crypto";
@@ -21,7 +21,6 @@ import {
   createWalletClient,
   getAddress,
   http,
-  parseAbi,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
@@ -73,7 +72,11 @@ export async function createAccount() {
 
     const sigHex = Buffer.from(sigDer).toString("hex");
     console.log(`Signature: ${sigHex}`);
-    return { derSig: sigHex, keySlot: 0 };
+
+    // Valid forever
+    const validUntil = 0;
+
+    return { derSig: sigHex, keySlot: 0, validUntil };
   };
   const dryRun = false;
 

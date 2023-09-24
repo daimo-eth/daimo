@@ -10,6 +10,7 @@ import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 
+import "account-abstraction/core/Helpers.sol";
 import "account-abstraction/interfaces/IAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 
@@ -153,7 +154,12 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         bytes32 hash,
         bytes calldata signature
     ) external view override returns (bytes4 magicValue) {
-        if (_validateSignature(hash, signature)) {
+        // P256-SHA256: hash the messageHash again
+        // Necessary since many P256 libraries integrate hashing, including iOS
+        // Secure Enclave and Android Keystore.
+        bytes32 sha256Hash = sha256(abi.encodePacked(hash));
+
+        if (_validateSignature(sha256Hash, signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
         return 0xffffffff;
@@ -164,14 +170,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     // - r, s are the P256 signature components
     /// Validate any P256 signature, whether for a userop or ERC1271 user sig.
     function _validateSignature(
-        bytes32 messageHash,
+        bytes32 sha256Hash,
         bytes calldata signature
     ) private view returns (bool) {
-        // P256-SHA256: hash the messageHash again
-        // Necessary since many P256 libraries integrate hashing, including iOS
-        // Secure Enclave and Android Keystore.
-        bytes32 hash = sha256(abi.encodePacked(messageHash));
-
         // signature
         uint256 r = uint256(bytes32(signature[1:33]));
         uint256 s = uint256(bytes32(signature[33:65]));
@@ -183,7 +184,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         uint256 y = uint256(keys[keySlot][1]);
 
         // call EIP-7212 precompile or P256Verifier fallback contract
-        bytes memory args = abi.encode(hash, r, s, x, y);
+        bytes memory args = abi.encode(sha256Hash, r, s, x, y);
         (bool success, bytes memory ret) = sigVerifier.staticcall(args);
         assert(success);
 
@@ -195,14 +196,38 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) private view returns (uint256 validationData) {
-        // TODO: to allow key rotation replay across chains
+        // TODO: version 2, allow key rotation replay across chains
         // Special case userOp.callData calling `executeKeyRotation`
         // Require nonce key = magic val, so that nonce sequence forces order
         // Calculate a replacement userOpHash excluding chainID.
 
-        if (_validateSignature(userOpHash, userOp.signature)) {
-            // TODO: return a validUntil
-            return 0;
+        // UserOp signature structure:
+        // - uint8 version
+        //
+        // v1:
+        // - uint48 validUntil
+        // - uint8 keySlot
+        // - uint256 r, s
+
+        // In all cases, we'll be checking a signature & returning a result.
+        bytes memory messageToVerify;
+        bytes calldata signature;
+        ValidationData memory returnIfValid;
+
+        uint8 version = uint8(userOp.signature[0]);
+        if (version == 1) {
+            uint48 validUntil = uint48(bytes6(userOp.signature[1:7]));
+            signature = userOp.signature[7:]; // keySlot, r, s
+            messageToVerify = abi.encodePacked(version, validUntil, userOpHash);
+            returnIfValid.validUntil = validUntil;
+        } else {
+            revert("unsupported signature version");
+        }
+
+        // P256-SHA256
+        bytes32 sha256Hash = sha256(messageToVerify);
+        if (_validateSignature(sha256Hash, signature)) {
+            return _packValidationData(returnIfValid);
         }
         return _SIG_VALIDATION_FAILED;
     }
