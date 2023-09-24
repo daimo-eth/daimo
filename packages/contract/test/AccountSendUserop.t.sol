@@ -8,6 +8,7 @@ import "../src/DaimoAccountFactory.sol";
 import "../src/DaimoAccount.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
+import "account-abstraction/interfaces/IEntryPoint.sol";
 
 contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
@@ -52,13 +53,22 @@ contract AccountSendUseropTest is Test {
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
-        bytes
-            memory ownerSig = hex"008e41b7285ca1efb89b3ee64e8f3886dda01789ddeb2289a6f9e26f2ab61ff8d17ed303d371abeddaceed701a61e7ffb1c9aae93d6781aeffab0902dba4d5f7b8";
+
+        bytes memory ownerSig = abi.encodePacked(
+            uint8(1), // version
+            uint48(0), // validUntil forever
+            uint8(0), // keySlot, r, s
+            hex"bc866887f06fd162a467958c9577b4aaf77e28f975697b38bb8664b75781f24d"
+            hex"af3b1dab5532b21db1144495f118921e0f346d8c1218e6daca179e266212b7eb"
+        );
 
         Call[] memory calls = new Call[](0);
         DaimoAccount acc = factory.createAccount(0, key, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
+
+        // base cost of a Daimo userop
+        uint256 expectedOpCost = 455744;
 
         // dummy op
         UserOperation memory op = UserOperation({
@@ -88,17 +98,18 @@ contract AccountSendUseropTest is Test {
         op.signature = ownerSig;
 
         // expect a valid but reverting op
+
         UserOperation[] memory ops = new UserOperation[](1);
         ops[0] = op;
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(true, true, true, true);
         emit UserOperationEvent(
             hash,
             address(acc),
             address(0),
-            42,
-            false,
             0,
-            0
+            false,
+            expectedOpCost * 1 gwei,
+            expectedOpCost
         );
         entryPoint.handleOps(ops, payable(address(acc)));
 
@@ -110,5 +121,65 @@ contract AccountSendUseropTest is Test {
         vm.prank(address(entryPoint));
         uint256 validationData = a2.validateUserOp(op, hash, 0);
         assertEq(validationData, 0);
+    }
+
+    function testValidUntil() public {
+        // hardcoded from swift playground
+        uint256[2] memory key1u = [
+            0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
+            0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
+        ];
+        bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
+
+        // validUntil unix timestamp 1e9
+        uint48 validUntil = 1e9;
+        bytes memory ownerSig = abi.encodePacked(
+            uint8(1), // version
+            validUntil,
+            uint8(0), // keySlot, r, s
+            hex"6d7570b4d5197d779ea880bd45c9e060c272e7a5133ce9fc27edf5bef640f293"
+            hex"5fb0860d1347f3c4dbc413aa2f1fd1903e490b587a9c01801651ddb2176c773e"
+        );
+
+        Call[] memory calls = new Call[](0);
+        DaimoAccount acc = factory.createAccount(0, key, calls, 42);
+        vm.deal(address(acc), 1 ether);
+
+        // valid (but reverting) dummy userop
+        UserOperation memory op = UserOperation({
+            sender: address(acc),
+            nonce: 0,
+            initCode: hex"",
+            callData: hex"00",
+            callGasLimit: 200000,
+            verificationGasLimit: 2000000,
+            preVerificationGas: 21000,
+            maxFeePerGas: 3e9,
+            maxPriorityFeePerGas: 1e9,
+            paymasterAndData: hex"",
+            signature: ownerSig
+        });
+
+        // userop hash
+        bytes32 hash = entryPoint.getUserOpHash(op);
+        console2.log("op hash: ");
+        console2.logBytes32(hash);
+
+        // too late: can't execute after timestamp 1e9
+        vm.warp(1e9 + 1);
+        UserOperation[] memory ops = new UserOperation[](1);
+        ops[0] = op;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IEntryPoint.FailedOp.selector,
+                0,
+                "AA22 expired or not due"
+            )
+        );
+        entryPoint.handleOps(ops, payable(address(acc)));
+
+        // just early enough: can execute at timestamp 1e9
+        vm.warp(1e9);
+        entryPoint.handleOps(ops, payable(address(acc)));
     }
 }

@@ -75,13 +75,13 @@ export function useWarmCache(
 ) {
   useEffect(() => {
     if (!enclaveKeyInfo || !address || !keySlot) return;
-    loadAccount(enclaveKeyInfo, address, keySlot);
+    loadOpSender(enclaveKeyInfo, address, keySlot);
   }, [enclaveKeyInfo?.name, enclaveKeyInfo?.forceWeakerKeys, address, keySlot]);
 }
 
 const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 
-function loadAccount(
+function loadOpSender(
   enclaveKeyInfo: EnclaveKeyInfo,
   address: Address,
   keySlot: number
@@ -93,14 +93,16 @@ function loadAccount(
     console.info(
       `[SEND] loading DaimoOpSender ${address} ${enclaveKeyInfo.name} ${keySlot}`
     );
-    const signer: SigningCallback = async (hexTx: string) => {
+    const signer: SigningCallback = async (messageHex: string) => {
+      const derSig = await requestEnclaveSignature(
+        enclaveKeyInfo,
+        messageHex,
+        "Authorize transaction"
+      );
+
       return {
-        derSig: await requestEnclaveSignature(
-          enclaveKeyInfo,
-          hexTx,
-          "Authorize transaction"
-        ),
         keySlot,
+        derSig,
       };
     };
 
@@ -126,10 +128,10 @@ async function sendAsync(
   try {
     if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const account = await loadAccount(enclaveKeyInfo, address, keySlot);
+    const opSender = await loadOpSender(enclaveKeyInfo, address, keySlot);
 
     setAS("loading", "Signing...");
-    const handle = await sendFn(account);
+    const handle = await sendFn(opSender);
     setAS("success", "Accepted");
 
     return handle;
@@ -143,7 +145,7 @@ async function sendAsync(
 
 export async function requestEnclaveSignature(
   enclaveKeyInfo: EnclaveKeyInfo,
-  hexTx: string,
+  hexMessage: string,
   usageMessage: string
 ) {
   const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
@@ -160,7 +162,7 @@ export async function requestEnclaveSignature(
 
   const signature = await Log.promise(
     "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyInfo.name, hexTx, biometricPromptCopy)
+    ExpoEnclave.sign(enclaveKeyInfo.name, hexMessage, biometricPromptCopy)
   );
 
   return signature;
