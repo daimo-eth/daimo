@@ -21,7 +21,7 @@ public class FallbackKeyManager : KeyManager {
     internal func createSigningPrivkey(accountName: String) throws {
         let signingPrivkey = P256.Signing.PrivateKey()
         
-        try self.store.storeKey(signingPrivkey, account: accountName)
+        try self.store.storeKey(signingPrivkey, account: accountName, requireUserPresence: true)
     }
 
     internal func getSigningPrivkey(accountName: String) throws -> P256.Signing.PrivateKey {
