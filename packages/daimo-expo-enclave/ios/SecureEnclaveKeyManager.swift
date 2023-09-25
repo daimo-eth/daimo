@@ -50,7 +50,11 @@ public class SecureEnclaveKeyManager : KeyManager {
         
         let signingPrivkey = try SecureEnclave.P256.Signing.PrivateKey(accessControl: accessControl)
         
-        try self.store.storeKey(signingPrivkey, account: accountName)
+        // Since the key is authed by the enclave and the keychain only stores an encrypted blob
+        // representation, we do not auth userPresence for keychain reads. Additionally, it would
+        // be bad UX to prompt the user for presence/auth twice (seperately for keychain reads and
+        // on Secure Enclave signing).
+        try self.store.storeKey(signingPrivkey, account: accountName, requireUserPresence: false)
     }
 
     public func fetchPublicKey(accountName: String) throws -> String? {
