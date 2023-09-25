@@ -50,7 +50,7 @@ public class SecureEnclaveKeyManager : KeyManager {
         
         let signingPrivkey = try SecureEnclave.P256.Signing.PrivateKey(accessControl: accessControl)
         
-        try self.store.storeKey(signingPrivkey, account: accountName)
+        try self.store.storeKey(signingPrivkey, account: accountName, requireUserPresence: false)
     }
 
     public func fetchPublicKey(accountName: String) throws -> String? {
