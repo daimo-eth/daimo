@@ -10,6 +10,3 @@
 	path = packages/contract/lib/account-abstraction
 	url = https://github.com/eth-infinitism/account-abstraction
 	branch = ver0.6.0
-[submodule "packages/contract/lib/p256-verifier"]
-	path = packages/contract/lib/p256-verifier
-	url = https://github.com/daimo-eth/p256-verifier
