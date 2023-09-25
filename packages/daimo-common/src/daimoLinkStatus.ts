@@ -1,5 +1,5 @@
 import { DaimoLinkAccount, DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
-import { EAccount } from "./model";
+import { EAccount } from "./eAccount";
 
 export type DaimoLinkStatus =
   | DaimoAccountStatus

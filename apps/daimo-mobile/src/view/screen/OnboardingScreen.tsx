@@ -577,7 +577,7 @@ function NamePicker({
       return <>{oct("alert")} sorry, that name is taken</>; // name taken
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true; // name valid & available
-      return <>{oct("check-circle", color.status.green)} available</>;
+      return <>{oct("check-circle", color.successDark)} available</>;
     }
     throw new Error("unreachable");
   })();

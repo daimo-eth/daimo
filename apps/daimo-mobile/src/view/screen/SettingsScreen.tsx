@@ -264,7 +264,7 @@ function KV({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   callout: {
-    backgroundColor: color.bg.lightGray,
+    backgroundColor: color.grayLight,
     padding: 16,
     borderRadius: 24,
   },

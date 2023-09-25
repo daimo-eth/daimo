@@ -52,7 +52,7 @@ const inputRow = {
   flexDirection: "row",
   alignItems: "center",
   gap: 8,
-  backgroundColor: color.bg.lightGray,
+  backgroundColor: color.grayLight,
   borderRadius: 8,
   paddingHorizontal: 16,
   paddingVertical: 12,
@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
   inputRow,
   inputRowFocused: {
     ...inputRow,
-    backgroundColor: color.bg.blue,
   },
   input,
   inputCentered: {

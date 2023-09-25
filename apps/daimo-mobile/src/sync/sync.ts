@@ -1,5 +1,5 @@
-import { EAccount } from "@daimo/api";
 import {
+  EAccount,
   OpStatus,
   TransferOpEvent,
   amountToDollars,

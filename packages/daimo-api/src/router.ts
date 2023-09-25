@@ -14,7 +14,7 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { Address, encodeFunctionData, getAddress, isAddress } from "viem";
+import { Address, encodeFunctionData, getAddress } from "viem";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
@@ -114,23 +114,9 @@ export function createRouter(
         }
 
         async function getEAccountFromStr(eAccStr: string): Promise<EAccount> {
-          if (eAccStr.includes(".")) {
-            const ensName = normalize(eAccStr);
-            const addr = await vc.l1Client.getEnsAddress({ name: ensName });
-            if (addr != null) {
-              return { ensName, addr } as EAccount;
-            }
-          } else if (isAddress(eAccStr)) {
-            const addr = getAddress(eAccStr);
-            return { addr } as EAccount;
-          } else {
-            const daimoAddress = nameReg.resolveName(eAccStr);
-            if (daimoAddress) {
-              return await nameReg.getEAccount(daimoAddress);
-            }
-          }
-
-          throw new Error(`${eAccStr} not found`);
+          const ret = await nameReg.getEAccountFromStr(eAccStr);
+          if (ret == null) throw new Error(`${eAccStr} not found`);
+          return ret;
         }
 
         switch (link.type) {
@@ -140,11 +126,8 @@ export function createRouter(
           }
           case "request": {
             const acc = await getEAccountFromStr(link.recipient);
-            if (acc.name == null) {
-              throw new Error(`Not found: ${link.recipient}`);
-            }
 
-            // Check if fulfilled
+            // Check if already fulfilled
             const fulfilledNonceMetadata = new DaimoNonceMetadata(
               DaimoNonceType.RequestResponse,
               BigInt(link.requestId)

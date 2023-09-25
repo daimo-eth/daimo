@@ -88,16 +88,17 @@ function useTouchUnderlay(type: ButtonProps["type"]) {
       case "danger":
         return touchHighlightUnderlay.danger;
       case "primary":
+        return touchHighlightUnderlay.primary;
       case "subtle":
       default:
-        return touchHighlightUnderlay.blue;
+        return touchHighlightUnderlay.subtle;
     }
   }, [type]);
 }
 
 type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
-function Button(
+export function Button(
   props: ButtonPropsSmall & {
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
@@ -119,20 +120,20 @@ function Button(
       onPress={props.onPress}
       style={props.disabled ? disabledStyle : props.style.button}
       disabled={props.disabled}
-      {...(props.touchUnderlay || touchHighlightUnderlay.blue)}
+      {...(props.touchUnderlay || touchHighlightUnderlay.subtle)}
     >
       {child}
     </TouchableHighlight>
   );
 }
 
-const buttonStyles = {
+export const buttonStyles = {
   big: StyleSheet.create({
     button: {
       paddingHorizontal: 24,
       paddingVertical: 16,
       borderRadius: 8,
-      backgroundColor: color.bg.lightBlue,
+      backgroundColor: color.primaryLight,
     },
     title: {
       fontSize: 20,
@@ -145,7 +146,7 @@ const buttonStyles = {
       paddingHorizontal: 16,
       paddingVertical: 12,
       borderRadius: 8,
-      backgroundColor: color.bg.lightBlue,
+      backgroundColor: color.primaryLight,
     },
     title: {
       fontSize: 16,
@@ -163,7 +164,7 @@ const buttonStyles = {
       fontSize: 16,
       fontWeight: "600",
       textAlign: "center",
-      color: color.darkGray,
+      color: color.grayDark,
     },
   }),
 };

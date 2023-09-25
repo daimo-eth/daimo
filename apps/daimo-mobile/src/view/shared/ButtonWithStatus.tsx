@@ -15,7 +15,7 @@ export function ButtonWithStatus({
   return (
     <View style={style.buttonWithStatus}>
       {button}
-      <Spacer h={16} />
+      <Spacer h={8} />
       <TextCenter>
         <TextLight>{status}</TextLight>
       </TextCenter>

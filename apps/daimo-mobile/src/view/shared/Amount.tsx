@@ -6,7 +6,7 @@ import Spacer from "./Spacer";
 import { color, ss } from "./style";
 
 /** 1.23 or 1,23 depending on user locale */
-export const amountSeparator = getLocales()[0].decimalSeparator || ".";
+const amountSeparator = getLocales()[0].decimalSeparator || ".";
 
 /** Returns eg "$1.00" or "$1,23" or "$1.2345" */
 export function getAmountText({

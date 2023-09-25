@@ -1,26 +1,16 @@
 import { Platform, StyleSheet, TextStyle } from "react-native";
 
 export const color = {
-  status: {
-    red: "#a00",
-    yellow: "#a70",
-    green: "#090",
-  },
-  black: "#000",
-  gray: "#668",
-  darkGray: "#222",
-  white: "#fff",
   primary: "#007aff",
+  primaryLight: "#aaccff",
   danger: "#f35369",
   success: "#4cd964",
-  bg: {
-    lightGray: "#eef0f4",
-    midGray: "#ccc",
-    /** Slightly darker than the TouchableHighlight blue tap color: D1E4FD. */
-    lightBlue: "#d1e4fd",
-    lightYellow: "#fff6e6",
-    blue: "#cce5ff",
-  },
+  successDark: "#090",
+  black: "#000",
+  grayDark: "#222",
+  gray: "#668",
+  grayLight: "#eef0f4",
+  white: "#fff",
 };
 
 const textBase: TextStyle = {
@@ -28,18 +18,20 @@ const textBase: TextStyle = {
   color: color.black,
 };
 
+const activeAlpha = "aa";
+
 export const touchHighlightUnderlay = {
-  blue: {
-    activeOpacity: 0.9,
-    underlayColor: color.bg.blue,
+  primary: {
+    underlayColor: color.primary + activeAlpha,
   },
   danger: {
-    activeOpacity: 0.9,
-    underlayColor: color.danger,
+    underlayColor: color.danger + activeAlpha,
   },
   success: {
-    activeOpacity: 0.9,
-    underlayColor: color.success,
+    underlayColor: color.success + activeAlpha,
+  },
+  subtle: {
+    underlayColor: color.primaryLight + activeAlpha,
   },
 };
 
@@ -60,6 +52,7 @@ export const ss = {
     fullWidthScroll: {
       ...styleFullWidth,
       paddingBottom: 0,
+      paddingTop: 48,
     },
     fullWidthModal: {
       ...styleFullWidth,

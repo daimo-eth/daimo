@@ -1,4 +1,5 @@
 import {
+  DaimoLinkNote,
   DaimoNoteStatus,
   OpStatus,
   assert,
@@ -32,10 +33,11 @@ export default function NoteScreen({ route }: Props) {
   const [account] = useAccount();
   assert(account != null);
 
-  const { ephemeralPrivateKey, ephemeralOwner } = route.params;
+  const { link } = route.params;
+  const { ephemeralPrivateKey, ephemeralOwner } = link as DaimoLinkNote;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const noteStatus = useFetchLinkStatus(route.params)!;
+  const noteStatus = useFetchLinkStatus(link)!;
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>

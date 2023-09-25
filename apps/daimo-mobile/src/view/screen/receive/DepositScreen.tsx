@@ -57,12 +57,13 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
 
   // Display
   let canRequest = false;
-  let buttonType = "primary" as "primary" | "danger";
+  let buttonType = "primary" as "primary" | "success" | "danger";
   let message = "Request $50 from faucet";
   if (mutation.isLoading) {
     message = "Loading...";
   } else if (mutation.isSuccess) {
     message = "Faucet payment sent";
+    buttonType = "success";
   } else if (mutation.isError) {
     message = "Error";
     buttonType = "danger";
@@ -78,6 +79,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
         break;
       case "alreadySent":
         message = "Faucet payment sent";
+        buttonType = "success";
         break;
       case "canRequest":
         canRequest = true;
@@ -126,7 +128,7 @@ function AddressCopier({ addr }: { addr: string }) {
       <TouchableHighlight
         style={styles.addressButton}
         onPress={copy}
-        {...touchHighlightUnderlay.blue}
+        {...touchHighlightUnderlay.subtle}
       >
         <View style={styles.addressView}>
           <Text style={styles.addressMono} numberOfLines={1}>
@@ -154,7 +156,7 @@ const styles = StyleSheet.create({
   },
   addressButton: {
     borderRadius: 8,
-    backgroundColor: color.bg.lightGray,
+    backgroundColor: color.grayLight,
     padding: 16,
   },
   addressView: {
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   callout: {
-    backgroundColor: color.bg.lightGray,
+    backgroundColor: color.grayLight,
     padding: 16,
     marginHorizontal: -16,
     borderRadius: 24,

@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   scrollPellet: {
-    backgroundColor: color.bg.midGray,
+    backgroundColor: color.gray,
     width: 96,
     height: 4,
     borderRadius: 2,

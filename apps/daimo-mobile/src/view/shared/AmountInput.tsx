@@ -1,27 +1,78 @@
-import { dollarsToAmount } from "@daimo/common";
-import { ReactNode, useCallback, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import React, { ReactNode, useCallback, useState } from "react";
+import {
+  NativeSyntheticEvent,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputEndEditingEventData,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
-import { TitleAmount, amountSeparator, getAmountText } from "./Amount";
-import { ButtonSmall } from "./Button";
+import { getAmountText } from "./Amount";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
-import { TextLight, TextCenter } from "./text";
+import { TextCenter, TextLight } from "./text";
 import { useAccount } from "../../model/account";
 import { CancelHeader } from "../screen/send/CancelHeader";
 
-export function AmountInput({
+export function AmountChooser({
+  actionDesc,
+  onCancel,
+  dollars,
+  onSetDollars,
+  showAmountAvailable,
+  disabled,
+  innerRef,
+}: {
+  actionDesc: ReactNode;
+  onCancel?: () => void;
+  dollars: number;
+  onSetDollars: (dollars: number) => void;
+  showAmountAvailable: boolean;
+  disabled?: boolean;
+  innerRef?: React.RefObject<TextInput>;
+}) {
+  // Show how much we have available
+  const [account] = useAccount();
+  if (account == null) return null;
+  const dollarStr = getAmountText({ amount: account.lastBalance });
+
+  return (
+    <>
+      <Spacer h={48} />
+      <CancelHeader hide={onCancel}>{actionDesc}</CancelHeader>
+      <Spacer h={32} />
+      <View style={ss.container.padH16}>
+        <AmountInput
+          dollars={dollars}
+          onChange={onSetDollars}
+          disabled={disabled}
+          innerRef={innerRef}
+        />
+        <Spacer h={8} />
+        <TextCenter>
+          <TextLight>
+            {showAmountAvailable ? `${dollarStr} available` : " "}
+          </TextLight>
+        </TextCenter>
+      </View>
+    </>
+  );
+}
+
+function AmountInput({
   dollars,
   onChange,
-  onSubmitEditing,
   innerRef,
   autoFocus,
+  disabled,
 }: {
   dollars: number;
   onChange: (dollars: number) => void;
-  onSubmitEditing?: (dollars: number) => void;
   innerRef?: React.RefObject<TextInput>;
   autoFocus?: boolean;
+  disabled?: boolean;
 }) {
   if (dollars < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -29,10 +80,27 @@ export function AmountInput({
 
   const [strVal, setStrVal] = useState(dollars <= 0 ? "" : fmt(dollars));
 
-  // On end editing, round value to 2 decimal places
-  const onEndEditing = (e: { nativeEvent: { text: string } }) => {
+  // While typing, show whatever the user is typing
+  const change = useCallback((text: string) => {
+    if (disabled) return;
+
+    setStrVal(text);
+    const newVal = parseLocalFloat(text);
+
+    // Handle empty entry, negative numbers, NaN etc
+    if (!(newVal > 0)) {
+      onChange(0);
+      return;
+    }
+
+    // Update number
+    onChange(newVal);
+  }, []);
+
+  // Once we're done, round value to 2 decimal places
+  const onBlur = (e: NativeSyntheticEvent<TextInputEndEditingEventData>) => {
     const value = e.nativeEvent.text;
-    console.log(`[INPUT] onEndEditing ${value}`);
+    console.log(`[INPUT] onBlur finalizing ${value}`);
 
     let newVal = parseLocalFloat(value);
     if (!(newVal >= 0)) {
@@ -43,111 +111,50 @@ export function AmountInput({
 
     const truncated = parseLocalFloat(newStrVal);
     onChange(truncated);
-    if (onSubmitEditing) onSubmitEditing(truncated);
   };
 
-  const change = useCallback((text: string) => {
-    setStrVal(text);
-    const newVal = parseLocalFloat(text);
-
-    // Handle invalid or entry, NaN etc
-    if (!(newVal > 0)) {
-      onChange(0);
-      return;
-    }
-
-    // Update number
-    onChange(newVal);
-    const nEnteredDecimals = (text.split(amountSeparator)[1] || "").length;
-    if (nEnteredDecimals === 2 && text.length > strVal.length) {
-      // User just typed in the full amount, down to the cent. Submit.
-      if (innerRef?.current) innerRef.current.blur();
-      if (onSubmitEditing) onSubmitEditing(newVal);
-    }
-  }, []);
-
-  const onSubmit = useCallback(() => {
-    console.log(`[INPUT] onSubmitEditing ${dollars}`);
-    if (onSubmitEditing) onSubmitEditing(dollars);
-  }, [dollars]);
+  const focus = useCallback(() => innerRef?.current?.focus(), [innerRef]);
 
   return (
-    <TextInput
-      ref={innerRef}
-      style={styles.amountInput}
-      keyboardType="numeric"
-      placeholder="0"
-      placeholderTextColor={color.gray}
-      numberOfLines={1}
-      autoFocus={autoFocus == null ? true : autoFocus}
-      value={strVal}
-      selectTextOnFocus
-      onChangeText={change}
-      onSubmitEditing={onSubmit}
-      returnKeyType="done"
-      onEndEditing={onEndEditing}
-    />
-  );
-}
-
-export function SendAmountChooser({
-  actionDesc,
-  onCancel,
-  dollars,
-  onSetDollars,
-}: {
-  actionDesc: ReactNode;
-  onCancel?: () => void;
-  dollars: number;
-  onSetDollars?: (dollars: number) => void;
-}) {
-  // Temporary dollar amount while typing
-  const [d, setD] = useState(0);
-  const submit =
-    onSetDollars &&
-    ((newD: number) => {
-      onSetDollars(newD);
-      setD(0);
-    });
-  const clearDollars = onSetDollars && (() => onSetDollars(0));
-
-  // Show how much we have available
-  const [account] = useAccount();
-  if (account == null) return null;
-  const dollarStr = getAmountText({ amount: account.lastBalance });
-
-  return (
-    <>
-      <Spacer h={64} />
-      <CancelHeader hide={onCancel}>{actionDesc}</CancelHeader>
-      <Spacer h={32} />
-      {dollars === 0 && (
-        <View style={ss.container.padH16}>
-          <AmountInput dollars={d} onChange={setD} onSubmitEditing={submit} />
-          <Spacer h={16} />
-          <TextCenter>
-            <TextLight>{dollarStr} available</TextLight>
-          </TextCenter>
-        </View>
-      )}
-      {dollars > 0 && (
-        <ButtonSmall onPress={clearDollars}>
-          <TextCenter>
-            <TitleAmount amount={dollarsToAmount(dollars)} />
-          </TextCenter>
-        </ButtonSmall>
-      )}
-    </>
+    <TouchableWithoutFeedback onPress={focus}>
+      <View style={styles.amountInputWrap}>
+        <Text style={styles.amountDollar}>$</Text>
+        <TextInput
+          ref={innerRef}
+          style={styles.amountInput}
+          keyboardType="numeric"
+          placeholder="0"
+          placeholderTextColor={color.gray}
+          numberOfLines={1}
+          focusable={!disabled}
+          selectTextOnFocus
+          autoFocus={autoFocus ?? true}
+          value={strVal}
+          onChangeText={change}
+          onEndEditing={onBlur} /* called on blur, works on Android */
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  amountInput: {
+  amountInputWrap: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 4,
+  },
+  amountDollar: {
     fontSize: 30,
     fontWeight: "bold",
-    textAlign: "center",
-    borderBottomColor: color.gray,
-    borderBottomWidth: 1,
+    textAlign: "right",
+    paddingBottom: 3,
+    flexGrow: 1,
+  },
+  amountInput: {
+    flexGrow: 1,
+    fontSize: 36,
+    fontWeight: "bold",
   },
 });
 
