@@ -1687,7 +1687,7 @@ export const ephemeralNotesABI = [
 ] as const
 
 export const ephemeralNotesAddress =
-  '0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce' as const
+  '0x7f65195c7386412baFecacbaCd9BC2437a9269E9' as const
 
 export const ephemeralNotesConfig = {
   address: ephemeralNotesAddress,
