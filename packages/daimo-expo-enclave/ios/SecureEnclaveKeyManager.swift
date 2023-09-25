@@ -59,10 +59,9 @@ public class SecureEnclaveKeyManager : KeyManager {
 
     public func fetchPublicKey(accountName: String) throws -> String? {
         let readSigningPrivkey: SecureEnclave.P256.Signing.PrivateKey? = try self.store.readKey(account: accountName)
-        if readSigningPrivkey == nil {
+        guard let signingPrivkey = readSigningPrivkey else {
             return nil
         }
-        let signingPrivkey = readSigningPrivkey!
         return signingPrivkey.publicKey.derRepresentation.hexEncodedString()
     }
 
