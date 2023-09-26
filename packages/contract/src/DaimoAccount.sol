@@ -178,8 +178,8 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         uint256 s = uint256(bytes32(signature[33:65]));
 
         // public key to verify against
+        // if keySlot is invalid, (x,y) will be (0,0) and verification will fail
         uint8 keySlot = uint8(signature[0]);
-        require(keys[keySlot][0] != bytes32(0), "invalid key slot");
         uint256 x = uint256(keys[keySlot][0]);
         uint256 y = uint256(keys[keySlot][1]);
 

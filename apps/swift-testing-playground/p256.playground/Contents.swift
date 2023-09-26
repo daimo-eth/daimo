@@ -45,9 +45,9 @@ extension Data {
 
 let messageHex = (
     "01" + // version
-    // "00003B9ACA00" + // validUntil
-    "000000000000" + // validUntil
-    "a3b3bc5df5f9ee5ced83e02ce15d8209421dbbf1ce4f01417d2b72be3633447b" // userOpHash
+    "00003B9ACA00" + // validUntil
+    // "000000000000" + // validUntil
+    "dc1fb2ecab193cd09e6fbe004b2444e04cb35f20758ee4df2e06a69d02d79a20" // userOpHash
 )
 let data = Data(fromHexEncodedString: messageHex)!
 print("data", data.hexEncodedString())

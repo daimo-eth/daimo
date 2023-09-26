@@ -58,8 +58,8 @@ contract AccountSendUseropTest is Test {
             uint8(1), // version
             uint48(0), // validUntil forever
             uint8(0), // keySlot, r, s
-            hex"163a15b584a65087b209a1ed91ea0f95cd8dbaedadb8735249989ed766bbf56b"
-            hex"3141eccf9c1b0b890196efc9df55cd0ac3769df6961fa0de376c581982120c4d"
+            hex"462c6091f0f16e3dd5803f03bafd3e42938ccd719d1303bdb88d4116d50369f5"
+            hex"e12047ba5e7a96da1c2365899d19b244c1bd78559b36fddc5ec9c7bf6d418cc5"
         );
 
         Call[] memory calls = new Call[](0);
@@ -67,8 +67,9 @@ contract AccountSendUseropTest is Test {
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
-        // base cost of a Daimo userop
-        uint256 expectedOpCost = 471463;
+        // base cost of a Daimo userop (per-op x 1 op): ~400k gas
+        // + EntryPoint handleOps overhead (per-bundle)
+        uint256 expectedOpCost = 431508;
 
         // dummy op
         UserOperation memory op = UserOperation({
@@ -136,8 +137,8 @@ contract AccountSendUseropTest is Test {
             uint8(1), // version
             validUntil,
             uint8(0), // keySlot, r, s
-            hex"12f3774bf8ecd018bfc2e3ef77b4542839b3d22db3e077525e7be774a9bcd741"
-            hex"c72c4adf29d4db151daef6cbd9d4b8589de00261dba2180f0720b39ebb6f6756"
+            hex"2e1b41283b8b6ff9c18bac2e3503faeb76e32fdaad9a47634fe932bb83889816"
+            hex"0f13a7789069ce31bdf48890f01c1f680a6a4bdac888cb9445a762a4ec3a2d27"
         );
 
         Call[] memory calls = new Call[](0);
