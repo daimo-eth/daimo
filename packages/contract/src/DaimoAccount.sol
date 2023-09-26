@@ -149,6 +149,10 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         _payPrefund(missingAccountFunds);
     }
 
+    /// P256 curve order N/2 for malleability check
+    uint256 constant _P256_N_DIV_2 =
+        57896044605178124381348723474703786764998477612067880171211129530534256022184;
+
     /// ERC1271: validate a user signature, verifying P256.
     function isValidSignature(
         bytes32 hash,
@@ -187,6 +191,12 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         bytes memory args = abi.encode(sha256Hash, r, s, x, y);
         (bool success, bytes memory ret) = sigVerifier.staticcall(args);
         assert(success);
+
+        // check for signature malleability
+        // do this after the precompile call for more consistent gas estimates
+        if (s > _P256_N_DIV_2) {
+            return false;
+        }
 
         return abi.decode(ret, (uint256)) == 1;
     }

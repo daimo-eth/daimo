@@ -80,7 +80,7 @@ export const accountFactoryABI = [
 ] as const
 
 export const accountFactoryAddress =
-  '0x7CA2978dF84B2ef4E4B5FCf37751a0A8Ad4c06Ac' as const
+  '0x950b352C271B3a7799Ed71542Dc49c9333a6c2C3' as const
 
 export const accountFactoryConfig = {
   address: accountFactoryAddress,
@@ -596,7 +596,7 @@ export const daimoNameRegistryABI = [
 ] as const
 
 export const daimoNameRegistryAddress =
-  '0x6b87D7d65CC5d534B6205C4AF3FF8cF5a6B6cBd4' as const
+  '0x26Eb9f563e46DA4A9934348781CED0D4923D93eb' as const
 
 export const daimoNameRegistryConfig = {
   address: daimoNameRegistryAddress,
@@ -666,7 +666,7 @@ export const daimoNameRegistryProxyABI = [
 ] as const
 
 export const daimoNameRegistryProxyAddress =
-  '0xDB756BbB9b72B3BEdDC403240121545cab5DE347' as const
+  '0x3a3a46d28318E87F50f925EF1c9AfcCE8Ab1b7b0' as const
 
 export const daimoNameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
@@ -1836,7 +1836,7 @@ export const ephemeralNotesABI = [
 ] as const
 
 export const ephemeralNotesAddress =
-  '0x7f65195c7386412baFecacbaCd9BC2437a9269E9' as const
+  '0x1eec7E083C1a10C16470bEAc7839364853c7B81f' as const
 
 export const ephemeralNotesConfig = {
   address: ephemeralNotesAddress,

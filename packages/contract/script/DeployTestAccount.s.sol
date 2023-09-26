@@ -5,15 +5,8 @@ import "forge-std/Script.sol";
 import "../src/DaimoAccountFactory.sol";
 
 contract DeployScript is Script {
-    function setUp() public {}
-
-    function run() public {
+    function run(AccountFactory factory) public {
         vm.startBroadcast();
-
-        // From DeployAccountFactory.s.sol
-        AccountFactory factory = AccountFactory(
-            0x692A2E6eA43A1fAB2f9f68393F5cB5dcaf9C67B9
-        );
 
         // hardcoded from swift playground
         bytes32[2] memory key = [

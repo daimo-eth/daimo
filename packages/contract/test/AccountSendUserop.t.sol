@@ -57,9 +57,9 @@ contract AccountSendUseropTest is Test {
         bytes memory ownerSig = abi.encodePacked(
             uint8(1), // version
             uint48(0), // validUntil forever
-            uint8(0), // keySlot, r, s
-            hex"462c6091f0f16e3dd5803f03bafd3e42938ccd719d1303bdb88d4116d50369f5"
-            hex"e12047ba5e7a96da1c2365899d19b244c1bd78559b36fddc5ec9c7bf6d418cc5"
+            uint8(0), // keySlot, r, s; s modified to avoid malleability.
+            hex"25dc337a2fd2896f76d8f70235bb559b4efde2156b6b56e8ab040bbc9b82f3e6",
+            hex"2282b2342d544f5c871c00825e6fc9673b25fdecc3f0fd3756acc3764a5a6d31"
         );
 
         Call[] memory calls = new Call[](0);
@@ -69,7 +69,7 @@ contract AccountSendUseropTest is Test {
 
         // base cost of a Daimo userop (per-op x 1 op): ~400k gas
         // + EntryPoint handleOps overhead (per-bundle)
-        uint256 expectedOpCost = 431508;
+        uint256 expectedOpCost = 436378;
 
         // dummy op
         UserOperation memory op = UserOperation({

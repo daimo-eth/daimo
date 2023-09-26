@@ -78,14 +78,35 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     const hexValidUntil = numberToHex(this.validUntil, { size: 6 });
     const hexTx = userOpHash.slice(2);
     const hexMsg = [hexVersion, hexValidUntil, hexTx].join("");
+
+    // Get P256 signature, typically from a hardware enclave
     const { derSig, keySlot } = await this.signer(hexMsg);
 
+    // Parse signature
     const parsedSignature = p256.Signature.fromDER(derSig);
-
     const hexKeySlot = numberToHex(keySlot, { size: 1 });
     const hexSig = parsedSignature.toCompactHex();
+    assert(hexSig.length === 128, "signature is not 64 bytes");
+    const hexR = hexSig.substring(0, 64);
+    const hexS = hexSig.substring(64);
 
-    ctx.op.signature = [hexVersion, hexValidUntil, hexKeySlot, hexSig].join("");
+    // Avoid malleability. Ensure low S (<= N/2 where N is the curve order)
+    let s = BigInt(`0x${hexS}`);
+    const n = BigInt(
+      "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
+    );
+    if (s > n / 2n) {
+      s = n - s;
+    }
+    const hexLowS = s.toString(16).padStart(64, "0");
+
+    ctx.op.signature = [
+      hexVersion,
+      hexValidUntil,
+      hexKeySlot,
+      hexR,
+      hexLowS,
+    ].join("");
   };
 
   /** Sets user-op nonce and fee payment metadata. */
