@@ -80,7 +80,7 @@ export const accountFactoryABI = [
 ] as const
 
 export const accountFactoryAddress =
-  '0x950b352C271B3a7799Ed71542Dc49c9333a6c2C3' as const
+  '0x023836339E1554a27a25B4E01B49fE6b62EA51A7' as const
 
 export const accountFactoryConfig = {
   address: accountFactoryAddress,
