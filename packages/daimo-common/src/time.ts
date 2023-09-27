@@ -22,7 +22,11 @@ export function timeString(s: number) {
   });
 }
 
-export function guessTimestampFromNum(blockNum: number, network: string) {
+export function guessTimestampFromNum(
+  blockNum: number | bigint,
+  network: string
+) {
+  if (typeof blockNum === "bigint") blockNum = Number(blockNum);
   switch (network) {
     case "base-goerli":
       return 1675193616 + blockNum * 2;

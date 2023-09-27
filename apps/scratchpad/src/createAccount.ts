@@ -5,10 +5,10 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import {
-  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
   SigningCallback,
 } from "@daimo/userop";
 import crypto from "node:crypto";
@@ -21,7 +21,6 @@ import {
   createWalletClient,
   getAddress,
   http,
-  parseAbi,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
