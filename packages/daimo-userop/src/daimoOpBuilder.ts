@@ -61,6 +61,9 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       .useMiddleware(
         Presets.Middleware.estimateUserOperationGas(instance.provider)
       )
+      .useMiddleware(async (ctx) => {
+        ctx.op.verificationGasLimit = 500_000;
+      })
       .useMiddleware(instance.signingCallback);
 
     return base;
@@ -72,7 +75,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     assert(userOpHash.startsWith("0x"));
 
     const hexVersion = "01";
-    const hexValidUntil = numberToHex(this.validUntil, { size: 6 });
+    const hexValidUntil = numberToHex(this.validUntil, { size: 6 }).slice(2);
     const hexTx = userOpHash.slice(2);
     const hexMsg = [hexVersion, hexValidUntil, hexTx].join("");
 
@@ -81,8 +84,12 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
     // Parse signature
     const parsedSignature = p256.Signature.fromDER(derSig);
-    const hexKeySlot = numberToHex(keySlot, { size: 1 });
+    const hexKeySlot = numberToHex(keySlot, { size: 1 }).slice(2);
     const hexSig = parsedSignature.toCompactHex();
+
+    // const hexKeySlot = "01";
+    // const hexSig =
+    //   "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551";
     assert(hexSig.length === 128, "signature is not 64 bytes");
     const hexR = hexSig.substring(0, 64);
     const hexS = hexSig.substring(64);
@@ -97,13 +104,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     }
     const hexLowS = s.toString(16).padStart(64, "0");
 
-    ctx.op.signature = [
-      hexVersion,
-      hexValidUntil,
-      hexKeySlot,
-      hexR,
-      hexLowS,
-    ].join("");
+    ctx.op.signature =
+      "0x" + [hexVersion, hexValidUntil, hexKeySlot, hexR, hexLowS].join("");
   };
 
   /** Sets user-op nonce and fee payment metadata. */

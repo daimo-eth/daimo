@@ -40,18 +40,18 @@ async function main() {
     address,
     functionName: "name",
   });
+  const chainId = baseGoerli.id;
 
   // Rather than call Pimlico SDK's getERC20Paymaster which makes
   // network requests and needs a ethers provider, we just hardcode
   // the create2 address computation call here for efficiency.
-  const oracle_address = ORACLE_ADDRESS[baseGoerli.id]["USDC"];
-  const nativeAssetOracle =
-    ORACLE_ADDRESS[baseGoerli.id][NATIVE_ASSET[baseGoerli.id]];
+  const oracleAddress = ORACLE_ADDRESS[chainId]["USDC"];
+  const nativeAssetOracle = ORACLE_ADDRESS[chainId][NATIVE_ASSET[chainId]];
 
   const paymasterAddress = await calculateERC20PaymasterAddress({
     tokenAddress: address,
     entrypoint: Constants.ERC4337.EntryPoint,
-    tokenOracle: oracle_address,
+    tokenOracle: oracleAddress,
     nativeAssetOracle,
     owner: "0x4337000c2828f5260d8921fd25829f606b9e8680", // pimlico address
   });
@@ -70,6 +70,7 @@ export const tokenMetadata = {
   decimals: ${tokenDecimals},
   symbol: "${tokenSymbol}",
   name: "${tokenName}",
+  chainId: ${chainId},
   paymasterAddress: "${paymasterAddress}",
   pimlicoPaymasterAbi: ${JSON.stringify(pimlicoPaymasterAbi)},
 } as const;

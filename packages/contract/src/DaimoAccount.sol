@@ -214,7 +214,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         // UserOp signature structure:
         // - uint8 version
         //
-        // v1:
+        // v1: 1+6+1+32+32 = 72 bytes
         // - uint48 validUntil
         // - uint8 keySlot
         // - uint256 r, s
@@ -224,14 +224,18 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         bytes calldata signature;
         ValidationData memory returnIfValid;
 
+        uint256 sigLength = userOp.signature.length;
+        if (sigLength == 0) return _SIG_VALIDATION_FAILED;
+
         uint8 version = uint8(userOp.signature[0]);
         if (version == 1) {
+            if (sigLength != 72) return _SIG_VALIDATION_FAILED;
             uint48 validUntil = uint48(bytes6(userOp.signature[1:7]));
             signature = userOp.signature[7:]; // keySlot, r, s
             messageToVerify = abi.encodePacked(version, validUntil, userOpHash);
             returnIfValid.validUntil = validUntil;
         } else {
-            revert("unsupported signature version");
+            return _SIG_VALIDATION_FAILED;
         }
 
         // P256-SHA256

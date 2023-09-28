@@ -5,6 +5,7 @@ export const tokenMetadata = {
   decimals: 6,
   symbol: "USDC",
   name: "testUSDC",
+  chainId: 84531,
   paymasterAddress: "0x13f490FafBb206440F25760A10C21A6220017fFa",
   pimlicoPaymasterAbi: ["function priceMarkup() view returns (uint32)","function previousPrice() view returns (uint192)"],
 } as const;

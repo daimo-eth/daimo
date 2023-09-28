@@ -2,6 +2,8 @@
 src = 'src'
 out = 'out'
 libs = ['lib']
+
+# Compiler settings
 solc = "0.8.21"
 via-ir = true
 optimizer = true

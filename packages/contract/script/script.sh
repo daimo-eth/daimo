@@ -7,7 +7,6 @@ forge build
 # Stablecoin, Base Goerli testnet USDC
 ADDR_TOKEN="0x1B85deDe8178E18CdE599B4C9d913534553C3dBf"
 
-
 # Deploy Account factory
 forge script script/DeployAccountFactory.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 

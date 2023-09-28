@@ -69,7 +69,7 @@ contract AccountSendUseropTest is Test {
 
         // base cost of a Daimo userop (per-op x 1 op): ~400k gas
         // + EntryPoint handleOps overhead (per-bundle)
-        uint256 expectedOpCost = 429132;
+        uint256 expectedOpCost = 429323;
 
         // dummy op
         UserOperation memory op = UserOperation({
