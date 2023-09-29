@@ -14,7 +14,16 @@ import {
   Presets,
   UserOperationBuilder,
 } from "userop";
-import { Address, encodeFunctionData, numberToHex } from "viem";
+import {
+  Address,
+  Hex,
+  bytesToBigint,
+  bytesToHex,
+  concat,
+  encodeFunctionData,
+  hexToBytes,
+  numberToBytes,
+} from "viem";
 
 import { DaimoNonce } from "./nonce";
 import { SigningCallback } from "./signingCallback";
@@ -62,7 +71,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         Presets.Middleware.estimateUserOperationGas(instance.provider)
       )
       .useMiddleware(async (ctx) => {
-        ctx.op.verificationGasLimit = 500_000;
+        ctx.op.verificationGasLimit = DEFAULT_USEROP_VERIFICATION_GAS_LIMIT;
       })
       .useMiddleware(instance.signingCallback);
 
@@ -71,41 +80,37 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   /** Signs userops. Signer can use the enclave, requesting user permission as needed. */
   private signingCallback = async (ctx: IUserOperationMiddlewareCtx) => {
-    const userOpHash = ctx.getUserOpHash();
-    assert(userOpHash.startsWith("0x"));
+    const hexOpHash = ctx.getUserOpHash() as Hex;
+    assert(hexOpHash.startsWith("0x"));
 
-    const hexVersion = "01";
-    const hexValidUntil = numberToHex(this.validUntil, { size: 6 }).slice(2);
-    const hexTx = userOpHash.slice(2);
-    const hexMsg = [hexVersion, hexValidUntil, hexTx].join("");
+    const bVersion = numberToBytes(1, { size: 1 });
+    const bValidUntil = numberToBytes(this.validUntil, { size: 6 });
+    const bOpHash = hexToBytes(hexOpHash);
+    const bMsg = concat([bVersion, bValidUntil, bOpHash]);
+    const bareHexMsg = bytesToHex(bMsg).slice(2); // no 0x prefix
 
     // Get P256 signature, typically from a hardware enclave
-    const { derSig, keySlot } = await this.signer(hexMsg);
+    const { derSig, keySlot } = await this.signer(bareHexMsg);
 
     // Parse signature
+    const bKeySlot = numberToBytes(keySlot, { size: 1 });
     const parsedSignature = p256.Signature.fromDER(derSig);
-    const hexKeySlot = numberToHex(keySlot, { size: 1 }).slice(2);
-    const hexSig = parsedSignature.toCompactHex();
-
-    // const hexKeySlot = "01";
-    // const hexSig =
-    //   "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551";
-    assert(hexSig.length === 128, "signature is not 64 bytes");
-    const hexR = hexSig.substring(0, 64);
-    const hexS = hexSig.substring(64);
+    const bSig = hexToBytes(`0x${parsedSignature.toCompactHex()}`);
+    assert(bSig.length === 64, "signature is not 64 bytes");
+    const bR = bSig.slice(0, 32);
+    const bS = bSig.slice(32);
 
     // Avoid malleability. Ensure low S (<= N/2 where N is the curve order)
-    let s = BigInt(`0x${hexS}`);
+    let s = bytesToBigint(bS);
     const n = BigInt(
       "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
     );
     if (s > n / 2n) {
       s = n - s;
     }
-    const hexLowS = s.toString(16).padStart(64, "0");
+    const bLowS = numberToBytes(s, { size: 32 });
 
-    ctx.op.signature =
-      "0x" + [hexVersion, hexValidUntil, hexKeySlot, hexR, hexLowS].join("");
+    ctx.op.signature = concat([bVersion, bValidUntil, bKeySlot, bR, bLowS]);
   };
 
   /** Sets user-op nonce and fee payment metadata. */
