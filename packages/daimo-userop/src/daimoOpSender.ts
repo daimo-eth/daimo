@@ -14,7 +14,8 @@ import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./signingCallback";
 import config from "../config.json";
 
-// DaimoOpSender is a wrapper that simplifies making user ops on behalf of a Daimo account.
+/// DaimoOpSender constructs user operations for a Daimo account.
+/// Supports key rotations, token transfers, and ephemeral note ops.
 export class DaimoOpSender {
   /** Connection to the chain */
   private provider: BundlerJsonRpcProvider;
@@ -27,9 +28,13 @@ export class DaimoOpSender {
   private notesAddress: `0x${string}`;
 
   constructor(
+    /// Userop builder, containing bundler and paymaster configuration.
     _opBuilder: DaimoOpBuilder,
+    /// Stablecoin token address.
     _tokenAddress: `0x${string}`,
+    /// Decimals for that token.
     _tokenDecimals: number,
+    /// EphemeralNotes instance. The stablecoin used must match _tokenAddress.
     _notesAddress: `0x${string}`
   ) {
     this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
