@@ -8,8 +8,8 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Log } from "../logic/log";
 import { useAccount } from "../model/account";
 
-/** Send a tx user op. */
-type SendOpFn = (opSender: DaimoOpSender) => Promise<string>;
+/** Send a user op, returning the userOpHash. */
+type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
 
 /** Send a user op, track status. */
 export function useSendAsync({

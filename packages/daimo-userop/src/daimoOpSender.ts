@@ -1,7 +1,14 @@
-import { derKeytoContractFriendlyKey } from "@daimo/common";
+import { assert, derKeytoContractFriendlyKey } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
 import { BundlerJsonRpcProvider, Constants, Utils } from "userop";
-import { Address, Hex, encodeFunctionData, getAddress, parseUnits } from "viem";
+import {
+  Address,
+  Hex,
+  encodeFunctionData,
+  getAddress,
+  isHex,
+  parseUnits,
+} from "viem";
 
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./signingCallback";
@@ -57,7 +64,7 @@ export class DaimoOpSender {
   }
 
   /** Submits a user op to bundler. Returns userOpHash. */
-  public async sendUserOp(opBuilder: DaimoOpBuilder) {
+  public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<Hex> {
     const builtOp = await opBuilder.buildOp(
       Constants.ERC4337.EntryPoint,
       Contracts.tokenMetadata.chainId
@@ -65,10 +72,11 @@ export class DaimoOpSender {
 
     console.log("[OP] built userOp:", builtOp);
 
-    const res: string = await this.provider.send("eth_sendUserOperation", [
+    const res: Hex = await this.provider.send("eth_sendUserOperation", [
       Utils.OpToJSON(builtOp),
       Constants.ERC4337.EntryPoint,
     ]);
+    assert(isHex(res));
 
     console.log(`[OP] submitted userOpHash: ${res}`);
 
