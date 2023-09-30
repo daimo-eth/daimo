@@ -82,7 +82,7 @@ export class PushNotifier {
 
       const receivingRequestedMoney =
         log.nonceMetadata != null &&
-        DaimoNonceMetadata.fromHex(log.nonceMetadata).nonceType ===
+        DaimoNonceMetadata.fromHex(log.nonceMetadata)?.nonceType ===
           DaimoNonceType.RequestResponse;
 
       const [a, b] = await Promise.all([

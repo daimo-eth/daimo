@@ -29,12 +29,12 @@ export class DaimoNonce {
     return nonce;
   }
 
-  public static fromHex(nonce: Hex): DaimoNonce {
+  public static fromHex(nonce: Hex): DaimoNonce | undefined {
     const paddedNonce = bytesToHex(hexToBytes(nonce), { size: 64 });
     const hexMetadata = paddedNonce.slice(0, 2 + 16) as Hex;
     const metadata = DaimoNonceMetadata.fromHex(hexMetadata);
     const key = `0x${paddedNonce.slice(2 + 16, 2 + 16 + 32)}` as Hex;
-    return new DaimoNonce(metadata, key);
+    return metadata ? new DaimoNonce(metadata, key) : undefined;
   }
 }
 
@@ -62,9 +62,11 @@ export class DaimoNonceMetadata {
     this.identifier = identifier;
   }
 
-  public static fromHex(hexMetadata: Hex): DaimoNonceMetadata {
+  public static fromHex(hexMetadata: Hex): DaimoNonceMetadata | undefined {
     assert(hexMetadata.length === 16 + 2);
     const nonceType = parseInt(hexMetadata.slice(2, 4), 16);
+    if (!(nonceType in DaimoNonceType) || nonceType === DaimoNonceType.MAX)
+      return undefined;
     const identifier = BigInt("0x" + hexMetadata.slice(4)) as bigint;
     return new DaimoNonceMetadata(nonceType, identifier);
   }
