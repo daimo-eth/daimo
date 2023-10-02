@@ -8,8 +8,13 @@ module.exports = {
   theme: {
     colors: {
       primary: "#007aff",
-      grayLight: "#cecccc",
-      grayMid: "#8a8888",
+      primaryLight: "#2888f7",
+      white: "#ffffff",
+      ivory: "#fafafa",
+      ivoryDark: "#f2f2f2",
+      grayLight: "#e2e2e2",
+      grayMid: "#717171",
+      midnight: "#262626",
     },
   },
   plugins: [],

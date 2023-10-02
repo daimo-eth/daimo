@@ -42,19 +42,21 @@ export default async function LinkPage(props: LinkProps) {
   };
 
   return (
-    <center>
-      <div className="h-16" />
-      <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
+    <main className="max-w-md mx-auto px-4">
+      <center>
+        <div className="h-16" />
+        <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
 
-      <div className="h-12" />
+        <div className="h-12" />
 
-      <H1>{title}</H1>
-      <div className="h-4" />
-      <H2>{description}</H2>
-      {walletAction && <OrConnectWalletStub />}
-      <div className="h-12" />
-      <AppStoreBadge />
-    </center>
+        <H1>{title}</H1>
+        <div className="h-4" />
+        <H2>{description}</H2>
+        {walletAction && <OrConnectWalletStub />}
+        <div className="h-12" />
+        <AppStoreBadge />
+      </center>
+    </main>
   );
 }
 

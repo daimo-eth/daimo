@@ -1,23 +1,21 @@
-import Image from "next/image";
-
-import { H1, H2 } from "../components/typography";
+import { SectionFAQ } from "./SectionFAQ";
+import { SectionHero } from "./SectionHero";
+import { SectionTeam } from "./SectionTeam";
+import { SectionTestimonial } from "./SectionTestimonial";
+import { SectionWhyDaimo } from "./SectionWhyDaimo";
+import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 
 export default function HomePage() {
   return (
-    <center>
-      <div className="h-16" />
-      <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
-      <div className="h-12" />
-      <H1>Daimo</H1>
-      <div className="h-2" />
-      <H2>USDC payments on Ethereum</H2>
-      <div className="h-2" />
-      <p>
-        Fast, permissionless, and global. Your keys, your coins.{" "}
-        <a className="font-bold" href="https://github.com/daimo-eth/daimo">
-          Learn more on our Github.
-        </a>{" "}
-      </p>
-    </center>
+    <>
+      <Header />
+      <SectionHero />
+      <SectionWhyDaimo />
+      <SectionTestimonial />
+      <SectionFAQ />
+      <SectionTeam />
+      <Footer />
+    </>
   );
 }
