@@ -7,6 +7,8 @@ import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
 import { HomeStackNav } from "./view/HomeStack";
 import { useInitNavLinks } from "./view/shared/nav";
+import { useInitNFC } from "./logic/nfcListen";
+
 
 export default function App() {
   console.log("[APP] rendering");
@@ -32,6 +34,8 @@ export default function App() {
 function AppBody() {
   // Handle incoming applinks
   useInitNavLinks();
+
+  useInitNFC();
 
   return (
     <>

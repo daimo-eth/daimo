@@ -92,7 +92,8 @@
       ],
       [
         "expo-notifications"
-      ]
+      ],
+      "react-native-nfc-manager"
     ]
   }
 }
