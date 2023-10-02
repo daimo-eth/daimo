@@ -44,3 +44,15 @@ test("DaimoNonce serde", () => {
     }
   }
 });
+
+test("DaimoNonce bad Nonce type serialization", () => {
+  const hexNonceBadType =
+    "0xFE00000000000123123412341234123412341234123412340000000000000000"; // Nonce type = 254
+  let parsed = DaimoNonce.fromHex(hexNonceBadType);
+  assert.strictEqual(parsed, undefined);
+
+  const hexNonceMaxType =
+    "0xFF00000000000123123412341234123412341234123412340000000000000000"; // Nonce type = 255
+  parsed = DaimoNonce.fromHex(hexNonceMaxType);
+  assert.strictEqual(parsed, undefined);
+});

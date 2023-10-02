@@ -73,7 +73,7 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
   assert(account != null);
 
   const opRequestId = op.nonceMetadata
-    ? DaimoNonceMetadata.fromHex(op.nonceMetadata).identifier.toString()
+    ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
     : undefined;
   const matchingTrackedRequest = account.trackedRequests.find(
     (req) =>

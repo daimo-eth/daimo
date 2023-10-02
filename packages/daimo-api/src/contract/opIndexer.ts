@@ -46,7 +46,9 @@ export class OpIndexer {
 
         const nonceMetadata = DaimoNonce.fromHex(
           numberToHex(log.args.nonce, { size: 32 })
-        ).metadata.toHex();
+        )?.metadata.toHex();
+        if (!nonceMetadata) continue;
+
         const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
         const newTxes = curTxes
           ? [...curTxes, log.transactionHash]
@@ -65,7 +67,7 @@ export class OpIndexer {
       if (log.logIndex > queryLogIndex) {
         return DaimoNonce.fromHex(
           numberToHex(log.args.nonce, { size: 32 })
-        ).metadata.toHex();
+        )?.metadata.toHex();
       }
     }
     return undefined;
