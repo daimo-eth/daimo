@@ -3,10 +3,10 @@ import { Spacer } from "../components/layout";
 export function SectionTestimonial() {
   return (
     <section className="bg-white py-32">
-      <center className="m-auto max-w-screen-xl px-8">
+      <center className="m-auto max-w-screen-xl px-16 md:px-32">
         <div className="text-4xl font-medium text-midnight">
-          I&apos;m so f*king bullish on Daimo. I could actually see myself using
-          this, and I never say that about anything.
+          There are these apps that just <i>feel</i> good to use but you
+          can&apos;t exactly describe why. Daimo is one of those.
         </div>
         <Spacer h={24} />
         <div className="text-2xl font-medium text-grayMid">Kristof Gaszo</div>
