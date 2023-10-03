@@ -14,11 +14,19 @@ export function SectionTeam() {
             img="/assets/team-dc.png"
             name="DC Posch"
             title="Co-founder"
+            links={[
+              { title: "x", url: "https://x.com/dcposch" },
+              { title: "fc", url: "https://warpcast.com/dcposch.eth" },
+            ]}
           />
           <Person
             img="/assets/team-nalin.png"
             name="Nalin Bhardwaj"
             title="Co-founder"
+            links={[
+              { title: "x", url: "https://x.com/nibnalin" },
+              { title: "fc", url: "https://warpcast.com/nibnalin" },
+            ]}
           />
         </div>
       </center>
@@ -30,10 +38,12 @@ function Person({
   img,
   name,
   title,
+  links,
 }: {
   img: string;
   name: string;
   title: string;
+  links: { title: string; url: string }[];
 }) {
   return (
     <div className="flex flex-col items-center">
@@ -42,6 +52,17 @@ function Person({
       <SectionH3>{name}</SectionH3>
       <Spacer h={12} />
       <div className="text-base text-grayMid">{title}</div>
+      <Spacer h={12} />
+      <div className="text-base text-grayMid">
+        {links.map((link, i) => (
+          <>
+            <a key={i} href={link.url} target="_blank" className="underline">
+              {link.title}
+            </a>
+            {i < links.length - 1 && ", "}
+          </>
+        ))}
+      </div>
     </div>
   );
 }
