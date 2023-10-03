@@ -6,24 +6,24 @@ import { SectionH3 } from "../components/typography";
 export function SectionWhyDaimo() {
   return (
     <section className="bg-ivory py-24">
-      <div className="m-auto max-w-screen-xl">
+      <div className="m-auto max-w-screen-xl px-8">
         <SectionH3>Why Daimo</SectionH3>
         <Spacer h={48} />
         <div className="flex gap-16">
           <WhyPellet
-            icon="/assets/icon-secure.png"
+            icon="/assets/ionicon-hardware-chip.svg"
             title="Secure"
-            copy="Daimo uses secure hardware on your phone to secure your money, using cryptography. There's no bank. Your money is yours alone, like cash."
+            copy="Store money using secure hardware on your phone. Yours alone, like cash."
           />
           <WhyPellet
-            icon="/assets/icon-global.png"
+            icon="/assets/ionicon-earth.svg"
             title="Global"
-            copy="Send and receive 1:1 backed US Dollar stablecoins to anyone, anywhere."
+            copy="Receive USDC from anyone. Send anywhere, including to .eth addresses."
           />
           <WhyPellet
-            icon="/assets/icon-snappy.png"
+            icon="/assets/ionicon-checkmark-circle.svg"
             title="Snappy"
-            copy="Transfers are instant and cheap using rollups, with all the security of Ethereum under the hood."
+            copy="Transfers are instant on rollups, with all the security of Ethereum under the hood."
           />
         </div>
       </div>
@@ -42,7 +42,7 @@ function WhyPellet({
 }) {
   return (
     <div className="bg-ivoryDark rounded-lg p-16 max-w-md basis-0 flex-1">
-      <Image src={icon} width={84} height={84} alt={title} />
+      <Image src={icon} width={72} height={72} alt={title} />
       <Spacer h={36} />
       <SectionH3>{title}</SectionH3>
       <Spacer h={36} />

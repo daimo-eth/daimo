@@ -16,23 +16,28 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 - <details><summary>How do Daimo accounts work?</summary>
 
-  Daimo accounts are secured by cryptography. Each device you add to your account stores a secret key. When you send a transaction, your phone authenticates you (with FaceID, PIN, or similar) and cryptographically signs the transaction using that key.
+  Daimo accounts are Ethereum accounts.
 
-  Daimo uses modern cryptography best practices. It leverages hardware enclaves such as the Secure Enclave on iOS and Keystore on Android. These generate cryptographic secrets that live in dedicated hardware made for storing secrets and never leave your device. With Account Abstraction (ERC-4337), we are able to support multiple devices for safety and convenience. If you lose a device, you can simply delete it from your account. All together, this enables secure, low-friction Ethereum accounts.
+  Under the hood, they're a new and much-improved type called an ERC-4337 contract account. Each device you add to your account stores a secret key. When you send money, your phone first authenticates you with FaceID or similar, then cryptographically signs the transaction using that key.
+
+  Daimo is non-custodial. Your keys, your coins.
+
+  Daimo offers stronger security than traditional wallets. Keys live in dedicated hardware made for storing secrets, such as Secure Enclave on iPhone, and never leave your device.
+
   </details>
 
 - <details><summary>Which stablecoin does Daimo use?</summary>
 
-  Stablecoins are cryptocurrencies designed to maintain a stable value. Many are pegged to the dollar, so that one coin is worth $1.
+  Daimo runs on USDC, a high-quality stablecoin issued by Circle.
 
-  Daimo runs on USDC, a high-quality stablecoin issued by Circle. Circle is a US-based licensed money transmitter, partly owned by Coinbase. USDC is one of the largest and most liquid onchain dollar equivalents. Learn more on [Bluechip](https://bluechip.org/coins/usdc).
+  Stablecoins are cryptocurrencies designed to maintain a stable value. Many are pegged to the dollar, so that one coin is worth $1. Circle is a US-based licensed money transmitter partnered with Coinbase, USDC is one of the largest and most liquid onchain dollar equivalents. [Learn more on Bluechip.](https://bluechip.org/coins/usdc)
   </details>
 
 - <details><summary>Which blockchain does it run on?</summary>
 
   Daimo uses Base, an Ethereum rollup.
 
-  Rollups support near-instant transactions that cost a few cents each. By contrast, transactions on the underlying Ethereum chain (layer 1 or L1) take about 10 times as long and cost a few dollars each. Rollups accomplish this by bundling many transactions into a single L1 transaction. They inherit the strong guarantees of the settlement chain: like L1, a rollup is reliable and secure. It works anywhere in the world, without requiring permission of any particular country or company. Learn more on [L2Beat](https://l2beat.com/scaling/projects/base).
+  Rollups support near-instant transactions that cost a few cents each. By contrast, transactions on the underlying Ethereum chain (layer 1 or L1) take about 10 times as long and cost a few dollars each. Rollups accomplish this by bundling many transactions into a single L1 transaction. They inherit the strong guarantees of Ethereum: like L1, Base is reliable and secure, and works worldwide. [Learn more on L2Beat.](https://l2beat.com/)
   </details>
 
 - <details><summary>Can I send other coins like USDT, or use other chains like Polygon?</summary>
@@ -42,12 +47,12 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 - <details><summary>Who can see my Daimo transactions?</summary>
 
-  Currently, all Ethereum transactions are generally public, including Daimo transactions. We plan to eventually support private payments as the infrastructure and support for them matures.
+  Currently, all Ethereum transactions are generally public, including Daimo transactions. We plan to add private payments as the infrastructure and support for them matures.
   </details>
 
 - <details><summary>Is Daimo open source?</summary>
 
-  Yes, Daimo is and will always be open-source. We use GPLv3, which means that anyone can build other open-source software reusing our work. If we're doing it right, we want the ecosystem to benefit. See more on [our Github](https://github.com/daimo-eth/daimo).
+  Yes, Daimo is and will always be open-source under GPLv3. We're here to collaborate. We want to make self-custody fast, safe, and easy. [See more on our Github.](https://github.com/daimo-eth/daimo)
   </details>
 
 ### Development

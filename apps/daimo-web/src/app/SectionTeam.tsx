@@ -5,7 +5,7 @@ import { SectionH3 } from "../components/typography";
 
 export function SectionTeam() {
   return (
-    <section className="bg-white py-24">
+    <section className="bg-white py-24" id="team">
       <center className="m-auto w-[32rem]">
         <SectionH3>Meet the team</SectionH3>
         <Spacer h={48} />
