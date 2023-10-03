@@ -22,7 +22,7 @@ export function DownloadLinkButton() {
     <Link
       href={link}
       target="_blank"
-      className="inline-block rounded-lg py-7 px-9 bg-primaryLight text-white font-semibold text-xl tracking-wider"
+      className="inline-block rounded-lg py-7 px-9 bg-primaryLight text-white font-semibold md:text-xl tracking-wider"
     >
       {title}
     </Link>

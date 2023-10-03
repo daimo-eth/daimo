@@ -5,11 +5,11 @@ import { SectionH3 } from "../components/typography";
 
 export function SectionWhyDaimo() {
   return (
-    <section className="bg-ivory py-24">
+    <section className="bg-white pt-24 md:bg-ivory md:py-24">
       <div className="m-auto max-w-screen-xl px-8">
         <SectionH3>Why Daimo</SectionH3>
         <Spacer h={48} />
-        <div className="flex gap-16">
+        <div className="flex gap-16 md:gap-8 xl:gap-16 flex-col items-stretch md:flex-row">
           <WhyPellet
             icon="/assets/ionicon-hardware-chip.svg"
             title="Secure"
@@ -41,8 +41,14 @@ function WhyPellet({
   copy: string;
 }) {
   return (
-    <div className="bg-ivoryDark rounded-lg p-16 max-w-md basis-0 flex-1">
-      <Image src={icon} width={72} height={72} alt={title} />
+    <div className="bg-ivoryDark rounded-lg p-16 md:max-w-md basis-0 flex-1">
+      <Image
+        src={icon}
+        width={72}
+        height={72}
+        alt={title}
+        className="w-20 h-20"
+      />
       <Spacer h={36} />
       <SectionH3>{title}</SectionH3>
       <Spacer h={36} />

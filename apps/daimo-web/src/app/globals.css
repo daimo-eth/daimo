@@ -15,7 +15,7 @@ body {
 }
 
 /** Adjust the root font size for large screens, medium, and mobile. */
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   :root {
     font-size: 14px;
   }
