@@ -30,19 +30,19 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
   Daimo runs on USDC, a high-quality stablecoin issued by Circle.
 
-  Stablecoins are cryptocurrencies designed to maintain a stable value. Many are pegged to the dollar, so that one coin is worth $1. Circle is a US-based licensed money transmitter partnered with Coinbase, USDC is one of the largest and most liquid onchain dollar equivalents. [Learn more on Bluechip.](https://bluechip.org/coins/usdc)
+  Stablecoins are cryptocurrencies designed to maintain a stable value. Many are pegged to the dollar, so that one coin is worth $1. Circle is a US-based licensed money transmitter partnered with Coinbase. USDC is one of the largest and most liquid onchain dollar equivalents. <a target="_blank" href="https://bluechip.org/coins/usdc" >Learn more on Bluechip.</a>
   </details>
 
 - <details><summary>Which blockchain does it run on?</summary>
 
   Daimo uses Base, an Ethereum rollup.
 
-  Rollups support near-instant transactions that cost a few cents each. By contrast, transactions on the underlying Ethereum chain (layer 1 or L1) take about 10 times as long and cost a few dollars each. Rollups accomplish this by bundling many transactions into a single L1 transaction. They inherit the strong guarantees of Ethereum: like L1, Base is reliable and secure, and works worldwide. [Learn more on L2Beat.](https://l2beat.com/)
+  Rollups support near-instant transactions that cost a few cents each. By contrast, transactions on the underlying Ethereum chain (layer 1 or L1) take about 10 times as long and cost a few dollars each. Rollups accomplish this by bundling many transactions into a single L1 transaction. They inherit the strong guarantees of Ethereum: like L1, Base is reliable and secure, and works worldwide. <a target="_blank"  href="https://l2beat.com/">Learn more on L2Beat.</a>
   </details>
 
 - <details><summary>Can I send other coins like USDT, or use other chains like Polygon?</summary>
 
-  Not yet. We plan to support payments in other stablecoins and other chains in the future.
+  Not yet. We plan to support payments in other stablecoins and on other chains soon.
   </details>
 
 - <details><summary>Who can see my Daimo transactions?</summary>
@@ -52,7 +52,7 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 - <details><summary>Is Daimo open source?</summary>
 
-  Yes, Daimo is and will always be open-source under GPLv3. We're here to collaborate. We want to make self-custody fast, safe, and easy. [See more on our Github.](https://github.com/daimo-eth/daimo)
+  Yes, Daimo is and will always be open-source under GPLv3. We're here to collaborate. We want to make self-custody fast, safe, and easy. <a target="_blank" href="https://github.com/daimo-eth/daimo">See more on our Github.</a>
   </details>
 
 ### Development

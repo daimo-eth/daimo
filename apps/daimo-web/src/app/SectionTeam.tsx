@@ -25,7 +25,7 @@ export function SectionTeam() {
             title="Co-founder"
             links={[
               { title: "x", url: "https://x.com/nibnalin" },
-              { title: "fc", url: "https://warpcast.com/nibnalin" },
+              { title: "web", url: "https://nibnalin.me/" },
             ]}
           />
         </div>

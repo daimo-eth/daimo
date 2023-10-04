@@ -6,6 +6,8 @@ export interface FAQ {
 }
 
 export function parseFAQs(markdown: string): FAQ[] {
+  console.log(`[WEB] parsing FAQ, input README.md ${markdown.length} chars`);
+
   function assert(cond: boolean, msg: string): asserts cond {
     if (!cond) throw new Error(`README FAQ: ${msg}`);
   }
@@ -19,8 +21,6 @@ export function parseFAQs(markdown: string): FAQ[] {
 
   const faqList = md[faqIx + 1];
   assert(faqList.type === "list", "after ## FAQ should be a list");
-
-  console.log(faqList.items[0]);
 
   const ret = [];
   for (const item of faqList.items) {
