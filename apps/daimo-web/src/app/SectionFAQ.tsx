@@ -35,7 +35,6 @@ function Question({
   question: string;
   answerHtml: string;
 }) {
-  // const [expanded, setExpanded] = useState(false);
   return (
     <li className="border-b border-grayLight">
       <details>

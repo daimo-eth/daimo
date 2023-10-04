@@ -9,13 +9,13 @@ export function SectionTestimonial() {
           can&apos;t exactly describe why. Daimo is one of those.
         </div>
         <Spacer h={24} />
-        <div className="text-2xl font-medium text-grayMid">Kristof Gaszo</div>
+        <div className="text-2xl font-medium text-grayMid">Kristof Gazso</div>
         <Spacer h={8} />
         <p className="text-2xl text-grayMid">
+          ERC-4337 coauthor, founder of{" "}
           <a href="https://pimlico.io" target="blank" className="underline">
             Pimlico
           </a>
-          , ERC-4337 coauthor
         </p>
       </center>
     </section>

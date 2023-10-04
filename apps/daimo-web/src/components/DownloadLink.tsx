@@ -30,16 +30,20 @@ export function DownloadLinkButton() {
 }
 
 function useDownloadTitleLink() {
+  const comingSoonLink = "https://noteforms.com/forms/daimo-uk2fe4";
+
   const [[title, link], setTitleLink] = useState([
     "Download on App Store",
-    "https://testflight.apple.com/join/j3ixWtuN",
+    comingSoonLink,
+    // "https://testflight.apple.com/join/j3ixWtuN",
   ]);
 
   useEffect(() => {
     if (navigator.userAgent.toLowerCase().includes("android")) {
       setTitleLink([
         "Download on Play Store",
-        "https://play.google.com/store/apps/details?id=com.daimo",
+        comingSoonLink,
+        // "https://play.google.com/store/apps/details?id=com.daimo",
       ]);
     }
   }, []);
