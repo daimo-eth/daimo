@@ -1,5 +1,6 @@
 package expo.modules.enclave
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -69,6 +70,14 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   internal fun hasBiometrics(): Boolean {
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q || Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+      // BIOMETRIC_STRONG | DEVICE_CREDENTIAL is unsupported on API 28-29
+      // https://developer.android.com/reference/androidx/biometric/BiometricManager#canAuthenticate(int)
+
+      val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+      return keyguardManager?.isDeviceSecure == true
+    }
+
     val biometricManager = BiometricManager.from(context)
     return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
   }
