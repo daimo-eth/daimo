@@ -21,7 +21,6 @@ import expo.modules.core.Promise
 import expo.modules.core.arguments.ReadableArguments
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO: doc comments
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
   if (incompleteSignature == null) {
@@ -32,7 +31,9 @@ fun completeSignature(incompleteSignature: Signature?, message: String, promise:
   promise.resolve(incompleteSignature.sign().toHexString())
 }
 
-class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
+// The key manager we will always be using on devices using API Level 30 or later
+// once we enforce PIN setting requirement during onboarding.
+class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
   private val context = _context
   private val moduleRegistry = _moduleRegistry
   private val uiManager = moduleRegistry.getModule(UIManager::class.java)
