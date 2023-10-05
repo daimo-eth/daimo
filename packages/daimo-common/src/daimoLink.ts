@@ -14,13 +14,13 @@ export type DaimoLink = DaimoLinkAccount | DaimoLinkRequest | DaimoLinkNote;
 
 export type DaimoLinkAccount = {
   type: "account";
-  addr: Address;
+  account: string;
 };
 
 export type DaimoLinkRequest = {
   type: "request";
   requestId: `${bigint}`;
-  recipient: Address;
+  recipient: string;
   dollars: `${number}`;
 };
 
@@ -33,12 +33,12 @@ export type DaimoLinkNote = {
 export function formatDaimoLink(link: DaimoLink) {
   switch (link.type) {
     case "account": {
-      return `${daimoLinkBase}/account/${link.addr}`;
+      return `${daimoLinkBase}/account/${link.account}`;
     }
     case "request": {
-      return `${daimoLinkBase}/request/${link.requestId.toString()}/${
-        link.recipient
-      }/${link.dollars}`;
+      return `${daimoLinkBase}/request/${link.recipient}/${
+        link.dollars
+      }/${link.requestId.toString()}`;
     }
     case "note": {
       const base = `${daimoLinkBase}/note/${link.ephemeralOwner}`;
@@ -79,16 +79,17 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
   switch (parts[0]) {
     case "account": {
       if (parts.length !== 2) return null;
-      const addr = getAddress(parts[1]);
-      return { type: "account", addr };
+      const account = parts[1];
+      return { type: "account", account };
     }
     case "request": {
       if (parts.length !== 4) return null;
-      const requestId = `${BigInt(parts[1])}` as `${bigint}`;
-      const recipient = getAddress(parts[2]);
-      const dollarNum = parseFloat(zDollarStr.parse(parts[3]));
+      const recipient = parts[1];
+      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
       if (!(dollarNum > 0)) return null;
       const dollars = dollarNum.toFixed(2) as `${number}`;
+      const requestId = `${BigInt(parts[3])}` as `${bigint}`;
+
       if (dollars === "0.00") return null;
       return { type: "request", requestId, recipient, dollars };
     }

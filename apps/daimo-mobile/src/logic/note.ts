@@ -1,16 +1,7 @@
-import { formatDaimoLink } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { Address, Hex, createWalletClient, http, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
-
-import { rpcHook } from "./trpc";
-
-export function useFetchNote(ephemeralOwner: `0x${string}`) {
-  const url = formatDaimoLink({ type: "note", ephemeralOwner });
-  const ret = rpcHook.getLinkStatus.useQuery({ url });
-  return ret;
-}
 
 export function useEphemeralSignature(
   ephemeralPrivateKey: `0x${string}` | undefined,

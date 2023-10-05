@@ -14,7 +14,7 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { Address, encodeFunctionData, getAddress } from "viem";
+import { Address, encodeFunctionData, getAddress, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
@@ -113,9 +113,33 @@ export function createRouter(
           throw new Error(`Invalid Daimo app link: ${url}`);
         }
 
+        async function getEAccountFromStr(eAccStr: string): Promise<EAccount> {
+          if (eAccStr.includes(".")) {
+            const ensName = normalize(eAccStr);
+            const addr = await vc.l1Client.getEnsAddress({ name: ensName });
+            if (addr != null) {
+              return { ensName, addr } as EAccount;
+            }
+          } else if (isAddress(eAccStr)) {
+            const addr = getAddress(eAccStr);
+            return { addr } as EAccount;
+          } else {
+            const daimoAddress = nameReg.resolveName(eAccStr);
+            if (daimoAddress) {
+              return await nameReg.getEAccount(daimoAddress);
+            }
+          }
+
+          throw new Error(`${eAccStr} not found`);
+        }
+
         switch (link.type) {
+          case "account": {
+            const acc = await getEAccountFromStr(link.account);
+            return { link, account: acc };
+          }
           case "request": {
-            const acc = await nameReg.getEAccount(link.recipient);
+            const acc = await getEAccountFromStr(link.recipient);
             if (acc.name == null) {
               throw new Error(`Not found: ${link.recipient}`);
             }
@@ -129,13 +153,12 @@ export function createRouter(
               fulfilledNonceMetadata
             );
             const relevantTransfers = coinIndexer.filterTransfers({
-              addr: link.recipient,
+              addr: acc.addr,
               txHashes: potentialFulfillTxes,
             });
             const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
             const fulfillTxes = relevantTransfers.filter(
-              (t) =>
-                t.to === link.recipient && BigInt(t.amount) === expectedAmount
+              (t) => t.to === acc.addr && BigInt(t.amount) === expectedAmount
             );
             const fulfilledBy =
               fulfillTxes.length > 0

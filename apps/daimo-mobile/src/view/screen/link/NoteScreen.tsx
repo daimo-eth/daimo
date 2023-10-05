@@ -17,7 +17,8 @@ import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
-import { useEphemeralSignature, useFetchNote } from "../../../logic/note";
+import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { useEphemeralSignature } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
@@ -34,15 +35,15 @@ export default function NoteScreen({ route }: Props) {
   const { ephemeralPrivateKey, ephemeralOwner } = route.params;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const res = useFetchNote(ephemeralOwner);
+  const noteStatus = useFetchLinkStatus(route.params)!;
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
-      {res.isFetching && <Spinner />}
-      {res.error && <TextError>{res.error.message}</TextError>}
-      {res.data && (
+      {noteStatus.isFetching && <Spinner />}
+      {noteStatus.error && <TextError>{noteStatus.error.message}</TextError>}
+      {noteStatus.data && (
         <NoteDisplay
-          noteStatus={res.data as DaimoNoteStatus}
+          noteStatus={noteStatus.data as DaimoNoteStatus}
           ephemeralPrivateKey={ephemeralPrivateKey}
         />
       )}
