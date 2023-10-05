@@ -9,13 +9,13 @@ import expo.modules.core.interfaces.ExpoMethod
 import expo.modules.core.ModuleRegistry
 import expo.modules.core.ExportedModule
 import expo.modules.core.Promise
+import expo.modules.core.arguments.ReadableArguments
 import java.security.spec.ECGenParameterSpec
 import java.security.KeyPairGenerator
 import androidx.biometric.BiometricManager
 import android.security.keystore.KeyInfo
 import java.security.KeyFactory
 import expo.modules.kotlin.types.Enumerable
-import expo.modules.core.arguments.ReadableArguments
 
 // Note that this is a ExportedModule, not a Module as expo recommends.
 // This is because we need access to the application context to be able
@@ -32,10 +32,11 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 
   override fun onCreate(_moduleRegistry: ModuleRegistry) {
     moduleRegistry = _moduleRegistry
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30
       keyManager = Android30PlusKeyManager(context, moduleRegistry, hasStrongbox())
     } else {
-      keyManager = FallbackKeyManager()
+      keyManager = FallbackKeyManager(context, moduleRegistry)
     }
   }
 
@@ -106,7 +107,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   @ExpoMethod
   fun forceFallbackUsage(promise: Promise) {
     forcedFallbackKeyManager = true
-    keyManager = FallbackKeyManager()
+    keyManager = FallbackKeyManager(context, moduleRegistry)
   }
 
   @ExpoMethod

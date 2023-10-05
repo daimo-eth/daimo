@@ -1,5 +1,6 @@
 package expo.modules.enclave
 
+import android.app.KeyguardManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import java.security.spec.ECGenParameterSpec
@@ -8,12 +9,16 @@ import java.security.KeyPair
 import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.Signature
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 import androidx.fragment.app.FragmentActivity
 import android.content.Context
+import android.content.Intent
 import expo.modules.core.ModuleRegistry
+import expo.modules.core.interfaces.ActivityEventListener
 import expo.modules.core.interfaces.ActivityProvider
 import android.app.Activity
 import expo.modules.core.interfaces.services.UIManager
@@ -22,9 +27,25 @@ import android.os.Build
 import android.content.pm.PackageManager
 import expo.modules.core.arguments.ReadableArguments
 
-// TODO: key lives in non-HW keystore. How do we make sure other apps can't access?
-// TODO: show system auth prompt when signing
-class FallbackKeyManager: KeyManager {
+class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): KeyManager, ActivityEventListener {
+  private val context = _context
+  private val moduleRegistry = _moduleRegistry
+  private val uiManager = moduleRegistry.getModule(UIManager::class.java)
+  private val DEVICE_CREDENTIAL_FALLBACK_CODE = 1001
+
+  private var pendingSignPromise: Promise? = null
+  private var pendingSignAccountName: String? = null
+  private var pendingSignHexMessage: String? = null
+
+  init {
+    uiManager.registerActivityEventListener(this)
+  }
+
+  internal fun getCurrentActivity(): Activity? {
+    val activityProvider: ActivityProvider = moduleRegistry.getModule(ActivityProvider::class.java)
+    return activityProvider.currentActivity
+  }
+
   internal fun createSigningPrivkey(accountName: String) {
     var params = KeyGenParameterSpec.Builder(accountName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
       .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
@@ -63,13 +84,21 @@ class FallbackKeyManager: KeyManager {
   }
 
   override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
-    val privateKey = getSigningPrivkey(accountName)!!.private
-    val signature = Signature.getInstance("SHA256withECDSA").run {
-      initSign(privateKey)
-      update(hexMessage.decodeHex())
-      sign()
+    val fragmentActivity = getCurrentActivity() as FragmentActivity?
+    val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    val intent = keyguardManager.createConfirmDeviceCredentialIntent(
+      biometricPromptCopy.getString("androidTitle"),
+      biometricPromptCopy.getString("usageMessage"))
+
+    if (intent == null) {
+      promise.reject("ERR_AUTH_FAILED", "Authentication failed")
     }
-    promise.resolve(signature.toHexString())
+    uiManager.runOnUiQueueThread {
+      fragmentActivity!!.startActivityForResult(intent, DEVICE_CREDENTIAL_FALLBACK_CODE)
+    }
+    pendingSignPromise = promise
+    pendingSignAccountName = accountName
+    pendingSignHexMessage = hexMessage
   }
 
   override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {
@@ -81,4 +110,26 @@ class FallbackKeyManager: KeyManager {
     }
     return verified
   }
+
+  override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+    if (requestCode == DEVICE_CREDENTIAL_FALLBACK_CODE) {
+      if (resultCode == Activity.RESULT_OK) {
+        val privateKey = getSigningPrivkey(pendingSignAccountName!!)!!.private
+        val signature = Signature.getInstance("SHA256withECDSA").run {
+          initSign(privateKey)
+          update(pendingSignHexMessage!!.decodeHex())
+          sign()
+        }
+        pendingSignAccountName = null
+        pendingSignHexMessage = null
+        pendingSignPromise!!.resolve(signature.toHexString())
+      } else {
+        pendingSignAccountName = null
+        pendingSignHexMessage = null
+        pendingSignPromise!!.reject("ERR_AUTH_FAILED", "Authentication failed")
+      }
+    }
+  }
+
+  override fun onNewIntent(intent: Intent) = Unit
 }
