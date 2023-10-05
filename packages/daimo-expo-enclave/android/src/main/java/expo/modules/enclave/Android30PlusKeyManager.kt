@@ -31,8 +31,7 @@ fun completeSignature(incompleteSignature: Signature?, message: String, promise:
   promise.resolve(incompleteSignature.sign().toHexString())
 }
 
-// The key manager we will always be using on devices using API Level 30 or later
-// once we enforce PIN setting requirement during onboarding.
+// The key manager we always use on devices using API Level 30 or later
 class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
   private val context = _context
   private val moduleRegistry = _moduleRegistry

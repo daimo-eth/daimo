@@ -32,7 +32,7 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
 
   override fun onCreate(_moduleRegistry: ModuleRegistry) {
     moduleRegistry = _moduleRegistry
-    if (hasBiometrics()) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // API 30
       keyManager = Android30PlusKeyManager(context, moduleRegistry, hasStrongbox())
     } else {
       keyManager = FallbackKeyManager()
