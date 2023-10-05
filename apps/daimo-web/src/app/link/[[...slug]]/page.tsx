@@ -130,8 +130,8 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     case "account": {
       const { account } = res as DaimoAccountStatus;
       return {
-        title: `${getAccountName(account)} is on Daimo`,
-        description: "Send or recieve payments from them",
+        title: getAccountName(account),
+        description: "Get Daimo to send or receive payments",
       };
     }
     case "request": {

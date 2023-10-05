@@ -27,6 +27,15 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
+    "https://example.com/link/request/dcposch.eth/4.20/555",
+    {
+      type: "request",
+      recipient: "dcposch.eth",
+      dollars: "4.20",
+      requestId: "555",
+    },
+  ],
+  [
     "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
     {
       type: "note",
@@ -103,6 +112,7 @@ test("DaimoLink normalization", () => {
   const variants = [
     "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
     "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
     "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
   ];
   const correct =
