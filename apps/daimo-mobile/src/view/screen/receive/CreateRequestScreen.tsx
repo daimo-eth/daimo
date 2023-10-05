@@ -19,7 +19,7 @@ export default function CreateRequestScreen() {
   const [account] = useAccount();
   if (account == null) return null;
 
-  const url = formatDaimoLink({ type: "account", addr: account.address });
+  const url = formatDaimoLink({ type: "account", account: account.name });
 
   return (
     <View style={ss.container.fullWidthSinglePage}>

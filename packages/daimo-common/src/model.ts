@@ -40,6 +40,14 @@ export function getAccountName(acc: EAccount): string {
   return addr.slice(0, 6) + "…" + addr.slice(-4);
 }
 
+/** Gets a Daimo name, ENS name or full account address. */
+export function getAccountNameOrAddress(acc: EAccount): string {
+  const str = acc.name || acc.ensName;
+  if (str) return str;
+
+  return acc.addr;
+}
+
 /** True if account has a display name, false if bare address. */
 export function hasAccountName(acc: EAccount): boolean {
   return !!(acc.name || acc.label || acc.ensName);

@@ -1,4 +1,5 @@
 import {
+  DaimoAccountStatus,
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
@@ -108,7 +109,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       };
     } else if (link.type === "account") {
       return {
-        title: getAccountName({ addr: link.addr }),
+        title: `${link.account}`,
         description: "Couldn't load account name",
       };
     } else if (link.type === "request") {
@@ -126,6 +127,13 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
   }
 
   switch (res.link.type) {
+    case "account": {
+      const { account } = res as DaimoAccountStatus;
+      return {
+        title: `${getAccountName(account)} is on Daimo`,
+        description: "Send or recieve payments from them",
+      };
+    }
     case "request": {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);

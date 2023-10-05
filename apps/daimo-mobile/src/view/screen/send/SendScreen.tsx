@@ -1,4 +1,6 @@
 import {
+  DaimoAccountStatus,
+  DaimoRequestStatus,
   EAccount,
   OpStatus,
   assert,
@@ -26,6 +28,7 @@ import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
 import { SendNoteButton } from "./SendNoteButton";
 import { useSendAsync } from "../../../action/useSendAsync";
+import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
@@ -48,7 +51,34 @@ const SegmentedControlFixed = SegmentedControl as any;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { recipient, dollars, requestId } = route.params || {};
+  const { link } = route.params || {};
+  const linkStatus = useFetchLinkStatus(link);
+
+  const { recipient, dollars, requestId } = useMemo(() => {
+    if (
+      !linkStatus ||
+      linkStatus.isFetching ||
+      linkStatus.error ||
+      linkStatus.data == null
+    )
+      return {};
+    if (linkStatus.data.link.type === "account") {
+      const status = linkStatus.data as DaimoAccountStatus;
+      return {
+        recipient: status.account,
+        dollars: undefined,
+        requestId: undefined,
+      };
+    } else {
+      assert(linkStatus.data.link.type === "request");
+      const status = linkStatus.data as DaimoRequestStatus;
+      return {
+        recipient: status.recipient,
+        dollars: parseFloat(status.link.dollars),
+        requestId: status.requestId,
+      };
+    }
+  }, [linkStatus]);
 
   // Navigation
   const [tab, setTab] = useState<SendTab>("search");

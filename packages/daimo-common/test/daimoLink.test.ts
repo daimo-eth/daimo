@@ -5,14 +5,23 @@ import { DaimoLink, formatDaimoLink, parseDaimoLink } from "../src/daimoLink";
 
 const testCases: [string, DaimoLink | null][] = [
   [
-    "https://example.com/link/account/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-    { type: "account", addr: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93" },
+    "https://example.com/link/account/dcposch",
+    { type: "account", account: "dcposch" },
   ],
   [
-    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.23",
+    "https://example.com/link/account/dcposch.eth",
+    { type: "account", account: "dcposch.eth" },
+  ],
+  [
+    "https://example.com/link/account/0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
+    { type: "account", account: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93" },
+  ],
+  ["https://example.com/link/account/0x0", { type: "account", account: "0x0" }],
+  [
+    "https://example.com/link/request/dcposch/1.23/123",
     {
       type: "request",
-      recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+      recipient: "dcposch",
       dollars: "1.23",
       requestId: "123",
     },
@@ -36,24 +45,23 @@ const testCases: [string, DaimoLink | null][] = [
   ["https://example.com/link", null],
   ["https://example.com/link/foo", null],
   ["https://example.com/link/account", null],
-  ["https://example.com/link/account/0x0", null],
   ["https://example.com/link/request", null],
   ["https://example.com/link/request/", null],
   ["https://example.com/link/request/0x0", null],
   [
-    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1/123",
     null,
   ],
   [
-    "https://example.com/link/request///0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93///1.1",
     null,
   ],
   [
-    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12/123",
     null,
   ],
   [
-    "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001/123",
     null,
   ],
   ["https://example.com/link/note/", null],
@@ -81,7 +89,7 @@ test("DaimoLink from daimo:// direct app link", () => {
   const url = "daimo://account/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
   assert.deepStrictEqual(parseDaimoLink(url), {
     type: "account",
-    addr: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+    account: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
   });
 });
 
@@ -89,19 +97,19 @@ test("DaimoLink normalization", () => {
   for (const [url, link] of testCases) {
     // Ensure addresses always end up checksummed
     assert.deepStrictEqual(parseDaimoLink(url.toLowerCase()), link);
+  }
 
-    // Ensure that amount is normalized
-    const variants = [
-      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001",
-      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0",
-      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1",
-    ];
-    const correct =
-      "https://example.com/link/request/123/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00";
+  // Ensure that amount is normalized
+  const variants = [
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
+  ];
+  const correct =
+    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00/123";
 
-    for (const variant of variants) {
-      const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);
-      assert.strictEqual(roundtrip, correct);
-    }
+  for (const variant of variants) {
+    const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);
+    assert.strictEqual(roundtrip, correct);
   }
 });

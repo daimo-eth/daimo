@@ -113,9 +113,31 @@ export function createRouter(
           throw new Error(`Invalid Daimo app link: ${url}`);
         }
 
+        async function getEAccountFromLinkString(
+          account: string
+        ): Promise<EAccount> {
+          const daimoAddress = nameReg.resolveName(account);
+          if (daimoAddress) {
+            return await nameReg.getEAccount(daimoAddress);
+          }
+
+          const ensName = normalize(account);
+          const addr = await vc.l1Client.getEnsAddress({ name: ensName });
+          if (addr != null) {
+            return { ensName, addr } as EAccount;
+          }
+
+          const normalizedAddr = getAddress(account);
+          return { addr: normalizedAddr } as EAccount;
+        }
+
         switch (link.type) {
+          case "account": {
+            const acc = await getEAccountFromLinkString(link.account);
+            return { link, account: acc };
+          }
           case "request": {
-            const acc = await nameReg.getEAccount(link.recipient);
+            const acc = await getEAccountFromLinkString(link.recipient);
             if (acc.name == null) {
               throw new Error(`Not found: ${link.recipient}`);
             }
@@ -129,13 +151,12 @@ export function createRouter(
               fulfilledNonceMetadata
             );
             const relevantTransfers = coinIndexer.filterTransfers({
-              addr: link.recipient,
+              addr: acc.addr,
               txHashes: potentialFulfillTxes,
             });
             const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
             const fulfillTxes = relevantTransfers.filter(
-              (t) =>
-                t.to === link.recipient && BigInt(t.amount) === expectedAmount
+              (t) => t.to === acc.addr && BigInt(t.amount) === expectedAmount
             );
             const fulfilledBy =
               fulfillTxes.length > 0
