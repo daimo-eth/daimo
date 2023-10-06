@@ -50,8 +50,8 @@ public class ExpoEnclaveModule: Module {
       return try self.keyManager.deleteKeyPair(accountName: accountName)
     }
 
-    AsyncFunction("sign") { (accountName: String, hexMessage: String, biometricPromptCopy: BiometricPromptCopy) throws -> String in
-      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: biometricPromptCopy.usageMessage)
+    AsyncFunction("sign") { (accountName: String, hexMessage: String, promptCopy: PromptCopy) throws -> String in
+      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: promptCopy.usageMessage)
     }
 
     AsyncFunction("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
@@ -71,7 +71,7 @@ enum BiometricSecurityLevel: String, Enumerable {
   case AVAILABLE
 }
 
-internal struct BiometricPromptCopy: Record {
+internal struct PromptCopy: Record {
   @Field
   var usageMessage: String
 

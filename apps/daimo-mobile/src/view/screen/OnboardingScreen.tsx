@@ -291,7 +291,7 @@ function TryEnclave({
           forceWeakerKeys: tryWeaker,
         },
         "dead",
-        "Create key"
+        "Authorize key creation"
       );
 
       console.log(`[ONBOARDING] enclave signature trial success`);

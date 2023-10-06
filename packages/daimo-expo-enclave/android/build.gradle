@@ -90,4 +90,6 @@ dependencies {
   implementation project(':expo-modules-core')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${getKotlinVersion()}"
   implementation "androidx.biometric:biometric:1.2.0-alpha05"
+  implementation 'androidx.activity:activity-ktx:1.7.2'
+  implementation 'androidx.fragment:fragment-ktx:1.6.0'
 }
