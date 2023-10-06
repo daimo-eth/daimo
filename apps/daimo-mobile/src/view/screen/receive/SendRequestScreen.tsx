@@ -35,7 +35,7 @@ export default function SendRequestScreen() {
     () =>
       formatDaimoLink({
         type: "request",
-        recipient: account.address,
+        recipient: account.name,
         dollars: `${dollars}`,
         requestId,
       }),

@@ -1,32 +1,12 @@
-import { assertNotNull } from "@daimo/common";
+import { EAccount } from "@daimo/common";
 import { Address } from "viem";
 
-import { rpcFunc, rpcHook } from "../logic/trpc";
-import { getAccountManager, useAccount } from "../model/account";
+import { rpcHook } from "../logic/trpc";
+import { useAccount } from "../model/account";
 import { getCachedEAccount } from "../view/shared/addr";
 
-export interface Recipient {
-  addr: Address;
-  name?: string;
+export interface Recipient extends EAccount {
   lastSendTime?: number;
-}
-
-/**
- * Loads recipient info, given an address.
- *
- * It's important to look this up ourselves; can't trust the requester to
- * provide the correct name.
- */
-export async function getRecipient(addr: Address): Promise<Recipient> {
-  const account = await rpcFunc.getEthereumAccount.query({ addr });
-
-  const { currentAccount } = assertNotNull(getAccountManager());
-  const lastSend = (currentAccount?.recentTransfers || []).find(
-    (t) => t.to === addr
-  );
-  const lastSendTime = lastSend?.timestamp;
-
-  return { ...account, lastSendTime };
 }
 
 export function useRecipientSearch(prefix: string) {

@@ -1,6 +1,8 @@
 import {
   DaimoLink,
+  DaimoLinkAccount,
   DaimoLinkNote,
+  DaimoLinkRequest,
   OpEvent,
   parseDaimoLink,
 } from "@daimo/common";
@@ -11,15 +13,12 @@ import { useEffect } from "react";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";
-import { Recipient, getRecipient } from "../../sync/recipients";
 
 export type HomeStackParamList = {
   Home: undefined;
   Settings: undefined;
   Chain: undefined;
-  Send:
-    | undefined
-    | { recipient: Recipient; dollars?: number; requestId?: `${bigint}` };
+  Send: undefined | { link: DaimoLinkAccount | DaimoLinkRequest };
   Withdraw: undefined;
   Request: undefined;
   Deposit: undefined;
@@ -68,14 +67,11 @@ async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
   const { type } = link;
   switch (type) {
     case "account": {
-      const recipient = await getRecipient(link.addr);
-      nav.navigate("Send", { recipient });
+      nav.navigate("Send", { link });
       break;
     }
     case "request": {
-      const recipient = await getRecipient(link.recipient);
-      const dollars = parseFloat(link.dollars);
-      nav.navigate("Send", { recipient, dollars, requestId: link.requestId });
+      nav.navigate("Send", { link });
       break;
     }
     case "note": {

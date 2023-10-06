@@ -46,6 +46,8 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
 
+  public logs: RegisteredLog[] = [];
+
   constructor(private vc: ViemClient) {}
 
   /** Init: index logs from chain, get all names so far */
@@ -61,6 +63,8 @@ export class NameRegistry {
 
   /** Parses Registered event logs, first in init(), then on subscription. */
   parseLogs = async (logs: RegisteredLog[]) => {
+    this.logs.push(...logs);
+
     const accounts = logs
       .map((l) => l.args)
       .map((a) => ({
@@ -111,9 +115,14 @@ export class NameRegistry {
     this.cacheAccount({ name, addr: address });
   };
 
-  /** Find wallet address for a given Daimo name, or null if not found. */
+  /** Find wallet address for a given Daimo name, or undefined if not found. */
   resolveName(name: string): Address | undefined {
     return this.nameToAddr.get(name);
+  }
+
+  /** Find name, or undefined if not a Daimo account. */
+  resolveDaimoNameForAddr(addr: Address): string | undefined {
+    return this.addrToName.get(addr);
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */

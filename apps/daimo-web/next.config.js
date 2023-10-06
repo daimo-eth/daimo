@@ -15,6 +15,10 @@ const nextConfig = {
         "utf-8-validate": "utf-8-validate",
       });
     }
+    config.module.rules.push({
+      test: /\.md$/,
+      type: "asset/source",
+    });
     return config;
   },
 };

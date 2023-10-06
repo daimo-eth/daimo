@@ -1,9 +1,16 @@
 // https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
 
 import { AppRouter } from "@daimo/api";
+import { getViemClientFromEnv } from "@daimo/api/src/chain";
+import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
+import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
+import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
+import { guessTimestampFromNum } from "@daimo/common";
+import { nameRegistryProxyConfig, tokenMetadata } from "@daimo/contract";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import csv from "csvtojson";
-import { numberToHex } from "viem";
+import { createPublicClient, http } from "viem";
+import { base } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
@@ -15,7 +22,8 @@ main()
 
 async function main() {
   const commands = [
-    { name: "ts", desc: tsDesc(), fn: ts },
+    { name: "default", desc: defaultDesc(), fn: defaultScript },
+    { name: "metrics", desc: metricsDesc(), fn: metrics },
     { name: "trpc", desc: trpcDesc(), fn: trpc },
     { name: "create", desc: createAccountDesc(), fn: createAccount },
     { name: "check", desc: checkAccountDesc(), fn: checkAccount },
@@ -23,7 +31,7 @@ async function main() {
     { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
   ];
 
-  const cmdName = process.argv[2];
+  const cmdName = process.argv[2] || "default";
   const cmd = commands.find((c) => c.name === cmdName);
   if (cmdName == null || cmdName === "help") {
     console.log(`Usage: scratchpad <command>`);
@@ -36,18 +44,81 @@ async function main() {
   }
 }
 
-function tsDesc() {
-  return `Typescript scratchpad`;
+function defaultDesc() {
+  return `Scratchpad for quick tests`;
 }
 
-async function ts() {
+async function defaultScript() {
   console.log("Hello, world");
+}
 
-  const num =
-    23658957077183673623975163142370986705703709099221578179586031616n;
-  console.log(`Hex length: ` + num.toString(16).length);
-  console.log(`toHex() length: ` + numberToHex(num).length);
-  console.log(`toHex(64) length: ` + numberToHex(num, { size: 64 }).length);
+function metricsDesc() {
+  return `Print weekly Daimo usage metrics`;
+}
+
+async function metrics() {
+  const vc = getViemClientFromEnv();
+  await vc.init();
+
+  console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
+  const nameReg = new NameRegistry(vc);
+  const opIndexer = new OpIndexer(vc);
+  const coinIndexer = new CoinIndexer(vc, opIndexer);
+
+  console.log(`[METRICS] initializing indexers...`);
+  await Promise.all([nameReg.init(), opIndexer.init()]);
+  await Promise.all([coinIndexer.init()]);
+
+  console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
+  console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);
+  const signups = new Map<string, number>();
+  const { network } = vc.publicClient.chain;
+  for (const log of nameReg.logs.sort(
+    (a, b) => Number(a.blockNumber) - Number(b.blockNumber)
+  )) {
+    const ts = guessTimestampFromNum(log.blockNumber, network);
+    addMetric(signups, ts, 1);
+  }
+
+  const tm = tokenMetadata;
+  console.log(`[METRICS] compiling ${tm.symbol} transfers ${tm.address}`);
+  const transfers = new Map<string, number>();
+  coinIndexer.pipeAllTransfers(async (logs) => {
+    for (const log of logs) {
+      const from = nameReg.resolveDaimoNameForAddr(log.from);
+      const to = nameReg.resolveDaimoNameForAddr(log.to);
+      if (from == null && to == null) continue;
+      const ts = guessTimestampFromNum(log.blockNumber!, network);
+      addMetric(transfers, ts, 1);
+    }
+  });
+
+  // Output CSV
+  const csvLines = [["date", "signups", "transfers"].join(",")];
+  const series = [signups, transfers];
+  const dateSet = new Set(series.flatMap((s) => [...s.keys()]));
+  const dates = [...dateSet].sort();
+  for (const date of dates) {
+    const values = series.map((s) => s.get(date) || 0);
+    csvLines.push([date, ...values].join(","));
+  }
+  console.log(`\n${csvLines.join("\n")}\n`);
+}
+
+function addMetric(
+  metrics: Map<string, number>,
+  tsUnix: number,
+  value: number
+) {
+  const week = getWeek(tsUnix * 1000);
+  metrics.set(week, (metrics.get(week) || 0) + value);
+}
+
+// Returns eg 2023-09-24
+function getWeek(tsMs: number): string {
+  const date = new Date(tsMs);
+  const sundayTs = tsMs - date.getUTCDay() * 24 * 60 * 60 * 1000;
+  return new Date(sundayTs).toISOString().slice(0, 10);
 }
 
 function trpcDesc() {

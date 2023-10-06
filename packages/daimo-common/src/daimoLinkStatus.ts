@@ -1,7 +1,19 @@
-import { DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
+import { DaimoLinkAccount, DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
 import { EAccount } from "./model";
 
-export type DaimoLinkStatus = DaimoRequestStatus | DaimoNoteStatus;
+export type DaimoLinkStatus =
+  | DaimoAccountStatus
+  | DaimoRequestStatus
+  | DaimoNoteStatus;
+
+/**
+ * Tracks details about an account link.
+ */
+export type DaimoAccountStatus = {
+  link: DaimoLinkAccount;
+
+  account: EAccount;
+};
 
 /**
  * Tracks details about a request for payment.
