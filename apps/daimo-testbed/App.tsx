@@ -20,7 +20,7 @@ export default function App() {
     useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
   const [opHash, setOpHash] = useState<string>("");
 
-  const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
+  const promptCopy: ExpoEnclave.PromptCopy = {
     usageMessage: "Authorise transaction",
     androidTitle: "Sign tx",
   };
@@ -35,11 +35,7 @@ export default function App() {
     const accAddress = "0x4E8FBb345Ba703c84D29c4D531f23CFb3BBCc14d";
     const derPublicKey = (await ExpoEnclave.fetchPublicKey(accName)) as string;
     const signer: SigningCallback = async (message) => {
-      const signature = await ExpoEnclave.sign(
-        accName,
-        message,
-        biometricPromptCopy
-      );
+      const signature = await ExpoEnclave.sign(accName, message, promptCopy);
       return {
         derSig: signature,
         keySlot: 0,
@@ -100,9 +96,7 @@ export default function App() {
       <Button
         title="Sign Message"
         onPress={async () => {
-          setSignature(
-            await ExpoEnclave.sign(account, "deadbeef", biometricPromptCopy)
-          );
+          setSignature(await ExpoEnclave.sign(account, "deadbeef", promptCopy));
         }}
       />
       <Text>Created signature is {signature} for message deadbeef</Text>

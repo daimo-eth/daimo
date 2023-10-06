@@ -83,22 +83,24 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
     ks.deleteEntry(accountName)
   }
 
-  override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, promptCopy: ReadableArguments, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     val intent = keyguardManager.createConfirmDeviceCredentialIntent(
-      biometricPromptCopy.getString("androidTitle"),
-      biometricPromptCopy.getString("usageMessage"))
+      promptCopy.getString("androidTitle"),
+      promptCopy.getString("usageMessage"))
 
     if (intent == null) {
       promise.reject("ERR_AUTH_FAILED", "Authentication failed")
     }
-    uiManager.runOnUiQueueThread {
-      fragmentActivity!!.startActivityForResult(intent, DEVICE_CREDENTIAL_FALLBACK_CODE)
-    }
+
     pendingSignPromise = promise
     pendingSignAccountName = accountName
     pendingSignHexMessage = hexMessage
+
+    uiManager.runOnUiQueueThread {
+      fragmentActivity!!.startActivityForResult(intent, DEVICE_CREDENTIAL_FALLBACK_CODE)
+    }
   }
 
   override fun verify(accountName: String, hexSignature: String, hexMessage: String): Boolean {

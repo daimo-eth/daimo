@@ -131,8 +131,8 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   }
 
   @ExpoMethod
-  fun sign(accountName: String, message: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
-    keyManager.sign(accountName, message, biometricPromptCopy, promise)
+  fun sign(accountName: String, message: String, promptCopy: ReadableArguments, promise: Promise) {
+    keyManager.sign(accountName, message, promptCopy, promise)
   }
 
   @ExpoMethod

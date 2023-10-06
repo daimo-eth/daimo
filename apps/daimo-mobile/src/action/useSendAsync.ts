@@ -138,7 +138,7 @@ export async function requestEnclaveSignature(
   hexMessage: string,
   usageMessage: string
 ) {
-  const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
+  const promptCopy: ExpoEnclave.PromptCopy = {
     usageMessage,
     androidTitle: "Daimo",
   };
@@ -152,7 +152,7 @@ export async function requestEnclaveSignature(
 
   const signature = await Log.promise(
     "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyInfo.name, hexMessage, biometricPromptCopy)
+    ExpoEnclave.sign(enclaveKeyInfo.name, hexMessage, promptCopy)
   );
 
   return signature;

@@ -9,7 +9,7 @@ export type HardwareSecurityLevel =
 
 export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
 
-export type BiometricPromptCopy = {
+export type PromptCopy = {
   /**
    * Message displayed when prompting for biometric authentication,
    * rendered on both iOS and Android devices.
@@ -91,7 +91,7 @@ export async function deleteKeyPair(accountName: string): Promise<void> {
 export async function sign(
   accountName: string,
   hexMessage: string,
-  promptCopy: BiometricPromptCopy
+  promptCopy: PromptCopy
 ): Promise<string> {
   return ExpoEnclaveModule.sign(accountName, hexMessage, promptCopy);
 }

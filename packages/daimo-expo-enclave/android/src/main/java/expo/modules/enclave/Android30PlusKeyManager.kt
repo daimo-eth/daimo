@@ -87,7 +87,7 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
     ks.deleteEntry(accountName)
   }
 
-  override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, promptCopy: ReadableArguments, promise: Promise) {
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val failedAttempts = AtomicInteger(0)
     val biometricPrompt = BiometricPrompt(
@@ -113,8 +113,8 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
     })
 
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle(biometricPromptCopy.getString("androidTitle"))
-      .setSubtitle(biometricPromptCopy.getString("usageMessage"))
+      .setTitle(promptCopy.getString("androidTitle"))
+      .setSubtitle(promptCopy.getString("usageMessage"))
       .setNegativeButtonText("Cancel")
       .build()
     
