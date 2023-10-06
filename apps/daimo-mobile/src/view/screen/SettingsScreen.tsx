@@ -78,42 +78,48 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <ScrollView contentContainerStyle={ss.container.fullWidthModal}>
-      <Spacer h={4} />
-      <View style={ss.container.padH16}>
-        <TextH2>
-          {account.name}
-          <TextBody>
-            {` \u00A0 `}
-            {tokenMetadata.name} · {chainConfig.l2.name}
-          </TextBody>
-        </TextH2>
-      </View>
-      <ButtonSmall onPress={linkToExplorer}>
-        <View>
-          <TextLight>
-            {account.address}
-            {`\u00A0\u00A0`}
-            <Octicons name="link-external" size={16} />
-            {`\u00A0\u00A0`}
-            View{`\u00A0`}on{`\u00a0`}
-            {explorer.name}
-          </TextLight>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Spacer h={4} />
+        <View style={ss.container.padH16}>
+          <TextH2>
+            {account.name}
+            <TextBody>
+              {` \u00A0 `}
+              {tokenMetadata.name} · {chainConfig.l2.name}
+            </TextBody>
+          </TextH2>
         </View>
-      </ButtonSmall>
-      <Spacer h={32} />
-      <DevicesInfo {...{ account }} />
-      <Spacer h={32} />
+        <ButtonSmall onPress={linkToExplorer}>
+          <View>
+            <TextLight>
+              {account.address}
+              {`\u00A0\u00A0`}
+              <Octicons name="link-external" size={16} />
+              {`\u00A0\u00A0`}
+              View{`\u00A0`}on{`\u00a0`}
+              {explorer.name}
+            </TextLight>
+          </View>
+        </ButtonSmall>
+        <Spacer h={32} />
+        <DevicesInfo {...{ account }} />
+        <Spacer h={32} />
 
-      <AppInfo {...{ account }} />
-      <Spacer h={32} />
+        <AppInfo {...{ account }} />
+        <Spacer h={32} />
 
-      <View style={ss.container.padH16}>
-        <TextH3>Danger zone</TextH3>
-        <Spacer h={8} />
-        <ButtonMed type="danger" title="Delete Device" onPress={clearWallet} />
-      </View>
-    </ScrollView>
+        <View style={ss.container.padH16}>
+          <TextH3>Danger zone</TextH3>
+          <Spacer h={8} />
+          <ButtonMed
+            type="danger"
+            title="Delete Device"
+            onPress={clearWallet}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -279,5 +285,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  scrollContainer: {
+    padding: 16,
+    backgroundColor: color.white,
+    alignItems: "stretch",
   },
 });
