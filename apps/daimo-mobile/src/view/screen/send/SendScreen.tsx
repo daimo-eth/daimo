@@ -169,7 +169,7 @@ function DescSendToRecipient({ recipient }: { recipient: Recipient }) {
   const disp = getAccountName(recipient);
 
   return (
-    <View style={ss.container.debug}>
+    <View>
       <TextCenter>
         <TextBody>Sending to</TextBody>
       </TextCenter>

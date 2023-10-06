@@ -3,7 +3,7 @@ import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,6 +14,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -57,49 +58,25 @@ export default function OnboardingScreen({
 }: {
   onOnboardingComplete: () => void;
 }) {
+  // Navigation with a back button
   const [page, setPage] = useState<OnboardPage>("intro");
-
-  const next = useCallback(
-    (choice?: "create" | "existing") => {
-      setPage(
-        (function () {
-          switch (page) {
-            case "intro":
-              if (Platform.OS === "android") {
-                // Android goes through an extra onboarding step
-                return assertNotNull(choice) === "create"
-                  ? "create-try-enclave"
-                  : "existing-try-enclave";
-              }
-              return assertNotNull(choice);
-            case "create-try-enclave":
-              return "create";
-            case "existing-try-enclave":
-              return "existing";
-            case "create":
-              return "new-allow-notifications";
-            case "existing":
-              return "existing-allow-notifications";
-            case "new-allow-notifications":
-              return "new-loading";
-            case "existing-allow-notifications":
-            case "new-loading":
-              onOnboardingComplete();
-              return page;
-            default:
-              throw new Error(`unreachable ${page}`);
-          }
-        })()
-      );
-    },
-    [page]
+  const pageStack = useRef([] as OnboardPage[]).current;
+  const goTo = (newPage: OnboardPage) => {
+    pageStack.push(page);
+    setPage(newPage);
+  };
+  const goToPrev = useCallback(
+    () => pageStack.length > 0 && setPage(pageStack.pop()!),
+    []
   );
+  const next = getNext(page, goTo, onOnboardingComplete); // , [page]);
+  const prev = pageStack.length === 0 ? undefined : goToPrev;
 
-  // TODO: add back buttons on create and existing pages
-  const prev = useCallback(() => {}, []);
-
+  // User enters their name
+  // TODO: consider splitting into components and just using StackNavigation
   const [name, setName] = useState("");
 
+  // Create an account as soon as possible, hiding latency
   const {
     exec: createExec,
     status: createStatus,
@@ -139,6 +116,39 @@ export default function OnboardingScreen({
       )}
     </View>
   );
+}
+
+function getNext(
+  page: OnboardPage,
+  goToPage: (p: OnboardPage) => void,
+  onOnboardingComplete: () => void
+): (choice?: "create" | "existing") => void {
+  const fnGoTo = (p: OnboardPage) => () => goToPage(p);
+
+  switch (page) {
+    case "intro":
+      return (choice?: "create" | "existing") => {
+        // Android goes through an extra onboarding step
+        if (Platform.OS !== "android") goToPage(assertNotNull(choice));
+        else if (choice === "create") goToPage("create-try-enclave");
+        else goToPage("existing-try-enclave");
+      };
+    case "create-try-enclave":
+      return fnGoTo("create");
+    case "existing-try-enclave":
+      return fnGoTo("existing");
+    case "create":
+      return fnGoTo("new-allow-notifications");
+    case "existing":
+      return fnGoTo("existing-allow-notifications");
+    case "new-allow-notifications":
+      return fnGoTo("new-loading");
+    case "existing-allow-notifications":
+    case "new-loading":
+      return onOnboardingComplete;
+    default:
+      throw new Error(`unreachable ${page}`);
+  }
 }
 
 function IntroPages({
@@ -384,7 +394,7 @@ function CreateAccountPage({
   message,
 }: {
   onNext: () => void;
-  onPrev: () => void;
+  onPrev?: () => void;
   name: string;
   setName: (name: string) => void;
   exec: () => void;
@@ -402,27 +412,31 @@ function CreateAccountPage({
   return (
     <KeyboardAvoidingView behavior="padding">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.onboardingScreen}>
-          <View style={styles.createAccountPage}>
-            <TextH1>Welcome</TextH1>
-            <View style={styles.namePickerWrap}>
-              {status === "idle" && (
-                <NamePicker
-                  name={name}
-                  onChange={setName}
-                  onChoose={createAccount}
-                />
-              )}
+        <View>
+          <OnboardingHeader onPrev={onPrev} />
+          <View style={styles.onboardingScreen}>
+            <View style={styles.createAccountPage}>
+              <TextH1>Welcome</TextH1>
+              <View style={styles.namePickerWrap}>
+                {status === "idle" && (
+                  <NamePicker
+                    name={name}
+                    onChange={setName}
+                    onChoose={createAccount}
+                  />
+                )}
+              </View>
+              <TextCenter>
+                {status === "error" && <TextError>{message}</TextError>}
+                {status !== "error" && (
+                  <TextLight>
+                    <EmojiToOcticon size={16} text={message} />
+                  </TextLight>
+                )}
+              </TextCenter>
             </View>
-            <TextCenter>
-              {status === "error" && <TextError>{message}</TextError>}
-              {status !== "error" && (
-                <TextLight>
-                  <EmojiToOcticon size={16} text={message} />
-                </TextLight>
-              )}
-            </TextCenter>
           </View>
+          <OnboardingFooter />
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -434,7 +448,7 @@ function UseExistingPage({
   onPrev,
 }: {
   onNext: () => void;
-  onPrev: () => void;
+  onPrev?: () => void;
 }) {
   const { status, message, pubKeyHex } = useExistingAccount();
 
@@ -445,36 +459,69 @@ function UseExistingPage({
   if (pubKeyHex === undefined) return null;
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.useExistingPage}>
-        <TextH1>Welcome</TextH1>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextBody>
-            Scan QR code from the Settings page of existing device
-          </TextBody>
-        </TextCenter>
-        <Spacer h={32} />
-        <View style={styles.vertQR}>
-          <QRCode
-            value={createAddDeviceString(pubKeyHex)}
-            color="#333"
-            size={256}
-            logo={{ uri: image.qrLogo }}
-            logoSize={72}
-          />
+    <View>
+      <OnboardingHeader onPrev={onPrev} />
+      <View style={styles.onboardingScreen}>
+        <View style={styles.useExistingPage}>
+          <TextH1>Welcome</TextH1>
+          <Spacer h={32} />
+          <TextCenter>
+            <TextBody>
+              Scan QR code from the Settings page of existing device
+            </TextBody>
+          </TextCenter>
+          <Spacer h={32} />
+          <View style={styles.vertQR}>
+            <QRCode
+              value={createAddDeviceString(pubKeyHex)}
+              color="#333"
+              size={256}
+              logo={{ uri: image.qrLogo }}
+              logoSize={72}
+            />
+          </View>
+          <Spacer h={16} />
+          <TextCenter>
+            {status !== "error" && (
+              <TextLight>
+                <EmojiToOcticon size={16} text={message} />
+              </TextLight>
+            )}
+          </TextCenter>
         </View>
-        <Spacer h={16} />
-        <TextCenter>
-          {status !== "error" && (
-            <TextLight>
-              <EmojiToOcticon size={16} text={message} />
-            </TextLight>
-          )}
-        </TextCenter>
+      </View>
+      <OnboardingFooter />
+    </View>
+  );
+}
+
+function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
+  return (
+    <View style={styles.onboardingHeaderFooter}>
+      <View style={styles.onboardingBackWrap}>
+        <ButtonSmall onPress={onPrev}>
+          <View style={styles.onboardingBack}>
+            {onPrev && (
+              <>
+                <Octicons
+                  name="chevron-left"
+                  size={20}
+                  color={color.grayDark}
+                />
+                <Text style={styles.onboardingBackText}>Back</Text>
+              </>
+            )}
+            {!onPrev && " "}
+          </View>
+        </ButtonSmall>
       </View>
     </View>
   );
+}
+
+function OnboardingFooter() {
+  /* Ensure header and footer are equal height to correctly center content. */
+  return <View style={styles.onboardingHeaderFooter} />;
 }
 
 function NamePicker({
@@ -589,6 +636,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-around",
+  },
+  onboardingHeaderFooter: {
+    height: 64,
+    marginTop: 48,
+  },
+  onboardingBackWrap: {
+    width: 128,
+    paddingLeft: 16,
+  },
+  onboardingBack: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    height: 32,
+  },
+  onboardingBackText: {
+    ...ss.text.h3,
+    color: color.grayDark,
   },
   introPages: {
     alignItems: "center",
