@@ -27,15 +27,17 @@ import android.os.Build
 import android.content.pm.PackageManager
 import expo.modules.core.arguments.ReadableArguments
 
+data class PendingSign(val promise: Promise, val accountName: String, val hexMessage: String)
+
+// Used only on Android 9 Pie and Android 10 (API level 28 and 29, respectively)
+// Daimo does not support older Android versions. For new versions, see Android30PlusKeyManager.
 class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): KeyManager, ActivityEventListener {
   private val context = _context
   private val moduleRegistry = _moduleRegistry
   private val uiManager = moduleRegistry.getModule(UIManager::class.java)
   private val DEVICE_CREDENTIAL_FALLBACK_CODE = 1001
 
-  private var pendingSignPromise: Promise? = null
-  private var pendingSignAccountName: String? = null
-  private var pendingSignHexMessage: String? = null
+  private var pendingSign: PendingSign? = null
 
   init {
     uiManager.registerActivityEventListener(this)
@@ -84,6 +86,8 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
   }
 
   override fun sign(accountName: String, hexMessage: String, promptCopy: ReadableArguments, promise: Promise) {
+    // Manually request user presence. This asks for PIN or similar.
+    // Sign the transactions only once that succeeds -- see onActivityResult.
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     val intent = keyguardManager.createConfirmDeviceCredentialIntent(
@@ -94,9 +98,7 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
       promise.reject("ERR_AUTH_FAILED", "Authentication failed")
     }
 
-    pendingSignPromise = promise
-    pendingSignAccountName = accountName
-    pendingSignHexMessage = hexMessage
+    pendingSign = PendingSign(promise, accountName, hexMessage)
 
     uiManager.runOnUiQueueThread {
       fragmentActivity!!.startActivityForResult(intent, DEVICE_CREDENTIAL_FALLBACK_CODE)
@@ -114,22 +116,28 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
   }
 
   override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-    if (requestCode == DEVICE_CREDENTIAL_FALLBACK_CODE) {
+    if (requestCode != DEVICE_CREDENTIAL_FALLBACK_CODE) {
+      return
+    }
+    if (pendingSign == null) {
+      return
+    }
+
+    try {
       if (resultCode == Activity.RESULT_OK) {
-        val privateKey = getSigningPrivkey(pendingSignAccountName!!)!!.private
+        val privateKey = getSigningPrivkey(pendingSign!!.accountName)!!.private
         val signature = Signature.getInstance("SHA256withECDSA").run {
           initSign(privateKey)
-          update(pendingSignHexMessage!!.decodeHex())
+          update(pendingSign!!.hexMessage.decodeHex())
           sign()
         }
-        pendingSignAccountName = null
-        pendingSignHexMessage = null
-        pendingSignPromise!!.resolve(signature.toHexString())
+
+        pendingSign!!.promise.resolve(signature.toHexString())
       } else {
-        pendingSignAccountName = null
-        pendingSignHexMessage = null
-        pendingSignPromise!!.reject("ERR_AUTH_FAILED", "Authentication failed")
+        pendingSign!!.promise.reject("ERR_AUTH_FAILED", "Authentication failed")
       }
+    } finally {
+      pendingSign = null
     }
   }
 
