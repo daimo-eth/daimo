@@ -51,7 +51,7 @@ export function useExistingAccount(forceWeakerKeys: boolean) {
           chainGasConstants: {
             maxPriorityFeePerGas: "0",
             maxFeePerGas: "0",
-            paymasterAndData: "0x",
+            estimatedFee: 0,
           },
 
           pushToken: null,

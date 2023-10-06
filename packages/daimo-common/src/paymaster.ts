@@ -1,11 +1,10 @@
-import { Hex } from "viem";
-
 export type ChainGasConstants = {
-  paymasterAndData: Hex;
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
+
+  /* Estimated fee in dollars (2 digits after decimal) */
+  estimatedFee: number;
 };
 
-export const DEFAULT_USEROP_VERIFICATION_GAS_LIMIT = 1500000n;
-export const DEFAULT_USEROP_CALL_GAS_LIMIT = 1000000n;
-export const DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT = 21000n;
+export const DEFAULT_USEROP_VERIFICATION_GAS_LIMIT = 500000n;
+export const DEFAULT_USEROP_CALL_GAS_LIMIT = 300000n;
