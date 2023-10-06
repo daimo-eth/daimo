@@ -130,7 +130,7 @@ Running `npm run dev` in the root directory is equivalent to running it concurre
 ```
 # Alternatively, to run JUST the mobile app.
 cd apps/daimo-mobile
-DAIMO_DOMAIN=daimo.onrender.com DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com npm run dev
+DAIMO_DOMAIN=daimo.xyz DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com npm run dev
 ```
 
 Either way, you get hot reloading.
