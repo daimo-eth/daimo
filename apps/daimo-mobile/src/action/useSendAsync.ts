@@ -32,9 +32,8 @@ export function useSendAsync({
     (keyData) => keyData.pubKey === account.enclavePubKey
   )?.slot;
 
-  // TODO: use history to immediately estimate fees
-  // Async load fee estimation from API to add precision
-  const feeDollars = 0.05;
+  // TODO: Async load fee estimation from API to add precision
+  const feeDollars = account.chainGasConstants.estimatedFee;
   const cost = { feeDollars, totalDollars: dollarsToSend + feeDollars };
 
   const exec = useCallback(async () => {

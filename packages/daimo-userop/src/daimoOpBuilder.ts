@@ -1,12 +1,11 @@
 import {
   ChainGasConstants,
   DEFAULT_USEROP_CALL_GAS_LIMIT,
-  DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT,
   DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
   DaimoAccountCall,
   assert,
 } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
+import { daimoAccountABI, tokenMetadata } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import {
   BundlerJsonRpcProvider,
@@ -65,7 +64,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         sender: instance.address,
         verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
         callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
-        preVerificationGas: DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT,
       })
       .useMiddleware(
         Presets.Middleware.estimateUserOperationGas(instance.provider)
@@ -116,7 +114,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Sets user-op nonce and fee payment metadata. */
   setOpMetadata(opMetadata: DaimoOpMetadata) {
     return this.setNonce(opMetadata.nonce.toHex())
-      .setPaymasterAndData(opMetadata.chainGasConstants.paymasterAndData)
       .setMaxFeePerGas(opMetadata.chainGasConstants.maxFeePerGas)
       .setMaxPriorityFeePerGas(
         opMetadata.chainGasConstants.maxPriorityFeePerGas
@@ -129,12 +126,14 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   }
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {
-    return this.setOpMetadata(opMetadata).setCallData(
-      encodeFunctionData({
-        abi: daimoAccountABI,
-        functionName: "executeBatch",
-        args: [calls],
-      })
-    );
+    return this.setOpMetadata(opMetadata)
+      .setPaymasterAndData(tokenMetadata.paymasterAddress)
+      .setCallData(
+        encodeFunctionData({
+          abi: daimoAccountABI,
+          functionName: "executeBatch",
+          args: [calls],
+        })
+      );
   }
 }

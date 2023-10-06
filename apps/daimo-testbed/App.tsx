@@ -58,11 +58,9 @@ export default function App() {
       {
         nonce,
         chainGasConstants: {
-          // TODO: works for now but we should properly query this rather than hardcode
-          paymasterAndData:
-            "0x13f490FafBb206440F25760A10C21A6220017fFa0000000000000000000000000000000000000000000000000000000000129aa2",
           maxPriorityFeePerGas: "1000000",
           maxFeePerGas: "100000050",
+          estimatedFee: 0.1,
         },
       }
     );
