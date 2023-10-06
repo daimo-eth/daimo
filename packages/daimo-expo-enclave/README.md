@@ -39,7 +39,7 @@ So, all in all, we have a 3x2 tradeoff space to communicate to a user:
 | **None**                                  	| 1           	| 2       	| 4                            	|
 | **BIOMETRIC_STRONG or DEVICE_CREDENTIAL** 	| N/A         	| 3       	| 5                            	|
 
-The numbers indicate the security level of each one (the higher the more secure). Note that the iOS version of the expo-enclave module is either 1 or 5, no in-betweens. Thus, for iOS, communicating these is simple. For Android, ideally, we should communicate both the axis of security to the user independently, which for this module translates to exposing two functions that expose each one (`getHardwareSecurityLevel` and `getBiometricSecurityLevel`).
+The numbers indicate the security level of each one (the higher the more secure). Note that the iOS version of the expo-enclave module is either 1 or 5, no in-betweens. Thus, for iOS, communicating these is simple. For Android, ideally, we should communicate both the axis of security to the user independently, which for this module translates to exposing two functions that expose each one (`getHardwareSecurityLevel`). Note that we do not support no authentication (and enforce the user to set at least a device PIN) so the second axis is always authenticating biometrics or device passwords of some kind.
 
 # API documentation
 

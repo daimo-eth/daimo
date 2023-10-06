@@ -7,17 +7,15 @@ export type HardwareSecurityLevel =
   | "TRUSTED_ENVIRONMENT"
   | "HARDWARE_ENCLAVE";
 
-export type BiometricSecurityLevel = "NONE" | "AVAILABLE";
-
 export type PromptCopy = {
   /**
-   * Message displayed when prompting for biometric authentication,
+   * Message displayed when prompting for authentication,
    * rendered on both iOS and Android devices.
    */
   usageMessage: string;
 
   /**
-   * Title of the biometric prompt, only rendered on Android
+   * Title of the auth prompt, only rendered on Android
    * devices.
    */
   androidTitle: string;
@@ -29,23 +27,6 @@ export type PromptCopy = {
  */
 export async function getHardwareSecurityLevel(): Promise<HardwareSecurityLevel> {
   return ExpoEnclaveModule.getHardwareSecurityLevel();
-}
-
-/**
- * Get key authenticaion biometrics security level.
- * @return BiometricSecurityLevel
- */
-export async function getBiometricSecurityLevel(): Promise<BiometricSecurityLevel> {
-  return ExpoEnclaveModule.getBiometricSecurityLevel();
-}
-
-/**
- * Forcibly use software (non-hardware backed) keys.
- * Old Android devices can be unreliable about secure enclave operations, so we
- * use this to fallback to software keys if usage of the secure enclave fails.
- */
-export async function forceFallbackUsage() {
-  ExpoEnclaveModule.forceFallbackUsage();
 }
 
 /**
@@ -85,7 +66,7 @@ export async function deleteKeyPair(accountName: string): Promise<void> {
  *
  * @param accountName The account to use.
  * @param hexMessage Hex string of the message bytes to sign.
- * @param promptCopy Message to display if prompting for biometrics.
+ * @param promptCopy Message to display when prompting for auth.
  * @return Hex string of DER representation of the signature
  */
 export async function sign(

@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const keySlot = account?.accountKeys.find(
     (keyData) => keyData.pubKey === account?.enclavePubKey
   )?.slot;
-  useWarmCache(account?.enclaveKeyInfo, account?.address, keySlot);
+  useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
 
   const nav = useNav();
   const setIsHistoryOpened = useCallback((isOpened: boolean) => {

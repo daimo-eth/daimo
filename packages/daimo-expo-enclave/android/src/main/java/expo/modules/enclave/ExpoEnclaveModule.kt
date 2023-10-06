@@ -27,7 +27,6 @@ import expo.modules.kotlin.types.Enumerable
 // design of this module is modeled after those two packages.
 class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
   lateinit var moduleRegistry: ModuleRegistry
-  var forcedFallbackKeyManager: Boolean = false
   lateinit var keyManager: KeyManager
 
   override fun onCreate(_moduleRegistry: ModuleRegistry) {
@@ -69,45 +68,16 @@ class ExpoEnclaveModule(context: Context) : ExportedModule(context) {
     }
   }
 
-  internal fun hasBiometrics(): Boolean {
-    val biometricManager = BiometricManager.from(context)
-    return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
-  }
-
   @ExpoMethod
   fun getHardwareSecurityLevel(promise: Promise) {
-    if (forcedFallbackKeyManager) {
-      promise.resolve(HardwareSecurityLevel.SOFTWARE.value)
-      return
-    }
-
-    if (hasStrongbox()) {
+    if (hasStrongbox() && keyManager is Android30PlusKeyManager) {
+      // Strongbox is only used by 30+ key manager
       promise.resolve(HardwareSecurityLevel.HARDWARE_ENCLAVE.value)
     } else if (hasTEE()) {
       promise.resolve(HardwareSecurityLevel.TRUSTED_ENVIRONMENT.value)
     } else {
       promise.resolve(HardwareSecurityLevel.SOFTWARE.value)
     }
-  }
-
-  @ExpoMethod
-  fun getBiometricSecurityLevel(promise: Promise) {
-    if (forcedFallbackKeyManager) {
-      promise.resolve(BiometricSecurityLevel.NONE.value)
-      return
-    }
-
-    if (hasBiometrics()) {
-      promise.resolve(BiometricSecurityLevel.AVAILABLE.value)
-    } else {
-      promise.resolve(BiometricSecurityLevel.NONE.value)
-    }
-  }
-
-  @ExpoMethod
-  fun forceFallbackUsage(promise: Promise) {
-    forcedFallbackKeyManager = true
-    keyManager = FallbackKeyManager(context, moduleRegistry)
   }
 
   @ExpoMethod

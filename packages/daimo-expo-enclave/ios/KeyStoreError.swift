@@ -22,6 +22,8 @@ struct KeyStoreError: Error, CustomStringConvertible {
     }
 }
 
+typealias SecurityError = Unmanaged<CFError>
+
 extension OSStatus {
     /// A human readable message for the status.
     var message: String {
