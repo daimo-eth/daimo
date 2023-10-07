@@ -39,7 +39,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce": AddrLabel.PaymentLink,
 };
 specialAddrLabels[ephemeralNotesAddress] = AddrLabel.PaymentLink;
-specialAddrLabels[tokenMetadata.address] = AddrLabel.Paymaster;
+specialAddrLabels[tokenMetadata.paymasterAddress] = AddrLabel.Paymaster;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
