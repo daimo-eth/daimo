@@ -31,6 +31,8 @@ just outright bugs.
 - [ ] Cancel Payment Link
 - [ ] Tap Payment Link, ensure it opens in-app
 - [ ] Create Request, open in browser
+- [ ] Add device + Use existing onboarding (test transactions work on both devices)
+- [ ] Remove device
 - [ ] Open History
 - [ ] Tap transaction, view in block explorer
 - [ ] Account screen: Send Debug Log
@@ -47,6 +49,8 @@ just outright bugs.
 - [ ] Create Payment Link, open in browser
 - [ ] Cancel Payment Link
 - [ ] Tap Payment Link, ensure it opens in-app
+- [ ] Add device + Use existing onboarding (test transactions work on both devices)
+- [ ] Remove device
 - [ ] Create Request, open in browser
 - [ ] Open History
 - [ ] Tap transaction, view in block explorer
