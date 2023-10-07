@@ -5,6 +5,16 @@ interface LogAction {
   error?: string;
 }
 
+export class NamedError extends Error {
+  constructor(message: string, public name: string) {
+    super(message);
+
+    // Set the prototype explicitly.
+    // https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, NamedError.prototype);
+  }
+}
+
 /**
  * Logging and telemetry. We'll use this in two ways:
  * - High-level, anonymized data (perf and reliability stats) telemetered.
@@ -20,7 +30,7 @@ export class Log {
     } catch (e: any) {
       const elapsedMs = Date.now() - startMs;
       this.log({ type, startMs, elapsedMs, error: getErrMessage(e) });
-      throw e;
+      throw new NamedError(getErrMessage(e), type);
     }
   }
 

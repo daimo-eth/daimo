@@ -5,7 +5,7 @@ import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { Log } from "../logic/log";
+import { Log, NamedError } from "../logic/log";
 import { useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
@@ -126,8 +126,11 @@ async function sendAsync(
     return handle;
   } catch (e: any) {
     console.error(e);
-    if (keySlot === undefined) setAS("error", "Device removed from account");
-    else setAS("error", "Error sending transaction");
+    if (keySlot === undefined) {
+      setAS("error", "Device removed from account");
+    } else if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+      setAS("error", e.message);
+    } else setAS("error", "Error sending transaction");
     throw e;
   }
 }

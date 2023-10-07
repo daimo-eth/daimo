@@ -122,7 +122,7 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
       .setTitle(promptCopy.getString("androidTitle"))
       .setSubtitle(promptCopy.getString("usageMessage"))
-      .setNegativeButtonText("Cancel")
+      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
       .build()
     
     val privateKey = getSigningPrivkey(accountName)!!.private

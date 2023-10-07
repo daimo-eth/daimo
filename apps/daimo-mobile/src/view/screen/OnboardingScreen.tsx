@@ -24,6 +24,7 @@ import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { requestEnclaveSignature } from "../../action/useSendAsync";
 import { createAddDeviceString } from "../../logic/device";
+import { NamedError } from "../../logic/log";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
@@ -271,7 +272,12 @@ function SetupKey({
       onNext();
     } catch (e: any) {
       console.error(e);
-      setError(e);
+      if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+        setError(e.message);
+      } else {
+        setError("Unknown error");
+      }
+
       // Assume user doesn't have proper auth set up.
       // TODO: In future, catch different errors differently and
       // show a retry button in case user intentionally cancelled auth.
