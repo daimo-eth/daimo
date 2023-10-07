@@ -278,9 +278,8 @@ function SetupKey({
         setError("Unknown error");
       }
 
-      // Assume user doesn't have proper auth set up.
-      // TODO: In future, catch different errors differently and
-      // show a retry button in case user intentionally cancelled auth.
+      // Auth failed. Possible user doesn't have proper auth set up.
+      // TODO: In future, catch different errors differently.
       setAskToSetPin(true);
     }
     setLoading(false);
@@ -303,8 +302,8 @@ function SetupKey({
             )}
             {askToSetPin && (
               <TextBody>
-                Your device does not appear to have a secure lock screen (PIN or
-                biometrics) set up. Please set one up and try again.
+                Authentication failed. Does your phone have a secure lock screen
+                set up? You'll need one to secure your Daimo account.
               </TextBody>
             )}
           </TextCenter>
