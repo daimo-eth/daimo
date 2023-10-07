@@ -9,6 +9,7 @@ import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.Signature
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 import androidx.fragment.app.FragmentActivity
@@ -88,6 +89,12 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
   }
 
   override fun sign(accountName: String, hexMessage: String, promptCopy: ReadableArguments, promise: Promise) {
+    val biometricManager = BiometricManager.from(context)
+    if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
+      promise.reject("ERR_DEVICE_INSECURE", "Pin not set")
+      return
+    }
+    
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val failedAttempts = AtomicInteger(0)
     val biometricPrompt = BiometricPrompt(
@@ -115,7 +122,7 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
       .setTitle(promptCopy.getString("androidTitle"))
       .setSubtitle(promptCopy.getString("usageMessage"))
-      .setNegativeButtonText("Cancel")
+      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
       .build()
     
     val privateKey = getSigningPrivkey(accountName)!!.private

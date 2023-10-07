@@ -7,7 +7,7 @@ public class ExpoEnclaveModule: Module {
     return TARGET_OS_SIMULATOR == 0 && SecureEnclave.isAvailable
   }
 
-  var keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
+  let keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
 
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
@@ -24,18 +24,6 @@ public class ExpoEnclaveModule: Module {
       } else {
         return HardwareSecurityLevel.SOFTWARE.rawValue
       }
-    }
-
-    AsyncFunction("getBiometricSecurityLevel") { () -> String in
-      if (keyManager is SecureEnclaveKeyManager) {
-        return BiometricSecurityLevel.AVAILABLE.rawValue
-      } else {
-        return BiometricSecurityLevel.NONE.rawValue
-      }
-    }
-
-    AsyncFunction("forceFallbackUsage") { () in
-      keyManager = FallbackKeyManager()
     }
 
     AsyncFunction("fetchPublicKey") { (accountName: String) throws -> String? in
@@ -64,11 +52,6 @@ enum HardwareSecurityLevel: String, Enumerable {
   case SOFTWARE
   case TRUSTED_ENVIRONMENT
   case HARDWARE_ENCLAVE
-}
-
-enum BiometricSecurityLevel: String, Enumerable {
-  case NONE
-  case AVAILABLE
 }
 
 internal struct PromptCopy: Record {

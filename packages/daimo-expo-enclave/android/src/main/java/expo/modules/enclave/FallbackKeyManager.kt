@@ -90,12 +90,19 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
     // Sign the transactions only once that succeeds -- see onActivityResult.
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    
+    if (!keyguardManager.isDeviceSecure) {
+      promise.reject("ERR_DEVICE_INSECURE", "Pin not set")
+      return
+    }
+    
     val intent = keyguardManager.createConfirmDeviceCredentialIntent(
       promptCopy.getString("androidTitle"),
       promptCopy.getString("usageMessage"))
 
     if (intent == null) {
-      promise.reject("ERR_AUTH_FAILED", "Authentication failed")
+      promise.reject("ERR_INTENT_AUTHENTICATION_ERRORED", "Intent creation failed")
+      return
     }
 
     pendingSign = PendingSign(promise, accountName, hexMessage)
@@ -134,7 +141,7 @@ class FallbackKeyManager(_context: Context, _moduleRegistry: ModuleRegistry): Ke
 
         pendingSign!!.promise.resolve(signature.toHexString())
       } else {
-        pendingSign!!.promise.reject("ERR_AUTH_FAILED", "Authentication failed")
+        pendingSign!!.promise.reject("ERR_INTENT_AUTHENTICATION_FAILED", "Authentication failed")
       }
     } finally {
       pendingSign = null

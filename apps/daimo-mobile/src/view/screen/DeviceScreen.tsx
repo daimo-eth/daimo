@@ -63,7 +63,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   });
 
   const removeDevice = useCallback(() => {
-    const { enclaveKeyInfo, enclavePubKey } = account;
+    const { enclaveKeyName, enclavePubKey } = account;
 
     Alert.alert(
       "Remove " + deviceName + "\n",
@@ -86,10 +86,8 @@ export function DeviceScreen({ route, navigation }: Props) {
       exec();
 
       if (devicePubkey === enclavePubKey) {
-        console.log(
-          `[USER] deleting account; deleting key ${enclaveKeyInfo.name}`
-        );
-        await deleteEnclaveKey(enclaveKeyInfo.name);
+        console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
+        await deleteEnclaveKey(enclaveKeyName);
 
         setAccount(null);
         nav.navigate("Home");

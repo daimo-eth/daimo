@@ -24,6 +24,7 @@ import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { requestEnclaveSignature } from "../../action/useSendAsync";
 import { createAddDeviceString } from "../../logic/device";
+import { NamedError } from "../../logic/log";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
@@ -99,24 +100,17 @@ export default function OnboardingScreen({
 
   const [name, setName] = useState("");
 
-  const [forceWeakerKeys, setForceWeakerKeys] = useState(false);
-
   const {
     exec: createExec,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name, forceWeakerKeys);
+  } = useCreateAccount(name);
 
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
-        <TryEnclave
-          onNext={next}
-          createStatus={createStatus}
-          forceWeakerKeys={forceWeakerKeys}
-          setForceWeakerKeys={setForceWeakerKeys}
-        />
+        <SetupKey onNext={next} createStatus={createStatus} />
       )}
       {page === "create" && (
         <CreateAccountPage
@@ -129,13 +123,7 @@ export default function OnboardingScreen({
           message={createMessage}
         />
       )}
-      {page === "existing" && (
-        <UseExistingPage
-          forceWeakerKeys={forceWeakerKeys}
-          onNext={next}
-          onPrev={prev}
-        />
-      )}
+      {page === "existing" && <UseExistingPage onNext={next} onPrev={prev} />}
       {page === "new-allow-notifications" && (
         <AllowNotifications onNext={next} />
       )}
@@ -260,36 +248,22 @@ function PageBubble({ count, index }: { count: number; index: number }) {
   return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
 }
 
-function TryEnclave({
+function SetupKey({
   onNext,
   createStatus,
-  forceWeakerKeys,
-  setForceWeakerKeys,
 }: {
   onNext: () => void;
   createStatus: ActStatus;
-  forceWeakerKeys: boolean;
-  setForceWeakerKeys: (force: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [askWeak, setAskWeak] = useState(false);
+  const [askToSetPin, setAskToSetPin] = useState(false);
   const [error, setError] = useState("");
 
-  // If we've failed in loading or creating the key already without force even
-  // before getting to this screen, force weaker keys now
-  useEffect(() => {
-    if (createStatus === "error" && !forceWeakerKeys) setForceWeakerKeys(true);
-  }, [createStatus]);
-
-  const trySignatureGeneration = async (tryWeaker: boolean) => {
+  const trySignatureGeneration = async () => {
     setLoading(true);
-    setForceWeakerKeys(tryWeaker);
     try {
       await requestEnclaveSignature(
-        {
-          name: defaultEnclaveKeyName,
-          forceWeakerKeys: tryWeaker,
-        },
+        defaultEnclaveKeyName,
         "dead",
         "Authorize key creation"
       );
@@ -298,16 +272,16 @@ function TryEnclave({
       onNext();
     } catch (e: any) {
       console.error(e);
-      if (!tryWeaker) {
-        console.error(
-          `[ONBOARDING] enclave signature trial error, asking to downgrade to weaker keys`
-        );
-        setAskWeak(true);
+      if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+        setError(e.message);
       } else {
-        const err = `[ONBOARDING] Failed with weaker keys too, giving up`;
-        setError(err);
-        console.error(err);
+        setError("Unknown error");
       }
+
+      // Assume user doesn't have proper auth set up.
+      // TODO: In future, catch different errors differently and
+      // show a retry button in case user intentionally cancelled auth.
+      setAskToSetPin(true);
     }
     setLoading(false);
   };
@@ -316,21 +290,21 @@ function TryEnclave({
     <View style={styles.onboardingScreen}>
       <View style={styles.createAccountPage}>
         <TextH1>
-          <Octicons name={askWeak ? "unlock" : "lock"} size={40} />
+          <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
         </TextH1>
         <Spacer h={32} />
         <View style={ss.container.padH16}>
           <TextCenter>
-            {!askWeak && (
+            {!askToSetPin && (
               <TextBody>
                 Create a cryptographic key on-device that will authorize your
                 account. This makes your money yours alone.
               </TextBody>
             )}
-            {askWeak && (
+            {askToSetPin && (
               <TextBody>
-                Failed to create hardware authenticated key. This can happen on
-                older Android devices. Use regular key?
+                Your device does not appear to have a secure lock screen (PIN or
+                biometrics) set up. Please set one up and try again.
               </TextBody>
             )}
           </TextCenter>
@@ -339,38 +313,12 @@ function TryEnclave({
         {(loading || createStatus === "loading") && (
           <ActivityIndicator size="large" />
         )}
-        {!loading && !askWeak && createStatus !== "loading" && (
+        {!loading && createStatus !== "loading" && (
           <ButtonBig
             type="primary"
-            title="Generate"
-            onPress={() => {
-              trySignatureGeneration(false);
-            }}
+            title={askToSetPin ? "Try again" : "Generate"}
+            onPress={trySignatureGeneration}
           />
-        )}
-        {askWeak && (
-          <>
-            <Spacer h={16} />
-            <ButtonBig
-              type="primary"
-              title="Use regular key"
-              onPress={() => {
-                trySignatureGeneration(true);
-              }}
-            />
-          </>
-        )}
-        {askWeak && (
-          <>
-            <Spacer h={16} />
-            <ButtonBig
-              type="subtle"
-              title="Try again"
-              onPress={() => {
-                trySignatureGeneration(false);
-              }}
-            />
-          </>
         )}
         {error && (
           <>
@@ -483,15 +431,13 @@ function CreateAccountPage({
 }
 
 function UseExistingPage({
-  forceWeakerKeys,
   onNext,
   onPrev,
 }: {
-  forceWeakerKeys: boolean;
   onNext: () => void;
   onPrev: () => void;
 }) {
-  const { status, message, pubKeyHex } = useExistingAccount(forceWeakerKeys);
+  const { status, message, pubKeyHex } = useExistingAccount();
 
   useEffect(() => {
     if (status === "success") onNext();

@@ -4,7 +4,6 @@ import {
   TransferOpEvent,
   TrackedRequest,
   KeyData,
-  EnclaveKeyInfo,
   ChainGasConstants,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
@@ -22,8 +21,8 @@ export const defaultEnclaveKeyName = "daimo-11";
 
 /** Account data stored on device. */
 export type Account = {
-  /** Local device signing key info */
-  enclaveKeyInfo: EnclaveKeyInfo;
+  /** Local device signing key name */
+  enclaveKeyName: string;
   /** Local device signing DER pubkey */
   enclavePubKey: Hex;
   /** Daimo name, registered onchain */
@@ -59,7 +58,7 @@ export type Account = {
 interface AccountV7 extends StoredModel {
   storageVersion: 7;
 
-  enclaveKeyInfo: EnclaveKeyInfo;
+  enclaveKeyName: string;
   enclavePubKey: Hex;
   name: string;
   address: string;
@@ -161,7 +160,7 @@ export function parseAccount(accountJSON?: string): Account | null {
   const a = model as AccountV7;
 
   return {
-    enclaveKeyInfo: a.enclaveKeyInfo,
+    enclaveKeyName: a.enclaveKeyName,
     enclavePubKey: a.enclavePubKey,
     name: a.name,
     address: getAddress(a.address),
@@ -188,7 +187,7 @@ export function serializeAccount(account: Account | null): string {
   const model: AccountV7 = {
     storageVersion: 7,
 
-    enclaveKeyInfo: account.enclaveKeyInfo,
+    enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
     name: account.name,
     address: account.address,

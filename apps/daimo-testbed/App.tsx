@@ -16,8 +16,6 @@ export default function App() {
   const [verification, setVerification] = useState<boolean>(false);
   const [hardwareSecurityLevel, setHardwareSecurityLevel] =
     useState<ExpoEnclave.HardwareSecurityLevel>("SOFTWARE");
-  const [biometricSecurityLevel, setBiometricSecurityLevel] =
-    useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
   const [opHash, setOpHash] = useState<string>("");
 
   const promptCopy: ExpoEnclave.PromptCopy = {
@@ -27,7 +25,6 @@ export default function App() {
 
   (async () => {
     setHardwareSecurityLevel(await ExpoEnclave.getHardwareSecurityLevel());
-    setBiometricSecurityLevel(await ExpoEnclave.getBiometricSecurityLevel());
   })();
 
   const testTx = async () => {
@@ -69,10 +66,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text>
-        hardware security level: {hardwareSecurityLevel}, biometrics security
-        level: {biometricSecurityLevel}
-      </Text>
+      <Text>hardware security level: {hardwareSecurityLevel}</Text>
       <TextInput onChangeText={setAccount} value={account} />
       <Button
         title="Create"

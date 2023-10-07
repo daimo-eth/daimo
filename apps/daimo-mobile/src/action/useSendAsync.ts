@@ -1,11 +1,11 @@
-import { EAccount, EnclaveKeyInfo, OpEvent } from "@daimo/common";
+import { EAccount, OpEvent } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoOpSender, SigningCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
-import { Log } from "../logic/log";
+import { Log, NamedError } from "../logic/log";
 import { useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
@@ -39,7 +39,7 @@ export function useSendAsync({
   const exec = useCallback(async () => {
     const handle = await sendAsync(
       setAS,
-      account.enclaveKeyInfo,
+      account.enclaveKeyName,
       account.address,
       keySlot,
       sendFn
@@ -56,27 +56,27 @@ export function useSendAsync({
 
       setAccount(account);
     }
-  }, [account.enclaveKeyInfo, keySlot, sendFn]);
+  }, [account.enclaveKeyName, keySlot, sendFn]);
 
   return { ...as, exec, cost };
 }
 
 /** Warm the DaimoOpSender cache. */
 export function useWarmCache(
-  enclaveKeyInfo?: EnclaveKeyInfo,
+  enclaveKeyName?: string,
   address?: Address,
   keySlot?: number
 ) {
   useEffect(() => {
-    if (!enclaveKeyInfo || !address || !keySlot) return;
-    loadOpSender(enclaveKeyInfo, address, keySlot);
-  }, [enclaveKeyInfo?.name, enclaveKeyInfo?.forceWeakerKeys, address, keySlot]);
+    if (!enclaveKeyName || !address || !keySlot) return;
+    loadOpSender(enclaveKeyName, address, keySlot);
+  }, [enclaveKeyName, address, keySlot]);
 }
 
 const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 
 function loadOpSender(
-  enclaveKeyInfo: EnclaveKeyInfo,
+  enclaveKeyName: string,
   address: Address,
   keySlot: number
 ) {
@@ -85,11 +85,11 @@ function loadOpSender(
 
   promise = (async () => {
     console.info(
-      `[SEND] loading DaimoOpSender ${address} ${enclaveKeyInfo.name} ${keySlot}`
+      `[SEND] loading DaimoOpSender ${address} ${enclaveKeyName} ${keySlot}`
     );
     const signer: SigningCallback = async (messageHex: string) => {
       const derSig = await requestEnclaveSignature(
-        enclaveKeyInfo,
+        enclaveKeyName,
         messageHex,
         "Authorize transaction"
       );
@@ -109,7 +109,7 @@ function loadOpSender(
 
 async function sendAsync(
   setAS: SetActStatus,
-  enclaveKeyInfo: EnclaveKeyInfo,
+  enclaveKeyName: string,
   address: Address,
   keySlot: number | undefined,
   sendFn: SendOpFn
@@ -117,7 +117,7 @@ async function sendAsync(
   try {
     if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const opSender = await loadOpSender(enclaveKeyInfo, address, keySlot);
+    const opSender = await loadOpSender(enclaveKeyName, address, keySlot);
 
     setAS("loading", "Signing...");
     const handle = await sendFn(opSender);
@@ -126,14 +126,19 @@ async function sendAsync(
     return handle;
   } catch (e: any) {
     console.error(e);
-    if (keySlot === undefined) setAS("error", "Device removed from account");
-    else setAS("error", "Error sending transaction");
+    if (keySlot === undefined) {
+      setAS("error", "Device removed from account");
+    } else if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+      setAS("error", e.message);
+    } else setAS("error", "Error sending transaction");
     throw e;
   }
 }
 
+// TODO: wrap in try / catch and properly show user
+// warnings or errors if auth is disabled by them.
 export async function requestEnclaveSignature(
-  enclaveKeyInfo: EnclaveKeyInfo,
+  enclaveKeyName: string,
   hexMessage: string,
   usageMessage: string
 ) {
@@ -142,16 +147,9 @@ export async function requestEnclaveSignature(
     androidTitle: "Daimo",
   };
 
-  if (enclaveKeyInfo.forceWeakerKeys) {
-    await Log.promise(
-      "ExpoEnclaveForceFallbackUsage",
-      ExpoEnclave.forceFallbackUsage()
-    );
-  }
-
   const signature = await Log.promise(
     "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyInfo.name, hexMessage, promptCopy)
+    ExpoEnclave.sign(enclaveKeyName, hexMessage, promptCopy)
   );
 
   return signature;
