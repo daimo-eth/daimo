@@ -41,11 +41,12 @@ export async function loadEnclaveKey(enclaveKeyName: string) {
 
 /** Deletes a key from the enclave. */
 export async function deleteEnclaveKey(enclaveKeyName: string) {
+  console.log(`[ENCLAVE] deleting key ${enclaveKeyName}`);
   await Log.promise(
     "ExpoEnclave.deleteKeyPair",
     ExpoEnclave.deleteKeyPair(enclaveKeyName)
   );
-  console.log(`[ENCLAVE] deleted ${enclaveKeyName}`);
+  console.log(`[ENCLAVE] deleted key ${enclaveKeyName}`);
 }
 
 /** Get hardware security level */

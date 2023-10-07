@@ -6,9 +6,9 @@ import * as Notifications from "expo-notifications";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -87,7 +87,7 @@ export default function OnboardingScreen({
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
-        <SetupKey onNext={next} createStatus={createStatus} />
+        <SetupKey onNext={next} onPrev={prev} createStatus={createStatus} />
       )}
       {page === "create" && (
         <CreateAccountPage
@@ -260,9 +260,11 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 
 function SetupKey({
   onNext,
+  onPrev,
   createStatus,
 }: {
   onNext: () => void;
+  onPrev?: () => void;
   createStatus: ActStatus;
 }) {
   const [loading, setLoading] = useState(false);
@@ -275,7 +277,7 @@ function SetupKey({
       await requestEnclaveSignature(
         defaultEnclaveKeyName,
         "dead",
-        "Authorize key creation"
+        "Create account"
       );
 
       console.log(`[ONBOARDING] enclave signature trial success`);
@@ -296,48 +298,52 @@ function SetupKey({
   };
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
-        <TextH1>
-          <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
-        </TextH1>
-        <Spacer h={32} />
-        <View style={ss.container.padH16}>
-          <TextCenter>
-            {!askToSetPin && (
-              <TextBody>
-                Create a cryptographic key on-device that will authorize your
-                account. This makes your money yours alone.
-              </TextBody>
-            )}
-            {askToSetPin && (
-              <TextBody>
-                Authentication failed. Does your phone have a secure lock screen
-                set up? You'll need one to secure your Daimo account.
-              </TextBody>
-            )}
-          </TextCenter>
-        </View>
-        <Spacer h={32} />
-        {(loading || createStatus === "loading") && (
-          <ActivityIndicator size="large" />
-        )}
-        {!loading && createStatus !== "loading" && (
-          <ButtonBig
-            type="primary"
-            title={askToSetPin ? "Try again" : "Generate"}
-            onPress={trySignatureGeneration}
-          />
-        )}
-        {error && (
-          <>
-            <Spacer h={16} />
+    <View>
+      <OnboardingHeader onPrev={onPrev} />
+      <View style={styles.onboardingScreen}>
+        <View style={styles.createAccountPage}>
+          <TextH1>
+            <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
+          </TextH1>
+          <Spacer h={32} />
+          <View style={ss.container.padH16}>
             <TextCenter>
-              <TextError>{error}</TextError>
+              {!askToSetPin && (
+                <TextBody>
+                  Generate your Daimo account. Your account is stored on your
+                  device, secured by cryptography.
+                </TextBody>
+              )}
+              {askToSetPin && (
+                <TextBody>
+                  Authentication failed. Does your phone have a secure lock
+                  screen set up? You'll need one to secure your Daimo account.
+                </TextBody>
+              )}
             </TextCenter>
-          </>
-        )}
+          </View>
+          <Spacer h={32} />
+          {(loading || createStatus === "loading") && (
+            <ActivityIndicator size="large" />
+          )}
+          {!loading && createStatus !== "loading" && (
+            <ButtonBig
+              type="primary"
+              title={askToSetPin ? "Try again" : "Generate"}
+              onPress={trySignatureGeneration}
+            />
+          )}
+          {error && (
+            <>
+              <Spacer h={16} />
+              <TextCenter>
+                <TextError>{error}</TextError>
+              </TextCenter>
+            </>
+          )}
+        </View>
       </View>
+      <OnboardingFooter />
     </View>
   );
 }
@@ -410,36 +416,34 @@ function CreateAccountPage({
   }, [exec]);
 
   return (
-    <KeyboardAvoidingView behavior="padding">
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View>
-          <OnboardingHeader onPrev={onPrev} />
-          <View style={styles.onboardingScreen}>
-            <View style={styles.createAccountPage}>
-              <TextH1>Welcome</TextH1>
-              <View style={styles.namePickerWrap}>
-                {status === "idle" && (
-                  <NamePicker
-                    name={name}
-                    onChange={setName}
-                    onChoose={createAccount}
-                  />
-                )}
-              </View>
-              <TextCenter>
-                {status === "error" && <TextError>{message}</TextError>}
-                {status !== "error" && (
-                  <TextLight>
-                    <EmojiToOcticon size={16} text={message} />
-                  </TextLight>
-                )}
-              </TextCenter>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View>
+        <OnboardingHeader onPrev={onPrev} />
+        <View style={styles.onboardingScreen}>
+          <View style={styles.createAccountPage}>
+            <TextH1>Welcome</TextH1>
+            <View style={styles.namePickerWrap}>
+              {status === "idle" && (
+                <NamePicker
+                  name={name}
+                  onChange={setName}
+                  onChoose={createAccount}
+                />
+              )}
             </View>
+            <TextCenter>
+              {status === "error" && <TextError>{message}</TextError>}
+              {status !== "error" && (
+                <TextLight>
+                  <EmojiToOcticon size={16} text={message} />
+                </TextLight>
+              )}
+            </TextCenter>
           </View>
-          <OnboardingFooter />
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        <OnboardingFooter />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -496,6 +500,17 @@ function UseExistingPage({
 }
 
 function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
+  /* On Android, listen for the native back button. */
+  useEffect(() => {
+    if (!onPrev) return;
+    const onBack = () => {
+      onPrev();
+      return true;
+    };
+    BackHandler.addEventListener("hardwareBackPress", onBack);
+    return () => BackHandler.removeEventListener("hardwareBackPress", onBack);
+  }, [onPrev]);
+
   return (
     <View style={styles.onboardingHeaderFooter}>
       <View style={styles.onboardingBackWrap}>

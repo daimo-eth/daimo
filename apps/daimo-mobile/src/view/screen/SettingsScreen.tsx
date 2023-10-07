@@ -73,7 +73,7 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.scrollWrap}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={4} />
         <View style={ss.container.padH16}>
@@ -265,6 +265,14 @@ function KV({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
+  scrollWrap: {
+    flex: 1,
+    backgroundColor: color.white,
+  },
+  scrollContainer: {
+    padding: 16,
+    alignItems: "stretch",
+  },
   callout: {
     backgroundColor: color.grayLight,
     padding: 16,
@@ -281,10 +289,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  scrollContainer: {
-    padding: 16,
-    backgroundColor: color.white,
-    alignItems: "stretch",
   },
 });
