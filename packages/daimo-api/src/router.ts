@@ -1,5 +1,6 @@
 import {
   DaimoAccountCall,
+  DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
   dollarsToAmount,
@@ -159,6 +160,21 @@ export function createRouter(
 
           case "note": {
             const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
+            if (ret == null) {
+              const sender = await nameReg.getEAccountFromStr(
+                link.previewSender
+              );
+              if (sender == null) {
+                throw new Error(`Note sender not found: ${link.previewSender}`);
+              }
+              const pending: DaimoNoteStatus = {
+                status: "pending",
+                link,
+                sender,
+                dollars: link.previewDollars,
+              };
+              return pending;
+            }
             return ret;
           }
 

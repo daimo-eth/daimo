@@ -36,17 +36,21 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+    "https://example.com/link/note/foo/1.23/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
     {
       type: "note",
+      previewSender: "foo",
+      previewDollars: "1.23",
       ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
       ephemeralPrivateKey: undefined,
     },
   ],
   [
-    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x1234",
+    "https://example.com/link/note/bar.eth/4.20/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x1234",
     {
       type: "note",
+      previewSender: "bar.eth",
+      previewDollars: "4.20",
       ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
       ephemeralPrivateKey: "0x1234",
     },
@@ -122,4 +126,17 @@ test("DaimoLink normalization", () => {
     const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);
     assert.strictEqual(roundtrip, correct);
   }
+});
+
+test("DaimoLink note backcompat", () => {
+  const oldUrl =
+    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x1234";
+  const link = parseDaimoLink(oldUrl)!;
+  assert.deepStrictEqual(link, {
+    type: "note",
+    previewSender: "unknown",
+    previewDollars: "0.00",
+    ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+    ephemeralPrivateKey: "0x1234",
+  });
 });

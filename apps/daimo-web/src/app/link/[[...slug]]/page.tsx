@@ -110,17 +110,17 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     } else if (link.type === "account") {
       return {
         title: `${link.account}`,
-        description: "Couldn't load account name",
+        description: "Couldn't load account",
       };
     } else if (link.type === "request") {
       return {
-        title: `Request for $${link.dollars}`,
+        title: `${link.recipient} is requesting $${link.dollars}`,
         description: "Couldn't load request status",
       };
     } else {
       assert(link.type === "note");
       return {
-        title: `Payment ${getAccountName({ addr: link.ephemeralOwner })}`,
+        title: `${link.previewSender} sent ${link.previewDollars}`,
         description: "Couldn't load Payment Link status",
       };
     }
@@ -155,9 +155,10 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     case "note": {
       const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
       switch (status) {
-        case "pending": {
+        case "pending":
+        case "confirmed": {
           return {
-            title: `${getAccountName(sender)} sent you $${dollars}`,
+            title: `${getAccountName(sender)} sent $${dollars}`,
             description: `Claim on Daimo`,
             walletAction: true,
           };
