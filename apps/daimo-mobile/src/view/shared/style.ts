@@ -1,21 +1,23 @@
 import { Platform, StyleSheet, TextStyle } from "react-native";
 
+/** Match daimo-web tailwind config. Same name = refers to the same color. */
 export const color = {
   primary: "#007aff",
-  primaryLight: "#aaccff",
+  primaryBgLight: "#aaccff",
   danger: "#f35369",
   success: "#4cd964",
-  successDark: "#090",
-  black: "#000",
-  grayDark: "#222",
-  gray: "#668",
-  grayLight: "#eef0f4",
-  white: "#fff",
+  successDark: "#009900",
+  white: "#ffffff",
+  ivoryDark: "#f2f2f2",
+  grayLight: "#e2e2e2",
+  grayMid: "#717171",
+  grayDark: "#444",
+  midnight: "#262626",
 };
 
 const textBase: TextStyle = {
   fontVariant: ["tabular-nums"],
-  color: color.black,
+  color: color.midnight,
 };
 
 const activeAlpha = "aa";
@@ -31,7 +33,7 @@ export const touchHighlightUnderlay = {
     underlayColor: color.success + activeAlpha,
   },
   subtle: {
-    underlayColor: color.primaryLight + activeAlpha,
+    underlayColor: color.primaryBgLight + activeAlpha,
   },
 };
 
@@ -51,8 +53,6 @@ export const ss = {
     },
     fullWidthScroll: {
       ...styleFullWidth,
-      paddingBottom: 0,
-      paddingTop: 48,
     },
     fullWidthModal: {
       ...styleFullWidth,
@@ -100,11 +100,11 @@ export const ss = {
       fontSize: 16,
       lineHeight: 24,
     },
-    small: {
+    light: {
       ...textBase,
       fontSize: 16,
       lineHeight: 20,
-      color: color.gray,
+      color: color.grayMid,
     },
     error: {
       ...textBase,

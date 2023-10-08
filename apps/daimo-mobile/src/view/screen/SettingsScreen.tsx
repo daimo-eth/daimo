@@ -273,11 +273,6 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "stretch",
   },
-  callout: {
-    backgroundColor: color.grayLight,
-    padding: 16,
-    borderRadius: 24,
-  },
   keyValueList: {
     ...ss.container.padH16,
     flex: 1,

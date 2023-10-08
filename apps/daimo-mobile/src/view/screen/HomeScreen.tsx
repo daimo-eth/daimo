@@ -1,6 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback } from "react";
 import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HistoryList, HistoryScreen } from "./HistoryScreen";
 import { useWarmCache } from "../../action/useSendAsync";
@@ -35,7 +36,7 @@ export default function HomeScreen() {
   if (account == null) return null;
 
   return (
-    <View style={ss.container.fullWidthScroll}>
+    <SafeAreaView style={ss.container.fullWidthScroll}>
       <Header />
 
       <View style={styles.amountAndButtonsContainer}>
@@ -53,9 +54,9 @@ export default function HomeScreen() {
         onShowFull={() => setIsHistoryOpened(true)}
         animation="spring"
         extraMarginTop={0}
-        swipeHeight={256}
+        swipeHeight={192}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: 400,
+    height: screenDimensions.height - 256,
   },
   buttonRow: {
     flexDirection: "row",

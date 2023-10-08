@@ -21,7 +21,7 @@ export function TextBody(props: TextProps) {
 }
 
 export function TextLight(props: TextProps) {
-  return <Text {...props} style={ss.text.small} />;
+  return <Text {...props} style={ss.text.light} />;
 }
 
 export function TextBold(props: TextProps) {

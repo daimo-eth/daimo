@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   addressButton: {
     borderRadius: 8,
-    backgroundColor: color.grayLight,
+    backgroundColor: color.ivoryDark,
     padding: 16,
   },
   addressView: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   callout: {
-    backgroundColor: color.grayLight,
+    backgroundColor: color.ivoryDark,
     padding: 16,
     marginHorizontal: -16,
     borderRadius: 24,
