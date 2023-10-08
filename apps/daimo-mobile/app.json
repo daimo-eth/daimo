@@ -1,0 +1,88 @@
+{
+  "expo": {
+    "owner": "daimo",
+    "name": "Daimo",
+    "slug": "daimo",
+    "version": "0.3.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["assets/*"],
+    "scheme": "daimo",
+    "notification": {
+      "iosDisplayInForeground": true
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.daimo",
+      "buildNumber": "48",
+      "associatedDomains": ["applinks:daimo.xyz"],
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+      }
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "daimo.xyz",
+              "pathPrefix": "/link"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.daimo",
+      "versionCode": 48
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1eff7c6e-e88b-4e35-8b31-eab7e6814904"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "minSdkVersion": 28,
+            "buildToolsVersion": "33.0.0",
+            "kotlinVersion": "1.8.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.0"
+          }
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Protect Daimo using Face ID."
+        }
+      ],
+      [
+        "expo-notifications"
+      ],
+      "react-native-nfc-manager"
+    ]
+  }
+}

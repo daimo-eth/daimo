@@ -3,6 +3,7 @@ import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { useNFCReader } from "./action/useNFCReader";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
@@ -38,6 +39,8 @@ export default function App() {
 function AppBody() {
   // Handle incoming applinks
   useInitNavLinks();
+
+  useNFCReader();
 
   return (
     <SafeAreaProvider>

@@ -94,10 +94,10 @@ export function handleDeepLink(nav: MainNav, url: string) {
   }
 
   console.log(`[NAV] going to ${url}`);
-  goTo(nav, link);
+  navToLink(nav, link);
 }
 
-async function goTo(nav: MainNav, link: DaimoLink) {
+function navToLink(nav: MainNav, link: DaimoLink) {
   const { type } = link;
   switch (type) {
     case "account":
