@@ -127,6 +127,7 @@ function AmountInput({
           placeholderTextColor={color.gray}
           numberOfLines={1}
           focusable={!disabled}
+          editable={!disabled}
           selectTextOnFocus
           autoFocus={autoFocus ?? true}
           value={strVal}
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     fontSize: 36,
     fontWeight: "bold",
+    color: color.black,
   },
 });
 

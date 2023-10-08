@@ -1,17 +1,11 @@
+import { EAccount, OpStatus, assert, dollarsToAmount } from "@daimo/common";
 import {
-  assert,
-  dollarsToAmount,
-  OpStatus,
-  EAccount,
-  getAccountName,
-} from "@daimo/common";
-import {
+  DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
-  DaimoNonce,
   DaimoOpSender,
 } from "@daimo/userop";
-import { useMemo, ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
@@ -77,7 +71,7 @@ export function SendTransferButton({
       case "error":
         return (
           <ButtonBig
-            title={`Send to ${getAccountName(recipient)}`}
+            title={`Send ${getAmountText({ dollars })}`}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
