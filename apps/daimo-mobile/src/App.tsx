@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -34,9 +35,9 @@ function AppBody() {
   useInitNavLinks();
 
   return (
-    <>
+    <SafeAreaProvider>
       <HomeStackNav />
       <StatusBar style="auto" />
-    </>
+    </SafeAreaProvider>
   );
 }

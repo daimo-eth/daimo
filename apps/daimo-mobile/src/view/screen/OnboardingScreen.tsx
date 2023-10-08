@@ -249,7 +249,7 @@ function PageBubble({ count, index }: { count: number; index: number }) {
           width: 8,
           height: 8,
           borderRadius: 4,
-          backgroundColor: i === index ? "#000" : "#ccc",
+          backgroundColor: i === index ? color.midnight : color.grayLight,
           margin: 4,
         }}
       />
@@ -478,7 +478,7 @@ function UseExistingPage({
           <View style={styles.vertQR}>
             <QRCode
               value={createAddDeviceString(pubKeyHex)}
-              color="#333"
+              color={color.grayDark}
               size={256}
               logo={{ uri: image.qrLogo }}
               logoSize={72}
@@ -521,7 +521,7 @@ function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
                 <Octicons
                   name="chevron-left"
                   size={20}
-                  color={color.grayDark}
+                  color={color.midnight}
                 />
                 <Text style={styles.onboardingBackText}>Back</Text>
               </>
@@ -648,7 +648,7 @@ const screenDimensions = Dimensions.get("screen");
 const styles = StyleSheet.create({
   onboardingScreen: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "space-around",
   },
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   },
   onboardingBackText: {
     ...ss.text.h3,
-    color: color.grayDark,
+    color: color.midnight,
   },
   introPages: {
     alignItems: "center",

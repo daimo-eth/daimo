@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   titleGray: {
-    color: color.gray,
+    color: color.grayMid,
   },
 });

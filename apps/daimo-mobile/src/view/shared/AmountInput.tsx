@@ -124,7 +124,7 @@ function AmountInput({
           style={styles.amountInput}
           keyboardType="numeric"
           placeholder="0"
-          placeholderTextColor={color.gray}
+          placeholderTextColor={color.grayMid}
           numberOfLines={1}
           focusable={!disabled}
           editable={!disabled}
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     fontSize: 36,
     fontWeight: "bold",
-    color: color.black,
+    color: color.midnight,
   },
 });
 

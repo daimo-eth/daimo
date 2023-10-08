@@ -21,7 +21,7 @@ import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { HomeStackParamList, useNav } from "../../shared/nav";
-import { ss } from "../../shared/style";
+import { color, ss } from "../../shared/style";
 import { TextBody, TextCenter, TextH2 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
@@ -64,7 +64,7 @@ function SendNav() {
         onValueChange={setTab}
         fontStyle={{ fontSize: 16 }}
         activeFontStyle={{ fontSize: 16 }}
-        style={{ height: 40 }}
+        style={{ height: 40, backgroundColor: color.ivoryDark }}
       />
       <Spacer h={8} />
       {tab === "Search" && <SearchTab />}

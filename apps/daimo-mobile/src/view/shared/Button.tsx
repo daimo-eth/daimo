@@ -133,7 +133,7 @@ export const buttonStyles = {
       paddingHorizontal: 24,
       paddingVertical: 16,
       borderRadius: 8,
-      backgroundColor: color.primaryLight,
+      backgroundColor: color.primaryBgLight,
     },
     title: {
       fontSize: 20,
@@ -146,7 +146,7 @@ export const buttonStyles = {
       paddingHorizontal: 16,
       paddingVertical: 12,
       borderRadius: 8,
-      backgroundColor: color.primaryLight,
+      backgroundColor: color.primaryBgLight,
     },
     title: {
       fontSize: 16,
@@ -164,7 +164,7 @@ export const buttonStyles = {
       fontSize: 16,
       fontWeight: "600",
       textAlign: "center",
-      color: color.grayDark,
+      color: color.midnight,
     },
   }),
 };

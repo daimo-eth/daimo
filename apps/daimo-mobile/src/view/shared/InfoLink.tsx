@@ -10,7 +10,7 @@ export function InfoLink({ url, title }: { url: string; title: string }) {
     <View style={ss.container.marginHNeg16}>
       <ButtonSmall onPress={() => Linking.openURL(url)}>
         <TextLight>
-          <Octicons name="info" size={16} color={color.gray} />
+          <Octicons name="info" size={16} color={color.grayMid} />
           {` \u00A0 `}
           {title}
         </TextLight>
