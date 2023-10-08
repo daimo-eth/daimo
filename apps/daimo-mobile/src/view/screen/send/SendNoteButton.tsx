@@ -97,6 +97,8 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
     try {
       const link: DaimoLink = {
         type: "note",
+        previewSender: account.name,
+        previewDollars: `${dollars}`,
         ephemeralOwner,
         ephemeralPrivateKey: ephemeralPrivKey,
       };

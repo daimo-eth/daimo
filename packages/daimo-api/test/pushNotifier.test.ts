@@ -1,4 +1,9 @@
-import { EAccount, OpStatus, TransferOpEvent } from "@daimo/common";
+import {
+  DaimoLinkNote,
+  EAccount,
+  OpStatus,
+  TransferOpEvent,
+} from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
@@ -65,15 +70,22 @@ test("PushNotifier", async () => {
     );
   });
 
+  const paymentLinkFromAlice: DaimoLinkNote = {
+    type: "note",
+    previewSender: "alice",
+    previewDollars: "1.00",
+    ephemeralOwner: "0x0",
+  };
+
   await test("send payment link", async () => {
     const input: NoteOpLog[] = [
       {
         type: "create",
         noteStatus: {
-          status: "pending",
+          status: "confirmed",
           sender: { addr: addrAlice, name: "alice" },
           dollars: "1.00",
-          link: { type: "note", ephemeralOwner: "0x0" },
+          link: paymentLinkFromAlice,
         },
       },
     ];
@@ -94,7 +106,7 @@ test("PushNotifier", async () => {
           sender: { addr: addrAlice, name: "alice" },
           claimer: { addr: addrBob, name: "bob" },
           dollars: "1.00",
-          link: { type: "note", ephemeralOwner: "0x0" },
+          link: paymentLinkFromAlice,
         },
       },
     ];
@@ -121,7 +133,7 @@ test("PushNotifier", async () => {
           sender: { addr: addrAlice, name: "alice" },
           claimer: { addr: addrAlice, name: "alice" },
           dollars: "4.20",
-          link: { type: "note", ephemeralOwner: "0x0" },
+          link: paymentLinkFromAlice,
         },
       },
     ];

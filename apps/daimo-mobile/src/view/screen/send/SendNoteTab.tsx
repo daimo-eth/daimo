@@ -43,6 +43,7 @@ export function SendNoteTab() {
             <ButtonBig
               type="primary"
               title="Create Payment Link"
+              disabled={!(noteDollars > 0)}
               onPress={onChooseAmount}
             />
           }

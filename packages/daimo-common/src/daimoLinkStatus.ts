@@ -7,11 +7,10 @@ export type DaimoLinkStatus =
   | DaimoNoteStatus;
 
 /**
- * Tracks details about an account link.
+ * Summarizes a link to any Ethereum account.
  */
 export type DaimoAccountStatus = {
   link: DaimoLinkAccount;
-
   account: EAccount;
 };
 
@@ -34,7 +33,12 @@ export type DaimoRequestStatus = {
 export type DaimoNoteStatus = {
   link: DaimoLinkNote;
 
-  status: "pending" | "claimed" | "cancelled";
+  /**
+   * Pending means the note hasn't yet been created onchain. Confirmed means
+   * it's been created and is waiting to be claimed. Cancelled means claimed
+   * back by the original sender, and claimed means claimed by anyone else.
+   */
+  status: "pending" | "confirmed" | "claimed" | "cancelled";
   sender: EAccount;
   claimer?: EAccount;
   dollars: `${number}`;
