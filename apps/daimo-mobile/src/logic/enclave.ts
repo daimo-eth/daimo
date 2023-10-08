@@ -3,11 +3,6 @@ import { Hex } from "viem";
 
 import { Log } from "./log";
 
-export async function forceWeakerFallbackKeyUsage() {
-  await Log.promise("forceFallbackUsage", ExpoEnclave.forceFallbackUsage());
-  console.log(`[ENCLAVE] forceFallbackUsage done`);
-}
-
 /** Create a new key in the secure enclave. */
 export async function createEnclaveKey(enclaveKeyName: string) {
   const pubKey = await Log.promise(
@@ -46,27 +41,19 @@ export async function loadEnclaveKey(enclaveKeyName: string) {
 
 /** Deletes a key from the enclave. */
 export async function deleteEnclaveKey(enclaveKeyName: string) {
+  console.log(`[ENCLAVE] deleting key ${enclaveKeyName}`);
   await Log.promise(
     "ExpoEnclave.deleteKeyPair",
     ExpoEnclave.deleteKeyPair(enclaveKeyName)
   );
-  console.log(`[ENCLAVE] deleted ${enclaveKeyName}`);
+  console.log(`[ENCLAVE] deleted key ${enclaveKeyName}`);
 }
 
-export interface EnclaveSecSummary {
-  biometricSecurityLevel: ExpoEnclave.BiometricSecurityLevel;
-  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel;
-}
-
-/** Gets detailed enclave security level */
-export async function getEnclaveSec(): Promise<EnclaveSecSummary> {
-  const promises = [
-    ExpoEnclave.getBiometricSecurityLevel(),
-    ExpoEnclave.getHardwareSecurityLevel(),
-  ] as const;
-  const results = await Promise.all(promises);
-  return {
-    biometricSecurityLevel: results[0],
-    hardwareSecurityLevel: results[1],
-  };
+/** Get hardware security level */
+export async function getHardwareSec(): Promise<ExpoEnclave.HardwareSecurityLevel> {
+  const result = await Log.promise(
+    "getHardwareSec",
+    ExpoEnclave.getHardwareSecurityLevel()
+  );
+  return result;
 }

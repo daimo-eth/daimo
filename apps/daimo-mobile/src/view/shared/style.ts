@@ -1,45 +1,39 @@
 import { Platform, StyleSheet, TextStyle } from "react-native";
 
+/** Match daimo-web tailwind config. Same name = refers to the same color. */
 export const color = {
-  status: {
-    red: "#a00",
-    yellow: "#a70",
-    green: "#090",
-  },
-  black: "#000",
-  gray: "#668",
-  darkGray: "#222",
-  white: "#fff",
   primary: "#007aff",
+  primaryBgLight: "#aaccff",
   danger: "#f35369",
   success: "#4cd964",
-  bg: {
-    lightGray: "#eef0f4",
-    midGray: "#ccc",
-    /** Slightly darker than the TouchableHighlight blue tap color: D1E4FD. */
-    lightBlue: "#d1e4fd",
-    lightYellow: "#fff6e6",
-    blue: "#cce5ff",
-  },
+  successDark: "#009900",
+  white: "#ffffff",
+  ivoryDark: "#f2f2f2",
+  grayLight: "#e2e2e2",
+  grayMid: "#717171",
+  grayDark: "#444",
+  midnight: "#262626",
 };
 
 const textBase: TextStyle = {
   fontVariant: ["tabular-nums"],
-  color: color.black,
+  color: color.midnight,
 };
 
+const activeAlpha = "aa";
+
 export const touchHighlightUnderlay = {
-  blue: {
-    activeOpacity: 0.9,
-    underlayColor: color.bg.blue,
+  primary: {
+    underlayColor: color.primary + activeAlpha,
   },
   danger: {
-    activeOpacity: 0.9,
-    underlayColor: color.danger,
+    underlayColor: color.danger + activeAlpha,
   },
   success: {
-    activeOpacity: 0.9,
-    underlayColor: color.success,
+    underlayColor: color.success + activeAlpha,
+  },
+  subtle: {
+    underlayColor: color.primaryBgLight + activeAlpha,
   },
 };
 
@@ -59,7 +53,6 @@ export const ss = {
     },
     fullWidthScroll: {
       ...styleFullWidth,
-      paddingBottom: 0,
     },
     fullWidthModal: {
       ...styleFullWidth,
@@ -107,11 +100,11 @@ export const ss = {
       fontSize: 16,
       lineHeight: 24,
     },
-    small: {
+    light: {
       ...textBase,
       fontSize: 16,
       lineHeight: 20,
-      color: color.gray,
+      color: color.grayMid,
     },
     error: {
       ...textBase,

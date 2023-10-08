@@ -3,12 +3,11 @@ import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { useState } from "react";
 import { Linking } from "react-native";
 
-import { CancelHeader } from "./CancelHeader";
 import { Scanner } from "../../shared/Scanner";
 import Spacer from "../../shared/Spacer";
 
 /** Scans a QR code to pay someone. */
-export function ScanTab({ hide }: { hide: () => void }) {
+export function ScanTab() {
   const [handled, setHandled] = useState(false);
 
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
@@ -31,8 +30,7 @@ export function ScanTab({ hide }: { hide: () => void }) {
 
   return (
     <>
-      <CancelHeader hide={hide}>Scan to pay</CancelHeader>
-      <Spacer h={8} />
+      <Spacer h={16} />
       <Scanner handleBarCodeScanned={handleBarCodeScanned} />
     </>
   );

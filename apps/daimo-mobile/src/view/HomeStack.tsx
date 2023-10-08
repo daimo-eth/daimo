@@ -1,6 +1,6 @@
 import { tokenMetadata } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -20,15 +20,13 @@ import { useAccount } from "../model/account";
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 
 export function HomeStackNav() {
-  const [account] = useAccount();
-
   return (
     <HomeStack.Navigator initialRouteName="Home">
       <HomeStack.Group>
         <HomeStack.Screen
           name="Home"
           component={MainScreen}
-          options={useMemo(() => ({ headerShown: !!account }), [account])}
+          options={{ headerShown: false }}
         />
         <HomeStack.Screen name="Send" component={SendScreen} />
         <HomeStack.Screen name="Request" component={CreateRequestScreen} />
@@ -65,9 +63,12 @@ export function HomeStackNav() {
 
 function MainScreen() {
   const [account] = useAccount();
-  const [isOnboarding, setIsOnboarding] = useState<boolean>(account === null);
-  const onOnboardingComplete = () => setIsOnboarding(false);
+  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
+  useEffect(() => {
+    if (isOnboarded && account == null) setIsOnboarded(false);
+  }, [isOnboarded, account]);
+  const onOnboardingComplete = () => setIsOnboarded(true);
 
-  if (account && !isOnboarding) return <HomeScreen />;
-  return <OnboardingScreen onOnboardingComplete={onOnboardingComplete} />;
+  if (isOnboarded) return <HomeScreen />;
+  return <OnboardingScreen {...{ onOnboardingComplete }} />;
 }

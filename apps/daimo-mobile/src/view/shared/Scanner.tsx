@@ -2,7 +2,7 @@ import { BarCodeScanner, BarCodeScannedCallback } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { TextBody } from "./text";
+import { TextBody, TextCenter } from "./text";
 
 /** Scans a QR code. */
 export function Scanner({
@@ -18,17 +18,19 @@ export function Scanner({
       .catch((e) => console.error(e));
   }, []);
 
-  useEffect(() => {
-    BarCodeScanner.requestPermissionsAsync()
-      .then(({ status }) => setHasPermission(status === "granted"))
-      .catch((e) => console.error(e));
-  }, []);
-
   let body: ReactNode;
   if (hasPermission === null) {
-    body = <TextBody>Requesting for camera permission</TextBody>;
+    body = (
+      <TextCenter>
+        <TextBody>Requesting camera access</TextBody>
+      </TextCenter>
+    );
   } else if (hasPermission === false) {
-    body = <TextBody>No access to camera</TextBody>;
+    body = (
+      <TextCenter>
+        <TextBody>Allow camera access in Settings</TextBody>
+      </TextCenter>
+    );
   } else {
     body = (
       <View style={styles.cameraBox}>

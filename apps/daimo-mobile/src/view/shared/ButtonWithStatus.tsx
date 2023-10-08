@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 
 import Spacer from "./Spacer";
-import { ss } from "./style";
 import { TextCenter, TextLight } from "./text";
 
 export function ButtonWithStatus({
@@ -15,7 +14,7 @@ export function ButtonWithStatus({
   return (
     <View style={style.buttonWithStatus}>
       {button}
-      <Spacer h={16} />
+      <Spacer h={8} />
       <TextCenter>
         <TextLight>{status}</TextLight>
       </TextCenter>
@@ -30,7 +29,6 @@ const style = StyleSheet.create({
     alignItems: "stretch",
   },
   statusRow: {
-    ...ss.container.debug,
     alignSelf: "stretch",
     flex: 1,
     flexDirection: "column",

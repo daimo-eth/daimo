@@ -16,10 +16,10 @@ export function CancelHeader({
   return (
     <ButtonSmall onPress={hide}>
       <View style={styles.cancelHeader}>
-        <Spacer h={8} />
+        <Spacer w={12} />
         <TextLight>{children}</TextLight>
         {hide && <Octicons name="x" size={20} color="gray" />}
-        {!hide && <Spacer h={8} />}
+        {!hide && <Spacer w={12} />}
       </View>
     </ButtonSmall>
   );

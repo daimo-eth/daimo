@@ -3,17 +3,18 @@ import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -24,6 +25,7 @@ import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { requestEnclaveSignature } from "../../action/useSendAsync";
 import { createAddDeviceString } from "../../logic/device";
+import { NamedError } from "../../logic/log";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
@@ -56,67 +58,36 @@ export default function OnboardingScreen({
 }: {
   onOnboardingComplete: () => void;
 }) {
+  // Navigation with a back button
   const [page, setPage] = useState<OnboardPage>("intro");
-
-  const next = useCallback(
-    (choice?: "create" | "existing") => {
-      setPage(
-        (function () {
-          switch (page) {
-            case "intro":
-              if (Platform.OS === "android") {
-                // Android goes through an extra onboarding step
-                return assertNotNull(choice) === "create"
-                  ? "create-try-enclave"
-                  : "existing-try-enclave";
-              }
-              return assertNotNull(choice);
-            case "create-try-enclave":
-              return "create";
-            case "existing-try-enclave":
-              return "existing";
-            case "create":
-              return "new-allow-notifications";
-            case "existing":
-              return "existing-allow-notifications";
-            case "new-allow-notifications":
-              return "new-loading";
-            case "existing-allow-notifications":
-            case "new-loading":
-              onOnboardingComplete();
-              return page;
-            default:
-              throw new Error(`unreachable ${page}`);
-          }
-        })()
-      );
-    },
-    [page]
+  const pageStack = useRef([] as OnboardPage[]).current;
+  const goTo = (newPage: OnboardPage) => {
+    pageStack.push(page);
+    setPage(newPage);
+  };
+  const goToPrev = useCallback(
+    () => pageStack.length > 0 && setPage(pageStack.pop()!),
+    []
   );
+  const next = getNext(page, goTo, onOnboardingComplete); // , [page]);
+  const prev = pageStack.length === 0 ? undefined : goToPrev;
 
-  // TODO: add back buttons on create and existing pages
-  const prev = useCallback(() => {}, []);
-
+  // User enters their name
+  // TODO: consider splitting into components and just using StackNavigation
   const [name, setName] = useState("");
 
-  const [forceWeakerKeys, setForceWeakerKeys] = useState(false);
-
+  // Create an account as soon as possible, hiding latency
   const {
     exec: createExec,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name, forceWeakerKeys);
+  } = useCreateAccount(name);
 
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
-        <TryEnclave
-          onNext={next}
-          createStatus={createStatus}
-          forceWeakerKeys={forceWeakerKeys}
-          setForceWeakerKeys={setForceWeakerKeys}
-        />
+        <SetupKey onNext={next} onPrev={prev} createStatus={createStatus} />
       )}
       {page === "create" && (
         <CreateAccountPage
@@ -129,13 +100,7 @@ export default function OnboardingScreen({
           message={createMessage}
         />
       )}
-      {page === "existing" && (
-        <UseExistingPage
-          forceWeakerKeys={forceWeakerKeys}
-          onNext={next}
-          onPrev={prev}
-        />
-      )}
+      {page === "existing" && <UseExistingPage onNext={next} onPrev={prev} />}
       {page === "new-allow-notifications" && (
         <AllowNotifications onNext={next} />
       )}
@@ -151,6 +116,39 @@ export default function OnboardingScreen({
       )}
     </View>
   );
+}
+
+function getNext(
+  page: OnboardPage,
+  goToPage: (p: OnboardPage) => void,
+  onOnboardingComplete: () => void
+): (choice?: "create" | "existing") => void {
+  const fnGoTo = (p: OnboardPage) => () => goToPage(p);
+
+  switch (page) {
+    case "intro":
+      return (choice?: "create" | "existing") => {
+        // Android goes through an extra onboarding step
+        if (Platform.OS !== "android") goToPage(assertNotNull(choice));
+        else if (choice === "create") goToPage("create-try-enclave");
+        else goToPage("existing-try-enclave");
+      };
+    case "create-try-enclave":
+      return fnGoTo("create");
+    case "existing-try-enclave":
+      return fnGoTo("existing");
+    case "create":
+      return fnGoTo("new-allow-notifications");
+    case "existing":
+      return fnGoTo("existing-allow-notifications");
+    case "new-allow-notifications":
+      return fnGoTo("new-loading");
+    case "existing-allow-notifications":
+    case "new-loading":
+      return onOnboardingComplete;
+    default:
+      throw new Error(`unreachable ${page}`);
+  }
 }
 
 function IntroPages({
@@ -251,7 +249,7 @@ function PageBubble({ count, index }: { count: number; index: number }) {
           width: 8,
           height: 8,
           borderRadius: 4,
-          backgroundColor: i === index ? "#000" : "#ccc",
+          backgroundColor: i === index ? color.midnight : color.grayLight,
           margin: 4,
         }}
       />
@@ -260,127 +258,92 @@ function PageBubble({ count, index }: { count: number; index: number }) {
   return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
 }
 
-function TryEnclave({
+function SetupKey({
   onNext,
+  onPrev,
   createStatus,
-  forceWeakerKeys,
-  setForceWeakerKeys,
 }: {
   onNext: () => void;
+  onPrev?: () => void;
   createStatus: ActStatus;
-  forceWeakerKeys: boolean;
-  setForceWeakerKeys: (force: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [askWeak, setAskWeak] = useState(false);
+  const [askToSetPin, setAskToSetPin] = useState(false);
   const [error, setError] = useState("");
 
-  // If we've failed in loading or creating the key already without force even
-  // before getting to this screen, force weaker keys now
-  useEffect(() => {
-    if (createStatus === "error" && !forceWeakerKeys) setForceWeakerKeys(true);
-  }, [createStatus]);
-
-  const trySignatureGeneration = async (tryWeaker: boolean) => {
+  const trySignatureGeneration = async () => {
     setLoading(true);
-    setForceWeakerKeys(tryWeaker);
     try {
       await requestEnclaveSignature(
-        {
-          name: defaultEnclaveKeyName,
-          forceWeakerKeys: tryWeaker,
-        },
+        defaultEnclaveKeyName,
         "dead",
-        "Create key"
+        "Create account"
       );
 
       console.log(`[ONBOARDING] enclave signature trial success`);
       onNext();
     } catch (e: any) {
       console.error(e);
-      if (!tryWeaker) {
-        console.error(
-          `[ONBOARDING] enclave signature trial error, asking to downgrade to weaker keys`
-        );
-        setAskWeak(true);
+      if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+        setError(e.message);
       } else {
-        const err = `[ONBOARDING] Failed with weaker keys too, giving up`;
-        setError(err);
-        console.error(err);
+        setError("Unknown error");
       }
+
+      // Auth failed. Possible user doesn't have proper auth set up.
+      // TODO: In future, catch different errors differently.
+      setAskToSetPin(true);
     }
     setLoading(false);
   };
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
-        <TextH1>
-          <Octicons name={askWeak ? "unlock" : "lock"} size={40} />
-        </TextH1>
-        <Spacer h={32} />
-        <View style={ss.container.padH16}>
-          <TextCenter>
-            {!askWeak && (
-              <TextBody>
-                Create a cryptographic key on-device that will authorize your
-                account. This makes your money yours alone.
-              </TextBody>
-            )}
-            {askWeak && (
-              <TextBody>
-                Failed to create hardware authenticated key. This can happen on
-                older Android devices. Use regular key?
-              </TextBody>
-            )}
-          </TextCenter>
-        </View>
-        <Spacer h={32} />
-        {(loading || createStatus === "loading") && (
-          <ActivityIndicator size="large" />
-        )}
-        {!loading && !askWeak && createStatus !== "loading" && (
-          <ButtonBig
-            type="primary"
-            title="Generate"
-            onPress={() => {
-              trySignatureGeneration(false);
-            }}
-          />
-        )}
-        {askWeak && (
-          <>
-            <Spacer h={16} />
+    <View>
+      <OnboardingHeader onPrev={onPrev} />
+      <View style={styles.onboardingScreen}>
+        <View style={styles.createAccountPage}>
+          <TextH1>
+            <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
+          </TextH1>
+          <Spacer h={32} />
+          <View style={ss.container.padH16}>
+            <TextCenter>
+              {!askToSetPin && (
+                <TextBody>
+                  Generate your Daimo account. Your account is stored on your
+                  device, secured by cryptography.
+                </TextBody>
+              )}
+              {askToSetPin && (
+                <TextBody>
+                  Authentication failed. Does your phone have a secure lock
+                  screen set up? You'll need one to secure your Daimo account.
+                </TextBody>
+              )}
+            </TextCenter>
+          </View>
+          <Spacer h={32} />
+          {(loading || createStatus === "loading") && (
+            <ActivityIndicator size="large" />
+          )}
+          {!loading && createStatus !== "loading" && (
             <ButtonBig
               type="primary"
-              title="Use regular key"
-              onPress={() => {
-                trySignatureGeneration(true);
-              }}
+              title={askToSetPin ? "Try again" : "Generate"}
+              onPress={trySignatureGeneration}
             />
-          </>
-        )}
-        {askWeak && (
-          <>
-            <Spacer h={16} />
-            <ButtonBig
-              type="subtle"
-              title="Try again"
-              onPress={() => {
-                trySignatureGeneration(false);
-              }}
-            />
-          </>
-        )}
-        {error && (
-          <>
-            <Spacer h={16} />
-            <TextCenter>
-              <TextError>{error}</TextError>
-            </TextCenter>
-          </>
-        )}
+          )}
+          {error && (
+            <>
+              <Spacer h={16} />
+              <TextCenter>
+                <TextError>{error}</TextError>
+              </TextCenter>
+            </>
+          )}
+        </View>
       </View>
+      <OnboardingFooter />
     </View>
   );
 }
@@ -437,7 +400,7 @@ function CreateAccountPage({
   message,
 }: {
   onNext: () => void;
-  onPrev: () => void;
+  onPrev?: () => void;
   name: string;
   setName: (name: string) => void;
   exec: () => void;
@@ -453,8 +416,9 @@ function CreateAccountPage({
   }, [exec]);
 
   return (
-    <KeyboardAvoidingView behavior="padding">
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View>
+        <OnboardingHeader onPrev={onPrev} />
         <View style={styles.onboardingScreen}>
           <View style={styles.createAccountPage}>
             <TextH1>Welcome</TextH1>
@@ -477,21 +441,20 @@ function CreateAccountPage({
             </TextCenter>
           </View>
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        <OnboardingFooter />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 function UseExistingPage({
-  forceWeakerKeys,
   onNext,
   onPrev,
 }: {
-  forceWeakerKeys: boolean;
   onNext: () => void;
-  onPrev: () => void;
+  onPrev?: () => void;
 }) {
-  const { status, message, pubKeyHex } = useExistingAccount(forceWeakerKeys);
+  const { status, message, pubKeyHex } = useExistingAccount();
 
   useEffect(() => {
     if (status === "success") onNext();
@@ -500,36 +463,80 @@ function UseExistingPage({
   if (pubKeyHex === undefined) return null;
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.useExistingPage}>
-        <TextH1>Welcome</TextH1>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextBody>
-            Scan QR code from the Settings page of existing device
-          </TextBody>
-        </TextCenter>
-        <Spacer h={32} />
-        <View style={styles.vertQR}>
-          <QRCode
-            value={createAddDeviceString(pubKeyHex)}
-            color="#333"
-            size={256}
-            logo={{ uri: image.qrLogo }}
-            logoSize={72}
-          />
+    <View>
+      <OnboardingHeader onPrev={onPrev} />
+      <View style={styles.onboardingScreen}>
+        <View style={styles.useExistingPage}>
+          <TextH1>Welcome</TextH1>
+          <Spacer h={32} />
+          <TextCenter>
+            <TextBody>
+              Scan QR code from the Settings page of existing device
+            </TextBody>
+          </TextCenter>
+          <Spacer h={32} />
+          <View style={styles.vertQR}>
+            <QRCode
+              value={createAddDeviceString(pubKeyHex)}
+              color={color.grayDark}
+              size={256}
+              logo={{ uri: image.qrLogo }}
+              logoSize={72}
+            />
+          </View>
+          <Spacer h={16} />
+          <TextCenter>
+            {status !== "error" && (
+              <TextLight>
+                <EmojiToOcticon size={16} text={message} />
+              </TextLight>
+            )}
+          </TextCenter>
         </View>
-        <Spacer h={16} />
-        <TextCenter>
-          {status !== "error" && (
-            <TextLight>
-              <EmojiToOcticon size={16} text={message} />
-            </TextLight>
-          )}
-        </TextCenter>
+      </View>
+      <OnboardingFooter />
+    </View>
+  );
+}
+
+function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
+  /* On Android, listen for the native back button. */
+  useEffect(() => {
+    if (!onPrev) return;
+    const onBack = () => {
+      onPrev();
+      return true;
+    };
+    BackHandler.addEventListener("hardwareBackPress", onBack);
+    return () => BackHandler.removeEventListener("hardwareBackPress", onBack);
+  }, [onPrev]);
+
+  return (
+    <View style={styles.onboardingHeaderFooter}>
+      <View style={styles.onboardingBackWrap}>
+        <ButtonSmall onPress={onPrev}>
+          <View style={styles.onboardingBack}>
+            {onPrev && (
+              <>
+                <Octicons
+                  name="chevron-left"
+                  size={20}
+                  color={color.midnight}
+                />
+                <Text style={styles.onboardingBackText}>Back</Text>
+              </>
+            )}
+            {!onPrev && " "}
+          </View>
+        </ButtonSmall>
       </View>
     </View>
   );
+}
+
+function OnboardingFooter() {
+  /* Ensure header and footer are equal height to correctly center content. */
+  return <View style={styles.onboardingHeaderFooter} />;
 }
 
 function NamePicker({
@@ -577,7 +584,7 @@ function NamePicker({
       return <>{oct("alert")} sorry, that name is taken</>; // name taken
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true; // name valid & available
-      return <>{oct("check-circle", color.status.green)} available</>;
+      return <>{oct("check-circle", color.successDark)} available</>;
     }
     throw new Error("unreachable");
   })();
@@ -641,9 +648,27 @@ const screenDimensions = Dimensions.get("screen");
 const styles = StyleSheet.create({
   onboardingScreen: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "space-around",
+  },
+  onboardingHeaderFooter: {
+    height: 64,
+    marginTop: 48,
+  },
+  onboardingBackWrap: {
+    width: 128,
+    paddingLeft: 16,
+  },
+  onboardingBack: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    height: 32,
+  },
+  onboardingBackText: {
+    ...ss.text.h3,
+    color: color.midnight,
   },
   introPages: {
     alignItems: "center",

@@ -7,14 +7,7 @@ import {
   SigningCallback,
 } from "@daimo/userop";
 import { useState } from "react";
-import {
-  Button,
-  Linking,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function App() {
   const [account, setAccount] = useState<string>("testdaimo");
@@ -23,18 +16,15 @@ export default function App() {
   const [verification, setVerification] = useState<boolean>(false);
   const [hardwareSecurityLevel, setHardwareSecurityLevel] =
     useState<ExpoEnclave.HardwareSecurityLevel>("SOFTWARE");
-  const [biometricSecurityLevel, setBiometricSecurityLevel] =
-    useState<ExpoEnclave.BiometricSecurityLevel>("NONE");
-  const [txHash, setTxHash] = useState<string>("");
+  const [opHash, setOpHash] = useState<string>("");
 
-  const biometricPromptCopy: ExpoEnclave.BiometricPromptCopy = {
+  const promptCopy: ExpoEnclave.PromptCopy = {
     usageMessage: "Authorise transaction",
     androidTitle: "Sign tx",
   };
 
   (async () => {
     setHardwareSecurityLevel(await ExpoEnclave.getHardwareSecurityLevel());
-    setBiometricSecurityLevel(await ExpoEnclave.getBiometricSecurityLevel());
   })();
 
   const testTx = async () => {
@@ -42,11 +32,7 @@ export default function App() {
     const accAddress = "0x4E8FBb345Ba703c84D29c4D531f23CFb3BBCc14d";
     const derPublicKey = (await ExpoEnclave.fetchPublicKey(accName)) as string;
     const signer: SigningCallback = async (message) => {
-      const signature = await ExpoEnclave.sign(
-        accName,
-        message,
-        biometricPromptCopy
-      );
+      const signature = await ExpoEnclave.sign(accName, message, promptCopy);
       return {
         derSig: signature,
         keySlot: 0,
@@ -56,42 +42,31 @@ export default function App() {
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
       derPublicKey
     );
-    const account = await DaimoOpSender.init(
-      accAddress,
-      signer,
-      "https://goerli.base.org",
-      false
-    );
+    const account = await DaimoOpSender.init(accAddress, signer);
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()
     );
 
     const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
-    const opHandle = await account.erc20transfer(
+    const opHash = await account.erc20transfer(
       "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
       "42",
       {
         nonce,
         chainGasConstants: {
-          // TODO: works for now but we should properly query this rather than hardcode
-          paymasterAndData:
-            "0x13f490FafBb206440F25760A10C21A6220017fFa0000000000000000000000000000000000000000000000000000000000129aa2",
           maxPriorityFeePerGas: "1000000",
           maxFeePerGas: "100000050",
+          estimatedFee: 0.1,
         },
       }
     );
-    const hash = (await opHandle.wait())?.transactionHash;
-    setTxHash(hash ?? "failed");
+    setOpHash(opHash ?? "failed");
   };
 
   return (
     <View style={styles.container}>
-      <Text>
-        hardware security level: {hardwareSecurityLevel}, biometrics security
-        level: {biometricSecurityLevel}
-      </Text>
+      <Text>hardware security level: {hardwareSecurityLevel}</Text>
       <TextInput onChangeText={setAccount} value={account} />
       <Button
         title="Create"
@@ -113,9 +88,7 @@ export default function App() {
       <Button
         title="Sign Message"
         onPress={async () => {
-          setSignature(
-            await ExpoEnclave.sign(account, "deadbeef", biometricPromptCopy)
-          );
+          setSignature(await ExpoEnclave.sign(account, "deadbeef", promptCopy));
         }}
       />
       <Text>Created signature is {signature} for message deadbeef</Text>
@@ -130,15 +103,8 @@ export default function App() {
       <Text>Verification result is {verification.toString()}</Text>
       <Button title="Test Tx" onPress={testTx} />
       <Text>
-        Test tx hash is{" "}
-        <Text
-          style={{ color: "blue" }}
-          onPress={() =>
-            Linking.openURL(`https://goerli.basescan.org/tx/${txHash}`)
-          }
-        >
-          {txHash}
-        </Text>
+        Test op hash is
+        {opHash}
       </Text>
     </View>
   );

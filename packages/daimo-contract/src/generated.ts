@@ -80,7 +80,7 @@ export const accountFactoryABI = [
 ] as const
 
 export const accountFactoryAddress =
-  '0x692A2E6eA43A1fAB2f9f68393F5cB5dcaf9C67B9' as const
+  '0xe5a1744d42a30c3Bb87f16FbC4484B984594cD7C' as const
 
 export const accountFactoryConfig = {
   address: accountFactoryAddress,
@@ -409,6 +409,39 @@ export const daimoAccountABI = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const daimoNameRegistryABI = [
+  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
   {
     type: 'event',
     anonymous: false,
@@ -446,6 +479,19 @@ export const daimoNameRegistryABI = [
     name: 'Registered',
   },
   {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
+  {
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
@@ -454,6 +500,13 @@ export const daimoNameRegistryABI = [
     ],
     name: 'forceRegister',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'implementation',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -468,6 +521,13 @@ export const daimoNameRegistryABI = [
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -514,14 +574,103 @@ export const daimoNameRegistryABI = [
     name: 'transferOwnership',
     outputs: [],
   },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'upgradeTo',
+    outputs: [],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+      { name: 'data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+  },
 ] as const
 
 export const daimoNameRegistryAddress =
-  '0x6deA1a9C749F0dfeDa90D35C243fBeeA06fc7069' as const
+  '0x26Eb9f563e46DA4A9934348781CED0D4923D93eb' as const
 
 export const daimoNameRegistryConfig = {
   address: daimoNameRegistryAddress,
   abi: daimoNameRegistryABI,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoNameRegistryProxy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoNameRegistryProxyABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_logic', internalType: 'address', type: 'address' },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
+    ],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
+  { stateMutability: 'payable', type: 'fallback' },
+  { stateMutability: 'payable', type: 'receive' },
+] as const
+
+export const daimoNameRegistryProxyAddress =
+  '0x3a3a46d28318E87F50f925EF1c9AfcCE8Ab1b7b0' as const
+
+export const daimoNameRegistryProxyConfig = {
+  address: daimoNameRegistryProxyAddress,
+  abi: daimoNameRegistryProxyABI,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1687,7 +1836,7 @@ export const ephemeralNotesABI = [
 ] as const
 
 export const ephemeralNotesAddress =
-  '0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce' as const
+  '0x1eec7E083C1a10C16470bEAc7839364853c7B81f' as const
 
 export const ephemeralNotesConfig = {
   address: ephemeralNotesAddress,
@@ -1837,116 +1986,3 @@ export const testUsdcABI = [
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
 ] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TransparentUpgradeableProxy
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const transparentUpgradeableProxyABI = [
-  {
-    stateMutability: 'payable',
-    type: 'constructor',
-    inputs: [
-      { name: '_logic', internalType: 'address', type: 'address' },
-      { name: 'admin_', internalType: 'address', type: 'address' },
-      { name: '_data', internalType: 'bytes', type: 'bytes' },
-    ],
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
-  { stateMutability: 'payable', type: 'fallback' },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [],
-    name: 'admin',
-    outputs: [{ name: 'admin_', internalType: 'address', type: 'address' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [{ name: 'newAdmin', internalType: 'address', type: 'address' }],
-    name: 'changeAdmin',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [],
-    name: 'implementation',
-    outputs: [
-      { name: 'implementation_', internalType: 'address', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
-    stateMutability: 'payable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-      { name: 'data', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'upgradeToAndCall',
-    outputs: [],
-  },
-  { stateMutability: 'payable', type: 'receive' },
-] as const
-
-export const transparentUpgradeableProxyAddress =
-  '0xF64840839FdcEDcF70f7C65D6cf4E2558d854ba4' as const
-
-export const transparentUpgradeableProxyConfig = {
-  address: transparentUpgradeableProxyAddress,
-  abi: transparentUpgradeableProxyABI,
-} as const

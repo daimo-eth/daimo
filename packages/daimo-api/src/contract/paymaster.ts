@@ -1,10 +1,5 @@
-import {
-  DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT,
-  DEFAULT_USEROP_CALL_GAS_LIMIT,
-  DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
-} from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
-import { concat, pad, parseAbi, toHex } from "viem";
+import { parseAbi } from "viem";
 
 import { ViemClient } from "../chain";
 
@@ -23,12 +18,45 @@ export class Paymaster {
   private priceMarkup: bigint = 0n;
   private previousPrice: bigint = 0n;
 
+  /* Estimated fee in dollars (2 digits after decimal) */
+  private estimatedFee = 0;
+
+  /* Last time we fetched the above constants */
   private lastFetchTs = 0;
 
   constructor(private vc: ViemClient) {}
 
   async init() {
     this.fetchLatestState();
+  }
+
+  // Since our various gas limits corresponding to the userop are nearly fixed,
+  // we can compute these constants as a pure function of current on-chain state.
+  // TODO: track history of different type of userops for precision.
+  estimateFee() {
+    // This is exactly what Pimlico's paymaster SDK does:
+    // https://github.com/pimlicolabs/erc20-paymaster-contracts/blob/master/sdk/ERC20Paymaster.ts#L223
+    // without the 3x multiplier on verification gas limit (that it adds due some postOp edge case).
+    // We do not use their SDK to save fetches.
+
+    const expectedPreVerificationCost = 40_000n;
+    const expectedVerificationCost = 400_000n;
+    const expectedCallCost = 160_000n;
+    const expectedRefundCost = 40_000n; // REFUND_POSTOP_COST constant
+
+    const expectedFunding =
+      (expectedPreVerificationCost +
+        expectedVerificationCost +
+        expectedCallCost +
+        expectedRefundCost) *
+      this.maxFeePerGas;
+
+    const tokenAmount =
+      (expectedFunding * this.priceMarkup * this.previousPrice) / 10n ** 24n; // 1e24 = 1e6 * 1e18, 1e6 is the priceDenominator constant, 1e18 is number of ETH decimals
+    const dollars =
+      Number((tokenAmount * 100n) / 10n ** BigInt(tokenMetadata.decimals)) /
+      100; // normalize to dollars with 2 digits after decimal
+    return dollars;
   }
 
   private async fetchLatestState() {
@@ -57,39 +85,17 @@ export class Paymaster {
     this.previousPrice = previousPrice;
     this.maxFeePerGas = maxFeePerGas;
     this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+    this.estimatedFee = this.estimateFee(); // Depends on other constants
   }
 
-  // Since our various gas limits corresponding to the userop are fixed, we can
-  // compute these constants as a pure function.
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
   async calculateChainGasConstants() {
     await this.fetchLatestState();
 
-    // This is exactly what Pimlico's paymaster SDK does:
-    // https://github.com/pimlicolabs/erc20-paymaster-contracts/blob/master/sdk/ERC20Paymaster.ts#L223
-    // but we do not use their SDK to save fetches.
-
-    const requiredPreFund =
-      (DEFAULT_USEROP_PREVERIFICATION_GAS_LIMIT +
-        DEFAULT_USEROP_VERIFICATION_GAS_LIMIT * 3n + // 3 is for buffer when using paymaster
-        DEFAULT_USEROP_CALL_GAS_LIMIT) *
-      this.maxFeePerGas;
-
-    const refundCost = this.maxFeePerGas * 40000n; // 40000 is the REFUND_POSTOP_COST constant
-
-    const tokenAmount =
-      ((requiredPreFund + refundCost) * this.priceMarkup * this.previousPrice) /
-      10n ** 24n; // 1e24 = 1e6 * 1e18, 1e6 is the priceDenominator constant, 1e18 is number of ETH decimals
-
-    const paymasterAndData = concat([
-      tokenMetadata.paymasterAddress,
-      pad(toHex(tokenAmount)),
-    ]);
-
     return {
-      paymasterAndData,
       maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
       maxFeePerGas: this.maxFeePerGas.toString(),
+      estimatedFee: this.estimatedFee,
     };
   }
 }

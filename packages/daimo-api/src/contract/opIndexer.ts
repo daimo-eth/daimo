@@ -45,8 +45,10 @@ export class OpIndexer {
         );
 
         const nonceMetadata = DaimoNonce.fromHex(
-          numberToHex(log.args.nonce)
-        ).metadata.toHex();
+          numberToHex(log.args.nonce, { size: 32 })
+        )?.metadata.toHex();
+        if (!nonceMetadata) continue;
+
         const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
         const newTxes = curTxes
           ? [...curTxes, log.transactionHash]
@@ -63,7 +65,9 @@ export class OpIndexer {
     const possibleLogs = this.txHashToSortedUserOps.get(txHash) || [];
     for (const log of possibleLogs) {
       if (log.logIndex > queryLogIndex) {
-        return DaimoNonce.fromHex(numberToHex(log.args.nonce)).metadata.toHex();
+        return DaimoNonce.fromHex(
+          numberToHex(log.args.nonce, { size: 32 })
+        )?.metadata.toHex();
       }
     }
     return undefined;

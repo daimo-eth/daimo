@@ -1,6 +1,8 @@
 import {
   DaimoLink,
+  DaimoLinkAccount,
   DaimoLinkNote,
+  DaimoLinkRequest,
   OpEvent,
   parseDaimoLink,
 } from "@daimo/common";
@@ -11,19 +13,17 @@ import { useEffect } from "react";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";
-import { Recipient, getRecipient } from "../../sync/recipients";
+import { Recipient } from "../../sync/recipients";
 
 export type HomeStackParamList = {
   Home: undefined;
   Settings: undefined;
   Chain: undefined;
-  Send:
-    | undefined
-    | { recipient: Recipient; dollars?: number; requestId?: `${bigint}` };
+  Send: SendNavProp;
   Withdraw: undefined;
   Request: undefined;
   Deposit: undefined;
-  Note: DaimoLinkNote;
+  Note: { link: DaimoLinkNote };
   RequestSend: undefined;
   History: undefined;
   HistoryOp: { op: OpEvent };
@@ -31,9 +31,22 @@ export type HomeStackParamList = {
   Device: { pubKey: Hex };
 };
 
-export function useNav() {
-  return useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+interface SendNavProp {
+  link?: DaimoLinkAccount | DaimoLinkRequest;
+  recipient?: Recipient;
+  dollars?: `${number}`;
+  requestId?: `${bigint}`;
 }
+
+export function useNav<
+  RouteName extends keyof HomeStackParamList = keyof HomeStackParamList
+>() {
+  return useNavigation<
+    NativeStackNavigationProp<HomeStackParamList, RouteName>
+  >();
+}
+
+type HomeStackNavProp = ReturnType<typeof useNav>;
 
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
@@ -50,10 +63,7 @@ export function useInitNavLinks() {
   }, [accountNotNull]);
 }
 
-function handleDeepLink(
-  nav: NativeStackNavigationProp<HomeStackParamList>,
-  url: string
-) {
+function handleDeepLink(nav: HomeStackNavProp, url: string) {
   const link = parseDaimoLink(url);
   if (link == null) {
     console.log(`[NAV] skipping unparseable link ${url}`);
@@ -67,19 +77,13 @@ function handleDeepLink(
 async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
   const { type } = link;
   switch (type) {
-    case "account": {
-      const recipient = await getRecipient(link.addr);
-      nav.navigate("Send", { recipient });
-      break;
-    }
+    case "account":
     case "request": {
-      const recipient = await getRecipient(link.recipient);
-      const dollars = parseFloat(link.dollars);
-      nav.navigate("Send", { recipient, dollars, requestId: link.requestId });
+      nav.navigate("Send", { link });
       break;
     }
     case "note": {
-      nav.navigate("Note", link);
+      nav.navigate("Note", { link });
       break;
     }
     default:

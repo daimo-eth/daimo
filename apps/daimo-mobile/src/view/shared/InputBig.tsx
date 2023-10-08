@@ -31,7 +31,7 @@ export function InputBig({
     <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor={color.gray}
+        placeholderTextColor={color.grayMid}
         value={value}
         onChangeText={onChange}
         style={center ? styles.inputCentered : styles.input}
@@ -52,7 +52,7 @@ const inputRow = {
   flexDirection: "row",
   alignItems: "center",
   gap: 8,
-  backgroundColor: color.bg.lightGray,
+  backgroundColor: color.ivoryDark,
   borderRadius: 8,
   paddingHorizontal: 16,
   paddingVertical: 12,
@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
   inputRow,
   inputRowFocused: {
     ...inputRow,
-    backgroundColor: color.bg.blue,
   },
   input,
   inputCentered: {

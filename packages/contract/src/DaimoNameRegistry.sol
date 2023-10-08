@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 /// Basic name registry.
 /// Uniquely and permanently associates addresses with a short name.
-contract DaimoNameRegistry is Ownable, Initializable {
+contract DaimoNameRegistry is OwnableUpgradeable, UUPSUpgradeable {
     // APPEND-ONLY storage slots.
     // This contract is used with upgradeable proxies. Future versions may add
     // new storage items at the end, but cannot change existing ones.
@@ -15,15 +15,34 @@ contract DaimoNameRegistry is Ownable, Initializable {
 
     event Registered(bytes32 indexed name, address indexed addr);
 
-    /// On TransparentUpgradeableProxy deployment, owner becomes the deployer.
+    constructor() {
+        _disableInitializers();
+    }
+
+    /// On proxy deployment, deployer becomes the owner.
     function init() public initializer {
-        _transferOwnership(msg.sender);
+        __Ownable_init();
+    }
+
+    /// UUPSUpsgradeable: only allow owner to upgrade
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override onlyOwner {
+        (newImplementation); // No-op; silence unused parameter warning
+    }
+
+    /// UUPSUpgradeable: expose implementation
+    function implementation() public view returns (address) {
+        return _getImplementation();
     }
 
     /// Enforces uniqueness. Doesn't do any validation on name. The app
     /// validates names both for claiming and lookup, so there's no advantage
     /// to registering an invalid name onchain (will be ignored / unusable).
     function register(bytes32 name, address addr) public {
+        require(name != bytes32(0), "NameRegistry: empty name");
+        require(addr != address(0), "NameRegistry: empty addr");
+
         require(_addrs[name] == address(0), "NameRegistry: name taken");
         require(_names[addr] == bytes32(0), "NameRegistry: addr taken");
         _addrs[name] = addr;
@@ -33,7 +52,7 @@ contract DaimoNameRegistry is Ownable, Initializable {
 
     /// Registers msg.sender under a given name.
     function registerSelf(bytes32 name) external {
-        this.register(name, msg.sender);
+        register(name, msg.sender);
     }
 
     /// Looks up the address for a given name, or address(0) if missing.

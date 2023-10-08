@@ -1,10 +1,15 @@
-import { TransferOpEvent, assert, assertNotNull } from "@daimo/common";
+import {
+  AddrLabel,
+  TransferOpEvent,
+  assert,
+  assertNotNull,
+  getAccountName,
+} from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
-import { AddrLabel, getAccountName } from ".";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
@@ -82,7 +87,7 @@ export class PushNotifier {
 
       const receivingRequestedMoney =
         log.nonceMetadata != null &&
-        DaimoNonceMetadata.fromHex(log.nonceMetadata).nonceType ===
+        DaimoNonceMetadata.fromHex(log.nonceMetadata)?.nonceType ===
           DaimoNonceType.RequestResponse;
 
       const [a, b] = await Promise.all([

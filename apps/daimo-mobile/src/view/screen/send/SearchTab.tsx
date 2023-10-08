@@ -1,12 +1,13 @@
-import { getAccountName, timeAgo } from "@daimo/common";
+import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
+import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
-import { TextCenter, TextError, TextH3, TextLight } from "../../shared/text";
+import { TextCenter, TextH3, TextLight } from "../../shared/text";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {
@@ -16,7 +17,7 @@ export function SearchTab() {
   return (
     <View style={styles.vertSearch}>
       <InputBig icon="search" value={prefix} onChange={setPrefix} />
-      {res.error && <ErrorRow error={res.error} />}
+      {res.error && <ErrorRowCentered error={res.error} />}
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
@@ -29,17 +30,13 @@ export function SearchTab() {
   );
 }
 
-function ErrorRow({ error }: { error: { message: string } }) {
-  return (
-    <TextCenter>
-      <TextError>{error.message}</TextError>
-    </TextCenter>
-  );
-}
-
 function RecipientRow({ recipient }: { recipient: Recipient }) {
-  const nav = useNav();
-  const pay = useCallback(() => nav.setParams({ recipient }), []);
+  const eAccStr = getEAccountStr(recipient);
+  const nav = useNav<"Send">();
+  const pay = useCallback(
+    () => nav.setParams({ link: { type: "account", account: eAccStr } }),
+    []
+  );
 
   const name = getAccountName(recipient);
   const nowS = Date.now() / 1e3;

@@ -27,7 +27,7 @@ export function Header() {
 function StyleTBD() {
   return (
     <View style={styles.pellet}>
-      <Text style={styles.pelletText}>DESIGN TBD</Text>
+      <Text style={styles.pelletText}>DESIGN SOON</Text>
     </View>
   );
 }
@@ -41,13 +41,13 @@ const styles = StyleSheet.create({
   },
   pellet: {
     borderRadius: 4,
-    backgroundColor: color.bg.lightGray,
+    backgroundColor: color.ivoryDark,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   pelletText: {
     ...ss.text.body,
     fontWeight: "bold",
-    color: color.gray,
+    color: color.grayMid,
   },
 });

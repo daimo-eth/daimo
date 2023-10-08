@@ -7,7 +7,7 @@ public class ExpoEnclaveModule: Module {
     return TARGET_OS_SIMULATOR == 0 && SecureEnclave.isAvailable
   }
 
-  var keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
+  let keyManager: KeyManager = shouldUseSecureEnclave() ? SecureEnclaveKeyManager() : FallbackKeyManager()
 
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
@@ -26,18 +26,6 @@ public class ExpoEnclaveModule: Module {
       }
     }
 
-    AsyncFunction("getBiometricSecurityLevel") { () -> String in
-      if (keyManager is SecureEnclaveKeyManager) {
-        return BiometricSecurityLevel.AVAILABLE.rawValue
-      } else {
-        return BiometricSecurityLevel.NONE.rawValue
-      }
-    }
-
-    AsyncFunction("forceFallbackUsage") { () in
-      keyManager = FallbackKeyManager()
-    }
-
     AsyncFunction("fetchPublicKey") { (accountName: String) throws -> String? in
       return try self.keyManager.fetchPublicKey(accountName: accountName)
     }
@@ -50,8 +38,8 @@ public class ExpoEnclaveModule: Module {
       return try self.keyManager.deleteKeyPair(accountName: accountName)
     }
 
-    AsyncFunction("sign") { (accountName: String, hexMessage: String, biometricPromptCopy: BiometricPromptCopy) throws -> String in
-      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: biometricPromptCopy.usageMessage)
+    AsyncFunction("sign") { (accountName: String, hexMessage: String, promptCopy: PromptCopy) throws -> String in
+      return try self.keyManager.sign(accountName: accountName, hexMessage: hexMessage, usageMessage: promptCopy.usageMessage)
     }
 
     AsyncFunction("verify") { (accountName: String, hexSignature: String, hexMessage: String) throws -> Bool in
@@ -66,12 +54,7 @@ enum HardwareSecurityLevel: String, Enumerable {
   case HARDWARE_ENCLAVE
 }
 
-enum BiometricSecurityLevel: String, Enumerable {
-  case NONE
-  case AVAILABLE
-}
-
-internal struct BiometricPromptCopy: Record {
+internal struct PromptCopy: Record {
   @Field
   var usageMessage: String
 

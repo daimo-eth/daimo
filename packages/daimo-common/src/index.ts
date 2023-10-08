@@ -8,3 +8,4 @@ export * from "./key";
 export * from "./name";
 export * from "./time";
 export * from "./paymaster";
+export * from "./eAccount";

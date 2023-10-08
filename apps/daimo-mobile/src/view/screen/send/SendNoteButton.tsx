@@ -12,12 +12,13 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { useSendAsync } from "../../../action/useSendAsync";
+import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { useAccount } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
@@ -26,13 +27,7 @@ import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
-export function SendNoteButton({
-  dollars,
-  onCreated,
-}: {
-  dollars: number;
-  onCreated: () => void;
-}) {
+export function SendNoteButton({ dollars }: { dollars: number }) {
   const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
   const ephemeralOwner = useMemo(
     () => ephemeralPrivKey && privateKeyToAccount(ephemeralPrivKey).address,
@@ -71,25 +66,23 @@ export function SendNoteButton({
       : undefined;
   const sendDisabled = sendDisabledReason != null || dollars === 0;
 
+  const [, sendViaAppStr] = useAvailMessagingApps();
+
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
         if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         }
-        return `Works like cash, redeemable by recipient\n${
-          dollars <= 0
-            ? ""
-            : `Total incl. fees ${getAmountText({
-                dollars: cost.totalDollars,
-              })}`
-        }`;
+        return `Total incl. fees ${getAmountText({
+          dollars: cost.totalDollars,
+        })}`;
       case "loading":
         return message;
       case "error":
         return <TextError>{message}</TextError>;
       case "success":
-        return "Works like cash, redeemable by recipient";
+        return sendViaAppStr;
       default:
         return null;
     }
@@ -104,6 +97,8 @@ export function SendNoteButton({
     try {
       const link: DaimoLink = {
         type: "note",
+        previewSender: account.name,
+        previewDollars: `${dollars}`,
         ephemeralOwner,
         ephemeralPrivateKey: ephemeralPrivKey,
       };
@@ -138,7 +133,7 @@ export function SendNoteButton({
         return (
           <ButtonBig
             type="primary"
-            title="Create Payment Link"
+            title={`Create ${getAmountText({ dollars })} Link`}
             onPress={exec}
             disabled={sendDisabled}
           />
@@ -157,10 +152,6 @@ export function SendNoteButton({
         return <ButtonBig type="danger" title="Error" disabled />;
     }
   })();
-
-  useEffect(() => {
-    if (status === "success") onCreated();
-  }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;
 }

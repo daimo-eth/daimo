@@ -7,8 +7,6 @@
 //
 //  The common protocol for key management (creation, sign, verify, fetch etc.).
 
-typealias SecurityError = Unmanaged<CFError>
-
 protocol KeyManager {
     func fetchPublicKey(accountName: String) throws -> String?
     func createKeyPair(accountName: String) throws -> String

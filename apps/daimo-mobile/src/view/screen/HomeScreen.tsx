@@ -1,13 +1,14 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback } from "react";
 import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HistoryList, HistoryScreen } from "./HistoryScreen";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
 import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
-import { ButtonBig } from "../shared/Button";
+import { Button, buttonStyles } from "../shared/Button";
 import { Header } from "../shared/Header";
 import { OctName } from "../shared/InputBig";
 import ScrollPellet from "../shared/ScrollPellet";
@@ -25,7 +26,7 @@ export default function HomeScreen() {
   const keySlot = account?.accountKeys.find(
     (keyData) => keyData.pubKey === account?.enclavePubKey
   )?.slot;
-  useWarmCache(account?.enclaveKeyInfo, account?.address, keySlot);
+  useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
 
   const nav = useNav();
   const setIsHistoryOpened = useCallback((isOpened: boolean) => {
@@ -35,10 +36,8 @@ export default function HomeScreen() {
   if (account == null) return null;
 
   return (
-    <View style={ss.container.fullWidthScroll}>
-      <View style={ss.container.marginHNeg16}>
-        <Header />
-      </View>
+    <SafeAreaView style={ss.container.fullWidthScroll}>
+      <Header />
 
       <View style={styles.amountAndButtonsContainer}>
         <AmountAndButtons account={account} />
@@ -55,15 +54,15 @@ export default function HomeScreen() {
         onShowFull={() => setIsHistoryOpened(true)}
         animation="spring"
         extraMarginTop={0}
-        swipeHeight={256}
+        swipeHeight={192}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
-  const goSend = useCallback(() => nav.navigate("Send"), [nav]);
+  const goSend = useCallback(() => nav.navigate("Send", {}), [nav]);
   const goRequest = useCallback(() => nav.navigate("Request"), [nav]);
   const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
 
@@ -109,13 +108,18 @@ function IconButton({
   return (
     <TouchableHighlight
       onPress={handlePress}
-      {...touchHighlightUnderlay.blue}
+      {...touchHighlightUnderlay.subtle}
       style={styles.iconButtonHighlight}
     >
       <View>
-        <ButtonBig type="primary" disabled={disabled} onPress={handlePress}>
+        <Button
+          disabled={disabled}
+          onPress={handlePress}
+          style={iconButtonStyle}
+          touchUnderlay={touchHighlightUnderlay.primary}
+        >
           <TextCenter>{icon}</TextCenter>
-        </ButtonBig>
+        </Button>
         <Spacer h={8} />
         <View style={styles.iconButtonLabel}>
           {disabled && <TextLight>{title}</TextLight>}
@@ -128,13 +132,27 @@ function IconButton({
 
 const screenDimensions = Dimensions.get("screen");
 
+const iconButtonStyle = StyleSheet.create({
+  button: {
+    ...buttonStyles.big.button,
+    backgroundColor: color.primary,
+    height: 72,
+    paddingTop: 24,
+    borderRadius: 72,
+  },
+  title: {
+    ...buttonStyles.big.title,
+    color: color.white,
+  },
+});
+
 const styles = StyleSheet.create({
   amountAndButtons: {
     width: "100%",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: 400,
+    height: screenDimensions.height - 256,
   },
   buttonRow: {
     flexDirection: "row",
@@ -142,8 +160,8 @@ const styles = StyleSheet.create({
   },
   iconButtonHighlight: {
     borderRadius: 16,
-    padding: 12,
-    width: 112,
+    padding: 16,
+    width: 104,
   },
   iconButtonLabel: {
     alignSelf: "stretch",

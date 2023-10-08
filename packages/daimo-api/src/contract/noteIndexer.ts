@@ -1,4 +1,9 @@
-import { DaimoNoteStatus, amountToDollars, assert } from "@daimo/common";
+import {
+  DaimoNoteStatus,
+  amountToDollars,
+  assert,
+  getEAccountStr,
+} from "@daimo/common";
 import { ephemeralNotesABI, ephemeralNotesConfig } from "@daimo/contract";
 import { Address, Log, decodeEventLog, getAbiItem } from "viem";
 
@@ -92,11 +97,18 @@ export class NoteIndexer {
         if (this.notes.get(ephemeralOwner) != null) {
           throw new Error(`dupe NoteCreated: ${ephemeralOwner} ${logInfo()}`);
         }
+        const sender = await this.nameReg.getEAccount(from);
+        const dollars = amountToDollars(amount);
         const newNote: DaimoNoteStatus = {
-          status: "pending",
-          dollars: amountToDollars(amount),
-          link: { type: "note", ephemeralOwner },
-          sender: await this.nameReg.getEAccount(from),
+          status: "confirmed",
+          dollars,
+          link: {
+            type: "note",
+            previewSender: getEAccountStr(sender),
+            previewDollars: dollars,
+            ephemeralOwner,
+          },
+          sender,
         };
         this.notes.set(ephemeralOwner, newNote);
 
@@ -113,7 +125,7 @@ export class NoteIndexer {
           throw new Error(
             `bad NoteRedeemed, missing note: ${ephemeralOwner} ${logInfo()}`
           );
-        } else if (note.status !== "pending") {
+        } else if (note.status !== "confirmed") {
           throw new Error(
             `bad NoteRedeemed, already claimed: ${ephemeralOwner} ${logInfo()}`
           );
@@ -139,10 +151,11 @@ export class NoteIndexer {
     ls.forEach((l) => l(opLogs));
   };
 
-  /** Gets unclaimed note amount, or 0 if note is claimed. */
-  async getNoteStatus(ephemeralOwner: Address): Promise<DaimoNoteStatus> {
+  /** Gets note status, or null if the note is not yet indexed. */
+  async getNoteStatus(
+    ephemeralOwner: Address
+  ): Promise<DaimoNoteStatus | null> {
     const ret = this.notes.get(ephemeralOwner);
-    if (ret == null) throw new Error(`missing note ${ephemeralOwner}`);
-    return ret;
+    return ret || null;
   }
 }

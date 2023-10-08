@@ -1,5 +1,5 @@
-import { EAccount } from "@daimo/api";
 import {
+  EAccount,
   OpStatus,
   TransferOpEvent,
   amountToDollars,
@@ -63,7 +63,7 @@ function maybeSync(fromScratch?: boolean) {
 }
 
 /** Gets latest balance & history for this account, in the background. */
-export function resync(reason: string, fromScratch?: boolean) {
+function resync(reason: string, fromScratch?: boolean) {
   const { currentAccount, setCurrentAccount } = getAccountManager();
   assert(currentAccount != null, `no account, skipping sync: ${reason}`);
 

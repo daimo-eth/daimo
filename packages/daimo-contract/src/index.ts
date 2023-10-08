@@ -1,11 +1,12 @@
 import {
   daimoNameRegistryABI,
-  transparentUpgradeableProxyAddress,
+  daimoNameRegistryProxyAddress,
 } from "./generated";
 
 export const nameRegistryProxyConfig = {
-  address: transparentUpgradeableProxyAddress,
+  address: daimoNameRegistryProxyAddress,
   abi: daimoNameRegistryABI,
 } as const;
+
 export * from "./generated";
 export * from "./tokenMetadata";

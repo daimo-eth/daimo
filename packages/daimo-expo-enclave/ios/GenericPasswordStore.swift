@@ -11,16 +11,27 @@ import Foundation
 import CryptoKit
 import Security
 
-// TODO: change when we update the account contract? just com.daimo
-let KEYCHAIN_STORE_PREFIX = "com.daimoeth.daimo."
+let KEYCHAIN_STORE_PREFIX = "com.daimo."
 
 struct GenericPasswordStore {
     /// Stores a CryptoKit key in the keychain as a generic password.
-    func storeKey<T: GenericPasswordConvertible>(_ key: T, account: String) throws {
+    func storeKey<T: GenericPasswordConvertible>(_ key: T, account: String, requireUserPresence: Bool) throws {
+        var accessError: SecurityError?
+        let accessControl = SecAccessControlCreateWithFlags(
+            kCFAllocatorDefault,
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            requireUserPresence ? [.userPresence] : [],
+            &accessError
+        )!
+
+        if let error = accessError {
+            throw error.takeRetainedValue() as Error
+        }
+
         // Treat the key data as a generic password.
         let query = [kSecClass: kSecClassGenericPassword,
                      kSecAttrAccount: KEYCHAIN_STORE_PREFIX + account,
-                     kSecAttrAccessible: kSecAttrAccessibleWhenUnlocked,
+                     kSecAttrAccessControl: accessControl,
                      kSecUseDataProtectionKeychain: true,
                      kSecValueData: key.rawRepresentation] as [String: Any]
         
@@ -63,7 +74,7 @@ struct GenericPasswordStore {
         try deleteKey(account: account)
         
         // Store and read it back.
-        try storeKey(key, account: account)
+        try storeKey(key, account: account, requireUserPresence: false)
         guard let key: T = try readKey(account: account) else {
             throw KeyStoreError("Failed to locate stored key.")
         }

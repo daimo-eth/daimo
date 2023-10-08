@@ -9,6 +9,7 @@ import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.Signature
 import androidx.biometric.BiometricPrompt
+import androidx.biometric.BiometricManager
 import androidx.core.content.ContextCompat
 import java.util.concurrent.Executor
 import androidx.fragment.app.FragmentActivity
@@ -21,7 +22,6 @@ import expo.modules.core.Promise
 import expo.modules.core.arguments.ReadableArguments
 import java.util.concurrent.atomic.AtomicInteger
 
-// TODO: doc comments
 // Callback invoked when the user has successfully authenticated with biometrics.
 fun completeSignature(incompleteSignature: Signature?, message: String, promise: Promise) {
   if (incompleteSignature == null) {
@@ -32,7 +32,8 @@ fun completeSignature(incompleteSignature: Signature?, message: String, promise:
   promise.resolve(incompleteSignature.sign().toHexString())
 }
 
-class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
+// The key manager we always use on devices using API Level 30 or later
+class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _useStrongbox: Boolean) : KeyManager {
   private val context = _context
   private val moduleRegistry = _moduleRegistry
   private val uiManager = moduleRegistry.getModule(UIManager::class.java)
@@ -87,7 +88,13 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     ks.deleteEntry(accountName)
   }
 
-  override fun sign(accountName: String, hexMessage: String, biometricPromptCopy: ReadableArguments, promise: Promise) {
+  override fun sign(accountName: String, hexMessage: String, promptCopy: ReadableArguments, promise: Promise) {
+    val biometricManager = BiometricManager.from(context)
+    if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS) {
+      promise.reject("ERR_DEVICE_INSECURE", "Pin not set")
+      return
+    }
+    
     val fragmentActivity = getCurrentActivity() as FragmentActivity?
     val failedAttempts = AtomicInteger(0)
     val biometricPrompt = BiometricPrompt(
@@ -113,9 +120,9 @@ class BiometricsKeyManager(_context: Context, _moduleRegistry: ModuleRegistry, _
     })
 
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle(biometricPromptCopy.getString("androidTitle"))
-      .setSubtitle(biometricPromptCopy.getString("usageMessage"))
-      .setNegativeButtonText("Cancel")
+      .setTitle(promptCopy.getString("androidTitle"))
+      .setSubtitle(promptCopy.getString("usageMessage"))
+      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
       .build()
     
     val privateKey = getSigningPrivkey(accountName)!!.private

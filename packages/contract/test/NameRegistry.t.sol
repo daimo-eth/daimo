@@ -2,8 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
 import "../src/DaimoNameRegistry.sol";
+import "../src/DaimoNameRegistryProxy.sol";
 
 // Does nothing. Used to test upgradability.
 contract Brick {
@@ -11,15 +13,41 @@ contract Brick {
         (name); // silence warning
         return address(0xdead);
     }
+
+    /// Test contract, exclude from coverage
+    function test() public {}
+}
+
+contract UpgradeableBrick is UUPSUpgradeable, OwnableUpgradeable {
+    /// UUPSUpsgradeable: only allow owner to upgrade
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal view override onlyOwner {
+        (newImplementation); // No-op; silence unused parameter warning
+    }
+
+    function resolveAddr(bytes32 name) external pure returns (address) {
+        (name); // silence warning
+        return address(0xdead);
+    }
+
+    /// Test contract, exclude from coverage
+    function test() public {}
 }
 
 contract NameRegistryTest is Test {
+    address public implementation;
     DaimoNameRegistry public registry;
 
     event Registered(bytes32 indexed name, address indexed addr);
 
     function setUp() public {
-        registry = new DaimoNameRegistry();
+        implementation = address(new DaimoNameRegistry{salt: 0}());
+        DaimoNameRegistryProxy proxy = new DaimoNameRegistryProxy{salt: 0}(
+            implementation,
+            abi.encodeWithSelector(DaimoNameRegistry.init.selector, hex"")
+        );
+        registry = DaimoNameRegistry(address(proxy));
     }
 
     function testRegister() public {
@@ -55,6 +83,13 @@ contract NameRegistryTest is Test {
         registry.register("newname", address(0x1234));
     }
 
+    function testNullAddrOrName() public {
+        vm.expectRevert("NameRegistry: empty name");
+        registry.register("", address(0x1234));
+        vm.expectRevert("NameRegistry: empty addr");
+        registry.register("foo", address(0));
+    }
+
     function testForceRegister() public {
         registry.register("foo", address(0x123));
         assertEq(registry.resolveName(address(0x123)), bytes32(bytes("foo")));
@@ -75,57 +110,49 @@ contract NameRegistryTest is Test {
     }
 
     function testUpgrade() public {
-        // Construct proxy, same mechanism as the deploy script
-        address initAdmin = address(0x777);
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy{
-            salt: 0
-        }(
-            address(registry), // implementation
-            initAdmin, // admin
-            abi.encodeWithSelector(DaimoNameRegistry.init.selector, hex"")
-        );
-        DaimoNameRegistry proxyNameReg = DaimoNameRegistry(address(proxy));
-
-        // Transparent: admin can ONLY upgrade, everyeone else can ONLY call
-        vm.expectRevert(
-            "TransparentUpgradeableProxy: admin cannot fallback to proxy target"
-        );
-        vm.prank(initAdmin);
-        proxyNameReg.owner();
+        // Registry is a UUPS proxy.
+        // Show that the proxy points to the correct implementation.
+        assertFalse(address(registry) == implementation);
+        assertEq(registry.implementation(), implementation);
 
         // Call owner() to show it's correct
         address initOwner = address(this);
-        assertEq(proxyNameReg.owner(), initOwner);
+        assertEq(registry.owner(), initOwner);
 
         // Transfer ownership
         address newOwner = address(0x5555);
-        proxyNameReg.transferOwnership(newOwner);
-        assertEq(proxyNameReg.owner(), newOwner);
+        registry.transferOwnership(newOwner);
+        assertEq(registry.owner(), newOwner);
 
-        // Transparent proxy: any non-admin can't upgrade, not even the owner
-        vm.expectRevert();
+        // Old owner can't upgrade
+        vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(initOwner);
-        proxy.upgradeTo(address(0x123));
+        registry.upgradeTo(address(0x123));
 
-        vm.expectRevert();
-        vm.prank(newOwner);
-        proxy.upgradeTo(address(0x123));
-
-        // Only the admin can upgrade. Using admin, brick the contract.
+        // Using new owner, try bricking the contract. Can't, not UUPS.
         Brick brick = new Brick();
-        vm.prank(initAdmin);
-        proxy.upgradeTo(address(brick));
-        vm.prank(initAdmin);
-        assertEq(proxy.implementation(), address(brick));
+        vm.expectRevert("ERC1967Upgrade: new implementation is not UUPS");
+        vm.prank(newOwner);
+        registry.upgradeTo(address(brick));
+
+        // Register Alice, show that worked
+        registry.register("alice", address(0x123));
+        assertEq(registry.resolveAddr(bytes32("alice")), address(0x123));
+
+        // Brick the contract
+        UpgradeableBrick upBrick = new UpgradeableBrick();
+        vm.prank(newOwner);
+        registry.upgradeTo(address(upBrick));
 
         // Confirm it's bricked
-        assertEq(proxyNameReg.resolveAddr(bytes32("alice")), address(0xdead));
+        assertEq(registry.resolveAddr(bytes32("alice")), address(0xdead));
 
-        // Unbruck the contract
-        vm.prank(initAdmin);
-        proxy.upgradeTo(address(registry));
+        // Unbrick the contract
+        vm.prank(newOwner);
+        registry.upgradeTo(implementation);
 
-        // Confirm unbricked
-        assertEq(proxyNameReg.resolveAddr(bytes32("alice")), address(0));
+        // Confirm unbricked, state still good
+        assertEq(registry.resolveAddr(bytes32("alice")), address(0x123));
+        assertEq(registry.implementation(), implementation);
     }
 }

@@ -1,5 +1,6 @@
 import {
   DaimoAccountCall,
+  DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
   dollarsToAmount,
@@ -113,14 +114,21 @@ export function createRouter(
           throw new Error(`Invalid Daimo app link: ${url}`);
         }
 
-        switch (link.type) {
-          case "request": {
-            const acc = await nameReg.getEAccount(link.recipient);
-            if (acc.name == null) {
-              throw new Error(`Not found: ${link.recipient}`);
-            }
+        async function getEAccountFromStr(eAccStr: string): Promise<EAccount> {
+          const ret = await nameReg.getEAccountFromStr(eAccStr);
+          if (ret == null) throw new Error(`${eAccStr} not found`);
+          return ret;
+        }
 
-            // Check if fulfilled
+        switch (link.type) {
+          case "account": {
+            const acc = await getEAccountFromStr(link.account);
+            return { link, account: acc };
+          }
+          case "request": {
+            const acc = await getEAccountFromStr(link.recipient);
+
+            // Check if already fulfilled
             const fulfilledNonceMetadata = new DaimoNonceMetadata(
               DaimoNonceType.RequestResponse,
               BigInt(link.requestId)
@@ -129,13 +137,12 @@ export function createRouter(
               fulfilledNonceMetadata
             );
             const relevantTransfers = coinIndexer.filterTransfers({
-              addr: link.recipient,
+              addr: acc.addr,
               txHashes: potentialFulfillTxes,
             });
             const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
             const fulfillTxes = relevantTransfers.filter(
-              (t) =>
-                t.to === link.recipient && BigInt(t.amount) === expectedAmount
+              (t) => t.to === acc.addr && BigInt(t.amount) === expectedAmount
             );
             const fulfilledBy =
               fulfillTxes.length > 0
@@ -153,6 +160,21 @@ export function createRouter(
 
           case "note": {
             const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
+            if (ret == null) {
+              const sender = await nameReg.getEAccountFromStr(
+                link.previewSender
+              );
+              if (sender == null) {
+                throw new Error(`Note sender not found: ${link.previewSender}`);
+              }
+              const pending: DaimoNoteStatus = {
+                status: "pending",
+                link,
+                sender,
+                dollars: link.previewDollars,
+              };
+              return pending;
+            }
             return ret;
           }
 

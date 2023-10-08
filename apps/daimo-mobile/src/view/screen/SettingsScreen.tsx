@@ -1,5 +1,6 @@
 import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
+import * as ExpoEnclave from "@daimo/expo-enclave";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -17,11 +18,7 @@ import {
 import { getDebugLog } from "../../debugLog";
 import { chainConfig } from "../../logic/chainConfig";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
-import {
-  EnclaveSecSummary,
-  deleteEnclaveKey,
-  getEnclaveSec,
-} from "../../logic/enclave";
+import { deleteEnclaveKey, getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/useTime";
@@ -39,7 +36,7 @@ export function SettingsScreen() {
   const clearWallet = useCallback(() => {
     // TODO: warn if any assets might be lost. Show a scary confirmation.
     if (!account) return;
-    const { enclaveKeyInfo } = account;
+    const { enclaveKeyName } = account;
 
     Alert.alert(
       "Clear wallet",
@@ -58,10 +55,8 @@ export function SettingsScreen() {
     );
 
     async function clearWallet() {
-      console.log(
-        `[USER] deleting account; deleting key ${enclaveKeyInfo.name}`
-      );
-      await deleteEnclaveKey(enclaveKeyInfo.name);
+      console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
+      await deleteEnclaveKey(enclaveKeyName);
 
       setAccount(null);
       nav.navigate("Home");
@@ -78,42 +73,48 @@ export function SettingsScreen() {
   if (!account) return null;
 
   return (
-    <ScrollView contentContainerStyle={ss.container.fullWidthModal}>
-      <Spacer h={4} />
-      <View style={ss.container.padH16}>
-        <TextH2>
-          {account.name}
-          <TextBody>
-            {` \u00A0 `}
-            {tokenMetadata.name} · {chainConfig.l2.name}
-          </TextBody>
-        </TextH2>
-      </View>
-      <ButtonSmall onPress={linkToExplorer}>
-        <View>
-          <TextLight>
-            {account.address}
-            {`\u00A0\u00A0`}
-            <Octicons name="link-external" size={16} />
-            {`\u00A0\u00A0`}
-            View{`\u00A0`}on{`\u00a0`}
-            {explorer.name}
-          </TextLight>
+    <View style={styles.scrollWrap}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Spacer h={4} />
+        <View style={ss.container.padH16}>
+          <TextH2>
+            {account.name}
+            <TextBody>
+              {` \u00A0 `}
+              {tokenMetadata.name} · {chainConfig.l2.name}
+            </TextBody>
+          </TextH2>
         </View>
-      </ButtonSmall>
-      <Spacer h={32} />
-      <DevicesInfo {...{ account }} />
-      <Spacer h={32} />
+        <ButtonSmall onPress={linkToExplorer}>
+          <View>
+            <TextLight>
+              {account.address}
+              {`\u00A0\u00A0`}
+              <Octicons name="link-external" size={16} />
+              {`\u00A0\u00A0`}
+              View{`\u00A0`}on{`\u00a0`}
+              {explorer.name}
+            </TextLight>
+          </View>
+        </ButtonSmall>
+        <Spacer h={32} />
+        <DevicesInfo {...{ account }} />
+        <Spacer h={32} />
 
-      <AppInfo {...{ account }} />
-      <Spacer h={32} />
+        <AppInfo {...{ account }} />
+        <Spacer h={32} />
 
-      <View style={ss.container.padH16}>
-        <TextH3>Danger zone</TextH3>
-        <Spacer h={8} />
-        <ButtonMed type="danger" title="Delete Device" onPress={clearWallet} />
-      </View>
-    </ScrollView>
+        <View style={ss.container.padH16}>
+          <TextH3>Danger zone</TextH3>
+          <Spacer h={8} />
+          <ButtonMed
+            type="danger"
+            title="Delete Device"
+            onPress={clearWallet}
+          />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -173,10 +174,10 @@ function DeviceRow({
 }
 
 function AppInfo({ account }: { account: Account }) {
-  const [sec, setSec] = useState<Awaited<ReturnType<typeof getEnclaveSec>>>();
+  const [sec, setSec] = useState<Awaited<ReturnType<typeof getHardwareSec>>>();
 
   useEffect(() => {
-    getEnclaveSec().then(setSec);
+    getHardwareSec().then(setSec);
   }, []);
 
   const enableNotifications = async () => {
@@ -235,17 +236,18 @@ function AppInfo({ account }: { account: Account }) {
   );
 }
 
-function getKeySecDescription(sec: EnclaveSecSummary) {
-  const bio = sec.biometricSecurityLevel === "AVAILABLE" ? "biometrics" : "PIN";
-  switch (sec.hardwareSecurityLevel) {
+function getKeySecDescription(
+  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel
+) {
+  switch (hardwareSecurityLevel) {
     case "SOFTWARE":
-      return `software key, ${bio}`;
+      return "software key";
     case "TRUSTED_ENVIRONMENT":
-      return `Android TEE, ${bio}`;
+      return "Android TEE";
     case "HARDWARE_ENCLAVE":
-      return `secure enclave, ${bio}`;
+      return "secure enclave";
     default:
-      return `${sec.hardwareSecurityLevel}, ${bio}}`;
+      return `${hardwareSecurityLevel}`;
   }
 }
 
@@ -263,10 +265,13 @@ function KV({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  callout: {
-    backgroundColor: color.bg.lightGray,
+  scrollWrap: {
+    flex: 1,
+    backgroundColor: color.white,
+  },
+  scrollContainer: {
     padding: 16,
-    borderRadius: 24,
+    alignItems: "stretch",
   },
   keyValueList: {
     ...ss.container.padH16,

@@ -1,4 +1,5 @@
 import {
+  DaimoAccountStatus,
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
@@ -42,19 +43,21 @@ export default async function LinkPage(props: LinkProps) {
   };
 
   return (
-    <center>
-      <div className="h-16" />
-      <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
+    <main className="max-w-md mx-auto px-4">
+      <center>
+        <div className="h-16" />
+        <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
 
-      <div className="h-12" />
+        <div className="h-12" />
 
-      <H1>{title}</H1>
-      <div className="h-4" />
-      <H2>{description}</H2>
-      {walletAction && <OrConnectWalletStub />}
-      <div className="h-12" />
-      <AppStoreBadge />
-    </center>
+        <H1>{title}</H1>
+        <div className="h-4" />
+        <H2>{description}</H2>
+        {walletAction && <OrConnectWalletStub />}
+        <div className="h-12" />
+        <AppStoreBadge />
+      </center>
+    </main>
   );
 }
 
@@ -106,24 +109,31 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       };
     } else if (link.type === "account") {
       return {
-        title: getAccountName({ addr: link.addr }),
-        description: "Couldn't load account name",
+        title: `${link.account}`,
+        description: "Couldn't load account",
       };
     } else if (link.type === "request") {
       return {
-        title: `Request for $${link.dollars}`,
+        title: `${link.recipient} is requesting $${link.dollars}`,
         description: "Couldn't load request status",
       };
     } else {
       assert(link.type === "note");
       return {
-        title: `Payment ${getAccountName({ addr: link.ephemeralOwner })}`,
+        title: `${link.previewSender} sent ${link.previewDollars}`,
         description: "Couldn't load Payment Link status",
       };
     }
   }
 
   switch (res.link.type) {
+    case "account": {
+      const { account } = res as DaimoAccountStatus;
+      return {
+        title: getAccountName(account),
+        description: "Get Daimo to send or receive payments",
+      };
+    }
     case "request": {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
@@ -145,9 +155,10 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     case "note": {
       const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
       switch (status) {
-        case "pending": {
+        case "pending":
+        case "confirmed": {
           return {
-            title: `${getAccountName(sender)} sent you $${dollars}`,
+            title: `${getAccountName(sender)} sent $${dollars}`,
             description: `Claim on Daimo`,
             walletAction: true,
           };

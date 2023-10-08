@@ -18,7 +18,9 @@ import {
   getAbiItem,
   getAddress,
   hexToString,
+  isAddress,
 } from "viem";
+import { normalize } from "viem/ens";
 
 import { ViemClient } from "../chain";
 
@@ -32,10 +34,12 @@ type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
+  // old notes contract addresses
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
+  "0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce": AddrLabel.PaymentLink,
 };
 specialAddrLabels[ephemeralNotesAddress] = AddrLabel.PaymentLink;
-specialAddrLabels[tokenMetadata.address] = AddrLabel.Paymaster;
+specialAddrLabels[tokenMetadata.paymasterAddress] = AddrLabel.Paymaster;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
@@ -43,6 +47,8 @@ export class NameRegistry {
   private nameToAddr = new Map<string, Address>();
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
+
+  public logs: RegisteredLog[] = [];
 
   constructor(private vc: ViemClient) {}
 
@@ -59,6 +65,8 @@ export class NameRegistry {
 
   /** Parses Registered event logs, first in init(), then on subscription. */
   parseLogs = async (logs: RegisteredLog[]) => {
+    this.logs.push(...logs);
+
     const accounts = logs
       .map((l) => l.args)
       .map((a) => ({
@@ -109,9 +117,14 @@ export class NameRegistry {
     this.cacheAccount({ name, addr: address });
   };
 
-  /** Find wallet address for a given Daimo name, or null if not found. */
+  /** Find wallet address for a given Daimo name, or undefined if not found. */
   resolveName(name: string): Address | undefined {
     return this.nameToAddr.get(name);
+  }
+
+  /** Find name, or undefined if not a Daimo account. */
+  resolveDaimoNameForAddr(addr: Address): string | undefined {
+    return this.addrToName.get(addr);
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */
@@ -129,6 +142,14 @@ export class NameRegistry {
     try {
       console.log(`[NAME-REG] looking up ENS name for ${address}`);
       ensName = (await this.vc.l1Client.getEnsName({ address })) || undefined;
+      // Verify the forward lookup
+      if (ensName != null) {
+        const addr = await this.vc.l1Client.getEnsAddress({ name: ensName });
+        if (addr !== address) {
+          console.warn(`[NAME-REG] bad ENS ${address} > ${ensName} > ${addr}`);
+          ensName = undefined;
+        }
+      }
       console.log(`[NAME-REG] ENS name for ${address}: ${ensName}`);
     } catch (e) {
       console.log(`[NAME-REG] ENS lookup failed for ${address}: ${e}`);
@@ -136,5 +157,24 @@ export class NameRegistry {
 
     // Bare addresses are fine too, ensName can be undefined
     return { addr: address, ensName };
+  }
+
+  /** Gets an Ethereum account given "alice", "bob.eth", or "0x..." */
+  async getEAccountFromStr(eAccStr: string): Promise<EAccount | undefined> {
+    if (eAccStr.includes(".")) {
+      const ensName = normalize(eAccStr);
+      const addr = await this.vc.l1Client.getEnsAddress({ name: ensName });
+      if (addr != null) {
+        return { ensName, addr } as EAccount;
+      }
+    } else if (isAddress(eAccStr)) {
+      const addr = getAddress(eAccStr);
+      return { addr } as EAccount;
+    } else {
+      const daimoAddress = this.resolveName(eAccStr);
+      if (daimoAddress) {
+        return await this.getEAccount(daimoAddress);
+      }
+    }
   }
 }

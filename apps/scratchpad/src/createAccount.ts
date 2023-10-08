@@ -5,10 +5,10 @@ import {
   tokenMetadata,
 } from "@daimo/contract";
 import {
-  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
   SigningCallback,
 } from "@daimo/userop";
 import crypto from "node:crypto";
@@ -21,7 +21,6 @@ import {
   createWalletClient,
   getAddress,
   http,
-  parseAbi,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseGoerli } from "viem/chains";
@@ -73,9 +72,12 @@ export async function createAccount() {
 
     const sigHex = Buffer.from(sigDer).toString("hex");
     console.log(`Signature: ${sigHex}`);
-    return { derSig: sigHex, keySlot: 0 };
+
+    // Valid forever
+    const validUntil = 0;
+
+    return { derSig: sigHex, keySlot: 0, validUntil };
   };
-  const dryRun = false;
 
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
   if (pubKey.length !== 64) {
@@ -113,12 +115,7 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoOpSender.init(
-    address,
-    signer,
-    chain.rpcUrls.public.http[0],
-    dryRun
-  );
+  const account = await DaimoOpSender.init(address, signer);
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 
@@ -146,24 +143,15 @@ export async function createAccount() {
   // Send $0.50 USDC to nibnalin.eth
   const recipient = `0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB`;
   const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
-  const userOp = await account.erc20transfer(recipient, "0.1", {
+  const userOpHash = await account.erc20transfer(recipient, "0.1", {
     nonce,
     chainGasConstants: {
-      // TODO: works for now but we should properly query this rather than hardcode
-      paymasterAndData:
-        "0x13f490FafBb206440F25760A10C21A6220017fFa0000000000000000000000000000000000000000000000000000000000129aa2",
       maxPriorityFeePerGas: "1000000",
       maxFeePerGas: "100000050",
+      estimatedFee: 0.1,
     },
   });
-  console.log("✅ userop accepted by bundler: ", userOp.userOpHash);
-
-  const bundleTxHash = (await userOp.wait())?.transactionHash;
-  if (!bundleTxHash) throw new Error("Bundle failed");
-  console.log(`✅ bundle submitted: ${bundleTxHash}`);
-
-  await waitForTx(publicClient, bundleTxHash as Hex);
-  console.log(`✅ bundle confirmed: ${bundleTxHash}`);
+  console.log("✅ userop accepted by bundler: ", userOpHash);
 }
 
 async function waitForTx(
