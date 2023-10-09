@@ -2,7 +2,7 @@
 
 ### Daimo is a stablecoin wallet
 
-Single stablecoin, single rollup, payments only.
+Single stablecoin, single rollup, payments only. Cross-chain transfers coming soon.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
 leave. You can add multiple devices to secure your account. Under the hood, it's
