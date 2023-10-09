@@ -2,7 +2,7 @@
 
 ### Daimo is a stablecoin wallet
 
-We're starting minimalist. Single stablecoin, single rollup, payments only.
+Single stablecoin, single rollup, payments only. Cross-chain transfers coming soon.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
 leave. You can add multiple devices to secure your account. Under the hood, it's
@@ -59,6 +59,8 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 
 **Daimo is under active development.** Now on testnet, TestFlight, and in Play
 Store open testing.
+
+Veridise's audit report of our codebase is available [here](./audits/2023-10-veridise.pdf).
 
 <details>
 <summary><strong>Architecture</strong></summary>
