@@ -87,9 +87,10 @@ function SendLoadRecipient({ link }: { link: DaimoLink }) {
         break;
       }
       case "request": {
-        // TODO: handle fulfilledBy
+        // TODO: handle fulfilledBy (request already completed)
         const { recipient, requestId } = data as DaimoRequestStatus;
-        nav.setParams({ recipient, requestId });
+        const { dollars } = data.link;
+        nav.setParams({ recipient, requestId, dollars });
         break;
       }
     }
