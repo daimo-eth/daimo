@@ -15,7 +15,7 @@ function FooterNav() {
   return (
     <nav className="flex gap-8 md:gap-16">
       <LinkBold14 href="#faq">FAQ</LinkBold14>
-      <LinkBold14 href="#team">Team</LinkBold14>
+      <LinkBold14 href="/blog">Blog</LinkBold14>
       <LinkBold14 href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
       </LinkBold14>
