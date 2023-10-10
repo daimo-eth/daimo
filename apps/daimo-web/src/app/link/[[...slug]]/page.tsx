@@ -12,6 +12,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 import { AppStoreBadge } from "../../../components/AppStoreBadge";
+import { OrConnectWalletStub } from "../../../components/ConnectWallet";
 import { H1, H2 } from "../../../components/typography";
 import { trpc } from "../../../utils/trpc";
 
@@ -58,15 +59,6 @@ export default async function LinkPage(props: LinkProps) {
         <AppStoreBadge />
       </center>
     </main>
-  );
-}
-
-function OrConnectWalletStub() {
-  return (
-    // eslint-disable-next-line no-script-url
-    <a className="text-primary" href="javascript:alert('Coming soon')">
-      or with any Ethereum wallet
-    </a>
   );
 }
 
