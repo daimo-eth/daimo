@@ -7,12 +7,7 @@ import {
 } from "@daimo/common";
 import { daimoAccountABI, tokenMetadata } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
-import {
-  BundlerJsonRpcProvider,
-  IUserOperationMiddlewareCtx,
-  Presets,
-  UserOperationBuilder,
-} from "userop";
+import { IUserOperationMiddlewareCtx, UserOperationBuilder } from "userop";
 import {
   Address,
   Hex,
@@ -26,7 +21,6 @@ import {
 
 import { DaimoNonce } from "./nonce";
 import { SigningCallback } from "./signingCallback";
-import config from "../config.json";
 
 // Metadata for a userop: nonce and paymaster constant.
 export type DaimoOpMetadata = {
@@ -36,9 +30,6 @@ export type DaimoOpMetadata = {
 
 /** Creates userops from a Daimo account.  */
 export class DaimoOpBuilder extends UserOperationBuilder {
-  /** Connection to the chain */
-  private provider: BundlerJsonRpcProvider;
-
   /** Daimo account address */
   private address: `0x${string}` = "0x";
 
@@ -47,7 +38,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   private constructor(private signer: SigningCallback) {
     super();
-    this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
   }
 
   /** Client is used for simulation. Paymaster pays for userops. */
@@ -64,12 +54,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         sender: instance.address,
         verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
         callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
-      })
-      .useMiddleware(
-        Presets.Middleware.estimateUserOperationGas(instance.provider)
-      )
-      .useMiddleware(async (ctx) => {
-        ctx.op.verificationGasLimit = DEFAULT_USEROP_VERIFICATION_GAS_LIMIT;
       })
       .useMiddleware(instance.signingCallback);
 
