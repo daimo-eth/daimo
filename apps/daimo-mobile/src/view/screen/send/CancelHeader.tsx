@@ -14,14 +14,18 @@ export function CancelHeader({
   hide?: () => void;
 }) {
   return (
-    <ButtonSmall onPress={hide}>
-      <View style={styles.cancelHeader}>
-        <Spacer w={12} />
-        <TextLight>{children}</TextLight>
-        {hide && <Octicons name="x" size={20} color="gray" />}
-        {!hide && <Spacer w={12} />}
-      </View>
-    </ButtonSmall>
+    <View style={styles.cancelHeader}>
+      <Spacer w={64} />
+      <TextLight>{children}</TextLight>
+      {hide && (
+        <ButtonSmall onPress={hide}>
+          <View style={styles.cancelButton}>
+            <Octicons name="x" size={24} color="gray" />
+          </View>
+        </ButtonSmall>
+      )}
+      {!hide && <Spacer w={64} />}
+    </View>
   );
 }
 
@@ -30,6 +34,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingLeft: 8,
+  },
+  cancelButton: {
+    width: 32,
+    height: 40,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

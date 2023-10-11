@@ -46,24 +46,27 @@ export function useNav<
   >();
 }
 
-type HomeStackNavProp = ReturnType<typeof useNav>;
+export type HomeStackNav = ReturnType<typeof useNav>;
 
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
   const nav = useNav();
   const [account] = useAccount();
-  const accountNotNull = account != null;
+  const accountMissing = account == null;
 
   useEffect(() => {
-    if (accountNotNull) {
-      console.log(`[NAV] listening for deep links ${account}`);
-      getInitialURL().then((url) => url && handleDeepLink(nav, url));
-      addEventListener("url", ({ url }) => handleDeepLink(nav, url));
-    }
-  }, [accountNotNull]);
+    if (accountMissing) return;
+    console.log(`[NAV] listening for deep links, account ${account.name}`);
+    getInitialURL().then((url) => {
+      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
+      if (url == null) return;
+      setTimeout(() => handleDeepLink(nav, url), 100);
+    });
+    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+  }, [accountMissing]);
 }
 
-function handleDeepLink(nav: HomeStackNavProp, url: string) {
+export function handleDeepLink(nav: HomeStackNav, url: string) {
   const link = parseDaimoLink(url);
   if (link == null) {
     console.log(`[NAV] skipping unparseable link ${url}`);
@@ -74,7 +77,7 @@ function handleDeepLink(nav: HomeStackNavProp, url: string) {
   goTo(nav, link);
 }
 
-async function goTo(nav: ReturnType<typeof useNav>, link: DaimoLink) {
+async function goTo(nav: HomeStackNav, link: DaimoLink) {
   const { type } = link;
   switch (type) {
     case "account":

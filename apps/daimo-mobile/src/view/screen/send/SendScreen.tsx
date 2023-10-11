@@ -34,14 +34,13 @@ const SegmentedControlFixed = SegmentedControl as any;
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
   const { link, recipient, dollars, requestId } = route.params || {};
-
   return (
     <View style={ss.container.fullWidthSinglePage}>
       <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={128}>
         {!recipient && !link && <SendNav /> /* User picks who to pay */}
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
-          <SendChooseAmount {...{ recipient }} />
+          <SendChooseAmount recipient={recipient} />
         )}
         {recipient && dollars != null && (
           <SendConfirm {...{ recipient, dollars, requestId }} />
@@ -87,9 +86,10 @@ function SendLoadRecipient({ link }: { link: DaimoLink }) {
         break;
       }
       case "request": {
-        // TODO: handle fulfilledBy
+        // TODO: handle fulfilledBy (request already completed)
         const { recipient, requestId } = data as DaimoRequestStatus;
-        nav.setParams({ recipient, requestId });
+        const { dollars } = data.link;
+        nav.setParams({ recipient, requestId, dollars });
         break;
       }
     }
@@ -148,11 +148,12 @@ function SendConfirm({
   requestId?: `${bigint}`;
 }) {
   const nDollars = parseFloat(dollars);
+  const isRequest = requestId != null;
   return (
     <View>
       <Spacer h={32} />
       <AmountChooser
-        actionDesc={<DescSendToRecipient recipient={recipient} />}
+        actionDesc={<DescSendToRecipient {...{ recipient, isRequest }} />}
         dollars={nDollars}
         onSetDollars={useCallback(() => {}, [])}
         disabled
@@ -164,14 +165,20 @@ function SendConfirm({
   );
 }
 
-function DescSendToRecipient({ recipient }: { recipient: Recipient }) {
+function DescSendToRecipient({
+  recipient,
+  isRequest,
+}: {
+  recipient: Recipient;
+  isRequest?: boolean;
+}) {
   // Show who we're sending to
   const disp = getAccountName(recipient);
 
   return (
     <View>
       <TextCenter>
-        <TextBody>Sending to</TextBody>
+        <TextBody>{isRequest ? "Requested by" : "Sending to"}</TextBody>
       </TextCenter>
       <TextCenter>
         <TextH2>{disp}</TextH2>
