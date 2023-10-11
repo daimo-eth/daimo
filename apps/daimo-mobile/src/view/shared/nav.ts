@@ -56,8 +56,12 @@ export function useInitNavLinks() {
 
   useEffect(() => {
     if (accountMissing) return;
-    console.log(`[NAV] listening for deep links ${account}`);
-    getInitialURL().then((url) => url && handleDeepLink(nav, url));
+    console.log(`[NAV] listening for deep links, account ${account.name}`);
+    getInitialURL().then((url) => {
+      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
+      if (url == null) return;
+      setTimeout(() => handleDeepLink(nav, url), 100);
+    });
     addEventListener("url", ({ url }) => handleDeepLink(nav, url));
   }, [accountMissing]);
 }
