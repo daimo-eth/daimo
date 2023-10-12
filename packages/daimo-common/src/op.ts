@@ -58,6 +58,11 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** Userop nonce, if this transfer occurred in a userop */
   nonceMetadata?: Hex;
+
+  /* Fees paid to paymaster for corresponding userop, in USDC amount.
+   * Estimate if pending, actual if not. 0 if paymaster wasn't used.
+   */
+  feeAmount?: number;
 }
 
 interface OpEventBase {

@@ -2,7 +2,7 @@ import { OpStatus, TransferOpEvent } from "@daimo/common";
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
 import { Address } from "viem";
 
-import { CoinIndexer } from "./coinIndexer";
+import { CoinIndexer, TransferLog } from "./coinIndexer";
 import { ViemClient } from "../chain";
 
 export type FaucetStatus =
@@ -22,9 +22,9 @@ export class Faucet {
     this.coinIndexer.pipeAllTransfers(this.parseLogs);
   }
 
-  parseLogs = (logs: TransferOpEvent[]) => {
+  parseLogs = (logs: TransferLog[]) => {
     for (const log of logs) {
-      const { from, to } = log;
+      const { from, to } = log.args;
       if (to != null && from === this.vc.walletClient.account.address) {
         this.sent.add(to);
       }

@@ -143,12 +143,8 @@ async function syncAccount(
   );
 
   // Match pending transfers
-  const nowS = Date.now() / 1e3;
-  const maxPendingAgeS = 5 * 60; // 5 mins
   const stillPending = oldPending.filter(
-    (t) =>
-      syncFindSameOp(t, recentTransfers) == null &&
-      nowS - t.timestamp < maxPendingAgeS
+    (t) => syncFindSameOp(t, recentTransfers) == null
   );
   recentTransfers.push(...stillPending);
 
@@ -252,6 +248,7 @@ function addTransfers(
       blockHash: transfer.blockHash,
       logIndex: transfer.logIndex,
       opHash: transfer.opHash,
+      feeAmount: transfer.feeAmount,
     });
   }
 

@@ -1,4 +1,4 @@
-import { EAccount, OpEvent } from "@daimo/common";
+import { EAccount, OpEvent, dollarsToAmount } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoOpSender, SigningCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -49,6 +49,7 @@ export function useSendAsync({
     if (pendingOp) {
       pendingOp.opHash = handle as Hex;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
+      pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
       const newAccount = {
         ...account,

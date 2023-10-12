@@ -1,6 +1,5 @@
 import {
   AddrLabel,
-  TransferOpEvent,
   assert,
   assertNotNull,
   getAccountName,
@@ -10,10 +9,11 @@ import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
-import { CoinIndexer } from "./contract/coinIndexer";
+import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { KeyRegistry } from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer, NoteOpLog } from "./contract/noteIndexer";
+import { OpIndexer } from "./contract/opIndexer";
 import { DB } from "./db/db";
 
 const pushEnabled = process.env.DAIMO_PUSH_ENABLED === "true";
@@ -30,6 +30,7 @@ export class PushNotifier {
     private coinIndexer: CoinIndexer,
     private nameReg: NameRegistry,
     private noteIndexer: NoteIndexer,
+    private opIndexer: OpIndexer,
     private keyReg: KeyRegistry, // TODO: notify devices on key add/remove
     private db: DB
   ) {}
@@ -53,7 +54,7 @@ export class PushNotifier {
     this.maybeSendNotifications(messages);
   };
 
-  private handleTransfers = async (logs: TransferOpEvent[]) => {
+  private handleTransfers = async (logs: TransferLog[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
     this.maybeSendNotifications(messages);
@@ -72,34 +73,40 @@ export class PushNotifier {
     }
   }
 
-  async getPushMessagesFromTransfers(logs: TransferOpEvent[]) {
+  async getPushMessagesFromTransfers(logs: TransferLog[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      const { from, to, amount } = log;
+      const { from, to, value } = log.args;
+      const amount = Number(value);
       if (!from || !to || !amount) {
         console.warn(`[PUSH] invalid transfer log: ${JSON.stringify(log)}`);
         continue;
       }
-      if (log.txHash == null) {
+      if (log.transactionHash == null) {
         console.warn(`[PUSH] skipping unconfirmed tx: ${JSON.stringify(log)}`);
         continue;
       }
 
+      const nonceMetadata = await this.opIndexer.fetchNonceMetadata(
+        log.transactionHash,
+        log.logIndex
+      );
+
       const receivingRequestedMoney =
-        log.nonceMetadata != null &&
-        DaimoNonceMetadata.fromHex(log.nonceMetadata)?.nonceType ===
+        nonceMetadata !== undefined &&
+        DaimoNonceMetadata.fromHex(nonceMetadata)?.nonceType ===
           DaimoNonceType.RequestResponse;
 
       const [a, b] = await Promise.all([
         this.getPushMessagesFromTransfer(
-          log.txHash,
+          log.transactionHash,
           from,
           to,
           -BigInt(amount),
           false
         ),
         this.getPushMessagesFromTransfer(
-          log.txHash,
+          log.transactionHash,
           to,
           from,
           BigInt(amount),
@@ -173,7 +180,7 @@ export class PushNotifier {
     if (value < 0) {
       body = `You sent ${dollars} ${symbol} to ${otherStr}`;
     } else if (receivingRequestedMoney) {
-      body = `${otherStr} accepted your ${dollars} ${symbol} request`;
+      body = `${otherStr} fulfilled your ${dollars} ${symbol} request`;
     } else {
       body = `You received ${dollars} ${symbol} from ${otherStr}`;
     }
