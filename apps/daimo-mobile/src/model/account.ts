@@ -107,12 +107,6 @@ class AccountManager {
     this.listeners.delete(listener);
   }
 
-  addPendingOp(op: TransferOpEvent) {
-    if (!this.currentAccount) return;
-    this.currentAccount.recentTransfers.push(op);
-    this.setCurrentAccount(this.currentAccount);
-  }
-
   setCurrentAccount = (account: Account | null) => {
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
 

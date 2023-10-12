@@ -197,17 +197,7 @@ export function syncFindSameOp(
   op: TransferOpEvent,
   ops: TransferOpEvent[]
 ): TransferOpEvent | null {
-  // TODO: we need a clean way to get the userop hash (or transaction hash) for
-  // a given log. Should not need any fuzzy matching.
-  return (
-    ops.find(
-      (r) =>
-        op.from === r.from &&
-        op.to === r.to &&
-        op.amount === r.amount &&
-        Math.abs(r.timestamp - op.timestamp) < 600
-    ) || null
-  );
+  return ops.find((r) => op.opHash === r.opHash) || null;
 }
 
 /** Update contacts based on recent interactions */
@@ -261,6 +251,7 @@ function addTransfers(
       blockNumber: transfer.blockNumber,
       blockHash: transfer.blockHash,
       logIndex: transfer.logIndex,
+      opHash: transfer.opHash,
     });
   }
 

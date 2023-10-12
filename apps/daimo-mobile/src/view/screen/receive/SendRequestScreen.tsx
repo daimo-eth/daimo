@@ -31,11 +31,15 @@ export default function SendRequestScreen() {
   );
   const nav = useNav();
   const trackRequest = (requestId: `${bigint}`) => {
-    account.trackedRequests.push({
-      requestId,
-      amount: `${dollarsToAmount(dollars)}`,
-    });
-    setAccount(account);
+    const newAccount = { ...account };
+    newAccount.trackedRequests = [
+      ...account.trackedRequests,
+      {
+        requestId,
+        amount: `${dollarsToAmount(dollars)}`,
+      },
+    ];
+    setAccount(newAccount);
   };
 
   const textInputRef = useRef<TextInput>(null);

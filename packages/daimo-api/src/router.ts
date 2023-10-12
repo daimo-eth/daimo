@@ -234,10 +234,18 @@ export function createRouter(
         // TODO: get userops, including reverted ones. Show failed sends.
 
         // Get successful transfers since sinceBlockNum
-        const transferLogs = coinIndexer.filterTransfers({
+        const transferLogsWithoutOpHash = coinIndexer.filterTransfers({
           addr: address,
           sinceBlockNum: BigInt(sinceBlockNum),
         });
+        const transferLogs = transferLogsWithoutOpHash.map((log) => ({
+          ...log,
+          opHash:
+            log.txHash && log.logIndex
+              ? opIndexer.fetchUserOpLog(log.txHash, log.logIndex)?.args
+                  .userOpHash
+              : undefined,
+        }));
 
         console.log(
           `[API] getAccountHist: ${transferLogs.length} logs for ${address} since ${sinceBlockNum}`
