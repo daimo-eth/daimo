@@ -9,7 +9,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { addEventListener, getInitialURL } from "expo-linking";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";
@@ -54,14 +54,21 @@ export function useInitNavLinks() {
   const [account] = useAccount();
   const accountMissing = account == null;
 
+  // Handle the link that opened this app, if any.
+  const openedInitialURL = useRef(false);
+
   useEffect(() => {
     if (accountMissing) return;
     console.log(`[NAV] listening for deep links, account ${account.name}`);
+
     getInitialURL().then((url) => {
-      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
       if (url == null) return;
+      if (openedInitialURL.current) return;
+      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
       setTimeout(() => handleDeepLink(nav, url), 100);
+      openedInitialURL.current = true;
     });
+
     addEventListener("url", ({ url }) => handleDeepLink(nav, url));
   }, [accountMissing]);
 }

@@ -5,7 +5,8 @@
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "scripts": {
-    "codegen": "wagmi generate && ts-node script/fetchTokenMetadata.ts",
+    "codegen": "wagmi generate",
+    "fetch-token": "ts-node script/fetchTokenMetadata.ts",
     "build": "tsc"
   },
   "author": "",

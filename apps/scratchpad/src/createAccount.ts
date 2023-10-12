@@ -30,14 +30,6 @@ export function createAccountDesc() {
 }
 
 export async function createAccount() {
-  // TODO: try paymaster once it supports Base Goerli.
-  //
-  // Pimlico paymaster, uses ethers
-  //   const provider = new StaticJsonRpcProvider("https://goerli.base.org");
-  //   const erc20Paymaster = await getERC20Paymaster(provider, "USDC");
-  //   const paymasterAddr = erc20Paymaster.contract.address as Address;
-  //   console.log(`Pimlico paymaster: ${paymasterAddr}`);
-
   // Viem
   const chain = baseGoerli;
   const publicClient = createPublicClient({ chain, transport: http() });
