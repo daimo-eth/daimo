@@ -79,8 +79,9 @@ function NoteDisplay({
 
   // Signature to claim the note
   const ephemeralSignature = useEphemeralSignature(
-    ephemeralPrivateKey,
-    account.address
+    noteStatus.sender.addr,
+    account.address,
+    ephemeralPrivateKey
   );
 
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);

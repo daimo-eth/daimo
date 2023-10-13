@@ -19,6 +19,11 @@ const nextConfig = {
       test: /\.md$/,
       type: "asset/source",
     });
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      loader: "ts-loader",
+      exclude: /node_modules/,
+    });
     return config;
   },
 };

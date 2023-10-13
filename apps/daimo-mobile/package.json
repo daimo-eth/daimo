@@ -73,7 +73,7 @@
     "react-native-svg": "13.9.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.6.0"
+    "viem": "^1.16.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

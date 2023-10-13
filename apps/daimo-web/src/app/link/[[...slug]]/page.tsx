@@ -12,7 +12,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 import { AppStoreBadge } from "../../../components/AppStoreBadge";
-import { OrConnectWalletStub } from "../../../components/ConnectWallet";
+import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { H1, H2 } from "../../../components/typography";
 import { trpc } from "../../../utils/trpc";
 
@@ -24,7 +24,7 @@ type LinkProps = {
 type TitleDesc = {
   title: string;
   description: string;
-  walletAction?: boolean;
+  walletActionLinkStatus?: DaimoLinkStatus;
 };
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN;
@@ -38,7 +38,9 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function LinkPage(props: LinkProps) {
-  const { title, description, walletAction } = (await loadTitleDesc(props)) || {
+  const { title, description, walletActionLinkStatus } = (await loadTitleDesc(
+    props
+  )) || {
     title: "Daimo",
     description: "Experimental stablecoin wallet",
   };
@@ -54,7 +56,9 @@ export default async function LinkPage(props: LinkProps) {
         <H1>{title}</H1>
         <div className="h-4" />
         <H2>{description}</H2>
-        {walletAction && <OrConnectWalletStub />}
+        {walletActionLinkStatus && (
+          <PerformWalletAction linkStatus={walletActionLinkStatus} />
+        )}
         <div className="h-12" />
         <AppStoreBadge />
       </center>
@@ -106,13 +110,17 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       };
     } else if (link.type === "request") {
       return {
-        title: `${link.recipient} is requesting $${link.dollars}`,
+        title: `${link.recipient} is requesting $${Number(link.dollars).toFixed(
+          2
+        )}`,
         description: "Couldn't load request status",
       };
     } else {
       assert(link.type === "note");
       return {
-        title: `${link.previewSender} sent ${link.previewDollars}`,
+        title: `${link.previewSender} sent $${Number(
+          link.previewDollars
+        ).toFixed(2)}`,
         description: "Couldn't load Payment Link status",
       };
     }
@@ -133,7 +141,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
         return {
           title: `${name} is requesting $${res.link.dollars}`,
           description: "Pay via Daimo",
-          walletAction: true,
+          walletActionLinkStatus: res,
         };
       } else {
         return {
@@ -152,7 +160,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
           return {
             title: `${getAccountName(sender)} sent $${dollars}`,
             description: `Claim on Daimo`,
-            walletAction: true,
+            walletActionLinkStatus: res,
           };
         }
         case "claimed": {
