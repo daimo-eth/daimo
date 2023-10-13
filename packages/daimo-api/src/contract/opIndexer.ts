@@ -59,18 +59,30 @@ export class OpIndexer {
   };
 
   /**
-   * Interpret a (txHash, queryLogIndex) as having originated from a Daimo Account userop and fetch the nonce metadata of it.
+   * Interpret a (txHash, queryLogIndex) as having originated from a userop and fetch the userop log of it.
    */
-  fetchNonceMetadata(txHash: Hex, queryLogIndex: number): Hex | undefined {
+  fetchUserOpLog(
+    txHash: Hex,
+    queryLogIndex: number
+  ): userOperationLog | undefined {
     const possibleLogs = this.txHashToSortedUserOps.get(txHash) || [];
     for (const log of possibleLogs) {
       if (log.logIndex > queryLogIndex) {
-        return DaimoNonce.fromHex(
-          numberToHex(log.args.nonce, { size: 32 })
-        )?.metadata.toHex();
+        return log;
       }
     }
     return undefined;
+  }
+
+  /**
+   * Interpret a (txHash, queryLogIndex) as having originated from a Daimo Account userop and fetch the nonce metadata of it.
+   */
+  fetchNonceMetadata(txHash: Hex, queryLogIndex: number): Hex | undefined {
+    const log = this.fetchUserOpLog(txHash, queryLogIndex);
+    if (!log) return undefined;
+    return DaimoNonce.fromHex(
+      numberToHex(log.args.nonce, { size: 32 })
+    )?.metadata.toHex();
   }
 
   /**

@@ -1,4 +1,4 @@
-import { AddrLabel } from "@daimo/common";
+import { AddrLabel, assert } from "@daimo/common";
 import { tokenMetadata } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
@@ -8,10 +8,9 @@ import { Address, getAddress } from "viem";
 
 import { chainConfig } from "../../../logic/chainConfig";
 import { rpcHook } from "../../../logic/trpc";
-import { getAccountManager, useAccount } from "../../../model/account";
+import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { cacheEAccounts } from "../../shared/addr";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
 
@@ -39,6 +38,9 @@ export default function DepositScreen() {
 
 /** Request token from testnet faucet. */
 function TestnetFaucet({ recipient }: { recipient: Address }) {
+  const [account, setAccount] = useAccount();
+  assert(account != null);
+
   const faucetStatus = rpcHook.testnetFaucetStatus.useQuery({ recipient });
 
   const mutation = rpcHook.testnetRequestFaucet.useMutation();
@@ -49,10 +51,15 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   // Show faucet payment in history promptly
   useEffect(() => {
     if (!mutation.isSuccess) return;
-    getAccountManager().addPendingOp(mutation.data);
-    cacheEAccounts([
-      { addr: getAddress(mutation.data.from), label: AddrLabel.Faucet },
-    ]);
+    const newAccount = {
+      ...account,
+      recentTransfers: [...account.recentTransfers, mutation.data],
+      namedAccounts: [
+        ...account.namedAccounts,
+        { addr: getAddress(mutation.data.from), label: AddrLabel.Faucet },
+      ],
+    };
+    setAccount(newAccount);
   }, [mutation.isSuccess]);
 
   // Display

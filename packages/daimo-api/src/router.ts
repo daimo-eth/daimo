@@ -3,6 +3,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
+  TransferOpEvent,
   dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
@@ -234,10 +235,20 @@ export function createRouter(
         // TODO: get userops, including reverted ones. Show failed sends.
 
         // Get successful transfers since sinceBlockNum
-        const transferLogs = coinIndexer.filterTransfers({
+        const transferLogsWithoutOpHash = coinIndexer.filterTransfers({
           addr: address,
           sinceBlockNum: BigInt(sinceBlockNum),
         });
+
+        const getOp = (log: TransferOpEvent) =>
+          log.txHash && log.logIndex
+            ? opIndexer.fetchUserOpLog(log.txHash, log.logIndex)
+            : undefined;
+
+        const transferLogs = transferLogsWithoutOpHash.map((log) => ({
+          ...log,
+          opHash: getOp(log)?.args.userOpHash,
+        }));
 
         console.log(
           `[API] getAccountHist: ${transferLogs.length} logs for ${address} since ${sinceBlockNum}`
