@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address, getAddress } from "viem";
 
+import { CBPayWebView } from "./OnrampCBPay";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
@@ -14,16 +15,35 @@ import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
 
 export default function DepositScreen() {
+  const [onramp, setOnramp] = useState<"cbpay" | null>(null);
+  const exitOnramp = () => {
+    // TODO: add a placeholder "penidng op" for the onramp transfer
+    // Onramp doesn't give us the amount, and tx may be sent later
+    setOnramp(null);
+  };
+
   const [account] = useAccount();
   if (account == null) return null;
 
   const { chainL2, tokenSymbol } = chainConfig;
+  // Overwrite to test CBPay
+  const testnet = chainL2.testnet;
+
+  if (onramp === "cbpay") {
+    return <CBPayWebView destAddress={account.address} onExit={exitOnramp} />;
+  }
 
   return (
     <View style={styles.vertOuter}>
-      {chainL2.testnet && <TestnetFaucet recipient={account.address} />}
-      {chainL2.testnet && <Spacer h={32} />}
-      <OnrampStub />
+      {testnet && <TestnetFaucet recipient={account.address} />}
+      {testnet && <Spacer h={32} />}
+      {!testnet && (
+        <ButtonMed
+          type="primary"
+          title="Deposit from Coinbase"
+          onPress={() => setOnramp("cbpay")}
+        />
+      )}
       <Spacer h={32} />
       <TextBody>
         <TextBold>
@@ -110,16 +130,6 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
         disabled={!canRequest}
       />
     </View>
-  );
-}
-
-/** Coming soon: onramp, eg Coinbase Pay */
-function OnrampStub() {
-  return (
-    <TextBody>
-      <TextBold>On-ramp goes here.</TextBold> Soon, we'll link to exchanges like
-      Coinbase so that you can deposit money from a bank account.
-    </TextBody>
   );
 }
 
