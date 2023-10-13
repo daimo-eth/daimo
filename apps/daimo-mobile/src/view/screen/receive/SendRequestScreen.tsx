@@ -31,14 +31,16 @@ export default function SendRequestScreen() {
   );
   const nav = useNav();
   const trackRequest = (requestId: `${bigint}`) => {
-    const newAccount = { ...account };
-    newAccount.trackedRequests = [
-      ...account.trackedRequests,
-      {
-        requestId,
-        amount: `${dollarsToAmount(dollars)}`,
-      },
-    ];
+    const newAccount = {
+      ...account,
+      trackedRequests: [
+        ...account.trackedRequests,
+        {
+          requestId,
+          amount: `${dollarsToAmount(dollars)}` as `${bigint}`,
+        },
+      ],
+    };
     setAccount(newAccount);
   };
 

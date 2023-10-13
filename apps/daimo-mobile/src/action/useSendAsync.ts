@@ -49,12 +49,12 @@ export function useSendAsync({
     if (pendingOp) {
       pendingOp.opHash = handle as Hex;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
-      const newAccount = { ...account };
-      newAccount.recentTransfers = [...account.recentTransfers, pendingOp];
-      newAccount.namedAccounts = [
-        ...account.namedAccounts,
-        ...(namedAccounts || []),
-      ];
+
+      const newAccount = {
+        ...account,
+        recentTransfers: [...account.recentTransfers, pendingOp],
+        namedAccounts: [...account.namedAccounts, ...(namedAccounts || [])],
+      };
 
       // TODO: add pending device add/removes
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);

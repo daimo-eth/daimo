@@ -51,12 +51,14 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
   // Show faucet payment in history promptly
   useEffect(() => {
     if (!mutation.isSuccess) return;
-    const newAccount = { ...account };
-    newAccount.recentTransfers = [...account.recentTransfers, mutation.data];
-    newAccount.namedAccounts = [
-      ...account.namedAccounts,
-      { addr: getAddress(mutation.data.from), label: AddrLabel.Faucet },
-    ];
+    const newAccount = {
+      ...account,
+      recentTransfers: [...account.recentTransfers, mutation.data],
+      namedAccounts: [
+        ...account.namedAccounts,
+        { addr: getAddress(mutation.data.from), label: AddrLabel.Faucet },
+      ],
+    };
     setAccount(newAccount);
   }, [mutation.isSuccess]);
 

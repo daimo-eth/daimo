@@ -3,6 +3,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
+  TransferOpEvent,
   dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
@@ -238,13 +239,15 @@ export function createRouter(
           addr: address,
           sinceBlockNum: BigInt(sinceBlockNum),
         });
+
+        const getOp = (log: TransferOpEvent) =>
+          log.txHash && log.logIndex
+            ? opIndexer.fetchUserOpLog(log.txHash, log.logIndex)
+            : undefined;
+
         const transferLogs = transferLogsWithoutOpHash.map((log) => ({
           ...log,
-          opHash:
-            log.txHash && log.logIndex
-              ? opIndexer.fetchUserOpLog(log.txHash, log.logIndex)?.args
-                  .userOpHash
-              : undefined,
+          opHash: getOp(log)?.args.userOpHash,
         }));
 
         console.log(
