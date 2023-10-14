@@ -141,6 +141,7 @@ export class CoinIndexer {
 
   /* Attach fee amounts to transfer ops and filter out transfers involving
    * paymaster.
+   * TODO: unit test this function
    */
   private attachFeeAmounts(
     transferOpsIncludingPaymaster: TransferOpEvent[]
@@ -150,15 +151,13 @@ export class CoinIndexer {
     for (const op of transferOpsIncludingPaymaster) {
       if (op.opHash === undefined) continue;
 
-      if (!opHashToFee.has(op.opHash)) {
-        opHashToFee.set(op.opHash, 0);
-      }
+      const prevFee = opHashToFee.get(op.opHash) || 0;
 
       if (op.to === tokenMetadata.paymasterAddress) {
-        opHashToFee.set(op.opHash, opHashToFee.get(op.opHash)! + op.amount);
+        opHashToFee.set(op.opHash, prevFee + op.amount);
       } else if (op.from === tokenMetadata.paymasterAddress) {
         // Account for fee refund
-        opHashToFee.set(op.opHash, opHashToFee.get(op.opHash)! - op.amount);
+        opHashToFee.set(op.opHash, prevFee - op.amount);
       }
     }
 

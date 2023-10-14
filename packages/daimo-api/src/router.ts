@@ -3,7 +3,6 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
-  TransferOpEvent,
   dollarsToAmount,
   hasAccountName,
   parseDaimoLink,
