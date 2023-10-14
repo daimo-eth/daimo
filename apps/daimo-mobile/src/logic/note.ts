@@ -10,11 +10,9 @@ export function useEphemeralSignature(
   const [ephemeralSignature, setEphemeralSignature] = useState<Hex>("0x");
 
   useEffect(() => {
-    (async () => {
-      setEphemeralSignature(
-        await getNoteClaimSignature(sender, recipient, ephemeralPrivateKey)
-      );
-    })();
+    getNoteClaimSignature(sender, recipient, ephemeralPrivateKey).then(
+      setEphemeralSignature
+    );
   }, [ephemeralPrivateKey]);
 
   return ephemeralSignature;
