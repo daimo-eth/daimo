@@ -4,7 +4,8 @@ import {
   guessTimestampFromNum,
 } from "@daimo/common";
 import { erc20ABI, tokenMetadata } from "@daimo/contract";
-import { Address, Hex, Log, getAbiItem } from "viem";
+import { DaimoNonce } from "@daimo/userop";
+import { Address, Hex, Log, getAbiItem, numberToHex } from "viem";
 
 import { OpIndexer } from "./opIndexer";
 import { ViemClient } from "../chain";
@@ -20,9 +21,9 @@ export type TransferLog = Log<
 
 /* USDC or testUSDC stablecoin contract. Tracks transfers. */
 export class CoinIndexer {
-  private allTransfers: TransferOpEvent[] = [];
+  private allTransfers: TransferLog[] = [];
 
-  private listeners: ((logs: TransferOpEvent[]) => void)[] = [];
+  private listeners: ((logs: TransferLog[]) => void)[] = [];
 
   constructor(private client: ViemClient, private opIndexer: OpIndexer) {}
 
@@ -39,9 +40,8 @@ export class CoinIndexer {
   private parseLogs = (logs: TransferLog[]) => {
     if (logs.length === 0) return;
 
-    const ops = logs.map((log) => this.logToTransferOp(log));
-    this.allTransfers.push(...ops);
-    this.listeners.forEach((l) => l(ops));
+    this.allTransfers.push(...logs);
+    this.listeners.forEach((l) => l(logs));
   };
 
   /** Get balance as of a block height. */
@@ -57,22 +57,25 @@ export class CoinIndexer {
   }
 
   /** Listener invoked for all past coin transfers, then for new ones. */
-  pipeAllTransfers(listener: (logs: TransferOpEvent[]) => void) {
+  pipeAllTransfers(listener: (logs: TransferLog[]) => void) {
     listener(this.allTransfers);
     this.addListener(listener);
   }
 
   /** Listener is invoked for all new coin transfers. */
-  addListener(listener: (logs: TransferOpEvent[]) => void) {
+  addListener(listener: (logs: TransferLog[]) => void) {
     this.listeners.push(listener);
   }
 
   /** Unsubscribe from new coin transfers. */
-  removeListener(listener: (logs: TransferOpEvent[]) => void) {
+  removeListener(listener: (logs: TransferLog[]) => void) {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  /** Returns all transfers from or to a given address */
+  /**
+   * Returns all transfer events from or to a given address,
+   * with fees included and excluding paymaster transfers.
+   */
   filterTransfers({
     addr,
     sinceBlockNum,
@@ -82,42 +85,42 @@ export class CoinIndexer {
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
   }): TransferOpEvent[] {
-    let ret = this.allTransfers.filter(
-      (log) => log.from === addr || log.to === addr
+    let relevantTransfers = this.allTransfers.filter(
+      (log) => log.args.from === addr || log.args.to === addr
     );
     if (sinceBlockNum) {
-      ret = ret.filter((log) => (log.blockNumber || 0n) >= sinceBlockNum);
+      relevantTransfers = relevantTransfers.filter(
+        (log) => (log.blockNumber || 0n) >= sinceBlockNum
+      );
     }
     if (txHashes !== undefined) {
-      ret = ret.filter((log) => txHashes.includes(log.txHash || "0x"));
+      relevantTransfers = relevantTransfers.filter((log) =>
+        txHashes.includes(log.transactionHash || "0x")
+      );
     }
-    // HACK: Ignore paymaster transfers for now
-    // TODO: Stop doing that and show them in UI
-    ret = ret.filter(
-      (log) =>
-        log.from !== tokenMetadata.paymasterAddress &&
-        log.to !== tokenMetadata.paymasterAddress
+
+    const transferOpsIncludingPaymaster = relevantTransfers.map((log) =>
+      this.attachTransferOpProperties(log)
     );
 
-    return ret;
+    const transferOps = this.attachFeeAmounts(transferOpsIncludingPaymaster);
+
+    return transferOps;
   }
 
-  private logToTransferOp(log: TransferLog): TransferOpEvent {
+  /* Populates atomic properties of logs to convert it Op Event.
+   * Does not account for fees since they involve multiple logs.
+   */
+  private attachTransferOpProperties(log: TransferLog): TransferOpEvent {
     const { blockNumber, blockHash, logIndex, transactionHash } = log;
     const { from, to, value } = log.args;
-    const nonceMetadata = this.opIndexer.fetchNonceMetadata(
-      transactionHash,
-      logIndex
-    );
-
-    if (
-      blockNumber == null ||
-      blockHash == null ||
-      logIndex == null ||
-      transactionHash == null
-    ) {
-      throw new Error(`pending log ${JSON.stringify(log)}`);
-    }
+    const userOp = this.opIndexer.fetchUserOpLog(transactionHash, logIndex);
+    const opHash = userOp?.args.userOpHash;
+    const nonceMetadata = userOp
+      ? DaimoNonce.fromHex(
+          numberToHex(userOp.args.nonce, { size: 32 })
+        )?.metadata.toHex()
+      : undefined;
 
     return {
       type: "transfer",
@@ -132,6 +135,47 @@ export class CoinIndexer {
       txHash: transactionHash,
       logIndex,
       nonceMetadata,
+      opHash,
     };
+  }
+
+  /* Attach fee amounts to transfer ops and filter out transfers involving
+   * paymaster.
+   * TODO: unit test this function
+   */
+  private attachFeeAmounts(
+    transferOpsIncludingPaymaster: TransferOpEvent[]
+  ): TransferOpEvent[] {
+    // Map of opHash to fee amount paid to paymaster address
+    const opHashToFee = new Map<Hex, number>();
+    for (const op of transferOpsIncludingPaymaster) {
+      if (op.opHash === undefined) continue;
+
+      const prevFee = opHashToFee.get(op.opHash) || 0;
+
+      if (op.to === tokenMetadata.paymasterAddress) {
+        opHashToFee.set(op.opHash, prevFee + op.amount);
+      } else if (op.from === tokenMetadata.paymasterAddress) {
+        // Account for fee refund
+        opHashToFee.set(op.opHash, prevFee - op.amount);
+      }
+    }
+
+    const transferOps = transferOpsIncludingPaymaster
+      .filter(
+        // Remove paymaster logs
+        (op) =>
+          op.from !== tokenMetadata.paymasterAddress &&
+          op.to !== tokenMetadata.paymasterAddress
+      )
+      .map((op) => {
+        // Attach fee amounts to other transfers
+        return {
+          ...op,
+          feeAmount: opHashToFee.get(op.opHash!) || 0,
+        };
+      });
+
+    return transferOps;
   }
 }

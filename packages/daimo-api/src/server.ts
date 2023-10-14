@@ -36,6 +36,7 @@ async function main() {
     coinIndexer,
     nameReg,
     noteIndexer,
+    opIndexer,
     keyReg,
     db
   );

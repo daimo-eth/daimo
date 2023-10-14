@@ -1,4 +1,9 @@
-import { assert, timeString, TransferOpEvent } from "@daimo/common";
+import {
+  amountToDollars,
+  assert,
+  timeString,
+  TransferOpEvent,
+} from "@daimo/common";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -115,13 +120,23 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
       </Text>
       <Spacer h={16} />
       {matchingTrackedRequest !== undefined && (
-        <Text style={styles.h3Small}>
-          <Text>
-            Your request was fulfilled by <AddrText addr={op.from} />
+        <>
+          <Text style={styles.h3Small}>
+            <Text>
+              Your request was fulfilled by <AddrText addr={op.from} />
+            </Text>
           </Text>
-        </Text>
+          <Spacer h={16} />
+        </>
       )}
-      <Spacer h={16} />
+      {op.feeAmount !== undefined && (
+        <>
+          <Text style={styles.h3Small}>
+            <Text>Fee: ${amountToDollars(op.feeAmount)}</Text>
+          </Text>
+          <Spacer h={16} />
+        </>
+      )}
       <View style={styles.statusRow}>
         <OpStatusIndicator status={op.status} size={24} />
         <TextH3>

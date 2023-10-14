@@ -1,16 +1,13 @@
-import {
-  DaimoLinkNote,
-  EAccount,
-  OpStatus,
-  TransferOpEvent,
-} from "@daimo/common";
+import { DaimoLinkNote, EAccount } from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
-import { Address, Hex } from "viem";
+import { Address, Hex, numberToHex } from "viem";
 
+import { TransferLog } from "../src/contract/coinIndexer";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteOpLog } from "../src/contract/noteIndexer";
+import { OpIndexer } from "../src/contract/opIndexer";
 import { PushNotifier } from "../src/pushNotifier";
 
 const addrAlice = "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94";
@@ -21,7 +18,7 @@ test("PushNotifier", async () => {
   const pn = createNotifierAliceBob();
 
   await test("transfer between two Daimo accounts", async () => {
-    const input: TransferOpEvent[] = [
+    const input: TransferLog[] = [
       createTransfer({ from: addrAlice, to: addrBob, value: 1000000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -37,7 +34,7 @@ test("PushNotifier", async () => {
   });
 
   await test("transfer to external address", async () => {
-    const input: TransferOpEvent[] = [
+    const input: TransferLog[] = [
       createTransfer({ from: addrAlice, to: addrCharlie, value: 690000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -49,14 +46,12 @@ test("PushNotifier", async () => {
   });
 
   await test("transfer fulfilling request", async () => {
-    const input: TransferOpEvent[] = [
+    const input: TransferLog[] = [
       createTransfer({
         from: addrCharlie,
         to: addrAlice,
         value: 5000000n,
-        nonceMetadata: new DaimoNonceMetadata(
-          DaimoNonceType.RequestResponse
-        ).toHex(),
+        isRequestResponse: true,
       }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -66,7 +61,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].title, "Received $5.00");
     assert.strictEqual(
       output[0].body,
-      "charlie.eth accepted your 5.00 USDC request"
+      "charlie.eth fulfilled your 5.00 USDC request"
     );
   });
 
@@ -159,8 +154,27 @@ function createNotifierAliceBob() {
       throw new Error(`Invalid addr ${addr}`);
     },
   } as unknown as NameRegistry;
+
+  const stubOpIndexer = {
+    fetchNonceMetadata: (
+      txHash: Hex,
+      queryLogIndex: number
+    ): Hex | undefined => {
+      if (txHash === "0x42")
+        return new DaimoNonceMetadata(DaimoNonceType.RequestResponse).toHex();
+      return undefined;
+    },
+  } as unknown as OpIndexer;
+
   const nullAny = null as any;
-  const pn = new PushNotifier(nullAny, stubNameReg, nullAny, nullAny, nullAny);
+  const pn = new PushNotifier(
+    nullAny,
+    stubNameReg,
+    nullAny,
+    stubOpIndexer,
+    nullAny,
+    nullAny
+  );
   pn.pushTokens.set(addrAlice, ["pushTokenAlice"]);
   pn.pushTokens.set(addrBob, ["pushTokenBob1", "pushTokenBob2"]);
 
@@ -171,20 +185,23 @@ function createTransfer(args: {
   from: Address;
   to: Address;
   value: bigint;
-  nonceMetadata?: Hex;
-}): TransferOpEvent {
+  isRequestResponse?: boolean;
+}): TransferLog {
   return {
-    type: "transfer",
-    status: OpStatus.confirmed,
-    amount: Number(args.value),
-    from: args.from,
-    to: args.to,
-    timestamp: 0,
+    address: "0x0",
     blockHash: "0x0",
-    blockNumber: 0,
+    blockNumber: 0n,
+    transactionHash: args.isRequestResponse ? "0x42" : "0x0",
+    transactionIndex: 0,
+    data: "0x0",
     logIndex: 0,
-    txHash: "0x0",
-    opHash: "0x0",
-    nonceMetadata: args.nonceMetadata,
+    removed: false,
+    args: {
+      from: args.from,
+      to: args.to,
+      value: args.value,
+    },
+    eventName: "Transfer",
+    topics: [args.from, args.to, numberToHex(args.value)],
   };
 }

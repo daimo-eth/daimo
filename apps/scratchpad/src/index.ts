@@ -85,8 +85,8 @@ async function metrics() {
   const transfers = new Map<string, number>();
   coinIndexer.pipeAllTransfers(async (logs) => {
     for (const log of logs) {
-      const from = nameReg.resolveDaimoNameForAddr(log.from);
-      const to = nameReg.resolveDaimoNameForAddr(log.to);
+      const from = nameReg.resolveDaimoNameForAddr(log.args.from);
+      const to = nameReg.resolveDaimoNameForAddr(log.args.to);
       if (from == null && to == null) continue;
       const ts = guessTimestampFromNum(log.blockNumber!, network);
       addMetric(transfers, ts, 1);
