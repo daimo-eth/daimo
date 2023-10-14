@@ -1,5 +1,4 @@
 import {
-  DaimoAccountCall,
   DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
@@ -9,16 +8,12 @@ import {
   zAddress,
   zHex,
 } from "@daimo/common";
-import {
-  ephemeralNotesAddress,
-  erc20ABI,
-  tokenMetadata,
-} from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { Address, encodeFunctionData, getAddress } from "viem";
+import { Address, getAddress } from "viem";
 import { normalize } from "viem/ens";
 import { z } from "zod";
 
+import { deployWallet } from "./api/deployWallet";
 import { ViemClient } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
@@ -29,7 +24,8 @@ import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
 import { PushNotifier } from "./pushNotifier";
-import { publicProcedure, router } from "./trpc";
+import { Telemetry } from "./telemetry";
+import { trpcT } from "./trpc";
 
 export function createRouter(
   vc: ViemClient,
@@ -41,9 +37,32 @@ export function createRouter(
   paymaster: Paymaster,
   faucet: Faucet,
   notifier: PushNotifier,
-  accountFactory: AccountFactory
+  accountFactory: AccountFactory,
+  telemetry: Telemetry
 ) {
-  return router({
+  // TODO: tracer doesn't work.
+  // https://github.com/honeycombio/honeycomb-opentelemetry-node/issues/239
+  // const tracer = trace.getTracer("daimo-api");
+
+  const tracerMiddleware = trpcT.middleware(async (opts) => {
+    // const span = tracer.startSpan(`trpc.${opts.type}`);
+    // span.setAttributes({ "trpc.path": opts.path });
+    const startMs = performance.now();
+
+    const result = await opts.next();
+
+    const endMs = performance.now();
+    telemetry.recordRpc(opts.ctx, opts.path, result.ok, endMs - startMs);
+    // const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
+    // span.setStatus({ code });
+    // span.end();
+
+    return result;
+  });
+
+  const publicProcedure = trpcT.procedure.use(tracerMiddleware);
+
+  return trpcT.router({
     search: publicProcedure
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
@@ -61,7 +80,7 @@ export function createRouter(
             if (addr == null) return null;
             return { ensName, addr } as EAccount;
           } catch (e) {
-            console.log(`[API] ens lookup '{ensName}' failed: ${e}`);
+            console.log(`[API] ens lookup '${prefix}' failed: ${e}`);
             return null;
           }
         }
@@ -87,14 +106,6 @@ export function createRouter(
       .query(async (opts) => {
         const { name } = opts.input;
         return nameReg.resolveName(name) || null;
-      }),
-
-    // DEPRECATED
-    resolveAddr: publicProcedure
-      .input(z.object({ addr: zAddress }))
-      .query(async (opts) => {
-        const addr = getAddress(opts.input.addr);
-        return (await nameReg.getEAccount(addr)).name || null;
       }),
 
     getEthereumAccount: publicProcedure
@@ -298,51 +309,13 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
-
-        const maxUint256 = 2n ** 256n - 1n;
-        const initCalls: DaimoAccountCall[] = [
-          {
-            // Approve notes contract infinite spending on behalf of the account
-            dest: tokenMetadata.address,
-            value: 0n,
-            data: encodeFunctionData({
-              abi: erc20ABI,
-              functionName: "approve",
-              args: [ephemeralNotesAddress, maxUint256],
-            }),
-          },
-          {
-            // Approve paymaster contract infinite spending on behalf of the account
-            dest: tokenMetadata.address,
-            value: 0n,
-            data: encodeFunctionData({
-              abi: erc20ABI,
-              functionName: "approve",
-              args: [tokenMetadata.paymasterAddress, maxUint256],
-            }),
-          },
-          nameReg.getRegisterNameCall(name), // Register name
-        ];
-
-        // TODO: put a check for the counterfactual address on client side so the server is not trusted.
-        const address = await accountFactory.getAddress(pubKeyHex, initCalls);
-
-        // We use paymaster now, not needed.
-        // TODO: delete code.
-        const value = 0n;
-
-        console.log(`[API] Deploying account for ${name}, address ${address}`);
-        const deployReceipt = await accountFactory.deploy(
+        telemetry.recordUserAction("deployWallet", name, opts.ctx);
+        const address = await deployWallet(
+          name,
           pubKeyHex,
-          initCalls,
-          value
-        ); // Deploy account
-
-        if (deployReceipt.status !== "success") {
-          return { status: deployReceipt.status, address: undefined };
-        }
-
-        nameReg.onSuccessfulRegister(name, address);
+          nameReg,
+          accountFactory
+        );
         return { status: "success", address };
       }),
 

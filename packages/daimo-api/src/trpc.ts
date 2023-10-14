@@ -1,24 +1,18 @@
 import { initTRPC } from "@trpc/server";
+import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
+
+export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
+
+/** Request context */
+export const createContext = async (opts: CreateHTTPContextOptions) => {
+  const ipAddrOrArr =
+    opts.req.headers["x-forwarded-for"] || opts.req.socket.remoteAddress || "";
+  const ipAddr = Array.isArray(ipAddrOrArr) ? ipAddrOrArr[0] : ipAddrOrArr;
+  const userAgent = opts.req.headers["user-agent"] || "";
+  return { ipAddr, userAgent };
+};
 
 /**
  * Initialization of tRPC backend
- * Should be done only once per backend!
  */
-const t = initTRPC.create();
-
-/**
- * Export reusable router and procedure helpers
- * that can be used throughout the router
- */
-export const router = t.router;
-
-const timerMiddleware = t.middleware(async (opts) => {
-  const start = performance.now();
-  const result = await opts.next();
-  const durationMs = performance.now() - start;
-  console.log(`[TRPC] ${opts.type} ${opts.path} took ${durationMs}ms`);
-
-  return result;
-});
-
-export const publicProcedure = t.procedure.use(timerMiddleware);
+export const trpcT = initTRPC.context<typeof createContext>().create();

@@ -6,7 +6,7 @@
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@rainbow-me/rainbowkit": "^1.1.1",
-    "@trpc/client": "^10.34.0",
+    "@trpc/client": "^10.40.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.4.14",

@@ -12,6 +12,8 @@ import { Paymaster } from "./contract/paymaster";
 import { DB } from "./db/db";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
+import { Telemetry } from "./telemetry";
+import { createContext } from "./trpc";
 
 async function main() {
   console.log(`[API] starting...`);
@@ -59,6 +61,9 @@ async function main() {
     setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
 
+  console.log(`[API] initializing telemetry...`);
+  const monitor = new Telemetry();
+
   console.log(`[API] serving...`);
   const router = createRouter(
     vc,
@@ -70,9 +75,10 @@ async function main() {
     paymaster,
     faucet,
     notifier,
-    accountFactory
+    accountFactory,
+    monitor
   );
-  const server = createHTTPServer({ router });
+  const server = createHTTPServer({ router, createContext });
   const { port } = server.listen(3000);
 
   console.log(`[API] listening on port ${port}`);

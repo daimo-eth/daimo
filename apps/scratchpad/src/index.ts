@@ -1,16 +1,10 @@
-// https://api.pimlico.io/v1/goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07
-
-import { AppRouter } from "@daimo/api";
 import { getViemClientFromEnv } from "@daimo/api/src/chain";
 import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { guessTimestampFromNum } from "@daimo/common";
 import { nameRegistryProxyConfig, tokenMetadata } from "@daimo/contract";
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import csv from "csvtojson";
-import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
@@ -24,7 +18,6 @@ async function main() {
   const commands = [
     { name: "default", desc: defaultDesc(), fn: defaultScript },
     { name: "metrics", desc: metricsDesc(), fn: metrics },
-    { name: "trpc", desc: trpcDesc(), fn: trpc },
     { name: "create", desc: createAccountDesc(), fn: createAccount },
     { name: "check", desc: checkAccountDesc(), fn: checkAccount },
     { name: "mailing-list", desc: mailingListDesc(), fn: mailingList },
@@ -119,36 +112,6 @@ function getWeek(tsMs: number): string {
   const date = new Date(tsMs);
   const sundayTs = tsMs - date.getUTCDay() * 24 * 60 * 60 * 1000;
   return new Date(sundayTs).toISOString().slice(0, 10);
-}
-
-function trpcDesc() {
-  return `TRPC client scratchpad`;
-}
-
-async function trpc() {
-  const apiUrl = process.env.DAIMO_APP_API_URL || "http://localhost:3000";
-  console.log(`Connecting to TRPC at ${apiUrl}`);
-  const trpc = createTRPCProxyClient<AppRouter>({
-    links: [httpBatchLink({ url: apiUrl })],
-  });
-
-  console.log(`\n\nTRPC search`);
-  const searchResults = await trpc.search.query({ prefix: "d" });
-  console.log(JSON.stringify(searchResults));
-
-  console.log(`\n\nTRPC resolveAddr`);
-  const addr = "0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D";
-  const acc = await trpc.getEthereumAccount.query({ addr });
-  console.log("Addr", addr);
-  if (acc.name) console.log("Name", acc.name);
-  if (acc.label) console.log("Label", acc.label);
-  if (acc.ensName) console.log("ENS", acc.ensName);
-
-  console.log(`\n\nTRPC getLinkStatus`);
-  const status = await trpc.getLinkStatus.query({
-    url: "http://localhost:3001/link/request/0x4aEC6307cc5E6Ac7A9a939125D3e2b58B38E6368/1.23",
-  });
-  console.log(JSON.stringify(status));
 }
 
 function mailingListDesc() {
