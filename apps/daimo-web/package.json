@@ -4,18 +4,23 @@
   "dependencies": {
     "@daimo/api": "*",
     "@daimo/common": "*",
+    "@daimo/contract": "*",
+    "@rainbow-me/rainbowkit": "^1.1.1",
     "@trpc/client": "^10.34.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.4.14",
     "depcheck": "^1.4.3",
     "eslint": "^8.44.0",
-    "eslint-config-next": "^13.4.9",
+    "eslint-config-next": "^13.5.4",
     "marked": "^9.0.3",
-    "next": "^13.4.9",
+    "next": "^13.5.4",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^3.3.3"
+    "tailwindcss": "^3.3.3",
+    "ts-loader": "^9.5.0",
+    "viem": "^1.16.0",
+    "wagmi": "^1.4.3"
   },
   "scripts": {
     "dev": "next dev -p 3001",

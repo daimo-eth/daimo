@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
+import { Providers } from "../components/Providers";
 
 export const metadata: Metadata = {
   title: "Daimo",
-  description: "Experimental stablecoin wallet",
+  description: "Stablecoin payments app",
   icons: {
     icon: "/logo-web-favicon.png",
   },
@@ -17,7 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
