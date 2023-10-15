@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "daimo-expo-passkeys-example",
+    "slug": "daimo-expo-passkeys-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "associatedDomains": [
+        "webcredentials:funny-froyo-3f9b75.netlify.app"
+      ],
+      "supportsTablet": true,
+      "bundleIdentifier": "expo.modules.daimopasskeys.example"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "expo.modules.daimopasskeys.example"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 33,
+            "targetSdkVersion": 33,
+            "minSdkVersion": 28,
+            "buildToolsVersion": "33.0.0",
+            "kotlinVersion": "1.8.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.0"
+          }
+        }
+      ]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "26863796-a85f-40dc-9e99-50db5999d974"
+      }
+    }
+  }
+}
