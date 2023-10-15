@@ -31,14 +31,12 @@ export class AccountFactory {
    */
   async deploy(
     pubKeyHex: Hex,
-    initCalls: DaimoAccountCall[],
-    value: bigint
+    initCalls: DaimoAccountCall[]
   ): Promise<TransactionReceipt> {
     const hash = await this.vc.walletClient.writeContract({
       ...accountFactoryConfig,
       functionName: "createAccount",
       args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
-      value,
     });
     console.log(`[API] deploy transaction ${hash}`);
     const receipt = await this.vc.publicClient.waitForTransactionReceipt({
