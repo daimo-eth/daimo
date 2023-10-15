@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "daimo-expo-passkeys": ["../src/index"],
+      "daimo-expo-passkeys/*": ["../src/*"]
+    }
+  }
+}
