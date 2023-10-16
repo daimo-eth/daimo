@@ -1,65 +1,29 @@
-// Import the native module. On web, it will be resolved to ExpoPasskeys.web.ts
-// and on native platforms to ExpoPasskeys.ts
 import { decode as atob, encode as btoa } from "base-64";
 import { Platform } from "react-native";
 
 import ExpoPasskeysModule from "./ExpoPasskeysModule";
+import {
+  CreateRequest,
+  CreateResult,
+  SignRequest,
+  SignResult,
+  toAndroidCreateRequest,
+  toAndroidSignRequest,
+  toBase64,
+} from "./utils";
 
-export type CreateRequest = {
-  domain: string;
-  challengeB64: string;
-  accountName: string;
-};
+export { CreateRequest, CreateResult, SignRequest, SignResult };
 
-export type CreateResult = {
-  rawClientDataJSONB64: string;
-  rawAttestationObjectB64: string;
-};
-
-function toBase64URL(valueBase64: string): string {
-  return valueBase64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function toBase64(valueBase64URL: string): string {
-  const m = valueBase64URL.length % 4;
-  return valueBase64URL
-    .replace(/-/g, "+")
-    .replace(/_/g, "/")
-    .padEnd(valueBase64URL.length + (m === 0 ? 0 : 4 - m), "=");
-}
-
-function toAndroidCreateRequest(
-  request: CreateRequest,
-  userIDB64: string
-): string {
-  const requestObj = {
-    rp: {
-      id: request.domain,
-      name: request.domain,
-    },
-    user: {
-      id: toBase64URL(userIDB64),
-      name: request.accountName,
-      displayName: request.accountName,
-    },
-    challenge: toBase64URL(request.challengeB64),
-    pubKeyCredParams: [
-      {
-        type: "public-key",
-        alg: -7, // "ES256" as registered in the IANA COSE Algorithms registry
-      },
-    ],
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      requireResidentKey: true,
-      residentKey: "required",
-      userVerification: "required",
-    },
-  };
-
-  return JSON.stringify(requestObj);
-}
-
+/**
+ * Create a new passkey.
+ * All parameters are either strings or in regular base64 encoding.
+ *
+ * @param request.domain The domain to create the passkey for.
+ * @param request.challengeB64 The challenge to use for creation request.
+ * @param request.accountName The account name to attach the passkey to.
+ * @return result.rawClientDataJSONB64 The raw client data JSON.
+ * @return result.rawAttestationObjectB64 The raw attestation object.
+ */
 export async function createPasskey(
   request: CreateRequest
 ): Promise<CreateResult> {
@@ -94,27 +58,18 @@ export async function createPasskey(
   }
 }
 
-export type SignRequest = {
-  domain: string;
-  challengeB64: string;
-};
-
-export type SignResult = {
-  accountName: string;
-  rawClientDataJSONB64: string;
-  rawAuthenticatorDataB64: string;
-  signatureB64: string;
-};
-
-function toAndroidSignRequest(request: SignRequest): string {
-  const requestObj = {
-    rpId: request.domain,
-    challenge: toBase64URL(request.challengeB64),
-  };
-
-  return JSON.stringify(requestObj);
-}
-
+/**
+ * Sign using a passkey for a domain. The user is prompted to pick a passkey
+ * if they have multiple passkeys for the domain.
+ * All parameters are either strings or in regular base64 encoding.
+ *
+ * @param request.domain The domain to create the passkey for.
+ * @param request.challengeB64 The challenge to request signature for.
+ * @return result.accountName The account name corresponding to the passkey used.
+ * @return result.rawClientDataJSONB64 The raw client data JSON.
+ * @return result.rawAuthenticatorDataB64 The raw authenticator data.
+ * @return result.signatureB64 The signature.
+ */
 export async function signWithPasskey(
   request: SignRequest
 ): Promise<SignResult> {

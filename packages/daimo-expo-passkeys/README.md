@@ -16,4 +16,6 @@ recommendations. For example,
 - We return and use a simplified interface to requests and responses, rather than
   the full WebAuthn spec.
 
-TODO: any more?
+Recommended readings:
+- [Webauthn Guide](https://webauthn.guide)
+- [Webauthn Spec](https://w3c.github.io/webauthn/)
