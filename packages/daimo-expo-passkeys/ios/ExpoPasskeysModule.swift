@@ -1,7 +1,7 @@
 import ExpoModulesCore
 
 public class ExpoPasskeysModule: Module {
-  let passkeyManager = PasskeyManager(domain: "funny-froyo-3f9b75.netlify.app")
+  let passkeyManager = PasskeyManager()
 
 
   // Each module class must implement the definition function. The definition consists of components
@@ -13,12 +13,12 @@ public class ExpoPasskeysModule: Module {
     // The module will be accessible from `requireNativeModule('ExpoPasskeys')` in JavaScript.
     Name("ExpoPasskeys")
 
-    AsyncFunction("createPasskey") { (accountName: String, challengeBase64: String, promise: Promise) in
-      self.passkeyManager.createPasskey(accountName: accountName, challengeBase64: challengeBase64, promise: promise)
+    AsyncFunction("createPasskey") { (domain: String, accountName: String, userIdBase64: String, challengeBase64: String, promise: Promise) in
+      self.passkeyManager.createPasskey(domain: domain, accountName: accountName, userIdBase64: userIdBase64, challengeBase64: challengeBase64, promise: promise)
     }
 
-    AsyncFunction("signWithPasskey") { (challengeBase64: String, promise: Promise) in
-      self.passkeyManager.signWithPasskey(challengeBase64: challengeBase64, promise: promise)
+    AsyncFunction("signWithPasskey") { (domain: String, challengeBase64: String, promise: Promise) in
+      self.passkeyManager.signWithPasskey(domain: domain, challengeBase64: challengeBase64, promise: promise)
     }
   }
 }

@@ -11,12 +11,6 @@ import AuthenticationServices
 import ExpoModulesCore
 
 public class PasskeyManager {
-    let provider: ASAuthorizationPlatformPublicKeyCredentialProvider
-
-    public init(domain: String) {
-        self.provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
-    }
-
     internal func interpretError(_ error: Error) -> String {
         guard let authError = error as? ASAuthorizationError else {
             return "Unexpected auth error: \(error.localizedDescription)"
@@ -30,11 +24,12 @@ public class PasskeyManager {
         }
     }
 
-    public func createPasskey(accountName: String, challengeBase64: String, promise: Promise) {
+    public func createPasskey(domain: String, accountName: String, userIdBase64: String, challengeBase64: String, promise: Promise) {
+        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
         let challenge = Data(base64Encoded: challengeBase64)!
-        let userId = accountName.data(using: .utf8)!
+        let userId = Data(base64Encoded: userIdBase64)!
 
-        let registrationRequest = self.provider.createCredentialRegistrationRequest(challenge: challenge, name: accountName, userID: userId)
+        let registrationRequest = provider.createCredentialRegistrationRequest(challenge: challenge, name: accountName, userID: userId)
         let controller = ASAuthorizationController(authorizationRequests: [registrationRequest])
 
         PasskeyResponse().performAuth(controller: controller, callback: { (response, error) in
@@ -51,7 +46,6 @@ public class PasskeyManager {
             switch response.credential {
                 case let credential as ASAuthorizationPlatformPublicKeyCredentialRegistration:
                     let response: [AnyHashable: Any] = [
-                        "credentialID": credential.credentialID.base64EncodedString(),
                         "rawClientDataJSON": credential.rawClientDataJSON.base64EncodedString(),
                         "rawAttestationObject": credential.rawAttestationObject?.base64EncodedString()
                     ]
@@ -63,10 +57,11 @@ public class PasskeyManager {
         })
     }
 
-    public func signWithPasskey(challengeBase64: String, promise: Promise) {
+    public func signWithPasskey(domain: String, challengeBase64: String, promise: Promise) {
+        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
         let challenge = Data(base64Encoded: challengeBase64)!
 
-        let assertionRequest = self.provider.createCredentialAssertionRequest(challenge: challenge)
+        let assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
         let controller = ASAuthorizationController(authorizationRequests: [assertionRequest])
 
         PasskeyResponse().performAuth(controller: controller, callback: { (response, error) in
@@ -83,8 +78,7 @@ public class PasskeyManager {
             switch response.credential {
                 case let credential as ASAuthorizationPlatformPublicKeyCredentialAssertion:
                     let response: [AnyHashable: Any] = [
-                        "credentialID": credential.credentialID.base64EncodedString(),
-                        "userID": String(data: credential.userID, encoding: .utf8)!,
+                        "userID": credential.userID.base64EncodedString(),
                         "signature": credential.signature.base64EncodedString(),
                         "rawClientDataJSON": credential.rawClientDataJSON.base64EncodedString(),
                         "rawAuthenticatorData": credential.rawAuthenticatorData.base64EncodedString()

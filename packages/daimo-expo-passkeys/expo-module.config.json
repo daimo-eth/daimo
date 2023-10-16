@@ -1,9 +1,11 @@
 {
-  "platforms": ["ios", "android", "web"],
+  "platforms": [
+    "ios",
+    "android"
+  ],
   "ios": {
-    "modules": ["ExpoPasskeysModule"]
-  },
-  "android": {
-    "modules": ["expo.modules.passkeys.ExpoPasskeysModule"]
+    "modules": [
+      "ExpoPasskeysModule"
+    ]
   }
 }

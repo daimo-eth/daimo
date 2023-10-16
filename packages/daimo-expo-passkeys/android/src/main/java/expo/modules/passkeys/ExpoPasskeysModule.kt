@@ -1,38 +1,98 @@
 package expo.modules.passkeys
 
-import expo.modules.kotlin.modules.Module
-import expo.modules.kotlin.modules.ModuleDefinition
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import expo.modules.core.interfaces.ExpoMethod
+import expo.modules.core.ModuleRegistry
+import expo.modules.core.ExportedModule
+import expo.modules.core.Promise
+import expo.modules.core.arguments.ReadableArguments
+import java.security.spec.ECGenParameterSpec
+import java.security.KeyPairGenerator
+import android.security.keystore.KeyInfo
+import java.security.KeyFactory
+import expo.modules.kotlin.types.Enumerable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import expo.modules.core.interfaces.ActivityProvider
+import android.app.Activity
+import androidx.credentials.CredentialManager
+import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetPublicKeyCredentialOption
+import androidx.credentials.exceptions.*
+import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
+import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
 
-class ExpoPasskeysModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoPasskeys')` in JavaScript.
-    Name("ExpoPasskeys")
+// Note that this is a ExportedModule, not a Module as expo recommends.
+// This is because we need access to the application context to be able
+// to inject a BiometricPrompt instance. As far as I can tell, using a
+// ExportedModule is the only way to do this, as seen in the official 
+// [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)
+// and [expo-sensors](https://docs.expo.dev/versions/latest/sdk/sensors/) packages.
+// Unfortunately, ExportedModule is not documented well, so much of the
+// design of this module is modeled after those two packages.
+class ExpoPasskeysModule(context: Context) : ExportedModule(context) {
+  val REGISTRATION_RESPONSE = "androidx.credentials.BUNDLE_KEY_REGISTRATION_RESPONSE_JSON"
+  val AUTH_RESPONSE = "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+  private val moduleCoroutineScope = CoroutineScope(Dispatchers.Default)
+  lateinit var moduleRegistry: ModuleRegistry
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+  override fun onCreate(_moduleRegistry: ModuleRegistry) {
+    moduleRegistry = _moduleRegistry
+  }
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
+  override fun onDestroy() {
+    moduleCoroutineScope.cancel(ModuleDestroyedException())
+  }
+
+  override fun getName() = "ExpoPasskeys"
+
+  internal fun getCurrentActivity(): Activity? {
+    val activityProvider: ActivityProvider = moduleRegistry.getModule(ActivityProvider::class.java)
+    return activityProvider.currentActivity
+  }
+
+  @ExpoMethod
+  fun createPasskey(requestJSON: String, promise: Promise) {
+    val credentialManager = CredentialManager.create(context)
+    val createPublicKeyCredentialRequest = CreatePublicKeyCredentialRequest(requestJSON)
+    val currentActivity = getCurrentActivity()
+
+    moduleCoroutineScope.launch {
+      try {
+        val result = currentActivity?.let { credentialManager.createCredential(it, createPublicKeyCredentialRequest) }
+        val response =
+          result?.data?.getString(REGISTRATION_RESPONSE)
+        promise.resolve(response)
+      } catch (e: Exception) {
+        promise.reject("Error", e.toString())
+      }
     }
+  }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
+  @ExpoMethod
+  fun signWithPasskey(requestJSON: String, promise: Promise) {
+    val credentialManager = CredentialManager.create(context)
+    val getCredentialRequest =
+        GetCredentialRequest(listOf(GetPublicKeyCredentialOption(requestJSON)))
+    val currentActivity = getCurrentActivity()
+
+    moduleCoroutineScope.launch {
+      try {
+        val result = currentActivity?.let { credentialManager.getCredential(it, getCredentialRequest) }
+        val response =
+          result?.credential?.data?.getString(AUTH_RESPONSE)
+        promise.resolve(response)
+      } catch (e: Exception) {
+        promise.reject("Error", e.toString())
+      }
     }
   }
 }
