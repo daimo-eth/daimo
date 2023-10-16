@@ -15,7 +15,7 @@
     "eslint-config-next": "^13.5.4",
     "marked": "^9.0.3",
     "next": "^13.5.4",
-    "react": "18.2.0",
+    "react": "*",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.3.3",
     "ts-loader": "^9.5.0",
