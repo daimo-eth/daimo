@@ -14,12 +14,12 @@ contract AccountSigningKeysTest is Test {
 
     address public verifier;
     EntryPoint public entryPoint;
-    AccountFactory public factory;
+    DaimoAccountFactory public factory;
 
     function setUp() public {
         verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
-        factory = new AccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactory(entryPoint, verifier);
     }
 
     event SigningKeyAdded(

@@ -1,8 +1,8 @@
 import {
+  chainConfig,
   entryPointABI,
   erc20ABI,
   nameRegistryProxyConfig,
-  tokenMetadata,
 } from "@daimo/contract";
 import { Constants } from "userop";
 import {
@@ -14,7 +14,6 @@ import {
   http,
   stringToHex,
 } from "viem";
-import { baseGoerli } from "viem/chains";
 
 export function checkAccountDesc() {
   return `Check the balance, nonce, etc of a Daimo account.`;
@@ -24,14 +23,17 @@ export async function checkAccount() {
   const input = process.argv[3];
   if (!input) throw new Error("Usage: check <name or address>");
 
-  const chain = baseGoerli;
-  console.log(`Daimo account on ${chain.name}`);
+  const { tokenDecimals, tokenSymbol, chainL2 } = chainConfig;
+  console.log(`Daimo account on ${chainL2.name}`);
   console.log("");
 
   // Resolve name or address
   let name: string, addr: Address;
 
-  const publicClient = createPublicClient({ chain, transport: http() });
+  const publicClient = createPublicClient({
+    chain: chainL2,
+    transport: http(),
+  });
   if (input.startsWith("0x")) {
     addr = getAddress(input);
     const nameHex = await publicClient.readContract({
@@ -56,12 +58,11 @@ export async function checkAccount() {
   // Get balance from coin contract
   const bal = await publicClient.readContract({
     abi: erc20ABI,
-    address: tokenMetadata.address,
+    address: chainConfig.tokenAddress,
     functionName: "balanceOf",
     args: [addr],
   });
-  const { decimals, symbol } = tokenMetadata;
-  const balStr = formatUnits(bal, decimals) + " " + symbol;
+  const balStr = formatUnits(bal, tokenDecimals) + " " + tokenSymbol;
   console.log(`BAL      - ${balStr}`);
 
   // Get account info from the EntryPoint contract
@@ -76,7 +77,7 @@ export async function checkAccount() {
   console.log();
 
   console.log(`...NameReg ${nameRegistryProxyConfig.address}`);
-  console.log(`...  ERC20 ${tokenMetadata.address}`);
+  console.log(`...  ERC20 ${chainConfig.tokenAddress}`);
   console.log(`EntryPoint ${Constants.ERC4337.EntryPoint}`);
   console.log();
 }

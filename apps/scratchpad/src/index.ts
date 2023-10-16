@@ -1,9 +1,9 @@
-import { getViemClientFromEnv } from "@daimo/api/src/chain";
 import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
+import { getViemClientFromEnv } from "@daimo/api/src/viemClient";
 import { guessTimestampFromNum } from "@daimo/common";
-import { nameRegistryProxyConfig, tokenMetadata } from "@daimo/contract";
+import { nameRegistryProxyConfig, chainConfig } from "@daimo/contract";
 import csv from "csvtojson";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
@@ -73,8 +73,8 @@ async function metrics() {
     addMetric(signups, ts, 1);
   }
 
-  const tm = tokenMetadata;
-  console.log(`[METRICS] compiling ${tm.symbol} transfers ${tm.address}`);
+  const { tokenSymbol, tokenAddress } = chainConfig;
+  console.log(`[METRICS] compiling ${tokenSymbol} transfers ${tokenAddress}`);
   const transfers = new Map<string, number>();
   coinIndexer.pipeAllTransfers(async (logs) => {
     for (const log of logs) {

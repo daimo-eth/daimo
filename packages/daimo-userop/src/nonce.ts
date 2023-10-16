@@ -1,4 +1,3 @@
-import { assert } from "@daimo/common";
 import { Hex, bytesToHex, hexToBytes, numberToHex } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 
@@ -76,4 +75,8 @@ export class DaimoNonceMetadata {
     const hexIdentifier = numberToHex(this.identifier, { size: 7 }).slice(2);
     return (hexNonceType + hexIdentifier) as Hex;
   }
+}
+
+function assert(condition: boolean) {
+  if (!condition) throw new Error("Assertion failed");
 }

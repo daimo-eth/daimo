@@ -4,11 +4,10 @@ import {
   TransferOpEvent,
   amountToDollars,
   assert,
-  guessTimestampFromNum,
 } from "@daimo/common";
 import { useEffect } from "react";
 
-import { chainConfig } from "../logic/chainConfig";
+import { timestampForBlock } from "../logic/time";
 import { rpcFunc } from "../logic/trpc";
 import { Account, getAccountManager } from "../model/account";
 
@@ -239,10 +238,7 @@ function addTransfers(
       amount: Number(transfer.amount),
       nonceMetadata: transfer.nonceMetadata,
 
-      timestamp: guessTimestampFromNum(
-        transfer.blockNumber!,
-        chainConfig.l2.network
-      ),
+      timestamp: timestampForBlock(transfer.blockNumber!),
       txHash: transfer.txHash,
       blockNumber: transfer.blockNumber,
       blockHash: transfer.blockHash,

@@ -1,12 +1,6 @@
-import { tokenMetadata } from "@daimo/contract";
-import { parseAbi } from "viem";
+import { chainConfig, pimlicoPaymasterAbi } from "@daimo/contract";
 
-import { ViemClient } from "../chain";
-
-const pimlicoPaymasterAbi = parseAbi([
-  "function priceMarkup() view returns (uint32)",
-  "function previousPrice() view returns (uint192)",
-]);
+import { ViemClient } from "../viemClient";
 
 /* Interface to on-chain paymaster and gas related data. */
 export class Paymaster {
@@ -54,7 +48,7 @@ export class Paymaster {
     const tokenAmount =
       (expectedFunding * this.priceMarkup * this.previousPrice) / 10n ** 24n; // 1e24 = 1e6 * 1e18, 1e6 is the priceDenominator constant, 1e18 is number of ETH decimals
     const dollars =
-      Number((tokenAmount * 100n) / 10n ** BigInt(tokenMetadata.decimals)) /
+      Number((tokenAmount * 100n) / 10n ** BigInt(chainConfig.tokenDecimals)) /
       100; // normalize to dollars with 2 digits after decimal
     return dollars;
   }
@@ -68,12 +62,12 @@ export class Paymaster {
 
     const priceMarkup = await this.vc.publicClient.readContract({
       abi: pimlicoPaymasterAbi,
-      address: tokenMetadata.paymasterAddress,
+      address: chainConfig.paymasterAddress,
       functionName: "priceMarkup",
     });
     const previousPrice = await this.vc.publicClient.readContract({
       abi: pimlicoPaymasterAbi,
-      address: tokenMetadata.paymasterAddress,
+      address: chainConfig.paymasterAddress,
       functionName: "previousPrice",
     });
 

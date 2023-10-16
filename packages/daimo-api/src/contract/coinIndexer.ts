@@ -3,12 +3,12 @@ import {
   TransferOpEvent,
   guessTimestampFromNum,
 } from "@daimo/common";
-import { erc20ABI, tokenMetadata } from "@daimo/contract";
+import { erc20ABI, chainConfig } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Address, Hex, Log, getAbiItem, numberToHex } from "viem";
 
 import { OpIndexer } from "./opIndexer";
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
 export type TransferLog = Log<
@@ -30,7 +30,7 @@ export class CoinIndexer {
   async init() {
     await this.client.pipeLogs(
       {
-        address: tokenMetadata.address,
+        address: chainConfig.tokenAddress,
         event: transferEvent,
       },
       this.parseLogs
@@ -49,7 +49,7 @@ export class CoinIndexer {
     const blockNumber = BigInt(blockNum);
     return this.client.publicClient.readContract({
       abi: erc20ABI,
-      address: tokenMetadata.address,
+      address: chainConfig.tokenAddress,
       functionName: "balanceOf",
       args: [addr],
       blockNumber,
@@ -125,7 +125,10 @@ export class CoinIndexer {
     return {
       type: "transfer",
       status: OpStatus.confirmed,
-      timestamp: guessTimestampFromNum(Number(blockNumber), "base-goerli"),
+      timestamp: guessTimestampFromNum(
+        Number(blockNumber),
+        chainConfig.chainL2.network
+      ),
       from,
       to,
       amount: Number(value),
@@ -153,9 +156,9 @@ export class CoinIndexer {
 
       const prevFee = opHashToFee.get(op.opHash) || 0;
 
-      if (op.to === tokenMetadata.paymasterAddress) {
+      if (op.to === chainConfig.paymasterAddress) {
         opHashToFee.set(op.opHash, prevFee + op.amount);
-      } else if (op.from === tokenMetadata.paymasterAddress) {
+      } else if (op.from === chainConfig.paymasterAddress) {
         // Account for fee refund
         opHashToFee.set(op.opHash, prevFee - op.amount);
       }
@@ -165,8 +168,8 @@ export class CoinIndexer {
       .filter(
         // Remove paymaster logs
         (op) =>
-          op.from !== tokenMetadata.paymasterAddress &&
-          op.to !== tokenMetadata.paymasterAddress
+          op.from !== chainConfig.paymasterAddress &&
+          op.to !== chainConfig.paymasterAddress
       )
       .map((op) => {
         // Attach fee amounts to other transfers

@@ -1,8 +1,8 @@
 import { DaimoAccountCall } from "@daimo/common";
 import {
-  ephemeralNotesAddress,
+  chainConfig,
+  daimoEphemeralNotesAddress,
   erc20ABI,
-  tokenMetadata,
 } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
@@ -19,22 +19,22 @@ export async function deployWallet(
   const initCalls: DaimoAccountCall[] = [
     {
       // Approve notes contract infinite spending on behalf of the account
-      dest: tokenMetadata.address,
+      dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [ephemeralNotesAddress, maxUint256],
+        args: [daimoEphemeralNotesAddress, maxUint256],
       }),
     },
     {
       // Approve paymaster contract infinite spending on behalf of the account
-      dest: tokenMetadata.address,
+      dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [tokenMetadata.paymasterAddress, maxUint256],
+        args: [chainConfig.paymasterAddress, maxUint256],
       }),
     },
     nameReg.getRegisterNameCall(name), // Register name

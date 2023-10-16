@@ -4,17 +4,15 @@ import {
   assert,
   getEAccountStr,
 } from "@daimo/common";
-import { ephemeralNotesABI, ephemeralNotesConfig } from "@daimo/contract";
+import { daimoEphemeralNotesConfig } from "@daimo/contract";
 import { Address, Log, decodeEventLog, getAbiItem } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
-const createEvent = getAbiItem({ abi: ephemeralNotesABI, name: "NoteCreated" });
-const redeemEvent = getAbiItem({
-  abi: ephemeralNotesABI,
-  name: "NoteRedeemed",
-});
+const notesABI = daimoEphemeralNotesConfig.abi;
+const createEvent = getAbiItem({ abi: notesABI, name: "NoteCreated" });
+const redeemEvent = getAbiItem({ abi: notesABI, name: "NoteRedeemed" });
 
 // TODO: getEventSelector returns incorrect results.
 // See https://goerli.basescan.org/tx/0xf1347cc24f8eafee1ff7ea88d964920ffccfe7667e71ac55afd0358840ed84b0#eventlog
@@ -63,7 +61,7 @@ export class NoteIndexer {
   async init() {
     await this.client.pipeLogs(
       {
-        address: ephemeralNotesConfig.address,
+        address: daimoEphemeralNotesConfig.address,
         event: undefined,
       },
       this.parseLogs
@@ -85,7 +83,7 @@ export class NoteIndexer {
     for (const log of logs) {
       const { topics, data } = log;
       const selector = topics[0];
-      const abi = ephemeralNotesABI;
+      const abi = daimoEphemeralNotesConfig.abi;
       const args = { abi, topics, data, strict: true } as const;
 
       const logInfo = () => `[${log.transactionHash} ${log.logIndex}]`;

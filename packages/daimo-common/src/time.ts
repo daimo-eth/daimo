@@ -30,6 +30,8 @@ export function guessTimestampFromNum(
   switch (network) {
     case "base-goerli":
       return 1675193616 + blockNum * 2;
+    case "base":
+      return 1686789347 + blockNum * 2;
     default:
       throw new Error(`Unsupported network: ${network}`);
   }

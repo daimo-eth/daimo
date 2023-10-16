@@ -7,9 +7,9 @@ import {
   validateName,
 } from "@daimo/common";
 import {
-  ephemeralNotesAddress,
+  daimoEphemeralNotesAddress,
   nameRegistryProxyConfig,
-  tokenMetadata,
+  chainConfig,
 } from "@daimo/contract";
 import {
   Address,
@@ -22,7 +22,7 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({
@@ -34,12 +34,13 @@ type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
-  // old notes contract addresses
+  // Old notes contract addresses
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
   "0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce": AddrLabel.PaymentLink,
+  "0x1eec7E083C1a10C16470bEAc7839364853c7B81f": AddrLabel.PaymentLink,
 };
-specialAddrLabels[ephemeralNotesAddress] = AddrLabel.PaymentLink;
-specialAddrLabels[tokenMetadata.paymasterAddress] = AddrLabel.Paymaster;
+specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
+specialAddrLabels[chainConfig.paymasterAddress] = AddrLabel.Paymaster;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {

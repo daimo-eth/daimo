@@ -1,6 +1,5 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 
-import { getViemClientFromEnv } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -14,6 +13,7 @@ import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
 import { createContext } from "./trpc";
+import { getViemClientFromEnv } from "./viemClient";
 
 async function main() {
   console.log(`[API] starting...`);

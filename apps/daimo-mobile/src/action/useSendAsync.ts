@@ -106,7 +106,7 @@ function loadOpSender(
       };
     };
 
-    return await DaimoOpSender.init(address, signer);
+    return await DaimoOpSender.initFromEnv(address, signer);
   })();
   accountCache.set([address, keySlot], promise);
 

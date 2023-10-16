@@ -20,7 +20,7 @@ contract TestDAI is ERC20 {
 
 contract EphemeralNotesTest is Test {
     TestDAI public token;
-    EphemeralNotes public notes;
+    DaimoEphemeralNotes public notes;
     uint256 private constant ephemeralPrivateKey =
         0x1010101010101010101010101010101010101010101010101010101010101010;
     address private ephemeralAddress = vm.addr(ephemeralPrivateKey);
@@ -32,7 +32,7 @@ contract EphemeralNotesTest is Test {
 
     function setUp() public {
         token = new TestDAI("TestDAI", "DAI");
-        notes = new EphemeralNotes(token);
+        notes = new DaimoEphemeralNotes(token);
     }
 
     // This is equivalent to what the users have to run on client side using ethers.js or equivalent

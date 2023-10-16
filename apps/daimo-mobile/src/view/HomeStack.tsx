@@ -1,4 +1,4 @@
-import { tokenMetadata } from "@daimo/contract";
+import { chainConfig } from "@daimo/contract";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
 
@@ -46,7 +46,7 @@ export function HomeStackNav() {
         />
         <HomeStack.Screen
           name="RequestSend"
-          options={{ headerTitle: `Request ${tokenMetadata.symbol}` }}
+          options={{ headerTitle: `Request ${chainConfig.tokenSymbol}` }}
           component={SendRequestScreen}
         />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />

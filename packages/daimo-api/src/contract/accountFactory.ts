@@ -1,12 +1,12 @@
 import { derKeytoContractFriendlyKey, DaimoAccountCall } from "@daimo/common";
-import { accountFactoryConfig } from "@daimo/contract";
+import { daimoAccountFactoryConfig } from "@daimo/contract";
 import { Hex, TransactionReceipt } from "viem";
 
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 const SALT = 0n; // Daimo Account Factory salt, always 0.
 
-/* Interface to the AccountFactory contract. Creates Daimo accounts. */
+/* Interface to the DaimoAccountFactory contract. Creates Daimo accounts. */
 export class AccountFactory {
   constructor(private vc: ViemClient) {}
 
@@ -18,7 +18,7 @@ export class AccountFactory {
    */
   async getAddress(pubKeyHex: Hex, initCalls: DaimoAccountCall[]) {
     const address = await this.vc.publicClient.readContract({
-      ...accountFactoryConfig,
+      ...daimoAccountFactoryConfig,
       functionName: "getAddress",
       args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
     });
@@ -34,7 +34,7 @@ export class AccountFactory {
     initCalls: DaimoAccountCall[]
   ): Promise<TransactionReceipt> {
     const hash = await this.vc.walletClient.writeContract({
-      ...accountFactoryConfig,
+      ...daimoAccountFactoryConfig,
       functionName: "createAccount",
       args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
     });

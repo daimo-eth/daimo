@@ -15,19 +15,33 @@ struct Note {
  * @notice Simple escrow notes, used for onboarding new accounts.
  * Notes are created by a user and can be redeemed by anyone who shows
  * a signature from the ephemeral key owner for their address. Additionally,
- * the sender of the note can "revert" it without a signature.
+ * the sender of the note can reclaim it without a signature.
  */
-contract EphemeralNotes {
+contract DaimoEphemeralNotes {
     using SafeERC20 for IERC20;
 
     mapping(address => Note) public notes;
-    IERC20 public immutable token;
+    IERC20 public token;
 
     event NoteCreated(Note note);
     event NoteRedeemed(Note note, address redeemer);
 
+    // Stablecoin token to use for notes, or 0x0 for USDC.
+    // This allows us to CREATE2-deploy this contract at the same address
+    // on Base and Base Goerli.
     constructor(IERC20 _token) {
-        token = _token;
+        uint256 chainId = block.chainid;
+        if (address(_token) != address(0)) {
+            token = _token;
+        } else if (chainId == 8453) {
+            // Base USDC
+            token = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
+        } else if (chainId == 84531) {
+            // Base Goerli testnet USDC
+            token = IERC20(0x1B85deDe8178E18CdE599B4C9d913534553C3dBf);
+        } else {
+            revert("EphemeralNotes: unknown chain and no token specified");
+        }
     }
 
     // Call token.approve(<address of this contract>, amount) on the token contract before this

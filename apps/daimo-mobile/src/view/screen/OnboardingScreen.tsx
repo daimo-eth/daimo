@@ -1,5 +1,5 @@
 import { assertNotNull, validateName } from "@daimo/common";
-import { tokenMetadata } from "@daimo/contract";
+import { chainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
@@ -163,6 +163,8 @@ function IntroPages({
     setPageIndex(page);
   };
 
+  const { tokenSymbol } = chainConfig;
+
   return (
     <View style={styles.introPages}>
       <PageBubble count={4} index={pageIndex} />
@@ -180,10 +182,10 @@ function IntroPages({
             technology. Use at your own risk.
           </TextBody>
         </IntroPage>
-        <IntroPage title={tokenMetadata.symbol}>
+        <IntroPage title={tokenSymbol}>
           <TextBody>
-            Daimo lets you send and receive money using the{" "}
-            {tokenMetadata.symbol} stablecoin. 1 {tokenMetadata.symbol} is $1.
+            Daimo lets you send and receive money using the {tokenSymbol}{" "}
+            stablecoin. 1 {tokenSymbol} is $1.
           </TextBody>
           <InfoLink
             url="https://www.circle.com/en/usdc"

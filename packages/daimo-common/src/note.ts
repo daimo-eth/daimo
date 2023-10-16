@@ -1,6 +1,6 @@
+import { chainConfig } from "@daimo/contract";
 import { Address, Hex, createWalletClient, http, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseGoerli } from "viem/chains";
 
 export async function getNoteClaimSignature(
   sender: Address,
@@ -13,7 +13,7 @@ export async function getNoteClaimSignature(
   const ephemeralAccount = privateKeyToAccount(notePrivateKey);
   const ephemeralClient = createWalletClient({
     account: ephemeralAccount,
-    chain: baseGoerli,
+    chain: chainConfig.chainL2,
     transport: http(), // unused
   });
   const message = keccak256(recipient);

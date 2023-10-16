@@ -1,5 +1,5 @@
-import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
-import { tokenMetadata } from "@daimo/contract";
+import { KeyData, timeAgo } from "@daimo/common";
+import { chainConfig } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
@@ -16,12 +16,11 @@ import {
 } from "react-native";
 
 import { getDebugLog } from "../../debugLog";
-import { chainConfig } from "../../logic/chainConfig";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey, getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
-import { useTime } from "../../logic/useTime";
+import { timestampForBlock, useTime } from "../../logic/time";
 import { Account, serializeAccount, useAccount } from "../../model/account";
 import { ButtonMed, ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -63,7 +62,7 @@ export function SettingsScreen() {
     }
   }, []);
 
-  const explorer = chainConfig.l2.blockExplorers.default;
+  const explorer = chainConfig.chainL2.blockExplorers!.default;
   const linkToExplorer = useCallback(() => {
     if (!account) return;
     const url = `${explorer.url}/address/${account.address}`;
@@ -81,7 +80,7 @@ export function SettingsScreen() {
             {account.name}
             <TextBody>
               {` \u00A0 `}
-              {tokenMetadata.name} · {chainConfig.l2.name}
+              {chainConfig.tokenSymbol} · {chainConfig.chainL2.name}
             </TextBody>
           </TextH2>
         </View>
@@ -157,7 +156,7 @@ function DeviceRow({
 
   const viewDevice = () => nav.navigate("Device", { pubKey: keyData.pubKey });
 
-  const addAtS = guessTimestampFromNum(keyData.addedAt, chainConfig.l2.network);
+  const addAtS = timestampForBlock(keyData.addedAt);
 
   return (
     <ButtonSmall onPress={viewDevice}>

@@ -1,9 +1,9 @@
 import { OpStatus, TransferOpEvent } from "@daimo/common";
-import { erc20ABI, tokenMetadata } from "@daimo/contract";
+import { erc20ABI, chainConfig } from "@daimo/contract";
 import { Address } from "viem";
 
 import { CoinIndexer, TransferLog } from "./coinIndexer";
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 export type FaucetStatus =
   | "unavailable"
@@ -48,7 +48,7 @@ export class Faucet {
     const amount = 50_000_000n;
     const hash = await this.vc.walletClient.writeContract({
       abi: erc20ABI,
-      address: tokenMetadata.address,
+      address: chainConfig.tokenAddress,
       functionName: "transfer",
       args: [address, amount],
     });

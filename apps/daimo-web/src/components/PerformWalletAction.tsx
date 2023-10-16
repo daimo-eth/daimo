@@ -5,11 +5,7 @@ import {
   DaimoRequestStatus,
   getNoteClaimSignature,
 } from "@daimo/common";
-import {
-  ephemeralNotesABI,
-  ephemeralNotesAddress,
-  tokenMetadata,
-} from "@daimo/contract";
+import { daimoEphemeralNotesConfig, chainConfig } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useMemo, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
@@ -43,11 +39,11 @@ async function linkStatusToAction(
       const { recipient } = linkStatus as DaimoRequestStatus;
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
-        tokenMetadata.decimals
+        chainConfig.tokenDecimals
       );
       return {
         wagmiPrep: {
-          address: tokenMetadata.address,
+          address: chainConfig.tokenAddress,
           abi: erc20ABI as readonly unknown[],
           functionName: "transfer" as const,
           args: [recipient.addr, parsedAmount] as const,
@@ -65,8 +61,7 @@ async function linkStatusToAction(
 
       return {
         wagmiPrep: {
-          address: ephemeralNotesAddress,
-          abi: ephemeralNotesABI as readonly unknown[],
+          ...daimoEphemeralNotesConfig,
           functionName: "claimNote" as const,
           args: [linkStatus.link.ephemeralOwner, signature] as const,
         },

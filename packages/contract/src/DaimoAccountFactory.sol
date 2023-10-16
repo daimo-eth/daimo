@@ -7,12 +7,12 @@ import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "./DaimoAccount.sol";
 
 /**
- * A sample factory contract for Account
- * A UserOperations "initCode" holds the address of the factory, and a method call (to createAccount, in this sample factory).
- * The factory's createAccount returns the target account address even if it is already installed.
+ * This factory deploys ERC-4337 DaimoAccount contracts using CREATE2.
+ *
+ * The factory's createAccount returns the target account address even if it it's already deployed.
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
-contract AccountFactory {
+contract DaimoAccountFactory {
     DaimoAccount public immutable accountImplementation;
     IEntryPoint public immutable entryPoint;
 
@@ -22,10 +22,10 @@ contract AccountFactory {
     }
 
     /**
-     * create an account, and return its address.
-     * returns the address even if the account is already deployed.
+     * Create an account, and return its address.
+     * Ceturns the address even if the account is already deployed.
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
-     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
+     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation.
      */
     function createAccount(
         uint8 keySlot,
@@ -60,7 +60,7 @@ contract AccountFactory {
     }
 
     /**
-     * calculate the counterfactual address of this account as it would be returned by createAccount()
+     * Calculate the counterfactual address of this account as it would be returned by createAccount()
      */
     function getAddress(
         uint8 keySlot,

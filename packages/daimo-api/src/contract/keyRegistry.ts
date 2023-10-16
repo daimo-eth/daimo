@@ -2,7 +2,7 @@ import { KeyData, contractFriendlyKeyToDER } from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
 import { Address, Hex, Log, getAbiItem, getAddress } from "viem";
 
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 const signingKeyAddedEvent = getAbiItem({
   abi: daimoAccountABI,

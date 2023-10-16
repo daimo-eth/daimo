@@ -4,7 +4,7 @@ import {
   assertNotNull,
   getAccountName,
 } from "@daimo/common";
-import { tokenMetadata } from "@daimo/contract";
+import { chainConfig } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
@@ -160,8 +160,8 @@ export class PushNotifier {
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens || pushTokens.length === 0) return [];
 
-    const { decimals, symbol } = tokenMetadata;
-    const rawAmount = formatUnits(value, decimals);
+    const { tokenDecimals, tokenSymbol } = chainConfig;
+    const rawAmount = formatUnits(value, tokenDecimals);
     const dollars = Math.abs(Number(rawAmount)).toFixed(2);
 
     // Get the other side
@@ -178,11 +178,11 @@ export class PushNotifier {
     const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
     let body;
     if (value < 0) {
-      body = `You sent ${dollars} ${symbol} to ${otherStr}`;
+      body = `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
     } else if (receivingRequestedMoney) {
-      body = `${otherStr} fulfilled your ${dollars} ${symbol} request`;
+      body = `${otherStr} fulfilled your ${dollars} ${tokenSymbol} request`;
     } else {
-      body = `You received ${dollars} ${symbol} from ${otherStr}`;
+      body = `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
     }
 
     return [
@@ -197,7 +197,7 @@ export class PushNotifier {
   }
 
   getPushMessagesFromNoteOps(logs: NoteOpLog[]) {
-    const { symbol } = tokenMetadata;
+    const symbol = chainConfig.tokenSymbol;
 
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {

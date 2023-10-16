@@ -3,7 +3,7 @@ import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { Constants } from "userop";
 import { Hex, Log, getAbiItem, numberToHex } from "viem";
 
-import { ViemClient } from "../chain";
+import { ViemClient } from "../viemClient";
 
 const userOperationEvent = getAbiItem({
   abi: entryPointABI,

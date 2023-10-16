@@ -1,8 +1,8 @@
 import {
-  accountFactoryConfig,
+  daimoAccountFactoryConfig,
+  chainConfig,
   entryPointABI,
   erc20ABI,
-  tokenMetadata,
 } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -14,6 +14,7 @@ import {
 import crypto from "node:crypto";
 import { Constants } from "userop";
 import {
+  Chain,
   Hex,
   PublicClient,
   Transport,
@@ -23,7 +24,6 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { baseGoerli } from "viem/chains";
 
 export function createAccountDesc() {
   return `Create a Daimo account. Fund with faucet. Send a test userop from that account.`;
@@ -31,7 +31,7 @@ export function createAccountDesc() {
 
 export async function createAccount() {
   // Viem
-  const chain = baseGoerli;
+  const chain = chainConfig.chainL2;
   const publicClient = createPublicClient({ chain, transport: http() });
   console.log(`Connected to ${chain.name}, ${publicClient.transport.url}`);
 
@@ -82,7 +82,7 @@ export async function createAccount() {
   const args = [0, [key1, key2], [], salt] as const;
 
   const address = await publicClient.readContract({
-    ...accountFactoryConfig,
+    ...daimoAccountFactoryConfig,
     functionName: "getAddress",
     args,
   });
@@ -98,7 +98,7 @@ export async function createAccount() {
 
   // Deploy account
   const hash = await walletClient.writeContract({
-    ...accountFactoryConfig,
+    ...daimoAccountFactoryConfig,
     functionName: "createAccount",
     args,
     value: 0n,
@@ -107,14 +107,14 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoOpSender.init(address, signer);
+  const account = await DaimoOpSender.initFromEnv(address, signer);
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 
   // Fund it from the faucet
   const usdcTxHash = await walletClient.writeContract({
     abi: erc20ABI,
-    address: tokenMetadata.address,
+    address: chainConfig.tokenAddress,
     functionName: "transfer",
     args: [addr, 1000000n],
   });
@@ -147,7 +147,7 @@ export async function createAccount() {
 }
 
 async function waitForTx(
-  publicClient: PublicClient<Transport, typeof baseGoerli>,
+  publicClient: PublicClient<Transport, Chain>,
   hash: Hex
 ) {
   const receipt = await publicClient.waitForTransactionReceipt({

@@ -1,12 +1,11 @@
 import { AddrLabel, assert } from "@daimo/common";
-import { tokenMetadata } from "@daimo/contract";
+import { chainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address, getAddress } from "viem";
 
-import { chainConfig } from "../../../logic/chainConfig";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
@@ -18,15 +17,17 @@ export default function DepositScreen() {
   const [account] = useAccount();
   if (account == null) return null;
 
+  const { chainL2, tokenSymbol } = chainConfig;
+
   return (
     <View style={styles.vertOuter}>
-      {chainConfig.testnet && <TestnetFaucet recipient={account.address} />}
-      {chainConfig.testnet && <Spacer h={32} />}
+      {chainL2.testnet && <TestnetFaucet recipient={account.address} />}
+      {chainL2.testnet && <Spacer h={32} />}
       <OnrampStub />
       <Spacer h={32} />
       <TextBody>
         <TextBold>
-          Deposit {tokenMetadata.symbol} on {chainConfig.l2.name} only.
+          Deposit {tokenSymbol} on {chainL2.name} only.
         </TextBold>{" "}
         Use the following address.
       </TextBody>
@@ -99,7 +100,7 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
-        runs on {chainConfig.l2.name}.
+        runs on {chainConfig.chainL2.name}.
       </TextBody>
       <Spacer h={16} />
       <ButtonMed

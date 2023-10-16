@@ -6,7 +6,7 @@ import {
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import { ephemeralNotesAddress } from "@daimo/contract";
+import { daimoEphemeralNotesAddress } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -105,7 +105,7 @@ function NoteDisplay({
     pendingOp: {
       type: "transfer",
       status: OpStatus.pending,
-      from: ephemeralNotesAddress,
+      from: daimoEphemeralNotesAddress,
       to: account.address,
       amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,

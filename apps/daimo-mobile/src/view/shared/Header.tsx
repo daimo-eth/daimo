@@ -1,5 +1,6 @@
+import { chainConfig } from "@daimo/contract";
 import { useCallback } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { ButtonSmall } from "./Button";
 import { useNav } from "./nav";
@@ -25,9 +26,20 @@ export function Header() {
 }
 
 function StyleTBD() {
+  const { testnet } = chainConfig.chainL2;
+  const stylePellet = [styles.pellet] as ViewStyle[];
+  const styleText = [styles.pelletText] as TextStyle[];
+  let text;
+  if (testnet) {
+    stylePellet.push({ backgroundColor: color.primaryBgLight });
+    styleText.push({ color: color.grayDark });
+    text = "TESTNET";
+  } else {
+    text = "MAINNET";
+  }
   return (
-    <View style={styles.pellet}>
-      <Text style={styles.pelletText}>DESIGN SOON</Text>
+    <View style={stylePellet}>
+      <Text style={styleText}>{text}</Text>
     </View>
   );
 }

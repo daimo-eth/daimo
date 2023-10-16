@@ -1,18 +1,18 @@
-import { assert, guessTimestampFromNum, timeString } from "@daimo/common";
+import { assert, timeString } from "@daimo/common";
 import {
-  DaimoOpSender,
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
+  DaimoOpSender,
 } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { chainConfig } from "../../logic/chainConfig";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey } from "../../logic/enclave";
+import { timestampForBlock } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -127,10 +127,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     }
   })();
 
-  const addedAtS = guessTimestampFromNum(
-    device.addedAt,
-    chainConfig.l2.network
-  );
+  const addedAtS = timestampForBlock(device.addedAt);
 
   return (
     <View style={ss.container.fullWidthModal}>

@@ -15,12 +15,12 @@ contract AccountSendUseropTest is Test {
 
     address public verifier;
     EntryPoint public entryPoint;
-    AccountFactory public factory;
+    DaimoAccountFactory public factory;
 
     function setUp() public {
         verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
-        factory = new AccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactory(entryPoint, verifier);
         console.log("verifier address:", address(verifier));
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));

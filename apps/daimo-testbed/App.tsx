@@ -42,7 +42,7 @@ export default function App() {
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
       derPublicKey
     );
-    const account = await DaimoOpSender.init(accAddress, signer);
+    const account = await DaimoOpSender.initFromEnv(accAddress, signer);
     console.log(
       "account, give it some eth + usdc magically:",
       account.getAddress()

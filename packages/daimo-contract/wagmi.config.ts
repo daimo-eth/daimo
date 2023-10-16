@@ -5,8 +5,10 @@ import latestAccountFactory from "../contract/broadcast/DeployAccountFactory.s.s
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
 
-// TODO: Base Mainnet
-// Works on testnet too, because these are all CREATE2 contracts.
+/**
+ * We get contract addresses from our latest Base mainnet deployments.
+ * Because of CREATE2, all except EphemeralNotes are deterministic.
+ */
 const deployments = Object.fromEntries(
   [
     ...latestNameReg.transactions,

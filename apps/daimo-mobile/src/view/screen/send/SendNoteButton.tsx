@@ -5,7 +5,7 @@ import {
   dollarsToAmount,
   formatDaimoLink,
 } from "@daimo/common";
-import { ephemeralNotesAddress } from "@daimo/contract";
+import { daimoEphemeralNotesAddress } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -53,7 +53,7 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
       type: "transfer",
       status: OpStatus.pending,
       from: account.address,
-      to: ephemeralNotesAddress,
+      to: daimoEphemeralNotesAddress,
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),

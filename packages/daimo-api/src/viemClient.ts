@@ -1,3 +1,4 @@
+import { chainConfig } from "@daimo/contract";
 import type { AbiEvent } from "abitype";
 import fs from "node:fs/promises";
 import os from "os";
@@ -6,6 +7,7 @@ import {
   Abi,
   Account,
   Address,
+  Chain,
   GetContractReturnType,
   GetLogsReturnType,
   PublicClient,
@@ -16,7 +18,6 @@ import {
   webSocket,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { Chain, baseGoerli, mainnet } from "viem/chains";
 
 import { jsonBigParse, jsonBigStringify } from "./jsonBig";
 
@@ -27,12 +28,12 @@ import { jsonBigParse, jsonBigStringify } from "./jsonBig";
 export function getViemClientFromEnv() {
   // Connect to L1
   const l1Client = createPublicClient({
-    chain: mainnet,
+    chain: chainConfig.chainL1,
     transport: webSocket(process.env.DAIMO_API_L1_RPC_WS),
   });
 
   // Connect to L2
-  const chain = baseGoerli; // TODO: DAIMO_API_CHAIN once mainnet is supported
+  const chain = chainConfig.chainL2;
   const account = getAccount(process.env.DAIMO_API_PRIVATE_KEY);
   const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
   const publicClient = createPublicClient({ chain, transport });
@@ -41,7 +42,7 @@ export function getViemClientFromEnv() {
   return new ViemClient(l1Client, publicClient, walletClient);
 }
 
-export function getAccount(privateKey?: string) {
+function getAccount(privateKey?: string) {
   if (!privateKey) throw new Error("Missing private key");
   return privateKeyToAccount(`0x${privateKey}`);
 }
@@ -80,9 +81,9 @@ export class ViemClient {
   private lockLogProcessing = true;
 
   constructor(
-    public l1Client: PublicClient<Transport, typeof mainnet>,
-    public publicClient: PublicClient<Transport, typeof baseGoerli>,
-    public walletClient: WalletClient<Transport, typeof baseGoerli, Account>
+    public l1Client: PublicClient<Transport, Chain>,
+    public publicClient: PublicClient<Transport, Chain>,
+    public walletClient: WalletClient<Transport, Chain, Account>
   ) {
     fs.mkdir(this.logCacheDir, { recursive: true });
   }
@@ -207,7 +208,7 @@ export class ViemClient {
     const filter: LogFilter<E> = { ...args, callback };
 
     // Catch up to latest block
-    const isTestnet = this.publicClient.chain.id === baseGoerli.id;
+    const isTestnet = this.publicClient.chain.testnet;
     const startBlock = isTestnet ? 8750000n : 0n;
     const lastBlockNum = BigInt(this.lastBlock.number);
     const step = 5000n;

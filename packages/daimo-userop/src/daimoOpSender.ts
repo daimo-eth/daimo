@@ -14,54 +14,93 @@ import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./signingCallback";
 import config from "../config.json";
 
+interface DaimoOpConfig {
+  /// Chain ID
+  chainId: number;
+  /// Bundler RPC URL.
+  bundlerRpcUrl: string;
+  /// Stablecoin token address.
+  tokenAddress: Address;
+  /// Decimals for that token.
+  tokenDecimals: number;
+  /// EphemeralNotes instance. The stablecoin used must match tokenAddress.
+  notesAddress: `0x${string}`;
+  /// Paymaster, payable in tokenAddress.
+  paymasterAddress: Address;
+  /// Daimo account address.
+  accountAddress: Address;
+  /// Signs userops. Must, in some form, check user presence.
+  accountSigner: SigningCallback;
+}
+
 /// DaimoOpSender constructs user operations for a Daimo account.
 /// Supports key rotations, token transfers, and ephemeral note ops.
 export class DaimoOpSender {
   /** Connection to the chain */
   private provider: BundlerJsonRpcProvider;
 
-  private opBuilder: DaimoOpBuilder;
-
-  private tokenAddress: Address;
-  private tokenDecimals: number;
-
-  private notesAddress: `0x${string}`;
-
-  constructor(
-    /// Userop builder, containing bundler and paymaster configuration.
-    _opBuilder: DaimoOpBuilder,
-    /// Stablecoin token address.
-    _tokenAddress: `0x${string}`,
-    /// Decimals for that token.
-    _tokenDecimals: number,
-    /// EphemeralNotes instance. The stablecoin used must match _tokenAddress.
-    _notesAddress: `0x${string}`
+  private constructor(
+    private opConfig: DaimoOpConfig,
+    private opBuilder: DaimoOpBuilder
   ) {
     this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
-    this.opBuilder = _opBuilder;
-
-    this.tokenAddress = _tokenAddress;
-    this.tokenDecimals = _tokenDecimals;
-
-    this.notesAddress = _notesAddress;
   }
 
-  public static async init(
-    deployedAddress: Address,
-    signer: SigningCallback
+  /**
+   * Initializes using the DAIMO_CHAIN and DAIMO_BUNDLER_RPC env vars.
+   */
+  public static async initFromEnv(
+    accountAddress: Address,
+    accountSigner: SigningCallback
   ): Promise<DaimoOpSender> {
-    const daimoBuilder = await DaimoOpBuilder.init(deployedAddress, signer);
+    const { tokenAddress, tokenDecimals, paymasterAddress, chainL2 } =
+      Contracts.chainConfig;
 
+    let bundlerRpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
+    if (bundlerRpcUrl === "" && chainL2.network === "base-goerli") {
+      bundlerRpcUrl = // Default to testnet
+        "https://api.pimlico.io/v1/base-goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07";
+    }
+    if (bundlerRpcUrl === "") {
+      throw new Error("Missing DAIMO_BUNDLER_RPC env var");
+    }
+
+    return DaimoOpSender.init({
+      accountAddress,
+      accountSigner,
+      bundlerRpcUrl,
+      chainId: chainL2.id,
+      notesAddress: Contracts.daimoEphemeralNotesAddress,
+      paymasterAddress,
+      tokenAddress,
+      tokenDecimals,
+    });
+  }
+
+  /**
+   * Initializes with all configuration provided: no env vars required.
+   */
+  public static async init(opConfig: DaimoOpConfig): Promise<DaimoOpSender> {
+    const { accountAddress, accountSigner, paymasterAddress } = opConfig;
+    const builder = await DaimoOpBuilder.init(
+      accountAddress,
+      accountSigner,
+      paymasterAddress
+    );
+
+    const { tokenAddress, tokenDecimals } = opConfig;
     console.log(
-      `[OP] init. token ${Contracts.tokenMetadata.address}, decimals ${Contracts.tokenMetadata.decimals}`
+      `[OP] init: ${JSON.stringify({
+        accountAddress,
+        tokenAddress,
+        tokenDecimals,
+        paymasterAddress,
+        notesAddress: opConfig.notesAddress,
+        bundlerRpcUrl: opConfig.bundlerRpcUrl,
+      })})}`
     );
 
-    return new DaimoOpSender(
-      daimoBuilder,
-      Contracts.tokenMetadata.address,
-      Contracts.tokenMetadata.decimals,
-      Contracts.ephemeralNotesAddress
-    );
+    return new DaimoOpSender(opConfig, builder);
   }
 
   public getAddress(): Address {
@@ -72,7 +111,7 @@ export class DaimoOpSender {
   public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<Hex> {
     const builtOp = await opBuilder.buildOp(
       Constants.ERC4337.EntryPoint,
-      Contracts.tokenMetadata.chainId
+      this.opConfig.chainId
     );
 
     console.log("[OP] built userOp:", builtOp);
@@ -140,13 +179,15 @@ export class DaimoOpSender {
     amount: `${number}`, // in the native unit of the token
     opMetadata: DaimoOpMetadata
   ) {
-    const parsedAmount = parseUnits(amount, this.tokenDecimals);
-    console.log(`[OP] transfer ${parsedAmount} ${this.tokenAddress} to ${to}`);
+    const { tokenAddress, tokenDecimals } = this.opConfig;
+
+    const parsedAmount = parseUnits(amount, tokenDecimals);
+    console.log(`[OP] transfer ${parsedAmount} ${tokenAddress} to ${to}`);
 
     const op = this.opBuilder.executeBatch(
       [
         {
-          dest: this.tokenAddress,
+          dest: tokenAddress,
           value: 0n,
           data: encodeFunctionData({
             abi: Contracts.erc20ABI,
@@ -167,16 +208,18 @@ export class DaimoOpSender {
     amount: `${number}`,
     opMetadata: DaimoOpMetadata
   ) {
-    const parsedAmount = parseUnits(amount, this.tokenDecimals);
+    const { tokenDecimals, notesAddress } = this.opConfig;
+
+    const parsedAmount = parseUnits(amount, tokenDecimals);
     console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
 
     const op = this.opBuilder.executeBatch(
       [
         {
-          dest: this.notesAddress,
+          dest: notesAddress,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.ephemeralNotesABI,
+            abi: Contracts.daimoEphemeralNotesABI,
             functionName: "createNote",
             args: [ephemeralOwner, parsedAmount],
           }),
@@ -199,10 +242,10 @@ export class DaimoOpSender {
     const op = this.opBuilder.executeBatch(
       [
         {
-          dest: this.notesAddress,
+          dest: this.opConfig.notesAddress,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.ephemeralNotesABI,
+            abi: Contracts.daimoEphemeralNotesABI,
             functionName: "claimNote",
             args: [ephemeralOwner, signature],
           }),

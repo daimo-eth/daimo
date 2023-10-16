@@ -4,13 +4,13 @@ import {
   timeString,
   TransferOpEvent,
 } from "@daimo/common";
+import { chainConfig } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 
-import { chainConfig } from "../../logic/chainConfig";
 import { useAccount } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
@@ -55,7 +55,7 @@ export function HistoryOpScreen({ route, navigation }: Props) {
 }
 
 function LinkToExplorer({ txHash }: { txHash: string }) {
-  const explorer = chainConfig.l2.blockExplorers.default;
+  const explorer = chainConfig.chainL2.blockExplorers!.default;
   const url = `${explorer.url}/tx/${txHash}`;
 
   const openURL = useCallback(() => Linking.openURL(url), []);

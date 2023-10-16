@@ -14,7 +14,6 @@ import { normalize } from "viem/ens";
 import { z } from "zod";
 
 import { deployWallet } from "./api/deployWallet";
-import { ViemClient } from "./chain";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -26,6 +25,7 @@ import { Paymaster } from "./contract/paymaster";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry } from "./telemetry";
 import { trpcT } from "./trpc";
+import { ViemClient } from "./viemClient";
 
 export function createRouter(
   vc: ViemClient,

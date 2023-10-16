@@ -6,7 +6,6 @@
   "main": "./dist/index.js",
   "scripts": {
     "codegen": "wagmi generate",
-    "fetch-token": "ts-node script/fetchTokenMetadata.ts",
     "build": "tsc"
   },
   "author": "",

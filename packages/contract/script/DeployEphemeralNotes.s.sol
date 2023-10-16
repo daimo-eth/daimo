@@ -5,9 +5,10 @@ import "forge-std/Script.sol";
 import "../src/DaimoEphemeralNotes.sol";
 
 contract DeployEphemeralNotesScript is Script {
-    function run(IERC20 token) public {
+    function run() public {
         vm.startBroadcast();
-        new EphemeralNotes(token);
+        // DaimoEphemeralNotes defaults to USDC on Base.
+        new DaimoEphemeralNotes{salt: 0}(IERC20(address(0x0)));
         vm.stopBroadcast();
     }
 

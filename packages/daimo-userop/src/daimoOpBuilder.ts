@@ -5,13 +5,13 @@ import {
   DaimoAccountCall,
   assert,
 } from "@daimo/common";
-import { daimoAccountABI, tokenMetadata } from "@daimo/contract";
+import { daimoAccountABI } from "@daimo/contract";
 import { p256 } from "@noble/curves/p256";
 import { IUserOperationMiddlewareCtx, UserOperationBuilder } from "userop";
 import {
   Address,
   Hex,
-  bytesToBigint,
+  bytesToBigInt,
   bytesToHex,
   concat,
   encodeFunctionData,
@@ -30,28 +30,33 @@ export type DaimoOpMetadata = {
 
 /** Creates userops from a Daimo account.  */
 export class DaimoOpBuilder extends UserOperationBuilder {
-  /** Daimo account address */
-  private address: `0x${string}` = "0x";
-
   /** Execution deadline */
   private validUntil = 0;
 
-  private constructor(private signer: SigningCallback) {
+  private constructor(
+    private accountAddress: Address,
+    private paymasterAddress: Address,
+    private signer: SigningCallback
+  ) {
     super();
   }
 
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
-    deployedAddress: Address,
-    signUserOperation: SigningCallback
+    accountAddress: Address,
+    accountSigner: SigningCallback,
+    paymasterAddress: Address
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(signUserOperation);
-    instance.address = deployedAddress;
+    const instance = new DaimoOpBuilder(
+      accountAddress,
+      paymasterAddress,
+      accountSigner
+    );
 
-    console.log(`[OP]: init address ${instance.address}`);
+    console.log(`[OP]: init address ${instance.accountAddress}`);
     const base = instance
       .useDefaults({
-        sender: instance.address,
+        sender: instance.accountAddress,
         verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
         callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
       })
@@ -60,7 +65,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     return base;
   }
 
-  /** Signs userops. Signer can use the enclave, requesting user permission as needed. */
+  /** Signs userops. Signer can use the enclave, which checks user presence. */
   private signingCallback = async (ctx: IUserOperationMiddlewareCtx) => {
     const hexOpHash = ctx.getUserOpHash() as Hex;
     assert(hexOpHash.startsWith("0x"));
@@ -83,7 +88,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     const bS = bSig.slice(32);
 
     // Avoid malleability. Ensure low S (<= N/2 where N is the curve order)
-    let s = bytesToBigint(bS);
+    let s = bytesToBigInt(bS);
     const n = BigInt(
       "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
     );
@@ -111,7 +116,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {
     return this.setOpMetadata(opMetadata)
-      .setPaymasterAndData(tokenMetadata.paymasterAddress)
+      .setPaymasterAndData(this.paymasterAddress)
       .setCallData(
         encodeFunctionData({
           abi: daimoAccountABI,

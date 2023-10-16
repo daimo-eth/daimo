@@ -9,7 +9,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { addEventListener, getInitialURL } from "expo-linking";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";

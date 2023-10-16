@@ -14,13 +14,13 @@ contract AccountVerify1271Test is Test {
 
     address public verifier;
     EntryPoint public entryPoint;
-    AccountFactory public factory;
+    DaimoAccountFactory public factory;
     DaimoAccount public account;
 
     function setUp() public {
         verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
-        factory = new AccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactory(entryPoint, verifier);
 
         // Create test account with a single signing key
         uint256[2] memory pubKey = [
