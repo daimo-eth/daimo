@@ -43,7 +43,7 @@
     }
   },
   "submit": {
-    "stage": {
+    "prod": {
       "ios": {
         "ascAppId": "6459700343",
         "companyName": "Daimo, Inc"
@@ -52,7 +52,6 @@
         "track": "internal",
         "releaseStatus": "draft"
       }
-    },
-    "prod": {}
+    }
   }
 }

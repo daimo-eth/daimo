@@ -3,7 +3,7 @@
     "owner": "daimo",
     "name": "Daimo",
     "slug": "daimo",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "49",
+      "buildNumber": "54",
       "associatedDomains": ["applinks:daimo.xyz"],
       "config": {
         "usesNonExemptEncryption": false
@@ -50,7 +50,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 49
+      "versionCode": 54
     },
     "extra": {
       "eas": {
