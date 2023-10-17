@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     method: request.method,
     headers: {
       ...request.headers,
-      Host: "daimo.xyz",
+      Host: "daimo.super.site",
     },
   });
 
