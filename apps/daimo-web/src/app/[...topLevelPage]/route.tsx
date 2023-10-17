@@ -1,3 +1,6 @@
+// Opt out of caching for all data requests in the route segment
+export const dynamic = "force-dynamic";
+
 const superSo = "https://cname.super.so";
 
 export async function GET(request: Request) {
@@ -13,6 +16,7 @@ export async function GET(request: Request) {
       ...request.headers,
       Host: "daimo.super.site",
     },
+    cache: "no-store",
   });
 
   const resBody = await res.blob();
