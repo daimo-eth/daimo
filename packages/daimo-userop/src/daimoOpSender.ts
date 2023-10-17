@@ -12,7 +12,6 @@ import {
 
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
 import { SigningCallback } from "./signingCallback";
-import config from "../config.json";
 
 interface DaimoOpConfig {
   /// Chain ID
@@ -43,7 +42,7 @@ export class DaimoOpSender {
     private opConfig: DaimoOpConfig,
     private opBuilder: DaimoOpBuilder
   ) {
-    this.provider = new BundlerJsonRpcProvider(config.bundlerRpcUrl);
+    this.provider = new BundlerJsonRpcProvider(opConfig.bundlerRpcUrl);
   }
 
   /**

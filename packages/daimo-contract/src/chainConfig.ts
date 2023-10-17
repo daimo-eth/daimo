@@ -13,7 +13,8 @@ export interface ChainConfig {
 export const chainConfig = getChainConfig();
 
 function getChainConfig(): ChainConfig {
-  const daimoChain = process.env.DAIMO_CHAIN || "";
+  const daimoChain =
+    process.env.DAIMO_CHAIN || process.env.NEXT_PUBLIC_DAIMO_CHAIN || "";
   switch (daimoChain) {
     case "base":
       return {
@@ -35,6 +36,6 @@ function getChainConfig(): ChainConfig {
         paymasterAddress: "0x13f490FafBb206440F25760A10C21A6220017fFa",
       };
     default:
-      throw new Error(`unknown DAIMO_CHAIN '${process.env.DAIMO_CHAIN}'`);
+      throw new Error(`unknown DAIMO_CHAIN '${daimoChain}'`);
   }
 }
