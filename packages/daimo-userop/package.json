@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "license": "GPL-3.0-or-later",
   "description": "userop.js for daimo account contracts",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "eslint . --max-warnings=0"
   },
   "dependencies": {
+    "@daimo/common": "*",
     "@daimo/contract": "*",
     "@noble/curves": "^1.1.0",
     "text-encoding-polyfill": "^0.6.7",
