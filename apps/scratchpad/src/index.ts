@@ -2,8 +2,14 @@ import { getViemClientFromEnv } from "@daimo/api/src/chain";
 import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
-import { guessTimestampFromNum } from "@daimo/common";
+import {
+  guessTimestampFromNum,
+  parseCreateResponse,
+  parseSignResponse,
+} from "@daimo/common";
 import { nameRegistryProxyConfig, tokenMetadata } from "@daimo/contract";
+import * as ExpoPasskeys from "@daimo/expo-passkeys";
+import * as base64 from "base-64";
 import csv from "csvtojson";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
@@ -17,6 +23,7 @@ main()
 async function main() {
   const commands = [
     { name: "default", desc: defaultDesc(), fn: defaultScript },
+    { name: "webauthn", desc: webauthnDesc(), fn: webauthnScript },
     { name: "metrics", desc: metricsDesc(), fn: metrics },
     { name: "create", desc: createAccountDesc(), fn: createAccount },
     { name: "check", desc: checkAccountDesc(), fn: checkAccount },
@@ -43,6 +50,44 @@ function defaultDesc() {
 
 async function defaultScript() {
   console.log("Hello, world");
+}
+
+function webauthnDesc() {
+  return `Scratchpad for webauthn tests`;
+}
+
+async function webauthnScript() {
+  const { pubKey } = parseCreateResponse({
+    rawAttestationObjectB64:
+      "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViY4LWSp91U7t7sZSBuAx/BlrjlkV+bOJc1hgyDhU9l3A5dAAAAAAAAAAAAAAAAAAAAAAAAAAAAFH9Dx+qRRvSrA9CzZvtuLkrZeWElpQECAyYgASFYIIDZMm5J62MU0D9YgwNp6luvvE4nCbML/x9DeVhsqGnZIlgggG7XRtisbCd5pHLYwe1MIAsHl42djY2GK+i31Lf7Y1A=",
+    rawClientDataJSONB64:
+      "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiZEdWemRBIiwib3JpZ2luIjoiaHR0cHM6Ly9mdW5ueS1mcm95by0zZjliNzUubmV0bGlmeS5hcHAifQ==",
+  });
+
+  console.log("pubKey", pubKey);
+
+  const challenge = "dGVzdA==";
+  console.log(
+    "challenge",
+    Buffer.from(base64.decode(challenge)).toString("hex")
+  );
+
+  const signResponse: ExpoPasskeys.SignResult = {
+    accountName: "coco-froyoyo",
+    rawAuthenticatorDataB64:
+      "4LWSp91U7t7sZSBuAx/BlrjlkV+bOJc1hgyDhU9l3A4dAAAAAA==",
+    rawClientDataJSONB64:
+      "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZEdWemRBIiwib3JpZ2luIjoiaHR0cHM6Ly9mdW5ueS1mcm95by0zZjliNzUubmV0bGlmeS5hcHAifQ==",
+    signatureB64:
+      "MEQCIDLgBaU65JqWrIjHFSQ2ON1cmF+9RjxyfY7v0FvuTiVwAiB6T+9NCxEYf5X2nu+7Qo34rHmbvZMFBmsenJ/ppbz4xA==",
+  };
+
+  const { signature, rawAuthenticatorData, clientDataJSON, challengeLocation } =
+    parseSignResponse(signResponse);
+  console.log("signature", signature);
+  console.log("rawAuthenticatorData", rawAuthenticatorData);
+  console.log("clientDataJSON", clientDataJSON);
+  console.log("challengeLocation", challengeLocation);
 }
 
 function metricsDesc() {

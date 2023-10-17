@@ -10,3 +10,4 @@ export * from "./time";
 export * from "./paymaster";
 export * from "./eAccount";
 export * from "./note";
+export * from "./webauthn";
