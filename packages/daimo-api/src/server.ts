@@ -1,4 +1,6 @@
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { chainConfig } from "@daimo/contract";
+import { createHTTPHandler } from "@trpc/server/adapters/standalone";
+import http from "http";
 
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
@@ -78,10 +80,25 @@ async function main() {
     accountFactory,
     monitor
   );
-  const server = createHTTPServer({ router, createContext });
-  const { port } = server.listen(3000);
+  const handler = createHTTPHandler({ router, createContext });
 
-  console.log(`[API] listening on port ${port}`);
+  const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;
+  const server = http.createServer((req, res) => {
+    // Only serve requests for the correct network.
+    if (req.url == null || !req.url.startsWith(trpcPrefix)) {
+      console.log(`[API] SKIPPING ${req.url}`);
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+
+    console.log(`[API] serving ${req.url}`);
+    req.url = "/" + req.url.slice(trpcPrefix.length);
+    handler(req, res);
+  });
+  server.listen(3000).address();
+
+  console.log(`[API] listening`);
 }
 
 main().catch(console.error);

@@ -1,4 +1,3 @@
-import { assert } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
@@ -107,10 +106,10 @@ export class Telemetry {
 
   /** Clippy is our Slack bot for API monitoring. */
   private recordClippy(message: string) {
-    console.log(`[TELEM] clippy: ${message}`);
-
     const url = process.env.CLIPPY_WEBHOOK_URL || "";
-    assert(url != null, "CLIPPY_WEBHOOK_URL not set");
+    console.log(`[TELEM] ${url == null ? "SKIPPING " : ""}clippy: ${message}`);
+    if (url == null) return;
+
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

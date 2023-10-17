@@ -1,3 +1,4 @@
+import { chainConfig } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
@@ -33,6 +34,10 @@ export function useExistingAccount() {
           enclavePubKey: pubKeyHex,
           name: result.name,
           address: result.addr,
+
+          // No possibility of mismatch since API is locked to same chain
+          homeChainId: chainConfig.chainL2.id,
+          homeCoinAddress: chainConfig.tokenAddress,
 
           // These populate on sync with server
           lastBalance: BigInt(0),

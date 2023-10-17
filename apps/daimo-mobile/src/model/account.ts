@@ -6,6 +6,7 @@ import {
   KeyData,
   ChainGasConstants,
 } from "@daimo/common";
+import { chainConfig } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress, Hex } from "viem";
@@ -17,7 +18,7 @@ import { cacheEAccounts } from "../view/shared/addr";
  * Singleton account key.
  * Will be a series if/when we support multiple accounts.
  */
-export const defaultEnclaveKeyName = "daimo-11";
+export const defaultEnclaveKeyName = "daimo-12";
 
 /** Account data stored on device. */
 export type Account = {
@@ -29,6 +30,11 @@ export type Account = {
   name: string;
   /** Contract wallet address */
   address: Address;
+
+  /** Home chain where we hold our balance */
+  homeChainId: number;
+  /** Home ERC-20 token where we hold our balance */
+  homeCoinAddress: Address;
 
   /** Latest sync block number */
   lastBlock: number;
@@ -55,13 +61,16 @@ export type Account = {
   pushToken: string | null;
 };
 
-interface AccountV7 extends StoredModel {
-  storageVersion: 7;
+interface AccountV8 extends StoredModel {
+  storageVersion: 8;
 
   enclaveKeyName: string;
   enclavePubKey: Hex;
   name: string;
   address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
 
   lastBlock: number;
   lastBlockTimestamp: number;
@@ -147,17 +156,20 @@ export function parseAccount(accountJSON?: string): Account | null {
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // Migrations
-  // Delete V1-7 testnet accounts. Re-onboard to latest account with paymasters.
-  if (model.storageVersion < 7) return null;
+  // Delete V1-78 testnet accounts. Re-onboard to latest account with paymasters.
+  if (model.storageVersion < 8) return null;
 
-  assert(model.storageVersion === 7);
-  const a = model as AccountV7;
+  assert(model.storageVersion === 8);
+  const a = model as AccountV8;
 
-  return {
+  const ret = {
     enclaveKeyName: a.enclaveKeyName,
     enclavePubKey: a.enclavePubKey,
     name: a.name,
     address: getAddress(a.address),
+
+    homeChainId: a.homeChainId,
+    homeCoinAddress: getAddress(a.homeCoinAddress),
 
     lastBalance: BigInt(a.lastBalance),
     lastBlock: a.lastBlock,
@@ -173,18 +185,26 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     pushToken: a.pushToken,
   };
+
+  assert(a.homeChainId === chainConfig.chainL2.id, "account: wrong home chain");
+  assert(a.homeCoinAddress === chainConfig.tokenAddress, "account: wrong coin");
+
+  return ret;
 }
 
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV7 = {
-    storageVersion: 7,
+  const model: AccountV8 = {
+    storageVersion: 8,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
     name: account.name,
     address: account.address,
+
+    homeChainId: account.homeChainId,
+    homeCoinAddress: account.homeCoinAddress,
 
     lastBalance: account.lastBalance.toString(),
     lastBlock: account.lastBlock,

@@ -1,4 +1,5 @@
 import { assert } from "@daimo/common";
+import { chainConfig } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
@@ -53,6 +54,9 @@ export function useCreateAccount(name: string): ActHandle {
       enclavePubKey: pubKeyHex,
       name,
       address,
+
+      homeChainId: chainConfig.chainL2.id,
+      homeCoinAddress: chainConfig.tokenAddress,
 
       lastBalance: BigInt(0),
       lastBlockTimestamp: 0,
