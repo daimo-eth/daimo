@@ -34,10 +34,14 @@ type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
-  // Old notes contract addresses
+  // All historical notes ("payment link") contract addresses
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
   "0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce": AddrLabel.PaymentLink,
   "0x1eec7E083C1a10C16470bEAc7839364853c7B81f": AddrLabel.PaymentLink,
+  "0x831967F433D9425Aa34D6A3dAC01a428d839De0f": AddrLabel.PaymentLink,
+  // All historical paymaster addresses
+  "0x13f490FafBb206440F25760A10C21A6220017fFa": AddrLabel.Paymaster,
+  "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56": AddrLabel.Paymaster,
 };
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.paymasterAddress] = AddrLabel.Paymaster;

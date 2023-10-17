@@ -23,7 +23,7 @@ function getChainConfig(): ChainConfig {
         tokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
         tokenSymbol: "USDC",
         tokenDecimals: 6,
-        paymasterAddress: "0x939263eafe57038a072cb4edd6b25dd81a8a6c56",
+        paymasterAddress: "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56",
       };
     case "baseGoerli":
     case "": // Tests, etc default to testnet
