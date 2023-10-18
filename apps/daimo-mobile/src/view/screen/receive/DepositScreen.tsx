@@ -30,7 +30,7 @@ export default function DepositScreen() {
   const testnet = chainL2.testnet;
 
   if (onramp === "cbpay") {
-    return <CBPayWebView destAddress={account.address} onExit={exitOnramp} />;
+    return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
   }
 
   return (

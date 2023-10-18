@@ -2,6 +2,7 @@ import { SpanStatusCode } from "@opentelemetry/api";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
 import Libhoney from "libhoney";
+import z from "zod";
 
 import { TrpcRequestContext } from "./trpc";
 
@@ -18,6 +19,16 @@ export type TelemKey =
   | "rpc.ip_addr"
   | "rpc.ip_country"
   | "rpc.user_agent";
+
+export const zUserAction = z.object({
+  name: z.string(),
+  accountName: z.string(),
+  startMs: z.number(),
+  durationMs: z.number(),
+  error: z.string().optional(),
+});
+
+export type UserAction = z.infer<typeof zUserAction>;
 
 /**
  * Server-side API telemetry.
@@ -61,8 +72,7 @@ export class Telemetry {
     durationMs: number
   ) {
     const { ipAddr, userAgent } = ctx;
-    const ipGeo = geoIP.lookup(ipAddr);
-    const ipCountry = ipGeo?.country || "unknown";
+    const ipCountry = getIpCountry(ipAddr);
 
     this.honeyRpc?.sendNow({
       status_code: success ? SpanStatusCode.OK : SpanStatusCode.ERROR,
@@ -77,21 +87,25 @@ export class Telemetry {
   }
 
   recordUserAction(
+    ctx: TrpcRequestContext,
     actionName: string,
     accountName: string,
-    ctx: TrpcRequestContext
+    durationMs?: number,
+    error?: string
   ) {
     console.log(`[TELEM] recording ${actionName} ${accountName}`);
 
     const { ipAddr, userAgent } = ctx;
-    const ipGeo = geoIP.lookup(ipAddr);
-    const ipCountry = ipGeo?.country || "unknown";
+    const ipCountry = getIpCountry(ipAddr);
 
     this.honeyEvents?.sendNow({
+      duration_ms: durationMs,
       "service.name": "daimo-api",
       "event.type": "user-action",
       "event.name": actionName,
       "event.account_name": accountName,
+      "event.error": error,
+      status_code: error == null ? SpanStatusCode.OK : SpanStatusCode.ERROR,
       "rpc.ip_addr": ipAddr,
       "rpc.ip_country": ipCountry,
       "rpc.user_agent": userAgent,
@@ -101,14 +115,17 @@ export class Telemetry {
       this.recordClippy(
         `It looks like you have a new user! ${accountName} from ${ipCountry}`
       );
+    } else if (actionName === "client-onramp-cbpay") {
+      const m = error ? `failed: ${error}` : "succeeded";
+      this.recordClippy(`${accountName} from ${ipCountry} ${actionName} ${m}`);
     }
   }
 
   /** Clippy is our Slack bot for API monitoring. */
   private recordClippy(message: string) {
     const url = process.env.CLIPPY_WEBHOOK_URL || "";
-    console.log(`[TELEM] ${url == null ? "SKIPPING " : ""}clippy: ${message}`);
-    if (url == null) return;
+    console.log(`[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${message}`);
+    if (url === "") return;
 
     fetch(url, {
       method: "POST",
@@ -116,4 +133,9 @@ export class Telemetry {
       body: JSON.stringify({ text: message }),
     });
   }
+}
+
+function getIpCountry(ipAddr: string) {
+  const ipGeo = geoIP.lookup(ipAddr);
+  return ipGeo?.country || "Atlantis";
 }

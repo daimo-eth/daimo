@@ -1,14 +1,16 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
-import { Address } from "viem";
+
 import "react-native-url-polyfill/auto";
+import { rpcFunc } from "../../../logic/trpc";
+import { Account } from "../../../model/account";
 
 export function CBPayWebView({
-  destAddress,
+  destAccount,
   onExit,
 }: {
-  destAddress: Address;
+  destAccount: Account;
   onExit: () => void;
 }) {
   const coinbaseURL = useMemo(
@@ -17,7 +19,7 @@ export function CBPayWebView({
         appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
         destinationWallets: [
           {
-            address: destAddress,
+            address: destAccount.address,
             blockchains: ["base"],
             assets: ["USDC"],
             supportedNetworks: ["base"],
@@ -26,7 +28,24 @@ export function CBPayWebView({
         handlingRequestedUrls: true,
         defaultExperience: "send",
       }),
-    [destAddress]
+    [destAccount.address]
+  );
+
+  // Track timing and outcome
+  const startMs = useRef(performance.now());
+  const routeReached = useRef("initial");
+  const succeeded = useRef(false);
+
+  // On exit, log result
+  useEffect(
+    () => () => {
+      console.log("[CB] onramp exit");
+      const error = succeeded.current
+        ? undefined
+        : `reached ${routeReached.current}`;
+      logOnramp(destAccount, "onramp-cbpay", startMs.current, error);
+    },
+    []
   );
 
   const onMessage = useCallback((event: WebViewMessageEvent) => {
@@ -37,17 +56,20 @@ export function CBPayWebView({
       case "open":
         break;
       case "request_open_url":
-        console.log(`[CB] TODO request_open_url ${data.url}`);
+        console.log(`[CB] UNHANDLED request_open_url ${data.url}`);
         break;
       case "transition_view":
         console.log(`[CB] transition to ${data.pageRoute}`);
+        routeReached.current = data.pageRoute;
         break;
       case "success":
         console.log(`[CB] onramp success`);
+        succeeded.current = true;
         break;
-      case "exit":
+      case "exit": {
         onExit();
         break;
+      }
       default:
         console.warn(`[CB] unknown event ${data.eventName}`);
     }
@@ -60,4 +82,22 @@ export function CBPayWebView({
       originWhitelist={["*"]}
     />
   );
+}
+
+function logOnramp(
+  account: Account,
+  actionName: string,
+  startMs: number,
+  error?: string
+) {
+  // Fire and forget
+  rpcFunc.logAction.mutate({
+    action: {
+      name: actionName,
+      accountName: account.name,
+      startMs,
+      durationMs: performance.now() - startMs,
+      error,
+    },
+  });
 }

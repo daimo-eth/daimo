@@ -15,7 +15,7 @@ import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
 import { PushNotifier } from "./pushNotifier";
-import { Telemetry } from "./telemetry";
+import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
 import { ViemClient } from "./viemClient";
 
@@ -143,7 +143,7 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { name, pubKeyHex } = opts.input;
-        telemetry.recordUserAction("deployWallet", name, opts.ctx);
+        telemetry.recordUserAction(opts.ctx, "deployWallet", name);
         const address = await deployWallet(
           name,
           pubKeyHex,
@@ -151,6 +151,19 @@ export function createRouter(
           accountFactory
         );
         return { status: "success", address };
+      }),
+
+    logAction: publicProcedure
+      .input(z.object({ action: zUserAction }))
+      .mutation(async (opts) => {
+        const { action } = opts.input;
+        telemetry.recordUserAction(
+          opts.ctx,
+          `client-${action.name}`,
+          action.accountName,
+          action.durationMs,
+          action.error
+        );
       }),
 
     testnetFaucetStatus: publicProcedure
