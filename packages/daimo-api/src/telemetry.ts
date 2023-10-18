@@ -1,4 +1,4 @@
-import { SpanStatusCode } from "@opentelemetry/api";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
 import Libhoney from "libhoney";
@@ -43,47 +43,32 @@ export type UserAction = z.infer<typeof zUserAction>;
  */
 export class Telemetry {
   private honeyEvents: Libhoney | null;
-  private honeyRpc: Libhoney | null;
+  private tracerApi = trace.getTracer("daimo-api");
 
   constructor() {
     const apiKey = process.env.HONEYCOMB_API_KEY || "";
     if (apiKey === "") {
       console.log(`[TELEM] no HONEYCOMB_API_KEY set, telemetry disabled`);
       this.honeyEvents = null;
-      this.honeyRpc = null;
     } else {
       this.honeyEvents = new Libhoney({
         writeKey: apiKey,
         dataset: "daimo-events",
         sampleRate: 1,
       });
-      this.honeyRpc = new Libhoney({
-        writeKey: apiKey,
-        dataset: "daimo-rpc",
-        sampleRate: 1,
-      });
     }
   }
 
-  recordRpc(
-    ctx: TrpcRequestContext,
-    path: string,
-    success: boolean,
-    durationMs: number
-  ) {
-    const { ipAddr, userAgent } = ctx;
-    const ipCountry = getIpCountry(ipAddr);
-
-    this.honeyRpc?.sendNow({
-      status_code: success ? SpanStatusCode.OK : SpanStatusCode.ERROR,
-      "trace.trace_id": ("" + Math.random()).slice(2),
-      duration_ms: durationMs,
-      "service.name": "daimo-api",
+  startApiSpan(ctx: TrpcRequestContext, type: string, path: string) {
+    const span = this.tracerApi.startSpan(`trpc.${type}`);
+    const ipCountry = getIpCountry(ctx.ipAddr);
+    span.setAttributes({
       "rpc.path": path,
-      "rpc.ip_addr": ipAddr,
+      "rpc.ip_addr": ctx.ipAddr,
       "rpc.ip_country": ipCountry,
-      "rpc.user_agent": userAgent,
+      "rpc.user_agent": ctx.userAgent,
     });
+    return span;
   }
 
   recordUserAction(

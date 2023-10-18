@@ -17,7 +17,7 @@
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",
-    "@honeycombio/opentelemetry-node": "^0.5.0",
+    "@honeycombio/opentelemetry-node": "^0.6.0",
     "@opentelemetry/api": "^1.4.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.3",
     "@trpc/server": "^10.40.0",

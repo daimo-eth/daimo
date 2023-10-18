@@ -1,4 +1,5 @@
 import { EAccount, zAddress, zHex } from "@daimo/common";
+import { trace, SpanStatusCode } from "@opentelemetry/api";
 import { getAddress } from "viem";
 import { z } from "zod";
 
@@ -32,22 +33,14 @@ export function createRouter(
   accountFactory: AccountFactory,
   telemetry: Telemetry
 ) {
-  // TODO: tracer doesn't work.
-  // https://github.com/honeycombio/honeycomb-opentelemetry-node/issues/239
-  // const tracer = trace.getTracer("daimo-api");
-
+  // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
-    // const span = tracer.startSpan(`trpc.${opts.type}`);
-    // span.setAttributes({ "trpc.path": opts.path });
-    const startMs = performance.now();
+    const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
 
     const result = await opts.next();
 
-    const endMs = performance.now();
-    telemetry.recordRpc(opts.ctx, opts.path, result.ok, endMs - startMs);
-    // const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
-    // span.setStatus({ code });
-    // span.end();
+    const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
+    span.setStatus({ code }).end();
 
     return result;
   });
