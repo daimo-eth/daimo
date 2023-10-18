@@ -7,7 +7,9 @@ export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
 export const createContext = async (opts: CreateHTTPContextOptions) => {
   const ipAddr = getXForwardedIP(opts) || opts.req.socket.remoteAddress || "";
   const userAgent = opts.req.headers["user-agent"] || "";
-  return { ipAddr, userAgent };
+  const daimoPlatform = opts.req.headers["x-daimo-platform"] || "";
+  const daimoVersion = opts.req.headers["x-daimo-version"] || "";
+  return { ipAddr, userAgent, daimoPlatform, daimoVersion };
 };
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {

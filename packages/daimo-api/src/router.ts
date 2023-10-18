@@ -1,5 +1,5 @@
 import { EAccount, zAddress, zHex } from "@daimo/common";
-import { trace, SpanStatusCode } from "@opentelemetry/api";
+import { SpanStatusCode } from "@opentelemetry/api";
 import { getAddress } from "viem";
 import { z } from "zod";
 

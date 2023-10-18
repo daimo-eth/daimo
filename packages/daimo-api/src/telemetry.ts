@@ -67,6 +67,8 @@ export class Telemetry {
       "rpc.ip_addr": ctx.ipAddr,
       "rpc.ip_country": ipCountry,
       "rpc.user_agent": ctx.userAgent,
+      "app.platform": ctx.daimoPlatform,
+      "app.version": ctx.daimoVersion,
     });
     return span;
   }
