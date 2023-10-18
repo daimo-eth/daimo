@@ -1,19 +1,11 @@
-import {
-  DaimoNoteStatus,
-  DaimoRequestStatus,
-  EAccount,
-  dollarsToAmount,
-  hasAccountName,
-  parseDaimoLink,
-  zAddress,
-  zHex,
-} from "@daimo/common";
-import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { Address, getAddress } from "viem";
-import { normalize } from "viem/ens";
+import { EAccount, zAddress, zHex } from "@daimo/common";
+import { getAddress } from "viem";
 import { z } from "zod";
 
 import { deployWallet } from "./api/deployWallet";
+import { getAccountHistory } from "./api/getAccountHistory";
+import { getLinkStatus } from "./api/getLinkStatus";
+import { search } from "./api/search";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -67,37 +59,7 @@ export function createRouter(
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
         const { prefix } = opts.input;
-
-        // Search for "vitalik" or "vitalik.eth" matches vitalik.eth
-        // Search for "jesse.cb.id" matches jesse.cb.id
-        async function tryGetEnsAddr() {
-          if (prefix.length < 3) return null;
-          try {
-            const ensName = normalize(
-              prefix.includes(".") ? prefix : prefix + ".eth"
-            );
-            const addr = await vc.l1Client.getEnsAddress({ name: ensName });
-            if (addr == null) return null;
-            return { ensName, addr } as EAccount;
-          } catch (e) {
-            console.log(`[API] ens lookup '${prefix}' failed: ${e}`);
-            return null;
-          }
-        }
-
-        const ret: EAccount[] = [];
-        const [daimoAccounts, ensAccount] = await Promise.all([
-          nameReg.search(prefix),
-          tryGetEnsAddr(),
-        ]);
-        ret.push(...daimoAccounts);
-        if (ensAccount) {
-          let insertAt = 0;
-          if (ret[0] && ret[0].name === prefix) insertAt = 1;
-          ret.splice(insertAt, 0, ensAccount);
-        }
-
-        console.log(`[API] search: ${ret.length} results for '${prefix}'`);
+        const ret: EAccount[] = await search(prefix, vc, nameReg);
         return ret;
       }),
 
@@ -119,87 +81,11 @@ export function createRouter(
       .input(z.object({ url: z.string() }))
       .query(async (opts) => {
         const { url } = opts.input;
-
-        const link = parseDaimoLink(url);
-        if (link == null) {
-          throw new Error(`Invalid Daimo app link: ${url}`);
-        }
-
-        async function getEAccountFromStr(eAccStr: string): Promise<EAccount> {
-          const ret = await nameReg.getEAccountFromStr(eAccStr);
-          if (ret == null) throw new Error(`${eAccStr} not found`);
-          return ret;
-        }
-
-        switch (link.type) {
-          case "account": {
-            const acc = await getEAccountFromStr(link.account);
-            return { link, account: acc };
-          }
-          case "request": {
-            const acc = await getEAccountFromStr(link.recipient);
-
-            // Check if already fulfilled
-            const fulfilledNonceMetadata = new DaimoNonceMetadata(
-              DaimoNonceType.RequestResponse,
-              BigInt(link.requestId)
-            );
-            const potentialFulfillTxes = opIndexer.fetchTxHashes(
-              fulfilledNonceMetadata
-            );
-            const relevantTransfers = coinIndexer.filterTransfers({
-              addr: acc.addr,
-              txHashes: potentialFulfillTxes,
-            });
-            const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
-            const fulfillTxes = relevantTransfers.filter(
-              (t) => t.to === acc.addr && BigInt(t.amount) === expectedAmount
-            );
-            const fulfilledBy =
-              fulfillTxes.length > 0
-                ? await nameReg.getEAccount(fulfillTxes[0].from)
-                : undefined;
-
-            const ret: DaimoRequestStatus = {
-              link,
-              recipient: acc,
-              requestId: link.requestId,
-              fulfilledBy,
-            };
-            return ret;
-          }
-
-          case "note": {
-            const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
-            if (ret == null) {
-              const sender = await nameReg.getEAccountFromStr(
-                link.previewSender
-              );
-              if (sender == null) {
-                throw new Error(`Note sender not found: ${link.previewSender}`);
-              }
-              const pending: DaimoNoteStatus = {
-                status: "pending",
-                link,
-                sender,
-                dollars: link.previewDollars,
-              };
-              return pending;
-            }
-            return ret;
-          }
-
-          default:
-            throw new Error(`Invalid Daimo app link: ${url}`);
-        }
+        return getLinkStatus(url, nameReg, opIndexer, coinIndexer, noteIndexer);
       }),
 
     lookupEthereumAccountByKey: publicProcedure
-      .input(
-        z.object({
-          pubKeyHex: zHex,
-        })
-      )
+      .input(z.object({ pubKeyHex: zHex }))
       .query(async (opts) => {
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
         return addr ? await nameReg.getEAccount(addr) : null;
@@ -222,67 +108,15 @@ export function createRouter(
       .query(async (opts) => {
         const { sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
-        console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
-
-        // Get latest finalized block. Next account sync, fetch since this block.
-        const finBlock = await vc.publicClient.getBlock({
-          blockTag: "finalized",
-        });
-        if (finBlock.number == null) throw new Error("No finalized block");
-        if (finBlock.number < sinceBlockNum) {
-          console.log(
-            `[API] getAccountHist: OLD final block ${finBlock.number} < ${sinceBlockNum}`
-          );
-        }
-
-        // Get the latest block + current balance.
-        const lastBlk = vc.getLastBlock();
-        if (lastBlk == null) throw new Error("No latest block");
-        const lastBlock = Number(lastBlk.number);
-        const lastBlockTimestamp = Number(lastBlk.timestamp);
-        const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
-
-        // TODO: get userops, including reverted ones. Show failed sends.
-
-        // Get successful transfers since sinceBlockNum
-        const transferLogs = coinIndexer.filterTransfers({
-          addr: address,
-          sinceBlockNum: BigInt(sinceBlockNum),
-        });
-
-        console.log(
-          `[API] getAccountHist: ${transferLogs.length} logs for ${address} since ${sinceBlockNum}`
-        );
-
-        // Get named accounts
-        const addrs = new Set<Address>();
-        transferLogs.forEach((log) => {
-          addrs.add(log.from);
-          addrs.add(log.to);
-        });
-        const namedAccounts = (
-          await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
-        ).filter((acc) => hasAccountName(acc));
-
-        // Get account keys
-        const accountKeys = await keyReg.resolveAddressKeys(address);
-
-        const chainGasConstants = await paymaster.calculateChainGasConstants();
-
-        return {
+        return getAccountHistory(
           address,
-
-          lastFinalizedBlock: Number(finBlock.number),
-          lastBlock,
-          lastBlockTimestamp,
-          lastBalance: String(lastBalance),
-
-          chainGasConstants,
-
-          transferLogs,
-          namedAccounts,
-          accountKeys,
-        };
+          sinceBlockNum,
+          vc,
+          coinIndexer,
+          nameReg,
+          keyReg,
+          paymaster
+        );
       }),
 
     registerPushToken: publicProcedure
@@ -293,7 +127,7 @@ export function createRouter(
         })
       )
       .mutation(async (opts) => {
-        // TODO: device attestation or validate token to avoid griefing
+        // TODO: device attestation or similar to avoid griefing.
         // Auth is not for privacy; anyone can watch an address onchain.
         const { token } = opts.input;
         const address = getAddress(opts.input.address);
