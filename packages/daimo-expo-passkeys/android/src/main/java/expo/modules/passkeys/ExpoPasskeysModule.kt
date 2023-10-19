@@ -30,10 +30,8 @@ import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCreden
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
 
 // Note that this is a ExportedModule, not a Module as expo recommends.
-// This is because we need access to the application context to be able
-// to inject a BiometricPrompt instance. As far as I can tell, using a
-// ExportedModule is the only way to do this, as seen in the official 
-// [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)
+// As far as I can tell, using a ExportedModule is the only way to get context, 
+// as seen in the official [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/)
 // and [expo-sensors](https://docs.expo.dev/versions/latest/sdk/sensors/) packages.
 // Unfortunately, ExportedModule is not documented well, so much of the
 // design of this module is modeled after those two packages.
@@ -68,8 +66,7 @@ class ExpoPasskeysModule(context: Context) : ExportedModule(context) {
     moduleCoroutineScope.launch {
       try {
         val result = currentActivity?.let { credentialManager.createCredential(it, createPublicKeyCredentialRequest) }
-        val response =
-          result?.data?.getString(REGISTRATION_RESPONSE)
+        val response = result?.data?.getString(REGISTRATION_RESPONSE)
         promise.resolve(response)
       } catch (e: Exception) {
         promise.reject("Error", e.toString())
@@ -87,8 +84,7 @@ class ExpoPasskeysModule(context: Context) : ExportedModule(context) {
     moduleCoroutineScope.launch {
       try {
         val result = currentActivity?.let { credentialManager.getCredential(it, getCredentialRequest) }
-        val response =
-          result?.credential?.data?.getString(AUTH_RESPONSE)
+        val response = result?.credential?.data?.getString(AUTH_RESPONSE)
         promise.resolve(response)
       } catch (e: Exception) {
         promise.reject("Error", e.toString())

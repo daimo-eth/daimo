@@ -18,7 +18,7 @@ export { CreateRequest, CreateResult, SignRequest, SignResult };
  * Create a new passkey.
  * All parameters are either strings or in regular base64 encoding.
  *
- * @param request.domain The domain to create the passkey for.
+ * @param request.domain The domain of the existing passkey.
  * @param request.challengeB64 The challenge to use for creation request.
  * @param request.accountName The account name to attach the passkey to.
  * @return result.rawClientDataJSONB64 The raw client data JSON.

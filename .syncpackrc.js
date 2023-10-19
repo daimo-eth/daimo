@@ -3,16 +3,16 @@
 module.exports = {
   versionGroups: [
     {
-      packages: ["@daimo/expo-enclave"],
+      packages: ["@daimo/expo-enclave", "@daimo/expo-passkeys"],
       dependencies: ["expo", "react", "react-native"],
       pinVersion: "*",
-      label: "Peer dependencies of the re-usable enclave module.",
+      label: "Peer dependencies of the re-usable Expo modules.",
     },
     {
       packages: ["@daimo/*"],
       dependencies: ["@daimo/*"],
       isIgnored: true,
       label: "Monorepo packages.",
-    }
+    },
   ],
 };
