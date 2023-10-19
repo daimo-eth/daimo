@@ -2,6 +2,7 @@ package expo.modules.enclave
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.os.Build
 import java.security.spec.ECGenParameterSpec
 import java.security.KeyPairGenerator
 import java.security.KeyPair
