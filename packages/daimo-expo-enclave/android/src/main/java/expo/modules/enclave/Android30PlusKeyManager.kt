@@ -45,14 +45,7 @@ class Android30PlusKeyManager(_context: Context, _moduleRegistry: ModuleRegistry
   }
 
   internal fun createSigningPrivkey(accountName: String) {
-    var purpose = KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31
-      // Future proofing in case we want to use these keys for encrypted memos
-      purpose = purpose or KeyProperties.PURPOSE_AGREE_KEY
-    }
-
-    var params = KeyGenParameterSpec.Builder(accountName, purpose)
+    var params = KeyGenParameterSpec.Builder(accountName, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
       .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
       .setDigests(KeyProperties.DIGEST_SHA256)
       .setUserAuthenticationRequired(true)
