@@ -19,8 +19,8 @@ import {
   numberToBytes,
 } from "viem";
 
+import { SigningCallback } from "./callback";
 import { DaimoNonce } from "./nonce";
-import { SigningCallback } from "./signingCallback";
 
 // Metadata for a userop: nonce and paymaster constant.
 export type DaimoOpMetadata = {

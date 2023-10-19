@@ -1,73 +1,59 @@
-import { assert, derKeytoContractFriendlyKey } from "@daimo/common";
-import * as Contracts from "@daimo/contract";
-import { BundlerJsonRpcProvider, Constants, Utils } from "userop";
 import {
-  Address,
-  Hex,
-  encodeFunctionData,
-  getAddress,
-  isHex,
-  parseUnits,
-} from "viem";
+  UserOpHex,
+  derKeytoContractFriendlyKey,
+  zUserOpHex,
+} from "@daimo/common";
+import * as Contracts from "@daimo/contract";
+import { Constants, Utils } from "userop";
+import { Address, Hex, encodeFunctionData, getAddress, parseUnits } from "viem";
 
+import { OpSenderCallback, SigningCallback } from "./callback";
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
-import { SigningCallback } from "./signingCallback";
 
 interface DaimoOpConfig {
-  /// Chain ID
+  /** Chain ID */
   chainId: number;
-  /// Bundler RPC URL.
-  bundlerRpcUrl: string;
-  /// Stablecoin token address.
+  /** Stablecoin token address. */
   tokenAddress: Address;
-  /// Decimals for that token.
+  /** Decimals for that token. */
   tokenDecimals: number;
-  /// EphemeralNotes instance. The stablecoin used must match tokenAddress.
+  /** EphemeralNotes instance. The stablecoin used must match tokenAddress. */
   notesAddress: `0x${string}`;
-  /// Paymaster, payable in tokenAddress.
+  /** Paymaster, payable in tokenAddress. */
   paymasterAddress: Address;
-  /// Daimo account address.
+  /** Daimo account address. */
   accountAddress: Address;
-  /// Signs userops. Must, in some form, check user presence.
+  /** Signs userops. Must, in some form, check user presence. */
   accountSigner: SigningCallback;
+  /** Sends userops. Returns userOpHash. */
+  opSender: OpSenderCallback;
 }
 
-/// DaimoOpSender constructs user operations for a Daimo account.
-/// Supports key rotations, token transfers, and ephemeral note ops.
+/**
+ * DaimoOpSender constructs user operations for a Daimo account.
+ * Supports key rotations, token transfers, and ephemeral note ops.
+ */
 export class DaimoOpSender {
-  /** Connection to the chain */
-  private provider: BundlerJsonRpcProvider;
-
   private constructor(
     private opConfig: DaimoOpConfig,
     private opBuilder: DaimoOpBuilder
-  ) {
-    this.provider = new BundlerJsonRpcProvider(opConfig.bundlerRpcUrl);
-  }
+  ) {}
 
   /**
-   * Initializes using the DAIMO_CHAIN and DAIMO_BUNDLER_RPC env vars.
+   * Initializes using the DAIMO_CHAIN env var. (See chainConfig)
    */
   public static async initFromEnv(
     accountAddress: Address,
-    accountSigner: SigningCallback
+    accountSigner: SigningCallback,
+    opSender: OpSenderCallback
   ): Promise<DaimoOpSender> {
     const { tokenAddress, tokenDecimals, paymasterAddress, chainL2 } =
       Contracts.chainConfig;
 
-    let bundlerRpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
-    if (bundlerRpcUrl === "" && chainL2.network === "base-goerli") {
-      bundlerRpcUrl = // Default to testnet
-        "https://api.pimlico.io/v1/base-goerli/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07";
-    }
-    if (bundlerRpcUrl === "") {
-      throw new Error("Missing DAIMO_BUNDLER_RPC env var");
-    }
-
     return DaimoOpSender.init({
       accountAddress,
       accountSigner,
-      bundlerRpcUrl,
+      opSender,
       chainId: chainL2.id,
       notesAddress: Contracts.daimoEphemeralNotesAddress,
       paymasterAddress,
@@ -95,7 +81,6 @@ export class DaimoOpSender {
         tokenDecimals,
         paymasterAddress,
         notesAddress: opConfig.notesAddress,
-        bundlerRpcUrl: opConfig.bundlerRpcUrl,
       })})}`
     );
 
@@ -113,17 +98,13 @@ export class DaimoOpSender {
       this.opConfig.chainId
     );
 
-    console.log("[OP] built userOp:", builtOp);
+    // This method is incorrectly named. It does not return JSON, it returns
+    // a userop object with all the fields normalized to hex.
+    const hexOp = Utils.OpToJSON(builtOp) as UserOpHex;
+    console.log("[OP] sending userOp:", hexOp);
+    zUserOpHex.parse(hexOp);
 
-    const res: Hex = await this.provider.send("eth_sendUserOperation", [
-      Utils.OpToJSON(builtOp),
-      Constants.ERC4337.EntryPoint,
-    ]);
-    assert(isHex(res));
-
-    console.log(`[OP] submitted userOpHash: ${res}`);
-
-    return res;
+    return this.opConfig.opSender(hexOp);
   }
 
   /** Adds an account signing key. Returns userOpHash. */

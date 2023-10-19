@@ -1,11 +1,16 @@
-import { EAccount, OpEvent, dollarsToAmount } from "@daimo/common";
+import { EAccount, OpEvent, UserOpHex, dollarsToAmount } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import { DaimoOpSender, SigningCallback } from "@daimo/userop";
+import {
+  DaimoOpSender,
+  SigningCallback,
+  OpSenderCallback,
+} from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Log, NamedError } from "../logic/log";
+import { rpcFunc } from "../logic/trpc";
 import { useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
@@ -89,24 +94,25 @@ function loadOpSender(
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
+  const signer: SigningCallback = async (messageHex: string) => {
+    const derSig = await requestEnclaveSignature(
+      enclaveKeyName,
+      messageHex,
+      "Authorize transaction"
+    );
+    return { keySlot, derSig };
+  };
+
+  const sender: OpSenderCallback = async (op: UserOpHex) => {
+    return rpcFunc.sendUserOp.mutate({ op });
+  };
+
   promise = (async () => {
     console.info(
       `[SEND] loading DaimoOpSender ${address} ${enclaveKeyName} ${keySlot}`
     );
-    const signer: SigningCallback = async (messageHex: string) => {
-      const derSig = await requestEnclaveSignature(
-        enclaveKeyName,
-        messageHex,
-        "Authorize transaction"
-      );
 
-      return {
-        keySlot,
-        derSig,
-      };
-    };
-
-    return await DaimoOpSender.initFromEnv(address, signer);
+    return await DaimoOpSender.initFromEnv(address, signer, sender);
   })();
   accountCache.set([address, keySlot], promise);
 

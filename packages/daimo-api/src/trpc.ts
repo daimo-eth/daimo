@@ -1,3 +1,4 @@
+import { Span } from "@opentelemetry/api";
 import { initTRPC } from "@trpc/server";
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
 
@@ -9,7 +10,8 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
   const userAgent = opts.req.headers["user-agent"] || "";
   const daimoPlatform = opts.req.headers["x-daimo-platform"] || "";
   const daimoVersion = opts.req.headers["x-daimo-version"] || "";
-  return { ipAddr, userAgent, daimoPlatform, daimoVersion };
+  const span = null as Span | null;
+  return { ipAddr, userAgent, daimoPlatform, daimoVersion, span };
 };
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {

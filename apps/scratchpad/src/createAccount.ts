@@ -1,3 +1,5 @@
+import { getBundlerClientFromEnv } from "@daimo/api/src/chain/bundlerClient";
+import { UserOpHex } from "@daimo/common";
 import {
   daimoAccountFactoryConfig,
   chainConfig,
@@ -10,6 +12,7 @@ import {
   DaimoNonceType,
   DaimoOpSender,
   SigningCallback,
+  OpSenderCallback,
 } from "@daimo/userop";
 import crypto from "node:crypto";
 import { Constants } from "userop";
@@ -71,6 +74,11 @@ export async function createAccount() {
     return { derSig: sigHex, keySlot: 0, validUntil };
   };
 
+  const bundlerClient = getBundlerClientFromEnv();
+  const sender: OpSenderCallback = async (op: UserOpHex) => {
+    return bundlerClient.sendUserOp(op);
+  };
+
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
   if (pubKey.length !== 64) {
     throw new Error("Invalid public key, wrong length");
@@ -107,7 +115,7 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoOpSender.initFromEnv(address, signer);
+  const account = await DaimoOpSender.initFromEnv(address, signer, sender);
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 

@@ -36,7 +36,6 @@
       "node": "20.3.0",
       "env": {
         "DAIMO_APP_API_URL": "https://daimo-api-prod.onrender.com",
-        "DAIMO_BUNDLER_RPC": "https://api.pimlico.io/v1/base/rpc?apikey=70ecef54-a28e-4e96-b2d3-3ad67fbc1b07",
         "DAIMO_CHAIN": "base",
         "DAIMO_DOMAIN": "daimo.xyz"
       }

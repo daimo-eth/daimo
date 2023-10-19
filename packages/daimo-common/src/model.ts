@@ -20,7 +20,7 @@ export interface DAccount {
 
 export const zHex = z
   .string()
-  .regex(/^0x([0-9a-f]{2})*$/i)
+  .regex(/^0x[0-9a-f]*$/i)
   .refine((s): s is Hex => true);
 
 export const zBigIntStr = z
@@ -54,3 +54,19 @@ export const zKeyData = z.object({
 });
 
 export type KeyData = z.infer<typeof zKeyData>;
+
+export const zUserOpHex = z.object({
+  sender: zAddress,
+  nonce: zHex,
+  initCode: zHex,
+  callData: zHex,
+  callGasLimit: zHex,
+  verificationGasLimit: zHex,
+  preVerificationGas: zHex,
+  maxFeePerGas: zHex,
+  maxPriorityFeePerGas: zHex,
+  paymasterAndData: zHex,
+  signature: zHex,
+});
+
+export type UserOpHex = z.infer<typeof zUserOpHex>;

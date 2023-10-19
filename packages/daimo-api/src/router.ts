@@ -1,12 +1,13 @@
-import { EAccount, zAddress, zHex } from "@daimo/common";
+import { EAccount, zAddress, zHex, zUserOpHex } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
-import { getAddress } from "viem";
+import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { deployWallet } from "./api/deployWallet";
 import { getAccountHistory } from "./api/getAccountHistory";
 import { getLinkStatus } from "./api/getLinkStatus";
 import { search } from "./api/search";
+import { BundlerClient } from "./chain/bundlerClient";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -22,6 +23,7 @@ import { ViemClient } from "./viemClient";
 
 export function createRouter(
   vc: ViemClient,
+  bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   opIndexer: OpIndexer,
@@ -36,6 +38,7 @@ export function createRouter(
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
     const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
+    opts.ctx.span = span;
 
     const result = await opts.next();
 
@@ -144,6 +147,21 @@ export function createRouter(
           accountFactory
         );
         return { status: "success", address };
+      }),
+
+    sendUserOp: publicProcedure
+      .input(z.object({ op: zUserOpHex }))
+      .mutation(async (opts) => {
+        const { op } = opts.input;
+        const span = opts.ctx.span!;
+        span.setAttribute("op.sender", op.sender);
+        span.setAttribute("op.nonce", op.nonce);
+        const h = hexToNumber;
+        span.setAttribute("op.call_gas_limit", h(op.callGasLimit));
+        span.setAttribute("op.pre_ver_gas", h(op.preVerificationGas));
+        span.setAttribute("op.ver_gas_limit", h(op.verificationGasLimit));
+        span.setAttribute("op.paymaster", op.paymasterAndData);
+        return bundlerClient.sendUserOp(op);
       }),
 
     logAction: publicProcedure

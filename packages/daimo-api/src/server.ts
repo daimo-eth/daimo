@@ -2,6 +2,7 @@ import { chainConfig } from "@daimo/contract";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import http from "http";
 
+import { getBundlerClientFromEnv } from "./chain/bundlerClient";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -21,6 +22,7 @@ async function main() {
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv();
   await vc.init();
+  const bundlerClient = getBundlerClientFromEnv();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const keyReg = new KeyRegistry(vc);
@@ -69,6 +71,7 @@ async function main() {
   console.log(`[API] serving...`);
   const router = createRouter(
     vc,
+    bundlerClient,
     coinIndexer,
     noteIndexer,
     opIndexer,
