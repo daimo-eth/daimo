@@ -23,12 +23,12 @@ export type ParamListHome = {
 
 export type ParamListSend = {
   Send: SendNavProp;
-  Note: { link: DaimoLinkNote };
 };
 
 export type ParamListReceive = {
   Request: undefined;
   RequestSend: undefined;
+  Note: { link: DaimoLinkNote };
 };
 
 export type ParamListSettings = {
@@ -105,7 +105,7 @@ async function goTo(nav: HomeStackNav, link: DaimoLink) {
       break;
     }
     case "note": {
-      nav.navigate("SendTab", { screen: "Note", params: { link } });
+      nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
       break;
     }
     default:

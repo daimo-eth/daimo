@@ -3,30 +3,35 @@ import { DaimoLink } from "@daimo/common";
 import { HomeStackNav, handleDeepLink } from "../src/view/shared/nav";
 
 describe("nav", () => {
-  const history = [] as { screen: string; params: any }[];
+  const history = [] as { tab: string; screen: string; params: any }[];
   const nav: HomeStackNav = {
     navigate: (
       tab: string,
       { screen, params }: { screen: string; params: any }
     ) => {
-      expect(tab).toBe("SendTab");
-      history.push({ screen, params });
+      history.push({ tab, screen, params });
     },
   } as any;
 
-  const assertNav = (screen: string, params: { link: DaimoLink }) => {
-    expect(history).toStrictEqual([{ screen, params }]);
+  const assertNav = (
+    tab: string,
+    screen: string,
+    params: { link: DaimoLink }
+  ) => {
+    expect(history).toStrictEqual([{ tab, screen, params }]);
   };
 
   it("handles account links", () => {
     history.length = 0;
     handleDeepLink(nav, "daimo://account/alice");
-    assertNav("Send", { link: { type: "account", account: "alice" } });
+    assertNav("SendTab", "Send", {
+      link: { type: "account", account: "alice" },
+    });
   });
   it("handles request links", () => {
     history.length = 0;
     handleDeepLink(nav, "daimo://request/alice/1.23/456");
-    assertNav("Send", {
+    assertNav("SendTab", "Send", {
       link: {
         type: "request",
         recipient: "alice",
@@ -41,7 +46,7 @@ describe("nav", () => {
       nav,
       "daimo://note/alice/1.23/0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     );
-    assertNav("Note", {
+    assertNav("ReceiveTab", "Note", {
       link: {
         type: "note",
         previewSender: "alice",

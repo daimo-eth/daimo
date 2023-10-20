@@ -23,11 +23,11 @@ import { useEphemeralSignature } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import { ParamListSend, useNav } from "../../shared/nav";
+import { ParamListReceive, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
 
-type Props = NativeStackScreenProps<ParamListSend, "Note">;
+type Props = NativeStackScreenProps<ParamListReceive, "Note">;
 
 export default function NoteScreen({ route }: Props) {
   const [account] = useAccount();

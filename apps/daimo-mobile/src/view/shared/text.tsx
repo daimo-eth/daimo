@@ -32,10 +32,6 @@ export function TextCenter(props: TextProps) {
   return <Text {...props} style={ss.text.center} />;
 }
 
-export function TextRight(props: TextProps) {
-  return <Text {...props} style={ss.text.right} />;
-}
-
 export function TextError(props: TextProps) {
   return <Text {...props} style={ss.text.error} />;
 }

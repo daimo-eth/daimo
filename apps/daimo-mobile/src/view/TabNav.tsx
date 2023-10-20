@@ -54,12 +54,17 @@ function getTabOptions({
   const all: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
-      height: 72,
-      paddingTop: 16,
+      height: 78,
       paddingHorizontal: 16,
     },
     tabBarItemStyle: {
-      height: 44,
+      paddingTop: 16,
+      height: 76,
+      paddingBottom: 16,
+    },
+    tabBarLabelStyle: {
+      fontSize: 11,
+      fontWeight: "600",
     },
   };
   const head = { ...all, headerShown: true };
@@ -101,13 +106,6 @@ function SendTab() {
       <SendStack.Group>
         <SendStack.Screen name="Send" component={SendScreen} />
       </SendStack.Group>
-      <SendStack.Group screenOptions={{ presentation: "modal" }}>
-        <SendStack.Screen
-          name="Note"
-          options={{ headerTitle: "Payment Link" }}
-          component={NoteScreen}
-        />
-      </SendStack.Group>
     </SendStack.Navigator>
   );
 }
@@ -147,6 +145,11 @@ function ReceiveTab() {
           name="RequestSend"
           options={{ headerTitle: `Request ${chainConfig.tokenSymbol}` }}
           component={SendRequestScreen}
+        />
+        <ReceiveStack.Screen
+          name="Note"
+          options={{ headerTitle: "Payment Link" }}
+          component={NoteScreen}
         />
       </ReceiveStack.Group>
     </ReceiveStack.Navigator>
