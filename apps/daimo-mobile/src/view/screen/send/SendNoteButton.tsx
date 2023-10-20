@@ -116,7 +116,7 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
           "[APP] Note shared with activity type ",
           result.activityType || "unknown"
         );
-        nav.navigate("Home");
+        nav.navigate("HomeTab", { screen: "Home" });
       } else if (result.action === Share.dismissedAction) {
         // Only on iOS
         console.log("[APP] Note share reverted");

@@ -130,7 +130,8 @@ function TransferRow({
   }
 
   const nav = useNav();
-  const viewOp = () => nav.navigate("HistoryOp", { op: transfer });
+  const viewOp = () =>
+    nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
 
   return (
     <ButtonSmall onPress={viewOp}>

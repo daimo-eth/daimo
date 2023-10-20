@@ -62,9 +62,15 @@ export default function HomeScreen() {
 
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
-  const goSend = useCallback(() => nav.navigate("Send", {}), [nav]);
-  const goRequest = useCallback(() => nav.navigate("Request"), [nav]);
-  const goDeposit = useCallback(() => nav.navigate("Deposit"), [nav]);
+  const goSend = useCallback(
+    () => nav.navigate("SendTab", { screen: "Send", params: {} }),
+    [nav]
+  );
+  const goRequest = useCallback(
+    () => nav.navigate("ReceiveTab", { screen: "Request" }),
+    [nav]
+  );
+  const goDeposit = useCallback(() => nav.navigate("DepositTab"), [nav]);
 
   const isEmpty = account.lastBalance === 0n;
 

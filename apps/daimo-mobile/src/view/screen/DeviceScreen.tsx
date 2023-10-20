@@ -17,7 +17,7 @@ import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { HomeStackParamList, useNav } from "../shared/nav";
+import { ParamListSettings, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import {
   TextBody,
@@ -28,7 +28,7 @@ import {
   TextLight,
 } from "../shared/text";
 
-type Props = NativeStackScreenProps<HomeStackParamList, "Device">;
+type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 
 export function DeviceScreen({ route, navigation }: Props) {
   const [account, setAccount] = useAccount();
@@ -90,7 +90,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         await deleteEnclaveKey(enclaveKeyName);
 
         setAccount(null);
-        nav.navigate("Home");
+        nav.navigate("HomeTab", { screen: "Home" });
       }
     }
   }, []);

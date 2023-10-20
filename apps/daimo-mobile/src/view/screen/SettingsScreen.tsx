@@ -58,7 +58,7 @@ export function SettingsScreen() {
       await deleteEnclaveKey(enclaveKeyName);
 
       setAccount(null);
-      nav.navigate("Home");
+      nav.navigate("HomeTab", { screen: "Home" });
     }
   }, []);
 
@@ -120,7 +120,7 @@ export function SettingsScreen() {
 function DevicesInfo({ account }: { account: Account }) {
   const nav = useNav();
 
-  const addDevice = () => nav.navigate("AddDevice");
+  const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
 
   return (
     <>
@@ -154,7 +154,11 @@ function DeviceRow({
   const nowS = useTime();
   const nav = useNav();
 
-  const viewDevice = () => nav.navigate("Device", { pubKey: keyData.pubKey });
+  const viewDevice = () =>
+    nav.navigate("SettingsTab", {
+      screen: "Device",
+      params: { pubKey: keyData.pubKey },
+    });
 
   const addAtS = timestampForBlock(keyData.addedAt);
 

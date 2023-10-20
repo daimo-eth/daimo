@@ -1,4 +1,5 @@
 import { EAccount } from "@daimo/common";
+import { isAddress } from "viem";
 import { normalize } from "viem/ens";
 
 import { NameRegistry } from "../contract/nameRegistry";
@@ -12,15 +13,19 @@ export async function search(
   nameReg: NameRegistry
 ) {
   const ret: EAccount[] = [];
-  const [daimoAccounts, ensAccount] = await Promise.all([
-    nameReg.search(prefix),
-    tryGetEnsAddr(prefix, vc),
-  ]);
-  ret.push(...daimoAccounts);
-  if (ensAccount) {
-    let insertAt = 0;
-    if (ret[0] && ret[0].name === prefix) insertAt = 1;
-    ret.splice(insertAt, 0, ensAccount);
+  if (isAddress(prefix)) {
+    ret.push(await nameReg.getEAccount(prefix));
+  } else {
+    const [daimoAccounts, ensAccount] = await Promise.all([
+      nameReg.search(prefix),
+      tryGetEnsAddr(prefix, vc),
+    ]);
+    ret.push(...daimoAccounts);
+    if (ensAccount) {
+      let insertAt = 0;
+      if (ret[0] && ret[0].name === prefix) insertAt = 1;
+      ret.splice(insertAt, 0, ensAccount);
+    }
   }
 
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);
@@ -29,8 +34,9 @@ export async function search(
 
 async function tryGetEnsAddr(prefix: string, vc: ViemClient) {
   if (prefix.length < 3) return null;
+  if (!prefix.includes(".")) return null;
   try {
-    const ensName = normalize(prefix.includes(".") ? prefix : prefix + ".eth");
+    const ensName = normalize(prefix);
     const addr = await vc.l1Client.getEnsAddress({ name: ensName });
     if (addr == null) return null;
     return { ensName, addr } as EAccount;

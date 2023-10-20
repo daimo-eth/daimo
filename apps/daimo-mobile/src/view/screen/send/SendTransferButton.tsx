@@ -106,7 +106,7 @@ export function SendTransferButton({
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-    nav.navigate("Home");
+    nav.navigate("HomeTab", { screen: "Home" });
   }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;

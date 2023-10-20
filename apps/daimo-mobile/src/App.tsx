@@ -6,7 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
-import { HomeStackNav } from "./view/HomeStack";
+import { TabNav } from "./view/TabNav";
 import { useInitNavLinks } from "./view/shared/nav";
 
 export default function App() {
@@ -36,7 +36,7 @@ function AppBody() {
 
   return (
     <SafeAreaProvider>
-      <HomeStackNav />
+      <TabNav />
       <StatusBar style="auto" />
     </SafeAreaProvider>
   );

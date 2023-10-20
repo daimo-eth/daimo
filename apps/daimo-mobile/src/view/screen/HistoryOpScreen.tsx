@@ -17,12 +17,12 @@ import { TitleAmount } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
-import { HomeStackParamList } from "../shared/nav";
+import { ParamListHome } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
-type Props = NativeStackScreenProps<HomeStackParamList, "HistoryOp">;
+type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
 
 export function HistoryOpScreen({ route, navigation }: Props) {
   // Load the latest version of this op. If the user opens the detail screen

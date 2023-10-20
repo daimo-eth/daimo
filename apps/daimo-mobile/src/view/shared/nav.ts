@@ -6,7 +6,7 @@ import {
   OpEvent,
   parseDaimoLink,
 } from "@daimo/common";
-import { useNavigation } from "@react-navigation/native";
+import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { addEventListener, getInitialURL } from "expo-linking";
 import { useEffect, useRef } from "react";
@@ -15,18 +15,24 @@ import { Hex } from "viem";
 import { useAccount } from "../../model/account";
 import { Recipient } from "../../sync/recipients";
 
-export type HomeStackParamList = {
+export type ParamListHome = {
   Home: undefined;
-  Settings: undefined;
-  Chain: undefined;
-  Send: SendNavProp;
-  Withdraw: undefined;
-  Request: undefined;
-  Deposit: undefined;
-  Note: { link: DaimoLinkNote };
-  RequestSend: undefined;
   History: undefined;
   HistoryOp: { op: OpEvent };
+};
+
+export type ParamListSend = {
+  Send: SendNavProp;
+  Note: { link: DaimoLinkNote };
+};
+
+export type ParamListReceive = {
+  Request: undefined;
+  RequestSend: undefined;
+};
+
+export type ParamListSettings = {
+  Settings: undefined;
   AddDevice: undefined;
   Device: { pubKey: Hex };
 };
@@ -38,12 +44,18 @@ interface SendNavProp {
   requestId?: `${bigint}`;
 }
 
+export type ParamListTab = {
+  DepositTab: undefined;
+  ReceiveTab: NavigatorScreenParams<ParamListReceive>;
+  HomeTab: NavigatorScreenParams<ParamListHome>;
+  SendTab: NavigatorScreenParams<ParamListSend>;
+  SettingsTab: { screen: keyof ParamListSettings; params?: any };
+};
+
 export function useNav<
-  RouteName extends keyof HomeStackParamList = keyof HomeStackParamList
+  RouteName extends keyof ParamListTab = keyof ParamListTab
 >() {
-  return useNavigation<
-    NativeStackNavigationProp<HomeStackParamList, RouteName>
-  >();
+  return useNavigation<NativeStackNavigationProp<ParamListTab, RouteName>>();
 }
 
 export type HomeStackNav = ReturnType<typeof useNav>;
@@ -89,11 +101,11 @@ async function goTo(nav: HomeStackNav, link: DaimoLink) {
   switch (type) {
     case "account":
     case "request": {
-      nav.navigate("Send", { link });
+      nav.navigate("SendTab", { screen: "Send", params: { link } });
       break;
     }
     case "note": {
-      nav.navigate("Note", { link });
+      nav.navigate("SendTab", { screen: "Note", params: { link } });
       break;
     }
     default:

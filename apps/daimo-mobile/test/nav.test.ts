@@ -5,7 +5,11 @@ import { HomeStackNav, handleDeepLink } from "../src/view/shared/nav";
 describe("nav", () => {
   const history = [] as { screen: string; params: any }[];
   const nav: HomeStackNav = {
-    navigate: (screen: string, params: any) => {
+    navigate: (
+      tab: string,
+      { screen, params }: { screen: string; params: any }
+    ) => {
+      expect(tab).toBe("SendTab");
       history.push({ screen, params });
     },
   } as any;

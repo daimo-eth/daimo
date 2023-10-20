@@ -72,7 +72,7 @@ export default function SendRequestScreen() {
         console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
         setStatus("sent");
         trackRequest(requestId);
-        nav.navigate("Home");
+        nav.navigate("HomeTab", { screen: "Home" });
       } else if (result.action === Share.dismissedAction) {
         // Only on iOS
         console.log(`[REQUEST] share dismissed`);

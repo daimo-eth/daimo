@@ -23,11 +23,11 @@ import { useEphemeralSignature } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import { HomeStackParamList, useNav } from "../../shared/nav";
+import { ParamListSend, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
 
-type Props = NativeStackScreenProps<HomeStackParamList, "Note">;
+type Props = NativeStackScreenProps<ParamListSend, "Note">;
 
 export default function NoteScreen({ route }: Props) {
   const [account] = useAccount();
@@ -121,7 +121,7 @@ function NoteDisplay({
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-    nav.navigate("Home");
+    nav.navigate("HomeTab", { screen: "Home" });
   }, [status]);
 
   const statusMessage = (function (): ReactNode {

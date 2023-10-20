@@ -20,11 +20,11 @@ import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { HomeStackParamList, useNav } from "../../shared/nav";
+import { ParamListSend, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBody, TextCenter, TextH2 } from "../../shared/text";
 
-type Props = NativeStackScreenProps<HomeStackParamList, "Send">;
+type Props = NativeStackScreenProps<ParamListSend, "Send">;
 
 type SendTab = "Search" | "Send Link" | "Scan";
 
@@ -74,7 +74,7 @@ function SendNav() {
 }
 
 function SendLoadRecipient({ link }: { link: DaimoLink }) {
-  const nav = useNav<"Send">();
+  const nav = useNav();
   const status = useFetchLinkStatus(link)!;
   useEffect(() => {
     if (status.data == null) return;
@@ -82,14 +82,20 @@ function SendLoadRecipient({ link }: { link: DaimoLink }) {
     switch (data.link.type) {
       case "account": {
         const { account } = data as DaimoAccountStatus;
-        nav.setParams({ recipient: account });
+        nav.navigate("SendTab", {
+          screen: "Send",
+          params: { recipient: account },
+        });
         break;
       }
       case "request": {
         // TODO: handle fulfilledBy (request already completed)
         const { recipient, requestId } = data as DaimoRequestStatus;
         const { dollars } = data.link;
-        nav.setParams({ recipient, requestId, dollars });
+        nav.navigate("SendTab", {
+          screen: "Send",
+          params: { recipient, requestId, dollars },
+        });
         break;
       }
     }
@@ -108,9 +114,14 @@ function SendChooseAmount({ recipient }: { recipient: Recipient }) {
   const [dollars, setDollars] = useState(0);
 
   // Once done, update nav
-  const nav = useNav<"Send">();
-  const cancelRecipient = () => nav.replace("Send", {});
-  const setSendAmount = () => nav.setParams({ dollars: `${dollars}` });
+  const nav = useNav();
+  const cancelRecipient = () =>
+    nav.navigate("SendTab", { screen: "Send", params: {} });
+  const setSendAmount = () =>
+    nav.navigate("SendTab", {
+      screen: "Send",
+      params: { dollars: `${dollars}`, recipient },
+    });
 
   return (
     <View>

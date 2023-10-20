@@ -13,7 +13,10 @@ import { TextBody, TextLight } from "../../shared/text";
 
 export default function CreateRequestScreen() {
   const nav = useNav();
-  const send = useCallback(() => nav.navigate("RequestSend"), [nav]);
+  const send = useCallback(
+    () => nav.navigate("ReceiveTab", { screen: "RequestSend" }),
+    [nav]
+  );
 
   const [account] = useAccount();
   if (account == null) return null;

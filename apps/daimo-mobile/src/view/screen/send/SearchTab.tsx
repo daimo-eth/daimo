@@ -32,10 +32,14 @@ export function SearchTab() {
 
 function RecipientRow({ recipient }: { recipient: Recipient }) {
   const eAccStr = getEAccountStr(recipient);
-  const nav = useNav<"Send">();
-  const pay = useCallback(
-    () => nav.setParams({ link: { type: "account", account: eAccStr } }),
-    []
+  const nav = useNav();
+  const payAccount = useCallback(
+    () =>
+      nav.navigate("SendTab", {
+        screen: "Send",
+        params: { link: { type: "account", account: eAccStr } },
+      }),
+    [eAccStr]
   );
 
   const name = getAccountName(recipient);
@@ -45,7 +49,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
     `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
 
   return (
-    <ButtonBig type="subtle" onPress={pay}>
+    <ButtonBig type="subtle" onPress={payAccount}>
       <View style={styles.recipientRow}>
         <TextH3>{name}</TextH3>
         <TextLight>{lastSendStr}</TextLight>
