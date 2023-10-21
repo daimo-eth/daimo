@@ -1,13 +1,13 @@
 import { registerRootComponent } from "expo";
 
 // Polyfills for React Native
-import "react-native-get-random-values"; // needs to precede ethers
+import "react-native-get-random-values";
 
 import "@ethersproject/shims";
-import "fast-text-encoding";
+import "text-encoding-polyfill";
 
 import App from "./src/App";
-import { initDebugLog } from "./src/debugLog";
+import { initDebugLog } from "./src/debugLog"; // needs to precede ethers
 
 initDebugLog();
 registerRootComponent(App);

@@ -28,6 +28,7 @@ export type HomeStackParamList = {
   History: undefined;
   HistoryOp: { op: OpEvent };
   AddDevice: undefined;
+  AddPasskey: undefined;
   Device: { pubKey: Hex };
 };
 

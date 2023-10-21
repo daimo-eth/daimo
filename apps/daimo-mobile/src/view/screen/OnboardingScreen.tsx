@@ -24,7 +24,7 @@ import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
 import { requestEnclaveSignature } from "../../action/useSendAsync";
-import { createAddDeviceString } from "../../logic/device";
+import { createAddDeviceString } from "../../logic/key";
 import { NamedError } from "../../logic/log";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";

@@ -6,12 +6,10 @@ import {
   assert,
 } from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
-import { p256 } from "@noble/curves/p256";
 import { IUserOperationMiddlewareCtx, UserOperationBuilder } from "userop";
 import {
   Address,
   Hex,
-  bytesToBigInt,
   bytesToHex,
   concat,
   encodeFunctionData,
@@ -74,30 +72,17 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     const bValidUntil = numberToBytes(this.validUntil, { size: 6 });
     const bOpHash = hexToBytes(hexOpHash);
     const bMsg = concat([bVersion, bValidUntil, bOpHash]);
-    const bareHexMsg = bytesToHex(bMsg).slice(2); // no 0x prefix
 
-    // Get P256 signature, typically from a hardware enclave
-    const { derSig, keySlot } = await this.signer(bareHexMsg);
+    const { keySlot, encodedSig } = await this.signer(bytesToHex(bMsg));
 
-    // Parse signature
     const bKeySlot = numberToBytes(keySlot, { size: 1 });
-    const parsedSignature = p256.Signature.fromDER(derSig);
-    const bSig = hexToBytes(`0x${parsedSignature.toCompactHex()}`);
-    assert(bSig.length === 64, "signature is not 64 bytes");
-    const bR = bSig.slice(0, 32);
-    const bS = bSig.slice(32);
 
-    // Avoid malleability. Ensure low S (<= N/2 where N is the curve order)
-    let s = bytesToBigInt(bS);
-    const n = BigInt(
-      "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
-    );
-    if (s > n / 2n) {
-      s = n - s;
-    }
-    const bLowS = numberToBytes(s, { size: 32 });
-
-    ctx.op.signature = concat([bVersion, bValidUntil, bKeySlot, bR, bLowS]);
+    ctx.op.signature = concat([
+      bVersion,
+      bValidUntil,
+      bKeySlot,
+      hexToBytes(encodedSig),
+    ]);
   };
 
   /** Sets user-op nonce and fee payment metadata. */
@@ -110,9 +95,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   }
 
   /** Sets a deadline for this userop to execute. */
-  setValidUntil(validUntil: number) {
-    this.validUntil = validUntil;
-  }
+  setValidUntil(validUntil: number) {}
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {
     return this.setOpMetadata(opMetadata)

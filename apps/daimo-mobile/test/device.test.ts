@@ -1,4 +1,4 @@
-import { findUnusedSlot, keySlotToDeviceIdentifier } from "../src/logic/device";
+import { findUnusedSlot, keySlotToDeviceIdentifier } from "../src/logic/key";
 
 const testCases: [number, string][] = [
   [0, "A"],

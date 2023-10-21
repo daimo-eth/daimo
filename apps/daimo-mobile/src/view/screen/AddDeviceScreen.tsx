@@ -13,9 +13,9 @@ import { Hex } from "viem";
 import { useSendAsync } from "../../action/useSendAsync";
 import {
   findUnusedSlot,
-  keySlotToDeviceIdentifier,
+  keySlotTokeyLabel,
   parseAddDeviceString,
-} from "../../logic/device";
+} from "../../logic/key";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -34,7 +34,10 @@ export function AddDeviceScreen() {
   assert(account != null);
 
   const [newKey, setNewKey] = useState<Hex>();
-  const nextSlot = findUnusedSlot(account.accountKeys.map((k) => k.slot));
+  const nextSlot = findUnusedSlot(
+    account.accountKeys.map((k) => k.slot),
+    "Device"
+  );
   const [barCodeStatus, setBarCodeStatus] = useState<
     "idle" | "error" | "scanned"
   >("idle");
@@ -113,8 +116,7 @@ export function AddDeviceScreen() {
         <>
           <TextCenter>
             <TextH2>
-              Scanned{" "}
-              <TextBold>Device {keySlotToDeviceIdentifier(nextSlot)}</TextBold>
+              Scanned <TextBold>{keySlotTokeyLabel(nextSlot)}</TextBold>
             </TextH2>
           </TextCenter>
           <Spacer h={32} />

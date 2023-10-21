@@ -16,9 +16,9 @@ import {
 } from "react-native";
 
 import { getDebugLog } from "../../debugLog";
-import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey, getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
+import { keySlotTokeyLabel } from "../../logic/key";
 import { getPushNotificationManager } from "../../logic/notify";
 import { timestampForBlock, useTime } from "../../logic/time";
 import { Account, serializeAccount, useAccount } from "../../model/account";
@@ -121,6 +121,7 @@ function DevicesInfo({ account }: { account: Account }) {
   const nav = useNav();
 
   const addDevice = () => nav.navigate("AddDevice");
+  const createBackup = () => nav.navigate("AddPasskey");
 
   return (
     <>
@@ -139,6 +140,14 @@ function DevicesInfo({ account }: { account: Account }) {
       <Spacer h={8} />
       <View style={ss.container.padH16}>
         <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
+      </View>
+      <Spacer h={8} />
+      <View style={ss.container.padH16}>
+        <ButtonMed
+          type="primary"
+          title="Create Backup"
+          onPress={createBackup}
+        />
       </View>
     </>
   );
@@ -162,7 +171,7 @@ function DeviceRow({
     <ButtonSmall onPress={viewDevice}>
       <View style={styles.deviceDataRow}>
         <TextBody>
-          <TextBold>Device {keySlotToDeviceIdentifier(keyData.slot)}</TextBold>
+          <TextBold>{keySlotTokeyLabel(keyData.slot)}</TextBold>
           {isCurrentDevice && <TextBody>{"\u00A0"} current device</TextBody>}
         </TextBody>
 

@@ -2,7 +2,7 @@ import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { getViemClientFromEnv } from "@daimo/api/src/viemClient";
-import { guessTimestampFromNum, zHex, zUserOpHex } from "@daimo/common";
+import { guessTimestampFromNum } from "@daimo/common";
 import { nameRegistryProxyConfig, chainConfig } from "@daimo/contract";
 import csv from "csvtojson";
 import z from "zod";

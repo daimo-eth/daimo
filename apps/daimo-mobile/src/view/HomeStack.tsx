@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
+import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import { HistoryScreen } from "./screen/HistoryScreen";
@@ -54,6 +55,11 @@ export function HomeStackNav() {
           name="AddDevice"
           component={AddDeviceScreen}
           options={{ title: "Add Device" }}
+        />
+        <HomeStack.Screen
+          name="AddPasskey"
+          component={AddPasskeyScreen}
+          options={{ title: "Create Backup" }}
         />
         <HomeStack.Screen name="Device" component={DeviceScreen} />
       </HomeStack.Group>

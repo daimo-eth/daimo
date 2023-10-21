@@ -13,6 +13,7 @@
     "fix:deps": "syncpack fix-mismatches"
   },
   "dependencies": {
+    "@daimo/mobile": "*",
     "eslint-config-universe": "^11.3.0",
     "prettier": "^2.8.8",
     "syncpack": "^10.6.1",

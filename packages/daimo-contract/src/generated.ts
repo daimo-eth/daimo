@@ -1,4 +1,85 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// AccountFactory
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const accountFactoryABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+      { name: '_sigVerifier', internalType: 'address', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'accountImplementation',
+    outputs: [
+      { name: '', internalType: 'contract DaimoAccount', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      {
+        name: 'initCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'dest', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'createAccount',
+    outputs: [
+      { name: 'ret', internalType: 'contract DaimoAccount', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'entryPoint',
+    outputs: [
+      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      {
+        name: 'initCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'dest', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getAddress',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoAccount
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -12,7 +93,6 @@ export const daimoAccountABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -146,7 +226,7 @@ export const daimoAccountABI = [
     inputs: [
       {
         name: 'calls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -184,7 +264,7 @@ export const daimoAccountABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -200,7 +280,7 @@ export const daimoAccountABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [
-      { name: 'hash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'message', internalType: 'bytes32', type: 'bytes32' },
       { name: 'signature', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'isValidSignature',
@@ -245,11 +325,33 @@ export const daimoAccountABI = [
     outputs: [],
   },
   {
-    stateMutability: 'view',
+    stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [],
-    name: 'sigVerifier',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [
+      {
+        name: 'sig',
+        internalType: 'struct DaimoAccount.Signature',
+        type: 'tuple',
+        components: [
+          { name: 'authenticatorData', internalType: 'bytes', type: 'bytes' },
+          { name: 'clientDataJSON', internalType: 'string', type: 'string' },
+          {
+            name: 'challengeLocation',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          {
+            name: 'responseTypeLocation',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'r', internalType: 'uint256', type: 'uint256' },
+          { name: 's', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'signatureStruct',
+    outputs: [],
   },
   {
     stateMutability: 'nonpayable',
@@ -329,7 +431,6 @@ export const daimoAccountFactoryABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -349,7 +450,7 @@ export const daimoAccountFactoryABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -381,7 +482,7 @@ export const daimoAccountFactoryABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -397,7 +498,7 @@ export const daimoAccountFactoryABI = [
 ] as const
 
 export const daimoAccountFactoryAddress =
-  '0xED5F5066de0c177729Eb0D5FECEC4BF87CA6Bf3C' as const
+  '0xb126d96e8641F2E02C493a42A2249976c48e8524' as const
 
 export const daimoAccountFactoryConfig = {
   address: daimoAccountFactoryAddress,
@@ -1841,6 +1942,100 @@ export const entryPointABI = [
     outputs: [],
   },
   { stateMutability: 'payable', type: 'receive' },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EphemeralNotes
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const ephemeralNotesABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_token', internalType: 'contract IERC20', type: 'address' },
+    ],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'note',
+        internalType: 'struct Note',
+        type: 'tuple',
+        components: [
+          { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+    ],
+    name: 'NoteCreated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'note',
+        internalType: 'struct Note',
+        type: 'tuple',
+        components: [
+          { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+      {
+        name: 'redeemer',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'NoteRedeemed',
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: '_signature', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'claimNote',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: '_amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'createNote',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'notes',
+    outputs: [
+      { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'token',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
