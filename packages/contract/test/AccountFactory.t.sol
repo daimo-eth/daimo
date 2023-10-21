@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
-import "p256-verifier/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccountFactory.sol";
@@ -12,14 +11,12 @@ import "account-abstraction/core/EntryPoint.sol";
 contract AccountFactoryTest is Test {
     using UserOperationLib for UserOperation;
 
-    address public verifier;
     EntryPoint public entryPoint;
     DaimoAccountFactory public factory;
 
     function setUp() public {
-        verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
-        factory = new DaimoAccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactory(entryPoint);
     }
 
     function testDeploy() public {
@@ -27,7 +24,7 @@ contract AccountFactoryTest is Test {
         bytes32[2] memory key1 = [bytes32(0), bytes32(0)];
 
         // deploy account
-        Call[] memory calls = new Call[](0);
+        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
         DaimoAccount acc = factory.createAccount{value: 0}(0, key1, calls, 42);
         console.log("new account address:", address(acc));
         assertEq(acc.numActiveKeys(), uint8(1));
