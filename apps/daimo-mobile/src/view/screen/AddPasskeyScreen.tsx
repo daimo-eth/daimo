@@ -9,7 +9,7 @@ import { ReactNode, useMemo } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { findUnusedSlot } from "../../logic/key";
+import { findUnusedSlot } from "../../logic/keySlot";
 import { createPasskey } from "../../logic/passkey";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
@@ -32,7 +32,7 @@ export function AddPasskeyScreen() {
   );
 
   const sendFn = async (opSender: DaimoOpSender) => {
-    const pubKey = await createPasskey(account.name);
+    const pubKey = await createPasskey(account.name, nextSlot);
     console.log(`[ACTION] adding passkey ${pubKey}`);
     return opSender.addSigningKey(nextSlot, pubKey, {
       nonce,

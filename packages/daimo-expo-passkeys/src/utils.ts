@@ -2,6 +2,7 @@ export type CreateRequest = {
   domain: string;
   challengeB64: string;
   accountName: string;
+  keyID: number;
 };
 
 export type CreateResult = {
@@ -16,6 +17,7 @@ export type SignRequest = {
 
 export type SignResult = {
   accountName: string;
+  keyID: number;
   rawClientDataJSONB64: string;
   rawAuthenticatorDataB64: string;
   signatureB64: string;

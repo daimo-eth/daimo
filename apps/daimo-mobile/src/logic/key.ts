@@ -16,35 +16,6 @@ import {
 
 import { Log } from "./log";
 
-// slots 0 - 127 are for devices, 128 - 255 are for passkeys
-
-function isPasskeySlot(slot: number): boolean {
-  return (slot & 0x80) === 0x80;
-}
-
-export function keySlotTokeyLabel(slot: number): string {
-  if (isPasskeySlot(slot)) {
-    return "Passkey " + String.fromCharCode(65 + slot - 0x80);
-  } else {
-    return "Device " + String.fromCharCode(65 + slot);
-  }
-}
-
-export function findUnusedSlot(slots: number[], variant: KeyVariant): number {
-  slots = slots.filter(
-    (slot) => isPasskeySlot(slot) === (variant === "Passkey")
-  );
-  if (slots.length === 0) return variant === "Device" ? 0 : 0x80;
-  const maxSlot = Math.max.apply(null, slots);
-  if (maxSlot + 1 < 255) {
-    assert(isPasskeySlot(maxSlot) === (variant === "Passkey"));
-    return maxSlot + 1;
-  } else {
-    // maxActivekeys on contract is 20
-    throw new Error("no unused slot");
-  }
-}
-
 export function parseAddDeviceString(addString: string): Hex {
   const [prefix, pubKey] = addString.split(":");
   assert(prefix === "addkey");
@@ -69,7 +40,7 @@ export function getWrappedRawSigner(
     const clientDataJSON = JSON.stringify({
       type: "webauthn.get",
       challenge: challengeB64URL,
-      origin: "https://daimo.xyz",
+      origin: "daimo.xyz",
     });
 
     const clientDataHash = new Uint8Array(
@@ -90,7 +61,7 @@ export function getWrappedRawSigner(
       "Authorize transaction"
     );
 
-    const { r, s } = parseAndNormalizeSig(derSig);
+    const { r, s } = parseAndNormalizeSig(`0x${derSig}`);
 
     const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":'));
     const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
@@ -118,7 +89,7 @@ export function getWrappedRawSigner(
   };
 }
 
-async function requestEnclaveSignature(
+export async function requestEnclaveSignature(
   enclaveKeyName: string,
   hexMessage: string,
   usageMessage: string

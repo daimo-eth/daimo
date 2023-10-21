@@ -55,11 +55,11 @@ var messageHex = (
     "01" + // version
      "00003B9ACA00" + // validUntil
 //    "000000000000" + // validUntil
-    "3a062b48d4bfb332152e825dd2db01a262f44d95435174ecb5037521f7f00a84" // userOpHash
+    "ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b" // userOpHash
 )
 
 // isValidSignature ERC1271 test
-messageHex = "15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5"
+//messageHex = "15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5"
 
 let challengeB64 = Data(fromHexEncodedString: messageHex)!.base64EncodedString()
 let challengeB64URL = base64ToBase64url(base64: challengeB64)

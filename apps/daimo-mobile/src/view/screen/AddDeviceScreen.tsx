@@ -11,11 +11,8 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import {
-  findUnusedSlot,
-  keySlotTokeyLabel,
-  parseAddDeviceString,
-} from "../../logic/key";
+import { parseAddDeviceString } from "../../logic/key";
+import { findUnusedSlot, keySlotTokeyLabel } from "../../logic/keySlot";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";

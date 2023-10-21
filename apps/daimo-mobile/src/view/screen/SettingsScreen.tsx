@@ -18,7 +18,7 @@ import {
 import { getDebugLog } from "../../debugLog";
 import { deleteEnclaveKey, getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
-import { keySlotTokeyLabel } from "../../logic/key";
+import { keySlotTokeyLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
 import { timestampForBlock, useTime } from "../../logic/time";
 import { Account, serializeAccount, useAccount } from "../../model/account";

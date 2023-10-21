@@ -5,12 +5,11 @@ import { Hex } from "viem";
 export interface SigResponse {
   // Signing key slot, see DaimoAccount.sol
   keySlot: number;
-  // Hex DER signature
-  derSig: string;
+  // encoded bytes of Signature object from DaimoAccount.sol
+  encodedSig: Hex;
 }
 
-/** Produces a P256 signature for a message. */
-export type SigningCallback = (msgHex: string) => Promise<SigResponse>;
+export type SigningCallback = (msgHex: Hex) => Promise<SigResponse>;
 
 /**
  * Submits a signed userop, returning the userOpHash once the bundler accepts.

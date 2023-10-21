@@ -5,7 +5,9 @@ import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { getWrappedRawSigner } from "../logic/key";
+import { isPasskeySlot } from "../logic/keySlot";
 import { NamedError } from "../logic/log";
+import { getWrappedPasskeySigner } from "../logic/passkey";
 import { rpcFunc } from "../logic/trpc";
 import { useAccount } from "../model/account";
 
@@ -32,6 +34,7 @@ export function useSendAsync({
   const keySlot = account.accountKeys.find(
     (keyData) => keyData.pubKey === account.enclavePubKey
   )?.slot;
+  // const keySlot = 128; // Testing passkey
 
   // TODO: Async load fee estimation from API to add precision
   const feeDollars = account.chainGasConstants.estimatedFee;
@@ -90,7 +93,9 @@ function loadOpSender(
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
-  const signer = getWrappedRawSigner(enclaveKeyName, keySlot);
+  const signer = isPasskeySlot(keySlot)
+    ? getWrappedPasskeySigner()
+    : getWrappedRawSigner(enclaveKeyName, keySlot);
 
   const sender: OpSenderCallback = (op: UserOpHex) =>
     rpcFunc.sendUserOp.mutate({ op });

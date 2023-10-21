@@ -11,7 +11,7 @@ import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { deleteEnclaveKey } from "../../logic/enclave";
-import { keySlotTokeyLabel } from "../../logic/key";
+import { keySlotTokeyLabel } from "../../logic/keySlot";
 import { timestampForBlock } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
