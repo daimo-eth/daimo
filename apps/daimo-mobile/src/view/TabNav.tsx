@@ -7,7 +7,9 @@ import {
 } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -28,20 +30,26 @@ import {
   ParamListSend,
   ParamListSettings,
   ParamListTab,
+  useNav,
 } from "./shared/nav";
-import { color } from "./shared/style";
+import { color, ss, touchHighlightUnderlay } from "./shared/style";
+import { TextH3 } from "./shared/text";
 import { useAccount } from "../model/account";
 
 const Tab = createBottomTabNavigator<ParamListTab>();
 
 export function TabNav() {
+  const opts: BottomTabNavigationOptions = {
+    unmountOnBlur: true,
+    tabBarHideOnKeyboard: true,
+  };
   return (
     <Tab.Navigator initialRouteName="HomeTab" screenOptions={getTabOptions}>
-      <Tab.Screen name="DepositTab" component={DepositTab} />
-      <Tab.Screen name="SendTab" component={SendTab} />
-      <Tab.Screen name="HomeTab" component={HomeTab} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} />
-      <Tab.Screen name="SettingsTab" component={SettingsTab} />
+      <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
+      <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
+      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
+      <Tab.Screen name="SendTab" component={SendTab} options={opts} />
+      <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
     </Tab.Navigator>
   );
 }
@@ -54,7 +62,7 @@ function getTabOptions({
   const all: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
-      height: 78,
+      height: 80,
       paddingHorizontal: 16,
     },
     tabBarItemStyle: {
@@ -102,7 +110,10 @@ const SendStack = createNativeStackNavigator<ParamListSend>();
 
 function SendTab() {
   return (
-    <SendStack.Navigator initialRouteName="Send">
+    <SendStack.Navigator
+      initialRouteName="Send"
+      screenOptions={{ header: ScreenHeader }}
+    >
       <SendStack.Group>
         <SendStack.Screen name="Send" component={SendScreen} />
       </SendStack.Group>
@@ -110,10 +121,82 @@ function SendTab() {
   );
 }
 
+function ScreenHeader() {
+  const nav = useNav();
+  const showBack = nav.canGoBack();
+  const goBack = useCallback(() => nav.goBack(), [nav]);
+  const goHome = useCallback(
+    () => nav.reset({ routes: [{ name: "HomeTab" }] }),
+    [nav]
+  );
+  const state = nav.getState();
+  const route = state.routes[state.index];
+
+  const ins = useSafeAreaInsets();
+  const style = useMemo(
+    () => [styles.screenHead, { paddingTop: ins.top, height: 48 + ins.top }],
+    [ins]
+  );
+
+  return (
+    <View style={style}>
+      <ScreenHeadButton icon="arrow-left" show={showBack} onPress={goBack} />
+      <TextH3>{route.name}</TextH3>
+      <ScreenHeadButton icon="x" show onPress={goHome} />
+    </View>
+  );
+}
+
+/** Shows a nav button if show===true, blank placeholder otherwise. */
+function ScreenHeadButton({
+  icon,
+  show,
+  onPress,
+}: {
+  icon: OctName;
+  show: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <View style={styles.screenHeadButtonWrap}>
+      {show && (
+        <TouchableHighlight
+          onPress={onPress}
+          style={styles.screenHeadButton}
+          {...touchHighlightUnderlay.subtle}
+        >
+          <Octicons name={icon} size={24} color={color.midnight} />
+        </TouchableHighlight>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screenHead: {
+    backgroundColor: color.white,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  screenHeadButtonWrap: {
+    width: 48,
+  },
+  screenHeadButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 48,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
+
 const HomeStack = createNativeStackNavigator<ParamListHome>();
 
 function HomeTab() {
-  const noHead = useMemo(() => ({ headerShown: false }), []);
+  const noHead = useRef({ headerShown: false }).current;
   return (
     <HomeStack.Navigator initialRouteName="Home">
       <HomeStack.Group>

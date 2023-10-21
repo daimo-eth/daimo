@@ -1,41 +1,43 @@
 import {
-  AddrLabel,
-  EAccount,
   TransferOpEvent,
   assert,
   getAccountName,
   timeAgo,
 } from "@daimo/common";
-import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode, useMemo } from "react";
+import { ReactNode } from "react";
 import {
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TextStyle,
   TouchableHighlight,
   View,
-  ViewStyle,
 } from "react-native";
 import { Address, getAddress } from "viem";
 
 import { Account, useAccount } from "../../model/account";
+import { AccountBubble } from "../shared/AccountBubble";
 import { getAmountText } from "../shared/Amount";
 import ScrollPellet from "../shared/ScrollPellet";
+import Spacer from "../shared/Spacer";
 import { getCachedEAccount } from "../shared/addr";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBold, TextCenter, TextLight } from "../shared/text";
+import { TextBody, TextCenter, TextLight } from "../shared/text";
 
 export function HistoryScreen() {
   const [account] = useAccount();
   if (account == null) return null;
 
+  console.log("[HISTORY] rendering HistoryScreen");
+
   return (
-    <View style={ss.container.fullWidthModal}>
-      <ScrollPellet />
-      <HistoryList account={account} />
-    </View>
+    <SafeAreaView>
+      <View style={ss.container.fullWidthModal}>
+        <ScrollPellet />
+        <HistoryList account={account} />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -51,6 +53,7 @@ export function HistoryList({
   if (ops.length === 0) {
     return (
       <View>
+        <Spacer h={8} />
         <TextCenter>
           <TextLight>No transactions yet</TextLight>
         </TextCenter>
@@ -131,19 +134,25 @@ function TransferRow({
     nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
 
   return (
-    <TouchableHighlight onPress={viewOp} {...touchHighlightUnderlay.subtle}>
-      <View style={styles.transferRow}>
-        <View style={styles.transferOtherAccount}>
-          <AccountBubble eAcc={otherAcc} size={36} />
-          <TextBold>{getAccountName(otherAcc)}</TextBold>
+    <View style={styles.transferBorder}>
+      <TouchableHighlight
+        onPress={viewOp}
+        {...touchHighlightUnderlay.subtle}
+        style={styles.transferRowWrap}
+      >
+        <View style={styles.transferRow}>
+          <View style={styles.transferOtherAccount}>
+            <AccountBubble eAcc={otherAcc} size={36} />
+            <TextBody>{getAccountName(otherAcc)}</TextBody>
+          </View>
+          <TransferAmountDate
+            amount={amountDelta}
+            timestamp={transfer.timestamp}
+            showDate={showDate}
+          />
         </View>
-        <TransferAmountDate
-          amount={amountDelta}
-          timestamp={transfer.timestamp}
-          showDate={showDate}
-        />
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
+    </View>
   );
 }
 
@@ -181,58 +190,6 @@ function TransferAmountDate({
   );
 }
 
-function AccountBubble({ eAcc, size }: { eAcc: EAccount; size: number }) {
-  const style: ViewStyle = useMemo(
-    () => ({
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-      backgroundColor: color.white,
-      borderWidth: 1,
-      borderColor: color.primary,
-      alignItems: "center",
-      justifyContent: "center",
-    }),
-    [size]
-  );
-
-  const textStyle: TextStyle = useMemo(
-    () => ({
-      fontSize: size / 2,
-      fontWeight: "bold",
-      textAlign: "center",
-      color: color.primary,
-    }),
-    [size]
-  );
-
-  const name = getAccountName(eAcc);
-  const letter = (function () {
-    if (name.startsWith("0x")) {
-      return "0x";
-    } else if (eAcc.label != null) {
-      switch (eAcc.label) {
-        case AddrLabel.Faucet:
-          return <Octicons name="download" size={16} color={color.primary} />;
-        case AddrLabel.PaymentLink:
-          return <Octicons name="link" size={16} color={color.primary} />;
-        default:
-          return "?";
-      }
-    } else {
-      return name[0].toUpperCase();
-    }
-  })();
-
-  return (
-    <View style={style}>
-      <Text style={textStyle} numberOfLines={1}>
-        {letter}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   rowHeader: {
     flexDirection: "row",
@@ -243,17 +200,23 @@ const styles = StyleSheet.create({
   },
   transferList: {
     borderBottomWidth: 1,
-    borderColor: color.ivoryDark,
+    borderColor: color.grayLight,
     paddingHorizontal: 24,
     marginBottom: 48,
   },
+  transferBorder: {
+    borderTopWidth: 1,
+    borderColor: color.grayLight,
+  },
+  transferRowWrap: {
+    marginHorizontal: -24,
+  },
   transferRow: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderColor: color.ivoryDark,
-    paddingVertical: 16,
   },
   transferOtherAccount: {
     flexDirection: "row",

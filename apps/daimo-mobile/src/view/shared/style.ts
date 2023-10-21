@@ -48,6 +48,13 @@ const styleFullWidth = {
 
 export const ss = {
   container: StyleSheet.create({
+    bodyBetweenHeaderAndFooter: {
+      flex: 1,
+      flexDirection: "column",
+      alignItems: "stretch",
+      backgroundColor: color.white,
+      paddingHorizontal: 16,
+    },
     fullWidthSinglePage: {
       ...styleFullWidth,
       paddingBottom: 48,
@@ -111,13 +118,12 @@ export const ss = {
     light: {
       ...textBase,
       fontSize: 16,
-      lineHeight: 20,
-      color: color.grayMid,
+      fontWeight: "600",
+      color: color.gray3,
     },
     error: {
       ...textBase,
       fontSize: 16,
-      lineHeight: 20,
       color: color.danger,
     },
     center: {

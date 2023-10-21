@@ -7,6 +7,7 @@ import {
 import { chainConfig } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
+import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
@@ -30,6 +31,11 @@ export function HistoryOpScreen({ route, navigation }: Props) {
   const [account] = useAccount();
   let { op } = route.params;
   op = syncFindSameOp(op, account?.recentTransfers || []) || op;
+
+  useEffect(() => () => {
+    console.log(`WTF BLUR`);
+    StackActions.pop();
+  });
 
   const [title, body] = (() => {
     switch (op.type) {

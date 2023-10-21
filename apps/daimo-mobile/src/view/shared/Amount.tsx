@@ -57,10 +57,7 @@ export function TitleAmount({
   const [style, styleSym] = (() => {
     switch (size) {
       default:
-      case "h1":
-        return [ss.text.h1, styles.h1Small] as const;
-      case "h2":
-        return [ss.text.h2, styles.h2Small] as const;
+        return [styles.hero, styles.heroSmall] as const;
     }
   })();
   return (
@@ -77,11 +74,15 @@ export function TitleAmount({
 }
 
 const styles = StyleSheet.create({
-  h1Small: {
-    fontSize: 30,
+  hero: {
+    fontSize: 48,
+    fontVariant: ["tabular-nums"],
+    color: color.midnight,
+    fontWeight: "600",
+    textAlign: "center",
   },
-  h2Small: {
-    fontSize: 20,
+  heroSmall: {
+    fontSize: 42,
   },
   titleGray: {
     color: color.grayMid,

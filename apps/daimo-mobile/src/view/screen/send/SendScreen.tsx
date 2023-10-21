@@ -4,6 +4,7 @@ import {
   DaimoRequestStatus,
   getAccountName,
 } from "@daimo/common";
+import Octicons from "@expo/vector-icons/Octicons";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
@@ -35,7 +36,7 @@ export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
   const { link, recipient, dollars, requestId } = route.params || {};
   return (
-    <View style={ss.container.fullWidthSinglePage}>
+    <View style={ss.container.bodyBetweenHeaderAndFooter}>
       <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={128}>
         {!recipient && !link && <SendNav /> /* User picks who to pay */}
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
@@ -61,11 +62,11 @@ function SendNav() {
         values={tabs}
         selectedIndex={tabs.indexOf(tab)}
         onValueChange={setTab}
-        fontStyle={{ fontSize: 16 }}
-        activeFontStyle={{ fontSize: 16 }}
-        style={{ height: 40, backgroundColor: color.ivoryDark }}
+        fontStyle={{ ...ss.text.body, color: color.grayDark }}
+        activeFontStyle={ss.text.body}
+        style={{ height: 48, backgroundColor: color.ivoryDark }}
       />
-      <Spacer h={8} />
+      <Spacer h={24} />
       {tab === "Search" && <SearchTab />}
       {tab === "Send Link" && <SendNoteTab />}
       {tab === "Scan" && <ScanTab />}

@@ -1,21 +1,21 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HistoryList, HistoryScreen } from "./HistoryScreen";
+import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
 import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
-import { Button, buttonStyles } from "../shared/Button";
-import { Header } from "../shared/Header";
 import { OctName } from "../shared/InputBig";
 import ScrollPellet from "../shared/ScrollPellet";
+import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextCenter, TextLight } from "../shared/text";
+import { TextBody, TextLight } from "../shared/text";
 
 export default function HomeScreen() {
   const [account] = useAccount();
@@ -33,29 +33,35 @@ export default function HomeScreen() {
     nav.setOptions({ title: isOpened ? "History" : "Home" });
   }, []);
 
+  const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
+
   if (account == null) return null;
 
   return (
     <SafeAreaView style={ss.container.fullWidthScroll}>
-      <Header />
+      <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
+      {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
+      {searchPrefix == null && (
+        <>
+          <Spacer h={64} />
+          <AmountAndButtons account={account} />
 
-      <View style={styles.amountAndButtonsContainer}>
-        <AmountAndButtons account={account} />
-      </View>
-      <SwipeUpDown
-        itemMini={
-          <View style={styles.historyElem}>
-            <ScrollPellet />
-            <HistoryList account={account} maxToShow={5} />
-          </View>
-        }
-        itemFull={<HistoryScreen />}
-        onShowMini={() => setIsHistoryOpened(false)}
-        onShowFull={() => setIsHistoryOpened(true)}
-        animation="spring"
-        extraMarginTop={0}
-        swipeHeight={192}
-      />
+          <SwipeUpDown
+            itemMini={
+              <View style={styles.historyElem}>
+                <ScrollPellet />
+                <HistoryList account={account} maxToShow={5} />
+              </View>
+            }
+            itemFull={<HistoryScreen />}
+            onShowMini={() => setIsHistoryOpened(false)}
+            onShowFull={() => setIsHistoryOpened(true)}
+            animation="spring"
+            extraMarginTop={0}
+            swipeHeight={screenDimensions.height / 3}
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -76,11 +82,12 @@ function AmountAndButtons({ account }: { account: Account }) {
 
   return (
     <View style={styles.amountAndButtons}>
+      <TextLight>Your balance</TextLight>
       <TitleAmount amount={account.lastBalance} />
-      <Spacer h={32} />
+      <Spacer h={16} />
       <View style={styles.buttonRow}>
         <IconButton title="Deposit" onPress={goDeposit} />
-        <IconButton title="Request" onPress={goRequest} />
+        <IconButton title="Receive" onPress={goRequest} />
         <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
       </View>
     </View>
@@ -98,81 +105,77 @@ function IconButton({
 }) {
   const name: OctName = (function () {
     switch (title) {
+      case "Deposit":
+        return "plus";
+      case "Receive":
+        return "download";
       case "Send":
         return "paper-airplane";
-      case "Request":
-        return "apps";
-      case "Deposit":
-        return "download";
       default:
         return "question";
     }
   })();
 
-  const icon = <Octicons name={name} size={24} color={color.white} />;
-  const handlePress = disabled ? undefined : onPress;
   return (
-    <TouchableHighlight
-      onPress={handlePress}
-      {...touchHighlightUnderlay.subtle}
-      style={styles.iconButtonHighlight}
-    >
-      <View>
-        <Button
-          disabled={disabled}
-          onPress={handlePress}
-          style={iconButtonStyle}
-          touchUnderlay={touchHighlightUnderlay.primary}
-        >
-          <TextCenter>{icon}</TextCenter>
-        </Button>
-        <Spacer h={8} />
-        <View style={styles.iconButtonLabel}>
-          {disabled && <TextLight>{title}</TextLight>}
-          {!disabled && <TextBody>{title}</TextBody>}
-        </View>
+    <View style={styles.iconButtonWrap}>
+      <TouchableHighlight
+        disabled={disabled}
+        onPress={disabled ? undefined : onPress}
+        style={disabled ? styles.iconButtonDisabled : styles.iconButton}
+        hitSlop={16}
+        {...touchHighlightUnderlay.primary}
+      >
+        <Octicons name={name} size={24} color={color.white} />
+      </TouchableHighlight>
+      <Spacer h={8} />
+      <View style={disabled ? styles.iconLabelDisabled : styles.iconLabel}>
+        <TextBody>{title}</TextBody>
       </View>
-    </TouchableHighlight>
+    </View>
   );
 }
 
 const screenDimensions = Dimensions.get("screen");
 
-const iconButtonStyle = StyleSheet.create({
-  button: {
-    ...buttonStyles.big.button,
-    backgroundColor: color.primary,
-    height: 72,
-    paddingTop: 24,
-    borderRadius: 72,
-  },
-  title: {
-    ...buttonStyles.big.title,
-    color: color.white,
-  },
-});
+const iconButton = {
+  backgroundColor: color.primary,
+  height: 64,
+  width: 64,
+  borderRadius: 64,
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+} as const;
+
+const iconLabel = {
+  alignSelf: "stretch",
+  flexDirection: "row",
+  justifyContent: "center",
+} as const;
 
 const styles = StyleSheet.create({
   amountAndButtons: {
-    width: "100%",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    height: screenDimensions.height - 256,
   },
   buttonRow: {
     flexDirection: "row",
     paddingHorizontal: 20,
   },
-  iconButtonHighlight: {
+  iconButtonWrap: {
     borderRadius: 16,
     padding: 16,
-    width: 104,
+    width: 96,
   },
-  iconButtonLabel: {
-    alignSelf: "stretch",
-    flexDirection: "row",
-    justifyContent: "center",
+  iconButton,
+  iconButtonDisabled: {
+    ...iconButton,
+    opacity: 0.5,
+  },
+  iconLabel,
+  iconLabelDisabled: {
+    ...iconLabel,
+    opacity: 0.5,
   },
   historyScroll: {
     paddingTop: 32,
@@ -180,9 +183,5 @@ const styles = StyleSheet.create({
   historyElem: {
     backgroundColor: color.white,
     minHeight: screenDimensions.height,
-  },
-  amountAndButtonsContainer: {
-    flex: 1,
-    alignItems: "stretch",
   },
 });

@@ -1,27 +1,43 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
-import { useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
-import { ButtonBig } from "../../shared/Button";
+import { AccountBubble } from "../../shared/AccountBubble";
 import { InputBig } from "../../shared/InputBig";
+import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
-import { TextCenter, TextH3, TextLight } from "../../shared/text";
+import { color, touchHighlightUnderlay } from "../../shared/style";
+import { TextBody, TextCenter, TextLight } from "../../shared/text";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {
   const [prefix, setPrefix] = useState("");
-  const res = useRecipientSearch(prefix.trim().toLowerCase());
 
   return (
     <View style={styles.vertSearch}>
-      <InputBig icon="search" value={prefix} onChange={setPrefix} />
+      <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
+      <Spacer h={24} />
+      <SearchResults prefix={prefix} />
+    </View>
+  );
+}
+
+export function SearchResults({ prefix }: { prefix: string }) {
+  const res = useRecipientSearch(prefix.trim().toLowerCase());
+  return (
+    <View style={styles.vertSearch}>
       {res.error && <ErrorRowCentered error={res.error} />}
+      {res.recipients.length > 0 && (
+        <View style={styles.resultsHeader}>
+          <TextLight>Search results</TextLight>
+        </View>
+      )}
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
-      {res.isSearching && res.recipients.length === 0 && (
+      {res.recipients.length === 0 && (
         <TextCenter>
           <TextLight>No results</TextLight>
         </TextCenter>
@@ -49,12 +65,21 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
     `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
 
   return (
-    <ButtonBig type="subtle" onPress={payAccount}>
-      <View style={styles.recipientRow}>
-        <TextH3>{name}</TextH3>
-        <TextLight>{lastSendStr}</TextLight>
-      </View>
-    </ButtonBig>
+    <View style={styles.resultBorder}>
+      <TouchableHighlight
+        onPress={payAccount}
+        {...touchHighlightUnderlay.subtle}
+        style={styles.resultRowWrap}
+      >
+        <View style={styles.resultRow}>
+          <View style={styles.resultAccount}>
+            <AccountBubble eAcc={recipient} size={36} />
+            <TextBody>{name}</TextBody>
+          </View>
+          <TextLight>{lastSendStr}</TextLight>
+        </View>
+      </TouchableHighlight>
+    </View>
   );
 }
 
@@ -62,11 +87,29 @@ const styles = StyleSheet.create({
   vertSearch: {
     flexDirection: "column",
     alignSelf: "stretch",
-    gap: 8,
   },
-  recipientRow: {
+  resultsHeader: {
     flexDirection: "row",
+    paddingVertical: 16,
+    paddingHorizontal: 2,
+  },
+  resultBorder: {
+    borderTopWidth: 1,
+    borderColor: color.grayLight,
+  },
+  resultRowWrap: {
+    marginHorizontal: -24,
+  },
+  resultRow: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "flex-end",
+  },
+  resultAccount: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
   },
 });
