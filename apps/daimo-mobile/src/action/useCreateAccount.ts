@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
+import { createEmptyAccount } from "../logic/account";
 import { rpcHook } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
@@ -49,33 +50,14 @@ export function useCreateAccount(name: string): ActHandle {
     const { name } = result.variables;
     const { address } = result.data;
     console.log(`[CHAIN] created new account ${name} at ${address}`);
-    setAccount({
-      enclaveKeyName,
-      enclavePubKey: pubKeyHex,
-      name,
-      address,
-
-      homeChainId: chainConfig.chainL2.id,
-      homeCoinAddress: chainConfig.tokenAddress,
-
-      lastBalance: BigInt(0),
-      lastBlockTimestamp: 0,
-      lastBlock: 0,
-      lastFinalizedBlock: 0,
-
-      namedAccounts: [],
-      recentTransfers: [],
-      trackedRequests: [],
-      accountKeys: [],
-
-      chainGasConstants: {
-        maxPriorityFeePerGas: "0",
-        maxFeePerGas: "0",
-        estimatedFee: 0,
-      },
-
-      pushToken: null,
-    });
+    setAccount(
+      createEmptyAccount({
+        enclaveKeyName,
+        enclavePubKey: pubKeyHex,
+        name,
+        address,
+      })
+    );
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
 

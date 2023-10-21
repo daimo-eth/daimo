@@ -8,7 +8,7 @@ export function isPasskeySlot(slot: number): boolean {
 
 export function keySlotTokeyLabel(slot: number): string {
   if (isPasskeySlot(slot)) {
-    return "Passkey " + String.fromCharCode(65 + slot - 0x80);
+    return "Backup " + String.fromCharCode(65 + slot - 0x80);
   } else {
     return "Device " + String.fromCharCode(65 + slot);
   }

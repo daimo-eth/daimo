@@ -6,7 +6,7 @@ import {
   DaimoOpSender,
 } from "@daimo/userop";
 import { ReactNode, useMemo } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { findUnusedSlot } from "../../logic/keySlot";
@@ -15,7 +15,14 @@ import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { TextCenter, TextError, TextLight } from "../shared/text";
+import {
+  TextBody,
+  TextBold,
+  TextCenter,
+  TextError,
+  TextH1,
+  TextLight,
+} from "../shared/text";
 
 export function AddPasskeyScreen() {
   const [account] = useAccount();
@@ -61,7 +68,9 @@ export function AddPasskeyScreen() {
   const button = (function () {
     switch (status) {
       case "idle":
-        return <ButtonBig type="primary" title="Add Backup" onPress={exec} />;
+        return (
+          <ButtonBig type="primary" title="Create Backup" onPress={exec} />
+        );
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
@@ -71,11 +80,23 @@ export function AddPasskeyScreen() {
     }
   })();
 
+  const cloudName =
+    Platform.OS === "ios" ? "iCloud Keychain" : "Google Password Manager";
+
   return (
     <View style={styles.vertOuter}>
+      <TextCenter>
+        <TextH1>Backup account</TextH1>
+      </TextCenter>
+      <Spacer h={32} />
+      <TextBody>
+        Backup your account by storing a passkey in {cloudName}. This will allow
+        you to recover your account from any device signed into your cloud
+        account even if you lose this device.
+      </TextBody>
       <Spacer h={32} />
       {button}
-      <Spacer h={32} />
+      <Spacer h={16} />
       <TextCenter>
         <TextLight>{statusMessage}</TextLight>
       </TextCenter>

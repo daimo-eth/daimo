@@ -1,9 +1,23 @@
-import { assertNotNull, validateName } from "@daimo/common";
+import { assert, assertNotNull, validateName } from "@daimo/common";
 import { chainConfig } from "@daimo/contract";
+import {
+  DaimoNonce,
+  DaimoNonceMetadata,
+  DaimoNonceType,
+  DaimoOpSender,
+} from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
+import { base64 } from "@scure/base";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -19,17 +33,27 @@ import {
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { hexToBytes } from "viem";
 
 import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
+import { useSendAsync } from "../../action/useSendAsync";
+import { createEmptyAccount } from "../../logic/account";
 import {
   createAddDeviceString,
   requestEnclaveSignature,
 } from "../../logic/key";
+import { findUnusedSlot } from "../../logic/keySlot";
 import { NamedError } from "../../logic/log";
-import { rpcHook } from "../../logic/trpc";
-import { defaultEnclaveKeyName } from "../../model/account";
+import { requestPasskeySignature } from "../../logic/passkey";
+import { rpcFunc, rpcHook } from "../../logic/trpc";
+import {
+  Account,
+  defaultEnclaveKeyName,
+  useAccount,
+} from "../../model/account";
+import { syncAccount } from "../../sync/sync";
 import { ButtonBig, ButtonSmall } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
@@ -460,11 +484,150 @@ function UseExistingPage({
 }) {
   const { status, message, pubKeyHex } = useExistingAccount();
 
+  const sendFn = async (opSender: DaimoOpSender) => {
+    if (!pubKeyHex || !account || !nextSlot) throw new Error("not ready?");
+    console.log(`[ACTION] adding device ${pubKeyHex}`);
+    return opSender.addSigningKey(nextSlot, pubKeyHex, {
+      nonce,
+      chainGasConstants: account.chainGasConstants,
+    });
+  };
+
+  const {
+    status: addDeviceStatus,
+    message: addDeviceMessage,
+    exec: addDeviceExec,
+  } = useSendAsync({
+    dollarsToSend: 0,
+    sendFn,
+  });
+
   useEffect(() => {
-    if (status === "success") onNext();
-  }, [status]);
+    if (addDeviceStatus === "success" || status === "success") onNext();
+  }, [status, addDeviceStatus]);
+
+  const [account, setAccount] = useAccount();
+
+  const [restoreStatus, setRestoreStatus] = useState<{
+    status: ActStatus;
+    message: string;
+  }>({ status: "idle", message: "Restore from backup" });
+
+  const onRestoreBackup = async () => {
+    assert(pubKeyHex !== undefined);
+    console.log(`[ONBOARDING] restore backup attempt`);
+    setRestoreStatus({ status: "loading", message: "Requesting backup" });
+
+    const bChallenge = hexToBytes("0xdead");
+    const challengeB64 = base64.encode(bChallenge);
+    try {
+      const { accountName } = await requestPasskeySignature(
+        challengeB64,
+        "daimo.xyz"
+      );
+
+      const addr = await rpcFunc.resolveName.query({ name: accountName });
+
+      if (!addr) {
+        setRestoreStatus({ status: "error", message: "Backup not found" });
+        return;
+      }
+
+      console.log(`[ONBOARDING] trying to restore ${accountName} ${addr}`);
+
+      const newAccount = createEmptyAccount({
+        name: accountName,
+        address: addr,
+        enclaveKeyName: defaultEnclaveKeyName,
+        enclavePubKey: pubKeyHex,
+      });
+
+      const syncedAccount = await syncAccount(newAccount, true);
+
+      setAccount(syncedAccount);
+
+      // now add device should work
+      setRestoreStatus({
+        status: "success",
+        message: `Successfully found account ${accountName}`,
+      });
+    } catch (e: any) {
+      console.error(e);
+      setRestoreStatus({ status: "error", message: e.message });
+      throw e;
+    }
+  };
+
+  const nextSlot = account
+    ? findUnusedSlot(
+        account.accountKeys.map((k) => k.slot),
+        "Device"
+      )
+    : null;
+
+  const nonce = useMemo(
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
+    [pubKeyHex]
+  );
 
   if (pubKeyHex === undefined) return null;
+
+  const addDeviceElement = (function () {
+    switch (addDeviceStatus) {
+      case "idle":
+        return (
+          <>
+            <ButtonBig
+              type="primary"
+              title="Load account"
+              onPress={addDeviceExec}
+            />
+            <Spacer h={16} />
+            <TextCenter>
+              <TextBody>{restoreStatus.message}</TextBody>
+            </TextCenter>
+          </>
+        );
+      case "loading":
+        return <ActivityIndicator size="large" />;
+      case "success":
+        return <ActivityIndicator size="large" />;
+      case "error":
+        return (
+          <>
+            <TextCenter>
+              <TextError>{addDeviceMessage}</TextError>
+            </TextCenter>
+          </>
+        );
+    }
+  })();
+
+  const restoreElement = (function () {
+    switch (restoreStatus.status) {
+      case "idle":
+        return (
+          <ButtonBig
+            type="primary"
+            title="Restore from backup"
+            onPress={onRestoreBackup}
+          />
+        );
+      case "loading":
+        return <ActivityIndicator size="large" />;
+      case "success": {
+        return <></>;
+      }
+      case "error":
+        return (
+          <>
+            <TextCenter>
+              <TextError>{restoreStatus.message}</TextError>
+            </TextCenter>
+          </>
+        );
+    }
+  })();
 
   return (
     <View>
@@ -472,12 +635,6 @@ function UseExistingPage({
       <View style={styles.onboardingScreen}>
         <View style={styles.useExistingPage}>
           <TextH1>Welcome</TextH1>
-          <Spacer h={32} />
-          <TextCenter>
-            <TextBody>
-              Scan QR code from the Settings page of existing device
-            </TextBody>
-          </TextCenter>
           <Spacer h={32} />
           <View style={styles.vertQR}>
             <QRCode
@@ -496,6 +653,22 @@ function UseExistingPage({
               </TextLight>
             )}
           </TextCenter>
+          <Spacer h={48} />
+          <TextCenter>
+            <TextBody>
+              Scan QR code from Settings on an existing device
+            </TextBody>
+          </TextCenter>
+          <Spacer h={32} />
+          <TextCenter>
+            <TextLight>or</TextLight>
+          </TextCenter>
+          <Spacer h={32} />
+          {restoreStatus.status !== "success" && restoreElement}
+          {restoreStatus.status === "success" &&
+            account !== null &&
+            nextSlot !== null &&
+            addDeviceElement}
         </View>
       </View>
       <OnboardingFooter />

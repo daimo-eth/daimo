@@ -83,7 +83,7 @@ function resync(reason: string, fromScratch?: boolean) {
 
 /** Loads all account history since the last finalized block as of the previous sync.
  * This means we're guaranteed to see all events even if there were reorgs. */
-async function syncAccount(
+export async function syncAccount(
   account: Account,
   fromScratch?: boolean
 ): Promise<Account> {

@@ -5,7 +5,6 @@ import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { getWrappedRawSigner } from "../logic/key";
-import { isPasskeySlot } from "../logic/keySlot";
 import { NamedError } from "../logic/log";
 import { getWrappedPasskeySigner } from "../logic/passkey";
 import { rpcFunc } from "../logic/trpc";
@@ -29,28 +28,31 @@ export function useSendAsync({
   const [as, setAS] = useActStatus();
 
   const [account, setAccount] = useAccount();
-  if (!account) throw new Error("No account");
 
-  const keySlot = account.accountKeys.find(
-    (keyData) => keyData.pubKey === account.enclavePubKey
-  )?.slot;
-  // const keySlot = 128; // Testing passkey
+  const keySlot = account
+    ? account.accountKeys.find(
+        (keyData) => keyData.pubKey === account.enclavePubKey
+      )?.slot
+    : undefined; // if key slot is undefined, use passkey
 
   // TODO: Async load fee estimation from API to add precision
-  const feeDollars = account.chainGasConstants.estimatedFee;
-  const cost = { feeDollars, totalDollars: dollarsToSend + feeDollars };
+  const feeDollars = account?.chainGasConstants.estimatedFee || 0;
+  const cost = {
+    feeDollars,
+    totalDollars: dollarsToSend + feeDollars,
+  };
 
   const exec = useCallback(async () => {
     const handle = await sendAsync(
       setAS,
-      account.enclaveKeyName,
-      account.address,
+      account?.enclaveKeyName,
+      account?.address,
       keySlot,
       sendFn
     );
 
     // Add pending op and named accounts to history
-    if (pendingOp) {
+    if (pendingOp && account) {
       pendingOp.opHash = handle as Hex;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
@@ -66,7 +68,7 @@ export function useSendAsync({
 
       setAccount(newAccount);
     }
-  }, [account.enclaveKeyName, keySlot, sendFn]);
+  }, [account?.enclaveKeyName, keySlot, sendFn]);
 
   return { ...as, exec, cost };
 }
@@ -83,17 +85,22 @@ export function useWarmCache(
   }, [enclaveKeyName, address, keySlot]);
 }
 
-const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
+const accountCache: Map<
+  [Address, number | undefined],
+  Promise<DaimoOpSender>
+> = new Map();
 
 function loadOpSender(
   enclaveKeyName: string,
   address: Address,
-  keySlot: number
+  keySlot?: number // no key slot == usePasskey
 ) {
+  const usePasskey = keySlot === undefined;
+
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
-  const signer = isPasskeySlot(keySlot)
+  const signer = usePasskey
     ? getWrappedPasskeySigner()
     : getWrappedRawSigner(enclaveKeyName, keySlot);
 
@@ -111,13 +118,14 @@ function loadOpSender(
 
 async function sendAsync(
   setAS: SetActStatus,
-  enclaveKeyName: string,
-  address: Address,
+  enclaveKeyName: string | undefined,
+  address: Address | undefined,
   keySlot: number | undefined,
   sendFn: SendOpFn
 ) {
   try {
-    if (keySlot === undefined) throw new Error("No key slot");
+    if (address === undefined || enclaveKeyName === undefined)
+      throw new Error("Unable to send transaction with current account");
     setAS("loading", "Loading account...");
     const opSender = await loadOpSender(enclaveKeyName, address, keySlot);
 

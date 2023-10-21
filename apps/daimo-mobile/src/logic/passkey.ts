@@ -149,7 +149,10 @@ export function getWrappedPasskeySigner(): SigningCallback {
   };
 }
 
-async function requestPasskeySignature(challengeB64: string, domain: string) {
+export async function requestPasskeySignature(
+  challengeB64: string,
+  domain: string
+) {
   const result = await Log.promise(
     "ExpoPasskeysSign",
     ExpoPasskeys.signWithPasskey({
