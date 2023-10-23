@@ -5,6 +5,7 @@ import {
   chainConfig,
   entryPointABI,
   erc20ABI,
+  daimoPaymasterAddress,
 } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -149,6 +150,7 @@ export async function createAccount() {
       maxPriorityFeePerGas: "1000000",
       maxFeePerGas: "100000050",
       estimatedFee: 0.1,
+      paymasterAddress: daimoPaymasterAddress,
     },
   });
   console.log("✅ userop accepted by bundler: ", userOpHash);

@@ -1,4 +1,4 @@
-import { chainConfig } from "@daimo/contract";
+import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
@@ -54,6 +54,7 @@ export function useExistingAccount() {
             maxPriorityFeePerGas: "0",
             maxFeePerGas: "0",
             estimatedFee: 0,
+            paymasterAddress: daimoPaymasterAddress,
           },
 
           pushToken: null,
