@@ -1,67 +1,70 @@
-import { KeyData, timeAgo } from "@daimo/common";
+import { KeyData, getAccountName, timeAgo } from "@daimo/common";
 import { chainConfig } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import Octicons from "@expo/vector-icons/Octicons";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
   Linking,
   Platform,
   ScrollView,
   Share,
   StyleSheet,
-  Text,
+  TouchableHighlight,
   View,
 } from "react-native";
 
 import { getDebugLog } from "../../debugLog";
 import { keySlotToDeviceIdentifier } from "../../logic/device";
-import { deleteEnclaveKey, getHardwareSec } from "../../logic/enclave";
+import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { timestampForBlock, useTime } from "../../logic/time";
-import { Account, serializeAccount, useAccount } from "../../model/account";
-import { ButtonMed, ButtonSmall } from "../shared/Button";
+import {
+  Account,
+  serializeAccount,
+  toEAccount,
+  useAccount,
+} from "../../model/account";
+import { AccountBubble } from "../shared/AccountBubble";
+import { Badge } from "../shared/Badge";
+import { ButtonMed, TextButton } from "../shared/Button";
+import { ScreenHeader, useExitToHome } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
-import { color, ss } from "../shared/style";
-import { TextBody, TextBold, TextH2, TextH3, TextLight } from "../shared/text";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { TextBody, TextH3, TextLight, TextMeta } from "../shared/text";
 
 export function SettingsScreen() {
-  const [account, setAccount] = useAccount();
-  const nav = useNav();
+  const [account] = useAccount();
+  const goHome = useExitToHome();
 
-  const clearWallet = useCallback(() => {
-    // TODO: warn if any assets might be lost. Show a scary confirmation.
-    if (!account) return;
-    const { enclaveKeyName } = account;
+  const [showDetails, setShowDetails] = useState(false);
 
-    Alert.alert(
-      "Clear wallet",
-      `Are you sure you want to clear your wallet? This can't be undone.\n\n` +
-        `If this is the only device on your account, you'll lose your account.`,
-      [
-        {
-          text: "Clear wallet",
-          onPress: clearWallet,
-        },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
+  if (!account) return null;
 
-    async function clearWallet() {
-      console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
-      await deleteEnclaveKey(enclaveKeyName);
+  return (
+    <View style={styles.pageWrap}>
+      <View style={ss.container.padH16}>
+        <ScreenHeader title="Settings" onBack={goHome} />
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Spacer h={16} />
+        <AccountSection account={account} />
+        <Spacer h={32} />
+        <DevicesSection account={account} />
+        <Spacer h={8} />
+        <TextButton
+          title={showDetails ? "Hide details" : "Show details"}
+          onPress={() => setShowDetails(!showDetails)}
+        />
+        <Spacer h={8} />
+        {showDetails && <DetailsSection account={account} />}
+      </ScrollView>
+    </View>
+  );
+}
 
-      setAccount(null);
-      nav.navigate("HomeTab", { screen: "Home" });
-    }
-  }, []);
-
+function AccountSection({ account }: { account: Account }) {
   const explorer = chainConfig.chainL2.blockExplorers!.default;
   const linkToExplorer = useCallback(() => {
     if (!account) return;
@@ -69,63 +72,38 @@ export function SettingsScreen() {
     Linking.openURL(url);
   }, [account]);
 
-  if (!account) return null;
-
   return (
-    <View style={styles.scrollWrap}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Spacer h={4} />
-        <View style={ss.container.padH16}>
-          <TextH2>
-            {account.name}
-            <TextBody>
-              {` \u00A0 `}
-              {chainConfig.tokenSymbol} · {chainConfig.chainL2.name}
-            </TextBody>
-          </TextH2>
+    <View style={styles.sectionWrap}>
+      <View style={styles.accountHero}>
+        <AccountBubble eAcc={toEAccount(account)} size={64} />
+        <View>
+          <TextH3>{account?.name}</TextH3>
+          <TextH3 color={color.gray3}>
+            {getAccountName({ addr: account.address })}
+          </TextH3>
         </View>
-        <ButtonSmall onPress={linkToExplorer}>
-          <View>
-            <TextLight>
-              {account.address}
-              {`\u00A0\u00A0`}
-              <Octicons name="link-external" size={16} />
-              {`\u00A0\u00A0`}
-              View{`\u00A0`}on{`\u00a0`}
-              {explorer.name}
-            </TextLight>
-          </View>
-        </ButtonSmall>
-        <Spacer h={32} />
-        <DevicesInfo {...{ account }} />
-        <Spacer h={32} />
-
-        <AppInfo {...{ account }} />
-        <Spacer h={32} />
-
-        <View style={ss.container.padH16}>
-          <TextH3>Danger zone</TextH3>
-          <Spacer h={8} />
-          <ButtonMed
-            type="danger"
-            title="Delete Device"
-            onPress={clearWallet}
-          />
-        </View>
-      </ScrollView>
+      </View>
+      <Spacer h={16} />
+      <ButtonMed
+        type="subtle"
+        title="View account on basescan"
+        onPress={linkToExplorer}
+      />
     </View>
   );
 }
 
-function DevicesInfo({ account }: { account: Account }) {
+function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
-
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
 
   return (
-    <>
-      <View style={ss.container.padH16}>
-        <TextH3>Devices</TextH3>
+    <View style={styles.sectionWrap}>
+      <View style={styles.headerRow}>
+        <TextLight>My devices</TextLight>
+      </View>
+      <Spacer h={8} />
+      <View style={styles.listBody}>
         {account.accountKeys
           .filter((k) => k.removedAt === undefined)
           .map((keyData) => (
@@ -136,11 +114,9 @@ function DevicesInfo({ account }: { account: Account }) {
             />
           ))}
       </View>
-      <Spacer h={8} />
-      <View style={ss.container.padH16}>
-        <ButtonMed type="primary" title="Add Device" onPress={addDevice} />
-      </View>
-    </>
+      <Spacer h={16} />
+      <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
+    </View>
   );
 }
 
@@ -162,21 +138,37 @@ function DeviceRow({
 
   const addAtS = timestampForBlock(keyData.addedAt);
 
-  return (
-    <ButtonSmall onPress={viewDevice}>
-      <View style={styles.deviceDataRow}>
-        <TextBody>
-          <TextBold>Device {keySlotToDeviceIdentifier(keyData.slot)}</TextBold>
-          {isCurrentDevice && <TextBody>{"\u00A0"} current device</TextBody>}
-        </TextBody>
+  const dispDevice = "Device " + keySlotToDeviceIdentifier(keyData.slot);
+  const dispTime = "Added " + timeAgo(addAtS, nowS, true);
 
-        <TextBody>{timeAgo(addAtS, nowS)}</TextBody>
-      </View>
-    </ButtonSmall>
+  return (
+    <View style={styles.rowBorder}>
+      <TouchableHighlight
+        onPress={viewDevice}
+        {...touchHighlightUnderlay.subtle}
+        style={styles.rowWrap}
+      >
+        <View style={styles.row}>
+          <TextBody>
+            {dispDevice}
+            {isCurrentDevice && (
+              <>
+                <Spacer w={12} />
+                <Badge>THIS DEVICE</Badge>
+              </>
+            )}
+          </TextBody>
+          <View style={styles.rowRight}>
+            <TextMeta>Mobile</TextMeta>
+            <TextMeta color={color.gray3}>{dispTime}</TextMeta>
+          </View>
+        </View>
+      </TouchableHighlight>
+    </View>
   );
 }
 
-function AppInfo({ account }: { account: Account }) {
+function DetailsSection({ account }: { account: Account }) {
   const [sec, setSec] = useState<Awaited<ReturnType<typeof getHardwareSec>>>();
 
   useEffect(() => {
@@ -219,21 +211,25 @@ function AppInfo({ account }: { account: Account }) {
   };
 
   return (
-    <View style={ss.container.padH16}>
-      <TextH3>Details</TextH3>
-      <Spacer h={8} />
-      {Object.entries(envKV).map(([k, v]) => (
-        <KV key={k} label={k} value={v} />
-      ))}
+    <View style={styles.sectionWrap}>
+      <View style={styles.headerRow}>
+        <TextLight>Device details</TextLight>
+      </View>
+      <Spacer h={4} />
+      <View style={styles.kvList}>
+        {Object.entries(envKV).map(([k, v]) => (
+          <KV key={k} label={k} value={v} />
+        ))}
+      </View>
       {!account.pushToken && <Spacer h={8} />}
       {!account.pushToken && (
         <ButtonMed
-          type="primary"
+          type="subtle"
           title="Enable notifications"
           onPress={enableNotifications}
         />
       )}
-      <Spacer h={8} />
+      <Spacer h={16} />
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
     </View>
   );
@@ -256,36 +252,70 @@ function getKeySecDescription(
 
 function KV({ label, value }: { label: string; value: string }) {
   return (
-    <View>
-      <TextBody>
-        <TextLight>{label}</TextLight>
-        {` \u00A0 `}
-        <Text>{value}</Text>
-      </TextBody>
-      <Spacer h={8} />
+    <View style={styles.kvRow}>
+      <View style={styles.kvKey}>
+        <TextMeta color={color.grayDark}>{label}</TextMeta>
+      </View>
+      <TextMeta>{value}</TextMeta>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollWrap: {
+  pageWrap: {
     flex: 1,
     backgroundColor: color.white,
   },
   scrollContainer: {
-    padding: 16,
     alignItems: "stretch",
+    paddingHorizontal: 24,
   },
-  keyValueList: {
-    ...ss.container.padH16,
+  sectionWrap: {},
+  accountHero: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  listBody: {
     flex: 1,
-    flexDirection: "column",
-    gap: 8,
+    borderBottomWidth: 1,
+    borderColor: color.grayLight,
   },
-  deviceDataRow: {
-    marginHorizontal: -16,
+  headerRow: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 2,
+  },
+  rowBorder: {
+    borderTopWidth: 1,
+    borderColor: color.grayLight,
+  },
+  rowWrap: {
+    marginHorizontal: -24,
+  },
+  row: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  rowRight: {
+    flexDirection: "column",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    gap: 2,
+  },
+  kvList: {
+    flexDirection: "column",
+    paddingHorizontal: 4,
+    gap: 2,
+  },
+  kvRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  kvKey: {
+    width: 128,
   },
 });

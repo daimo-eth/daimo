@@ -3,7 +3,7 @@ import { getLocales } from "expo-localization";
 import { StyleSheet, Text } from "react-native";
 
 import Spacer from "./Spacer";
-import { color, ss } from "./style";
+import { color } from "./style";
 
 /** 1.23 or 1,23 depending on user locale */
 const amountSeparator = getLocales()[0].decimalSeparator || ".";

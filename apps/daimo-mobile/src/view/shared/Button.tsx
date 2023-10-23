@@ -9,14 +9,14 @@ import {
 
 import { color, touchHighlightUnderlay } from "./style";
 
-interface ButtonPropsSmall {
+interface TextButtonProps {
   title?: string;
   children?: React.ReactNode;
   onPress?: () => void;
   disabled?: boolean;
 }
 
-interface ButtonProps extends ButtonPropsSmall {
+interface ButtonProps extends TextButtonProps {
   type: "primary" | "success" | "danger" | "subtle";
 }
 
@@ -40,11 +40,11 @@ export function ButtonMed(props: ButtonProps) {
   );
 }
 
-export function ButtonSmall(props: ButtonPropsSmall) {
+export function TextButton(props: TextButtonProps) {
   return <Button {...props} style={useStyle(buttonStyles.small, props)} />;
 }
 
-function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
+function useStyle(base: ButtonStyle, props: TextButtonProps) {
   const { type } = props as ButtonProps;
   const btnOverride = useMemo<ViewStyle>(() => {
     switch (type) {
@@ -54,12 +54,14 @@ function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
         return { backgroundColor: color.danger };
       case "success":
         return { backgroundColor: color.success };
-      default:
+      case "subtle": // Hollow, primary border on white background
         return {
           backgroundColor: color.white,
           borderWidth: 1,
           borderColor: color.primary,
         };
+      default: // Text button. No fill, no border
+        return {};
     }
   }, [type]);
 
@@ -102,8 +104,8 @@ function useTouchUnderlay(type: ButtonProps["type"]) {
 
 type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
-export function Button(
-  props: ButtonPropsSmall & {
+function Button(
+  props: TextButtonProps & {
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
   }
@@ -131,7 +133,7 @@ export function Button(
   );
 }
 
-export const buttonStyles = {
+const buttonStyles = {
   big: StyleSheet.create({
     button: {
       paddingHorizontal: 24,
@@ -150,7 +152,7 @@ export const buttonStyles = {
     button: {
       paddingHorizontal: 16,
       paddingVertical: 12,
-      borderRadius: 8,
+      borderRadius: 6,
       backgroundColor: color.primaryBgLight,
     },
     title: {
@@ -167,10 +169,10 @@ export const buttonStyles = {
       borderRadius: 8,
     },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: 14,
+      fontWeight: "bold",
+      letterSpacing: 1,
       textAlign: "center",
-      color: color.midnight,
     },
   }),
 };

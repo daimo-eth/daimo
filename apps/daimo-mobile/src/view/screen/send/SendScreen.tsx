@@ -4,6 +4,7 @@ import {
   DaimoRequestStatus,
   getAccountName,
 } from "@daimo/common";
+import { chainConfig } from "@daimo/contract";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +15,6 @@ import {
   View,
 } from "react-native";
 
-import { ScanTab } from "./ScanTab";
 import { SearchTab } from "./SearchTab";
 import { SendNoteTab } from "./SendNoteTab";
 import { SendTransferButton } from "./SendTransferButton";
@@ -24,7 +24,7 @@ import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBubble } from "../../shared/InfoBubble";
-import { ScreenHeader } from "../../shared/ScreenHeader";
+import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { ParamListSend, useNav } from "../../shared/nav";
@@ -43,23 +43,28 @@ export default function SendScreen({ route }: Props) {
   const { link, recipient, dollars, requestId } = route.params || {};
 
   const nav = useNav();
-  const back = useCallback(() => {
+  const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
       nav.navigate("SendTab", { screen: "Send", params });
     if (dollars != null) goTo({ recipient });
     else if (recipient != null) goTo({});
     else nav.reset({ routes: [{ name: "HomeTab" }] });
   }, [nav, dollars, recipient]);
+  const goHome = useExitToHome();
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Send funds to" onBack={back} />
+      <ScreenHeader
+        title={`Send ${chainConfig.tokenSymbol} to`}
+        onBack={goBack}
+        onExit={recipient && goHome}
+      />
       <Spacer h={8} />
       <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={128}>
         {!recipient && !link && <SendNav /> /* User picks who to pay */}
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
-          <SendChooseAmount recipient={recipient} onCancel={back} />
+          <SendChooseAmount recipient={recipient} onCancel={goBack} />
         )}
         {recipient && dollars != null && (
           <SendConfirm {...{ recipient, dollars, requestId }} />
@@ -72,7 +77,7 @@ export default function SendScreen({ route }: Props) {
 function SendNav() {
   // Navigation
   const [tab, setTab] = useState<SendTab>("Search");
-  const [tabs] = useState(["Search", "Send Link", "Scan"] as SendTab[]);
+  const [tabs] = useState(["Search", "Send Link"] as SendTab[]);
 
   return (
     <View>
@@ -87,7 +92,6 @@ function SendNav() {
       <Spacer h={24} />
       {tab === "Search" && <SearchTab />}
       {tab === "Send Link" && <SendNoteTab />}
-      {tab === "Scan" && <ScanTab />}
     </View>
   );
 }

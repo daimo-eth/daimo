@@ -15,7 +15,7 @@ export function InfoBubble({
       <View style={styles.bubbleIcon}>
         <TextBody color={color.white}>i</TextBody>
       </View>
-      <View>
+      <View style={styles.bubbleText}>
         <TextBody>{title}</TextBody>
         <TextBody color={color.grayDark}>{subtitle}</TextBody>
       </View>
@@ -41,5 +41,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 32,
+  },
+  bubbleText: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
 });

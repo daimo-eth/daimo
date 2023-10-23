@@ -1,67 +1,119 @@
-import { formatDaimoLink } from "@daimo/common";
-import { useCallback } from "react";
-import { StyleSheet, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import { assert, dollarsToAmount, formatDaimoLink } from "@daimo/common";
+import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
+import { useRef, useState } from "react";
+import {
+  Alert,
+  Platform,
+  Share,
+  ShareAction,
+  TextInput,
+  View,
+} from "react-native";
+import { Hex } from "viem";
+import { generatePrivateKey } from "viem/accounts";
 
 import { useAccount } from "../../../model/account";
+import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { ScreenHeader } from "../../shared/ScreenHeader";
+import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import image from "../../shared/image";
 import { useNav } from "../../shared/nav";
-import { color, ss } from "../../shared/style";
-import { TextBody, TextLight } from "../../shared/text";
+import { ss } from "../../shared/style";
+import { TextCenter, TextLight } from "../../shared/text";
 
 export default function ReceiveScreen() {
-  const nav = useNav();
-  const send = useCallback(
-    () => nav.navigate("ReceiveTab", { screen: "RequestSend" }),
-    [nav]
+  const [account, setAccount] = useAccount();
+  assert(account != null);
+  const [dollars, setDollars] = useState(0);
+
+  // On successful send, go home
+  const [status, setStatus] = useState<"creating" | "sending" | "sent">(
+    "creating"
   );
+  const nav = useNav();
+  const trackRequest = (requestId: `${bigint}`) => {
+    const newAccount = {
+      ...account,
+      trackedRequests: [
+        ...account.trackedRequests,
+        {
+          requestId,
+          amount: `${dollarsToAmount(dollars)}` as `${bigint}`,
+        },
+      ],
+    };
+    setAccount(newAccount);
+  };
 
-  const [account] = useAccount();
-  if (account == null) return null;
+  const textInputRef = useRef<TextInput>(null);
 
-  const url = formatDaimoLink({ type: "account", account: account.name });
+  const sendRequest = async () => {
+    try {
+      textInputRef.current?.blur();
+      setStatus("sending");
+
+      const requestId = generateRequestID();
+
+      const url = formatDaimoLink({
+        type: "request",
+        recipient: account.name,
+        dollars: `${dollars}`,
+        requestId,
+      });
+
+      let result: ShareAction;
+      if (Platform.OS === "android") {
+        result = await Share.share({ message: url });
+      } else {
+        result = await Share.share({ url }); // Default behavior for iOS
+      }
+
+      console.log(`[REQUEST] action ${result.action}`);
+      if (result.action === Share.sharedAction) {
+        console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
+        setStatus("sent");
+        trackRequest(requestId);
+        nav.navigate("HomeTab", { screen: "Home" });
+      } else if (result.action === Share.dismissedAction) {
+        // Only on iOS
+        console.log(`[REQUEST] share dismissed`);
+        setStatus("creating");
+      }
+    } catch (error: any) {
+      Alert.alert(error.message);
+    }
+  };
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Receive" />
+      <ScreenHeader title="Send request" onExit={useExitToHome()} />
       <Spacer h={64} />
-      <View style={styles.vertMain}>
-        <View style={styles.vertQR}>
-          <QRCode
-            value={url}
-            color={color.grayDark}
-            size={192}
-            logo={{ uri: image.qrLogo }}
-            logoSize={72}
-          />
-          <TextBody>Scan to pay</TextBody>
-        </View>
-        <Spacer h={48} />
-        <TextLight>or</TextLight>
-        <Spacer h={48} />
-        <View style={styles.horzButtons}>
-          <ButtonBig type="primary" title="Send Request" onPress={send} />
-        </View>
-      </View>
+      <TextCenter>
+        <TextLight>Enter amount to request</TextLight>
+      </TextCenter>
+      <Spacer h={24} />
+      <AmountChooser
+        dollars={dollars}
+        onSetDollars={setDollars}
+        showAmountAvailable={false}
+        innerRef={textInputRef}
+        disabled={status !== "creating"}
+      />
+      <Spacer h={32} />
+      <ButtonBig
+        type={status === "sent" ? "success" : "primary"}
+        disabled={dollars <= 0 || status !== "creating"}
+        title={status === "sent" ? "Sent" : "Send Request"}
+        onPress={sendRequest}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  vertMain: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  vertQR: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
-  },
-  horzButtons: {
-    flexDirection: "row",
-    gap: 24,
-  },
-});
+function generateRequestID() {
+  const hexRandomString = generatePrivateKey().slice(
+    0,
+    2 + Number(MAX_NONCE_ID_SIZE_BITS / 4n) // One hex is 4 bits
+  ) as Hex; // Uses secure random.
+  return `${BigInt(hexRandomString)}` as `${bigint}`;
+}

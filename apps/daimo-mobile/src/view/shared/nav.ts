@@ -17,7 +17,7 @@ import { Recipient } from "../../sync/recipients";
 
 export type ParamListHome = {
   Home: undefined;
-  History: undefined;
+  QR: undefined;
   HistoryOp: { op: OpEvent };
 };
 

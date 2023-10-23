@@ -1,20 +1,25 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { Linking, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 
-import { ButtonSmall } from "./Button";
-import { color, ss } from "./style";
-import { TextLight } from "./text";
+import { TextButton } from "./Button";
+import { color } from "./style";
+import { TextBody } from "./text";
 
 export function InfoLink({ url, title }: { url: string; title: string }) {
   return (
-    <View style={ss.container.marginHNeg16}>
-      <ButtonSmall onPress={() => Linking.openURL(url)}>
-        <TextLight>
-          <Octicons name="info" size={16} color={color.grayMid} />
-          {` \u00A0 `}
-          {title}
-        </TextLight>
-      </ButtonSmall>
-    </View>
+    <TextButton onPress={() => Linking.openURL(url)}>
+      <View style={styles.infoLinkRow}>
+        <Octicons name="info" size={16} color={color.grayMid} />
+        <TextBody color={color.grayMid}>{title}</TextBody>
+      </View>
+    </TextButton>
   );
 }
+
+const styles = StyleSheet.create({
+  infoLinkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+});

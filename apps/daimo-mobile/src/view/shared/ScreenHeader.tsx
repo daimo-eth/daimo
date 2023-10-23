@@ -11,29 +11,37 @@ import { TextH3 } from "./text";
 export function ScreenHeader({
   title,
   onBack,
+  onExit,
 }: {
   title: string;
   onBack?: () => void;
+  onExit?: () => void;
 }) {
   const ins = useSafeAreaInsets();
+  const top = Math.max(ins.top, 32);
   const style = useMemo(
-    () => [styles.screenHead, { paddingTop: ins.top, height: 40 + ins.top }],
-    [ins]
+    () => [styles.screenHead, { paddingTop: top, height: 40 + top }],
+    [top]
   );
 
-  const nav = useNav();
   const back = useCallback(onBack || (() => {}), [onBack]);
-  const exit = useCallback(
-    () => nav.reset({ routes: [{ name: "HomeTab" }] }),
-    []
-  );
+  const exit = useCallback(onExit || (() => {}), [onExit]);
 
   return (
     <View style={style}>
       <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
       <TextH3>{title}</TextH3>
-      <ScreenHeadButton icon="x" show onPress={exit} />
+      <ScreenHeadButton icon="x" show={!!onExit} onPress={exit} />
     </View>
+  );
+}
+
+export function useExitToHome() {
+  const nav = useNav();
+  return useCallback(
+    () =>
+      nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] }),
+    []
   );
 }
 

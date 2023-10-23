@@ -1,5 +1,4 @@
 import { assertUnreachable } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import {
   BottomTabNavigationOptions,
@@ -8,21 +7,20 @@ import {
 import { RouteProp } from "@react-navigation/native";
 import {
   NativeStackNavigationOptions,
-  NativeStackNavigationProp,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
 import OnboardingScreen from "./screen/OnboardingScreen";
+import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
-import SendRequestScreen from "./screen/receive/SendRequestScreen";
 import SendScreen from "./screen/send/SendScreen";
 import { OctName } from "./shared/InputBig";
 import {
@@ -43,6 +41,17 @@ export function TabNav() {
     // NativeStackNavigator has a bug where it remembers route after unmounting.
     tabBarHideOnKeyboard: true,
   };
+
+  const [account] = useAccount();
+  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
+  useEffect(() => {
+    if (isOnboarded && account == null) setIsOnboarded(false);
+  }, [isOnboarded, account]);
+  const onOnboardingComplete = () => setIsOnboarded(true);
+
+  // if (isOnboarded) return <HomeScreen />;
+  if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
+
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
@@ -129,7 +138,8 @@ function HomeTab() {
   return (
     <HomeStack.Navigator initialRouteName="Home" screenOptions={noHeaders}>
       <HomeStack.Group>
-        <HomeStack.Screen name="Home" component={MainScreen} />
+        <HomeStack.Screen name="Home" component={HomeScreen} />
+        <HomeStack.Screen name="QR" component={QRScreen} />
       </HomeStack.Group>
       <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
@@ -150,16 +160,7 @@ function ReceiveTab() {
         <ReceiveStack.Screen name="Receive" component={ReceiveScreen} />
       </ReceiveStack.Group>
       <ReceiveStack.Group screenOptions={{ presentation: "modal" }}>
-        <ReceiveStack.Screen
-          name="RequestSend"
-          options={{ headerTitle: `Request ${chainConfig.tokenSymbol}` }}
-          component={SendRequestScreen}
-        />
-        <ReceiveStack.Screen
-          name="Note"
-          options={{ headerTitle: "Payment Link" }}
-          component={NoteScreen}
-        />
+        <ReceiveStack.Screen name="Note" component={NoteScreen} />
       </ReceiveStack.Group>
     </ReceiveStack.Navigator>
   );
@@ -169,30 +170,10 @@ const SettingsStack = createNativeStackNavigator<ParamListSettings>();
 
 function SettingsTab() {
   return (
-    <SettingsStack.Navigator>
-      <SettingsStack.Group>
-        <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-      </SettingsStack.Group>
-      <SettingsStack.Group screenOptions={{ presentation: "modal" }}>
-        <SettingsStack.Screen
-          name="AddDevice"
-          component={AddDeviceScreen}
-          options={{ title: "Add Device" }}
-        />
-        <SettingsStack.Screen name="Device" component={DeviceScreen} />
-      </SettingsStack.Group>
+    <SettingsStack.Navigator screenOptions={noHeaders}>
+      <SettingsStack.Screen name="Settings" component={SettingsScreen} />
+      <SettingsStack.Screen name="AddDevice" component={AddDeviceScreen} />
+      <SettingsStack.Screen name="Device" component={DeviceScreen} />
     </SettingsStack.Navigator>
   );
-}
-
-function MainScreen() {
-  const [account] = useAccount();
-  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
-  useEffect(() => {
-    if (isOnboarded && account == null) setIsOnboarded(false);
-  }, [isOnboarded, account]);
-  const onOnboardingComplete = () => setIsOnboarded(true);
-
-  if (isOnboarded) return <HomeScreen />;
-  return <OnboardingScreen {...{ onOnboardingComplete }} />;
 }

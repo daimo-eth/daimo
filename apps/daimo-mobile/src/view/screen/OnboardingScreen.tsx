@@ -18,8 +18,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 
+import { QRCodeBox } from "./QRScreen";
 import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
@@ -28,11 +28,12 @@ import { createAddDeviceString } from "../../logic/device";
 import { NamedError } from "../../logic/log";
 import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";
-import { ButtonBig, ButtonSmall } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
+import { InfoBubble } from "../shared/InfoBubble";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import image from "../shared/image";
 import { color, ss } from "../shared/style";
 import {
   EmojiToOcticon,
@@ -59,21 +60,18 @@ export default function OnboardingScreen({
   onOnboardingComplete: () => void;
 }) {
   // Navigation with a back button
+  // TODO: consider splitting into components and just using StackNavigation
   const [page, setPage] = useState<OnboardPage>("intro");
   const pageStack = useRef([] as OnboardPage[]).current;
   const goTo = (newPage: OnboardPage) => {
     pageStack.push(page);
     setPage(newPage);
   };
-  const goToPrev = useCallback(
-    () => pageStack.length > 0 && setPage(pageStack.pop()!),
-    []
-  );
-  const next = getNext(page, goTo, onOnboardingComplete); // , [page]);
+  const goToPrev = () => pageStack.length > 0 && setPage(pageStack.pop()!);
+  const next = getNext(page, goTo, onOnboardingComplete);
   const prev = pageStack.length === 0 ? undefined : goToPrev;
 
   // User enters their name
-  // TODO: consider splitting into components and just using StackNavigation
   const [name, setName] = useState("");
 
   // Create an account as soon as possible, hiding latency
@@ -177,52 +175,53 @@ function IntroPages({
         scrollEventThrottle={32}
       >
         <IntroPage title="Welcome to Daimo">
-          <TextBody>
-            Thanks for testing our alpha release. Daimo is experimental
-            technology. Use at your own risk.
-          </TextBody>
+          <TextParagraph>
+            Daimo is a global payments app that runs on Ethereum.
+          </TextParagraph>
         </IntroPage>
         <IntroPage title={tokenSymbol}>
-          <TextBody>
-            Daimo lets you send and receive money using the {tokenSymbol}{" "}
-            stablecoin. 1 {tokenSymbol} is $1.
-          </TextBody>
-          <InfoLink
-            url="https://www.circle.com/en/usdc"
-            title="Learn how it works here"
-          />
+          <TextParagraph>
+            You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
+            {tokenSymbol} is $1.
+          </TextParagraph>
+          <View style={ss.container.marginHNeg16}>
+            <InfoLink
+              url="https://www.circle.com/en/usdc"
+              title="Learn how it works here"
+            />
+          </View>
         </IntroPage>
         <IntroPage title="Yours alone">
-          <TextBody>
-            Daimo stores money via cryptographic secrets. There's no bank. To
-            protect your funds in case you lose your phone, you can add
-            additional devices.
-          </TextBody>
+          <TextParagraph>
+            Daimo stores money via cryptographic secrets. There's no bank.
+          </TextParagraph>
         </IntroPage>
         <IntroPage title="On Ethereum">
-          <TextBody>
+          <TextParagraph>
             Daimo runs on Base, an Ethereum rollup. This lets you send money
-            securely, anywhere in the world, quickly, and at low cost.
-          </TextBody>
+            securely, anywhere in the world.
+          </TextParagraph>
         </IntroPage>
       </ScrollView>
-      <Spacer h={64} />
-      <ButtonBig
-        type="primary"
-        title="Create Account"
-        onPress={() => {
-          onNext("create");
-        }}
-      />
-      <Spacer h={8} />
-      <ButtonSmall
-        title="Use existing"
-        onPress={() => {
-          onNext("existing");
-        }}
-      />
+      <View style={styles.introButtonsWrap}>
+        <ButtonBig
+          type="primary"
+          title="Create Account"
+          onPress={() => onNext("create")}
+        />
+        <Spacer h={8} />
+        <ButtonBig
+          type="subtle"
+          title="Use existing"
+          onPress={() => onNext("existing")}
+        />
+      </View>
     </View>
   );
+}
+
+function TextParagraph({ children }: { children: ReactNode }) {
+  return <Text style={styles.introText}>{children}</Text>;
 }
 
 function IntroPage({
@@ -234,7 +233,9 @@ function IntroPage({
 }) {
   return (
     <View style={styles.introPage}>
-      <TextH1>{title}</TextH1>
+      <TextCenter>
+        <TextH1>{title}</TextH1>
+      </TextCenter>
       <Spacer h={32} />
       {children}
     </View>
@@ -257,7 +258,11 @@ function PageBubble({ count, index }: { count: number; index: number }) {
       />
     );
   }
-  return <View style={{ flexDirection: "row" }}>{bubbles}</View>;
+  return (
+    <View style={{ flexDirection: "row", justifyContent: "center" }}>
+      {bubbles}
+    </View>
+  );
 }
 
 function SetupKey({
@@ -302,50 +307,47 @@ function SetupKey({
   return (
     <View>
       <OnboardingHeader onPrev={onPrev} />
-      <View style={styles.onboardingScreen}>
-        <View style={styles.createAccountPage}>
-          <TextH1>
-            <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
-          </TextH1>
-          <Spacer h={32} />
-          <View style={ss.container.padH16}>
-            <TextCenter>
-              {!askToSetPin && (
-                <TextBody>
-                  Generate your Daimo account. Your account is stored on your
-                  device, secured by cryptography.
-                </TextBody>
-              )}
-              {askToSetPin && (
-                <TextBody>
-                  Authentication failed. Does your phone have a secure lock
-                  screen set up? You'll need one to secure your Daimo account.
-                </TextBody>
-              )}
-            </TextCenter>
-          </View>
-          <Spacer h={32} />
-          {(loading || createStatus === "loading") && (
-            <ActivityIndicator size="large" />
-          )}
-          {!loading && createStatus !== "loading" && (
-            <ButtonBig
-              type="primary"
-              title={askToSetPin ? "Try again" : "Generate"}
-              onPress={trySignatureGeneration}
-            />
-          )}
-          {error && (
-            <>
-              <Spacer h={16} />
-              <TextCenter>
-                <TextError>{error}</TextError>
-              </TextCenter>
-            </>
-          )}
+      <View style={styles.createAccountPage}>
+        <TextH1>
+          <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
+        </TextH1>
+        <Spacer h={32} />
+        <View style={ss.container.padH16}>
+          <TextCenter>
+            {!askToSetPin && (
+              <TextBody>
+                Generate your Daimo account. Your account is stored on your
+                device, secured by cryptography.
+              </TextBody>
+            )}
+            {askToSetPin && (
+              <TextBody>
+                Authentication failed. Does your phone have a secure lock screen
+                set up? You'll need one to secure your Daimo account.
+              </TextBody>
+            )}
+          </TextCenter>
         </View>
+        <Spacer h={32} />
+        {(loading || createStatus === "loading") && (
+          <ActivityIndicator size="large" />
+        )}
+        {!loading && createStatus !== "loading" && (
+          <ButtonBig
+            type="primary"
+            title={askToSetPin ? "Try again" : "Generate"}
+            onPress={trySignatureGeneration}
+          />
+        )}
+        {error && (
+          <>
+            <Spacer h={16} />
+            <TextCenter>
+              <TextError>{error}</TextError>
+            </TextCenter>
+          </>
+        )}
       </View>
-      <OnboardingFooter />
     </View>
   );
 }
@@ -365,29 +367,25 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
-        <TextH1>
-          <Octicons name="bell" size={40} />
-        </TextH1>
-        <Spacer h={32} />
-        <View style={ss.container.padH16}>
-          <TextCenter>
-            <TextBody>
-              You'll be notified only for account activity. For example, when
-              you receive money.
-            </TextBody>
-          </TextCenter>
-        </View>
-        <Spacer h={32} />
-        <ButtonBig
-          type="primary"
-          title="Allow Notifications"
-          onPress={requestPermission}
-        />
-        <Spacer h={16} />
-        <ButtonSmall title="Skip" onPress={onNext} />
-      </View>
+    <View style={styles.createAccountPage}>
+      <TextCenter>
+        <Octicons name="bell" size={32} />
+      </TextCenter>
+      <Spacer h={32} />
+      <TextCenter>
+        <TextParagraph>
+          You'll be notified only for account activity. For example, when you
+          receive money.
+        </TextParagraph>
+      </TextCenter>
+      <Spacer h={32} />
+      <ButtonBig
+        type="primary"
+        title="Allow Notifications"
+        onPress={requestPermission}
+      />
+      <Spacer h={16} />
+      <ButtonBig type="subtle" title="Skip" onPress={onNext} />
     </View>
   );
 }
@@ -421,29 +419,25 @@ function CreateAccountPage({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View>
         <OnboardingHeader onPrev={onPrev} />
-        <View style={styles.onboardingScreen}>
-          <View style={styles.createAccountPage}>
-            <TextH1>Welcome</TextH1>
-            <View style={styles.namePickerWrap}>
-              {status === "idle" && (
-                <NamePicker
-                  name={name}
-                  onChange={setName}
-                  onChoose={createAccount}
-                />
-              )}
-            </View>
-            <TextCenter>
-              {status === "error" && <TextError>{message}</TextError>}
-              {status !== "error" && (
-                <TextLight>
-                  <EmojiToOcticon size={16} text={message} />
-                </TextLight>
-              )}
-            </TextCenter>
+        <View style={styles.createAccountPage}>
+          <View style={styles.namePickerWrap}>
+            {status === "idle" && (
+              <NamePicker
+                name={name}
+                onChange={setName}
+                onChoose={createAccount}
+              />
+            )}
           </View>
+          <TextCenter>
+            {status === "error" && <TextError>{message}</TextError>}
+            {status !== "error" && (
+              <TextLight>
+                <EmojiToOcticon size={16} text={message} />
+              </TextLight>
+            )}
+          </TextCenter>
         </View>
-        <OnboardingFooter />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -467,36 +461,22 @@ function UseExistingPage({
   return (
     <View>
       <OnboardingHeader onPrev={onPrev} />
-      <View style={styles.onboardingScreen}>
-        <View style={styles.useExistingPage}>
-          <TextH1>Welcome</TextH1>
-          <Spacer h={32} />
-          <TextCenter>
-            <TextBody>
-              Scan QR code from the Settings page of existing device
-            </TextBody>
-          </TextCenter>
-          <Spacer h={32} />
-          <View style={styles.vertQR}>
-            <QRCode
-              value={createAddDeviceString(pubKeyHex)}
-              color={color.grayDark}
-              size={256}
-              logo={{ uri: image.qrLogo }}
-              logoSize={72}
-            />
-          </View>
-          <Spacer h={16} />
-          <TextCenter>
-            {status !== "error" && (
-              <TextLight>
-                <EmojiToOcticon size={16} text={message} />
-              </TextLight>
-            )}
-          </TextCenter>
-        </View>
+      <View style={styles.useExistingPage}>
+        <InfoBubble
+          title="Add this phone to an existing account"
+          subtitle="Scan this QR code with your other device"
+        />
+        <Spacer h={32} />
+        <QRCodeBox value={createAddDeviceString(pubKeyHex)} />
+        <Spacer h={16} />
+        <TextCenter>
+          {status !== "error" && (
+            <TextLight>
+              <EmojiToOcticon size={16} text={message} />
+            </TextLight>
+          )}
+        </TextCenter>
       </View>
-      <OnboardingFooter />
     </View>
   );
 }
@@ -514,31 +494,10 @@ function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
   }, [onPrev]);
 
   return (
-    <View style={styles.onboardingHeaderFooter}>
-      <View style={styles.onboardingBackWrap}>
-        <ButtonSmall onPress={onPrev}>
-          <View style={styles.onboardingBack}>
-            {onPrev && (
-              <>
-                <Octicons
-                  name="chevron-left"
-                  size={20}
-                  color={color.midnight}
-                />
-                <Text style={styles.onboardingBackText}>Back</Text>
-              </>
-            )}
-            {!onPrev && " "}
-          </View>
-        </ButtonSmall>
-      </View>
+    <View style={ss.container.padH16}>
+      <ScreenHeader title="Create Account" onBack={onPrev} />
     </View>
   );
-}
-
-function OnboardingFooter() {
-  /* Ensure header and footer are equal height to correctly center content. */
-  return <View style={styles.onboardingHeaderFooter} />;
 }
 
 function NamePicker({
@@ -593,12 +552,12 @@ function NamePicker({
 
   return (
     <View>
-      <Spacer h={64} />
       <InputBig
         placeholder="choose a username"
         value={name}
         onChange={onChange}
         center
+        autoFocus
       />
       <Spacer h={8} />
       <TextCenter>
@@ -650,58 +609,35 @@ const screenDimensions = Dimensions.get("screen");
 const styles = StyleSheet.create({
   onboardingScreen: {
     flex: 1,
-    backgroundColor: color.white,
-    alignItems: "center",
-    justifyContent: "space-around",
-  },
-  onboardingHeaderFooter: {
-    height: 64,
-    marginTop: 48,
-  },
-  onboardingBackWrap: {
-    width: 128,
-    paddingLeft: 16,
-  },
-  onboardingBack: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    height: 32,
-  },
-  onboardingBackText: {
-    ...ss.text.h3,
-    color: color.midnight,
   },
   introPages: {
-    alignItems: "center",
+    flex: 1,
+    backgroundColor: color.white,
+    alignItems: "stretch",
+    justifyContent: "center",
   },
   introPageScroll: {
-    flexBasis: 280,
     flexGrow: 0,
   },
   introPage: {
     width: screenDimensions.width,
     padding: 32,
   },
-  body: {
+  introText: {
     ...ss.text.body,
-    width: "100%",
-    textAlign: "center",
+    lineHeight: 24,
   },
-  createAccountPage: {
-    width: screenDimensions.width,
-    padding: 32,
+  introButtonsWrap: {
+    paddingHorizontal: 24,
   },
   namePickerWrap: {
-    height: 256,
+    height: 168,
+  },
+  createAccountPage: {
+    paddingTop: 128,
+    paddingHorizontal: 24,
   },
   useExistingPage: {
-    width: screenDimensions.width,
-    padding: 32,
-  },
-  vertQR: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
+    paddingHorizontal: 24,
   },
 });

@@ -10,7 +10,7 @@ import { CBPayWebView } from "./OnrampCBPay";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
-import { ScreenHeader } from "../../shared/ScreenHeader";
+import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
@@ -18,11 +18,12 @@ import { TextBody, TextBold, TextLight } from "../../shared/text";
 export default function DepositScreen() {
   const [onramp, setOnramp] = useState<"cbpay" | null>(null);
   const exitOnramp = () => {
-    // TODO: add a placeholder "penidng op" for the onramp transfer
+    // TODO: add a placeholder "pendng op" for the onramp transfer
     // Onramp doesn't give us the amount, and tx may be sent later
     setOnramp(null);
   };
 
+  const goHome = useExitToHome();
   const [account] = useAccount();
   if (account == null) return null;
 
@@ -36,7 +37,7 @@ export default function DepositScreen() {
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" />
+      <ScreenHeader title="Deposit" onExit={goHome} />
       <Spacer h={16} />
       {testnet && <TestnetFaucet recipient={account.address} />}
       {testnet && <Spacer h={32} />}
@@ -124,8 +125,8 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
     <View style={styles.callout}>
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
-        <TextBold>Testnet version.</TextBold> This unreleased version of Daimo
-        runs on {chainConfig.chainL2.name}.
+        <TextBold>Testnet account.</TextBold> Your account is on the{" "}
+        {chainConfig.chainL2.name} testnet.
       </TextBody>
       <Spacer h={16} />
       <ButtonMed

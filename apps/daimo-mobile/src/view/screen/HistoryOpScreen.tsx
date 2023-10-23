@@ -6,21 +6,20 @@ import {
 } from "@daimo/common";
 import { chainConfig } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
-import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect } from "react";
-import { Linking, StyleSheet, Text, View } from "react-native";
+import { ReactNode, useCallback, useEffect } from "react";
+import { Linking, StyleSheet, View } from "react-native";
 
 import { useAccount } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
-import { ButtonSmall } from "../shared/Button";
+import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
-import { ParamListHome, useNav } from "../shared/nav";
+import { ParamListHome } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import { TextCenter, TextH3, TextLight } from "../shared/text";
+import { TextBody, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
 
@@ -46,9 +45,9 @@ export function HistoryOpScreen({ route, navigation }: Props) {
 
   return (
     <View style={ss.container.screen}>
-      <Spacer h={8} />
+      <Spacer h={32} />
       {body}
-      <Spacer h={8} />
+      <Spacer h={32} />
       {op.txHash && <LinkToExplorer txHash={op.txHash} />}
     </View>
   );
@@ -61,15 +60,11 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
   const openURL = useCallback(() => Linking.openURL(url), []);
 
   return (
-    <ButtonSmall onPress={openURL}>
-      <TextCenter>
-        <TextLight>
-          <Octicons name="link-external" size={16} />
-          {` \u00A0 `}
-          View on {explorer.name}
-        </TextLight>
-      </TextCenter>
-    </ButtonSmall>
+    <ButtonMed
+      onPress={openURL}
+      type="subtle"
+      title={`View on ${explorer.name}`}
+    />
   );
 }
 
@@ -87,56 +82,46 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
       op.to === account.address
   );
 
-  const [directionSymbol, directionText] = (() => {
-    if (op.from === account.address) {
-      return [
-        "↗",
-        <>
-          to <AddrText addr={op.to} />
-        </>,
-      ];
-    } else {
-      return [
-        "↘",
-        <>
-          from <AddrText addr={op.from} />
-        </>,
-      ];
-    }
-  })();
+  const kv: [string, ReactNode][] = [];
+
+  if (op.from === account.address) {
+    kv.push(["Recipient", <AddrText addr={op.to} />]);
+  } else {
+    kv.push(["Sender", <AddrText addr={op.from} />]);
+  }
+
+  if (matchingTrackedRequest != null) {
+    const amount = amountToDollars(BigInt(matchingTrackedRequest.amount));
+    kv.push(["Amount you requested", amount]);
+  }
+
+  kv.push(["Date", timeString(op.timestamp)]);
+
+  if (op.feeAmount !== undefined) {
+    kv.push(["Fee", `$${amountToDollars(op.feeAmount)}`]);
+  }
+
+  const coinName = chainConfig.tokenSymbol;
+  const chainName = chainConfig.chainL2.name;
+  kv.push(["Currency", `${coinName} on ${chainName}`]);
 
   return (
     <View>
       <TitleAmount amount={BigInt(op.amount)} />
       <Spacer h={32} />
-      <Text style={styles.h2Small}>
-        <Text>{directionSymbol}</Text>
-        <Spacer w={8} />
-        <Text>{directionText}</Text>
-      </Text>
+      <View style={styles.kvWrap}>
+        <View style={styles.kvList}>
+          {kv.map(([k, v]) => (
+            <View key={k} style={styles.kvRow}>
+              <View style={styles.kvKey}>
+                <TextLight>{k}</TextLight>
+              </View>
+              <TextBody>{v}</TextBody>
+            </View>
+          ))}
+        </View>
+      </View>
       <Spacer h={16} />
-      <Text style={styles.h3Small}>
-        <Text>{timeString(op.timestamp)}</Text>
-      </Text>
-      <Spacer h={16} />
-      {matchingTrackedRequest !== undefined && (
-        <>
-          <Text style={styles.h3Small}>
-            <Text>
-              Your request was fulfilled by <AddrText addr={op.from} />
-            </Text>
-          </Text>
-          <Spacer h={16} />
-        </>
-      )}
-      {op.feeAmount !== undefined && (
-        <>
-          <Text style={styles.h3Small}>
-            <Text>Fee: ${amountToDollars(op.feeAmount)}</Text>
-          </Text>
-          <Spacer h={16} />
-        </>
-      )}
       <View style={styles.statusRow}>
         <OpStatusIndicator status={op.status} size={24} />
         <TextH3>
@@ -148,18 +133,24 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
 }
 
 const styles = StyleSheet.create({
+  kvWrap: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  kvList: {
+    flexDirection: "column",
+    gap: 4,
+  },
+  kvRow: {
+    flexDirection: "row",
+  },
+  kvKey: {
+    width: 128,
+  },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
-  },
-  h2Small: {
-    fontSize: 20,
-    textAlign: "center",
-  },
-  h3Small: {
-    fontSize: 18,
-    textAlign: "center",
   },
 });

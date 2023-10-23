@@ -29,7 +29,7 @@ export function AccountBubble({
   const textStyle: TextStyle = useMemo(
     () => ({
       fontSize: size / 2,
-      lineHeight: size / 2 + 4,
+      lineHeight: size / 2 + 2,
       fontWeight: "bold",
       textAlign: "center",
       color: color.primary,

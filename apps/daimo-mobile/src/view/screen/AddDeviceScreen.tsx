@@ -7,7 +7,7 @@ import {
 } from "@daimo/userop";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { ReactNode, useMemo, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
@@ -20,7 +20,10 @@ import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Scanner } from "../shared/Scanner";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { useNav } from "../shared/nav";
+import { ss } from "../shared/style";
 import {
   TextBold,
   TextCenter,
@@ -99,8 +102,13 @@ export function AddDeviceScreen() {
     }
   })();
 
+  const nav = useNav();
+  const goBack = () => nav.goBack();
+
   return (
-    <View style={styles.vertOuter}>
+    <View style={ss.container.screen}>
+      <ScreenHeader title="Add Device" onBack={goBack} />
+      <Spacer h={16} />
       {barCodeStatus === "idle" && (
         <Scanner handleBarCodeScanned={handleBarCodeScanned} />
       )}
@@ -128,11 +136,3 @@ export function AddDeviceScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  vertOuter: {
-    flex: 1,
-    padding: 32,
-    overflow: "hidden",
-  },
-});

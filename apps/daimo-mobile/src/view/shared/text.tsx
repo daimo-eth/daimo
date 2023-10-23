@@ -24,6 +24,10 @@ export function TextBody(props: TextProps & { color?: string }) {
   return <Text {...props} style={useStyle(ss.text.body, props)} />;
 }
 
+export function TextMeta(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.metadata, props)} />;
+}
+
 export function TextLight(props: TextProps) {
   return <Text {...props} style={ss.text.light} />;
 }

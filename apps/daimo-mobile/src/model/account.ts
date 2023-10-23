@@ -64,6 +64,10 @@ export type Account = {
   pushToken: string | null;
 };
 
+export function toEAccount(account: Account): EAccount {
+  return { addr: account.address, name: account.name };
+}
+
 interface AccountV8 extends StoredModel {
   storageVersion: 8;
 

@@ -44,8 +44,6 @@ function HistoryListBody({
   maxToShow?: number;
 }) {
   const ops = account.recentTransfers.slice().reverse();
-  console.log(`WTF ${ops.length} ops`);
-
   if (ops.length === 0) {
     return (
       <View style={styles.historyListBody}>
