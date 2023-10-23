@@ -85,17 +85,13 @@ export default function SendRequestScreen() {
 
   return (
     <View style={styles.vertOuter}>
+      <TextCenter>
+        <TextBody>Sending</TextBody>
+      </TextCenter>
+      <TextH2>request link</TextH2>
       <AmountChooser
         dollars={dollars}
         onSetDollars={setDollars}
-        actionDesc={
-          <View>
-            <TextCenter>
-              <TextBody>Sending</TextBody>
-            </TextCenter>
-            <TextH2>request link</TextH2>
-          </View>
-        }
         showAmountAvailable={false}
         innerRef={textInputRef}
         disabled={status !== "creating"}

@@ -53,7 +53,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
     () =>
       nav.navigate("SendTab", {
         screen: "Send",
-        params: { link: { type: "account", account: eAccStr } },
+        params: { recipient },
       }),
     [eAccStr]
   );

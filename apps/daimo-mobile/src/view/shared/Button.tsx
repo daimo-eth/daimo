@@ -55,7 +55,11 @@ function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
       case "success":
         return { backgroundColor: color.success };
       default:
-        return {};
+        return {
+          backgroundColor: color.white,
+          borderWidth: 1,
+          borderColor: color.primary,
+        };
     }
   }, [type]);
 
@@ -66,7 +70,7 @@ function useStyle(base: ButtonStyle, props: ButtonPropsSmall) {
       case "success":
         return { color: color.white };
       default:
-        return {};
+        return { color: color.primary };
     }
   }, [type]);
 
@@ -110,7 +114,7 @@ export function Button(
   );
 
   const child = props.title ? (
-    <Text style={props.style.title}>{props.title}</Text>
+    <Text style={props.style.title}>{props.title.toUpperCase()}</Text>
   ) : (
     props.children
   );
@@ -131,13 +135,14 @@ export const buttonStyles = {
   big: StyleSheet.create({
     button: {
       paddingHorizontal: 24,
-      paddingVertical: 16,
+      paddingVertical: 20,
       borderRadius: 8,
       backgroundColor: color.primaryBgLight,
     },
     title: {
-      fontSize: 20,
-      fontWeight: "600",
+      fontSize: 14,
+      fontWeight: "bold",
+      letterSpacing: 1,
       textAlign: "center",
     },
   }),
@@ -149,8 +154,9 @@ export const buttonStyles = {
       backgroundColor: color.primaryBgLight,
     },
     title: {
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: 14,
+      fontWeight: "bold",
+      letterSpacing: 1,
       textAlign: "center",
     },
   }),

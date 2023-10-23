@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   NativeSyntheticEvent,
   StyleSheet,
@@ -14,19 +14,14 @@ import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { TextCenter, TextLight } from "./text";
 import { useAccount } from "../../model/account";
-import { CancelHeader } from "../screen/send/CancelHeader";
 
 export function AmountChooser({
-  actionDesc,
-  onCancel,
   dollars,
   onSetDollars,
   showAmountAvailable,
   disabled,
   innerRef,
 }: {
-  actionDesc: ReactNode;
-  onCancel?: () => void;
   dollars: number;
   onSetDollars: (dollars: number) => void;
   showAmountAvailable: boolean;
@@ -39,25 +34,20 @@ export function AmountChooser({
   const dollarStr = getAmountText({ amount: account.lastBalance });
 
   return (
-    <>
-      <Spacer h={48} />
-      <CancelHeader hide={onCancel}>{actionDesc}</CancelHeader>
-      <Spacer h={32} />
-      <View style={ss.container.padH16}>
-        <AmountInput
-          dollars={dollars}
-          onChange={onSetDollars}
-          disabled={disabled}
-          innerRef={innerRef}
-        />
-        <Spacer h={8} />
-        <TextCenter>
-          <TextLight>
-            {showAmountAvailable ? `${dollarStr} available` : " "}
-          </TextLight>
-        </TextCenter>
-      </View>
-    </>
+    <View style={ss.container.padH16}>
+      <AmountInput
+        dollars={dollars}
+        onChange={onSetDollars}
+        disabled={disabled}
+        innerRef={innerRef}
+      />
+      <Spacer h={8} />
+      <TextCenter>
+        <TextLight>
+          {showAmountAvailable ? `${dollarStr} available` : " "}
+        </TextLight>
+      </TextCenter>
+    </View>
   );
 }
 
@@ -146,16 +136,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   amountDollar: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "right",
-    paddingBottom: 3,
     flexGrow: 1,
+    fontSize: 56,
+    fontWeight: "600",
+    paddingBottom: 2,
+    color: color.midnight,
+    textAlign: "right",
   },
   amountInput: {
     flexGrow: 1,
-    fontSize: 36,
-    fontWeight: "bold",
+    fontSize: 64,
+    fontWeight: "600",
+    fontVariant: ["tabular-nums"],
     color: color.midnight,
   },
 });

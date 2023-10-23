@@ -5,13 +5,14 @@ import QRCode from "react-native-qrcode-svg";
 
 import { useAccount } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
 import { useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBody, TextLight } from "../../shared/text";
 
-export default function CreateRequestScreen() {
+export default function ReceiveScreen() {
   const nav = useNav();
   const send = useCallback(
     () => nav.navigate("ReceiveTab", { screen: "RequestSend" }),
@@ -24,7 +25,8 @@ export default function CreateRequestScreen() {
   const url = formatDaimoLink({ type: "account", account: account.name });
 
   return (
-    <View style={ss.container.fullWidthSinglePage}>
+    <View style={ss.container.screen}>
+      <ScreenHeader title="Receive" />
       <Spacer h={64} />
       <View style={styles.vertMain}>
         <View style={styles.vertQR}>

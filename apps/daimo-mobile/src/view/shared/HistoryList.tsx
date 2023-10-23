@@ -6,7 +6,6 @@ import {
 } from "@daimo/common";
 import { ReactNode } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,33 +14,29 @@ import {
 } from "react-native";
 import { Address, getAddress } from "viem";
 
-import { Account, useAccount } from "../../model/account";
-import { AccountBubble } from "../shared/AccountBubble";
-import { getAmountText } from "../shared/Amount";
-import ScrollPellet from "../shared/ScrollPellet";
-import Spacer from "../shared/Spacer";
-import { getCachedEAccount } from "../shared/addr";
-import { useNav } from "../shared/nav";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextCenter, TextLight } from "../shared/text";
+import { AccountBubble } from "./AccountBubble";
+import { getAmountText } from "./Amount";
+import ScrollPellet from "./ScrollPellet";
+import Spacer from "./Spacer";
+import { getCachedEAccount } from "./addr";
+import { useNav } from "./nav";
+import { color, ss, touchHighlightUnderlay } from "./style";
+import { TextBody, TextCenter, TextLight } from "./text";
+import { Account } from "../../model/account";
 
-export function HistoryScreen() {
-  const [account] = useAccount();
-  if (account == null) return null;
-
-  console.log("[HISTORY] rendering HistoryScreen");
-
+export function HistoryListSwipe(props: {
+  account: Account;
+  maxToShow?: number;
+}) {
   return (
-    <SafeAreaView>
-      <View style={ss.container.fullWidthModal}>
-        <ScrollPellet />
-        <HistoryList account={account} />
-      </View>
-    </SafeAreaView>
+    <View style={styles.historyListSwipe}>
+      <ScrollPellet />
+      <HistoryListBody {...props} />
+    </View>
   );
 }
 
-export function HistoryList({
+function HistoryListBody({
   account,
   maxToShow,
 }: {
@@ -49,10 +44,11 @@ export function HistoryList({
   maxToShow?: number;
 }) {
   const ops = account.recentTransfers.slice().reverse();
+  console.log(`WTF ${ops.length} ops`);
 
   if (ops.length === 0) {
     return (
-      <View>
+      <View style={styles.historyListBody}>
         <Spacer h={8} />
         <TextCenter>
           <TextLight>No transactions yet</TextLight>
@@ -74,7 +70,7 @@ export function HistoryList({
 
   if (maxToShow != null) {
     return (
-      <View style={styles.transferList}>
+      <View style={styles.historyListBody}>
         <HeaderRow key="h0" title="Transaction history" />
         {ops.slice(0, maxToShow).map(renderRow)}
       </View>
@@ -98,9 +94,15 @@ export function HistoryList({
     }
     rows.push(renderRow(t));
   }
-  rows.push(<View key="footer" style={styles.transferList} />);
 
-  return <ScrollView stickyHeaderIndices={stickyIndices}>{rows}</ScrollView>;
+  return (
+    <ScrollView
+      contentContainerStyle={styles.historyListBody}
+      stickyHeaderIndices={stickyIndices}
+    >
+      {rows}
+    </ScrollView>
+  );
 }
 
 function HeaderRow({ title }: { title: string }) {
@@ -191,18 +193,23 @@ function TransferAmountDate({
 }
 
 const styles = StyleSheet.create({
+  historyListSwipe: {
+    flex: 1,
+    backgroundColor: color.white,
+  },
+  historyListBody: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderColor: color.grayLight,
+    paddingHorizontal: 24,
+    marginBottom: 48,
+  },
   rowHeader: {
     flexDirection: "row",
     paddingVertical: 8,
     paddingTop: 16,
     paddingHorizontal: 2,
     backgroundColor: color.white,
-  },
-  transferList: {
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
-    paddingHorizontal: 24,
-    marginBottom: 48,
   },
   transferBorder: {
     borderTopWidth: 1,

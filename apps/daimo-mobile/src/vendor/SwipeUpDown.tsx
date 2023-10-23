@@ -5,6 +5,7 @@
 //
 // MIT License
 //
+// Copyright (c) 2023-present, Daimo authors.
 // Copyright (c) 2018-present, Duong Minh Chien.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,14 +33,10 @@ import {
   LayoutAnimation,
   PanResponder,
   PanResponderGestureState,
-  Platform,
   StyleSheet,
   View,
-  ViewStyle,
 } from "react-native";
-
-const MARGIN_TOP = Platform.OS === "ios" ? 24 : 0;
-const DEVICE_HEIGHT = Dimensions.get("window").height - MARGIN_TOP;
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const springAnimation = {
   duration: 300,
@@ -55,29 +52,28 @@ const springAnimation = {
 };
 
 interface SwipeUpDownProps {
-  swipeHeight?: number;
-  extraMarginTop?: number;
   itemMini: ReactNode;
   itemFull: ReactNode;
-  style?: ViewStyle;
+  swipeHeight: number;
   onShowMini?: () => void;
   onShowFull?: () => void;
-  animation?: "linear" | "spring" | "easeInEaseOut";
 }
 
+const screenDimensions = Dimensions.get("screen");
+
 export function SwipeUpDown({
-  swipeHeight = 60,
-  extraMarginTop = MARGIN_TOP,
   itemMini,
   itemFull,
-  style,
   onShowMini,
   onShowFull,
-  animation = "spring",
+  swipeHeight,
 }: SwipeUpDownProps) {
-  const maxHeight = DEVICE_HEIGHT - extraMarginTop;
+  const ins = useSafeAreaInsets();
+  console.log(`[SWIPE] ins ${JSON.stringify(ins)}`);
+
+  const maxHeight = screenDimensions.height - ins.top - ins.bottom;
   const posYMini = maxHeight - swipeHeight;
-  const posYFull = extraMarginTop;
+  const posYFull = ins.top;
   const customStyle = {
     style: {
       bottom: 0,
@@ -149,9 +145,8 @@ export function SwipeUpDown({
         {
           top: customStyle.style.top,
           height: maxHeight,
-          marginTop: extraMarginTop,
+          marginTop: 0,
         },
-        style,
       ]}
     >
       {isMini ? itemMini : itemFull}

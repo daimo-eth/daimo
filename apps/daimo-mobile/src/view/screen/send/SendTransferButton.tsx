@@ -71,7 +71,7 @@ export function SendTransferButton({
       case "error":
         return (
           <ButtonBig
-            title={`Send ${getAmountText({ dollars })}`}
+            title="CONFIRM AND SEND"
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}

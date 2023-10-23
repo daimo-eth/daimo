@@ -3,14 +3,13 @@ import { useCallback, useState } from "react";
 import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HistoryList, HistoryScreen } from "./HistoryScreen";
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account, useAccount } from "../../model/account";
 import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
+import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
-import ScrollPellet from "../shared/ScrollPellet";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -20,7 +19,7 @@ import { TextBody, TextLight } from "../shared/text";
 export default function HomeScreen() {
   const [account] = useAccount();
   console.log(
-    `[HOME] rendering with account ${account?.name}, ${account?.recentTransfers?.length} ops`
+    `[HOME] rendering ${account?.name}, ${account?.recentTransfers?.length} ops`
   );
 
   const keySlot = account?.accountKeys.find(
@@ -29,7 +28,9 @@ export default function HomeScreen() {
   useWarmCache(account?.enclaveKeyName, account?.address, keySlot);
 
   const nav = useNav();
+  const [isHistOpen, setIsHistOpen] = useState(false);
   const setIsHistoryOpened = useCallback((isOpened: boolean) => {
+    setIsHistOpen(isOpened);
     nav.setOptions({ title: isOpened ? "History" : "Home" });
   }, []);
 
@@ -37,27 +38,26 @@ export default function HomeScreen() {
 
   if (account == null) return null;
 
+  const histList = (
+    <HistoryListSwipe
+      account={account}
+      maxToShow={isHistOpen ? undefined : 5}
+    />
+  );
+
   return (
-    <SafeAreaView style={ss.container.fullWidthScroll}>
+    <SafeAreaView style={ss.container.screen}>
       <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
       {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
       {searchPrefix == null && (
         <>
           <Spacer h={64} />
           <AmountAndButtons account={account} />
-
           <SwipeUpDown
-            itemMini={
-              <View style={styles.historyElem}>
-                <ScrollPellet />
-                <HistoryList account={account} maxToShow={5} />
-              </View>
-            }
-            itemFull={<HistoryScreen />}
+            itemMini={histList}
+            itemFull={histList}
             onShowMini={() => setIsHistoryOpened(false)}
             onShowFull={() => setIsHistoryOpened(true)}
-            animation="spring"
-            extraMarginTop={0}
             swipeHeight={screenDimensions.height / 3}
           />
         </>
@@ -73,7 +73,7 @@ function AmountAndButtons({ account }: { account: Account }) {
     [nav]
   );
   const goRequest = useCallback(
-    () => nav.navigate("ReceiveTab", { screen: "Request" }),
+    () => nav.navigate("ReceiveTab", { screen: "Receive" }),
     [nav]
   );
   const goDeposit = useCallback(() => nav.navigate("DepositTab"), [nav]);
@@ -176,12 +176,5 @@ const styles = StyleSheet.create({
   iconLabelDisabled: {
     ...iconLabel,
     opacity: 0.5,
-  },
-  historyScroll: {
-    paddingTop: 32,
-  },
-  historyElem: {
-    backgroundColor: color.white,
-    minHeight: screenDimensions.height,
   },
 });

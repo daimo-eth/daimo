@@ -10,6 +10,7 @@ import { CBPayWebView } from "./OnrampCBPay";
 import { rpcHook } from "../../../logic/trpc";
 import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
@@ -34,7 +35,9 @@ export default function DepositScreen() {
   }
 
   return (
-    <View style={styles.vertOuter}>
+    <View style={ss.container.screen}>
+      <ScreenHeader title="Deposit" />
+      <Spacer h={16} />
       {testnet && <TestnetFaucet recipient={account.address} />}
       {testnet && <Spacer h={32} />}
       {!testnet && (
@@ -45,14 +48,16 @@ export default function DepositScreen() {
         />
       )}
       <Spacer h={32} />
-      <TextBody>
-        <TextBold>
-          Deposit {tokenSymbol} on {chainL2.name} only.
-        </TextBold>{" "}
-        Use the following address.
-      </TextBody>
-      <Spacer h={16} />
-      <AddressCopier addr={account.address} />
+      <View style={styles.padH16}>
+        <TextBody>
+          <TextBold>
+            Deposit {tokenSymbol} on {chainL2.name} only.
+          </TextBold>{" "}
+          Use the following address.
+        </TextBody>
+        <Spacer h={16} />
+        <AddressCopier addr={account.address} />
+      </View>
     </View>
   );
 }
@@ -161,11 +166,8 @@ function AddressCopier({ addr }: { addr: string }) {
 }
 
 const styles = StyleSheet.create({
-  vertOuter: {
-    backgroundColor: color.white,
-    flex: 1,
-    padding: 32,
-    overflow: "hidden",
+  padH16: {
+    paddingHorizontal: 16,
   },
   address: {
     flexDirection: "column",
@@ -189,7 +191,6 @@ const styles = StyleSheet.create({
   callout: {
     backgroundColor: color.ivoryDark,
     padding: 16,
-    marginHorizontal: -16,
     borderRadius: 24,
   },
 });

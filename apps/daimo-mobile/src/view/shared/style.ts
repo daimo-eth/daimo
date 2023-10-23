@@ -38,34 +38,14 @@ export const touchHighlightUnderlay = {
   },
 };
 
-const styleFullWidth = {
-  flex: 1,
-  flexDirection: "column",
-  padding: 16,
-  backgroundColor: color.white,
-  alignItems: "stretch",
-} as const;
-
 export const ss = {
   container: StyleSheet.create({
-    bodyBetweenHeaderAndFooter: {
+    screen: {
       flex: 1,
       flexDirection: "column",
       alignItems: "stretch",
       backgroundColor: color.white,
       paddingHorizontal: 16,
-    },
-    fullWidthSinglePage: {
-      ...styleFullWidth,
-      paddingBottom: 48,
-    },
-    fullWidthScroll: {
-      ...styleFullWidth,
-    },
-    fullWidthModal: {
-      ...styleFullWidth,
-      alignSelf: "stretch",
-      flexGrow: 1,
     },
     center: {
       flex: 1,

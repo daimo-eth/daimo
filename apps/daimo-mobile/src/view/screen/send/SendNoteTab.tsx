@@ -21,17 +21,13 @@ export function SendNoteTab() {
 
   return (
     <View>
+      <TextCenter>
+        <TextBody>Creating</TextBody>
+      </TextCenter>
+      <TextH2>payment link</TextH2>
       <AmountChooser
         dollars={noteDollars}
         onSetDollars={setNoteDollars}
-        actionDesc={
-          <View>
-            <TextCenter>
-              <TextBody>Creating</TextBody>
-            </TextCenter>
-            <TextH2>payment link</TextH2>
-          </View>
-        }
         showAmountAvailable={!amountChosen}
         disabled={amountChosen}
         innerRef={textInputRef}

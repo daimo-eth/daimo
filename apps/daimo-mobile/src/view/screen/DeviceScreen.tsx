@@ -130,7 +130,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const addedAtS = timestampForBlock(device.addedAt);
 
   return (
-    <View style={ss.container.fullWidthModal}>
+    <View style={ss.container.screen}>
       <Spacer h={16} />
       <TextH1>{deviceName}</TextH1>
       <Spacer h={16} />

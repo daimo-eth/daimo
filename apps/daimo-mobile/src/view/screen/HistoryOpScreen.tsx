@@ -7,7 +7,6 @@ import {
 import { chainConfig } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
-import { StackActions } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
@@ -18,7 +17,7 @@ import { TitleAmount } from "../shared/Amount";
 import { ButtonSmall } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
-import { ParamListHome } from "../shared/nav";
+import { ParamListHome, useNav } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
@@ -31,11 +30,6 @@ export function HistoryOpScreen({ route, navigation }: Props) {
   const [account] = useAccount();
   let { op } = route.params;
   op = syncFindSameOp(op, account?.recentTransfers || []) || op;
-
-  useEffect(() => () => {
-    console.log(`WTF BLUR`);
-    StackActions.pop();
-  });
 
   const [title, body] = (() => {
     switch (op.type) {
@@ -51,7 +45,7 @@ export function HistoryOpScreen({ route, navigation }: Props) {
   }, [navigation, title]);
 
   return (
-    <View style={ss.container.fullWidthModal}>
+    <View style={ss.container.screen}>
       <Spacer h={8} />
       {body}
       <Spacer h={8} />

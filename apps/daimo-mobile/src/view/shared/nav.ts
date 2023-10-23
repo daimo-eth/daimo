@@ -26,7 +26,7 @@ export type ParamListSend = {
 };
 
 export type ParamListReceive = {
-  Request: undefined;
+  Receive: undefined;
   RequestSend: undefined;
   Note: { link: DaimoLinkNote };
 };

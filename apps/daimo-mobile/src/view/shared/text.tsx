@@ -1,23 +1,27 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode } from "react";
-import { Text, TextProps } from "react-native";
+import { ReactNode, useMemo } from "react";
+import { Text, TextProps, TextStyle } from "react-native";
 
 import { ss } from "./style";
 
-export function TextH1(props: TextProps) {
-  return <Text {...props} style={ss.text.h1} />;
+function useStyle(baseStyle: TextStyle, { color }: { color?: string }) {
+  return useMemo(() => [baseStyle, { color }], [baseStyle, color]);
 }
 
-export function TextH2(props: TextProps) {
-  return <Text {...props} style={ss.text.h2} />;
+export function TextH1(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.h1, props)} />;
 }
 
-export function TextH3(props: TextProps) {
-  return <Text {...props} style={ss.text.h3} />;
+export function TextH2(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.h2, props)} />;
 }
 
-export function TextBody(props: TextProps) {
-  return <Text {...props} style={ss.text.body} />;
+export function TextH3(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.h3, props)} />;
+}
+
+export function TextBody(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.body, props)} />;
 }
 
 export function TextLight(props: TextProps) {
