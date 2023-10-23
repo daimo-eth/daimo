@@ -27,7 +27,7 @@ export function SearchHeader({
 
   // Right: QR code
   const goToQR = useCallback(
-    () => nav.navigate("ReceiveTab", { screen: "Request" }),
+    () => nav.navigate("ReceiveTab", { screen: "Receive" }),
     [nav]
   );
 

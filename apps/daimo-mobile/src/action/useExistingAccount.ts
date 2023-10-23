@@ -48,6 +48,7 @@ export function useExistingAccount() {
           namedAccounts: [],
           recentTransfers: [],
           trackedRequests: [],
+          pendingNotes: [],
           accountKeys: [],
 
           chainGasConstants: {

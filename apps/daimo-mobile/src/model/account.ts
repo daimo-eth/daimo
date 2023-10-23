@@ -5,6 +5,7 @@ import {
   TrackedRequest,
   KeyData,
   ChainGasConstants,
+  DaimoLinkNote,
 } from "@daimo/common";
 import { chainConfig } from "@daimo/contract";
 import { useEffect, useState } from "react";
@@ -49,6 +50,8 @@ export type Account = {
   recentTransfers: TransferOpEvent[];
   /** Requests sent from this account. */
   trackedRequests: TrackedRequest[];
+  /** Payment links created by this account, but not yet claimed. */
+  pendingNotes: DaimoLinkNote[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
@@ -78,6 +81,7 @@ interface AccountV8 extends StoredModel {
   lastFinalizedBlock: number;
   recentTransfers: TransferOpEvent[];
   trackedRequests: TrackedRequest[];
+  pendingNotes: DaimoLinkNote[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
 
@@ -180,6 +184,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
+    pendingNotes: a.pendingNotes || [],
 
     chainGasConstants: a.chainGasConstants,
 
@@ -213,6 +218,7 @@ export function serializeAccount(account: Account | null): string {
 
     recentTransfers: account.recentTransfers,
     trackedRequests: account.trackedRequests,
+    pendingNotes: account.pendingNotes,
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
 

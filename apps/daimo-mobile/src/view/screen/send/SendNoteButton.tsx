@@ -12,7 +12,7 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { ReactNode, useCallback, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
@@ -30,7 +30,7 @@ import { TextError } from "../../shared/text";
 export function SendNoteButton({ dollars }: { dollars: number }) {
   const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
   const ephemeralOwner = useMemo(
-    () => ephemeralPrivKey && privateKeyToAccount(ephemeralPrivKey).address,
+    () => privateKeyToAccount(ephemeralPrivKey).address,
     [ephemeralPrivKey]
   );
 
@@ -58,6 +58,19 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),
     },
+    accountTransform: (account) => ({
+      ...account,
+      pendingNotes: [
+        ...account.pendingNotes,
+        {
+          type: "note",
+          ephemeralOwner,
+          ephemeralPrivateKey: ephemeralPrivKey,
+          previewDollars: `${dollars}`,
+          previewSender: account.name,
+        },
+      ],
+    }),
   });
 
   const sendDisabledReason =
@@ -92,7 +105,6 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
 
   const sendNote = useCallback(async () => {
     if (status !== "success") return;
-    if (ephemeralOwner == null) return;
 
     try {
       const link: DaimoLink = {
@@ -127,13 +139,20 @@ export function SendNoteButton({ dollars }: { dollars: number }) {
     }
   }, [ephemeralOwner, ephemeralPrivKey, status]);
 
+  // As soon as payment link is created, show share sheet
+  // TODO: move this to a dispatcher
+  useEffect(() => {
+    if (status !== "success") return;
+    sendNote();
+  }, [status]);
+
   const button = (function () {
     switch (status) {
       case "idle":
         return (
           <ButtonBig
             type="primary"
-            title={`Create ${getAmountText({ dollars })} Link`}
+            title="CREATE PAYMENT LINK"
             onPress={exec}
             disabled={sendDisabled}
           />

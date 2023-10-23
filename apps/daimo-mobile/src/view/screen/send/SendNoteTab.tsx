@@ -4,9 +4,9 @@ import { TextInput, View } from "react-native";
 import { SendNoteButton } from "./SendNoteButton";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
+import { InfoBubble } from "../../shared/InfoBubble";
 import Spacer from "../../shared/Spacer";
-import { TextBody, TextCenter, TextH2 } from "../../shared/text";
+import { TextCenter, TextLight } from "../../shared/text";
 
 export function SendNoteTab() {
   // Send Payment Link shows available secure messaging apps
@@ -21,10 +21,16 @@ export function SendNoteTab() {
 
   return (
     <View>
+      <Spacer h={8} />
+      <InfoBubble
+        title="Pay by sending a link"
+        subtitle="Anyone with the link can claim it"
+      />
+      <Spacer h={32} />
       <TextCenter>
-        <TextBody>Creating</TextBody>
+        <TextLight>Enter amount</TextLight>
       </TextCenter>
-      <TextH2>payment link</TextH2>
+      <Spacer h={24} />
       <AmountChooser
         dollars={noteDollars}
         onSetDollars={setNoteDollars}
@@ -34,16 +40,11 @@ export function SendNoteTab() {
       />
       <Spacer h={32} />
       {!amountChosen && (
-        <ButtonWithStatus
-          button={
-            <ButtonBig
-              type="primary"
-              title="Create Payment Link"
-              disabled={!(noteDollars > 0)}
-              onPress={onChooseAmount}
-            />
-          }
-          status=""
+        <ButtonBig
+          type="primary"
+          title="Create Payment Link"
+          disabled={!(noteDollars > 0)}
+          onPress={onChooseAmount}
         />
       )}
       {amountChosen && <SendNoteButton dollars={noteDollars} />}

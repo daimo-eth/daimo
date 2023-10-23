@@ -66,6 +66,7 @@ export function useCreateAccount(name: string): ActHandle {
       namedAccounts: [],
       recentTransfers: [],
       trackedRequests: [],
+      pendingNotes: [],
       accountKeys: [],
 
       chainGasConstants: {

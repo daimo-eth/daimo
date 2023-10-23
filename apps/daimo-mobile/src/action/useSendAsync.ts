@@ -11,7 +11,7 @@ import { Address, Hex } from "viem";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { Log, NamedError } from "../logic/log";
 import { rpcFunc } from "../logic/trpc";
-import { useAccount } from "../model/account";
+import { Account, useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
@@ -22,11 +22,14 @@ export function useSendAsync({
   sendFn,
   pendingOp,
   namedAccounts,
+  accountTransform,
 }: {
   dollarsToSend: number;
   sendFn: SendOpFn;
   pendingOp?: OpEvent;
   namedAccounts?: EAccount[];
+  /** Runs on success, before the account is saved */
+  accountTransform?: (account: Account) => Account;
 }): ActHandle {
   const [as, setAS] = useActStatus();
 
@@ -56,11 +59,15 @@ export function useSendAsync({
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
-      const newAccount = {
+      let newAccount = {
         ...account,
         recentTransfers: [...account.recentTransfers, pendingOp],
         namedAccounts: [...account.namedAccounts, ...(namedAccounts || [])],
       };
+
+      if (accountTransform) {
+        newAccount = accountTransform(newAccount);
+      }
 
       // TODO: add pending device add/removes
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
