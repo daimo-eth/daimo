@@ -1012,7 +1012,7 @@ export const daimoPaymasterABI = [
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x135287A1222b2c0A2EEEfaEe2bbE0B7c3B123A81' as const
+  '0x5B746BE4D3aC8702dc01fBfDFD8818fC9F8C8F79' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,

@@ -48,6 +48,7 @@ contract DeployPaymasterScript is Script {
         dests[0] = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913; // Base USDC
         dests[1] = 0x1B85deDe8178E18CdE599B4C9d913534553C3dBf; // CREATE-2ed Base Goerli testnet USDC
         dests[2] = 0x831967F433D9425Aa34D6A3dAC01a428d839De0f; // CREATE-2ed DaimoEphemeralNotes
+        // note that the name registry contract is not called by the account directly
 
         vm.startBroadcast();
         paymaster.setDestAddressWhitelist(dests, true);

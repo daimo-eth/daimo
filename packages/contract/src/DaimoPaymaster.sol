@@ -5,6 +5,14 @@ import "account-abstraction/core/BasePaymaster.sol";
 
 import "./DaimoAccount.sol";
 
+/// Paymaster contract to sponsor user operations on DaimoAccount, making them
+/// free for the user.
+/// Pattern matches the calldata pattern of DaimoAccount, sponsoring ops that
+/// call executeBatch, and pass to it an arg that's either further making calls
+/// into a set of whitelisted contract address (destWhitelist) or to the sender
+/// contract itself.
+/// Additionally includes a blacklist for senders settable by contract owner.
+/// Will not sponsor blacklisted sender ops.
 contract DaimoPaymaster is BasePaymaster {
     mapping(address => bool) public destWhitelist;
     mapping(address => bool) public senderBlacklist;
