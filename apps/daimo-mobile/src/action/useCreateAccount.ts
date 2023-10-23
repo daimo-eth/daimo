@@ -1,5 +1,5 @@
 import { assert } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
@@ -72,6 +72,7 @@ export function useCreateAccount(name: string): ActHandle {
         maxPriorityFeePerGas: "0",
         maxFeePerGas: "0",
         estimatedFee: 0,
+        paymasterAddress: daimoPaymasterAddress,
       },
 
       pushToken: null,

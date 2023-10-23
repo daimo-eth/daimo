@@ -44,7 +44,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56": AddrLabel.Paymaster,
 };
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
-specialAddrLabels[chainConfig.paymasterAddress] = AddrLabel.Paymaster;
+specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {

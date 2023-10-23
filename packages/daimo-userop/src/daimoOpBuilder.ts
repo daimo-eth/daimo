@@ -35,7 +35,6 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   private constructor(
     private accountAddress: Address,
-    private paymasterAddress: Address,
     private signer: SigningCallback
   ) {
     super();
@@ -44,14 +43,9 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
     accountAddress: Address,
-    accountSigner: SigningCallback,
-    paymasterAddress: Address
+    accountSigner: SigningCallback
   ): Promise<DaimoOpBuilder> {
-    const instance = new DaimoOpBuilder(
-      accountAddress,
-      paymasterAddress,
-      accountSigner
-    );
+    const instance = new DaimoOpBuilder(accountAddress, accountSigner);
 
     console.log(`[OP]: init address ${instance.accountAddress}`);
     const base = instance
@@ -106,7 +100,8 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       .setMaxFeePerGas(opMetadata.chainGasConstants.maxFeePerGas)
       .setMaxPriorityFeePerGas(
         opMetadata.chainGasConstants.maxPriorityFeePerGas
-      );
+      )
+      .setPaymasterAndData(opMetadata.chainGasConstants.paymasterAddress);
   }
 
   /** Sets a deadline for this userop to execute. */
@@ -115,14 +110,12 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   }
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {
-    return this.setOpMetadata(opMetadata)
-      .setPaymasterAndData(this.paymasterAddress)
-      .setCallData(
-        encodeFunctionData({
-          abi: daimoAccountABI,
-          functionName: "executeBatch",
-          args: [calls],
-        })
-      );
+    return this.setOpMetadata(opMetadata).setCallData(
+      encodeFunctionData({
+        abi: daimoAccountABI,
+        functionName: "executeBatch",
+        args: [calls],
+      })
+    );
   }
 }

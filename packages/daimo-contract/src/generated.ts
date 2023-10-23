@@ -776,6 +776,250 @@ export const daimoNameRegistryProxyConfig = {
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPaymaster
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPaymasterABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+      { name: '_owner', internalType: 'address', type: 'address' },
+    ],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'requiredPreFund',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'UserOperationSponsored',
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
+    ],
+    name: 'addStake',
+    outputs: [],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [],
+    name: 'deposit',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'destWhitelist',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'entryPoint',
+    outputs: [
+      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'getDeposit',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'mode',
+        internalType: 'enum IPaymaster.PostOpMode',
+        type: 'uint8',
+      },
+      { name: 'context', internalType: 'bytes', type: 'bytes' },
+      { name: 'actualGasCost', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'postOp',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'senderBlacklist',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'addresses', internalType: 'address[]', type: 'address[]' },
+      { name: 'isWhitelisted', internalType: 'bool', type: 'bool' },
+    ],
+    name: 'setDestAddressWhitelist',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'addresses', internalType: 'address[]', type: 'address[]' },
+      { name: 'isBlacklisted', internalType: 'bool', type: 'bool' },
+    ],
+    name: 'setSenderAddressBlacklist',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'unlockStake',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'userOp',
+        internalType: 'struct UserOperation',
+        type: 'tuple',
+        components: [
+          { name: 'sender', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+          { name: 'initCode', internalType: 'bytes', type: 'bytes' },
+          { name: 'callData', internalType: 'bytes', type: 'bytes' },
+          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'verificationGasLimit',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          {
+            name: 'preVerificationGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'maxPriorityFeePerGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
+          { name: 'signature', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'userOpHash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'maxCost', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'validatePaymasterUserOp',
+    outputs: [
+      { name: 'context', internalType: 'bytes', type: 'bytes' },
+      { name: 'validationData', internalType: 'uint256', type: 'uint256' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'withdrawAddress',
+        internalType: 'address payable',
+        type: 'address',
+      },
+    ],
+    name: 'withdrawStake',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'withdrawAddress',
+        internalType: 'address payable',
+        type: 'address',
+      },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'withdrawTo',
+    outputs: [],
+  },
+] as const
+
+export const daimoPaymasterAddress =
+  '0x5B746BE4D3aC8702dc01fBfDFD8818fC9F8C8F79' as const
+
+export const daimoPaymasterConfig = {
+  address: daimoPaymasterAddress,
+  abi: daimoPaymasterABI,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC1967Proxy
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -24,6 +24,7 @@ export {
   daimoAccountFactoryABI,
   daimoAccountFactoryAddress,
   daimoAccountFactoryConfig,
+  daimoPaymasterAddress,
   erc20ABI,
   entryPointABI,
 } from "./generated";

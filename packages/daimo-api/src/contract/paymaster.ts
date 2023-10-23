@@ -1,4 +1,4 @@
-import { chainConfig, pimlicoPaymasterAbi } from "@daimo/contract";
+import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
 
 import { ViemClient } from "../viemClient";
 
@@ -8,7 +8,7 @@ export class Paymaster {
   private maxFeePerGas: bigint = 0n;
   private maxPriorityFeePerGas: bigint = 0n;
 
-  /* Paymaster constants */
+  /* Pimlico Paymaster constants */
   private priceMarkup: bigint = 0n;
   private previousPrice: bigint = 0n;
 
@@ -27,7 +27,7 @@ export class Paymaster {
   // Since our various gas limits corresponding to the userop are nearly fixed,
   // we can compute these constants as a pure function of current on-chain state.
   // TODO: track history of different type of userops for precision.
-  estimateFee() {
+  estimatePimlicoFee() {
     // This is exactly what Pimlico's paymaster SDK does:
     // https://github.com/pimlicolabs/erc20-paymaster-contracts/blob/master/sdk/ERC20Paymaster.ts#L223
     // without the 3x multiplier on verification gas limit (that it adds due some postOp edge case).
@@ -60,26 +60,25 @@ export class Paymaster {
     if (Date.now() - this.lastFetchTs < 5 * 60 * 1000) return;
     this.lastFetchTs = Date.now();
 
-    const priceMarkup = await this.vc.publicClient.readContract({
-      abi: pimlicoPaymasterAbi,
-      address: chainConfig.paymasterAddress,
-      functionName: "priceMarkup",
-    });
-    const previousPrice = await this.vc.publicClient.readContract({
-      abi: pimlicoPaymasterAbi,
-      address: chainConfig.paymasterAddress,
-      functionName: "previousPrice",
-    });
+    // Pimlico Paymaster constants, disabled fetching for now.
+    // const priceMarkup = await this.vc.publicClient.readContract({
+    //   abi: pimlicoPaymasterAbi,
+    //   address: chainConfig.paymasterAddress,
+    //   functionName: "priceMarkup",
+    // });
+    // const previousPrice = await this.vc.publicClient.readContract({
+    //   abi: pimlicoPaymasterAbi,
+    //   address: chainConfig.paymasterAddress,
+    //   functionName: "previousPrice",
+    // });
 
     const maxFeePerGas = await this.vc.publicClient.getGasPrice();
     const maxPriorityFeePerGas =
       await this.vc.publicClient.estimateMaxPriorityFeePerGas(); // Assumes we're on an EIP-1559 chain
 
-    this.priceMarkup = BigInt(priceMarkup);
-    this.previousPrice = previousPrice;
     this.maxFeePerGas = maxFeePerGas;
     this.maxPriorityFeePerGas = maxPriorityFeePerGas;
-    this.estimatedFee = this.estimateFee(); // Depends on other constants
+    this.estimatedFee = 0;
   }
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
@@ -90,6 +89,7 @@ export class Paymaster {
       maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
       maxFeePerGas: this.maxFeePerGas.toString(),
       estimatedFee: this.estimatedFee,
+      paymasterAddress: daimoPaymasterAddress,
     };
   }
 }

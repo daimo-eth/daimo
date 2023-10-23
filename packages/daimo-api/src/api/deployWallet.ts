@@ -29,12 +29,14 @@ export async function deployWallet(
     },
     {
       // Approve paymaster contract infinite spending on behalf of the account
+      // While we no longer use the Pimlico paymaster, we approve it as a backup
+      // in case our own free paymaster is failing in future.
       dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [chainConfig.paymasterAddress, maxUint256],
+        args: [chainConfig.pimlicoPaymasterAddress, maxUint256],
       }),
     },
     nameReg.getRegisterNameCall(name), // Register name

@@ -156,9 +156,9 @@ export class CoinIndexer {
 
       const prevFee = opHashToFee.get(op.opHash) || 0;
 
-      if (op.to === chainConfig.paymasterAddress) {
+      if (op.to === chainConfig.pimlicoPaymasterAddress) {
         opHashToFee.set(op.opHash, prevFee + op.amount);
-      } else if (op.from === chainConfig.paymasterAddress) {
+      } else if (op.from === chainConfig.pimlicoPaymasterAddress) {
         // Account for fee refund
         opHashToFee.set(op.opHash, prevFee - op.amount);
       }
@@ -168,8 +168,8 @@ export class CoinIndexer {
       .filter(
         // Remove paymaster logs
         (op) =>
-          op.from !== chainConfig.paymasterAddress &&
-          op.to !== chainConfig.paymasterAddress
+          op.from !== chainConfig.pimlicoPaymasterAddress &&
+          op.to !== chainConfig.pimlicoPaymasterAddress
       )
       .map((op) => {
         // Attach fee amounts to other transfers
