@@ -19,8 +19,6 @@ interface DaimoOpConfig {
   tokenDecimals: number;
   /** EphemeralNotes instance. The stablecoin used must match tokenAddress. */
   notesAddress: `0x${string}`;
-  /** Paymaster, payable in tokenAddress. */
-  paymasterAddress: Address;
   /** Daimo account address. */
   accountAddress: Address;
   /** Signs userops. Must, in some form, check user presence. */
@@ -47,8 +45,7 @@ export class DaimoOpSender {
     accountSigner: SigningCallback,
     opSender: OpSenderCallback
   ): Promise<DaimoOpSender> {
-    const { tokenAddress, tokenDecimals, paymasterAddress, chainL2 } =
-      Contracts.chainConfig;
+    const { tokenAddress, tokenDecimals, chainL2 } = Contracts.chainConfig;
 
     return DaimoOpSender.init({
       accountAddress,
@@ -56,7 +53,6 @@ export class DaimoOpSender {
       opSender,
       chainId: chainL2.id,
       notesAddress: Contracts.daimoEphemeralNotesAddress,
-      paymasterAddress,
       tokenAddress,
       tokenDecimals,
     });
@@ -66,12 +62,8 @@ export class DaimoOpSender {
    * Initializes with all configuration provided: no env vars required.
    */
   public static async init(opConfig: DaimoOpConfig): Promise<DaimoOpSender> {
-    const { accountAddress, accountSigner, paymasterAddress } = opConfig;
-    const builder = await DaimoOpBuilder.init(
-      accountAddress,
-      accountSigner,
-      paymasterAddress
-    );
+    const { accountAddress, accountSigner } = opConfig;
+    const builder = await DaimoOpBuilder.init(accountAddress, accountSigner);
 
     const { tokenAddress, tokenDecimals } = opConfig;
     console.log(
@@ -79,7 +71,6 @@ export class DaimoOpSender {
         accountAddress,
         tokenAddress,
         tokenDecimals,
-        paymasterAddress,
         notesAddress: opConfig.notesAddress,
       })})}`
     );

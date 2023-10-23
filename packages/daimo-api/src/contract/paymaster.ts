@@ -1,4 +1,8 @@
-import { chainConfig, pimlicoPaymasterAbi } from "@daimo/contract";
+import {
+  chainConfig,
+  pimlicoPaymasterAbi,
+  daimoPaymasterAddress,
+} from "@daimo/contract";
 
 import { ViemClient } from "../viemClient";
 
@@ -90,6 +94,7 @@ export class Paymaster {
       maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
       maxFeePerGas: this.maxFeePerGas.toString(),
       estimatedFee: this.estimatedFee,
+      paymasterAddress: daimoPaymasterAddress,
     };
   }
 }

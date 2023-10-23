@@ -13,4 +13,4 @@ docs/
 # Dotenv file
 .env
 broadcast/*/*/*
-!broadcast/*/*/run-latest.json
+!broadcast/*/*/*-latest.json

@@ -1,9 +1,12 @@
+import { Address } from "viem";
+
 export type ChainGasConstants = {
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
 
   /* Estimated fee in dollars (2 digits after decimal) */
   estimatedFee: number;
+  paymasterAddress: Address;
 };
 
 export const DEFAULT_USEROP_VERIFICATION_GAS_LIMIT = 500000n;
