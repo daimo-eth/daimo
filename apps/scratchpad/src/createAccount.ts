@@ -2,7 +2,7 @@ import { getBundlerClientFromEnv } from "@daimo/api/src/chain/bundlerClient";
 import { UserOpHex } from "@daimo/common";
 import {
   daimoAccountFactoryConfig,
-  chainConfig,
+  daimoEphemeralNotesAddress,
   entryPointABI,
   erc20ABI,
   daimoPaymasterAddress,
@@ -35,6 +35,8 @@ import {
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+
+import { chainConfig } from "./env";
 
 export function createAccountDesc() {
   return `Create a Daimo account. Fund with faucet. Send a test userop from that account.`;
@@ -156,7 +158,15 @@ export async function createAccount() {
   const tx = await publicClient.waitForTransactionReceipt({ hash });
   console.log(`[API] deploy transaction ${tx.status}`);
 
-  const account = await DaimoOpSender.initFromEnv(address, signer, sender);
+  const account = await DaimoOpSender.init({
+    chainId: chainConfig.chainL2.id,
+    tokenAddress: chainConfig.tokenAddress,
+    tokenDecimals: chainConfig.tokenDecimals,
+    notesAddress: daimoEphemeralNotesAddress,
+    accountAddress: address,
+    accountSigner: signer,
+    opSender: sender,
+  });
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);
 

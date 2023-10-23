@@ -7,7 +7,6 @@ import {
   ChainGasConstants,
   DaimoLinkNote,
 } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, getAddress, Hex } from "viem";
@@ -194,9 +193,6 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     pushToken: a.pushToken,
   };
-
-  assert(a.homeChainId === chainConfig.chainL2.id, "account: wrong home chain");
-  assert(a.homeCoinAddress === chainConfig.tokenAddress, "account: wrong coin");
 
   return ret;
 }

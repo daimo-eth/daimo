@@ -1,5 +1,5 @@
 import { assertNotNull, validateName } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
@@ -9,6 +9,7 @@ import {
   BackHandler,
   Dimensions,
   Keyboard,
+  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -23,14 +24,14 @@ import { QRCodeBox } from "./QRScreen";
 import { ActStatus } from "../../action/actStatus";
 import { useCreateAccount } from "../../action/useCreateAccount";
 import { useExistingAccount } from "../../action/useExistingAccount";
+import { env } from "../../logic/env";
 import {
   createAddDeviceString,
   requestEnclaveSignature,
 } from "../../logic/key";
 import { NamedError } from "../../logic/log";
-import { rpcHook } from "../../logic/trpc";
 import { defaultEnclaveKeyName } from "../../model/account";
-import { ButtonBig } from "../shared/Button";
+import { ButtonBig, TextButton } from "../shared/Button";
 import { InfoBubble } from "../shared/InfoBubble";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
@@ -48,6 +49,8 @@ import {
 
 type OnboardPage =
   | "intro"
+  | "invite"
+  | "flow-selection"
   | "create-try-enclave"
   | "existing-try-enclave"
   | "create"
@@ -70,22 +73,28 @@ export default function OnboardingScreen({
     setPage(newPage);
   };
   const goToPrev = () => pageStack.length > 0 && setPage(pageStack.pop()!);
-  const next = getNext(page, goTo, onOnboardingComplete);
+  const [daimoChain, setDaimoChain] = useState<DaimoChain>("base");
+
+  const next = getNext(page, goTo, setDaimoChain, onOnboardingComplete);
   const prev = pageStack.length === 0 ? undefined : goToPrev;
 
   // User enters their name
   const [name, setName] = useState("");
+
+  console.log(`[ONBOARDING] chainId ${daimoChain}`);
 
   // Create an account as soon as possible, hiding latency
   const {
     exec: createExec,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name);
+  } = useCreateAccount(name, daimoChain);
 
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
+      {page === "invite" && <InvitePage onNext={next} />}
+      {page === "flow-selection" && <FlowSelectionPage onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
         <SetupKey onNext={next} onPrev={prev} createStatus={createStatus} />
       )}
@@ -95,12 +104,15 @@ export default function OnboardingScreen({
           onPrev={prev}
           name={name}
           setName={setName}
+          daimoChain={daimoChain}
           exec={createExec}
           status={createStatus}
           message={createMessage}
         />
       )}
-      {page === "existing" && <UseExistingPage onNext={next} onPrev={prev} />}
+      {page === "existing" && (
+        <UseExistingPage onNext={next} onPrev={prev} daimoChain={daimoChain} />
+      )}
       {page === "new-allow-notifications" && (
         <AllowNotifications onNext={next} />
       )}
@@ -121,13 +133,28 @@ export default function OnboardingScreen({
 function getNext(
   page: OnboardPage,
   goToPage: (p: OnboardPage) => void,
+  setDaimoChain: (daimoChain: DaimoChain) => void,
   onOnboardingComplete: () => void
-): (choice?: "create" | "existing") => void {
+): ({
+  choice,
+  isTestnet,
+}?: {
+  choice?: "create" | "existing";
+  isTestnet?: boolean;
+}) => void {
   const fnGoTo = (p: OnboardPage) => () => goToPage(p);
-
   switch (page) {
     case "intro":
-      return (choice?: "create" | "existing") => {
+      return fnGoTo("invite");
+    case "invite":
+      return (input) => {
+        const { isTestnet } = assertNotNull(input);
+        setDaimoChain(assertNotNull(isTestnet) ? "baseGoerli" : "base");
+        goToPage("flow-selection");
+      };
+    case "flow-selection":
+      return (input) => {
+        const { choice } = assertNotNull(input);
         // Android goes through an extra onboarding step
         if (Platform.OS !== "android") goToPage(assertNotNull(choice));
         else if (choice === "create") goToPage("create-try-enclave");
@@ -151,11 +178,7 @@ function getNext(
   }
 }
 
-function IntroPages({
-  onNext,
-}: {
-  onNext: (choice: "create" | "existing") => void;
-}) {
+function IntroPages({ onNext }: { onNext: () => void }) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
@@ -163,7 +186,7 @@ function IntroPages({
     setPageIndex(page);
   };
 
-  const { tokenSymbol } = chainConfig;
+  const tokenSymbol = "USDC";
 
   return (
     <View style={styles.introPages}>
@@ -205,19 +228,8 @@ function IntroPages({
           </TextParagraph>
         </IntroPage>
       </ScrollView>
-      <View style={styles.introButtonsWrap}>
-        <ButtonBig
-          type="primary"
-          title="Create Account"
-          onPress={() => onNext("create")}
-        />
-        <Spacer h={8} />
-        <ButtonBig
-          type="subtle"
-          title="Use existing"
-          onPress={() => onNext("existing")}
-        />
-      </View>
+      <Spacer h={64} />
+      <ButtonBig type="primary" title="Continue" onPress={onNext} />
     </View>
   );
 }
@@ -263,6 +275,105 @@ function PageBubble({ count, index }: { count: number; index: number }) {
   return (
     <View style={{ flexDirection: "row", justifyContent: "center" }}>
       {bubbles}
+    </View>
+  );
+}
+
+function InvitePage({
+  onNext,
+}: {
+  onNext: ({ isTestnet }: { isTestnet: boolean }) => void;
+}) {
+  const [inviteCode, setInviteCode] = useState("");
+  const onChange = (text: string) => setInviteCode(text);
+
+  const isValid = ["zuconnect", "devconnect", "testnet"].includes(inviteCode);
+  const isTestnet = inviteCode === "testnet";
+
+  const oct = (name: OctName, color?: string) => (
+    <Octicons {...{ name, color }} size={14} />
+  );
+  const status = (function () {
+    if (!inviteCode) return <></>;
+    if (isValid)
+      return <>{oct("check-circle", color.successDark)} valid invite</>;
+    else return <>{oct("alert")} invalid invite</>;
+  })();
+
+  const linkToWaitlist = () => {
+    const url = `https://noteforms.com/forms/daimo-uk2fe4`;
+    Linking.openURL(url);
+  };
+
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.createAccountPage}>
+        <TextH1>Invite Code</TextH1>
+        <Spacer h={32} />
+        <TextCenter>
+          <TextBody>
+            Daimo is currently invite-only. If you have an invite code, please
+            enter it below. Otherwise, you can join the waitlist.
+          </TextBody>
+        </TextCenter>
+        <Spacer h={32} />
+        <InputBig
+          placeholder="enter invite code"
+          value={inviteCode}
+          onChange={onChange}
+          center
+        />
+        <Spacer h={8} />
+        <TextCenter>
+          <TextLight>{status}</TextLight>
+        </TextCenter>
+        <Spacer h={32} />
+        <ButtonBig
+          type="primary"
+          title="Submit"
+          onPress={() => onNext({ isTestnet })}
+          disabled={!isValid}
+        />
+        <Spacer h={16} />
+        <TextButton title="Join waitlist" onPress={linkToWaitlist} />
+      </View>
+    </View>
+  );
+}
+
+function FlowSelectionPage({
+  onNext,
+}: {
+  onNext: ({ choice }: { choice: "create" | "existing" }) => void;
+}) {
+  return (
+    <View style={styles.onboardingScreen}>
+      <View style={styles.createAccountPage}>
+        <TextH1>Welcome</TextH1>
+        <Spacer h={32} />
+        <TextCenter>
+          <TextBody>
+            Daimo is a payments app on Ethereum. Thanks for testing our early
+            release!
+          </TextBody>
+        </TextCenter>
+        <Spacer h={32} />
+        <ButtonBig
+          type="primary"
+          title="Create Account"
+          onPress={() => {
+            onNext({ choice: "create" });
+          }}
+        />
+        <Spacer h={8} />
+        <ButtonBig
+          type="subtle"
+          title="Use existing"
+          onPress={() => {
+            onNext({ choice: "existing" });
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -397,6 +508,7 @@ function CreateAccountPage({
   onPrev,
   name,
   setName,
+  daimoChain,
   exec,
   status,
   message,
@@ -405,6 +517,7 @@ function CreateAccountPage({
   onPrev?: () => void;
   name: string;
   setName: (name: string) => void;
+  daimoChain: DaimoChain;
   exec: () => void;
   status: ActStatus;
   message: string;
@@ -426,6 +539,7 @@ function CreateAccountPage({
             {status === "idle" && (
               <NamePicker
                 name={name}
+                daimoChain={daimoChain}
                 onChange={setName}
                 onChoose={createAccount}
               />
@@ -448,11 +562,13 @@ function CreateAccountPage({
 function UseExistingPage({
   onNext,
   onPrev,
+  daimoChain,
 }: {
   onNext: () => void;
   onPrev?: () => void;
+  daimoChain: DaimoChain;
 }) {
-  const { status, message, pubKeyHex } = useExistingAccount();
+  const { status, message, pubKeyHex } = useExistingAccount(daimoChain);
 
   useEffect(() => {
     if (status === "success") onNext();
@@ -504,10 +620,12 @@ function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
 
 function NamePicker({
   name,
+  daimoChain,
   onChange,
   onChoose,
 }: {
   name: string;
+  daimoChain: DaimoChain;
   onChange: (name: string) => void;
   onChoose: () => void;
 }) {
@@ -517,6 +635,7 @@ function NamePicker({
   } catch (e: any) {
     error = e.message;
   }
+  const rpcHook = env(daimoChain).rpcHook;
   const result = rpcHook.resolveName.useQuery({ name }, { enabled: !error });
 
   const [debounce, setDebounce] = useState(false);

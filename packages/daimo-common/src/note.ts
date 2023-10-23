@@ -1,5 +1,4 @@
-import { chainConfig } from "@daimo/contract";
-import { Address, Hex, createWalletClient, http, keccak256 } from "viem";
+import { Address, Hex, keccak256 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 export async function getNoteClaimSignature(
@@ -11,13 +10,8 @@ export async function getNoteClaimSignature(
   if (!notePrivateKey) throw new Error("Cannot claim without secret");
 
   const ephemeralAccount = privateKeyToAccount(notePrivateKey);
-  const ephemeralClient = createWalletClient({
-    account: ephemeralAccount,
-    chain: chainConfig.chainL2,
-    transport: http(), // unused
-  });
   const message = keccak256(recipient);
-  const signature = await ephemeralClient.signMessage({
+  const signature = await ephemeralAccount.signMessage({
     message: { raw: message },
   });
   return signature;

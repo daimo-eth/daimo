@@ -1,12 +1,13 @@
 import { EAccount, OpEvent, UserOpHex, dollarsToAmount } from "@daimo/common";
+import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { env } from "../logic/env";
 import { getWrappedRawSigner } from "../logic/key";
 import { NamedError } from "../logic/log";
-import { rpcFunc } from "../logic/trpc";
 import { Account, useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
@@ -46,6 +47,7 @@ export function useSendAsync({
       account.enclaveKeyName,
       account.address,
       keySlot,
+      account.homeChainId,
       sendFn
     );
 
@@ -79,12 +81,13 @@ export function useSendAsync({
 export function useWarmCache(
   enclaveKeyName?: string,
   address?: Address,
-  keySlot?: number
+  keySlot?: number,
+  chainId?: number
 ) {
   useEffect(() => {
-    if (!enclaveKeyName || !address || !keySlot) return;
-    loadOpSender(enclaveKeyName, address, keySlot);
-  }, [enclaveKeyName, address, keySlot]);
+    if (!enclaveKeyName || !address || !keySlot || !chainId) return;
+    loadOpSender(enclaveKeyName, address, keySlot, chainId);
+  }, [enclaveKeyName, address, keySlot, chainId]);
 }
 
 const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
@@ -92,12 +95,16 @@ const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 function loadOpSender(
   enclaveKeyName: string,
   address: Address,
-  keySlot: number
+  keySlot: number,
+  chainId: number
 ) {
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
-  const signer = getWrappedRawSigner(enclaveKeyName, keySlot);
+  const daimoChain = daimoChainFromId(chainId);
+  const rpcFunc = env(daimoChain).rpcFunc;
+
+  const signer = getWrappedRawSigner(enclaveKeyName, keySlot, daimoChain);
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     return rpcFunc.sendUserOp.mutate({ op });
@@ -108,7 +115,15 @@ function loadOpSender(
       `[SEND] loading DaimoOpSender ${address} ${enclaveKeyName} ${keySlot}`
     );
 
-    return await DaimoOpSender.initFromEnv(address, signer, sender);
+    return await DaimoOpSender.init({
+      chainId,
+      tokenAddress: env(daimoChain).chainConfig.tokenAddress,
+      tokenDecimals: env(daimoChain).chainConfig.tokenDecimals,
+      notesAddress: daimoEphemeralNotesAddress,
+      accountAddress: address,
+      accountSigner: signer,
+      opSender: sender,
+    });
   })();
   accountCache.set([address, keySlot], promise);
 
@@ -120,12 +135,18 @@ async function sendAsync(
   enclaveKeyName: string,
   address: Address,
   keySlot: number | undefined,
+  chainId: number,
   sendFn: SendOpFn
 ) {
   try {
     if (keySlot === undefined) throw new Error("No key slot");
     setAS("loading", "Loading account...");
-    const opSender = await loadOpSender(enclaveKeyName, address, keySlot);
+    const opSender = await loadOpSender(
+      enclaveKeyName,
+      address,
+      keySlot,
+      chainId
+    );
 
     setAS("loading", "Signing...");
     const handle = await sendFn(opSender);

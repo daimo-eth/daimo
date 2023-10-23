@@ -1,18 +1,22 @@
 import { assert } from "@daimo/common";
-import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
+import { DaimoChain, daimoPaymasterAddress } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
-import { rpcHook } from "../logic/trpc";
+import { env } from "../logic/env";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
 /** Deploys a new contract wallet and registers it under a given username. */
-export function useCreateAccount(name: string): ActHandle {
+export function useCreateAccount(
+  name: string,
+  daimoChain: DaimoChain
+): ActHandle {
   const [as, setAS] = useActStatus();
 
   const enclaveKeyName = defaultEnclaveKeyName;
   const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
+  const rpcHook = env(daimoChain).rpcHook;
 
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
@@ -55,8 +59,8 @@ export function useCreateAccount(name: string): ActHandle {
       name,
       address,
 
-      homeChainId: chainConfig.chainL2.id,
-      homeCoinAddress: chainConfig.tokenAddress,
+      homeChainId: env(daimoChain).chainConfig.chainL2.id,
+      homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
 
       lastBalance: BigInt(0),
       lastBlockTimestamp: 0,

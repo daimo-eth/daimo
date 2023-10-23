@@ -3,12 +3,12 @@ import {
   TransferOpEvent,
   guessTimestampFromNum,
 } from "@daimo/common";
-import { erc20ABI, chainConfig } from "@daimo/contract";
+import { daimoChainFromId, erc20ABI } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Address, Hex, Log, getAbiItem, numberToHex } from "viem";
 
 import { OpIndexer } from "./opIndexer";
-import { ViemClient } from "../viemClient";
+import { ViemClient, chainConfig } from "../env";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
 export type TransferLog = Log<
@@ -127,7 +127,7 @@ export class CoinIndexer {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
-        chainConfig.chainL2.network
+        daimoChainFromId(chainConfig.chainL2.id)
       ),
       from,
       to,

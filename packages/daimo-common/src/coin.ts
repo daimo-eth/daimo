@@ -1,10 +1,10 @@
-import { chainConfig } from "@daimo/contract";
 import { parseUnits } from "viem";
 
-const { tokenDecimals } = chainConfig;
-
 /** Returns token units, 6000000 for $6 USDC */
-export function dollarsToAmount(dollars: number | string) {
+export function dollarsToAmount(
+  dollars: number | string,
+  tokenDecimals: number = 6
+) {
   if (typeof dollars === "number") {
     dollars = `${dollars}`;
   }
@@ -12,7 +12,10 @@ export function dollarsToAmount(dollars: number | string) {
 }
 
 /** Returns eg "6.00" for 6000000 USDC units. */
-export function amountToDollars(amount: bigint | number): `${number}` {
+export function amountToDollars(
+  amount: bigint | number,
+  tokenDecimals: number = 6
+): `${number}` {
   const dispDecimals = 2;
 
   const totalCents =

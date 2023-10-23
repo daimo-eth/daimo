@@ -4,12 +4,13 @@ import {
   timeString,
   TransferOpEvent,
 } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
+import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
@@ -27,8 +28,10 @@ export function HistoryOpScreen({ route, navigation }: Props) {
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
   const [account] = useAccount();
+  assert(account != null);
+
   let { op } = route.params;
-  op = syncFindSameOp(op, account?.recentTransfers || []) || op;
+  op = syncFindSameOp(op, account.recentTransfers) || op;
 
   const [title, body] = (() => {
     switch (op.type) {
@@ -56,7 +59,11 @@ export function HistoryOpScreen({ route, navigation }: Props) {
 }
 
 function LinkToExplorer({ txHash }: { txHash: string }) {
-  const explorer = chainConfig.chainL2.blockExplorers!.default;
+  const [account] = useAccount();
+  assert(account != null);
+
+  const explorer = env(daimoChainFromId(account.homeChainId)).chainConfig
+    .chainL2.blockExplorers!.default;
   const url = `${explorer.url}/tx/${txHash}`;
 
   const openURL = useCallback(() => Linking.openURL(url), []);
@@ -104,6 +111,7 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
     kv.push(["Fee", `$${amountToDollars(op.feeAmount)}`]);
   }
 
+  const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol;
   const chainName = chainConfig.chainL2.name;
   kv.push(["Currency", coinName]);

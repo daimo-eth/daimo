@@ -1,6 +1,6 @@
-import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
+import { daimoPaymasterAddress } from "@daimo/contract";
 
-import { ViemClient } from "../viemClient";
+import { ViemClient, chainConfig } from "../env";
 
 /* Interface to on-chain paymaster and gas related data. */
 export class Paymaster {

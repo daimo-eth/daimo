@@ -1,4 +1,4 @@
-import { chainConfig } from "@daimo/contract";
+import { DaimoChain, getChainConfig } from "@daimo/contract";
 import type { AbiEvent } from "abitype";
 import fs from "node:fs/promises";
 import os from "os";
@@ -20,6 +20,10 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 
 import { jsonBigParse, jsonBigStringify } from "./jsonBig";
+
+export const chainConfig = getChainConfig(
+  (process.env.DAIMO_CHAIN || "baseGoerli") as DaimoChain
+);
 
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.

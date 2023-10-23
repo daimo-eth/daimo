@@ -5,7 +5,7 @@ import {
   DaimoRequestStatus,
   getNoteClaimSignature,
 } from "@daimo/common";
-import { daimoEphemeralNotesConfig, chainConfig } from "@daimo/contract";
+import { daimoEphemeralNotesConfig } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useMemo, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
@@ -18,6 +18,7 @@ import {
 } from "wagmi";
 
 import { H2 } from "./typography";
+import { chainConfig } from "../env";
 
 type Action = {
   wagmiPrep: {

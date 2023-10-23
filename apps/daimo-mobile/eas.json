@@ -11,8 +11,8 @@
         "simulator": true
       },
       "env": {
-        "DAIMO_CHAIN": "baseGoerli",
-        "DAIMO_DOMAIN": "daimo.xyz"
+        "DAIMO_DOMAIN": "daimo.xyz",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz"
       }
     },
     "dev": {
@@ -26,8 +26,8 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "DAIMO_CHAIN": "baseGoerli",
-        "DAIMO_DOMAIN": "daimo.xyz"
+        "DAIMO_DOMAIN": "daimo.xyz",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz"
       }
     },
     "prod": {
@@ -35,9 +35,10 @@
       "autoIncrement": true,
       "node": "20.3.0",
       "env": {
-        "DAIMO_APP_API_URL": "https://daimo-api-prod.onrender.com",
-        "DAIMO_CHAIN": "base",
-        "DAIMO_DOMAIN": "daimo.xyz"
+        "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
+        "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
+        "DAIMO_DOMAIN": "daimo.xyz",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz"
       }
     }
   },

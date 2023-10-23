@@ -1,9 +1,9 @@
 import { OpStatus, TransferOpEvent } from "@daimo/common";
-import { erc20ABI, chainConfig } from "@daimo/contract";
+import { erc20ABI } from "@daimo/contract";
 import { Address } from "viem";
 
 import { CoinIndexer, TransferLog } from "./coinIndexer";
-import { ViemClient } from "../viemClient";
+import { ViemClient, chainConfig } from "../env";
 
 export type FaucetStatus =
   | "unavailable"

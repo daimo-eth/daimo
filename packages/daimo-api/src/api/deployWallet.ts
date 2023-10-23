@@ -1,13 +1,10 @@
 import { DaimoAccountCall } from "@daimo/common";
-import {
-  chainConfig,
-  daimoEphemeralNotesAddress,
-  erc20ABI,
-} from "@daimo/contract";
+import { daimoEphemeralNotesAddress, erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
+import { chainConfig } from "../env";
 
 export async function deployWallet(
   name: string,

@@ -1,6 +1,5 @@
 "use client";
 
-import { chainConfig } from "@daimo/contract";
 import {
   RainbowKitProvider,
   connectorsForWallets,
@@ -9,6 +8,8 @@ import {
 import * as React from "react";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
+
+import { chainConfig } from "../env";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [chainConfig.chainL2],

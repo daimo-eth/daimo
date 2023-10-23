@@ -2,7 +2,7 @@ import { derKeytoContractFriendlyKey, DaimoAccountCall } from "@daimo/common";
 import { daimoAccountFactoryConfig } from "@daimo/contract";
 import { Hex, TransactionReceipt } from "viem";
 
-import { ViemClient } from "../viemClient";
+import { ViemClient } from "../env";
 
 const SALT = 0n; // Daimo Account Factory salt, always 0.
 

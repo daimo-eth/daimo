@@ -6,7 +6,7 @@ import {
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import { daimoEphemeralNotesAddress } from "@daimo/contract";
+import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -37,7 +37,10 @@ export default function NoteScreen({ route }: Props) {
   const { ephemeralPrivateKey, ephemeralOwner } = link as DaimoLinkNote;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const noteStatus = useFetchLinkStatus(link)!;
+  const noteStatus = useFetchLinkStatus(
+    link,
+    daimoChainFromId(account.homeChainId)
+  )!;
 
   return (
     <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>

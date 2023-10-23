@@ -4,12 +4,7 @@ const correctSerV7 = `{"storageVersion":7,"enclaveKeyName":"test","enclavePubKey
 
 const correctSerV8 = `{"storageVersion":8,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"pendingNotes":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456"},"pushToken":null}`;
 
-const wrongChainV8 = correctSerV8.replace(
-  `"homeChainId":84531`,
-  `"homeChainId":8453`
-);
-
-const lowercaseAddrV8 = `{"storageVersion":8,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0xef4396d9ff8107086d215a1c9f8866c54795d7c7","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"pendingNotes":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456"},"pushToken":null}`;
+const lowercaseAddrV8 = `{"storageVersion":8,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0xef4396d9ff8107086d215a1c9f8866c54795d7c7","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"trackedRequests":[],"pendingNotes":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0},"pushToken":null}`;
 
 const account: Account = {
   enclaveKeyName: "test",
@@ -62,9 +57,5 @@ describe("Account", () => {
     // Drop V7 accounts, testnet users re-onboard.
     const a = parseAccount(correctSerV7);
     expect(a).toBeNull();
-  });
-
-  it("ensures correct home chain and coin", () => {
-    expect(() => parseAccount(wrongChainV8)).toThrow();
   });
 });

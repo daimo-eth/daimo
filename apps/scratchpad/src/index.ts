@@ -1,13 +1,14 @@
 import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
-import { getViemClientFromEnv } from "@daimo/api/src/viemClient";
+import { getViemClientFromEnv } from "@daimo/api/src/env";
 import { guessTimestampFromNum } from "@daimo/common";
-import { nameRegistryProxyConfig, chainConfig } from "@daimo/contract";
+import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
 import csv from "csvtojson";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
+import { chainConfig } from "./env";
 import { pushNotify, pushNotifyDesc } from "./pushNotify";
 
 main()
@@ -65,11 +66,11 @@ async function metrics() {
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);
   const signups = new Map<string, number>();
-  const { network } = vc.publicClient.chain;
+  const daimoChain = daimoChainFromId(vc.publicClient.chain.id);
   for (const log of nameReg.logs.sort(
     (a, b) => Number(a.blockNumber) - Number(b.blockNumber)
   )) {
-    const ts = guessTimestampFromNum(log.blockNumber, network);
+    const ts = guessTimestampFromNum(log.blockNumber, daimoChain);
     addMetric(signups, ts, 1);
   }
 
@@ -81,7 +82,7 @@ async function metrics() {
       const from = nameReg.resolveDaimoNameForAddr(log.args.from);
       const to = nameReg.resolveDaimoNameForAddr(log.args.to);
       if (from == null && to == null) continue;
-      const ts = guessTimestampFromNum(log.blockNumber!, network);
+      const ts = guessTimestampFromNum(log.blockNumber!, daimoChain);
       addMetric(transfers, ts, 1);
     }
   });

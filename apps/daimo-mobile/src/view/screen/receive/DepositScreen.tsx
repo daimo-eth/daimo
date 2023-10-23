@@ -1,5 +1,5 @@
 import { AddrLabel, assert } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Address, getAddress } from "viem";
 
 import { CBPayWebView } from "./OnrampCBPay";
-import { rpcHook } from "../../../logic/trpc";
+import { env } from "../../../logic/env";
 import { useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
@@ -27,7 +27,9 @@ export default function DepositScreen() {
   const [account] = useAccount();
   if (account == null) return null;
 
-  const { chainL2, tokenSymbol } = chainConfig;
+  const { chainL2, tokenSymbol } = env(
+    daimoChainFromId(account.homeChainId)
+  ).chainConfig;
   // Overwrite to test CBPay
   const testnet = chainL2.testnet;
 
@@ -67,6 +69,8 @@ export default function DepositScreen() {
 function TestnetFaucet({ recipient }: { recipient: Address }) {
   const [account, setAccount] = useAccount();
   assert(account != null);
+
+  const rpcHook = env(daimoChainFromId(account.homeChainId)).rpcHook;
 
   const faucetStatus = rpcHook.testnetFaucetStatus.useQuery({ recipient });
 
@@ -126,7 +130,8 @@ function TestnetFaucet({ recipient }: { recipient: Address }) {
       <TextBody>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet account.</TextBold> Your account is on the{" "}
-        {chainConfig.chainL2.name} testnet.
+        {env(daimoChainFromId(account.homeChainId)).chainConfig.chainL2.name}{" "}
+        testnet.
       </TextBody>
       <Spacer h={16} />
       <ButtonMed

@@ -5,7 +5,7 @@ import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
-import { ViemClient } from "../viemClient";
+import { ViemClient } from "../env";
 
 /**
  * Serves everything new that happened to an account since block n.

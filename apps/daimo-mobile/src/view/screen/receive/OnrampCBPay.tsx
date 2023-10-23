@@ -1,9 +1,10 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
+import { daimoChainFromId } from "@daimo/contract";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import "react-native-url-polyfill/auto";
-import { rpcFunc } from "../../../logic/trpc";
+import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 
 export function CBPayWebView({
@@ -91,6 +92,7 @@ function logOnramp(
   error?: string
 ) {
   // Fire and forget
+  const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
   rpcFunc.logAction.mutate({
     action: {
       name: actionName,

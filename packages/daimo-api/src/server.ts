@@ -1,4 +1,3 @@
-import { chainConfig } from "@daimo/contract";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import http from "http";
 
@@ -12,11 +11,11 @@ import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
 import { DB } from "./db/db";
+import { getViemClientFromEnv, chainConfig } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
 import { createContext } from "./trpc";
-import { getViemClientFromEnv } from "./viemClient";
 
 async function main() {
   console.log(`[API] starting...`);

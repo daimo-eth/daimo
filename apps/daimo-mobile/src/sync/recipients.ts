@@ -1,7 +1,8 @@
-import { EAccount } from "@daimo/common";
+import { EAccount, assert } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
-import { rpcHook } from "../logic/trpc";
+import { env } from "../logic/env";
 import { useAccount } from "../model/account";
 import { getCachedEAccount } from "../view/shared/addr";
 
@@ -14,11 +15,13 @@ export function useRecipientSearch(prefix: string) {
 
   // Load recent recipients
   const [account] = useAccount();
+  assert(account != null);
+
   const recents = [] as Recipient[];
   const recentsByAddr = new Map<Address, Recipient>();
-  const transfersNewToOld = (account?.recentTransfers || []).slice().reverse();
+  const transfersNewToOld = account.recentTransfers.slice().reverse();
   for (const t of transfersNewToOld) {
-    if (t.from !== account?.address) continue;
+    if (t.from !== account.address) continue;
     const other = t.to;
     if (recentsByAddr.has(other)) continue;
 
@@ -52,6 +55,7 @@ export function useRecipientSearch(prefix: string) {
   // Search if we have a prefix. Anyone we've already sent to appears first.
   // Otherwise, just show recent recipients.
   const enabled = prefix.length >= 1;
+  const rpcHook = env(daimoChainFromId(account.homeChainId)).rpcHook;
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     for (const account of res.data) {

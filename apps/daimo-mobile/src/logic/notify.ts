@@ -1,9 +1,10 @@
+import { daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 
+import { env } from "./env";
 import { Log } from "./log";
-import { rpcFunc } from "./trpc";
 import { getAccountManager, useAccount } from "../model/account";
 import { syncAfterPushNotification } from "../sync/sync";
 
@@ -97,7 +98,8 @@ class PushNotificationManager {
       return;
     }
 
-    const { address, name } = this.accountManager.currentAccount;
+    const { address, name, homeChainId } = this.accountManager.currentAccount;
+    const rpcFunc = env(daimoChainFromId(homeChainId)).rpcFunc;
     console.log(`[NOTIFY] saving push token ${token.data} for account ${name}`);
     await Log.promise(
       "registerPushToken",

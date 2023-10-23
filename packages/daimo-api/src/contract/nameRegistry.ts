@@ -9,7 +9,6 @@ import {
 import {
   daimoEphemeralNotesAddress,
   nameRegistryProxyConfig,
-  chainConfig,
 } from "@daimo/contract";
 import {
   Address,
@@ -22,7 +21,7 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
-import { ViemClient } from "../viemClient";
+import { ViemClient, chainConfig } from "../env";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({

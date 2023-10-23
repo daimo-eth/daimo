@@ -16,10 +16,10 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
+import { ViemClient } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
-import { ViemClient } from "./viemClient";
 
 export function createRouter(
   vc: ViemClient,

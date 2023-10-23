@@ -1,4 +1,10 @@
-import { assert, dollarsToAmount, timeString } from "@daimo/common";
+import {
+  assert,
+  dollarsToAmount,
+  guessTimestampFromNum,
+  timeString,
+} from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -12,7 +18,6 @@ import { ActivityIndicator, Alert, View } from "react-native";
 import { useSendAsync } from "../../action/useSendAsync";
 import { deleteEnclaveKey } from "../../logic/enclave";
 import { keySlotToLabel } from "../../logic/keySlot";
-import { timestampForBlock } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -141,7 +146,10 @@ export function DeviceScreen({ route, navigation }: Props) {
     }
   })();
 
-  const addedAtS = timestampForBlock(device.addedAt);
+  const addedAtS = guessTimestampFromNum(
+    device.addedAt,
+    daimoChainFromId(account.homeChainId)
+  );
 
   const goBack = () => nav.goBack();
   return (

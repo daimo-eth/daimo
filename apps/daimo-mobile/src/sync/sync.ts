@@ -4,11 +4,12 @@ import {
   TransferOpEvent,
   amountToDollars,
   assert,
+  guessTimestampFromNum,
 } from "@daimo/common";
+import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { useEffect } from "react";
 
-import { timestampForBlock } from "../logic/time";
-import { rpcFunc } from "../logic/trpc";
+import { env } from "../logic/env";
 import { Account, getAccountManager } from "../model/account";
 
 // Sync strategy:
@@ -89,6 +90,8 @@ async function syncAccount(
 ): Promise<Account> {
   const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
 
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const rpcFunc = env(daimoChain).rpcFunc;
   const result = await rpcFunc.getAccountHistory.query({
     address: account.address,
     sinceBlockNum,
@@ -126,7 +129,8 @@ async function syncAccount(
   // Add newly onchain transfers
   const recentTransfers = addTransfers(
     oldFinalizedTransfers,
-    result.transferLogs
+    result.transferLogs,
+    daimoChain
   );
 
   // Mark finalized
@@ -216,7 +220,8 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
   old: TransferOpEvent[],
-  logs: TransferOpEvent[]
+  logs: TransferOpEvent[],
+  daimoChain: DaimoChain
 ): TransferOpEvent[] {
   // Start with old, finalized transfers
   const ret = [...old];
@@ -238,7 +243,7 @@ function addTransfers(
       amount: Number(transfer.amount),
       nonceMetadata: transfer.nonceMetadata,
 
-      timestamp: timestampForBlock(transfer.blockNumber!),
+      timestamp: guessTimestampFromNum(transfer.blockNumber!, daimoChain),
       txHash: transfer.txHash,
       blockNumber: transfer.blockNumber,
       blockHash: transfer.blockHash,

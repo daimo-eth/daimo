@@ -2,9 +2,10 @@ import {
   DaimoAccountStatus,
   DaimoLink,
   DaimoRequestStatus,
+  assert,
   getAccountName,
 } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { daimoChainFromId } from "@daimo/contract";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,6 +20,7 @@ import { SearchTab } from "./SearchTab";
 import { SendNoteTab } from "./SendNoteTab";
 import { SendTransferButton } from "./SendTransferButton";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { useAccount } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -55,7 +57,7 @@ export default function SendScreen({ route }: Props) {
   return (
     <View style={ss.container.screen}>
       <ScreenHeader
-        title={`Send ${chainConfig.tokenSymbol} to`}
+        title="Send funds to"
         onBack={goBack}
         onExit={recipient && goHome}
       />
@@ -107,8 +109,15 @@ function SendNav({ sendNote }: { sendNote?: boolean }) {
 }
 
 function SendLoadRecipient({ link }: { link: DaimoLink }) {
+  const [account] = useAccount();
+  assert(account != null);
+
   const nav = useNav();
-  const status = useFetchLinkStatus(link)!;
+
+  const status = useFetchLinkStatus(
+    link,
+    daimoChainFromId(account.homeChainId)
+  )!;
   useEffect(() => {
     if (status.data == null) return;
     const { data } = status;

@@ -1,5 +1,5 @@
 import { isDERPubKey, assert, parseAndNormalizeSig } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
+import { DaimoChain, daimoAccountABI } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { SigningCallback } from "@daimo/userop";
 import { base64urlnopad } from "@scure/base";
@@ -36,7 +36,8 @@ export function createAddDeviceString(pubKey: Hex): string {
 // Unlike passkeys, which are backed up, enclave keys never leave the device.
 export function getWrappedRawSigner(
   enclaveKeyName: string,
-  keySlot: number
+  keySlot: number,
+  daimoChain: DaimoChain
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -45,7 +46,7 @@ export function getWrappedRawSigner(
     const clientDataJSON = JSON.stringify({
       type: "webauthn.get",
       challenge: challengeB64URL,
-      origin: env.passkeyDomain,
+      origin: env(daimoChain).passkeyDomain,
     });
 
     const clientDataHash = new Uint8Array(

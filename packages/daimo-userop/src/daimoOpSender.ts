@@ -38,27 +38,6 @@ export class DaimoOpSender {
   ) {}
 
   /**
-   * Initializes using the DAIMO_CHAIN env var. (See chainConfig)
-   */
-  public static async initFromEnv(
-    accountAddress: Address,
-    accountSigner: SigningCallback,
-    opSender: OpSenderCallback
-  ): Promise<DaimoOpSender> {
-    const { tokenAddress, tokenDecimals, chainL2 } = Contracts.chainConfig;
-
-    return DaimoOpSender.init({
-      accountAddress,
-      accountSigner,
-      opSender,
-      chainId: chainL2.id,
-      notesAddress: Contracts.daimoEphemeralNotesAddress,
-      tokenAddress,
-      tokenDecimals,
-    });
-  }
-
-  /**
    * Initializes with all configuration provided: no env vars required.
    */
   public static async init(opConfig: DaimoOpConfig): Promise<DaimoOpSender> {

@@ -1,3 +1,5 @@
+import { DaimoChain } from "@daimo/contract";
+
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */
 export function timeAgo(sinceS: number, nowS: number, long?: boolean) {
   const seconds = Math.floor(nowS - sinceS);
@@ -24,15 +26,15 @@ export function timeString(s: number) {
 
 export function guessTimestampFromNum(
   blockNum: number | bigint,
-  network: string
+  chain: DaimoChain
 ) {
   if (typeof blockNum === "bigint") blockNum = Number(blockNum);
-  switch (network) {
-    case "base-goerli":
+  switch (chain) {
+    case "baseGoerli":
       return 1675193616 + blockNum * 2;
     case "base":
       return 1686789347 + blockNum * 2;
     default:
-      throw new Error(`Unsupported network: ${network}`);
+      throw new Error(`Unsupported network: ${chain}`);
   }
 }

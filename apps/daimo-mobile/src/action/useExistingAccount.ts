@@ -1,17 +1,18 @@
-import { chainConfig, daimoPaymasterAddress } from "@daimo/contract";
+import { daimoPaymasterAddress, DaimoChain } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
+import { env } from "../logic/env";
 import { useTime } from "../logic/time";
-import { rpcFunc } from "../logic/trpc";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
-export function useExistingAccount() {
+export function useExistingAccount(daimoChain: DaimoChain) {
   const [as, setAS] = useActStatus();
 
   const enclaveKeyName = defaultEnclaveKeyName;
   const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
+  const rpcFunc = env(daimoChain).rpcFunc;
 
   const ts = useTime(2);
 
@@ -36,8 +37,8 @@ export function useExistingAccount() {
           address: result.addr,
 
           // No possibility of mismatch since API is locked to same chain
-          homeChainId: chainConfig.chainL2.id,
-          homeCoinAddress: chainConfig.tokenAddress,
+          homeChainId: env(daimoChain).chainConfig.chainL2.id,
+          homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
 
           // These populate on sync with server
           lastBalance: BigInt(0),

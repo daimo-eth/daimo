@@ -3,7 +3,7 @@ import { isAddress } from "viem";
 import { normalize } from "viem/ens";
 
 import { NameRegistry } from "../contract/nameRegistry";
-import { ViemClient } from "../viemClient";
+import { ViemClient } from "../env";
 
 // Search for "vitalik" or "vitalik.eth" matches vitalik.eth
 // Search for "jesse.cb.id" matches jesse.cb.id

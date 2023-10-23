@@ -1,5 +1,5 @@
-import { KeyData, getAccountName, timeAgo } from "@daimo/common";
-import { chainConfig } from "@daimo/contract";
+import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
+import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
@@ -18,7 +18,7 @@ import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
 import { keySlotToLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
-import { timestampForBlock, useTime } from "../../logic/time";
+import { useTime } from "../../logic/time";
 import {
   Account,
   serializeAccount,
@@ -65,9 +65,13 @@ export function SettingsScreen() {
 }
 
 function AccountSection({ account }: { account: Account }) {
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
+  const tokenSymbol = chainConfig.tokenSymbol;
+  const l2Name = chainConfig.chainL2.name;
+
   const linkToExplorer = useCallback(() => {
-    if (!account) return;
     const url = `${explorer.url}/address/${account.address}`;
     Linking.openURL(url);
   }, [account]);
@@ -79,7 +83,8 @@ function AccountSection({ account }: { account: Account }) {
         <View>
           <TextH3>{account?.name}</TextH3>
           <TextH3 color={color.gray3}>
-            {getAccountName({ addr: account.address })}
+            {tokenSymbol} · {l2Name}{" "}
+            {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
           </TextH3>
         </View>
       </View>
@@ -111,6 +116,7 @@ function DevicesSection({ account }: { account: Account }) {
               key={keyData.pubKey}
               keyData={keyData}
               isCurrentDevice={keyData.pubKey === account.enclavePubKey}
+              chain={daimoChainFromId(account.homeChainId)}
             />
           ))}
       </View>
@@ -123,9 +129,11 @@ function DevicesSection({ account }: { account: Account }) {
 function DeviceRow({
   keyData,
   isCurrentDevice,
+  chain,
 }: {
   keyData: KeyData;
   isCurrentDevice: boolean;
+  chain: DaimoChain;
 }) {
   const nowS = useTime();
   const nav = useNav();
@@ -136,7 +144,7 @@ function DeviceRow({
       params: { pubKey: keyData.pubKey },
     });
 
-  const addAtS = timestampForBlock(keyData.addedAt);
+  const addAtS = guessTimestampFromNum(keyData.addedAt, chain);
 
   const dispDevice = keySlotToLabel(keyData.slot);
   const dispTime = "Added " + timeAgo(addAtS, nowS, true);
@@ -185,10 +193,13 @@ function DetailsSection({ account }: { account: Account }) {
     }
   };
 
+  const daimoChain = daimoChainFromId(account.homeChainId);
   const envKV: Record<string, string> = {
     Platform: `${Platform.OS} ${Platform.Version}`,
-    Version: `${env.nativeApplicationVersion} #${env.nativeBuildVersion}`,
-    Commit: `${env.gitHash} ${env.buildProfile}`,
+    Version: `${env(daimoChain).nativeApplicationVersion} #${
+      env(daimoChain).nativeBuildVersion
+    }`,
+    Commit: `${env(daimoChain).gitHash} ${env(daimoChain).buildProfile}`,
     Notifications: account.pushToken ? "enabled" : "disabled",
   };
   if (sec) {

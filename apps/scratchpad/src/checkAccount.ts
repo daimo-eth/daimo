@@ -1,5 +1,4 @@
 import {
-  chainConfig,
   entryPointABI,
   erc20ABI,
   nameRegistryProxyConfig,
@@ -14,6 +13,8 @@ import {
   http,
   stringToHex,
 } from "viem";
+
+import { chainConfig } from "./env";
 
 export function checkAccountDesc() {
   return `Check the balance, nonce, etc of a Daimo account.`;

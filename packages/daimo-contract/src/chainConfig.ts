@@ -1,6 +1,19 @@
 import { Address, Chain } from "viem";
 import { base, baseGoerli, mainnet } from "viem/chains";
 
+export type DaimoChain = "base" | "baseGoerli";
+
+export function daimoChainFromId(chainId: number): DaimoChain {
+  switch (chainId) {
+    case base.id:
+      return "base";
+    case baseGoerli.id:
+      return "baseGoerli";
+    default:
+      throw new Error(`unknown chainId ${chainId}`);
+  }
+}
+
 export interface ChainConfig {
   chainL1: Chain;
   chainL2: Chain;
@@ -10,11 +23,7 @@ export interface ChainConfig {
   pimlicoPaymasterAddress: Address; // Unused, only for backup
 }
 
-export const chainConfig = getChainConfig();
-
-function getChainConfig(): ChainConfig {
-  const daimoChain =
-    process.env.DAIMO_CHAIN || process.env.NEXT_PUBLIC_DAIMO_CHAIN || "";
+export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
   switch (daimoChain) {
     case "base":
       return {
@@ -26,7 +35,6 @@ function getChainConfig(): ChainConfig {
         pimlicoPaymasterAddress: "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56",
       };
     case "baseGoerli":
-    case "": // Tests, etc default to testnet
       return {
         chainL1: mainnet, // ENS resolution = eth mainnet, read-only
         chainL2: baseGoerli,
