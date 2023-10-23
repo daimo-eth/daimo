@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source .env
+
 # Build
 forge build
 
@@ -14,15 +16,15 @@ forge script script/DeployNameRegistry.s.sol --fork-url $RPC_URL --private-key $
 forge script script/DeployEphemeralNotes.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
 
 # From DeployAccountFactory
-ADDR_ACCOUNT_FACTORY="0xED5F5066de0c177729Eb0D5FECEC4BF87CA6Bf3C"
+ADDR_ACCOUNT_FACTORY="0xd102Af345e3463DA0D0937861783fc64Dbf5c554"
 
 # Deploy test Account and verify it on Etherscan
-forge script script/DeployTestAccount.s.sol --sig "run(address)" $ADDR_ACCOUNT_FACTORY --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+# forge script script/DeployTestAccount.s.sol --sig "run(address)" $ADDR_ACCOUNT_FACTORY --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
 # Deploy paymaster and verify it on Etherscan
 forge script script/ManagePaymaster.s.sol --sig "deploy()" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
-PAYMASTER_ADDR="0x5B746BE4D3aC8702dc01fBfDFD8818fC9F8C8F79"
+PAYMASTER_ADDR="0x9634d8b747fdfe5c4320dffff391c476322553f8"
 
 # Start paymaster by depositing and whitelisting
 forge script script/ManagePaymaster.s.sol --sig "start(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY

@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-/* solhint-disable avoid-low-level-calls */
-/* solhint-disable no-inline-assembly */
-/* solhint-disable reason-string */
-
 import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -14,11 +10,8 @@ import "account-abstraction/core/Helpers.sol";
 import "account-abstraction/interfaces/IAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 
-struct Call {
-    address dest;
-    uint256 value;
-    bytes data;
-}
+import "p256-verifier/P256.sol";
+import "p256-verifier/WebAuthn.sol";
 
 /**
  * Daimo ERC-4337 contract account.
@@ -26,6 +19,21 @@ struct Call {
  * Implements a 1-of-n multisig with P256 keys. Supports key rotation.
  */
 contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
+    struct Call {
+        address dest;
+        uint256 value;
+        bytes data;
+    }
+
+    struct Signature {
+        bytes authenticatorData;
+        string clientDataJSON;
+        uint256 challengeLocation;
+        uint256 responseTypeLocation;
+        uint256 r;
+        uint256 s;
+    }
+
     /// Number of keys. 1-of-n multisig, n = numActiveKeys
     uint8 public numActiveKeys;
     /// Map of slot to key. Invariant: exactly n slots are nonzero.
@@ -33,8 +41,6 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// The ERC-4337 entry point singleton
     IEntryPoint public immutable entryPoint;
-    /// P256 (secp256r1) signature verifier matching EIP-7212 precompile spec
-    address public immutable sigVerifier;
     /// Maximum number of signing keys
     uint8 public immutable maxKeys = 20;
 
@@ -74,9 +80,8 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// Runs at deploy time. Implementation contract = no init, no state.
     /// All other methods are called via proxy = initialized once, has state.
-    constructor(IEntryPoint _entryPoint, address _sigVerifier) {
+    constructor(IEntryPoint _entryPoint) {
         entryPoint = _entryPoint;
-        sigVerifier = _sigVerifier;
         _disableInitializers();
     }
 
@@ -149,59 +154,57 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         _payPrefund(missingAccountFunds);
     }
 
-    /// P256 curve order N/2 for malleability check
-    uint256 constant _P256_N_DIV_2 =
-        57896044605178124381348723474703786764998477612067880171211129530534256022184;
+    // no-op function with structs as arguments to expose it in generated ABI
+    // for client-side usage
+    function signatureStruct(Signature memory sig) public {}
 
-    /// ERC1271: validate a user signature, verifying P256.
+    // Signature structure: [uint8 keySlot, uint8 signatureType, bytes signature]
+    // - keySlot: 0-255
+    // - signature: abi.encode form of Signature struct
+    /// Validate any Daimo account signature, whether for a userop or ERC1271 user sig.
+    function _validateSignature(
+        bytes memory message,
+        bytes calldata signature
+    ) private view returns (bool) {
+        if (signature.length < 1) return false;
+
+        // First bit identifies the keySlot
+        uint8 keySlot = uint8(signature[0]);
+
+        // If the keySlot is empty, this is an invalid key
+        uint256 x = uint256(keys[keySlot][0]);
+        uint256 y = uint256(keys[keySlot][1]);
+
+        Signature memory sig = abi.decode(signature[1:], (Signature));
+
+        return
+            WebAuthn.verifySignature({
+                challenge: message,
+                authenticatorData: sig.authenticatorData,
+                requireUserVerification: false,
+                clientDataJSON: sig.clientDataJSON,
+                challengeLocation: sig.challengeLocation,
+                responseTypeLocation: sig.responseTypeLocation,
+                r: sig.r,
+                s: sig.s,
+                x: x,
+                y: y
+            });
+    }
+
+    /// ERC1271: validate a user signature, verifying a valid Daimo account
+    /// signature.
     function isValidSignature(
-        bytes32 hash,
+        bytes32 message,
         bytes calldata signature
     ) external view override returns (bytes4 magicValue) {
-        // P256-SHA256: hash the messageHash again
-        // Necessary since many P256 libraries integrate hashing, including iOS
-        // Secure Enclave and Android Keystore.
-        bytes32 sha256Hash = sha256(abi.encodePacked(hash));
-
-        if (_validateSignature(sha256Hash, signature)) {
+        if (_validateSignature(abi.encodePacked(message), signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
         return 0xffffffff;
     }
 
-    // Signature structure: [uint8 keySlot, uint256 r, s]
-    // - keySlot identifies the signing public key to verify against
-    // - r, s are the P256 signature components
-    /// Validate any P256 signature, whether for a userop or ERC1271 user sig.
-    function _validateSignature(
-        bytes32 sha256Hash,
-        bytes calldata signature
-    ) private view returns (bool) {
-        // signature
-        uint256 r = uint256(bytes32(signature[1:33]));
-        uint256 s = uint256(bytes32(signature[33:65]));
-
-        // public key to verify against
-        // if keySlot is invalid, (x,y) will be (0,0) and verification will fail
-        uint8 keySlot = uint8(signature[0]);
-        uint256 x = uint256(keys[keySlot][0]);
-        uint256 y = uint256(keys[keySlot][1]);
-
-        // call EIP-7212 precompile or P256Verifier fallback contract
-        bytes memory args = abi.encode(sha256Hash, r, s, x, y);
-        (bool success, bytes memory ret) = sigVerifier.staticcall(args);
-        assert(success);
-
-        // check for signature malleability
-        // do this after the precompile call for more consistent gas estimates
-        if (s > _P256_N_DIV_2) {
-            return false;
-        }
-
-        return abi.decode(ret, (uint256)) == 1;
-    }
-
-    /// Validate userop by verifying a P256 signature.
+    /// Validate userop by verifying a Daimo account signature.
     function _validateUseropSignature(
         UserOperation calldata userOp,
         bytes32 userOpHash
@@ -214,10 +217,10 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         // UserOp signature structure:
         // - uint8 version
         //
-        // v1: 1+6+1+32+32 = 72 bytes
+        // v1: 1+6+1+(unknown) bytes
         // - uint48 validUntil
         // - uint8 keySlot
-        // - uint256 r, s
+        // - bytes (type Signature) signature
 
         // In all cases, we'll be checking a signature & returning a result.
         bytes memory messageToVerify;
@@ -229,18 +232,17 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
         uint8 version = uint8(userOp.signature[0]);
         if (version == 1) {
-            if (sigLength != 72) return _SIG_VALIDATION_FAILED;
+            if (sigLength < 7) return _SIG_VALIDATION_FAILED;
             uint48 validUntil = uint48(bytes6(userOp.signature[1:7]));
-            signature = userOp.signature[7:]; // keySlot, r, s
+
+            signature = userOp.signature[7:]; // keySlot, signature
             messageToVerify = abi.encodePacked(version, validUntil, userOpHash);
             returnIfValid.validUntil = validUntil;
         } else {
             return _SIG_VALIDATION_FAILED;
         }
 
-        // P256-SHA256
-        bytes32 sha256Hash = sha256(messageToVerify);
-        if (_validateSignature(sha256Hash, signature)) {
+        if (_validateSignature(messageToVerify, signature)) {
             return _packValidationData(returnIfValid);
         }
         return _SIG_VALIDATION_FAILED;

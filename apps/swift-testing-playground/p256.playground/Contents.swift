@@ -43,15 +43,39 @@ extension Data {
         }
 }
 
-let messageHex = (
+func base64ToBase64url(base64: String) -> String {
+    let base64url = base64
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
+    return base64url
+}
+
+var messageHex = (
     "01" + // version
-    // "00003B9ACA00" + // validUntil
-    "000000000000" + // validUntil
-    "dc1fb2ecab193cd09e6fbe004b2444e04cb35f20758ee4df2e06a69d02d79a20" // userOpHash
+     "00003B9ACA00" + // validUntil
+//    "000000000000" + // validUntil
+    "ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b" // userOpHash
 )
-let data = Data(fromHexEncodedString: messageHex)!
-print("data", data.hexEncodedString())
-print("hash", SHA256.hash(data: data))
+
+// isValidSignature ERC1271 test
+//messageHex = "15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5"
+
+let challengeB64 = Data(fromHexEncodedString: messageHex)!.base64EncodedString()
+let challengeB64URL = base64ToBase64url(base64: challengeB64)
+let clientDataJSON = "{\"type\":\"webauthn.get\",\"challenge\":\"\(challengeB64URL)\",\"origin\":\"https://daimo.xyz\"}";
+let clientDataHash = SHA256.hash(data: Data(clientDataJSON.utf8))
+let clientDataHashString = clientDataHash.compactMap { String(format: "%02x", $0) }.joined()
+print("clientDataHash", clientDataHashString);
+var authenticatorData = Data(repeating: UInt8(0), count: 37)
+authenticatorData[32] = 5 // flags: user present (1) + user verified (4)
+var messageData = authenticatorData
+messageData.append(Data(fromHexEncodedString: clientDataHashString)!)
+print("data", messageData.hexEncodedString())
+print("hash data", SHA256.hash(data: messageData))
+
+
+
 
 let pemKeyString = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgzgqPr1Hne1iJ0M+5\nskB1cD+mDR5kM4C/potmFVHn46ihRANCAARlovpE2q1G6rAnhwPttsTc9eMLiprs\nCf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3\n-----END PRIVATE KEY-----";
 
@@ -64,7 +88,7 @@ print("privkey raw", privKey.rawRepresentation.hexEncodedString())
 let emptiness: UInt8 = 0
 
 
-let signature = try privKey.signature(for: data)
+let signature = try privKey.signature(for: messageData)
 let hexSignature = signature.rawRepresentation.hexEncodedString()
 print("sig raw", hexSignature)
 print("sig r", signature.rawRepresentation[..<32].hexEncodedString())

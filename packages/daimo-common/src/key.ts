@@ -1,4 +1,5 @@
-import { Hex } from "viem";
+import { p256 } from "@noble/curves/p256";
+import { Hex, bytesToBigInt, hexToBytes } from "viem";
 
 import { assert } from "./assert";
 
@@ -30,4 +31,25 @@ export function contractFriendlyKeyToDER(
   return (derPrefix +
     accountPubkey[0].substring(2) +
     accountPubkey[1].substring(2)) as Hex;
+}
+
+// Parse DER signature to contractly friendly signature and normalize it so
+// the signature is not malleable.
+export function parseAndNormalizeSig(derSig: Hex): { r: bigint; s: bigint } {
+  const parsedSignature = p256.Signature.fromDER(derSig.slice(2));
+  const bSig = hexToBytes(`0x${parsedSignature.toCompactHex()}`);
+  assert(bSig.length === 64, "signature is not 64 bytes");
+  const bR = bSig.slice(0, 32);
+  const bS = bSig.slice(32);
+
+  // Avoid malleability. Ensure low S (<= N/2 where N is the curve order)
+  const r = bytesToBigInt(bR);
+  let s = bytesToBigInt(bS);
+  const n = BigInt(
+    "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
+  );
+  if (s > n / 2n) {
+    s = n - s;
+  }
+  return { r, s };
 }

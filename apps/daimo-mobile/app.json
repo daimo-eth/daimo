@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["assets/*"],
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -21,12 +23,19 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
       "buildNumber": "54",
-      "associatedDomains": ["applinks:daimo.xyz"],
+      "associatedDomains": [
+        "applinks:daimo.xyz",
+        "webcredentials:daimo.xyz"
+      ],
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
+        "LSApplicationQueriesSchemes": [
+          "whatsapp",
+          "sgnl",
+          "tg"
+        ]
       }
     },
     "android": {
@@ -42,7 +51,10 @@
               "pathPrefix": "/link"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "adaptiveIcon": {
@@ -62,10 +74,10 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 33,
-            "targetSdkVersion": 33,
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
             "minSdkVersion": 28,
-            "buildToolsVersion": "33.0.0",
+            "buildToolsVersion": "34.0.0",
             "kotlinVersion": "1.8.0"
           },
           "ios": {
@@ -79,7 +91,9 @@
           "faceIDPermission": "Protect Daimo using Face ID."
         }
       ],
-      ["expo-notifications"]
+      [
+        "expo-notifications"
+      ]
     ]
   }
 }

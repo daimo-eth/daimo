@@ -14,9 +14,9 @@ import {
 } from "react-native";
 
 import { getDebugLog } from "../../debugLog";
-import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
+import { keySlotTokeyLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
 import { timestampForBlock, useTime } from "../../logic/time";
 import {
@@ -138,7 +138,7 @@ function DeviceRow({
 
   const addAtS = timestampForBlock(keyData.addedAt);
 
-  const dispDevice = "Device " + keySlotToDeviceIdentifier(keyData.slot);
+  const dispDevice = keySlotTokeyLabel(keyData.slot);
   const dispTime = "Added " + timeAgo(addAtS, nowS, true);
 
   return (

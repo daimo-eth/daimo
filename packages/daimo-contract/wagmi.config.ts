@@ -1,10 +1,11 @@
 import { defineConfig } from "@wagmi/cli";
 import { foundry } from "@wagmi/cli/plugins";
 
-import latestAccountFactory from "../contract/broadcast/DeployAccountFactory.s.sol/8453/run-latest.json";
-import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
-import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
-import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/8453/deploy-latest.json";
+// TODO Mainnet
+import latestAccountFactory from "../contract/broadcast/DeployAccountFactory.s.sol/84531/run-latest.json";
+import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/84531/run-latest.json";
+import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/84531/run-latest.json";
+import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/84531/deploy-latest.json";
 
 /**
  * We get contract addresses from our latest Base mainnet deployments.

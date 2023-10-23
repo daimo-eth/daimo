@@ -47,7 +47,7 @@ contract DeployPaymasterScript is Script {
         address[] memory dests = new address[](3);
         dests[0] = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913; // Base USDC
         dests[1] = 0x1B85deDe8178E18CdE599B4C9d913534553C3dBf; // CREATE-2ed Base Goerli testnet USDC
-        dests[2] = 0x831967F433D9425Aa34D6A3dAC01a428d839De0f; // CREATE-2ed DaimoEphemeralNotes
+        dests[2] = 0x4AdcA7cB84497c9c4c308063D2f219C7b6041183; // CREATE-2ed DaimoEphemeralNotes
         // note that the name registry contract is not called by the account directly
 
         vm.startBroadcast();

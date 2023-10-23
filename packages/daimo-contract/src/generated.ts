@@ -12,7 +12,6 @@ export const daimoAccountABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -146,7 +145,7 @@ export const daimoAccountABI = [
     inputs: [
       {
         name: 'calls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -184,7 +183,7 @@ export const daimoAccountABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -200,7 +199,7 @@ export const daimoAccountABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [
-      { name: 'hash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'message', internalType: 'bytes32', type: 'bytes32' },
       { name: 'signature', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'isValidSignature',
@@ -245,11 +244,33 @@ export const daimoAccountABI = [
     outputs: [],
   },
   {
-    stateMutability: 'view',
+    stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [],
-    name: 'sigVerifier',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [
+      {
+        name: 'sig',
+        internalType: 'struct DaimoAccount.Signature',
+        type: 'tuple',
+        components: [
+          { name: 'authenticatorData', internalType: 'bytes', type: 'bytes' },
+          { name: 'clientDataJSON', internalType: 'string', type: 'string' },
+          {
+            name: 'challengeLocation',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          {
+            name: 'responseTypeLocation',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'r', internalType: 'uint256', type: 'uint256' },
+          { name: 's', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'signatureStruct',
+    outputs: [],
   },
   {
     stateMutability: 'nonpayable',
@@ -329,7 +350,6 @@ export const daimoAccountFactoryABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
-      { name: '_sigVerifier', internalType: 'address', type: 'address' },
     ],
   },
   {
@@ -349,7 +369,7 @@ export const daimoAccountFactoryABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -381,7 +401,7 @@ export const daimoAccountFactoryABI = [
       { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
       {
         name: 'initCalls',
-        internalType: 'struct Call[]',
+        internalType: 'struct DaimoAccount.Call[]',
         type: 'tuple[]',
         components: [
           { name: 'dest', internalType: 'address', type: 'address' },
@@ -397,7 +417,7 @@ export const daimoAccountFactoryABI = [
 ] as const
 
 export const daimoAccountFactoryAddress =
-  '0xED5F5066de0c177729Eb0D5FECEC4BF87CA6Bf3C' as const
+  '0xDBAFC2C1eE506A14966DEfFe1B9CFE15e78F59b6' as const
 
 export const daimoAccountFactoryConfig = {
   address: daimoAccountFactoryAddress,
@@ -499,7 +519,7 @@ export const daimoEphemeralNotesABI = [
 ] as const
 
 export const daimoEphemeralNotesAddress =
-  '0x831967F433D9425Aa34D6A3dAC01a428d839De0f' as const
+  '0x4AdcA7cB84497c9c4c308063D2f219C7b6041183' as const
 
 export const daimoEphemeralNotesConfig = {
   address: daimoEphemeralNotesAddress,
@@ -698,7 +718,7 @@ export const daimoNameRegistryABI = [
 ] as const
 
 export const daimoNameRegistryAddress =
-  '0x26Eb9f563e46DA4A9934348781CED0D4923D93eb' as const
+  '0x99486281FB1Fe17e7c94A6fa54cDD9DB918A9a16' as const
 
 export const daimoNameRegistryConfig = {
   address: daimoNameRegistryAddress,
@@ -768,7 +788,7 @@ export const daimoNameRegistryProxyABI = [
 ] as const
 
 export const daimoNameRegistryProxyAddress =
-  '0x3a3a46d28318E87F50f925EF1c9AfcCE8Ab1b7b0' as const
+  '0x9e3a4536E0C59B56FdBd94e12DDFF0d01c8587C1' as const
 
 export const daimoNameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
@@ -1012,7 +1032,7 @@ export const daimoPaymasterABI = [
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x5B746BE4D3aC8702dc01fBfDFD8818fC9F8C8F79' as const
+  '0x9634d8b747fdFe5c4320dFfFF391C476322553f8' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,

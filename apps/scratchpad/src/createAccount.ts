@@ -6,6 +6,7 @@ import {
   entryPointABI,
   erc20ABI,
   daimoPaymasterAddress,
+  daimoAccountABI,
 } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -15,6 +16,7 @@ import {
   SigningCallback,
   OpSenderCallback,
 } from "@daimo/userop";
+import { base64urlnopad } from "@scure/base";
 import crypto from "node:crypto";
 import { Constants } from "userop";
 import {
@@ -22,9 +24,14 @@ import {
   Hex,
   PublicClient,
   Transport,
+  bytesToHex,
+  concat,
   createPublicClient,
   createWalletClient,
+  encodeAbiParameters,
+  getAbiItem,
   getAddress,
+  hexToBytes,
   http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -47,32 +54,65 @@ export async function createAccount() {
   console.log(`Generated pubkey: ${pubKeyHex}`);
 
   // Daimo account
-  const signer: SigningCallback = async (msg: string) => {
-    console.log(`Signing message: ${msg}`);
-    const msgBuf = Buffer.from(msg, "hex");
-    const sigRaw = await crypto.subtle.sign(p256, key.privateKey, msgBuf);
+  const signer: SigningCallback = async (challenge: Hex) => {
+    console.log(`Signing message: ${challenge}`);
+    const bChallenge = hexToBytes(challenge);
+    const challengeB64URL = base64urlnopad.encode(bChallenge);
+
+    const clientDataJSON = JSON.stringify({
+      type: "webauthn.get",
+      challenge: challengeB64URL,
+      origin: "daimo.xyz",
+    });
+
+    // const clientDataHash = new Uint8Array(
+    //   await Crypto.digest(
+    //     Crypto.CryptoDigestAlgorithm.SHA256,
+    //     new TextEncoder().encode(clientDataJSON)
+    //   )
+    // );
+    const clientDataHash = await crypto.subtle.digest(
+      "SHA-256",
+      Buffer.from(clientDataJSON)
+    );
+
+    const authenticatorData = new Uint8Array(37); // rpIdHash (32) + flags (1) + counter (4)
+    authenticatorData[32] = 5; // flags: user present (1) + user verified (4)
+    const message = concat([authenticatorData, new Uint8Array(clientDataHash)]);
+
+    const sigRaw = await crypto.subtle.sign(
+      p256,
+      key.privateKey,
+      Buffer.from(message)
+    );
 
     // DER encode
-    const r = Buffer.from(sigRaw).subarray(0, 32);
-    const s = Buffer.from(sigRaw).subarray(32, 64);
+    const r = Buffer.from(sigRaw).subarray(0, 32).toString("hex");
+    const s = Buffer.from(sigRaw).subarray(32, 64).toString("hex");
 
-    function encodeInt(i: Buffer) {
-      if (i.length !== 32) throw new Error();
-      if (i[0] < 0x80) return Buffer.concat([Buffer.from([0x02, 32]), i]);
-      return Buffer.concat([Buffer.from([0x02, 33, 0x00]), i]);
-    }
-    const encR = encodeInt(r);
-    const encS = encodeInt(s);
-    const header = Buffer.from([0x30, encR.length + encS.length]);
-    const sigDer = Buffer.concat([header, encR, encS]);
+    const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":'));
+    const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
 
-    const sigHex = Buffer.from(sigDer).toString("hex");
-    console.log(`Signature: ${sigHex}`);
+    const signatureStruct = getAbiItem({
+      abi: daimoAccountABI,
+      name: "signatureStruct",
+    }).inputs;
 
-    // Valid forever
-    const validUntil = 0;
+    const encodedSig = encodeAbiParameters(signatureStruct, [
+      {
+        authenticatorData: bytesToHex(authenticatorData),
+        clientDataJSON,
+        challengeLocation,
+        responseTypeLocation,
+        r: BigInt(`0x${r}`),
+        s: BigInt(`0x${s}`),
+      },
+    ]);
 
-    return { derSig: sigHex, keySlot: 0, validUntil };
+    return {
+      keySlot: 0,
+      encodedSig,
+    };
   };
 
   const bundlerClient = getBundlerClientFromEnv();

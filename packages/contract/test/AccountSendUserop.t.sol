@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
-import "p256-verifier/P256Verifier.sol";
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccountFactory.sol";
 import "../src/DaimoAccount.sol";
+import "./Utils.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
@@ -13,15 +13,12 @@ import "account-abstraction/interfaces/IEntryPoint.sol";
 contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
 
-    address public verifier;
     EntryPoint public entryPoint;
     DaimoAccountFactory public factory;
 
     function setUp() public {
-        verifier = address(new P256Verifier());
         entryPoint = new EntryPoint();
-        factory = new DaimoAccountFactory(entryPoint, verifier);
-        console.log("verifier address:", address(verifier));
+        factory = new DaimoAccountFactory(entryPoint);
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
     }
@@ -54,22 +51,32 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
-        bytes memory ownerSig = abi.encodePacked(
-            uint8(1), // version
-            uint48(0), // validUntil forever
-            uint8(0), // keySlot, r, s; s modified to avoid malleability.
-            hex"25dc337a2fd2896f76d8f70235bb559b4efde2156b6b56e8ab040bbc9b82f3e6",
-            hex"2282b2342d544f5c871c00825e6fc9673b25fdecc3f0fd3756acc3764a5a6d31"
+        uint8 version = 1;
+        uint48 validUntil = 0;
+        bytes32 expectedUserOpHash = hex"ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b";
+        bytes memory challengeToSign = abi.encodePacked(
+            version,
+            validUntil,
+            expectedUserOpHash
         );
 
-        Call[] memory calls = new Call[](0);
+        bytes memory ownerSig = abi.encodePacked(
+            version,
+            validUntil,
+            uint8(0), // keySlot
+            abi.encode( // signature
+                Utils.rawSignatureToSignature({
+                    challenge: challengeToSign,
+                    r: 0x817d68f6485389a101ccaa28001f00f24fd9ffc82930f347a6bbd468a9668066,
+                    s: 0x36e3451c227a93263d6694331b25a50eb6c0608ff292a1027a231d8e0c9b19c7
+                })
+            )
+        );
+
+        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
         DaimoAccount acc = factory.createAccount(0, key, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
-
-        // base cost of a Daimo userop (per-op x 1 op): ~400k gas
-        // + EntryPoint handleOps overhead (per-bundle)
-        uint256 expectedOpCost = 429323;
 
         // dummy op
         UserOperation memory op = UserOperation({
@@ -95,27 +102,28 @@ contract AccountSendUseropTest is Test {
         bytes32 hash = entryPoint.getUserOpHash(op);
         console2.log("op hash: ");
         console2.logBytes32(hash);
+        assertEq(expectedUserOpHash, hash);
 
         op.signature = ownerSig;
 
         // expect a valid but reverting op
         UserOperation[] memory ops = new UserOperation[](1);
         ops[0] = op;
-        vm.expectEmit(true, true, true, true);
+        vm.expectEmit(true, true, true, false);
         emit UserOperationEvent(
             hash,
             address(acc),
             address(0),
-            0,
+            0, // These and following are not checked.
             false,
-            expectedOpCost * 1 gwei,
-            expectedOpCost
+            0 gwei,
+            0
         );
         entryPoint.handleOps(ops, payable(address(acc)));
 
         // code coverage can't handle indirect calls
         // call validateUserOp directly
-        DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.sigVerifier());
+        DaimoAccount a2 = new DaimoAccount(acc.entryPoint());
         vm.store(address(a2), 0, 0); // set _initialized = 0
         a2.initialize(0, key, calls);
         vm.prank(address(entryPoint));
@@ -131,17 +139,29 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
-        // validUntil unix timestamp 1e9
-        uint48 validUntil = 1e9;
-        bytes memory ownerSig = abi.encodePacked(
-            uint8(1), // version
+        uint8 version = 1;
+        uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
+        bytes32 expectedUserOpHash = hex"ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b";
+        bytes memory challengeToSign = abi.encodePacked(
+            version,
             validUntil,
-            uint8(0), // keySlot, r, s
-            hex"2e1b41283b8b6ff9c18bac2e3503faeb76e32fdaad9a47634fe932bb83889816"
-            hex"0f13a7789069ce31bdf48890f01c1f680a6a4bdac888cb9445a762a4ec3a2d27"
+            expectedUserOpHash
         );
 
-        Call[] memory calls = new Call[](0);
+        bytes memory ownerSig = abi.encodePacked(
+            version,
+            validUntil,
+            uint8(0), // keySlot
+            abi.encode( // signature
+                Utils.rawSignatureToSignature({
+                    challenge: challengeToSign,
+                    r: 0x64426461cb87efcb38c9d0a202012712cf50d45dd5dc2ba10d9266ce71ccfc5d,
+                    s: 0x6c8877c93fe31224ddba5a7a14579c77cb0fdb11717b21b089d3f62624c6c042
+                })
+            )
+        );
+
+        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
         DaimoAccount acc = factory.createAccount(0, key, calls, 42);
         vm.deal(address(acc), 1 ether);
 
@@ -164,6 +184,7 @@ contract AccountSendUseropTest is Test {
         bytes32 hash = entryPoint.getUserOpHash(op);
         console2.log("op hash: ");
         console2.logBytes32(hash);
+        assertEq(expectedUserOpHash, hash);
 
         // too late: can't execute after timestamp 1e9
         vm.warp(1e9 + 1);

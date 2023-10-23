@@ -10,8 +10,8 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { keySlotToDeviceIdentifier } from "../../logic/device";
 import { deleteEnclaveKey } from "../../logic/enclave";
+import { keySlotTokeyLabel } from "../../logic/keySlot";
 import { timestampForBlock } from "../../logic/time";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
@@ -38,9 +38,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const { pubKey: devicePubkey } = route.params;
   const device = account?.accountKeys?.find((k) => k.pubKey === devicePubkey);
 
-  const deviceName = device
-    ? "Device " + keySlotToDeviceIdentifier(device.slot)
-    : "Deleted device";
+  const deviceName = device ? keySlotTokeyLabel(device.slot) : "Deleted device";
 
   useEffect(() => {
     navigation.setOptions({ title: deviceName });

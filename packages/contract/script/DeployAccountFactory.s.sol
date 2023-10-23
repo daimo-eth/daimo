@@ -15,12 +15,8 @@ contract DeployScript is Script {
             0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
         );
 
-        // From https://github.com/daimo-eth/eip-7212
-        address verifier = 0xc2b78104907F722DABAc4C69f826a522B2754De4;
-
         DaimoAccountFactory factory = new DaimoAccountFactory{salt: 0}(
-            entryPoint,
-            verifier
+            entryPoint
         );
         console.log("factory address:", address(factory));
 
