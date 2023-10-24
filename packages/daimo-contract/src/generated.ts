@@ -661,7 +661,9 @@ export const daimoNameRegistryABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [],
+    inputs: [
+      { name: 'initialOwner', internalType: 'address', type: 'address' },
+    ],
     name: 'init',
     outputs: [],
   },

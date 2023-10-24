@@ -12,9 +12,10 @@ contract DeployNameRegistryScript is Script {
 
         // Use CREATE2
         address registry = address(new DaimoNameRegistry{salt: 0}());
+        address initOwner = 0x8603fb56E2B6DeaF02F3e247110CEc6f4Cbb7C8F;
         new DaimoNameRegistryProxy{salt: 0}(
             address(registry), // implementation
-            abi.encodeWithSelector(DaimoNameRegistry.init.selector, hex"")
+            abi.encodeWithSelector(DaimoNameRegistry.init.selector, initOwner)
         );
 
         vm.stopBroadcast();

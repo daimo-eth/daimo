@@ -38,6 +38,7 @@ contract UpgradeableBrick is UUPSUpgradeable, OwnableUpgradeable {
 contract NameRegistryTest is Test {
     address public implementation;
     DaimoNameRegistry public registry;
+    address constant initOwner = address(0x1010);
 
     event Registered(bytes32 indexed name, address indexed addr);
 
@@ -45,7 +46,7 @@ contract NameRegistryTest is Test {
         implementation = address(new DaimoNameRegistry{salt: 0}());
         DaimoNameRegistryProxy proxy = new DaimoNameRegistryProxy{salt: 0}(
             implementation,
-            abi.encodeWithSelector(DaimoNameRegistry.init.selector, hex"")
+            abi.encodeWithSelector(DaimoNameRegistry.init.selector, initOwner)
         );
         registry = DaimoNameRegistry(address(proxy));
     }
@@ -100,7 +101,7 @@ contract NameRegistryTest is Test {
         registry.forceRegister("foo", address(0x999));
 
         // owner can force register
-        vm.prank(address(this));
+        vm.prank(initOwner);
         registry.forceRegister("foo", address(0x999));
 
         // once done, the old name is deregistered
@@ -116,11 +117,11 @@ contract NameRegistryTest is Test {
         assertEq(registry.implementation(), implementation);
 
         // Call owner() to show it's correct
-        address initOwner = address(this);
         assertEq(registry.owner(), initOwner);
 
         // Transfer ownership
         address newOwner = address(0x5555);
+        vm.prank(initOwner);
         registry.transferOwnership(newOwner);
         assertEq(registry.owner(), newOwner);
 
