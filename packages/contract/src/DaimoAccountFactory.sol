@@ -15,10 +15,12 @@ import "./DaimoAccount.sol";
 contract DaimoAccountFactory {
     DaimoAccount public immutable accountImplementation;
     IEntryPoint public immutable entryPoint;
+    DaimoVerifier public immutable verifier;
 
-    constructor(IEntryPoint _entryPoint) {
+    constructor(IEntryPoint _entryPoint, DaimoVerifier _verifier) {
         entryPoint = _entryPoint;
-        accountImplementation = new DaimoAccount(_entryPoint);
+        verifier = _verifier;
+        accountImplementation = new DaimoAccount(_entryPoint, _verifier);
     }
 
     /**

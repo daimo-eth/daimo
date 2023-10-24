@@ -13,12 +13,14 @@ contract AccountVerify1271Test is Test {
     using UserOperationLib for UserOperation;
 
     EntryPoint public entryPoint;
+    DaimoVerifier public verifier;
     DaimoAccountFactory public factory;
     DaimoAccount public account;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        factory = new DaimoAccountFactory(entryPoint);
+        verifier = new DaimoVerifier();
+        factory = new DaimoAccountFactory(entryPoint, verifier);
 
         // Create test account with a single signing key
         uint256[2] memory pubKey = [

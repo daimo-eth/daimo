@@ -6,8 +6,13 @@ source .env
 # Build
 forge build
 
+# Deploy verifier with proxy
+forge script script/DeployVerifier.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+
+VERIFIER_PROXY_ADDRESS="0x065a18B5aBB62c22b67C47E9707Fb7BE5f7edB08"
+
 # Deploy Account factory
-forge script script/DeployAccountFactory.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+forge script script/DeployAccountFactory.s.sol --sig "run(address)" $VERIFIER_PROXY_ADDRESS --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
 # Deploy name registry
 forge script script/DeployNameRegistry.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY

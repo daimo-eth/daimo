@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
-import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 
 import "account-abstraction/core/Helpers.sol";
 import "account-abstraction/interfaces/IAccount.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 
-import "p256-verifier/P256.sol";
 import "p256-verifier/WebAuthn.sol";
+
+import "./DaimoVerifier.sol";
 
 /**
  * Daimo ERC-4337 contract account.
@@ -25,15 +23,6 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         bytes data;
     }
 
-    struct Signature {
-        bytes authenticatorData;
-        string clientDataJSON;
-        uint256 challengeLocation;
-        uint256 responseTypeLocation;
-        uint256 r;
-        uint256 s;
-    }
-
     /// Number of keys. 1-of-n multisig, n = numActiveKeys
     uint8 public numActiveKeys;
     /// Map of slot to key. Invariant: exactly n slots are nonzero.
@@ -41,6 +30,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// The ERC-4337 entry point singleton
     IEntryPoint public immutable entryPoint;
+    /// Signature verifier contract
+    DaimoVerifier public immutable verifier;
+
     /// Maximum number of signing keys
     uint8 public immutable maxKeys = 20;
 
@@ -80,8 +72,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
 
     /// Runs at deploy time. Implementation contract = no init, no state.
     /// All other methods are called via proxy = initialized once, has state.
-    constructor(IEntryPoint _entryPoint) {
+    constructor(IEntryPoint _entryPoint, DaimoVerifier _daimoVerifier) {
         entryPoint = _entryPoint;
+        verifier = _daimoVerifier;
         _disableInitializers();
     }
 
@@ -175,21 +168,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         uint256 x = uint256(keys[keySlot][0]);
         uint256 y = uint256(keys[keySlot][1]);
 
-        Signature memory sig = abi.decode(signature[1:], (Signature));
-
-        return
-            WebAuthn.verifySignature({
-                challenge: message,
-                authenticatorData: sig.authenticatorData,
-                requireUserVerification: false,
-                clientDataJSON: sig.clientDataJSON,
-                challengeLocation: sig.challengeLocation,
-                responseTypeLocation: sig.responseTypeLocation,
-                r: sig.r,
-                s: sig.s,
-                x: x,
-                y: y
-            });
+        return verifier.verifySignature(message, signature, x, y);
     }
 
     /// ERC1271: validate a user signature, verifying a valid Daimo account

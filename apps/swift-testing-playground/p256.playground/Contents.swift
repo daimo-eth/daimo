@@ -55,7 +55,7 @@ var messageHex = (
     "01" + // version
      "00003B9ACA00" + // validUntil
 //    "000000000000" + // validUntil
-    "ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b" // userOpHash
+    "215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb" // userOpHash
 )
 
 // isValidSignature ERC1271 test

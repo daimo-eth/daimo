@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccountFactory.sol";
 import "../src/DaimoAccount.sol";
+import "../src/DaimoVerifier.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 
@@ -13,10 +14,12 @@ contract AccountFactoryTest is Test {
 
     EntryPoint public entryPoint;
     DaimoAccountFactory public factory;
+    DaimoVerifier public verifier;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        factory = new DaimoAccountFactory(entryPoint);
+        verifier = new DaimoVerifier();
+        factory = new DaimoAccountFactory(entryPoint, verifier);
     }
 
     function testDeploy() public {

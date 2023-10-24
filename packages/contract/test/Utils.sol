@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoAccount.sol";
+import "../src/DaimoVerifier.sol";
 import "p256-verifier/utils/Base64URL.sol";
 
 library Utils {
@@ -11,7 +12,7 @@ library Utils {
         bytes memory challenge,
         uint256 r,
         uint256 s
-    ) public pure returns (DaimoAccount.Signature memory) {
+    ) public pure returns (Signature memory) {
         string memory challengeb64url = Base64URL.encode(challenge);
         string memory clientDataJSON = string(
             abi.encodePacked(
@@ -27,7 +28,7 @@ library Utils {
         authenticatorData[32] = bytes1(0x05); // flags: user present, user verified
 
         return
-            DaimoAccount.Signature({
+            Signature({
                 authenticatorData: authenticatorData,
                 clientDataJSON: clientDataJSON,
                 challengeLocation: challengeLocation,

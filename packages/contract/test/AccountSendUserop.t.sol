@@ -14,11 +14,13 @@ contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
 
     EntryPoint public entryPoint;
+    DaimoVerifier public verifier;
     DaimoAccountFactory public factory;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        factory = new DaimoAccountFactory(entryPoint);
+        verifier = new DaimoVerifier();
+        factory = new DaimoAccountFactory(entryPoint, verifier);
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
     }
@@ -53,7 +55,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b";
+        bytes32 expectedUserOpHash = hex"215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -67,8 +69,8 @@ contract AccountSendUseropTest is Test {
             abi.encode( // signature
                 Utils.rawSignatureToSignature({
                     challenge: challengeToSign,
-                    r: 0x817d68f6485389a101ccaa28001f00f24fd9ffc82930f347a6bbd468a9668066,
-                    s: 0x36e3451c227a93263d6694331b25a50eb6c0608ff292a1027a231d8e0c9b19c7
+                    r: 0xfd104adfe668f2710243c0085900bf932a1cde10f5786ae050c7fe02ace566cd,
+                    s: 0x6bb5a97b41c4fc62a06679cd96a3dd38517393ec6ff4e4fa515e62e65ae058c9
                 })
             )
         );
@@ -123,7 +125,7 @@ contract AccountSendUseropTest is Test {
 
         // code coverage can't handle indirect calls
         // call validateUserOp directly
-        DaimoAccount a2 = new DaimoAccount(acc.entryPoint());
+        DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.verifier());
         vm.store(address(a2), 0, 0); // set _initialized = 0
         a2.initialize(0, key, calls);
         vm.prank(address(entryPoint));
@@ -141,7 +143,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"ed2872f51164a6c9591034cf7268ce8be5ab3f99f9356200a08d11420af8266b";
+        bytes32 expectedUserOpHash = hex"215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -155,8 +157,8 @@ contract AccountSendUseropTest is Test {
             abi.encode( // signature
                 Utils.rawSignatureToSignature({
                     challenge: challengeToSign,
-                    r: 0x64426461cb87efcb38c9d0a202012712cf50d45dd5dc2ba10d9266ce71ccfc5d,
-                    s: 0x6c8877c93fe31224ddba5a7a14579c77cb0fdb11717b21b089d3f62624c6c042
+                    r: 0x6f255bb79144ca77967dcf09c97072c0c399943f54310ef47c252fa8c4499ede,
+                    s: 0x5ac0ae8ba13eee89509ab1c4151af3d9a8f58c24d3cd3c68579eb64549e7ef47
                 })
             )
         );

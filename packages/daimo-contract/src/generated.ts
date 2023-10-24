@@ -12,6 +12,11 @@ export const daimoAccountABI = [
         internalType: 'contract IEntryPoint',
         type: 'address',
       },
+      {
+        name: '_daimoVerifier',
+        internalType: 'contract DaimoVerifier',
+        type: 'address',
+      },
     ],
   },
   {
@@ -249,7 +254,7 @@ export const daimoAccountABI = [
     inputs: [
       {
         name: 'sig',
-        internalType: 'struct DaimoAccount.Signature',
+        internalType: 'struct Signature',
         type: 'tuple',
         components: [
           { name: 'authenticatorData', internalType: 'bytes', type: 'bytes' },
@@ -333,6 +338,15 @@ export const daimoAccountABI = [
       { name: 'validationData', internalType: 'uint256', type: 'uint256' },
     ],
   },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'verifier',
+    outputs: [
+      { name: '', internalType: 'contract DaimoVerifier', type: 'address' },
+    ],
+  },
   { stateMutability: 'payable', type: 'receive' },
 ] as const
 
@@ -348,6 +362,11 @@ export const daimoAccountFactoryABI = [
       {
         name: '_entryPoint',
         internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+      {
+        name: '_verifier',
+        internalType: 'contract DaimoVerifier',
         type: 'address',
       },
     ],
@@ -414,10 +433,19 @@ export const daimoAccountFactoryABI = [
     name: 'getAddress',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'verifier',
+    outputs: [
+      { name: '', internalType: 'contract DaimoVerifier', type: 'address' },
+    ],
+  },
 ] as const
 
 export const daimoAccountFactoryAddress =
-  '0xDBAFC2C1eE506A14966DEfFe1B9CFE15e78F59b6' as const
+  '0x5d896979bFab624640F16CAb1a9E26268426114B' as const
 
 export const daimoAccountFactoryConfig = {
   address: daimoAccountFactoryAddress,
@@ -1038,6 +1066,221 @@ export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,
   abi: daimoPaymasterABI,
 } as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoVerifier
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoVerifierABI = [
+  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'implementation',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'init',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'upgradeTo',
+    outputs: [],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+      { name: 'data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'message', internalType: 'bytes', type: 'bytes' },
+      { name: 'signature', internalType: 'bytes', type: 'bytes' },
+      { name: 'x', internalType: 'uint256', type: 'uint256' },
+      { name: 'y', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'verifySignature',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoVerifierProxy
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoVerifierProxyABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_logic', internalType: 'address', type: 'address' },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
+    ],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
+  { stateMutability: 'payable', type: 'fallback' },
+  { stateMutability: 'payable', type: 'receive' },
+] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC1967Proxy

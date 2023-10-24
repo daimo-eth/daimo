@@ -1,7 +1,7 @@
 import { chainConfig } from "@daimo/contract";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 
-const apiUrl = process.env.DAIMO_APP_API_URL || "http://nibnalin.local:3000";
+const apiUrl = process.env.DAIMO_APP_API_URL || "http://localhost:3000";
 const apiUrlWithChain = `${apiUrl}/chain/${chainConfig.chainL2.id}`;
 const passkeyDomain = process.env.DAIMO_PASSKEY_DOMAIN || "daimo.xyz";
 

@@ -7,7 +7,7 @@ import "../src/DaimoAccountFactory.sol";
 contract DeployScript is Script {
     function setUp() public {}
 
-    function run() public {
+    function run(DaimoVerifier verifierProxy) public {
         vm.startBroadcast();
 
         // From https://docs.stackup.sh/docs/entity-addresses#entrypoint
@@ -16,7 +16,8 @@ contract DeployScript is Script {
         );
 
         DaimoAccountFactory factory = new DaimoAccountFactory{salt: 0}(
-            entryPoint
+            entryPoint,
+            verifierProxy
         );
         console.log("factory address:", address(factory));
 
