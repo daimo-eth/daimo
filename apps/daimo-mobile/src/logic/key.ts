@@ -17,6 +17,7 @@ import {
 import { env } from "./env";
 import { Log } from "./log";
 
+// Parses the custom URI from the Add Device QR code.
 export function parseAddDeviceString(addString: string): Hex {
   const [prefix, pubKey] = addString.split(":");
   assert(prefix === "addkey");
@@ -25,11 +26,14 @@ export function parseAddDeviceString(addString: string): Hex {
   return pubKey;
 }
 
+// Creates a custom URI for the Add Device QR code.
 export function createAddDeviceString(pubKey: Hex): string {
   assert(isDERPubKey(pubKey));
   return `addkey:${pubKey}`;
 }
 
+// Creates minimal Webauthn signatures using a hardware enclave key.
+// Unlike passkeys, which are backed up, enclave keys never leave the device.
 export function getWrappedRawSigner(
   enclaveKeyName: string,
   keySlot: number

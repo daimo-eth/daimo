@@ -16,7 +16,7 @@ import {
 import { getDebugLog } from "../../debugLog";
 import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
-import { keySlotTokeyLabel } from "../../logic/keySlot";
+import { keySlotToLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
 import { timestampForBlock, useTime } from "../../logic/time";
 import {
@@ -138,7 +138,7 @@ function DeviceRow({
 
   const addAtS = timestampForBlock(keyData.addedAt);
 
-  const dispDevice = keySlotTokeyLabel(keyData.slot);
+  const dispDevice = keySlotToLabel(keyData.slot);
   const dispTime = "Added " + timeAgo(addAtS, nowS, true);
 
   return (

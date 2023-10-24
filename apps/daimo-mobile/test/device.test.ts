@@ -1,4 +1,4 @@
-import { findUnusedSlot, keySlotTokeyLabel } from "../src/logic/keySlot";
+import { findUnusedSlot, keySlotToLabel } from "../src/logic/keySlot";
 
 const testCases: [number, string][] = [
   [0, "Device A"],
@@ -9,7 +9,7 @@ const testCases: [number, string][] = [
 describe("Device", () => {
   it("describes identifiers correctly", () => {
     for (const [keyData, expected] of testCases) {
-      expect(keySlotTokeyLabel(keyData)).toEqual(expected);
+      expect(keySlotToLabel(keyData)).toEqual(expected);
     }
   });
 

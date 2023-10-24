@@ -1,12 +1,11 @@
 import { assert } from "@daimo/common";
 
 // slots 0 - 127 are for devices, 128 - 255 are for passkeys
-
 function isPasskeySlot(slot: number): boolean {
   return (slot & 0x80) === 0x80;
 }
 
-export function keySlotTokeyLabel(slot: number): string {
+export function keySlotToLabel(slot: number): string {
   if (isPasskeySlot(slot)) {
     return "Backup " + String.fromCharCode(65 + slot - 0x80);
   } else {
