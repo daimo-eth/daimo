@@ -53,9 +53,9 @@ func base64ToBase64url(base64: String) -> String {
 
 var messageHex = (
     "01" + // version
-     "00003B9ACA00" + // validUntil
-//    "000000000000" + // validUntil
-    "215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb" // userOpHash
+//     "00003B9ACA00" + // validUntil
+    "000000000000" + // validUntil
+    "cef2863e6be232ac99eef76f754acda25d51cec80009102e0df7af9f9078cd61" // userOpHash
 )
 
 // isValidSignature ERC1271 test

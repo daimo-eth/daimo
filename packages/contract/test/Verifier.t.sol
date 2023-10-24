@@ -56,9 +56,10 @@ contract VerifierTest is Test {
 
     function setUp() public {
         implementation = address(new DaimoVerifier{salt: 0}());
+        address initOwner = address(this);
         DaimoVerifierProxy proxy = new DaimoVerifierProxy{salt: 0}(
             implementation,
-            abi.encodeWithSelector(DaimoVerifier.init.selector, hex"")
+            abi.encodeWithSelector(DaimoVerifier.init.selector, initOwner)
         );
         verifier = DaimoVerifier(address(proxy));
 

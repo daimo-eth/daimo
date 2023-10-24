@@ -55,7 +55,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb";
+        bytes32 expectedUserOpHash = hex"cef2863e6be232ac99eef76f754acda25d51cec80009102e0df7af9f9078cd61";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -69,8 +69,8 @@ contract AccountSendUseropTest is Test {
             abi.encode( // signature
                 Utils.rawSignatureToSignature({
                     challenge: challengeToSign,
-                    r: 0xfd104adfe668f2710243c0085900bf932a1cde10f5786ae050c7fe02ace566cd,
-                    s: 0x6bb5a97b41c4fc62a06679cd96a3dd38517393ec6ff4e4fa515e62e65ae058c9
+                    r: 0x3e642fa939f04968b29630dddfe14d7b97c1589ac07d843174c7cf5f44493d2a,
+                    s: 0x73ae19f8113f338cf3944f1b7d59e13cf811bcb57e56013a46fc40a521caa2c3
                 })
             )
         );
@@ -143,7 +143,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"215ca7ecb510fd321864dc69106e538c19001224432d6ce73487e992b3dc54cb";
+        bytes32 expectedUserOpHash = hex"cef2863e6be232ac99eef76f754acda25d51cec80009102e0df7af9f9078cd61";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -157,8 +157,8 @@ contract AccountSendUseropTest is Test {
             abi.encode( // signature
                 Utils.rawSignatureToSignature({
                     challenge: challengeToSign,
-                    r: 0x6f255bb79144ca77967dcf09c97072c0c399943f54310ef47c252fa8c4499ede,
-                    s: 0x5ac0ae8ba13eee89509ab1c4151af3d9a8f58c24d3cd3c68579eb64549e7ef47
+                    r: 0x899af9e296b35a479af395160b580772dfbaa10656f4a00a3a8edf29896c2a56,
+                    s: 0x43f87343e7ee7c305aaed9cfc0945997175f39ffa272cfc423ad1f3a74712b1c
                 })
             )
         );
