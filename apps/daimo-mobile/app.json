@@ -3,7 +3,7 @@
     "owner": "daimo",
     "name": "Daimo",
     "slug": "daimo",
-    "version": "0.5.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "assets/*"
-    ],
+    "assetBundlePatterns": ["assets/*"],
     "scheme": "daimo",
     "notification": {
       "iosDisplayInForeground": true
@@ -22,20 +20,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "54",
-      "associatedDomains": [
-        "applinks:daimo.xyz",
-        "webcredentials:daimo.xyz"
-      ],
+      "buildNumber": "55",
+      "associatedDomains": ["applinks:daimo.xyz", "webcredentials:daimo.xyz"],
       "config": {
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "LSApplicationQueriesSchemes": [
-          "whatsapp",
-          "sgnl",
-          "tg"
-        ]
+        "LSApplicationQueriesSchemes": ["whatsapp", "sgnl", "tg"]
       }
     },
     "android": {
@@ -51,10 +42,7 @@
               "pathPrefix": "/link"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
       "adaptiveIcon": {
@@ -62,7 +50,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 54
+      "versionCode": 55
     },
     "extra": {
       "eas": {
@@ -91,9 +79,7 @@
           "faceIDPermission": "Protect Daimo using Face ID."
         }
       ],
-      [
-        "expo-notifications"
-      ]
+      ["expo-notifications"]
     ]
   }
 }
