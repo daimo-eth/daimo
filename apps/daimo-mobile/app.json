@@ -76,10 +76,16 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Protect Daimo using Face ID."
+          "faceIDPermission": "Allows Daimo to protect your account and authenticate you when you send payments."
         }
       ],
-      ["expo-notifications"]
+      ["expo-notifications"],
+      [
+        "expo-barcode-scanner",
+        {
+          "cameraPermission": "Allows Daimo to scan QR codes to pay other users or add new devices to your account."
+        }
+      ]
     ]
   }
 }
