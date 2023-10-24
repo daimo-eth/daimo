@@ -310,9 +310,9 @@ function InvitePage({
 
   return (
     <View style={styles.createAccountPage}>
-      <TextCenter>
+      <View style={ss.container.center}>
         <Octicons name="mail" size={40} color={color.midnight} />
-      </TextCenter>
+      </View>
       <Spacer h={32} />
       <TextCenter>
         <TextParagraph>

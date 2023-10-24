@@ -18,9 +18,9 @@
       "iosDisplayInForeground": true
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "55",
+      "buildNumber": "57",
       "associatedDomains": ["applinks:daimo.xyz", "webcredentials:daimo.xyz"],
       "config": {
         "usesNonExemptEncryption": false
@@ -50,7 +50,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 55
+      "versionCode": 57
     },
     "extra": {
       "eas": {
