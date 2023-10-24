@@ -5,6 +5,7 @@ export const color = {
   primary: "#007aff",
   primaryBgLight: "#aaccff",
   danger: "#f35369",
+  yellow: "#FFDC62",
   success: "#0CA01B",
   successDark: "#009900",
   white: "#ffffff",

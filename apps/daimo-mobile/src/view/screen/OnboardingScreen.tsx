@@ -32,7 +32,6 @@ import {
 import { NamedError } from "../../logic/log";
 import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, TextButton } from "../shared/Button";
-import { InfoBubble } from "../shared/InfoBubble";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -202,7 +201,7 @@ function IntroPages({ onNext }: { onNext: () => void }) {
         <IntroPage title="Welcome to Daimo">
           <TextParagraph>
             Daimo is a global payments app that runs on Ethereum. Thanks for
-            being one the first to try it out!
+            being one of the first to try it out!
           </TextParagraph>
         </IntroPage>
         <IntroPage title={tokenSymbol}>
@@ -423,7 +422,7 @@ function SetupKey({
 
   return (
     <View>
-      <OnboardingHeader onPrev={onPrev} />
+      <OnboardingHeader title="Set up device" onPrev={onPrev} />
       <View style={styles.createAccountPage}>
         <TextH1>
           <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
@@ -537,7 +536,7 @@ function CreateAccountPage({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View>
-        <OnboardingHeader onPrev={onPrev} />
+        <OnboardingHeader title="Create Account" onPrev={onPrev} />
         <View style={styles.createAccountPage}>
           <View style={styles.namePickerWrap}>
             {status === "idle" && (
@@ -582,12 +581,15 @@ function UseExistingPage({
 
   return (
     <View>
-      <OnboardingHeader onPrev={onPrev} />
+      <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
-        <InfoBubble
-          title="Add this phone to an existing account"
-          subtitle="Scan this QR code with your other device"
-        />
+        <Spacer h={32} />
+        <TextCenter>
+          <TextParagraph>
+            Add this phone to an existing account. Scan this QR code with your
+            other device.
+          </TextParagraph>
+        </TextCenter>
         <Spacer h={32} />
         <QRCodeBox value={createAddDeviceString(pubKeyHex)} />
         <Spacer h={16} />
@@ -603,7 +605,13 @@ function UseExistingPage({
   );
 }
 
-function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
+function OnboardingHeader({
+  title,
+  onPrev,
+}: {
+  title: string;
+  onPrev?: () => void;
+}) {
   /* On Android, listen for the native back button. */
   useEffect(() => {
     if (!onPrev) return;
@@ -617,7 +625,7 @@ function OnboardingHeader({ onPrev }: { onPrev?: () => void }) {
 
   return (
     <View style={ss.container.padH16}>
-      <ScreenHeader title="Create Account" onBack={onPrev} />
+      <ScreenHeader title={title} onBack={onPrev} />
     </View>
   );
 }
