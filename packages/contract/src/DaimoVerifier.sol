@@ -33,9 +33,10 @@ contract DaimoVerifier is OwnableUpgradeable, UUPSUpgradeable {
         _disableInitializers();
     }
 
-    /// On proxy deployment, deployer becomes the owner.
-    function init() public initializer {
-        __Ownable_init();
+    /// We specify the initial owner (rather than using msg.sender) so that we
+    /// can deploy the proxy at a deterministic CREATE2 address.
+    function init(address initialOwner) public initializer {
+        _transferOwnership(initialOwner);
     }
 
     /// UUPSUpsgradeable: only allow owner to upgrade

@@ -24,11 +24,11 @@ contract ManageVerifierScript is Script {
     }
 
     function upgradeVerifier(bool confirm) public {
-        // TODO: fill addresses
+        // TODO: double check addresses
         DaimoVerifier currentVerifier = DaimoVerifier(
-            0x065a18B5aBB62c22b67C47E9707Fb7BE5f7edB08 // Proxy address
+            0xa7284d3cC7D053fE7388401c1F31311BaEcE1f6e // Proxy address
         );
-        address upgradedAddress = 0x065a18B5aBB62c22b67C47E9707Fb7BE5f7edB08;
+        address upgradedAddress = address(0);
 
         console.log("current verifier:", address(currentVerifier));
         console.log("upgraded verifier:", upgradedAddress);
@@ -41,9 +41,9 @@ contract ManageVerifierScript is Script {
     }
 
     function burnOwnership(bool confirm) public {
-        // TODO: fill addresses
+        // TODO: double check addresses
         DaimoVerifier currentVerifier = DaimoVerifier(
-            0x065a18B5aBB62c22b67C47E9707Fb7BE5f7edB08 // Proxy address
+            0xa7284d3cC7D053fE7388401c1F31311BaEcE1f6e // Proxy address
         );
 
         console.log("current verifier:", address(currentVerifier));
