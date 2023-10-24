@@ -1,14 +1,11 @@
 import { EAccount, OpEvent, UserOpHex, dollarsToAmount } from "@daimo/common";
 import * as ExpoEnclave from "@daimo/expo-enclave";
-import {
-  DaimoOpSender,
-  SigningCallback,
-  OpSenderCallback,
-} from "@daimo/userop";
+import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { getWrappedRawSigner } from "../logic/key";
 import { Log, NamedError } from "../logic/log";
 import { rpcFunc } from "../logic/trpc";
 import { Account, useAccount } from "../model/account";
@@ -101,14 +98,7 @@ function loadOpSender(
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
-  const signer: SigningCallback = async (messageHex: string) => {
-    const derSig = await requestEnclaveSignature(
-      enclaveKeyName,
-      messageHex,
-      "Authorize transaction"
-    );
-    return { keySlot, derSig };
-  };
+  const signer = getWrappedRawSigner(enclaveKeyName, keySlot);
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     return rpcFunc.sendUserOp.mutate({ op });
@@ -152,24 +142,4 @@ async function sendAsync(
     } else setAS("error", "Error sending transaction");
     throw e;
   }
-}
-
-// TODO: wrap in try / catch and properly show user
-// warnings or errors if auth is disabled by them.
-export async function requestEnclaveSignature(
-  enclaveKeyName: string,
-  hexMessage: string,
-  usageMessage: string
-) {
-  const promptCopy: ExpoEnclave.PromptCopy = {
-    usageMessage,
-    androidTitle: "Daimo",
-  };
-
-  const signature = await Log.promise(
-    "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyName, hexMessage, promptCopy)
-  );
-
-  return signature;
 }

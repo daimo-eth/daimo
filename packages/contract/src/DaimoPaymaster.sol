@@ -62,7 +62,10 @@ contract DaimoPaymaster is BasePaymaster {
             DaimoAccount.executeBatch.selector == selector,
             "DaimoPaymaster: callData not for executeBatch"
         );
-        Call[] memory calls = abi.decode(userOp.callData[4:], (Call[]));
+        DaimoAccount.Call[] memory calls = abi.decode(
+            userOp.callData[4:],
+            (DaimoAccount.Call[])
+        );
         require(calls.length > 0, "DaimoPaymaster: no calls");
         for (uint256 i = 0; i < calls.length; i++) {
             require(

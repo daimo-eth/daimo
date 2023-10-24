@@ -15,10 +15,12 @@ import "./DaimoAccount.sol";
 contract DaimoAccountFactory {
     DaimoAccount public immutable accountImplementation;
     IEntryPoint public immutable entryPoint;
+    DaimoVerifier public immutable verifier;
 
-    constructor(IEntryPoint _entryPoint, address _sigVerifier) {
+    constructor(IEntryPoint _entryPoint, DaimoVerifier _verifier) {
         entryPoint = _entryPoint;
-        accountImplementation = new DaimoAccount(_entryPoint, _sigVerifier);
+        verifier = _verifier;
+        accountImplementation = new DaimoAccount(_entryPoint, _verifier);
     }
 
     /**
@@ -30,7 +32,7 @@ contract DaimoAccountFactory {
     function createAccount(
         uint8 keySlot,
         bytes32[2] memory key,
-        Call[] calldata initCalls,
+        DaimoAccount.Call[] calldata initCalls,
         uint256 salt
     ) public payable returns (DaimoAccount ret) {
         address addr = getAddress(keySlot, key, initCalls, salt);
@@ -65,7 +67,7 @@ contract DaimoAccountFactory {
     function getAddress(
         uint8 keySlot,
         bytes32[2] memory key,
-        Call[] calldata initCalls,
+        DaimoAccount.Call[] calldata initCalls,
         uint256 salt
     ) public view returns (address) {
         return

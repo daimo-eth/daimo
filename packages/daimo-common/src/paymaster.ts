@@ -9,5 +9,5 @@ export type ChainGasConstants = {
   paymasterAddress: Address;
 };
 
-export const DEFAULT_USEROP_VERIFICATION_GAS_LIMIT = 500000n;
+export const DEFAULT_USEROP_VERIFICATION_GAS_LIMIT = 700000n;
 export const DEFAULT_USEROP_CALL_GAS_LIMIT = 300000n;

@@ -29,7 +29,10 @@ jobs:
         with:
           version: nightly
 
-      - run: forge test -vvv && forge coverage --ir-minimum --report lcov && git diff --exit-code
+      - run: |
+          forge test -vvv --fork-url "https://base-goerli.publicnode.com"
+          forge coverage --report lcov --fork-url "https://base-goerli.publicnode.com"
+          git diff --exit-code
         working-directory: ./packages/contract
 
   lint:
@@ -45,4 +48,7 @@ jobs:
         with:
           version: nightly
 
-      - run: npm ci && npm run lint && npm run codegen && git diff --exit-code
+      - run: |
+          npm ci
+          npm run lint && npm run codegen
+          git diff --exit-code

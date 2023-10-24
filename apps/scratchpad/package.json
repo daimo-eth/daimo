@@ -10,6 +10,7 @@
     "@daimo/api": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",
+    "@scure/base": "^1.1.3",
     "@trpc/client": "^10.40.0",
     "@trpc/server": "^10.40.0",
     "@tsconfig/node20": "^20.1.0",

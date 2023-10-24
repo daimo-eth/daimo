@@ -50,8 +50,12 @@ contract PaymasterTest is Test {
         );
 
         // try self call, should pass
-        Call[] memory dummyCalls = new Call[](1);
-        dummyCalls[0] = Call({dest: senderAddress, value: 0, data: hex""});
+        DaimoAccount.Call[] memory dummyCalls = new DaimoAccount.Call[](1);
+        dummyCalls[0] = DaimoAccount.Call({
+            dest: senderAddress,
+            value: 0,
+            data: hex""
+        });
 
         bytes memory dummyCalldata = abi.encodeWithSelector(
             DaimoAccount.executeBatch.selector,
@@ -90,7 +94,7 @@ contract PaymasterTest is Test {
         // try without any calls, should fail
         dummyCalldata = abi.encodeWithSelector(
             DaimoAccount.executeBatch.selector,
-            new Call[](0)
+            new DaimoAccount.Call[](0)
         );
         op.callData = dummyCalldata;
 
@@ -98,7 +102,7 @@ contract PaymasterTest is Test {
         paymaster.validatePaymasterUserOp(op, hash, 500000);
 
         // try with a call to a non-whitelisted address, should fail
-        dummyCalls[0] = Call({
+        dummyCalls[0] = DaimoAccount.Call({
             dest: 0x6666666666666666666666666666666666666666,
             value: 0,
             data: hex""
