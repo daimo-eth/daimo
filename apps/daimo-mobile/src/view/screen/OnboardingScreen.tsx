@@ -201,7 +201,8 @@ function IntroPages({ onNext }: { onNext: () => void }) {
       >
         <IntroPage title="Welcome to Daimo">
           <TextParagraph>
-            Daimo is a global payments app that runs on Ethereum.
+            Daimo is a global payments app that runs on Ethereum. Thanks for
+            being one the first to try it out!
           </TextParagraph>
         </IntroPage>
         <IntroPage title={tokenSymbol}>
@@ -228,14 +229,17 @@ function IntroPages({ onNext }: { onNext: () => void }) {
           </TextParagraph>
         </IntroPage>
       </ScrollView>
-      <Spacer h={64} />
-      <ButtonBig type="primary" title="Continue" onPress={onNext} />
+      <Spacer h={32} />
+      <View style={styles.introButtonsWrap}>
+        <ButtonBig type="primary" title="Enter" onPress={onNext} />
+      </View>
     </View>
   );
 }
 
 function TextParagraph({ children }: { children: ReactNode }) {
-  return <Text style={styles.introText}>{children}</Text>;
+  const style = useRef([styles.introText, { color: color.grayDark }]).current;
+  return <Text style={style}>{children}</Text>;
 }
 
 function IntroPage({
@@ -294,7 +298,7 @@ function InvitePage({
     <Octicons {...{ name, color }} size={14} />
   );
   const status = (function () {
-    if (!inviteCode) return <></>;
+    if (!inviteCode) return " ";
     if (isValid)
       return <>{oct("check-circle", color.successDark)} valid invite</>;
     else return <>{oct("alert")} invalid invite</>;
@@ -306,37 +310,37 @@ function InvitePage({
   };
 
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
-        <TextH1>Invite Code</TextH1>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextBody>
-            Daimo is currently invite-only. If you have an invite code, please
-            enter it below. Otherwise, you can join the waitlist.
-          </TextBody>
-        </TextCenter>
-        <Spacer h={32} />
-        <InputBig
-          placeholder="enter invite code"
-          value={inviteCode}
-          onChange={onChange}
-          center
-        />
-        <Spacer h={8} />
-        <TextCenter>
-          <TextLight>{status}</TextLight>
-        </TextCenter>
-        <Spacer h={32} />
-        <ButtonBig
-          type="primary"
-          title="Submit"
-          onPress={() => onNext({ isTestnet })}
-          disabled={!isValid}
-        />
-        <Spacer h={16} />
-        <TextButton title="Join waitlist" onPress={linkToWaitlist} />
-      </View>
+    <View style={styles.createAccountPage}>
+      <TextCenter>
+        <Octicons name="mail" size={40} color={color.midnight} />
+      </TextCenter>
+      <Spacer h={32} />
+      <TextCenter>
+        <TextParagraph>
+          Daimo is currently invite-only. If you have an invite code, please
+          enter it below. Otherwise, you can join the waitlist.
+        </TextParagraph>
+      </TextCenter>
+      <Spacer h={32} />
+      <InputBig
+        placeholder="enter invite code"
+        value={inviteCode}
+        onChange={onChange}
+        center
+      />
+      <Spacer h={8} />
+      <TextCenter>
+        <TextLight>{status}</TextLight>
+      </TextCenter>
+      <Spacer h={16} />
+      <ButtonBig
+        type="primary"
+        title="Submit"
+        onPress={() => onNext({ isTestnet })}
+        disabled={!isValid}
+      />
+      <Spacer h={16} />
+      <TextButton title="Join waitlist" onPress={linkToWaitlist} />
     </View>
   );
 }
@@ -347,33 +351,33 @@ function FlowSelectionPage({
   onNext: ({ choice }: { choice: "create" | "existing" }) => void;
 }) {
   return (
-    <View style={styles.onboardingScreen}>
-      <View style={styles.createAccountPage}>
+    <View style={styles.createAccountPage}>
+      <TextCenter>
         <TextH1>Welcome</TextH1>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextBody>
-            Daimo is a payments app on Ethereum. Thanks for testing our early
-            release!
-          </TextBody>
-        </TextCenter>
-        <Spacer h={32} />
-        <ButtonBig
-          type="primary"
-          title="Create Account"
-          onPress={() => {
-            onNext({ choice: "create" });
-          }}
-        />
-        <Spacer h={8} />
-        <ButtonBig
-          type="subtle"
-          title="Use existing"
-          onPress={() => {
-            onNext({ choice: "existing" });
-          }}
-        />
-      </View>
+      </TextCenter>
+      <Spacer h={64} />
+      <TextCenter>
+        <TextParagraph>
+          You can create a new account, or add this device to an account you
+          already have.
+        </TextParagraph>
+      </TextCenter>
+      <Spacer h={32} />
+      <ButtonBig
+        type="primary"
+        title="Create Account"
+        onPress={() => {
+          onNext({ choice: "create" });
+        }}
+      />
+      <Spacer h={16} />
+      <ButtonBig
+        type="subtle"
+        title="Use existing"
+        onPress={() => {
+          onNext({ choice: "existing" });
+        }}
+      />
     </View>
   );
 }
