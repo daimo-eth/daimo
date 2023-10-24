@@ -31,7 +31,7 @@ jobs:
 
       - run: |
           forge test -vvv --fork-url "https://base-goerli.publicnode.com"
-          forge coverage --ir-minimum --report lcov --fork-url "https://base-goerli.publicnode.com"
+          forge coverage --report lcov --fork-url "https://base-goerli.publicnode.com"
           git diff --exit-code
         working-directory: ./packages/contract
 
