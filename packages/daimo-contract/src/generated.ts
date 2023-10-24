@@ -445,7 +445,7 @@ export const daimoAccountFactoryABI = [
 ] as const
 
 export const daimoAccountFactoryAddress =
-  '0x5d896979bFab624640F16CAb1a9E26268426114B' as const
+  '0xF9D643f5645C6140b8EEb7eF42878b71eBfEe40b' as const
 
 export const daimoAccountFactoryConfig = {
   address: daimoAccountFactoryAddress,
@@ -748,7 +748,7 @@ export const daimoNameRegistryABI = [
 ] as const
 
 export const daimoNameRegistryAddress =
-  '0x99486281FB1Fe17e7c94A6fa54cDD9DB918A9a16' as const
+  '0xf0fc94DCDC04b2400E5EEac6Aba35cC87d1954D0' as const
 
 export const daimoNameRegistryConfig = {
   address: daimoNameRegistryAddress,
@@ -818,7 +818,7 @@ export const daimoNameRegistryProxyABI = [
 ] as const
 
 export const daimoNameRegistryProxyAddress =
-  '0x9e3a4536E0C59B56FdBd94e12DDFF0d01c8587C1' as const
+  '0x4430A644B215a187a3daa5b114fA3f3d9DeBc17D' as const
 
 export const daimoNameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
@@ -1062,7 +1062,7 @@ export const daimoPaymasterABI = [
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x9634d8b747fdFe5c4320dFfFF391C476322553f8' as const
+  '0x99D720cd5A04c16Dc5377638e3f6D609c895714F' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,
@@ -1157,7 +1157,9 @@ export const daimoVerifierABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [],
+    inputs: [
+      { name: 'initialOwner', internalType: 'address', type: 'address' },
+    ],
     name: 'init',
     outputs: [],
   },

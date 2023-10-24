@@ -1,12 +1,11 @@
 import { EAccount, OpEvent, UserOpHex, dollarsToAmount } from "@daimo/common";
-import * as ExpoEnclave from "@daimo/expo-enclave";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { getWrappedRawSigner } from "../logic/key";
-import { Log, NamedError } from "../logic/log";
+import { NamedError } from "../logic/log";
 import { rpcFunc } from "../logic/trpc";
 import { Account, useAccount } from "../model/account";
 
