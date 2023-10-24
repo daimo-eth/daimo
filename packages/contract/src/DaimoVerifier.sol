@@ -25,9 +25,9 @@ struct Signature {
 }
 
 // Proxies a signature verification call to the Webauthn library.
-// This contract exists only to enable upgradability of the Webauthn
-// library that is in control of the owner rather than account.
-// Stateless, upgradeable, ownable.
+// This contract exists only to enable temporary upgradeability
+// of the Webauthn library. After further audit(s), ownership
+// will be burned, making this verifier library immutable.
 contract DaimoVerifier is OwnableUpgradeable, UUPSUpgradeable {
     constructor() {
         _disableInitializers();

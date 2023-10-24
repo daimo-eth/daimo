@@ -39,3 +39,9 @@ forge script script/ManagePaymaster.s.sol --sig "addDeposit(address)" $PAYMASTER
 
 # Stop paymaster by clearing deposit
 forge script script/ManagePaymaster.s.sol --sig "stop(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+
+# Upgrade verifier contract
+forge script script/ManageVerifier.s.sol --sig "upgradeVerifier(bool)" <confirm> --fork-url $RPC_URL --private-key $PRIVATE_KEY
+
+# Burn ownership of verifier contract
+forge script script/ManageVerifier.s.sol --sig "burnOwnership(bool)" <confirm> --fork-url $RPC_URL --private-key $PRIVATE_KEY

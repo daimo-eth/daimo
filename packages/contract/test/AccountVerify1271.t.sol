@@ -109,44 +109,4 @@ contract AccountVerify1271Test is Test {
         ret = account.isValidSignature(hash, sig);
         assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
     }
-
-    // TODO
-    // function testWebauthnSignature() public {
-    //     uint256[2] memory publicKey = [
-    //         0x80d9326e49eb6314d03f58830369ea5bafbc4e2709b30bff1f4379586ca869d9,
-    //         0x806ed746d8ac6c2779a472d8c1ed4c200b07978d9d8d8d862be8b7d4b7fb6350
-    //     ];
-    //     bytes32[2] memory key = [bytes32(publicKey[0]), bytes32(publicKey[1])];
-    //     vm.startPrank(address(account));
-    //     account.addSigningKey(1, key);
-    //     vm.stopPrank();
-
-    //     string
-    //         memory clientDataJSON = '{"type":"webauthn.get","challenge":"dGVzdA","origin":"https://funny-froyo-3f9b75.netlify.app"}';
-    //     bytes memory challenge = hex"74657374";
-    //     bytes
-    //         memory authenticatorData = hex"e0b592a7dd54eedeec65206e031fc196b8e5915f9b389735860c83854f65dc0e1d00000000";
-    //     uint256 r = 0x32e005a53ae49a96ac88c715243638dd5c985fbd463c727d8eefd05bee4e2570;
-    //     uint256 s = 0x7a4fef4d0b11187f95f69eefbb428df8ac799bbd9305066b1e9c9fe9a5bcf8c4;
-    //     uint256 challengeLocation = 23;
-    //     uint256 responseTypeLocation = 1;
-
-    //     bytes memory sig = abi.encodePacked(
-    //         uint8(1), // keySlot
-    //         uint8(1), // signatureType
-    //         abi.encode(
-    //             DaimoAccount.WebAuthnSignature({
-    //                 authenticatorData: authenticatorData,
-    //                 clientDataJSON: clientDataJSON,
-    //                 challengeLocation: challengeLocation,
-    //                 responseTypeLocation: responseTypeLocation,
-    //                 r: r,
-    //                 s: s
-    //             })
-    //         ) // signature
-    //     );
-
-    //     bytes4 ret = account.isValidSignature(bytes32(challenge), sig);
-    //     assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
-    // }
 }
