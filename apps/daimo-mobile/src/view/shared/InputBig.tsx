@@ -1,6 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
-import { useCallback, useState } from "react";
+import { Ref, useCallback, useState } from "react";
 import { Platform, StyleSheet, TextInput, View } from "react-native";
 
 import { color, ss } from "./style";
@@ -16,6 +16,7 @@ export function InputBig({
   icon,
   center,
   autoFocus,
+  innerRef,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -25,6 +26,7 @@ export function InputBig({
   icon?: OctName;
   center?: boolean;
   autoFocus?: boolean;
+  innerRef?: Ref<TextInput>;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {
@@ -42,6 +44,7 @@ export function InputBig({
   return (
     <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
       <TextInput
+        ref={innerRef}
         placeholder={placeholder}
         placeholderTextColor={color.grayMid}
         value={value}

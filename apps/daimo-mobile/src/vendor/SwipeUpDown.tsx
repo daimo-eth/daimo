@@ -69,7 +69,6 @@ export function SwipeUpDown({
   swipeHeight,
 }: SwipeUpDownProps) {
   const ins = useSafeAreaInsets();
-  console.log(`[SWIPE] ins ${JSON.stringify(ins)}`);
 
   const maxHeight = screenDimensions.height - ins.top - ins.bottom;
   const posYMini = maxHeight - swipeHeight;

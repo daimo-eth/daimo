@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   kvList: {
     flexDirection: "column",
     paddingHorizontal: 4,
-    gap: 2,
+    gap: 8,
   },
   kvRow: {
     flexDirection: "row",

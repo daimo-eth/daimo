@@ -1,9 +1,17 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import React, { useCallback, useState } from "react";
-import { StyleSheet, TouchableHighlight, View } from "react-native";
+import {
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
+import { ButtonMed } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
@@ -16,32 +24,56 @@ export function SearchTab() {
   const [prefix, setPrefix] = useState("");
 
   return (
-    <View style={styles.vertSearch}>
-      <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
-      <Spacer h={24} />
-      <SearchResults prefix={prefix} />
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View>
+        <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
+        <Spacer h={24} />
+        <SearchResults prefix={prefix} />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 export function SearchResults({ prefix }: { prefix: string }) {
   const res = useRecipientSearch(prefix.trim().toLowerCase());
+
+  const recentsOnly = prefix === "";
+
   return (
-    <View style={styles.vertSearch}>
+    <ScrollView contentContainerStyle={styles.vertSearch} bounces={false}>
       {res.error && <ErrorRowCentered error={res.error} />}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
-          <TextLight>Search results</TextLight>
+          <TextLight>
+            {recentsOnly ? "Recent recipients" : "Search results"}
+          </TextLight>
         </View>
       )}
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
-      {res.recipients.length === 0 && (
-        <TextCenter>
-          <TextLight>No results</TextLight>
-        </TextCenter>
-      )}
+      {res.recipients.length === 0 && <NoSearchResults />}
+    </ScrollView>
+  );
+}
+
+function NoSearchResults() {
+  const nav = useNav();
+  const sendPaymentLink = () =>
+    nav.navigate("SendTab", { screen: "Send", params: { sendNote: true } });
+
+  return (
+    <View>
+      <Spacer h={16} />
+      <TextCenter>
+        <TextLight>No results</TextLight>
+      </TextCenter>
+      <Spacer h={32} />
+      <ButtonMed
+        type="subtle"
+        title="SEND PAYMENT LINK INSTEAD"
+        onPress={sendPaymentLink}
+      />
     </View>
   );
 }

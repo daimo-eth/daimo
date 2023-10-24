@@ -1,6 +1,13 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useState } from "react";
-import { Dimensions, StyleSheet, TouchableHighlight, View } from "react-native";
+import {
+  Dimensions,
+  Keyboard,
+  StyleSheet,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
@@ -46,23 +53,25 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={ss.container.screen}>
-      <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
-      {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
-      {searchPrefix == null && (
-        <>
-          <Spacer h={64} />
-          <AmountAndButtons account={account} />
-          <SwipeUpDown
-            itemMini={histList}
-            itemFull={histList}
-            onShowMini={() => setIsHistoryOpened(false)}
-            onShowFull={() => setIsHistoryOpened(true)}
-            swipeHeight={screenDimensions.height / 3}
-          />
-        </>
-      )}
-    </SafeAreaView>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={ss.container.screen}>
+        <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
+        {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
+        {searchPrefix == null && (
+          <>
+            <Spacer h={64} />
+            <AmountAndButtons account={account} />
+            <SwipeUpDown
+              itemMini={histList}
+              itemFull={histList}
+              onShowMini={() => setIsHistoryOpened(false)}
+              onShowFull={() => setIsHistoryOpened(true)}
+              swipeHeight={screenDimensions.height / 3}
+            />
+          </>
+        )}
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 

@@ -37,19 +37,22 @@ const Tab = createBottomTabNavigator<ParamListTab>();
 
 export function TabNav() {
   const opts: BottomTabNavigationOptions = {
-    // unmountOnBlur cannot be used.
-    // NativeStackNavigator has a bug where it remembers route after unmounting.
+    // Note: don't use unmountOnBlur here, it exposes nav bugs.
+    // NativeStackNavigator has a bug where it remembers route after unmounting,
+    // and another where dismissing a modal doesn't change the route.
     tabBarHideOnKeyboard: true,
   };
 
+  // Track whether we've onboarded. If not, show OnboardingScreen.
   const [account] = useAccount();
   const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
   useEffect(() => {
+    // This is a latch: if we clear the account, go back to onboarding.
     if (isOnboarded && account == null) setIsOnboarded(false);
   }, [isOnboarded, account]);
+  // Stay onboarding till it's complete.
   const onOnboardingComplete = () => setIsOnboarded(true);
 
-  // if (isOnboarded) return <HomeScreen />;
   if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
 
   return (

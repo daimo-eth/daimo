@@ -42,6 +42,7 @@ interface SendNavProp {
   recipient?: Recipient;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
+  sendNote?: boolean;
 }
 
 export type ParamListTab = {

@@ -7,7 +7,7 @@ import {
 import { chainConfig } from "@daimo/contract";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -40,7 +40,7 @@ const SegmentedControlFixed = SegmentedControl as any;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { link, recipient, dollars, requestId } = route.params || {};
+  const { link, recipient, dollars, requestId, sendNote } = route.params || {};
 
   const nav = useNav();
   const goBack = useCallback(() => {
@@ -61,7 +61,7 @@ export default function SendScreen({ route }: Props) {
       />
       <Spacer h={8} />
       <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={128}>
-        {!recipient && !link && <SendNav /> /* User picks who to pay */}
+        {!recipient && !link && <SendNav {...{ sendNote }} />}
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
           <SendChooseAmount recipient={recipient} onCancel={goBack} />
@@ -74,10 +74,20 @@ export default function SendScreen({ route }: Props) {
   );
 }
 
-function SendNav() {
+function SendNav({ sendNote }: { sendNote?: boolean }) {
   // Navigation
-  const [tab, setTab] = useState<SendTab>("Search");
+
+  const [tab, setTab] = useState<SendTab>(sendNote ? "Send Link" : "Search");
   const [tabs] = useState(["Search", "Send Link"] as SendTab[]);
+
+  // Hack: listen for prop changed due to navigation
+  const refSend = useRef(!!sendNote);
+  useEffect(() => {
+    if (!!sendNote !== refSend.current) {
+      setTab(sendNote ? "Send Link" : "Search");
+    }
+    refSend.current = !!sendNote;
+  }, [sendNote]);
 
   return (
     <View>

@@ -19,7 +19,7 @@ import { AddrText } from "../shared/addr";
 import { ParamListHome } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import { TextBody, TextH3, TextLight } from "../shared/text";
+import { TextBody, TextCenter, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
 
@@ -48,7 +48,9 @@ export function HistoryOpScreen({ route, navigation }: Props) {
       <Spacer h={32} />
       {body}
       <Spacer h={32} />
-      {op.txHash && <LinkToExplorer txHash={op.txHash} />}
+      <View style={ss.container.padH16}>
+        {op.txHash && <LinkToExplorer txHash={op.txHash} />}
+      </View>
     </View>
   );
 }
@@ -84,7 +86,8 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
 
   const kv: [string, ReactNode][] = [];
 
-  if (op.from === account.address) {
+  const sentByUs = op.from === account.address;
+  if (sentByUs) {
     kv.push(["Recipient", <AddrText addr={op.to} />]);
   } else {
     kv.push(["Sender", <AddrText addr={op.from} />]);
@@ -103,10 +106,15 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
 
   const coinName = chainConfig.tokenSymbol;
   const chainName = chainConfig.chainL2.name;
-  kv.push(["Currency", `${coinName} on ${chainName}`]);
+  kv.push(["Currency", coinName]);
+  kv.push(["Chain", `${chainName}`]);
 
   return (
     <View>
+      <Spacer h={64} />
+      <TextCenter>
+        <TextLight>{sentByUs ? "Sent" : "Received"}</TextLight>
+      </TextCenter>
       <TitleAmount amount={BigInt(op.amount)} />
       <Spacer h={32} />
       <View style={styles.kvWrap}>
@@ -121,7 +129,7 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
           ))}
         </View>
       </View>
-      <Spacer h={16} />
+      <Spacer h={32} />
       <View style={styles.statusRow}>
         <OpStatusIndicator status={op.status} size={24} />
         <TextH3>
@@ -139,7 +147,7 @@ const styles = StyleSheet.create({
   },
   kvList: {
     flexDirection: "column",
-    gap: 4,
+    gap: 8,
   },
   kvRow: {
     flexDirection: "row",

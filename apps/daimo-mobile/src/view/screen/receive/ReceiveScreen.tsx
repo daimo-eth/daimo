@@ -3,10 +3,12 @@ import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
 import { useRef, useState } from "react";
 import {
   Alert,
+  Keyboard,
   Platform,
   Share,
   ShareAction,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { Hex } from "viem";
@@ -85,28 +87,30 @@ export default function ReceiveScreen() {
   };
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader title="Send request" onExit={useExitToHome()} />
-      <Spacer h={64} />
-      <TextCenter>
-        <TextLight>Enter amount to request</TextLight>
-      </TextCenter>
-      <Spacer h={24} />
-      <AmountChooser
-        dollars={dollars}
-        onSetDollars={setDollars}
-        showAmountAvailable={false}
-        innerRef={textInputRef}
-        disabled={status !== "creating"}
-      />
-      <Spacer h={32} />
-      <ButtonBig
-        type={status === "sent" ? "success" : "primary"}
-        disabled={dollars <= 0 || status !== "creating"}
-        title={status === "sent" ? "Sent" : "Send Request"}
-        onPress={sendRequest}
-      />
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={ss.container.screen}>
+        <ScreenHeader title="Send request" onExit={useExitToHome()} />
+        <Spacer h={64} />
+        <TextCenter>
+          <TextLight>Enter amount to request</TextLight>
+        </TextCenter>
+        <Spacer h={24} />
+        <AmountChooser
+          dollars={dollars}
+          onSetDollars={setDollars}
+          showAmountAvailable={false}
+          innerRef={textInputRef}
+          disabled={status !== "creating"}
+        />
+        <Spacer h={32} />
+        <ButtonBig
+          type={status === "sent" ? "success" : "primary"}
+          disabled={dollars <= 0 || status !== "creating"}
+          title={status === "sent" ? "Sent" : "Send Request"}
+          onPress={sendRequest}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
