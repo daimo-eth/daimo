@@ -144,7 +144,8 @@ export function createRouter(
           name,
           pubKeyHex,
           nameReg,
-          accountFactory
+          accountFactory,
+          telemetry
         );
         return { status: "success", address };
       }),

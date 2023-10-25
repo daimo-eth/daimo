@@ -5,12 +5,14 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
+import { Telemetry } from "../telemetry";
 
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
   nameReg: NameRegistry,
-  accountFactory: AccountFactory
+  accountFactory: AccountFactory,
+  telemetry: Telemetry
 ): Promise<Address> {
   const maxUint256 = 2n ** 256n - 1n;
   const initCalls: DaimoAccountCall[] = [
@@ -51,6 +53,10 @@ export async function deployWallet(
   } else {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
   }
+
+  const explorer = chainConfig.chainL2.blockExplorers!.default.url;
+  const url = `${explorer}/address/${address}`;
+  telemetry.recordClippy(`New user ${name} at ${url}`, "info");
 
   return address;
 }

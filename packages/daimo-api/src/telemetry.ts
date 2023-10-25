@@ -4,6 +4,7 @@ import geoIP from "geoip-lite";
 import Libhoney from "libhoney";
 import z from "zod";
 
+import { chainConfig } from "./env";
 import { TrpcRequestContext } from "./trpc";
 
 // More keys to come. This list ensures we don't duplicate columns.
@@ -98,26 +99,38 @@ export class Telemetry {
       "rpc.user_agent": userAgent,
     });
 
-    if (actionName === "deployWallet") {
-      this.recordClippy(
-        `It looks like you have a new user! ${accountName} from ${ipCountry}`
-      );
-    } else if (actionName === "client-onramp-cbpay") {
+    if (actionName === "client-onramp-cbpay") {
       const m = error ? `failed: ${error}` : "succeeded";
-      this.recordClippy(`${accountName} from ${ipCountry} ${actionName} ${m}`);
+      this.recordClippy(
+        `${accountName} from ${ipCountry} ${actionName} ${m}`,
+        error ? "error" : "celebrate"
+      );
     }
   }
 
   /** Clippy is our Slack bot for API monitoring. */
-  private recordClippy(message: string) {
+  recordClippy(
+    message: string,
+    level: "info" | "warn" | "error" | "celebrate" = "info"
+  ) {
     const url = process.env.CLIPPY_WEBHOOK_URL || "";
-    console.log(`[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${message}`);
+    const levelEmoji = {
+      info: "",
+      warn: ":warning:",
+      error: ":x:",
+      celebrate: ":tada:",
+    }[level];
+    const fullMessage = `[${chainConfig.chainL2.name}]${levelEmoji} ${message}`;
+
+    console.log(
+      `[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${fullMessage}`
+    );
     if (url === "") return;
 
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: message }),
+      body: JSON.stringify({ text: fullMessage }),
     });
   }
 }

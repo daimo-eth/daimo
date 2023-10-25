@@ -23,6 +23,7 @@
     "@trpc/server": "^10.40.0",
     "@types/geoip-lite": "^1.4.2",
     "abitype": "^0.9.2",
+    "cron": "^3.1.4",
     "expo-server-sdk": "^3.7.0",
     "geoip-lite": "^1.4.7",
     "libhoney": "^4.1.0",
