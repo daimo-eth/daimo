@@ -6,6 +6,7 @@ import {
   KeyData,
   ChainGasConstants,
   DaimoLinkNote,
+  TrackedNote,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -62,10 +63,6 @@ export type Account = {
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
 };
-
-export interface TrackedNote extends DaimoLinkNote {
-  opHash?: Hex;
-}
 
 export function toEAccount(account: Account): EAccount {
   return { addr: account.address, name: account.name };

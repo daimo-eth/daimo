@@ -40,7 +40,7 @@ export function SearchHeader({
   return (
     <View style={styles.header}>
       <ButtonCircle onPress={goToAccount}>
-        <AccountBubble eAcc={eAcc} size={50} />
+        <AccountBubble eAcc={eAcc} size={50} transparent />
       </ButtonCircle>
       <InputBig
         icon="search"
@@ -71,6 +71,7 @@ function ButtonCircle({
     <TouchableHighlight
       onPress={onPress}
       style={styles.buttonCircle}
+      hitSlop={12}
       {...touchHighlightUnderlay.subtle}
     >
       {children}
@@ -86,16 +87,15 @@ const styles = StyleSheet.create({
     marginHorizontal: -12,
   },
   buttonCircle: {
-    width: 74,
-    height: 74,
+    width: 50,
+    height: 50,
     borderRadius: 50,
-    padding: 12,
+    margin: 12,
   },
   qrCircle: {
     width: 50,
     height: 50,
     borderRadius: 50,
-    backgroundColor: color.white,
     borderWidth: 1,
     borderColor: color.grayLight,
     display: "flex",

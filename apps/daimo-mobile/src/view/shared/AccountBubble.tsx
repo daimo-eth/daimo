@@ -9,10 +9,12 @@ export function AccountBubble({
   eAcc,
   size,
   isPending,
+  transparent,
 }: {
   eAcc: EAccount;
   size: number;
   isPending?: boolean;
+  transparent?: boolean;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
 
@@ -21,7 +23,7 @@ export function AccountBubble({
       width: size,
       height: size,
       borderRadius: size / 2,
-      backgroundColor: color.white,
+      backgroundColor: transparent ? "transparent" : color.white,
       borderWidth: 1,
       borderColor: col,
       alignItems: "center",

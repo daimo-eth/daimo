@@ -3,6 +3,7 @@ import {
   DaimoNoteStatus,
   OpEvent,
   timeString,
+  TrackedNote,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
@@ -13,7 +14,7 @@ import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { NoteDisplay } from "./link/NoteScreen";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
-import { Account, TrackedNote } from "../../model/account";
+import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { Badge } from "../shared/Badge";

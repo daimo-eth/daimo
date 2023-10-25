@@ -1,6 +1,8 @@
 import { Address, Hex } from "viem";
 import { z } from "zod";
 
+import { DaimoLinkNote } from "./daimoLink";
+
 export const zAddress = z
   .string()
   .regex(/^0x[0-9a-f]{40}$/i)
@@ -44,6 +46,10 @@ export const zTrackedRequest = z.object({
 });
 
 export type TrackedRequest = z.infer<typeof zTrackedRequest>;
+
+export interface TrackedNote extends DaimoLinkNote {
+  opHash?: Hex;
+}
 
 export const zKeyData = z.object({
   pubKey: zHex, // DER Format
