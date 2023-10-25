@@ -47,8 +47,8 @@ function HistoryListBody({
   const ops = account.recentTransfers.slice().reverse();
   if (ops.length === 0) {
     return (
-      <View style={styles.historyListBody}>
-        <Spacer h={8} />
+      <View>
+        <Spacer h={16} />
         <TextCenter>
           <TextLight>No transactions yet</TextLight>
         </TextCenter>
@@ -72,6 +72,7 @@ function HistoryListBody({
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title="Transaction history" />
         {ops.slice(0, maxToShow).map(renderRow)}
+        <View style={styles.transferBorder} />
       </View>
     );
   }
@@ -217,8 +218,6 @@ const styles = StyleSheet.create({
     borderRadiusTopRight: 16,
   },
   historyListBody: {
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
     paddingHorizontal: 24,
     marginBottom: 48,
   },

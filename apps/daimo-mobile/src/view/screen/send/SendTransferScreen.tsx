@@ -28,7 +28,7 @@ import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextBody, TextH3 } from "../../shared/text";
+import { TextBody, TextH3, TextLight } from "../../shared/text";
 import { withAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
@@ -233,8 +233,9 @@ function RecipientDisplay({
   return (
     <View style={styles.recipientDisp}>
       <AccountBubble eAcc={recipient} size={64} />
-      {isRequest && <TextBody>Requested by</TextBody>}
       <Spacer h={16} />
+      {isRequest && <TextLight>Requested by</TextLight>}
+      {isRequest && <Spacer h={8} />}
       <TextH3>{disp}</TextH3>
     </View>
   );

@@ -27,7 +27,7 @@ export function QRScreen() {
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title={title} onExit={useExitToHome()} />
+      <ScreenHeader title={title} onBack={useExitToHome()} />
       <Spacer h={8} />
       <SegmentedControl
         values={tabs}

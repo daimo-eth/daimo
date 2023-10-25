@@ -66,10 +66,15 @@ function SendTransferButtonInner({
     namedAccounts: recipient.name ? [recipient as EAccount] : [],
   });
 
-  const sendDisabledReason =
-    account.lastBalance < dollarsToAmount(cost.totalDollars)
-      ? "Insufficient funds"
-      : undefined;
+  const sendDisabledReason = (function () {
+    if (account.lastBalance < dollarsToAmount(cost.totalDollars)) {
+      return "Insufficient funds";
+    } else if (account.address === recipient.addr) {
+      return "Can't send to yourself";
+    } else {
+      return undefined;
+    }
+  })();
   const disabled = sendDisabledReason != null || dollars === 0;
 
   const button = (function () {

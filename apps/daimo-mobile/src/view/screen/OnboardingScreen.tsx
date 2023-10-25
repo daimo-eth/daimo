@@ -31,7 +31,7 @@ import {
 } from "../../logic/key";
 import { NamedError } from "../../logic/log";
 import { defaultEnclaveKeyName } from "../../model/account";
-import { ButtonBig } from "../shared/Button";
+import { ButtonBig, TextButton } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -310,7 +310,7 @@ function InvitePage({
 
   return (
     <View style={styles.createAccountPage}>
-      <View style={ss.container.center}>
+      <View style={{ flexDirection: "row", justifyContent: "center" }}>
         <Octicons name="mail" size={40} color={color.midnight} />
       </View>
       <Spacer h={32} />
@@ -321,16 +321,16 @@ function InvitePage({
         </TextParagraph>
       </TextCenter>
       <Spacer h={32} />
+      <TextCenter>
+        <TextLight>{status}</TextLight>
+      </TextCenter>
+      <Spacer h={16} />
       <InputBig
         placeholder="enter invite code"
         value={inviteCode}
         onChange={onChange}
         center
       />
-      <Spacer h={8} />
-      <TextCenter>
-        <TextLight>{status}</TextLight>
-      </TextCenter>
       <Spacer h={16} />
       <ButtonBig
         type="primary"
@@ -339,7 +339,7 @@ function InvitePage({
         disabled={!isValid}
       />
       <Spacer h={16} />
-      <ButtonBig type="subtle" title="Join waitlist" onPress={linkToWaitlist} />
+      <TextButton title="Join waitlist" onPress={linkToWaitlist} />
     </View>
   );
 }
@@ -538,6 +538,10 @@ function CreateAccountPage({
       <View>
         <OnboardingHeader title="Create Account" onPrev={onPrev} />
         <View style={styles.createAccountPage}>
+          <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <Octicons name="person" size={40} color={color.midnight} />
+          </View>
+          <Spacer h={32} />
           <View style={styles.namePickerWrap}>
             {status === "idle" && (
               <NamePicker
@@ -767,7 +771,7 @@ const styles = StyleSheet.create({
     height: 168,
   },
   createAccountPage: {
-    paddingTop: 128,
+    paddingTop: 180,
     paddingHorizontal: 24,
   },
   useExistingPage: {
