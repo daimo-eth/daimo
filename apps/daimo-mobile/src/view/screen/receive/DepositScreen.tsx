@@ -63,6 +63,12 @@ export default function DepositScreen() {
         <Spacer h={16} />
         <AddressCopier addr={account.address} />
       </View>
+      <View style={styles.callout}>
+        <TextBody>
+          <Octicons name="alert" size={16} color="black" /> Send USDC (Base
+          Native) only. Daimo does not support other tokens.
+        </TextBody>
+      </View>
     </View>
   );
 }
