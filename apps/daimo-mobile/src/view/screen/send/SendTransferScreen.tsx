@@ -28,7 +28,7 @@ import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextBody, TextH3, TextLight } from "../../shared/text";
+import { TextH3, TextLight } from "../../shared/text";
 import { withAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;

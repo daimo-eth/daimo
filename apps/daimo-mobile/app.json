@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.daimo",
-      "buildNumber": "60",
+      "buildNumber": "61",
       "associatedDomains": ["applinks:daimo.xyz", "webcredentials:daimo.xyz"],
       "config": {
         "usesNonExemptEncryption": false
@@ -50,7 +50,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.daimo",
-      "versionCode": 60
+      "versionCode": 61
     },
     "extra": {
       "eas": {
