@@ -1,5 +1,7 @@
 import {
+  AddrLabel,
   DaimoLink,
+  EAccount,
   OpStatus,
   dollarsToAmount,
   formatDaimoLink,
@@ -80,6 +82,12 @@ function SendNoteButtonInner({
         },
       ],
     }),
+    namedAccounts: [
+      {
+        addr: daimoEphemeralNotesAddress,
+        label: AddrLabel.PaymentLink,
+      } as EAccount,
+    ],
   });
 
   const sendDisabledReason =

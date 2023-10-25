@@ -1,4 +1,10 @@
-import { EAccount, OpStatus, assert, dollarsToAmount } from "@daimo/common";
+import {
+  EAccount,
+  OpStatus,
+  assert,
+  dollarsToAmount,
+  hasAccountName,
+} from "@daimo/common";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -63,7 +69,7 @@ function SendTransferButtonInner({
       timestamp: 0,
       nonceMetadata: nonceMetadata.toHex(),
     },
-    namedAccounts: recipient.name ? [recipient as EAccount] : [],
+    namedAccounts: hasAccountName(recipient) ? [recipient as EAccount] : [],
   });
 
   const sendDisabledReason = (function () {

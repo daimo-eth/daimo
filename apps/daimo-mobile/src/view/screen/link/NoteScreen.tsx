@@ -1,6 +1,8 @@
 import {
+  AddrLabel,
   DaimoLinkNote,
   DaimoNoteStatus,
+  EAccount,
   OpStatus,
   dollarsToAmount,
   getAccountName,
@@ -149,6 +151,12 @@ function NoteDisplayInner({
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonceMetadata.toHex(),
     },
+    namedAccounts: [
+      {
+        addr: daimoEphemeralNotesAddress,
+        label: AddrLabel.PaymentLink,
+      } as EAccount,
+    ],
   });
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);
