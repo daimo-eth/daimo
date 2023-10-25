@@ -213,7 +213,7 @@ export class ViemClient {
 
     // Catch up to latest block
     const isTestnet = this.publicClient.chain.testnet;
-    const startBlock = isTestnet ? 8750000n : 0n;
+    const startBlock = isTestnet ? 8750000n : 5700000n;
     const lastBlockNum = BigInt(this.lastBlock.number);
     const step = 5000n;
     for (
