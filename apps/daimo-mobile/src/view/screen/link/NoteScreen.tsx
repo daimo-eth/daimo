@@ -26,7 +26,13 @@ import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ParamListReceive, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
+import {
+  TextBody,
+  TextBold,
+  TextCenter,
+  TextError,
+  TextLight,
+} from "../../shared/text";
 import { withAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListReceive, "Note">;
@@ -83,10 +89,13 @@ function Spinner() {
 
 interface NoteDisplayProps {
   noteStatus: DaimoNoteStatus;
-  ephemeralPrivateKey: `0x${string}` | undefined;
+  ephemeralPrivateKey?: `0x${string}`;
 }
 
-function NoteDisplay(props: NoteDisplayProps) {
+/// Displays a note: amount, status, and button to claim.
+export function NoteDisplay(
+  props: NoteDisplayProps & { hideAmount?: boolean }
+) {
   const Inner = withAccount(NoteDisplayInner);
   return <Inner {...props} />;
 }
@@ -95,7 +104,8 @@ function NoteDisplayInner({
   account,
   noteStatus,
   ephemeralPrivateKey,
-}: NoteDisplayProps & { account: Account }) {
+  hideAmount,
+}: NoteDisplayProps & { account: Account; hideAmount?: boolean }) {
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address
@@ -159,7 +169,11 @@ function NoteDisplayInner({
           <TextBold>Claimed by {getAccountName(noteStatus.claimer!)}</TextBold>
         );
       case "cancelled":
-        return <TextError>Cancelled by sender</TextError>;
+        if (isOwnSentNote) {
+          return <TextBody>You reclaimed this payment link</TextBody>;
+        } else {
+          return <TextError>Cancelled by sender</TextError>;
+        }
       default:
       // Pending note, available to claim
     }
@@ -182,13 +196,11 @@ function NoteDisplayInner({
   })();
 
   const button = (function () {
-    switch (noteStatus.status) {
-      case "claimed":
-      case "cancelled":
-        return null;
-      default:
-      // Pending note, available to claim
-    }
+    // Pending notes are not yet claimable.
+    // Claimed and cancelled notes are no longer claimable.
+    // Only "confirmed" notes are claimable.
+    const isClaimable = noteStatus.status === "confirmed";
+
     switch (status) {
       case "idle":
         if (isOwnSentNote) {
@@ -197,7 +209,7 @@ function NoteDisplayInner({
               type="primary"
               title="Reclaim"
               onPress={exec}
-              disabled={netRecv === 0}
+              disabled={!isClaimable || netRecv === 0}
             />
           );
         } else {
@@ -206,7 +218,7 @@ function NoteDisplayInner({
               type="primary"
               title="Claim"
               onPress={exec}
-              disabled={netRecv === 0}
+              disabled={!isClaimable || netRecv === 0}
             />
           );
         }
@@ -221,13 +233,17 @@ function NoteDisplayInner({
 
   return (
     <>
-      <Spacer h={64} />
-      <TextCenter>
-        <TextLight>{sendPhrase}</TextLight>
-      </TextCenter>
-      <Spacer h={8} />
-      <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
-      <Spacer h={32} />
+      {!hideAmount && (
+        <>
+          <Spacer h={64} />
+          <TextCenter>
+            <TextLight>{sendPhrase}</TextLight>
+          </TextCenter>
+          <Spacer h={8} />
+          <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
+          <Spacer h={32} />
+        </>
+      )}
       <View style={ss.container.padH16}>{button}</View>
       <Spacer h={16} />
       <TextCenter>

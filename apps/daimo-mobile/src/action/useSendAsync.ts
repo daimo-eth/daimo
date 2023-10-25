@@ -1,4 +1,10 @@
-import { EAccount, OpEvent, UserOpHex, dollarsToAmount } from "@daimo/common";
+import {
+  EAccount,
+  OpEvent,
+  TransferOpEvent,
+  UserOpHex,
+  dollarsToAmount,
+} from "@daimo/common";
 import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useCallback, useEffect } from "react";
@@ -26,7 +32,7 @@ export function useSendAsync({
   pendingOp?: OpEvent;
   namedAccounts?: EAccount[];
   /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account) => Account;
+  accountTransform?: (account: Account, pendingOp: TransferOpEvent) => Account;
 }): ActHandle {
   const [as, setAS] = useActStatus();
 
@@ -63,7 +69,7 @@ export function useSendAsync({
       };
 
       if (accountTransform) {
-        newAccount = accountTransform(newAccount);
+        newAccount = accountTransform(newAccount, pendingOp);
       }
 
       // TODO: add pending device add/removes

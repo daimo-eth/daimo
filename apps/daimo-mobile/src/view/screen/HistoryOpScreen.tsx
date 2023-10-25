@@ -1,23 +1,36 @@
-import { amountToDollars, timeString, TransferOpEvent } from "@daimo/common";
+import {
+  amountToDollars,
+  DaimoNoteStatus,
+  OpEvent,
+  timeString,
+} from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 
+import { NoteDisplay } from "./link/NoteScreen";
 import { env } from "../../logic/env";
-import { Account } from "../../model/account";
+import { useFetchLinkStatus } from "../../logic/linkStatus";
+import { Account, TrackedNote } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
-import { ButtonMed } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
 import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
 import { ParamListHome } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import { TextBody, TextCenter, TextH3, TextLight } from "../shared/text";
+import {
+  TextBody,
+  TextCenter,
+  TextError,
+  TextH3,
+  TextLight,
+} from "../shared/text";
 import { withAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
@@ -30,12 +43,18 @@ export function HistoryOpScreen(props: Props) {
 function HistoryOpScreenInner({
   account,
   route,
-  navigation,
 }: Props & { account: Account }) {
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
   let { op } = route.params;
   op = syncFindSameOp(op, account.recentTransfers) || op;
+
+  // If we sent a note, show the note screen.
+  // TODO: annotate note info directly on op via sync
+  // This approach works, but means we can never expire "pendingNotes"
+  // even when they are no longer pending.
+  const pendingNote =
+    op.opHash && account.pendingNotes.find((n) => n.opHash === op.opHash);
 
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 
@@ -50,6 +69,30 @@ function HistoryOpScreenInner({
           <LinkToExplorer {...{ chainConfig }} txHash={op.txHash} />
         )}
       </View>
+      <Spacer h={16} />
+      {pendingNote && <NoteView account={account} note={pendingNote} />}
+    </View>
+  );
+}
+
+function NoteView({ account, note }: { account: Account; note: TrackedNote }) {
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const noteFetch = useFetchLinkStatus(note, daimoChain)!;
+  const noteStatus = noteFetch.data as DaimoNoteStatus | undefined;
+
+  return (
+    <View>
+      {noteFetch.isFetching && <Spinner />}
+      {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
+      {noteStatus && <NoteDisplay {...{ account, noteStatus }} hideAmount />}
+    </View>
+  );
+}
+
+function Spinner() {
+  return (
+    <View style={ss.container.center}>
+      <ActivityIndicator size="large" />
     </View>
   );
 }
@@ -67,7 +110,7 @@ function LinkToExplorer({
   const openURL = useCallback(() => Linking.openURL(url), []);
 
   return (
-    <ButtonMed
+    <ButtonBig
       onPress={openURL}
       type="subtle"
       title={`View on ${explorer.name}`}
@@ -75,13 +118,7 @@ function LinkToExplorer({
   );
 }
 
-function TransferBody({
-  account,
-  op,
-}: {
-  account: Account;
-  op: TransferOpEvent;
-}) {
+function TransferBody({ account, op }: { account: Account; op: OpEvent }) {
   const opRequestId = op.nonceMetadata
     ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
     : undefined;

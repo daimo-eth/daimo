@@ -50,7 +50,7 @@ export type Account = {
   /** Requests sent from this account. */
   trackedRequests: TrackedRequest[];
   /** Payment links created by this account, but not yet claimed. */
-  pendingNotes: DaimoLinkNote[];
+  pendingNotes: TrackedNote[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
@@ -62,6 +62,10 @@ export type Account = {
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
 };
+
+export interface TrackedNote extends DaimoLinkNote {
+  opHash?: Hex;
+}
 
 export function toEAccount(account: Account): EAccount {
   return { addr: account.address, name: account.name };

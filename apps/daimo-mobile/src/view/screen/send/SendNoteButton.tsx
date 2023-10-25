@@ -66,7 +66,7 @@ function SendNoteButtonInner({
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),
     },
-    accountTransform: (account) => ({
+    accountTransform: (account, pendingOp) => ({
       ...account,
       pendingNotes: [
         ...account.pendingNotes,
@@ -76,6 +76,7 @@ function SendNoteButtonInner({
           ephemeralPrivateKey: ephemeralPrivKey,
           previewDollars: `${dollars}`,
           previewSender: account.name,
+          opHash: pendingOp.opHash,
         },
       ],
     }),
