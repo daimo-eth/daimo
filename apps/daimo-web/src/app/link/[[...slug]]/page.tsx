@@ -121,7 +121,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
         title: `${link.previewSender} sent $${Number(
           link.previewDollars
         ).toFixed(2)}`,
-        description: "Couldn't load Payment Link status",
+        description: "Couldn't load payment link",
       };
     }
   }

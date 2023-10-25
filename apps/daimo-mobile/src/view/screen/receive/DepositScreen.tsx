@@ -1,4 +1,4 @@
-import { AddrLabel, assert } from "@daimo/common";
+import { AddrLabel } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
@@ -8,7 +8,7 @@ import { Address, getAddress } from "viem";
 
 import { CBPayWebView } from "./OnrampCBPay";
 import { env } from "../../../logic/env";
-import { useAccount } from "../../../model/account";
+import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -41,7 +41,9 @@ export default function DepositScreen() {
     <View style={ss.container.screen}>
       <ScreenHeader title="Deposit" onExit={goHome} />
       <Spacer h={16} />
-      {testnet && <TestnetFaucet recipient={account.address} />}
+      {testnet && (
+        <TestnetFaucet account={account} recipient={account.address} />
+      )}
       {testnet && <Spacer h={32} />}
       {!testnet && (
         <ButtonMed
@@ -66,9 +68,14 @@ export default function DepositScreen() {
 }
 
 /** Request token from testnet faucet. */
-function TestnetFaucet({ recipient }: { recipient: Address }) {
-  const [account, setAccount] = useAccount();
-  assert(account != null);
+function TestnetFaucet({
+  account,
+  recipient,
+}: {
+  account: Account;
+  recipient: Address;
+}) {
+  const [, setAccount] = useAccount();
 
   const rpcHook = env(daimoChainFromId(account.homeChainId)).rpcHook;
 

@@ -1,69 +1,67 @@
-import {
-  amountToDollars,
-  assert,
-  timeString,
-  TransferOpEvent,
-} from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
+import { amountToDollars, timeString, TransferOpEvent } from "@daimo/common";
+import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useCallback, useEffect } from "react";
+import { ReactNode, useCallback } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { env } from "../../logic/env";
-import { useAccount } from "../../model/account";
+import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
+import { Badge } from "../shared/Badge";
 import { ButtonMed } from "../shared/Button";
+import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
 import { ParamListHome } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import { TextBody, TextCenter, TextH3, TextLight } from "../shared/text";
+import { withAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
 
-export function HistoryOpScreen({ route, navigation }: Props) {
+export function HistoryOpScreen(props: Props) {
+  const Inner = withAccount(HistoryOpScreenInner);
+  return <Inner {...props} />;
+}
+
+function HistoryOpScreenInner({
+  account,
+  route,
+  navigation,
+}: Props & { account: Account }) {
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
-  const [account] = useAccount();
-  assert(account != null);
-
   let { op } = route.params;
   op = syncFindSameOp(op, account.recentTransfers) || op;
 
-  const [title, body] = (() => {
-    switch (op.type) {
-      case "transfer":
-        return ["Transfer", <TransferBody op={op} />];
-      default:
-        throw new Error(`unknown op type ${op.type}`);
-    }
-  })();
-
-  useEffect(() => {
-    navigation.setOptions({ title });
-  }, [navigation, title]);
+  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 
   return (
     <View style={ss.container.screen}>
-      <Spacer h={32} />
-      {body}
-      <Spacer h={32} />
+      <ScreenHeader title="Transfer" modal onExit={useExitBack()} />
+      <Spacer h={64} />
+      <TransferBody account={account} op={op} />
+      <Spacer h={64} />
       <View style={ss.container.padH16}>
-        {op.txHash && <LinkToExplorer txHash={op.txHash} />}
+        {op.txHash && (
+          <LinkToExplorer {...{ chainConfig }} txHash={op.txHash} />
+        )}
       </View>
     </View>
   );
 }
 
-function LinkToExplorer({ txHash }: { txHash: string }) {
-  const [account] = useAccount();
-  assert(account != null);
-
-  const explorer = env(daimoChainFromId(account.homeChainId)).chainConfig
-    .chainL2.blockExplorers!.default;
+function LinkToExplorer({
+  chainConfig,
+  txHash,
+}: {
+  chainConfig: ChainConfig;
+  txHash: string;
+}) {
+  const explorer = chainConfig.chainL2.blockExplorers!.default;
   const url = `${explorer.url}/tx/${txHash}`;
 
   const openURL = useCallback(() => Linking.openURL(url), []);
@@ -77,10 +75,13 @@ function LinkToExplorer({ txHash }: { txHash: string }) {
   );
 }
 
-function TransferBody({ op }: { op: TransferOpEvent }) {
-  const [account] = useAccount();
-  assert(account != null);
-
+function TransferBody({
+  account,
+  op,
+}: {
+  account: Account;
+  op: TransferOpEvent;
+}) {
   const opRequestId = op.nonceMetadata
     ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
     : undefined;
@@ -108,7 +109,18 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
   kv.push(["Date", timeString(op.timestamp)]);
 
   if (op.feeAmount !== undefined) {
-    kv.push(["Fee", `$${amountToDollars(op.feeAmount)}`]);
+    const feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
+    const feeVal =
+      feeStr === "$0.00" ? (
+        <>
+          {feeStr}
+          <Spacer w={8} />
+          <Badge>FREE</Badge>
+        </>
+      ) : (
+        feeStr
+      );
+    kv.push(["Fee", feeVal]);
   }
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
@@ -119,7 +131,6 @@ function TransferBody({ op }: { op: TransferOpEvent }) {
 
   return (
     <View>
-      <Spacer h={64} />
       <TextCenter>
         <TextLight>{sentByUs ? "Sent" : "Received"}</TextLight>
       </TextCenter>

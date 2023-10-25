@@ -2,7 +2,6 @@ import {
   DaimoLinkNote,
   DaimoNoteStatus,
   OpStatus,
-  assert,
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
@@ -15,45 +14,62 @@ import {
 } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useMemo } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
-import { useAccount } from "../../../model/account";
+import { Account } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
+import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ParamListReceive, useNav } from "../../shared/nav";
-import { color, ss } from "../../shared/style";
+import { ss } from "../../shared/style";
 import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListReceive, "Note">;
 
-export default function NoteScreen({ route }: Props) {
-  const [account] = useAccount();
-  assert(account != null);
+export default function NoteScreen(props: Props) {
+  const Inner = withAccount(NoteScreenInner);
+  return <Inner {...props} />;
+}
 
+function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const { link } = route.params;
   const { ephemeralPrivateKey, ephemeralOwner } = link as DaimoLinkNote;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);
 
-  const noteStatus = useFetchLinkStatus(
+  const noteFetch = useFetchLinkStatus(
     link,
     daimoChainFromId(account.homeChainId)
   )!;
 
+  const noteStatus = noteFetch.data as DaimoNoteStatus | undefined;
+
+  const title = (function (): string {
+    switch (noteStatus?.status) {
+      case "claimed":
+        return "Claimed Link";
+      case "cancelled":
+        return "Cancelled Link";
+      default:
+        return "Payment Link";
+    }
+  })();
+
   return (
-    <ScrollView contentContainerStyle={styles.vertOuter} bounces={false}>
-      {noteStatus.isFetching && <Spinner />}
-      {noteStatus.error && <TextError>{noteStatus.error.message}</TextError>}
-      {noteStatus.data && (
-        <NoteDisplay
-          noteStatus={noteStatus.data as DaimoNoteStatus}
-          ephemeralPrivateKey={ephemeralPrivateKey}
-        />
-      )}
-    </ScrollView>
+    <View style={ss.container.screen}>
+      <ScreenHeader title={title} onExit={useExitToHome()} />
+      <ScrollView bounces={false}>
+        {noteFetch.isFetching && <Spinner />}
+        {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
+        {noteStatus && (
+          <NoteDisplay {...{ account, ephemeralPrivateKey, noteStatus }} />
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -65,18 +81,26 @@ function Spinner() {
   );
 }
 
-function NoteDisplay({
-  noteStatus,
-  ephemeralPrivateKey,
-}: {
+interface NoteDisplayProps {
   noteStatus: DaimoNoteStatus;
   ephemeralPrivateKey: `0x${string}` | undefined;
-}) {
-  const [account] = useAccount();
-  assert(account != null);
+}
 
+function NoteDisplay(props: NoteDisplayProps) {
+  const Inner = withAccount(NoteDisplayInner);
+  return <Inner {...props} />;
+}
+
+function NoteDisplayInner({
+  account,
+  noteStatus,
+  ephemeralPrivateKey,
+}: NoteDisplayProps & { account: Account }) {
   // Where the note came from
-  const senderName = getAccountName(noteStatus.sender);
+  const sendPhrase =
+    noteStatus.sender.addr === account.address
+      ? "You sent"
+      : getAccountName(noteStatus.sender) + " sent";
 
   // The note itself
   const { ephemeralOwner } = noteStatus.link;
@@ -199,23 +223,16 @@ function NoteDisplay({
     <>
       <Spacer h={64} />
       <TextCenter>
-        <TextLight>{senderName} sent</TextLight>
+        <TextLight>{sendPhrase}</TextLight>
       </TextCenter>
+      <Spacer h={8} />
       <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
-      {button}
+      <Spacer h={32} />
+      <View style={ss.container.padH16}>{button}</View>
+      <Spacer h={16} />
       <TextCenter>
         <TextLight>{statusMessage}</TextLight>
       </TextCenter>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  vertOuter: {
-    backgroundColor: color.white,
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: "hidden",
-  },
-});

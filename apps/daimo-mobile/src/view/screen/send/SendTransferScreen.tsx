@@ -2,25 +2,22 @@ import {
   DaimoAccountStatus,
   DaimoLink,
   DaimoRequestStatus,
-  assert,
   getAccountName,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
+  Keyboard,
   StyleSheet,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
-import { SearchTab } from "./SearchTab";
-import { SendNoteTab } from "./SendNoteTab";
 import { SendTransferButton } from "./SendTransferButton";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
-import { useAccount } from "../../../model/account";
+import { Account } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -29,41 +26,36 @@ import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { ParamListSend, useNav } from "../../shared/nav";
-import { color, ss } from "../../shared/style";
+import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
+import { ss } from "../../shared/style";
 import { TextBody, TextH3 } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListSend, "Send">;
-
-type SendTab = "Search" | "Send Link" | "Scan";
-
-// TODO: remove after upgrading react/expo to fix typescript error
-const SegmentedControlFixed = SegmentedControl as any;
+type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { link, recipient, dollars, requestId, sendNote } = route.params || {};
+  const { link, recipient, dollars, requestId } = route.params || {};
 
   const nav = useNav();
   const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
-      nav.navigate("SendTab", { screen: "Send", params });
+      nav.navigate("SendTab", { screen: "SendTransfer", params });
     if (dollars != null) goTo({ recipient });
-    else if (recipient != null) goTo({});
-    else nav.reset({ routes: [{ name: "HomeTab" }] });
+    else if (nav.canGoBack()) nav.goBack();
+    else navResetToHome(nav);
   }, [nav, dollars, recipient]);
   const goHome = useExitToHome();
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader
-        title="Send funds to"
-        onBack={goBack}
-        onExit={recipient && goHome}
-      />
-      <Spacer h={8} />
-      <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={128}>
-        {!recipient && !link && <SendNav {...{ sendNote }} />}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={ss.container.screen}>
+        <ScreenHeader
+          title="Send funds to"
+          onBack={goBack}
+          onExit={recipient && goHome}
+        />
+        <Spacer h={8} />
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
           <SendChooseAmount recipient={recipient} onCancel={goBack} />
@@ -71,47 +63,23 @@ export default function SendScreen({ route }: Props) {
         {recipient && dollars != null && (
           <SendConfirm {...{ recipient, dollars, requestId }} />
         )}
-      </KeyboardAvoidingView>
-    </View>
-  );
-}
-
-function SendNav({ sendNote }: { sendNote?: boolean }) {
-  // Navigation
-
-  const [tab, setTab] = useState<SendTab>(sendNote ? "Send Link" : "Search");
-  const [tabs] = useState(["Search", "Send Link"] as SendTab[]);
-
-  // Hack: listen for prop changed due to navigation
-  const refSend = useRef(!!sendNote);
-  useEffect(() => {
-    if (!!sendNote !== refSend.current) {
-      setTab(sendNote ? "Send Link" : "Search");
-    }
-    refSend.current = !!sendNote;
-  }, [sendNote]);
-
-  return (
-    <View>
-      <SegmentedControlFixed
-        values={tabs}
-        selectedIndex={tabs.indexOf(tab)}
-        onValueChange={setTab}
-        fontStyle={{ ...ss.text.body, color: color.grayDark }}
-        activeFontStyle={ss.text.body}
-        style={{ height: 48, backgroundColor: color.ivoryDark }}
-      />
-      <Spacer h={24} />
-      {tab === "Search" && <SearchTab />}
-      {tab === "Send Link" && <SendNoteTab />}
-    </View>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 function SendLoadRecipient({ link }: { link: DaimoLink }) {
-  const [account] = useAccount();
-  assert(account != null);
+  const Inner = withAccount(SendLoadRecipientInner);
+  return <Inner link={link} />;
+}
 
+function SendLoadRecipientInner({
+  account,
+  link,
+}: {
+  account: Account;
+  link: DaimoLink;
+}) {
   const nav = useNav();
 
   const status = useFetchLinkStatus(
@@ -125,7 +93,7 @@ function SendLoadRecipient({ link }: { link: DaimoLink }) {
       case "account": {
         const { account } = data as DaimoAccountStatus;
         nav.navigate("SendTab", {
-          screen: "Send",
+          screen: "SendTransfer",
           params: { recipient: account },
         });
         break;
@@ -135,7 +103,7 @@ function SendLoadRecipient({ link }: { link: DaimoLink }) {
         const { recipient, requestId } = data as DaimoRequestStatus;
         const { dollars } = data.link;
         nav.navigate("SendTab", {
-          screen: "Send",
+          screen: "SendTransfer",
           params: { recipient, requestId, dollars },
         });
         break;
@@ -165,7 +133,7 @@ function SendChooseAmount({
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
-      screen: "Send",
+      screen: "SendTransfer",
       params: { dollars: `${dollars}`, recipient },
     });
 

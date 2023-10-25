@@ -1,14 +1,8 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import React, { useCallback, useState } from "react";
-import {
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
+import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
@@ -18,29 +12,48 @@ import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextCenter, TextLight } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {
   const [prefix, setPrefix] = useState("");
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View>
+    <>
+      <View style={{ flexGrow: 0 }}>
         <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
-        <Spacer h={24} />
-        <SearchResults prefix={prefix} />
       </View>
-    </TouchableWithoutFeedback>
+      <Spacer h={24} />
+      <SearchResults prefix={prefix} />
+    </>
   );
 }
 
 export function SearchResults({ prefix }: { prefix: string }) {
-  const res = useRecipientSearch(prefix.trim().toLowerCase());
+  const Inner = withAccount(SearchResultsScroll);
+  return (
+    <View style={styles.resultsWrap}>
+      <Inner prefix={prefix.trim().toLowerCase()} />
+    </View>
+  );
+}
+
+function SearchResultsScroll({
+  account,
+  prefix,
+}: {
+  account: Account;
+  prefix: string;
+}) {
+  const res = useRecipientSearch(account, prefix);
 
   const recentsOnly = prefix === "";
 
   return (
-    <ScrollView contentContainerStyle={styles.vertSearch} bounces={false}>
+    <ScrollView
+      contentContainerStyle={styles.resultsScroll}
+      keyboardShouldPersistTaps="handled"
+    >
       {res.error && <ErrorRowCentered error={res.error} />}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
@@ -60,7 +73,7 @@ export function SearchResults({ prefix }: { prefix: string }) {
 function NoSearchResults() {
   const nav = useNav();
   const sendPaymentLink = () =>
-    nav.navigate("SendTab", { screen: "Send", params: { sendNote: true } });
+    nav.navigate("SendTab", { screen: "SendNav", params: { sendNote: true } });
 
   return (
     <View>
@@ -84,7 +97,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   const payAccount = useCallback(
     () =>
       nav.navigate("SendTab", {
-        screen: "Send",
+        screen: "SendTransfer",
         params: { recipient },
       }),
     [eAccStr]
@@ -116,9 +129,14 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
 }
 
 const styles = StyleSheet.create({
-  vertSearch: {
+  resultsWrap: {
+    flex: 1,
+    marginHorizontal: -16,
+  },
+  resultsScroll: {
     flexDirection: "column",
     alignSelf: "stretch",
+    paddingHorizontal: 16,
   },
   resultsHeader: {
     flexDirection: "row",

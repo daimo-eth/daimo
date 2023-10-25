@@ -1,4 +1,3 @@
-import { assert } from "@daimo/common";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -13,7 +12,7 @@ import { Hex } from "viem";
 import { useSendAsync } from "../../action/useSendAsync";
 import { parseAddDeviceString } from "../../logic/key";
 import { findUnusedSlot, keySlotToLabel } from "../../logic/keySlot";
-import { useAccount } from "../../model/account";
+import { Account } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Scanner } from "../shared/Scanner";
@@ -28,11 +27,14 @@ import {
   TextH2,
   TextLight,
 } from "../shared/text";
+import { withAccount } from "../shared/withAccount";
 
 export function AddDeviceScreen() {
-  const [account] = useAccount();
-  assert(account != null);
+  const Inner = withAccount(AddDeviceScreenInner);
+  return <Inner />;
+}
 
+function AddDeviceScreenInner({ account }: { account: Account }) {
   const [newKey, setNewKey] = useState<Hex>();
   const nextSlot = findUnusedSlot(
     account.accountKeys.map((k) => k.slot),

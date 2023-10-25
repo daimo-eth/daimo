@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
-import { Account, useAccount } from "../../model/account";
+import { Account } from "../../model/account";
 import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
@@ -22,34 +22,34 @@ import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
+import { withAccount } from "../shared/withAccount";
 
 export default function HomeScreen() {
-  const [account] = useAccount();
+  const Inner = withAccount(HomeScreenInner);
+  return <Inner />;
+}
+
+function HomeScreenInner({ account }: { account: Account }) {
   console.log(
-    `[HOME] rendering ${account?.name}, ${account?.recentTransfers?.length} ops`
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
 
-  const keySlot = account?.accountKeys.find(
-    (keyData) => keyData.pubKey === account?.enclavePubKey
+  // Initialize DaimoOpSender immediately for speed.
+  const keySlot = account.accountKeys.find(
+    (keyData) => keyData.pubKey === account.enclavePubKey
   )?.slot;
   useWarmCache(
-    account?.enclaveKeyName,
-    account?.address,
+    account.enclaveKeyName,
+    account.address,
     keySlot,
-    account?.homeChainId
+    account.homeChainId
   );
 
-  const nav = useNav();
-  const [isHistOpen, setIsHistOpen] = useState(false);
-  const setIsHistoryOpened = useCallback((isOpened: boolean) => {
-    setIsHistOpen(isOpened);
-    nav.setOptions({ title: isOpened ? "History" : "Home" });
-  }, []);
-
+  // Show search results when search is focused.
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
 
-  if (account == null) return null;
-
+  // Show history
+  const [isHistOpen, setIsHistOpen] = useState(false);
   const histList = (
     <HistoryListSwipe
       account={account}
@@ -69,8 +69,8 @@ export default function HomeScreen() {
             <SwipeUpDown
               itemMini={histList}
               itemFull={histList}
-              onShowMini={() => setIsHistoryOpened(false)}
-              onShowFull={() => setIsHistoryOpened(true)}
+              onShowMini={() => setIsHistOpen(false)}
+              onShowFull={() => setIsHistOpen(true)}
               swipeHeight={screenDimensions.height / 3}
             />
           </>
@@ -83,7 +83,7 @@ export default function HomeScreen() {
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
   const goSend = useCallback(
-    () => nav.navigate("SendTab", { screen: "Send", params: {} }),
+    () => nav.navigate("SendTab", { screen: "SendNav", params: {} }),
     [nav]
   );
   const goRequest = useCallback(

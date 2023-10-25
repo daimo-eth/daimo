@@ -22,7 +22,8 @@ export type ParamListHome = {
 };
 
 export type ParamListSend = {
-  Send: SendNavProp;
+  SendNav: { sendNote?: boolean };
+  SendTransfer: SendNavProp;
 };
 
 export type ParamListReceive = {
@@ -42,7 +43,6 @@ interface SendNavProp {
   recipient?: Recipient;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
-  sendNote?: boolean;
 }
 
 export type ParamListTab = {
@@ -59,7 +59,7 @@ export function useNav<
   return useNavigation<NativeStackNavigationProp<ParamListTab, RouteName>>();
 }
 
-export type HomeStackNav = ReturnType<typeof useNav>;
+export type MainNav = ReturnType<typeof useNav>;
 
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
@@ -86,7 +86,7 @@ export function useInitNavLinks() {
   }, [accountMissing]);
 }
 
-export function handleDeepLink(nav: HomeStackNav, url: string) {
+export function handleDeepLink(nav: MainNav, url: string) {
   const link = parseDaimoLink(url);
   if (link == null) {
     console.log(`[NAV] skipping unparseable link ${url}`);
@@ -97,12 +97,12 @@ export function handleDeepLink(nav: HomeStackNav, url: string) {
   goTo(nav, link);
 }
 
-async function goTo(nav: HomeStackNav, link: DaimoLink) {
+async function goTo(nav: MainNav, link: DaimoLink) {
   const { type } = link;
   switch (type) {
     case "account":
     case "request": {
-      nav.navigate("SendTab", { screen: "Send", params: { link } });
+      nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
       break;
     }
     case "note": {
@@ -112,4 +112,8 @@ async function goTo(nav: HomeStackNav, link: DaimoLink) {
     default:
       throw new Error(`Unhandled link type ${type}`);
   }
+}
+
+export function navResetToHome(nav: MainNav) {
+  nav.reset({ routes: [{ name: "HomeTab" }] });
 }

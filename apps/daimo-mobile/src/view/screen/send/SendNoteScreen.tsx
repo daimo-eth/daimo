@@ -8,7 +8,7 @@ import { InfoBubble } from "../../shared/InfoBubble";
 import Spacer from "../../shared/Spacer";
 import { TextCenter, TextLight } from "../../shared/text";
 
-export function SendNoteTab() {
+export function SendNoteScreen() {
   // Send Payment Link shows available secure messaging apps
   const [noteDollars, setNoteDollars] = useState(0);
 

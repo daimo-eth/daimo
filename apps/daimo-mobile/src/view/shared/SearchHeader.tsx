@@ -1,7 +1,7 @@
 import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode, useCallback } from "react";
-import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { ReactNode, RefObject, useCallback } from "react";
+import { StyleSheet, TextInput, TouchableHighlight, View } from "react-native";
 
 import { AccountBubble } from "./AccountBubble";
 import { InputBig } from "./InputBig";
@@ -13,9 +13,11 @@ import { useAccount } from "../../model/account";
 export function SearchHeader({
   prefix,
   setPrefix,
+  innerRef,
 }: {
   prefix?: string;
   setPrefix: (prefix?: string) => void;
+  innerRef?: RefObject<TextInput>;
 }) {
   const nav = useNav();
 
@@ -47,6 +49,7 @@ export function SearchHeader({
         onChange={setPrefix}
         onFocus={() => setPrefix("")}
         onBlur={() => setPrefix(undefined)}
+        innerRef={innerRef}
       />
       <ButtonCircle onPress={goToQR}>
         <View style={styles.qrCircle}>

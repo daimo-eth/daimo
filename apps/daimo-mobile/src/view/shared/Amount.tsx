@@ -65,10 +65,8 @@ export function TitleAmount({
       <Text style={styleSym}>{symbol}</Text>
       <Spacer w={4} />
       {dollars}
-      <Text style={styles.titleGray}>
-        {amountSeparator}
-        {cents}
-      </Text>
+      {amountSeparator}
+      {cents}
     </Text>
   );
 }
@@ -83,8 +81,5 @@ const styles = StyleSheet.create({
   },
   heroSmall: {
     fontSize: 42,
-  },
-  titleGray: {
-    color: color.grayMid,
   },
 });

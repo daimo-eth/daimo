@@ -23,7 +23,7 @@ export function Badge({
       backgroundColor: bgColor,
       borderRadius: 4,
       paddingVertical: 2,
-      paddingHorizontal: 4,
+      paddingHorizontal: 6,
       marginBottom: -3,
     }),
     [bgColor]

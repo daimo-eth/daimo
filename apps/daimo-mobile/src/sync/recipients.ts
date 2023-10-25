@@ -1,22 +1,19 @@
-import { EAccount, assert } from "@daimo/common";
+import { EAccount } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
 import { env } from "../logic/env";
-import { useAccount } from "../model/account";
+import { Account } from "../model/account";
 import { getCachedEAccount } from "../view/shared/addr";
 
 export interface Recipient extends EAccount {
   lastSendTime?: number;
 }
 
-export function useRecipientSearch(prefix: string) {
+export function useRecipientSearch(account: Account, prefix: string) {
   prefix = prefix.toLowerCase();
 
   // Load recent recipients
-  const [account] = useAccount();
-  assert(account != null);
-
   const recents = [] as Recipient[];
   const recentsByAddr = new Map<Address, Recipient>();
   const transfersNewToOld = account.recentTransfers.slice().reverse();

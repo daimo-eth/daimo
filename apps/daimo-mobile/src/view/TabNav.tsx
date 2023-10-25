@@ -21,7 +21,8 @@ import { SettingsScreen } from "./screen/SettingsScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
-import SendScreen from "./screen/send/SendScreen";
+import { SendNavScreen } from "./screen/send/SendNavScreen";
+import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { OctName } from "./shared/InputBig";
 import {
   ParamListHome,
@@ -127,9 +128,10 @@ const SendStack = createNativeStackNavigator<ParamListSend>();
 
 function SendTab() {
   return (
-    <SendStack.Navigator initialRouteName="Send" screenOptions={noHeaders}>
+    <SendStack.Navigator initialRouteName="SendNav" screenOptions={noHeaders}>
       <SendStack.Group>
-        <SendStack.Screen name="Send" component={SendScreen} />
+        <SendStack.Screen name="SendNav" component={SendNavScreen} />
+        <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );

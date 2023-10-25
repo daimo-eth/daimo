@@ -9,26 +9,33 @@ import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
-import { useAccount } from "../../../model/account";
+import { Account } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { useNav } from "../../shared/nav";
+import { navResetToHome, useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
-export function SendTransferButton({
-  recipient,
-  dollars,
-  requestId,
-}: {
+interface SendTransferButtonProps {
   recipient: Recipient;
   dollars: number;
   requestId?: `${bigint}`;
-}) {
+}
+
+export function SendTransferButton(props: SendTransferButtonProps) {
+  const Inner = withAccount(SendTransferButtonInner);
+  return <Inner {...props} />;
+}
+
+function SendTransferButtonInner({
+  account,
+  recipient,
+  dollars,
+  requestId,
+}: SendTransferButtonProps & { account: Account }) {
   console.log(`[SEND] rendering SendButton ${dollars} ${requestId}`);
-  const [account] = useAccount();
-  assert(account != null);
   assert(dollars >= 0);
 
   const nonceMetadata = requestId
@@ -106,7 +113,7 @@ export function SendTransferButton({
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-    nav.navigate("HomeTab", { screen: "Home" });
+    navResetToHome(nav);
   }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;

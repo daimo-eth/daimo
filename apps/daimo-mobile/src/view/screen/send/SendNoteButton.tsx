@@ -1,7 +1,6 @@
 import {
   DaimoLink,
   OpStatus,
-  assert,
   dollarsToAmount,
   formatDaimoLink,
 } from "@daimo/common";
@@ -19,23 +18,32 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
-import { useAccount } from "../../../model/account";
+import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function SendNoteButton({ dollars }: { dollars: number }) {
+  const Inner = withAccount(SendNoteButtonInner);
+  return <Inner dollars={dollars} />;
+}
+
+function SendNoteButtonInner({
+  account,
+  dollars,
+}: {
+  account: Account;
+  dollars: number;
+}) {
   const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
   const ephemeralOwner = useMemo(
     () => privateKeyToAccount(ephemeralPrivKey).address,
     [ephemeralPrivKey]
   );
-
-  const [account] = useAccount();
-  assert(account != null);
 
   const [nonce] = useState(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))

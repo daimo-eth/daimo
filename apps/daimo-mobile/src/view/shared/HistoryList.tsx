@@ -32,6 +32,7 @@ export function HistoryListSwipe(props: {
     <View style={styles.historyListSwipe}>
       <ScrollPellet />
       <HistoryListBody {...props} />
+      <View style={{ flex: 1 }} />
     </View>
   );
 }
@@ -212,9 +213,10 @@ const styles = StyleSheet.create({
   historyListSwipe: {
     flex: 1,
     backgroundColor: color.white,
+    borderRadiusTopLeft: 16,
+    borderRadiusTopRight: 16,
   },
   historyListBody: {
-    flex: 1,
     borderBottomWidth: 1,
     borderColor: color.grayLight,
     paddingHorizontal: 24,
@@ -225,7 +227,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingTop: 16,
     paddingHorizontal: 2,
-    backgroundColor: color.white,
   },
   transferBorder: {
     borderTopWidth: 1,

@@ -31,7 +31,7 @@ import {
 } from "../../logic/key";
 import { NamedError } from "../../logic/log";
 import { defaultEnclaveKeyName } from "../../model/account";
-import { ButtonBig, TextButton } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
 import { InputBig, OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -339,7 +339,7 @@ function InvitePage({
         disabled={!isValid}
       />
       <Spacer h={16} />
-      <TextButton title="Join waitlist" onPress={linkToWaitlist} />
+      <ButtonBig type="subtle" title="Join waitlist" onPress={linkToWaitlist} />
     </View>
   );
 }

@@ -1,7 +1,13 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
-import { Ref, useCallback, useState } from "react";
-import { Platform, StyleSheet, TextInput, View } from "react-native";
+import { RefObject, useCallback, useRef, useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 import { color, ss } from "./style";
 
@@ -26,7 +32,7 @@ export function InputBig({
   icon?: OctName;
   center?: boolean;
   autoFocus?: boolean;
-  innerRef?: Ref<TextInput>;
+  innerRef?: RefObject<TextInput>;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {
@@ -41,31 +47,39 @@ export function InputBig({
   // Android text input incorrectly autocapitalizes. Fix via password input.
   const needsAndroidWorkaround = Platform.OS === "android";
 
+  const otherRef = useRef<TextInput>(null);
+  const ref = innerRef || otherRef;
+  const focus = useCallback(() => {
+    ref.current?.focus();
+  }, [ref]);
+
   return (
-    <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
-      <TextInput
-        ref={innerRef}
-        placeholder={placeholder}
-        placeholderTextColor={color.grayMid}
-        value={value}
-        onChangeText={onChange}
-        style={center ? styles.inputCentered : styles.input}
-        multiline
-        numberOfLines={1}
-        autoCapitalize="none"
-        autoCorrect={false}
-        autoFocus={autoFocus}
-        secureTextEntry={needsAndroidWorkaround}
-        keyboardType={needsAndroidWorkaround ? "visible-password" : "default"}
-        onFocus={onInputFocus}
-        onBlur={onInputBlur}
-      />
-      {icon && (
-        <View style={styles.inputIcon}>
-          <Octicons name={icon} size={16} color={color.primary} />
-        </View>
-      )}
-    </View>
+    <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
+      <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
+        <TextInput
+          ref={ref}
+          placeholder={placeholder}
+          placeholderTextColor={color.grayMid}
+          value={value}
+          onChangeText={onChange}
+          style={center ? styles.inputCentered : styles.input}
+          multiline={Platform.OS === "android"}
+          numberOfLines={1}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoFocus={autoFocus}
+          secureTextEntry={needsAndroidWorkaround}
+          keyboardType={needsAndroidWorkaround ? "visible-password" : "default"}
+          onFocus={onInputFocus}
+          onBlur={onInputBlur}
+        />
+        {icon && (
+          <View style={styles.inputIcon}>
+            <Octicons name={icon} size={16} color={color.primary} />
+          </View>
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

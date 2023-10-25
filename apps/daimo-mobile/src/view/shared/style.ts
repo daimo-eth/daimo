@@ -9,6 +9,7 @@ export const color = {
   success: "#0CA01B",
   successDark: "#009900",
   white: "#ffffff",
+  ivoryLight: "#f9f9f9",
   ivoryDark: "#f2f2f2",
   grayLight: "#e2e2e2", // TODO gray2 = d6d6d6
   gray3: "#aaaaaa",

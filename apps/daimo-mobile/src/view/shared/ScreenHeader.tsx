@@ -12,13 +12,15 @@ export function ScreenHeader({
   title,
   onBack,
   onExit,
+  modal,
 }: {
   title: string;
   onBack?: () => void;
   onExit?: () => void;
+  modal?: boolean;
 }) {
   const ins = useSafeAreaInsets();
-  const top = Math.max(ins.top, 32);
+  const top = modal ? 16 : Math.max(ins.top, 32);
   const style = useMemo(
     () => [styles.screenHead, { paddingTop: top, height: 40 + top }],
     [top]
@@ -43,6 +45,12 @@ export function useExitToHome() {
       nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] }),
     []
   );
+}
+
+export function useExitBack() {
+  const nav = useNav();
+  const goBack = useCallback(() => nav.goBack(), []);
+  return nav.canGoBack() ? goBack : undefined;
 }
 
 /** Shows a nav button if `show`, blank placeholder otherwise. */
