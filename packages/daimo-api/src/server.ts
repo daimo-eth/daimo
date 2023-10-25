@@ -10,6 +10,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
+import { Crontab } from "./cron";
 import { DB } from "./db/db";
 import { getViemClientFromEnv, chainConfig } from "./env";
 import { PushNotifier } from "./pushNotifier";
@@ -18,6 +19,9 @@ import { Telemetry } from "./telemetry";
 import { createContext } from "./trpc";
 
 async function main() {
+  console.log(`[API] initializing telemetry...`);
+  const monitor = new Telemetry();
+
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv();
   await vc.init();
@@ -32,6 +36,7 @@ async function main() {
   const noteIndexer = new NoteIndexer(vc, nameReg);
   const faucet = new Faucet(vc, coinIndexer);
   const accountFactory = new AccountFactory(vc);
+  const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
@@ -58,15 +63,11 @@ async function main() {
     await Promise.all([coinIndexer.init(), noteIndexer.init()]);
 
     console.log(`[API] initializing push notifications...`);
-    await Promise.all([notifier.init(), faucet.init()]);
+    await Promise.all([notifier.init(), faucet.init(), crontab.init()]);
 
     console.log(`[API] polling logs...`);
     setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
-
-  console.log(`[API] initializing telemetry...`);
-  const monitor = new Telemetry();
-
   console.log(`[API] serving...`);
   const router = createRouter(
     vc,
