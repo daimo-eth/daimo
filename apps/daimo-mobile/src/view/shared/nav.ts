@@ -3,7 +3,7 @@ import {
   DaimoLinkAccount,
   DaimoLinkNote,
   DaimoLinkRequest,
-  OpEvent,
+  TransferOpEvent,
   parseDaimoLink,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
@@ -18,7 +18,7 @@ import { Recipient } from "../../sync/recipients";
 export type ParamListHome = {
   Home: undefined;
   QR: undefined;
-  HistoryOp: { op: OpEvent };
+  HistoryOp: { op: TransferOpEvent };
 };
 
 export type ParamListSend = {

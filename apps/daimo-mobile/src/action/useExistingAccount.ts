@@ -51,6 +51,7 @@ export function useExistingAccount(daimoChain: DaimoChain) {
           trackedRequests: [],
           pendingNotes: [],
           accountKeys: [],
+          pendingKeyRotation: [],
 
           chainGasConstants: {
             maxPriorityFeePerGas: "0",

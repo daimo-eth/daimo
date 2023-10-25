@@ -40,6 +40,13 @@ export function syncAfterPushNotification() {
   lastPushNotificationS = Date.now() / 1e3;
 }
 
+function hasPendingOps(account: Account) {
+  return (
+    account.recentTransfers.find((t) => t.status === "pending") != null ||
+    account.pendingKeyRotation.length > 0
+  );
+}
+
 function maybeSync(fromScratch?: boolean) {
   const manager = getAccountManager();
   if (manager.currentAccount == null) return;
@@ -48,7 +55,7 @@ function maybeSync(fromScratch?: boolean) {
   // Synced recently? Wait first.
   const nowS = Date.now() / 1e3;
   let intervalS = 10;
-  if (account.recentTransfers.find((t) => t.status === "pending") != null) {
+  if (hasPendingOps(account)) {
     intervalS = 1;
   }
   if (fromScratch) {
@@ -106,7 +113,7 @@ async function syncAccount(
     lastBalance: result.lastBalance,
     numTransfers: result.transferLogs.length,
     numNamedAccounts: result.namedAccounts.length,
-    numAccountKeys: result.accountKeys?.length,
+    numAccountKeys: result.accountKeys.length,
     chainGasConstants: result.chainGasConstants,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
@@ -162,6 +169,15 @@ async function syncAccount(
     );
   }
 
+  // Clear pending key rotations
+  // If pending rotation was an {add, remove} and slot is {not in, in} result
+  // still, its pending
+  const stillPendingKeyRotation = account.pendingKeyRotation.filter((r) => {
+    const isSlotNotInResult =
+      result.accountKeys.find((k) => k.slot === r.slot) == null;
+    return r.rotationType === "add" ? isSlotNotInResult : !isSlotNotInResult;
+  });
+
   const ret: Account = {
     ...account,
 
@@ -175,6 +191,7 @@ async function syncAccount(
     recentTransfers,
     namedAccounts,
     accountKeys: result.accountKeys || [],
+    pendingKeyRotation: stillPendingKeyRotation,
   };
 
   console.log(

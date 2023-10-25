@@ -1,4 +1,4 @@
-import { hasAccountName } from "@daimo/common";
+import { assert, hasAccountName } from "@daimo/common";
 import { Address } from "viem";
 
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -65,6 +65,7 @@ export async function getAccountHistory(
 
   // Get account keys
   const accountKeys = await keyReg.resolveAddressKeys(address);
+  assert(accountKeys != null);
 
   const chainGasConstants = await paymaster.calculateChainGasConstants();
 

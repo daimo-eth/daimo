@@ -72,6 +72,7 @@ export function useCreateAccount(
       trackedRequests: [],
       pendingNotes: [],
       accountKeys: [],
+      pendingKeyRotation: [],
 
       chainGasConstants: {
         maxPriorityFeePerGas: "0",

@@ -1,3 +1,4 @@
+import { OpStatus, assert } from "@daimo/common";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -76,6 +77,20 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
+    pendingOp: {
+      type: "keyRotation",
+      status: OpStatus.pending,
+      slot: nextSlot,
+      rotationType: "add",
+      timestamp: Date.now() / 1e3,
+    },
+    accountTransform: (acc, pendingOp) => {
+      assert(pendingOp.type === "keyRotation");
+      return {
+        ...acc,
+        pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
+      };
+    },
   });
 
   const statusMessage = (function (): ReactNode {

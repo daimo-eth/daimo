@@ -14,7 +14,10 @@ import {
 import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator } from "react-native";
 
-import { useSendAsync } from "../../../action/useSendAsync";
+import {
+  transferAccountTransform,
+  useSendAsync,
+} from "../../../action/useSendAsync";
 import { Account } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
@@ -69,7 +72,9 @@ function SendTransferButtonInner({
       timestamp: 0,
       nonceMetadata: nonceMetadata.toHex(),
     },
-    namedAccounts: hasAccountName(recipient) ? [recipient as EAccount] : [],
+    accountTransform: transferAccountTransform(
+      hasAccountName(recipient) ? [recipient as EAccount] : []
+    ),
   });
 
   const sendDisabledReason = (function () {
