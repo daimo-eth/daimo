@@ -1,17 +1,21 @@
-import { EAccount, getAccountName, AddrLabel } from "@daimo/common";
+import { AddrLabel, EAccount, getAccountName } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import { ViewStyle, TextStyle, View, Text } from "react-native";
+import { Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { color } from "./style";
 
 export function AccountBubble({
   eAcc,
   size,
+  isPending,
 }: {
   eAcc: EAccount;
   size: number;
+  isPending?: boolean;
 }) {
+  const col = isPending ? color.primaryBgLight : color.primary;
+
   const style: ViewStyle = useMemo(
     () => ({
       width: size,
@@ -19,11 +23,11 @@ export function AccountBubble({
       borderRadius: size / 2,
       backgroundColor: color.white,
       borderWidth: 1,
-      borderColor: color.primary,
+      borderColor: col,
       alignItems: "center",
       justifyContent: "center",
     }),
-    [size]
+    [size, col]
   );
 
   const textStyle: TextStyle = useMemo(
@@ -33,9 +37,9 @@ export function AccountBubble({
       paddingTop: size / 9,
       fontWeight: "bold",
       textAlign: "center",
-      color: color.primary,
+      color: col,
     }),
-    [size]
+    [size, col]
   );
 
   const name = getAccountName(eAcc);

@@ -52,7 +52,7 @@ export function SearchResults({ prefix }: { prefix: string }) {
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
-      {res.recipients.length === 0 && <NoSearchResults />}
+      {res.recipients.length === 0 && prefix !== "" && <NoSearchResults />}
     </ScrollView>
   );
 }

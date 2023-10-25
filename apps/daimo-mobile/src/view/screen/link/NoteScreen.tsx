@@ -23,6 +23,7 @@ import { useEphemeralSignature } from "../../../logic/note";
 import { useAccount } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
+import Spacer from "../../shared/Spacer";
 import { ParamListReceive, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import { TextBold, TextCenter, TextError, TextLight } from "../../shared/text";
@@ -196,6 +197,7 @@ function NoteDisplay({
 
   return (
     <>
+      <Spacer h={64} />
       <TextCenter>
         <TextLight>{senderName} sent</TextLight>
       </TextCenter>

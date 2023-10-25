@@ -133,6 +133,9 @@ function TransferRow({
   const viewOp = () =>
     nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
 
+  const isPending = transfer.status === "pending";
+  const textCol = isPending ? color.gray3 : color.midnight;
+
   return (
     <View style={styles.transferBorder}>
       <TouchableHighlight
@@ -142,13 +145,15 @@ function TransferRow({
       >
         <View style={styles.transferRow}>
           <View style={styles.transferOtherAccount}>
-            <AccountBubble eAcc={otherAcc} size={36} />
-            <TextBody>{getAccountName(otherAcc)}</TextBody>
+            <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
+            <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
+            {isPending && <View style={styles.pendingDot} />}
           </View>
           <TransferAmountDate
             amount={amountDelta}
             timestamp={transfer.timestamp}
             showDate={showDate}
+            {...{ isPending }}
           />
         </View>
       </TouchableHighlight>
@@ -160,17 +165,21 @@ function TransferAmountDate({
   amount,
   timestamp,
   showDate,
+  isPending,
 }: {
   amount: number;
   timestamp: number;
   showDate?: boolean;
+  isPending?: boolean;
 }) {
   const dollarStr = getAmountText({ amount: BigInt(Math.abs(amount)) });
   const sign = amount < 0 ? "-" : "+";
-  const col = amount < 0 ? color.midnight : color.success;
+  const amountColor = amount < 0 ? color.midnight : color.success;
 
   let timeStr: string;
-  if (showDate) {
+  if (isPending) {
+    timeStr = "Pending";
+  } else if (showDate) {
     timeStr = new Date(timestamp * 1000).toLocaleString("default", {
       month: "numeric",
       day: "numeric",
@@ -180,17 +189,26 @@ function TransferAmountDate({
     timeStr = timeAgo(timestamp, nowS);
   }
 
+  const textCol = isPending ? color.gray3 : color.midnight;
+  const amountCol = isPending ? color.gray3 : amountColor;
+
   return (
     <View style={styles.transferAmountDate}>
-      <Text style={[ss.text.metadata, { color: col }]}>
+      <Text style={[ss.text.metadata, { color: amountCol }]}>
         {sign} {dollarStr}
       </Text>
-      <Text style={ss.text.metadataLight}>{timeStr}</Text>
+      <Text style={[ss.text.metadataLight, { color: textCol }]}>{timeStr}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  pendingDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 12,
+    backgroundColor: color.yellow,
+  },
   historyListSwipe: {
     flex: 1,
     backgroundColor: color.white,
