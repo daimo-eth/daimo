@@ -296,6 +296,7 @@ function DetailsSection({ account }: { account: Account }) {
       )}
       <Spacer h={16} />
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
+      <Spacer h={32} />
     </View>
   );
 }
