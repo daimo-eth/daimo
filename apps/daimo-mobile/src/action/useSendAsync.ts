@@ -62,12 +62,11 @@ export function useSendAsync({
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
-      // Filter to new named accounts
+      // Filter to new named accounts only
+      const findAccount = (addr: Address) =>
+        account.namedAccounts.find((a) => a.addr === addr);
       namedAccounts = (namedAccounts || []).filter(
-        (acc) =>
-          account.namedAccounts.find(
-            (alreadyNamed) => alreadyNamed.addr === acc.addr
-          ) == null
+        (a) => findAccount(a.addr) == null
       );
 
       let newAccount = {
