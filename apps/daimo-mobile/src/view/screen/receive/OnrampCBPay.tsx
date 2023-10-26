@@ -37,13 +37,15 @@ export function CBPayWebView({
   // Track timing and outcome
   const startMs = useRef(performance.now());
   const routeReached = useRef("initial");
-  const [succeeded, setSucceeded] = useState(false);
+  const succeeded = useRef(false);
 
   // On exit, log result
   useEffect(
     () => () => {
       console.log("[CB] onramp exit");
-      const error = succeeded ? undefined : `reached ${routeReached.current}`;
+      const error = succeeded.current
+        ? undefined
+        : `reached ${routeReached.current}`;
       logOnramp(destAccount, "onramp-cbpay", startMs.current, error);
     },
     []
@@ -66,10 +68,10 @@ export function CBPayWebView({
         break;
       case "success":
         console.log(`[CB] onramp success`);
-        setSucceeded(true);
+        succeeded.current = true;
         break;
       case "exit": {
-        onExit(succeeded);
+        onExit(succeeded.current);
         break;
       }
       default:
@@ -79,7 +81,7 @@ export function CBPayWebView({
 
   return (
     <View style={{ flex: 1 }}>
-      <ScreenHeader title="Coinbase" onExit={() => onExit(succeeded)} />
+      <ScreenHeader title="Coinbase" onExit={() => onExit(succeeded.current)} />
       <WebView
         source={{ uri: coinbaseURL }}
         onMessage={onMessage}
