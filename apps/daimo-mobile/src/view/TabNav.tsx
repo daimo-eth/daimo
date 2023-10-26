@@ -80,11 +80,7 @@ export function TabNav() {
 
 function getTabOptions(
   safeInsets: EdgeInsets,
-  {
-    route,
-  }: {
-    route: RouteProp<ParamListTab, keyof ParamListTab>;
-  }
+  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
 ): BottomTabNavigationOptions {
   const opts: BottomTabNavigationOptions = {
     headerShown: false,
