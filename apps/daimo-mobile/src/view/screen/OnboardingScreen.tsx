@@ -424,9 +424,13 @@ function SetupKey({
     <View>
       <OnboardingHeader title="Set up device" onPrev={onPrev} />
       <View style={styles.createAccountPage}>
-        <TextH1>
-          <Octicons name={askToSetPin ? "unlock" : "lock"} size={40} />
-        </TextH1>
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <Octicons
+            name={askToSetPin ? "unlock" : "lock"}
+            size={40}
+            color={color.midnight}
+          />
+        </View>
         <Spacer h={32} />
         <View style={ss.container.padH16}>
           <TextCenter>
