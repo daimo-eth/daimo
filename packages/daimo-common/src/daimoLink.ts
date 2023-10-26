@@ -123,7 +123,7 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
         previewSender = parts[1];
         const parsedDollars = zDollarStr.safeParse(parts[2]);
         if (!parsedDollars.success) return null;
-        previewDollars = parsedDollars.data;
+        previewDollars = parseFloat(parsedDollars.data).toFixed(2) as DollarStr;
         ephem = parts[3];
       } else return null;
 

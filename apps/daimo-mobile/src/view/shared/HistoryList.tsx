@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingTop: 16,
     paddingHorizontal: 2,
+    backgroundColor: color.white,
   },
   transferBorder: {
     borderTopWidth: 1,

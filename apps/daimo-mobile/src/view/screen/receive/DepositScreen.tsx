@@ -56,9 +56,12 @@ export default function DepositScreen() {
       <View style={styles.padH16}>
         <TextBody>
           <TextBold>
-            Deposit {tokenSymbol} on {chainL2.name} only.
+            Send {tokenSymbol} on {chainL2.name} to your address below.
           </TextBold>{" "}
-          Use the following address.
+          Daimo doesn't currently support other tokens.
+          {tokenSymbol === "USDC" &&
+            chainL2.name === "Base" &&
+            ' Use native USDC, not bridged "USDbC".'}
         </TextBody>
         <Spacer h={16} />
         <AddressCopier addr={account.address} />

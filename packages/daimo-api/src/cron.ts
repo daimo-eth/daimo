@@ -32,6 +32,7 @@ export class Crontab {
     this.coinIndexer.pipeAllTransfers(this.pipeTransfers);
     this.cronJobs = [
       new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
+      new CronJob("*/5 * * * *", () => this.checkFaucetBalance()), // Every 5 minutes
       new CronJob("*/5 * * * *", () => this.postRecentTransfers()), // Every 5 minutes
     ];
 
@@ -68,12 +69,31 @@ export class Crontab {
 
     if (depositEth < 0.001) {
       this.telemetry.recordClippy(
-        `Paymaster deposit too low: ${depositEth} eth`,
+        `Paymaster ${daimoPaymasterAddress} deposit too low: ${depositEth} eth`,
         "error"
       );
     } else if (depositEth < 0.01) {
       this.telemetry.recordClippy(
-        `Paymaster deposit low: ${depositEth} eth`,
+        `Paymaster ${daimoPaymasterAddress} deposit low: ${depositEth} eth`,
+        "warn"
+      );
+    }
+  }
+
+  async checkFaucetBalance() {
+    const faucetAddr = this.vc.walletClient.account.address;
+    const balance = await this.vc.publicClient.getBalance({
+      address: faucetAddr,
+    });
+    const balanceEth = Number(formatEther(balance));
+    if (balanceEth < 0.002) {
+      this.telemetry.recordClippy(
+        `Faucet ${faucetAddr} balance too low: ${balanceEth} eth`,
+        "error"
+      );
+    } else if (balanceEth < 0.02) {
+      this.telemetry.recordClippy(
+        `Faucet ${faucetAddr} balance low: ${balanceEth} eth`,
         "warn"
       );
     }

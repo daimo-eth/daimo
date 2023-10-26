@@ -47,7 +47,7 @@ function maybeSync(fromScratch?: boolean) {
 
   // Synced recently? Wait first.
   const nowS = Date.now() / 1e3;
-  let intervalS = 30;
+  let intervalS = 10;
   if (account.recentTransfers.find((t) => t.status === "pending") != null) {
     intervalS = 1;
   }

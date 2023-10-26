@@ -16,6 +16,9 @@ import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { H1, H2 } from "../../../components/typography";
 import { trpc } from "../../../utils/trpc";
 
+// Opt out of caching for all data requests in the route segment
+export const dynamic = "force-dynamic";
+
 type LinkProps = {
   params: { slug?: string[] };
   searchParams: { [key: string]: string | string[] | undefined };
@@ -29,7 +32,7 @@ type TitleDesc = {
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
-const defaultMeta = metadata("Daimo", "Experimental stablecoin wallet");
+const defaultMeta = metadata("Daimo", "Payments on Ethereum");
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(props);
@@ -42,14 +45,14 @@ export default async function LinkPage(props: LinkProps) {
     props
   )) || {
     title: "Daimo",
-    description: "Experimental stablecoin wallet",
+    description: "Payments on Ethereum",
   };
 
   return (
     <main className="max-w-md mx-auto px-4">
       <center>
         <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="128" height="128" />
+        <Image src="/logo-web.png" alt="Daimo" width="96" height="96" />
 
         <div className="h-12" />
 

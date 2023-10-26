@@ -56,7 +56,7 @@ export async function deployWallet(
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
   const url = `${explorer}/address/${address}`;
-  telemetry.recordClippy(`New user ${name} at ${url}`, "info");
+  telemetry.recordClippy(`New user ${name} at ${url}`, "celebrate");
 
   return address;
 }
