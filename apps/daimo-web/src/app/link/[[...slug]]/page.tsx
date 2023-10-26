@@ -32,7 +32,7 @@ type TitleDesc = {
 
 const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
-const defaultMeta = metadata("Daimo", "Payments App on Ethereum");
+const defaultMeta = metadata("Daimo", "Payments on Ethereum");
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(props);
@@ -45,7 +45,7 @@ export default async function LinkPage(props: LinkProps) {
     props
   )) || {
     title: "Daimo",
-    description: "Payments App on Ethereum",
+    description: "Payments on Ethereum",
   };
 
   return (
