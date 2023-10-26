@@ -1,7 +1,8 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { daimoChainFromId } from "@daimo/contract";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { SafeAreaView } from "react-native";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import "react-native-url-polyfill/auto";
@@ -16,6 +17,8 @@ export function CBPayWebView({
   destAccount: Account;
   onExit: () => void;
 }) {
+  const insets = useSafeAreaInsets();
+
   const coinbaseURL = useMemo(
     () =>
       generateOnRampURL({
@@ -79,13 +82,19 @@ export function CBPayWebView({
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: color.white }}>
+    <View
+      style={{
+        paddingTop: insets.top,
+        flex: 1,
+        backgroundColor: color.white,
+      }}
+    >
       <WebView
         source={{ uri: coinbaseURL }}
         onMessage={onMessage}
         originWhitelist={["*"]}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
