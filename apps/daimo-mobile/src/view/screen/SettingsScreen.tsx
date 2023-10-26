@@ -82,10 +82,12 @@ function AccountSection({ account }: { account: Account }) {
         <AccountBubble eAcc={toEAccount(account)} size={64} />
         <View>
           <TextH3>{account?.name}</TextH3>
-          <TextH3 color={color.gray3}>
-            {tokenSymbol} · {l2Name}{" "}
-            {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
-          </TextH3>
+          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+            <TextH3 color={color.gray3}>
+              {tokenSymbol} · {l2Name}{" "}
+              {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
+            </TextH3>
+          </View>
         </View>
       </View>
       <Spacer h={16} />
@@ -157,15 +159,11 @@ function DeviceRow({
         style={styles.rowWrap}
       >
         <View style={styles.row}>
-          <TextBody>
-            {dispDevice}
-            {isCurrentDevice && (
-              <>
-                <Spacer w={12} />
-                <Badge>THIS DEVICE</Badge>
-              </>
-            )}
-          </TextBody>
+          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+            <TextBody>{dispDevice}</TextBody>
+            {isCurrentDevice && <Spacer w={12} />}
+            {isCurrentDevice && <Badge>THIS DEVICE</Badge>}
+          </View>
           <View style={styles.rowRight}>
             <TextMeta>Mobile</TextMeta>
             <TextMeta color={color.gray3}>{dispTime}</TextMeta>

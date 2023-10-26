@@ -22,17 +22,13 @@ export default function App() {
   // Load font to fix icons on Android
   useFonts({ Octicons: require("../assets/octicons.ttf") });
 
-  const whiteBgTheme = {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      background: color.white,
-    },
-  };
+  // White background to avoid between-tab flicker
+  let theme = DefaultTheme;
+  theme = { ...theme, colors: { ...theme.colors, background: color.white } };
 
   return (
     <RpcProvider>
-      <NavigationContainer theme={whiteBgTheme}>
+      <NavigationContainer theme={theme}>
         <AppBody />
       </NavigationContainer>
     </RpcProvider>

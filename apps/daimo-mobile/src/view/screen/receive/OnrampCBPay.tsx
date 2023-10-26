@@ -1,24 +1,21 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { daimoChainFromId } from "@daimo/contract";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Linking, View } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import "react-native-url-polyfill/auto";
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
-import { color } from "../../shared/style";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 
 export function CBPayWebView({
   destAccount,
   onExit,
 }: {
   destAccount: Account;
-  onExit: () => void;
+  onExit: (succeeded: boolean) => void;
 }) {
-  const insets = useSafeAreaInsets();
-
   const coinbaseURL = useMemo(
     () =>
       generateOnRampURL({
@@ -40,15 +37,13 @@ export function CBPayWebView({
   // Track timing and outcome
   const startMs = useRef(performance.now());
   const routeReached = useRef("initial");
-  const succeeded = useRef(false);
+  const [succeeded, setSucceeded] = useState(false);
 
   // On exit, log result
   useEffect(
     () => () => {
       console.log("[CB] onramp exit");
-      const error = succeeded.current
-        ? undefined
-        : `reached ${routeReached.current}`;
+      const error = succeeded ? undefined : `reached ${routeReached.current}`;
       logOnramp(destAccount, "onramp-cbpay", startMs.current, error);
     },
     []
@@ -62,7 +57,8 @@ export function CBPayWebView({
       case "open":
         break;
       case "request_open_url":
-        console.log(`[CB] UNHANDLED request_open_url ${data.url}`);
+        console.log(`[CB] opening request_open_url ${data.url}`);
+        Linking.openURL(data.url);
         break;
       case "transition_view":
         console.log(`[CB] transition to ${data.pageRoute}`);
@@ -70,10 +66,10 @@ export function CBPayWebView({
         break;
       case "success":
         console.log(`[CB] onramp success`);
-        succeeded.current = true;
+        setSucceeded(true);
         break;
       case "exit": {
-        onExit();
+        onExit(succeeded);
         break;
       }
       default:
@@ -82,13 +78,8 @@ export function CBPayWebView({
   }, []);
 
   return (
-    <View
-      style={{
-        paddingTop: insets.top,
-        flex: 1,
-        backgroundColor: color.white,
-      }}
-    >
+    <View style={{ flex: 1 }}>
+      <ScreenHeader title="Coinbase" onExit={() => onExit(succeeded)} />
       <WebView
         source={{ uri: coinbaseURL }}
         onMessage={onMessage}

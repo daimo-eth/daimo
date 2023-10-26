@@ -1,5 +1,5 @@
 import { EAccount } from "@daimo/common";
-import { isAddress } from "viem";
+import { isAddress, getAddress } from "viem";
 import { normalize } from "viem/ens";
 
 import { NameRegistry } from "../contract/nameRegistry";
@@ -14,7 +14,7 @@ export async function search(
 ) {
   const ret: EAccount[] = [];
   if (isAddress(prefix)) {
-    ret.push(await nameReg.getEAccount(prefix));
+    ret.push(await nameReg.getEAccount(getAddress(prefix)));
   } else {
     const [daimoAccounts, ensAccount] = await Promise.all([
       nameReg.search(prefix),

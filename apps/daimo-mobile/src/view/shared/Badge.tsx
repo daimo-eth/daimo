@@ -24,7 +24,6 @@ export function Badge({
       borderRadius: 4,
       paddingVertical: 2,
       paddingHorizontal: 6,
-      marginBottom: -3,
     }),
     [bgColor]
   );
@@ -32,6 +31,7 @@ export function Badge({
   const styleText = useMemo(
     () => ({
       ...ss.text.metadata,
+      lineHeight: 18,
       color,
     }),
     []

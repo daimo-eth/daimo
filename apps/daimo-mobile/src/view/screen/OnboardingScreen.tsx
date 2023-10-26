@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
     height: 168,
   },
   createAccountPage: {
-    paddingTop: 180,
+    paddingTop: 96,
     paddingHorizontal: 24,
   },
   useExistingPage: {

@@ -1,5 +1,5 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { Account } from "../../../model/account";

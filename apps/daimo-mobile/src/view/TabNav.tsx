@@ -10,6 +10,7 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -38,11 +39,17 @@ const Tab = createBottomTabNavigator<ParamListTab>();
 
 export function TabNav() {
   const opts: BottomTabNavigationOptions = {
-    // Note: don't use unmountOnBlur here, it exposes nav bugs.
-    // NativeStackNavigator has a bug where it remembers route after unmounting,
-    // and another where dismissing a modal doesn't change the route.
     tabBarHideOnKeyboard: true,
   };
+  // Note: don't use unmountOnBlur together with NativeStackNavigator.
+  // NativeStackNavigator has a bug where it remembers routes after unmounting,
+  // and another where dismissing a modal doesn't change the route.
+  const unmount: BottomTabNavigationOptions = {
+    ...opts,
+    unmountOnBlur: true,
+  };
+
+  const ins = useSafeAreaInsets();
 
   // Track whether we've onboarded. If not, show OnboardingScreen.
   const [account] = useAccount();
@@ -59,10 +66,10 @@ export function TabNav() {
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
-      screenOptions={getTabOptions}
+      screenOptions={(props) => getTabOptions(ins, props)}
       backBehavior="none"
     >
-      <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
+      <Tab.Screen name="DepositTab" component={DepositTab} options={unmount} />
       <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
       <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
       <Tab.Screen name="SendTab" component={SendTab} options={opts} />
@@ -71,16 +78,20 @@ export function TabNav() {
   );
 }
 
-function getTabOptions({
-  route,
-}: {
-  route: RouteProp<ParamListTab, keyof ParamListTab>;
-}): BottomTabNavigationOptions {
+function getTabOptions(
+  safeInsets: EdgeInsets,
+  {
+    route,
+  }: {
+    route: RouteProp<ParamListTab, keyof ParamListTab>;
+  }
+): BottomTabNavigationOptions {
   const opts: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
-      height: 80,
+      height: 72 + safeInsets.bottom,
       paddingHorizontal: 16,
+      paddingBottom: safeInsets.bottom,
     },
     tabBarItemStyle: {
       paddingTop: 16,

@@ -1,19 +1,24 @@
+import Octicons from "@expo/vector-icons/Octicons";
 import { StyleSheet, View } from "react-native";
 
+import { OctName } from "./InputBig";
 import { color } from "./style";
 import { TextBody } from "./text";
 
 export function InfoBubble({
   title,
   subtitle,
+  icon,
 }: {
   title: string;
   subtitle: string;
+  icon?: OctName;
 }) {
   return (
     <View style={styles.bubble}>
       <View style={styles.bubbleIcon}>
-        <TextBody color={color.white}>i</TextBody>
+        {!icon && <TextBody color={color.white}>i</TextBody>}
+        {icon && <Octicons name={icon} size={16} color={color.white} />}
       </View>
       <View style={styles.bubbleText}>
         <TextBody>{title}</TextBody>

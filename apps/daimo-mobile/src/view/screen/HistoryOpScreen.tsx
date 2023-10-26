@@ -134,38 +134,48 @@ function TransferBody({ account, op }: { account: Account; op: OpEvent }) {
 
   const sentByUs = op.from === account.address;
   if (sentByUs) {
-    kv.push(["Recipient", <AddrText addr={op.to} />]);
+    kv.push([
+      "Recipient",
+      <TextBody>
+        <AddrText addr={op.to} />
+      </TextBody>,
+    ]);
   } else {
-    kv.push(["Sender", <AddrText addr={op.from} />]);
+    kv.push([
+      "Sender",
+      <TextBody>
+        <AddrText addr={op.from} />
+      </TextBody>,
+    ]);
   }
 
   if (matchingTrackedRequest != null) {
     const amount = amountToDollars(BigInt(matchingTrackedRequest.amount));
-    kv.push(["Amount you requested", amount]);
+    kv.push(["Amount you requested", <TextBody>{amount}</TextBody>]);
   }
 
-  kv.push(["Date", timeString(op.timestamp)]);
+  kv.push(["Date", <TextBody>{timeString(op.timestamp)}</TextBody>]);
 
   if (op.feeAmount !== undefined) {
     const feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
-    const feeVal =
+    const feeElem =
       feeStr === "$0.00" ? (
         <>
-          {feeStr}
+          <TextBody>{feeStr}</TextBody>
           <Spacer w={8} />
           <Badge>FREE</Badge>
         </>
       ) : (
-        feeStr
+        <TextBody>{feeStr}</TextBody>
       );
-    kv.push(["Fee", feeVal]);
+    kv.push(["Fee", feeElem]);
   }
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol;
   const chainName = chainConfig.chainL2.name;
-  kv.push(["Currency", coinName]);
-  kv.push(["Chain", `${chainName}`]);
+  kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
+  kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
 
   return (
     <View>
@@ -181,7 +191,7 @@ function TransferBody({ account, op }: { account: Account; op: OpEvent }) {
               <View style={styles.kvKey}>
                 <TextLight>{k}</TextLight>
               </View>
-              <TextBody>{v}</TextBody>
+              {v}
             </View>
           ))}
         </View>
@@ -208,9 +218,14 @@ const styles = StyleSheet.create({
   },
   kvRow: {
     flexDirection: "row",
+    alignItems: "baseline",
   },
   kvKey: {
     width: 128,
+  },
+  kvVal: {
+    flexDirection: "row",
+    alignItems: "baseline",
   },
   statusRow: {
     flexDirection: "row",

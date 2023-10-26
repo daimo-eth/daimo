@@ -10,6 +10,7 @@ import { CBPayWebView } from "./OnrampCBPay";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
+import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
@@ -17,10 +18,10 @@ import { TextBody, TextBold, TextLight } from "../../shared/text";
 
 export default function DepositScreen() {
   const [onramp, setOnramp] = useState<"cbpay" | null>(null);
-  const exitOnramp = () => {
-    // TODO: add a placeholder "pendng op" for the onramp transfer
-    // Onramp doesn't give us the amount, and tx may be sent later
+  const [succeeded, setSucceeded] = useState(false);
+  const exitOnramp = (succeeded: boolean) => {
     setOnramp(null);
+    setSucceeded(succeeded);
   };
 
   const goHome = useExitToHome();
@@ -40,11 +41,12 @@ export default function DepositScreen() {
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Deposit" onExit={goHome} />
-      <Spacer h={16} />
+      <Spacer h={32} />
       {testnet && (
         <TestnetFaucet account={account} recipient={account.address} />
       )}
       {testnet && <Spacer h={32} />}
+      {!testnet && <HeaderRow title="Recommended exchange" />}
       {!testnet && (
         <ButtonMed
           type="primary"
@@ -52,7 +54,16 @@ export default function DepositScreen() {
           onPress={() => setOnramp("cbpay")}
         />
       )}
+      {succeeded && <Spacer h={16} />}
+      {succeeded && (
+        <InfoBubble
+          icon="check"
+          title="Deposit started"
+          subtitle="You should see it arrive soon."
+        />
+      )}
       <Spacer h={32} />
+      <HeaderRow title="Deposit from anywhere" />
       <View style={styles.padH16}>
         <TextBody>
           <TextBold>
@@ -181,9 +192,22 @@ function AddressCopier({ addr }: { addr: string }) {
   );
 }
 
+function HeaderRow({ title }: { title: string }) {
+  return (
+    <View style={styles.rowHeader}>
+      <TextLight>{title}</TextLight>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   padH16: {
     paddingHorizontal: 16,
+  },
+  rowHeader: {
+    flexDirection: "row",
+    paddingVertical: 16,
+    paddingHorizontal: 2,
   },
   address: {
     flexDirection: "column",

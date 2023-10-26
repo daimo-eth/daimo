@@ -27,7 +27,7 @@
 // SOFTWARE.
 //
 
-import React, { ReactNode, useRef, useState } from "react";
+import { ReactNode, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   LayoutAnimation,
@@ -105,7 +105,7 @@ export function SwipeUpDown({
     }
   };
 
-  const panResponder = React.useMemo(
+  const panResponder = useMemo(
     () =>
       PanResponder.create({
         onStartShouldSetPanResponder: (ev, g) => true,
