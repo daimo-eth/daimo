@@ -10,11 +10,11 @@
 
 ### API and webapp
 
-- [ ] Push to stage
-- [ ] API deployed correctly
-- [ ] Webapp deployed correctly
-- [ ] No new or increased Sentry errors
+- [ ] Branch from `master`
+- [ ] Testnet API deployed correctly
+- [ ] Testnet webapp deployed correctly
 - [ ] Logs look clean
+- [ ] Test Honeycomb looks clean
 
 ### iOS
 
@@ -22,7 +22,6 @@ Watch all of the following interactions closely for jank and UX regressions, not
 just outright bugs.
 
 - [ ] Install from private TestFlight
-- [ ] Clear account (create one first, if necessary)
 - [ ] Create account
 - [ ] Request faucet
 - [ ] Notification appears on faucet send
@@ -56,6 +55,14 @@ just outright bugs.
 - [ ] Tap transaction, view in block explorer
 - [ ] Account screen: Send Debug Log
 - [ ] Debug log looks clean
+
+### Push to prod
+
+- [ ] Push to `prod`
+- [ ] Prod API deploys correctly
+- [ ] Prod website deploys correctly
+- [ ] Logs clean
+- [ ] Honeycomb clean
 
 ### Promote release
 
