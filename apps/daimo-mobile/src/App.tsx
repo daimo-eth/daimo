@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,6 +8,7 @@ import { RpcProvider } from "./logic/trpc";
 import { useSyncChain } from "./sync/sync";
 import { TabNav } from "./view/TabNav";
 import { useInitNavLinks } from "./view/shared/nav";
+import { color } from "./view/shared/style";
 
 export default function App() {
   console.log("[APP] rendering");
@@ -21,9 +22,17 @@ export default function App() {
   // Load font to fix icons on Android
   useFonts({ Octicons: require("../assets/octicons.ttf") });
 
+  const whiteBgTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: color.white,
+    },
+  };
+
   return (
     <RpcProvider>
-      <NavigationContainer>
+      <NavigationContainer theme={whiteBgTheme}>
         <AppBody />
       </NavigationContainer>
     </RpcProvider>

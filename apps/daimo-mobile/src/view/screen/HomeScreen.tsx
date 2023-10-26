@@ -8,7 +8,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
@@ -30,6 +30,8 @@ export default function HomeScreen() {
 }
 
 function HomeScreenInner({ account }: { account: Account }) {
+  const insets = useSafeAreaInsets();
+
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
@@ -59,7 +61,14 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={ss.container.screen}>
+      {/* We don't use SafeAreaView because it has a bug: 
+      https://github.com/software-mansion/react-native-screens/issues/1276 */}
+      <View
+        style={{
+          ...ss.container.screen,
+          paddingTop: insets.top,
+        }}
+      >
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
         {searchPrefix == null && (
@@ -75,7 +84,7 @@ function HomeScreenInner({ account }: { account: Account }) {
             />
           </>
         )}
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
