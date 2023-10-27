@@ -1,6 +1,7 @@
-import { AddrLabel } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
+import { AddrLabel, assert } from "@daimo/common";
+import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
+import CheckBox from "@react-native-community/checkbox";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
@@ -15,45 +16,54 @@ import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextBold, TextLight } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
 export default function DepositScreen() {
+  const Inner = withAccount(DepositScreenInner);
+  return <Inner />;
+}
+
+function DepositScreenInner({ account }: { account: Account }) {
+  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
+  const testnet = chainConfig.chainL2.testnet;
+
+  return (
+    <View style={ss.container.screen}>
+      <ScreenHeader title="Deposit" onExit={useExitToHome()} />
+      <Spacer h={32} />
+      {testnet ? (
+        <TestnetFaucet account={account} recipient={account.address} />
+      ) : (
+        <OnrampsSection account={account} />
+      )}
+      <Spacer h={32} />
+      <SendToAddressSection {...{ account, chainConfig }} />
+    </View>
+  );
+}
+
+function OnrampsSection({ account }: { account: Account }) {
   const [onramp, setOnramp] = useState<"cbpay" | null>(null);
+
   const [succeeded, setSucceeded] = useState(false);
   const exitOnramp = (succeeded: boolean) => {
     setOnramp(null);
     setSucceeded(succeeded);
   };
 
-  const goHome = useExitToHome();
-  const [account] = useAccount();
-  if (account == null) return null;
-
-  const { chainL2, tokenSymbol } = env(
-    daimoChainFromId(account.homeChainId)
-  ).chainConfig;
-  // Overwrite to test CBPay
-  const testnet = chainL2.testnet;
-
   if (onramp === "cbpay") {
     return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
   }
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" onExit={goHome} />
-      <Spacer h={32} />
-      {testnet && (
-        <TestnetFaucet account={account} recipient={account.address} />
-      )}
-      {testnet && <Spacer h={32} />}
-      {!testnet && <HeaderRow title="Recommended exchange" />}
-      {!testnet && (
-        <ButtonMed
-          type="primary"
-          title="Deposit from Coinbase"
-          onPress={() => setOnramp("cbpay")}
-        />
-      )}
+    <View>
+      <HeaderRow title="Recommended exchanges" />
+
+      <ButtonMed
+        type="primary"
+        title="Deposit from Coinbase"
+        onPress={() => setOnramp("cbpay")}
+      />
       {succeeded && <Spacer h={16} />}
       {succeeded && (
         <InfoBubble
@@ -62,20 +72,53 @@ export default function DepositScreen() {
           subtitle="You should see it arrive soon."
         />
       )}
-      <Spacer h={32} />
-      <HeaderRow title="Deposit from anywhere" />
+    </View>
+  );
+}
+
+function SendToAddressSection({
+  account,
+  chainConfig,
+}: {
+  account: Account;
+  chainConfig: ChainConfig;
+}) {
+  const { tokenSymbol, chainL2 } = chainConfig;
+
+  const [check1, setCheck1] = useState(false);
+  const [check2, setCheck2] = useState(false);
+
+  assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
+
+  return (
+    <View>
+      <HeaderRow title="Deposit to address" />
       <View style={styles.padH16}>
         <TextBody>
-          <TextBold>
-            Send {tokenSymbol} on {chainL2.name} to your address below.
-          </TextBold>{" "}
-          Daimo doesn't currently support other tokens.
-          {tokenSymbol === "USDC" &&
-            chainL2.name === "Base" &&
-            ' Use native USDC, not bridged "USDbC".'}
+          Send {tokenSymbol} to your address below. Confirm that you're sending:
         </TextBody>
         <Spacer h={16} />
-        <AddressCopier addr={account.address} />
+        <TextBody>
+          <CheckBox
+            boxType="square"
+            style={styles.checkbox}
+            value={check2}
+            onValueChange={setCheck2}
+          />{" "}
+          <TextBold>{tokenSymbol}</TextBold>, not USDbC or other assets
+        </TextBody>
+        <Spacer h={16} />
+        <TextBody>
+          <CheckBox
+            boxType="square"
+            style={styles.checkbox}
+            value={check1}
+            onValueChange={setCheck1}
+          />{" "}
+          On <TextBold>{chainL2.name}</TextBold>, not any other chain
+        </TextBody>
+        <Spacer h={16} />
+        <AddressCopier addr={account.address} disabled={!check1 || !check2} />
       </View>
     </View>
   );
@@ -165,7 +208,13 @@ function TestnetFaucet({
   );
 }
 
-function AddressCopier({ addr }: { addr: string }) {
+function AddressCopier({
+  addr,
+  disabled,
+}: {
+  addr: string;
+  disabled?: boolean;
+}) {
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
     await Clipboard.setStringAsync(addr);
@@ -173,18 +222,20 @@ function AddressCopier({ addr }: { addr: string }) {
     setTimeout(() => setJustCopied(false), 1000);
   }, [addr]);
 
+  const col = disabled ? color.gray3 : color.midnight;
+
   return (
     <View style={styles.address}>
       <TouchableHighlight
         style={styles.addressButton}
-        onPress={copy}
+        onPress={disabled ? undefined : copy}
         {...touchHighlightUnderlay.subtle}
       >
         <View style={styles.addressView}>
-          <Text style={styles.addressMono} numberOfLines={1}>
-            {addr}
+          <Text style={[styles.addressMono, { color: col }]} numberOfLines={1}>
+            {disabled ? "0x········································" : addr}
           </Text>
-          <Octicons name="copy" size={16} color="black" />
+          <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
       <TextLight>{justCopied ? "Copied" : " "}</TextLight>
@@ -201,6 +252,10 @@ function HeaderRow({ title }: { title: string }) {
 }
 
 const styles = StyleSheet.create({
+  checkbox: {
+    width: 16,
+    height: 16,
+  },
   padH16: {
     paddingHorizontal: 16,
   },

@@ -34,6 +34,7 @@
     "@ethersproject/shims": "^5.7.0",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
+    "@react-native-community/checkbox": "^0.5.16",
     "@react-native-segmented-control/segmented-control": "2.4.1",
     "@react-navigation/bottom-tabs": "^6.5.10",
     "@react-navigation/native": "^6.1.6",
