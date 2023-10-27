@@ -1,6 +1,6 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { daimoChainFromId } from "@daimo/contract";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Linking, View } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 

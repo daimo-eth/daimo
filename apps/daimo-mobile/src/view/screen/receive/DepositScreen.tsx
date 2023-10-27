@@ -1,13 +1,20 @@
+import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { AddrLabel, assert } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import CheckBox from "@react-native-community/checkbox";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
 import { Address, getAddress } from "viem";
+import "react-native-url-polyfill/auto";
 
-import { CBPayWebView } from "./OnrampCBPay";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
@@ -43,17 +50,36 @@ function DepositScreenInner({ account }: { account: Account }) {
 }
 
 function OnrampsSection({ account }: { account: Account }) {
-  const [onramp, setOnramp] = useState<"cbpay" | null>(null);
+  // const [onramp, setOnramp] = useState<"cbpay" | null>(null);
+  // const exitOnramp = (succeeded: boolean) => {
+  //   setOnramp(null);
+  //   setSucceeded(succeeded);
+  // };
+  // if (onramp === "cbpay") {
+  //   return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
+  // }
 
-  const [succeeded, setSucceeded] = useState(false);
-  const exitOnramp = (succeeded: boolean) => {
-    setOnramp(null);
-    setSucceeded(succeeded);
-  };
+  // TODO: RPC call to fetch recommended onramp links.
+  const [started, setStarted] = useState(false);
 
-  if (onramp === "cbpay") {
-    return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
-  }
+  const openCBPay = useCallback(() => {
+    const cbUrl = generateOnRampURL({
+      appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
+      destinationWallets: [
+        {
+          address: account.address,
+          blockchains: ["base"],
+          assets: ["USDC"],
+          supportedNetworks: ["base"],
+        },
+      ],
+      handlingRequestedUrls: true,
+      defaultExperience: "send",
+    });
+
+    Linking.openURL(cbUrl);
+    setStarted(true);
+  }, [account]);
 
   return (
     <View>
@@ -62,14 +88,14 @@ function OnrampsSection({ account }: { account: Account }) {
       <ButtonMed
         type="primary"
         title="Deposit from Coinbase"
-        onPress={() => setOnramp("cbpay")}
+        onPress={openCBPay}
       />
-      {succeeded && <Spacer h={16} />}
-      {succeeded && (
+      {started && <Spacer h={16} />}
+      {started && (
         <InfoBubble
           icon="check"
           title="Deposit started"
-          subtitle="You should see it arrive soon."
+          subtitle="Complete in browser, then funds should arrive in a few minutes."
         />
       )}
     </View>
