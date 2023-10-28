@@ -72,7 +72,7 @@ export function toEAccount(account: Account): EAccount {
 }
 
 // Pre-v9 chain gas constants
-type OldChainGasConstants = {
+type ChainGasConstantsV8 = {
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
   estimatedFee: number;
@@ -100,7 +100,7 @@ interface AccountV8 extends StoredModel {
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
 
-  chainGasConstants: OldChainGasConstants;
+  chainGasConstants: ChainGasConstantsV8;
 
   pushToken: string | null;
 }
