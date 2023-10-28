@@ -3,6 +3,7 @@ import { Address } from "viem";
 export type ChainGasConstants = {
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
+  preVerificationGas: string;
 
   /* Estimated fee in dollars (2 digits after decimal) */
   estimatedFee: number;
