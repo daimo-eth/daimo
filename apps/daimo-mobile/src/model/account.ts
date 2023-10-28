@@ -20,7 +20,8 @@ import { cacheEAccounts } from "../view/shared/addr";
  * Singleton account key.
  * Will be a series if/when we support multiple accounts.
  */
-export const defaultEnclaveKeyName = "daimo-12";
+export const defaultEnclaveKeyName =
+  process.env.DAIMO_APP_VARIANT === "dev" ? "daimo-dev-12" : "daimo-12";
 
 /** Account data stored on device. */
 export type Account = {
@@ -71,6 +72,14 @@ export function toEAccount(account: Account): EAccount {
   return { addr: account.address, name: account.name };
 }
 
+// Pre-v9 chain gas constants
+type ChainGasConstantsV8 = {
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+  estimatedFee: number;
+  paymasterAddress: Address;
+};
+
 interface AccountV8 extends StoredModel {
   storageVersion: 8;
 
@@ -92,7 +101,7 @@ interface AccountV8 extends StoredModel {
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
 
-  chainGasConstants: ChainGasConstants;
+  chainGasConstants: ChainGasConstantsV8;
 
   pushToken: string | null;
 }
@@ -220,7 +229,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       pendingNotes: a.pendingNotes || [],
       pendingKeyRotation: [],
 
-      chainGasConstants: a.chainGasConstants,
+      chainGasConstants: { ...a.chainGasConstants, preVerificationGas: "0" },
 
       pushToken: a.pushToken,
     };

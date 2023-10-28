@@ -86,6 +86,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
       .setMaxPriorityFeePerGas(
         opMetadata.chainGasConstants.maxPriorityFeePerGas
       )
+      .setPreVerificationGas(opMetadata.chainGasConstants.preVerificationGas)
       .setPaymasterAndData(opMetadata.chainGasConstants.paymasterAddress);
   }
 

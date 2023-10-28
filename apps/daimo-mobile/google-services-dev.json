@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "237014922171",
+    "project_id": "daimo-dev",
+    "storage_bucket": "daimo-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:237014922171:android:4696dfa5f3217204394a9e",
+        "android_client_info": {
+          "package_name": "com.daimo.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmf9Gjty6WgqzbcQwWLrOUP-UIGYpOcQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

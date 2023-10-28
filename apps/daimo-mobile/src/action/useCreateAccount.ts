@@ -79,6 +79,7 @@ export function useCreateAccount(
         maxFeePerGas: "0",
         estimatedFee: 0,
         paymasterAddress: daimoPaymasterAddress,
+        preVerificationGas: "0",
       },
 
       pushToken: null,
