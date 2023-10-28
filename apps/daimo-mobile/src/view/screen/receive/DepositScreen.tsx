@@ -2,9 +2,8 @@ import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { AddrLabel, assert } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
-import CheckBox from "@react-native-community/checkbox";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -12,22 +11,39 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { Address, getAddress } from "viem";
 import "react-native-url-polyfill/auto";
+import { Address, getAddress } from "viem";
 
+import { WithdrawScreen } from "./WithdrawScreen";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
+import { Check } from "../../shared/Check";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import { TextBody, TextBold, TextLight } from "../../shared/text";
+import { TextBody, TextBold, TextLight, TextPara } from "../../shared/text";
 import { withAccount } from "../../shared/withAccount";
 
+type Tab = "DEPOSIT" | "WITHDRAW";
 export default function DepositScreen() {
-  const Inner = withAccount(DepositScreenInner);
-  return <Inner />;
+  const [tab, setTab] = useState<Tab>("DEPOSIT");
+  const tabs = useRef(["DEPOSIT", "WITHDRAW"] as Tab[]).current;
+
+  const DepositInner = withAccount(DepositScreenInner);
+  const WithdrawInner = withAccount(WithdrawScreen);
+
+  return (
+    <View style={ss.container.screen}>
+      <ScreenHeader title="Deposit" onExit={useExitToHome()} />
+      <SegmentSlider {...{ tabs, tab, setTab }} />
+      <Spacer h={24} />
+      {tab === "DEPOSIT" && <DepositInner />}
+      {tab === "WITHDRAW" && <WithdrawInner />}
+    </View>
+  );
 }
 
 function DepositScreenInner({ account }: { account: Account }) {
@@ -35,9 +51,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   const testnet = chainConfig.chainL2.testnet;
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" onExit={useExitToHome()} />
-      <Spacer h={32} />
+    <View>
       {testnet ? (
         <TestnetFaucet account={account} recipient={account.address} />
       ) : (
@@ -50,16 +64,6 @@ function DepositScreenInner({ account }: { account: Account }) {
 }
 
 function OnrampsSection({ account }: { account: Account }) {
-  // const [onramp, setOnramp] = useState<"cbpay" | null>(null);
-  // const exitOnramp = (succeeded: boolean) => {
-  //   setOnramp(null);
-  //   setSucceeded(succeeded);
-  // };
-  // if (onramp === "cbpay") {
-  //   return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
-  // }
-
-  // TODO: RPC call to fetch recommended onramp links.
   const [started, setStarted] = useState(false);
 
   const openCBPay = useCallback(() => {
@@ -119,28 +123,20 @@ function SendToAddressSection({
   return (
     <View>
       <HeaderRow title="Deposit to address" />
-      <View style={styles.padH16}>
-        <TextBody>
+      <View style={ss.container.padH16}>
+        <TextPara>
           Send {tokenSymbol} to your address below. Confirm that you're sending:
+        </TextPara>
+        <Spacer h={12} />
+        <TextBody>
+          <Check value={check1} setValue={setCheck1} />
+          <Spacer w={8} /> <TextBold>{tokenSymbol}</TextBold>, not USDbC or
+          other assets
         </TextBody>
         <Spacer h={16} />
         <TextBody>
-          <CheckBox
-            boxType="square"
-            style={styles.checkbox}
-            value={check2}
-            onValueChange={setCheck2}
-          />{" "}
-          <TextBold>{tokenSymbol}</TextBold>, not USDbC or other assets
-        </TextBody>
-        <Spacer h={16} />
-        <TextBody>
-          <CheckBox
-            boxType="square"
-            style={styles.checkbox}
-            value={check1}
-            onValueChange={setCheck1}
-          />{" "}
+          <Check value={check2} setValue={setCheck2} />
+          <Spacer w={8} />
           On <TextBold>{chainL2.name}</TextBold>, not any other chain
         </TextBody>
         <Spacer h={16} />
@@ -217,12 +213,12 @@ function TestnetFaucet({
 
   return (
     <View style={styles.callout}>
-      <TextBody>
+      <TextPara>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet account.</TextBold> Your account is on the{" "}
         {env(daimoChainFromId(account.homeChainId)).chainConfig.chainL2.name}{" "}
         testnet.
-      </TextBody>
+      </TextPara>
       <Spacer h={16} />
       <ButtonMed
         title={message}
@@ -271,25 +267,15 @@ function AddressCopier({
 
 function HeaderRow({ title }: { title: string }) {
   return (
-    <View style={styles.rowHeader}>
+    <>
+      <Spacer h={16} />
       <TextLight>{title}</TextLight>
-    </View>
+      <Spacer h={16} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  checkbox: {
-    width: 16,
-    height: 16,
-  },
-  padH16: {
-    paddingHorizontal: 16,
-  },
-  rowHeader: {
-    flexDirection: "row",
-    paddingVertical: 16,
-    paddingHorizontal: 2,
-  },
   address: {
     flexDirection: "column",
     gap: 16,

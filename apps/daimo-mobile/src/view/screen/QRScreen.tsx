@@ -4,15 +4,15 @@ import {
   getAccountName,
   parseDaimoLink,
 } from "@daimo/common";
-import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { useRef, useState } from "react";
-import { View, StyleSheet, Linking } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import { useAccount } from "../../model/account";
 import { Scanner } from "../shared/Scanner";
 import { ScreenHeader, useExitToHome } from "../shared/ScreenHeader";
+import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
 import { color, ss } from "../shared/style";
@@ -29,14 +29,7 @@ export function QRScreen() {
     <View style={ss.container.screen}>
       <ScreenHeader title={title} onBack={useExitToHome()} />
       <Spacer h={8} />
-      <SegmentedControl
-        values={tabs}
-        onValueChange={setTab as (tab: string) => void}
-        selectedIndex={tabs.indexOf(tab)}
-        fontStyle={{ ...ss.text.body, color: color.grayDark }}
-        activeFontStyle={{ ...ss.text.body, color: color.midnight }}
-        style={{ height: 48, backgroundColor: color.ivoryDark }}
-      />
+      <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
       {tab === "PAY ME" && <QRDisplay />}
       {tab === "SCAN" && <QRScan />}
