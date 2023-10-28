@@ -16,7 +16,7 @@ import { Address, Hex } from "viem";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferOpEvent;
+export type OpEvent = TransferOpEvent | KeyRotationOpEvent;
 
 /**
  * Represents a transfer of tokens from one address to another.
@@ -58,11 +58,13 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** Userop nonce, if this transfer occurred in a userop */
   nonceMetadata?: Hex;
+}
 
-  /* Fees paid to paymaster for corresponding userop, in USDC amount.
-   * Estimate if pending, actual if not. 0 if paymaster wasn't used.
-   */
-  feeAmount?: number;
+export interface KeyRotationOpEvent extends OpEventBase {
+  type: "keyRotation";
+
+  slot: number;
+  rotationType: "add" | "remove";
 }
 
 interface OpEventBase {
@@ -82,6 +84,11 @@ interface OpEventBase {
   blockNumber?: number;
   blockHash?: string;
   logIndex?: number;
+
+  /* Fees paid to paymaster for corresponding userop, in USDC amount.
+   * Estimate if pending, actual if not. 0 if paymaster wasn't used.
+   */
+  feeAmount?: number;
 }
 
 export enum OpStatus {

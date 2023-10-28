@@ -1,8 +1,8 @@
 import {
   EAccount,
   OpEvent,
-  TransferOpEvent,
   UserOpHex,
+  assert,
   dollarsToAmount,
 } from "@daimo/common";
 import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
@@ -24,15 +24,13 @@ export function useSendAsync({
   dollarsToSend,
   sendFn,
   pendingOp,
-  namedAccounts,
   accountTransform,
 }: {
   dollarsToSend: number;
   sendFn: SendOpFn;
   pendingOp?: OpEvent;
-  namedAccounts?: EAccount[];
   /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account, pendingOp: TransferOpEvent) => Account;
+  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
 }): ActHandle {
   const [as, setAS] = useActStatus();
 
@@ -62,31 +60,35 @@ export function useSendAsync({
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
-      // Filter to new named accounts only
-      const findAccount = (addr: Address) =>
-        account.namedAccounts.find((a) => a.addr === addr);
-      namedAccounts = (namedAccounts || []).filter(
-        (a) => findAccount(a.addr) == null
-      );
-
-      let newAccount = {
-        ...account,
-        recentTransfers: [...account.recentTransfers, pendingOp],
-        namedAccounts: [...account.namedAccounts, ...namedAccounts],
-      };
-
       if (accountTransform) {
-        newAccount = accountTransform(newAccount, pendingOp);
+        const newAccount = accountTransform(account, pendingOp);
+        setAccount(newAccount);
       }
 
-      // TODO: add pending device add/removes
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
-
-      setAccount(newAccount);
     }
   }, [account.enclaveKeyName, keySlot, sendFn]);
 
   return { ...as, exec, cost };
+}
+
+/** Regular transfer account transform. Adds pending transfer to history and
+ *  merges any new named accounts. */
+export function transferAccountTransform(namedAccounts: EAccount[]) {
+  return (account: Account, pendingOp: OpEvent) => {
+    assert(pendingOp.type === "transfer");
+    // Filter to new named accounts only
+    const findAccount = (addr: Address) =>
+      account.namedAccounts.find((a) => a.addr === addr);
+
+    namedAccounts = namedAccounts.filter((a) => findAccount(a.addr) == null);
+
+    return {
+      ...account,
+      recentTransfers: [...account.recentTransfers, pendingOp],
+      namedAccounts: [...account.namedAccounts, ...namedAccounts],
+    };
+  };
 }
 
 /** Warm the DaimoOpSender cache. */
@@ -101,7 +103,6 @@ export function useWarmCache(
     loadOpSender(enclaveKeyName, address, keySlot, chainId);
   }, [enclaveKeyName, address, keySlot, chainId]);
 }
-
 const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 
 function loadOpSender(

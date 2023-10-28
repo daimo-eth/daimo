@@ -7,6 +7,7 @@ import {
   ChainGasConstants,
   DaimoLinkNote,
   TrackedNote,
+  KeyRotationOpEvent,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -56,6 +57,8 @@ export type Account = {
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
   accountKeys: KeyData[];
+  /** Pending changes to authorised keys  */
+  pendingKeyRotation: KeyRotationOpEvent[];
 
   /** Current gas and paymaster related constants */
   chainGasConstants: ChainGasConstants;
@@ -88,6 +91,33 @@ interface AccountV8 extends StoredModel {
   pendingNotes: DaimoLinkNote[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+}
+
+interface AccountV9 extends StoredModel {
+  storageVersion: 9;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
+  pendingNotes: DaimoLinkNote[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
 
   chainGasConstants: ChainGasConstants;
 
@@ -167,8 +197,37 @@ export function parseAccount(accountJSON?: string): Account | null {
   // Delete V1-78 testnet accounts. Re-onboard to latest account with paymasters.
   if (model.storageVersion < 8) return null;
 
-  assert(model.storageVersion === 8);
-  const a = model as AccountV8;
+  if (model.storageVersion === 8) {
+    const a = model as AccountV8;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingNotes: a.pendingNotes || [],
+      pendingKeyRotation: [],
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+    };
+  }
+
+  assert(model.storageVersion === 9);
+  const a = model as AccountV9;
 
   const ret = {
     enclaveKeyName: a.enclaveKeyName,
@@ -188,7 +247,8 @@ export function parseAccount(accountJSON?: string): Account | null {
     trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
-    pendingNotes: a.pendingNotes || [],
+    pendingNotes: a.pendingNotes,
+    pendingKeyRotation: a.pendingKeyRotation,
 
     chainGasConstants: a.chainGasConstants,
 
@@ -201,8 +261,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV8 = {
-    storageVersion: 8,
+  const model: AccountV9 = {
+    storageVersion: 9,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -222,6 +282,7 @@ export function serializeAccount(account: Account | null): string {
     pendingNotes: account.pendingNotes,
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
+    pendingKeyRotation: account.pendingKeyRotation,
 
     chainGasConstants: account.chainGasConstants,
 

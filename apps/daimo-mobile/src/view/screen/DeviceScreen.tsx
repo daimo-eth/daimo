@@ -1,4 +1,5 @@
 import {
+  OpStatus,
   assert,
   dollarsToAmount,
   guessTimestampFromNum,
@@ -66,6 +67,20 @@ export function DeviceScreen({ route, navigation }: Props) {
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
+    pendingOp: {
+      type: "keyRotation",
+      status: OpStatus.pending,
+      slot: device!.slot,
+      rotationType: "remove",
+      timestamp: Date.now() / 1e3,
+    },
+    accountTransform: (acc, pendingOp) => {
+      assert(pendingOp.type === "keyRotation");
+      return {
+        ...acc,
+        pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
+      };
+    },
   });
 
   const removeDevice = useCallback(() => {

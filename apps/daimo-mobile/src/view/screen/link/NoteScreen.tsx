@@ -18,7 +18,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
-import { useSendAsync } from "../../../action/useSendAsync";
+import {
+  transferAccountTransform,
+  useSendAsync,
+} from "../../../action/useSendAsync";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { Account } from "../../../model/account";
@@ -151,12 +154,12 @@ function NoteDisplayInner({
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonceMetadata.toHex(),
     },
-    namedAccounts: [
+    accountTransform: transferAccountTransform([
       {
         addr: daimoEphemeralNotesAddress,
         label: AddrLabel.PaymentLink,
       } as EAccount,
-    ],
+    ]),
   });
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);

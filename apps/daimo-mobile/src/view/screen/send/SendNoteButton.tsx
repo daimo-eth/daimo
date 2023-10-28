@@ -18,7 +18,10 @@ import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
 import { Hex } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
-import { useSendAsync } from "../../../action/useSendAsync";
+import {
+  transferAccountTransform,
+  useSendAsync,
+} from "../../../action/useSendAsync";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
@@ -51,6 +54,13 @@ function SendNoteButtonInner({
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
+  const addPendingNote = transferAccountTransform([
+    {
+      addr: daimoEphemeralNotesAddress,
+      label: AddrLabel.PaymentLink,
+    } as EAccount,
+  ]);
+
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
@@ -68,26 +78,23 @@ function SendNoteButtonInner({
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),
     },
-    accountTransform: (account, pendingOp) => ({
-      ...account,
-      pendingNotes: [
-        ...account.pendingNotes,
-        {
-          type: "note",
-          ephemeralOwner,
-          ephemeralPrivateKey: ephemeralPrivKey,
-          previewDollars: `${dollars}`,
-          previewSender: account.name,
-          opHash: pendingOp.opHash,
-        },
-      ],
-    }),
-    namedAccounts: [
-      {
-        addr: daimoEphemeralNotesAddress,
-        label: AddrLabel.PaymentLink,
-      } as EAccount,
-    ],
+    accountTransform: (account, pendingOp) => {
+      const newAccount = addPendingNote(account, pendingOp);
+      return {
+        ...newAccount,
+        pendingNotes: [
+          ...newAccount.pendingNotes,
+          {
+            type: "note",
+            ephemeralOwner,
+            ephemeralPrivateKey: ephemeralPrivKey,
+            previewDollars: `${dollars}`,
+            previewSender: account.name,
+            opHash: pendingOp.opHash,
+          },
+        ],
+      };
+    },
   });
 
   const sendDisabledReason =

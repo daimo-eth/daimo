@@ -28,6 +28,7 @@ import {
 import { AccountBubble } from "../shared/AccountBubble";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
+import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader, useExitToHome } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -104,24 +105,45 @@ function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
 
+  const currentKeyRows = useCallback(() => {
+    return account.accountKeys
+      .filter((k) => k.removedAt === undefined)
+      .map((keyData) => (
+        <DeviceRow
+          key={keyData.slot}
+          keyData={keyData}
+          isCurrentDevice={keyData.pubKey === account.enclavePubKey}
+          chain={daimoChainFromId(account.homeChainId)}
+          pendingRemoval={
+            account.pendingKeyRotation.find(
+              (k) => k.rotationType === "remove" && k.slot === keyData.slot
+            ) !== undefined
+          }
+        />
+      ));
+  }, [
+    account.pendingKeyRotation,
+    account.accountKeys,
+    account.enclavePubKey,
+    account.homeChainId,
+  ])();
+
+  const pendingDeviceRows = useCallback(() => {
+    return account.pendingKeyRotation
+      .filter((k) => k.rotationType === "add")
+      .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
+  }, [account.pendingKeyRotation])();
+
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
         <TextLight>My devices</TextLight>
       </View>
       <Spacer h={8} />
-      <View style={styles.listBody}>
-        {account.accountKeys
-          .filter((k) => k.removedAt === undefined)
-          .map((keyData) => (
-            <DeviceRow
-              key={keyData.pubKey}
-              keyData={keyData}
-              isCurrentDevice={keyData.pubKey === account.enclavePubKey}
-              chain={daimoChainFromId(account.homeChainId)}
-            />
-          ))}
-      </View>
+      <View
+        style={styles.listBody}
+        children={currentKeyRows.concat(pendingDeviceRows)}
+      />
       <Spacer h={16} />
       <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
     </View>
@@ -132,24 +154,31 @@ function DeviceRow({
   keyData,
   isCurrentDevice,
   chain,
+  pendingRemoval,
 }: {
   keyData: KeyData;
   isCurrentDevice: boolean;
   chain: DaimoChain;
+  pendingRemoval: boolean;
 }) {
   const nowS = useTime();
   const nav = useNav();
 
-  const viewDevice = () =>
-    nav.navigate("SettingsTab", {
-      screen: "Device",
-      params: { pubKey: keyData.pubKey },
-    });
+  const viewDevice = () => {
+    if (!pendingRemoval)
+      nav.navigate("SettingsTab", {
+        screen: "Device",
+        params: { pubKey: keyData.pubKey },
+      });
+  };
 
   const addAtS = guessTimestampFromNum(keyData.addedAt, chain);
 
   const dispDevice = keySlotToLabel(keyData.slot);
-  const dispTime = "Added " + timeAgo(addAtS, nowS, true);
+  const dispTime = pendingRemoval
+    ? "Pending"
+    : "Added " + timeAgo(addAtS, nowS, true);
+  const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
     <View style={styles.rowBorder}>
@@ -160,13 +189,40 @@ function DeviceRow({
       >
         <View style={styles.row}>
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-            <TextBody>{dispDevice}</TextBody>
-            {isCurrentDevice && <Spacer w={12} />}
-            {isCurrentDevice && <Badge>THIS DEVICE</Badge>}
+            <TextBody color={textCol}>{dispDevice}</TextBody>
+            {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
+            {isCurrentDevice && !pendingRemoval && <Badge>THIS DEVICE</Badge>}
+            {pendingRemoval && <PendingDot />}
           </View>
           <View style={styles.rowRight}>
-            <TextMeta>Mobile</TextMeta>
+            <TextMeta color={textCol}>Mobile</TextMeta>
             <TextMeta color={color.gray3}>{dispTime}</TextMeta>
+          </View>
+        </View>
+      </TouchableHighlight>
+    </View>
+  );
+}
+
+function PendingDeviceRow({ slot }: { slot: number }) {
+  const dispDevice = keySlotToLabel(slot);
+
+  return (
+    <View style={styles.rowBorder}>
+      <TouchableHighlight
+        onPress={() => {}}
+        {...touchHighlightUnderlay.subtle}
+        style={styles.rowWrap}
+      >
+        <View style={styles.row}>
+          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+            <TextBody color={color.gray3}>{dispDevice}</TextBody>
+            <Spacer w={12} />
+            <PendingDot />
+          </View>
+          <View style={styles.rowRight}>
+            <TextMeta color={color.gray3}>Mobile</TextMeta>
+            <TextMeta color={color.gray3}>Pending</TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -326,5 +382,11 @@ const styles = StyleSheet.create({
   },
   kvKey: {
     width: 128,
+  },
+  pendingDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 16,
+    backgroundColor: color.yellow,
   },
 });

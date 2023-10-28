@@ -1,9 +1,9 @@
 import {
   amountToDollars,
   DaimoNoteStatus,
-  OpEvent,
   timeString,
   TrackedNote,
+  TransferOpEvent,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
@@ -119,7 +119,13 @@ function LinkToExplorer({
   );
 }
 
-function TransferBody({ account, op }: { account: Account; op: OpEvent }) {
+function TransferBody({
+  account,
+  op,
+}: {
+  account: Account;
+  op: TransferOpEvent;
+}) {
   const opRequestId = op.nonceMetadata
     ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
     : undefined;
