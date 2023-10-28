@@ -1,81 +1,146 @@
-import { AddrLabel } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
+import { generateOnRampURL } from "@coinbase/cbpay-js";
+import { AddrLabel, assert } from "@daimo/common";
+import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+} from "react-native";
+import "react-native-url-polyfill/auto";
 import { Address, getAddress } from "viem";
 
-import { CBPayWebView } from "./OnrampCBPay";
+import { WithdrawScreen } from "./WithdrawScreen";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
+import { Check } from "../../shared/Check";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import { TextBody, TextBold, TextLight } from "../../shared/text";
+import { TextBody, TextBold, TextLight, TextPara } from "../../shared/text";
+import { withAccount } from "../../shared/withAccount";
 
+type Tab = "DEPOSIT" | "WITHDRAW";
 export default function DepositScreen() {
-  const [onramp, setOnramp] = useState<"cbpay" | null>(null);
-  const [succeeded, setSucceeded] = useState(false);
-  const exitOnramp = (succeeded: boolean) => {
-    setOnramp(null);
-    setSucceeded(succeeded);
-  };
+  const [tab, setTab] = useState<Tab>("DEPOSIT");
+  const tabs = useRef(["DEPOSIT", "WITHDRAW"] as Tab[]).current;
 
-  const goHome = useExitToHome();
-  const [account] = useAccount();
-  if (account == null) return null;
-
-  const { chainL2, tokenSymbol } = env(
-    daimoChainFromId(account.homeChainId)
-  ).chainConfig;
-  // Overwrite to test CBPay
-  const testnet = chainL2.testnet;
-
-  if (onramp === "cbpay") {
-    return <CBPayWebView destAccount={account} onExit={exitOnramp} />;
-  }
+  const DepositInner = withAccount(DepositScreenInner);
+  const WithdrawInner = withAccount(WithdrawScreen);
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" onExit={goHome} />
-      <Spacer h={32} />
-      {testnet && (
+      <ScreenHeader title="Deposit" onExit={useExitToHome()} />
+      <SegmentSlider {...{ tabs, tab, setTab }} />
+      <Spacer h={24} />
+      {tab === "DEPOSIT" && <DepositInner />}
+      {tab === "WITHDRAW" && <WithdrawInner />}
+    </View>
+  );
+}
+
+function DepositScreenInner({ account }: { account: Account }) {
+  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
+  const testnet = chainConfig.chainL2.testnet;
+
+  return (
+    <View>
+      {testnet ? (
         <TestnetFaucet account={account} recipient={account.address} />
+      ) : (
+        <OnrampsSection account={account} />
       )}
-      {testnet && <Spacer h={32} />}
-      {!testnet && <HeaderRow title="Recommended exchange" />}
-      {!testnet && (
-        <ButtonMed
-          type="primary"
-          title="Deposit from Coinbase"
-          onPress={() => setOnramp("cbpay")}
-        />
-      )}
-      {succeeded && <Spacer h={16} />}
-      {succeeded && (
+      <Spacer h={32} />
+      <SendToAddressSection {...{ account, chainConfig }} />
+    </View>
+  );
+}
+
+function OnrampsSection({ account }: { account: Account }) {
+  const [started, setStarted] = useState(false);
+
+  const openCBPay = useCallback(() => {
+    const cbUrl = generateOnRampURL({
+      appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
+      destinationWallets: [
+        {
+          address: account.address,
+          blockchains: ["base"],
+          assets: ["USDC"],
+          supportedNetworks: ["base"],
+        },
+      ],
+      handlingRequestedUrls: true,
+      defaultExperience: "send",
+    });
+
+    Linking.openURL(cbUrl);
+    setStarted(true);
+  }, [account]);
+
+  return (
+    <View>
+      <HeaderRow title="Recommended exchanges" />
+
+      <ButtonMed
+        type="primary"
+        title="Deposit from Coinbase"
+        onPress={openCBPay}
+      />
+      {started && <Spacer h={16} />}
+      {started && (
         <InfoBubble
           icon="check"
           title="Deposit started"
-          subtitle="You should see it arrive soon."
+          subtitle="Complete in browser, then funds should arrive in a few minutes."
         />
       )}
-      <Spacer h={32} />
-      <HeaderRow title="Deposit from anywhere" />
-      <View style={styles.padH16}>
+    </View>
+  );
+}
+
+function SendToAddressSection({
+  account,
+  chainConfig,
+}: {
+  account: Account;
+  chainConfig: ChainConfig;
+}) {
+  const { tokenSymbol, chainL2 } = chainConfig;
+
+  const [check1, setCheck1] = useState(false);
+  const [check2, setCheck2] = useState(false);
+
+  assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
+
+  return (
+    <View>
+      <HeaderRow title="Deposit to address" />
+      <View style={ss.container.padH16}>
+        <TextPara>
+          Send {tokenSymbol} to your address below. Confirm that you're sending:
+        </TextPara>
+        <Spacer h={12} />
         <TextBody>
-          <TextBold>
-            Send {tokenSymbol} on {chainL2.name} to your address below.
-          </TextBold>{" "}
-          Daimo doesn't currently support other tokens.
-          {tokenSymbol === "USDC" &&
-            chainL2.name === "Base" &&
-            ' Use native USDC, not bridged "USDbC".'}
+          <Check value={check1} setValue={setCheck1} />
+          <Spacer w={8} /> <TextBold>{tokenSymbol}</TextBold>, not USDbC or
+          other assets
         </TextBody>
         <Spacer h={16} />
-        <AddressCopier addr={account.address} />
+        <TextBody>
+          <Check value={check2} setValue={setCheck2} />
+          <Spacer w={8} />
+          On <TextBold>{chainL2.name}</TextBold>, not any other chain
+        </TextBody>
+        <Spacer h={16} />
+        <AddressCopier addr={account.address} disabled={!check1 || !check2} />
       </View>
     </View>
   );
@@ -148,12 +213,12 @@ function TestnetFaucet({
 
   return (
     <View style={styles.callout}>
-      <TextBody>
+      <TextPara>
         <Octicons name="alert" size={16} color="black" />{" "}
         <TextBold>Testnet account.</TextBold> Your account is on the{" "}
         {env(daimoChainFromId(account.homeChainId)).chainConfig.chainL2.name}{" "}
         testnet.
-      </TextBody>
+      </TextPara>
       <Spacer h={16} />
       <ButtonMed
         title={message}
@@ -165,7 +230,13 @@ function TestnetFaucet({
   );
 }
 
-function AddressCopier({ addr }: { addr: string }) {
+function AddressCopier({
+  addr,
+  disabled,
+}: {
+  addr: string;
+  disabled?: boolean;
+}) {
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
     await Clipboard.setStringAsync(addr);
@@ -173,18 +244,20 @@ function AddressCopier({ addr }: { addr: string }) {
     setTimeout(() => setJustCopied(false), 1000);
   }, [addr]);
 
+  const col = disabled ? color.gray3 : color.midnight;
+
   return (
     <View style={styles.address}>
       <TouchableHighlight
         style={styles.addressButton}
-        onPress={copy}
+        onPress={disabled ? undefined : copy}
         {...touchHighlightUnderlay.subtle}
       >
         <View style={styles.addressView}>
-          <Text style={styles.addressMono} numberOfLines={1}>
-            {addr}
+          <Text style={[styles.addressMono, { color: col }]} numberOfLines={1}>
+            {disabled ? "0x········································" : addr}
           </Text>
-          <Octicons name="copy" size={16} color="black" />
+          <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
       <TextLight>{justCopied ? "Copied" : " "}</TextLight>
@@ -194,21 +267,15 @@ function AddressCopier({ addr }: { addr: string }) {
 
 function HeaderRow({ title }: { title: string }) {
   return (
-    <View style={styles.rowHeader}>
+    <>
+      <Spacer h={16} />
       <TextLight>{title}</TextLight>
-    </View>
+      <Spacer h={16} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  padH16: {
-    paddingHorizontal: 16,
-  },
-  rowHeader: {
-    flexDirection: "row",
-    paddingVertical: 16,
-    paddingHorizontal: 2,
-  },
   address: {
     flexDirection: "column",
     gap: 16,

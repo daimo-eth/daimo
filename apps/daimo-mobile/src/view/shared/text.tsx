@@ -2,7 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useMemo } from "react";
 import { Text, TextProps, TextStyle } from "react-native";
 
-import { ss } from "./style";
+import { color, ss } from "./style";
 
 function useStyle(baseStyle: TextStyle, { color }: { color?: string }) {
   return useMemo(() => [baseStyle, { color }], [baseStyle, color]);
@@ -28,8 +28,12 @@ export function TextMeta(props: TextProps & { color?: string }) {
   return <Text {...props} style={useStyle(ss.text.metadata, props)} />;
 }
 
+export function TextPara(props: TextProps) {
+  return <Text {...props} style={ss.text.para} />;
+}
+
 export function TextLight(props: TextProps) {
-  return <Text {...props} style={ss.text.light} />;
+  return <TextBody {...props} color={color.gray3} />;
 }
 
 export function TextBold(props: TextProps) {

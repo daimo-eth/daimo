@@ -86,6 +86,12 @@ export const ss = {
       fontSize: 16,
       fontWeight: "600",
     },
+    para: {
+      ...textBase,
+      fontSize: 16,
+      fontWeight: "500",
+      lineHeight: 28,
+    },
     metadata: {
       ...textBase,
       fontSize: 13,
@@ -94,12 +100,6 @@ export const ss = {
     metadataLight: {
       ...textBase,
       fontSize: 13,
-      fontWeight: "600",
-      color: color.gray3,
-    },
-    light: {
-      ...textBase,
-      fontSize: 16,
       fontWeight: "600",
       color: color.gray3,
     },
