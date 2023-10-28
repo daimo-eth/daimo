@@ -1,4 +1,11 @@
-import { assert, hasAccountName } from "@daimo/common";
+import {
+  ChainGasConstants,
+  EAccount,
+  KeyData,
+  TransferOpEvent,
+  assert,
+  hasAccountName,
+} from "@daimo/common";
 import { Address } from "viem";
 
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -6,6 +13,22 @@ import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../env";
+
+export interface AccountHistoryResult {
+  address: Address;
+  sinceBlockNum: number;
+
+  lastFinalizedBlock: number;
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: `${bigint}`;
+
+  chainGasConstants: ChainGasConstants;
+
+  transferLogs: TransferOpEvent[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+}
 
 /**
  * Serves everything new that happened to an account since block n.
@@ -20,7 +43,7 @@ export async function getAccountHistory(
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster
-) {
+): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
 
   // Get latest finalized block. Next account sync, fetch since this block.
@@ -71,11 +94,12 @@ export async function getAccountHistory(
 
   return {
     address,
+    sinceBlockNum,
 
     lastFinalizedBlock: Number(finBlock.number),
     lastBlock,
     lastBlockTimestamp,
-    lastBalance: String(lastBalance),
+    lastBalance: `${lastBalance}`,
 
     chainGasConstants,
 

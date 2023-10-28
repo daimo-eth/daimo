@@ -1,3 +1,4 @@
+import { AccountHistoryResult } from "@daimo/api";
 import {
   EAccount,
   OpStatus,
@@ -70,31 +71,31 @@ function maybeSync(fromScratch?: boolean) {
 }
 
 /** Gets latest balance & history for this account, in the background. */
-function resync(reason: string, fromScratch?: boolean) {
-  const { currentAccount, setCurrentAccount } = getAccountManager();
-  assert(currentAccount != null, `no account, skipping sync: ${reason}`);
+async function resync(reason: string, fromScratch?: boolean) {
+  const manager = getAccountManager();
+  const accOld = manager.currentAccount;
+  assert(!!accOld, `no account, skipping sync: ${reason}`);
 
-  console.log(`[SYNC] RESYNC ${currentAccount.name}, ${reason}`);
+  console.log(`[SYNC] RESYNC ${accOld.name}, ${reason}`);
   lastSyncS = Date.now() / 1e3;
 
-  const acc = currentAccount;
-  syncAccount(acc, fromScratch)
-    .then((a: Account) => {
-      console.log(`[SYNC] SUCCEEDED ${acc.name}`);
-      setCurrentAccount(a);
-    })
-    .catch((e) => {
-      console.error(`[SYNC] FAILED ${acc.name}`, e);
-      setCurrentAccount({ ...acc });
-    });
+  try {
+    const res = await fetchSync(accOld, fromScratch);
+    assert(!!manager.currentAccount, `account deleted during sync`);
+    const accNew = applySync(manager.currentAccount, res);
+    console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
+    manager.setCurrentAccount(accNew);
+  } catch (e) {
+    console.error(`[SYNC] FAILED ${accOld.name}`, e);
+  }
 }
 
 /** Loads all account history since the last finalized block as of the previous sync.
  * This means we're guaranteed to see all events even if there were reorgs. */
-async function syncAccount(
+async function fetchSync(
   account: Account,
   fromScratch?: boolean
-): Promise<Account> {
+): Promise<AccountHistoryResult> {
   const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
 
   const daimoChain = daimoChainFromId(account.homeChainId);
@@ -118,6 +119,10 @@ async function syncAccount(
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
+  return result;
+}
+
+function applySync(account: Account, result: AccountHistoryResult): Account {
   assert(result.address === account.address);
   if (result.lastFinalizedBlock < account.lastFinalizedBlock) {
     console.log(
@@ -130,10 +135,11 @@ async function syncAccount(
   // Sync in recent transfers
   // Start with finalized transfers only
   const oldFinalizedTransfers = account.recentTransfers.filter(
-    (t) => t.blockNumber && t.blockNumber < sinceBlockNum
+    (t) => t.blockNumber && t.blockNumber < result.sinceBlockNum
   );
 
   // Add newly onchain transfers
+  const daimoChain = daimoChainFromId(account.homeChainId);
   const recentTransfers = addTransfers(
     oldFinalizedTransfers,
     result.transferLogs,
@@ -159,7 +165,7 @@ async function syncAccount(
   recentTransfers.push(...stillPending);
 
   let namedAccounts: EAccount[];
-  if (sinceBlockNum === 0) {
+  if (result.sinceBlockNum === 0) {
     // If resyncing from scratch,  reset named accounts
     namedAccounts = result.namedAccounts;
   } else {

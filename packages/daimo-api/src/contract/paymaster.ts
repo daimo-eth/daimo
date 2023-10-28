@@ -1,6 +1,6 @@
+import { UserOpHex } from "@daimo/common";
 import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
 
-import { UserOpHex } from "..";
 import { BundlerClient } from "../chain/bundlerClient";
 import { ViemClient, chainConfig } from "../env";
 
