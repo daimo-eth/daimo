@@ -54,6 +54,13 @@ function SendNoteButtonInner({
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
+  const addPendingNote = transferAccountTransform([
+    {
+      addr: daimoEphemeralNotesAddress,
+      label: AddrLabel.PaymentLink,
+    } as EAccount,
+  ]);
+
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
@@ -72,12 +79,7 @@ function SendNoteButtonInner({
       nonceMetadata: nonce.metadata.toHex(),
     },
     accountTransform: (account, pendingOp) => {
-      const newAccount = transferAccountTransform([
-        {
-          addr: daimoEphemeralNotesAddress,
-          label: AddrLabel.PaymentLink,
-        } as EAccount,
-      ])(account, pendingOp);
+      const newAccount = addPendingNote(account, pendingOp);
       return {
         ...newAccount,
         pendingNotes: [

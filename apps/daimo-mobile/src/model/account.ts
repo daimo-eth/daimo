@@ -247,7 +247,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
-    pendingNotes: a.pendingNotes || [],
+    pendingNotes: a.pendingNotes,
     pendingKeyRotation: a.pendingKeyRotation,
 
     chainGasConstants: a.chainGasConstants,

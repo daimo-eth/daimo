@@ -28,6 +28,7 @@ import {
 import { AccountBubble } from "../shared/AccountBubble";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
+import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader, useExitToHome } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -174,7 +175,9 @@ function DeviceRow({
   const addAtS = guessTimestampFromNum(keyData.addedAt, chain);
 
   const dispDevice = keySlotToLabel(keyData.slot);
-  const dispTime = "Added " + timeAgo(addAtS, nowS, true);
+  const dispTime = pendingRemoval
+    ? "Pending"
+    : "Added " + timeAgo(addAtS, nowS, true);
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
@@ -187,22 +190,13 @@ function DeviceRow({
         <View style={styles.row}>
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
             <TextBody color={textCol}>{dispDevice}</TextBody>
-            {isCurrentDevice && <Spacer w={12} />}
-            {isCurrentDevice && <Badge>THIS DEVICE</Badge>}
+            {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
+            {isCurrentDevice && !pendingRemoval && <Badge>THIS DEVICE</Badge>}
+            {pendingRemoval && <PendingDot />}
           </View>
           <View style={styles.rowRight}>
-            {pendingRemoval && (
-              <>
-                <View style={styles.pendingDot} />
-                <TextMeta color={color.gray3}>Pending</TextMeta>
-              </>
-            )}
-            {!pendingRemoval && (
-              <>
-                <TextMeta color={textCol}>Mobile</TextMeta>
-                <TextMeta color={color.gray3}>{dispTime}</TextMeta>
-              </>
-            )}
+            <TextMeta color={textCol}>Mobile</TextMeta>
+            <TextMeta color={color.gray3}>{dispTime}</TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -221,12 +215,14 @@ function PendingDeviceRow({ slot }: { slot: number }) {
         style={styles.rowWrap}
       >
         <View style={styles.row}>
-          <TextBody color={color.gray3}>{dispDevice}</TextBody>
+          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+            <TextBody color={color.gray3}>{dispDevice}</TextBody>
+            <Spacer w={12} />
+            <PendingDot />
+          </View>
           <View style={styles.rowRight}>
-            <>
-              <View style={styles.pendingDot} />
-              <TextMeta color={color.gray3}>Pending</TextMeta>
-            </>
+            <TextMeta color={color.gray3}>Mobile</TextMeta>
+            <TextMeta color={color.gray3}>Pending</TextMeta>
           </View>
         </View>
       </TouchableHighlight>

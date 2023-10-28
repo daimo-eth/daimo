@@ -16,6 +16,7 @@ import { Address, getAddress } from "viem";
 
 import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
+import { PendingDot } from "./PendingDot";
 import ScrollPellet from "./ScrollPellet";
 import Spacer from "./Spacer";
 import { getCachedEAccount } from "./addr";
@@ -149,7 +150,7 @@ function TransferRow({
           <View style={styles.transferOtherAccount}>
             <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
             <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
-            {isPending && <View style={styles.pendingDot} />}
+            {isPending && <PendingDot />}
           </View>
           <TransferAmountDate
             amount={amountDelta}
@@ -205,12 +206,6 @@ function TransferAmountDate({
 }
 
 const styles = StyleSheet.create({
-  pendingDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 12,
-    backgroundColor: color.yellow,
-  },
   historyListSwipe: {
     flex: 1,
     backgroundColor: color.white,
