@@ -1,28 +1,29 @@
 import { assert } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import React from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { Badge } from "../../shared/Badge";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
-import { TextLight, TextPara } from "../../shared/text";
+import { TextBold, TextLight, TextPara } from "../../shared/text";
 
 export function WithdrawScreen({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   assert(chainConfig.tokenSymbol === "USDC");
   assert(chainConfig.chainL2.name.startsWith("Base"));
 
+  const BB = Platform.OS === "android" ? TextBold : Badge;
+
   return (
     <View>
       <HeaderRow title="Withdraw via Coinbase" />
       <View style={ss.container.padH16}>
         <TextPara>
-          Go to Coinbase, then tap <Badge>Send & Receive</Badge> ▶{" "}
-          <Badge>Receive</Badge>. Choose <Badge>USDC</Badge>. Finally, set
-          Network to <Badge>Base</Badge>.
+          Go to Coinbase, then tap <BB>Send & Receive</BB> ▶ <BB>Receive</BB>.
+          Choose <BB>USDC</BB>. Finally, set Network to <BB>Base</BB>.
         </TextPara>
         <Spacer h={16} />
         <TextPara>
@@ -33,7 +34,11 @@ export function WithdrawScreen({ account }: { account: Account }) {
       <Spacer h={32} />
       <HeaderRow title="Withdraw to another exchange" />
       <View style={ss.container.padH16}>
-        <TextPara>Instructions for other exchanges coming soon.</TextPara>
+        <TextPara>
+          More instructions coming soon. The process is similar at most
+          exchanges. Just make sure your exchange can receive <BB>USDC</BB> on{" "}
+          <BB>Base</BB>.
+        </TextPara>
       </View>
     </View>
   );

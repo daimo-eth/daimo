@@ -1,7 +1,8 @@
 import { BarCodeScanner, BarCodeScannedCallback } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 
+import { ss } from "./style";
 import { TextBody, TextCenter } from "./text";
 
 /** Scans a QR code. */
@@ -36,7 +37,10 @@ export function Scanner({
       <View style={styles.cameraBox}>
         <BarCodeScanner
           onBarCodeScanned={handleBarCodeScanned}
-          style={StyleSheet.absoluteFillObject}
+          style={Platform.select<ViewStyle>({
+            ios: StyleSheet.absoluteFillObject,
+            android: styles.cameraAndroid,
+          })}
           barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
         />
       </View>
@@ -52,5 +56,12 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 16,
     overflow: "hidden",
+  },
+  cameraAndroid: {
+    position: "absolute",
+    width: 400,
+    height: 600,
+    top: -150,
+    left: -20,
   },
 });

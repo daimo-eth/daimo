@@ -3,7 +3,7 @@ import { AddrLabel, assert } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -18,7 +18,7 @@ import { WithdrawScreen } from "./WithdrawScreen";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
-import { Check } from "../../shared/Check";
+import { Check, CheckLabel } from "../../shared/Check";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import { SegmentSlider } from "../../shared/SegmentSlider";
@@ -129,17 +129,13 @@ function SendToAddressSection({
           Send {tokenSymbol} to your address below. Confirm that you're sending:
         </TextPara>
         <Spacer h={12} />
-        <TextBody>
-          <Check value={check1} setValue={setCheck1} />
-          <Spacer w={8} /> <TextBold>{tokenSymbol}</TextBold>, not USDbC or
-          other assets
-        </TextBody>
+        <CheckLabel value={check1} setValue={setCheck1}>
+          <TextBold>{tokenSymbol}</TextBold>, not USDbC or other assets
+        </CheckLabel>
         <Spacer h={16} />
-        <TextBody>
-          <Check value={check2} setValue={setCheck2} />
-          <Spacer w={8} />
+        <CheckLabel value={check2} setValue={setCheck2}>
           On <TextBold>{chainL2.name}</TextBold>, not any other chain
-        </TextBody>
+        </CheckLabel>
         <Spacer h={16} />
         <AddressCopier addr={account.address} disabled={!check1 || !check2} />
       </View>
