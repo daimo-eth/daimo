@@ -30,6 +30,7 @@ import {
   requestEnclaveSignature,
 } from "../../logic/key";
 import { NamedError } from "../../logic/log";
+import { getPushNotificationManager } from "../../logic/notify";
 import { defaultEnclaveKeyName } from "../../model/account";
 import { ButtonBig, TextButton } from "../shared/Button";
 import { InfoLink } from "../shared/InfoLink";
@@ -482,6 +483,8 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
     const status = await Notifications.requestPermissionsAsync();
     console.log(`[ONBOARDING] notifications request ${status.status}`);
     if (!status.granted) return;
+
+    getPushNotificationManager().maybeSavePushTokenForAccount();
 
     onNext();
   };
