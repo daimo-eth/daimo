@@ -52,7 +52,7 @@ export class Crontab {
   };
 
   private pipeTransfers = (logs: TransferLog[]) => {
-    this.transfersQueue.push(...logs);
+    this.transfersQueue = this.transfersQueue.concat(logs);
     this.pruneTransfers();
   };
 
