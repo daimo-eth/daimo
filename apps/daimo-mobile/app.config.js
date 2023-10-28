@@ -1,4 +1,4 @@
-const IS_DEV = process.env.APP_VARIANT === "dev";
+const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
 export default {
   owner: "daimo",
