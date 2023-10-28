@@ -54,6 +54,8 @@ export function AccountBubble({
           return <Octicons name="download" size={16} color={color.primary} />;
         case AddrLabel.PaymentLink:
           return <Octicons name="link" size={16} color={color.primary} />;
+        case AddrLabel.Coinbase:
+          return <Octicons name="plus" size={16} color={color.primary} />;
         default:
           return "?";
       }

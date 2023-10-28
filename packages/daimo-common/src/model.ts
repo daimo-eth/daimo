@@ -12,6 +12,7 @@ export enum AddrLabel {
   Faucet = "faucet",
   PaymentLink = "payment link",
   Paymaster = "fee",
+  Coinbase = "coinbase",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */

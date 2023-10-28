@@ -41,6 +41,8 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // All historical paymaster addresses
   "0x13f490FafBb206440F25760A10C21A6220017fFa": AddrLabel.Paymaster,
   "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56": AddrLabel.Paymaster,
+  // Known Coinbase Pay addresses on Base
+  "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A": AddrLabel.Coinbase,
 };
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
