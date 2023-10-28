@@ -38,6 +38,7 @@ export default function DepositScreen() {
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Deposit" onExit={useExitToHome()} />
+      <Spacer h={8} />
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
       {tab === "DEPOSIT" && <DepositInner />}
