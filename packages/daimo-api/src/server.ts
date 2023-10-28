@@ -31,7 +31,7 @@ async function main() {
   const keyReg = new KeyRegistry(vc);
   const nameReg = new NameRegistry(vc);
   const opIndexer = new OpIndexer(vc);
-  const paymaster = new Paymaster(vc);
+  const paymaster = new Paymaster(vc, bundlerClient);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
   const noteIndexer = new NoteIndexer(vc, nameReg);
   const faucet = new Faucet(vc, coinIndexer);

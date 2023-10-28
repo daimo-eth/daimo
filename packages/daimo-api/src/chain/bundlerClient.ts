@@ -1,6 +1,10 @@
 import { UserOpHex, assert } from "@daimo/common";
 import { BundlerJsonRpcProvider, Constants } from "userop";
-import { isHex } from "viem";
+import { Hex, hexToBigInt, isHex } from "viem";
+
+interface GasEstimate {
+  preVerificationGas: Hex;
+}
 
 /** Sends userops through an ERC-4337 bundler. */
 export class BundlerClient {
@@ -17,6 +21,21 @@ export class BundlerClient {
     assert(isHex(opHash));
     console.log(`[BUNDLER] submitted userOpHash: ${opHash}`);
     return opHash;
+  }
+
+  async estimatePreVerificationGas(op: UserOpHex) {
+    const args = [op, Constants.ERC4337.EntryPoint];
+    const gasEstimate = (await this.provider.send(
+      "eth_estimateUserOperationGas",
+      args
+    )) as GasEstimate;
+    console.log(
+      `[BUNDLER] estimated userOp gas: ${JSON.stringify(op)}: ${JSON.stringify(
+        gasEstimate
+      )}`
+    );
+    assert(isHex(gasEstimate.preVerificationGas));
+    return hexToBigInt(gasEstimate.preVerificationGas);
   }
 }
 

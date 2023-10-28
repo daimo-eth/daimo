@@ -201,6 +201,7 @@ export async function createAccount() {
       maxFeePerGas: "100000050",
       estimatedFee: 0.1,
       paymasterAddress: daimoPaymasterAddress,
+      preVerificationGas: "0",
     },
   });
   console.log("✅ userop accepted by bundler: ", userOpHash);

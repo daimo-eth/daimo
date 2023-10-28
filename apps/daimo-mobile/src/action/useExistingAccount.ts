@@ -58,6 +58,7 @@ export function useExistingAccount(daimoChain: DaimoChain) {
             maxFeePerGas: "0",
             estimatedFee: 0,
             paymasterAddress: daimoPaymasterAddress,
+            preVerificationGas: "0",
           },
 
           pushToken: null,
