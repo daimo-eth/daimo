@@ -51,6 +51,9 @@ export function createRouter(
   const publicProcedure = trpcT.procedure.use(tracerMiddleware);
 
   return trpcT.router({
+    health: publicProcedure.query(async (_opts) => {
+      return "healthy";
+    }),
     search: publicProcedure
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
