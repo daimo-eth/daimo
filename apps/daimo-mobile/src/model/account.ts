@@ -20,7 +20,8 @@ import { cacheEAccounts } from "../view/shared/addr";
  * Singleton account key.
  * Will be a series if/when we support multiple accounts.
  */
-export const defaultEnclaveKeyName = "daimo-12";
+export const defaultEnclaveKeyName =
+  process.env.DAIMO_APP_VARIANT === "dev" ? "daimo-dev-12" : "daimo-12";
 
 /** Account data stored on device. */
 export type Account = {

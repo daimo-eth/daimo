@@ -4,7 +4,8 @@
     "details": [
       {
         "appIDs": [
-          "JV8PYC9QV4.com.daimo"
+          "JV8PYC9QV4.com.daimo",
+          "JV8PYC9QV4.com.daimo.dev"
         ],
         "components": [
           {
@@ -17,12 +18,14 @@
   },
   "activitycontinuation": {
     "apps": [
-      "JV8PYC9QV4.com.daimo"
+      "JV8PYC9QV4.com.daimo",
+      "JV8PYC9QV4.com.daimo.dev"
     ]
   },
   "webcredentials": {
     "apps": [
-      "JV8PYC9QV4.com.daimo"
+      "JV8PYC9QV4.com.daimo",
+      "JV8PYC9QV4.com.daimo.dev"
     ]
   }
 }
