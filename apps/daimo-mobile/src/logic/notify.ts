@@ -72,6 +72,10 @@ class PushNotificationManager {
           lightColor: "#FF231F7C",
         });
       }
+      if (this.accountManager.currentAccount == null) {
+        console.log("[NOTIFY] no account, skipping savePushToken");
+        return;
+      }
       await this.savePushTokenForAccount();
     } catch (e) {
       console.error(`[NOTIFY] failed to save push token`, e);

@@ -34,7 +34,6 @@
     },
     "prod": {
       "resourceClass": "large",
-      "autoIncrement": true,
       "node": "20.3.0",
       "env": {
         "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",

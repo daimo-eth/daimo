@@ -1,10 +1,13 @@
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
+const VERSION = "1.1.2";
+const BUILD_NUM = 68;
+
 export default {
   owner: "daimo",
   name: IS_DEV ? "Daimo Dev" : "Daimo",
   slug: "daimo",
-  version: "1.0.5",
+  version: VERSION,
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -21,7 +24,7 @@ export default {
   ios: {
     supportsTablet: false,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    buildNumber: "63",
+    buildNumber: `${BUILD_NUM}`,
     associatedDomains: ["applinks:daimo.xyz", "webcredentials:daimo.xyz"],
     config: {
       usesNonExemptEncryption: false,
@@ -53,7 +56,7 @@ export default {
       backgroundColor: "#ffffff",
     },
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    versionCode: 63,
+    versionCode: BUILD_NUM,
   },
   extra: {
     eas: {

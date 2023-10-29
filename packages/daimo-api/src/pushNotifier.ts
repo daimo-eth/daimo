@@ -78,16 +78,22 @@ export class PushNotifier {
     for (const log of logs) {
       const { from, to, value } = log.args;
       const amount = Number(value);
-      if (!from || !to || !amount) {
-        console.warn(`[PUSH] invalid transfer log: ${JSON.stringify(log)}`);
+
+      const logId = `${log.transactionHash}:${log.logIndex}`;
+      if (from == null || to == null || amount == null) {
+        console.warn(`[PUSH] invalid transfer log: ${logId}`);
+        continue;
+      }
+      if (amount === 0) {
+        console.log(`[PUSH] skipping zero-value transfer: ${logId}`);
         continue;
       }
       if (log.transactionHash == null) {
-        console.warn(`[PUSH] skipping unconfirmed tx: ${JSON.stringify(log)}`);
+        console.warn(`[PUSH] skipping unconfirmed tx: ${logId}`);
         continue;
       }
 
-      const nonceMetadata = await this.opIndexer.fetchNonceMetadata(
+      const nonceMetadata = this.opIndexer.fetchNonceMetadata(
         log.transactionHash,
         log.logIndex
       );
