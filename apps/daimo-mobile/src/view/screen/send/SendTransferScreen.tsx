@@ -18,7 +18,7 @@ import {
 import { SendTransferButton } from "./SendTransferButton";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
-import { Recipient } from "../../../sync/recipients";
+import { Recipient, extendToRecipient } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
@@ -100,7 +100,9 @@ function SendLoadRecipientInner({
       }
       case "request": {
         // TODO: handle fulfilledBy (request already completed)
-        const { recipient, requestId } = data as DaimoRequestStatus;
+        const { recipient: recipientEAcc, requestId } =
+          data as DaimoRequestStatus;
+        const recipient = extendToRecipient(account, recipientEAcc);
         const { dollars } = data.link;
         nav.navigate("SendTab", {
           screen: "SendTransfer",
