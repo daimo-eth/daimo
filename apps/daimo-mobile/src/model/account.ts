@@ -163,6 +163,15 @@ class AccountManager {
     this.listeners.delete(listener);
   }
 
+  transform(f: (a: Account) => Account) {
+    if (this.currentAccount == null) {
+      console.log("[ACCOUNT] SKIPPING transform: no current account");
+      return;
+    }
+    console.log("[ACCOUNT] transform");
+    this.setCurrentAccount(f(this.currentAccount));
+  }
+
   setCurrentAccount = (account: Account | null) => {
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
 

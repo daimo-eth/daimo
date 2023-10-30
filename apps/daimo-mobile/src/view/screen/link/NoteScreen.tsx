@@ -141,7 +141,7 @@ function NoteDisplayInner({
     });
   };
 
-  // Add pending transaction immmmediately
+  // Add pending transaction immediately
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
@@ -161,6 +161,7 @@ function NoteDisplayInner({
       } as EAccount,
     ]),
   });
+  console.log(`[NOTE] rendering NoteScreen, status ${status} ${message}`);
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);
   const netDollarsReceivedStr = getAmountText({ dollars: netRecv });

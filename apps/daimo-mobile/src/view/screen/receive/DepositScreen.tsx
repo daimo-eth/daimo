@@ -18,13 +18,13 @@ import { WithdrawScreen } from "./WithdrawScreen";
 import { env } from "../../../logic/env";
 import { Account, useAccount } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
-import { Check, CheckLabel } from "../../shared/Check";
+import { CheckLabel } from "../../shared/Check";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import { TextBody, TextBold, TextLight, TextPara } from "../../shared/text";
+import { TextBold, TextLight, TextPara } from "../../shared/text";
 import { withAccount } from "../../shared/withAccount";
 
 type Tab = "DEPOSIT" | "WITHDRAW";

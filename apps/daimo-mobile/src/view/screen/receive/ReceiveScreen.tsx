@@ -107,6 +107,7 @@ function RequestScreenInner({ account }: { account: Account }) {
 }
 
 function useTrackRequest() {
+  // TODO: use AccountManager. Delayed setAccount can clobber data.
   const [account, setAccount] = useAccount();
   return (requestId: `${bigint}`, dollars: number) => {
     if (account == null) return;

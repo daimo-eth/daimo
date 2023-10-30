@@ -166,6 +166,7 @@ export async function createAccount() {
     accountAddress: address,
     accountSigner: signer,
     opSender: sender,
+    deadlineSecs: 60,
   });
   const addr = account.getAddress();
   console.log(`Burner Daimo account: ${addr}`);

@@ -14,10 +14,13 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { env } from "../logic/env";
 import { getWrappedRawSigner } from "../logic/key";
 import { NamedError } from "../logic/log";
-import { Account, useAccount } from "../model/account";
+import { Account, getAccountManager, useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
+
+/** Default send deadline, in seconds. Determines validUntil for each op. */
+export const SEND_DEADLINE_SECS = 60;
 
 /** Send a user op, track status. */
 export function useSendAsync({
@@ -34,7 +37,7 @@ export function useSendAsync({
 }): ActHandle {
   const [as, setAS] = useActStatus();
 
-  const [account, setAccount] = useAccount();
+  const [account] = useAccount();
   if (!account) throw new Error("No account");
 
   const keySlot = account.accountKeys.find(
@@ -61,8 +64,7 @@ export function useSendAsync({
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
       if (accountTransform) {
-        const newAccount = accountTransform(account, pendingOp);
-        setAccount(newAccount);
+        getAccountManager().transform((a) => accountTransform(a, pendingOp));
       }
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
@@ -136,6 +138,7 @@ function loadOpSender(
       accountAddress: address,
       accountSigner: signer,
       opSender: sender,
+      deadlineSecs: SEND_DEADLINE_SECS,
     });
   })();
   accountCache.set([address, keySlot], promise);

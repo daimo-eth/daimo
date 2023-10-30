@@ -93,6 +93,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Sets a deadline for this userop to execute. */
   setValidUntil(validUntil: number) {
     this.validUntil = validUntil;
+    return this;
   }
 
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {

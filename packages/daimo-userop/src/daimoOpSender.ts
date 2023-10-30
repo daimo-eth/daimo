@@ -25,6 +25,8 @@ interface DaimoOpConfig {
   accountSigner: SigningCallback;
   /** Sends userops. Returns userOpHash. */
   opSender: OpSenderCallback;
+  /** Deadline to calculate validUntil before sending each operation */
+  deadlineSecs: number;
 }
 
 /**
@@ -63,10 +65,11 @@ export class DaimoOpSender {
 
   /** Submits a user op to bundler. Returns userOpHash. */
   public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<Hex> {
-    const builtOp = await opBuilder.buildOp(
-      Constants.ERC4337.EntryPoint,
-      this.opConfig.chainId
-    );
+    const nowS = Math.floor(Date.now() / 1e3);
+    const validUntil = nowS + this.opConfig.deadlineSecs;
+    const builtOp = await opBuilder
+      .setValidUntil(validUntil)
+      .buildOp(Constants.ERC4337.EntryPoint, this.opConfig.chainId);
 
     // This method is incorrectly named. It does not return JSON, it returns
     // a userop object with all the fields normalized to hex.
