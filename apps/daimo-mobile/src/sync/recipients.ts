@@ -11,7 +11,7 @@ export interface Recipient extends EAccount {
 }
 
 /** Adds lastSendTime to an EAccount using account's recentTransfers */
-export function extendToRecipient(
+export function addLastSendTime(
   account: Account,
   recipientEAcc: EAccount
 ): Recipient {
