@@ -97,10 +97,7 @@ export class KeyRegistry {
           slot,
         });
       } else if (log.eventName === "SigningKeyRemoved") {
-        currentKeyData.set(derKey, {
-          ...currentKeyData.get(derKey)!,
-          removedAt: Number(log.blockNumber),
-        });
+        currentKeyData.delete(derKey);
       }
     }
 

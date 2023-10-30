@@ -106,21 +106,19 @@ function DevicesSection({ account }: { account: Account }) {
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
 
   const currentKeyRows = useCallback(() => {
-    return account.accountKeys
-      .filter((k) => k.removedAt === undefined)
-      .map((keyData) => (
-        <DeviceRow
-          key={keyData.slot}
-          keyData={keyData}
-          isCurrentDevice={keyData.pubKey === account.enclavePubKey}
-          chain={daimoChainFromId(account.homeChainId)}
-          pendingRemoval={
-            account.pendingKeyRotation.find(
-              (k) => k.rotationType === "remove" && k.slot === keyData.slot
-            ) !== undefined
-          }
-        />
-      ));
+    return account.accountKeys.map((keyData) => (
+      <DeviceRow
+        key={keyData.slot}
+        keyData={keyData}
+        isCurrentDevice={keyData.pubKey === account.enclavePubKey}
+        chain={daimoChainFromId(account.homeChainId)}
+        pendingRemoval={
+          account.pendingKeyRotation.find(
+            (k) => k.rotationType === "remove" && k.slot === keyData.slot
+          ) !== undefined
+        }
+      />
+    ));
   }, [
     account.pendingKeyRotation,
     account.accountKeys,

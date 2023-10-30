@@ -55,9 +55,7 @@ export interface TrackedNote extends DaimoLinkNote {
 export const zKeyData = z.object({
   pubKey: zHex, // DER Format
   addedAt: z.number(),
-  removedAt: z.number().optional(),
   slot: z.number(),
-  lastUsedAt: z.number().optional(),
 });
 
 export type KeyData = z.infer<typeof zKeyData>;
