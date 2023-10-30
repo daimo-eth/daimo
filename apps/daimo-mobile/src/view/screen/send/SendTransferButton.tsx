@@ -25,7 +25,7 @@ import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { navResetToHome, useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 interface SendTransferButtonProps {
   recipient: Recipient;
@@ -34,7 +34,7 @@ interface SendTransferButtonProps {
 }
 
 export function SendTransferButton(props: SendTransferButtonProps) {
-  const Inner = withAccount(SendTransferButtonInner);
+  const Inner = useWithAccount(SendTransferButtonInner);
   return <Inner {...props} />;
 }
 

@@ -22,10 +22,10 @@ import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 export default function ReceiveScreen() {
-  const Inner = withAccount(RequestScreenInner);
+  const Inner = useWithAccount(RequestScreenInner);
   return <Inner />;
 }
 

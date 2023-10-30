@@ -38,12 +38,12 @@ import {
   TextError,
   TextLight,
 } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListReceive, "Note">;
 
 export default function NoteScreen(props: Props) {
-  const Inner = withAccount(NoteScreenInner);
+  const Inner = useWithAccount(NoteScreenInner);
   return <Inner {...props} />;
 }
 
@@ -101,7 +101,7 @@ interface NoteDisplayProps {
 export function NoteDisplay(
   props: NoteDisplayProps & { hideAmount?: boolean }
 ) {
-  const Inner = withAccount(NoteDisplayInner);
+  const Inner = useWithAccount(NoteDisplayInner);
   return <Inner {...props} />;
 }
 
@@ -161,7 +161,7 @@ function NoteDisplayInner({
       } as EAccount,
     ]),
   });
-  console.log(`[NOTE] rendering NoteScreen, status ${status} ${message}`);
+  console.log(`[NOTE] rendering NoteDisplay, status ${status} ${message}`);
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);
   const netDollarsReceivedStr = getAmountText({ dollars: netRecv });

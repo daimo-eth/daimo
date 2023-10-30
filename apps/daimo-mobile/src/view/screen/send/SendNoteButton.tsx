@@ -29,11 +29,11 @@ import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 /** Creates a Note. User picks amount, then sends message via ShareSheet. */
 export function SendNoteButton({ dollars }: { dollars: number }) {
-  const Inner = withAccount(SendNoteButtonInner);
+  const Inner = useWithAccount(SendNoteButtonInner);
   return <Inner dollars={dollars} />;
 }
 

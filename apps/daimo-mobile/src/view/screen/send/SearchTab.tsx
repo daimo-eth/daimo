@@ -12,7 +12,7 @@ import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextCenter, TextLight } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab() {
@@ -30,7 +30,7 @@ export function SearchTab() {
 }
 
 export function SearchResults({ prefix }: { prefix: string }) {
-  const Inner = withAccount(SearchResultsScroll);
+  const Inner = useWithAccount(SearchResultsScroll);
   return (
     <View style={styles.resultsWrap}>
       <Inner prefix={prefix.trim().toLowerCase()} />

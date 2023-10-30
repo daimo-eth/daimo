@@ -1,6 +1,7 @@
 import {
   amountToDollars,
   DaimoNoteStatus,
+  OpStatus,
   timeString,
   TrackedNote,
   TransferOpEvent,
@@ -32,12 +33,12 @@ import {
   TextH3,
   TextLight,
 } from "../shared/text";
-import { withAccount } from "../shared/withAccount";
+import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
 
 export function HistoryOpScreen(props: Props) {
-  const Inner = withAccount(HistoryOpScreenInner);
+  const Inner = useWithAccount(HistoryOpScreenInner);
   return <Inner {...props} />;
 }
 
@@ -59,6 +60,9 @@ function HistoryOpScreenInner({
 
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 
+  const shouldShowNote =
+    pendingNote && [OpStatus.confirmed, OpStatus.finalized].includes(op.status);
+
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Transfer" modal onExit={useExitBack()} />
@@ -71,7 +75,7 @@ function HistoryOpScreenInner({
         )}
       </View>
       <Spacer h={16} />
-      {pendingNote && <NoteView account={account} note={pendingNote} />}
+      {shouldShowNote && <NoteView account={account} note={pendingNote} />}
     </View>
   );
 }

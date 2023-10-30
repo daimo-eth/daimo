@@ -29,7 +29,7 @@ import { ErrorRowCentered } from "../../shared/error";
 import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextH3, TextLight } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 
@@ -69,7 +69,7 @@ export default function SendScreen({ route }: Props) {
 }
 
 function SendLoadRecipient({ link }: { link: DaimoLink }) {
-  const Inner = withAccount(SendLoadRecipientInner);
+  const Inner = useWithAccount(SendLoadRecipientInner);
   return <Inner link={link} />;
 }
 

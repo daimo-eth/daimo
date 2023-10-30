@@ -20,7 +20,7 @@ import { Account, getAccountManager, useAccount } from "../model/account";
 type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
 
 /** Default send deadline, in seconds. Determines validUntil for each op. */
-export const SEND_DEADLINE_SECS = 60;
+export const SEND_DEADLINE_SECS = 120;
 
 /** Send a user op, track status. */
 export function useSendAsync({

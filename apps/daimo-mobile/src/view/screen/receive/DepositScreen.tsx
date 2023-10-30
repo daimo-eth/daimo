@@ -25,15 +25,15 @@ import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBold, TextLight, TextPara } from "../../shared/text";
-import { withAccount } from "../../shared/withAccount";
+import { useWithAccount } from "../../shared/withAccount";
 
 type Tab = "DEPOSIT" | "WITHDRAW";
 export default function DepositScreen() {
   const [tab, setTab] = useState<Tab>("DEPOSIT");
   const tabs = useRef(["DEPOSIT", "WITHDRAW"] as Tab[]).current;
 
-  const DepositInner = withAccount(DepositScreenInner);
-  const WithdrawInner = withAccount(WithdrawScreen);
+  const DepositInner = useWithAccount(DepositScreenInner);
+  const WithdrawInner = useWithAccount(WithdrawScreen);
 
   return (
     <View style={ss.container.screen}>

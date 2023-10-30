@@ -22,10 +22,10 @@ import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
-import { withAccount } from "../shared/withAccount";
+import { useWithAccount } from "../shared/withAccount";
 
 export default function HomeScreen() {
-  const Inner = withAccount(HomeScreenInner);
+  const Inner = useWithAccount(HomeScreenInner);
   return <Inner />;
 }
 

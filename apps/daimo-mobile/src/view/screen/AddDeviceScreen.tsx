@@ -28,10 +28,10 @@ import {
   TextH2,
   TextLight,
 } from "../shared/text";
-import { withAccount } from "../shared/withAccount";
+import { useWithAccount } from "../shared/withAccount";
 
 export function AddDeviceScreen() {
-  const Inner = withAccount(AddDeviceScreenInner);
+  const Inner = useWithAccount(AddDeviceScreenInner);
   return <Inner />;
 }
 
