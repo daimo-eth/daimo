@@ -60,6 +60,20 @@ export class PushNotifier {
     this.maybeSendNotifications(messages);
   };
 
+  /** NOT MEANT TO BE CALLED DIRECTLY: Always use maybeSendNotifications */
+  private async sendExpoNotifications(messages: ExpoPushMessage[]) {
+    try {
+      const chunks = this.expo.chunkPushNotifications(messages);
+
+      for (const chunk of chunks) {
+        const receipts = await this.expo.sendPushNotificationsAsync(chunk);
+        console.log(`[PUSH] sent ${receipts.length} receipts`);
+      }
+    } catch (e) {
+      console.error(`[PUSH] error sending notifications: ${e}`);
+    }
+  }
+
   async maybeSendNotifications(messages: ExpoPushMessage[]) {
     // Log the notification. In local development, stop there.
     const verb = pushEnabled ? "notifying" : "NOT notifying";
@@ -69,7 +83,7 @@ export class PushNotifier {
 
     if (pushEnabled) {
       console.log(`[PUSH] sending ${messages.length} notifications`);
-      this.expo.sendPushNotificationsAsync(messages);
+      if (messages.length !== 0) this.sendExpoNotifications(messages);
     }
   }
 
