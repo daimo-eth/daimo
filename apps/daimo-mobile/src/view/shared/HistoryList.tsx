@@ -6,6 +6,7 @@ import {
 } from "@daimo/common";
 import { ReactNode } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -105,7 +106,7 @@ function HistoryListBody({
       stickyHeaderIndices={stickyIndices}
     >
       {rows}
-      <Spacer h={ins.bottom + 64} />
+      <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />
     </ScrollView>
   );
 }

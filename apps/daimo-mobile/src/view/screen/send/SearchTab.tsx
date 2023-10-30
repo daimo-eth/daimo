@@ -1,6 +1,12 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  TouchableHighlight,
+  View,
+  Platform,
+} from "react-native";
 
 import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
@@ -69,7 +75,8 @@ function SearchResultsScroll({
         <RecipientRow key={r.addr} recipient={r} />
       ))}
       {res.recipients.length === 0 && prefix !== "" && <NoSearchResults />}
-      <Spacer h={32 + kbH} />
+      <Spacer h={32} />
+      {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>
   );
 }
