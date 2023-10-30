@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { detectPlatform, downloadMetadata } from "../utils/platform";
+
 export function DownloadLink() {
   const [, link] = useDownloadTitleLink();
   return (
@@ -30,20 +32,16 @@ export function DownloadLinkButton() {
 }
 
 function useDownloadTitleLink() {
-  const comingSoonLink = "https://noteforms.com/forms/daimo-uk2fe4";
-
   const [[title, link], setTitleLink] = useState([
-    "Download on App Store",
-    comingSoonLink,
-    // "https://testflight.apple.com/join/j3ixWtuN",
+    downloadMetadata["ios"].title,
+    downloadMetadata["ios"].url,
   ]);
 
   useEffect(() => {
-    if (navigator.userAgent.toLowerCase().includes("android")) {
+    if (detectPlatform(navigator.userAgent) === "android") {
       setTitleLink([
-        "Download on Play Store",
-        comingSoonLink,
-        // "https://play.google.com/store/apps/details?id=com.daimo",
+        downloadMetadata["android"].title,
+        downloadMetadata["android"].url,
       ]);
     }
   }, []);
