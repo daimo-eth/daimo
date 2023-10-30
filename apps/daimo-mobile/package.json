@@ -18,7 +18,7 @@
     "ios": "expo run:ios --no-build-cache",
     "test": "tsc --noEmit && jest",
     "lint": "npm run lint:deps && npm run lint:style",
-    "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=gen '--ignoreFiles=.*.config.ts' && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-system-ui,expo-build-properties,expo-local-authentication,@babel/core,babel-plugin-transform-inline-environment-variables",
+    "lint:deps": "ts-unused-exports ./tsconfig.json --excludePathsFromReport=app.config.js && npx depcheck --ignores @expo/ngrok,@types/jest,expo-dev-client,expo-splash-screen,expo-system-ui,expo-build-properties,expo-local-authentication,@babel/core,babel-plugin-transform-inline-environment-variables",
     "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
@@ -76,7 +76,6 @@
     "react-native-screens": "~3.22.0",
     "react-native-svg": "13.9.0",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-webview": "13.2.2",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
     "viem": "^1.16.0"

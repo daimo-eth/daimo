@@ -21,7 +21,7 @@ export function CheckLabel({
   );
 }
 
-export function Check({
+function Check({
   value,
   setValue,
 }: {

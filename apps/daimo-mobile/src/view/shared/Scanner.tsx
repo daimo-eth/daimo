@@ -1,8 +1,7 @@
-import { BarCodeScanner, BarCodeScannedCallback } from "expo-barcode-scanner";
+import { BarCodeScannedCallback, BarCodeScanner } from "expo-barcode-scanner";
 import { ReactNode, useEffect, useState } from "react";
 import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 
-import { ss } from "./style";
 import { TextBody, TextCenter } from "./text";
 
 /** Scans a QR code. */
