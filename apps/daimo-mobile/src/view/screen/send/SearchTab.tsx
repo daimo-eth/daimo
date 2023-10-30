@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
+import useKeyboardHeight from "../../../vendor/useKeyboardHeight";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
@@ -49,6 +50,8 @@ function SearchResultsScroll({
 
   const recentsOnly = prefix === "";
 
+  const kbH = useKeyboardHeight();
+
   return (
     <ScrollView
       contentContainerStyle={styles.resultsScroll}
@@ -66,6 +69,7 @@ function SearchResultsScroll({
         <RecipientRow key={r.addr} recipient={r} />
       ))}
       {res.recipients.length === 0 && prefix !== "" && <NoSearchResults />}
+      <Spacer h={32 + kbH} />
     </ScrollView>
   );
 }

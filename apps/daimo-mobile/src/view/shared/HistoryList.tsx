@@ -12,6 +12,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Address, getAddress } from "viem";
 
 import { AccountBubble } from "./AccountBubble";
@@ -45,6 +46,8 @@ function HistoryListBody({
   account: Account;
   maxToShow?: number;
 }) {
+  const ins = useSafeAreaInsets();
+
   const ops = account.recentTransfers.slice().reverse();
   if (ops.length === 0) {
     return (
@@ -102,6 +105,7 @@ function HistoryListBody({
       stickyHeaderIndices={stickyIndices}
     >
       {rows}
+      <Spacer h={ins.bottom + 64} />
     </ScrollView>
   );
 }
