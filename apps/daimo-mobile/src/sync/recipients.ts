@@ -10,6 +10,18 @@ export interface Recipient extends EAccount {
   lastSendTime?: number;
 }
 
+/** Adds lastSendTime to an EAccount using account's recentTransfers */
+export function addLastSendTime(
+  account: Account,
+  recipientEAcc: EAccount
+): Recipient {
+  const transfersNewToOld = account.recentTransfers.slice().reverse();
+  const lastSendTime = transfersNewToOld.find(
+    (t) => t.from === account.address && t.to === recipientEAcc.addr
+  )?.timestamp;
+  return { ...recipientEAcc, lastSendTime };
+}
+
 export function useRecipientSearch(account: Account, prefix: string) {
   prefix = prefix.toLowerCase();
 
