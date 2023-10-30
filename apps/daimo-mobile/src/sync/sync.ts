@@ -37,6 +37,8 @@ export function useSyncChain() {
 let lastSyncS = 0;
 let lastPushNotificationS = 0;
 
+const OP_EXPIRY_TIME_S = 20;
+
 export function syncAfterPushNotification() {
   lastPushNotificationS = Date.now() / 1e3;
 }
@@ -159,8 +161,12 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   );
 
   // Match pending transfers
+  // TODO: kick out expired pending only if online
+  // TODO: use validUntil, store directly on the op
   const stillPending = oldPending.filter(
-    (t) => syncFindSameOp(t, recentTransfers) == null
+    (t) =>
+      syncFindSameOp(t, recentTransfers) == null ||
+      t.timestamp + OP_EXPIRY_TIME_S > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
 
