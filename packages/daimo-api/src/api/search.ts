@@ -12,6 +12,9 @@ export async function search(
   vc: ViemClient,
   nameReg: NameRegistry
 ) {
+  prefix = prefix.trim();
+  if (prefix.startsWith("@")) prefix = prefix.slice(1);
+
   const ret: EAccount[] = [];
   if (isAddress(prefix)) {
     ret.push(await nameReg.getEAccount(getAddress(prefix)));
