@@ -194,8 +194,8 @@ function IntroPages({ onNext }: { onNext: () => void }) {
       >
         <IntroPage title="Welcome to Daimo">
           <TextParagraph>
-            Daimo is a global payments app that runs on Ethereum. Thanks for
-            being one of the first to try it out!
+            Daimo is a global payments app that runs on Ethereum. Send and
+            receive USDC on Base mainnet.
           </TextParagraph>
         </IntroPage>
         <IntroPage title={tokenSymbol}>
