@@ -50,7 +50,7 @@ async function readNdef(nav: ReturnType<typeof useNav>) {
     console.log(`[NFC] reading card: ` + resp1);
 
     // This sends the custom data-transceive command, it returns the Daimo link
-    const realResp = await transceiveString("0x00ca9a2b00");
+    const realResp = await transceiveString("0x00da");
     const daimoLink = parseDaimoLink(realResp);
     if (daimoLink == null) {
       console.warn(`[NFC] ignoring invalid daimo link: `, realResp);

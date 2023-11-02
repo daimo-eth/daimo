@@ -1,16 +1,16 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import { useCallback, useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
   View,
-  Platform,
 } from "react-native";
 
 import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
-import useKeyboardHeight from "../../../vendor/useKeyboardHeight";
+import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";

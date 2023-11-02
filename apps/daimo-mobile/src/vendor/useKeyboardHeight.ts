@@ -24,5 +24,3 @@ export function useKeyboardHeight() {
 
   return keyboardHeight;
 }
-
-export default useKeyboardHeight;
