@@ -31,6 +31,7 @@ export default {
     },
     infoPlist: {
       LSApplicationQueriesSchemes: ["whatsapp", "sgnl", "tg"],
+      NFCReaderUsageDescription: "Daimo uses NFC for tap-to-pay checkout.",
     },
   },
   android: {
