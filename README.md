@@ -72,7 +72,7 @@ Veridise's audit report of our codebase is available [here](./audits/2023-10-ver
 - [apps/daimo-web](apps/daimo-web) web app, including deep links. Typescript + NextJS
 - [packages/contract](packages/contract) contracts, Solidity + Forge
 - [packages/daimo-api](packages/daimo-api) API, including indexer. Typescript + Node
-- [packages/daimo-common](packages/daimo-common) data models common to clients and API. Typescript
+- [packages/daimo-common](packages/daimo-common) data models common to apps and API. Typescript
 - [packages/daimo-expo-enclave](packages/daimo-expo-enclave) hardware enclave interface. Typescript, Kotlin, Swift + Expo native module
 - [packages/daimo-userop](packages/daimo-userop) account abstraction interface. Typescript
 
@@ -122,20 +122,13 @@ If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a
 Once the base app is installed in your simulator, you can run Daimo.
 
 ```
-# Run mobile app, local API server, and web app (for deep links) simultaneously.
-# Requires Postgres, see API Setup below.
+cd apps/daimo-mobile # in one tab
+npm run dev
+cd packages/daimo-api # in another tab
 npm run dev
 ```
 
-Running `npm run dev` in the root directory is equivalent to running it concurrently in each `apps/...` and `packages/...` directory.
-
-```
-# Alternatively, to run JUST the mobile app.
-cd apps/daimo-mobile
-DAIMO_DOMAIN=daimo.xyz DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com npm run dev
-```
-
-Either way, you get hot reloading.
+**Use invite code `testnet`.**
 
 <details>
 <summary><strong>API Setup</strong></summary>
@@ -164,30 +157,5 @@ You'll need to either use the hosted Daimo API or run one locally.
 - Download latest Android internal distribution build from Expo, and install it in the emulator.
 - Lastly, go to `apps/daimo-mobile` and run `npm run dev:android`.
 </details>
-
-</details>
-
-<details>
-<summary><strong>Release instructions</strong></summary>
-
-Start from latest `master` with green CI. Create a release candidate for each platform.
-
-```
-cd apps/daimo-mobile
-npm run build:stage
-npm run build:stage-android
-```
-
-The last two run concurrently and submit automatically within ~10 minutes. Build
-versions increment automatically, creating a diff.
-
-While you wait, update the API and webapp.
-
-- Make a release PR stating the new, incremented build version.
-- Push to `stage`. PR into `master` remains open.
-- Complete the API and webapp checklist in the PR. Roll back if necessary.
-- By now, builds should be done. Install on Android. Install on iOS.
-- Complete app release testing checklist. You've now shipped a new public TestFlight and Play Store test release
-- Finally, merge the PR.
 
 </details>
