@@ -13,7 +13,6 @@ import Image from "next/image";
 
 import { AppStoreBadge } from "../../../components/AppStoreBadge";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
-import { H1, H2 } from "../../../components/typography";
 import { trpc } from "../../../utils/trpc";
 
 // Opt out of caching for all data requests in the route segment
@@ -25,7 +24,9 @@ type LinkProps = {
 };
 
 type TitleDesc = {
-  title: string;
+  name?: string;
+  action?: string;
+  dollars?: `${number}`;
   description: string;
   walletActionLinkStatus?: DaimoLinkStatus;
 };
@@ -34,19 +35,25 @@ const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
 const defaultMeta = metadata("Daimo", "Payments on Ethereum");
 
+function getUrl(props: LinkProps): string {
+  const path = (props.params.slug || []).join("/");
+  return `${daimoLinkBase}/${path}`;
+}
+
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
-  const titleDesc = await loadTitleDesc(props);
+  const titleDesc = await loadTitleDesc(getUrl(props));
   if (titleDesc == null) return defaultMeta;
-  return metadata(titleDesc.title, titleDesc.description);
+  const { name, action, dollars } = titleDesc;
+  const title = [name, action, dollars].filter((x) => x).join(" ");
+  return metadata(title, titleDesc.description);
 }
 
 export default async function LinkPage(props: LinkProps) {
-  const { title, description, walletActionLinkStatus } = (await loadTitleDesc(
-    props
-  )) || {
-    title: "Daimo",
-    description: "Payments on Ethereum",
-  };
+  const { name, action, dollars, description, walletActionLinkStatus } =
+    (await loadTitleDesc(getUrl(props))) || {
+      title: "Daimo",
+      description: "Payments on Ethereum",
+    };
 
   return (
     <main className="max-w-md mx-auto px-4">
@@ -56,11 +63,24 @@ export default async function LinkPage(props: LinkProps) {
 
         <div className="h-12" />
 
-        <H1>{title}</H1>
-        <div className="h-4" />
-        <H2>{description}</H2>
-        {walletActionLinkStatus && (
-          <PerformWalletAction linkStatus={walletActionLinkStatus} />
+        <div className="text-xl font-semibold">
+          {name && <span>{name}</span>}
+          {action && <span className="text-grayMid">{" " + action}</span>}
+        </div>
+        {dollars && (
+          <>
+            <div className="h-4" />
+            <div className="text-6xl font-semibold">${dollars}</div>
+          </>
+        )}
+        <div className="h-9" />
+        {walletActionLinkStatus ? (
+          <PerformWalletAction
+            linkStatus={walletActionLinkStatus}
+            description={description}
+          />
+        ) : (
+          <h1 className="text-xl font-semibold text-grayMid">{description}</h1>
         )}
         <div className="h-12" />
         <AppStoreBadge />
@@ -91,10 +111,7 @@ function metadata(title: string, description: string): Metadata {
   };
 }
 
-async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
-  const path = (params.slug || []).join("/");
-  const url = `${daimoLinkBase}/${path}`;
-
+async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
   let res: DaimoLinkStatus;
   try {
     res = await trpc.getLinkStatus.query({ url });
@@ -103,27 +120,27 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     const link = parseDaimoLink(url);
     if (link == null) {
       return {
-        title: "Daimo",
+        name: "Daimo",
         description: "Unrecognized link",
       };
     } else if (link.type === "account") {
       return {
-        title: `${link.account}`,
+        name: `${link.account}`,
         description: "Couldn't load account",
       };
     } else if (link.type === "request") {
       return {
-        title: `${link.recipient} is requesting $${Number(link.dollars).toFixed(
-          2
-        )}`,
+        name: `${link.recipient}`,
+        action: `is requesting`,
+        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
         description: "Couldn't load request status",
       };
     } else {
       assert(link.type === "note");
       return {
-        title: `${link.previewSender} sent $${Number(
-          link.previewDollars
-        ).toFixed(2)}`,
+        name: `${link.previewSender}`,
+        action: `sent you`,
+        dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
         description: "Couldn't load payment link",
       };
     }
@@ -133,7 +150,7 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
     case "account": {
       const { account } = res as DaimoAccountStatus;
       return {
-        title: getAccountName(account),
+        name: getAccountName(account),
         description: "Get Daimo to send or receive payments",
       };
     }
@@ -142,15 +159,17 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
       const name = getAccountName(recipient);
       if (fulfilledBy === undefined) {
         return {
-          title: `${name} is requesting $${res.link.dollars}`,
-          description: "Pay via Daimo",
+          name: `${name}`,
+          action: `is requesting`,
+          dollars: `${res.link.dollars}`,
+          description: "PAY",
           walletActionLinkStatus: res,
         };
       } else {
         return {
-          title: `${name} requested $${res.link.dollars} from ${getAccountName(
-            fulfilledBy
-          )}`,
+          name: `${name}`,
+          action: `requested`,
+          dollars: `${res.link.dollars}`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
       }
@@ -161,22 +180,28 @@ async function loadTitleDesc({ params }: LinkProps): Promise<TitleDesc | null> {
         case "pending":
         case "confirmed": {
           return {
-            title: `${getAccountName(sender)} sent $${dollars}`,
-            description: `Claim on Daimo`,
+            name: `${getAccountName(sender)}`,
+            action: `sent you`,
+            dollars: `${dollars}`,
+            description: `CLAIM`,
             walletActionLinkStatus: res,
           };
         }
         case "claimed": {
           const claim = claimer ? getAccountName(claimer) : "(missing claimer)";
           return {
-            title: `${getAccountName(sender)} sent $${dollars}`,
+            name: `${getAccountName(sender)}`,
+            action: `sent`,
+            dollars: `${dollars}`,
             description: `Claimed by ${claim}`,
           };
         }
         case "cancelled": {
           return {
-            title: `Cancelled send: $${dollars}`,
-            description: `Cancelled by ${getAccountName(sender)}`,
+            name: `${getAccountName(sender)}`,
+            action: `cancelled send`,
+            dollars: `${dollars}`,
+            description: `Reclaimed by ${getAccountName(sender)}`,
           };
         }
         default: {
