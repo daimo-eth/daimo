@@ -51,13 +51,9 @@ function HomeScreenInner({ account }: { account: Account }) {
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
 
   // Show history
-  const [isHistOpen, setIsHistOpen] = useState(false);
-  const histList = (
-    <HistoryListSwipe
-      account={account}
-      maxToShow={isHistOpen ? undefined : 5}
-    />
-  );
+  const histListMini = <HistoryListSwipe account={account} maxToShow={5} />;
+
+  const histListFull = <HistoryListSwipe account={account} />;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -76,10 +72,8 @@ function HomeScreenInner({ account }: { account: Account }) {
             <Spacer h={64} />
             <AmountAndButtons account={account} />
             <SwipeUpDown
-              itemMini={histList}
-              itemFull={histList}
-              onShowMini={() => setIsHistOpen(false)}
-              onShowFull={() => setIsHistOpen(true)}
+              itemMini={histListMini}
+              itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
             />
           </>
