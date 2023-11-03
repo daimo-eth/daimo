@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     paddingTop: 16,
+    paddingBottom: 16,
   },
   scrollPellet: {
     backgroundColor: color.grayLight,

@@ -27,7 +27,11 @@
 // SOFTWARE.
 //
 
-import { ReactNode, useMemo, useRef, useState } from "react";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   LayoutAnimation,
@@ -37,6 +41,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import ScrollPellet from "../view/shared/ScrollPellet";
 
 const springAnimation = {
   duration: 300,
@@ -135,21 +141,31 @@ export function SwipeUpDown({
     viewRef.current?.setNativeProps(customStyle);
   };
 
+  const snapPoints = useMemo(() => ["35%", "96%"], []);
+  const renderBackdrop = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={0}
+        appearsOnIndex={1}
+      />
+    ),
+    []
+  );
+
   return (
-    <View
-      ref={viewRef}
-      {...panResponder.panHandlers}
-      style={[
-        styles.wrapSwipe,
-        {
-          top: customStyle.style.top,
-          height: maxHeight,
-          marginTop: 0,
-        },
-      ]}
+    <BottomSheet
+      // ref={bottomSheetRef}
+      index={1}
+      snapPoints={snapPoints}
+      handleComponent={ScrollPellet}
+      // onChange={handleSheetChanges}
+      backdropComponent={renderBackdrop}
     >
-      {isMini ? itemMini : itemFull}
-    </View>
+      <BottomSheetScrollView>
+        {isMini ? itemMini : itemFull}
+      </BottomSheetScrollView>
+    </BottomSheet>
   );
 }
 

@@ -19,7 +19,6 @@ import { Address, getAddress } from "viem";
 import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
 import { PendingDot } from "./PendingDot";
-import ScrollPellet from "./ScrollPellet";
 import Spacer from "./Spacer";
 import { getCachedEAccount } from "./addr";
 import { useNav } from "./nav";
@@ -33,7 +32,6 @@ export function HistoryListSwipe(props: {
 }) {
   return (
     <View style={styles.historyListSwipe}>
-      <ScrollPellet />
       <HistoryListBody {...props} />
       <View style={{ flex: 1 }} />
     </View>

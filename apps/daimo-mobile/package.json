@@ -78,7 +78,10 @@
     "react-native-url-polyfill": "^2.0.0",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.16.0"
+    "viem": "^1.16.0",
+    "react-native-reanimated": "~3.3.0",
+    "react-native-gesture-handler": "~2.12.0",
+    "@gorhom/bottom-sheet": "^4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
@@ -106,5 +109,6 @@
         }
       ]
     }
-  }
+  },
+  "version": "1.0.0"
 }
