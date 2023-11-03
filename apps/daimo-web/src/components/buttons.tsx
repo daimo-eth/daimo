@@ -1,13 +1,16 @@
 export function PrimaryButton({
   onClick,
   children,
+  disabled,
 }: {
   onClick: () => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <button
-      className="bg-primaryLight tracking-wider text-white font-bold py-5 w-full rounded-md"
+      className="bg-primaryLight tracking-wider text-white font-bold py-5 w-full rounded-md disabled:opacity-50"
+      disabled={disabled}
       onClick={onClick}
     >
       {children}

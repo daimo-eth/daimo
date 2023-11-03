@@ -3,7 +3,6 @@ import {
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
-  daimoLinkBase,
   getNoteClaimSignature,
 } from "@daimo/common";
 import { daimoEphemeralNotesConfig } from "@daimo/contract";
@@ -143,6 +142,7 @@ export function PerformWalletAction({
             window.open(window.location.href, "_blank");
           }
         }}
+        disabled={isLoading || isSuccess}
       >
         {primaryTitle}
       </PrimaryButton>
@@ -164,7 +164,7 @@ export function PerformWalletAction({
             {isLoading
               ? "SENDING"
               : isSuccess
-              ? "BLOCK EXPLORER ↗"
+              ? "VIEW ON BASESCAN ↗"
               : secondaryTitle}
           </SecondaryButton>
           <div className="h-4" />
