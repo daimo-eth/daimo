@@ -42,7 +42,7 @@ async function readNdef(nav: ReturnType<typeof useNav>) {
     }
 
     // the resolved tag object will contain `ndefMessage` property
-    const tag = await NfcManager.getTag();
+    const tag = await NfcManager.getBackgroundTag();
     console.log(`[NFC] tag event`, tag);
 
     // This sends the SELECT command for the Daimo POS App AID
