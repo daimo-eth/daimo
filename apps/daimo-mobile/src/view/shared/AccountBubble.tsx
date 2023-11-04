@@ -60,7 +60,9 @@ export function AccountBubble({
           return "?";
       }
     } else {
-      return name[0].toUpperCase();
+      const hex = (name.codePointAt(0) || "?".charCodeAt(0)).toString(16);
+      const result = "\\u" + "0000".substring(0, 4 - hex.length) + hex;
+      return result.toUpperCase();
     }
   })();
 
