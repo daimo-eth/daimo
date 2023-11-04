@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
+import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
@@ -185,6 +186,7 @@ function SettingsTab() {
     <SettingsStack.Navigator screenOptions={noHeaders}>
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
       <SettingsStack.Screen name="AddDevice" component={AddDeviceScreen} />
+      <SettingsStack.Screen name="AddPasskey" component={AddPasskeyScreen} />
       <SettingsStack.Screen name="Device" component={DeviceScreen} />
     </SettingsStack.Navigator>
   );

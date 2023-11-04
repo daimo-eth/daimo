@@ -3,6 +3,7 @@ interface LogAction {
   startMs: number;
   elapsedMs: number;
   error?: string;
+  trace?: string;
 }
 
 export class NamedError extends Error {
@@ -29,7 +30,13 @@ export class Log {
       return ret;
     } catch (e: any) {
       const elapsedMs = Date.now() - startMs;
-      this.log({ type, startMs, elapsedMs, error: getErrMessage(e) });
+      this.log({
+        type,
+        startMs,
+        elapsedMs,
+        error: getErrMessage(e),
+        trace: getErrTrace(e),
+      });
       throw new NamedError(getErrMessage(e), type);
     }
   }
@@ -43,4 +50,8 @@ export class Log {
 /** Always returns a nonempty string, "unknown error" if missing. */
 function getErrMessage(e: any): string {
   return typeof e === "string" ? e : e?.message || "unknown error";
+}
+
+function getErrTrace(e: any): string {
+  return typeof e === "string" ? "" : e?.stack || "unknown trace";
 }

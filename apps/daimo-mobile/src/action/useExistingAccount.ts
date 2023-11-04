@@ -1,8 +1,9 @@
-import { daimoPaymasterAddress, DaimoChain } from "@daimo/contract";
+import { DaimoChain } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
+import { createEmptyAccount } from "../logic/account";
 import { env } from "../logic/env";
 import { useTime } from "../logic/time";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
@@ -30,39 +31,17 @@ export function useExistingAccount(daimoChain: DaimoChain) {
 
       if (result && result.name) {
         console.log(`[ACTION] loaded account ${result.name} at ${result.addr}`);
-        setAccount({
-          enclaveKeyName,
-          enclavePubKey: pubKeyHex,
-          name: result.name,
-          address: result.addr,
-
-          // No possibility of mismatch since API is locked to same chain
-          homeChainId: env(daimoChain).chainConfig.chainL2.id,
-          homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
-
-          // These populate on sync with server
-          lastBalance: BigInt(0),
-          lastBlockTimestamp: 0,
-          lastBlock: 0,
-          lastFinalizedBlock: 0,
-
-          namedAccounts: [],
-          recentTransfers: [],
-          trackedRequests: [],
-          pendingNotes: [],
-          accountKeys: [],
-          pendingKeyRotation: [],
-
-          chainGasConstants: {
-            maxPriorityFeePerGas: "0",
-            maxFeePerGas: "0",
-            estimatedFee: 0,
-            paymasterAddress: daimoPaymasterAddress,
-            preVerificationGas: "0",
-          },
-
-          pushToken: null,
-        });
+        setAccount(
+          createEmptyAccount(
+            {
+              enclaveKeyName,
+              enclavePubKey: pubKeyHex,
+              name: result.name,
+              address: result.addr,
+            },
+            daimoChain
+          )
+        );
         setAS("success", "Found account");
       }
     })();

@@ -91,6 +91,12 @@ async function resync(reason: string, fromScratch?: boolean) {
   }
 }
 
+/** Hydrate a newly created account to fill in properties from server */
+export async function hydrateAccount(account: Account): Promise<Account> {
+  const res = await fetchSync(account, true);
+  return applySync(account, res);
+}
+
 /** Loads all account history since the last finalized block as of the previous sync.
  * This means we're guaranteed to see all events even if there were reorgs. */
 async function fetchSync(

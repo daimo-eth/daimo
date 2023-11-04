@@ -1,32 +1,67 @@
-import { assert } from "@daimo/common";
-
-// slots 0 - 127 are for devices, 128 - 255 are for passkeys
-function isPasskeySlot(slot: number): boolean {
-  return (slot & 0x80) === 0x80;
+export enum SlotType {
+  Mobile = "Mobile",
+  Computer = "Computer",
+  Backup = "Backup",
 }
 
-export function keySlotToLabel(slot: number): string {
-  if (isPasskeySlot(slot)) {
-    return "Backup " + String.fromCharCode(65 + slot - 0x80);
-  } else {
-    return "Device " + String.fromCharCode(65 + slot);
+const slotTypeToFirstSlot = {
+  [SlotType.Mobile]: 0,
+  [SlotType.Computer]: 0x40,
+  [SlotType.Backup]: 0x80,
+};
+
+// Top two bits of slot denote the type.
+function getSlotType(slot: number): SlotType {
+  if ((slot & 0x80) === 0x80) return SlotType.Backup;
+  else if ((slot & 0x40) === 0x40) return SlotType.Computer;
+  else return SlotType.Mobile;
+}
+
+// diff is the index of key wrt first slot of its type
+// convert diff to a human readable string (A, B, C, ... Z, AA, AB, ...)
+function getSlotCharCode(diff: number): string {
+  const base = 26;
+  let result = "";
+  let n = diff + 1; // 1-indexed
+  while (n > 0) {
+    const rem = (n - 1) % base;
+    result = String.fromCharCode(65 + rem) + result;
+    n = Math.floor((n - 1) / base);
   }
+  return result;
+}
+
+// slots 0 - 63 are for mobile devices
+// slots 64 - 127 are for computer devices
+// slots 128 - 255 are for passkey backups
+export function getSlotLabel(slot: number): string {
+  const prefix = getSlotType(slot) + " ";
+  return (
+    prefix + getSlotCharCode(slot - slotTypeToFirstSlot[getSlotType(slot)])
+  );
 }
 
 export function findUnusedSlot(
-  slots: number[],
-  variant: "Device" | "Passkey"
+  allUsedSlots: number[],
+  variant: SlotType
 ): number {
-  slots = slots.filter(
-    (slot) => isPasskeySlot(slot) === (variant === "Passkey")
+  const variantUsedSlots = allUsedSlots.filter(
+    (slot) => getSlotType(slot) === variant
   );
-  if (slots.length === 0) return variant === "Device" ? 0 : 0x80;
-  const maxSlot = Math.max.apply(null, slots);
-  if (maxSlot + 1 < 255) {
-    assert(isPasskeySlot(maxSlot) === (variant === "Passkey"));
-    return maxSlot + 1;
-  } else {
-    // maxActivekeys on contract is 20
-    throw new Error("no unused slot");
+
+  if (variantUsedSlots.length === 0) {
+    return slotTypeToFirstSlot[variant];
+  }
+
+  const maxSlot = Math.max.apply(null, variantUsedSlots);
+  if (getSlotType(maxSlot + 1) === variant) return maxSlot + 1;
+  else {
+    // return first unused slot
+    for (let i = slotTypeToFirstSlot[variant]; i < 256; i++) {
+      if (!variantUsedSlots.includes(i) && getSlotType(i) === variant) return i;
+    }
+
+    // Max active keys on contract is 20, so this should never happen
+    throw new Error("No unused slots");
   }
 }
