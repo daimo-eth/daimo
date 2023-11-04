@@ -11,7 +11,6 @@ import {
 import { Metadata } from "next";
 import Image from "next/image";
 
-import { AppStoreBadge } from "../../../components/AppStoreBadge";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { trpc } from "../../../utils/trpc";
 
@@ -82,8 +81,6 @@ export default async function LinkPage(props: LinkProps) {
         ) : (
           <h1 className="text-xl font-semibold text-grayMid">{description}</h1>
         )}
-        <div className="h-12" />
-        <AppStoreBadge />
       </center>
     </main>
   );

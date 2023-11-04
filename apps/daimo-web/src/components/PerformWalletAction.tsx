@@ -19,7 +19,7 @@ import {
 
 import { PrimaryButton, SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
-import { detectPlatform } from "../utils/platform";
+import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 type Action = {
   wagmiPrep: {
@@ -125,7 +125,6 @@ export function PerformWalletAction({
     })();
   }, [linkStatus, address]);
 
-  const primaryTitle = description + " ON DAIMO";
   const secondaryTitle = description + " WITH CONNECTED WALLET";
   const secondaryConnectTitle = description + " WITH ANOTHER WALLET";
 
@@ -136,15 +135,12 @@ export function PerformWalletAction({
           const platform = detectPlatform(navigator.userAgent);
           if (platform === "other") window.open("/");
           else {
-            // Covers the case of opening Daimo when someone without Daimo opens
-            // the page in-browser, downloads the app and comes back to the page
-            // in-browser and clicks the button.
-            window.open(window.location.href, "_blank");
+            window.open(downloadMetadata[platform].url, "_blank");
           }
         }}
         disabled={isLoading || isSuccess}
       >
-        {primaryTitle}
+        GET DAIMO
       </PrimaryButton>
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
