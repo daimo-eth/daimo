@@ -95,5 +95,6 @@ export default {
           "Allows Daimo to scan QR codes to pay other users or add new devices to your account.",
       },
     ],
+    "react-native-nfc-manager",
   ],
 };
