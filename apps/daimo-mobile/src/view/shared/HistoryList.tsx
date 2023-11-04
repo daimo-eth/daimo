@@ -31,8 +31,10 @@ export function HistoryListSwipe(props: {
   account: Account;
   maxToShow?: number;
 }) {
+  const ins = useSafeAreaInsets();
   return (
     <View style={styles.historyListSwipe}>
+      <Spacer h={Platform.OS === "ios" ? 0 : ins.top} />
       <ScrollPellet />
       <HistoryListBody {...props} />
       <View style={{ flex: 1 }} />

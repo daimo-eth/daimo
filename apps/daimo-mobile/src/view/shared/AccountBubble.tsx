@@ -20,8 +20,8 @@ export function AccountBubble({
 
   const style: ViewStyle = useMemo(
     () => ({
-      width: size,
-      height: size,
+      width: size - 1,
+      height: size - 1,
       borderRadius: size / 2,
       backgroundColor: transparent ? "transparent" : color.white,
       borderWidth: 1,
@@ -34,9 +34,8 @@ export function AccountBubble({
 
   const textStyle: TextStyle = useMemo(
     () => ({
-      fontSize: size / 2,
-      lineHeight: size / 2,
-      paddingTop: size / 9,
+      fontSize: size / 2 + 1,
+      lineHeight: size - 2.5,
       fontWeight: "bold",
       textAlign: "center",
       color: col,
@@ -60,9 +59,8 @@ export function AccountBubble({
           return "?";
       }
     } else {
-      const hex = (name.codePointAt(0) || "?".charCodeAt(0)).toString(16);
-      const result = "\\u" + "0000".substring(0, 4 - hex.length) + hex;
-      return result.toUpperCase();
+      const codePoint = name.codePointAt(0) || "?".charCodeAt(0);
+      return String.fromCodePoint(codePoint).toUpperCase();
     }
   })();
 
