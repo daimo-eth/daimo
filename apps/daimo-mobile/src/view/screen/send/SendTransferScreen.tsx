@@ -91,10 +91,11 @@ function SendLoadRecipientInner({
     const { data } = status;
     switch (data.link.type) {
       case "account": {
-        const { account } = data as DaimoAccountStatus;
+        const { account: recipientEAcc } = data as DaimoAccountStatus;
+        const recipient = addLastSendTime(account, recipientEAcc);
         nav.navigate("SendTab", {
           screen: "SendTransfer",
-          params: { recipient: account },
+          params: { recipient },
         });
         break;
       }
