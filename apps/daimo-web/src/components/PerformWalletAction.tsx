@@ -125,7 +125,6 @@ export function PerformWalletAction({
     })();
   }, [linkStatus, address]);
 
-  const primaryTitle = description + " ON DAIMO";
   const secondaryTitle = description + " WITH CONNECTED WALLET";
   const secondaryConnectTitle = description + " WITH ANOTHER WALLET";
 
@@ -141,7 +140,7 @@ export function PerformWalletAction({
         }}
         disabled={isLoading || isSuccess}
       >
-        {primaryTitle}
+        GET DAIMO
       </PrimaryButton>
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
