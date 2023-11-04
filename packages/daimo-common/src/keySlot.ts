@@ -1,4 +1,4 @@
-import { assert } from "@daimo/common";
+import { assert } from "./assert";
 
 export enum SlotType {
   Phone = "Phone",

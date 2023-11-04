@@ -1,4 +1,10 @@
-import { OpStatus, assert } from "@daimo/common";
+import {
+  OpStatus,
+  assert,
+  SlotType,
+  findUnusedSlot,
+  getSlotLabel,
+} from "@daimo/common";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -12,7 +18,6 @@ import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { parseAddDeviceString } from "../../logic/key";
-import { SlotType, findUnusedSlot, getSlotLabel } from "../../logic/keySlot";
 import { Account } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";

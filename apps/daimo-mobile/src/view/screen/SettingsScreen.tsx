@@ -1,4 +1,9 @@
-import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
+import {
+  KeyData,
+  guessTimestampFromNum,
+  timeAgo,
+  getSlotLabel,
+} from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import * as Notifications from "expo-notifications";
@@ -16,7 +21,6 @@ import {
 import { getDebugLog } from "../../debugLog";
 import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
-import { getSlotLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import {

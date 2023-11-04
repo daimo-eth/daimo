@@ -5,6 +5,10 @@ import test from "node:test";
 import { Address, Hex, numberToHex } from "viem";
 
 import { TransferLog } from "../src/contract/coinIndexer";
+import {
+  KeyRegistry,
+  SigningKeyAddedOrRemovedLog,
+} from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteOpLog } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
@@ -119,6 +123,76 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[1].body, "You received 1.00 USDC from alice");
   });
 
+  await test("simple remove device", async () => {
+    const input: SigningKeyAddedOrRemovedLog[] = [
+      createKeyRotation({
+        from: addrAlice,
+        keySlot: 0,
+        isDeploymentLog: true,
+        eventName: "SigningKeyAdded",
+      }),
+      createKeyRotation({
+        from: addrAlice,
+        keySlot: 0,
+        isDeploymentLog: false,
+        eventName: "SigningKeyRemoved",
+      }),
+    ];
+    const output = pn.getPushMessagesFromKeyRotations(input);
+
+    assert.strictEqual(output.length, 1);
+    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
+    assert.strictEqual(output[0].title, "Mobile A removed");
+    assert.strictEqual(
+      output[0].body,
+      "You removed Mobile A from your account"
+    );
+  });
+
+  await test("complex add/removes", async () => {
+    const input: SigningKeyAddedOrRemovedLog[] = [
+      createKeyRotation({
+        from: addrBob,
+        keySlot: 0,
+        isDeploymentLog: true,
+        eventName: "SigningKeyAdded",
+      }),
+      createKeyRotation({
+        from: addrAlice,
+        keySlot: 0,
+        isDeploymentLog: true,
+        eventName: "SigningKeyAdded",
+      }),
+      createKeyRotation({
+        from: addrBob,
+        keySlot: 128,
+        isDeploymentLog: false,
+        eventName: "SigningKeyAdded",
+      }),
+      createKeyRotation({
+        from: addrBob,
+        keySlot: 0,
+        isDeploymentLog: false,
+        eventName: "SigningKeyRemoved",
+      }),
+      createKeyRotation({
+        from: addrBob,
+        keySlot: 25,
+        isDeploymentLog: false,
+        eventName: "SigningKeyAdded",
+      }),
+    ];
+    const output = pn.getPushMessagesFromKeyRotations(input);
+    assert.strictEqual(output.length, 3);
+    for (const msg of output) {
+      assert.deepStrictEqual(msg.to, ["pushTokenBob1", "pushTokenBob2"]);
+    }
+    assert.strictEqual(output[0].title, "Backup A added");
+    assert.strictEqual(output[0].body, "You added Backup A to your account");
+    assert.strictEqual(output[1].title, "Mobile A removed");
+    assert.strictEqual(output[2].title, "Mobile Z added");
+  });
+
   await test("cancel payment link", async () => {
     const input: NoteOpLog[] = [
       {
@@ -166,13 +240,19 @@ function createNotifierAliceBob() {
     },
   } as unknown as OpIndexer;
 
+  const stubKeyReg = {
+    isDeploymentKeyRotationLog: (log: SigningKeyAddedOrRemovedLog): boolean => {
+      return log.transactionHash === "0x42";
+    },
+  } as unknown as KeyRegistry;
+
   const nullAny = null as any;
   const pn = new PushNotifier(
     nullAny,
     stubNameReg,
     nullAny,
     stubOpIndexer,
-    nullAny,
+    stubKeyReg,
     nullAny
   );
   pn.pushTokens.set(addrAlice, ["pushTokenAlice"]);
@@ -203,5 +283,30 @@ function createTransfer(args: {
     },
     eventName: "Transfer",
     topics: [args.from, args.to, numberToHex(args.value)],
+  };
+}
+
+function createKeyRotation(args: {
+  from: Address;
+  keySlot: number;
+  isDeploymentLog: boolean;
+  eventName: "SigningKeyAdded" | "SigningKeyRemoved";
+}): SigningKeyAddedOrRemovedLog {
+  return {
+    address: args.from,
+    blockHash: "0x0",
+    blockNumber: 0n,
+    transactionHash: args.isDeploymentLog ? "0x42" : "0x0",
+    transactionIndex: 0,
+    data: "0x0",
+    logIndex: 0,
+    removed: false,
+    args: {
+      account: args.from,
+      key: ["0x0", "0x0"],
+      keySlot: args.keySlot,
+    },
+    eventName: args.eventName,
+    topics: ["0x0", "0x0"],
   };
 }
