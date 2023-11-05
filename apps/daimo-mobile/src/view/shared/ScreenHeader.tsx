@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     height: 40,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   screenHeadButtonWrap: {
     width: 40,
