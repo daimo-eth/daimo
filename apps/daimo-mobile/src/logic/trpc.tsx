@@ -7,7 +7,7 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
-import { setNetworkState } from "../sync/networkState";
+import { updateNetworkStateOnline } from "../sync/networkState";
 
 const apiUrlTestnet =
   process.env.DAIMO_APP_API_URL_TESTNET || "http://localhost:3000";
@@ -60,10 +60,8 @@ function getOpts(daimoChain: DaimoChain) {
           init.headers["x-daimo-version"] = version;
 
           return fetch(input, init).then((res) => {
-            if (res.ok) {
-              // When a request succeeds, mark us online immediately.
-              setNetworkState("online");
-            }
+            // When a request succeeds, mark us online immediately.
+            if (res.ok) updateNetworkStateOnline();
             return res;
           });
         },

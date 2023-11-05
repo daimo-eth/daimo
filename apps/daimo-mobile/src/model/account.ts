@@ -183,7 +183,9 @@ class AccountManager {
 
   constructor() {
     // On first load, load+save to ensure latest serialization version.
-    this.currentAccount = parseAccount(this.mmkv.getString("account"));
+    const accountJSON = this.mmkv.getString("account");
+    console.log(`[ACCOUNT] read account JSON: ${accountJSON}`);
+    this.currentAccount = parseAccount(accountJSON);
     this.setCurrentAccount(this.currentAccount);
   }
 
@@ -240,14 +242,17 @@ export function useAccount(): [
 
 export function parseAccount(accountJSON?: string): Account | null {
   if (!accountJSON) return null;
-
   const model = JSON.parse(accountJSON) as StoredModel;
 
   // Migrations
   // Delete V1-78 testnet accounts. Re-onboard to latest account with paymasters.
-  if (model.storageVersion < 8) return null;
+  if (model.storageVersion < 8) {
+    console.log(`[ACCOUNT] DROPPING v${model.storageVersion} account`);
+    return null;
+  }
 
   if (model.storageVersion === 8) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
     const a = model as AccountV8;
     return {
       enclaveKeyName: a.enclaveKeyName,
@@ -276,6 +281,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       pushToken: a.pushToken,
     };
   } else if (model.storageVersion === 9) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
     const a = model as AccountV9;
     return {
       enclaveKeyName: a.enclaveKeyName,
