@@ -106,7 +106,7 @@ export function AddPasskeyScreen() {
       <ScreenHeader title="Passkey Backup" onBack={goBack} />
       <Spacer h={32} />
       <TextPara>
-        Backup your account by saving a secure passkey in {cloudName}.
+        Back up your account by saving a secure passkey in {cloudName}.
       </TextPara>
       <TextPara>
         This way, your funds will be safe even if you lose your device.

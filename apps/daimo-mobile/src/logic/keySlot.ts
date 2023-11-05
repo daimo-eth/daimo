@@ -1,20 +1,30 @@
+import { assert } from "@daimo/common";
+
 export enum SlotType {
   Mobile = "Mobile",
-  Computer = "Computer",
+  Desktop = "Desktop",
   Backup = "Backup",
 }
 
 const slotTypeToFirstSlot = {
   [SlotType.Mobile]: 0,
-  [SlotType.Computer]: 0x40,
+  [SlotType.Desktop]: 0x40,
   [SlotType.Backup]: 0x80,
 };
 
 // Top two bits of slot denote the type.
-function getSlotType(slot: number): SlotType {
-  if ((slot & 0x80) === 0x80) return SlotType.Backup;
-  else if ((slot & 0x40) === 0x40) return SlotType.Computer;
-  else return SlotType.Mobile;
+function getSlotType(slot: number): SlotType | undefined {
+  if (slot > 255) return undefined;
+
+  const slotType = slot & 0xc0;
+
+  const isSlotType = (type: SlotType) =>
+    (slotType & slotTypeToFirstSlot[type]) === slotTypeToFirstSlot[type];
+
+  if (isSlotType(SlotType.Backup)) return SlotType.Backup;
+  else if (isSlotType(SlotType.Desktop)) return SlotType.Desktop;
+  else if (isSlotType(SlotType.Mobile)) return SlotType.Mobile;
+  else return undefined;
 }
 
 // diff is the index of key wrt first slot of its type
@@ -35,10 +45,11 @@ function getSlotCharCode(diff: number): string {
 // slots 64 - 127 are for computer devices
 // slots 128 - 255 are for passkey backups
 export function getSlotLabel(slot: number): string {
-  const prefix = getSlotType(slot) + " ";
-  return (
-    prefix + getSlotCharCode(slot - slotTypeToFirstSlot[getSlotType(slot)])
-  );
+  const slotType = getSlotType(slot);
+  assert(slotType !== undefined, "Invalid slot");
+
+  const prefix = slotType + " ";
+  return prefix + getSlotCharCode(slot - slotTypeToFirstSlot[slotType]);
 }
 
 export function findUnusedSlot(

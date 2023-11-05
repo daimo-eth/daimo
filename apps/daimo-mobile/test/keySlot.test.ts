@@ -18,7 +18,7 @@ describe("Device", () => {
     expect(findUnusedSlot([], SlotType.Mobile)).toEqual(0);
     expect(findUnusedSlot([0], SlotType.Mobile)).toEqual(1);
     expect(findUnusedSlot([0, 1], SlotType.Backup)).toEqual(128);
-    expect(findUnusedSlot([0, 1], SlotType.Computer)).toEqual(64);
+    expect(findUnusedSlot([0, 1], SlotType.Desktop)).toEqual(64);
     expect(findUnusedSlot([0, 2], SlotType.Mobile)).toEqual(3);
     expect(findUnusedSlot([0, 255], SlotType.Mobile)).toEqual(1);
     expect(

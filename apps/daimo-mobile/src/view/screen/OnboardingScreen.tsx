@@ -712,6 +712,8 @@ function UseExistingPage({
 
   if (pubKeyHex === undefined) return null;
 
+  const deviceType = SlotType.Mobile; // TODO: detect and support desktop
+
   const addDeviceElement = (function () {
     switch (addDeviceStatus) {
       case "idle":
@@ -786,8 +788,8 @@ function UseExistingPage({
         <Spacer h={32} />
         <TextCenter>
           <TextParagraph>
-            Add this phone to an existing account. Scan the QR code above with
-            your other device.
+            Add this {deviceType} to an existing account. Scan the QR code above
+            with your other device.
           </TextParagraph>
         </TextCenter>
         <Spacer h={32} />
