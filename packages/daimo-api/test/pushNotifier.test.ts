@@ -2,7 +2,7 @@ import { DaimoLinkNote, EAccount } from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
-import { Address, Hex, numberToHex } from "viem";
+import { Address, Hex, getAddress, numberToHex } from "viem";
 
 import { TransferLog } from "../src/contract/coinIndexer";
 import {
@@ -14,9 +14,9 @@ import { NoteOpLog } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { PushNotifier } from "../src/pushNotifier";
 
-const addrAlice = "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94";
-const addrBob = "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
-const addrCharlie = "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b95";
+const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
+const addrBob = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93");
+const addrCharlie = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b95");
 
 test("PushNotifier", async () => {
   const pn = createNotifierAliceBob();
