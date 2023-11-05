@@ -263,3 +263,6 @@ export type ReadOnlyContractType<TAbi extends Abi> = GetContractReturnType<
   TAbi,
   PublicClient<Transport, Chain>
 >;
+
+export const DAIMO_INVITE_CODES =
+  process.env.DAIMO_INVITE_CODES || "zuconnect,devconnect";
