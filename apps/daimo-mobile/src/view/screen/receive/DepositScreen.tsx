@@ -242,7 +242,7 @@ function AddressCopier({
       >
         <View style={styles.addressView}>
           <Text style={[styles.addressMono, { color: col }]} numberOfLines={1}>
-            {disabled ? "0x········································" : addr}
+            {addr}
           </Text>
           <Octicons name="copy" size={16} color={col} />
         </View>
