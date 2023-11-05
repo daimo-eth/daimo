@@ -4,6 +4,7 @@ import {
   dollarsToAmount,
   guessTimestampFromNum,
   timeString,
+  getSlotLabel,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
@@ -18,7 +19,6 @@ import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { deleteEnclaveKey } from "../../logic/enclave";
-import { getSlotLabel } from "../../logic/keySlot";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";

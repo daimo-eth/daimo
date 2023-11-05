@@ -1,4 +1,4 @@
-import { KeyData, contractFriendlyKeyToDER } from "@daimo/common";
+import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
 import { Address, Hex, Log, getAbiItem, getAddress } from "viem";
 
@@ -27,13 +27,19 @@ type SigningKeyRemovedLog = Log<
   typeof signingKeyRemovedEvent,
   true
 >;
-type SigningKeyAddedOrRemovedLog = SigningKeyAddedLog | SigningKeyRemovedLog;
+
+export type SigningKeyAddedOrRemovedLog =
+  | SigningKeyAddedLog
+  | SigningKeyRemovedLog;
 
 export class KeyRegistry {
   /* In-memory indexer, for now. */
   private keyToAddr = new Map<Hex, Address>();
   private addrToLogs = new Map<Address, SigningKeyAddedOrRemovedLog[]>();
   private addrToKeyData = new Map<Address, KeyData[]>();
+  private addrToDeploymentTxHash = new Map<Address, Hex>();
+
+  private listeners: ((logs: SigningKeyAddedOrRemovedLog[]) => void)[] = [];
 
   constructor(private vc: ViemClient) {}
 
@@ -52,6 +58,16 @@ export class KeyRegistry {
       this.parseLogs
     );
     console.log(`[KEY-REG] watching logs`);
+  }
+
+  /** Listener is invoked for all key rotation events. */
+  addListener(listener: (logs: SigningKeyAddedOrRemovedLog[]) => void) {
+    this.listeners.push(listener);
+  }
+
+  /** Unsubscribe from new key rotations. */
+  removeListener(listener: (logs: SigningKeyAddedOrRemovedLog[]) => void) {
+    this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
   /** Parses account key add/remove logs, first on init() and then on subscription. */
@@ -73,6 +89,8 @@ export class KeyRegistry {
 
       this.cacheAddressProperties(addr);
     }
+
+    this.listeners.forEach((l) => l(logs));
   };
 
   /** Cache an address's key properties in memory. */
@@ -96,6 +114,10 @@ export class KeyRegistry {
           addedAt: Number(log.blockNumber),
           slot,
         });
+
+        if (!this.addrToDeploymentTxHash.has(addr)) {
+          this.addrToDeploymentTxHash.set(addr, log.transactionHash);
+        }
       } else if (log.eventName === "SigningKeyRemoved") {
         currentKeyData.delete(derKey);
       }
@@ -121,5 +143,12 @@ export class KeyRegistry {
   /** Find all keys and metadata for a daimo account address */
   async resolveAddressKeys(addr: Address): Promise<KeyData[] | null> {
     return this.addrToKeyData.get(addr) || null;
+  }
+
+  isDeploymentKeyRotationLog(log: SigningKeyAddedOrRemovedLog) {
+    const addr = getAddress(log.address);
+    const deploymentTxHash = this.addrToDeploymentTxHash.get(addr);
+    assert(deploymentTxHash !== undefined, "No deployment tx hash");
+    return log.transactionHash === deploymentTxHash;
   }
 }

@@ -1,4 +1,4 @@
-import { OpStatus, assert } from "@daimo/common";
+import { OpStatus, assert, SlotType, findUnusedSlot } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -10,7 +10,6 @@ import { ReactNode, useMemo } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { SlotType, findUnusedSlot } from "../../logic/keySlot";
 import { createPasskey } from "../../logic/passkey";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";

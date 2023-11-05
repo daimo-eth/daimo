@@ -3,13 +3,17 @@ import {
   assert,
   assertNotNull,
   getAccountName,
+  getSlotLabel,
 } from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
-import { KeyRegistry } from "./contract/keyRegistry";
+import {
+  KeyRegistry,
+  SigningKeyAddedOrRemovedLog,
+} from "./contract/keyRegistry";
 import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer, NoteOpLog } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
@@ -31,7 +35,7 @@ export class PushNotifier {
     private nameReg: NameRegistry,
     private noteIndexer: NoteIndexer,
     private opIndexer: OpIndexer,
-    private keyReg: KeyRegistry, // TODO: notify devices on key add/remove
+    private keyReg: KeyRegistry,
     private db: DB
   ) {}
 
@@ -39,6 +43,8 @@ export class PushNotifier {
     this.coinIndexer.addListener(this.handleTransfers);
 
     this.noteIndexer.addListener(this.handleNoteOps);
+
+    this.keyReg.addListener(this.handleKeyRotations);
 
     // Load Expo push notification tokens
     const rows = await this.db.loadPushTokens();
@@ -57,6 +63,12 @@ export class PushNotifier {
   private handleTransfers = async (logs: TransferLog[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
+    this.maybeSendNotifications(messages);
+  };
+
+  private handleKeyRotations = async (logs: SigningKeyAddedOrRemovedLog[]) => {
+    console.log(`[PUSH] got ${logs.length} key rotations`);
+    const messages = this.getPushMessagesFromKeyRotations(logs);
     this.maybeSendNotifications(messages);
   };
 
@@ -259,6 +271,30 @@ export class PushNotifier {
             `You cancelled your ${dollars} ${symbol} payment link`
           )
         );
+      }
+    }
+
+    return messages;
+  }
+
+  getPushMessagesFromKeyRotations(logs: SigningKeyAddedOrRemovedLog[]) {
+    const messages: ExpoPushMessage[] = [];
+    for (const log of logs) {
+      const addr = log.address;
+      const keyLabel = getSlotLabel(log.args.keySlot);
+
+      // Skip notifications for account creation
+      if (this.keyReg.isDeploymentKeyRotationLog(log)) continue;
+
+      if (log.eventName === "SigningKeyAdded") {
+        const title = `${keyLabel} added`;
+        const body = `You added ${keyLabel} to your account`;
+        messages.push(...this.getPushMessages(addr, title, body));
+      } else {
+        assert(log.eventName === "SigningKeyRemoved");
+        const title = `${keyLabel} removed`;
+        const body = `You removed ${keyLabel} from your account`;
+        messages.push(...this.getPushMessages(addr, title, body));
       }
     }
 
