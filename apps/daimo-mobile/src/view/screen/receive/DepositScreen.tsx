@@ -78,7 +78,7 @@ function OnrampsSection({ account }: { account: Account }) {
       {account.recommendedExchanges.map((rec, idx) => (
         <View key={idx}>
           <ButtonMed
-            type="primary"
+            type={idx > 0 ? "subtle" : "primary"}
             title={rec.cta}
             onPress={() => openRecommendedExchange(rec.url)}
           />
