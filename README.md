@@ -5,8 +5,8 @@
 Single stablecoin, single rollup, payments only. Cross-chain transfers coming soon.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
-leave. You can add multiple devices to secure your account. Under the hood, it's
-a ERC-4337 contract wallet.
+leave. You can add multiple devices and create Passkey backups to secure your 
+account. Under the hood, it's a ERC-4337 contract wallet.
 
 The mission is to make an excellent experience. Payments should be fast, secure, and permissionless.
 
