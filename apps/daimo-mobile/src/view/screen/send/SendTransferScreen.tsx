@@ -51,7 +51,7 @@ export default function SendScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
         <ScreenHeader
-          title="Send funds to"
+          title="Send to"
           onBack={goBack}
           onExit={recipient && goHome}
         />

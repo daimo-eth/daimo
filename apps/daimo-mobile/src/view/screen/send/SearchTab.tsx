@@ -28,7 +28,13 @@ export function SearchTab() {
   return (
     <>
       <View style={{ flexGrow: 0 }}>
-        <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
+        <InputBig
+          autoFocus
+          icon="search"
+          placeholder="Search user, ENS, or address..."
+          value={prefix}
+          onChange={setPrefix}
+        />
       </View>
       <Spacer h={24} />
       <SearchResults prefix={prefix} />

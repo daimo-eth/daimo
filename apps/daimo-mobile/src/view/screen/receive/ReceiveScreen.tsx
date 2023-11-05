@@ -81,7 +81,7 @@ function RequestScreenInner({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send request" onExit={useExitToHome()} />
+        <ScreenHeader title="Request" onExit={useExitToHome()} />
         <Spacer h={64} />
         <TextCenter>
           <TextLight>Enter amount to request</TextLight>

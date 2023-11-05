@@ -103,7 +103,7 @@ function getTabOptions(
     case "DepositTab":
       return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
     case "ReceiveTab":
-      return { title: "Receive", tabBarIcon: getIcon("download"), ...opts };
+      return { title: "Request", tabBarIcon: getIcon("download"), ...opts };
     case "HomeTab":
       return { title: "Home", tabBarIcon: getIcon("home"), ...opts };
     case "SendTab":

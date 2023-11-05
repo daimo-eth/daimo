@@ -110,7 +110,7 @@ function AmountAndButtons({ account }: { account: Account }) {
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <IconButton title="Deposit" onPress={goDeposit} />
-        <IconButton title="Receive" onPress={goRequest} />
+        <IconButton title="Request" onPress={goRequest} />
         <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
       </View>
     </View>
@@ -130,7 +130,7 @@ function IconButton({
     switch (title) {
       case "Deposit":
         return "plus";
-      case "Receive":
+      case "Request":
         return "download";
       case "Send":
         return "paper-airplane";
