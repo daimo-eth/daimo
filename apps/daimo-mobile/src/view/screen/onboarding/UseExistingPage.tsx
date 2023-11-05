@@ -1,4 +1,4 @@
-import { assert } from "@daimo/common";
+import { assert, SlotType, findUnusedSlot } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -18,7 +18,6 @@ import { useSendAsync } from "../../../action/useSendAsync";
 import { createEmptyAccount } from "../../../logic/account";
 import { env } from "../../../logic/env";
 import { createAddDeviceString } from "../../../logic/key";
-import { SlotType, findUnusedSlot } from "../../../logic/keySlot";
 import { requestPasskeySignature } from "../../../logic/passkey";
 import { Account, defaultEnclaveKeyName } from "../../../model/account";
 import { hydrateAccount } from "../../../sync/sync";
