@@ -58,7 +58,7 @@ export function createRouter(
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
         const { prefix } = opts.input;
-        const ret: EAccount[] = await search(prefix, vc, nameReg);
+        const ret = await search(prefix, vc, nameReg);
         return ret;
       }),
 

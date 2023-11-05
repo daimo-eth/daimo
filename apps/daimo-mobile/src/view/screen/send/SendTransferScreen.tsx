@@ -231,6 +231,8 @@ function RecipientDisplay({
 }) {
   // Show who we're sending to
   const disp = getAccountName(recipient);
+  const { originalMatch } = recipient;
+  const showOrig = originalMatch != null && originalMatch !== disp;
 
   return (
     <View style={styles.recipientDisp}>
@@ -239,6 +241,8 @@ function RecipientDisplay({
       {isRequest && <TextLight>Requested by</TextLight>}
       {isRequest && <Spacer h={8} />}
       <TextH3>{disp}</TextH3>
+      {showOrig && <Spacer h={8} />}
+      {showOrig && <TextLight>{originalMatch}</TextLight>}
     </View>
   );
 }

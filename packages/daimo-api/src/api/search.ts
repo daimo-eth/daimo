@@ -1,5 +1,5 @@
-import { EAccount } from "@daimo/common";
-import { isAddress, getAddress } from "viem";
+import { EAccountSearchResult, getAccountName } from "@daimo/common";
+import { Address, getAddress, isAddress } from "viem";
 import { normalize } from "viem/ens";
 
 import { NameRegistry } from "../contract/nameRegistry";
@@ -15,24 +15,36 @@ export async function search(
   prefix = prefix.trim();
   if (prefix.startsWith("@")) prefix = prefix.slice(1);
 
-  const ret: EAccount[] = [];
+  // Show a santized, simplified view of what the user entered
+  // This is important when eg entering an address > matches reverse ENS
+  // Othewise, you have no confirmation on send screen that it's the same addr.
+  // Also important when entering an ENS > get a *different* reverse ENS.
+
+  let ret: EAccountSearchResult[];
   if (isAddress(prefix)) {
-    ret.push(await nameReg.getEAccount(getAddress(prefix)));
+    const addr = getAddress(prefix);
+    const addrDisp = getAccountName({ addr });
+    ret = [await getResultFromAddr(addr, addrDisp, nameReg)];
+  } else if (prefix.includes(".")) {
+    const addr = await tryGetEnsAddr(prefix, vc);
+    if (addr == null) ret = [];
+    else ret = [await getResultFromAddr(addr, prefix, nameReg)];
   } else {
-    const [daimoAccounts, ensAccount] = await Promise.all([
-      nameReg.search(prefix),
-      tryGetEnsAddr(prefix, vc),
-    ]);
-    ret.push(...daimoAccounts);
-    if (ensAccount) {
-      let insertAt = 0;
-      if (ret[0] && ret[0].name === prefix) insertAt = 1;
-      ret.splice(insertAt, 0, ensAccount);
-    }
+    const dAccounts = await nameReg.search(prefix);
+    ret = dAccounts.map((d) => ({ ...d, originalMatch: d.name }));
   }
 
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);
   return ret;
+}
+
+async function getResultFromAddr(
+  addr: Address,
+  originalMatch: string,
+  nameReg: NameRegistry
+): Promise<EAccountSearchResult> {
+  const eAcc = await nameReg.getEAccount(addr);
+  return { ...eAcc, originalMatch };
 }
 
 async function tryGetEnsAddr(prefix: string, vc: ViemClient) {
@@ -40,9 +52,7 @@ async function tryGetEnsAddr(prefix: string, vc: ViemClient) {
   if (!prefix.includes(".")) return null;
   try {
     const ensName = normalize(prefix);
-    const addr = await vc.l1Client.getEnsAddress({ name: ensName });
-    if (addr == null) return null;
-    return { ensName, addr } as EAccount;
+    return await vc.l1Client.getEnsAddress({ name: ensName });
   } catch (e) {
     console.log(`[API] ens lookup '${prefix}' failed: ${e}`);
     return null;

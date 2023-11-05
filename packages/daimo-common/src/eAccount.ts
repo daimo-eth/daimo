@@ -15,6 +15,11 @@ export const zEAccount = z.object({
 /** EAccount represents any Ethereum address + display name(s). */
 export type EAccount = z.infer<typeof zEAccount>;
 
+/** EAccountSearchResult is an EAccount + shows what we matched on. */
+export interface EAccountSearchResult extends EAccount {
+  originalMatch: string;
+}
+
 /** Returns eg "bob", "alice.eth", or "0x123..." */
 export function getEAccountStr(eAccount: EAccount): string {
   if (eAccount.name) return eAccount.name;
