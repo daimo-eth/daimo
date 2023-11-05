@@ -52,24 +52,21 @@ export function getSlotLabel(slot: number): string {
   return prefix + getSlotCharCode(slot - slotTypeToFirstSlot[slotType]);
 }
 
-export function findUnusedSlot(
-  allUsedSlots: number[],
-  variant: SlotType
-): number {
-  const variantUsedSlots = allUsedSlots.filter(
-    (slot) => getSlotType(slot) === variant
+export function findUnusedSlot(allUsedSlots: number[], type: SlotType): number {
+  const typeUsedSlots = allUsedSlots.filter(
+    (slot) => getSlotType(slot) === type
   );
 
-  if (variantUsedSlots.length === 0) {
-    return slotTypeToFirstSlot[variant];
+  if (typeUsedSlots.length === 0) {
+    return slotTypeToFirstSlot[type];
   }
 
-  const maxSlot = Math.max.apply(null, variantUsedSlots);
-  if (getSlotType(maxSlot + 1) === variant) return maxSlot + 1;
+  const maxSlot = Math.max.apply(null, typeUsedSlots);
+  if (getSlotType(maxSlot + 1) === type) return maxSlot + 1;
   else {
     // return first unused slot
-    for (let i = slotTypeToFirstSlot[variant]; i < 256; i++) {
-      if (!variantUsedSlots.includes(i) && getSlotType(i) === variant) return i;
+    for (let i = slotTypeToFirstSlot[type]; i < 256; i++) {
+      if (!typeUsedSlots.includes(i) && getSlotType(i) === type) return i;
     }
 
     // Max active keys on contract is 20, so this should never happen

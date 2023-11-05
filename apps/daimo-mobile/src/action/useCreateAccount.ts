@@ -1,5 +1,5 @@
 import { assert } from "@daimo/common";
-import { DaimoChain, daimoPaymasterAddress } from "@daimo/contract";
+import { DaimoChain } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
