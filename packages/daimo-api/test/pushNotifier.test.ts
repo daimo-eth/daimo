@@ -142,11 +142,8 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Mobile A removed");
-    assert.strictEqual(
-      output[0].body,
-      "You removed Mobile A from your account"
-    );
+    assert.strictEqual(output[0].title, "Phone A removed");
+    assert.strictEqual(output[0].body, "You removed Phone A from your account");
   });
 
   await test("complex add/removes", async () => {
@@ -187,10 +184,13 @@ test("PushNotifier", async () => {
     for (const msg of output) {
       assert.deepStrictEqual(msg.to, ["pushTokenBob1", "pushTokenBob2"]);
     }
-    assert.strictEqual(output[0].title, "Backup A added");
-    assert.strictEqual(output[0].body, "You added Backup A to your account");
-    assert.strictEqual(output[1].title, "Mobile A removed");
-    assert.strictEqual(output[2].title, "Mobile Z added");
+    assert.strictEqual(output[0].title, "Passkey Backup A added");
+    assert.strictEqual(
+      output[0].body,
+      "You added Passkey Backup A to your account"
+    );
+    assert.strictEqual(output[1].title, "Phone A removed");
+    assert.strictEqual(output[2].title, "Phone Z added");
   });
 
   await test("cancel payment link", async () => {

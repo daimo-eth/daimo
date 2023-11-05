@@ -115,7 +115,7 @@ export class KeyRegistry {
           slot,
         });
 
-        if (this.addrToDeploymentTxHash.get(addr) === undefined) {
+        if (!this.addrToDeploymentTxHash.has(addr)) {
           this.addrToDeploymentTxHash.set(addr, log.transactionHash);
         }
       } else if (log.eventName === "SigningKeyRemoved") {
