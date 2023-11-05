@@ -123,6 +123,7 @@ async function fetchSync(
     numNamedAccounts: result.namedAccounts.length,
     numAccountKeys: result.accountKeys.length,
     chainGasConstants: result.chainGasConstants,
+    recommendedExchanges: result.recommendedExchanges,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -203,6 +204,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     lastFinalizedBlock: result.lastFinalizedBlock,
 
     chainGasConstants: result.chainGasConstants,
+    recommendedExchanges: result.recommendedExchanges,
 
     recentTransfers,
     namedAccounts,

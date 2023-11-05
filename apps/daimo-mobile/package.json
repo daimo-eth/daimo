@@ -26,7 +26,6 @@
     "eas-build-post-install": "cd ../.. && npm run build:mobile"
   },
   "dependencies": {
-    "@coinbase/cbpay-js": "^1.8.0",
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@daimo/api": "*",
     "@daimo/common": "*",

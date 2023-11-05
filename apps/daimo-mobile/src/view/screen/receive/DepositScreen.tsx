@@ -1,4 +1,3 @@
-import { generateOnRampURL } from "@coinbase/cbpay-js";
 import { AddrLabel, assert } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -67,34 +66,25 @@ function DepositScreenInner({ account }: { account: Account }) {
 function OnrampsSection({ account }: { account: Account }) {
   const [started, setStarted] = useState(false);
 
-  const openCBPay = useCallback(() => {
-    const cbUrl = generateOnRampURL({
-      appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
-      destinationWallets: [
-        {
-          address: account.address,
-          blockchains: ["base"],
-          assets: ["USDC"],
-          supportedNetworks: ["base"],
-        },
-      ],
-      handlingRequestedUrls: true,
-      defaultExperience: "send",
-    });
-
-    Linking.openURL(cbUrl);
+  const openRecommendedExchange = (url: string) => {
+    Linking.openURL(url);
     setStarted(true);
-  }, [account]);
+  };
 
   return (
     <View>
       <HeaderRow title="Recommended exchanges" />
 
-      <ButtonMed
-        type="primary"
-        title="Deposit from Coinbase"
-        onPress={openCBPay}
-      />
+      {account.recommendedExchanges.map((rec, idx) => (
+        <View key={idx}>
+          <ButtonMed
+            type="primary"
+            title={rec.cta}
+            onPress={() => openRecommendedExchange(rec.url)}
+          />
+          {idx < account.recommendedExchanges.length - 1 && <Spacer h={16} />}
+        </View>
+      ))}
       {started && <Spacer h={16} />}
       {started && (
         <InfoBubble
