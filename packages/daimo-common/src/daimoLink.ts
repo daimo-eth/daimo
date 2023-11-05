@@ -86,7 +86,7 @@ export function parseDaimoLink(link: string): DaimoLink | null {
 
 function parseDaimoLinkInner(link: string): DaimoLink | null {
   let suffix: string | undefined;
-  const prefixes = [`${daimoLinkBase}/`, "daimo://"];
+  const prefixes = [`${daimoLinkBase}/`, "daimo://", "https://daimo.xyz/link/"];
   for (const prefix of prefixes) {
     if (link.startsWith(prefix)) {
       suffix = link.substring(prefix.length);

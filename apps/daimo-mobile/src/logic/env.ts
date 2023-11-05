@@ -3,7 +3,7 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 
 import { getRpcFunc, getRpcHook } from "./trpc";
 
-const passkeyDomain = process.env.DAIMO_PASSKEY_DOMAIN || "daimo.xyz";
+const passkeyDomain = process.env.DAIMO_PASSKEY_DOMAIN || "daimo.com";
 
 const buildEnv = {
   buildProfile: process.env.EAS_BUILD_PROFILE || "local",

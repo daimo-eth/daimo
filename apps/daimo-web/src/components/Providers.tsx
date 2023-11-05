@@ -26,7 +26,7 @@ const { wallets } = getDefaultWallets({
 
 const demoAppInfo = {
   appName: "Daimo",
-  learnMoreUrl: "https://daimo.xyz",
+  learnMoreUrl: "https://daimo.com",
 };
 
 const connectors = connectorsForWallets([...wallets]);

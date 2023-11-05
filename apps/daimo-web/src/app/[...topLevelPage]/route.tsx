@@ -5,8 +5,7 @@ export async function GET(request: Request) {
   const upstreamUrl = request.url.replace(url.origin, superSo);
   console.log(`[WEB] proxying ${request.url} to ${upstreamUrl}`);
 
-  // Proxy the request to superSo, setting the Host header to daimo.xyz
-  // Return the response
+  // Proxy the request to super.so
   const res = await fetch(upstreamUrl, {
     method: request.method,
     headers: {

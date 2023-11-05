@@ -36,9 +36,9 @@ to avoid float rounding bugs.
 
 These are app deep links. For example
 
-- `https://daimo.xyz/link/account/0x4Fe4e666Be5752f1FdD210F4Ab5DE2Cc26e3E0e8`
-- `https://daimo.xyz/link/request/...`
-- `https://daimo.xyz/link/note/...`
+- `https://daimo.com/link/account/ansgar`
+- `https://daimo.com/link/request/...`
+- `https://daimo.com/link/note/...`
 
 ...all can be parsed or serialized to/from `DaimoLink`.
 

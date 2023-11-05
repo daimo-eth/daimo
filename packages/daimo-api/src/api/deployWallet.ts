@@ -56,7 +56,7 @@ export async function deployWallet(
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
   const url = `${explorer}/address/${address}`;
-  const starterUrl = `https://daimo.xyz/link/account/${name}`;
+  const starterUrl = `https://daimo.com/link/account/${name}`;
   telemetry.recordClippy(
     `New user ${name} at ${url}\n\nSend starter: ${starterUrl}`,
     "celebrate"
