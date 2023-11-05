@@ -2,13 +2,13 @@ import { assert } from "@daimo/common";
 
 export enum SlotType {
   Mobile = "Mobile",
-  Desktop = "Desktop",
+  Computer = "Computer",
   Backup = "Backup",
 }
 
 const slotTypeToFirstSlot = {
   [SlotType.Mobile]: 0,
-  [SlotType.Desktop]: 0x40,
+  [SlotType.Computer]: 0x40,
   [SlotType.Backup]: 0x80,
 };
 
@@ -22,7 +22,7 @@ function getSlotType(slot: number): SlotType | undefined {
     (slotType & slotTypeToFirstSlot[type]) === slotTypeToFirstSlot[type];
 
   if (isSlotType(SlotType.Backup)) return SlotType.Backup;
-  else if (isSlotType(SlotType.Desktop)) return SlotType.Desktop;
+  else if (isSlotType(SlotType.Computer)) return SlotType.Computer;
   else if (isSlotType(SlotType.Mobile)) return SlotType.Mobile;
   else return undefined;
 }

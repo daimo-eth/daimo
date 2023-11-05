@@ -712,7 +712,7 @@ function UseExistingPage({
 
   if (pubKeyHex === undefined) return null;
 
-  const deviceType = SlotType.Mobile; // TODO: detect and support desktop
+  const deviceType = SlotType.Mobile; // TODO: detect and support Computer
 
   const addDeviceElement = (function () {
     switch (addDeviceStatus) {
