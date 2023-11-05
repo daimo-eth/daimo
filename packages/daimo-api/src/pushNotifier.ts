@@ -280,7 +280,7 @@ export class PushNotifier {
   getPushMessagesFromKeyRotations(logs: SigningKeyAddedOrRemovedLog[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      const addr = log.address;
+      const addr = getAddress(log.address);
       const keyLabel = getSlotLabel(log.args.keySlot);
 
       // Skip notifications for account creation

@@ -22,6 +22,7 @@ import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
 import { useCreateAccount } from "../../../action/useCreateAccount";
+import { env } from "../../../logic/env";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
 import { getPushNotificationManager } from "../../../logic/notify";
@@ -86,7 +87,9 @@ export default function OnboardingScreen({
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
-      {page === "invite" && <InvitePage onNext={next} />}
+      {page === "invite" && (
+        <InvitePage onNext={next} daimoChain={daimoChain} />
+      )}
       {page === "flow-selection" && <FlowSelectionPage onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
         <SetupKeyPage onNext={next} onPrev={prev} createStatus={createStatus} />
@@ -278,23 +281,37 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 
 function InvitePage({
   onNext,
+  daimoChain,
 }: {
   onNext: ({ isTestnet }: { isTestnet: boolean }) => void;
+  daimoChain: DaimoChain;
 }) {
   const [inviteCode, setInviteCode] = useState("");
   const onChange = (text: string) => setInviteCode(text);
 
-  const isValid = ["zuconnect", "devconnect", "testnet"].includes(inviteCode);
+  // We haven't picked a daimoChain yet so this defaults to prod.
+  const rpcHook = env(daimoChain).rpcHook;
+  const result = rpcHook.verifyInviteCode.useQuery({ inviteCode });
+
   const isTestnet = inviteCode === "testnet";
+  const isValid = isTestnet || (result.isSuccess && result.data);
 
   const oct = (name: OctName, color?: string) => (
     <Octicons {...{ name, color }} size={14} />
   );
   const status = (function () {
-    if (!inviteCode) return " ";
-    if (isValid)
+    if (!inviteCode) {
+      return " ";
+    } else if (result.isLoading) {
+      return "...";
+    } else if (isTestnet || (result.isSuccess && result.data)) {
       return <>{oct("check-circle", color.successDark)} valid invite</>;
-    else return <>{oct("alert")} invalid invite</>;
+    } else if (result.isSuccess && !result.data) {
+      return <>{oct("alert")} invalid invite</>;
+    } else if (result.error) {
+      return <>{oct("alert")} offline?</>;
+    }
+    throw new Error("unreachable");
   })();
 
   const linkToWaitlist = () => {
