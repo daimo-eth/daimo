@@ -1,28 +1,12 @@
-import { assert, assertNotNull, validateName } from "@daimo/common";
+import { assertNotNull } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
-import {
-  DaimoNonce,
-  DaimoNonceMetadata,
-  DaimoNonceType,
-  DaimoOpSender,
-} from "@daimo/userop";
 import Octicons from "@expo/vector-icons/Octicons";
-import { base64 } from "@scure/base";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  BackHandler,
   Dimensions,
-  Keyboard,
   Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -30,34 +14,23 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { hexToBytes } from "viem";
 
-import { QRCodeBox } from "./QRScreen";
-import { ActStatus } from "../../action/actStatus";
-import { useCreateAccount } from "../../action/useCreateAccount";
-import { useExistingAccount } from "../../action/useExistingAccount";
-import { useSendAsync } from "../../action/useSendAsync";
-import { createEmptyAccount } from "../../logic/account";
-import { env } from "../../logic/env";
-import {
-  createAddDeviceString,
-  requestEnclaveSignature,
-} from "../../logic/key";
-import { SlotType, findUnusedSlot } from "../../logic/keySlot";
-import { NamedError } from "../../logic/log";
-import { getPushNotificationManager } from "../../logic/notify";
-import { requestPasskeySignature } from "../../logic/passkey";
-import { Account, defaultEnclaveKeyName } from "../../model/account";
-import { hydrateAccount } from "../../sync/sync";
-import { ButtonBig, TextButton } from "../shared/Button";
-import { InfoLink } from "../shared/InfoLink";
-import { InputBig, OctName } from "../shared/InputBig";
-import { ScreenHeader } from "../shared/ScreenHeader";
-import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
+import { CreateAccountPage } from "./CreateAccountPage";
+import { OnboardingHeader } from "./OnboardingHeader";
+import { UseExistingPage } from "./UseExistingPage";
+import { ActStatus } from "../../../action/actStatus";
+import { useCreateAccount } from "../../../action/useCreateAccount";
+import { requestEnclaveSignature } from "../../../logic/key";
+import { NamedError } from "../../../logic/log";
+import { getPushNotificationManager } from "../../../logic/notify";
+import { defaultEnclaveKeyName } from "../../../model/account";
+import { ButtonBig, TextButton } from "../../shared/Button";
+import { InfoLink } from "../../shared/InfoLink";
+import { InputBig, OctName } from "../../shared/InputBig";
+import Spacer from "../../shared/Spacer";
+import { color, ss } from "../../shared/style";
 import {
   EmojiToOcticon,
   TextBody,
@@ -65,7 +38,7 @@ import {
   TextError,
   TextH1,
   TextLight,
-} from "../shared/text";
+} from "../../shared/text";
 
 type OnboardPage =
   | "intro"
@@ -116,7 +89,7 @@ export default function OnboardingScreen({
       {page === "invite" && <InvitePage onNext={next} />}
       {page === "flow-selection" && <FlowSelectionPage onNext={next} />}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
-        <SetupKey onNext={next} onPrev={prev} createStatus={createStatus} />
+        <SetupKeyPage onNext={next} onPrev={prev} createStatus={createStatus} />
       )}
       {page === "create" && (
         <CreateAccountPage
@@ -330,7 +303,7 @@ function InvitePage({
   };
 
   return (
-    <View style={styles.createAccountPage}>
+    <View style={styles.paddedPage}>
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         <Octicons name="mail" size={40} color={color.midnight} />
       </View>
@@ -371,7 +344,7 @@ function FlowSelectionPage({
   onNext: ({ choice }: { choice: "create" | "existing" }) => void;
 }) {
   return (
-    <View style={styles.createAccountPage}>
+    <View style={styles.paddedPage}>
       <TextCenter>
         <TextH1>Welcome</TextH1>
       </TextCenter>
@@ -402,7 +375,7 @@ function FlowSelectionPage({
   );
 }
 
-function SetupKey({
+function SetupKeyPage({
   onNext,
   onPrev,
   createStatus,
@@ -444,7 +417,7 @@ function SetupKey({
   return (
     <View>
       <OnboardingHeader title="Set up device" onPrev={onPrev} />
-      <View style={styles.createAccountPage}>
+      <View style={styles.paddedPage}>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Octicons
             name={askToSetPin ? "unlock" : "lock"}
@@ -510,7 +483,7 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <View style={styles.createAccountPage}>
+    <View style={styles.paddedPage}>
       <TextCenter>
         <Octicons name="bell" size={32} />
       </TextCenter>
@@ -529,379 +502,6 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
       />
       <Spacer h={16} />
       <ButtonBig type="subtle" title="Skip" onPress={onNext} />
-    </View>
-  );
-}
-
-function CreateAccountPage({
-  onNext,
-  onPrev,
-  name,
-  setName,
-  daimoChain,
-  exec,
-  status,
-  message,
-}: {
-  onNext: () => void;
-  onPrev?: () => void;
-  name: string;
-  setName: (name: string) => void;
-  daimoChain: DaimoChain;
-  exec: () => void;
-  status: ActStatus;
-  message: string;
-}) {
-  const createAccount = useCallback(() => {
-    if (status === "idle") {
-      exec();
-      console.log(`[ONBOARDING] create account ${name} ${status} ${message}`);
-      onNext();
-    }
-  }, [exec]);
-
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View>
-        <OnboardingHeader title="Create Account" onPrev={onPrev} />
-        <View style={styles.createAccountPage}>
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Octicons name="person" size={40} color={color.midnight} />
-          </View>
-          <Spacer h={32} />
-          <View style={styles.namePickerWrap}>
-            {status === "idle" && (
-              <NamePicker
-                name={name}
-                daimoChain={daimoChain}
-                onChange={setName}
-                onChoose={createAccount}
-              />
-            )}
-          </View>
-          <TextCenter>
-            {status === "error" && <TextError>{message}</TextError>}
-            {status !== "error" && (
-              <TextLight>
-                <EmojiToOcticon size={16} text={message} />
-              </TextLight>
-            )}
-          </TextCenter>
-        </View>
-      </View>
-    </TouchableWithoutFeedback>
-  );
-}
-
-function UseExistingPage({
-  onNext,
-  onPrev,
-  daimoChain,
-}: {
-  onNext: () => void;
-  onPrev?: () => void;
-  daimoChain: DaimoChain;
-}) {
-  // Use existing account spin loops and waits for this device to show up
-  // in some on-chain account.
-  const { status, message, pubKeyHex } = useExistingAccount(daimoChain);
-
-  useEffect(() => {
-    if (status === "success") onNext();
-  }, [status]);
-
-  // Account and associated logic used to restore from backup passkey ephemerally.
-  const [passkeyAccount, setPasskeyAccount] = useState<Account | undefined>(
-    undefined
-  );
-
-  const nextSlot = useMemo(
-    () =>
-      passkeyAccount
-        ? findUnusedSlot(
-            passkeyAccount.accountKeys.map((k) => k.slot),
-            env(daimoChain).deviceType === "phone"
-              ? SlotType.Phone
-              : SlotType.Computer
-          )
-        : null,
-    [passkeyAccount]
-  );
-
-  const nonce = useMemo(
-    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
-    [pubKeyHex]
-  );
-
-  const sendFn = async (opSender: DaimoOpSender) => {
-    if (!pubKeyHex || !passkeyAccount || nextSlot === null)
-      throw new Error("[ACTION] passkey account not ready");
-    console.log(`[ACTION] adding device ${pubKeyHex}`);
-    return opSender.addSigningKey(nextSlot, pubKeyHex, {
-      nonce,
-      chainGasConstants: passkeyAccount.chainGasConstants,
-    });
-  };
-
-  const {
-    status: addDeviceStatus,
-    message: addDeviceMessage,
-    exec: addDeviceExec,
-  } = useSendAsync({
-    dollarsToSend: 0,
-    sendFn,
-    passkeyAccount,
-  });
-
-  const [restoreStatus, setRestoreStatus] = useState<{
-    status: ActStatus;
-    message: string;
-  }>({ status: "idle", message: "Restore from backup" });
-
-  const onRestoreBackup = async () => {
-    assert(pubKeyHex !== undefined);
-    console.log(`[ONBOARDING] restore backup attempt`);
-    setRestoreStatus({ status: "loading", message: "Requesting backup" });
-
-    const bChallenge = hexToBytes("0xdead");
-    const challengeB64 = base64.encode(bChallenge);
-    try {
-      const { accountName } = await requestPasskeySignature(
-        challengeB64,
-        env(daimoChain).passkeyDomain
-      );
-
-      const rpcFunc = env(daimoChain).rpcFunc;
-      const addr = await rpcFunc.resolveName.query({ name: accountName });
-
-      if (!addr) {
-        setRestoreStatus({
-          status: "error",
-          message: "Backup account not found",
-        });
-        return;
-      }
-
-      console.log(`[ONBOARDING] trying to restore ${accountName} ${addr}`);
-
-      const newAccount = createEmptyAccount(
-        {
-          name: accountName,
-          address: addr,
-          enclaveKeyName: defaultEnclaveKeyName,
-          enclavePubKey: pubKeyHex,
-        },
-        daimoChain
-      );
-
-      const syncedAccount = await hydrateAccount(newAccount);
-
-      setPasskeyAccount(syncedAccount);
-
-      // now add device will work if we use the passkey account
-      // We don't set the main account to the passkey account because
-      // we haven't yet added this device key to it.
-      setRestoreStatus({
-        status: "success",
-        message: `Successfully found account ${accountName}`,
-      });
-    } catch (e: any) {
-      console.error(e);
-      setRestoreStatus({ status: "error", message: e.message });
-      throw e;
-    }
-  };
-
-  if (pubKeyHex === undefined) return null;
-
-  const addDeviceElement = (function () {
-    switch (addDeviceStatus) {
-      case "idle":
-        return (
-          <>
-            <ButtonBig
-              type="primary"
-              title="Load account"
-              onPress={addDeviceExec}
-            />
-            <Spacer h={16} />
-            <TextCenter>
-              <TextBody>{restoreStatus.message}</TextBody>
-            </TextCenter>
-          </>
-        );
-      case "loading":
-        return <ActivityIndicator size="large" />;
-      case "success":
-        return <ActivityIndicator size="large" />;
-      case "error":
-        return (
-          <>
-            <TextCenter>
-              <TextError>{addDeviceMessage}</TextError>
-            </TextCenter>
-          </>
-        );
-    }
-  })();
-
-  const restoreElement = (function () {
-    switch (restoreStatus.status) {
-      case "idle":
-        return (
-          <ButtonBig
-            type="primary"
-            title="Restore from backup"
-            onPress={onRestoreBackup}
-          />
-        );
-      case "loading":
-        return <ActivityIndicator size="large" />;
-      case "success": {
-        return <></>;
-      }
-      case "error":
-        return (
-          <>
-            <TextCenter>
-              <TextError>{restoreStatus.message}</TextError>
-            </TextCenter>
-          </>
-        );
-    }
-  })();
-
-  return (
-    <View>
-      <OnboardingHeader title="Existing Account" onPrev={onPrev} />
-      <View style={styles.useExistingPage}>
-        <Spacer h={32} />
-        <QRCodeBox value={createAddDeviceString(pubKeyHex)} />
-        <Spacer h={16} />
-        <TextCenter>
-          {status !== "error" && (
-            <TextLight>
-              <EmojiToOcticon size={16} text={message} />
-            </TextLight>
-          )}
-        </TextCenter>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextParagraph>
-            Add this {env(daimoChain).deviceType} to an existing account. Scan
-            the QR code above with your other device.
-          </TextParagraph>
-        </TextCenter>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextLight>or</TextLight>
-        </TextCenter>
-        <Spacer h={32} />
-        {restoreStatus.status !== "success" && restoreElement}
-        {restoreStatus.status === "success" && addDeviceElement}
-      </View>
-    </View>
-  );
-}
-
-function OnboardingHeader({
-  title,
-  onPrev,
-}: {
-  title: string;
-  onPrev?: () => void;
-}) {
-  /* On Android, listen for the native back button. */
-  useEffect(() => {
-    if (!onPrev) return;
-    const onBack = () => {
-      onPrev();
-      return true;
-    };
-    BackHandler.addEventListener("hardwareBackPress", onBack);
-    return () => BackHandler.removeEventListener("hardwareBackPress", onBack);
-  }, [onPrev]);
-
-  return (
-    <View style={ss.container.padH16}>
-      <ScreenHeader title={title} onBack={onPrev} />
-    </View>
-  );
-}
-
-function NamePicker({
-  name,
-  daimoChain,
-  onChange,
-  onChoose,
-}: {
-  name: string;
-  daimoChain: DaimoChain;
-  onChange: (name: string) => void;
-  onChoose: () => void;
-}) {
-  let error = "";
-  try {
-    validateName(name);
-  } catch (e: any) {
-    error = e.message;
-  }
-  const rpcHook = env(daimoChain).rpcHook;
-  const result = rpcHook.resolveName.useQuery({ name }, { enabled: !error });
-
-  const [debounce, setDebounce] = useState(false);
-  useEffect(() => {
-    setDebounce(true);
-    const t = setTimeout(() => setDebounce(false), 500);
-    return () => clearTimeout(t);
-  }, [name]);
-
-  let isAvailable = false;
-  const oct = (name: OctName, color?: string) => (
-    <Octicons {...{ name, color }} size={14} />
-  );
-  const status = (function () {
-    if (name.length === 0 || debounce) {
-      return " "; // no error
-    } else if (error) {
-      return (
-        <>
-          {oct("alert")} {error.toLowerCase()}
-        </>
-      ); // invalid name
-    } else if (result.isLoading) {
-      return "..."; // name valid, loading
-    } else if (result.error) {
-      return <>{oct("alert")} offline?</>; // name valid, other error
-    } else if (result.isSuccess && result.data) {
-      return <>{oct("alert")} sorry, that name is taken</>; // name taken
-    } else if (result.isSuccess && result.data === null) {
-      isAvailable = true; // name valid & available
-      return <>{oct("check-circle", color.successDark)} available</>;
-    }
-    throw new Error("unreachable");
-  })();
-
-  return (
-    <View>
-      <InputBig
-        placeholder="choose a username"
-        value={name}
-        onChange={onChange}
-        center
-        autoFocus
-      />
-      <Spacer h={8} />
-      <TextCenter>
-        <TextLight>{status}</TextLight>
-      </TextCenter>
-      <Spacer h={8} />
-      <ButtonBig
-        type="primary"
-        title="Create"
-        onPress={onChoose}
-        disabled={!isAvailable}
-      />
     </View>
   );
 }
@@ -962,14 +562,8 @@ const styles = StyleSheet.create({
   introButtonsWrap: {
     paddingHorizontal: 24,
   },
-  namePickerWrap: {
-    height: 168,
-  },
-  createAccountPage: {
+  paddedPage: {
     paddingTop: 96,
-    paddingHorizontal: 24,
-  },
-  useExistingPage: {
     paddingHorizontal: 24,
   },
 });
