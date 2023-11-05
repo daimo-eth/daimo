@@ -159,7 +159,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           name: `${name}`,
           action: `is requesting`,
           dollars: `${res.link.dollars}`,
-          description: "PAY",
+          description: "Pay with Daimo",
           walletActionLinkStatus: res,
         };
       } else {
@@ -180,7 +180,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             name: `${getAccountName(sender)}`,
             action: `sent you`,
             dollars: `${dollars}`,
-            description: `CLAIM`,
+            description: "Claim with Daimo",
             walletActionLinkStatus: res,
           };
         }
