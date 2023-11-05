@@ -1,9 +1,9 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { OctName } from "./InputBig";
+import { OfflineHeader } from "./OfflineHeader";
 import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextH3 } from "./text";
@@ -19,22 +19,18 @@ export function ScreenHeader({
   onExit?: () => void;
   modal?: boolean;
 }) {
-  const ins = useSafeAreaInsets();
-  const top = modal ? 16 : Math.max(ins.top, 32);
-  const style = useMemo(
-    () => [styles.screenHead, { paddingTop: top, height: 40 + top }],
-    [top]
-  );
-
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
 
   return (
-    <View style={style}>
-      <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
-      <TextH3>{title}</TextH3>
-      <ScreenHeadButton icon="x" show={!!onExit} onPress={exit} />
-    </View>
+    <>
+      {!modal && <OfflineHeader />}
+      <View style={styles.screenHead}>
+        <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
+        <TextH3>{title}</TextH3>
+        <ScreenHeadButton icon="x" show={!!onExit} onPress={exit} />
+      </View>
+    </>
   );
 }
 
@@ -85,6 +81,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    height: 40,
+    paddingTop: 16,
   },
   screenHeadButtonWrap: {
     width: 40,

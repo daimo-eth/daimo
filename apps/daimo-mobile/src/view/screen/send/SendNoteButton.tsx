@@ -173,6 +173,7 @@ function SendNoteButtonInner({
   const button = (function () {
     switch (status) {
       case "idle":
+      case "error":
         return (
           <ButtonBig
             type="primary"
@@ -191,8 +192,6 @@ function SendNoteButtonInner({
             onPress={sendNote}
           />
         );
-      case "error":
-        return <ButtonBig type="danger" title="Error" disabled />;
     }
   })();
 

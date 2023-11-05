@@ -208,12 +208,15 @@ async function sendAsync(
 
     return handle;
   } catch (e: any) {
-    console.error(e);
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");
     } else if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
       setAS("error", e.message);
-    } else setAS("error", "Error sending transaction");
+    } else if (e.message === "Network request failed") {
+      setAS("error", "Request failed. Offline?");
+    } else {
+      setAS("error", "Error sending transaction");
+    }
     throw e;
   }
 }

@@ -80,7 +80,9 @@ function SearchResultsScroll({
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
-      {res.recipients.length === 0 && prefix !== "" && <NoSearchResults />}
+      {res.status === "success" &&
+        res.recipients.length === 0 &&
+        prefix !== "" && <NoSearchResults />}
       <Spacer h={32} />
       {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>

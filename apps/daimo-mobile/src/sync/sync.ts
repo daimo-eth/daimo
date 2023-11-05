@@ -8,8 +8,8 @@ import {
   guessTimestampFromNum,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import { useEffect } from "react";
 
+import { setNetworkState } from "./networkState";
 import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
 import { env } from "../logic/env";
 import { Account, getAccountManager } from "../model/account";
@@ -21,18 +21,10 @@ import { Account, getAccountManager } from "../model/account";
 //   ...immediately on push notification
 //   ...frequently while there's a pending transaction
 //   ...occasionally otherwise
-//
-// TODO: better sync strategy:
-// - On app load, load account from storage
-// - Connect to API websocket. Listen for updates.
-export function useSyncChain() {
-  // Sync on app load, then periodically after
-  useEffect(() => {
-    console.log("[SYNC] APP LOAD, starting sync");
-    maybeSync(true);
-    const int = window.setInterval(maybeSync, 1_000);
-    return () => window.clearInterval(int);
-  }, []);
+export function startSync() {
+  console.log("[SYNC] APP LOAD, starting sync");
+  maybeSync(true);
+  setInterval(maybeSync, 1_000);
 }
 
 let lastSyncS = 0;
@@ -86,8 +78,10 @@ async function resync(reason: string, fromScratch?: boolean) {
     const accNew = applySync(manager.currentAccount, res);
     console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
     manager.setCurrentAccount(accNew);
+    setNetworkState("online");
   } catch (e) {
     console.error(`[SYNC] FAILED ${accOld.name}`, e);
+    setNetworkState("offline");
   }
 }
 

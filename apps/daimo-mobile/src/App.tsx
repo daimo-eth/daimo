@@ -5,7 +5,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
-import { useSyncChain } from "./sync/sync";
 import { TabNav } from "./view/TabNav";
 import { useInitNavLinks } from "./view/shared/nav";
 import { color } from "./view/shared/style";
@@ -15,9 +14,6 @@ export default function App() {
 
   // Display notifications, listen for push notifications
   useInitNotifications();
-
-  // Sync data from chain. Account balance, transfers, ...
-  useSyncChain();
 
   // Load font to fix icons on Android
   useFonts({ Octicons: require("../assets/octicons.ttf") });

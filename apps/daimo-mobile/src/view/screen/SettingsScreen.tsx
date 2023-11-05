@@ -149,9 +149,9 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={16} />
-      <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
+      <ButtonMed type="primary" title="CREATE BACKUP" onPress={createBackup} />
       <Spacer h={16} />
-      <ButtonMed type="subtle" title="Create Backup" onPress={createBackup} />
+      <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
     </View>
   );
 }
