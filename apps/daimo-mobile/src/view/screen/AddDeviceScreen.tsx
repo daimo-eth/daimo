@@ -40,7 +40,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   const [newKey, setNewKey] = useState<Hex>();
   const nextSlot = findUnusedSlot(
     account.accountKeys.map((k) => k.slot),
-    SlotType.Mobile
+    SlotType.Phone
   );
   const [barCodeStatus, setBarCodeStatus] = useState<
     "idle" | "error" | "scanned"

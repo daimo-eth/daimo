@@ -27,7 +27,7 @@ export function AddPasskeyScreen() {
 
   const nextSlot = findUnusedSlot(
     account.accountKeys.map((k) => k.slot),
-    SlotType.Backup
+    SlotType.PasskeyBackup
   );
 
   const nonce = useMemo(

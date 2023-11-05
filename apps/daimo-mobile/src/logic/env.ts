@@ -16,7 +16,7 @@ const buildEnv = {
 
 console.log(`[APP] build environment ${JSON.stringify(buildEnv, null, 2)}`);
 
-function getDeviceType() {
+function getDeviceType(): "computer" | "phone" {
   switch (deviceType) {
     case DeviceType.DESKTOP:
       return "computer";

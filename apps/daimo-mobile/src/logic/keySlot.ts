@@ -1,15 +1,15 @@
 import { assert } from "@daimo/common";
 
 export enum SlotType {
-  Mobile = "Mobile",
+  Phone = "Phone",
   Computer = "Computer",
-  Backup = "Backup",
+  PasskeyBackup = "Passkey Backup",
 }
 
 const slotTypeToFirstSlot = {
-  [SlotType.Mobile]: 0,
+  [SlotType.Phone]: 0,
   [SlotType.Computer]: 0x40,
-  [SlotType.Backup]: 0x80,
+  [SlotType.PasskeyBackup]: 0x80,
 };
 
 // Top two bits of slot denote the type.
@@ -21,9 +21,9 @@ function getSlotType(slot: number): SlotType | undefined {
   const isSlotType = (type: SlotType) =>
     (slotType & slotTypeToFirstSlot[type]) === slotTypeToFirstSlot[type];
 
-  if (isSlotType(SlotType.Backup)) return SlotType.Backup;
+  if (isSlotType(SlotType.PasskeyBackup)) return SlotType.PasskeyBackup;
   else if (isSlotType(SlotType.Computer)) return SlotType.Computer;
-  else if (isSlotType(SlotType.Mobile)) return SlotType.Mobile;
+  else if (isSlotType(SlotType.Phone)) return SlotType.Phone;
   else return undefined;
 }
 

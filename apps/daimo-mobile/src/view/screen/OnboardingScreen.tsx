@@ -620,7 +620,9 @@ function UseExistingPage({
       passkeyAccount
         ? findUnusedSlot(
             passkeyAccount.accountKeys.map((k) => k.slot),
-            SlotType.Mobile
+            env(daimoChain).deviceType === "phone"
+              ? SlotType.Phone
+              : SlotType.Computer
           )
         : null,
     [passkeyAccount]
@@ -712,8 +714,6 @@ function UseExistingPage({
 
   if (pubKeyHex === undefined) return null;
 
-  const deviceType = SlotType.Mobile; // TODO: detect and support Computer
-
   const addDeviceElement = (function () {
     switch (addDeviceStatus) {
       case "idle":
@@ -788,8 +788,8 @@ function UseExistingPage({
         <Spacer h={32} />
         <TextCenter>
           <TextParagraph>
-            Add this {deviceType} to an existing account. Scan the QR code above
-            with your other device.
+            Add this {env(daimoChain).deviceType} to an existing account. Scan
+            the QR code above with your other device.
           </TextParagraph>
         </TextCenter>
         <Spacer h={32} />
