@@ -30,6 +30,7 @@ export function createEmptyAccount(
     pendingNotes: [],
     accountKeys: [],
     pendingKeyRotation: [],
+    recommendedExchanges: [],
 
     chainGasConstants: {
       maxPriorityFeePerGas: "0",
