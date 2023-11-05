@@ -246,12 +246,11 @@ function DetailsSection({ account }: { account: Account }) {
   };
 
   const daimoChain = daimoChainFromId(account.homeChainId);
+  const envObj = env(daimoChain);
   const envKV: Record<string, string> = {
-    Platform: `${Platform.OS} ${Platform.Version}`,
-    Version: `${env(daimoChain).nativeApplicationVersion} #${
-      env(daimoChain).nativeBuildVersion
-    }`,
-    Commit: `${env(daimoChain).gitHash} ${env(daimoChain).buildProfile}`,
+    Platform: `${Platform.OS} ${Platform.Version} ${envObj.deviceType}`,
+    Version: `${envObj.nativeApplicationVersion} #${envObj.nativeBuildVersion}`,
+    Commit: `${envObj.gitHash} ${envObj.buildProfile}`,
     Notifications: account.pushToken ? "enabled" : "disabled",
   };
   if (sec) {
