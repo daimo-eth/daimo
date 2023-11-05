@@ -16,7 +16,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
-import { DAIMO_INVITE_CODES, ViemClient } from "./env";
+import { daimoInviteCodes, ViemClient } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -199,7 +199,7 @@ export function createRouter(
       .input(z.object({ inviteCode: z.string() }))
       .query(async (opts) => {
         const { inviteCode } = opts.input;
-        return DAIMO_INVITE_CODES.split(",").includes(inviteCode);
+        return daimoInviteCodes.has(inviteCode);
       }),
   });
 }
