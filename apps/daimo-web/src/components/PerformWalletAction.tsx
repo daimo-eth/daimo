@@ -125,8 +125,9 @@ export function PerformWalletAction({
     })();
   }, [linkStatus, address]);
 
-  const secondaryTitle = description + " WITH CONNECTED WALLET";
-  const secondaryConnectTitle = description + " WITH ANOTHER WALLET";
+  const descriptionVerb = description.split(" ")[0].toUpperCase();
+  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
+  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
 
   return (
     <center>
