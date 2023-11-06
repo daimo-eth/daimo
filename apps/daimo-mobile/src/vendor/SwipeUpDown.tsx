@@ -1,10 +1,8 @@
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { ReactNode, useCallback, useMemo, useState } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,6 +10,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "../view/shared/ScrollPellet";
+import { color } from "../view/shared/style";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;
@@ -21,7 +20,7 @@ interface SwipeUpDownProps {
   onShowFull?: () => void;
 }
 
-const screenDimensions = Dimensions.get("screen");
+const screenDimensions = Dimensions.get("window");
 
 export function SwipeUpDown({
   itemMini,
@@ -29,10 +28,11 @@ export function SwipeUpDown({
   swipeHeight,
 }: SwipeUpDownProps) {
   const ins = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const maxHeight = screenDimensions.height - ins.top - ins.bottom;
-  const posYMini = maxHeight - swipeHeight;
-  const posYFull = ins.top;
+  const posYMini = swipeHeight;
+  const posYFull = maxHeight - tabBarHeight;
 
   const [isMini, setIsMini] = useState(true);
 
@@ -48,7 +48,7 @@ export function SwipeUpDown({
     setIsMini(true);
   };
 
-  const snapPoints = useMemo(() => ["35%", "96%"], []);
+  const snapPoints = useMemo(() => [posYMini, posYFull], []);
   const renderBackdrop = useCallback(
     (props: BottomSheetDefaultBackdropProps) => (
       <BottomSheetBackdrop
@@ -83,15 +83,13 @@ export function SwipeUpDown({
       backdropComponent={renderBackdrop}
       animatedIndex={animatedIndex}
     >
-      <BottomSheetScrollView>
-        <Animated.View
-          style={[styles.itemMiniWrapper, itemMiniStyle]}
-          pointerEvents={isMini ? "auto" : "none"}
-        >
-          {itemMini}
-        </Animated.View>
-        <View>{itemFull}</View>
-      </BottomSheetScrollView>
+      <Animated.View
+        style={[styles.itemMiniWrapper, itemMiniStyle]}
+        pointerEvents={isMini ? "auto" : "none"}
+      >
+        {itemMini}
+      </Animated.View>
+      {itemFull}
     </BottomSheet>
   );
 }
@@ -101,5 +99,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 100,
     width: "100%",
+    backgroundColor: color.white,
   },
 });
