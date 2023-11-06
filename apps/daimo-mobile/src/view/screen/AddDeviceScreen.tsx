@@ -1,4 +1,10 @@
-import { OpStatus, assert } from "@daimo/common";
+import {
+  OpStatus,
+  assert,
+  SlotType,
+  findUnusedSlot,
+  getSlotLabel,
+} from "@daimo/common";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -12,7 +18,6 @@ import { Hex } from "viem";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { parseAddDeviceString } from "../../logic/key";
-import { findUnusedSlot, keySlotToLabel } from "../../logic/keySlot";
 import { Account } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -27,6 +32,7 @@ import {
   TextError,
   TextH2,
   TextLight,
+  TextPara,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -39,7 +45,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   const [newKey, setNewKey] = useState<Hex>();
   const nextSlot = findUnusedSlot(
     account.accountKeys.map((k) => k.slot),
-    "Device"
+    SlotType.Phone
   );
   const [barCodeStatus, setBarCodeStatus] = useState<
     "idle" | "error" | "scanned"
@@ -125,7 +131,11 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Add Device" onBack={goBack} />
-      <Spacer h={16} />
+      <Spacer h={32} />
+      <TextPara>
+        Link a new device to your account by scanning its QR code during setup.
+      </TextPara>
+      <Spacer h={32} />
       {barCodeStatus === "idle" && (
         <Scanner handleBarCodeScanned={handleBarCodeScanned} />
       )}
@@ -138,7 +148,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
         <>
           <TextCenter>
             <TextH2>
-              Scanned <TextBold>{keySlotToLabel(nextSlot)}</TextBold>
+              Scanned <TextBold>{getSlotLabel(nextSlot)}</TextBold>
             </TextH2>
           </TextCenter>
           <Spacer h={32} />

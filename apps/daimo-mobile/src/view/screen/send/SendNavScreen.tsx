@@ -22,7 +22,7 @@ export function SendNavScreen({ route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send funds to" onBack={goBack} />
+        <ScreenHeader title="Send" onBack={goBack} />
         <Spacer h={8} />
         <SendNav {...{ sendNote }} />
       </View>

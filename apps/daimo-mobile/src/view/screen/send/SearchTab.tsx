@@ -1,16 +1,16 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import { useCallback, useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
   View,
-  Platform,
 } from "react-native";
 
 import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
-import useKeyboardHeight from "../../../vendor/useKeyboardHeight";
+import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
@@ -28,7 +28,13 @@ export function SearchTab() {
   return (
     <>
       <View style={{ flexGrow: 0 }}>
-        <InputBig autoFocus icon="search" value={prefix} onChange={setPrefix} />
+        <InputBig
+          autoFocus
+          icon="search"
+          placeholder="Search user, ENS, or address..."
+          value={prefix}
+          onChange={setPrefix}
+        />
       </View>
       <Spacer h={24} />
       <SearchResults prefix={prefix} />
@@ -74,7 +80,9 @@ function SearchResultsScroll({
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
-      {res.recipients.length === 0 && prefix !== "" && <NoSearchResults />}
+      {res.status === "success" &&
+        res.recipients.length === 0 &&
+        prefix !== "" && <NoSearchResults />}
       <Spacer h={32} />
       {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>

@@ -11,8 +11,8 @@
         "simulator": true
       },
       "env": {
-        "DAIMO_DOMAIN": "daimo.xyz",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz",
+        "DAIMO_DOMAIN": "daimo.com",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
         "DAIMO_APP_VARIANT": "sim"
       }
     },
@@ -27,8 +27,8 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "DAIMO_DOMAIN": "daimo.xyz",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz",
+        "DAIMO_DOMAIN": "daimo.com",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
         "DAIMO_APP_VARIANT": "dev"
       }
     },
@@ -38,8 +38,8 @@
       "env": {
         "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
         "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
-        "DAIMO_DOMAIN": "daimo.xyz",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.xyz",
+        "DAIMO_DOMAIN": "daimo.com",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
         "DAIMO_APP_VARIANT": "prod"
       }
     }

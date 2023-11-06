@@ -7,6 +7,8 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
+import { setNetworkState } from "../sync/networkState";
+
 const apiUrlTestnet =
   process.env.DAIMO_APP_API_URL_TESTNET || "http://localhost:3000";
 const apiUrlTestnetWithChain = `${apiUrlTestnet}/chain/84531`;
@@ -51,13 +53,19 @@ function getOpts(daimoChain: DaimoChain) {
 
           init = init ?? {};
           init.headers = (init.headers ?? {}) as Record<string, string>;
-          init.headers[
-            "x-daimo-platform"
-          ] = `${Platform.OS} ${Platform.Version}`;
-          const v = `${nativeApplicationVersion} #${nativeBuildVersion}`;
-          init.headers["x-daimo-version"] = v;
 
-          return fetch(input, init);
+          const platform = `${Platform.OS} ${Platform.Version}`;
+          const version = `${nativeApplicationVersion} #${nativeBuildVersion}`;
+          init.headers["x-daimo-platform"] = platform;
+          init.headers["x-daimo-version"] = version;
+
+          return fetch(input, init).then((res) => {
+            if (res.ok) {
+              // When a request succeeds, mark us online immediately.
+              setNetworkState("online");
+            }
+            return res;
+          });
         },
       }),
     ],

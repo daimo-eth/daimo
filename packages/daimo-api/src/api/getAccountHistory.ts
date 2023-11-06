@@ -1,7 +1,9 @@
+import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   ChainGasConstants,
   EAccount,
   KeyData,
+  RecommendedExchange,
   TransferOpEvent,
   assert,
   hasAccountName,
@@ -24,6 +26,7 @@ export interface AccountHistoryResult {
   lastBalance: `${bigint}`;
 
   chainGasConstants: ChainGasConstants;
+  recommendedExchanges: RecommendedExchange[];
 
   transferLogs: TransferOpEvent[];
   namedAccounts: EAccount[];
@@ -92,6 +95,8 @@ export async function getAccountHistory(
 
   const chainGasConstants = await paymaster.calculateChainGasConstants();
 
+  const recommendedExchanges = fetchRecommendedExchanges(address);
+
   return {
     address,
     sinceBlockNum,
@@ -102,9 +107,27 @@ export async function getAccountHistory(
     lastBalance: `${lastBalance}`,
 
     chainGasConstants,
+    recommendedExchanges,
 
     transferLogs,
     namedAccounts,
     accountKeys,
   };
+}
+
+function fetchRecommendedExchanges(addr: Address): RecommendedExchange[] {
+  const cbUrl = generateOnRampURL({
+    appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
+    destinationWallets: [
+      {
+        address: addr,
+        blockchains: ["base"],
+        assets: ["USDC"],
+        supportedNetworks: ["base"],
+      },
+    ],
+    handlingRequestedUrls: true,
+    defaultExperience: "send",
+  });
+  return [{ cta: "Deposit from Coinbase", url: cbUrl }];
 }

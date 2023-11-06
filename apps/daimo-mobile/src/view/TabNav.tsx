@@ -13,13 +13,14 @@ import { useEffect, useState } from "react";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
+import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
-import OnboardingScreen from "./screen/OnboardingScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import NoteScreen from "./screen/link/NoteScreen";
+import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
@@ -103,7 +104,7 @@ function getTabOptions(
     case "DepositTab":
       return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
     case "ReceiveTab":
-      return { title: "Receive", tabBarIcon: getIcon("download"), ...opts };
+      return { title: "Request", tabBarIcon: getIcon("download"), ...opts };
     case "HomeTab":
       return { title: "Home", tabBarIcon: getIcon("home"), ...opts };
     case "SendTab":
@@ -185,6 +186,7 @@ function SettingsTab() {
     <SettingsStack.Navigator screenOptions={noHeaders}>
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
       <SettingsStack.Screen name="AddDevice" component={AddDeviceScreen} />
+      <SettingsStack.Screen name="AddPasskey" component={AddPasskeyScreen} />
       <SettingsStack.Screen name="Device" component={DeviceScreen} />
     </SettingsStack.Navigator>
   );

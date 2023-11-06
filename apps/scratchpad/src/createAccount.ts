@@ -64,7 +64,7 @@ export async function createAccount() {
     const clientDataJSON = JSON.stringify({
       type: "webauthn.get",
       challenge: challengeB64URL,
-      origin: "daimo.xyz",
+      origin: "daimo.com",
     });
 
     // const clientDataHash = new Uint8Array(

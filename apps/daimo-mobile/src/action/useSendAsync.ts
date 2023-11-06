@@ -14,6 +14,7 @@ import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { env } from "../logic/env";
 import { getWrappedRawSigner } from "../logic/key";
 import { NamedError } from "../logic/log";
+import { getWrappedPasskeySigner } from "../logic/passkey";
 import { Account, getAccountManager, useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
@@ -28,32 +29,41 @@ export function useSendAsync({
   sendFn,
   pendingOp,
   accountTransform,
+  passkeyAccount,
 }: {
   dollarsToSend: number;
   sendFn: SendOpFn;
   pendingOp?: OpEvent;
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
+  passkeyAccount?: Account;
 }): ActHandle {
   const [as, setAS] = useActStatus();
 
-  const [account] = useAccount();
-  if (!account) throw new Error("No account");
+  const [deviceAccount] = useAccount();
+  const account = passkeyAccount || deviceAccount;
 
-  const keySlot = account.accountKeys.find(
-    (keyData) => keyData.pubKey === account.enclavePubKey
-  )?.slot;
+  const keySlot = account
+    ? account.accountKeys.find(
+        (keyData) => keyData.pubKey === account.enclavePubKey
+      )?.slot
+    : undefined;
 
-  const feeDollars = account.chainGasConstants.estimatedFee;
+  const feeDollars = account?.chainGasConstants.estimatedFee || 0;
   const cost = { feeDollars, totalDollars: dollarsToSend + feeDollars };
 
   const exec = useCallback(async () => {
+    assert(
+      passkeyAccount !== undefined || keySlot != null,
+      "No key slot or passkey"
+    );
+    assert(account != null, "No account");
+
     const handle = await sendAsync(
       setAS,
-      account.enclaveKeyName,
-      account.address,
+      account,
       keySlot,
-      account.homeChainId,
+      !!passkeyAccount,
       sendFn
     );
 
@@ -69,7 +79,7 @@ export function useSendAsync({
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
     }
-  }, [account.enclaveKeyName, keySlot, sendFn]);
+  }, [account?.enclaveKeyName, keySlot, sendFn]);
 
   return { ...as, exec, cost };
 }
@@ -102,24 +112,48 @@ export function useWarmCache(
 ) {
   useEffect(() => {
     if (!enclaveKeyName || !address || !keySlot || !chainId) return;
-    loadOpSender(enclaveKeyName, address, keySlot, chainId);
+    loadOpSender({
+      enclaveKeyName,
+      address,
+      keySlot,
+      usePasskey: false,
+      chainId,
+    });
   }, [enclaveKeyName, address, keySlot, chainId]);
 }
-const accountCache: Map<[Address, number], Promise<DaimoOpSender>> = new Map();
 
-function loadOpSender(
-  enclaveKeyName: string,
-  address: Address,
-  keySlot: number,
-  chainId: number
-) {
+const accountCache: Map<
+  [Address, number | undefined],
+  Promise<DaimoOpSender>
+> = new Map();
+
+function loadOpSender({
+  enclaveKeyName,
+  address,
+  keySlot,
+  usePasskey,
+  chainId,
+}: {
+  enclaveKeyName: string;
+  address: Address;
+  keySlot: number | undefined;
+  usePasskey: boolean;
+  chainId: number;
+}) {
+  assert(
+    (keySlot == null) === usePasskey,
+    "Key slot and passkey are mutually exclusive"
+  );
+
   let promise = accountCache.get([address, keySlot]);
   if (promise) return promise;
 
   const daimoChain = daimoChainFromId(chainId);
   const rpcFunc = env(daimoChain).rpcFunc;
 
-  const signer = getWrappedRawSigner(enclaveKeyName, keySlot, daimoChain);
+  const signer = usePasskey
+    ? getWrappedPasskeySigner(daimoChain)
+    : getWrappedRawSigner(enclaveKeyName, keySlot!, daimoChain);
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     return rpcFunc.sendUserOp.mutate({ op });
@@ -148,21 +182,25 @@ function loadOpSender(
 
 async function sendAsync(
   setAS: SetActStatus,
-  enclaveKeyName: string,
-  address: Address,
+  account: Account,
   keySlot: number | undefined,
-  chainId: number,
+  usePasskey: boolean,
   sendFn: SendOpFn
 ) {
   try {
-    if (keySlot === undefined) throw new Error("No key slot");
+    if (keySlot === undefined && !usePasskey)
+      throw new Error("No key slot or passkey");
+
+    const { enclaveKeyName, address, homeChainId } = account;
+
     setAS("loading", "Loading account...");
-    const opSender = await loadOpSender(
+    const opSender = await loadOpSender({
       enclaveKeyName,
       address,
       keySlot,
-      chainId
-    );
+      usePasskey,
+      chainId: homeChainId,
+    });
 
     setAS("loading", "Signing...");
     const handle = await sendFn(opSender);
@@ -170,12 +208,15 @@ async function sendAsync(
 
     return handle;
   } catch (e: any) {
-    console.error(e);
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");
     } else if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
       setAS("error", e.message);
-    } else setAS("error", "Error sending transaction");
+    } else if (e.message === "Network request failed") {
+      setAS("error", "Request failed. Offline?");
+    } else {
+      setAS("error", "Error sending transaction");
+    }
     throw e;
   }
 }

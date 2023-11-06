@@ -106,6 +106,15 @@ test("DaimoLink from daimo:// direct app link", () => {
   });
 });
 
+test("DaimoLink from https://daimo.xyz legacy URL", () => {
+  const url =
+    "https://daimo.xyz/link/account/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
+  assert.deepStrictEqual(parseDaimoLink(url), {
+    type: "account",
+    account: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+  });
+});
+
 test("DaimoLink normalization", () => {
   for (const [url, link] of testCases) {
     // Ensure addresses always end up checksummed

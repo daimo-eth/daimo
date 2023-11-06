@@ -51,7 +51,7 @@ export default function SendScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
         <ScreenHeader
-          title="Send funds to"
+          title="Send to"
           onBack={goBack}
           onExit={recipient && goHome}
         />
@@ -91,10 +91,11 @@ function SendLoadRecipientInner({
     const { data } = status;
     switch (data.link.type) {
       case "account": {
-        const { account } = data as DaimoAccountStatus;
+        const { account: recipientEAcc } = data as DaimoAccountStatus;
+        const recipient = addLastSendTime(account, recipientEAcc);
         nav.navigate("SendTab", {
           screen: "SendTransfer",
-          params: { recipient: account },
+          params: { recipient },
         });
         break;
       }
@@ -231,6 +232,8 @@ function RecipientDisplay({
 }) {
   // Show who we're sending to
   const disp = getAccountName(recipient);
+  const { originalMatch } = recipient;
+  const showOrig = originalMatch != null && originalMatch !== disp;
 
   return (
     <View style={styles.recipientDisp}>
@@ -239,6 +242,8 @@ function RecipientDisplay({
       {isRequest && <TextLight>Requested by</TextLight>}
       {isRequest && <Spacer h={8} />}
       <TextH3>{disp}</TextH3>
+      {showOrig && <Spacer h={8} />}
+      {showOrig && <TextLight>{originalMatch}</TextLight>}
     </View>
   );
 }

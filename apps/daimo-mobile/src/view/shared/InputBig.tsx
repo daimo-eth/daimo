@@ -75,7 +75,7 @@ export function InputBig({
         />
         {icon && (
           <View style={styles.inputIcon}>
-            <Octicons name={icon} size={16} color={color.primary} />
+            <Octicons name={icon} size={18} color={color.primary} />
           </View>
         )}
       </View>
@@ -85,6 +85,7 @@ export function InputBig({
 
 const inputRow = {
   flexGrow: 1,
+  height: 48,
   backgroundColor: color.ivoryDark,
   borderRadius: 99,
   borderColor: color.grayLight,
@@ -95,6 +96,10 @@ const inputRow = {
 
 const input = {
   ...ss.text.body,
+  position: "absolute",
+  top: 14,
+  left: 16,
+  right: 40,
   paddingTop: 0,
   paddingVertical: 0,
 } as const;
@@ -109,6 +114,7 @@ const styles = StyleSheet.create({
   inputCentered: {
     ...input,
     textAlign: "center",
+    left: 40,
   },
   inputIcon: {
     position: "absolute",

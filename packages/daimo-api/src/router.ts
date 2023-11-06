@@ -1,4 +1,4 @@
-import { EAccount, zAddress, zHex, zUserOpHex } from "@daimo/common";
+import { zAddress, zHex, zUserOpHex } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
@@ -16,7 +16,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
-import { ViemClient } from "./env";
+import { daimoInviteCodes, ViemClient } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -58,7 +58,7 @@ export function createRouter(
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
         const { prefix } = opts.input;
-        const ret: EAccount[] = await search(prefix, vc, nameReg);
+        const ret = await search(prefix, vc, nameReg);
         return ret;
       }),
 
@@ -193,6 +193,13 @@ export function createRouter(
       .mutation(async (opts) => {
         const recipient = getAddress(opts.input.recipient);
         return faucet.request(recipient);
+      }),
+
+    verifyInviteCode: publicProcedure
+      .input(z.object({ inviteCode: z.string() }))
+      .query(async (opts) => {
+        const { inviteCode } = opts.input;
+        return daimoInviteCodes.has(inviteCode);
       }),
   });
 }

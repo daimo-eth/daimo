@@ -25,7 +25,12 @@ export default {
     supportsTablet: false,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
     buildNumber: `${BUILD_NUM}`,
-    associatedDomains: ["applinks:daimo.xyz", "webcredentials:daimo.xyz"],
+    associatedDomains: [
+      "applinks:daimo.xyz",
+      "applinks:daimo.com",
+      "webcredentials:daimo.xyz",
+      "webcredentials:daimo.com",
+    ],
     config: {
       usesNonExemptEncryption: false,
     },
@@ -38,6 +43,18 @@ export default {
       ? "./google-services-dev.json"
       : "./google-services.json",
     intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: "daimo.com",
+            pathPrefix: "/link",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
       {
         action: "VIEW",
         autoVerify: true,

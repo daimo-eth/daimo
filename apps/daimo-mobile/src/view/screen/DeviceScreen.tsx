@@ -4,6 +4,7 @@ import {
   dollarsToAmount,
   guessTimestampFromNum,
   timeString,
+  getSlotLabel,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
@@ -18,7 +19,6 @@ import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { deleteEnclaveKey } from "../../logic/enclave";
-import { keySlotToLabel } from "../../logic/keySlot";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
@@ -44,7 +44,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const { pubKey: devicePubkey } = route.params;
   const device = account?.accountKeys?.find((k) => k.pubKey === devicePubkey);
 
-  const deviceName = device ? keySlotToLabel(device.slot) : "Deleted device";
+  const deviceName = device ? getSlotLabel(device.slot) : "Deleted device";
 
   useEffect(() => {
     navigation.setOptions({ title: deviceName });
@@ -84,15 +84,12 @@ export function DeviceScreen({ route, navigation }: Props) {
   });
 
   const removeDevice = useCallback(() => {
-    if (!account) return;
-    const { enclaveKeyName, enclavePubKey } = account;
-
     Alert.alert(
       "Remove " + deviceName + "\n",
       `Are you sure you want to remove this device?`,
       [
         {
-          text: "Remove Device",
+          text: `Remove ${deviceName}`,
           onPress: removeKey,
         },
         {
@@ -105,18 +102,25 @@ export function DeviceScreen({ route, navigation }: Props) {
     async function removeKey() {
       console.log(`[DEVICE] Removing device ${devicePubkey}`);
       exec();
+    }
+  }, []);
 
-      // TODO: wait for sync
+  useEffect(() => {
+    (async () => {
+      if (status !== "success" || !account) return;
+      const { enclaveKeyName, enclavePubKey } = account;
 
       if (devicePubkey === enclavePubKey) {
-        console.log(`[USER] deleting account; deleting key ${enclaveKeyName}`);
+        console.log(
+          `[USER] deleted device key onchain; deleting locally ${enclaveKeyName}`
+        );
         await deleteEnclaveKey(enclaveKeyName);
 
         setAccount(null);
         nav.navigate("HomeTab", { screen: "Home" });
       }
-    }
-  }, []);
+    })();
+  }, [status]);
 
   if (!account || !device) return null;
 
@@ -174,8 +178,6 @@ export function DeviceScreen({ route, navigation }: Props) {
 
       <View style={ss.container.padH16}>
         <TextH3>{deviceName}</TextH3>
-        <Spacer h={8} />
-        <TextH3 color={color.grayMid}>Mobile</TextH3>
         <Spacer h={8} />
         <TextBody color={color.grayMid}>Added {timeString(addedAtS)}</TextBody>
       </View>

@@ -1,7 +1,8 @@
 export type CreateRequest = {
   domain: string;
   challengeB64: string;
-  accountName: string;
+  passkeyName: string;
+  passkeyDisplayTitle: string;
 };
 
 export type CreateResult = {
@@ -15,7 +16,7 @@ export type SignRequest = {
 };
 
 export type SignResult = {
-  accountName: string;
+  passkeyName: string;
   rawClientDataJSONB64: string;
   rawAuthenticatorDataB64: string;
   signatureB64: string;
@@ -44,8 +45,8 @@ export function toAndroidCreateRequest(
     },
     user: {
       id: toBase64URL(userIDB64),
-      name: request.accountName,
-      displayName: request.accountName,
+      name: request.passkeyDisplayTitle,
+      displayName: request.passkeyDisplayTitle,
     },
     challenge: toBase64URL(request.challengeB64),
     pubKeyCredParams: [

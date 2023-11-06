@@ -1,4 +1,9 @@
-import { KeyData, guessTimestampFromNum, timeAgo } from "@daimo/common";
+import {
+  KeyData,
+  guessTimestampFromNum,
+  timeAgo,
+  getSlotLabel,
+} from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import * as Notifications from "expo-notifications";
@@ -16,7 +21,6 @@ import {
 import { getDebugLog } from "../../debugLog";
 import { getHardwareSec } from "../../logic/enclave";
 import { env } from "../../logic/env";
-import { keySlotToLabel } from "../../logic/keySlot";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import {
@@ -104,6 +108,8 @@ function AccountSection({ account }: { account: Account }) {
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
+  const createBackup = () =>
+    nav.navigate("SettingsTab", { screen: "AddPasskey" });
 
   const currentKeyRows = useCallback(() => {
     return account.accountKeys.map((keyData) => (
@@ -135,7 +141,7 @@ function DevicesSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>My devices</TextLight>
+        <TextLight>My devices &amp; backups</TextLight>
       </View>
       <Spacer h={8} />
       <View
@@ -143,7 +149,9 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={16} />
-      <ButtonMed type="subtle" title="Add Device" onPress={addDevice} />
+      <ButtonMed type="primary" title="CREATE BACKUP" onPress={createBackup} />
+      <Spacer h={16} />
+      <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
     </View>
   );
 }
@@ -172,7 +180,7 @@ function DeviceRow({
 
   const addAtS = guessTimestampFromNum(keyData.addedAt, chain);
 
-  const dispDevice = keySlotToLabel(keyData.slot);
+  const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
     ? "Pending"
     : "Added " + timeAgo(addAtS, nowS, true);
@@ -187,13 +195,12 @@ function DeviceRow({
       >
         <View style={styles.row}>
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-            <TextBody color={textCol}>{dispDevice}</TextBody>
+            <TextBody color={textCol}>{dispName}</TextBody>
             {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
             {isCurrentDevice && !pendingRemoval && <Badge>THIS DEVICE</Badge>}
             {pendingRemoval && <PendingDot />}
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={textCol}>Mobile</TextMeta>
             <TextMeta color={color.gray3}>{dispTime}</TextMeta>
           </View>
         </View>
@@ -203,7 +210,7 @@ function DeviceRow({
 }
 
 function PendingDeviceRow({ slot }: { slot: number }) {
-  const dispDevice = keySlotToLabel(slot);
+  const dispName = getSlotLabel(slot);
 
   return (
     <View style={styles.rowBorder}>
@@ -214,12 +221,11 @@ function PendingDeviceRow({ slot }: { slot: number }) {
       >
         <View style={styles.row}>
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-            <TextBody color={color.gray3}>{dispDevice}</TextBody>
+            <TextBody color={color.gray3}>{dispName}</TextBody>
             <Spacer w={12} />
             <PendingDot />
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={color.gray3}>Mobile</TextMeta>
             <TextMeta color={color.gray3}>Pending</TextMeta>
           </View>
         </View>
@@ -246,12 +252,11 @@ function DetailsSection({ account }: { account: Account }) {
   };
 
   const daimoChain = daimoChainFromId(account.homeChainId);
+  const envObj = env(daimoChain);
   const envKV: Record<string, string> = {
-    Platform: `${Platform.OS} ${Platform.Version}`,
-    Version: `${env(daimoChain).nativeApplicationVersion} #${
-      env(daimoChain).nativeBuildVersion
-    }`,
-    Commit: `${env(daimoChain).gitHash} ${env(daimoChain).buildProfile}`,
+    Platform: `${Platform.OS} ${Platform.Version} ${envObj.deviceType}`,
+    Version: `${envObj.nativeApplicationVersion} #${envObj.nativeBuildVersion}`,
+    Commit: `${envObj.gitHash} ${envObj.buildProfile}`,
     Notifications: account.pushToken ? "enabled" : "disabled",
   };
   if (sec) {
@@ -359,7 +364,7 @@ const styles = StyleSheet.create({
   },
   row: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

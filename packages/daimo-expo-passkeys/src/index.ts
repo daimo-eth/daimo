@@ -1,4 +1,6 @@
-import { decode as atob, encode as btoa } from "base-64";
+import "text-encoding-polyfill";
+
+import { base64 } from "@scure/base";
 import { Platform } from "react-native";
 
 import ExpoPasskeysModule from "./ExpoPasskeysModule";
@@ -20,20 +22,23 @@ export { CreateRequest, CreateResult, SignRequest, SignResult };
  *
  * @param request.domain The domain of the existing passkey.
  * @param request.challengeB64 The challenge to use for creation request.
- * @param request.accountName The account name to attach the passkey to.
+ * @param request.passkeyName The name to attach the passkey to.
+ * @param request.passkeyDisplayTitle The passkey name to display to user.
  * @return result.rawClientDataJSONB64 The raw client data JSON.
  * @return result.rawAttestationObjectB64 The raw attestation object.
  */
 export async function createPasskey(
   request: CreateRequest
 ): Promise<CreateResult> {
-  const userIDB64 = btoa(request.accountName);
+  const userIDB64 = base64.encode(
+    new TextEncoder().encode(request.passkeyName)
+  );
 
   switch (Platform.OS) {
     case "ios": {
       const ret = await ExpoPasskeysModule.createPasskey(
         request.domain,
-        request.accountName,
+        request.passkeyDisplayTitle,
         userIDB64,
         request.challengeB64
       );
@@ -65,7 +70,7 @@ export async function createPasskey(
  *
  * @param request.domain The domain to create the passkey for.
  * @param request.challengeB64 The challenge to request signature for.
- * @return result.accountName The account name corresponding to the passkey used.
+ * @return result.passkeyName The account name corresponding to the passkey used.
  * @return result.rawClientDataJSONB64 The raw client data JSON.
  * @return result.rawAuthenticatorDataB64 The raw authenticator data.
  * @return result.signatureB64 The signature.
@@ -79,8 +84,11 @@ export async function signWithPasskey(
         request.domain,
         request.challengeB64
       );
+      const userIDstr = new TextDecoder("utf-8").decode(
+        base64.decode(ret.userID)
+      );
       return {
-        accountName: atob(ret.userID),
+        passkeyName: userIDstr,
         rawClientDataJSONB64: ret.rawClientDataJSON,
         rawAuthenticatorDataB64: ret.rawAuthenticatorData,
         signatureB64: ret.signature,
@@ -91,8 +99,11 @@ export async function signWithPasskey(
       const ret = JSON.parse(
         await ExpoPasskeysModule.signWithPasskey(requestJSON)
       );
+      const userIDstr = new TextDecoder("utf-8").decode(
+        base64.decode(toBase64(ret.response.userHandle))
+      );
       return {
-        accountName: atob(toBase64(ret.response.userHandle)),
+        passkeyName: userIDstr,
         rawClientDataJSONB64: toBase64(ret.response.clientDataJSON),
         rawAuthenticatorDataB64: toBase64(ret.response.authenticatorData),
         signatureB64: toBase64(ret.response.signature),

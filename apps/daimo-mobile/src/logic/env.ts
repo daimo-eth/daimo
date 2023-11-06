@@ -1,9 +1,10 @@
 import { DaimoChain, getChainConfig } from "@daimo/contract";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
+import { DeviceType, deviceType } from "expo-device";
 
 import { getRpcFunc, getRpcHook } from "./trpc";
 
-const passkeyDomain = process.env.DAIMO_PASSKEY_DOMAIN || "daimo.xyz";
+const passkeyDomain = process.env.DAIMO_PASSKEY_DOMAIN || "daimo.com";
 
 const buildEnv = {
   buildProfile: process.env.EAS_BUILD_PROFILE || "local",
@@ -15,10 +16,21 @@ const buildEnv = {
 
 console.log(`[APP] build environment ${JSON.stringify(buildEnv, null, 2)}`);
 
+function getDeviceType(): "computer" | "phone" {
+  switch (deviceType) {
+    case DeviceType.DESKTOP:
+      return "computer";
+    case DeviceType.PHONE:
+    case DeviceType.TABLET:
+    default:
+      return "phone";
+  }
+}
 export function env(daimoChain: DaimoChain) {
   const chainConfig = getChainConfig(daimoChain);
   return {
     ...buildEnv,
+    deviceType: getDeviceType(),
     chainConfig,
     rpcFunc: getRpcFunc(daimoChain),
     rpcHook: getRpcHook(daimoChain),

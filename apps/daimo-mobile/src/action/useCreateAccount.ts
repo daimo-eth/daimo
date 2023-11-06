@@ -1,9 +1,10 @@
 import { assert } from "@daimo/common";
-import { DaimoChain, daimoPaymasterAddress } from "@daimo/contract";
+import { DaimoChain } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
 import { useLoadOrCreateEnclaveKey } from "./key";
+import { createEmptyAccount } from "../logic/account";
 import { env } from "../logic/env";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
@@ -53,37 +54,17 @@ export function useCreateAccount(
     const { name } = result.variables;
     const { address } = result.data;
     console.log(`[CHAIN] created new account ${name} at ${address}`);
-    setAccount({
-      enclaveKeyName,
-      enclavePubKey: pubKeyHex,
-      name,
-      address,
-
-      homeChainId: env(daimoChain).chainConfig.chainL2.id,
-      homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
-
-      lastBalance: BigInt(0),
-      lastBlockTimestamp: 0,
-      lastBlock: 0,
-      lastFinalizedBlock: 0,
-
-      namedAccounts: [],
-      recentTransfers: [],
-      trackedRequests: [],
-      pendingNotes: [],
-      accountKeys: [],
-      pendingKeyRotation: [],
-
-      chainGasConstants: {
-        maxPriorityFeePerGas: "0",
-        maxFeePerGas: "0",
-        estimatedFee: 0,
-        paymasterAddress: daimoPaymasterAddress,
-        preVerificationGas: "0",
-      },
-
-      pushToken: null,
-    });
+    setAccount(
+      createEmptyAccount(
+        {
+          enclaveKeyName,
+          enclavePubKey: pubKeyHex,
+          name,
+          address,
+        },
+        daimoChain
+      )
+    );
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
 

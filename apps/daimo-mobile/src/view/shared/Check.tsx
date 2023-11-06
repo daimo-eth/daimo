@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { StyleSheet, TouchableHighlight, View } from "react-native";
+import React, { ReactNode, useCallback } from "react";
+import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 
 import { color } from "./style";
 import { TextBody } from "./text";
@@ -13,37 +13,22 @@ export function CheckLabel({
   setValue: (val: boolean) => void;
   children: ReactNode;
 }) {
-  return (
-    <View style={styles.checkLabel}>
-      <Check {...{ value, setValue }} />
-      <TextBody>{children}</TextBody>
-    </View>
-  );
-}
+  const toggle = useCallback(() => setValue(!value), [value, setValue]);
 
-function Check({
-  value,
-  setValue,
-}: {
-  value: boolean;
-  setValue: (val: boolean) => void;
-}) {
   return (
-    <TouchableHighlight
-      style={value ? styles.checked : styles.unchecked}
-      onPress={() => setValue(!value)}
-      underlayColor="transparent"
-      hitSlop={12}
-    >
-      <View />
-    </TouchableHighlight>
+    <TouchableWithoutFeedback onPress={toggle} hitSlop={12}>
+      <View style={styles.checkLabel}>
+        <View style={value ? styles.checked : styles.unchecked} />
+        <TextBody>{children}</TextBody>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const checkbox = {
-  width: 16,
-  height: 16,
-  borderRadius: 4,
+  width: 18,
+  height: 18,
+  borderRadius: 6,
   borderWidth: 2,
   borderColor: color.primary,
 };

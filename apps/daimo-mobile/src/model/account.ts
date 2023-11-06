@@ -8,6 +8,7 @@ import {
   DaimoLinkNote,
   TrackedNote,
   KeyRotationOpEvent,
+  RecommendedExchange,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
@@ -66,6 +67,9 @@ export type Account = {
 
   /** Local device push token, if permission was granted. */
   pushToken: string | null;
+
+  /** List of URLs for exchanges to show on deposit screen */
+  recommendedExchanges: RecommendedExchange[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -127,6 +131,34 @@ interface AccountV9 extends StoredModel {
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   pendingKeyRotation: KeyRotationOpEvent[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+}
+
+interface AccountV10 extends StoredModel {
+  storageVersion: 10;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
+  pendingNotes: DaimoLinkNote[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
+  recommendedExchanges: RecommendedExchange[];
 
   chainGasConstants: ChainGasConstants;
 
@@ -237,15 +269,44 @@ export function parseAccount(accountJSON?: string): Account | null {
       accountKeys: a.accountKeys,
       pendingNotes: a.pendingNotes || [],
       pendingKeyRotation: [],
+      recommendedExchanges: [],
 
       chainGasConstants: { ...a.chainGasConstants, preVerificationGas: "0" },
 
       pushToken: a.pushToken,
     };
+  } else if (model.storageVersion === 9) {
+    const a = model as AccountV9;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingNotes: a.pendingNotes,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: [],
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+    };
   }
 
-  assert(model.storageVersion === 9);
-  const a = model as AccountV9;
+  assert(model.storageVersion === 10);
+  const a = model as AccountV10;
 
   const ret = {
     enclaveKeyName: a.enclaveKeyName,
@@ -267,6 +328,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     accountKeys: a.accountKeys,
     pendingNotes: a.pendingNotes,
     pendingKeyRotation: a.pendingKeyRotation,
+    recommendedExchanges: a.recommendedExchanges,
 
     chainGasConstants: a.chainGasConstants,
 
@@ -279,8 +341,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV9 = {
-    storageVersion: 9,
+  const model: AccountV10 = {
+    storageVersion: 10,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -301,6 +363,7 @@ export function serializeAccount(account: Account | null): string {
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
     pendingKeyRotation: account.pendingKeyRotation,
+    recommendedExchanges: account.recommendedExchanges,
 
     chainGasConstants: account.chainGasConstants,
 

@@ -1,4 +1,4 @@
-import { EAccount } from "@daimo/common";
+import { EAccount, EAccountSearchResult } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
@@ -7,13 +7,14 @@ import { Account } from "../model/account";
 import { getCachedEAccount } from "../view/shared/addr";
 
 export interface Recipient extends EAccount {
+  originalMatch?: string;
   lastSendTime?: number;
 }
 
 /** Adds lastSendTime to an EAccount using account's recentTransfers */
 export function addLastSendTime(
   account: Account,
-  recipientEAcc: EAccount
+  recipientEAcc: EAccount | EAccountSearchResult
 ): Recipient {
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   const lastSendTime = transfersNewToOld.find(
@@ -54,7 +55,7 @@ export function useRecipientSearch(account: Account, prefix: string) {
     if (prefix === "") {
       recipients.push(r); // Show ALL recent recipients
     } else if (r.name && r.name.startsWith(prefix)) {
-      recipients.push(r); // Show matching-name recent recipients
+      recipients.push(r); // Show prefix-matching-name recent recipients
     } else if (prefix.length >= 3 && r.name && r.name.includes(prefix)) {
       looseMatchRecents.push(r); // Show matching-name recent recipients
     }

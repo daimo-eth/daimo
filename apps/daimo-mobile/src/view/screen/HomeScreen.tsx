@@ -8,7 +8,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
@@ -17,6 +16,7 @@ import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
+import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { useNav } from "../shared/nav";
@@ -30,8 +30,6 @@ export default function HomeScreen() {
 }
 
 function HomeScreenInner({ account }: { account: Account }) {
-  const insets = useSafeAreaInsets();
-
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
@@ -57,14 +55,8 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      {/* We don't use SafeAreaView because it has a bug: 
-      https://github.com/software-mansion/react-native-screens/issues/1276 */}
-      <View
-        style={{
-          ...ss.container.screen,
-          paddingTop: insets.top,
-        }}
-      >
+      <View style={ss.container.screen}>
+        <OfflineHeader />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
         {searchPrefix == null && (
@@ -104,7 +96,7 @@ function AmountAndButtons({ account }: { account: Account }) {
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <IconButton title="Deposit" onPress={goDeposit} />
-        <IconButton title="Receive" onPress={goRequest} />
+        <IconButton title="Request" onPress={goRequest} />
         <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
       </View>
     </View>
@@ -124,7 +116,7 @@ function IconButton({
     switch (title) {
       case "Deposit":
         return "plus";
-      case "Receive":
+      case "Request":
         return "download";
       case "Send":
         return "paper-airplane";

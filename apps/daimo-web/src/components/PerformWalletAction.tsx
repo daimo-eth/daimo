@@ -17,8 +17,9 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
-import { H2 } from "./typography";
+import { PrimaryButton, SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
+import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 type Action = {
   wagmiPrep: {
@@ -27,7 +28,6 @@ type Action = {
     functionName: string;
     args: readonly unknown[];
   };
-  buttonTitle: string;
 };
 
 async function linkStatusToAction(
@@ -49,7 +49,6 @@ async function linkStatusToAction(
           functionName: "transfer" as const,
           args: [recipient.addr, parsedAmount] as const,
         },
-        buttonTitle: "Send via Wallet",
       };
     }
     case "note": {
@@ -66,7 +65,6 @@ async function linkStatusToAction(
           functionName: "claimNote" as const,
           args: [linkStatus.link.ephemeralOwner, signature] as const,
         },
-        buttonTitle: "Claim via Wallet",
       };
     }
     default: {
@@ -79,8 +77,10 @@ async function linkStatusToAction(
 
 export function PerformWalletAction({
   linkStatus,
+  description,
 }: {
   linkStatus: DaimoLinkStatus;
+  description: string;
 }) {
   const { address, isConnected } = useAccount();
   const { chain } = useNetwork();
@@ -125,47 +125,117 @@ export function PerformWalletAction({
     })();
   }, [linkStatus, address]);
 
+  const secondaryTitle = description + " WITH CONNECTED WALLET";
+  const secondaryConnectTitle = description + " WITH ANOTHER WALLET";
+
   return (
     <center>
-      <H2>or</H2>
+      <PrimaryButton
+        onClick={() => {
+          const platform = detectPlatform(navigator.userAgent);
+          if (platform === "other") window.open("/");
+          else {
+            window.open(downloadMetadata[platform].url, "_blank");
+          }
+        }}
+        disabled={isLoading || isSuccess}
+      >
+        GET DAIMO
+      </PrimaryButton>
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>
-          <button
-            disabled={!write || isLoading || isSuccess}
-            onClick={() => write?.()}
-            className="inline-block rounded-lg py-2 px-4 bg-primaryLight text-white font-semibold md:text-xl tracking-wider hover:enabled:scale-105 transition-all"
+          <SecondaryButton
+            disabled={!write || isLoading}
+            onClick={() => {
+              if (isSuccess && data?.hash)
+                window.open(
+                  chain?.blockExplorers!.default.url + "/tx/" + data?.hash,
+                  "_blank"
+                );
+              else write?.();
+            }}
+            buttonType={isSuccess ? "success" : undefined}
           >
             {isLoading
-              ? "Sending"
+              ? "SENDING"
               : isSuccess
-              ? "Successful"
-              : action?.buttonTitle}
-          </button>
+              ? "VIEW ON BASESCAN ↗"
+              : secondaryTitle}
+          </SecondaryButton>
           <div className="h-4" />
         </>
       )}
       {isConnected && humanReadableError !== undefined && (
         <>
-          <p>{humanReadableError}</p>
+          <SecondaryButton disabled buttonType="danger">
+            {humanReadableError.toUpperCase()}
+          </SecondaryButton>
           <div className="h-4" />
         </>
       )}
-      {isSuccess && data?.hash && (
-        <>
-          <a
-            href={chain?.blockExplorers!.default.url + "/tx/" + data?.hash}
-            target="_blank"
-            className="hover:underline"
-          >
-            Block explorer ↗
-          </a>
-          <div className="h-4" />
-        </>
-      )}
-      <div className="flex justify-center">
-        <ConnectButton />
-      </div>
+      <CustomConnectButton title={secondaryConnectTitle} />
     </center>
+  );
+}
+
+function CustomConnectButton({ title }: { title: string }): JSX.Element {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openChainModal,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        // Note: If your app doesn't use authentication, you
+        // can remove all 'authenticationStatus' checks
+        const ready = mounted && authenticationStatus !== "loading";
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
+        return (
+          <div
+            {...(!ready && {
+              "aria-hidden": true,
+              style: {
+                opacity: 0,
+                pointerEvents: "none",
+                userSelect: "none",
+              },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <SecondaryButton onClick={openConnectModal}>
+                    {title}
+                  </SecondaryButton>
+                );
+              }
+
+              if (chain.unsupported) {
+                return (
+                  <SecondaryButton onClick={openChainModal} buttonType="danger">
+                    Wrong network
+                  </SecondaryButton>
+                );
+              }
+
+              return (
+                <p className="tracking-wider text-primaryLight font-semibold">
+                  CONNECTED TO {account.displayName.toUpperCase()}
+                </p>
+              );
+            })()}
+          </div>
+        );
+      }}
+    </ConnectButton.Custom>
   );
 }

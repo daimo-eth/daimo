@@ -35,6 +35,7 @@ export type ParamListReceive = {
 export type ParamListSettings = {
   Settings: undefined;
   AddDevice: undefined;
+  AddPasskey: undefined;
   Device: { pubKey: Hex };
 };
 
