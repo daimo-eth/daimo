@@ -19,7 +19,6 @@ import {
 
 import { PrimaryButton, SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
-import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 type Action = {
   wagmiPrep: {
@@ -131,18 +130,7 @@ export function PerformWalletAction({
 
   return (
     <center>
-      <PrimaryButton
-        onClick={() => {
-          const platform = detectPlatform(navigator.userAgent);
-          if (platform === "other") window.open("/");
-          else {
-            window.open(downloadMetadata[platform].url, "_blank");
-          }
-        }}
-        disabled={isLoading || isSuccess}
-      >
-        GET DAIMO
-      </PrimaryButton>
+      <PrimaryButton disabled={isLoading || isSuccess}>GET DAIMO</PrimaryButton>
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>

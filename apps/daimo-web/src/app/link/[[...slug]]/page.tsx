@@ -11,6 +11,7 @@ import {
 import { Metadata } from "next";
 import Image from "next/image";
 
+import { PrimaryButton } from "../../../components/buttons";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { trpc } from "../../../utils/trpc";
 
@@ -79,7 +80,13 @@ export default async function LinkPage(props: LinkProps) {
             description={description}
           />
         ) : (
-          <h1 className="text-xl font-semibold text-grayMid">{description}</h1>
+          <>
+            <h1 className="text-xl font-semibold text-grayMid">
+              {description}
+            </h1>
+            <div className="h-4" />
+            <PrimaryButton>GET DAIMO</PrimaryButton>
+          </>
         )}
       </center>
     </main>

@@ -1,12 +1,21 @@
+"use client";
+import { detectPlatform, downloadMetadata } from "../utils/platform";
+
 export function PrimaryButton({
-  onClick,
   children,
   disabled,
 }: {
-  onClick: () => void;
   children: React.ReactNode;
   disabled?: boolean;
 }) {
+  const onClick = () => {
+    const platform = detectPlatform(navigator.userAgent);
+    if (platform === "other") window.open("/");
+    else {
+      window.open(downloadMetadata[platform].url, "_blank");
+    }
+  };
+
   return (
     <button
       className="bg-primaryLight tracking-wider text-white font-bold py-5 w-full rounded-md disabled:opacity-50"
