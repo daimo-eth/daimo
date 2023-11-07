@@ -179,8 +179,10 @@ const styles = StyleSheet.create({
   },
   iconButtonWrap: {
     borderRadius: 16,
-    padding: 16,
+    paddingVertical: 16,
     width: 96,
+    flexDirection: "column",
+    alignItems: "center",
   },
   iconButton,
   iconButtonDisabled: {
