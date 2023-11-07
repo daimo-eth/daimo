@@ -17,7 +17,7 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
-import { PrimaryButton, SecondaryButton } from "./buttons";
+import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
 
 type Action = {
@@ -130,7 +130,7 @@ export function PerformWalletAction({
 
   return (
     <center>
-      <PrimaryButton disabled={isLoading || isSuccess} />
+      <PrimaryOpenInAppButton disabled={isLoading || isSuccess} />
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>

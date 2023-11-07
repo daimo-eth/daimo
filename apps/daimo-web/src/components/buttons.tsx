@@ -4,8 +4,8 @@ import { useState } from "react";
 
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
-export function PrimaryButton({ disabled }: { disabled?: boolean }) {
-  const [openInApp, SetOpenInApp] = useState(false);
+export function PrimaryOpenInAppButton({ disabled }: { disabled?: boolean }) {
+  const [openInApp, setOpenInApp] = useState(false);
 
   function getCurrentInAppUrl() {
     const url = window.location.href;
@@ -22,7 +22,7 @@ export function PrimaryButton({ disabled }: { disabled?: boolean }) {
 
     const platform = detectPlatform(navigator.userAgent);
     window.open(downloadMetadata[platform].url, "_blank");
-    SetOpenInApp(true);
+    setOpenInApp(true);
   };
 
   return (

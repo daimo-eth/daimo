@@ -11,7 +11,7 @@ import {
 import { Metadata } from "next";
 import Image from "next/image";
 
-import { PrimaryButton } from "../../../components/buttons";
+import { PrimaryOpenInAppButton } from "../../../components/buttons";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { trpc } from "../../../utils/trpc";
 
@@ -85,7 +85,7 @@ export default async function LinkPage(props: LinkProps) {
               {description}
             </h1>
             <div className="h-4" />
-            <PrimaryButton />
+            <PrimaryOpenInAppButton />
           </>
         )}
       </center>
