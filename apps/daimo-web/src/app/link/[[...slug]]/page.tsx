@@ -85,7 +85,7 @@ export default async function LinkPage(props: LinkProps) {
               {description}
             </h1>
             <div className="h-4" />
-            <PrimaryButton>GET DAIMO</PrimaryButton>
+            <PrimaryButton />
           </>
         )}
       </center>

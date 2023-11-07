@@ -130,7 +130,7 @@ export function PerformWalletAction({
 
   return (
     <center>
-      <PrimaryButton disabled={isLoading || isSuccess}>GET DAIMO</PrimaryButton>
+      <PrimaryButton disabled={isLoading || isSuccess} />
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>
