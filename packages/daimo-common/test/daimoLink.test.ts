@@ -1,7 +1,12 @@
 import assert from "node:assert";
 import test from "node:test";
 
-import { DaimoLink, formatDaimoLink, parseDaimoLink } from "../src/daimoLink";
+import {
+  DaimoLink,
+  formatDaimoLink,
+  formatDaimoLinkDirect,
+  parseDaimoLink,
+} from "../src/daimoLink";
 
 const testCases: [string, DaimoLink | null][] = [
   [
@@ -148,4 +153,17 @@ test("DaimoLink note backcompat", () => {
     ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
     ephemeralPrivateKey: "0x1234",
   });
+});
+
+test("DaimoLink format direct link", () => {
+  const link: DaimoLink = { type: "account", account: "dcposch" };
+  assert.equal(formatDaimoLinkDirect(link), "daimo://account/dcposch");
+
+  for (const [url, link] of testCases) {
+    if (link == null) continue;
+    assert.equal(
+      formatDaimoLinkDirect(link),
+      url.replace("https://example.com/link/", "daimo://")
+    );
+  }
 });

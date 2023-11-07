@@ -41,14 +41,24 @@ export type DaimoLinkNote = {
   ephemeralPrivateKey?: Hex;
 };
 
+// Returns a shareable https://daimo.com/... deep link.
 export function formatDaimoLink(link: DaimoLink) {
+  return formatDaimoLinkInner(link, daimoLinkBase);
+}
+
+// Returns a direct daimo:// deep link, not shareable.
+export function formatDaimoLinkDirect(link: DaimoLink) {
+  return formatDaimoLinkInner(link, "daimo:/");
+}
+
+function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
   switch (link.type) {
     case "account": {
-      return `${daimoLinkBase}/account/${link.account}`;
+      return `${linkBase}/account/${link.account}`;
     }
     case "request": {
       return [
-        daimoLinkBase,
+        linkBase,
         "request",
         link.recipient,
         link.dollars,
@@ -58,7 +68,7 @@ export function formatDaimoLink(link: DaimoLink) {
     case "note": {
       const hash = link.ephemeralPrivateKey && `#${link.ephemeralPrivateKey}`;
       return [
-        daimoLinkBase,
+        linkBase,
         "note",
         link.previewSender,
         link.previewDollars,

@@ -1,6 +1,6 @@
 import {
-  daimoLinkBase,
   formatDaimoLink,
+  formatDaimoLinkDirect,
   getAccountName,
   parseDaimoLink,
 } from "@daimo/common";
@@ -84,14 +84,9 @@ function QRScan() {
     if (daimoLink == null) return;
     setHandled(true);
 
-    let directLink: string;
-    if (data.startsWith(daimoLinkBase + "/")) {
-      directLink = "daimo://" + data.substring(daimoLinkBase.length + 1);
-    } else {
-      directLink = data;
-    }
-
+    const directLink = formatDaimoLinkDirect(daimoLink);
     console.log(`[SCAN] opening URL ${directLink}`);
+
     Linking.openURL(directLink);
   };
 
