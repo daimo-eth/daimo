@@ -9,8 +9,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import ScrollPellet from "../view/shared/ScrollPellet";
-import { color } from "../view/shared/style";
+import ScrollPellet from "./ScrollPellet";
+import { color } from "./style";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;

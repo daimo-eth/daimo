@@ -12,13 +12,13 @@ import {
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account } from "../../model/account";
-import { SwipeUpDown } from "../../vendor/SwipeUpDown";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
+import { SwipeUpDown } from "../shared/SwipeUpDown";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
