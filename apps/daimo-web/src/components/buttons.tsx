@@ -10,10 +10,7 @@ export function PrimaryButton({
 }) {
   const onClick = () => {
     const platform = detectPlatform(navigator.userAgent);
-    if (platform === "other") window.open("/");
-    else {
-      window.open(downloadMetadata[platform].url, "_blank");
-    }
+    window.open(downloadMetadata[platform].url, "_blank");
   };
 
   return (
