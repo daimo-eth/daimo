@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useState } from "react";
+import { useIsFocused } from "@react-navigation/native";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Keyboard,
@@ -18,7 +19,7 @@ import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
-import { SwipeUpDown } from "../shared/SwipeUpDown";
+import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
@@ -30,6 +31,24 @@ export default function HomeScreen() {
 }
 
 function HomeScreenInner({ account }: { account: Account }) {
+  const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const nav = useNav();
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (nav.getParent()) {
+      // @ts-ignore
+      const unsub = nav.getParent().addListener("tabPress", (e: Event) => {
+        if (isFocused && bottomSheetRef.current) {
+          e.preventDefault();
+          bottomSheetRef.current.collapse();
+        }
+      });
+
+      return unsub;
+    }
+  }, [nav, isFocused]);
+
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
@@ -64,6 +83,7 @@ function HomeScreenInner({ account }: { account: Account }) {
             <Spacer h={64} />
             <AmountAndButtons account={account} />
             <SwipeUpDown
+              ref={bottomSheetRef}
               itemMini={histListMini}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}

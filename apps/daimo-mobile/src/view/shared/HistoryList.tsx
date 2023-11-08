@@ -87,10 +87,7 @@ export function HistoryListSwipe({
   }
 
   return (
-    <BottomSheetScrollView
-      contentContainerStyle={styles.historyListBody}
-      stickyHeaderIndices={stickyIndices}
-    >
+    <BottomSheetScrollView contentContainerStyle={styles.historyListBody}>
       {rows}
       <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />
     </BottomSheetScrollView>
