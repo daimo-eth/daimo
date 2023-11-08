@@ -4,10 +4,10 @@ import {
   getAccountName,
   timeAgo,
 } from "@daimo/common";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { ReactNode } from "react";
 import {
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -19,7 +19,6 @@ import { Address, getAddress } from "viem";
 import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
 import { PendingDot } from "./PendingDot";
-import ScrollPellet from "./ScrollPellet";
 import Spacer from "./Spacer";
 import { getCachedEAccount } from "./addr";
 import { useNav } from "./nav";
@@ -27,22 +26,7 @@ import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { Account } from "../../model/account";
 
-export function HistoryListSwipe(props: {
-  account: Account;
-  maxToShow?: number;
-}) {
-  const ins = useSafeAreaInsets();
-  return (
-    <View style={styles.historyListSwipe}>
-      <Spacer h={Platform.OS === "ios" ? 0 : ins.top} />
-      <ScrollPellet />
-      <HistoryListBody {...props} />
-      <View style={{ flex: 1 }} />
-    </View>
-  );
-}
-
-function HistoryListBody({
+export function HistoryListSwipe({
   account,
   maxToShow,
 }: {
@@ -103,13 +87,10 @@ function HistoryListBody({
   }
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.historyListBody}
-      stickyHeaderIndices={stickyIndices}
-    >
+    <BottomSheetScrollView contentContainerStyle={styles.historyListBody}>
       {rows}
       <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />
-    </ScrollView>
+    </BottomSheetScrollView>
   );
 }
 
@@ -213,12 +194,6 @@ function TransferAmountDate({
 }
 
 const styles = StyleSheet.create({
-  historyListSwipe: {
-    flex: 1,
-    backgroundColor: color.white,
-    borderRadiusTopLeft: 16,
-    borderRadiusTopRight: 16,
-  },
   historyListBody: {
     paddingHorizontal: 24,
     marginBottom: 48,
