@@ -94,7 +94,7 @@ async function resync(reason: string, fromScratch?: boolean) {
       const syncAttemptsFailed = state.syncAttemptsFailed + 1;
       return {
         syncAttemptsFailed,
-        status: syncAttemptsFailed > 3 ? "offline" : "online",
+        status: syncAttemptsFailed > 2 ? "offline" : "online",
       };
     });
   }

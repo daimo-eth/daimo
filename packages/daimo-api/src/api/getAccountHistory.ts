@@ -23,7 +23,7 @@ export interface AccountHistoryResult {
   lastFinalizedBlock: number;
   lastBlock: number;
   lastBlockTimestamp: number;
-  lastBalance: `${bigint}`;
+  lastBalances: { [tokenAddr: Address]: `${bigint}` };
 
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
