@@ -171,8 +171,6 @@ function ReceiveTab() {
     >
       <ReceiveStack.Group>
         <ReceiveStack.Screen name="Receive" component={ReceiveScreen} />
-      </ReceiveStack.Group>
-      <ReceiveStack.Group screenOptions={{ presentation: "modal" }}>
         <ReceiveStack.Screen name="Note" component={NoteScreen} />
       </ReceiveStack.Group>
     </ReceiveStack.Navigator>

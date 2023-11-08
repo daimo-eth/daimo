@@ -81,8 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: 40,
-    paddingTop: 16,
+    height: 48,
   },
   screenHeadButtonWrap: {
     width: 40,

@@ -9,7 +9,7 @@ import {
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 
-import { setNetworkState } from "./networkState";
+import { getNetworkState, updateNetworkState } from "./networkState";
 import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
 import { env } from "../logic/env";
 import { Account, getAccountManager } from "../model/account";
@@ -49,15 +49,23 @@ function maybeSync(fromScratch?: boolean) {
   // Synced recently? Wait first.
   const nowS = Date.now() / 1e3;
   let intervalS = 10;
+
+  // Sync faster for 1. pending ops, and 2. recently-failed sync
   if (hasPendingOps(account)) {
     intervalS = 1;
   }
+
+  const netState = getNetworkState();
+  if (netState.status === "online" && netState.syncAttemptsFailed > 0) {
+    intervalS = 1;
+  }
+
   if (fromScratch) {
     resync(`initial sync from scratch`, true);
-  } else if (lastSyncS + intervalS > nowS) {
-    console.log(`[SYNC] skipping sync, attempted sync recently`);
   } else if (lastPushNotificationS + 10 > nowS) {
     resync(`push notification ${nowS - lastPushNotificationS}s ago`);
+  } else if (lastSyncS + intervalS > nowS) {
+    console.log(`[SYNC] skipping sync, attempted sync recently`);
   } else {
     resync(`interval ${intervalS}s`);
   }
@@ -78,10 +86,17 @@ async function resync(reason: string, fromScratch?: boolean) {
     const accNew = applySync(manager.currentAccount, res);
     console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
     manager.setCurrentAccount(accNew);
-    setNetworkState("online");
+    // We are automatically marked online when any RPC req succeeds
   } catch (e) {
     console.error(`[SYNC] FAILED ${accOld.name}`, e);
-    setNetworkState("offline");
+    // Mark offline
+    updateNetworkState((state) => {
+      const syncAttemptsFailed = state.syncAttemptsFailed + 1;
+      return {
+        syncAttemptsFailed,
+        status: syncAttemptsFailed > 3 ? "offline" : "online",
+      };
+    });
   }
 }
 
@@ -198,7 +213,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     lastFinalizedBlock: result.lastFinalizedBlock,
 
     chainGasConstants: result.chainGasConstants,
-    recommendedExchanges: result.recommendedExchanges,
+    recommendedExchanges: result.recommendedExchanges || [],
 
     recentTransfers,
     namedAccounts,

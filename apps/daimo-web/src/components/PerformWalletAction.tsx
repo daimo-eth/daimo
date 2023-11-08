@@ -17,9 +17,8 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
-import { PrimaryButton, SecondaryButton } from "./buttons";
+import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
-import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 type Action = {
   wagmiPrep: {
@@ -125,23 +124,13 @@ export function PerformWalletAction({
     })();
   }, [linkStatus, address]);
 
-  const secondaryTitle = description + " WITH CONNECTED WALLET";
-  const secondaryConnectTitle = description + " WITH ANOTHER WALLET";
+  const descriptionVerb = description.split(" ")[0].toUpperCase();
+  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
+  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
 
   return (
     <center>
-      <PrimaryButton
-        onClick={() => {
-          const platform = detectPlatform(navigator.userAgent);
-          if (platform === "other") window.open("/");
-          else {
-            window.open(downloadMetadata[platform].url, "_blank");
-          }
-        }}
-        disabled={isLoading || isSuccess}
-      >
-        GET DAIMO
-      </PrimaryButton>
+      <PrimaryOpenInAppButton disabled={isLoading || isSuccess} />
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>

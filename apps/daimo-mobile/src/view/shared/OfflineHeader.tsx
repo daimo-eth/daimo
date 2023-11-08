@@ -9,7 +9,7 @@ import { useNetworkState } from "../../sync/networkState";
 
 export function OfflineHeader() {
   const netState = useNetworkState();
-  const isOffline = netState === "offline";
+  const isOffline = netState.status === "offline";
 
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);

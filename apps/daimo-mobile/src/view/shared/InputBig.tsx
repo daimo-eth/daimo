@@ -63,7 +63,7 @@ export function InputBig({
           value={value}
           onChangeText={onChange}
           style={center ? styles.inputCentered : styles.input}
-          multiline={Platform.OS === "android"}
+          multiline={Platform.OS === "android" && center}
           numberOfLines={1}
           autoCapitalize="none"
           autoCorrect={false}
@@ -97,7 +97,8 @@ const inputRow = {
 const input = {
   ...ss.text.body,
   position: "absolute",
-  top: 14,
+  top: 0,
+  bottom: 0,
   left: 16,
   right: 40,
   paddingTop: 0,

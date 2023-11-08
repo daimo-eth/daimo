@@ -11,6 +11,7 @@ import {
 import { Metadata } from "next";
 import Image from "next/image";
 
+import { PrimaryOpenInAppButton } from "../../../components/buttons";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
 import { trpc } from "../../../utils/trpc";
 
@@ -79,7 +80,13 @@ export default async function LinkPage(props: LinkProps) {
             description={description}
           />
         ) : (
-          <h1 className="text-xl font-semibold text-grayMid">{description}</h1>
+          <>
+            <h1 className="text-xl font-semibold text-grayMid">
+              {description}
+            </h1>
+            <div className="h-4" />
+            <PrimaryOpenInAppButton />
+          </>
         )}
       </center>
     </main>
@@ -159,7 +166,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           name: `${name}`,
           action: `is requesting`,
           dollars: `${res.link.dollars}`,
-          description: "PAY",
+          description: "Pay with Daimo",
           walletActionLinkStatus: res,
         };
       } else {
@@ -180,7 +187,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             name: `${getAccountName(sender)}`,
             action: `sent you`,
             dollars: `${dollars}`,
-            description: `CLAIM`,
+            description: "Claim with Daimo",
             walletActionLinkStatus: res,
           };
         }

@@ -210,7 +210,12 @@ async function sendAsync(
   } catch (e: any) {
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");
-    } else if (e instanceof NamedError && e.name === "ExpoEnclaveSign") {
+    } else if (
+      e instanceof NamedError &&
+      ["ExpoEnclaveSign", "ExpoPasskeysCreate", "ExpoPasskeysSign"].includes(
+        e.name
+      )
+    ) {
       setAS("error", e.message);
     } else if (e.message === "Network request failed") {
       setAS("error", "Request failed. Offline?");
