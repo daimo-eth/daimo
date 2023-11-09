@@ -51,9 +51,7 @@ function HistoryOpScreenInner({
   // A pending op always has an opHash (since its initiated by the user's
   // account).
   let { op } = route.params;
-  op = op.opHash
-    ? syncFindSameOp(op.opHash, account.recentTransfers) || op
-    : op;
+  op = syncFindSameOp(op.opHash, account.recentTransfers) || op;
 
   // If we sent a note, show the note screen.
   // TODO: annotate note info directly on op via sync

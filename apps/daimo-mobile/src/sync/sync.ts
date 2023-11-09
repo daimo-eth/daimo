@@ -180,7 +180,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   // TODO: store validUntil directly on the op
   const stillPending = oldPending.filter(
     (t) =>
-      syncFindSameOp(t.opHash!, recentTransfers) == null &&
+      syncFindSameOp(t.opHash, recentTransfers) == null &&
       t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
@@ -238,9 +238,10 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 }
 
 export function syncFindSameOp(
-  opHash: Hex,
+  opHash: Hex | undefined,
   ops: TransferOpEvent[]
 ): TransferOpEvent | null {
+  if (opHash == null) return null;
   return ops.find((r) => opHash === r.opHash) || null;
 }
 
