@@ -4,7 +4,7 @@ import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
-import { chainConfig } from "../env";
+import { chainConfig, retryBackoff } from "../env";
 import { Telemetry } from "../telemetry";
 
 export async function deployWallet(
@@ -45,9 +45,13 @@ export async function deployWallet(
   const address = await accountFactory.getAddress(pubKeyHex, initCalls);
 
   console.log(`[API] Deploying account for ${name}, address ${address}`);
-  const deployReceipt = await accountFactory.deploy(pubKeyHex, initCalls);
+  const deployReceipt = await retryBackoff(
+    `deployWallet-${name}-${pubKeyHex}`,
+    () => accountFactory.deploy(pubKeyHex, initCalls),
+    5
+  );
 
-  // If it worked, cache the name<>address mapping immediately.
+  // If it worked, cache the name <> address mapping immediately.
   if (deployReceipt.status === "success") {
     nameReg.onSuccessfulRegister(name, address);
   } else {

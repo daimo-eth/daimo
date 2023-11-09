@@ -239,9 +239,10 @@ function getFilterName(filter: LogFilter<any>) {
 
 export async function retryBackoff<T>(
   name: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
+  retryCount: number = 10
 ): Promise<T> {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= retryCount; i++) {
     try {
       return await fn();
     } catch (e) {
