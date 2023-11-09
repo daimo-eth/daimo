@@ -1,10 +1,10 @@
-import { TextBold14, LinkBold14 } from "./typography";
+import { TextBold, LinkBold } from "./typography";
 
 export function Footer() {
   return (
     <header className="bg-white py-5">
       <div className="m-auto max-w-screen-xl px-8 flex justify-between items-baseline">
-        <TextBold14>© {new Date().getFullYear()} Daimo</TextBold14>
+        <TextBold>© {new Date().getFullYear()} Daimo</TextBold>
         <FooterNav />
       </div>
     </header>
@@ -14,11 +14,11 @@ export function Footer() {
 function FooterNav() {
   return (
     <nav className="flex gap-8 md:gap-16">
-      <LinkBold14 href="#faq">FAQ</LinkBold14>
-      <LinkBold14 href="/blog">Blog</LinkBold14>
-      <LinkBold14 href="https://github.com/daimo-eth/daimo" target="_blank">
+      <LinkBold href="#faq">FAQ</LinkBold>
+      <LinkBold href="/blog">Blog</LinkBold>
+      <LinkBold href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
-      </LinkBold14>
+      </LinkBold>
     </nav>
   );
 }

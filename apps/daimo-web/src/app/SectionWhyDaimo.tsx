@@ -1,13 +1,13 @@
 import Image from "next/image";
 
 import { Spacer } from "../components/layout";
-import { SectionH3 } from "../components/typography";
+import { TextH1 } from "../components/typography";
 
 export function SectionWhyDaimo() {
   return (
     <section className="bg-white pt-24 md:bg-ivory md:py-24">
       <div className="m-auto max-w-screen-xl px-8">
-        <SectionH3>Why Daimo</SectionH3>
+        <TextH1>Why Daimo</TextH1>
         <Spacer h={48} />
         <div className="flex gap-16 md:gap-8 xl:gap-16 flex-col items-stretch md:flex-row">
           <WhyPellet
@@ -50,7 +50,7 @@ function WhyPellet({
         className="w-20 h-20"
       />
       <Spacer h={36} />
-      <SectionH3>{title}</SectionH3>
+      <TextH1>{title}</TextH1>
       <Spacer h={36} />
       <p className="text-grayMid text-2xl">{copy}</p>
     </div>

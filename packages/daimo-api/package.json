@@ -21,9 +21,11 @@
     "@honeycombio/opentelemetry-node": "^0.6.0",
     "@opentelemetry/api": "^1.4.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.3",
-    "@trpc/server": "^10.40.0",
+    "@trpc/server": "^10.43.2",
+    "@types/cors": "^2.8.16",
     "@types/geoip-lite": "^1.4.2",
     "abitype": "^0.9.2",
+    "cors": "^2.8.5",
     "cron": "^3.1.4",
     "expo-server-sdk": "^3.7.0",
     "geoip-lite": "^1.4.7",
@@ -31,7 +33,7 @@
     "pg": "^8.11.0",
     "userop": "^0.3.2",
     "viem": "^1.16.0",
-    "zod": "^3.21.4"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.0",

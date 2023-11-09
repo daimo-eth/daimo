@@ -1,15 +1,23 @@
 import Link from "next/link";
 import { HTMLAttributeAnchorTarget } from "react";
 
-export function SectionH3({ children }: { children: React.ReactNode }) {
+export function TextH1({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-[1.75rem] font-semibold text-midnight leading-none">
+    <h1 className="text-[1.75rem] font-semibold text-midnight leading-none">
+      {children}
+    </h1>
+  );
+}
+
+export function TextH3Subtle({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="font-semibold text-sm text-grayMid tracking-wider leading-none capitalize">
       {children}
     </h3>
   );
 }
 
-export function LinkBold14({
+export function LinkBold({
   href,
   target,
   children,
@@ -20,11 +28,19 @@ export function LinkBold14({
 }) {
   return (
     <Link href={href} target={target}>
-      <TextBold14>{children}</TextBold14>
+      <TextBold>{children}</TextBold>
     </Link>
   );
 }
 
-export function TextBold14({ children }: { children: React.ReactNode }) {
+export function TextBold({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-semibold text-midnight">{children}</p>;
+}
+
+export function TextError({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm font-semibold text-danger">{children}</p>;
+}
+
+export function TextLight({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm font-medium text-grayMid">{children}</p>;
 }

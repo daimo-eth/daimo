@@ -1,4 +1,5 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
+import cors from "cors";
 import http from "http";
 
 import { getBundlerClientFromEnv } from "./chain/bundlerClient";
@@ -12,7 +13,7 @@ import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
 import { Crontab } from "./cron";
 import { DB } from "./db/db";
-import { getViemClientFromEnv, chainConfig } from "./env";
+import { chainConfig, getViemClientFromEnv } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
@@ -68,6 +69,7 @@ async function main() {
     console.log(`[API] polling logs...`);
     setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
+
   console.log(`[API] serving...`);
   const router = createRouter(
     vc,
@@ -83,7 +85,11 @@ async function main() {
     accountFactory,
     monitor
   );
-  const handler = createHTTPHandler({ router, createContext });
+  const handler = createHTTPHandler({
+    middleware: cors(),
+    router,
+    createContext,
+  });
 
   const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;
   const server = http.createServer((req, res) => {
@@ -95,7 +101,8 @@ async function main() {
       return;
     }
 
-    console.log(`[API] serving ${req.url}`);
+    console.log(`[API] serving ${req.method} ${req.url}`);
+
     req.url = "/" + req.url.slice(trpcPrefix.length);
     handler(req, res);
   });

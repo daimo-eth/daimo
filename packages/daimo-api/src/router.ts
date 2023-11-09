@@ -3,6 +3,7 @@ import { SpanStatusCode } from "@opentelemetry/api";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
+import { getDefaultBridge } from "./api/bridge";
 import { deployWallet } from "./api/deployWallet";
 import { getAccountHistory } from "./api/getAccountHistory";
 import { getLinkStatus } from "./api/getLinkStatus";
@@ -48,12 +49,23 @@ export function createRouter(
     return result;
   });
 
-  const publicProcedure = trpcT.procedure.use(tracerMiddleware);
+  const corsMiddleware = trpcT.middleware(async (opts) => {
+    opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    return opts.next();
+  });
+
+  const publicProcedure = trpcT.procedure
+    .use(corsMiddleware)
+    .use(tracerMiddleware);
 
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
-      return "healthy";
+      // Push Notifier is the last service to load.
+      const ret = notifier.isInitialized ? "healthy" : "pending";
+      console.log(`[API] health check: ${ret}`);
+      return ret;
     }),
+
     search: publicProcedure
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
@@ -200,6 +212,13 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode } = opts.input;
         return daimoInviteCodes.has(inviteCode);
+      }),
+
+    bridgeGetAvailableAssets: publicProcedure
+      .input(z.object({ addr: zAddress }))
+      .query(async (opts) => {
+        const { addr } = opts.input;
+        return getDefaultBridge().getAvailableAssets(addr);
       }),
   });
 }

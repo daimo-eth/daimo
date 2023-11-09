@@ -1,13 +1,13 @@
 import Image from "next/image";
 
 import { Spacer } from "../components/layout";
-import { SectionH3 } from "../components/typography";
+import { TextH1 } from "../components/typography";
 
 export function SectionTeam() {
   return (
     <section className="bg-white py-24" id="team">
       <center className="m-auto w-[32rem]">
-        <SectionH3>Meet the team</SectionH3>
+        <TextH1>Meet the team</TextH1>
         <Spacer h={48} />
         <div className="flex gap-12">
           <Person
@@ -49,7 +49,7 @@ function Person({
     <div className="flex flex-col items-center">
       <Image src={img} width={270} height={270} alt={name} />
       <Spacer h={24} />
-      <SectionH3>{name}</SectionH3>
+      <TextH1>{name}</TextH1>
       <Spacer h={12} />
       <div className="text-base text-grayMid">{title}</div>
       <Spacer h={12} />

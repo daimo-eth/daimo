@@ -11,7 +11,8 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
   const daimoPlatform = opts.req.headers["x-daimo-platform"] || "";
   const daimoVersion = opts.req.headers["x-daimo-version"] || "";
   const span = null as Span | null;
-  return { ipAddr, userAgent, daimoPlatform, daimoVersion, span };
+
+  return { ipAddr, userAgent, daimoPlatform, daimoVersion, span, ...opts };
 };
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {
