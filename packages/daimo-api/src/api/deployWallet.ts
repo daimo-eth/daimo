@@ -47,9 +47,7 @@ export async function deployWallet(
   console.log(`[API] Deploying account for ${name}, address ${address}`);
   const deployReceipt = await retryBackoff(
     `deployWallet-${name}-${pubKeyHex}`,
-    async () => {
-      return accountFactory.deploy(pubKeyHex, initCalls);
-    },
+    () => accountFactory.deploy(pubKeyHex, initCalls),
     5
   );
 
