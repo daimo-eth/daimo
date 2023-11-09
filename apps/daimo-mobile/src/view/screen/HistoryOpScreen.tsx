@@ -48,8 +48,12 @@ function HistoryOpScreenInner({
 }: Props & { account: Account }) {
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
+  // A pending op always has an opHash (since its initiated by the user's
+  // account).
   let { op } = route.params;
-  op = syncFindSameOp(op, account.recentTransfers) || op;
+  op = op.opHash
+    ? syncFindSameOp(op.opHash, account.recentTransfers) || op
+    : op;
 
   // If we sent a note, show the note screen.
   // TODO: annotate note info directly on op via sync

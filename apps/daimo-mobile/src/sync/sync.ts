@@ -8,6 +8,7 @@ import {
   guessTimestampFromNum,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import { Hex } from "viem";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
 import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
@@ -179,7 +180,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   // TODO: store validUntil directly on the op
   const stillPending = oldPending.filter(
     (t) =>
-      syncFindSameOp(t, recentTransfers) == null &&
+      syncFindSameOp(t.opHash!, recentTransfers) == null &&
       t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
@@ -237,10 +238,10 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 }
 
 export function syncFindSameOp(
-  op: TransferOpEvent,
+  opHash: Hex,
   ops: TransferOpEvent[]
 ): TransferOpEvent | null {
-  return ops.find((r) => op.opHash === r.opHash) || null;
+  return ops.find((r) => opHash === r.opHash) || null;
 }
 
 /** Update contacts based on recent interactions */
