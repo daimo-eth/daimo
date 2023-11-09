@@ -12,6 +12,7 @@ export function getDefaultBridge() {
 }
 
 export interface TokenBalance {
+  chainID: number;
   chainNetwork: string;
   chainName: string;
   tokenAddr: Address;
@@ -98,7 +99,7 @@ export class Bridge {
   }
 
   async getChainAssets(client: PublicClient, addr: Address) {
-    const { network, name: chainName } = client.chain!;
+    const { network, name: chainName, id: chainID } = client.chain!;
     const tokens = this.tokens.filter((t) => t.chainNetwork === network);
 
     console.log(`[BRIDGE] fetch ${tokens.length} balances ${network} ${addr}`);
@@ -113,6 +114,7 @@ export class Bridge {
 
         return {
           balance: `${result}`,
+          chainID,
           chainName,
           chainNetwork: network,
           tokenDecimals: token.decimals,
