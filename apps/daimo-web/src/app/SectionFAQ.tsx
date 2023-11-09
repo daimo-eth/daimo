@@ -1,7 +1,7 @@
 "use client";
 
 import { Spacer } from "../components/layout";
-import { SectionH3 } from "../components/typography";
+import { TextH1 } from "../components/typography";
 import { FAQ } from "../utils/parseFAQ";
 
 export function SectionFAQ({ faq }: { faq: FAQ[] }) {
@@ -16,7 +16,7 @@ export function SectionFAQ({ faq }: { faq: FAQ[] }) {
         }
       `}</style>
       <div className="m-auto max-w-screen-xl px-8 section-faq">
-        <SectionH3>Frequently Asked Questions</SectionH3>
+        <TextH1>Frequently Asked Questions</TextH1>
         <Spacer h={48} />
         <ul className="border-t border-grayLight">
           {faq.map((qna, i) => (

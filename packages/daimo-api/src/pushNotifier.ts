@@ -30,6 +30,8 @@ export class PushNotifier {
   pushTokens = new Map<Address, string[]>();
   expo = new Expo();
 
+  isInitialized = false;
+
   constructor(
     private coinIndexer: CoinIndexer,
     private nameReg: NameRegistry,
@@ -52,6 +54,8 @@ export class PushNotifier {
     for (const row of rows) {
       this.cachePushToken(getAddress(row.address), row.pushtoken);
     }
+
+    this.isInitialized = true;
   }
 
   private handleNoteOps = async (logs: NoteOpLog[]) => {

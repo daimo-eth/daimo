@@ -48,12 +48,24 @@ export function createRouter(
     return result;
   });
 
-  const publicProcedure = trpcT.procedure.use(tracerMiddleware);
+  const corsMiddleware = trpcT.middleware(async (opts) => {
+    opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    return opts.next();
+  });
+
+  const publicProcedure = trpcT.procedure
+    .use(corsMiddleware)
+    .use(tracerMiddleware);
 
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
+      // Push Notifier is the last service to load.
+      const isReady = notifier.isInitialized;
+      console.log(`[API] health check. ready? ${isReady}`);
+      if (!isReady) throw new Error("not ready");
       return "healthy";
     }),
+
     search: publicProcedure
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {

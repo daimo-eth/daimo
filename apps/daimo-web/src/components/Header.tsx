@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { DownloadLink } from "./DownloadLink";
-import { LinkBold14 } from "./typography";
+import { LinkBold } from "./typography";
 
 export function Header() {
   return (
@@ -18,7 +18,7 @@ function HeaderLogo() {
   return (
     <div className="flex gap-2 items-center">
       <Image src="/logo-web-favicon.png" width={24} height={24} alt={"Logo"} />
-      <LinkBold14 href="/">Daimo</LinkBold14>
+      <LinkBold href="/">Daimo</LinkBold>
     </div>
   );
 }
@@ -26,11 +26,11 @@ function HeaderLogo() {
 function HeaderNav() {
   return (
     <nav className="flex gap-8 md:gap-16 items-center">
-      <LinkBold14 href="#faq">FAQ</LinkBold14>
-      <LinkBold14 href="/blog">Blog</LinkBold14>
-      <LinkBold14 href="https://github.com/daimo-eth/daimo" target="_blank">
+      <LinkBold href="#faq">FAQ</LinkBold>
+      <LinkBold href="/blog">Blog</LinkBold>
+      <LinkBold href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
-      </LinkBold14>
+      </LinkBold>
       <DownloadLink />
     </nav>
   );

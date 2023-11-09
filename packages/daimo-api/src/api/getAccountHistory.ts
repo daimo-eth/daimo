@@ -48,6 +48,8 @@ export async function getAccountHistory(
   paymaster: Paymaster
 ): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
+  const eAcc = await nameReg.getEAccount(address);
+  assert(eAcc.name != null, "Not a Daimo account");
 
   // Get latest finalized block. Next account sync, fetch since this block.
   const finBlock = await vc.publicClient.getBlock({
@@ -93,9 +95,11 @@ export async function getAccountHistory(
   const accountKeys = await keyReg.resolveAddressKeys(address);
   assert(accountKeys != null);
 
+  // Prefetch info required to send operations > fast at time of sending.
   const chainGasConstants = await paymaster.calculateChainGasConstants();
 
-  const recommendedExchanges = fetchRecommendedExchanges(address);
+  // Prefetch info required to deposit to your Daimo account.
+  const recommendedExchanges = fetchRecommendedExchanges(eAcc);
 
   return {
     address,
@@ -115,12 +119,12 @@ export async function getAccountHistory(
   };
 }
 
-function fetchRecommendedExchanges(addr: Address): RecommendedExchange[] {
+function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   const cbUrl = generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
     destinationWallets: [
       {
-        address: addr,
+        address: account.addr,
         blockchains: ["base"],
         assets: ["USDC"],
         supportedNetworks: ["base"],
@@ -129,5 +133,11 @@ function fetchRecommendedExchanges(addr: Address): RecommendedExchange[] {
     handlingRequestedUrls: true,
     defaultExperience: "send",
   });
-  return [{ cta: "Deposit from Coinbase", url: cbUrl }];
+  return [
+    {
+      cta: "Bridge from any wallet",
+      url: `https://daimo.com/bridge/${account.name}`,
+    },
+    { cta: "Deposit from Coinbase", url: cbUrl },
+  ];
 }

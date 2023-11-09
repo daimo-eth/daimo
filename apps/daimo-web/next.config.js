@@ -6,6 +6,10 @@ const nextConfig = {
         source: "/.well-known/apple-app-site-association",
         headers: [{ key: "content-type", value: "application/json" }],
       },
+      {
+        source: "/(.*)",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
     ];
   },
   webpack: (config) => {
@@ -26,6 +30,7 @@ const nextConfig = {
     });
     return config;
   },
+  transpilePackages: ["@lifi/widget", "@lifi/wallet-management"],
 };
 
 module.exports = nextConfig;

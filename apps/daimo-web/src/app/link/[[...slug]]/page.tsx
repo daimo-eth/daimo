@@ -13,7 +13,8 @@ import Image from "next/image";
 
 import { PrimaryOpenInAppButton } from "../../../components/buttons";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
-import { trpc } from "../../../utils/trpc";
+import { Providers, chainsDaimoL2 } from "../../../components/Providers";
+import { rpc } from "../../../utils/rpc";
 
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";
@@ -49,6 +50,14 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function LinkPage(props: LinkProps) {
+  return (
+    <Providers chains={chainsDaimoL2}>
+      <LinkPageInner {...props} />
+    </Providers>
+  );
+}
+
+async function LinkPageInner(props: LinkProps) {
   const { name, action, dollars, description, walletActionLinkStatus } =
     (await loadTitleDesc(getUrl(props))) || {
       title: "Daimo",
@@ -118,7 +127,7 @@ function metadata(title: string, description: string): Metadata {
 async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
   let res: DaimoLinkStatus;
   try {
-    res = await trpc.getLinkStatus.query({ url });
+    res = await rpc.getLinkStatus.query({ url });
   } catch (err) {
     console.warn(`Error loading link status for ${url}`, err);
     const link = parseDaimoLink(url);
