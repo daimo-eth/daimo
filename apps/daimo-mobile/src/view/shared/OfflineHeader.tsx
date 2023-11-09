@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Spacer from "./Spacer";
@@ -22,8 +22,15 @@ export function OfflineHeader() {
     marginHorizontal: -16,
   } as const;
 
+  const isAndroid = Platform.OS === "android";
+
   return (
     <View style={style}>
+      {
+        isAndroid && (
+          <Spacer h={16} />
+        ) /* Some Androids have a camera excluded from the safe insets. */
+      }
       {isOffline && (
         <TextBody color={color.midnight}>
           <Octicons name="alert" size={14} />

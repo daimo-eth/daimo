@@ -48,8 +48,8 @@ function getOpts(daimoChain: DaimoChain) {
           daimoChain === "base"
             ? apiUrlMainnetWithChain
             : apiUrlTestnetWithChain,
-        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-          console.log(`[APP] trpc fetching ${input}`, init);
+        fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+          console.log(`[TRPC] fetching ${input}`, init);
 
           init = init ?? {};
           init.headers = (init.headers ?? {}) as Record<string, string>;
@@ -59,11 +59,23 @@ function getOpts(daimoChain: DaimoChain) {
           init.headers["x-daimo-platform"] = platform;
           init.headers["x-daimo-version"] = version;
 
-          return fetch(input, init).then((res) => {
+          // Fetch timeout: 10 seconds
+          const timeout = 10_000;
+          const controller = new AbortController();
+          const timeoutID = setTimeout(() => {
+            console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);
+            controller.abort();
+          }, timeout);
+          init.signal = controller.signal;
+
+          const ret = await fetch(input, init).then((res) => {
             // When a request succeeds, mark us online immediately.
             if (res.ok) updateNetworkStateOnline();
             return res;
           });
+          clearTimeout(timeoutID);
+
+          return ret;
         },
       }),
     ],
