@@ -61,9 +61,10 @@ export function createRouter(
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
       // Push Notifier is the last service to load.
-      const ret = notifier.isInitialized ? "healthy" : "pending";
-      console.log(`[API] health check: ${ret}`);
-      return ret;
+      const isReady = notifier.isInitialized;
+      console.log(`[API] health check. ready? ${isReady}`);
+      if (!isReady) throw new Error("not ready");
+      return "healthy";
     }),
 
     search: publicProcedure
