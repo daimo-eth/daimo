@@ -13,6 +13,7 @@ import Image from "next/image";
 
 import { PrimaryOpenInAppButton } from "../../../components/buttons";
 import { PerformWalletAction } from "../../../components/PerformWalletAction";
+import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { trpc } from "../../../utils/trpc";
 
 // Opt out of caching for all data requests in the route segment
@@ -49,6 +50,14 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function LinkPage(props: LinkProps) {
+  return (
+    <Providers chains={chainsDaimoL2}>
+      <LinKPageInner {...props} />
+    </Providers>
+  );
+}
+
+async function LinKPageInner(props: LinkProps) {
   const { name, action, dollars, description, walletActionLinkStatus } =
     (await loadTitleDesc(getUrl(props))) || {
       title: "Daimo",

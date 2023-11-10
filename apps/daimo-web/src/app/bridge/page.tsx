@@ -2,13 +2,23 @@
 
 import { RouteData, Squid } from "@0xsquid/sdk";
 import { TokenBalance } from "@daimo/api";
+import { EAccount, assert } from "@daimo/common";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Signer, providers } from "ethers";
 import Image from "next/image";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FocusEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { WalletClient, formatUnits, getAddress, parseUnits } from "viem";
 import { Address, useAccount, useWalletClient } from "wagmi";
 
+import { AccountBubble } from "../../components/AccountBubble";
+import { Providers, chainsBridge } from "../../components/Providers";
 import {
   TextBold,
   TextError,
@@ -16,7 +26,8 @@ import {
   TextH3Subtle,
   TextLight,
 } from "../../components/typography";
-import { RpcHookProvider, rpcHook } from "../../utils/trpc";
+import { chainConfig } from "../../env";
+import { RpcHookProvider, rpcHook, trpc } from "../../utils/trpc";
 
 let initSquid: Promise<Squid> | null = null;
 
@@ -37,6 +48,14 @@ async function getSquid() {
 }
 
 export default function BridgePage() {
+  return (
+    <Providers chains={chainsBridge}>
+      <BridgePageInner />
+    </Providers>
+  );
+}
+
+function BridgePageInner() {
   const account = useAccount();
 
   useEffect(() => {
@@ -47,9 +66,11 @@ export default function BridgePage() {
     <RpcHookProvider>
       <main className="max-w-md m-auto py-8">
         <TextH1>Bridge to Daimo</TextH1>
+        <div className="h-8" />
+        <TextH3Subtle>FROM</TextH3Subtle>
         <div className="h-4" />
-        <ConnectButton />
-        {account.address && <div className="h-8" />}
+        <ConnectButton showBalance={false} />
+        {account.address && <div className="h-4" />}
         {account.address && <BalancesSection addr={account.address} />}
       </main>
     </RpcHookProvider>
@@ -61,8 +82,6 @@ function BalancesSection({ addr }: { addr: Address }) {
 
   return (
     <>
-      <TextH3Subtle>FROM</TextH3Subtle>
-      <div className="h-4" />
       {result.isLoading && <TextBold>Loading...</TextBold>}
       {result.error && <TextError>{result.error.message}</TextError>}
       {result.data && <BalancesList balances={result.data} />}
@@ -119,7 +138,7 @@ function BalanceRow({
     <li
       className={
         "flex justify-between items-center cursor-pointer p-2 rounded-md hover:bg-ivory border " +
-        (sel ? "border-primary" : "border-white")
+        (sel ? "border-primary bg-ivory" : "border-white")
       }
       onClick={onSel}
     >
@@ -156,22 +175,27 @@ function BridgeSection({ fromBal }: { fromBal: TokenBalance }) {
     [setAmount]
   );
 
+  const onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setAmount(Number(val).toFixed(2));
+  }, []);
+
   const amountUnits = parseUnits(amount, fromBal.tokenDecimals);
 
   return (
     <>
+      <TextH3Subtle>AMOUNT</TextH3Subtle>
+      <div className="h-4" />
       <div className="flex flex-row justify-stretch">
         <input
-          className="rounded-md text-xl font-semibold text-right text-midnight tabular-nums bg-ivory flex-grow px-4 py-2 outline-none border border-white active:border-primary focus:border-primary"
+          className="rounded-md text-3xl font-semibold text-right text-midnight tabular-nums bg-ivory flex-grow px-8 py-4 outline-none border border-white active:border-primary focus:border-primary"
+          placeholder="0.00"
           value={amount}
           onChange={onChange}
+          onBlur={onBlur}
         />
       </div>
       <div className="h-8" />
-      <TextH3Subtle>DESTINATION</TextH3Subtle>
-      <div className="h-4" />
-      <TextBold>USDC on Base</TextBold>
-
       <BridgeExecSection fromBal={fromBal!} amount={`${amountUnits}`} />
     </>
   );
@@ -188,6 +212,10 @@ function BridgeExecSection({
 
   const toAddr = getAddress(window.location.hash.slice(1));
 
+  // Load recipient
+  const eAccResult = rpcHook.trpc.getEthereumAccount.useQuery({ addr: toAddr });
+
+  // Load route
   useEffect(() => {
     setRoute(undefined);
     (async () => {
@@ -196,8 +224,8 @@ function BridgeExecSection({
         fromToken: fromBal.tokenAddr,
         fromAddress: fromBal.ownerAddr,
         fromAmount: amount,
-        toChain: 8453, // Base
-        toToken: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // USDC
+        toChain: chainConfig.chainL2.id, // Base
+        toToken: chainConfig.tokenAddress, // USDC
         toAddress: toAddr,
         slippage: 1.0, // 1.00 = 1% max slippage across the entire route
         enableForecall: true, // instant execution service, defaults to true
@@ -242,26 +270,67 @@ function BridgeExecSection({
 
   return (
     <>
-      <TextH3Subtle>DESTINATION</TextH3Subtle>
+      <TextH3Subtle>TO DAIMO</TextH3Subtle>
       <div className="h-4" />
-      <TextBold>USDC on Base</TextBold>
-      {route && (
-        <TextBold>Duration {route.estimate.estimatedRouteDuration}</TextBold>
+      {route && eAccResult.data && (
+        <RouteSummary route={route} toAccount={eAccResult.data} />
       )}
-      {route && (
-        <TextBold>
-          To amount {(Number(route.estimate.toAmountMin) / 1e6).toFixed(2)}
-        </TextBold>
-      )}
-
-      <button
-        className="bg-primary p-4 text-center text-sm text-white tracking-wider rounded-md"
-        onClick={exec}
-        disabled={execDisabled}
-      >
-        {execLabel}
-      </button>
+      <div className="h-8" />
+      <div className="flex">
+        <button
+          className="bg-primary font-semibold p-4 text-center text-sm text-white tracking-wider rounded-md flex-grow"
+          onClick={exec}
+          disabled={execDisabled}
+        >
+          {execLabel}
+        </button>
+      </div>
     </>
+  );
+}
+
+function RouteSummary({
+  route,
+  toAccount,
+}: {
+  route: RouteData;
+  toAccount: EAccount;
+}) {
+  assert(route.params.toAddress === toAccount.addr, "addr mismatch");
+  assert(toAccount.name !== null, "destination not a Daimo account");
+
+  const timeS = route.estimate.estimatedRouteDuration;
+  const amount = (Number(route.estimate.toAmount) / 1e6).toFixed(2);
+
+  return (
+    <div>
+      <div className="flex justify-between items-center pl-2 pr-8 py-4">
+        <div className="flex items-center">
+          <AccountBubble name={toAccount.name} />
+          <div className="w-4" />
+          <div className="text-midnight font-semibold text-xl leading-none">
+            {toAccount.name}
+          </div>
+        </div>
+        <div className="text-2xl text-midnight font-semibold text-right">
+          ${amount} <span className="text-xl">USDC</span>
+        </div>
+      </div>
+      <div className="flex justify-between pl-4 pr-8">
+        <div>
+          {route.estimate.feeCosts
+            .filter((fee) => Number(fee.amountUSD) > 0)
+            .map((fee) => (
+              <TextBold key={fee.name}>
+                {fee.name}: ${Number(fee.amountUSD).toFixed(2)}
+              </TextBold>
+            ))}
+        </div>
+        <div>
+          <TextBold>Estimated time: {timeS}s</TextBold>
+        </div>
+      </div>
+    </div>
   );
 }
 
