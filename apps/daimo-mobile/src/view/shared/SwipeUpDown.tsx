@@ -101,6 +101,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         onChange={handleSheetChanges}
         backdropComponent={renderBackdrop}
         animatedIndex={animatedIndex}
+        animateOnMount={false}
       >
         <Animated.View
           style={[styles.itemMiniWrapper, itemMiniStyle]}
