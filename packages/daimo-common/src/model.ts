@@ -9,7 +9,7 @@ export const zAddress = z
   .refine((s): s is Address => true);
 
 export enum AddrLabel {
-  Faucet = "faucet",
+  Faucet = "team daimo",
   PaymentLink = "payment link",
   Paymaster = "fee",
   Coinbase = "coinbase",

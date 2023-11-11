@@ -43,6 +43,11 @@ export class DB {
             address CHAR(42) NOT NULL
           );
           CREATE INDEX IF NOT EXISTS pushtoken_address ON pushtoken (address);
+          CREATE TABLE IF NOT EXISTS invitecode (
+            code VARCHAR(64) PRIMARY KEY,
+            use_count INT NOT NULL,
+            max_uses INT NOT NULL DEFAULT 1
+          )
       `);
     await client.end();
   }
@@ -69,9 +74,48 @@ export class DB {
     );
     client.release();
   }
+
+  async loadInviteCodes(): Promise<InviteCodeRow[]> {
+    console.log(`[DB] loading invite codes`);
+    const client = await this.pool.connect();
+    const result = await client.query<InviteCodeRow>(
+      `SELECT code, use_count, max_uses FROM invitecode`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} invite codes`);
+    return result.rows;
+  }
+
+  async saveInviteCode(code: InviteCodeRow) {
+    console.log(`[DB] inserting invite code`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO invitecode (code, use_count, max_uses) VALUES ($1, $2, $3)
+       ON CONFLICT (code) DO UPDATE SET use_count = $2 AND max_uses = $3`,
+      [code.code, code.useCount, code.maxUses]
+    );
+    client.release();
+  }
+
+  async incrementInviteCodeUseCount(code: string) {
+    console.log(`[DB] incrementing invite code use count`);
+    const client = await this.pool.connect();
+    await client.query(
+      `UPDATE invitecode SET use_count = use_count + 1 WHERE code = $1`,
+      [code]
+    );
+    client.release();
+  }
 }
 
 interface PushTokenRow {
   pushtoken: string;
   address: string;
+}
+
+interface InviteCodeRow {
+  code: string;
+  useCount: number;
+  maxUses: number;
 }

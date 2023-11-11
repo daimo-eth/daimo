@@ -29,6 +29,7 @@
     "geoip-lite": "^1.4.7",
     "libhoney": "^4.1.0",
     "pg": "^8.11.0",
+    "random-word-slugs": "^0.1.7",
     "userop": "^0.3.2",
     "viem": "^1.16.0",
     "zod": "^3.21.4"
