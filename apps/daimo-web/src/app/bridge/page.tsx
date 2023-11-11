@@ -2,7 +2,8 @@
 
 import { RouteData, Squid } from "@0xsquid/sdk";
 import { TokenBalance } from "@daimo/api";
-import { EAccount, assert } from "@daimo/common";
+import { EAccount, assert, getAccountName } from "@daimo/common";
+import { getChainConfig } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Signer, providers } from "ethers";
 import Image from "next/image";
@@ -26,8 +27,7 @@ import {
   TextH3Subtle,
   TextLight,
 } from "../../components/typography";
-import { chainConfig } from "../../env";
-import { RpcHookProvider, rpcHook, trpc } from "../../utils/trpc";
+import { RpcHookProvider, rpcHook } from "../../utils/trpc";
 
 let initSquid: Promise<Squid> | null = null;
 
@@ -217,6 +217,7 @@ function BridgeExecSection({
 
   // Load route
   useEffect(() => {
+    const chainConfigBase = getChainConfig("base");
     setRoute(undefined);
     (async () => {
       const params = {
@@ -224,8 +225,8 @@ function BridgeExecSection({
         fromToken: fromBal.tokenAddr,
         fromAddress: fromBal.ownerAddr,
         fromAmount: amount,
-        toChain: chainConfig.chainL2.id, // Base
-        toToken: chainConfig.tokenAddress, // USDC
+        toChain: chainConfigBase.chainL2.id, // Base
+        toToken: chainConfigBase.tokenAddress, // USDC
         toAddress: toAddr,
         slippage: 1.0, // 1.00 = 1% max slippage across the entire route
         enableForecall: true, // instant execution service, defaults to true
@@ -297,7 +298,7 @@ function RouteSummary({
   toAccount: EAccount;
 }) {
   assert(route.params.toAddress === toAccount.addr, "addr mismatch");
-  assert(toAccount.name !== null, "destination not a Daimo account");
+  const toName = getAccountName(toAccount);
 
   const timeS = route.estimate.estimatedRouteDuration;
   const amount = (Number(route.estimate.toAmount) / 1e6).toFixed(2);
@@ -306,10 +307,10 @@ function RouteSummary({
     <div>
       <div className="flex justify-between items-center pl-2 pr-8 py-4">
         <div className="flex items-center">
-          <AccountBubble name={toAccount.name} />
+          <AccountBubble name={toName} />
           <div className="w-4" />
           <div className="text-midnight font-semibold text-xl leading-none">
-            {toAccount.name}
+            {toName}
           </div>
         </div>
         <div className="text-2xl text-midnight font-semibold text-right">
