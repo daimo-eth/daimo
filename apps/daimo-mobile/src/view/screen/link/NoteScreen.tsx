@@ -228,7 +228,7 @@ function NoteDisplayInner({
           return (
             <ButtonBig
               type="primary"
-              title="Claim"
+              title="Accept"
               onPress={exec}
               disabled={!isClaimable || netRecv === 0}
             />
