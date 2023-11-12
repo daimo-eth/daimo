@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "start": "turbo start",
     "build": "turbo build",
+    "build:api": "turbo run build --filter @daimo/api",
     "build:mobile": "turbo run build --filter @daimo/mobile",
     "test": "turbo test",
     "lint": "turbo lint && syncpack list-mismatches",

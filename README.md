@@ -149,7 +149,6 @@ You'll need to either use the hosted Daimo API or run one locally.
 
 - To run the API locally, configure the `DAIMO_API_*` secrets, then run `npm run dev`.
 - You can run Postgres in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
-- To use the testnet staging API, just set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`. You can run both the mobile and web app this way.
 </details>
 
 <details>
