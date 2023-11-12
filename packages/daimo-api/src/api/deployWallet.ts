@@ -63,7 +63,11 @@ export async function deployWallet(
       console.log(
         `[API] Request $${dollars} USDC from faucet for ${name} ${address}`
       );
-      faucet.request(address, dollars, invCode); // Kick off in background
+      await retryBackoff(
+        `faucet-${name}`,
+        () => faucet.request(address, dollars, invCode),
+        5
+      );
     }
   } else {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
