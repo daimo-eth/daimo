@@ -5,6 +5,7 @@ import * as Clipboard from "expo-clipboard";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Linking,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -50,7 +51,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   const testnet = chainConfig.chainL2.testnet;
 
   return (
-    <View>
+    <ScrollView>
       {!testnet && (
         <>
           <OnrampsSection account={account} />
@@ -58,7 +59,7 @@ function DepositScreenInner({ account }: { account: Account }) {
         </>
       )}
       <SendToAddressSection {...{ account, chainConfig }} />
-    </View>
+    </ScrollView>
   );
 }
 
