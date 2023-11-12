@@ -27,6 +27,10 @@ async function main() {
   await vc.init();
   const bundlerClient = getBundlerClientFromEnv();
 
+  console.log(`[API] initializing db...`);
+  const db = new DB();
+  await db.createTables();
+
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const keyReg = new KeyRegistry(vc);
   const nameReg = new NameRegistry(vc);
@@ -34,13 +38,9 @@ async function main() {
   const paymaster = new Paymaster(vc, bundlerClient);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
   const noteIndexer = new NoteIndexer(vc, nameReg);
-  const faucet = new Faucet(vc, coinIndexer);
+  const faucet = new Faucet(vc, coinIndexer, db);
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
-
-  console.log(`[API] initializing db...`);
-  const db = new DB();
-  await db.createTables();
 
   const notifier = new PushNotifier(
     coinIndexer,

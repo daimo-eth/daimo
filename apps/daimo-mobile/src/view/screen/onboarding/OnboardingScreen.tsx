@@ -43,8 +43,8 @@ import {
 
 type OnboardPage =
   | "intro"
-  | "invite"
   | "flow-selection"
+  | "create-invite"
   | "create-try-enclave"
   | "existing-try-enclave"
   | "create"
@@ -74,6 +74,7 @@ export default function OnboardingScreen({
 
   // User enters their name
   const [name, setName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
 
   console.log(`[ONBOARDING] chainId ${daimoChain}`);
 
@@ -82,15 +83,21 @@ export default function OnboardingScreen({
     exec: createExec,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name, daimoChain);
+  } = useCreateAccount(name, inviteCode, daimoChain);
 
   return (
     <View style={styles.onboardingScreen}>
       {page === "intro" && <IntroPages onNext={next} />}
-      {page === "invite" && (
-        <InvitePage onNext={next} daimoChain={daimoChain} />
-      )}
       {page === "flow-selection" && <FlowSelectionPage onNext={next} />}
+      {page === "create-invite" && (
+        <InvitePage
+          onNext={next}
+          onPrev={prev}
+          daimoChain={daimoChain}
+          inviteCode={inviteCode}
+          setInviteCode={setInviteCode}
+        />
+      )}
       {(page === "create-try-enclave" || page === "existing-try-enclave") && (
         <SetupKeyPage onNext={next} onPrev={prev} createStatus={createStatus} />
       )}
@@ -141,20 +148,25 @@ function getNext(
   const fnGoTo = (p: OnboardPage) => () => goToPage(p);
   switch (page) {
     case "intro":
-      return fnGoTo("invite");
-    case "invite":
-      return (input) => {
-        const { isTestnet } = assertNotNull(input);
-        setDaimoChain(assertNotNull(isTestnet) ? "baseGoerli" : "base");
-        goToPage("flow-selection");
-      };
+      return fnGoTo("flow-selection");
     case "flow-selection":
       return (input) => {
         const { choice } = assertNotNull(input);
         // Android goes through an extra onboarding step
-        if (Platform.OS !== "android") goToPage(assertNotNull(choice));
-        else if (choice === "create") goToPage("create-try-enclave");
-        else goToPage("existing-try-enclave");
+        if (choice === "create") goToPage("create-invite");
+        else {
+          // Use existing
+          if (Platform.OS !== "android") goToPage("existing");
+          else goToPage("existing-try-enclave");
+        }
+      };
+    case "create-invite":
+      return (input) => {
+        const { isTestnet } = assertNotNull(input);
+        setDaimoChain(assertNotNull(isTestnet) ? "baseGoerli" : "base");
+
+        if (Platform.OS !== "android") goToPage("create");
+        else goToPage("create-try-enclave");
       };
     case "create-try-enclave":
       return fnGoTo("create");
@@ -281,13 +293,18 @@ function PageBubble({ count, index }: { count: number; index: number }) {
 
 function InvitePage({
   onNext,
+  onPrev,
   daimoChain,
+  inviteCode,
+  setInviteCode,
 }: {
   onNext: ({ isTestnet }: { isTestnet: boolean }) => void;
+  onPrev?: () => void;
   daimoChain: DaimoChain;
+  inviteCode: string;
+  setInviteCode: (inviteCode: string) => void;
 }) {
-  const [inviteCode, setInviteCode] = useState("");
-  const onChange = (text: string) => setInviteCode(text);
+  const onChange = (text: string) => setInviteCode(text.toLowerCase());
 
   // We haven't picked a daimoChain yet so this defaults to prod.
   const rpcHook = env(daimoChain).rpcHook;
@@ -320,37 +337,40 @@ function InvitePage({
   };
 
   return (
-    <View style={styles.paddedPage}>
-      <View style={{ flexDirection: "row", justifyContent: "center" }}>
-        <Octicons name="mail" size={40} color={color.midnight} />
+    <View>
+      <OnboardingHeader title="Invite" onPrev={onPrev} />
+      <View style={styles.paddedPage}>
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <Octicons name="mail" size={40} color={color.midnight} />
+        </View>
+        <Spacer h={32} />
+        <TextCenter>
+          <TextParagraph>
+            Daimo is currently invite-only. If you have an invite code, please
+            enter it below. Otherwise, you can join the waitlist.
+          </TextParagraph>
+        </TextCenter>
+        <Spacer h={32} />
+        <TextCenter>
+          <TextLight>{status}</TextLight>
+        </TextCenter>
+        <Spacer h={16} />
+        <InputBig
+          placeholder="enter invite code"
+          value={inviteCode}
+          onChange={onChange}
+          center
+        />
+        <Spacer h={16} />
+        <ButtonBig
+          type="primary"
+          title="Submit"
+          onPress={() => onNext({ isTestnet })}
+          disabled={!isValid}
+        />
+        <Spacer h={16} />
+        <TextButton title="Join waitlist" onPress={linkToWaitlist} />
       </View>
-      <Spacer h={32} />
-      <TextCenter>
-        <TextParagraph>
-          Daimo is currently invite-only. If you have an invite code, please
-          enter it below. Otherwise, you can join the waitlist.
-        </TextParagraph>
-      </TextCenter>
-      <Spacer h={32} />
-      <TextCenter>
-        <TextLight>{status}</TextLight>
-      </TextCenter>
-      <Spacer h={16} />
-      <InputBig
-        placeholder="enter invite code"
-        value={inviteCode}
-        onChange={onChange}
-        center
-      />
-      <Spacer h={16} />
-      <ButtonBig
-        type="primary"
-        title="Submit"
-        onPress={() => onNext({ isTestnet })}
-        disabled={!isValid}
-      />
-      <Spacer h={16} />
-      <TextButton title="Join waitlist" onPress={linkToWaitlist} />
     </View>
   );
 }
@@ -368,8 +388,8 @@ function FlowSelectionPage({
       <Spacer h={64} />
       <TextCenter>
         <TextParagraph>
-          You can create a new account, or add this device to an account you
-          already have.
+          You can create a new account, or add this device to a Daimo account
+          you already have.
         </TextParagraph>
       </TextCenter>
       <Spacer h={32} />
@@ -383,7 +403,7 @@ function FlowSelectionPage({
       <Spacer h={16} />
       <ButtonBig
         type="subtle"
-        title="Use existing"
+        title="Already have an account?"
         onPress={() => {
           onNext({ choice: "existing" });
         }}

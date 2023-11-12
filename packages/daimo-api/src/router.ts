@@ -16,7 +16,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
-import { daimoInviteCodes, ViemClient } from "./env";
+import { ViemClient } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -138,16 +138,19 @@ export function createRouter(
         z.object({
           name: z.string(),
           pubKeyHex: zHex,
+          invCode: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { name, pubKeyHex } = opts.input;
+        const { name, pubKeyHex, invCode } = opts.input;
         telemetry.recordUserAction(opts.ctx, "deployWallet", name);
         const address = await deployWallet(
           name,
           pubKeyHex,
+          invCode,
           nameReg,
           accountFactory,
+          faucet,
           telemetry
         );
         return { status: "success", address };
@@ -181,25 +184,11 @@ export function createRouter(
         );
       }),
 
-    testnetFaucetStatus: publicProcedure
-      .input(z.object({ recipient: zAddress }))
-      .query(async (opts) => {
-        const recipient = getAddress(opts.input.recipient);
-        return faucet.getStatus(recipient);
-      }),
-
-    testnetRequestFaucet: publicProcedure
-      .input(z.object({ recipient: zAddress }))
-      .mutation(async (opts) => {
-        const recipient = getAddress(opts.input.recipient);
-        return faucet.request(recipient);
-      }),
-
     verifyInviteCode: publicProcedure
       .input(z.object({ inviteCode: z.string() }))
       .query(async (opts) => {
         const { inviteCode } = opts.input;
-        return daimoInviteCodes.has(inviteCode);
+        return faucet.verifyInviteCode(inviteCode);
       }),
   });
 }

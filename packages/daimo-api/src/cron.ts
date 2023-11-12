@@ -7,6 +7,7 @@ import {
   daimoChainFromId,
   daimoPaymasterAddress,
   entryPointABI,
+  erc20ABI,
 } from "@daimo/contract";
 import { CronJob } from "cron";
 import { Constants } from "userop";
@@ -56,6 +57,22 @@ export class Crontab {
     this.pruneTransfers();
   };
 
+  async sendLowBalanceMessage(
+    balance: number,
+    label: string,
+    thresholdWarn: number,
+    thresholdError: number
+  ) {
+    if (balance < thresholdError) {
+      this.telemetry.recordClippy(
+        `${label} balance too low: ${balance}`,
+        "error"
+      );
+    } else if (balance < thresholdWarn) {
+      this.telemetry.recordClippy(`${label} balance low: ${balance}`, "warn");
+    }
+  }
+
   async checkPaymasterDeposit() {
     const depositInfo = await this.vc.publicClient.readContract({
       address: Constants.ERC4337.EntryPoint as Hex,
@@ -67,17 +84,12 @@ export class Crontab {
     const depositEth = Number(formatEther(depositInfo.deposit));
     console.log(`[CRON] checked paymaster deposit ${depositEth}`);
 
-    if (depositEth < 0.001) {
-      this.telemetry.recordClippy(
-        `Paymaster ${daimoPaymasterAddress} deposit too low: ${depositEth} eth`,
-        "error"
-      );
-    } else if (depositEth < 0.01) {
-      this.telemetry.recordClippy(
-        `Paymaster ${daimoPaymasterAddress} deposit low: ${depositEth} eth`,
-        "warn"
-      );
-    }
+    await this.sendLowBalanceMessage(
+      depositEth,
+      `Paymaster ${daimoPaymasterAddress} ETH`,
+      0.05,
+      0.005
+    );
   }
 
   async checkFaucetBalance() {
@@ -86,17 +98,27 @@ export class Crontab {
       address: faucetAddr,
     });
     const balanceEth = Number(formatEther(balance));
-    if (balanceEth < 0.002) {
-      this.telemetry.recordClippy(
-        `Faucet ${faucetAddr} balance too low: ${balanceEth} eth`,
-        "error"
-      );
-    } else if (balanceEth < 0.02) {
-      this.telemetry.recordClippy(
-        `Faucet ${faucetAddr} balance low: ${balanceEth} eth`,
-        "warn"
-      );
-    }
+    await this.sendLowBalanceMessage(
+      balanceEth,
+      `Faucet ${faucetAddr} ETH`,
+      0.05,
+      0.005
+    );
+
+    const balanceUSDC = await this.vc.publicClient.readContract({
+      abi: erc20ABI,
+      address: chainConfig.tokenAddress,
+      functionName: "balanceOf",
+      args: [faucetAddr],
+    });
+    const balanceDollars = Number(amountToDollars(balanceUSDC));
+
+    await this.sendLowBalanceMessage(
+      balanceDollars,
+      `Faucet ${faucetAddr} USDC`,
+      200,
+      20
+    );
   }
 
   async postRecentTransfers() {
