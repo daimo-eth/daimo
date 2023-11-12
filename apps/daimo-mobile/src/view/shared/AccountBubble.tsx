@@ -16,6 +16,48 @@ export function AccountBubble({
   isPending?: boolean;
   transparent?: boolean;
 }) {
+  const name = getAccountName(eAcc);
+  const letter = (function () {
+    if (name.startsWith("0x")) {
+      return "0x";
+    } else if (eAcc.label != null) {
+      switch (eAcc.label) {
+        case AddrLabel.Faucet:
+          return <Octicons name="download" size={16} color={color.primary} />;
+        case AddrLabel.PaymentLink:
+          return <Octicons name="link" size={16} color={color.primary} />;
+        case AddrLabel.Coinbase:
+          return <Octicons name="plus" size={16} color={color.primary} />;
+        default:
+          return "?";
+      }
+    } else {
+      const codePoint = name.codePointAt(0) || "?".charCodeAt(0);
+      return String.fromCodePoint(codePoint).toUpperCase();
+    }
+  })();
+
+  return (
+    <Bubble
+      inside={letter}
+      size={size}
+      isPending={isPending}
+      transparent={transparent}
+    />
+  );
+}
+
+export function Bubble({
+  inside,
+  size,
+  isPending,
+  transparent,
+}: {
+  inside: string | React.JSX.Element;
+  size: number;
+  isPending?: boolean;
+  transparent?: boolean;
+}) {
   const col = isPending ? color.primaryBgLight : color.primary;
 
   const style: ViewStyle = useMemo(
@@ -43,31 +85,10 @@ export function AccountBubble({
     [size, col]
   );
 
-  const name = getAccountName(eAcc);
-  const letter = (function () {
-    if (name.startsWith("0x")) {
-      return "0x";
-    } else if (eAcc.label != null) {
-      switch (eAcc.label) {
-        case AddrLabel.Faucet:
-          return <Octicons name="download" size={16} color={color.primary} />;
-        case AddrLabel.PaymentLink:
-          return <Octicons name="link" size={16} color={color.primary} />;
-        case AddrLabel.Coinbase:
-          return <Octicons name="plus" size={16} color={color.primary} />;
-        default:
-          return "?";
-      }
-    } else {
-      const codePoint = name.codePointAt(0) || "?".charCodeAt(0);
-      return String.fromCodePoint(codePoint).toUpperCase();
-    }
-  })();
-
   return (
     <View style={style}>
       <Text style={textStyle} numberOfLines={1}>
-        {letter}
+        {inside}
       </Text>
     </View>
   );

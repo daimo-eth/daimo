@@ -15,15 +15,18 @@ import { Hex } from "viem";
 import { useAccount } from "../../model/account";
 import { Recipient } from "../../sync/recipients";
 
+export type QRScreenOptions = "PAY ME" | "SCAN";
+
 export type ParamListHome = {
   Home: undefined;
-  QR: undefined;
+  QR: { option: QRScreenOptions | undefined };
   HistoryOp: { op: TransferOpEvent };
 };
 
 export type ParamListSend = {
   SendNav: { sendNote?: boolean };
   SendTransfer: SendNavProp;
+  QR: { option: QRScreenOptions | undefined };
 };
 
 export type ParamListReceive = {

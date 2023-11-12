@@ -116,13 +116,7 @@ function LinkToExplorer({
 
   const openURL = useCallback(() => Linking.openURL(url), []);
 
-  return (
-    <ButtonBig
-      onPress={openURL}
-      type="subtle"
-      title={`View on ${explorer.name}`}
-    />
-  );
+  return <ButtonBig onPress={openURL} type="subtle" title="View on explorer" />;
 }
 
 function TransferBody({
