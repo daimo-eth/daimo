@@ -72,16 +72,13 @@ function SearchResultsScroll({
     >
       {res.error && <ErrorRowCentered error={res.error} />}
       {recentsOnly && <QRRow />}
-      {res.recipients.length > 0 &&
-        (recentsOnly ? (
-          <View style={styles.resultsHeader}>
-            <TextLight>Recent recipients</TextLight>
-          </View>
-        ) : (
-          <View style={styles.resultsHeader}>
-            <TextLight>Search results</TextLight>
-          </View>
-        ))}
+      {res.recipients.length > 0 && (
+        <View style={styles.resultsHeader}>
+          <TextLight>
+            {recentsOnly ? "Recent recipients" : "Search results"}
+          </TextLight>
+        </View>
+      )}
       {res.recipients.map((r) => (
         <RecipientRow key={r.addr} recipient={r} />
       ))}
