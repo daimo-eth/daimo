@@ -350,7 +350,7 @@ function InvitePage({
             an invite code using your Devconnect Zupass ticket.
           </TextParagraph>
         </TextCenter>
-        <Spacer h={32} />
+        <Spacer h={16} />
         <TextCenter>
           <TextLight>{status}</TextLight>
         </TextCenter>
@@ -386,6 +386,7 @@ function FlowSelectionPage({
 }) {
   return (
     <View style={styles.paddedPage}>
+      <Spacer h={32} />
       <TextCenter>
         <TextH1>Welcome</TextH1>
       </TextCenter>
@@ -604,7 +605,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   paddedPage: {
-    paddingTop: 96,
+    paddingTop: 64,
     paddingHorizontal: 24,
   },
 });
