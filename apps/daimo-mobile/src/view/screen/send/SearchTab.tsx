@@ -1,4 +1,5 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
+import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useState } from "react";
 import {
   Platform,
@@ -11,7 +12,7 @@ import {
 import { Account } from "../../../model/account";
 import { Recipient, useRecipientSearch } from "../../../sync/recipients";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
-import { AccountBubble } from "../../shared/AccountBubble";
+import { AccountBubble, Bubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
@@ -36,7 +37,7 @@ export function SearchTab() {
           onChange={setPrefix}
         />
       </View>
-      <Spacer h={24} />
+      <Spacer h={16} />
       <SearchResults prefix={prefix} />
     </>
   );
@@ -70,6 +71,7 @@ function SearchResultsScroll({
       keyboardShouldPersistTaps="handled"
     >
       {res.error && <ErrorRowCentered error={res.error} />}
+      {recentsOnly && <QRRow />}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
           <TextLight>
@@ -129,19 +131,58 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
     `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
 
   return (
-    <View style={styles.resultBorder}>
+    <Row onPress={payAccount}>
+      <View style={styles.resultRow}>
+        <View style={styles.resultAccount}>
+          <AccountBubble eAcc={recipient} size={36} />
+          <TextBody>{name}</TextBody>
+        </View>
+        <TextLight>{lastSendStr}</TextLight>
+      </View>
+    </Row>
+  );
+}
+
+function QRRow() {
+  const nav = useNav();
+  return (
+    <Row
+      key="qrScan"
+      onPress={() =>
+        nav.navigate("SendTab", {
+          screen: "QR",
+          params: { option: "SCAN" },
+        })
+      }
+    >
+      <View style={styles.resultRow}>
+        <View style={styles.resultAccount}>
+          <Bubble
+            inside={<Octicons name="apps" size={16} color={color.primary} />}
+            size={36}
+          />
+          <TextBody>Scan QR code</TextBody>
+        </View>
+      </View>
+    </Row>
+  );
+}
+
+function Row({
+  children,
+  onPress,
+}: {
+  children: React.ReactNode;
+  onPress: () => void;
+}) {
+  return (
+    <View>
       <TouchableHighlight
-        onPress={payAccount}
+        onPress={onPress}
         {...touchHighlightUnderlay.subtle}
         style={styles.resultRowWrap}
       >
-        <View style={styles.resultRow}>
-          <View style={styles.resultAccount}>
-            <AccountBubble eAcc={recipient} size={36} />
-            <TextBody>{name}</TextBody>
-          </View>
-          <TextLight>{lastSendStr}</TextLight>
-        </View>
+        {children}
       </TouchableHighlight>
     </View>
   );
@@ -159,19 +200,15 @@ const styles = StyleSheet.create({
   },
   resultsHeader: {
     flexDirection: "row",
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 2,
-  },
-  resultBorder: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
   },
   resultRowWrap: {
     marginHorizontal: -24,
   },
   resultRow: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

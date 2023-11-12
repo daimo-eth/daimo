@@ -149,7 +149,7 @@ export function PerformWalletAction({
             {isLoading
               ? "SENDING"
               : isSuccess
-              ? "VIEW ON BASESCAN ↗"
+              ? "VIEW ON EXPLORER ↗"
               : secondaryTitle}
           </SecondaryButton>
           <div className="h-4" />

@@ -147,16 +147,25 @@ function SendNoteButtonInner({
         result = await Share.share({ url }); // Default behavior for iOS
       }
 
-      if (result.action === Share.sharedAction) {
+      nav.reset({
+        routes: [
+          {
+            name: "SendTab",
+            params: { screen: "SendNav", params: {} },
+          },
+        ],
+      });
+      nav.navigate("HomeTab", { screen: "Home" });
+
+      // sharedAction is only available on iOS
+      // For Android we don't know if it was shared or not
+      if (result.action === Share.sharedAction && Platform.OS === "ios") {
         console.log(
           "[APP] Note shared with activity type ",
           result.activityType || "unknown"
         );
-        nav.navigate("HomeTab", { screen: "Home" });
       } else if (result.action === Share.dismissedAction) {
-        // Only on iOS
         console.log("[APP] Note share reverted");
-        // TODO: Suggest revert or retry?
       }
     } catch (error: any) {
       console.error("[APP] Note share error:", error);

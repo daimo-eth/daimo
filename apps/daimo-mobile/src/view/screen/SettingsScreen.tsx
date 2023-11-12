@@ -98,7 +98,7 @@ function AccountSection({ account }: { account: Account }) {
       <Spacer h={16} />
       <ButtonMed
         type="subtle"
-        title="View account on basescan"
+        title="View account on explorer"
         onPress={linkToExplorer}
       />
     </View>
