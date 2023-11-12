@@ -10,9 +10,9 @@ import { ViemClient, chainConfig } from "../env";
 export type FaucetStatus =
   | "unavailable"
   | "canRequest"
-  | "alreadyRequested"
-  | "alreadySentInvite"
-  | "alreadySentAddress";
+  | "alreadyRequestedCoins"
+  | "alreadyUsedInvite"
+  | "alreadySentCoins";
 
 type InviteCodeStatus = {
   useCount: number;
@@ -65,10 +65,10 @@ export class Faucet {
   }
 
   getStatus(address: Address, invCode: string): FaucetStatus {
-    if (!this.verifyInviteCode(invCode)) return "alreadySentInvite";
+    if (!this.verifyInviteCode(invCode)) return "alreadyUsedInvite";
 
-    if (this.sent.has(address)) return "alreadySentAddress";
-    if (this.requested.has(address)) return "alreadyRequested";
+    if (this.sent.has(address)) return "alreadySentCoins";
+    if (this.requested.has(address)) return "alreadyRequestedCoins";
     return "canRequest";
   }
 
