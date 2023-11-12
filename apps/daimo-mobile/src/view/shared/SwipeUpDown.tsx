@@ -61,11 +61,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     };
 
     const showMini = () => {
-      console.log(`[SWIPE] showFull ${posYMini}`);
+      console.log(`[SWIPE] showMini ${posYMini}`);
       setIsMini(true);
     };
 
-    const snapPoints = useMemo(() => [posYMini, posYFull], []);
+    const snapPoints = useMemo(
+      () => [posYMini, posYFull],
+      [posYMini, posYFull]
+    );
 
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (

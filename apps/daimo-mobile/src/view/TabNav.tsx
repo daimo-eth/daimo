@@ -154,8 +154,6 @@ function HomeTab() {
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
-      </HomeStack.Group>
-      <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>

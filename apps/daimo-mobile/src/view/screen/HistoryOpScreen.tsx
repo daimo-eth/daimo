@@ -67,7 +67,7 @@ function HistoryOpScreenInner({
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Transfer" modal onExit={useExitBack()} />
+      <ScreenHeader title="Transfer" onBack={useExitBack()} />
       <Spacer h={64} />
       <TransferBody account={account} op={op} />
       <Spacer h={64} />
