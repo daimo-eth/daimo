@@ -1,6 +1,5 @@
 "use client";
 
-import { getChainConfig } from "@daimo/contract";
 import { LiFiWidget, WidgetConfig } from "@lifi/widget";
 import { useMemo } from "react";
 import { Address } from "viem";

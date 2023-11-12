@@ -9,11 +9,14 @@ import {
   View,
 } from "react-native";
 
-import { getAmountText } from "./Amount";
+import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { TextCenter, TextLight } from "./text";
 import { useAccount } from "../../model/account";
+
+// Input componens allows entry in range $0.01 to $99,999.99
+const MAX_DOLLAR_INPUT_EXCLUSIVE = 100_000;
 
 export function AmountChooser({
   dollars,
@@ -74,16 +77,26 @@ function AmountInput({
   const change = useCallback((text: string) => {
     if (disabled) return;
 
-    setStrVal(text);
+    // Validate. Handle negative numbers, NaN, out of range.
+    const looksValid = /^(|0|(0?[.,]\d*)|([1-9]\d*[.,]?\d*))$/.test(text);
     const newVal = parseLocalFloat(text);
-
-    // Handle empty entry, negative numbers, NaN etc
-    if (!(newVal > 0)) {
-      onChange(0);
+    if (!looksValid || !(newVal >= 0) || newVal >= MAX_DOLLAR_INPUT_EXCLUSIVE) {
+      // reject input
       return;
     }
 
-    // Update number
+    // Max two decimals: if necessary, modify entry
+    const parts = text.split(/[.,]/);
+    if (parts.length >= 2) {
+      const roundedStr = `${parts[0]}${amountSeparator}${parts[1].slice(0, 2)}`;
+      const roundedVal = parseLocalFloat(`${parts[0]}.${parts[1].slice(0, 2)}`);
+      setStrVal(roundedStr);
+      onChange(roundedVal);
+      return;
+    }
+
+    // Accept entry as-is
+    setStrVal(text);
     onChange(newVal);
   }, []);
 
@@ -154,6 +167,6 @@ const styles = StyleSheet.create({
 
 // Parse both 1.23 and 1,23
 function parseLocalFloat(str?: string) {
-  if (str == null) return 0;
+  if (str == null || ["", ".", ","].includes(str)) return 0;
   return parseFloat(str.replace(",", "."));
 }

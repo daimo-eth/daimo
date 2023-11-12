@@ -45,20 +45,25 @@ function SendTransferButtonInner({
   requestId,
 }: SendTransferButtonProps & { account: Account }) {
   console.log(`[SEND] rendering SendButton ${dollars} ${requestId}`);
-  assert(dollars >= 0);
 
+  // Get exact amount. No partial cents.
+  assert(dollars >= 0);
+  const maxDecimals = 2;
+  const dollarsStr = dollars.toFixed(maxDecimals) as `${number}`;
+
+  // Generate nonce
   const nonceMetadata = requestId
     ? new DaimoNonceMetadata(DaimoNonceType.RequestResponse, BigInt(requestId))
     : new DaimoNonceMetadata(DaimoNonceType.Send);
-
   const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [requestId]);
 
+  // On exec, request signature from device enclave, send transfer.
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
-      console.log(`[ACTION] sending $${dollars} to ${recipient.addr}`);
-      return opSender.erc20transfer(recipient.addr, `${dollars}`, {
+      console.log(`[ACTION] sending $${dollarsStr} to ${recipient.addr}`);
+      return opSender.erc20transfer(recipient.addr, dollarsStr, {
         nonce,
         chainGasConstants: account.chainGasConstants,
       });
@@ -67,7 +72,7 @@ function SendTransferButtonInner({
       type: "transfer",
       from: account.address,
       to: recipient.addr,
-      amount: Number(dollarsToAmount(dollars)),
+      amount: Number(dollarsToAmount(dollarsStr)),
       status: OpStatus.pending,
       timestamp: 0,
       nonceMetadata: nonceMetadata.toHex(),
@@ -82,6 +87,8 @@ function SendTransferButtonInner({
       return "Insufficient funds";
     } else if (account.address === recipient.addr) {
       return "Can't send to yourself";
+    } else if (Number(dollarsStr) === 0) {
+      return "Enter an amount";
     } else {
       return undefined;
     }

@@ -6,7 +6,7 @@ export function dollarsToAmount(
   tokenDecimals: number = 6
 ) {
   if (typeof dollars === "number") {
-    dollars = `${dollars}`;
+    dollars = dollars.toFixed(tokenDecimals);
   }
   return parseUnits(dollars, tokenDecimals);
 }
