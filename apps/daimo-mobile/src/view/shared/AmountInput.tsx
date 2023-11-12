@@ -15,7 +15,7 @@ import { color, ss } from "./style";
 import { TextCenter, TextLight } from "./text";
 import { useAccount } from "../../model/account";
 
-// Input componens allows entry in range $0.01 to $99,999.99
+// Input components allows entry in range $0.01 to $99,999.99
 const MAX_DOLLAR_INPUT_EXCLUSIVE = 100_000;
 
 export function AmountChooser({
