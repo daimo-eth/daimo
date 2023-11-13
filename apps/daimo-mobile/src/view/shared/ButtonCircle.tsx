@@ -21,7 +21,7 @@ export function ButtonCircle({
     </TouchableHighlight>
   );
 }
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   buttonCircle: {
     width: 50,
     height: 50,

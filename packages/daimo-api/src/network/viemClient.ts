@@ -240,12 +240,21 @@ export class ViemClient {
     this.logFilters.push(filter);
   }
 
-  getEnsAddress = memoize((a: { name: string }) =>
-    this.l1Client.getEnsAddress(a)
+  getEnsAddress = memoize(
+    async (a: { name: string }) => {
+      try {
+        return await this.l1Client.getEnsAddress(a);
+      } catch (e: any) {
+        console.log(`[CHAIN] getEnsAddr ${a.name} error: ${e.message}`);
+        return null;
+      }
+    },
+    ({ name }: { name: string }) => name
   );
 
-  getEnsName = memoize((a: { address: Address }) =>
-    this.l1Client.getEnsName(a)
+  getEnsName = memoize(
+    (a: { address: Address }) => this.l1Client.getEnsName(a),
+    ({ address }: { address: Address }) => address
   );
 
   async writeContract<

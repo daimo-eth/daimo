@@ -23,7 +23,7 @@ export function BridgePageClient({ name }: { name: string }) {
 
   return (
     <main className="max-w-md mx-auto py-8 flex flex-col items-center">
-      {isTestnet && <TextError>Set DAIMO_CHAIN to use the bridge.</TextError>}
+      {isTestnet && <TextError>Configure mainnet to use the bridge.</TextError>}
       {res.isError && <TextError>{res.error.message}</TextError>}
       {res.isLoading && <TextLight>Loading address...</TextLight>}
       {res.isSuccess && !res.data && (

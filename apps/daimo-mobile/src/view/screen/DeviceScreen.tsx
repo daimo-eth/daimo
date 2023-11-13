@@ -2,9 +2,9 @@ import {
   OpStatus,
   assert,
   dollarsToAmount,
+  getSlotLabel,
   guessTimestampFromNum,
   timeString,
-  getSlotLabel,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
@@ -126,7 +126,9 @@ export function DeviceScreen({ route, navigation }: Props) {
 
   const isCurrentDevice = devicePubkey === account?.enclavePubKey;
   const canRemove =
-    account.accountKeys.length > 1 || account.lastBalance < dollarsToAmount(1);
+    account.accountKeys.length > 1 ||
+    account.lastBalance < dollarsToAmount(1) ||
+    account.homeChainId === 84531; // Testnet
 
   const statusMessage = (function (): ReactNode {
     switch (status) {

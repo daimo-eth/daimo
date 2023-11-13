@@ -1,12 +1,16 @@
 // Functional programming utilities.
 
 /** In-memory cache a function. */
-export function memoize<I, O>(func: (i: I) => O) {
-  const cache = new Map<I, O>();
+export function memoize<K, I, O>(
+  func: (i: I) => O,
+  keyFunc: (i: I) => K = (i) => i as any
+) {
+  const cache = new Map<K, O>();
   return (i: I) => {
-    if (cache.has(i)) return cache.get(i)!;
+    const k = keyFunc(i);
+    if (cache.has(k)) return cache.get(k)!;
     const o = func(i);
-    cache.set(i, o);
+    cache.set(k, o);
     return o;
   };
 }

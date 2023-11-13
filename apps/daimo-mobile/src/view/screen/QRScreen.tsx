@@ -15,7 +15,11 @@ import QRCode from "react-native-qrcode-svg";
 import { useAccount } from "../../model/account";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { Scanner } from "../shared/Scanner";
-import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
+import {
+  ScreenHeader,
+  useExitBack,
+  useExitToHome,
+} from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
@@ -31,9 +35,12 @@ export function QRScreen(props: Props) {
   const tabs = useRef(["PAY ME", "SCAN"] as QRScreenOptions[]).current;
   const title = tab === "PAY ME" ? "Display QR Code" : "Scan QR Code";
 
+  const goBack = useExitBack();
+  const goHome = useExitToHome();
+
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title={title} onBack={useExitBack()} />
+      <ScreenHeader title={title} onBack={goBack || goHome} />
       <Spacer h={8} />
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
@@ -70,7 +77,7 @@ function QRDisplay() {
   );
 }
 
-export function ShareButton({ name }: { name: string }) {
+function ShareButton({ name }: { name: string }) {
   const link: DaimoLinkAccount = {
     type: "account",
     account: name,
