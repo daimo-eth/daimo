@@ -8,7 +8,8 @@ import { DaimoNonce } from "@daimo/userop";
 import { Address, Hex, Log, getAbiItem, numberToHex } from "viem";
 
 import { OpIndexer } from "./opIndexer";
-import { ViemClient, chainConfig } from "../env";
+import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
 
 const transferEvent = getAbiItem({ abi: erc20ABI, name: "Transfer" });
 export type TransferLog = Log<

@@ -25,3 +25,13 @@ body {
     font-size: 16px;
   }
 }
+
+/** Hack: avoid double scrollbar on the bridge page. */
+
+.MuiScopedCssBaseline-root {
+  max-height: none !important;
+}
+
+.MuiBox-root > .MuiButtonBase-root:nth-child(2) {
+  display: none !important;
+}

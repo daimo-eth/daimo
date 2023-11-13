@@ -3,15 +3,19 @@ import { daimoEphemeralNotesAddress, erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
+import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
-import { chainConfig, retryBackoff } from "../env";
+import { chainConfig } from "../env";
+import { retryBackoff } from "../network/retryBackoff";
 import { Telemetry } from "../telemetry";
 
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
+  invCode: string | undefined,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
+  faucet: Faucet,
   telemetry: Telemetry
 ): Promise<Address> {
   const maxUint256 = 2n ** 256n - 1n;
@@ -54,15 +58,22 @@ export async function deployWallet(
   // If it worked, cache the name <> address mapping immediately.
   if (deployReceipt.status === "success") {
     nameReg.onSuccessfulRegister(name, address);
+
+    if (invCode) {
+      const dollars = chainConfig.chainL2.testnet ? 50 : 5;
+      console.log(
+        `[API] Request $${dollars} USDC from faucet for ${name} ${address}`
+      );
+      faucet.request(address, dollars, invCode); // Kick off in background
+    }
   } else {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
   }
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
   const url = `${explorer}/address/${address}`;
-  const starterUrl = `https://daimo.com/link/account/${name}`;
   telemetry.recordClippy(
-    `New user ${name} at ${url}\n\nSend starter: ${starterUrl}`,
+    `New user ${name} with invite code ${invCode} at ${url}`,
     "celebrate"
   );
 

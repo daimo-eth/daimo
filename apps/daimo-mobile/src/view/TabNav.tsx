@@ -140,6 +140,7 @@ function SendTab() {
       <SendStack.Group>
         <SendStack.Screen name="SendNav" component={SendNavScreen} />
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
+        <SendStack.Screen name="QR" component={QRScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
@@ -153,8 +154,6 @@ function HomeTab() {
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
-      </HomeStack.Group>
-      <HomeStack.Group screenOptions={{ presentation: "modal" }}>
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>

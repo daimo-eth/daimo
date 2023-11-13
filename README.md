@@ -5,7 +5,7 @@
 Single stablecoin, single rollup, payments only. Cross-chain transfers coming soon.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
-leave. You can add multiple devices and create Passkey backups to secure your 
+leave. You can add multiple devices and create Passkey backups to secure your
 account. Under the hood, it's a ERC-4337 contract wallet.
 
 The mission is to make an excellent experience. Payments should be fast, secure, and permissionless.
@@ -55,12 +55,16 @@ The mission is to make an excellent experience. Payments should be fast, secure,
   Yes, Daimo is and will always be open-source under GPLv3. We're here to collaborate. We want to make self-custody fast, safe, and easy. <a target="_blank" href="https://github.com/daimo-eth/daimo">See more on our Github.</a>
   </details>
 
+### Audits
+
+- [Veridise audit 2023 Oct: Daimo](./audits/2023-10-veridise-daimo.pdf)
+- [Veridise audit 2023 Oct: P-256 verifier](./audits-2023-10-veridise-p256.pdf)
+- [Veridise audit 2023 Nov: WebAuthn verifier](./audits-2023-11-veridise-webauthn.pdf)
+
 ### Development
 
-**Daimo is under active development.** Now on testnet, TestFlight, and in Play
-Store open testing.
-
-Veridise's audit report of our codebase is available [here](./audits/2023-10-veridise.pdf).
+**Daimo is under active development.** Now in App Store and Play Store with an
+invite code. Coming soon: desktop app, no invite code, cross-chain support.
 
 <details>
 <summary><strong>Architecture</strong></summary>
@@ -145,7 +149,6 @@ You'll need to either use the hosted Daimo API or run one locally.
 
 - To run the API locally, configure the `DAIMO_API_*` secrets, then run `npm run dev`.
 - You can run Postgres in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
-- To use the testnet staging API, just set `DAIMO_APP_API_URL=https://daimo-api-stage.onrender.com`. You can run both the mobile and web app this way.
 </details>
 
 <details>

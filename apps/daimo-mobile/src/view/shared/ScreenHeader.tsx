@@ -12,19 +12,17 @@ export function ScreenHeader({
   title,
   onBack,
   onExit,
-  modal,
 }: {
   title: string;
   onBack?: () => void;
   onExit?: () => void;
-  modal?: boolean;
 }) {
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
 
   return (
     <>
-      {!modal && <OfflineHeader />}
+      <OfflineHeader />
       <View style={styles.screenHead}>
         <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
         <TextH3>{title}</TextH3>

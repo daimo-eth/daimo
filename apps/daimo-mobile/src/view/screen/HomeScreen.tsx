@@ -80,9 +80,13 @@ function HomeScreenInner({ account }: { account: Account }) {
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
 
   // Show history
-  const histListMini = <HistoryListSwipe account={account} maxToShow={5} />;
-
-  const histListFull = <HistoryListSwipe account={account} />;
+  const histListMini = (
+    <HistoryListSwipe account={account} showDate={false} maxToShow={5} />
+  );
+  const histListFullPreview = (
+    <HistoryListSwipe account={account} showDate maxToShow={12} />
+  );
+  const histListFull = <HistoryListSwipe account={account} showDate />;
 
   return (
     <View>
@@ -112,6 +116,7 @@ function HomeScreenInner({ account }: { account: Account }) {
             <SwipeUpDown
               ref={bottomSheetRef}
               itemMini={histListMini}
+              itemFullPreview={histListFullPreview}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
             />

@@ -28,9 +28,11 @@ import { Account } from "../../model/account";
 
 export function HistoryListSwipe({
   account,
+  showDate,
   maxToShow,
 }: {
   account: Account;
+  showDate: boolean;
   maxToShow?: number;
 }) {
   const ins = useSafeAreaInsets();
@@ -47,11 +49,9 @@ export function HistoryListSwipe({
     );
   }
 
-  const showDate = maxToShow == null;
-
   const renderRow = (t: TransferOpEvent) => (
     <TransferRow
-      key={`${t.timestamp}-${t.from}-${t.to}`}
+      key={`${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`}
       transfer={t}
       address={account.address}
       showDate={showDate}

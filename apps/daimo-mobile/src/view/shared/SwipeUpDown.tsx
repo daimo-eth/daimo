@@ -3,12 +3,12 @@ import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typesc
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
   ReactNode,
+  forwardRef,
   useCallback,
   useImperativeHandle,
   useMemo,
-  useState,
-  forwardRef,
   useRef,
+  useState,
 } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
@@ -22,6 +22,7 @@ import { color } from "./style";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;
+  itemFullPreview: ReactNode;
   itemFull: ReactNode;
   swipeHeight: number;
   onShowMini?: () => void;
@@ -35,7 +36,7 @@ export type SwipeUpDownRef = {
 };
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
-  ({ itemMini, itemFull, swipeHeight }, ref) => {
+  ({ itemMini, itemFullPreview, itemFull, swipeHeight }, ref) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useBottomTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
@@ -50,9 +51,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     useImperativeHandle(ref, () => ({
       collapse() {
-        if (bottomRef?.current) {
-          bottomRef.current.collapse();
-        }
+        bottomRef.current?.collapse();
       },
     }));
 
@@ -62,24 +61,30 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     };
 
     const showMini = () => {
-      console.log(`[SWIPE] showFull ${posYMini}`);
+      console.log(`[SWIPE] showMini ${posYMini}`);
       setIsMini(true);
     };
 
-    const snapPoints = useMemo(() => [posYMini, posYFull], []);
+    const snapPoints = useMemo(
+      () => [posYMini, posYFull],
+      [posYMini, posYFull]
+    );
+
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (
         <BottomSheetBackdrop
           {...props}
           disappearsOnIndex={0}
           appearsOnIndex={1}
+          pressBehavior="none" // Disable fully closing to swipeIndex -1
         />
       ),
       []
     );
 
     const handleSheetChanges = (snapIndex: number) => {
-      if (snapIndex === 0) {
+      console.log(`[SWIPE] snapIndex ${snapIndex}`);
+      if (snapIndex < 1) {
         showMini();
       } else {
         showFull();
@@ -102,6 +107,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         backdropComponent={renderBackdrop}
         animatedIndex={animatedIndex}
         animateOnMount={false}
+        enablePanDownToClose={false}
       >
         <Animated.View
           style={[styles.itemMiniWrapper, itemMiniStyle]}
@@ -109,7 +115,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         >
           {itemMini}
         </Animated.View>
-        {itemFull}
+        {isMini ? itemFullPreview : itemFull}
       </BottomSheet>
     );
   }

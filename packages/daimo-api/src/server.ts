@@ -1,7 +1,8 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
+import cors from "cors";
 import http from "http";
 
-import { getBundlerClientFromEnv } from "./chain/bundlerClient";
+import { getBundlerClientFromEnv } from "./network/bundlerClient";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -10,9 +11,10 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
+import { getViemClientFromEnv } from "./network/viemClient";
 import { Crontab } from "./cron";
 import { DB } from "./db/db";
-import { getViemClientFromEnv, chainConfig } from "./env";
+import { chainConfig } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
@@ -27,6 +29,10 @@ async function main() {
   await vc.init();
   const bundlerClient = getBundlerClientFromEnv();
 
+  console.log(`[API] initializing db...`);
+  const db = new DB();
+  await db.createTables();
+
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const keyReg = new KeyRegistry(vc);
   const nameReg = new NameRegistry(vc);
@@ -34,13 +40,9 @@ async function main() {
   const paymaster = new Paymaster(vc, bundlerClient);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
   const noteIndexer = new NoteIndexer(vc, nameReg);
-  const faucet = new Faucet(vc, coinIndexer);
+  const faucet = new Faucet(vc, coinIndexer, db);
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
-
-  console.log(`[API] initializing db...`);
-  const db = new DB();
-  await db.createTables();
 
   const notifier = new PushNotifier(
     coinIndexer,
@@ -68,6 +70,7 @@ async function main() {
     console.log(`[API] polling logs...`);
     setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
+
   console.log(`[API] serving...`);
   const router = createRouter(
     vc,
@@ -83,7 +86,11 @@ async function main() {
     accountFactory,
     monitor
   );
-  const handler = createHTTPHandler({ router, createContext });
+  const handler = createHTTPHandler({
+    middleware: cors(),
+    router,
+    createContext,
+  });
 
   const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;
   const server = http.createServer((req, res) => {
@@ -95,7 +102,8 @@ async function main() {
       return;
     }
 
-    console.log(`[API] serving ${req.url}`);
+    console.log(`[API] serving ${req.method} ${req.url}`);
+
     req.url = "/" + req.url.slice(trpcPrefix.length);
     handler(req, res);
   });

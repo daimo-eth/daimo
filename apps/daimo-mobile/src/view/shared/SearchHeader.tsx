@@ -1,12 +1,13 @@
 import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode, RefObject, useCallback } from "react";
-import { StyleSheet, TextInput, TouchableHighlight, View } from "react-native";
+import { RefObject, useCallback } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
 
 import { AccountBubble } from "./AccountBubble";
+import { ButtonCircle } from "./ButtonCircle";
 import { InputBig } from "./InputBig";
 import { useNav } from "./nav";
-import { color, touchHighlightUnderlay } from "./style";
+import { color } from "./style";
 import { useAccount } from "../../model/account";
 
 /** Prefix is undefined when not focused, "" or longer when focused. */
@@ -29,7 +30,8 @@ export function SearchHeader({
 
   // Right: QR code
   const goToQR = useCallback(
-    () => nav.navigate("HomeTab", { screen: "QR" }),
+    () =>
+      nav.navigate("HomeTab", { screen: "QR", params: { option: undefined } }),
     [nav]
   );
 
@@ -60,36 +62,11 @@ export function SearchHeader({
   );
 }
 
-function ButtonCircle({
-  onPress,
-  children,
-}: {
-  onPress: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <TouchableHighlight
-      onPress={onPress}
-      style={styles.buttonCircle}
-      hitSlop={12}
-      {...touchHighlightUnderlay.subtle}
-    >
-      {children}
-    </TouchableHighlight>
-  );
-}
-
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  buttonCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    margin: 12,
   },
   qrCircle: {
     width: 50,

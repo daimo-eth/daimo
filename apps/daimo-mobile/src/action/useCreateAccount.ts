@@ -11,6 +11,7 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 /** Deploys a new contract wallet and registers it under a given username. */
 export function useCreateAccount(
   name: string,
+  invCode: string,
   daimoChain: DaimoChain
 ): ActHandle {
   const [as, setAS] = useActStatus();
@@ -24,7 +25,7 @@ export function useCreateAccount(
   const exec = async () => {
     if (!pubKeyHex) return;
     setAS("loading", "Creating account...");
-    result.mutate({ name, pubKeyHex });
+    result.mutate({ name, pubKeyHex, invCode });
   };
 
   // Once account creation succeeds, save the account

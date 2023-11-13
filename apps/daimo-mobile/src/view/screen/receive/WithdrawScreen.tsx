@@ -1,7 +1,7 @@
 import { assert } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import React from "react";
-import { Platform, View } from "react-native";
+import { Platform, ScrollView, View } from "react-native";
 
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
@@ -18,7 +18,7 @@ export function WithdrawScreen({ account }: { account: Account }) {
   const BB = Platform.OS === "android" ? TextBold : Badge;
 
   return (
-    <View>
+    <ScrollView>
       <HeaderRow title="Withdraw via Coinbase" />
       <View style={ss.container.padH16}>
         <TextPara>
@@ -40,7 +40,7 @@ export function WithdrawScreen({ account }: { account: Account }) {
           <BB>Base</BB>.
         </TextPara>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

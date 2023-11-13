@@ -1,8 +1,8 @@
 import {
   KeyData,
+  getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
-  getSlotLabel,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
@@ -30,6 +30,7 @@ import {
   useAccount,
 } from "../../model/account";
 import { AccountBubble } from "../shared/AccountBubble";
+import { amountSeparator } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { PendingDot } from "../shared/PendingDot";
@@ -98,7 +99,7 @@ function AccountSection({ account }: { account: Account }) {
       <Spacer h={16} />
       <ButtonMed
         type="subtle"
-        title="View account on basescan"
+        title="View account on explorer"
         onPress={linkToExplorer}
       />
     </View>
@@ -264,13 +265,13 @@ function DetailsSection({ account }: { account: Account }) {
   }
 
   const sendDebugLog = () => {
-    const env = JSON.stringify(envKV, null, 2);
+    const env = JSON.stringify({ ...envKV, amountSeparator }, null, 2);
     const accountJSON = serializeAccount(account);
     const debugLog = getDebugLog();
     Share.share(
       {
         title: "Send Debug Log",
-        message: `# Daimo Debug Log\n\n${env}\n\n${accountJSON}\n\n${debugLog}`,
+        message: [`# Daimo Debug Log`, env, accountJSON, debugLog].join("\n\n"),
       },
       {
         subject: "Daimo Debug Log",

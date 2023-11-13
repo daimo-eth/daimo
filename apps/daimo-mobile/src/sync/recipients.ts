@@ -1,4 +1,4 @@
-import { EAccount, EAccountSearchResult } from "@daimo/common";
+import { EAccount, EAccountSearchResult, getAccountName } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
@@ -52,11 +52,12 @@ export function useRecipientSearch(account: Account, prefix: string) {
   const recipients: Recipient[] = [];
   const looseMatchRecents: Recipient[] = [];
   for (const r of recents) {
+    const name = getAccountName(r).toLowerCase();
     if (prefix === "") {
       recipients.push(r); // Show ALL recent recipients
-    } else if (r.name && r.name.startsWith(prefix)) {
+    } else if (name.startsWith(prefix)) {
       recipients.push(r); // Show prefix-matching-name recent recipients
-    } else if (prefix.length >= 3 && r.name && r.name.includes(prefix)) {
+    } else if (prefix.length >= 3 && name.includes(prefix)) {
       looseMatchRecents.push(r); // Show matching-name recent recipients
     }
   }
