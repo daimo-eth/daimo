@@ -13,11 +13,11 @@ import { CronJob } from "cron";
 import { Constants } from "userop";
 import { Hex, formatEther } from "viem";
 
-import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
-import { NameRegistry } from "./contract/nameRegistry";
-import { ViemClient } from "./network/viemClient";
-import { chainConfig } from "./env";
 import { Telemetry } from "./telemetry";
+import { CoinIndexer, TransferLog } from "../contract/coinIndexer";
+import { NameRegistry } from "../contract/nameRegistry";
+import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
 
 export class Crontab {
   private transfersQueue: TransferLog[] = [];

@@ -1,4 +1,4 @@
-import { createRouter } from "./router";
+import { createRouter } from "./server/router";
 
 export type { AccountHistoryResult } from "./api/getAccountHistory";
 

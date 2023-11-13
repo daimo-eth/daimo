@@ -150,10 +150,10 @@ export class NameRegistry {
     let ensName: string | undefined = undefined;
     try {
       console.log(`[NAME-REG] looking up ENS name for ${address}`);
-      ensName = (await this.vc.l1Client.getEnsName({ address })) || undefined;
+      ensName = (await this.vc.getEnsName({ address })) || undefined;
       // Verify the forward lookup
       if (ensName != null) {
-        const addr = await this.vc.l1Client.getEnsAddress({ name: ensName });
+        const addr = await this.vc.getEnsAddress({ name: ensName });
         if (addr !== address) {
           console.warn(`[NAME-REG] bad ENS ${address} > ${ensName} > ${addr}`);
           ensName = undefined;
@@ -172,7 +172,7 @@ export class NameRegistry {
   async getEAccountFromStr(eAccStr: string): Promise<EAccount | undefined> {
     if (eAccStr.includes(".")) {
       const ensName = normalize(eAccStr);
-      const addr = await this.vc.l1Client.getEnsAddress({ name: ensName });
+      const addr = await this.vc.getEnsAddress({ name: ensName });
       if (addr != null) {
         return { ensName, addr } as EAccount;
       }

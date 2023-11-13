@@ -9,16 +9,16 @@ import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
-import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
+import { CoinIndexer, TransferLog } from "../contract/coinIndexer";
 import {
   KeyRegistry,
   SigningKeyAddedOrRemovedLog,
-} from "./contract/keyRegistry";
-import { NameRegistry } from "./contract/nameRegistry";
-import { NoteIndexer, NoteOpLog } from "./contract/noteIndexer";
-import { OpIndexer } from "./contract/opIndexer";
-import { DB } from "./db/db";
-import { chainConfig } from "./env";
+} from "../contract/keyRegistry";
+import { NameRegistry } from "../contract/nameRegistry";
+import { NoteIndexer, NoteOpLog } from "../contract/noteIndexer";
+import { OpIndexer } from "../contract/opIndexer";
+import { DB } from "../db/db";
+import { chainConfig } from "../env";
 
 const pushEnabled = process.env.DAIMO_PUSH_ENABLED === "true";
 

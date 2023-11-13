@@ -4,8 +4,8 @@ import geoIP from "geoip-lite";
 import Libhoney from "libhoney";
 import z from "zod";
 
-import { chainConfig } from "./env";
 import { TrpcRequestContext } from "./trpc";
+import { chainConfig } from "../env";
 
 // More keys to come. This list ensures we don't duplicate columns.
 export type TelemKey =

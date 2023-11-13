@@ -2,23 +2,23 @@ import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
 import http from "http";
 
-import { getBundlerClientFromEnv } from "./network/bundlerClient";
-import { AccountFactory } from "./contract/accountFactory";
-import { CoinIndexer } from "./contract/coinIndexer";
-import { Faucet } from "./contract/faucet";
-import { KeyRegistry } from "./contract/keyRegistry";
-import { NameRegistry } from "./contract/nameRegistry";
-import { NoteIndexer } from "./contract/noteIndexer";
-import { OpIndexer } from "./contract/opIndexer";
-import { Paymaster } from "./contract/paymaster";
-import { getViemClientFromEnv } from "./network/viemClient";
 import { Crontab } from "./cron";
-import { DB } from "./db/db";
-import { chainConfig } from "./env";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
 import { createContext } from "./trpc";
+import { AccountFactory } from "../contract/accountFactory";
+import { CoinIndexer } from "../contract/coinIndexer";
+import { Faucet } from "../contract/faucet";
+import { KeyRegistry } from "../contract/keyRegistry";
+import { NameRegistry } from "../contract/nameRegistry";
+import { NoteIndexer } from "../contract/noteIndexer";
+import { OpIndexer } from "../contract/opIndexer";
+import { Paymaster } from "../contract/paymaster";
+import { DB } from "../db/db";
+import { chainConfig } from "../env";
+import { getBundlerClientFromEnv } from "../network/bundlerClient";
+import { getViemClientFromEnv } from "../network/viemClient";
 
 async function main() {
   console.log(`[API] initializing telemetry...`);

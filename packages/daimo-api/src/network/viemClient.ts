@@ -18,9 +18,10 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { retryBackoff } from "./retryBackoff";
 import { chainConfig } from "../env";
-import { jsonBigParse, jsonBigStringify } from "../jsonBig";
+import { memoize } from "../utils/func";
+import { jsonBigParse, jsonBigStringify } from "../utils/jsonBig";
+import { retryBackoff } from "../utils/retryBackoff";
 
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
@@ -87,7 +88,7 @@ export class ViemClient {
   private lockLogProcessing = true;
 
   constructor(
-    public l1Client: PublicClient<Transport, Chain>,
+    private l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
     public walletClient: WalletClient<Transport, Chain, Account>
   ) {
@@ -231,6 +232,14 @@ export class ViemClient {
     // Follow future blocks
     this.logFilters.push(filter);
   }
+
+  getEnsAddress = memoize((a: { name: string }) =>
+    this.l1Client.getEnsAddress(a)
+  );
+
+  getEnsName = memoize((a: { address: Address }) =>
+    this.l1Client.getEnsName(a)
+  );
 }
 
 function getFilterName(filter: LogFilter<any>) {

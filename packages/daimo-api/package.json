@@ -5,8 +5,8 @@
   "description": "Daimo API for account creation, search, etc",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/tracing.ts src/server.ts",
-    "start": "OTEL_SERVICE_NAME=daimo-api ts-node -r ./src/tracing.ts src/server.ts",
+    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/server/tracing.ts src/server/server.ts",
+    "start": "OTEL_SERVICE_NAME=daimo-api ts-node -r ./src/server/tracing.ts src/server/server.ts",
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",

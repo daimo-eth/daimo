@@ -12,7 +12,7 @@ import {
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteOpLog } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
-import { PushNotifier } from "../src/pushNotifier";
+import { PushNotifier } from "../src/server/pushNotifier";
 
 const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
 const addrBob = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93");

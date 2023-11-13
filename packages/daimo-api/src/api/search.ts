@@ -52,7 +52,7 @@ async function tryGetEnsAddr(prefix: string, vc: ViemClient) {
   if (!prefix.includes(".")) return null;
   try {
     const ensName = normalize(prefix);
-    return await vc.l1Client.getEnsAddress({ name: ensName });
+    return await vc.getEnsAddress({ name: ensName });
   } catch (e) {
     console.log(`[API] ens lookup '${prefix}' failed: ${e}`);
     return null;
