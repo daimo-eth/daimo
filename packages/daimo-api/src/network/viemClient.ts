@@ -15,7 +15,6 @@ import {
   Transport,
   WalletClient,
   WriteContractParameters,
-  WriteContractReturnType,
   createPublicClient,
   createWalletClient,
   webSocket,
@@ -121,6 +120,7 @@ export class ViemClient {
   async processLogsToLatestBlock() {
     if (this.lockLogProcessing) {
       console.log("[CHAIN] SKIPPING, logs processing locked");
+      return;
     }
     this.lockLogProcessing = true;
 
