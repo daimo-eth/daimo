@@ -1,4 +1,4 @@
-import { getBundlerClientFromEnv } from "@daimo/api/src/chain/bundlerClient";
+import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
 import { UserOpHex } from "@daimo/common";
 import {
   daimoAccountFactoryConfig,

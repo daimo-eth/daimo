@@ -2,7 +2,7 @@ import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
 import http from "http";
 
-import { getBundlerClientFromEnv } from "./chain/bundlerClient";
+import { getBundlerClientFromEnv } from "./network/bundlerClient";
 import { AccountFactory } from "./contract/accountFactory";
 import { CoinIndexer } from "./contract/coinIndexer";
 import { Faucet } from "./contract/faucet";
@@ -11,7 +11,7 @@ import { NameRegistry } from "./contract/nameRegistry";
 import { NoteIndexer } from "./contract/noteIndexer";
 import { OpIndexer } from "./contract/opIndexer";
 import { Paymaster } from "./contract/paymaster";
-import { getViemClientFromEnv } from "./contract/viemClient";
+import { getViemClientFromEnv } from "./network/viemClient";
 import { Crontab } from "./cron";
 import { DB } from "./db/db";
 import { chainConfig } from "./env";

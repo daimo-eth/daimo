@@ -4,9 +4,9 @@ import { generateSlug } from "random-word-slugs";
 import { Address } from "viem";
 
 import { CoinIndexer, TransferLog } from "./coinIndexer";
-import { ViemClient } from "./viemClient";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
 
 export type FaucetStatus =
   | "unavailable"

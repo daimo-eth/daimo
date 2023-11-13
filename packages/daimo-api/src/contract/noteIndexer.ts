@@ -8,7 +8,7 @@ import { daimoEphemeralNotesConfig } from "@daimo/contract";
 import { Address, Log, decodeEventLog, getAbiItem } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
-import { ViemClient } from "./viemClient";
+import { ViemClient } from "../network/viemClient";
 
 const notesABI = daimoEphemeralNotesConfig.abi;
 const createEvent = getAbiItem({ abi: notesABI, name: "NoteCreated" });

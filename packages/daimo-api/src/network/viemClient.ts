@@ -18,6 +18,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+import { retryBackoff } from "./retryBackoff";
 import { chainConfig } from "../env";
 import { jsonBigParse, jsonBigStringify } from "../jsonBig";
 
@@ -76,7 +77,12 @@ export class ViemClient {
   // List of log filters to process initially + on each new block.
   private logFilters: LogFilter<any>[] = [];
   // Local cache of logs to avoid re-fetching them on restart.
-  private logCacheDir = path.join(os.homedir(), ".daimo", "logs");
+  private logCacheDir = path.join(
+    os.homedir(),
+    ".daimo",
+    "logs",
+    "" + chainConfig.chainL2.id
+  );
   // Lock to prevent concurrent or duplicate log ingestion.
   private lockLogProcessing = true;
 
@@ -231,23 +237,6 @@ function getFilterName(filter: LogFilter<any>) {
   const ret = filter.event?.name || filter.address?.substring(0, 10);
   if (ret) return ret;
   throw new Error("Invalid filter, no event name or address");
-}
-
-export async function retryBackoff<T>(
-  name: string,
-  fn: () => Promise<T>,
-  retryCount: number = 10
-): Promise<T> {
-  for (let i = 1; i <= retryCount; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      console.log(`[CHAIN] ${name} retry ${i} after error: ${e}`);
-      await new Promise((r) => setTimeout(r, 250 * 2 ** i));
-    }
-  }
-  // TODO: add performance logging
-  throw new Error(`too many retries: ${name}`);
 }
 
 export type ContractType<TAbi extends Abi> = GetContractReturnType<

@@ -21,8 +21,8 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
-import { ViemClient } from "./viemClient";
 import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
 
 const registeredName = "Registered";
 const registeredEvent = getAbiItem({

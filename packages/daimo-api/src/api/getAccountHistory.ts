@@ -14,7 +14,7 @@ import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
-import { ViemClient } from "../contract/viemClient";
+import { ViemClient } from "../network/viemClient";
 
 export interface AccountHistoryResult {
   address: Address;

@@ -15,7 +15,7 @@ import { Hex, formatEther } from "viem";
 
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
-import { ViemClient } from "./contract/viemClient";
+import { ViemClient } from "./network/viemClient";
 import { chainConfig } from "./env";
 import { Telemetry } from "./telemetry";
 

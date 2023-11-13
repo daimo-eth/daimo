@@ -5,7 +5,8 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
-import { chainConfig, retryBackoff } from "../env";
+import { chainConfig } from "../env";
+import { retryBackoff } from "../network/retryBackoff";
 import { Telemetry } from "../telemetry";
 
 export async function deployWallet(
