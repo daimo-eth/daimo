@@ -15,7 +15,8 @@ import { Hex, formatEther } from "viem";
 
 import { CoinIndexer, TransferLog } from "./contract/coinIndexer";
 import { NameRegistry } from "./contract/nameRegistry";
-import { ViemClient, chainConfig } from "./env";
+import { ViemClient } from "./contract/viemClient";
+import { chainConfig } from "./env";
 import { Telemetry } from "./telemetry";
 
 export class Crontab {

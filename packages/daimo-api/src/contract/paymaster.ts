@@ -1,8 +1,9 @@
 import { UserOpHex } from "@daimo/common";
 import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
 
+import { ViemClient } from "./viemClient";
 import { BundlerClient } from "../chain/bundlerClient";
-import { ViemClient, chainConfig } from "../env";
+import { chainConfig } from "../env";
 
 /* Interface to on-chain paymaster and gas related data. */
 export class Paymaster {
