@@ -1,4 +1,5 @@
 import type { AbiEvent } from "abitype";
+import AwaitLock from "await-lock";
 import fs from "node:fs/promises";
 import os from "os";
 import path from "path";
@@ -9,9 +10,12 @@ import {
   Chain,
   GetContractReturnType,
   GetLogsReturnType,
+  Hex,
   PublicClient,
   Transport,
   WalletClient,
+  WriteContractParameters,
+  WriteContractReturnType,
   createPublicClient,
   createWalletClient,
   webSocket,
@@ -86,6 +90,9 @@ export class ViemClient {
   );
   // Lock to prevent concurrent or duplicate log ingestion.
   private lockLogProcessing = true;
+  // Lock to ensure sequential nonce for walletClient writes
+  private lockNonce = new AwaitLock();
+  private nextNonce = 0;
 
   constructor(
     private l1Client: PublicClient<Transport, Chain>,
@@ -240,6 +247,44 @@ export class ViemClient {
   getEnsName = memoize((a: { address: Address }) =>
     this.l1Client.getEnsName(a)
   );
+
+  async writeContract<
+    const TAbi extends Abi | readonly unknown[],
+    TFunctionName extends string,
+    TChainOverride extends Chain | undefined = undefined
+  >(
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      Chain,
+      Account,
+      TChainOverride
+    >
+  ): Promise<Hex> {
+    const { publicClient, walletClient } = this;
+
+    console.log(`[CHAIN] exec ${args.functionName}, waiting for lock`);
+    await this.lockNonce.acquireAsync();
+
+    try {
+      const txCount = await publicClient.getTransactionCount({
+        address: walletClient.account.address,
+        blockTag: "pending",
+      });
+      console.log(
+        `[CHAIN] exec ${args.functionName}, got tx count ${txCount}, updating nonce ${this.nextNonce}`
+      );
+      this.nextNonce = Math.max(this.nextNonce, txCount);
+
+      // Execute, increment our nonce (saves us if we get a stale tx count)
+      args.nonce = this.nextNonce;
+      const ret = await this.walletClient.writeContract(args);
+      this.nextNonce += 1;
+      return ret;
+    } finally {
+      this.lockNonce.release();
+    }
+  }
 }
 
 function getFilterName(filter: LogFilter<any>) {

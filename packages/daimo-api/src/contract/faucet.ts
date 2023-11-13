@@ -103,7 +103,7 @@ export class Faucet {
     await this.incrementInviteCodeUseCount(invCode);
 
     console.log(`[FAUCET] sending $${dollars} USDC to ${address}`);
-    const hash = await this.vc.walletClient.writeContract({
+    const hash = await this.vc.writeContract({
       abi: erc20ABI,
       address: chainConfig.tokenAddress,
       functionName: "transfer",

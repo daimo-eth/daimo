@@ -6,8 +6,8 @@ import { AccountFactory } from "../contract/accountFactory";
 import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 import { Telemetry } from "../server/telemetry";
+import { retryBackoff } from "../utils/retryBackoff";
 
 export async function deployWallet(
   name: string,

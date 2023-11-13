@@ -33,7 +33,7 @@ export class AccountFactory {
     pubKeyHex: Hex,
     initCalls: DaimoAccountCall[]
   ): Promise<TransactionReceipt> {
-    const hash = await this.vc.walletClient.writeContract({
+    const hash = await this.vc.writeContract({
       ...daimoAccountFactoryConfig,
       functionName: "createAccount",
       args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
