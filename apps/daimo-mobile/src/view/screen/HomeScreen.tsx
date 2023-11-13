@@ -10,7 +10,9 @@ import {
   View,
   ScrollView,
   RefreshControl,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
@@ -35,9 +37,12 @@ export default function HomeScreen() {
 
 function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const nav = useNav();
   const isFocused = useIsFocused();
   const tabBarHeight = useBottomTabBarHeight();
+  const ins = useSafeAreaInsets();
+  const top = Math.max(ins.top, 16);
 
   useEffect(() => {
     if (nav.getParent()) {
@@ -74,6 +79,9 @@ function HomeScreenInner({ account }: { account: Account }) {
     setRefreshing(true);
     await resync("Home screen pull refresh");
     setRefreshing(false);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
   }, []);
 
   // Show search results when search is focused.
@@ -90,8 +98,9 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   return (
     <View>
-      <OfflineHeader />
+      <OfflineHeader shouldAddPaddingWhenOnline={false} />
       <ScrollView
+        ref={scrollRef}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -102,7 +111,9 @@ function HomeScreenInner({ account }: { account: Account }) {
           height: screenDimensions.height - tabBarHeight,
         }}
         scrollEnabled={searchPrefix == null}
+        contentInset={{ top: Math.max(ins.top, 16) }}
       >
+        {Platform.OS === "ios" && <Spacer h={top} />}
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults

@@ -7,7 +7,11 @@ import { color } from "./style";
 import { TextBody } from "./text";
 import { useNetworkState } from "../../sync/networkState";
 
-export function OfflineHeader() {
+export function OfflineHeader({
+  shouldAddPaddingWhenOnline = true,
+}: {
+  shouldAddPaddingWhenOnline?: boolean;
+}) {
   const netState = useNetworkState();
   const isOffline = netState.status === "offline";
 
@@ -18,7 +22,7 @@ export function OfflineHeader() {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: top,
+    paddingTop: isOffline || shouldAddPaddingWhenOnline ? top : 0,
     marginHorizontal: -16,
   } as const;
 
