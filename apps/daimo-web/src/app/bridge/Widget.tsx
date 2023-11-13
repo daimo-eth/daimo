@@ -39,7 +39,7 @@ export function Widget({
       languageResources: {
         en: {
           header: {
-            exchange: "Deposit to Daimo",
+            exchange: "Bridge to Daimo",
           },
           main: {
             sendToWallet: `Send to ${toName} on Daimo`,

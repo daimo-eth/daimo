@@ -9,8 +9,9 @@ type LinkProps = {
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   return {
-    title: "Daimo Deposit",
-    description: "Deposit to Daimo account: " + props.params.toAccountName,
+    title: "li.fi → Daimo Bridge",
+    description:
+      "Bridge from any wallet to Daimo account: " + props.params.toAccountName,
     icons: {
       icon: "/logo-web-favicon.png",
     },
