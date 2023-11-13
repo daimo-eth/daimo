@@ -108,10 +108,13 @@ function HomeScreenInner({ account }: { account: Account }) {
         }
         scrollToOverflowEnabled={false}
         contentContainerStyle={{
-          height: screenDimensions.height - tabBarHeight,
+          height:
+            screenDimensions.height -
+            tabBarHeight -
+            (Platform.OS === "android" ? ins.top : 0),
         }}
         scrollEnabled={searchPrefix == null}
-        contentInset={{ top: Math.max(ins.top, 16) }}
+        contentInset={{ top: ins.top }}
         scrollsToTop={false}
       >
         {Platform.OS === "ios" && <Spacer h={top} />}
