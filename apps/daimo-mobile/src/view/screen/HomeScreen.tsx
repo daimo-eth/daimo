@@ -112,6 +112,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         }}
         scrollEnabled={searchPrefix == null}
         contentInset={{ top: Math.max(ins.top, 16) }}
+        scrollsToTop={false}
       >
         {Platform.OS === "ios" && <Spacer h={top} />}
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
