@@ -1,18 +1,21 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
-  Keyboard,
   StyleSheet,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account } from "../../model/account";
+import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
@@ -21,7 +24,7 @@ import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useNav } from "../shared/nav";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -34,6 +37,7 @@ function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const nav = useNav();
   const isFocused = useIsFocused();
+  const tabBarHeight = useBottomTabBarHeight();
 
   useEffect(() => {
     if (nav.getParent()) {
@@ -63,6 +67,14 @@ function HomeScreenInner({ account }: { account: Account }) {
     keySlot,
     account.homeChainId
   );
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    resync("Pull refresh on home screen");
+    setRefreshing(true);
+    await resync("Home screen pull refresh");
+    setRefreshing(false);
+  }, []);
 
   // Show search results when search is focused.
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
@@ -73,14 +85,29 @@ function HomeScreenInner({ account }: { account: Account }) {
   const histListFull = <HistoryListSwipe account={account} />;
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={ss.container.screen}>
-        <OfflineHeader />
+    <View>
+      <OfflineHeader />
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        scrollToOverflowEnabled={false}
+        contentContainerStyle={{
+          height: screenDimensions.height - tabBarHeight,
+        }}
+        scrollEnabled={searchPrefix == null}
+      >
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
-        {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
+        {searchPrefix != null && (
+          <SearchResults
+            prefix={searchPrefix}
+            style={{ marginHorizontal: 0 }}
+          />
+        )}
         {searchPrefix == null && (
           <>
-            <Spacer h={64} />
             <AmountAndButtons account={account} />
             <SwipeUpDown
               ref={bottomSheetRef}
@@ -90,8 +117,8 @@ function HomeScreenInner({ account }: { account: Account }) {
             />
           </>
         )}
-      </View>
-    </TouchableWithoutFeedback>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -110,16 +137,19 @@ function AmountAndButtons({ account }: { account: Account }) {
   const isEmpty = account.lastBalance === 0n;
 
   return (
-    <View style={styles.amountAndButtons}>
-      <TextLight>Your balance</TextLight>
-      <TitleAmount amount={account.lastBalance} />
-      <Spacer h={16} />
-      <View style={styles.buttonRow}>
-        <IconButton title="Deposit" onPress={goDeposit} />
-        <IconButton title="Request" onPress={goRequest} />
-        <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+    <TouchableWithoutFeedback>
+      <View style={styles.amountAndButtons}>
+        <Spacer h={64 + 12} />
+        <TextLight>Your balance</TextLight>
+        <TitleAmount amount={account.lastBalance} />
+        <Spacer h={16} />
+        <View style={styles.buttonRow}>
+          <IconButton title="Deposit" onPress={goDeposit} />
+          <IconButton title="Request" onPress={goRequest} />
+          <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

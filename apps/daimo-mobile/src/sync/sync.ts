@@ -73,7 +73,7 @@ function maybeSync(fromScratch?: boolean) {
 }
 
 /** Gets latest balance & history for this account, in the background. */
-async function resync(reason: string, fromScratch?: boolean) {
+export async function resync(reason: string, fromScratch?: boolean) {
   const manager = getAccountManager();
   const accOld = manager.currentAccount;
   assert(!!accOld, `no account, skipping sync: ${reason}`);
@@ -88,6 +88,7 @@ async function resync(reason: string, fromScratch?: boolean) {
     console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
     manager.setCurrentAccount(accNew);
     // We are automatically marked online when any RPC req succeeds
+    return true;
   } catch (e) {
     console.error(`[SYNC] FAILED ${accOld.name}`, e);
     // Mark offline
@@ -98,6 +99,7 @@ async function resync(reason: string, fromScratch?: boolean) {
         status: syncAttemptsFailed > 3 ? "offline" : "online",
       };
     });
+    return false;
   }
 }
 

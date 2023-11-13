@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginHorizontal: -12,
   },
   buttonCircle: {
     width: 50,
