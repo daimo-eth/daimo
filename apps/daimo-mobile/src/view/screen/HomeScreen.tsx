@@ -98,6 +98,23 @@ function HomeScreenInner({ account }: { account: Account }) {
   );
   const histListFull = <HistoryListSwipe account={account} showDate />;
 
+  const onScrollBeginDrag = () => {
+    isScrollDragged.current = true;
+  };
+  const onScrollEndDrag = () => {
+    isScrollDragged.current = false;
+    if (scrollRef.current && !refreshing) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  const onOpenTransactionsModal = () => {
+    setIsModalOpen(true);
+  };
+  const onCloseTransactionsModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <View>
       <OfflineHeader shouldAddPaddingWhenOnline={false} />
@@ -118,15 +135,8 @@ function HomeScreenInner({ account }: { account: Account }) {
             tabBarHeight -
             (Platform.OS === "android" ? 16 : 0),
         }}
-        onScrollBeginDrag={() => {
-          isScrollDragged.current = true;
-        }}
-        onScrollEndDrag={() => {
-          isScrollDragged.current = false;
-          if (scrollRef.current && !refreshing) {
-            scrollRef.current.scrollTo({ y: 0, animated: true });
-          }
-        }}
+        onScrollBeginDrag={onScrollBeginDrag}
+        onScrollEndDrag={onScrollEndDrag}
       >
         <Spacer h={top} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
@@ -145,12 +155,8 @@ function HomeScreenInner({ account }: { account: Account }) {
               itemFullPreview={histListFullPreview}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
-              onShowFull={() => {
-                setIsModalOpen(true);
-              }}
-              onShowMini={() => {
-                setIsModalOpen(false);
-              }}
+              onShowFull={onOpenTransactionsModal}
+              onShowMini={onCloseTransactionsModal}
             />
           </>
         )}
