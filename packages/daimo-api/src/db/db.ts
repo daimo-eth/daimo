@@ -47,7 +47,8 @@ export class DB {
             code VARCHAR(64) PRIMARY KEY,
             use_count INT NOT NULL,
             max_uses INT NOT NULL DEFAULT 1
-          )
+          );
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
       `);
     await client.end();
   }
@@ -78,22 +79,26 @@ export class DB {
   async loadInviteCodes(): Promise<InviteCodeRow[]> {
     console.log(`[DB] loading invite codes`);
     const client = await this.pool.connect();
-    const result = await client.query<InviteCodeRow>(
-      `SELECT code, use_count, max_uses FROM invitecode`
+    const result = await client.query<RawInviteCodeRow>(
+      `SELECT code, use_count, max_uses, zupass_email FROM invitecode`
     );
     client.release();
 
-    console.log(`[DB] ${result.rows.length} invite codes`);
-    return result.rows;
+    return result.rows.map((row) => ({
+      code: row.code,
+      useCount: row.use_count,
+      maxUses: row.max_uses,
+      zupassEmail: row.zupass_email,
+    }));
   }
 
   async saveInviteCode(code: InviteCodeRow) {
     console.log(`[DB] inserting invite code`);
     const client = await this.pool.connect();
     await client.query(
-      `INSERT INTO invitecode (code, use_count, max_uses) VALUES ($1, $2, $3)
-       ON CONFLICT (code) DO UPDATE SET use_count = $2 AND max_uses = $3`,
-      [code.code, code.useCount, code.maxUses]
+      `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
+      [code.code, code.useCount, code.maxUses, code.zupassEmail]
     );
     client.release();
   }
@@ -118,4 +123,12 @@ interface InviteCodeRow {
   code: string;
   useCount: number;
   maxUses: number;
+  zupassEmail: string | null;
+}
+
+interface RawInviteCodeRow {
+  code: string;
+  use_count: number;
+  max_uses: number;
+  zupass_email: string | null;
 }

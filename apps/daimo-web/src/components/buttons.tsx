@@ -9,7 +9,9 @@ export function PrimaryOpenInAppButton({ disabled }: { disabled?: boolean }) {
 
   function getCurrentInAppUrl() {
     const url = window.location.href;
-    const inAppUrl = "daimo://" + url.substring(daimoLinkBase.length + 1);
+    const inAppUrl = url.startsWith(daimoLinkBase)
+      ? "daimo://" + url.substring(daimoLinkBase.length + 1)
+      : "daimo://"; // Just open the app without a deeplink
     console.log("Redirecting to In App URL: ", inAppUrl);
     return inAppUrl;
   }

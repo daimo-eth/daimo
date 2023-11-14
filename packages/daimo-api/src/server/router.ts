@@ -10,6 +10,7 @@ import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { search } from "../api/search";
+import { verifyZupass } from "../api/zupass";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { Faucet } from "../contract/faucet";
@@ -201,6 +202,20 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode } = opts.input;
         return faucet.verifyInviteCode(inviteCode);
+      }),
+
+    getZupassInviteCode: publicProcedure
+      .input(z.object({ pcd: z.string().optional() }))
+      .query(async (opts) => {
+        const { pcd } = opts.input;
+        if (!pcd) return null;
+
+        const zupassUser = await verifyZupass(pcd);
+        console.log(`[ZUPASS] verified ${zupassUser.email}`);
+        const inviteCode = await faucet.getOrCreateZupassInviteCode(
+          zupassUser.email
+        );
+        return inviteCode;
       }),
   });
 }

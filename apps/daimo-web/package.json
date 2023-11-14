@@ -24,16 +24,25 @@
     "pino-pretty": "^10.2.3",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
     "tailwindcss": "^3.3.3",
     "ts-loader": "^9.5.0",
     "viem": "^1.16.0",
-    "wagmi": "^1.4.3"
+    "wagmi": "^1.4.3",
+    "zukit": "github:nalinbhardwaj/zukit#daimo"
   },
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",
+    "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty,@types/json-bigint,@types/pako,@types/qr-image,@types/styled-components,@types/uuid && next lint",
     "export": "next export"
+  },
+  "devDependencies": {
+    "@types/json-bigint": "^1.0.4",
+    "@types/pako": "^2.0.3",
+    "@types/qr-image": "^3.2.9",
+    "@types/styled-components": "^5.1.30",
+    "@types/uuid": "^9.0.7"
   }
 }
