@@ -38,11 +38,13 @@ export default function HomeScreen() {
 function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
   const tabBarHeight = useBottomTabBarHeight();
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (nav.getParent()) {
@@ -79,7 +81,7 @@ function HomeScreenInner({ account }: { account: Account }) {
     setRefreshing(true);
     await resync("Home screen pull refresh");
     setRefreshing(false);
-    if (scrollRef.current) {
+    if (scrollRef.current && !isScrollDragged.current) {
       scrollRef.current.scrollTo({ y: 0, animated: true });
     }
   }, []);
@@ -103,26 +105,25 @@ function HomeScreenInner({ account }: { account: Account }) {
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        scrollToOverflowEnabled={false}
+        scrollsToTop={false}
+        scrollEnabled={searchPrefix == null && !isModalOpen}
+        contentInset={{ top: ins.top }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        scrollToOverflowEnabled={false}
         contentContainerStyle={{
           height:
             screenDimensions.height -
             tabBarHeight -
             (Platform.OS === "android" ? 16 : 0),
         }}
-        scrollEnabled={searchPrefix == null}
-        contentInset={{ top: ins.top }}
-        scrollsToTop={false}
-        onScrollEndDrag={(e) => {
-          console.log(e.nativeEvent.contentOffset.y);
-          if (
-            scrollRef.current &&
-            e.nativeEvent.contentOffset.y < 0 &&
-            !refreshing
-          ) {
+        onScrollBeginDrag={() => {
+          isScrollDragged.current = true;
+        }}
+        onScrollEndDrag={() => {
+          isScrollDragged.current = false;
+          if (scrollRef.current && !refreshing) {
             scrollRef.current.scrollTo({ y: 0, animated: true });
           }
         }}
@@ -144,6 +145,12 @@ function HomeScreenInner({ account }: { account: Account }) {
               itemFullPreview={histListFullPreview}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
+              onShowFull={() => {
+                setIsModalOpen(true);
+              }}
+              onShowMini={() => {
+                setIsModalOpen(false);
+              }}
             />
           </>
         )}
