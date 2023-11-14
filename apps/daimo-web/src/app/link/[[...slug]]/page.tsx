@@ -45,7 +45,8 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(getUrl(props));
   if (titleDesc == null) return defaultMeta;
   const { name, action, dollars } = titleDesc;
-  const title = [name, action, dollars].filter((x) => x).join(" ");
+  const prefixedDollars = dollars && `$${dollars}`;
+  const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
   return metadata(title, titleDesc.description);
 }
 
