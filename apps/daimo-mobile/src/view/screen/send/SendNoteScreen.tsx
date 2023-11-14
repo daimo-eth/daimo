@@ -35,6 +35,7 @@ export function SendNoteScreen() {
         dollars={noteDollars}
         onSetDollars={setNoteDollars}
         showAmountAvailable={!amountChosen}
+        autoFocus
         disabled={amountChosen}
         innerRef={textInputRef}
       />

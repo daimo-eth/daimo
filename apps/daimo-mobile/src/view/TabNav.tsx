@@ -42,13 +42,10 @@ export function TabNav() {
   const opts: BottomTabNavigationOptions = {
     tabBarHideOnKeyboard: true,
   };
-  // Note: don't use unmountOnBlur together with NativeStackNavigator.
+  // Note: take care using unmountOnBlur together with NativeStackNavigator.
   // NativeStackNavigator has a bug where it remembers routes after unmounting,
   // and another where dismissing a modal doesn't change the route.
-  const unmount: BottomTabNavigationOptions = {
-    ...opts,
-    unmountOnBlur: true,
-  };
+  const unmount: BottomTabNavigationOptions = { ...opts, unmountOnBlur: true };
 
   const ins = useSafeAreaInsets();
 
@@ -71,9 +68,9 @@ export function TabNav() {
       backBehavior="none"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={unmount} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
+      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={unmount} />
       <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
-      <Tab.Screen name="SendTab" component={SendTab} options={opts} />
+      <Tab.Screen name="SendTab" component={SendTab} options={unmount} />
       <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
     </Tab.Navigator>
   );

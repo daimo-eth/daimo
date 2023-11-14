@@ -23,14 +23,14 @@ import { TextBody, TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
-export function SearchTab() {
+export function SearchTab({ autoFocus }: { autoFocus: boolean }) {
   const [prefix, setPrefix] = useState("");
 
   return (
     <>
       <View style={{ flexGrow: 0 }}>
         <InputBig
-          autoFocus
+          autoFocus={autoFocus}
           icon="search"
           placeholder="Search user, ENS, or address..."
           value={prefix}
@@ -94,7 +94,10 @@ function SearchResultsScroll({
 function NoSearchResults() {
   const nav = useNav();
   const sendPaymentLink = () =>
-    nav.navigate("SendTab", { screen: "SendNav", params: { sendNote: true } });
+    nav.navigate("SendTab", {
+      screen: "SendNav",
+      params: { autoFocus: true, sendNote: true },
+    });
 
   return (
     <View>
