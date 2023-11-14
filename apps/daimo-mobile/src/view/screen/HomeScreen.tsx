@@ -111,13 +111,23 @@ function HomeScreenInner({ account }: { account: Account }) {
           height:
             screenDimensions.height -
             tabBarHeight -
-            (Platform.OS === "android" ? ins.top : 0),
+            (Platform.OS === "android" ? 16 : 0),
         }}
         scrollEnabled={searchPrefix == null}
         contentInset={{ top: ins.top }}
         scrollsToTop={false}
+        onScrollEndDrag={(e) => {
+          console.log(e.nativeEvent.contentOffset.y);
+          if (
+            scrollRef.current &&
+            e.nativeEvent.contentOffset.y < 0 &&
+            e.nativeEvent.contentOffset.y > -140
+          ) {
+            scrollRef.current.scrollTo({ y: 0, animated: true });
+          }
+        }}
       >
-        {Platform.OS === "ios" && <Spacer h={top} />}
+        <Spacer h={top} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults

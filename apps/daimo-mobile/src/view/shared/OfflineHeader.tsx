@@ -31,7 +31,7 @@ export function OfflineHeader({
   return (
     <View style={style}>
       {
-        isAndroid && (
+        isOffline && isAndroid && (
           <Spacer h={16} />
         ) /* Some Androids have a camera excluded from the safe insets. */
       }
