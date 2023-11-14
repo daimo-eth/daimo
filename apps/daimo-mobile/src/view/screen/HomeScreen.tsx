@@ -121,7 +121,7 @@ function HomeScreenInner({ account }: { account: Account }) {
           if (
             scrollRef.current &&
             e.nativeEvent.contentOffset.y < 0 &&
-            e.nativeEvent.contentOffset.y > -140
+            !refreshing
           ) {
             scrollRef.current.scrollTo({ y: 0, animated: true });
           }
