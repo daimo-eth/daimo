@@ -22,12 +22,14 @@ export function AmountChooser({
   dollars,
   onSetDollars,
   showAmountAvailable,
+  autoFocus,
   disabled,
   innerRef,
 }: {
   dollars: number;
   onSetDollars: (dollars: number) => void;
   showAmountAvailable: boolean;
+  autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
 }) {
@@ -43,6 +45,7 @@ export function AmountChooser({
         onChange={onSetDollars}
         disabled={disabled}
         innerRef={innerRef}
+        autoFocus={autoFocus}
       />
       <Spacer h={8} />
       <TextCenter>

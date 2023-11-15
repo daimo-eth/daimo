@@ -24,13 +24,13 @@ export type ParamListHome = {
 };
 
 export type ParamListSend = {
-  SendNav: { sendNote?: boolean };
+  SendNav: { autoFocus: boolean; sendNote?: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
 };
 
 export type ParamListReceive = {
-  Receive: undefined;
+  Receive: { autoFocus: boolean };
   RequestSend: undefined;
   Note: { link: DaimoLinkNote };
 };

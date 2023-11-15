@@ -167,11 +167,19 @@ function HomeScreenInner({ account }: { account: Account }) {
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
   const goSend = useCallback(
-    () => nav.navigate("SendTab", { screen: "SendNav", params: {} }),
+    () =>
+      nav.navigate("SendTab", {
+        screen: "SendNav",
+        params: { autoFocus: true },
+      }),
     [nav]
   );
   const goRequest = useCallback(
-    () => nav.navigate("ReceiveTab", { screen: "Receive" }),
+    () =>
+      nav.navigate("ReceiveTab", {
+        screen: "Receive",
+        params: { autoFocus: true },
+      }),
     [nav]
   );
   const goDeposit = useCallback(() => nav.navigate("DepositTab"), [nav]);
