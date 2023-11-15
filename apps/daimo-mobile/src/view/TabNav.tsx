@@ -1,9 +1,9 @@
 import { assertUnreachable } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import {
-  BottomTabNavigationOptions,
-  createBottomTabNavigator,
-} from "@react-navigation/bottom-tabs";
+  MaterialTopTabNavigationOptions,
+  createMaterialTopTabNavigator,
+} from "@react-navigation/material-top-tabs";
 import { RouteProp } from "@react-navigation/native";
 import {
   NativeStackNavigationOptions,
@@ -36,18 +36,15 @@ import {
 import { color } from "./shared/style";
 import { useAccount } from "../model/account";
 
-const Tab = createBottomTabNavigator<ParamListTab>();
+const Tab = createMaterialTopTabNavigator<ParamListTab>();
 
 export function TabNav() {
-  const opts: BottomTabNavigationOptions = {
-    tabBarHideOnKeyboard: true,
-  };
+  const opts: MaterialTopTabNavigationOptions = {};
   // Note: don't use unmountOnBlur together with NativeStackNavigator.
   // NativeStackNavigator has a bug where it remembers routes after unmounting,
   // and another where dismissing a modal doesn't change the route.
-  const unmount: BottomTabNavigationOptions = {
+  const unmount: MaterialTopTabNavigationOptions = {
     ...opts,
-    unmountOnBlur: true,
   };
 
   const ins = useSafeAreaInsets();
@@ -69,6 +66,7 @@ export function TabNav() {
       initialRouteName="HomeTab"
       screenOptions={(props) => getTabOptions(ins, props)}
       backBehavior="none"
+      tabBarPosition="bottom"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={unmount} />
       <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
@@ -82,12 +80,10 @@ export function TabNav() {
 function getTabOptions(
   safeInsets: EdgeInsets,
   { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
-): BottomTabNavigationOptions {
-  const opts: BottomTabNavigationOptions = {
-    headerShown: false,
+): MaterialTopTabNavigationOptions {
+  const opts: MaterialTopTabNavigationOptions = {
     tabBarStyle: {
       height: 72 + safeInsets.bottom,
-      paddingHorizontal: 16,
       paddingBottom: safeInsets.bottom,
     },
     tabBarItemStyle: {
@@ -98,6 +94,10 @@ function getTabOptions(
     tabBarLabelStyle: {
       fontSize: 11,
       fontWeight: "600",
+      width: 100,
+    },
+    tabBarIndicatorStyle: {
+      opacity: 0,
     },
   };
   switch (route.name) {
