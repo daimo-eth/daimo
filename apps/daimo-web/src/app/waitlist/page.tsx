@@ -107,9 +107,23 @@ function WaitlistPageInner() {
       }
       case "logged-out": {
         return (
-          <button className={primaryButtonStyle} onClick={login}>
-            SIGN IN WITH ZUPASS
-          </button>
+          <>
+            <button className={primaryButtonStyle} onClick={login}>
+              SIGN IN WITH ZUPASS
+            </button>
+            <div className="h-12" />
+            <div className="text-xl font-semibold text-grayMid">
+              Not at Devconnect? Sign up for the{" "}
+              <a
+                className="text-primaryLight"
+                href="https://noteforms.com/forms/daimo-uk2fe4"
+                target="_blank"
+              >
+                waitlist
+              </a>
+              .
+            </div>
+          </>
         );
       }
     }
