@@ -153,7 +153,7 @@ function loadOpSender({
 
   const signer = usePasskey
     ? getWrappedPasskeySigner(daimoChain)
-    : getWrappedRawSigner(enclaveKeyName, keySlot!, daimoChain);
+    : getWrappedRawSigner(enclaveKeyName, keySlot!);
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     return rpcFunc.sendUserOp.mutate({ op });
