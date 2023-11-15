@@ -77,7 +77,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
-    resync("Pull refresh on home screen");
     setRefreshing(true);
     await resync("Home screen pull refresh");
     setRefreshing(false);
