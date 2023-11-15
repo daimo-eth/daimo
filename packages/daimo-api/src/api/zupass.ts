@@ -1,4 +1,4 @@
-import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
+import { SemaphoreSignaturePCDPackage } from "./semaPCD";
 
 // Verify a Zupass PCD and return participant data
 export async function verifyZupass(pcd: string) {
