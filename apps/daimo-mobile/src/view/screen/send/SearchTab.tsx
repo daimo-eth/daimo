@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   View,
+  ViewStyle,
 } from "react-native";
 
 import { Account } from "../../../model/account";
@@ -43,10 +44,16 @@ export function SearchTab() {
   );
 }
 
-export function SearchResults({ prefix }: { prefix: string }) {
+export function SearchResults({
+  prefix,
+  style,
+}: {
+  prefix: string;
+  style?: ViewStyle;
+}) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
-    <View style={styles.resultsWrap}>
+    <View style={[styles.resultsWrap, style]}>
       <Inner prefix={prefix.trim().toLowerCase()} />
     </View>
   );

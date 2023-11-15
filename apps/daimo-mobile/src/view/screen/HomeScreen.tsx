@@ -1,18 +1,23 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
-  Keyboard,
   StyleSheet,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
+  ScrollView,
+  RefreshControl,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account } from "../../model/account";
+import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
@@ -21,7 +26,7 @@ import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useNav } from "../shared/nav";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -32,8 +37,14 @@ export default function HomeScreen() {
 
 function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
+  const tabBarHeight = useBottomTabBarHeight();
+  const ins = useSafeAreaInsets();
+  const top = Math.max(ins.top, 16);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (nav.getParent()) {
@@ -63,6 +74,16 @@ function HomeScreenInner({ account }: { account: Account }) {
     keySlot,
     account.homeChainId
   );
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await resync("Home screen pull refresh");
+    setRefreshing(false);
+    if (scrollRef.current && !isScrollDragged.current) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
+  }, []);
 
   // Show search results when search is focused.
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
@@ -76,15 +97,56 @@ function HomeScreenInner({ account }: { account: Account }) {
   );
   const histListFull = <HistoryListSwipe account={account} showDate />;
 
+  const onScrollBeginDrag = () => {
+    isScrollDragged.current = true;
+  };
+  const onScrollEndDrag = () => {
+    isScrollDragged.current = false;
+    if (scrollRef.current && !refreshing) {
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  const onOpenTransactionsModal = () => {
+    setIsModalOpen(true);
+  };
+  const onCloseTransactionsModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={ss.container.screen}>
-        <OfflineHeader />
+    <View>
+      <OfflineHeader shouldAddPaddingWhenOnline={false} />
+      <ScrollView
+        ref={scrollRef}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        scrollToOverflowEnabled={false}
+        scrollsToTop={false}
+        scrollEnabled={searchPrefix == null && !isModalOpen}
+        contentInset={{ top: ins.top }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        contentContainerStyle={{
+          height:
+            screenDimensions.height -
+            tabBarHeight -
+            (Platform.OS === "android" ? 16 : 0),
+        }}
+        onScrollBeginDrag={onScrollBeginDrag}
+        onScrollEndDrag={onScrollEndDrag}
+      >
+        <Spacer h={top} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
-        {searchPrefix != null && <SearchResults prefix={searchPrefix} />}
+        {searchPrefix != null && (
+          <SearchResults
+            prefix={searchPrefix}
+            style={{ marginHorizontal: 0 }}
+          />
+        )}
         {searchPrefix == null && (
           <>
-            <Spacer h={64} />
             <AmountAndButtons account={account} />
             <SwipeUpDown
               ref={bottomSheetRef}
@@ -92,11 +154,13 @@ function HomeScreenInner({ account }: { account: Account }) {
               itemFullPreview={histListFullPreview}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
+              onShowFull={onOpenTransactionsModal}
+              onShowMini={onCloseTransactionsModal}
             />
           </>
         )}
-      </View>
-    </TouchableWithoutFeedback>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -115,16 +179,19 @@ function AmountAndButtons({ account }: { account: Account }) {
   const isEmpty = account.lastBalance === 0n;
 
   return (
-    <View style={styles.amountAndButtons}>
-      <TextLight>Your balance</TextLight>
-      <TitleAmount amount={account.lastBalance} />
-      <Spacer h={16} />
-      <View style={styles.buttonRow}>
-        <IconButton title="Deposit" onPress={goDeposit} />
-        <IconButton title="Request" onPress={goRequest} />
-        <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+    <TouchableWithoutFeedback>
+      <View style={styles.amountAndButtons}>
+        <Spacer h={64 + 12} />
+        <TextLight>Your balance</TextLight>
+        <TitleAmount amount={account.lastBalance} />
+        <Spacer h={16} />
+        <View style={styles.buttonRow}>
+          <IconButton title="Deposit" onPress={goDeposit} />
+          <IconButton title="Request" onPress={goRequest} />
+          <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginHorizontal: -12,
   },
   qrCircle: {
     width: 50,

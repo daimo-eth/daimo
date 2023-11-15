@@ -36,7 +36,17 @@ export type SwipeUpDownRef = {
 };
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
-  ({ itemMini, itemFullPreview, itemFull, swipeHeight }, ref) => {
+  (
+    {
+      itemMini,
+      itemFullPreview,
+      itemFull,
+      swipeHeight,
+      onShowMini,
+      onShowFull,
+    },
+    ref
+  ) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useBottomTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
@@ -58,11 +68,13 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const showFull = () => {
       console.log(`[SWIPE] showFull ${posYFull}`);
       setIsMini(false);
+      onShowFull?.();
     };
 
     const showMini = () => {
       console.log(`[SWIPE] showMini ${posYMini}`);
       setIsMini(true);
+      onShowMini?.();
     };
 
     const snapPoints = useMemo(
