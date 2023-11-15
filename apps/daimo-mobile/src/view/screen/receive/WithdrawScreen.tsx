@@ -19,6 +19,14 @@ export function WithdrawScreen({ account }: { account: Account }) {
 
   return (
     <ScrollView>
+      <HeaderRow title="Withdraw to any wallet" />
+      <View style={ss.container.padH16}>
+        <TextPara>
+          Tap Send, then paste in your wallet address. Remember that you're
+          sending USDC on Base.
+        </TextPara>
+      </View>
+      <Spacer h={32} />
       <HeaderRow title="Withdraw via Coinbase" />
       <View style={ss.container.padH16}>
         <TextPara>
@@ -29,15 +37,6 @@ export function WithdrawScreen({ account }: { account: Account }) {
         <TextPara>
           Use Daimo to send to the address shown. Funds should appear on
           Coinbase in a few minutes.
-        </TextPara>
-      </View>
-      <Spacer h={32} />
-      <HeaderRow title="Withdraw to another exchange" />
-      <View style={ss.container.padH16}>
-        <TextPara>
-          More instructions coming soon. The process is similar at most
-          exchanges. Just make sure your exchange can receive <BB>USDC</BB> on{" "}
-          <BB>Base</BB>.
         </TextPara>
       </View>
     </ScrollView>

@@ -76,7 +76,14 @@ class PushNotificationManager {
         console.log("[NOTIFY] no account, skipping savePushToken");
         return;
       }
-      await this.savePushTokenForAccount();
+
+      const permission = await Notifications.getPermissionsAsync();
+      if (!permission.granted) {
+        console.log("[NOTIFY] permission denied, skipping savePushToken");
+        return;
+      }
+
+      await this.savePushTokenInner();
     } catch (e) {
       console.error(`[NOTIFY] failed to save push token`, e);
     }
@@ -89,6 +96,10 @@ class PushNotificationManager {
         "Notifications pemission denied. You can change this in Settings."
       );
     }
+    await this.savePushTokenInner();
+  };
+
+  private async savePushTokenInner() {
     if (this.accountManager.currentAccount == null) {
       throw new Error("No account");
     }
@@ -112,5 +123,5 @@ class PushNotificationManager {
 
     const acc = this.accountManager.currentAccount;
     this.accountManager.setCurrentAccount({ ...acc, pushToken: token.data });
-  };
+  }
 }

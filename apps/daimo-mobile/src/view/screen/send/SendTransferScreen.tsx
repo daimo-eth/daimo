@@ -162,6 +162,7 @@ function SendChooseAmount({
         dollars={dollars}
         onSetDollars={setDollars}
         showAmountAvailable
+        autoFocus
       />
       <Spacer h={32} />
       <View style={styles.buttonRow}>
@@ -216,6 +217,7 @@ function SendConfirm({
         onSetDollars={useCallback(() => {}, [])}
         disabled
         showAmountAvailable={false}
+        autoFocus={false}
       />
       <Spacer h={32} />
       <SendTransferButton {...{ recipient, dollars: nDollars, requestId }} />

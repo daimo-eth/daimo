@@ -1,5 +1,6 @@
 import { dollarsToAmount, formatDaimoLink } from "@daimo/common";
 import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useRef, useState } from "react";
 import {
   Alert,
@@ -19,17 +20,26 @@ import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
+import { ParamListReceive, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
-export default function ReceiveScreen() {
+type Props = NativeStackScreenProps<ParamListReceive, "Receive">;
+
+export default function ReceiveScreen({ route }: Props) {
+  const { autoFocus } = route.params || {};
   const Inner = useWithAccount(RequestScreenInner);
-  return <Inner />;
+  return <Inner autoFocus={!!autoFocus} />;
 }
 
-function RequestScreenInner({ account }: { account: Account }) {
+function RequestScreenInner({
+  account,
+  autoFocus,
+}: {
+  account: Account;
+  autoFocus: boolean;
+}) {
   const [dollars, setDollars] = useState(0);
 
   // On successful send, go home
@@ -82,25 +92,28 @@ function RequestScreenInner({ account }: { account: Account }) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Request" onExit={useExitToHome()} />
-        <Spacer h={64} />
+        <Spacer h={96} />
         <TextCenter>
           <TextLight>Enter amount to request</TextLight>
         </TextCenter>
-        <Spacer h={24} />
+        <Spacer h={8} />
         <AmountChooser
           dollars={dollars}
           onSetDollars={setDollars}
           showAmountAvailable={false}
+          autoFocus={autoFocus}
           innerRef={textInputRef}
           disabled={status !== "creating"}
         />
         <Spacer h={32} />
-        <ButtonBig
-          type={status === "sent" ? "success" : "primary"}
-          disabled={dollars <= 0 || status !== "creating"}
-          title={status === "sent" ? "Sent" : "Send Request"}
-          onPress={sendRequest}
-        />
+        <View style={ss.container.padH16}>
+          <ButtonBig
+            type={status === "sent" ? "success" : "primary"}
+            disabled={dollars <= 0 || status !== "creating"}
+            title={status === "sent" ? "Sent" : "Send Request"}
+            onPress={sendRequest}
+          />
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );

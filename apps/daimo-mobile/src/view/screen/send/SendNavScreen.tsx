@@ -13,7 +13,7 @@ import { ss } from "../../shared/style";
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
 
 export function SendNavScreen({ route }: Props) {
-  const { sendNote } = route.params || {};
+  const { autoFocus, sendNote } = route.params || {};
 
   const nav = useNav();
   const goHome = useExitToHome();
@@ -24,7 +24,7 @@ export function SendNavScreen({ route }: Props) {
       <View style={ss.container.screen}>
         <ScreenHeader title="Send" onBack={goBack} />
         <Spacer h={8} />
-        <SendNav {...{ sendNote }} />
+        <SendNav {...{ autoFocus, sendNote }} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -32,7 +32,13 @@ export function SendNavScreen({ route }: Props) {
 
 type SendTab = "SEARCH" | "SEND LINK";
 
-function SendNav({ sendNote }: { sendNote?: boolean }) {
+function SendNav({
+  autoFocus,
+  sendNote,
+}: {
+  autoFocus: boolean;
+  sendNote?: boolean;
+}) {
   // Navigation
   const [tab, setTab] = useState<SendTab>(sendNote ? "SEND LINK" : "SEARCH");
   const [tabs] = useState(["SEARCH", "SEND LINK"] as SendTab[]);
@@ -40,9 +46,8 @@ function SendNav({ sendNote }: { sendNote?: boolean }) {
   // Hack: listen for prop changed due to navigation
   const refSend = useRef(!!sendNote);
   useEffect(() => {
-    if (!!sendNote !== refSend.current) {
-      setTab(sendNote ? "SEND LINK" : "SEARCH");
-    }
+    if (!!sendNote === refSend.current) return;
+    setTab(sendNote ? "SEND LINK" : "SEARCH");
     refSend.current = !!sendNote;
   }, [sendNote]);
 
@@ -50,7 +55,7 @@ function SendNav({ sendNote }: { sendNote?: boolean }) {
     <View style={{ flex: 1, flexDirection: "column" }}>
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
-      {tab === "SEARCH" && <SearchTab />}
+      {tab === "SEARCH" && <SearchTab {...{ autoFocus }} />}
       {tab === "SEND LINK" && <SendNoteScreen />}
     </View>
   );
