@@ -7,24 +7,26 @@ import { detectPlatform, downloadMetadata } from "../utils/platform";
 export function PrimaryOpenInAppButton({ disabled }: { disabled?: boolean }) {
   const [openInApp, setOpenInApp] = useState(false);
 
-  function getCurrentInAppUrl() {
+  function getDirectDeeplink() {
     const url = window.location.href;
-    const inAppUrl = url.startsWith(daimoLinkBase)
+    return url.startsWith(daimoLinkBase)
       ? "daimo://" + url.substring(daimoLinkBase.length + 1)
-      : "daimo://"; // Just open the app without a deeplink
-    console.log("Redirecting to In App URL: ", inAppUrl);
-    return inAppUrl;
+      : undefined;
   }
 
   const onClick = () => {
-    if (openInApp) {
-      window.open(getCurrentInAppUrl(), "_blank");
+    const deeplink = getDirectDeeplink();
+    if (openInApp && deeplink != null) {
+      console.log("Redirecting to app. Direct deeplink: " + deeplink);
+      window.open(deeplink, "_blank");
       return;
     }
 
     const platform = detectPlatform(navigator.userAgent);
-    window.open(downloadMetadata[platform].url, "_blank");
-    setOpenInApp(true);
+    const { url } = downloadMetadata[platform];
+    console.log("Redirecting to store: " + url);
+    window.open(url, "_blank");
+    if (deeplink != null) setOpenInApp(true);
   };
 
   return (

@@ -3,10 +3,11 @@ import { Hex, getAddress } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
-const domain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
+export const daimoDomain =
+  process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
-export const daimoLinkBase = domain
-  ? `https://${domain}/link`
+export const daimoLinkBase = daimoDomain
+  ? `https://${daimoDomain}/link`
   : "http://localhost:3001/link";
 
 /** Represents a Daimo app deep-link */
