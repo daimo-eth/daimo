@@ -56,7 +56,8 @@ function SendNav({
   useEffect(() => {
     let focusTimeout;
     if (isFocused && autoFocus && Platform.OS === "ios") {
-      nav.setParams({
+      const { setParams }: { setParams: any } = nav;
+      setParams({
         autoFocus: false,
       });
       focusTimeout = setTimeout(() => {
