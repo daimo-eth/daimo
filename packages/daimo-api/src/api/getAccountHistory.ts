@@ -125,7 +125,6 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     destinationWallets: [
       {
         address: account.addr,
-        blockchains: ["base"],
         assets: ["USDC"],
         supportedNetworks: ["base"],
       },
