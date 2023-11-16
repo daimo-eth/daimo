@@ -97,6 +97,9 @@ function getTabOptions(
     tabBarIndicatorStyle: {
       opacity: 0,
     },
+    tabBarIconStyle: {
+      alignItems: "center",
+    },
   };
   switch (route.name) {
     case "DepositTab":
