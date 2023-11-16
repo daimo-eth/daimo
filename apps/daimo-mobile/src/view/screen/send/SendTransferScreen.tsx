@@ -23,7 +23,7 @@ import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBubble } from "../../shared/InfoBubble";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader, useResetToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
@@ -45,7 +45,7 @@ export default function SendScreen({ route }: Props) {
     else if (nav.canGoBack()) nav.goBack();
     else navResetToHome(nav);
   }, [nav, dollars, recipient]);
-  const goHome = useExitToHome();
+  const goHome = useResetToHome();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

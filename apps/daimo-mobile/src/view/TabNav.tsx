@@ -39,12 +39,6 @@ import { useAccount } from "../model/account";
 const Tab = createMaterialTopTabNavigator<ParamListTab>();
 
 export function TabNav() {
-  const opts: MaterialTopTabNavigationOptions = {};
-  // Note: take care using unmountOnBlur together with NativeStackNavigator.
-  // NativeStackNavigator has a bug where it remembers routes after unmounting,
-  // and another where dismissing a modal doesn't change the route.
-  const unmount: MaterialTopTabNavigationOptions = { ...opts };
-
   const ins = useSafeAreaInsets();
 
   // Track whether we've onboarded. If not, show OnboardingScreen.
@@ -66,11 +60,11 @@ export function TabNav() {
       backBehavior="none"
       tabBarPosition="bottom"
     >
-      <Tab.Screen name="DepositTab" component={DepositTab} options={unmount} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={unmount} />
-      <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
-      <Tab.Screen name="SendTab" component={SendTab} options={unmount} />
-      <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
+      <Tab.Screen name="DepositTab" component={DepositTab} />
+      <Tab.Screen name="ReceiveTab" component={ReceiveTab} />
+      <Tab.Screen name="HomeTab" component={HomeTab} />
+      <Tab.Screen name="SendTab" component={SendTab} />
+      <Tab.Screen name="SettingsTab" component={SettingsTab} />
     </Tab.Navigator>
   );
 }
