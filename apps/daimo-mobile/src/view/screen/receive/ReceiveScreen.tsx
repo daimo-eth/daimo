@@ -58,6 +58,7 @@ function RequestScreenInner({
       setParams({
         autoFocus: false,
       });
+      // wait for the screen transition animation to finish before open keyboard
       focusTimeout = setTimeout(() => {
         textInputRef.current?.focus();
       }, 500);
