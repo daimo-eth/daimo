@@ -130,7 +130,6 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
         supportedNetworks: ["base"],
       },
     ],
-    handlingRequestedUrls: true,
     defaultExperience: "send",
   });
   return [
