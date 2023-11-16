@@ -10,6 +10,7 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
@@ -74,6 +75,7 @@ function getTabOptions(
   { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
 ): MaterialTopTabNavigationOptions {
   const opts: MaterialTopTabNavigationOptions = {
+    animationEnabled: Platform.OS === "ios", // android text input breaks if enabled
     tabBarStyle: {
       height: 72 + safeInsets.bottom,
       paddingBottom: safeInsets.bottom,
