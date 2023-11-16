@@ -1,11 +1,14 @@
 import {
   KeyData,
+  formatDaimoLink,
   getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
+import Octicons from "@expo/vector-icons/Octicons";
+import * as Clipboard from "expo-clipboard";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -74,9 +77,6 @@ function AccountSection({ account }: { account: Account }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
-  const tokenSymbol = chainConfig.tokenSymbol;
-  const l2Name = chainConfig.chainL2.name;
-
   const linkToExplorer = useCallback(() => {
     const url = `${explorer.url}/address/${account.address}`;
     Linking.openURL(url);
@@ -84,18 +84,7 @@ function AccountSection({ account }: { account: Account }) {
 
   return (
     <View style={styles.sectionWrap}>
-      <View style={styles.accountHero}>
-        <AccountBubble eAcc={toEAccount(account)} size={64} />
-        <View>
-          <TextH3>{account?.name}</TextH3>
-          <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-            <TextH3 color={color.gray3}>
-              {tokenSymbol} · {l2Name}{" "}
-              {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
-            </TextH3>
-          </View>
-        </View>
-      </View>
+      <AccountHero account={account} />
       <Spacer h={16} />
       <ButtonMed
         type="subtle"
@@ -106,14 +95,72 @@ function AccountSection({ account }: { account: Account }) {
   );
 }
 
+function AccountHero({ account }: { account: Account }) {
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const { chainConfig } = env(daimoChain);
+  const tokenSymbol = chainConfig.tokenSymbol;
+  const l2Name = chainConfig.chainL2.name;
+
+  const acctUrl = formatDaimoLink({ type: "account", account: account.name });
+  const [justCopied, setJustCopied] = useState(false);
+  const copy = useCallback(async () => {
+    await Clipboard.setStringAsync(acctUrl);
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 1000);
+  }, [acctUrl]);
+
+  return (
+    <View style={styles.accountHero}>
+      <AccountBubble eAcc={toEAccount(account)} size={64} />
+      <View>
+        <TouchableHighlight
+          {...touchHighlightUnderlay.subtle}
+          style={{
+            paddingVertical: 4,
+            paddingHorizontal: 8,
+            marginLeft: -8,
+            borderRadius: 4,
+          }}
+          hitSlop={16}
+          onPress={copy}
+        >
+          <TextH3>
+            {account.name}
+            <Spacer w={8} />
+            <Octicons
+              name={justCopied ? "check" : "copy"}
+              color={color.grayDark}
+              size={16}
+            />
+          </TextH3>
+        </TouchableHighlight>
+        <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+          <TextH3 color={color.gray3}>
+            {tokenSymbol} · {l2Name}{" "}
+            {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
+          </TextH3>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
   const createBackup = () =>
     nav.navigate("SettingsTab", { screen: "AddPasskey" });
 
-  const currentKeyRows = useCallback(() => {
-    return account.accountKeys.map((keyData) => (
+  const sortKey: (k: KeyData) => number = (k) => {
+    // Our own key always first
+    if (k.pubKey === account.enclavePubKey) return -1;
+    // Rest in order
+    return k.slot;
+  };
+
+  const currentKeyRows = account.accountKeys
+    .sort((a, b) => sortKey(a) - sortKey(b))
+    .map((keyData) => (
       <DeviceRow
         key={keyData.slot}
         keyData={keyData}
@@ -126,12 +173,6 @@ function DevicesSection({ account }: { account: Account }) {
         }
       />
     ));
-  }, [
-    account.pendingKeyRotation,
-    account.accountKeys,
-    account.enclavePubKey,
-    account.homeChainId,
-  ])();
 
   const pendingDeviceRows = useCallback(() => {
     return account.pendingKeyRotation

@@ -132,9 +132,12 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
     <View style={ss.container.screen}>
       <ScreenHeader title="Add Device" onBack={goBack} />
       <Spacer h={32} />
-      <TextPara>
-        Link a new device to your account by scanning its QR code during setup.
-      </TextPara>
+      <View style={ss.container.padH16}>
+        <TextPara>
+          Link a new device to your account by scanning its QR code during
+          setup.
+        </TextPara>
+      </View>
       <Spacer h={32} />
       {barCodeStatus === "idle" && (
         <Scanner handleBarCodeScanned={handleBarCodeScanned} />
