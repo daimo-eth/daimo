@@ -1,7 +1,8 @@
 import { dollarsToAmount, formatDaimoLink } from "@daimo/common";
 import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
+import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -46,8 +47,25 @@ function RequestScreenInner({
   const [status, setStatus] = useState<"creating" | "sending" | "sent">(
     "creating"
   );
+  const isFocused = useIsFocused();
   const nav = useNav();
   const trackRequest = useTrackRequest();
+
+  useEffect(() => {
+    let focusTimeout;
+    if (isFocused && autoFocus && Platform.OS === "ios") {
+      nav.setParams({
+        autoFocus: false,
+      });
+      focusTimeout = setTimeout(() => {
+        textInputRef.current?.focus();
+      }, 500);
+    }
+
+    if (!isFocused) {
+      clearTimeout(focusTimeout);
+    }
+  }, [isFocused, autoFocus]);
 
   const textInputRef = useRef<TextInput>(null);
 
