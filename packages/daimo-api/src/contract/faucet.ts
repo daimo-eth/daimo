@@ -25,6 +25,7 @@ export class Faucet {
   private requested = new Set<Address>();
   private sent = new Set<Address>();
   private inviteCodes = new Map<string, InviteCodeStatus>();
+  private zupassEmailToInviteCode = new Map<string, string>();
 
   constructor(
     private vc: ViemClient,
@@ -33,16 +34,16 @@ export class Faucet {
   ) {}
 
   async init() {
-    this.coinIndexer.pipeAllTransfers(this.parseLogs);
-
     const rows = await this.db.loadInviteCodes();
-    console.log(`[PUSH] loaded ${rows.length} push tokens from DB`);
+    console.log(`[FAUCET] loaded ${rows.length} invites from DB`);
     for (const row of rows) {
-      this.cacheInviteCode(row.code, {
+      this.cacheInviteCode(row.code, row.zupassEmail, {
         useCount: row.useCount,
         maxUses: row.maxUses,
       });
     }
+
+    this.coinIndexer.pipeAllTransfers(this.parseLogs);
   }
 
   parseLogs = (logs: TransferLog[]) => {
@@ -54,8 +55,16 @@ export class Faucet {
     }
   };
 
-  cacheInviteCode(code: string, status: InviteCodeStatus) {
+  cacheInviteCode(
+    code: string,
+    zupassEmail: string | null,
+    status: InviteCodeStatus
+  ) {
+    console.log("[FAUCET] caching invite", code, zupassEmail, status);
     this.inviteCodes.set(code, status);
+    if (zupassEmail) {
+      this.zupassEmailToInviteCode.set(zupassEmail, code);
+    }
   }
 
   verifyInviteCode(invCode: string): boolean {
@@ -65,30 +74,53 @@ export class Faucet {
     return true;
   }
 
+  async incrementInviteCodeUseCount(code: string) {
+    await this.db.incrementInviteCodeUseCount(code);
+    this.inviteCodes.get(code)!.useCount += 1;
+  }
+
+  async saveInviteCode(
+    code: string,
+    zupassEmail: string | null,
+    status: InviteCodeStatus
+  ) {
+    await this.db.saveInviteCode({ code, zupassEmail, ...status });
+    this.cacheInviteCode(code, zupassEmail, {
+      useCount: status.useCount,
+      maxUses: status.maxUses,
+    });
+  }
+
+  async createInviteCode(
+    zupassEmail: string | null,
+    maxUses: number
+  ): Promise<string> {
+    // Generate an unused random invite code
+    let code: string;
+    do {
+      code = generateSlug(2, {
+        partsOfSpeech: ["adjective", "noun"],
+      }).toLowerCase();
+    } while (this.inviteCodes.has(code));
+
+    await this.saveInviteCode(code, zupassEmail, { useCount: 0, maxUses });
+    return code;
+  }
+
+  async getOrCreateZupassInviteCode(zupassEmail: string): Promise<string> {
+    if (!this.zupassEmailToInviteCode.has(zupassEmail)) {
+      return await this.createInviteCode(zupassEmail, 1);
+    } else {
+      return this.zupassEmailToInviteCode.get(zupassEmail)!;
+    }
+  }
+
   getStatus(address: Address, invCode: string): FaucetStatus {
     if (!this.verifyInviteCode(invCode)) return "alreadyUsedInvite";
 
     if (this.sent.has(address)) return "alreadySentCoins";
     if (this.requested.has(address)) return "alreadyRequestedCoins";
     return "canRequest";
-  }
-
-  async incrementInviteCodeUseCount(code: string) {
-    await this.db.incrementInviteCodeUseCount(code);
-    this.inviteCodes.get(code)!.useCount += 1;
-  }
-
-  async saveInviteCode(code: string, status: InviteCodeStatus) {
-    await this.db.saveInviteCode({ code, ...status });
-    this.inviteCodes.set(code, status);
-  }
-
-  async createInviteCode(maxUses: number): Promise<string> {
-    const code = generateSlug(2, {
-      partsOfSpeech: ["adjective", "noun"],
-    }).toLowerCase();
-    await this.saveInviteCode(code, { useCount: 0, maxUses });
-    return code;
   }
 
   async request(

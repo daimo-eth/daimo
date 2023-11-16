@@ -4,6 +4,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   assert,
+  daimoDomain,
   daimoLinkBase,
   getAccountName,
   parseDaimoLink,
@@ -31,8 +32,6 @@ type TitleDesc = {
   description: string;
   walletActionLinkStatus?: DaimoLinkStatus;
 };
-
-const domain = process.env.NEXT_PUBLIC_DOMAIN;
 
 const defaultMeta = metadata("Daimo", "Payments on Ethereum");
 
@@ -116,7 +115,7 @@ function metadata(title: string, description: string): Metadata {
       siteName: title,
       images: [
         {
-          url: `https://${domain}/logo-web.png`,
+          url: `https://${daimoDomain}/logo-link-preview.png`,
           alt: "Daimo",
         },
       ],
