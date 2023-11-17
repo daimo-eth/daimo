@@ -43,12 +43,17 @@ export class DB {
             address CHAR(42) NOT NULL
           );
           CREATE INDEX IF NOT EXISTS pushtoken_address ON pushtoken (address);
+          
           CREATE TABLE IF NOT EXISTS invitecode (
             code VARCHAR(64) PRIMARY KEY,
             use_count INT NOT NULL,
             max_uses INT NOT NULL DEFAULT 1
           );
           ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
+
+          CREATE TABLE IF NOT EXISTS name_blacklist (
+            name VARCHAR(32) PRIMARY KEY
+          );
       `);
     await client.end();
   }
@@ -74,6 +79,18 @@ export class DB {
       [token.pushtoken, token.address]
     );
     client.release();
+  }
+
+  async loadNameBlacklist(): Promise<Set<string>> {
+    console.log(`[DB] loading name blacklist`);
+    const client = await this.pool.connect();
+    const result = await client.query<{ name: string }>(
+      `SELECT name FROM name_blacklist`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} blacklisted names`);
+    return new Set(result.rows.map((row) => row.name));
   }
 
   async loadInviteCodes(): Promise<InviteCodeRow[]> {

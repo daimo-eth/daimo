@@ -35,7 +35,7 @@ async function main() {
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const keyReg = new KeyRegistry(vc);
-  const nameReg = new NameRegistry(vc);
+  const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
   const opIndexer = new OpIndexer(vc);
   const paymaster = new Paymaster(vc, bundlerClient);
   const coinIndexer = new CoinIndexer(vc, opIndexer);

@@ -55,7 +55,7 @@ async function metrics() {
   await vc.init();
 
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
-  const nameReg = new NameRegistry(vc);
+  const nameReg = new NameRegistry(vc, new Set([]));
   const opIndexer = new OpIndexer(vc);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
 
