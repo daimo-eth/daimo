@@ -25,7 +25,16 @@ import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { Account } from "../../model/account";
 
-type HeaderObject = { isHeader: boolean; month?: string; id: string };
+interface HeaderObject {
+  isHeader: true;
+  id: string;
+  month: string;
+}
+interface TransferRenderObject {
+  isHeader: false;
+  id: string;
+  t: TransferOpEvent;
+}
 
 export function HistoryListSwipe({
   account,
@@ -70,7 +79,7 @@ export function HistoryListSwipe({
   }
 
   const stickyIndices = [] as number[];
-  const rows: ((TransferOpEvent & HeaderObject) | HeaderObject)[] = [];
+  const rows: (TransferRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
@@ -91,7 +100,7 @@ export function HistoryListSwipe({
     rows.push({
       isHeader: false,
       id: `${t.timestamp}_${t.amount}_${t.blockHash}`,
-      ...t,
+      t,
     });
   }
 
@@ -105,16 +114,10 @@ export function HistoryListSwipe({
       keyExtractor={({ id }) => id}
       renderItem={({ item }) => {
         if (item.isHeader) {
-          return item.month ? (
-            <HeaderRow key={item.month} title={item.month} />
-          ) : null;
+          return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <TransferRow
-            transfer={item as TransferOpEvent}
-            address={account.address}
-            showDate
-          />
+          <TransferRow transfer={item.t} address={account.address} showDate />
         );
       }}
     />
