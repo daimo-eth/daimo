@@ -4,8 +4,7 @@ import {
   getAccountName,
   timeAgo,
 } from "@daimo/common";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { ReactNode } from "react";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import {
   Platform,
   StyleSheet,
@@ -25,6 +24,8 @@ import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { Account } from "../../model/account";
+
+type HeaderObject = { isHeader: boolean; month?: string; id: string };
 
 export function HistoryListSwipe({
   account,
@@ -69,7 +70,7 @@ export function HistoryListSwipe({
   }
 
   const stickyIndices = [] as number[];
-  const rows: ReactNode[] = [];
+  const rows: ((TransferOpEvent & HeaderObject) | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
@@ -80,17 +81,43 @@ export function HistoryListSwipe({
     });
     if (month !== lastMonth) {
       stickyIndices.push(rows.length);
-      rows.push(<HeaderRow key={month} title={month} />);
+      rows.push({
+        isHeader: true,
+        month,
+        id: month,
+      });
       lastMonth = month;
     }
-    rows.push(renderRow(t));
+    rows.push({
+      isHeader: false,
+      id: `${t.timestamp}_${t.amount}_${t.blockHash}`,
+      ...t,
+    });
   }
 
   return (
-    <BottomSheetScrollView contentContainerStyle={styles.historyListBody}>
-      {rows}
-      <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />
-    </BottomSheetScrollView>
+    <BottomSheetFlatList
+      ListFooterComponent={() => {
+        return <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />;
+      }}
+      contentContainerStyle={styles.historyListBody}
+      data={rows}
+      keyExtractor={({ id }) => id}
+      renderItem={({ item }) => {
+        if (item.isHeader) {
+          return item.month ? (
+            <HeaderRow key={item.month} title={item.month} />
+          ) : null;
+        }
+        return (
+          <TransferRow
+            transfer={item as TransferOpEvent}
+            address={account.address}
+            showDate
+          />
+        );
+      }}
+    />
   );
 }
 
