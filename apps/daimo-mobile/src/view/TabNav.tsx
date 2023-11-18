@@ -1,15 +1,16 @@
 import { assertUnreachable } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import {
-  BottomTabNavigationOptions,
-  createBottomTabNavigator,
-} from "@react-navigation/bottom-tabs";
+  MaterialTopTabNavigationOptions,
+  createMaterialTopTabNavigator,
+} from "@react-navigation/material-top-tabs";
 import { RouteProp } from "@react-navigation/native";
 import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
@@ -36,17 +37,9 @@ import {
 import { color } from "./shared/style";
 import { useAccount } from "../model/account";
 
-const Tab = createBottomTabNavigator<ParamListTab>();
+const Tab = createMaterialTopTabNavigator<ParamListTab>();
 
 export function TabNav() {
-  const opts: BottomTabNavigationOptions = {
-    tabBarHideOnKeyboard: true,
-  };
-  // Note: take care using unmountOnBlur together with NativeStackNavigator.
-  // NativeStackNavigator has a bug where it remembers routes after unmounting,
-  // and another where dismissing a modal doesn't change the route.
-  const unmount: BottomTabNavigationOptions = { ...opts, unmountOnBlur: true };
-
   const ins = useSafeAreaInsets();
 
   // Track whether we've onboarded. If not, show OnboardingScreen.
@@ -66,12 +59,13 @@ export function TabNav() {
       initialRouteName="HomeTab"
       screenOptions={(props) => getTabOptions(ins, props)}
       backBehavior="none"
+      tabBarPosition="bottom"
     >
-      <Tab.Screen name="DepositTab" component={DepositTab} options={unmount} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={unmount} />
-      <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
-      <Tab.Screen name="SendTab" component={SendTab} options={unmount} />
-      <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
+      <Tab.Screen name="DepositTab" component={DepositTab} />
+      <Tab.Screen name="ReceiveTab" component={ReceiveTab} />
+      <Tab.Screen name="HomeTab" component={HomeTab} />
+      <Tab.Screen name="SendTab" component={SendTab} />
+      <Tab.Screen name="SettingsTab" component={SettingsTab} />
     </Tab.Navigator>
   );
 }
@@ -79,12 +73,11 @@ export function TabNav() {
 function getTabOptions(
   safeInsets: EdgeInsets,
   { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
-): BottomTabNavigationOptions {
-  const opts: BottomTabNavigationOptions = {
-    headerShown: false,
+): MaterialTopTabNavigationOptions {
+  const opts: MaterialTopTabNavigationOptions = {
+    animationEnabled: Platform.OS === "ios", // android text input breaks if enabled
     tabBarStyle: {
       height: 72 + safeInsets.bottom,
-      paddingHorizontal: 16,
       paddingBottom: safeInsets.bottom,
     },
     tabBarItemStyle: {
@@ -95,6 +88,13 @@ function getTabOptions(
     tabBarLabelStyle: {
       fontSize: 11,
       fontWeight: "600",
+      width: 100,
+    },
+    tabBarIndicatorStyle: {
+      opacity: 0,
+    },
+    tabBarIconStyle: {
+      alignItems: "center",
     },
   };
   switch (route.name) {

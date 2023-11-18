@@ -5,6 +5,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableHighlight,
   View,
   ViewStyle,
@@ -24,13 +25,20 @@ import { TextBody, TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
-export function SearchTab({ autoFocus }: { autoFocus: boolean }) {
+export function SearchTab({
+  autoFocus,
+  textInnerRef,
+}: {
+  autoFocus: boolean;
+  textInnerRef: React.RefObject<TextInput>;
+}) {
   const [prefix, setPrefix] = useState("");
 
   return (
     <>
       <View style={{ flexGrow: 0 }}>
         <InputBig
+          innerRef={textInnerRef}
           autoFocus={autoFocus}
           icon="search"
           placeholder="Search user, ENS, or address..."

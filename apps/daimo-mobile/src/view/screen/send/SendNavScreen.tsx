@@ -1,6 +1,13 @@
+import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
-import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
 import { SendNoteScreen } from "./SendNoteScreen";
@@ -42,6 +49,27 @@ function SendNav({
   // Navigation
   const [tab, setTab] = useState<SendTab>(sendNote ? "SEND LINK" : "SEARCH");
   const [tabs] = useState(["SEARCH", "SEND LINK"] as SendTab[]);
+  const textInputRef = useRef<TextInput>(null);
+  const isFocused = useIsFocused();
+  const nav = useNav();
+
+  useEffect(() => {
+    let focusTimeout;
+    if (isFocused && autoFocus && Platform.OS === "ios") {
+      const { setParams }: { setParams: any } = nav;
+      setParams({
+        autoFocus: false,
+      });
+      // wait for the screen transition animation to finish before open keyboard
+      focusTimeout = setTimeout(() => {
+        textInputRef.current?.focus();
+      }, 500);
+    }
+
+    if (!isFocused) {
+      clearTimeout(focusTimeout);
+    }
+  }, [isFocused, autoFocus]);
 
   // Hack: listen for prop changed due to navigation
   const refSend = useRef(!!sendNote);
@@ -55,7 +83,9 @@ function SendNav({
     <View style={{ flex: 1, flexDirection: "column" }}>
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
-      {tab === "SEARCH" && <SearchTab {...{ autoFocus }} />}
+      {tab === "SEARCH" && (
+        <SearchTab {...{ autoFocus }} textInnerRef={textInputRef} />
+      )}
       {tab === "SEND LINK" && <SendNoteScreen />}
     </View>
   );
