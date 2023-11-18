@@ -61,7 +61,7 @@ export function HistoryListSwipe({
 
   const renderRow = (t: TransferOpEvent) => (
     <TransferRow
-      key={`${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`}
+      key={getTransferId(t)}
       transfer={t}
       address={account.address}
       showDate={showDate}
@@ -99,7 +99,7 @@ export function HistoryListSwipe({
     }
     rows.push({
       isHeader: false,
-      id: `${t.timestamp}_${t.amount}_${t.blockHash}`,
+      id: getTransferId(t),
       t,
     });
   }
@@ -221,6 +221,10 @@ function TransferAmountDate({
       <Text style={[ss.text.metadataLight, { color: textCol }]}>{timeStr}</Text>
     </View>
   );
+}
+
+function getTransferId(t: TransferOpEvent): string {
+  return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
 const styles = StyleSheet.create({
