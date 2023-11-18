@@ -59,7 +59,7 @@ export class NameRegistry {
 
   public logs: RegisteredLog[] = [];
 
-  constructor(private vc: ViemClient) {}
+  constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
   /** Init: index logs from chain, get all names so far */
   async init() {
@@ -81,8 +81,7 @@ export class NameRegistry {
       .map((a) => ({
         name: hexToString(a.name, { size: 32 }),
         addr: getAddress(a.addr),
-      }))
-      .filter((a) => isValidName(a.name));
+      }));
     console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
 
     accounts.forEach(this.cacheAccount);
@@ -90,8 +89,18 @@ export class NameRegistry {
 
   /** Cache an account in memory. */
   private cacheAccount = (acc: DAccount) => {
+    if (!isValidName(acc.name)) {
+      console.log(`[NAME-REG] skipping invalid name ${acc.name}`);
+      return;
+    }
+
     console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
     this.nameToAddr.set(acc.name, acc.addr);
+
+    if (this.nameBlacklist.has(acc.name)) {
+      console.log(`[NAME-REG] hiding blacklisted name ${acc.name}`);
+      return;
+    }
     this.addrToName.set(acc.addr, acc.name);
     this.accounts.push(acc);
   };
