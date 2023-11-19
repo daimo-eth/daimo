@@ -1,5 +1,6 @@
 import { UserOpHex } from "@daimo/common";
 import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
+import { hexToBigInt } from "viem";
 
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
@@ -82,18 +83,27 @@ export class Paymaster {
     //   functionName: "previousPrice",
     // });
 
-    const maxFeePerGas = await this.vc.publicClient.getGasPrice();
-    const maxPriorityFeePerGas =
-      await this.vc.publicClient.estimateMaxPriorityFeePerGas(); // Assumes we're on an EIP-1559 chain
+    const gasPriceParams =
+      await this.bundlerClient.getUserOperationGasPriceParams();
     const estimatedPreVerificationGas =
       await this.bundlerClient.estimatePreVerificationGas(
         dummyAddDeviceOps[daimoChainFromId(chainConfig.chainL2.id)]
       );
 
-    this.maxFeePerGas = maxFeePerGas;
-    this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+    this.maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
+    this.maxPriorityFeePerGas = hexToBigInt(
+      gasPriceParams.maxPriorityFeePerGas
+    );
     this.preVerificationGas = estimatedPreVerificationGas;
     this.estimatedFee = 0;
+
+    console.log(
+      `[PAYMASTER] fetched latest gas state: ${JSON.stringify({
+        maxFeePerGas: this.maxFeePerGas.toString(),
+        maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
+        preVerificationGas: this.preVerificationGas.toString(),
+      })}`
+    );
   }
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.

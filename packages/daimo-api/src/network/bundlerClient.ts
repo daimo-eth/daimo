@@ -6,6 +6,17 @@ interface GasEstimate {
   preVerificationGas: Hex;
 }
 
+interface GasPriceParams {
+  maxFeePerGas: Hex;
+  maxPriorityFeePerGas: Hex;
+}
+
+interface GasPrice {
+  slow: GasPriceParams;
+  standard: GasPriceParams;
+  fast: GasPriceParams;
+}
+
 /** Sends userops through an ERC-4337 bundler. */
 export class BundlerClient {
   provider: BundlerJsonRpcProvider;
@@ -36,6 +47,17 @@ export class BundlerClient {
     );
     assert(isHex(gasEstimate.preVerificationGas));
     return hexToBigInt(gasEstimate.preVerificationGas);
+  }
+
+  async getUserOperationGasPriceParams() {
+    const gasPrice = (await this.provider.send(
+      "pimlico_getUserOperationGasPrice",
+      []
+    )) as GasPrice;
+    console.log(
+      `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`
+    );
+    return gasPrice.fast;
   }
 }
 
