@@ -207,15 +207,7 @@ export function createRouter(
     getZupassInviteCode: publicProcedure
       .input(z.object({ pcd: z.string().optional() }))
       .query(async (opts) => {
-        const { pcd } = opts.input;
-        if (!pcd) return null;
-
-        const zupassUser = await verifyZupass(pcd);
-        console.log(`[ZUPASS] verified ${zupassUser.email}`);
-        const inviteCode = await faucet.getOrCreateZupassInviteCode(
-          zupassUser.email
-        );
-        return inviteCode;
+        return null;
       }),
   });
 }

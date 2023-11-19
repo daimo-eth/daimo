@@ -65,7 +65,7 @@ function WaitlistPageInner() {
             <div className="text-lg font-semibold text-grayMid">
               You&apos;re in. Here&apos;s your invite code:
             </div>
-            <InlineCopyButton inviteCode={inviteCode.data} />
+            <InlineCopyButton inviteCode={"unavailable"} />
             <div className="h-4" />
           </>
         );
@@ -108,12 +108,8 @@ function WaitlistPageInner() {
       case "logged-out": {
         return (
           <>
-            <button className={primaryButtonStyle} onClick={login}>
-              SIGN IN WITH ZUPASS
-            </button>
-            <div className="h-4" />
             <div className="text-lg font-semibold text-grayMid">
-              Not at Devconnect? Sign up for the{" "}
+              Thanks for joining us at Devconnect. Sign up for the{" "}
               <a
                 className="text-primaryLight"
                 href="https://noteforms.com/forms/daimo-uk2fe4"

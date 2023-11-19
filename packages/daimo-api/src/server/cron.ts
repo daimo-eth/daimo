@@ -106,20 +106,20 @@ export class Crontab {
       0.005
     );
 
-    const balanceUSDC = await this.vc.publicClient.readContract({
-      abi: erc20ABI,
-      address: chainConfig.tokenAddress,
-      functionName: "balanceOf",
-      args: [faucetAddr],
-    });
-    const balanceDollars = Number(amountToDollars(balanceUSDC));
+    // const balanceUSDC = await this.vc.publicClient.readContract({
+    //   abi: erc20ABI,
+    //   address: chainConfig.tokenAddress,
+    //   functionName: "balanceOf",
+    //   args: [faucetAddr],
+    // });
+    // const balanceDollars = Number(amountToDollars(balanceUSDC));
 
-    await this.sendLowBalanceMessage(
-      balanceDollars,
-      `Faucet ${faucetAddr} USDC`,
-      200,
-      20
-    );
+    // await this.sendLowBalanceMessage(
+    //   balanceDollars,
+    //   `Faucet ${faucetAddr} USDC`,
+    //   200,
+    //   20
+    // );
   }
 
   async postRecentTransfers() {

@@ -116,11 +116,12 @@ export class Faucet {
   }
 
   getStatus(address: Address, invCode: string): FaucetStatus {
-    if (!this.verifyInviteCode(invCode)) return "alreadyUsedInvite";
+    return "unavailable";
+    // if (!this.verifyInviteCode(invCode)) return "alreadyUsedInvite";
 
-    if (this.sent.has(address)) return "alreadySentCoins";
-    if (this.requested.has(address)) return "alreadyRequestedCoins";
-    return "canRequest";
+    // if (this.sent.has(address)) return "alreadySentCoins";
+    // if (this.requested.has(address)) return "alreadyRequestedCoins";
+    // return "canRequest";
   }
 
   async request(

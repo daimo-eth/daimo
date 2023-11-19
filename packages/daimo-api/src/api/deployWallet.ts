@@ -59,13 +59,13 @@ export async function deployWallet(
   if (deployReceipt.status === "success") {
     nameReg.onSuccessfulRegister(name, address);
 
-    if (invCode) {
-      const dollars = chainConfig.chainL2.testnet ? 50 : 5;
-      console.log(
-        `[API] Request $${dollars} USDC from faucet for ${name} ${address}`
-      );
-      faucet.request(address, dollars, invCode); // Kick off in background
-    }
+    // if (invCode) {
+    //   const dollars = chainConfig.chainL2.testnet ? 50 : 5;
+    //   console.log(
+    //     `[API] Request $${dollars} USDC from faucet for ${name} ${address}`
+    //   );
+    //   faucet.request(address, dollars, invCode); // Kick off in background
+    // }
   } else {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
   }
