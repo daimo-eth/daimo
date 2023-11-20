@@ -36,6 +36,7 @@ import {
 } from "./shared/nav";
 import { color } from "./shared/style";
 import { useAccount } from "../model/account";
+import { TAB_BAR_HEIGHT } from "../vendor/useTabBarHeight";
 
 const Tab = createMaterialTopTabNavigator<ParamListTab>();
 
@@ -77,7 +78,7 @@ function getTabOptions(
   const opts: MaterialTopTabNavigationOptions = {
     animationEnabled: Platform.OS === "ios", // android text input breaks if enabled
     tabBarStyle: {
-      height: 72 + safeInsets.bottom,
+      height: TAB_BAR_HEIGHT + safeInsets.bottom,
       paddingBottom: safeInsets.bottom,
     },
     tabBarItemStyle: {

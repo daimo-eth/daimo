@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
 import { color } from "./style";
+import useTabBarHeight from "../../vendor/useTabBarHeight";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;
@@ -36,7 +37,7 @@ export type SwipeUpDownRef = {
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   ({ itemMini, itemFull, swipeHeight, onShowMini, onShowFull }, ref) => {
     const ins = useSafeAreaInsets();
-    const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
+    const tabBarHeight = useTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
 
     const maxHeight = screenDimensions.height - ins.top - ins.bottom;

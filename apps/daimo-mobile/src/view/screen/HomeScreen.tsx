@@ -17,6 +17,7 @@ import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
+import useTabBarHeight from "../../vendor/useTabBarHeight";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
@@ -40,7 +41,7 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
-  const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
+  const tabBarHeight = useTabBarHeight();
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);
