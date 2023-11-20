@@ -10,7 +10,6 @@ import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { search } from "../api/search";
-import { verifyZupass } from "../api/zupass";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { Faucet } from "../contract/faucet";

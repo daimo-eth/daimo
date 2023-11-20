@@ -1,16 +1,15 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
+  Platform,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
-  ScrollView,
-  RefreshControl,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -41,7 +40,7 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);

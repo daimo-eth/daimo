@@ -1,6 +1,5 @@
 import { OpStatus, TransferOpEvent, dollarsToAmount } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
-import { generateSlug } from "random-word-slugs";
 import { Address } from "viem";
 
 import { CoinIndexer, TransferLog } from "./coinIndexer";
@@ -12,20 +11,12 @@ export type FaucetStatus =
   | "unavailable"
   | "canRequest"
   | "alreadyRequestedCoins"
-  | "alreadyUsedInvite"
   | "alreadySentCoins";
-
-type InviteCodeStatus = {
-  useCount: number;
-  maxUses: number;
-};
 
 /** Testnet faucet. Drips testUSDC to any account not yet requested. */
 export class Faucet {
   private requested = new Set<Address>();
   private sent = new Set<Address>();
-  private inviteCodes = new Map<string, InviteCodeStatus>();
-  private zupassEmailToInviteCode = new Map<string, string>();
 
   constructor(
     private vc: ViemClient,
@@ -34,15 +25,6 @@ export class Faucet {
   ) {}
 
   async init() {
-    const rows = await this.db.loadInviteCodes();
-    console.log(`[FAUCET] loaded ${rows.length} invites from DB`);
-    for (const row of rows) {
-      this.cacheInviteCode(row.code, row.zupassEmail, {
-        useCount: row.useCount,
-        maxUses: row.maxUses,
-      });
-    }
-
     this.coinIndexer.pipeAllTransfers(this.parseLogs);
   }
 
@@ -55,85 +37,31 @@ export class Faucet {
     }
   };
 
-  cacheInviteCode(
-    code: string,
-    zupassEmail: string | null,
-    status: InviteCodeStatus
-  ) {
-    console.log("[FAUCET] caching invite", code, zupassEmail, status);
-    this.inviteCodes.set(code, status);
-    if (zupassEmail) {
-      this.zupassEmailToInviteCode.set(zupassEmail, code);
-    }
+  async useInviteCode(invCode: string): Promise<boolean> {
+    await this.db.incrementInviteCodeUseCount(invCode);
+    const code = await this.db.loadInviteCode(invCode);
+    return code != null && code.useCount <= code.maxUses;
   }
 
-  verifyInviteCode(invCode: string): boolean {
-    if (!this.inviteCodes.has(invCode)) return false;
-    const { useCount, maxUses } = this.inviteCodes.get(invCode)!;
+  async verifyInviteCode(invCode: string): Promise<boolean> {
+    const code = await this.db.loadInviteCode(invCode);
+    if (code == null) return false;
+    const { useCount, maxUses } = code;
     if (useCount >= maxUses) return false;
     return true;
   }
 
-  async incrementInviteCodeUseCount(code: string) {
-    await this.db.incrementInviteCodeUseCount(code);
-    this.inviteCodes.get(code)!.useCount += 1;
+  getStatus(address: Address): FaucetStatus {
+    if (this.sent.has(address)) return "alreadySentCoins";
+    if (this.requested.has(address)) return "alreadyRequestedCoins";
+    return "canRequest";
   }
 
-  async saveInviteCode(
-    code: string,
-    zupassEmail: string | null,
-    status: InviteCodeStatus
-  ) {
-    await this.db.saveInviteCode({ code, zupassEmail, ...status });
-    this.cacheInviteCode(code, zupassEmail, {
-      useCount: status.useCount,
-      maxUses: status.maxUses,
-    });
-  }
-
-  async createInviteCode(
-    zupassEmail: string | null,
-    maxUses: number
-  ): Promise<string> {
-    // Generate an unused random invite code
-    let code: string;
-    do {
-      code = generateSlug(2, {
-        partsOfSpeech: ["adjective", "noun"],
-      }).toLowerCase();
-    } while (this.inviteCodes.has(code));
-
-    await this.saveInviteCode(code, zupassEmail, { useCount: 0, maxUses });
-    return code;
-  }
-
-  async getOrCreateZupassInviteCode(zupassEmail: string): Promise<string> {
-    if (!this.zupassEmailToInviteCode.has(zupassEmail)) {
-      return await this.createInviteCode(zupassEmail, 1);
-    } else {
-      return this.zupassEmailToInviteCode.get(zupassEmail)!;
-    }
-  }
-
-  getStatus(address: Address, invCode: string): FaucetStatus {
-    return "unavailable";
-    // if (!this.verifyInviteCode(invCode)) return "alreadyUsedInvite";
-
-    // if (this.sent.has(address)) return "alreadySentCoins";
-    // if (this.requested.has(address)) return "alreadyRequestedCoins";
-    // return "canRequest";
-  }
-
-  async request(
-    address: Address,
-    dollars: number,
-    invCode: string
-  ): Promise<TransferOpEvent> {
-    const status = this.getStatus(address, invCode);
+  async request(address: Address, dollars: number): Promise<TransferOpEvent> {
+    const status = this.getStatus(address);
     if (status !== "canRequest") throw new Error(status);
 
     this.requested.add(address);
-    await this.incrementInviteCodeUseCount(invCode);
 
     console.log(`[FAUCET] sending $${dollars} USDC to ${address}`);
     const hash = await this.vc.writeContract({

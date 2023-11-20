@@ -7,7 +7,6 @@ import {
   daimoChainFromId,
   daimoPaymasterAddress,
   entryPointABI,
-  erc20ABI,
 } from "@daimo/contract";
 import { CronJob } from "cron";
 import { Constants } from "userop";
@@ -105,21 +104,6 @@ export class Crontab {
       0.05,
       0.005
     );
-
-    // const balanceUSDC = await this.vc.publicClient.readContract({
-    //   abi: erc20ABI,
-    //   address: chainConfig.tokenAddress,
-    //   functionName: "balanceOf",
-    //   args: [faucetAddr],
-    // });
-    // const balanceDollars = Number(amountToDollars(balanceUSDC));
-
-    // await this.sendLowBalanceMessage(
-    //   balanceDollars,
-    //   `Faucet ${faucetAddr} USDC`,
-    //   200,
-    //   20
-    // );
   }
 
   async postRecentTransfers() {

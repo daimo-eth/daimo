@@ -18,6 +18,12 @@ export async function deployWallet(
   faucet: Faucet,
   telemetry: Telemetry
 ): Promise<Address> {
+  // For now, invite code is required
+  const invCodeSuccess = invCode && (await faucet.useInviteCode(invCode));
+  if (!invCodeSuccess) {
+    throw new Error("Invalid invite code");
+  }
+
   const maxUint256 = 2n ** 256n - 1n;
   const initCalls: DaimoAccountCall[] = [
     {
@@ -59,13 +65,11 @@ export async function deployWallet(
   if (deployReceipt.status === "success") {
     nameReg.onSuccessfulRegister(name, address);
 
-    // if (invCode) {
-    //   const dollars = chainConfig.chainL2.testnet ? 50 : 5;
-    //   console.log(
-    //     `[API] Request $${dollars} USDC from faucet for ${name} ${address}`
-    //   );
-    //   faucet.request(address, dollars, invCode); // Kick off in background
-    // }
+    if (invCode && chainConfig.chainL2.testnet) {
+      const dollars = 50;
+      console.log(`[API] faucet req: $${dollars} USDC for ${name} ${address}`);
+      faucet.request(address, dollars); // Kick off in background
+    }
   } else {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
   }

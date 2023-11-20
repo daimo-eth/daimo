@@ -93,20 +93,23 @@ export class DB {
     return new Set(result.rows.map((row) => row.name));
   }
 
-  async loadInviteCodes(): Promise<InviteCodeRow[]> {
-    console.log(`[DB] loading invite codes`);
+  async loadInviteCode(code: string): Promise<InviteCodeRow | null> {
+    console.log(`[DB] loading invite code ${code}`);
     const client = await this.pool.connect();
     const result = await client.query<RawInviteCodeRow>(
-      `SELECT code, use_count, max_uses, zupass_email FROM invitecode`
+      `SELECT code, use_count, max_uses, zupass_email FROM invitecode WHERE code = $1`,
+      [code]
     );
     client.release();
 
-    return result.rows.map((row) => ({
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    return {
       code: row.code,
       useCount: row.use_count,
       maxUses: row.max_uses,
       zupassEmail: row.zupass_email,
-    }));
+    };
   }
 
   async saveInviteCode(code: InviteCodeRow) {

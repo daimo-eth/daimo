@@ -1,6 +1,5 @@
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import {
   ReactNode,
   forwardRef,
@@ -37,7 +36,7 @@ export type SwipeUpDownRef = {
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   ({ itemMini, itemFull, swipeHeight, onShowMini, onShowFull }, ref) => {
     const ins = useSafeAreaInsets();
-    const tabBarHeight = useBottomTabBarHeight();
+    const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
 
     const maxHeight = screenDimensions.height - ins.top - ins.bottom;
