@@ -22,7 +22,6 @@ import { color } from "./style";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;
-  itemFullPreview: ReactNode;
   itemFull: ReactNode;
   swipeHeight: number;
   onShowMini?: () => void;
@@ -36,17 +35,7 @@ export type SwipeUpDownRef = {
 };
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
-  (
-    {
-      itemMini,
-      itemFullPreview,
-      itemFull,
-      swipeHeight,
-      onShowMini,
-      onShowFull,
-    },
-    ref
-  ) => {
+  ({ itemMini, itemFull, swipeHeight, onShowMini, onShowFull }, ref) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useBottomTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
@@ -127,7 +116,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         >
           {itemMini}
         </Animated.View>
-        {isMini ? itemFullPreview : itemFull}
+        {itemFull}
       </BottomSheet>
     );
   }

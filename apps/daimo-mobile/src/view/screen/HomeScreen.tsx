@@ -92,9 +92,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   const histListMini = (
     <HistoryListSwipe account={account} showDate={false} maxToShow={5} />
   );
-  const histListFullPreview = (
-    <HistoryListSwipe account={account} showDate maxToShow={12} />
-  );
   const histListFull = <HistoryListSwipe account={account} showDate />;
 
   const onScrollBeginDrag = () => {
@@ -151,7 +148,6 @@ function HomeScreenInner({ account }: { account: Account }) {
             <SwipeUpDown
               ref={bottomSheetRef}
               itemMini={histListMini}
-              itemFullPreview={histListFullPreview}
               itemFull={histListFull}
               swipeHeight={screenDimensions.height / 3}
               onShowFull={onOpenTransactionsModal}

@@ -4,8 +4,7 @@ import {
   getAccountName,
   timeAgo,
 } from "@daimo/common";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { ReactNode } from "react";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import {
   Platform,
   StyleSheet,
@@ -25,6 +24,17 @@ import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { Account } from "../../model/account";
+
+interface HeaderObject {
+  isHeader: true;
+  id: string;
+  month: string;
+}
+interface TransferRenderObject {
+  isHeader: false;
+  id: string;
+  t: TransferOpEvent;
+}
 
 export function HistoryListSwipe({
   account,
@@ -51,7 +61,7 @@ export function HistoryListSwipe({
 
   const renderRow = (t: TransferOpEvent) => (
     <TransferRow
-      key={`${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`}
+      key={getTransferId(t)}
       transfer={t}
       address={account.address}
       showDate={showDate}
@@ -69,7 +79,7 @@ export function HistoryListSwipe({
   }
 
   const stickyIndices = [] as number[];
-  const rows: ReactNode[] = [];
+  const rows: (TransferRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
@@ -80,17 +90,37 @@ export function HistoryListSwipe({
     });
     if (month !== lastMonth) {
       stickyIndices.push(rows.length);
-      rows.push(<HeaderRow key={month} title={month} />);
+      rows.push({
+        isHeader: true,
+        month,
+        id: month,
+      });
       lastMonth = month;
     }
-    rows.push(renderRow(t));
+    rows.push({
+      isHeader: false,
+      id: getTransferId(t),
+      t,
+    });
   }
 
   return (
-    <BottomSheetScrollView contentContainerStyle={styles.historyListBody}>
-      {rows}
-      <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />
-    </BottomSheetScrollView>
+    <BottomSheetFlatList
+      ListFooterComponent={() => {
+        return <Spacer h={ins.bottom + (Platform.OS === "ios" ? 64 : 128)} />;
+      }}
+      contentContainerStyle={styles.historyListBody}
+      data={rows}
+      keyExtractor={({ id }) => id}
+      renderItem={({ item }) => {
+        if (item.isHeader) {
+          return <HeaderRow key={item.month} title={item.month} />;
+        }
+        return (
+          <TransferRow transfer={item.t} address={account.address} showDate />
+        );
+      }}
+    />
   );
 }
 
@@ -191,6 +221,10 @@ function TransferAmountDate({
       <Text style={[ss.text.metadataLight, { color: textCol }]}>{timeStr}</Text>
     </View>
   );
+}
+
+function getTransferId(t: TransferOpEvent): string {
+  return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
 const styles = StyleSheet.create({
