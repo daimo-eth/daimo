@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
 import { color } from "./style";
-import useTabBarHeight from "../../vendor/useTabBarHeight";
+import useTabBarHeight from "../../common/useTabBarHeight";
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;

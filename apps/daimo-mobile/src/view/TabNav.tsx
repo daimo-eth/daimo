@@ -35,8 +35,8 @@ import {
   ParamListTab,
 } from "./shared/nav";
 import { color } from "./shared/style";
+import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccount } from "../model/account";
-import { TAB_BAR_HEIGHT } from "../vendor/useTabBarHeight";
 
 const Tab = createMaterialTopTabNavigator<ParamListTab>();
 

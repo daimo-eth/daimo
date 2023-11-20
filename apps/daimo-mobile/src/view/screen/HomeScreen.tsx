@@ -15,9 +15,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
+import useTabBarHeight from "../../common/useTabBarHeight";
 import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
-import useTabBarHeight from "../../vendor/useTabBarHeight";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
