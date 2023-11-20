@@ -1,16 +1,21 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Platform,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
@@ -36,7 +41,7 @@ export default function HomeScreen() {
 
 function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<Animated.ScrollView>(null);
   const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
@@ -44,6 +49,11 @@ function HomeScreenInner({ account }: { account: Account }) {
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const translationY = useSharedValue(0);
+  const screenHeight =
+    screenDimensions.height -
+    tabBarHeight -
+    (Platform.OS === "android" ? 16 : 0);
 
   useEffect(() => {
     if (nav.getParent()) {
@@ -110,10 +120,24 @@ function HomeScreenInner({ account }: { account: Account }) {
     setIsModalOpen(false);
   };
 
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    translationY.value = event.contentOffset.y;
+  });
+
+  const bottomSheetScrollStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: -translationY.value,
+        },
+      ],
+    };
+  });
+
   return (
     <View>
       <OfflineHeader shouldAddPaddingWhenOnline={false} />
-      <ScrollView
+      <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
@@ -125,13 +149,12 @@ function HomeScreenInner({ account }: { account: Account }) {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{
-          height:
-            screenDimensions.height -
-            tabBarHeight -
-            (Platform.OS === "android" ? 16 : 0),
+          height: screenHeight,
         }}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
+        onScroll={scrollHandler}
+        scrollEventThrottle={8}
       >
         <Spacer h={top} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
@@ -141,20 +164,28 @@ function HomeScreenInner({ account }: { account: Account }) {
             style={{ marginHorizontal: 0 }}
           />
         )}
-        {searchPrefix == null && (
-          <>
-            <AmountAndButtons account={account} />
-            <SwipeUpDown
-              ref={bottomSheetRef}
-              itemMini={histListMini}
-              itemFull={histListFull}
-              swipeHeight={screenDimensions.height / 3}
-              onShowFull={onOpenTransactionsModal}
-              onShowMini={onCloseTransactionsModal}
-            />
-          </>
-        )}
-      </ScrollView>
+        {searchPrefix == null && <AmountAndButtons account={account} />}
+      </Animated.ScrollView>
+      {searchPrefix == null && (
+        <Animated.View
+          style={[
+            { height: screenHeight },
+            styles.bottomSheetContainer,
+            bottomSheetScrollStyle,
+          ]}
+          pointerEvents="box-none"
+        >
+          <SwipeUpDown
+            ref={bottomSheetRef}
+            itemMini={histListMini}
+            itemFull={histListFull}
+            swipeHeight={screenDimensions.height / 3}
+            onShowFull={onOpenTransactionsModal}
+            onShowMini={onCloseTransactionsModal}
+            refreshing={refreshing}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -261,6 +292,10 @@ const styles = StyleSheet.create({
   amountAndButtons: {
     flexDirection: "column",
     alignItems: "center",
+  },
+  bottomSheetContainer: {
+    position: "absolute",
+    width: SCREEN_WIDTH,
   },
   buttonRow: {
     flexDirection: "row",
