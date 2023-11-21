@@ -71,7 +71,6 @@ export default function OnboardingScreen({
 
   const next = getNext(page, goTo, setDaimoChain, onOnboardingComplete);
   const prev = pageStack.length === 0 ? undefined : goToPrev;
-
   // User enters their name
   const [name, setName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
@@ -81,9 +80,18 @@ export default function OnboardingScreen({
   // Create an account as soon as possible, hiding latency
   const {
     exec: createExec,
+    reset: createReset,
     status: createStatus,
     message: createMessage,
   } = useCreateAccount(name, inviteCode, daimoChain);
+
+  const reset = () => {
+    pageStack.length = 0;
+    goTo("flow-selection");
+    setName("");
+    setInviteCode("");
+    createReset && createReset();
+  };
 
   return (
     <View style={styles.onboardingScreen}>
@@ -127,6 +135,7 @@ export default function OnboardingScreen({
           loadingStatus={createStatus}
           loadingMessage={createMessage}
           onNext={next}
+          onRetry={reset}
         />
       )}
     </View>
@@ -548,10 +557,12 @@ function LoadingScreen({
   loadingStatus,
   loadingMessage,
   onNext,
+  onRetry,
 }: {
   loadingStatus: ActStatus;
   loadingMessage: string;
   onNext: () => void;
+  onRetry: () => void;
 }) {
   useEffect(() => {
     console.log(`[ONBOARDING] loading status ${loadingStatus}`);
@@ -560,7 +571,10 @@ function LoadingScreen({
 
   return (
     <View style={ss.container.center}>
-      <ActivityIndicator size="large" />
+      {loadingStatus !== "error" && <ActivityIndicator size="large" />}
+      {loadingStatus === "error" && (
+        <ButtonBig title="Retry" onPress={onRetry} type="primary" />
+      )}
       <Spacer h={32} />
       <TextCenter>
         {loadingStatus === "error" && <TextError>{loadingMessage}</TextError>}

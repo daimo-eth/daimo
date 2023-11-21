@@ -28,6 +28,12 @@ export function useCreateAccount(
     result.mutate({ name, pubKeyHex, invCode });
   };
 
+  const reset = () => {
+    console.log(`[CREATE] resetting useCreateAccount`);
+    result.reset();
+    setAS("idle");
+  };
+
   // Once account creation succeeds, save the account
   const [account, setAccount] = useAccount();
   useEffect(() => {
@@ -69,5 +75,5 @@ export function useCreateAccount(
     setAS("success", "Account created");
   }, [result.isSuccess, result.isError]);
 
-  return { ...as, exec, cost: { feeDollars: 0, totalDollars: 0 } };
+  return { ...as, exec, reset, cost: { feeDollars: 0, totalDollars: 0 } };
 }

@@ -17,6 +17,8 @@ export interface ActHandle {
   message: string;
   /** Should be called only when status is 'idle' */
   exec: () => void;
+  /** Should be called only when status is 'success' or 'error' */
+  reset?: () => void;
 }
 
 /** Tracks progress of a user action. */

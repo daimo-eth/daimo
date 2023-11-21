@@ -82,6 +82,7 @@ export function CreateAccountPage({
     </TouchableWithoutFeedback>
   );
 }
+
 function NamePicker({
   name,
   daimoChain,
