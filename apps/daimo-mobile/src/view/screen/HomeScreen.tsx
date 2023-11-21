@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
+import useTabBarHeight from "../../common/useTabBarHeight";
 import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
@@ -45,7 +46,7 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const nav = useNav();
   const isFocused = useIsFocused();
-  const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
+  const tabBarHeight = useTabBarHeight();
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);
