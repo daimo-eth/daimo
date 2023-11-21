@@ -1,5 +1,9 @@
 import { UserOpHex } from "@daimo/common";
-import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
+import {
+  daimoChainFromId,
+  daimoPaymasterAddress,
+  pimlicoPaymasterAbi,
+} from "@daimo/contract";
 
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
@@ -70,21 +74,23 @@ export class Paymaster {
     if (Date.now() - this.lastFetchTs < 5 * 60 * 1000) return;
     this.lastFetchTs = Date.now();
 
-    // Pimlico Paymaster constants, disabled fetching for now.
-    // const priceMarkup = await this.vc.publicClient.readContract({
-    //   abi: pimlicoPaymasterAbi,
-    //   address: chainConfig.paymasterAddress,
-    //   functionName: "priceMarkup",
-    // });
-    // const previousPrice = await this.vc.publicClient.readContract({
-    //   abi: pimlicoPaymasterAbi,
-    //   address: chainConfig.paymasterAddress,
-    //   functionName: "previousPrice",
-    // });
+    // Pimlico Paymaster constants.
+    const priceMarkup = await this.vc.publicClient.readContract({
+      abi: pimlicoPaymasterAbi,
+      address: chainConfig.pimlicoPaymasterAddress,
+      functionName: "priceMarkup",
+    });
+    const previousPrice = await this.vc.publicClient.readContract({
+      abi: pimlicoPaymasterAbi,
+      address: chainConfig.pimlicoPaymasterAddress,
+      functionName: "previousPrice",
+    });
+    this.priceMarkup = BigInt(priceMarkup);
+    this.previousPrice = previousPrice;
 
     const maxFeePerGas = await this.vc.publicClient.getGasPrice();
     const maxPriorityFeePerGas =
-      await this.vc.publicClient.estimateMaxPriorityFeePerGas(); // Assumes we're on an EIP-1559 chain
+      await this.vc.publicClient.estimateMaxPriorityFeePerGas();
     const estimatedPreVerificationGas =
       await this.bundlerClient.estimatePreVerificationGas(
         dummyAddDeviceOps[daimoChainFromId(chainConfig.chainL2.id)]
@@ -93,7 +99,7 @@ export class Paymaster {
     this.maxFeePerGas = maxFeePerGas;
     this.maxPriorityFeePerGas = maxPriorityFeePerGas;
     this.preVerificationGas = estimatedPreVerificationGas;
-    this.estimatedFee = 0;
+    this.estimatedFee = this.estimatePimlicoFee();
   }
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
@@ -105,7 +111,7 @@ export class Paymaster {
       maxFeePerGas: this.maxFeePerGas.toString(),
       estimatedFee: this.estimatedFee,
       preVerificationGas: this.preVerificationGas.toString(),
-      paymasterAddress: daimoPaymasterAddress,
+      paymasterAddress: chainConfig.pimlicoPaymasterAddress,
     };
   }
 }

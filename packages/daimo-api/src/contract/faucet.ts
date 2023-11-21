@@ -38,6 +38,8 @@ export class Faucet {
   };
 
   async useInviteCode(invCode: string): Promise<boolean> {
+    if (chainConfig.chainL2.testnet && invCode === "testnet") return true;
+
     await this.db.incrementInviteCodeUseCount(invCode);
     const code = await this.db.loadInviteCode(invCode);
     return code != null && code.useCount <= code.maxUses;
