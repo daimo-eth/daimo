@@ -27,7 +27,7 @@ import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
 import { getPushNotificationManager } from "../../../logic/notify";
 import { defaultEnclaveKeyName } from "../../../model/account";
-import { ButtonBig } from "../../shared/Button";
+import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { InputBig, OctName } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
@@ -346,8 +346,8 @@ function InvitePage({
         <Spacer h={32} />
         <TextCenter>
           <TextParagraph>
-            Daimo is currently invite-only. Enter an invite code below or redeem
-            an invite code using your Devconnect Zupass ticket.
+            Daimo is currently invite-only. If you have an invite code, enter it
+            below. Otherwise, you can join the waitlist.
           </TextParagraph>
         </TextCenter>
         <Spacer h={16} />
@@ -369,11 +369,7 @@ function InvitePage({
           disabled={!isValid}
         />
         <Spacer h={16} />
-        <ButtonBig
-          type="subtle"
-          title="JOIN WITH DEVCONNECT TICKET"
-          onPress={linkToWaitlist}
-        />
+        <TextButton title="Join waitlist" onPress={linkToWaitlist} />
       </View>
     </View>
   );
