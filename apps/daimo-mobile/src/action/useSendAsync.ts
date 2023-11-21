@@ -156,6 +156,7 @@ function loadOpSender({
     : getWrappedRawSigner(enclaveKeyName, keySlot!);
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
+    console.info(`[SEND] sending op ${JSON.stringify(op)}`);
     return rpcFunc.sendUserOp.mutate({ op });
   };
 

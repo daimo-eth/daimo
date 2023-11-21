@@ -32,7 +32,7 @@ export class Crontab {
   async init() {
     this.coinIndexer.pipeAllTransfers(this.pipeTransfers);
     this.cronJobs = [
-      new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
+      // new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
       new CronJob("*/5 * * * *", () => this.checkFaucetBalance()), // Every 5 minutes
       new CronJob("*/5 * * * *", () => this.postRecentTransfers()), // Every 5 minutes
     ];
