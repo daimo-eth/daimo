@@ -202,11 +202,5 @@ export function createRouter(
         const { inviteCode } = opts.input;
         return faucet.verifyInviteCode(inviteCode);
       }),
-
-    getZupassInviteCode: publicProcedure
-      .input(z.object({ pcd: z.string().optional() }))
-      .query(async (opts) => {
-        return null;
-      }),
   });
 }

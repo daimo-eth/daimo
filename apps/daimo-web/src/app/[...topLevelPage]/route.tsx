@@ -2,6 +2,13 @@ const superSo = "https://daimo.super.site";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+
+  if (url.pathname === "/waitlist") {
+    // redirect to waitlist noteform for now
+    return Response.redirect("https://noteforms.com/forms/daimo-uk2fe4", 301);
+  }
+
+  // Otherwise proxy the request to our notion super.so
   const upstreamUrl = request.url.replace(url.origin, superSo);
   console.log(`[WEB] proxying ${request.url} to ${upstreamUrl}`);
 
