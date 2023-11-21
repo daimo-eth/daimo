@@ -38,7 +38,6 @@
     "@expo/vector-icons": "^13.0.0",
     "@gorhom/bottom-sheet": "^4",
     "@react-native-segmented-control/segmented-control": "2.4.1",
-    "@react-navigation/bottom-tabs": "^6.5.10",
     "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
