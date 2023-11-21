@@ -25,6 +25,7 @@ interface SwipeUpDownProps {
   swipeHeight: number;
   onShowMini?: () => void;
   onShowFull?: () => void;
+  refreshing: boolean;
 }
 
 const screenDimensions = Dimensions.get("window");
@@ -34,7 +35,10 @@ export type SwipeUpDownRef = {
 };
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
-  ({ itemMini, itemFull, swipeHeight, onShowMini, onShowFull }, ref) => {
+  (
+    { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, refreshing },
+    ref
+  ) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = 64; // TODO: useBottomTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
@@ -108,6 +112,8 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         animatedIndex={animatedIndex}
         animateOnMount={false}
         enablePanDownToClose={false}
+        enableHandlePanningGesture={!refreshing}
+        enableContentPanningGesture={!refreshing}
       >
         <Animated.View
           style={[styles.itemMiniWrapper, itemMiniStyle]}
