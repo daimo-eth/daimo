@@ -949,13 +949,6 @@ export const daimoPaymasterABI = [
     outputs: [],
   },
   {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'senderBlacklist',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-  {
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
@@ -969,11 +962,17 @@ export const daimoPaymasterABI = [
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
-      { name: 'addresses', internalType: 'address[]', type: 'address[]' },
-      { name: 'isBlacklisted', internalType: 'bool', type: 'bool' },
+      { name: '_ticketSigner', internalType: 'address', type: 'address' },
     ],
-    name: 'setSenderAddressBlacklist',
+    name: 'setTicketSigner',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'ticketSigner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -1062,7 +1061,7 @@ export const daimoPaymasterABI = [
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x99D720cd5A04c16Dc5377638e3f6D609c895714F' as const
+  '0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,

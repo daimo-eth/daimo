@@ -96,7 +96,7 @@ export async function getAccountHistory(
   assert(accountKeys != null);
 
   // Prefetch info required to send operations > fast at time of sending.
-  const chainGasConstants = await paymaster.calculateChainGasConstants();
+  const chainGasConstants = await paymaster.calculateChainGasConstants(eAcc);
 
   // Prefetch info required to deposit to your Daimo account.
   const recommendedExchanges = fetchRecommendedExchanges(eAcc);

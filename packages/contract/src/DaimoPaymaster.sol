@@ -11,11 +11,10 @@ import "./DaimoAccount.sol";
 /// call executeBatch, and pass to it an arg that's either further making calls
 /// into a set of whitelisted contract address (destWhitelist) or to the sender
 /// contract itself.
-/// Additionally includes a blacklist for senders settable by contract owner.
-/// Will not sponsor blacklisted sender ops.
+/// Requires a server-signed ticket whitelisting each sender address.
 contract DaimoPaymaster is BasePaymaster {
     mapping(address => bool) public destWhitelist;
-    mapping(address => bool) public senderBlacklist;
+    address public ticketSigner;
 
     event UserOperationSponsored(
         bytes32 indexed userOpHash,
@@ -38,13 +37,8 @@ contract DaimoPaymaster is BasePaymaster {
         }
     }
 
-    function setSenderAddressBlacklist(
-        address[] calldata addresses,
-        bool isBlacklisted
-    ) public onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) {
-            senderBlacklist[addresses[i]] = isBlacklisted;
-        }
+    function setTicketSigner(address _ticketSigner) public onlyOwner {
+        ticketSigner = _ticketSigner;
     }
 
     function _validatePaymasterUserOp(
@@ -52,10 +46,22 @@ contract DaimoPaymaster is BasePaymaster {
         bytes32 userOpHash,
         uint256 requiredPreFund
     ) internal override returns (bytes memory context, uint256 validationData) {
+        // Ticket attests that the sender is allowed to use this paymaster
+        bytes calldata ticket = userOp.paymasterAndData[20:];
+        require(ticket.length == 71, "DaimoPaymaster: invalid ticket length");
+        uint8 v = uint8(ticket[0]);
+        bytes32 r = bytes32(ticket[1:33]);
+        bytes32 s = bytes32(ticket[33:65]);
+        uint48 validUntil = uint48(bytes6(ticket[65:]));
+
+        bytes32 tHash = keccak256(abi.encodePacked(userOp.sender, validUntil));
+        address recoveredSigner = ecrecover(tHash, v, r, s);
         require(
-            !senderBlacklist[userOp.sender],
-            "DaimoPaymaster: sender blacklisted"
+            recoveredSigner == ticketSigner,
+            "DaimoPaymaster: invalid ticket signature"
         );
+
+        // Additionally, only certain calls are sponsored
         require(userOp.callData.length > 4, "DaimoPaymaster: no callData call");
         bytes4 selector = bytes4(userOp.callData[0:4]);
         require(
@@ -79,7 +85,7 @@ contract DaimoPaymaster is BasePaymaster {
             "",
             _packValidationData({
                 sigFailed: false, // sig did not fail
-                validUntil: 0, // inf
+                validUntil: validUntil,
                 validAfter: 0
             })
         );

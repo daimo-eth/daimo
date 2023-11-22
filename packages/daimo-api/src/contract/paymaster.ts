@@ -1,125 +1,162 @@
-import { UserOpHex } from "@daimo/common";
-import { daimoChainFromId, pimlicoPaymasterAbi } from "@daimo/contract";
-import { hexToBigInt } from "viem";
+import {
+  ChainGasConstants,
+  EAccount,
+  UserOpHex,
+  assert,
+  assertNotNull,
+} from "@daimo/common";
+import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
+import {
+  Address,
+  Hex,
+  concatHex,
+  hexToBigInt,
+  hexToBytes,
+  keccak256,
+  numberToHex,
+  toHex,
+} from "viem";
+import { privateKeyToAccount, sign } from "viem/accounts";
 
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 
+interface GasPrices {
+  /// L2 fee
+  maxFeePerGas: bigint;
+  /// L2 recommended priority fee
+  maxPriorityFeePerGas: bigint;
+  /// Covers L1 data cost @ current L1 fees
+  preVerificationGas: bigint;
+}
+
 /* Interface to on-chain paymaster and gas related data. */
 export class Paymaster {
-  /* Gas price constants */
-  private maxFeePerGas: bigint = 0n;
-  private maxPriorityFeePerGas: bigint = 0n;
-
-  /* Estimated pre-verification gas to use for Daimo userops.
-   * Currently, adding a new key is the most expensive userop since it
-   * has the most calldata. So we use the pre-verification gas estimate for that
-   * as a conservative estimate for all userops.
-   */
-  private preVerificationGas: bigint = 0n;
-
-  /* Pimlico Paymaster constants */
-  private priceMarkup: bigint = 0n;
-  private previousPrice: bigint = 0n;
-
-  /* Estimated fee in dollars (2 digits after decimal) */
-  private estimatedFee = 0;
-
-  /* Last time we fetched the above constants */
-  private lastFetchTs = 0;
+  private latestGasPrices?: GasPrices;
 
   constructor(private vc: ViemClient, private bundlerClient: BundlerClient) {}
 
   async init() {
-    this.fetchLatestState();
+    console.log(`[PAYMASTER] init`);
+    this.latestGasPrices = await this.fetchGasPrices();
   }
 
   // Since our various gas limits corresponding to the userop are nearly fixed,
   // we can compute these constants as a pure function of current on-chain state.
   // TODO: track history of different type of userops for precision.
-  estimatePimlicoFee() {
-    // This is exactly what Pimlico's paymaster SDK does:
-    // https://github.com/pimlicolabs/erc20-paymaster-contracts/blob/master/sdk/ERC20Paymaster.ts#L223
-    // without the 3x multiplier on verification gas limit (that it adds due some postOp edge case).
-    // We do not use their SDK to save fetches.
+  // estimatePimlicoFee() {
+  //   // This is exactly what Pimlico's paymaster SDK does:
+  //   // https://github.com/pimlicolabs/erc20-paymaster-contracts/blob/master/sdk/ERC20Paymaster.ts#L223
+  //   // without the 3x multiplier on verification gas limit (that it adds due some postOp edge case).
+  //   // We do not use their SDK to save fetches.
 
-    const expectedPreVerificationCost = 40_000n;
-    const expectedVerificationCost = 400_000n;
-    const expectedCallCost = 160_000n;
-    const expectedRefundCost = 40_000n; // REFUND_POSTOP_COST constant
+  //   const expectedPreVerificationCost = 40_000n;
+  //   const expectedVerificationCost = 400_000n;
+  //   const expectedCallCost = 160_000n;
+  //   const expectedRefundCost = 40_000n; // REFUND_POSTOP_COST constant
 
-    const expectedFunding =
-      (expectedPreVerificationCost +
-        expectedVerificationCost +
-        expectedCallCost +
-        expectedRefundCost) *
-      this.maxFeePerGas;
+  //   const expectedFunding =
+  //     (expectedPreVerificationCost +
+  //       expectedVerificationCost +
+  //       expectedCallCost +
+  //       expectedRefundCost) *
+  //     this.maxFeePerGas;
 
-    const tokenAmount =
-      (expectedFunding * this.priceMarkup * this.previousPrice) / 10n ** 24n; // 1e24 = 1e6 * 1e18, 1e6 is the priceDenominator constant, 1e18 is number of ETH decimals
-    const dollars =
-      Number((tokenAmount * 100n) / 10n ** BigInt(chainConfig.tokenDecimals)) /
-      100; // normalize to dollars with 2 digits after decimal
-    return dollars;
-  }
+  //   const tokenAmount =
+  //     (expectedFunding * this.priceMarkup * this.previousPrice) / 10n ** 24n; // 1e24 = 1e6 * 1e18, 1e6 is the priceDenominator constant, 1e18 is number of ETH decimals
+  //   const dollars =
+  //     Number((tokenAmount * 100n) / 10n ** BigInt(chainConfig.tokenDecimals)) /
+  //     100; // normalize to dollars with 2 digits after decimal
+  //   return dollars;
+  // }
 
-  private async fetchLatestState() {
-    // Do not fetch more than once per 5 minute for now.
-    // todo: Ask Pimlico to change contract to emit events on updates
-    // todo: fetch fees seperately on higher frequency
-    if (Date.now() - this.lastFetchTs < 5 * 60 * 1000) return;
-    this.lastFetchTs = Date.now();
-
-    // Pimlico Paymaster constants.
-    const priceMarkup = await this.vc.publicClient.readContract({
-      abi: pimlicoPaymasterAbi,
-      address: chainConfig.pimlicoPaymasterAddress,
-      functionName: "priceMarkup",
-    });
-    const previousPrice = await this.vc.publicClient.readContract({
-      abi: pimlicoPaymasterAbi,
-      address: chainConfig.pimlicoPaymasterAddress,
-      functionName: "previousPrice",
-    });
-    this.priceMarkup = BigInt(priceMarkup);
-    this.previousPrice = previousPrice;
+  private async fetchGasPrices(): Promise<GasPrices> {
+    // Pimlico Paymaster gas estimation.
+    // const priceMarkup = await this.vc.publicClient.readContract({
+    //   abi: pimlicoPaymasterAbi,
+    //   address: chainConfig.pimlicoPaymasterAddress,
+    //   functionName: "priceMarkup",
+    // });
+    // const previousPrice = await this.vc.publicClient.readContract({
+    //   abi: pimlicoPaymasterAbi,
+    //   address: chainConfig.pimlicoPaymasterAddress,
+    //   functionName: "previousPrice",
+    // });
+    // this.priceMarkup = BigInt(priceMarkup);
+    // this.previousPrice = previousPrice;
 
     const gasPriceParams =
       await this.bundlerClient.getUserOperationGasPriceParams();
     const estimatedPreVerificationGas =
       await this.bundlerClient.estimatePreVerificationGas(getDummyOp());
 
-    this.maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
-    this.maxPriorityFeePerGas = hexToBigInt(
+    const maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
+    const maxPriorityFeePerGas = hexToBigInt(
       gasPriceParams.maxPriorityFeePerGas
     );
-    this.preVerificationGas = estimatedPreVerificationGas;
+    const preVerificationGas = estimatedPreVerificationGas;
 
-    this.estimatedFee = this.estimatePimlicoFee();
+    // this.estimatedFee = this.estimatePimlicoFee();
 
     console.log(
-      `[PAYMASTER] fetched latest gas state: ${JSON.stringify({
-        estimatedFee: this.estimatedFee,
-        maxFeePerGas: this.maxFeePerGas.toString(),
-        maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
-        preVerificationGas: this.preVerificationGas.toString(),
+      `[PAYMASTER] fetched latest gas prices: ${JSON.stringify({
+        maxFeePerGas: maxFeePerGas.toString(),
+        maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+        preVerificationGas: preVerificationGas.toString(),
       })}`
     );
+
+    return { maxFeePerGas, maxPriorityFeePerGas, preVerificationGas };
   }
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
-  async calculateChainGasConstants() {
-    await this.fetchLatestState();
+  async calculateChainGasConstants(
+    sender: EAccount
+  ): Promise<ChainGasConstants> {
+    // Sign paymaster for any valid Daimo account, excluding name blacklist.
+    // Everyone else gets the Pimlico USDC paymaster.
+    const isSponsored = sender.name != null;
+    const paymasterAndData = isSponsored
+      ? await getPaymasterWithSignature(sender.addr)
+      : chainConfig.pimlicoPaymasterAddress;
+
+    // TODO: estimate real Pimlico fee for non-sponsored ops.
+    const estimatedFee = isSponsored ? 0 : 0.1;
+
+    const gas = this.latestGasPrices;
+    if (gas == null) throw new Error("No gas prices. Fetch failed?");
 
     return {
-      maxPriorityFeePerGas: this.maxPriorityFeePerGas.toString(),
-      maxFeePerGas: this.maxFeePerGas.toString(),
-      estimatedFee: this.estimatedFee,
-      preVerificationGas: this.preVerificationGas.toString(),
-      paymasterAddress: chainConfig.pimlicoPaymasterAddress,
+      estimatedFee,
+      paymasterAddress: paymasterAndData,
+
+      maxPriorityFeePerGas: gas.maxPriorityFeePerGas.toString(),
+      maxFeePerGas: gas.maxFeePerGas.toString(),
+      preVerificationGas: gas.preVerificationGas.toString(),
     };
   }
+}
+
+const signerPrivateKey = assertNotNull(
+  process.env.DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY,
+  "Missing DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY"
+) as Hex;
+const signer = privateKeyToAccount(signerPrivateKey);
+
+async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
+  const validUntil = (Date.now() / 1000 + 5 * 60) | 0; // 5 minute validity
+  const validUntilHex = numberToHex(validUntil, { size: 6 });
+  const ticketHex = concatHex([addr, validUntilHex]);
+  assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
+  const ticketHash = keccak256(ticketHex);
+  console.log(`[PAYMASTER] signing ${ticketHex} with ${signer.address}`);
+
+  const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
+  const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
+  assert(hexToBytes(sigHex).length === 65, "paymaster: invalid sig length");
+
+  return concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
 }
 
 function getDummyOp(): UserOpHex {

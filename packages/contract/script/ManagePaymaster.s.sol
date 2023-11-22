@@ -55,12 +55,9 @@ contract DeployPaymasterScript is Script {
         vm.stopBroadcast();
     }
 
-    function blacklistSenders(DaimoPaymaster paymaster) public {
-        // blacklist sender addresses
-        address[] memory senders = new address[](0);
-
+    function setTicketSigner(DaimoPaymaster paymaster, address signer) public {
         vm.startBroadcast();
-        paymaster.setSenderAddressBlacklist(senders, true);
+        paymaster.setTicketSigner(signer);
         vm.stopBroadcast();
     }
 

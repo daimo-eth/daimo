@@ -10,15 +10,17 @@ import "../src/DaimoPaymaster.sol";
 import "../src/DaimoAccount.sol";
 
 contract PaymasterTest is Test {
+    DaimoPaymaster public paymaster;
     IEntryPoint public entryPoint;
     address public owner;
-
-    DaimoPaymaster public paymaster;
+    address public apiSigner;
+    uint256 public apiSignerPk;
 
     function setUp() public {
         entryPoint = new EntryPoint();
         owner = 0x2222222222222222222222222222222222222222;
         paymaster = new DaimoPaymaster(entryPoint, owner);
+        (apiSigner, apiSignerPk) = makeAddrAndKey("alice");
     }
 
     function testWhitelisting() public {
@@ -27,27 +29,28 @@ contract PaymasterTest is Test {
         whitelist[0] = 0x3333333333333333333333333333333333333333;
         paymaster.setDestAddressWhitelist(whitelist, true);
 
-        address[] memory blacklist = new address[](1);
-        blacklist[0] = 0x4444444444444444444444444444444444444444;
-        paymaster.setSenderAddressBlacklist(blacklist, true);
-
-        assertTrue(paymaster.senderBlacklist(blacklist[0]));
         assertTrue(paymaster.destWhitelist(whitelist[0]));
         vm.stopPrank();
 
         vm.expectRevert("Ownable: caller is not the owner");
         paymaster.setDestAddressWhitelist(whitelist, false);
+    }
 
+    function testSetSigner() public {
         vm.expectRevert("Ownable: caller is not the owner");
-        paymaster.setSenderAddressBlacklist(blacklist, false);
+        paymaster.setTicketSigner(apiSigner);
+
+        vm.prank(owner);
+        paymaster.setTicketSigner(apiSigner);
     }
 
     function testUserOpValidation() public {
-        vm.startPrank(address(entryPoint));
+        vm.prank(owner);
+        paymaster.setTicketSigner(apiSigner);
 
-        address senderAddress = address(
-            0x5555555555555555555555555555555555555555
-        );
+        vm.startPrank(address(entryPoint));
+        // create sender = Alice
+        address senderAddress = 0x5555555555555555555555555555555555555555;
 
         // try self call, should pass
         DaimoAccount.Call[] memory dummyCalls = new DaimoAccount.Call[](1);
@@ -78,12 +81,28 @@ contract PaymasterTest is Test {
         });
 
         // fill data
-        op.sender = address(0x5555555555555555555555555555555555555555);
+        op.sender = senderAddress;
         op.callData = dummyCalldata;
+
+        // paymaster only, no ticket. fails
         op.paymasterAndData = abi.encodePacked(address(paymaster));
         bytes32 hash = entryPoint.getUserOpHash(op);
 
+        vm.expectRevert("DaimoPaymaster: invalid ticket length");
         (, uint256 validationData) = paymaster.validatePaymasterUserOp(
+            op,
+            hash,
+            500000
+        );
+
+        // paymaster + ticket. should pass
+        uint48 validUntil = 0xffffffff; // far future
+        bytes32 tHash = keccak256(abi.encodePacked(senderAddress, validUntil));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(apiSignerPk, tHash);
+        bytes memory ticket = abi.encodePacked(v, r, s, validUntil);
+        op.paymasterAndData = abi.encodePacked(address(paymaster), ticket);
+
+        (, validationData) = paymaster.validatePaymasterUserOp(
             op,
             hash,
             500000
