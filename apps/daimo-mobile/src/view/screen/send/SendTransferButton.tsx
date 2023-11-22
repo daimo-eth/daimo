@@ -23,7 +23,7 @@ import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { navResetToHome, useNav } from "../../shared/nav";
+import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
@@ -136,7 +136,10 @@ function SendTransferButtonInner({
   const nav = useNav();
   useEffect(() => {
     if (status !== "success") return;
-    navResetToHome(nav);
+    nav.navigate("SendTab", {
+      screen: "SendSuccess",
+      params: { recipient, requestId, dollars: `${dollars}` },
+    });
   }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;

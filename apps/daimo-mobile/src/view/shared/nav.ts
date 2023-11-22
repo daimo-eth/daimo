@@ -28,6 +28,7 @@ export type ParamListSend = {
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
   SendLink: undefined;
+  SendSuccess: SendNavProp;
 };
 
 export type ParamListReceive = {

@@ -26,6 +26,7 @@ import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
+import { SendSuccessScreen } from "./screen/send/SendSuccessScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { OctName } from "./shared/InputBig";
 import {
@@ -141,6 +142,7 @@ function SendTab() {
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="QR" component={QRScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
+        <SendStack.Screen name="SendSuccess" component={SendSuccessScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
