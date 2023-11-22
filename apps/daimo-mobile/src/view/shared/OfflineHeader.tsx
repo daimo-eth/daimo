@@ -9,8 +9,10 @@ import { useNetworkState } from "../../sync/networkState";
 
 export function OfflineHeader({
   shouldAddPaddingWhenOnline = true,
+  shouldRemovePaddingWhenOffline = false,
 }: {
   shouldAddPaddingWhenOnline?: boolean;
+  shouldRemovePaddingWhenOffline?: boolean;
 }) {
   const netState = useNetworkState();
   const isOffline = netState.status === "offline";
@@ -24,6 +26,7 @@ export function OfflineHeader({
     justifyContent: "center",
     paddingTop: isOffline || shouldAddPaddingWhenOnline ? top : 0,
     marginHorizontal: -16,
+    marginBottom: isOffline && shouldRemovePaddingWhenOffline ? -top : 0,
   } as const;
 
   const isAndroid = Platform.OS === "android";
