@@ -32,7 +32,7 @@ export class Crontab {
   async init() {
     this.coinIndexer.pipeAllTransfers(this.pipeTransfers);
     this.cronJobs = [
-      // new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
+      new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
       new CronJob("*/5 * * * *", () => this.checkFaucetBalance()), // Every 5 minutes
       new CronJob("*/5 * * * *", () => this.postRecentTransfers()), // Every 5 minutes
     ];
@@ -87,8 +87,8 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterAddress} ETH`,
-      0.05,
-      0.005
+      0.03,
+      0.01
     );
   }
 
