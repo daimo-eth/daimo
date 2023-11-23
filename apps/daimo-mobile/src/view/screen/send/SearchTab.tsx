@@ -86,7 +86,7 @@ function SearchResultsScroll({
       keyboardShouldPersistTaps="handled"
     >
       {res.error && <ErrorRowCentered error={res.error} />}
-      {recentsOnly && <QRRow />}
+      {recentsOnly && <ExtraRows />}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
           <TextLight>
@@ -110,8 +110,7 @@ function NoSearchResults() {
   const nav = useNav();
   const sendPaymentLink = () =>
     nav.navigate("SendTab", {
-      screen: "SendNav",
-      params: { autoFocus: true, sendNote: true },
+      screen: "SendLink",
     });
 
   return (
@@ -161,25 +160,49 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   );
 }
 
-function QRRow() {
+function ExtraRows() {
   const nav = useNav();
+
   return (
-    <Row
-      key="qrScan"
-      onPress={() =>
-        nav.navigate("SendTab", {
-          screen: "QR",
-          params: { option: "SCAN" },
-        })
-      }
-    >
+    <>
+      <ExtraRow
+        title="Send via link"
+        inside={<Octicons name="link" size={16} color={color.primary} />}
+        onPress={() =>
+          nav.navigate("SendTab", {
+            screen: "SendLink",
+          })
+        }
+      />
+      <ExtraRow
+        title="Scan QR code"
+        inside={<Octicons name="apps" size={16} color={color.primary} />}
+        onPress={() =>
+          nav.navigate("SendTab", {
+            screen: "QR",
+            params: { option: "SCAN" },
+          })
+        }
+      />
+    </>
+  );
+}
+
+function ExtraRow({
+  title,
+  inside,
+  onPress,
+}: {
+  title: string;
+  inside: React.JSX.Element;
+  onPress: () => void;
+}) {
+  return (
+    <Row key={title} onPress={onPress}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
-          <Bubble
-            inside={<Octicons name="apps" size={16} color={color.primary} />}
-            size={36}
-          />
-          <TextBody>Scan QR code</TextBody>
+          <Bubble inside={inside} size={36} />
+          <TextBody>{title}</TextBody>
         </View>
       </View>
     </Row>

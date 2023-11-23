@@ -27,6 +27,7 @@ export type ParamListSend = {
   SendNav: { autoFocus: boolean; sendNote?: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
+  SendLink: undefined;
 };
 
 export type ParamListReceive = {

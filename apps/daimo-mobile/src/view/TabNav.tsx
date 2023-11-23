@@ -25,6 +25,7 @@ import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
 import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
+import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { OctName } from "./shared/InputBig";
 import {
@@ -139,6 +140,7 @@ function SendTab() {
         <SendStack.Screen name="SendNav" component={SendNavScreen} />
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="QR" component={QRScreen} />
+        <SendStack.Screen name="SendLink" component={SendNoteScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );

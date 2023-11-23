@@ -1,6 +1,6 @@
 import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   Keyboard,
   Platform,
@@ -10,9 +10,7 @@ import {
 import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
-import { SendNoteScreen } from "./SendNoteScreen";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
-import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { ParamListSend, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
@@ -37,18 +35,8 @@ export function SendNavScreen({ route }: Props) {
   );
 }
 
-type SendTab = "SEARCH" | "SEND LINK";
-
-function SendNav({
-  autoFocus,
-  sendNote,
-}: {
-  autoFocus: boolean;
-  sendNote?: boolean;
-}) {
+function SendNav({ autoFocus }: { autoFocus: boolean }) {
   // Navigation
-  const [tab, setTab] = useState<SendTab>(sendNote ? "SEND LINK" : "SEARCH");
-  const [tabs] = useState(["SEARCH", "SEND LINK"] as SendTab[]);
   const textInputRef = useRef<TextInput>(null);
   const isFocused = useIsFocused();
   const nav = useNav();
@@ -71,22 +59,9 @@ function SendNav({
     }
   }, [isFocused, autoFocus]);
 
-  // Hack: listen for prop changed due to navigation
-  const refSend = useRef(!!sendNote);
-  useEffect(() => {
-    if (!!sendNote === refSend.current) return;
-    setTab(sendNote ? "SEND LINK" : "SEARCH");
-    refSend.current = !!sendNote;
-  }, [sendNote]);
-
   return (
     <View style={{ flex: 1, flexDirection: "column" }}>
-      <SegmentSlider {...{ tabs, tab, setTab }} />
-      <Spacer h={24} />
-      {tab === "SEARCH" && (
-        <SearchTab {...{ autoFocus }} textInnerRef={textInputRef} />
-      )}
-      {tab === "SEND LINK" && <SendNoteScreen />}
+      <SearchTab {...{ autoFocus }} textInnerRef={textInputRef} />
     </View>
   );
 }
