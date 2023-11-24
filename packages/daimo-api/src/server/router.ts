@@ -163,7 +163,8 @@ export function createRouter(
           nameReg,
           accountFactory,
           faucet,
-          telemetry
+          telemetry,
+          paymaster
         );
         return { status: "success", address };
       }),

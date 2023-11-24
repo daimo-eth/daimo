@@ -5,6 +5,7 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
+import { Paymaster } from "../contract/paymaster";
 import { chainConfig } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -16,13 +17,17 @@ export async function deployWallet(
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
   faucet: Faucet,
-  telemetry: Telemetry
+  telemetry: Telemetry,
+  paymaster: Paymaster
 ): Promise<Address> {
   // For now, invite code is required
   const invCodeSuccess = invCode && (await faucet.useInviteCode(invCode));
   if (!invCodeSuccess) {
     throw new Error("Invalid invite code");
   }
+
+  // Whitelist the account for using our sponsoring paymaster
+  paymaster.addToWhitelist(name);
 
   const maxUint256 = 2n ** 256n - 1n;
   const initCalls: DaimoAccountCall[] = [

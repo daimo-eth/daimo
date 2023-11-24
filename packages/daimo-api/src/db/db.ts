@@ -54,6 +54,12 @@ export class DB {
           CREATE TABLE IF NOT EXISTS name_blacklist (
             name VARCHAR(32) PRIMARY KEY
           );
+
+          -- These accounts are allowed to use our sponsoring paymaster.
+          -- We only include accounts created via a valid invite code.
+          CREATE TABLE IF NOT EXISTS paymaster_whitelist (
+            name VARCHAR(32) PRIMARY KEY
+          );
       `);
     await client.end();
   }
@@ -91,6 +97,31 @@ export class DB {
 
     console.log(`[DB] ${result.rows.length} blacklisted names`);
     return new Set(result.rows.map((row) => row.name));
+  }
+
+  async checkPaymasterWhitelist(name: string): Promise<boolean> {
+    console.log(`[DB] paymaster whitelist: checking ${name}...`);
+    const client = await this.pool.connect();
+    const result = await client.query<{ name: string }>(
+      `SELECT name FROM paymaster_whitelist WHERE name = $1`,
+      [name]
+    );
+    client.release();
+
+    const ret = result.rows.length > 0;
+    console.log(`[DB] paymaster whitelist: ${ret ? "allow" : "DENY"} ${name}`);
+    return ret;
+  }
+
+  async insertPaymasterWhiteslist(name: string) {
+    console.log(`[DB] inserting into paymaster whitelist: ${name}`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO paymaster_whitelist (name) VALUES ($1)
+       ON CONFLICT (name) DO NOTHING`,
+      [name]
+    );
+    client.release();
   }
 
   async loadInviteCode(code: string): Promise<InviteCodeRow | null> {

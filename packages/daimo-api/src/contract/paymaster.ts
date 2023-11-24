@@ -18,6 +18,7 @@ import {
 } from "viem";
 import { privateKeyToAccount, sign } from "viem/accounts";
 
+import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
@@ -35,11 +36,25 @@ interface GasPrices {
 export class Paymaster {
   private latestGasPrices?: GasPrices;
 
-  constructor(private vc: ViemClient, private bundlerClient: BundlerClient) {}
+  constructor(
+    private vc: ViemClient,
+    private bundlerClient: BundlerClient,
+    private db: DB
+  ) {}
 
   async init() {
     console.log(`[PAYMASTER] init`);
     this.latestGasPrices = await this.fetchGasPrices();
+
+    setInterval(async () => {
+      console.log(`[PAYMASTER] refreshing gas prices...`);
+      this.latestGasPrices = await this.fetchGasPrices();
+    }, 1000 * 60);
+  }
+
+  addToWhitelist(name: string) {
+    // Run in background, don't await
+    this.db.insertPaymasterWhiteslist(name);
   }
 
   // Since our various gas limits corresponding to the userop are nearly fixed,
@@ -116,7 +131,9 @@ export class Paymaster {
   ): Promise<ChainGasConstants> {
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
-    const isSponsored = sender.name != null;
+    const isSponsored =
+      sender.name != null &&
+      (await this.db.checkPaymasterWhitelist(sender.name));
     const paymasterAndData = isSponsored
       ? await getPaymasterWithSignature(sender.addr)
       : chainConfig.pimlicoPaymasterAddress;
