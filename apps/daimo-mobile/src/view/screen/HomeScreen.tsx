@@ -25,6 +25,7 @@ import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
+import { InfoToast } from "../shared/InfoToast";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
@@ -141,6 +142,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         shouldAddPaddingWhenOnline={false}
         shouldRemovePaddingWhenOffline
       />
+      <InfoToast />
       <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
