@@ -931,6 +931,92 @@ export const daimoPaymasterABI = [
     type: 'function',
     inputs: [
       {
+        name: 'ticket',
+        internalType: 'struct DaimoPaymaster.PaymasterTicket',
+        type: 'tuple',
+        components: [
+          { name: 'v', internalType: 'uint8', type: 'uint8' },
+          { name: 'r', internalType: 'bytes32', type: 'bytes32' },
+          { name: 's', internalType: 'bytes32', type: 'bytes32' },
+          {
+            name: 'data',
+            internalType: 'struct DaimoPaymaster.PaymasterTicketData',
+            type: 'tuple',
+            components: [
+              { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
+              { name: 'sender', internalType: 'address', type: 'address' },
+              {
+                name: 'callGasLimit',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
+                name: 'verificationGasLimit',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
+                name: 'preVerificationGas',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
+                name: 'maxFeePerGas',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
+                name: 'maxPriorityFeePerGas',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    name: 'paymasterTicket',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'data',
+        internalType: 'struct DaimoPaymaster.PaymasterTicketData',
+        type: 'tuple',
+        components: [
+          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
+          { name: 'sender', internalType: 'address', type: 'address' },
+          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'verificationGasLimit',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          {
+            name: 'preVerificationGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'maxPriorityFeePerGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+        ],
+      },
+    ],
+    name: 'paymasterTicketData',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
         name: 'mode',
         internalType: 'enum IPaymaster.PostOpMode',
         type: 'uint8',
@@ -1061,7 +1147,7 @@ export const daimoPaymasterABI = [
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877' as const
+  '0x0Ba3Eda23490d887aECe8dCA11fEd700C5FEeef1' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,

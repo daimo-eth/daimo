@@ -32,10 +32,11 @@ forge script script/DeployTestAccount.s.sol --sig "run(address)" $ADDR_ACCOUNT_F
 # Deploy paymaster and verify it on Etherscan
 forge script script/ManagePaymaster.s.sol --sig "deploy()" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
-PAYMASTER_ADDR="0x6f0f82fafac7b5d8c269b02d408f094bac6cf877"
+PAYMASTER_ADDR="0x0Ba3Eda23490d887aECe8dCA11fEd700C5FEeef1"
+PAYMASTER_TICKET_SIGNER_ADDRESS="0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7"
 
-# Start paymaster by depositing and whitelisting
-forge script script/ManagePaymaster.s.sol --sig "start(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+# Start paymaster by depositing, whitelisting and setting ticket signer
+forge script script/ManagePaymaster.s.sol --sig "start(address,address)" $PAYMASTER_ADDR $PAYMASTER_TICKET_SIGNER_ADDRESS --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
 # # Add paymaster deposit
 # forge script script/ManagePaymaster.s.sol --sig "addDeposit(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY

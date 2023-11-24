@@ -20,7 +20,10 @@ contract DeployPaymasterScript is Script {
         vm.stopBroadcast();
     }
 
-    function start(DaimoPaymaster paymaster) public payable {
+    function start(
+        DaimoPaymaster paymaster,
+        address ticketSigner
+    ) public payable {
         // start by staking paymaster: this is currently commented out
         // because Pimlico doesn't seem to be using it.
         // paymaster.addStake{value: 0.05 ether}(86400);
@@ -30,6 +33,9 @@ contract DeployPaymasterScript is Script {
 
         // whitelist destinations for paymaster
         whitelistDests(paymaster);
+
+        // set ticket signer
+        setTicketSigner(paymaster, ticketSigner);
     }
 
     function addDeposit(DaimoPaymaster paymaster) public payable {

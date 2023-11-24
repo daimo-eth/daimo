@@ -1,22 +1,26 @@
 import {
   ChainGasConstants,
+  DEFAULT_USEROP_CALL_GAS_LIMIT,
+  DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
   EAccount,
   UserOpHex,
-  assert,
   assertNotNull,
 } from "@daimo/common";
-import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
+import {
+  daimoChainFromId,
+  daimoPaymasterAddress,
+  daimoPaymasterABI,
+} from "@daimo/contract";
 import {
   Address,
   Hex,
   concatHex,
+  encodeAbiParameters,
+  getAbiItem,
   hexToBigInt,
-  hexToBytes,
   keccak256,
-  numberToHex,
-  toHex,
 } from "viem";
-import { privateKeyToAccount, sign } from "viem/accounts";
+import { sign } from "viem/accounts";
 
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
@@ -31,9 +35,27 @@ interface GasPrices {
   preVerificationGas: bigint;
 }
 
+interface PaymasterTicketData {
+  validUntil: number;
+  sender: Address;
+  callGasLimit: bigint;
+  verificationGasLimit: bigint;
+  preVerificationGas: bigint;
+  maxFeePerGas: bigint;
+  maxPriorityFeePerGas: bigint;
+}
+
+interface PaymasterTicket {
+  v: number;
+  r: Hex;
+  s: Hex;
+  data: PaymasterTicketData;
+}
+
 /* Interface to on-chain paymaster and gas related data. */
 export class Paymaster {
   private latestGasPrices?: GasPrices;
+  private lastFetchTs = 0;
 
   constructor(private vc: ViemClient, private bundlerClient: BundlerClient) {}
 
@@ -72,6 +94,10 @@ export class Paymaster {
   // }
 
   private async fetchGasPrices(): Promise<GasPrices> {
+    if (Date.now() - this.lastFetchTs < 1 * 60 * 1000)
+      return this.latestGasPrices!;
+    this.lastFetchTs = Date.now();
+
     // Pimlico Paymaster gas estimation.
     // const priceMarkup = await this.vc.publicClient.readContract({
     //   abi: pimlicoPaymasterAbi,
@@ -107,25 +133,30 @@ export class Paymaster {
       })}`
     );
 
-    return { maxFeePerGas, maxPriorityFeePerGas, preVerificationGas };
+    this.latestGasPrices = {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      preVerificationGas,
+    };
+    return this.latestGasPrices;
   }
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
   async calculateChainGasConstants(
     sender: EAccount
   ): Promise<ChainGasConstants> {
+    const gas = await this.fetchGasPrices();
+    if (gas == null) throw new Error("No gas prices. Fetch failed?");
+
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
     const isSponsored = sender.name != null;
     const paymasterAndData = isSponsored
-      ? await getPaymasterWithSignature(sender.addr)
+      ? await getPaymasterWithSignature(sender.addr, gas)
       : chainConfig.pimlicoPaymasterAddress;
 
     // TODO: estimate real Pimlico fee for non-sponsored ops.
     const estimatedFee = isSponsored ? 0 : 0.1;
-
-    const gas = this.latestGasPrices;
-    if (gas == null) throw new Error("No gas prices. Fetch failed?");
 
     return {
       estimatedFee,
@@ -142,21 +173,48 @@ const signerPrivateKey = assertNotNull(
   process.env.DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY,
   "Missing DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY"
 ) as Hex;
-const signer = privateKeyToAccount(signerPrivateKey);
 
-async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
+async function getPaymasterWithSignature(
+  addr: Address,
+  gasPrices: GasPrices
+): Promise<Hex> {
   const validUntil = (Date.now() / 1000 + 5 * 60) | 0; // 5 minute validity
-  const validUntilHex = numberToHex(validUntil, { size: 6 });
-  const ticketHex = concatHex([addr, validUntilHex]);
-  assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
-  const ticketHash = keccak256(ticketHex);
-  console.log(`[PAYMASTER] signing ${ticketHex} with ${signer.address}`);
+  const ticketData: PaymasterTicketData = {
+    validUntil,
+    sender: addr,
+    callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
+    verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
+    preVerificationGas: gasPrices.preVerificationGas,
+    maxFeePerGas: gasPrices.maxFeePerGas,
+    maxPriorityFeePerGas: gasPrices.maxPriorityFeePerGas,
+  };
 
-  const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
-  const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
-  assert(hexToBytes(sigHex).length === 65, "paymaster: invalid sig length");
+  const ticketDataStruct = getAbiItem({
+    abi: daimoPaymasterABI,
+    name: "paymasterTicketData",
+  }).inputs;
 
-  return concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  const encodedTicketData = encodeAbiParameters(ticketDataStruct, [ticketData]);
+
+  const ticketSigHash = keccak256(encodedTicketData);
+
+  const sig = await sign({ hash: ticketSigHash, privateKey: signerPrivateKey });
+
+  const ticket: PaymasterTicket = {
+    v: Number(sig.v),
+    r: sig.r,
+    s: sig.s,
+    data: ticketData,
+  };
+
+  const ticketStruct = getAbiItem({
+    abi: daimoPaymasterABI,
+    name: "paymasterTicket",
+  }).inputs;
+
+  const encodedTicket = encodeAbiParameters(ticketStruct, [ticket]);
+
+  return concatHex([daimoPaymasterAddress, encodedTicket]);
 }
 
 function getDummyOp(): UserOpHex {

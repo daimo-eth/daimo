@@ -87,8 +87,8 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterAddress} ETH`,
-      0.03,
-      0.01
+      0.01,
+      0.001
     );
   }
 

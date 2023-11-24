@@ -88,7 +88,7 @@ contract PaymasterTest is Test {
         op.paymasterAndData = abi.encodePacked(address(paymaster));
         bytes32 hash = entryPoint.getUserOpHash(op);
 
-        vm.expectRevert("DaimoPaymaster: invalid ticket length");
+        vm.expectRevert();
         (, uint256 validationData) = paymaster.validatePaymasterUserOp(
             op,
             hash,
@@ -97,10 +97,24 @@ contract PaymasterTest is Test {
 
         // paymaster + ticket. should pass
         uint48 validUntil = 0xffffffff; // far future
-        bytes32 tHash = keccak256(abi.encodePacked(senderAddress, validUntil));
+        DaimoPaymaster.PaymasterTicketData memory ticketData = DaimoPaymaster
+            .PaymasterTicketData({
+                validUntil: validUntil,
+                sender: senderAddress,
+                callGasLimit: 0,
+                verificationGasLimit: 150000,
+                preVerificationGas: 21000,
+                maxFeePerGas: 0,
+                maxPriorityFeePerGas: 1e9
+            });
+        bytes32 tHash = keccak256(abi.encode(ticketData));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(apiSignerPk, tHash);
-        bytes memory ticket = abi.encodePacked(v, r, s, validUntil);
-        op.paymasterAndData = abi.encodePacked(address(paymaster), ticket);
+        DaimoPaymaster.PaymasterTicket memory ticket = DaimoPaymaster
+            .PaymasterTicket({v: v, r: r, s: s, data: ticketData});
+        op.paymasterAndData = abi.encodePacked(
+            address(paymaster),
+            abi.encode(ticket)
+        );
 
         (, validationData) = paymaster.validatePaymasterUserOp(
             op,

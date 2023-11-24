@@ -41,21 +41,88 @@ contract DaimoPaymaster is BasePaymaster {
         ticketSigner = _ticketSigner;
     }
 
+    struct PaymasterTicketData {
+        uint48 validUntil;
+        address sender;
+        uint256 callGasLimit;
+        uint256 verificationGasLimit;
+        uint256 preVerificationGas;
+        uint256 maxFeePerGas;
+        uint256 maxPriorityFeePerGas;
+    }
+
+    // no-op function with struct as arguments to expose it in generated ABI
+    // for client-side usage
+    function paymasterTicketData(PaymasterTicketData memory data) public {}
+
+    function _verifyUserOpTicket(
+        UserOperation calldata userOp,
+        PaymasterTicketData memory data
+    ) internal view {
+        require(
+            data.validUntil >= block.timestamp,
+            "DaimoPaymaster: ticket expired"
+        );
+        require(
+            data.sender == userOp.sender,
+            "DaimoPaymaster: ticket sender mismatch"
+        );
+        require(
+            data.callGasLimit >= userOp.callGasLimit,
+            "DaimoPaymaster: ticket callGasLimit too low"
+        );
+        require(
+            data.verificationGasLimit >= userOp.verificationGasLimit,
+            "DaimoPaymaster: ticket verificationGasLimit too low"
+        );
+        require(
+            data.preVerificationGas >= userOp.preVerificationGas,
+            "DaimoPaymaster: ticket preVerificationGas too low"
+        );
+        require(
+            data.maxFeePerGas >= userOp.maxFeePerGas,
+            "DaimoPaymaster: ticket maxFeePerGas too low"
+        );
+        require(
+            data.maxPriorityFeePerGas >= userOp.maxPriorityFeePerGas,
+            "DaimoPaymaster: ticket maxPriorityFeePerGas too low"
+        );
+    }
+
+    struct PaymasterTicket {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+        PaymasterTicketData data;
+    }
+
+    // no-op function with struct as arguments to expose it in generated ABI
+    // for client-side usage
+    function paymasterTicket(PaymasterTicket memory ticket) public {}
+
     function _validatePaymasterUserOp(
         UserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 requiredPreFund
     ) internal override returns (bytes memory context, uint256 validationData) {
         // Ticket attests that the sender is allowed to use this paymaster
-        bytes calldata ticket = userOp.paymasterAndData[20:];
-        require(ticket.length == 71, "DaimoPaymaster: invalid ticket length");
-        uint8 v = uint8(ticket[0]);
-        bytes32 r = bytes32(ticket[1:33]);
-        bytes32 s = bytes32(ticket[33:65]);
-        uint48 validUntil = uint48(bytes6(ticket[65:]));
+        // and allowed whitelisted gas limits.
+        PaymasterTicket memory ticket = abi.decode(
+            userOp.paymasterAndData[20:],
+            (PaymasterTicket)
+        );
 
-        bytes32 tHash = keccak256(abi.encodePacked(userOp.sender, validUntil));
-        address recoveredSigner = ecrecover(tHash, v, r, s);
+        // Verify userOp gas constants against ticket
+        _verifyUserOpTicket(userOp, ticket.data);
+
+        // Verify ticket signature
+        bytes32 tHash = keccak256(abi.encode(ticket.data));
+        address recoveredSigner = ecrecover(
+            tHash,
+            ticket.v,
+            ticket.r,
+            ticket.s
+        );
         require(
             recoveredSigner == ticketSigner,
             "DaimoPaymaster: invalid ticket signature"
@@ -85,7 +152,7 @@ contract DaimoPaymaster is BasePaymaster {
             "",
             _packValidationData({
                 sigFailed: false, // sig did not fail
-                validUntil: validUntil,
+                validUntil: ticket.data.validUntil,
                 validAfter: 0
             })
         );
