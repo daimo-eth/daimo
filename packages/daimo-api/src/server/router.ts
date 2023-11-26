@@ -43,6 +43,7 @@ export function createRouter(
     const result = await opts.next();
 
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
+    console.log(`[API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`);
     span.setStatus({ code }).end();
 
     return result;
@@ -175,13 +176,21 @@ export function createRouter(
         const { op } = opts.input;
         const span = opts.ctx.span!;
         span.setAttribute("op.sender", op.sender);
+        const senderName = nameReg.resolveDaimoNameForAddr(op.sender);
+        span.setAttribute("op.sender_name", senderName || "");
         span.setAttribute("op.nonce", op.nonce);
         const h = hexToNumber;
         span.setAttribute("op.call_gas_limit", h(op.callGasLimit));
         span.setAttribute("op.pre_ver_gas", h(op.preVerificationGas));
         span.setAttribute("op.ver_gas_limit", h(op.verificationGasLimit));
         span.setAttribute("op.paymaster", op.paymasterAndData);
-        return bundlerClient.sendUserOp(op);
+
+        try {
+          return await bundlerClient.sendUserOp(op);
+        } catch (e: any) {
+          span.setAttribute("op.send_err", e.message || "");
+          throw e;
+        }
       }),
 
     logAction: publicProcedure
