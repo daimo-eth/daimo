@@ -223,6 +223,7 @@ async function sendAsync(
     } else {
       setAS("error", "Error sending transaction");
     }
+    console.error(`[SEND] error: ${e}`);
     throw e;
   }
 }

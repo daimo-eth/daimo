@@ -167,7 +167,7 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   const ticketHex = concatHex([addr, validUntilHex]);
   assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
   const ticketHash = keccak256(ticketHex);
-  console.log(`[PAYMASTER] signing ${ticketHex} with ${signer.address}`);
+  console.log(`[PAYMASTER] sign ${ticketHex} with ${signer.address}`);
 
   const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
   const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
