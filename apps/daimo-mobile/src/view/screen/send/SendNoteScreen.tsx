@@ -12,7 +12,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
+import { useDisableTabSwipe, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 
@@ -30,6 +30,7 @@ export function SendNoteScreen() {
   const nav = useNav();
   const goHome = useExitToHome();
   const goBack = nav.canGoBack() ? nav.goBack : goHome;
+  useDisableTabSwipe(nav);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
