@@ -18,7 +18,7 @@ import { ss } from "../../shared/style";
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
 
 export function SendNavScreen({ route }: Props) {
-  const { autoFocus, sendNote } = route.params || {};
+  const { autoFocus } = route.params || {};
 
   const nav = useNav();
   const goHome = useExitToHome();
@@ -29,7 +29,7 @@ export function SendNavScreen({ route }: Props) {
       <View style={ss.container.screen}>
         <ScreenHeader title="Send" onBack={goBack} />
         <Spacer h={8} />
-        <SendNav {...{ autoFocus, sendNote }} />
+        <SendNav {...{ autoFocus }} />
       </View>
     </TouchableWithoutFeedback>
   );

@@ -159,6 +159,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
         scrollEventThrottle={8}
+        keyboardShouldPersistTaps="handled"
       >
         <Spacer h={top} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
@@ -166,6 +167,7 @@ function HomeScreenInner({ account }: { account: Account }) {
           <SearchResults
             prefix={searchPrefix}
             style={{ marginHorizontal: 0 }}
+            lagAutoFocus
           />
         )}
         {searchPrefix == null && <AmountAndButtons account={account} />}

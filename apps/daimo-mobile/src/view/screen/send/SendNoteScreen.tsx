@@ -1,3 +1,4 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useRef, useState } from "react";
 import {
   Keyboard,
@@ -12,11 +13,15 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBubble } from "../../shared/InfoBubble";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useDisableTabSwipe, useNav } from "../../shared/nav";
+import { ParamListSend, useDisableTabSwipe, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 
-export function SendNoteScreen() {
+type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
+
+export function SendNoteScreen({ route }: Props) {
+  const { lagAutoFocus } = route.params || {};
+
   // Send Payment Link shows available secure messaging apps
   const [noteDollars, setNoteDollars] = useState(0);
 
@@ -51,6 +56,7 @@ export function SendNoteScreen() {
           onSetDollars={setNoteDollars}
           showAmountAvailable={!amountChosen}
           autoFocus
+          lagAutoFocus={lagAutoFocus}
           disabled={amountChosen}
           innerRef={textInputRef}
         />
