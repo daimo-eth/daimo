@@ -40,7 +40,8 @@ type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { link, recipient, dollars, requestId } = route.params || {};
+  const { link, recipient, dollars, requestId, lagAutoFocus } =
+    route.params || {};
 
   const nav = useNav();
   const goBack = useCallback(() => {
@@ -60,7 +61,11 @@ export default function SendScreen({ route }: Props) {
         <Spacer h={8} />
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
-          <SendChooseAmount recipient={recipient} onCancel={goBack} />
+          <SendChooseAmount
+            recipient={recipient}
+            onCancel={goBack}
+            lagAutoFocus={lagAutoFocus}
+          />
         )}
         {recipient && dollars != null && (
           <SendConfirm {...{ recipient, dollars, requestId }} />
@@ -127,9 +132,11 @@ function SendLoadRecipientInner({
 function SendChooseAmount({
   recipient,
   onCancel,
+  lagAutoFocus,
 }: {
   recipient: Recipient;
   onCancel: () => void;
+  lagAutoFocus?: boolean;
 }) {
   // Select how much
   const [dollars, setDollars] = useState(0);
@@ -165,6 +172,7 @@ function SendChooseAmount({
         onSetDollars={setDollars}
         showAmountAvailable
         autoFocus
+        lagAutoFocus={lagAutoFocus ?? false}
       />
       <Spacer h={32} />
       <View style={styles.buttonRow}>
@@ -226,6 +234,7 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
+        lagAutoFocus={false}
         onFocus={onFocus}
       />
       <Spacer h={32} />

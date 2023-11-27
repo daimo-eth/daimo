@@ -55,14 +55,16 @@ export function SearchTab({
 export function SearchResults({
   prefix,
   style,
+  lagAutoFocus,
 }: {
   prefix: string;
   style?: ViewStyle;
+  lagAutoFocus?: boolean;
 }) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
     <View style={[styles.resultsWrap, style]}>
-      <Inner prefix={prefix.trim().toLowerCase()} />
+      <Inner prefix={prefix.trim().toLowerCase()} lagAutoFocus={lagAutoFocus} />
     </View>
   );
 }
@@ -70,9 +72,11 @@ export function SearchResults({
 function SearchResultsScroll({
   account,
   prefix,
+  lagAutoFocus,
 }: {
   account: Account;
   prefix: string;
+  lagAutoFocus?: boolean;
 }) {
   const res = useRecipientSearch(account, prefix);
 
@@ -86,7 +90,7 @@ function SearchResultsScroll({
       keyboardShouldPersistTaps="handled"
     >
       {res.error && <ErrorRowCentered error={res.error} />}
-      {recentsOnly && <ExtraRows />}
+      {recentsOnly && <ExtraRows lagAutoFocus={lagAutoFocus} />}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
           <TextLight>
@@ -95,22 +99,23 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <RecipientRow key={r.addr} recipient={r} />
+        <RecipientRow key={r.addr} recipient={r} lagAutoFocus={lagAutoFocus} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
-        prefix !== "" && <NoSearchResults />}
+        prefix !== "" && <NoSearchResults lagAutoFocus={lagAutoFocus} />}
       <Spacer h={32} />
       {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>
   );
 }
 
-function NoSearchResults() {
+function NoSearchResults({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
   const nav = useNav();
   const sendPaymentLink = () =>
     nav.navigate("SendTab", {
       screen: "SendLink",
+      params: { lagAutoFocus: lagAutoFocus ?? false },
     });
 
   return (
@@ -129,14 +134,20 @@ function NoSearchResults() {
   );
 }
 
-function RecipientRow({ recipient }: { recipient: Recipient }) {
+function RecipientRow({
+  recipient,
+  lagAutoFocus,
+}: {
+  recipient: Recipient;
+  lagAutoFocus?: boolean;
+}) {
   const eAccStr = getEAccountStr(recipient);
   const nav = useNav();
   const payAccount = useCallback(
     () =>
       nav.navigate("SendTab", {
         screen: "SendTransfer",
-        params: { recipient },
+        params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
       }),
     [eAccStr]
   );
@@ -160,7 +171,7 @@ function RecipientRow({ recipient }: { recipient: Recipient }) {
   );
 }
 
-function ExtraRows() {
+function ExtraRows({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
   const nav = useNav();
 
   return (
@@ -171,6 +182,7 @@ function ExtraRows() {
         onPress={() =>
           nav.navigate("SendTab", {
             screen: "SendLink",
+            params: { lagAutoFocus: lagAutoFocus ?? false },
           })
         }
       />

@@ -122,6 +122,7 @@ function RequestScreenInner({
           onSetDollars={setDollars}
           showAmountAvailable={false}
           autoFocus={autoFocus}
+          lagAutoFocus={false}
           innerRef={textInputRef}
           disabled={status !== "creating"}
         />

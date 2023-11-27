@@ -24,10 +24,10 @@ export type ParamListHome = {
 };
 
 export type ParamListSend = {
-  SendNav: { autoFocus: boolean; sendNote?: boolean };
+  SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
-  SendLink: undefined;
+  SendLink: { lagAutoFocus: boolean };
 };
 
 export type ParamListReceive = {
@@ -48,6 +48,7 @@ interface SendNavProp {
   recipient?: Recipient;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
+  lagAutoFocus?: boolean;
 }
 
 export type ParamListTab = {

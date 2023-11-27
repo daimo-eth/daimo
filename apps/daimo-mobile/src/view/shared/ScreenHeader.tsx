@@ -32,15 +32,6 @@ export function ScreenHeader({
   );
 }
 
-export function useResetToHome() {
-  const nav = useNav();
-  return useCallback(
-    () =>
-      nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] }),
-    []
-  );
-}
-
 export function useExitToHome() {
   const nav = useNav();
   return useCallback(() => nav.navigate("HomeTab", { screen: "Home" }), []);
