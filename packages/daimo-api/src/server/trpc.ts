@@ -1,5 +1,5 @@
 import { Span } from "@opentelemetry/api";
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
 
 export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
@@ -14,6 +14,22 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
 
   return { ipAddr, userAgent, daimoPlatform, daimoVersion, span, ...opts };
 };
+
+type TrpcReqContext = Awaited<ReturnType<typeof createContext>>;
+
+export function onTrpcError({
+  error,
+  ctx,
+}: {
+  error: TRPCError;
+  ctx?: TrpcReqContext;
+}) {
+  const err = `${error.code} ${error.name} ${error.message}`;
+  if (ctx) {
+    ctx.span?.setAttribute("rpc.error", err);
+  }
+  console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
+}
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {
   let xForwardedFor = opts.req.headers["x-forwarded-for"];

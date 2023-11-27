@@ -173,7 +173,9 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
   assert(hexToBytes(sigHex).length === 65, "paymaster: invalid sig length");
 
-  return concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  const ret = concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  assert(hexToBytes(ret).length === 91, "paymaster: invalid ret length");
+  return ret;
 }
 
 function getDummyOp(): UserOpHex {
