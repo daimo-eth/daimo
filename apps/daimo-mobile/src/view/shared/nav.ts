@@ -122,3 +122,13 @@ async function goTo(nav: MainNav, link: DaimoLink) {
 export function navResetToHome(nav: MainNav) {
   nav.reset({ routes: [{ name: "HomeTab" }] });
 }
+
+export function useDisableTabSwipe(nav: MainNav) {
+  useEffect(() => {
+    nav.getParent()!.setOptions({ swipeEnabled: false });
+
+    return function cleanup() {
+      nav.getParent()!.setOptions({ swipeEnabled: true });
+    };
+  }, [nav]);
+}

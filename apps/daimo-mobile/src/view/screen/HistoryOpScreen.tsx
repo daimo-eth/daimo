@@ -23,7 +23,7 @@ import { ButtonBig } from "../shared/Button";
 import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { AddrText } from "../shared/addr";
-import { ParamListHome } from "../shared/nav";
+import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import {
@@ -46,6 +46,9 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
+  const nav = useNav();
+  useDisableTabSwipe(nav);
+
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
   // A pending op always has an opHash (since its initiated by the user's
