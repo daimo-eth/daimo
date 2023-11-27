@@ -1,7 +1,7 @@
 import { SuggestedAction } from "@daimo/api";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -14,14 +14,18 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { OctName } from "./InputBig";
+import { handleDeepLink, useNav } from "./nav";
 import { color } from "./style";
 import { TextBody } from "./text";
+import { useAccount } from "../../model/account";
 
 const ADDITIONAL_TOP_PADDING = 4;
 
 export function InfoToast({ action }: { action: SuggestedAction }) {
+  const nav = useNav();
+  const [account, setAccount] = useAccount();
   const { icon, title, subtitle } = action;
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
   const y = useSharedValue(-100);
@@ -29,6 +33,41 @@ export function InfoToast({ action }: { action: SuggestedAction }) {
   const scale = useSharedValue(1);
 
   const wasCancelled = useSharedValue(false);
+
+  const onPress = () => {
+    setIsVisible(false);
+
+    if (action.url.startsWith("http")) {
+      Linking.openURL(action.url);
+    } else if (action.url.startsWith("daimo")) {
+      handleDeepLink(nav, action.url);
+    }
+
+    if (account) {
+      setAccount({
+        ...account,
+        suggestedActions:
+          account?.suggestedActions?.filter(
+            (a: SuggestedAction) => a.id === action.id
+          ) || [],
+      });
+    }
+  };
+
+  const onDismiss = () => {
+    setIsVisible(false);
+
+    if (account) {
+      setAccount({
+        ...account,
+        dismissedActionIDs: [...account.dismissedActionIDs, action.id],
+        suggestedActions:
+          account?.suggestedActions?.filter(
+            (a: SuggestedAction) => a.id === action.id
+          ) || [],
+      });
+    }
+  };
 
   useEffect(() => {
     if (!isVisible) {
@@ -70,10 +109,10 @@ export function InfoToast({ action }: { action: SuggestedAction }) {
       opacity.value = withTiming(1);
     },
     onFinish: () => {
-      scale.value = withTiming(1.3);
       if (!wasCancelled.value) {
+        scale.value = withTiming(1.3);
         opacity.value = withTiming(0, {}, () => {
-          runOnJS(setIsVisible)(false);
+          runOnJS(onPress)();
           scale.value = 1;
           y.value = -100;
         });
@@ -81,7 +120,7 @@ export function InfoToast({ action }: { action: SuggestedAction }) {
         if (y.value < -20) {
           y.value = withSpring(-100);
           opacity.value = withTiming(0);
-          runOnJS(setIsVisible)(false);
+          runOnJS(onDismiss)();
         } else {
           y.value = withSpring(0);
           opacity.value = withTiming(1);
@@ -160,7 +199,7 @@ const styles = StyleSheet.create({
   },
   bubbleText: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     flexWrap: "wrap",
   },
 });

@@ -142,7 +142,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         shouldAddPaddingWhenOnline={false}
         shouldRemovePaddingWhenOffline
       />
-      {account.suggestedActions.length > 0 && (
+      {account?.suggestedActions?.length > 0 && (
         <InfoToast action={account.suggestedActions[0]} />
       )}
       <Animated.ScrollView

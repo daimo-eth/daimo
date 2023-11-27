@@ -228,7 +228,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges || [],
-    suggestedActions: result.suggestedActions.filter(
+    suggestedActions: result.suggestedActions?.filter(
       (a) => !account.dismissedActionIDs.includes(a.id)
     ),
 
