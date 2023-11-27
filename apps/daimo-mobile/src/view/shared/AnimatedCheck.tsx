@@ -35,10 +35,10 @@ export const AnimatedCheck = forwardRef<AnimatedCheckRef>((_, ref) => {
     pathScale.value = PATH_SCALE_INIT;
     setTimeout(() => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      pathDashOffset.value = withDelay(200, withTiming(0, { duration: 800 }));
-      circleDashOffset.value = withTiming(0, { duration: 800 });
-      pathScale.value = withDelay(200, withTiming(0, { duration: 900 }));
-    }, 500);
+      pathDashOffset.value = withDelay(200, withTiming(0, { duration: 500 }));
+      circleDashOffset.value = withTiming(0, { duration: 500 });
+      pathScale.value = withDelay(200, withTiming(0, { duration: 600 }));
+    }, 250);
   };
 
   useImperativeHandle(ref, () => ({

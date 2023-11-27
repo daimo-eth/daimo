@@ -1,6 +1,7 @@
+import { fullDateAndTime } from "@daimo/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import { AmountChooser } from "../../shared/AmountInput";
 import { AnimatedCheck, AnimatedCheckRef } from "../../shared/AnimatedCheck";
@@ -8,6 +9,7 @@ import { ButtonBig } from "../../shared/Button";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
+import { ss } from "../../shared/style";
 import { TextBody, TextCenter, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendSuccess">;
@@ -29,56 +31,46 @@ export function SendSuccessScreen({ route }: Props) {
       params: { autoFocus: true },
     });
 
-  const createDateString = () => {
-    const date = new Date(
-      recipient?.lastSendTime ? recipient?.lastSendTime * 1000 : Date.now()
-    );
-    const day = date.toLocaleString([], {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
+  const noop = useCallback(() => {}, []);
 
-    const time = date.toLocaleString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
-    return `on ${day} at ${time}`;
-  };
+  const nowS = useRef(Date.now() / 1000).current;
+  const { day, time } = fullDateAndTime(nowS);
+
+  if (!recipient) return null;
 
   return (
-    <View style={styles.container}>
-      <Spacer h={8} />
+    <View style={ss.container.padH16}>
       <ScreenHeader title="Successful transfer" onExit={onExit} />
       <Spacer h={32} />
       <AnimatedCheck ref={checkRef} />
       <Spacer h={32} />
       <AmountChooser
         dollars={nDollars}
-        onSetDollars={useCallback(() => {}, [])}
+        onSetDollars={noop}
         disabled
         showAmountAvailable={false}
         autoFocus={false}
       />
       <TextCenter>
-        <TextLight>Was send to </TextLight>
+        <TextLight>Sent to </TextLight>
         <TextBody>{recipient?.name || recipient?.ensName}</TextBody>
       </TextCenter>
       <Spacer h={6} />
       <TextCenter>
-        <TextLight>{createDateString()}</TextLight>
+        <TextLight>
+          on {day} at {time}
+        </TextLight>
       </TextCenter>
       <Spacer h={48} />
-      <ButtonBig title="FINISH" onPress={onExit} type="primary" />
-      <Spacer h={16} />
-      <ButtonBig title="MAKE ANOTHER TRANSFER" onPress={onBack} type="subtle" />
+      <View style={ss.container.padH8}>
+        <ButtonBig title="FINISH" onPress={onExit} type="primary" />
+        <Spacer h={16} />
+        <ButtonBig
+          title="MAKE ANOTHER TRANSFER"
+          onPress={onBack}
+          type="subtle"
+        />
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 24,
-  },
-});

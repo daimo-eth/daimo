@@ -139,8 +139,8 @@ function SendTab() {
     <SendStack.Navigator initialRouteName="SendNav" screenOptions={noHeaders}>
       <SendStack.Group>
         <SendStack.Screen name="SendNav" component={SendNavScreen} />
-        <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="QR" component={QRScreen} />
+        <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
         <SendStack.Screen name="SendSuccess" component={SendSuccessScreen} />
       </SendStack.Group>

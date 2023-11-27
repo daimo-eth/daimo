@@ -24,6 +24,25 @@ export function timeString(s: number) {
   });
 }
 
+/** Returns {day: "Aug 4 2023", time: "4:00pm PST"} */
+export function fullDateAndTime(s: number) {
+  const date = new Date(s * 1000);
+
+  const day = date.toLocaleString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+
+  const time = date.toLocaleString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
+
+  return { day, time };
+}
+
 export function guessTimestampFromNum(
   blockNum: number | bigint,
   chain: DaimoChain
