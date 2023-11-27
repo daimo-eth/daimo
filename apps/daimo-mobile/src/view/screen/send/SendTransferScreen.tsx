@@ -23,10 +23,15 @@ import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBubble } from "../../shared/InfoBubble";
-import { ScreenHeader, useResetToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
+import {
+  ParamListSend,
+  navResetToHome,
+  useDisableTabSwipe,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextH3, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -45,16 +50,13 @@ export default function SendScreen({ route }: Props) {
     else if (nav.canGoBack()) nav.goBack();
     else navResetToHome(nav);
   }, [nav, dollars, recipient]);
-  const goHome = useResetToHome();
+
+  useDisableTabSwipe(nav);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader
-          title="Send to"
-          onBack={goBack}
-          onExit={recipient && goHome}
-        />
+        <ScreenHeader title="Send to" onBack={goBack} />
         <Spacer h={8} />
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
@@ -205,6 +207,12 @@ function SendConfirm({
     );
   }
 
+  const nav = useNav();
+
+  const onFocus = () => {
+    nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
+  };
+
   return (
     <View>
       <Spacer h={8} />
@@ -218,6 +226,7 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
+        onFocus={onFocus}
       />
       <Spacer h={32} />
       <SendTransferButton {...{ recipient, dollars: nDollars, requestId }} />
