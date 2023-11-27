@@ -170,11 +170,15 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   console.log(`[PAYMASTER] sign ${ticketHex} with ${signer.address}`);
 
   const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
-  const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
-  assert(hexToBytes(sigHex).length === 65, "paymaster: invalid sig length");
+  const sigHex = concatHex([
+    toHex(sig.v, { size: 1 }),
+    toHex(hexToBigInt(sig.r), { size: 32 }),
+    toHex(hexToBigInt(sig.s, { size: 32 })),
+  ]);
+  assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
   const ret = concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
-  assert(hexToBytes(ret).length === 91, "paymaster: invalid ret length");
+  assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");
   return ret;
 }
 
