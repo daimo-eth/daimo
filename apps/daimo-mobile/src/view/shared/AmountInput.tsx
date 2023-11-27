@@ -25,6 +25,7 @@ export function AmountChooser({
   autoFocus,
   disabled,
   innerRef,
+  onFocus,
 }: {
   dollars: number;
   onSetDollars: (dollars: number) => void;
@@ -32,6 +33,7 @@ export function AmountChooser({
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
+  onFocus?: () => void;
 }) {
   // Show how much we have available
   const [account] = useAccount();
@@ -46,6 +48,7 @@ export function AmountChooser({
         disabled={disabled}
         innerRef={innerRef}
         autoFocus={autoFocus}
+        onFocus={onFocus}
       />
       <Spacer h={8} />
       <TextCenter>
@@ -63,12 +66,14 @@ function AmountInput({
   innerRef,
   autoFocus,
   disabled,
+  onFocus,
 }: {
   dollars: number;
   onChange: (dollars: number) => void;
   innerRef?: React.RefObject<TextInput>;
   autoFocus?: boolean;
   disabled?: boolean;
+  onFocus?: () => void;
 }) {
   if (dollars < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -119,7 +124,10 @@ function AmountInput({
     onChange(truncated);
   };
 
-  const focus = useCallback(() => innerRef?.current?.focus(), [innerRef]);
+  const focus = useCallback(() => {
+    innerRef?.current?.focus();
+    if (onFocus) onFocus();
+  }, [innerRef, onFocus]);
 
   return (
     <TouchableWithoutFeedback onPress={focus}>
@@ -139,6 +147,7 @@ function AmountInput({
           value={strVal}
           onChangeText={change}
           onEndEditing={onBlur} /* called on blur, works on Android */
+          onTouchEnd={focus}
         />
       </View>
     </TouchableWithoutFeedback>
