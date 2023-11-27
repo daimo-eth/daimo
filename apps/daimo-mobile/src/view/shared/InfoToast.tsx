@@ -1,3 +1,4 @@
+import { SuggestedAction } from "@daimo/api";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -12,18 +13,14 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { OctName } from "./InputBig";
 import { color } from "./style";
 import { TextBody } from "./text";
 
 const ADDITIONAL_TOP_PADDING = 4;
-const infoData = {
-  icon: undefined,
-  title: "Yo bro some info 🫵",
-  subtitle: "Very important trust me lol",
-};
 
-export function InfoToast() {
-  const { icon, title, subtitle } = infoData;
+export function InfoToast({ action }: { action: SuggestedAction }) {
+  const { icon, title, subtitle } = action;
   const [isVisible, setIsVisible] = useState(false);
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
@@ -123,7 +120,9 @@ export function InfoToast() {
         <View style={styles.bubble}>
           <View style={styles.bubbleIcon}>
             {!icon && <TextBody color={color.white}>i</TextBody>}
-            {icon && <Octicons name={icon} size={16} color={color.white} />}
+            {icon && (
+              <Octicons name={icon as OctName} size={16} color={color.white} />
+            )}
           </View>
           <View style={styles.bubbleText}>
             <TextBody>{title}</TextBody>

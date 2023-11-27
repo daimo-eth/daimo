@@ -57,6 +57,11 @@ function HomeScreenInner({ account }: { account: Account }) {
     tabBarHeight -
     (Platform.OS === "android" ? 16 : 0);
 
+  console.log(
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
+  );
+
+  // Hide history when tapping the home tab.
   useEffect(() => {
     if (nav.getParent()) {
       // @ts-ignore
@@ -66,14 +71,9 @@ function HomeScreenInner({ account }: { account: Account }) {
           bottomSheetRef.current.collapse();
         }
       });
-
       return unsub;
     }
   }, [nav, isFocused]);
-
-  console.log(
-    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
-  );
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(
@@ -142,7 +142,9 @@ function HomeScreenInner({ account }: { account: Account }) {
         shouldAddPaddingWhenOnline={false}
         shouldRemovePaddingWhenOffline
       />
-      <InfoToast />
+      {account.suggestedActions.length > 0 && (
+        <InfoToast action={account.suggestedActions[0]} />
+      )}
       <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
