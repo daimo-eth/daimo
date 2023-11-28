@@ -1,12 +1,7 @@
 import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef } from "react";
-import {
-  Keyboard,
-  Platform,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
@@ -43,7 +38,7 @@ function SendNav({ autoFocus }: { autoFocus: boolean }) {
 
   useEffect(() => {
     let focusTimeout;
-    if (isFocused && autoFocus && Platform.OS === "ios") {
+    if (isFocused && autoFocus) {
       const { setParams }: { setParams: any } = nav;
       setParams({
         autoFocus: false,

@@ -53,7 +53,7 @@ function RequestScreenInner({
 
   useEffect(() => {
     let focusTimeout;
-    if (isFocused && autoFocus && Platform.OS === "ios") {
+    if (isFocused && autoFocus) {
       const { setParams }: { setParams: any } = nav;
       setParams({
         autoFocus: false,
