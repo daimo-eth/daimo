@@ -126,10 +126,10 @@ export function navResetToHome(nav: MainNav) {
 
 export function useDisableTabSwipe(nav: MainNav) {
   useEffect(() => {
-    nav.getParent()!.setOptions({ swipeEnabled: false });
+    const p = nav.getParent();
+    if (p == null) return;
 
-    return function cleanup() {
-      nav.getParent()!.setOptions({ swipeEnabled: true });
-    };
+    p.setOptions({ swipeEnabled: false });
+    return () => p.setOptions({ swipeEnabled: true });
   }, [nav]);
 }

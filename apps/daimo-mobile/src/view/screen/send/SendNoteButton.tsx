@@ -186,7 +186,7 @@ function SendNoteButtonInner({
         return (
           <ButtonBig
             type="primary"
-            title="CREATE PAYMENT LINK"
+            title="CONFIRM PAYMENT LINK"
             onPress={exec}
             disabled={sendDisabled}
           />
