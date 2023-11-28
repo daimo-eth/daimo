@@ -143,7 +143,7 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
       id: "passkey-backup-1",
       title: "Secure your account",
       subtitle: "Keep your account safe with a passkey backup",
-      url: `daimo://settings`,
+      url: `daimo://settings/add-passkey`,
     });
   }
 

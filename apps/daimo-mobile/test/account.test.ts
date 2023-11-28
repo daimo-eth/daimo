@@ -47,11 +47,11 @@ const account: Account = {
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV10);
+    expect(ser).toEqual(correctSerV11);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV10);
+    const a = parseAccount(correctSerV11);
     expect(a).toEqual(account);
   });
 

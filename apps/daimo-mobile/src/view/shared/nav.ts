@@ -106,6 +106,15 @@ export function handleDeepLink(nav: MainNav, url: string) {
 async function goTo(nav: MainNav, link: DaimoLink) {
   const { type } = link;
   switch (type) {
+    case "settings": {
+      const screen = (() => {
+        if (link.screen === "add-passkey") return "AddPasskey";
+        else if (link.screen === "add-device") return "AddDevice";
+        else return "Settings";
+      })();
+      nav.navigate("SettingsTab", { screen });
+      break;
+    }
     case "account":
     case "request": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });

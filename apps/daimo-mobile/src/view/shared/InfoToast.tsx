@@ -37,20 +37,10 @@ export function InfoToast({ action }: { action: SuggestedAction }) {
   const onPress = () => {
     setIsVisible(false);
 
-    if (action.url.startsWith("http")) {
-      Linking.openURL(action.url);
-    } else if (action.url.startsWith("daimo")) {
-      handleDeepLink(nav, action.url);
-    }
-
-    if (account) {
-      setAccount({
-        ...account,
-        suggestedActions:
-          account?.suggestedActions?.filter(
-            (a: SuggestedAction) => a.id === action.id
-          ) || [],
-      });
+    if (action.url.startsWith("daimo")) {
+      handleDeepLink(nav, action.url); // daimo:// direct deeplinks
+    } else {
+      Linking.openURL(action.url); // https://, mailto://, ...
     }
   };
 
