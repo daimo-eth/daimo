@@ -173,7 +173,7 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   const sigHex = concatHex([
     toHex(sig.v, { size: 1 }),
     toHex(hexToBigInt(sig.r), { size: 32 }),
-    toHex(hexToBigInt(sig.s, { size: 32 })),
+    toHex(hexToBigInt(sig.s), { size: 32 }),
   ]);
   assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
