@@ -2,7 +2,6 @@ import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
-  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -144,15 +143,13 @@ function AmountInput({
   const nav = useNav();
 
   useEffect(() => {
-    if (Platform.OS === "ios") {
-      // Re-focus after screen transition animations finish.
-      // This is a workaround for a bug in react-navigation where autoFocus
-      // doesn't persist across screen animations.
-      nav.addListener("transitionEnd", () => {
-        if (lagAutoFocus && isFocused) focus();
-        if (!isFocused) ref.current?.blur();
-      });
-    }
+    // Re-focus after screen transition animations finish.
+    // This is a workaround for a bug in react-navigation where autoFocus
+    // doesn't persist across screen animations.
+    nav.addListener("transitionEnd", () => {
+      if (lagAutoFocus && isFocused) focus();
+      if (!isFocused) ref.current?.blur();
+    });
   }, [isFocused, lagAutoFocus]);
 
   return (

@@ -72,6 +72,7 @@ export default {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
+    softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
     versionCode: BUILD_NUM,
   },
