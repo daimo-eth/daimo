@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Layout,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -142,9 +143,6 @@ function HomeScreenInner({ account }: { account: Account }) {
         shouldAddPaddingWhenOnline={false}
         shouldRemovePaddingWhenOffline
       />
-      {account?.suggestedActions?.length > 0 && (
-        <InfoToast action={account.suggestedActions[0]} />
-      )}
       <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
@@ -174,7 +172,19 @@ function HomeScreenInner({ account }: { account: Account }) {
             lagAutoFocus
           />
         )}
-        {searchPrefix == null && <AmountAndButtons account={account} />}
+        {searchPrefix == null && (
+          <>
+            {account?.suggestedActions?.length > 0 ? (
+              <InfoToast action={account.suggestedActions[0]} />
+            ) : (
+              <Spacer h={64} />
+            )}
+            <Spacer h={12} />
+            <Animated.View layout={Layout}>
+              <AmountAndButtons account={account} />
+            </Animated.View>
+          </>
+        )}
       </Animated.ScrollView>
       {searchPrefix == null && (
         <Animated.View
@@ -225,7 +235,6 @@ function AmountAndButtons({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback>
       <View style={styles.amountAndButtons}>
-        <Spacer h={64 + 12} />
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />
         <Spacer h={16} />
