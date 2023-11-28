@@ -10,6 +10,10 @@ import {
 
 const testCases: [string, DaimoLink | null][] = [
   [
+    "https://example.com/link/settings/add-passkey",
+    { type: "settings", screen: "add-passkey" },
+  ],
+  [
     "https://example.com/link/account/dcposch",
     { type: "account", account: "dcposch" },
   ],
@@ -108,6 +112,11 @@ test("DaimoLink from daimo:// direct app link", () => {
   assert.deepStrictEqual(parseDaimoLink(url), {
     type: "account",
     account: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+  });
+
+  assert.deepStrictEqual(parseDaimoLink(`daimo://settings`), {
+    type: "settings",
+    screen: undefined,
   });
 });
 

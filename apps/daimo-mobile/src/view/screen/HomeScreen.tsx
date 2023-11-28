@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Layout,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -25,6 +26,7 @@ import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
+import { InfoToast } from "../shared/InfoToast";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
@@ -56,6 +58,11 @@ function HomeScreenInner({ account }: { account: Account }) {
     tabBarHeight -
     (Platform.OS === "android" ? 16 : 0);
 
+  console.log(
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
+  );
+
+  // Hide history when tapping the home tab.
   useEffect(() => {
     if (nav.getParent()) {
       // @ts-ignore
@@ -65,14 +72,9 @@ function HomeScreenInner({ account }: { account: Account }) {
           bottomSheetRef.current.collapse();
         }
       });
-
       return unsub;
     }
   }, [nav, isFocused]);
-
-  console.log(
-    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
-  );
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(
@@ -170,7 +172,19 @@ function HomeScreenInner({ account }: { account: Account }) {
             lagAutoFocus
           />
         )}
-        {searchPrefix == null && <AmountAndButtons account={account} />}
+        {searchPrefix == null && (
+          <>
+            {account?.suggestedActions?.length > 0 ? (
+              <InfoToast action={account.suggestedActions[0]} />
+            ) : (
+              <Spacer h={64} />
+            )}
+            <Spacer h={12} />
+            <Animated.View layout={Layout}>
+              <AmountAndButtons account={account} />
+            </Animated.View>
+          </>
+        )}
       </Animated.ScrollView>
       {searchPrefix == null && (
         <Animated.View
@@ -221,7 +235,6 @@ function AmountAndButtons({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback>
       <View style={styles.amountAndButtons}>
-        <Spacer h={64 + 12} />
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />
         <Spacer h={16} />

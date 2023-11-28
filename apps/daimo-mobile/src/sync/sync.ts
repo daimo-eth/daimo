@@ -136,6 +136,7 @@ async function fetchSync(
     numAccountKeys: result.accountKeys.length,
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges,
+    suggestedActions: result.suggestedActions,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -227,6 +228,9 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges || [],
+    suggestedActions: result.suggestedActions?.filter(
+      (a) => !account.dismissedActionIDs.includes(a.id)
+    ),
 
     recentTransfers,
     namedAccounts,

@@ -1,18 +1,19 @@
+import { SuggestedAction } from "@daimo/api";
 import {
-  EAccount,
-  assert,
-  TransferOpEvent,
-  TrackedRequest,
-  KeyData,
   ChainGasConstants,
   DaimoLinkNote,
-  TrackedNote,
+  EAccount,
+  KeyData,
   KeyRotationOpEvent,
   RecommendedExchange,
+  TrackedNote,
+  TrackedRequest,
+  TransferOpEvent,
+  assert,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
-import { Address, getAddress, Hex } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { cacheEAccounts } from "../view/shared/addr";
@@ -70,6 +71,10 @@ export type Account = {
 
   /** List of URLs for exchanges to show on deposit screen */
   recommendedExchanges: RecommendedExchange[];
+  /** Suggested actions. Dismissable, at most 1 displayed. */
+  suggestedActions: SuggestedAction[];
+  /** IDs of suggested actions that have been dismissed */
+  dismissedActionIDs: string[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -159,6 +164,36 @@ interface AccountV10 extends StoredModel {
   accountKeys: KeyData[];
   pendingKeyRotation: KeyRotationOpEvent[];
   recommendedExchanges: RecommendedExchange[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+}
+
+interface AccountV11 extends StoredModel {
+  storageVersion: 11;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: TransferOpEvent[];
+  trackedRequests: TrackedRequest[];
+  pendingNotes: DaimoLinkNote[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
+  recommendedExchanges: RecommendedExchange[];
+  suggestedActions: SuggestedAction[];
+  dismissedActionIDs: string[];
 
   chainGasConstants: ChainGasConstants;
 
@@ -275,6 +310,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       pendingNotes: a.pendingNotes || [],
       pendingKeyRotation: [],
       recommendedExchanges: [],
+      suggestedActions: [],
+      dismissedActionIDs: [],
 
       chainGasConstants: { ...a.chainGasConstants, preVerificationGas: "0" },
 
@@ -304,6 +341,39 @@ export function parseAccount(accountJSON?: string): Account | null {
       pendingNotes: a.pendingNotes,
       pendingKeyRotation: a.pendingKeyRotation,
       recommendedExchanges: [],
+      suggestedActions: [],
+      dismissedActionIDs: [],
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+    };
+  } else if (model.storageVersion === 10) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
+    const a = model as AccountV10;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingNotes: a.pendingNotes,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: a.recommendedExchanges,
+      suggestedActions: [],
+      dismissedActionIDs: [],
 
       chainGasConstants: a.chainGasConstants,
 
@@ -311,10 +381,10 @@ export function parseAccount(accountJSON?: string): Account | null {
     };
   }
 
-  assert(model.storageVersion === 10);
-  const a = model as AccountV10;
+  assert(model.storageVersion === 11);
+  const a = model as AccountV11;
 
-  const ret = {
+  return {
     enclaveKeyName: a.enclaveKeyName,
     enclavePubKey: a.enclavePubKey,
     name: a.name,
@@ -335,20 +405,20 @@ export function parseAccount(accountJSON?: string): Account | null {
     pendingNotes: a.pendingNotes,
     pendingKeyRotation: a.pendingKeyRotation,
     recommendedExchanges: a.recommendedExchanges,
+    suggestedActions: a.suggestedActions,
+    dismissedActionIDs: a.dismissedActionIDs,
 
     chainGasConstants: a.chainGasConstants,
 
     pushToken: a.pushToken,
   };
-
-  return ret;
 }
 
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV10 = {
-    storageVersion: 10,
+  const model: AccountV11 = {
+    storageVersion: 11,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -370,6 +440,8 @@ export function serializeAccount(account: Account | null): string {
     accountKeys: account.accountKeys,
     pendingKeyRotation: account.pendingKeyRotation,
     recommendedExchanges: account.recommendedExchanges,
+    suggestedActions: account.suggestedActions,
+    dismissedActionIDs: account.dismissedActionIDs,
 
     chainGasConstants: account.chainGasConstants,
 

@@ -11,7 +11,11 @@ export const daimoLinkBase = daimoDomain
   : "http://localhost:3001/link";
 
 /** Represents a Daimo app deep-link */
-export type DaimoLink = DaimoLinkAccount | DaimoLinkRequest | DaimoLinkNote;
+export type DaimoLink =
+  | DaimoLinkAccount
+  | DaimoLinkRequest
+  | DaimoLinkNote
+  | DaimoLinkSettings;
 
 /** Represents any Ethereum address */
 export type DaimoLinkAccount = {
@@ -40,6 +44,11 @@ export type DaimoLinkNote = {
   ephemeralOwner: Address;
   /** The ephemeral (burner) private key, from the hash portion of the URL. */
   ephemeralPrivateKey?: Hex;
+};
+
+export type DaimoLinkSettings = {
+  type: "settings";
+  screen?: "add-device" | "add-passkey";
 };
 
 // Returns a shareable https://daimo.com/... deep link.
@@ -75,6 +84,10 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
         link.previewDollars,
         link.ephemeralOwner + (hash || ""),
       ].join("/");
+    }
+    case "settings": {
+      if (link.screen == null) return `${linkBase}/settings`;
+      else return `${linkBase}/settings/${link.screen}`;
     }
   }
 }
@@ -151,6 +164,13 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
         ephemeralOwner,
         ephemeralPrivateKey,
       };
+    }
+    case "settings": {
+      if (!["add-device", "add-passkey", undefined].includes(parts[1])) {
+        return null;
+      }
+      const screen = parts[1] as "add-device" | "add-passkey" | undefined;
+      return { type: "settings", screen };
     }
     default:
       return null;
