@@ -16,7 +16,7 @@ import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useNav } from "../shared/nav";
+import { useDisableTabSwipe, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextCenter, TextError, TextLight, TextPara } from "../shared/text";
 
@@ -99,6 +99,7 @@ export function AddPasskeyScreen() {
 
   const nav = useNav();
   const goBack = () => nav.goBack();
+  useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>
