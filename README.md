@@ -58,8 +58,8 @@ The mission is to make an excellent experience. Payments should be fast, secure,
 ### Audits
 
 - [Veridise audit 2023 Oct: Daimo](./audits/2023-10-veridise-daimo.pdf)
-- [Veridise audit 2023 Oct: P-256 verifier](./audits-2023-10-veridise-p256.pdf)
-- [Veridise audit 2023 Nov: WebAuthn verifier](./audits-2023-11-veridise-webauthn.pdf)
+- [Veridise audit 2023 Oct: P-256 verifier](./audits/2023-10-veridise-p256.pdf)
+- [Veridise audit 2023 Nov: WebAuthn verifier](./audits/2023-11-veridise-webauthn.pdf)
 
 ### Development
 
