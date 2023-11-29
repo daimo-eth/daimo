@@ -94,11 +94,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
 
   // Fade in/out
   useEffect(() => {
-    if (!isVisible) {
-      setTimeout(() => {
-        setIsVisible(true);
-      }, 2000);
-    } else {
+    if (isVisible) {
       y.value = withTiming(0);
       x.value = 0;
       opacity.value = withTiming(1);
