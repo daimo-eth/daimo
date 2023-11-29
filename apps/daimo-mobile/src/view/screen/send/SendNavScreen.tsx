@@ -1,13 +1,17 @@
 import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListSend, useNav } from "../../shared/nav";
+import {
+  ParamListSend,
+  useFocusOnScreenTransitionEnd,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
@@ -36,27 +40,12 @@ function SendNav({ autoFocus }: { autoFocus: boolean }) {
   const isFocused = useIsFocused();
   const nav = useNav();
 
-  useEffect(() => {
-    let focusTimeout;
-    if (isFocused && autoFocus) {
-      const { setParams }: { setParams: any } = nav;
-      setParams({
-        autoFocus: false,
-      });
-      // wait for the screen transition animation to finish before open keyboard
-      focusTimeout = setTimeout(() => {
-        textInputRef.current?.focus();
-      }, 500);
-    }
-
-    if (!isFocused) {
-      clearTimeout(focusTimeout);
-    }
-  }, [isFocused, autoFocus]);
+  // Work around react-navigation autofocus bug
+  useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
 
   return (
     <View style={{ flex: 1, flexDirection: "column" }}>
-      <SearchTab {...{ autoFocus }} textInnerRef={textInputRef} />
+      <SearchTab autoFocus={false} textInnerRef={textInputRef} />
     </View>
   );
 }

@@ -86,7 +86,7 @@ export function useRecipientSearch(account: Account, prefix: string) {
 
   return {
     isSearching: enabled,
-    recipients,
+    recipients: recipients.slice(0, 16),
     status: res.status,
     error: res.error,
   };
