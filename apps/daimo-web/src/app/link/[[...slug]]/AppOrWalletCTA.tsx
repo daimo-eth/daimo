@@ -17,64 +17,13 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
-import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
-import { chainConfig } from "../env";
+import {
+  PrimaryOpenInAppButton,
+  SecondaryButton,
+} from "../../../components/buttons";
+import { chainConfig } from "../../../env";
 
-type Action = {
-  wagmiPrep: {
-    address: Address;
-    abi: readonly unknown[];
-    functionName: string;
-    args: readonly unknown[];
-  };
-};
-
-async function linkStatusToAction(
-  linkStatus: DaimoLinkStatus,
-  selfAddress: Address,
-  ephPrivateKey: Hex | undefined
-): Promise<Action> {
-  switch (linkStatus.link.type) {
-    case "request": {
-      const { recipient } = linkStatus as DaimoRequestStatus;
-      const parsedAmount = parseUnits(
-        linkStatus.link.dollars,
-        chainConfig.tokenDecimals
-      );
-      return {
-        wagmiPrep: {
-          address: chainConfig.tokenAddress,
-          abi: erc20ABI as readonly unknown[],
-          functionName: "transfer" as const,
-          args: [recipient.addr, parsedAmount] as const,
-        },
-      };
-    }
-    case "note": {
-      const { sender } = linkStatus as DaimoNoteStatus;
-      const signature = await getNoteClaimSignature(
-        sender.addr,
-        selfAddress,
-        ephPrivateKey
-      );
-
-      return {
-        wagmiPrep: {
-          ...daimoEphemeralNotesConfig,
-          functionName: "claimNote" as const,
-          args: [linkStatus.link.ephemeralOwner, signature] as const,
-        },
-      };
-    }
-    default: {
-      throw new Error(
-        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`
-      );
-    }
-  }
-}
-
-export function PerformWalletAction({
+export function AppOrWalletCTA({
   linkStatus,
   description,
 }: {
@@ -211,15 +160,18 @@ function CustomConnectButton({ title }: { title: string }): JSX.Element {
               if (chain.unsupported) {
                 return (
                   <SecondaryButton onClick={openChainModal} buttonType="danger">
-                    Wrong network
+                    WRONG NETWORK
                   </SecondaryButton>
                 );
               }
 
               return (
-                <p className="tracking-wider text-primaryLight font-semibold">
+                <button
+                  onClick={openConnectModal}
+                  className="tracking-wider text-primaryLight font-semibold"
+                >
                   CONNECTED TO {account.displayName.toUpperCase()}
-                </p>
+                </button>
               );
             })()}
           </div>
@@ -227,4 +179,58 @@ function CustomConnectButton({ title }: { title: string }): JSX.Element {
       }}
     </ConnectButton.Custom>
   );
+}
+
+type Action = {
+  wagmiPrep: {
+    address: Address;
+    abi: readonly unknown[];
+    functionName: string;
+    args: readonly unknown[];
+  };
+};
+
+async function linkStatusToAction(
+  linkStatus: DaimoLinkStatus,
+  selfAddress: Address,
+  ephPrivateKey: Hex | undefined
+): Promise<Action> {
+  switch (linkStatus.link.type) {
+    case "request": {
+      const { recipient } = linkStatus as DaimoRequestStatus;
+      const parsedAmount = parseUnits(
+        linkStatus.link.dollars,
+        chainConfig.tokenDecimals
+      );
+      return {
+        wagmiPrep: {
+          address: chainConfig.tokenAddress,
+          abi: erc20ABI as readonly unknown[],
+          functionName: "transfer" as const,
+          args: [recipient.addr, parsedAmount] as const,
+        },
+      };
+    }
+    case "note": {
+      const { sender } = linkStatus as DaimoNoteStatus;
+      const signature = await getNoteClaimSignature(
+        sender.addr,
+        selfAddress,
+        ephPrivateKey
+      );
+
+      return {
+        wagmiPrep: {
+          ...daimoEphemeralNotesConfig,
+          functionName: "claimNote" as const,
+          args: [linkStatus.link.ephemeralOwner, signature] as const,
+        },
+      };
+    }
+    default: {
+      throw new Error(
+        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`
+      );
+    }
+  }
 }

@@ -12,8 +12,7 @@ import {
 import { Metadata } from "next";
 import Image from "next/image";
 
-import { PrimaryOpenInAppButton } from "../../../components/buttons";
-import { PerformWalletAction } from "../../../components/PerformWalletAction";
+import { CallToAction } from "./CallToAction";
 import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { rpc } from "../../../utils/rpc";
 
@@ -40,6 +39,11 @@ function getUrl(props: LinkProps): string {
   return `${daimoLinkBase}/${path}`;
 }
 
+function getDirectDeeplink(props: LinkProps): string {
+  const path = (props.params.slug || []).join("/");
+  return `daimo://${path}`;
+}
+
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(getUrl(props));
   if (titleDesc == null) return defaultMeta;
@@ -64,6 +68,8 @@ async function LinkPageInner(props: LinkProps) {
       description: "Payments on Ethereum",
     };
 
+  const directDeepLink = getDirectDeeplink(props);
+
   return (
     <main className="max-w-md mx-auto px-4">
       <center>
@@ -83,20 +89,9 @@ async function LinkPageInner(props: LinkProps) {
           </>
         )}
         <div className="h-9" />
-        {walletActionLinkStatus ? (
-          <PerformWalletAction
-            linkStatus={walletActionLinkStatus}
-            description={description}
-          />
-        ) : (
-          <>
-            <h1 className="text-xl font-semibold text-grayMid">
-              {description}
-            </h1>
-            <div className="h-4" />
-            <PrimaryOpenInAppButton />
-          </>
-        )}
+        <CallToAction
+          {...{ description, walletActionLinkStatus, directDeepLink }}
+        />
       </center>
     </main>
   );

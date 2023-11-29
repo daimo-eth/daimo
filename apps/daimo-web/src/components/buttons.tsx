@@ -1,32 +1,13 @@
 "use client";
-import { daimoLinkBase } from "@daimo/common";
-import { useState } from "react";
 
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 export function PrimaryOpenInAppButton({ disabled }: { disabled?: boolean }) {
-  const [openInApp, setOpenInApp] = useState(false);
-
-  function getDirectDeeplink() {
-    const url = window.location.href;
-    return url.startsWith(daimoLinkBase)
-      ? "daimo://" + url.substring(daimoLinkBase.length + 1)
-      : undefined;
-  }
-
   const onClick = () => {
-    const deeplink = getDirectDeeplink();
-    if (openInApp && deeplink != null) {
-      console.log("Redirecting to app. Direct deeplink: " + deeplink);
-      window.open(deeplink, "_blank");
-      return;
-    }
-
     const platform = detectPlatform(navigator.userAgent);
     const { url } = downloadMetadata[platform];
     console.log("Redirecting to store: " + url);
     window.open(url, "_blank");
-    if (deeplink != null) setOpenInApp(true);
   };
 
   return (
@@ -35,7 +16,7 @@ export function PrimaryOpenInAppButton({ disabled }: { disabled?: boolean }) {
       disabled={disabled}
       onClick={onClick}
     >
-      {openInApp ? "OPEN IN DAIMO" : "GET DAIMO"}
+      GET DAIMO
     </button>
   );
 }
