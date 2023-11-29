@@ -124,7 +124,9 @@ function HomeScreenInner({ account }: { account: Account }) {
   };
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
-    translationY.value = event.contentOffset.y;
+    if (event.contentOffset.y < 0) {
+      translationY.value = event.contentOffset.y;
+    }
   });
 
   const bottomSheetScrollStyle = useAnimatedStyle(() => {
