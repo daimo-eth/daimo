@@ -21,7 +21,7 @@ import { useAccount } from "../../model/account";
 
 const ICON_X_SIZE = 24;
 
-export function InfoToast({ action }: { action: SuggestedAction }) {
+export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const nav = useNav();
   const [account, setAccount] = useAccount();
   const { icon, title, subtitle } = action;
@@ -118,13 +118,7 @@ export function InfoToast({ action }: { action: SuggestedAction }) {
     },
     onFinish: (_, ctx: { eventCancelled: boolean }) => {
       if (!wasCancelled.value && !ctx.eventCancelled) {
-        scale.value = withTiming(1.3);
-        opacity.value = withTiming(0, {}, () => {
-          runOnJS(onPress)();
-          scale.value = 1;
-          x.value = 0;
-          y.value = -100;
-        });
+        runOnJS(onPress)();
       } else {
         if (x.value < -20) {
           x.value = withSpring(-500, {}, () => {

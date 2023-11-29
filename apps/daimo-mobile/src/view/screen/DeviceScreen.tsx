@@ -22,7 +22,7 @@ import { deleteEnclaveKey } from "../../logic/enclave";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
-import { InfoBubble } from "../shared/InfoBubble";
+import { InfoBox } from "../shared/InfoBox";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { ParamListSettings, useDisableTabSwipe, useNav } from "../shared/nav";
@@ -188,7 +188,7 @@ export function DeviceScreen({ route, navigation }: Props) {
 
       <Spacer h={32} />
       {isCurrentDevice && (
-        <InfoBubble
+        <InfoBox
           title="You're using this device now"
           subtitle="Deleting it will remove your access to this account"
         />

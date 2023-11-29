@@ -112,7 +112,9 @@ async function goTo(nav: MainNav, link: DaimoLink) {
         else if (link.screen === "add-device") return "AddDevice";
         else return "Settings";
       })();
-      nav.navigate("SettingsTab", { screen });
+
+      // HACK: make the back button from Add[Passkey,...] go directly to Home.
+      nav.reset({ routes: [{ name: "SettingsTab", params: { screen } }] });
       break;
     }
     case "account":

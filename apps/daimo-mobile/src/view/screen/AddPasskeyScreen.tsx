@@ -1,4 +1,4 @@
-import { OpStatus, assert, SlotType, findUnusedSlot } from "@daimo/common";
+import { OpStatus, SlotType, assert, findUnusedSlot } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -14,7 +14,11 @@ import { createPasskey } from "../../logic/passkey";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
-import { ScreenHeader } from "../shared/ScreenHeader";
+import {
+  ScreenHeader,
+  useExitBack,
+  useExitToHome,
+} from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useDisableTabSwipe, useNav } from "../shared/nav";
 import { ss } from "../shared/style";
@@ -98,12 +102,13 @@ export function AddPasskeyScreen() {
     Platform.OS === "ios" ? "iCloud Keychain" : "Google Password Manager";
 
   const nav = useNav();
-  const goBack = () => nav.goBack();
+  const goBack = useExitBack();
+  const goHome = useExitToHome();
   useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Passkey Backup" onBack={goBack} />
+      <ScreenHeader title="Passkey Backup" onBack={goBack || goHome} />
       <Spacer h={32} />
       <View style={ss.container.padH16}>
         <TextPara>

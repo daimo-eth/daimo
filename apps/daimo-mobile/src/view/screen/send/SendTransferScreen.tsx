@@ -22,7 +22,7 @@ import { Recipient, addLastSendTime } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { InfoBubble } from "../../shared/InfoBubble";
+import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
@@ -153,7 +153,7 @@ function SendChooseAmount({
   let infoBubble = <Spacer h={32} />;
   if (recipient.lastSendTime == null) {
     infoBubble = (
-      <InfoBubble
+      <InfoBox
         title={`First time paying ${getAccountName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />
@@ -208,7 +208,7 @@ function SendConfirm({
   let infoBubble = <Spacer h={32} />;
   if (recipient.lastSendTime == null) {
     infoBubble = (
-      <InfoBubble
+      <InfoBox
         title={`First time paying ${getAccountName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />

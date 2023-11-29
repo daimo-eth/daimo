@@ -5,7 +5,7 @@ import { OctName } from "./InputBig";
 import { color } from "./style";
 import { TextBody } from "./text";
 
-export function InfoBubble({
+export function InfoBox({
   title,
   subtitle,
   icon,

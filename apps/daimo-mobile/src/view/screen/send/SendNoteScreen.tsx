@@ -10,7 +10,7 @@ import {
 import { SendNoteButton } from "./SendNoteButton";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { InfoBubble } from "../../shared/InfoBubble";
+import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ParamListSend, useDisableTabSwipe, useNav } from "../../shared/nav";
@@ -42,7 +42,7 @@ export function SendNoteScreen({ route }: Props) {
       <View style={ss.container.screen}>
         <ScreenHeader title="Send Link" onBack={goBack} />
         <Spacer h={8} />
-        <InfoBubble
+        <InfoBox
           title="Pay by sending a link"
           subtitle="Anyone with the link can claim it"
         />

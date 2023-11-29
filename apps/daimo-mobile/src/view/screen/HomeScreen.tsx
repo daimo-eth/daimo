@@ -26,11 +26,11 @@ import { Account } from "../../model/account";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
-import { InfoToast } from "../shared/InfoToast";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
+import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
@@ -175,7 +175,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         {searchPrefix == null && (
           <>
             {account?.suggestedActions?.length > 0 ? (
-              <InfoToast action={account.suggestedActions[0]} />
+              <SuggestedActionBox action={account.suggestedActions[0]} />
             ) : (
               <Spacer h={64} />
             )}
