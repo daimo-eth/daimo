@@ -11,7 +11,7 @@ export function dollarsToAmount(
   return parseUnits(dollars, tokenDecimals);
 }
 
-/** Returns eg "6.00" for 6000000 USDC units. */
+/** Returns eg "6.00" for 6000123 USDC units. */
 export function amountToDollars(
   amount: bigint | number,
   tokenDecimals: number = 6

@@ -34,6 +34,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
 
   const wasCancelled = useSharedValue(false);
 
+  // Press = do the suggested action.
   const onPress = () => {
     setIsVisible(false);
 
@@ -44,9 +45,10 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
     }
   };
 
+  // Dismiss by tapping (x) or swiping
   const onDismiss = () => {
+    console.log(`[SUGGESTED] dismissing ${action.id}: ${action.title}`);
     setIsVisible(false);
-
     if (account) {
       setAccount({
         ...account,
@@ -65,6 +67,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
     });
   };
 
+  // Fade in/out
   useEffect(() => {
     if (!isVisible) {
       setTimeout(() => {
@@ -198,7 +201,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     gap: 16,
-    marginHorizontal: 8,
+    marginHorizontal: 16,
   },
   bubbleIcon: {
     backgroundColor: color.primary,

@@ -5,10 +5,11 @@ import {
   KeyData,
   RecommendedExchange,
   TransferOpEvent,
+  amountToDollars,
   assert,
   hasAccountName,
 } from "@daimo/common";
-import { Address } from "viem";
+import { Address, hexToBytes } from "viem";
 
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -139,12 +140,23 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
   const ret: SuggestedAction[] = [];
 
   if (hist.accountKeys.length === 1) {
-    ret.push({
-      id: "passkey-backup-1",
-      title: "Secure your account",
-      subtitle: "Keep your account safe with a passkey backup",
-      url: `daimo://settings/add-passkey`,
-    });
+    const dollarStr = amountToDollars(BigInt(hist.lastBalance));
+    if (Number(dollarStr) > 0) {
+      ret.push({
+        id: "passkey-backup-balance",
+        title: `Secure your $${dollarStr}`,
+        subtitle: "Keep your account safe with a passkey backup",
+        url: `daimo://settings/add-passkey`,
+      });
+    } else if (hexToBytes(eAcc.addr)[0] < 0x80) {
+      // A/B test: half of accounts asked to "Secure your account" immediately.
+      ret.push({
+        id: "passkey-backup-new-account",
+        title: "Secure your account",
+        subtitle: "Keep your account safe with a passkey backup",
+        url: `daimo://settings/add-passkey`,
+      });
+    }
   }
 
   return ret;
