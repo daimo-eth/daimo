@@ -5,7 +5,6 @@ import {
   KeyData,
   RecommendedExchange,
   TransferOpEvent,
-  amountToDollars,
   assert,
   hasAccountName,
 } from "@daimo/common";
@@ -140,16 +139,9 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
   const ret: SuggestedAction[] = [];
 
   if (hist.accountKeys.length === 1) {
-    const dollarStr = amountToDollars(BigInt(hist.lastBalance));
-    if (Number(dollarStr) > 0) {
-      ret.push({
-        id: "passkey-backup-balance",
-        title: `Secure your $${dollarStr}`,
-        subtitle: "Keep your account safe with a passkey backup",
-        url: `daimo://settings/add-passkey`,
-      });
-    } else if (hexToBytes(eAcc.addr)[0] < 0x80) {
+    if (hist.lastBalance !== "0" || hexToBytes(eAcc.addr)[0] < 0x80) {
       // A/B test: half of accounts asked to "Secure your account" immediately.
+      // Other half are asked only once they have a balance.
       ret.push({
         id: "passkey-backup-new-account",
         title: "Secure your account",
