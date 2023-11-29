@@ -83,8 +83,7 @@ export function useInitNavLinks() {
     getInitialURL().then((url) => {
       if (url == null) return;
       if (openedInitialURL.current) return;
-      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
-      setTimeout(() => handleDeepLink(nav, url), 100);
+      handleDeepLink(nav, url);
       openedInitialURL.current = true;
     });
 
