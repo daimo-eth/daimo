@@ -144,3 +144,27 @@ export function useDisableTabSwipe(nav: MainNav) {
     return () => p.setOptions({ swipeEnabled: true });
   }, [nav]);
 }
+
+/* We can't use `autoLagFocus` because tabs persist state, so we need to use
+ * a seperate hook that clears tab state without unmounting the component.
+ * Assumes current nav has a params for `autoFocus`. */
+export function useFocusOnScreenTransitionEnd(
+  ref: React.RefObject<any>,
+  nav: MainNav,
+  isFocused: boolean,
+  autoFocus: boolean
+) {
+  useEffect(() => {
+    const unsubscribe = nav.addListener("transitionEnd", () => {
+      if (isFocused && autoFocus) {
+        ref.current?.focus();
+
+        // Now, wipe the autoFocus flag so that switching tab and coming back
+        // doesn't keep focusing the input.
+        nav.setParams({ autoFocus: false } as any);
+      }
+    });
+
+    return unsubscribe;
+  }, [isFocused, autoFocus]);
+}

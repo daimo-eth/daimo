@@ -22,6 +22,7 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
   /// L2 fee
@@ -101,10 +102,14 @@ export class Paymaster {
     // this.priceMarkup = BigInt(priceMarkup);
     // this.previousPrice = previousPrice;
 
-    const gasPriceParams =
-      await this.bundlerClient.getUserOperationGasPriceParams();
-    const estimatedPreVerificationGas =
-      await this.bundlerClient.estimatePreVerificationGas(getDummyOp());
+    const gasPriceParams = await retryBackoff(
+      "get-user-operation-gas-price-params",
+      () => this.bundlerClient.getUserOperationGasPriceParams()
+    );
+    const estimatedPreVerificationGas = await retryBackoff(
+      "estimate-preverification-gas",
+      () => this.bundlerClient.estimatePreVerificationGas(getDummyOp())
+    );
 
     const maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
     const maxPriorityFeePerGas = hexToBigInt(

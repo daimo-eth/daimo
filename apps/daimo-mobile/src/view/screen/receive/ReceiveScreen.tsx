@@ -2,7 +2,7 @@ import { dollarsToAmount, formatDaimoLink } from "@daimo/common";
 import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
 import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -21,7 +21,11 @@ import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListReceive, useNav } from "../../shared/nav";
+import {
+  ParamListReceive,
+  useFocusOnScreenTransitionEnd,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -47,29 +51,14 @@ function RequestScreenInner({
   const [status, setStatus] = useState<"creating" | "sending" | "sent">(
     "creating"
   );
-  const isFocused = useIsFocused();
-  const nav = useNav();
   const trackRequest = useTrackRequest();
 
-  useEffect(() => {
-    let focusTimeout;
-    if (isFocused && autoFocus) {
-      const { setParams }: { setParams: any } = nav;
-      setParams({
-        autoFocus: false,
-      });
-      // wait for the screen transition animation to finish before open keyboard
-      focusTimeout = setTimeout(() => {
-        textInputRef.current?.focus();
-      }, 500);
-    }
-
-    if (!isFocused) {
-      clearTimeout(focusTimeout);
-    }
-  }, [isFocused, autoFocus]);
-
+  const isFocused = useIsFocused();
+  const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
+
+  // Work around react-navigation autofocus bug
+  useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
 
   const sendRequest = async () => {
     try {
@@ -121,7 +110,7 @@ function RequestScreenInner({
           dollars={dollars}
           onSetDollars={setDollars}
           showAmountAvailable={false}
-          autoFocus={autoFocus}
+          autoFocus={false}
           lagAutoFocus={false}
           innerRef={textInputRef}
           disabled={status !== "creating"}
