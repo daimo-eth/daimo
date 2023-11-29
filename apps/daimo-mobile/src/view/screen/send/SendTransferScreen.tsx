@@ -22,11 +22,16 @@ import { Recipient, addLastSendTime } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { InfoBubble } from "../../shared/InfoBubble";
-import { ScreenHeader, useResetToHome } from "../../shared/ScreenHeader";
+import { InfoBox } from "../../shared/InfoBox";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { ParamListSend, navResetToHome, useNav } from "../../shared/nav";
+import {
+  ParamListSend,
+  navResetToHome,
+  useDisableTabSwipe,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextH3, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -35,7 +40,8 @@ type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { link, recipient, dollars, requestId } = route.params || {};
+  const { link, recipient, dollars, requestId, lagAutoFocus } =
+    route.params || {};
 
   const nav = useNav();
   const goBack = useCallback(() => {
@@ -45,20 +51,21 @@ export default function SendScreen({ route }: Props) {
     else if (nav.canGoBack()) nav.goBack();
     else navResetToHome(nav);
   }, [nav, dollars, recipient]);
-  const goHome = useResetToHome();
+
+  useDisableTabSwipe(nav);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader
-          title="Send to"
-          onBack={goBack}
-          onExit={recipient && goHome}
-        />
+        <ScreenHeader title="Send to" onBack={goBack} />
         <Spacer h={8} />
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
-          <SendChooseAmount recipient={recipient} onCancel={goBack} />
+          <SendChooseAmount
+            recipient={recipient}
+            onCancel={goBack}
+            lagAutoFocus={lagAutoFocus}
+          />
         )}
         {recipient && dollars != null && (
           <SendConfirm {...{ recipient, dollars, requestId }} />
@@ -125,9 +132,11 @@ function SendLoadRecipientInner({
 function SendChooseAmount({
   recipient,
   onCancel,
+  lagAutoFocus,
 }: {
   recipient: Recipient;
   onCancel: () => void;
+  lagAutoFocus?: boolean;
 }) {
   // Select how much
   const [dollars, setDollars] = useState(0);
@@ -144,7 +153,7 @@ function SendChooseAmount({
   let infoBubble = <Spacer h={32} />;
   if (recipient.lastSendTime == null) {
     infoBubble = (
-      <InfoBubble
+      <InfoBox
         title={`First time paying ${getAccountName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />
@@ -163,6 +172,7 @@ function SendChooseAmount({
         onSetDollars={setDollars}
         showAmountAvailable
         autoFocus
+        lagAutoFocus={lagAutoFocus ?? false}
       />
       <Spacer h={32} />
       <View style={styles.buttonRow}>
@@ -198,12 +208,18 @@ function SendConfirm({
   let infoBubble = <Spacer h={32} />;
   if (recipient.lastSendTime == null) {
     infoBubble = (
-      <InfoBubble
+      <InfoBox
         title={`First time paying ${getAccountName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />
     );
   }
+
+  const nav = useNav();
+
+  const onFocus = () => {
+    nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
+  };
 
   return (
     <View>
@@ -218,6 +234,8 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
+        lagAutoFocus={false}
+        onFocus={onFocus}
       />
       <Spacer h={32} />
       <SendTransferButton {...{ recipient, dollars: nDollars, requestId }} />

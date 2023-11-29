@@ -18,7 +18,7 @@ import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
 import { CheckLabel } from "../../shared/Check";
-import { InfoBubble } from "../../shared/InfoBubble";
+import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
@@ -87,7 +87,7 @@ function OnrampsSection({ account }: { account: Account }) {
       ))}
       {started && <Spacer h={16} />}
       {started && (
-        <InfoBubble
+        <InfoBox
           icon="check"
           title="Deposit started"
           subtitle="Complete in browser, then funds should arrive in a few minutes."

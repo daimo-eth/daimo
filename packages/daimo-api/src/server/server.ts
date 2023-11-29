@@ -6,7 +6,7 @@ import { Crontab } from "./cron";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
-import { createContext } from "./trpc";
+import { createContext, onTrpcError } from "./trpc";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { Faucet } from "../contract/faucet";
@@ -90,6 +90,7 @@ async function main() {
     middleware: cors(),
     router,
     createContext,
+    onError: onTrpcError,
   });
 
   const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;

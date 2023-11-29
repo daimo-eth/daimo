@@ -24,10 +24,10 @@ export type ParamListHome = {
 };
 
 export type ParamListSend = {
-  SendNav: { autoFocus: boolean; sendNote?: boolean };
+  SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
-  SendLink: undefined;
+  SendLink: { lagAutoFocus: boolean };
   SendSuccess: SendNavProp;
 };
 
@@ -49,6 +49,7 @@ interface SendNavProp {
   recipient?: Recipient;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
+  lagAutoFocus?: boolean;
 }
 
 export type ParamListTab = {
@@ -67,6 +68,8 @@ export function useNav<
 
 export type MainNav = ReturnType<typeof useNav>;
 
+let deepLinkInitialised = false;
+
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
   const nav = useNav();
@@ -77,14 +80,14 @@ export function useInitNavLinks() {
   const openedInitialURL = useRef(false);
 
   useEffect(() => {
-    if (accountMissing) return;
+    if (accountMissing || deepLinkInitialised) return;
     console.log(`[NAV] listening for deep links, account ${account.name}`);
 
+    deepLinkInitialised = true;
     getInitialURL().then((url) => {
       if (url == null) return;
       if (openedInitialURL.current) return;
-      // Workdaround: avoid "The 'navigation' object hasn't been initialized"
-      setTimeout(() => handleDeepLink(nav, url), 100);
+      handleDeepLink(nav, url);
       openedInitialURL.current = true;
     });
 
@@ -106,6 +109,17 @@ export function handleDeepLink(nav: MainNav, url: string) {
 async function goTo(nav: MainNav, link: DaimoLink) {
   const { type } = link;
   switch (type) {
+    case "settings": {
+      const screen = (() => {
+        if (link.screen === "add-passkey") return "AddPasskey";
+        else if (link.screen === "add-device") return "AddDevice";
+        else return "Settings";
+      })();
+
+      // HACK: make the back button from Add[Passkey,...] go directly to Home.
+      nav.reset({ routes: [{ name: "SettingsTab", params: { screen } }] });
+      break;
+    }
     case "account":
     case "request": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
@@ -122,4 +136,38 @@ async function goTo(nav: MainNav, link: DaimoLink) {
 
 export function navResetToHome(nav: MainNav) {
   nav.reset({ routes: [{ name: "HomeTab" }] });
+}
+
+export function useDisableTabSwipe(nav: MainNav) {
+  useEffect(() => {
+    const p = nav.getParent();
+    if (p == null) return;
+
+    p.setOptions({ swipeEnabled: false });
+    return () => p.setOptions({ swipeEnabled: true });
+  }, [nav]);
+}
+
+/* We can't use `autoLagFocus` because tabs persist state, so we need to use
+ * a seperate hook that clears tab state without unmounting the component.
+ * Assumes current nav has a params for `autoFocus`. */
+export function useFocusOnScreenTransitionEnd(
+  ref: React.RefObject<any>,
+  nav: MainNav,
+  isFocused: boolean,
+  autoFocus: boolean
+) {
+  useEffect(() => {
+    const unsubscribe = nav.addListener("transitionEnd", () => {
+      if (isFocused && autoFocus) {
+        ref.current?.focus();
+
+        // Now, wipe the autoFocus flag so that switching tab and coming back
+        // doesn't keep focusing the input.
+        nav.setParams({ autoFocus: false } as any);
+      }
+    });
+
+    return unsubscribe;
+  }, [isFocused, autoFocus]);
 }

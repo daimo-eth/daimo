@@ -8,7 +8,7 @@ import {
   assert,
   hasAccountName,
 } from "@daimo/common";
-import { Address } from "viem";
+import { Address, hexToBytes } from "viem";
 
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -31,6 +31,16 @@ export interface AccountHistoryResult {
   transferLogs: TransferOpEvent[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
+
+  suggestedActions: SuggestedAction[];
+}
+
+export interface SuggestedAction {
+  id: string;
+  icon?: string;
+  title: string;
+  subtitle: string;
+  url: string;
 }
 
 /**
@@ -101,7 +111,7 @@ export async function getAccountHistory(
   // Prefetch info required to deposit to your Daimo account.
   const recommendedExchanges = fetchRecommendedExchanges(eAcc);
 
-  return {
+  const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
 
@@ -112,11 +122,36 @@ export async function getAccountHistory(
 
     chainGasConstants,
     recommendedExchanges,
+    suggestedActions: [],
 
     transferLogs,
     namedAccounts,
     accountKeys,
   };
+
+  // Suggest an action to the user, like backing up their account
+  const suggestedActions = getSuggestedActions(eAcc, ret);
+
+  return { ...ret, suggestedActions };
+}
+
+function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
+  const ret: SuggestedAction[] = [];
+
+  if (hist.accountKeys.length === 1) {
+    if (hist.lastBalance !== "0" || hexToBytes(eAcc.addr)[0] < 0x80) {
+      // A/B test: half of accounts asked to "Secure your account" immediately.
+      // Other half are asked only once they have a balance.
+      ret.push({
+        id: "passkey-backup-new-account",
+        title: "Secure your account",
+        subtitle: "Keep your account safe with a passkey backup",
+        url: `daimo://settings/add-passkey`,
+      });
+    }
+  }
+
+  return ret;
 }
 
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {

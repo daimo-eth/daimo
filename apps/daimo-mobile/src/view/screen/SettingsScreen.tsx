@@ -1,5 +1,6 @@
 import {
   KeyData,
+  assertNotNull,
   formatDaimoLink,
   getSlotLabel,
   guessTimestampFromNum,
@@ -9,6 +10,7 @@ import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -16,6 +18,7 @@ import {
   Platform,
   ScrollView,
   Share,
+  ShareContent,
   StyleSheet,
   TouchableHighlight,
   View,
@@ -305,19 +308,28 @@ function DetailsSection({ account }: { account: Account }) {
     envKV["Key Security"] = getKeySecDescription(sec);
   }
 
-  const sendDebugLog = () => {
+  const sendDebugLog = async () => {
     const env = JSON.stringify({ ...envKV, amountSeparator }, null, 2);
     const accountJSON = serializeAccount(account);
-    const debugLog = getDebugLog();
-    Share.share(
-      {
+    const debugLog = getDebugLog([env, accountJSON]);
+
+    let content: ShareContent;
+    if (Platform.OS === "ios") {
+      const fileName = `debug-${account.name}.log`;
+      const debugLogUri = assertNotNull(FileSystem.cacheDirectory) + fileName;
+      await FileSystem.writeAsStringAsync(debugLogUri, debugLog);
+      content = {
         title: "Send Debug Log",
-        message: [`# Daimo Debug Log`, env, accountJSON, debugLog].join("\n\n"),
-      },
-      {
-        subject: "Daimo Debug Log",
-      }
-    );
+        url: debugLogUri,
+      };
+    } else {
+      content = {
+        title: "Send Debug Log",
+        message: debugLog,
+      };
+    }
+
+    Share.share(content, { subject: "Daimo Debug Log" });
   };
 
   return (

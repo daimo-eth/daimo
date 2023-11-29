@@ -29,7 +29,7 @@ import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListReceive, useNav } from "../../shared/nav";
+import { ParamListReceive, useDisableTabSwipe, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import {
   TextBody,
@@ -48,6 +48,9 @@ export default function NoteScreen(props: Props) {
 }
 
 function NoteScreenInner({ route, account }: Props & { account: Account }) {
+  const nav = useNav();
+  useDisableTabSwipe(nav);
+
   const { link } = route.params;
   const { ephemeralPrivateKey, ephemeralOwner } = link as DaimoLinkNote;
   console.log(`[NOTE] rendering note ${ephemeralOwner}`);

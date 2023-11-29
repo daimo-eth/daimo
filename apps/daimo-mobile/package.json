@@ -80,7 +80,7 @@
     "react-native-qrcode-svg": "^6.2.0",
     "react-native-reanimated": "~3.3.0",
     "react-native-safe-area-context": "4.6.3",
-    "react-native-screens": "~3.22.0",
+    "react-native-screens": "^3.27.0",
     "react-native-svg": "13.9.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-url-polyfill": "^2.0.0",
@@ -89,7 +89,8 @@
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
     "viem": "^1.16.0",
-    "expo-haptics": "~12.4.0"
+    "expo-haptics": "~12.4.0",
+    "expo-file-system": "~15.4.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

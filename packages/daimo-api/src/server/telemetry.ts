@@ -1,4 +1,4 @@
-import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { trace } from "@opentelemetry/api";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
 import Libhoney from "libhoney";
@@ -24,9 +24,7 @@ export type TelemKey =
 export const zUserAction = z.object({
   name: z.string(),
   accountName: z.string(),
-  startMs: z.number(),
-  durationMs: z.number(),
-  error: z.string().optional(),
+  keys: z.record(z.string()),
 });
 
 export type UserAction = z.infer<typeof zUserAction>;
@@ -74,38 +72,29 @@ export class Telemetry {
     return span;
   }
 
-  recordUserAction(
-    ctx: TrpcRequestContext,
-    actionName: string,
-    accountName: string,
-    durationMs?: number,
-    error?: string
-  ) {
-    console.log(`[TELEM] recording ${actionName} ${accountName}`);
+  recordUserAction(ctx: TrpcRequestContext, action: UserAction) {
+    console.log(`[TELEM] recording ${action.name} ${action.accountName}`);
 
     const { ipAddr, userAgent } = ctx;
     const ipCountry = getIpCountry(ipAddr);
 
     this.honeyEvents?.sendNow({
-      duration_ms: durationMs,
       "service.name": "daimo-api",
       "event.type": "user-action",
-      "event.name": actionName,
-      "event.account_name": accountName,
-      "event.error": error,
-      status_code: error == null ? SpanStatusCode.OK : SpanStatusCode.ERROR,
+      "event.account_name": action.accountName,
+      "event.name": action.name,
+      ...action.keys,
+
       "rpc.ip_addr": ipAddr,
       "rpc.ip_country": ipCountry,
       "rpc.user_agent": userAgent,
     });
 
-    if (actionName === "client-onramp-cbpay") {
-      const m = error ? `failed: ${error}` : "succeeded";
-      this.recordClippy(
-        `${accountName} from ${ipCountry} ${actionName} ${m}`,
-        error ? "error" : "celebrate"
-      );
-    }
+    const keysJson = JSON.stringify(action.keys);
+    this.recordClippy(
+      `${action.accountName} from ${ipCountry}: ${action.name} ${keysJson}`,
+      "info"
+    );
   }
 
   /** Clippy is our Slack bot for API monitoring. */

@@ -1,7 +1,7 @@
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.3.5";
-const BUILD_NUM = 80;
+const VERSION = "1.4.0";
+const BUILD_NUM = 84;
 
 export default {
   owner: "daimo",
@@ -72,6 +72,7 @@ export default {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff",
     },
+    softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
     versionCode: BUILD_NUM,
   },

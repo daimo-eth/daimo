@@ -156,7 +156,11 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { name, pubKeyHex, invCode } = opts.input;
-        telemetry.recordUserAction(opts.ctx, "deployWallet", name);
+        telemetry.recordUserAction(opts.ctx, {
+          name: "deployWallet",
+          accountName: name,
+          keys: {},
+        });
         const address = await deployWallet(
           name,
           pubKeyHex,
@@ -197,13 +201,7 @@ export function createRouter(
       .input(z.object({ action: zUserAction }))
       .mutation(async (opts) => {
         const { action } = opts.input;
-        telemetry.recordUserAction(
-          opts.ctx,
-          `client-${action.name}`,
-          action.accountName,
-          action.durationMs,
-          action.error
-        );
+        telemetry.recordUserAction(opts.ctx, action);
       }),
 
     verifyInviteCode: publicProcedure

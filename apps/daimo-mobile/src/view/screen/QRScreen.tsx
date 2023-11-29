@@ -23,7 +23,12 @@ import {
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
-import { ParamListHome, QRScreenOptions } from "../shared/nav";
+import {
+  ParamListHome,
+  QRScreenOptions,
+  useDisableTabSwipe,
+  useNav,
+} from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
@@ -37,6 +42,9 @@ export function QRScreen(props: Props) {
 
   const goBack = useExitBack();
   const goHome = useExitToHome();
+
+  const nav = useNav();
+  useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>

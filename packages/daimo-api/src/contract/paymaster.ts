@@ -22,6 +22,7 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
   /// L2 fee
@@ -101,10 +102,14 @@ export class Paymaster {
     // this.priceMarkup = BigInt(priceMarkup);
     // this.previousPrice = previousPrice;
 
-    const gasPriceParams =
-      await this.bundlerClient.getUserOperationGasPriceParams();
-    const estimatedPreVerificationGas =
-      await this.bundlerClient.estimatePreVerificationGas(getDummyOp());
+    const gasPriceParams = await retryBackoff(
+      "get-user-operation-gas-price-params",
+      () => this.bundlerClient.getUserOperationGasPriceParams()
+    );
+    const estimatedPreVerificationGas = await retryBackoff(
+      "estimate-preverification-gas",
+      () => this.bundlerClient.estimatePreVerificationGas(getDummyOp())
+    );
 
     const maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
     const maxPriorityFeePerGas = hexToBigInt(
@@ -170,10 +175,16 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   console.log(`[PAYMASTER] sign ${ticketHex} with ${signer.address}`);
 
   const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
-  const sigHex = concatHex([toHex(sig.v, { size: 1 }), sig.r, sig.s]);
-  assert(hexToBytes(sigHex).length === 65, "paymaster: invalid sig length");
+  const sigHex = concatHex([
+    toHex(sig.v, { size: 1 }),
+    toHex(hexToBigInt(sig.r), { size: 32 }),
+    toHex(hexToBigInt(sig.s), { size: 32 }),
+  ]);
+  assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
-  return concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  const ret = concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");
+  return ret;
 }
 
 function getDummyOp(): UserOpHex {

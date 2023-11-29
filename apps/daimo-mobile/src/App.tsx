@@ -7,7 +7,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
-import { useInitNavLinks } from "./view/shared/nav";
 import { color } from "./view/shared/style";
 
 export default function App() {
@@ -35,9 +34,6 @@ export default function App() {
 }
 
 function AppBody() {
-  // Handle incoming applinks
-  useInitNavLinks();
-
   return (
     <SafeAreaProvider>
       <TabNav />

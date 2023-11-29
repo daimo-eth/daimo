@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Layout,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -29,8 +30,9 @@ import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
+import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { useNav } from "../shared/nav";
+import { useInitNavLinks, useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
@@ -48,7 +50,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isFocused = useIsFocused();
   const tabBarHeight = useTabBarHeight();
   const ins = useSafeAreaInsets();
-  const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const translationY = useSharedValue(0);
   const screenHeight =
@@ -56,6 +57,11 @@ function HomeScreenInner({ account }: { account: Account }) {
     tabBarHeight -
     (Platform.OS === "android" ? 16 : 0);
 
+  console.log(
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
+  );
+
+  // Hide history when tapping the home tab.
   useEffect(() => {
     if (nav.getParent()) {
       // @ts-ignore
@@ -65,14 +71,9 @@ function HomeScreenInner({ account }: { account: Account }) {
           bottomSheetRef.current.collapse();
         }
       });
-
       return unsub;
     }
   }, [nav, isFocused]);
-
-  console.log(
-    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
-  );
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(
@@ -122,7 +123,9 @@ function HomeScreenInner({ account }: { account: Account }) {
   };
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
-    translationY.value = event.contentOffset.y;
+    if (event.contentOffset.y < 0) {
+      translationY.value = event.contentOffset.y;
+    }
   });
 
   const bottomSheetScrollStyle = useAnimatedStyle(() => {
@@ -134,6 +137,9 @@ function HomeScreenInner({ account }: { account: Account }) {
       ],
     };
   });
+
+  // Handle incoming applinks
+  useInitNavLinks();
 
   return (
     <View>
@@ -148,7 +154,6 @@ function HomeScreenInner({ account }: { account: Account }) {
         scrollToOverflowEnabled={false}
         scrollsToTop={false}
         scrollEnabled={searchPrefix == null && !isModalOpen}
-        contentInset={{ top: ins.top }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -159,16 +164,30 @@ function HomeScreenInner({ account }: { account: Account }) {
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
         scrollEventThrottle={8}
+        keyboardShouldPersistTaps="handled"
       >
-        <Spacer h={top} />
+        <Spacer h={Math.max(16, ins.top)} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults
             prefix={searchPrefix}
             style={{ marginHorizontal: 0 }}
+            lagAutoFocus
           />
         )}
-        {searchPrefix == null && <AmountAndButtons account={account} />}
+        {searchPrefix == null && account != null && (
+          <>
+            {account.suggestedActions.length > 0 ? (
+              <SuggestedActionBox action={account.suggestedActions[0]} />
+            ) : (
+              <Spacer h={64} />
+            )}
+            <Spacer h={12} />
+            <Animated.View layout={Layout}>
+              <AmountAndButtons account={account} />
+            </Animated.View>
+          </>
+        )}
       </Animated.ScrollView>
       {searchPrefix == null && (
         <Animated.View
@@ -219,7 +238,6 @@ function AmountAndButtons({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback>
       <View style={styles.amountAndButtons}>
-        <Spacer h={64 + 12} />
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />
         <Spacer h={16} />

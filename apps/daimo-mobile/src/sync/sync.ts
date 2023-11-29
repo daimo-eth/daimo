@@ -136,8 +136,19 @@ async function fetchSync(
     numAccountKeys: result.accountKeys.length,
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges,
+    suggestedActions: result.suggestedActions,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
+
+  // Validation
+  assert(result.address === account.address);
+  assert(result.sinceBlockNum === sinceBlockNum);
+  assert(result.lastBlock >= result.sinceBlockNum);
+  assert(result.lastBlockTimestamp > 0);
+  assert(
+    result.chainGasConstants.paymasterAddress.length % 2 === 0,
+    `invalid paymasterAndData ${result.chainGasConstants.paymasterAddress}`
+  );
 
   return result;
 }
@@ -217,6 +228,9 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges || [],
+    suggestedActions: result.suggestedActions?.filter(
+      (a) => !account.dismissedActionIDs.includes(a.id)
+    ),
 
     recentTransfers,
     namedAccounts,

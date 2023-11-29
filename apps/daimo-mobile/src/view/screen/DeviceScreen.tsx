@@ -22,10 +22,10 @@ import { deleteEnclaveKey } from "../../logic/enclave";
 import { useAccount } from "../../model/account";
 import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
-import { InfoBubble } from "../shared/InfoBubble";
+import { InfoBox } from "../shared/InfoBox";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { ParamListSettings, useNav } from "../shared/nav";
+import { ParamListSettings, useDisableTabSwipe, useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import {
   TextBody,
@@ -40,6 +40,7 @@ type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 export function DeviceScreen({ route, navigation }: Props) {
   const [account, setAccount] = useAccount();
   const nav = useNav();
+  useDisableTabSwipe(nav);
 
   const { pubKey: devicePubkey } = route.params;
   const device = account?.accountKeys?.find((k) => k.pubKey === devicePubkey);
@@ -173,6 +174,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   );
 
   const goBack = () => nav.goBack();
+
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title={deviceName} onBack={goBack} />
@@ -186,7 +188,7 @@ export function DeviceScreen({ route, navigation }: Props) {
 
       <Spacer h={32} />
       {isCurrentDevice && (
-        <InfoBubble
+        <InfoBox
           title="You're using this device now"
           subtitle="Deleting it will remove your access to this account"
         />
