@@ -33,7 +33,8 @@ function createLogFunc(type: string, oldLog: (...args: any[]) => void) {
   };
 }
 
-export function getDebugLog() {
+export function getDebugLog(headerLines: string[]) {
   const now = new Date().toISOString();
-  return logs.join("\n") + `\n${now} - debug log captured`;
+  const log = logs.join("\n") + `\n${now} - debug log captured`;
+  return [`# Daimo Debug Log`, ...headerLines, log].join("\n\n");
 }

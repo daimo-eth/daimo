@@ -88,7 +88,8 @@
     "text-encoding-polyfill": "^0.6.7",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.1.6",
-    "viem": "^1.16.0"
+    "viem": "^1.16.0",
+    "expo-file-system": "~15.4.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

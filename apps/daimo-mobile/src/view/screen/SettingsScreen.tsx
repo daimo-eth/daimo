@@ -1,5 +1,6 @@
 import {
   KeyData,
+  assertNotNull,
   formatDaimoLink,
   getSlotLabel,
   guessTimestampFromNum,
@@ -9,6 +10,7 @@ import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system";
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -305,14 +307,19 @@ function DetailsSection({ account }: { account: Account }) {
     envKV["Key Security"] = getKeySecDescription(sec);
   }
 
-  const sendDebugLog = () => {
+  const sendDebugLog = async () => {
     const env = JSON.stringify({ ...envKV, amountSeparator }, null, 2);
     const accountJSON = serializeAccount(account);
-    const debugLog = getDebugLog();
+    const debugLog = getDebugLog([env, accountJSON]);
+
+    const fileName = `debug-${account.name}.log`;
+    const debugLogUri = assertNotNull(FileSystem.cacheDirectory) + fileName;
+    await FileSystem.writeAsStringAsync(debugLogUri, debugLog);
+
     Share.share(
       {
         title: "Send Debug Log",
-        message: [`# Daimo Debug Log`, env, accountJSON, debugLog].join("\n\n"),
+        url: debugLogUri,
       },
       {
         subject: "Daimo Debug Log",
