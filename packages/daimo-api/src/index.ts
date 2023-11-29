@@ -5,4 +5,6 @@ export type {
   SuggestedAction,
 } from "./api/getAccountHistory";
 
+export type { UserAction } from "./server/telemetry";
+
 export type AppRouter = ReturnType<typeof createRouter>;

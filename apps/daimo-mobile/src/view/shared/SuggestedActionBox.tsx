@@ -1,4 +1,5 @@
 import { SuggestedAction } from "@daimo/api";
+import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import { OctName } from "./InputBig";
 import { handleDeepLink, useNav } from "./nav";
 import { color } from "./style";
 import { TextBody } from "./text";
+import { env } from "../../logic/env";
 import { useAccount } from "../../model/account";
 
 const ICON_X_SIZE = 24;
@@ -24,41 +26,64 @@ const ICON_X_SIZE = 24;
 export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const nav = useNav();
   const [account, setAccount] = useAccount();
+
+  // Action to display
   const { icon, title, subtitle } = action;
+
+  // UI state
   const [isVisible, setIsVisible] = useState(true);
   const x = useSharedValue(0);
   const y = useSharedValue(-100);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(1);
   const xPosition = useSharedValue({ x: 0, y: 0 });
-
   const wasCancelled = useSharedValue(false);
+
+  // Track when we do the action or dismiss it.
+  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
 
   // Press = do the suggested action.
   const onPress = () => {
-    setIsVisible(false);
+    if (account == null) return;
+    console.log(`[SUGGESTED] executing ${action.id}: ${action.title}`);
 
     if (action.url.startsWith("daimo")) {
       handleDeepLink(nav, action.url); // daimo:// direct deeplinks
     } else {
       Linking.openURL(action.url); // https://, mailto://, ...
     }
+
+    rpcFunc.logAction.mutate({
+      action: {
+        accountName: account.name,
+        name: "suggested-action-accept",
+        keys: { "suggestion.id": action.id, "suggestion.title": action.title },
+      },
+    });
   };
 
   // Dismiss by tapping (x) or swiping
   const onDismiss = () => {
+    if (account == null) return;
     console.log(`[SUGGESTED] dismissing ${action.id}: ${action.title}`);
+
     setIsVisible(false);
-    if (account) {
-      setAccount({
-        ...account,
-        dismissedActionIDs: [...account.dismissedActionIDs, action.id],
-        suggestedActions:
-          account?.suggestedActions?.filter(
-            (a: SuggestedAction) => a.id === action.id
-          ) || [],
-      });
-    }
+    setAccount({
+      ...account,
+      dismissedActionIDs: [...account.dismissedActionIDs, action.id],
+      suggestedActions:
+        account?.suggestedActions?.filter(
+          (a: SuggestedAction) => a.id === action.id
+        ) || [],
+    });
+
+    rpcFunc.logAction.mutate({
+      action: {
+        accountName: account.name,
+        name: "suggested-action-dismiss",
+        keys: { "suggestion.id": action.id, "suggestion.title": action.title },
+      },
+    });
   };
 
   const onPressX = () => {
