@@ -159,10 +159,7 @@ export function useFocusOnScreenTransitionEnd(
 
         // Now, wipe the autoFocus flag so that switching tab and coming back
         // doesn't keep focusing the input.
-        const { setParams }: { setParams: any } = nav;
-        setParams({
-          autoFocus: false,
-        });
+        nav.setParams({ autoFocus: false } as any);
       }
     });
 
