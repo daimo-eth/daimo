@@ -50,7 +50,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isFocused = useIsFocused();
   const tabBarHeight = useTabBarHeight();
   const ins = useSafeAreaInsets();
-  const top = Math.max(ins.top, 16);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const translationY = useSharedValue(0);
   const screenHeight =
@@ -155,7 +154,6 @@ function HomeScreenInner({ account }: { account: Account }) {
         scrollToOverflowEnabled={false}
         scrollsToTop={false}
         scrollEnabled={searchPrefix == null && !isModalOpen}
-        contentInset={{ top: ins.top }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -168,7 +166,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         scrollEventThrottle={8}
         keyboardShouldPersistTaps="handled"
       >
-        <Spacer h={top} />
+        <Spacer h={Math.max(16, ins.top)} />
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults
