@@ -67,6 +67,8 @@ export function useNav<
 
 export type MainNav = ReturnType<typeof useNav>;
 
+let deepLinkInitialised = false;
+
 /** Handle incoming app deep links. */
 export function useInitNavLinks() {
   const nav = useNav();
@@ -77,9 +79,10 @@ export function useInitNavLinks() {
   const openedInitialURL = useRef(false);
 
   useEffect(() => {
-    if (accountMissing) return;
+    if (accountMissing || deepLinkInitialised) return;
     console.log(`[NAV] listening for deep links, account ${account.name}`);
 
+    deepLinkInitialised = true;
     getInitialURL().then((url) => {
       if (url == null) return;
       if (openedInitialURL.current) return;
