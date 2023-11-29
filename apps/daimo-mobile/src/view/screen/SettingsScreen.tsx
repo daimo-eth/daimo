@@ -1,42 +1,29 @@
 import {
   KeyData,
-  assertNotNull,
   formatDaimoLink,
   getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import * as ExpoEnclave from "@daimo/expo-enclave";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import * as FileSystem from "expo-file-system";
 import * as Notifications from "expo-notifications";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   Linking,
-  Platform,
   ScrollView,
-  Share,
-  ShareContent,
   StyleSheet,
   TouchableHighlight,
   View,
 } from "react-native";
 
-import { getDebugLog } from "../../debugLog";
-import { getHardwareSec } from "../../logic/enclave";
+import { useSendDebugLog } from "../../debugLog";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
-import {
-  Account,
-  serializeAccount,
-  toEAccount,
-  useAccount,
-} from "../../model/account";
+import { Account, toEAccount, useAccount } from "../../model/account";
 import { AccountBubble } from "../shared/AccountBubble";
-import { amountSeparator } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { PendingDot } from "../shared/PendingDot";
@@ -280,12 +267,6 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 }
 
 function DetailsSection({ account }: { account: Account }) {
-  const [sec, setSec] = useState<Awaited<ReturnType<typeof getHardwareSec>>>();
-
-  useEffect(() => {
-    getHardwareSec().then(setSec);
-  }, []);
-
   const enableNotifications = async () => {
     await Notifications.requestPermissionsAsync();
     try {
@@ -296,41 +277,7 @@ function DetailsSection({ account }: { account: Account }) {
     }
   };
 
-  const daimoChain = daimoChainFromId(account.homeChainId);
-  const envObj = env(daimoChain);
-  const envKV: Record<string, string> = {
-    Platform: `${Platform.OS} ${Platform.Version} ${envObj.deviceType}`,
-    Version: `${envObj.nativeApplicationVersion} #${envObj.nativeBuildVersion}`,
-    Commit: `${envObj.gitHash} ${envObj.buildProfile}`,
-    Notifications: account.pushToken ? "enabled" : "disabled",
-  };
-  if (sec) {
-    envKV["Key Security"] = getKeySecDescription(sec);
-  }
-
-  const sendDebugLog = async () => {
-    const env = JSON.stringify({ ...envKV, amountSeparator }, null, 2);
-    const accountJSON = serializeAccount(account);
-    const debugLog = getDebugLog([env, accountJSON]);
-
-    let content: ShareContent;
-    if (Platform.OS === "ios") {
-      const fileName = `debug-${account.name}.log`;
-      const debugLogUri = assertNotNull(FileSystem.cacheDirectory) + fileName;
-      await FileSystem.writeAsStringAsync(debugLogUri, debugLog);
-      content = {
-        title: "Send Debug Log",
-        url: debugLogUri,
-      };
-    } else {
-      content = {
-        title: "Send Debug Log",
-        message: debugLog,
-      };
-    }
-
-    Share.share(content, { subject: "Daimo Debug Log" });
-  };
+  const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
 
   return (
     <View style={styles.sectionWrap}>
@@ -339,7 +286,7 @@ function DetailsSection({ account }: { account: Account }) {
       </View>
       <Spacer h={4} />
       <View style={styles.kvList}>
-        {Object.entries(envKV).map(([k, v]) => (
+        {Object.entries(debugEnvSummary).map(([k, v]) => (
           <KV key={k} label={k} value={v} />
         ))}
       </View>
@@ -356,21 +303,6 @@ function DetailsSection({ account }: { account: Account }) {
       <Spacer h={32} />
     </View>
   );
-}
-
-function getKeySecDescription(
-  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel
-) {
-  switch (hardwareSecurityLevel) {
-    case "SOFTWARE":
-      return "software key";
-    case "TRUSTED_ENVIRONMENT":
-      return "Android TEE";
-    case "HARDWARE_ENCLAVE":
-      return "secure enclave";
-    default:
-      return `${hardwareSecurityLevel}`;
-  }
 }
 
 function KV({ label, value }: { label: string; value: string }) {
