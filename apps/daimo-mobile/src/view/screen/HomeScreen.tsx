@@ -32,7 +32,7 @@ import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { useNav } from "../shared/nav";
+import { useInitNavLinks, useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
@@ -138,6 +138,9 @@ function HomeScreenInner({ account }: { account: Account }) {
       ],
     };
   });
+
+  // Handle incoming applinks
+  useInitNavLinks();
 
   return (
     <View>
