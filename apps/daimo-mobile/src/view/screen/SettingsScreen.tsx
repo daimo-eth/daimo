@@ -18,6 +18,7 @@ import {
   Platform,
   ScrollView,
   Share,
+  ShareContent,
   StyleSheet,
   TouchableHighlight,
   View,
@@ -312,19 +313,23 @@ function DetailsSection({ account }: { account: Account }) {
     const accountJSON = serializeAccount(account);
     const debugLog = getDebugLog([env, accountJSON]);
 
-    const fileName = `debug-${account.name}.log`;
-    const debugLogUri = assertNotNull(FileSystem.cacheDirectory) + fileName;
-    await FileSystem.writeAsStringAsync(debugLogUri, debugLog);
-
-    Share.share(
-      {
+    let content: ShareContent;
+    if (Platform.OS === "ios") {
+      const fileName = `debug-${account.name}.log`;
+      const debugLogUri = assertNotNull(FileSystem.cacheDirectory) + fileName;
+      await FileSystem.writeAsStringAsync(debugLogUri, debugLog);
+      content = {
         title: "Send Debug Log",
         url: debugLogUri,
-      },
-      {
-        subject: "Daimo Debug Log",
-      }
-    );
+      };
+    } else {
+      content = {
+        title: "Send Debug Log",
+        message: debugLog,
+      };
+    }
+
+    Share.share(content, { subject: "Daimo Debug Log" });
   };
 
   return (
