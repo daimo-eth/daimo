@@ -19,6 +19,7 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { getViemClientFromEnv } from "../network/viemClient";
+import { Watcher } from "../shovel/watcher";
 
 async function main() {
   console.log(`[API] initializing telemetry...`);
@@ -36,13 +37,17 @@ async function main() {
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const keyReg = new KeyRegistry(vc);
   const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
-  const opIndexer = new OpIndexer(vc);
+  const opIndexer = new OpIndexer();
   const paymaster = new Paymaster(vc, bundlerClient, db);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
-  const noteIndexer = new NoteIndexer(vc, nameReg);
+  const noteIndexer = new NoteIndexer(nameReg);
   const faucet = new Faucet(vc, coinIndexer, db);
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
+
+  const shovelWatcher = new Watcher();
+  shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
+  setInterval(() => shovelWatcher.run(), 1000);
 
   const notifier = new PushNotifier(
     coinIndexer,
@@ -56,19 +61,13 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    await Promise.all([
-      keyReg.init(),
-      nameReg.init(),
-      opIndexer.init(),
-      paymaster.init(),
-    ]);
-    await Promise.all([coinIndexer.init(), noteIndexer.init()]);
+    await Promise.all([paymaster.init()]);
 
     console.log(`[API] initializing push notifications...`);
     await Promise.all([notifier.init(), faucet.init(), crontab.init()]);
 
     console.log(`[API] polling logs...`);
-    setInterval(() => vc.processLogsToLatestBlock(), 1000);
+    //setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
 
   console.log(`[API] serving...`);

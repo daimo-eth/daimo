@@ -1,153 +1,135 @@
 import {
   DaimoNoteStatus,
+  EAccount,
   amountToDollars,
-  assert,
   getEAccountStr,
 } from "@daimo/common";
-import { daimoEphemeralNotesConfig } from "@daimo/contract";
-import { Address, Log, decodeEventLog, getAbiItem } from "viem";
+import { Pool } from "pg";
+import { Address } from "viem";
 
-import { NameRegistry } from "./nameRegistry";
-import { ViemClient } from "../network/viemClient";
+//type nameResolver = (address: Address) => Promise<EAccount>;
 
-const notesABI = daimoEphemeralNotesConfig.abi;
-const createEvent = getAbiItem({ abi: notesABI, name: "NoteCreated" });
-const redeemEvent = getAbiItem({ abi: notesABI, name: "NoteRedeemed" });
-
-// TODO: getEventSelector returns incorrect results.
-// See https://goerli.basescan.org/tx/0xf1347cc24f8eafee1ff7ea88d964920ffccfe7667e71ac55afd0358840ed84b0#eventlog
-//
-// Signature: NoteCreated(tuple note)
-// Viem getEventSelector calculated: 0xa46e98af3f55868378b594db228856857605fcd89d02713a85bc7563e8083586
-// Actual: 0xedafcff52f9510e3fee14034ebd5cb6c302432e2b233738af47ce5596a5bbeed
-const createEventSelector = `0xedafcff52f9510e3fee14034ebd5cb6c302432e2b233738af47ce5596a5bbeed`;
-const redeemEventSelector = `0xb45f3215e68b9bc29811df32d4910e77331ed2a01d8556bea2012566efa32920`;
-
-export type NoteCreateLog = Log<
-  bigint,
-  number,
-  false,
-  typeof createEvent,
-  true
->;
-export type NoteRedeemLog = Log<
-  bigint,
-  number,
-  false,
-  typeof redeemEvent,
-  true
->;
-
-export type NoteOpLog =
-  | {
-      type: "create";
-      noteStatus: DaimoNoteStatus;
-    }
-  | {
-      type: "claim";
-      noteStatus: DaimoNoteStatus;
-    };
+interface accountGetter {
+  getEAccount(address: Address): Promise<EAccount>;
+}
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
   private notes: Map<Address, DaimoNoteStatus> = new Map();
 
-  private listeners: ((logs: NoteOpLog[]) => void)[] = [];
+  private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
 
   private isInitialized = false;
 
-  constructor(private client: ViemClient, private nameReg: NameRegistry) {}
+  constructor(private ag: accountGetter) {}
 
-  async init() {
-    await this.client.pipeLogs(
-      {
-        address: daimoEphemeralNotesConfig.address,
-        event: undefined,
-      },
-      this.parseLogs
-    );
-    this.isInitialized = true;
-  }
-
-  addListener(listener: (log: NoteOpLog[]) => void) {
-    assert(this.isInitialized, "NoteIndexer not initialized");
+  addListener(listener: (log: DaimoNoteStatus[]) => void) {
     this.listeners.push(listener);
   }
 
-  private parseLogs = async (logs: Log[]) => {
-    if (logs.length === 0) return;
-    console.log(`[NOTE] parsing ${logs.length} logs`);
+  async load(pg: Pool, from: bigint, to: bigint) {
+    const logs: DaimoNoteStatus[] = [];
+    logs.push(...(await this.loadCreated(pg, from, to)));
+    logs.push(...(await this.loadRedeemed(pg, from, to)));
 
-    const opLogs: NoteOpLog[] = [];
-
-    for (const log of logs) {
-      const { topics, data } = log;
-      const selector = topics[0];
-      const abi = daimoEphemeralNotesConfig.abi;
-      const args = { abi, topics, data, strict: true } as const;
-
-      const logInfo = () => `[${log.transactionHash} ${log.logIndex}]`;
-
-      if (selector === createEventSelector) {
-        const nc = decodeEventLog({ ...args, eventName: "NoteCreated" });
-        const { ephemeralOwner, from, amount } = nc.args.note;
-        console.log(`[NOTE] NoteCreated ${ephemeralOwner}`);
-        if (this.notes.get(ephemeralOwner) != null) {
-          throw new Error(`dupe NoteCreated: ${ephemeralOwner} ${logInfo()}`);
-        }
-        const sender = await this.nameReg.getEAccount(from);
-        const dollars = amountToDollars(amount);
-        const newNote: DaimoNoteStatus = {
-          status: "confirmed",
-          dollars,
-          link: {
-            type: "note",
-            previewSender: getEAccountStr(sender),
-            previewDollars: dollars,
-            ephemeralOwner,
-          },
-          sender,
-        };
-        this.notes.set(ephemeralOwner, newNote);
-
-        opLogs.push({ type: "create", noteStatus: newNote });
-      } else if (selector === redeemEventSelector) {
-        const nr = decodeEventLog({ ...args, eventName: "NoteRedeemed" });
-        const { ephemeralOwner, from, amount } = nr.args.note;
-        const { redeemer } = nr.args;
-        console.log(`[NOTE] NoteRedeemed ${ephemeralOwner}`);
-
-        // Find and sanity check the Note that was redeemed
-        const note = this.notes.get(ephemeralOwner);
-        if (note == null) {
-          throw new Error(
-            `bad NoteRedeemed, missing note: ${ephemeralOwner} ${logInfo()}`
-          );
-        } else if (note.status !== "confirmed") {
-          throw new Error(
-            `bad NoteRedeemed, already claimed: ${ephemeralOwner} ${logInfo()}`
-          );
-        } else if (note.dollars !== amountToDollars(amount)) {
-          throw new Error(
-            `bad NoteRedeemed, wrong amount: ${ephemeralOwner} ${logInfo()}`
-          );
-        }
-
-        // Mark as redeemed
-        note.status = redeemer === from ? "cancelled" : "claimed";
-        note.claimer = await this.nameReg.getEAccount(redeemer);
-
-        opLogs.push({ type: "claim", noteStatus: { ...note } });
-      } else {
-        throw new Error(`unexpected event selector: ${selector}`);
-      }
-    }
-
-    // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;
-    console.log(`[NOTE] ${opLogs.length} logs for ${ls.length} listeners`);
-    ls.forEach((l) => l(opLogs));
-  };
+    console.log(`[NOTE] ${logs.length} logs for ${ls.length} listeners`);
+    ls.forEach((l) => l(logs));
+  }
+
+  private async loadCreated(
+    pg: Pool,
+    from: bigint,
+    to: bigint
+  ): Promise<DaimoNoteStatus[]> {
+    const result = await pg.query(
+      `
+        select
+        block_num,
+        encode(block_hash, 'hex') as block_hash,
+        encode(tx_hash, 'hex') as tx_hash,
+        tx_idx,
+        log_idx,
+        encode(log_addr, 'hex') as log_addr,
+        encode(f, 'hex') as "from",
+        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
+        amount
+      from note_created
+      where block_num >= $1 and block_num <= $2
+    `,
+      [from, to]
+    );
+    const ops = result.rows.map(async (row) => {
+      console.log(`[NOTE] NoteCreated ${row.ephemeral_owner}`);
+      const sender = await this.ag.getEAccount(row.from);
+      const amount = BigInt(row.amount);
+      const dollars = amountToDollars(amount);
+      if (this.notes.get(row.ephemeral_owner) != null) {
+        throw new Error(
+          `dupe NoteCreated: ${row.ephemeral_owner} ${row.tx_hash} ${row.log_idx}`
+        );
+      }
+      const ns: DaimoNoteStatus = {
+        status: "confirmed",
+        dollars,
+        link: {
+          type: "note",
+          previewSender: getEAccountStr(sender),
+          previewDollars: dollars,
+          ephemeralOwner: row.ephemeral_owner,
+        },
+        sender,
+      };
+      this.notes.set(row.ephemeral_owner, ns);
+      return ns;
+    });
+    return await Promise.all(ops);
+  }
+
+  private async loadRedeemed(
+    pg: Pool,
+    from: bigint,
+    to: bigint
+  ): Promise<DaimoNoteStatus[]> {
+    const result = await pg.query(
+      `
+        select
+        encode(f, 'hex') as "from",
+        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
+        amount,
+        block_num,
+        encode(block_hash, 'hex') as block_hash,
+        encode(tx_hash, 'hex') as tx_hash,
+        tx_idx,
+        log_idx,
+        encode(log_addr, 'hex') as log_addr
+      from note_created
+      where block_num >= $1 and block_num <= $2
+    `,
+      [from, to]
+    );
+    const ops = result.rows.map(async (row) => {
+      const amount = BigInt(row.amount);
+      const logInfo = () =>
+        `[${row.tx_hash} ${row.log_idx} ${row.ephemeral_owner}]`;
+      console.log(`[NOTE] NoteRedeemed ${row.ephemeral_owner}`);
+
+      // Find and sanity check the Note that was redeemed
+      const op = this.notes.get(row.ephemeral_owner);
+      if (op == null) {
+        throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
+      } else if (op.status !== "confirmed") {
+        throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
+      } else if (op.dollars !== amountToDollars(amount)) {
+        throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
+      }
+      // Mark as redeemed
+      op.status = row.redeemer === row.from ? "cancelled" : "claimed";
+      op.claimer = await this.ag.getEAccount(row.redeemer);
+      return op;
+    });
+    return await Promise.all(ops);
+  }
 
   /** Gets note status, or null if the note is not yet indexed. */
   async getNoteStatus(

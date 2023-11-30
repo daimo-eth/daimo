@@ -61,7 +61,6 @@ async function metrics() {
 
   console.log(`[METRICS] initializing indexers...`);
   await Promise.all([nameReg.init(), opIndexer.init()]);
-  await Promise.all([coinIndexer.init()]);
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);
@@ -79,8 +78,8 @@ async function metrics() {
   const transfers = new Map<string, number>();
   coinIndexer.pipeAllTransfers(async (logs) => {
     for (const log of logs) {
-      const from = nameReg.resolveDaimoNameForAddr(log.args.from);
-      const to = nameReg.resolveDaimoNameForAddr(log.args.to);
+      const from = nameReg.resolveDaimoNameForAddr(log.from);
+      const to = nameReg.resolveDaimoNameForAddr(log.to);
       if (from == null && to == null) continue;
       const ts = guessTimestampFromNum(log.blockNumber!, daimoChain);
       addMetric(transfers, ts, 1);

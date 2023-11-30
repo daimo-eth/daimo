@@ -10,27 +10,12 @@ import {
   daimoEphemeralNotesAddress,
   nameRegistryProxyConfig,
 } from "@daimo/contract";
-import {
-  Address,
-  Log,
-  encodeFunctionData,
-  getAbiItem,
-  getAddress,
-  hexToString,
-  isAddress,
-} from "viem";
+import { Pool } from "pg";
+import { Address, encodeFunctionData, getAddress, isAddress } from "viem";
 import { normalize } from "viem/ens";
 
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-
-const registeredName = "Registered";
-const registeredEvent = getAbiItem({
-  abi: nameRegistryProxyConfig.abi,
-  name: registeredName,
-});
-
-type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
@@ -57,35 +42,24 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
 
-  public logs: RegisteredLog[] = [];
-
   constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
-  /** Init: index logs from chain, get all names so far */
-  async init() {
-    await this.vc.pipeLogs(
-      {
-        address: nameRegistryProxyConfig.address,
-        event: registeredEvent,
-      },
-      this.parseLogs
+  async load(pg: Pool, from: bigint, to: bigint) {
+    const client = await pg.connect();
+    const result = await client.query(
+      `
+        select
+          encode(addr, 'hex') as addr,
+          encode(name, 'hex') as name
+        from names
+        where block_num >= $1 and block_num <= $2
+      `,
+      [from, to]
     );
+    client.release();
+    console.log(`[NAME-REG] parsed ${result.rows.length} named account(s)`);
+    result.rows.forEach(this.cacheAccount);
   }
-
-  /** Parses Registered event logs, first in init(), then on subscription. */
-  parseLogs = async (logs: RegisteredLog[]) => {
-    this.logs.push(...logs);
-
-    const accounts = logs
-      .map((l) => l.args)
-      .map((a) => ({
-        name: hexToString(a.name, { size: 32 }),
-        addr: getAddress(a.addr),
-      }));
-    console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
-
-    accounts.forEach(this.cacheAccount);
-  };
 
   /** Cache an account in memory. */
   private cacheAccount = (acc: DAccount) => {

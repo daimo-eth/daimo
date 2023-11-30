@@ -1,70 +1,58 @@
-import { entryPointABI } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
-import { Constants } from "userop";
-import { Hex, Log, getAbiItem, numberToHex } from "viem";
+import { Pool } from "pg";
+import { Hex, numberToHex } from "viem";
 
-import { ViemClient } from "../network/viemClient";
-
-const userOperationEvent = getAbiItem({
-  abi: entryPointABI,
-  name: "UserOperationEvent",
-});
-export type userOperationLog = Log<
-  bigint,
-  number,
-  false,
-  typeof userOperationEvent,
-  true
->;
+interface UserOp {
+  transactionHash: Hex;
+  logIndex: number;
+  nonce: bigint;
+  hash: Hex;
+}
 
 /* User operation indexer. Used to track fulfilled requests. */
 export class OpIndexer {
-  private txHashToSortedUserOps: Map<Hex, userOperationLog[]> = new Map();
+  private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
   private nonceMetadataToTxes: Map<Hex, Hex[]> = new Map();
 
-  constructor(private client: ViemClient) {}
-
-  async init() {
-    await this.client.pipeLogs(
-      {
-        address: Constants.ERC4337.EntryPoint as Hex,
-        event: userOperationEvent,
-      },
-      this.parseLogs
+  async load(pg: Pool, from: bigint, to: bigint) {
+    const result = await pg.query(
+      `
+        select
+          encode(tx_hash, 'hex') as tx_hash,
+          log_idx,
+          op_nonce,
+          encode(op_hash, 'hex') as hash
+        from erc4337_user_op 
+        where block_num >= $1 and block_num <= $2
+      `,
+      [from, to]
     );
+    result.rows.forEach((log) => {
+      if (!log.tx_hash) return;
+      const curLogs = this.txHashToSortedUserOps.get(log.transactionHash);
+      const newLogs = curLogs ? [...curLogs, log] : [log];
+      this.txHashToSortedUserOps.set(
+        log.transactionHash,
+        newLogs.sort((a, b) => a.logIndex - b.logIndex)
+      );
+
+      const nonceMetadata = DaimoNonce.fromHex(
+        numberToHex(log.nonce, { size: 32 })
+      )?.metadata.toHex();
+      if (!nonceMetadata) return;
+
+      const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
+      const newTxes = curTxes
+        ? [...curTxes, log.transactionHash]
+        : [log.transactionHash];
+      this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
+    });
   }
-
-  private parseLogs = (logs: userOperationLog[]) => {
-    for (const log of logs) {
-      if (log.transactionHash) {
-        const curLogs = this.txHashToSortedUserOps.get(log.transactionHash);
-        const newLogs = curLogs ? [...curLogs, log] : [log];
-        this.txHashToSortedUserOps.set(
-          log.transactionHash,
-          newLogs.sort((a, b) => a.logIndex - b.logIndex)
-        );
-
-        const nonceMetadata = DaimoNonce.fromHex(
-          numberToHex(log.args.nonce, { size: 32 })
-        )?.metadata.toHex();
-        if (!nonceMetadata) continue;
-
-        const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
-        const newTxes = curTxes
-          ? [...curTxes, log.transactionHash]
-          : [log.transactionHash];
-        this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
-      }
-    }
-  };
 
   /**
    * Interpret a (txHash, queryLogIndex) as having originated from a userop and fetch the userop log of it.
    */
-  fetchUserOpLog(
-    txHash: Hex,
-    queryLogIndex: number
-  ): userOperationLog | undefined {
+  fetchUserOpLog(txHash: Hex, queryLogIndex: number): UserOp | undefined {
     const possibleLogs = this.txHashToSortedUserOps.get(txHash) || [];
     for (const log of possibleLogs) {
       if (log.logIndex > queryLogIndex) {
@@ -81,7 +69,7 @@ export class OpIndexer {
     const log = this.fetchUserOpLog(txHash, queryLogIndex);
     if (!log) return undefined;
     return DaimoNonce.fromHex(
-      numberToHex(log.args.nonce, { size: 32 })
+      numberToHex(log.nonce, { size: 32 })
     )?.metadata.toHex();
   }
 
