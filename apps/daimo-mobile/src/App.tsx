@@ -9,7 +9,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
 
-import { useSendDebugLog } from "./debugLog";
+import { useSendDebugLog } from "./common/useSendDebugLog";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
@@ -46,7 +46,7 @@ export default function App() {
 function AppBody() {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const snapPoints = useMemo(() => ["50%"], []);
+  const snapPoints = useMemo(() => ["33%"], []);
 
   useEffect(() => {
     const subscription = RNShake.addListener(() => {
@@ -85,13 +85,10 @@ function AppBody() {
         enablePanDownToClose
       >
         <View style={styles.contentContainer}>
-          <View>
-            <TextH3>Did something go wrong?</TextH3>
-            <Spacer h={12} />
-            <TextLight>
-              Send us debug log to help us realise what went wrong
-            </TextLight>
-          </View>
+          <Spacer h={16} />
+          <TextH3>Did something go wrong?</TextH3>
+          <Spacer h={12} />
+          <TextLight>Help us realize what's going wrong.</TextLight>
           <Spacer h={32} />
           <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
         </View>
@@ -101,16 +98,9 @@ function AppBody() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: "grey",
-  },
   contentContainer: {
     flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 32,
-    justifyContent: "center",
+    alignSelf: "center",
+    alignItems: "stretch",
   },
 });
