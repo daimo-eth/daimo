@@ -13,7 +13,12 @@ import "./DaimoAccount.sol";
 /// contract itself.
 /// Requires a server-signed ticket whitelisting each sender address.
 contract DaimoPaymaster is BasePaymaster {
+    uint256 constant CALL_GAS_LIMIT = 300000;
+    uint256 constant VERIFICATION_GAS_LIMIT = 700000;
+
     mapping(address => bool) public destWhitelist;
+    // Mapping of ticket.signature => number of times it has been used.
+    mapping(uint256 => uint32) public ticketUses;
     address public ticketSigner;
 
     event UserOperationSponsored(
@@ -42,10 +47,9 @@ contract DaimoPaymaster is BasePaymaster {
     }
 
     struct PaymasterTicketData {
+        uint32 allowedUses;
         uint48 validUntil;
         address sender;
-        uint256 callGasLimit;
-        uint256 verificationGasLimit;
         uint256 preVerificationGas;
         uint256 maxFeePerGas;
         uint256 maxPriorityFeePerGas;
@@ -56,9 +60,10 @@ contract DaimoPaymaster is BasePaymaster {
     function paymasterTicketData(PaymasterTicketData memory data) public {}
 
     function _verifyUserOpTicket(
+        uint256 ticketR,
         UserOperation calldata userOp,
         PaymasterTicketData memory data
-    ) internal view {
+    ) internal {
         require(
             data.validUntil >= block.timestamp,
             "DaimoPaymaster: ticket expired"
@@ -68,12 +73,12 @@ contract DaimoPaymaster is BasePaymaster {
             "DaimoPaymaster: ticket sender mismatch"
         );
         require(
-            data.callGasLimit >= userOp.callGasLimit,
-            "DaimoPaymaster: ticket callGasLimit too low"
+            CALL_GAS_LIMIT >= userOp.callGasLimit,
+            "DaimoPaymaster: op callGasLimit too high"
         );
         require(
-            data.verificationGasLimit >= userOp.verificationGasLimit,
-            "DaimoPaymaster: ticket verificationGasLimit too low"
+            VERIFICATION_GAS_LIMIT >= userOp.verificationGasLimit,
+            "DaimoPaymaster: op verificationGasLimit too high"
         );
         require(
             data.preVerificationGas >= userOp.preVerificationGas,
@@ -86,6 +91,10 @@ contract DaimoPaymaster is BasePaymaster {
         require(
             data.maxPriorityFeePerGas >= userOp.maxPriorityFeePerGas,
             "DaimoPaymaster: ticket maxPriorityFeePerGas too low"
+        );
+        require(
+            ++ticketUses[ticketR] <= data.allowedUses,
+            "DaimoPaymaster: ticket exhausted"
         );
     }
 
@@ -113,7 +122,9 @@ contract DaimoPaymaster is BasePaymaster {
         );
 
         // Verify userOp gas constants against ticket
-        _verifyUserOpTicket(userOp, ticket.data);
+        // Tickets can be identified uniquely by signature.r because
+        // no two signatures can have the same r value.
+        _verifyUserOpTicket(uint256(ticket.r), userOp, ticket.data);
 
         // Verify ticket signature
         bytes32 tHash = keccak256(abi.encode(ticket.data));

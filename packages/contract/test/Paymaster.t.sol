@@ -99,10 +99,9 @@ contract PaymasterTest is Test {
         uint48 validUntil = 0xffffffff; // far future
         DaimoPaymaster.PaymasterTicketData memory ticketData = DaimoPaymaster
             .PaymasterTicketData({
+                allowedUses: 3,
                 validUntil: validUntil,
                 sender: senderAddress,
-                callGasLimit: 0,
-                verificationGasLimit: 150000,
                 preVerificationGas: 21000,
                 maxFeePerGas: 0,
                 maxPriorityFeePerGas: 1e9
