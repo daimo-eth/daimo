@@ -1,3 +1,4 @@
+import { assert } from "@daimo/common";
 import type { AbiEvent } from "abitype";
 import AwaitLock from "await-lock";
 import fs from "node:fs/promises";
@@ -17,6 +18,7 @@ import {
   WriteContractParameters,
   createPublicClient,
   createWalletClient,
+  isHex,
   webSocket,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -39,7 +41,7 @@ export function getViemClientFromEnv() {
 
   // Connect to L2
   const chain = chainConfig.chainL2;
-  const account = getAccount(process.env.DAIMO_API_PRIVATE_KEY);
+  const account = getEOA(process.env.DAIMO_API_PRIVATE_KEY);
   const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
@@ -47,9 +49,13 @@ export function getViemClientFromEnv() {
   return new ViemClient(l1Client, publicClient, walletClient);
 }
 
-function getAccount(privateKey?: string) {
+export function getEOA(privateKey?: string) {
   if (!privateKey) throw new Error("Missing private key");
-  return privateKeyToAccount(`0x${privateKey}`);
+
+  if (!privateKey.startsWith("0x")) privateKey = `0x${privateKey}`;
+  assert(isHex(privateKey) && privateKey.length === 66, "Invalid private key");
+
+  return privateKeyToAccount(privateKey);
 }
 
 interface LogFilter<E extends AbiEvent | undefined> {

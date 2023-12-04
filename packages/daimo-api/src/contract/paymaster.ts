@@ -16,12 +16,12 @@ import {
   numberToHex,
   toHex,
 } from "viem";
-import { privateKeyToAccount, sign } from "viem/accounts";
+import { sign } from "viem/accounts";
 
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
-import { ViemClient } from "../network/viemClient";
+import { ViemClient, getEOA } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
@@ -164,7 +164,7 @@ const signerPrivateKey = assertNotNull(
   process.env.DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY,
   "Missing DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY"
 ) as Hex;
-const signer = privateKeyToAccount(signerPrivateKey);
+const signer = getEOA(signerPrivateKey);
 
 async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   const validUntil = (Date.now() / 1000 + 5 * 60) | 0; // 5 minute validity
