@@ -1,10 +1,10 @@
 {
-  "pg_url": "postgres:///shovel",
+  "pg_url": "$DATABASE_URL",
   "eth_sources": [
     {
-      "name": "baseg",
+      "name": "base",
       "chain_id": 8453,
-      "url": "",
+      "url": "$L2_RPC_URL",
       "batch_size": 10,
       "concurrency": 4
     }
@@ -13,7 +13,7 @@
     {
       "name": "names",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "names",
         "columns": [
@@ -65,7 +65,7 @@
     {
       "name": "key_added",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "key_added",
         "columns": [
@@ -119,7 +119,7 @@
     {
       "name": "key_removed",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "key_removed",
         "columns": [
@@ -174,7 +174,7 @@
     {
       "name": "transfers",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "transfers",
         "columns": [
@@ -223,7 +223,7 @@
     {
       "name": "note_created",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "note_created",
         "columns": [
@@ -278,7 +278,7 @@
     {
       "name": "note_redeemed",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "note_redeemed",
         "columns": [
@@ -339,7 +339,7 @@
     {
       "name": "erc4337_user_op",
       "enabled": true,
-      "sources": [{ "name": "baseg" }],
+      "sources": [{ "name": "base", "start": 5700000 }],
       "table": {
         "name": "erc4337_user_op",
         "columns": [
