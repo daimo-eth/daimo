@@ -82,7 +82,7 @@ test("note indexer", async () => {
   const pg = await testPG(schema);
   test.after(async () => await pg.done());
 
-  const indexer = new NoteIndexer(testNameResolver);
+  const indexer = new NoteIndexer({ getEAccount: testNameResolver });
   const got = await indexer["loadCreated"](pg.pool, 0n, 100n);
   const want = {
     dollars: "0.00",

@@ -21,30 +21,35 @@ export class OpIndexer {
           encode(tx_hash, 'hex') as tx_hash,
           log_idx,
           op_nonce,
-          encode(op_hash, 'hex') as hash
+          encode(op_hash, 'hex') as op_hash
         from erc4337_user_op 
         where block_num >= $1 and block_num <= $2
       `,
       [from, to]
     );
-    result.rows.forEach((log) => {
-      if (!log.tx_hash) return;
-      const curLogs = this.txHashToSortedUserOps.get(log.transactionHash);
-      const newLogs = curLogs ? [...curLogs, log] : [log];
+    result.rows.forEach((row) => {
+      const userOp: UserOp = {
+        transactionHash: row.tx_hash,
+        logIndex: row.log_idx,
+        nonce: BigInt(row.op_nonce),
+        hash: row.op_hash,
+      };
+      const curLogs = this.txHashToSortedUserOps.get(userOp.transactionHash);
+      const newLogs = curLogs ? [...curLogs, row] : [userOp];
       this.txHashToSortedUserOps.set(
-        log.transactionHash,
+        userOp.transactionHash,
         newLogs.sort((a, b) => a.logIndex - b.logIndex)
       );
 
       const nonceMetadata = DaimoNonce.fromHex(
-        numberToHex(log.nonce, { size: 32 })
+        numberToHex(userOp.nonce, { size: 32 })
       )?.metadata.toHex();
       if (!nonceMetadata) return;
 
       const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
       const newTxes = curTxes
-        ? [...curTxes, log.transactionHash]
-        : [log.transactionHash];
+        ? [...curTxes, userOp.transactionHash]
+        : [userOp.transactionHash];
       this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
     });
   }
