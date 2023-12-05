@@ -113,18 +113,16 @@ export class NoteIndexer {
       [from, to]
     );
     const logs = result.rows.map(async (row) => {
-      const amount = BigInt(row.amount);
+      console.log(`[NOTE] NoteRedeemed ${row.ephemeral_owner}`);
       const logInfo = () =>
         `[${row.tx_hash} ${row.log_idx} ${row.ephemeral_owner}]`;
-      console.log(`[NOTE] NoteRedeemed ${row.ephemeral_owner}`);
-
       // Find and sanity check the Note that was redeemed
       const note = this.notes.get(row.ephemeral_owner);
       if (note == null) {
         throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
       } else if (note.status !== "confirmed") {
         throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
-      } else if (note.dollars !== amountToDollars(amount)) {
+      } else if (note.dollars !== amountToDollars(BigInt(row.amount))) {
         throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
       }
       // Mark as redeemed
