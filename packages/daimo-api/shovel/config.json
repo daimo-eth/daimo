@@ -102,7 +102,7 @@
             "column": "account"
           },
           {
-            "indexed": true,
+            "indexed": false,
             "name": "keySlot",
             "type": "uint8",
             "column": "key_slot"
@@ -156,7 +156,7 @@
             "column": "account"
           },
           {
-            "indexed": true,
+            "indexed": false,
             "name": "keySlot",
             "type": "uint8",
             "column": "key_slot"
@@ -170,7 +170,6 @@
         ]
       }
     },
-
     {
       "name": "transfers",
       "enabled": true,
@@ -316,11 +315,6 @@
         "anonymous": false,
         "inputs": [
           {
-            "name": "redeemer",
-            "type": "address",
-            "column": "redeemer"
-          },
-          {
             "name": "note",
             "type": "tuple",
             "components": [
@@ -332,6 +326,11 @@
               { "name": "from", "type": "address", "column": "f" },
               { "name": "amount", "type": "uint256", "column": "amount" }
             ]
+          },
+          {
+            "name": "redeemer",
+            "type": "address",
+            "column": "redeemer"
           }
         ]
       }
@@ -371,7 +370,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["4AdcA7cB84497c9c4c308063D2f219C7b6041183"]
+          "filter_arg": ["5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"]
         }
       ],
       "event": {
