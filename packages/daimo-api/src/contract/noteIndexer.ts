@@ -2,6 +2,8 @@ import {
   DaimoNoteStatus,
   EAccount,
   amountToDollars,
+  assert,
+  assertNotNull,
   getEAccountStr,
 } from "@daimo/common";
 import { Pool } from "pg";
@@ -47,10 +49,11 @@ export class NoteIndexer {
         select
         block_num,
         encode(block_hash, 'hex') as block_hash,
-        encode(tx_hash, 'hex') as tx_hash,
         tx_idx,
+        encode(tx_hash, 'hex') as tx_hash,
         log_idx,
         encode(log_addr, 'hex') as log_addr,
+
         encode(f, 'hex') as "from",
         encode(ephemeral_owner, 'hex') as "ephemeral_owner",
         amount
@@ -94,16 +97,18 @@ export class NoteIndexer {
     const result = await pg.query(
       `
         select
-        encode(f, 'hex') as "from",
-        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
-        amount,
         block_num,
         encode(block_hash, 'hex') as block_hash,
-        encode(tx_hash, 'hex') as tx_hash,
         tx_idx,
+        encode(tx_hash, 'hex') as tx_hash,
         log_idx,
-        encode(log_addr, 'hex') as log_addr
-      from note_created
+        encode(log_addr, 'hex') as log_addr,
+
+        encode(f, 'hex') as "from",
+        encode(redeemer, 'hex') as "redeemer",
+        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
+        amount,
+      from note_redeemed
       where block_num >= $1 and block_num <= $2
     `,
       [from, to]
@@ -124,6 +129,8 @@ export class NoteIndexer {
         throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
       }
       // Mark as redeemed
+      assertNotNull(row.redeemer, "redeemer is null");
+      assertNotNull(row.from, "fromis null");
       op.status = row.redeemer === row.from ? "cancelled" : "claimed";
       op.claimer = await this.ag.getEAccount(row.redeemer);
       return op;
