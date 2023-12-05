@@ -36,15 +36,16 @@ export class CoinIndexer {
     const result = await pg.query(
       `
         select
-          encode(f, 'hex') as "from",
-          encode(t, 'hex') as "to",
-          v as "value",
           block_num,
           encode(block_hash, 'hex') as block_hash,
           encode(tx_hash, 'hex') as tx_hash,
           tx_idx,
           log_idx,
-          encode(log_addr, 'hex') as log_addr
+          encode(log_addr, 'hex') as log_addr,
+
+          encode(f, 'hex') as "from",
+          encode(t, 'hex') as "to",
+          v as "value",
         from transfers
         where block_num >= $1
         and block_num <= $2
