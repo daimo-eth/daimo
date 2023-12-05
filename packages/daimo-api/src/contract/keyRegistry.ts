@@ -4,10 +4,8 @@ import { Address, Hex, getAddress } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 
-type keyChange = "added" | "removed";
-
 export interface KeyChange {
-  change: keyChange;
+  change: "added" | "removed";
   blockNumber: bigint;
   blockHash: Hex;
   transactionHash: Hex;
@@ -69,7 +67,7 @@ export class KeyRegistry {
     pg: Pool,
     from: bigint,
     to: bigint,
-    change: keyChange
+    change: "added" | "removed"
   ): Promise<KeyChange[]> {
     let table: string = "";
     if (change === "added") {
