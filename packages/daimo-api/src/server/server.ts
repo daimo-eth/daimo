@@ -65,9 +65,6 @@ async function main() {
 
     console.log(`[API] initializing push notifications...`);
     await Promise.all([notifier.init(), faucet.init(), crontab.init()]);
-
-    console.log(`[API] polling logs...`);
-    //setInterval(() => vc.processLogsToLatestBlock(), 1000);
   })();
 
   console.log(`[API] serving...`);
