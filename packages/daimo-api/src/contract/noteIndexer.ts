@@ -20,8 +20,6 @@ export class NoteIndexer {
 
   private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
 
-  private isInitialized = false;
-
   constructor(private ag: accountGetter) {}
 
   addListener(listener: (log: DaimoNoteStatus[]) => void) {
