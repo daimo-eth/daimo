@@ -52,7 +52,7 @@ function chooseChain<T>({
 }): T {
   assert(
     ["base", "baseGoerli"].includes(daimoChain),
-    `Unsupported DAIMO_CHAIN: ${daimoChain}`
+    `Unsupported chain: ${daimoChain}`
   );
   if (daimoChain === "base") return mainnet;
   else return testnet;

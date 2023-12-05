@@ -83,59 +83,86 @@ invite code. Coming soon: desktop app, no invite code, cross-chain support.
 </details>
 
 <details>
-<summary><strong>Quick start for developers</strong></summary>
+<summary><strong>Dev quickstart</strong></summary>
 
 Clone the repo, loading submodules.
 
-```
+```sh
 git clone git@github.com:daimo-eth/daimo --recurse-submodules
 ```
 
-Install prerequisites.
+Build the app.
 
-```
-# You'll need Node 20+
-node --version
+```sh
+node --version # ensure you have node 20+
+npm i
+npm run build
 ```
 
+Run the iPhone Simulator in XCode. (If you're not on a Mac, see the
+Android quick start below.) Get the latest simulator build from Expo; message us
+if you need access. Drag-drop the build into the simulator to install.
+
+Set the following variables to use the remote, hosted API.
+
+```sh
+export DAIMO_APP_API_URL_TESTNET="https://daimo-api-testnet.onrender.com"
+export DAIMO_APP_API_URL_MAINNET="https://daimo-api-prod.onrender.com"
 ```
-# (Optional) for contract development, install Foundry
+
+Finally, run the app in the simulator.
+
+```sh
+cd apps/daimo-mobile
+npm run dev
+```
+
+**Use invite code `testnet`.** Once you create an account, you should
+automatically get some testnet USDC from the faucet.
+
+> Expo apps come in two layers: a native layer and a React Native (Typescript)
+> layer. Whenever you add a native module or update `@daimo/expo-enclave`, you
+> must rebuild the native app. For details, see `apps/daimo-mobile`.
+
+</details>
+
+<details>
+<summary><strong>Dev quickstart: Android</strong></summary>
+
+- **Ensure you have the correct Java version.** Version 20 doesn't work, Java 17 works.
+- You need to `ANDROID_HOME` to the local Android SDK.
+- Install Android Studio, and create an emulator.
+- Download latest Android internal distribution build from Expo, and install it in the emulator.
+
+All other instructions are the same as above. After `npm run dev`, type `a` to
+open the Android simulator. You should now have both side-by-side. See the
+mobile `package.json` for details.
+
+</details>
+
+<details>
+<summary><strong>Dev quickstart: contracts</strong></summary>
+
+Install Foundry.
+
+```sh
 curl -L https://foundry.paradigm.xyz | bash
 # Reload your terminal, then run:
 foundryup
 ```
 
-```
-# (Optional) for mobile development, install Expo EAS
-npm i -g eas-cli
-```
+Build the contracts.
 
-Next, build the app.
-
-```
-npm i
-npm run build
+```sh
+forge build
 ```
 
-Finally, run the app in the iOS simulator, Android simulator, or on your phone.
+For commands to run tests and recompute code coverage, see `ci.yml`.
 
-If you're in the <a href="https://expo.dev/accounts/daimo">Daimo team on Expo</a>, you can download the latest development build from there.
-
-> Expo apps come in two layers: a native layer and a React Native (typescript) layer. Whenever you add a native module or update `@daimo/expo-enclave`, you must rebuild the native app. For details, see `apps/daimo-mobile`.
-
-Once the base app is installed in your simulator, you can run Daimo.
-
-```
-cd apps/daimo-mobile # in one tab
-npm run dev
-cd packages/daimo-api # in another tab
-npm run dev
-```
-
-**Use invite code `testnet`.**
+</details>
 
 <details>
-<summary><strong>API Setup</strong></summary>
+<summary><strong>Dev quickstart: API</strong></summary>
 
 `daimo-mobile` and `daimo-web` both rely on `daimo-api`.
 
@@ -147,18 +174,22 @@ By default:
 
 You'll need to either use the hosted Daimo API or run one locally.
 
-- To run the API locally, configure the `DAIMO_API_*` secrets, then run `npm run dev`.
-- You can run Postgres in the background locally using `initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+To run the API locally, fill in the `DAIMO_API_...` and `NEXT_PUBLIC_...`
+environment variables. Message us if you need help.
+
+You can run Postgres in the background locally using
+`initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+
+Once you're running the API locally, you can run the full stack self-contained.
+
+```sh
+# First tab
+cd packages/daimo-api && npm run dev
+# Second tab
+cd apps/daimo-mobile && npm run dev
+# Third tab
+cd apps/daimo-web && npm run dev
+```
+
 </details>
-
-<details>
-<summary><strong>Setup for android</strong></summary>
-
-- **Ensure you have the correct Java version.** Version 20 doesn't work, Java 17 works.
-- You need to `ANDROID_HOME` to the local Android SDK.
-- Install Android Studio, and create an emulator.
-- Download latest Android internal distribution build from Expo, and install it in the emulator.
-- Lastly, go to `apps/daimo-mobile` and run `npm run dev:android`.
-</details>
-
 </details>
