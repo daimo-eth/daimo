@@ -32,7 +32,7 @@ export class CoinIndexer {
 
   constructor(private client: ViemClient, private opIndexer: OpIndexer) {}
 
-  load = async (pg: Pool, from: bigint, to: bigint) => {
+  async load(pg: Pool, from: bigint, to: bigint) {
     const result = await pg.query(
       `
         select
@@ -69,7 +69,7 @@ export class CoinIndexer {
     console.log(`[COIN] loaded ${logs.length} transfers ${from} ${to}`);
     this.allTransfers.push(...logs);
     this.listeners.forEach((l) => l(logs));
-  };
+  }
 
   /** Get balance as of a block height. */
   async getBalanceAt(addr: Address, blockNum: number) {

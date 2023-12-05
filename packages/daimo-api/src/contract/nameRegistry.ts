@@ -45,8 +45,7 @@ export class NameRegistry {
   constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
-    const client = await pg.connect();
-    const result = await client.query(
+    const result = await pg.query(
       `
         select
           encode(addr, 'hex') as addr,
@@ -56,7 +55,6 @@ export class NameRegistry {
       `,
       [from, to]
     );
-    client.release();
     console.log(`[NAME-REG] parsed ${result.rows.length} named account(s)`);
     result.rows.forEach(this.cacheAccount);
   }
