@@ -62,17 +62,16 @@ export class NoteIndexer {
     `,
       [from, to]
     );
-    const ops = result.rows.map(async (row) => {
+    const logs = result.rows.map(async (row) => {
       console.log(`[NOTE] NoteCreated ${row.ephemeral_owner}`);
-      const sender = await this.ag.getEAccount(row.from);
-      const amount = BigInt(row.amount);
-      const dollars = amountToDollars(amount);
       if (this.notes.get(row.ephemeral_owner) != null) {
         throw new Error(
           `dupe NoteCreated: ${row.ephemeral_owner} ${row.tx_hash} ${row.log_idx}`
         );
       }
-      const ns: DaimoNoteStatus = {
+      const sender = await this.ag.getEAccount(row.from);
+      const dollars = amountToDollars(BigInt(row.amount));
+      const newNote: DaimoNoteStatus = {
         status: "confirmed",
         dollars,
         link: {
@@ -83,10 +82,10 @@ export class NoteIndexer {
         },
         sender,
       };
-      this.notes.set(row.ephemeral_owner, ns);
-      return ns;
+      this.notes.set(row.ephemeral_owner, newNote);
+      return newNote;
     });
-    return await Promise.all(ops);
+    return await Promise.all(logs);
   }
 
   private async loadRedeemed(
@@ -113,29 +112,29 @@ export class NoteIndexer {
     `,
       [from, to]
     );
-    const ops = result.rows.map(async (row) => {
+    const logs = result.rows.map(async (row) => {
       const amount = BigInt(row.amount);
       const logInfo = () =>
         `[${row.tx_hash} ${row.log_idx} ${row.ephemeral_owner}]`;
       console.log(`[NOTE] NoteRedeemed ${row.ephemeral_owner}`);
 
       // Find and sanity check the Note that was redeemed
-      const op = this.notes.get(row.ephemeral_owner);
-      if (op == null) {
+      const note = this.notes.get(row.ephemeral_owner);
+      if (note == null) {
         throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
-      } else if (op.status !== "confirmed") {
+      } else if (note.status !== "confirmed") {
         throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
-      } else if (op.dollars !== amountToDollars(amount)) {
+      } else if (note.dollars !== amountToDollars(amount)) {
         throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
       }
       // Mark as redeemed
       assertNotNull(row.redeemer, "redeemer is null");
       assertNotNull(row.from, "fromis null");
-      op.status = row.redeemer === row.from ? "cancelled" : "claimed";
-      op.claimer = await this.ag.getEAccount(row.redeemer);
-      return op;
+      note.status = row.redeemer === row.from ? "cancelled" : "claimed";
+      note.claimer = await this.ag.getEAccount(row.redeemer);
+      return note;
     });
-    return await Promise.all(ops);
+    return await Promise.all(logs);
   }
 
   /** Gets note status, or null if the note is not yet indexed. */
