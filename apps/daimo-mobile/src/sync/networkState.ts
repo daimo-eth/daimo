@@ -1,4 +1,5 @@
 import { ignore } from "@daimo/common";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 
 interface NetworkState {
@@ -36,6 +37,13 @@ export function updateNetworkState(fn: (state: NetworkState) => NetworkState) {
   const oldJson = JSON.stringify(currentState);
   const newJson = JSON.stringify(newState);
   if (oldJson === newJson) return;
+
+  if (newState.status === "offline") {
+    // create small delay to let interface adopt to the new banner
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 200);
+  }
 
   console.log(`[NETWORK] updating ${oldJson} > ${newJson}`);
   currentState = newState;

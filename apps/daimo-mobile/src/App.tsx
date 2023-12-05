@@ -1,5 +1,6 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,6 +9,8 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
 import { color } from "./view/shared/style";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   console.log("[APP] rendering");
