@@ -2,7 +2,6 @@ import {
   DaimoNoteStatus,
   EAccount,
   amountToDollars,
-  assert,
   assertNotNull,
   getEAccountStr,
 } from "@daimo/common";
