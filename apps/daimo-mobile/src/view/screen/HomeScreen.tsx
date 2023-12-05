@@ -167,6 +167,9 @@ function HomeScreenInner({ account }: { account: Account }) {
         keyboardShouldPersistTaps="handled"
       >
         <Spacer h={Math.max(16, ins.top)} />
+        {account.suggestedActions.length > 0 && (
+          <SuggestedActionBox action={account.suggestedActions[0]} />
+        )}
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults
@@ -177,11 +180,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         )}
         {searchPrefix == null && account != null && (
           <>
-            {account.suggestedActions.length > 0 ? (
-              <SuggestedActionBox action={account.suggestedActions[0]} />
-            ) : (
-              <Spacer h={64} />
-            )}
+            {account.suggestedActions.length === 0 && <Spacer h={64} />}
             <Spacer h={12} />
             <Animated.View layout={Layout}>
               <AmountAndButtons account={account} />

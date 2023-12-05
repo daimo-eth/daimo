@@ -3,7 +3,7 @@ import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { useEffect, useState } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { GestureResponderEvent, Linking, StyleSheet, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -17,15 +17,15 @@ import Animated, {
 import { OctName } from "./InputBig";
 import { handleDeepLink, useNav } from "./nav";
 import { color } from "./style";
-import { TextBody } from "./text";
+import { TextBody, TextMeta } from "./text";
 import { env } from "../../logic/env";
-import { useAccount } from "../../model/account";
+import { getAccountManager, useAccount } from "../../model/account";
 
 const ICON_X_SIZE = 24;
 
 export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const nav = useNav();
-  const [account, setAccount] = useAccount();
+  const [account] = useAccount();
 
   // Action to display
   const { icon, title, subtitle } = action;
@@ -68,14 +68,14 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
     console.log(`[SUGGESTED] dismissing ${action.id}: ${action.title}`);
 
     setIsVisible(false);
-    setAccount({
+    getAccountManager().transform((account) => ({
       ...account,
       dismissedActionIDs: [...account.dismissedActionIDs, action.id],
       suggestedActions:
         account?.suggestedActions?.filter(
-          (a: SuggestedAction) => a.id === action.id
+          (a: SuggestedAction) => a.id !== action.id
         ) || [],
-    });
+    }));
 
     rpcFunc.logAction.mutate({
       action: {
@@ -86,7 +86,8 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
     });
   };
 
-  const onPressX = () => {
+  const onPressX = (e: GestureResponderEvent) => {
+    e.stopPropagation();
     opacity.value = withTiming(0, {}, () => {
       runOnJS(onDismiss)();
     });
@@ -188,8 +189,8 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
             )}
           </View>
           <View style={styles.bubbleText}>
-            <TextBody>{title}</TextBody>
-            <TextBody color={color.grayDark}>{subtitle}</TextBody>
+            <TextMeta>{title}</TextMeta>
+            <TextMeta color={color.grayDark}>{subtitle}</TextMeta>
           </View>
           <View
             style={styles.bubbleExit}
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    padding: 12,
     gap: 16,
     marginHorizontal: 16,
   },

@@ -42,7 +42,7 @@ export function SearchHeader({
   return (
     <View style={styles.header}>
       <ButtonCircle onPress={goToAccount}>
-        <AccountBubble eAcc={eAcc} size={50} transparent />
+        <AccountBubble eAcc={eAcc} size={50} fontSize={22} transparent />
       </ButtonCircle>
       <InputBig
         icon="search"
