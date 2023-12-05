@@ -10,7 +10,7 @@
     "build:prod-android": "eas build -p android --profile=prod --auto-submit --non-interactive",
     "submit:prod": "eas submit --platform ios --profile=prod",
     "submit:prod-android": "eas submit --platform android --profile=prod",
-    "dev": "expo start --dev-client --clear -i",
+    "dev": "DAIMO_APP_API_URL=http://`ipconfig getifaddr en0`:3000 expo start --dev-client --clear -i",
     "dev:android": "expo start --dev-client --clear -a",
     "dev:tunnel": "expo start --dev-client --clear --tunnel",
     "dev:bare": "expo start --dev-client --clear",

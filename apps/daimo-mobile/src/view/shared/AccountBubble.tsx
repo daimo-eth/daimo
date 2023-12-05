@@ -64,7 +64,7 @@ export function Bubble({
     () => ({
       width: size - 1,
       height: size - 1,
-      borderRadius: size / 2,
+      borderRadius: 99,
       backgroundColor: transparent ? "transparent" : color.white,
       borderWidth: 1,
       borderColor: col,
