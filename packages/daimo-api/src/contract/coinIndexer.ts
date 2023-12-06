@@ -6,7 +6,7 @@ import {
 import { daimoChainFromId, erc20ABI } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
-import { Address, Hex, numberToHex } from "viem";
+import { Address, Hex, numberToHex, toBytes } from "viem";
 
 import { OpIndexer } from "./opIndexer";
 import { chainConfig } from "../env";
@@ -49,9 +49,9 @@ export class CoinIndexer {
         from transfers
         where block_num >= $1
         and block_num <= $2
-        and log_addr = '\\x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+        and log_addr = $3;
       `,
-      [from, to]
+      [from, to, toBytes(chainConfig.tokenAddress)]
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {
@@ -61,8 +61,8 @@ export class CoinIndexer {
         transactionIndex: row.tx_idx,
         logIndex: row.log_idx,
         address: row.log_addr,
-        from: `0x${row.from}`,
-        to: `0x${row.to}`,
+        from: row.from,
+        to: row.to,
         value: BigInt(row.value),
       };
     });
