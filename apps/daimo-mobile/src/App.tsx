@@ -2,18 +2,20 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
+import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
 import { color } from "./view/shared/style";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  console.log("[APP] rendering");
+  const [account] = useAccount();
 
   // Display notifications, listen for push notifications
   useInitNotifications();
@@ -24,6 +26,15 @@ export default function App() {
   // White background to avoid between-tab flicker
   let theme = DefaultTheme;
   theme = { ...theme, colors: { ...theme.colors, background: color.white } };
+
+  useEffect(() => {
+    if (account == null) return;
+
+    const nowS = Math.floor(Date.now() / 1000);
+    if (nowS - account.lastBlockTimestamp < 60 * 10) {
+      SplashScreen.hideAsync();
+    }
+  }, []);
 
   return (
     <RpcProvider>
