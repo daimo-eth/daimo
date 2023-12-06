@@ -8,11 +8,13 @@ import { color } from "./style";
 export function AccountBubble({
   eAcc,
   size,
+  fontSize,
   isPending,
   transparent,
 }: {
   eAcc: EAccount;
   size: number;
+  fontSize?: number;
   isPending?: boolean;
   transparent?: boolean;
 }) {
@@ -41,6 +43,7 @@ export function AccountBubble({
     <Bubble
       inside={letter}
       size={size}
+      fontSize={fontSize}
       isPending={isPending}
       transparent={transparent}
     />
@@ -50,21 +53,25 @@ export function AccountBubble({
 export function Bubble({
   inside,
   size,
+  fontSize,
   isPending,
   transparent,
 }: {
   inside: string | React.JSX.Element;
   size: number;
+  fontSize?: number;
   isPending?: boolean;
   transparent?: boolean;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
 
+  if (fontSize == null) fontSize = size / 2 + 1;
+
   const style: ViewStyle = useMemo(
     () => ({
       width: size - 1,
       height: size - 1,
-      borderRadius: size / 2,
+      borderRadius: 99,
       backgroundColor: transparent ? "transparent" : color.white,
       borderWidth: 1,
       borderColor: col,
@@ -76,8 +83,8 @@ export function Bubble({
 
   const textStyle: TextStyle = useMemo(
     () => ({
-      fontSize: size / 2 + 1,
-      lineHeight: size - 2.5,
+      fontSize,
+      lineHeight: size - 3,
       fontWeight: "bold",
       textAlign: "center",
       color: col,

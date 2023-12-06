@@ -18,7 +18,7 @@ import {
   View,
 } from "react-native";
 
-import { useSendDebugLog } from "../../debugLog";
+import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";

@@ -8,7 +8,7 @@ import { registerRootComponent } from "expo";
 import { enableScreens } from "react-native-screens";
 
 import App from "./src/App";
-import { initDebugLog } from "./src/debugLog";
+import { initDebugLog } from "./src/common/debugLog";
 import { startSync } from "./src/sync/sync";
 
 // Keep a local debug log. See Send Debug Log in the app.
