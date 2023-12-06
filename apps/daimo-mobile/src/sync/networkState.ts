@@ -1,5 +1,4 @@
 import { ignore } from "@daimo/common";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 
 interface NetworkState {
