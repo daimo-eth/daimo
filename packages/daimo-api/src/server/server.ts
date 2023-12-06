@@ -47,7 +47,7 @@ async function main() {
 
   const shovelWatcher = new Watcher();
   shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
-  setInterval(() => shovelWatcher.run(), 1000);
+  shovelWatcher.watch();
 
   const notifier = new PushNotifier(
     coinIndexer,
