@@ -229,7 +229,7 @@ export class ViemClient {
     for (
       let fromBlock = startBlock;
       fromBlock < lastBlockNum;
-      fromBlock += step
+      fromBlock += step + 1n
     ) {
       let toBlock = fromBlock + step;
       if (toBlock > lastBlockNum) toBlock = lastBlockNum;
