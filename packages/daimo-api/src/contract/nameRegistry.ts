@@ -11,7 +11,14 @@ import {
   nameRegistryProxyConfig,
 } from "@daimo/contract";
 import { Pool } from "pg";
-import { Address, encodeFunctionData, getAddress, isAddress } from "viem";
+import {
+  Address,
+  bytesToHex,
+  bytesToString,
+  encodeFunctionData,
+  getAddress,
+  isAddress,
+} from "viem";
 import { normalize } from "viem/ens";
 
 import { chainConfig } from "../env";
@@ -55,18 +62,22 @@ export class NameRegistry {
   async load(pg: Pool, from: bigint, to: bigint) {
     const result = await pg.query(
       `
-        select
-          block_num as "blockNumber",
-          encode(addr, 'hex') as addr,
-          encode(name, 'hex') as name
+        select block_num, addr, name
         from names
         where block_num >= $1 and block_num <= $2
       `,
       [from, to]
     );
-    console.log(`[NAME-REG] parsed ${result.rows.length} named account(s)`);
-    this.logs.push(...result.rows);
-    result.rows.forEach(this.cacheAccount);
+    const names = result.rows.map((r) => {
+      return {
+        blockNumber: BigInt(r.block_num),
+        name: bytesToString(r.name, { size: 32 }),
+        addr: bytesToHex(r.addr, { size: 20 }),
+      };
+    });
+    console.log(`[NAME-REG] parsed ${names.length} named account(s)`);
+    this.logs.push(...names);
+    names.forEach(this.cacheAccount);
   }
 
   /** Cache an account in memory. */
