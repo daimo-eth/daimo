@@ -5,6 +5,12 @@ import "account-abstraction/core/BasePaymaster.sol";
 
 import "./DaimoAccount.sol";
 
+/// Coinbase MetaPaymaster
+/// See https://github.com/base-org/paymaster/pull/22
+interface IMetaPaymaster {
+    function fund(address target, uint256 amount) external;
+}
+
 /// Paymaster contract to sponsor user operations on DaimoAccount, making them
 /// free for the user.
 /// Pattern matches the calldata pattern of DaimoAccount, sponsoring ops that
@@ -12,9 +18,14 @@ import "./DaimoAccount.sol";
 /// into a set of whitelisted contract address (destWhitelist) or to the sender
 /// contract itself.
 /// Requires a server-signed ticket whitelisting each sender address.
+///
+/// This variant uses a parent MetaPaymaster to pay gas.
 contract DaimoPaymaster is BasePaymaster {
     mapping(address => bool) public destWhitelist;
     address public ticketSigner;
+    IMetaPaymaster public immutable metaPaymaster;
+
+    uint256 private constant POST_OP_OVERHEAD = 34982;
 
     event UserOperationSponsored(
         bytes32 indexed userOpHash,
@@ -23,9 +34,11 @@ contract DaimoPaymaster is BasePaymaster {
 
     constructor(
         IEntryPoint _entryPoint,
-        address _owner
+        address _owner,
+        IMetaPaymaster _metaPaymaster
     ) BasePaymaster(_entryPoint) {
         transferOwnership(_owner);
+        metaPaymaster = _metaPaymaster;
     }
 
     function setDestAddressWhitelist(
@@ -82,12 +95,39 @@ contract DaimoPaymaster is BasePaymaster {
 
         emit UserOperationSponsored(userOpHash, requiredPreFund);
         return (
-            "",
+            abi.encode(userOp.maxFeePerGas, userOp.maxPriorityFeePerGas),
             _packValidationData({
                 sigFailed: false, // sig did not fail
                 validUntil: validUntil,
                 validAfter: 0
             })
         );
+    }
+
+    // From https://github.com/base-org/paymaster/pull/22
+    function _postOp(
+        PostOpMode mode,
+        bytes calldata context,
+        uint256 actualGasCost
+    ) internal override {
+        if (mode == PostOpMode.postOpReverted) {
+            return;
+        }
+        (uint256 maxFeePerGas, uint256 maxPriorityFeePerGas) = abi.decode(
+            context,
+            (uint256, uint256)
+        );
+        uint256 gasPrice = min(
+            maxFeePerGas,
+            maxPriorityFeePerGas + block.basefee
+        );
+        metaPaymaster.fund(
+            address(this),
+            actualGasCost + POST_OP_OVERHEAD * gasPrice
+        );
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
     }
 }

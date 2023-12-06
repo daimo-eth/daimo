@@ -19,7 +19,11 @@ contract PaymasterTest is Test {
     function setUp() public {
         entryPoint = new EntryPoint();
         owner = 0x2222222222222222222222222222222222222222;
-        paymaster = new DaimoPaymaster(entryPoint, owner);
+        paymaster = new DaimoPaymaster(
+            entryPoint,
+            owner,
+            IMetaPaymaster(address(0))
+        );
         (apiSigner, apiSignerPk) = makeAddrAndKey("alice");
     }
 

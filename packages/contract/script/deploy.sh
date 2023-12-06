@@ -32,7 +32,7 @@ forge script script/DeployTestAccount.s.sol --sig "run(address)" $ADDR_ACCOUNT_F
 # Deploy paymaster and verify it on Etherscan
 forge script script/ManagePaymaster.s.sol --sig "deploy()" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 
-PAYMASTER_ADDR="0x6f0f82fafac7b5d8c269b02d408f094bac6cf877"
+PAYMASTER_ADDR="0xedb395b8BD78788A57e3C8eD9b748f9CC29C2864"
 
 # Start paymaster by depositing and whitelisting
 forge script script/ManagePaymaster.s.sol --sig "start(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
