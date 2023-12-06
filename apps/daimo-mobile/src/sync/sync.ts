@@ -29,7 +29,9 @@ export function startSync() {
     .then((success) => {
       if (!success) {
         updateNetworkState(() => {
-          return { status: "offline", syncAttemptsFailed: 1 };
+          // set fail to 3 because at 2 it would remove offline banner
+          // for one try even if sync failed
+          return { status: "offline", syncAttemptsFailed: 3 };
         });
       }
     })
