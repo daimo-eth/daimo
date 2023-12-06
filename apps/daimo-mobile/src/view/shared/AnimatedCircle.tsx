@@ -11,6 +11,7 @@ import { color } from "./style";
 
 const ACircle = Animated.createAnimatedComponent(Circle);
 
+/** Animated circular progress bar. */
 export const AnimatedCircle = ({
   progress,
   size,
@@ -99,7 +100,6 @@ const styles = StyleSheet.create({
   },
   circleBehind: {
     position: "absolute",
-    transform: [{ rotate: "-90deg" }],
     opacity: 0.4,
   },
 });
