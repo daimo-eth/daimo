@@ -1,4 +1,5 @@
 import { CoinIndexer } from "../src/contract/coinIndexer";
+import { KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
@@ -12,10 +13,11 @@ async function main() {
   const opIndexer = new OpIndexer();
   const coinIndexer = new CoinIndexer(vc, opIndexer);
   const nameReg = new NameRegistry(vc, new Set<string>());
+  const keyReg = new KeyRegistry();
   const noteIndexer = new NoteIndexer(nameReg);
 
   const shovelWatcher = new Watcher();
-  shovelWatcher.add(nameReg, opIndexer, coinIndexer, noteIndexer);
+  shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
 
   const { startBlock, lastBlockNum } = {
     startBlock: 5700000n,
@@ -23,12 +25,18 @@ async function main() {
   };
   await shovelWatcher.init(startBlock, lastBlockNum);
 
+  let numKeyData: number = 0;
+  keyReg["addrToKeyData"].forEach((addr, kd) => (numKeyData += kd.length));
+
   console.log({
     allTransfers: coinIndexer["allTransfers"].length,
     txHashToSortedUserOps: opIndexer["txHashToSortedUserOps"].size,
     nonceMetadataToTxes: opIndexer["nonceMetadataToTxes"].size,
     accounts: nameReg["accounts"].length,
     notes: noteIndexer["notes"].size,
+    keyToAddr: keyReg["keyToAddr"].size,
+    addrToKeyData: keyReg["addrToKeyData"].size,
+    numKeyData,
   });
 }
 main();

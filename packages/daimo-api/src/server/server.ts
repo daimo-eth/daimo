@@ -35,7 +35,7 @@ async function main() {
   await db.createTables();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
-  const keyReg = new KeyRegistry(vc);
+  const keyReg = new KeyRegistry();
   const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
   const opIndexer = new OpIndexer();
   const paymaster = new Paymaster(vc, bundlerClient, db);
