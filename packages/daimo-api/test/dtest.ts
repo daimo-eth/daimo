@@ -1,4 +1,5 @@
 import { CoinIndexer } from "../src/contract/coinIndexer";
+import { NameRegistry } from "../src/contract/nameRegistry";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { getViemClientFromEnv } from "../src/network/viemClient";
 import { Watcher } from "../src/shovel/watcher";
@@ -9,19 +10,22 @@ async function main() {
 
   const opIndexer = new OpIndexer();
   const coinIndexer = new CoinIndexer(vc, opIndexer);
+  const nameReg = new NameRegistry(vc, new Set<string>());
+
+  const shovelWatcher = new Watcher();
+  shovelWatcher.add(nameReg, opIndexer, coinIndexer);
+
   const { startBlock, lastBlockNum } = {
     startBlock: 5700000n,
     lastBlockNum: 7000000n,
   };
-
-  const shovelWatcher = new Watcher();
-  shovelWatcher.add(opIndexer, coinIndexer);
   await shovelWatcher.init(startBlock, lastBlockNum);
 
   console.log({
-    transfers: coinIndexer["allTransfers"].length,
-    op1: opIndexer["txHashToSortedUserOps"].size,
-    op2: opIndexer["nonceMetadataToTxes"].size,
+    allTransfers: coinIndexer["allTransfers"].length,
+    txHashToSortedUserOps: opIndexer["txHashToSortedUserOps"].size,
+    nonceMetadataToTxes: opIndexer["nonceMetadataToTxes"].size,
+    accounts: nameReg["accounts"].length,
   });
 }
 main();
