@@ -23,6 +23,7 @@ import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import { Account } from "../../model/account";
+import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
@@ -141,6 +142,9 @@ function HomeScreenInner({ account }: { account: Account }) {
   // Handle incoming applinks
   useInitNavLinks();
 
+  // No suggested actions when offline.
+  const netState = useNetworkState();
+
   return (
     <View>
       <OfflineHeader
@@ -167,9 +171,10 @@ function HomeScreenInner({ account }: { account: Account }) {
         keyboardShouldPersistTaps="handled"
       >
         <Spacer h={Math.max(16, ins.top)} />
-        {account.suggestedActions.length > 0 && (
-          <SuggestedActionBox action={account.suggestedActions[0]} />
-        )}
+        {account.suggestedActions.length > 0 &&
+          netState.status !== "offline" && (
+            <SuggestedActionBox action={account.suggestedActions[0]} />
+          )}
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults

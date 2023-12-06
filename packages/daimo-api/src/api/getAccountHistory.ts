@@ -149,16 +149,16 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
         url: `daimo://settings/add-passkey`,
       });
     }
-
-    // Active accounts: ask them to join our TG
-    ret.push({
-      id: "2023-12-join-tg-5",
-      icon: "comment-discussion",
-      title: "Feedback? Ideas?",
-      subtitle: "Join our Telegram group.",
-      url: `https://t.me/+to2ghQJfgic0YjA9`,
-    });
   }
+
+  // Active accounts: ask them to join our TG
+  ret.push({
+    id: "2023-12-join-tg-5",
+    icon: "comment-discussion",
+    title: "Feedback? Ideas?",
+    subtitle: "Join our Telegram group.",
+    url: `https://t.me/+to2ghQJfgic0YjA9`,
+  });
 
   return ret;
 }
