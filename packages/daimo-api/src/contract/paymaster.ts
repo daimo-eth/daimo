@@ -182,10 +182,7 @@ async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
   assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
   // Experimentally try the new MetaPaymaster-sponsored Daimo paymaster.
-  const paymasterAddr =
-    sender.name === "dcposch" || sender.name!.startsWith("test")
-      ? daimoPaymasterAddress
-      : "0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877";
+  const paymasterAddr = daimoPaymasterAddress;
 
   const ret = concatHex([paymasterAddr, sigHex, validUntilHex]);
   assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");

@@ -192,7 +192,9 @@ export function createRouter(
         try {
           return await bundlerClient.sendUserOp(op);
         } catch (e: any) {
-          span.setAttribute("op.send_err", e.message || "");
+          const em = e.message || "no error message";
+          span.setAttribute("op.send_err", em);
+          telemetry.recordClippy(`❌ sendUserOp ${senderName}: ${em}`, "error");
           throw e;
         }
       }),
