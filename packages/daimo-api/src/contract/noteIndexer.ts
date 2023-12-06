@@ -1,18 +1,13 @@
 import {
   DaimoNoteStatus,
-  EAccount,
   amountToDollars,
   assertNotNull,
   getEAccountStr,
 } from "@daimo/common";
 import { Pool } from "pg";
-import { Address } from "viem";
+import { Address, bytesToHex } from "viem";
 
-//type nameResolver = (address: Address) => Promise<EAccount>;
-
-interface accountGetter {
-  getEAccount(address: Address): Promise<EAccount>;
-}
+import { NameRegistry } from "./nameRegistry";
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
@@ -20,7 +15,7 @@ export class NoteIndexer {
 
   private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
 
-  constructor(private ag: accountGetter) {}
+  constructor(private nameReg: NameRegistry) {}
 
   addListener(listener: (log: DaimoNoteStatus[]) => void) {
     this.listeners.push(listener);
@@ -44,44 +39,49 @@ export class NoteIndexer {
     const result = await pg.query(
       `
         select
-        block_num,
-        encode(block_hash, 'hex') as block_hash,
-        tx_idx,
-        encode(tx_hash, 'hex') as tx_hash,
-        log_idx,
-        encode(log_addr, 'hex') as log_addr,
-
-        encode(f, 'hex') as "from",
-        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
-        amount
-      from note_created
-      where block_num >= $1 and block_num <= $2
+          tx_hash,
+          log_idx,
+          f,
+          ephemeral_owner,
+          amount
+        from note_created
+        where block_num >= $1 and block_num <= $2
     `,
       [from, to]
     );
-    const logs = result.rows.map(async (row) => {
-      console.log(`[NOTE] NoteCreated ${row.ephemeral_owner}`);
-      if (this.notes.get(row.ephemeral_owner) != null) {
-        throw new Error(
-          `dupe NoteCreated: ${row.ephemeral_owner} ${row.tx_hash} ${row.log_idx}`
-        );
-      }
-      const sender = await this.ag.getEAccount(row.from);
-      const dollars = amountToDollars(BigInt(row.amount));
-      const newNote: DaimoNoteStatus = {
-        status: "confirmed",
-        dollars,
-        link: {
-          type: "note",
-          previewSender: getEAccountStr(sender),
-          previewDollars: dollars,
-          ephemeralOwner: row.ephemeral_owner,
-        },
-        sender,
-      };
-      this.notes.set(row.ephemeral_owner, newNote);
-      return newNote;
-    });
+    const logs = result.rows
+      .map((r) => {
+        return {
+          transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+          logIndex: r.log_idx,
+          from: bytesToHex(r.f, { size: 20 }),
+          ephemeralOwner: bytesToHex(r.ephemeral_owner, { size: 20 }),
+          amount: BigInt(r.amount),
+        };
+      })
+      .map(async (log) => {
+        console.log(`[NOTE] NoteCreated ${log.ephemeralOwner}`);
+        if (this.notes.get(log.ephemeralOwner) != null) {
+          throw new Error(
+            `dupe NoteCreated: ${log.ephemeralOwner} ${log.transactionHash} ${log.logIndex}`
+          );
+        }
+        const sender = await this.nameReg.getEAccount(log.from);
+        const dollars = amountToDollars(log.amount);
+        const newNote: DaimoNoteStatus = {
+          status: "confirmed",
+          dollars,
+          link: {
+            type: "note",
+            previewSender: getEAccountStr(sender),
+            previewDollars: dollars,
+            ephemeralOwner: log.ephemeralOwner,
+          },
+          sender,
+        };
+        this.notes.set(log.ephemeralOwner, newNote);
+        return newNote;
+      });
     return await Promise.all(logs);
   }
 
@@ -93,42 +93,48 @@ export class NoteIndexer {
     const result = await pg.query(
       `
         select
-        block_num,
-        encode(block_hash, 'hex') as block_hash,
-        tx_idx,
-        encode(tx_hash, 'hex') as tx_hash,
-        log_idx,
-        encode(log_addr, 'hex') as log_addr,
-
-        encode(f, 'hex') as "from",
-        encode(redeemer, 'hex') as "redeemer",
-        encode(ephemeral_owner, 'hex') as "ephemeral_owner",
-        amount,
+          tx_hash,
+          log_idx,
+          f,
+          redeemer,
+          ephemeral_owner,
+          amount
       from note_redeemed
       where block_num >= $1 and block_num <= $2
     `,
       [from, to]
     );
-    const logs = result.rows.map(async (row) => {
-      console.log(`[NOTE] NoteRedeemed ${row.ephemeral_owner}`);
-      const logInfo = () =>
-        `[${row.tx_hash} ${row.log_idx} ${row.ephemeral_owner}]`;
-      // Find and sanity check the Note that was redeemed
-      const note = this.notes.get(row.ephemeral_owner);
-      if (note == null) {
-        throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
-      } else if (note.status !== "confirmed") {
-        throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
-      } else if (note.dollars !== amountToDollars(BigInt(row.amount))) {
-        throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
-      }
-      // Mark as redeemed
-      assertNotNull(row.redeemer, "redeemer is null");
-      assertNotNull(row.from, "fromis null");
-      note.status = row.redeemer === row.from ? "cancelled" : "claimed";
-      note.claimer = await this.ag.getEAccount(row.redeemer);
-      return note;
-    });
+    const logs = result.rows
+      .map((r) => {
+        return {
+          transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+          logIndex: r.log_idx,
+          from: bytesToHex(r.f, { size: 20 }),
+          redeemer: bytesToHex(r.redeemer, { size: 20 }),
+          ephemeralOwner: bytesToHex(r.ephemeral_owner, { size: 20 }),
+          amount: BigInt(r.amount),
+        };
+      })
+      .map(async (log) => {
+        console.log(`[NOTE] NoteRedeemed ${log.ephemeralOwner}`);
+        const logInfo = () =>
+          `[${log.transactionHash} ${log.logIndex} ${log.ephemeralOwner}]`;
+        // Find and sanity check the Note that was redeemed
+        const note = this.notes.get(log.ephemeralOwner);
+        if (note == null) {
+          throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
+        } else if (note.status !== "confirmed") {
+          throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
+        } else if (note.dollars !== amountToDollars(log.amount)) {
+          throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
+        }
+        // Mark as redeemed
+        assertNotNull(log.redeemer, "redeemer is null");
+        assertNotNull(log.from, "fromis null");
+        note.status = log.redeemer === log.from ? "cancelled" : "claimed";
+        note.claimer = await this.nameReg.getEAccount(log.redeemer);
+        return note;
+      });
     return await Promise.all(logs);
   }
 
