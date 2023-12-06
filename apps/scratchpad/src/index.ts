@@ -56,11 +56,8 @@ async function metrics() {
 
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
   const nameReg = new NameRegistry(vc, new Set([]));
-  const opIndexer = new OpIndexer(vc);
+  const opIndexer = new OpIndexer();
   const coinIndexer = new CoinIndexer(vc, opIndexer);
-
-  console.log(`[METRICS] initializing indexers...`);
-  await Promise.all([nameReg.init(), opIndexer.init()]);
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);

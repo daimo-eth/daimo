@@ -35,6 +35,12 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
+interface Registration {
+  blockNumber: bigint;
+  name: string;
+  addr: Address;
+}
+
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
   /* In-memory indexer, for now. */
@@ -42,12 +48,15 @@ export class NameRegistry {
   private addrToName = new Map<Address, string>();
   private accounts: DAccount[] = [];
 
+  logs: Registration[] = [];
+
   constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const result = await pg.query(
       `
         select
+          block_num as "blockNumber",
           encode(addr, 'hex') as addr,
           encode(name, 'hex') as name
         from names
@@ -56,6 +65,7 @@ export class NameRegistry {
       [from, to]
     );
     console.log(`[NAME-REG] parsed ${result.rows.length} named account(s)`);
+    this.logs.push(...result.rows);
     result.rows.forEach(this.cacheAccount);
   }
 
