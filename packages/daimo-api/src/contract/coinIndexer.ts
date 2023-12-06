@@ -45,7 +45,7 @@ export class CoinIndexer {
 
           encode(f, 'hex') as "from",
           encode(t, 'hex') as "to",
-          v as "value",
+          v as "value"
         from transfers
         where block_num >= $1
         and block_num <= $2
