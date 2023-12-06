@@ -26,13 +26,16 @@ import { Account, getAccountManager } from "../model/account";
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
   maybeSync(true).then((success) => {
-    if (success) {
-      // create small delay to let interface render becuase this callback
-      // run right after getting data so the interface still got to adapt
-      setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 300);
+    if (!success) {
+      updateNetworkState(() => {
+        return { status: "offline", syncAttemptsFailed: 1 };
+      });
     }
+    // create small delay to let interface render becuase this callback
+    // run right after getting data so the interface still got to adapt
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 300);
   });
   setInterval(maybeSync, 1_000);
 }

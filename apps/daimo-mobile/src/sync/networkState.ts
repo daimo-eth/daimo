@@ -38,13 +38,6 @@ export function updateNetworkState(fn: (state: NetworkState) => NetworkState) {
   const newJson = JSON.stringify(newState);
   if (oldJson === newJson) return;
 
-  if (newState.status === "offline") {
-    // create small delay to let interface adopt to the new banner
-    setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 200);
-  }
-
   console.log(`[NETWORK] updating ${oldJson} > ${newJson}`);
   currentState = newState;
   listeners.forEach((listener) => listener(currentState));
