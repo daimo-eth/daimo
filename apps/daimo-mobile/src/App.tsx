@@ -15,6 +15,7 @@ import { color } from "./view/shared/style";
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  console.log("[APP] rendering");
   const [account] = useAccount();
 
   // Display notifications, listen for push notifications
