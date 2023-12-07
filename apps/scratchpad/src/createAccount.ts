@@ -48,6 +48,15 @@ export async function createAccount() {
   const publicClient = createPublicClient({ chain, transport: http() });
   console.log(`Connected to ${chain.name}, ${publicClient.transport.url}`);
 
+  const funderPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
+  const funderAccount = privateKeyToAccount(funderPrivKey);
+  console.log(`Faucet account: ${funderAccount.address}`);
+  const walletClient = createWalletClient({
+    account: funderAccount,
+    chain,
+    transport: http(),
+  });
+
   // Generate keypair
   const p256 = { name: "ECDSA", namedCurve: "P-256", hash: "SHA-256" };
   const key = await crypto.subtle.generateKey(p256, true, ["sign", "verify"]);
@@ -119,7 +128,7 @@ export async function createAccount() {
 
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
-    return bundlerClient.sendUserOp(op);
+    return bundlerClient.sendUserOp(op, walletClient);
   };
 
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
@@ -136,15 +145,6 @@ export async function createAccount() {
     ...daimoAccountFactoryConfig,
     functionName: "getAddress",
     args,
-  });
-
-  const funderPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
-  const funderAccount = privateKeyToAccount(funderPrivKey);
-  console.log(`Faucet account: ${funderAccount.address}`);
-  const walletClient = createWalletClient({
-    account: funderAccount,
-    chain,
-    transport: http(),
   });
 
   // Deploy account

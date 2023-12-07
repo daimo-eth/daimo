@@ -28,6 +28,7 @@ async function main() {
   const vc = getViemClientFromEnv();
   await vc.init();
   const bundlerClient = getBundlerClientFromEnv();
+  bundlerClient.init(vc.publicClient);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
