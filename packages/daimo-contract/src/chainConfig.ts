@@ -44,6 +44,6 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         pimlicoPaymasterAddress: "0x13f490FafBb206440F25760A10C21A6220017fFa",
       };
     default:
-      throw new Error(`unknown DAIMO_CHAIN '${daimoChain}'`);
+      throw new Error(`unknown chain '${daimoChain}'`);
   }
 }

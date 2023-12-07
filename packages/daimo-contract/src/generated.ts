@@ -840,45 +840,12 @@ export const daimoPaymasterABI = [
         type: 'address',
       },
       { name: '_owner', internalType: 'address', type: 'address' },
-    ],
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
       {
-        name: 'previousOwner',
-        internalType: 'address',
+        name: '_metaPaymaster',
+        internalType: 'contract IMetaPaymaster',
         type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
       },
     ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'userOpHash',
-        internalType: 'bytes32',
-        type: 'bytes32',
-        indexed: true,
-      },
-      {
-        name: 'requiredPreFund',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'UserOperationSponsored',
   },
   {
     stateMutability: 'payable',
@@ -918,6 +885,15 @@ export const daimoPaymasterABI = [
     inputs: [],
     name: 'getDeposit',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'metaPaymaster',
+    outputs: [
+      { name: '', internalType: 'contract IMetaPaymaster', type: 'address' },
+    ],
   },
   {
     stateMutability: 'view',
@@ -1058,10 +1034,48 @@ export const daimoPaymasterABI = [
     name: 'withdrawTo',
     outputs: [],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'requiredPreFund',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'UserOperationSponsored',
+  },
 ] as const
 
 export const daimoPaymasterAddress =
-  '0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877' as const
+  '0xedb395b8BD78788A57e3C8eD9b748f9CC29C2864' as const
 
 export const daimoPaymasterConfig = {
   address: daimoPaymasterAddress,
@@ -2351,6 +2365,23 @@ export const entryPointABI = [
     outputs: [],
   },
   { stateMutability: 'payable', type: 'receive' },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IMetaPaymaster
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const iMetaPaymasterABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'target', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'fund',
+    outputs: [],
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

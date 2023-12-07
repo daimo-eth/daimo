@@ -1,4 +1,4 @@
-import { getDebugLog, initDebugLog } from "../src/debugLog";
+import { getDebugLog, initDebugLog } from "../src/common/debugLog";
 
 describe("debugLog", () => {
   initDebugLog();

@@ -7,7 +7,6 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
 import {
-  Address,
   Hex,
   concatHex,
   hexToBigInt,
@@ -16,12 +15,12 @@ import {
   numberToHex,
   toHex,
 } from "viem";
-import { privateKeyToAccount, sign } from "viem/accounts";
+import { sign } from "viem/accounts";
 
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
-import { ViemClient } from "../network/viemClient";
+import { ViemClient, getEOA } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
@@ -140,7 +139,7 @@ export class Paymaster {
       sender.name != null &&
       (await this.db.checkPaymasterWhitelist(sender.name));
     const paymasterAndData = isSponsored
-      ? await getPaymasterWithSignature(sender.addr)
+      ? await getPaymasterWithSignature(sender)
       : chainConfig.pimlicoPaymasterAddress;
 
     // TODO: estimate real Pimlico fee for non-sponsored ops.
@@ -164,12 +163,12 @@ const signerPrivateKey = assertNotNull(
   process.env.DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY,
   "Missing DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY"
 ) as Hex;
-const signer = privateKeyToAccount(signerPrivateKey);
+const signer = getEOA(signerPrivateKey);
 
-async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
+async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
   const validUntil = (Date.now() / 1000 + 5 * 60) | 0; // 5 minute validity
   const validUntilHex = numberToHex(validUntil, { size: 6 });
-  const ticketHex = concatHex([addr, validUntilHex]);
+  const ticketHex = concatHex([sender.addr, validUntilHex]);
   assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
   const ticketHash = keccak256(ticketHex);
   console.log(`[PAYMASTER] sign ${ticketHex} with ${signer.address}`);
@@ -182,7 +181,10 @@ async function getPaymasterWithSignature(addr: Address): Promise<Hex> {
   ]);
   assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
-  const ret = concatHex([daimoPaymasterAddress, sigHex, validUntilHex]);
+  // Experimentally try the new MetaPaymaster-sponsored Daimo paymaster.
+  const paymasterAddr = daimoPaymasterAddress;
+
+  const ret = concatHex([paymasterAddr, sigHex, validUntilHex]);
   assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");
   return ret;
 }

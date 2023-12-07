@@ -11,11 +11,15 @@ contract DeployPaymasterScript is Script {
     IEntryPoint public entryPoint =
         IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
 
+    // Base USDC MetaPaymaster
+    IMetaPaymaster public metaPaymaster =
+        IMetaPaymaster(0x75B9328BB753144705b77b215E304eC7ef45235C);
+
     function deploy() public {
         vm.startBroadcast();
 
         // Use CREATE2
-        new DaimoPaymaster{salt: 0}(entryPoint, msg.sender);
+        new DaimoPaymaster{salt: 0}(entryPoint, msg.sender, metaPaymaster);
 
         vm.stopBroadcast();
     }
@@ -26,7 +30,8 @@ contract DeployPaymasterScript is Script {
         // paymaster.addStake{value: 0.05 ether}(86400);
 
         // deposit for paymaster
-        addDeposit(paymaster);
+        // unnecessary with metapaymaster
+        // addDeposit(paymaster);
 
         // whitelist destinations for paymaster
         whitelistDests(paymaster);

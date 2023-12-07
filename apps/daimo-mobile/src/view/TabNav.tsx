@@ -92,7 +92,10 @@ function getTabOptions(
       fontSize: 11,
       fontWeight: "600",
       width: 100,
+      textTransform: "none",
     },
+    tabBarActiveTintColor: color.primary,
+    tabBarInactiveTintColor: color.grayMid,
     tabBarIndicatorStyle: {
       opacity: 0,
     },
