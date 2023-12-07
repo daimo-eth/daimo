@@ -24,7 +24,12 @@ export class KeyRegistry {
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
     changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
-    for (const change of changes) {
+    const sortedChanges = changes!.sort((a, b) => {
+      const diff = a.blockNumber - b.blockNumber;
+      if (diff !== 0n) return Number(diff);
+      return a.logIndex - b.logIndex;
+    });
+    for (const change of sortedChanges) {
       const addr = getAddress(change.address);
       if (this.addrToLogs.get(addr) === undefined) {
         this.addrToLogs.set(addr, []);
