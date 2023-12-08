@@ -1,6 +1,6 @@
 import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
 import { Pool } from "pg";
-import { Hex, numberToHex } from "viem";
+import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { chainConfig } from "../env";
 
@@ -19,24 +19,18 @@ export class OpIndexer {
   async load(pg: Pool, from: bigint, to: bigint) {
     const result = await pg.query(
       `
-        select
-          encode(tx_hash, 'hex') as tx_hash,
-          log_idx,
-          op_nonce,
-          encode(op_hash, 'hex') as op_hash
+        select tx_hash, log_idx, op_nonce, op_hash,
         from erc4337_user_op
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
+        where block_num >= $1 and block_num <= $2 and chain_id = $3
       `,
       [from, to, chainConfig.chainL2.id]
     );
     result.rows.forEach((row) => {
       const userOp: UserOp = {
-        transactionHash: row.tx_hash,
+        transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         logIndex: row.log_idx,
         nonce: BigInt(row.op_nonce),
-        hash: row.op_hash,
+        hash: bytesToHex(row.op_hash, { size: 32 }),
       };
       const curLogs = this.txHashToSortedUserOps.get(userOp.transactionHash);
       const newLogs = curLogs ? [...curLogs, row] : [userOp];
