@@ -36,9 +36,11 @@ export class NoteIndexer {
           ephemeral_owner,
           amount
         from note_created
-        where block_num >= $1 and block_num <= $2
+        where block_num >= $1
+        and block_num <= $2
+        and chain_id = $3
     `,
-      [from, to]
+      [from, to, chainConfig.chainL2.id]
     );
     const logs = result.rows
       .map((r) => {
