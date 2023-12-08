@@ -35,6 +35,10 @@ export class Watcher {
     this.indexers.push(...i);
   }
 
+  async init() {
+    this.indexRange(this.latest, await this.getShovelLatest());
+  }
+
   async watch() {
     setInterval(async () => {
       const shovelLatest = await this.getShovelLatest();
@@ -42,7 +46,7 @@ export class Watcher {
     }, 1000);
   }
 
-  async init(start: bigint, stop: bigint) {
+  async indexRange(start: bigint, stop: bigint) {
     this.latest = start - 1n;
     while (this.latest < stop) {
       this.latest = await this.index(this.latest + 1n, stop, this.batchSize);

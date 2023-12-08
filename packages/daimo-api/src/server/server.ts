@@ -47,7 +47,6 @@ async function main() {
 
   const shovelWatcher = new Watcher();
   shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
-  shovelWatcher.watch();
 
   const notifier = new PushNotifier(
     coinIndexer,
@@ -61,7 +60,10 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    await Promise.all([paymaster.init()]);
+    await shovelWatcher.init();
+    shovelWatcher.watch();
+
+    await paymaster.init();
 
     console.log(`[API] initializing push notifications...`);
     await Promise.all([notifier.init(), faucet.init(), crontab.init()]);

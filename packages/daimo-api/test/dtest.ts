@@ -23,7 +23,7 @@ async function main() {
     startBlock: 5700000n,
     lastBlockNum: 7000000n,
   };
-  await shovelWatcher.init(startBlock, lastBlockNum);
+  await shovelWatcher.indexRange(startBlock, lastBlockNum);
 
   let numKeyData: number = 0;
   keyReg["addrToKeyData"].forEach((addr, kd) => (numKeyData += kd.length));
