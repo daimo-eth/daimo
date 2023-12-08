@@ -1,16 +1,17 @@
 import { Pool } from "pg";
 
+import { chainConfig } from "../env";
+
 interface indexer {
   load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
 }
 
 export class Watcher {
-  private srcName: string = "base";
-  private latest: bigint = 5700000n;
+  private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
   private batchSize = 10000n;
 
   private indexers: indexer[] = [];
-  private pg: Pool = new Pool({ connectionString: "postgres:///shovel" });
+  private pg: Pool = new Pool({ connectionString: "postgres:///shovel_full" });
 
   add(...i: indexer[]) {
     this.indexers.push(...i);
@@ -45,12 +46,12 @@ export class Watcher {
   async getShovelLatest(): Promise<bigint> {
     const result = await this.pg.query(
       `
-      select max(num) as num 
+      select max(num) as num
       from shovel.task_updates
-      where src_name = $1
+      where chain_id = $1
       and backfill = false;
     `,
-      [this.srcName]
+      [chainConfig.chainL2.id]
     );
     return BigInt(result.rows[0].num);
   }

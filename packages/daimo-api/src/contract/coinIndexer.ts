@@ -49,9 +49,10 @@ export class CoinIndexer {
         from transfers
         where block_num >= $1
         and block_num <= $2
-        and log_addr = $3;
+        and chain_id = $3
+        and log_addr = $4;
       `,
-      [from, to, toBytes(chainConfig.tokenAddress)]
+      [from, to, chainConfig.chainL2.id, toBytes(chainConfig.tokenAddress)]
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {

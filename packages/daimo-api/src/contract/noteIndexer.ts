@@ -8,6 +8,7 @@ import { Pool } from "pg";
 import { Address, bytesToHex } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
+import { chainConfig } from "../env";
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
@@ -100,9 +101,11 @@ export class NoteIndexer {
           ephemeral_owner,
           amount
       from note_redeemed
-      where block_num >= $1 and block_num <= $2
+      where block_num >= $1
+      and block_num <= $2
+      and chain_id = $3
     `,
-      [from, to]
+      [from, to, chainConfig.chainL2.id]
     );
     const logs = result.rows
       .map((r) => {

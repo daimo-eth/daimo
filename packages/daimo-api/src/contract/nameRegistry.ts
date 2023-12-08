@@ -64,9 +64,11 @@ export class NameRegistry {
       `
         select block_num, addr, name
         from names
-        where block_num >= $1 and block_num <= $2
+        where block_num >= $1
+        and block_num <= $2
+        and chain_id = $3
       `,
-      [from, to]
+      [from, to, chainConfig.chainL2.id]
     );
     const names = result.rows.map((r) => {
       return {

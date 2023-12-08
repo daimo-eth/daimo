@@ -2,6 +2,8 @@ import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
+import { chainConfig } from "../env";
+
 export interface KeyChange {
   change: "added" | "removed";
   blockNumber: bigint;
@@ -101,11 +103,11 @@ export class KeyRegistry {
           array_agg(key) as key
         from ${table}
         where block_num >= $1 and block_num <= $2
-        and src_name = 'base'
+        and chain_id = $3
         group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
         order by block_num, tx_idx, log_idx asc
       `,
-      [from, to]
+      [from, to, chainConfig.chainL2.id]
     );
     return result.rows.map((row) => ({
       change,
