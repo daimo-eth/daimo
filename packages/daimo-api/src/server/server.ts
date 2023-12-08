@@ -45,9 +45,6 @@ async function main() {
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
 
-  const shovelWatcher = new Watcher();
-  shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
-
   const notifier = new PushNotifier(
     coinIndexer,
     nameReg,
@@ -60,6 +57,8 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
+    const shovelWatcher = new Watcher();
+    shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
     await shovelWatcher.init();
     shovelWatcher.watch();
 
