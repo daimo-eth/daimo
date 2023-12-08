@@ -190,11 +190,7 @@ export function createRouter(
         span.setAttribute("op.paymaster", op.paymasterAndData);
 
         try {
-          return await bundlerClient.sendUserOp(
-            op,
-            vc.walletClient,
-            vc.publicClient
-          );
+          return await bundlerClient.sendUserOp(op, vc);
         } catch (e: any) {
           const em = e.message || "no error message";
           span.setAttribute("op.send_err", em);

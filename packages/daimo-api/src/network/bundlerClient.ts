@@ -3,26 +3,14 @@ import {
   bundleBulkerAddress,
   daimoTransferInflatorABI,
 } from "@daimo/bulk";
-import { UserOpHex, assert } from "@daimo/common";
+import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
 import { BundlerJsonRpcProvider, Constants } from "userop";
-import {
-  Account,
-  Address,
-  Chain,
-  Hex,
-  PublicClient,
-  Transport,
-  WalletClient,
-  concatHex,
-  hexToBigInt,
-  isHex,
-  numberToHex,
-  stringToHex,
-  toHex,
-} from "viem";
+import { Address, Hex, PublicClient, hexToBigInt, isHex } from "viem";
 
+import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
+import { chainConfig } from "../env";
 
 interface GasEstimate {
   preVerificationGas: Hex;
@@ -44,10 +32,7 @@ export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
   // Compression settings
-  private inflatorAddr: Address = "0xc4616e117C97088c991AE0ddDead010e384C00d4";
-  private inflatorID: number | undefined;
-  private inflatorCoinAddr: Address | undefined;
-  private inflatorPaymaster: Address | undefined;
+  private compressionInfo: CompressionInfo | undefined;
 
   constructor(bundlerRpcUrl: string, private vc?: ViemClient) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
@@ -55,37 +40,50 @@ export class BundlerClient {
 
   async init(publicClient: PublicClient) {
     console.log(`[BUNDLER] init, loading compression info`);
-    this.inflatorID = await publicClient.readContract({
-      abi: bundleBulkerABI,
-      address: bundleBulkerAddress,
-      functionName: "inflatorToID",
-      args: [this.inflatorAddr],
-    });
-    this.inflatorCoinAddr = await publicClient.readContract({
-      abi: daimoTransferInflatorABI,
-      address: this.inflatorAddr,
-      functionName: "coinAddr",
-    });
-    this.inflatorPaymaster = await publicClient.readContract({
-      abi: daimoTransferInflatorABI,
-      address: this.inflatorAddr,
-      functionName: "paymaster",
-    });
-    console.log(`[BUNDLER] init done. inflatorID: ${this.inflatorID}`);
+
+    const inflatorAddr = lookup(
+      [84531, "0xc4616e117C97088c991AE0ddDead010e384C00d4" as Address],
+      [8453, "0xc581c9ce986E348c8b8c47bA6CC7d51b47AE330e" as Address]
+    )(chainConfig.chainL2.id);
+
+    const [inflatorID, inflatorCoinAddr, inflatorPaymaster] = await Promise.all(
+      [
+        publicClient.readContract({
+          abi: bundleBulkerABI,
+          address: bundleBulkerAddress,
+          functionName: "inflatorToID",
+          args: [inflatorAddr],
+        }),
+        publicClient.readContract({
+          abi: daimoTransferInflatorABI,
+          address: inflatorAddr,
+          functionName: "coinAddr",
+        }),
+        publicClient.readContract({
+          abi: daimoTransferInflatorABI,
+          address: inflatorAddr,
+          functionName: "paymaster",
+        }),
+      ]
+    );
+    console.log(`[BUNDLER] init done. inflatorID: ${inflatorID}`);
+
+    this.compressionInfo = {
+      inflatorAddr,
+      inflatorID,
+      inflatorCoinAddr,
+      inflatorPaymaster,
+    };
   }
 
-  async sendUserOp(
-    op: UserOpHex,
-    walletClient: WalletClient<Transport, Chain, Account>,
-    publicClient: PublicClient
-  ) {
+  async sendUserOp(op: UserOpHex, viemClient: ViemClient) {
     console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
     try {
       const compressed = this.compress(op);
       // Simultanously get the opHash (view function) and submit the bundle
       const [opHash] = await Promise.all([
-        this.getOpHash(op, publicClient),
-        this.sendCompressedOpToBulk(compressed, walletClient),
+        this.getOpHash(op, viemClient.publicClient),
+        this.sendCompressedOpToBulk(compressed, viemClient),
       ]);
       console.log(`[BUNDLER] submitted compressed op ${opHash}`);
       return opHash;
@@ -119,98 +117,14 @@ export class BundlerClient {
   }
 
   compress(op: UserOpHex) {
-    if (this.inflatorID == null || this.inflatorCoinAddr == null) {
+    if (this.compressionInfo == null) {
       throw new Error("can't compress, inflator info not loaded");
-    } else if (this.inflatorID === 0) {
-      throw new Error(`can't compress. register inflator ${this.inflatorAddr}`);
     }
-
-    const ret: Hex[] = [numberToHex(this.inflatorID, { size: 4 })];
-
-    // sender
-    ret.push(op.sender);
-
-    // nonce
-    let m = /^0x(.*)0{16}$/i.exec(op.nonce);
-    if (!m) throw new Error("can't compress, bad nonce: " + op.nonce);
-    ret.push(numberToHex(hexToBigInt(`0x${m[1]}`), { size: 16 }));
-
-    // gas
-    ret.push(toHex(hexToBigInt(op.preVerificationGas), { size: 4 }));
-    ret.push(toHex(hexToBigInt(op.maxFeePerGas), { size: 6 }));
-    ret.push(toHex(hexToBigInt(op.maxPriorityFeePerGas), { size: 6 }));
-
-    // callData: ERC20 transfer
-    const calldataRegex = new RegExp(
-      [
-        "^",
-        "0x34fcd5be", // executeBatch
-        "0000000000000000000000000000000000000000000000000000000000000020",
-        "0000000000000000000000000000000000000000000000000000000000000001",
-        "0000000000000000000000000000000000000000000000000000000000000020",
-        "000000000000000000000000" + this.inflatorCoinAddr.slice(2),
-        "0000000000000000000000000000000000000000000000000000000000000000",
-        "0000000000000000000000000000000000000000000000000000000000000060",
-        "0000000000000000000000000000000000000000000000000000000000000044",
-        "a9059cbb", // transfer
-        "000000000000000000000000(.{40})",
-        "0000000000000000000000000000000000000000000000000000(.{12})",
-        "00000000000000000000000000000000000000000000000000000000",
-        "$",
-      ].join(""),
-      "i"
-    );
-    m = calldataRegex.exec(op.callData);
-    if (!m) throw new Error("can't compress, bad callData: " + op.callData);
-    ret.push(`0x${m[1]}`); // to
-    ret.push(`0x${m[2]}`); // amount
-
-    // op signature
-    const sigRegex = new RegExp(
-      [
-        "^",
-        "0x(.{16})", // sig version, validUntil, keySlot
-        "0000000000000000000000000000000000000000000000000000000000000020",
-        "00000000000000000000000000000000000000000000000000000000000000c0",
-        "0000000000000000000000000000000000000000000000000000000000000120",
-        "0000000000000000000000000000000000000000000000000000000000000017",
-        "0000000000000000000000000000000000000000000000000000000000000001",
-        "(.{64})", // sig r
-        "(.{64})", // sig s
-        "0000000000000000000000000000000000000000000000000000000000000025",
-        "0000000000000000000000000000000000000000000000000000000000000000",
-        "0500000000000000000000000000000000000000000000000000000000000000",
-        "000000000000000000000000000000000000000000000000000000000000005a",
-        stringToHex('{"type":"webauthn.get","challenge":"').slice(2),
-        "(.{104})", // authenticator challenge
-        stringToHex('"}').slice(2),
-        "000000000000",
-        "$",
-      ].join(""),
-      "i"
-    );
-    m = sigRegex.exec(op.signature);
-    if (!m) throw new Error("can't compress, bad signature: " + op.signature);
-    ret.push(`0x${m[1]}`); // sig version, validUntil, keySlot
-    ret.push(`0x${m[2]}`); // sig r
-    ret.push(`0x${m[3]}`); // sig s
-    ret.push(`0x${m[4]}`); // authenticator challenge
-
-    // paymaster signature, if present
-    const paymasterAddr = this.inflatorPaymaster;
-    const paymasterRegex = new RegExp(`${paymasterAddr}(.*)$`, "i");
-    m = paymasterRegex.exec(op.paymasterAndData);
-    if (!m) throw new Error("can't compress, bad paym.:" + op.paymasterAndData);
-    ret.push(`0x${m[1]}`); // paymaster data
-
-    return concatHex(ret);
+    return compressBundle(op, this.compressionInfo);
   }
 
-  async sendCompressedOpToBulk(
-    compressed: Hex,
-    walletClient: WalletClient<Transport, Chain, Account>
-  ) {
-    const txHash = await walletClient.writeContract({
+  async sendCompressedOpToBulk(compressed: Hex, viemClient: ViemClient) {
+    const txHash = await viemClient.writeContract({
       abi: bundleBulkerABI,
       address: bundleBulkerAddress,
       functionName: "submit",

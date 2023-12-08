@@ -1,20 +1,21 @@
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
+import { ViemClient } from "@daimo/api/src/network/viemClient";
 import { UserOpHex } from "@daimo/common";
 import {
+  daimoAccountABI,
   daimoAccountFactoryConfig,
   daimoEphemeralNotesAddress,
+  daimoPaymasterAddress,
   entryPointABI,
   erc20ABI,
-  daimoPaymasterAddress,
-  daimoAccountABI,
 } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
   DaimoOpSender,
-  SigningCallback,
   OpSenderCallback,
+  SigningCallback,
 } from "@daimo/userop";
 import { base64urlnopad } from "@scure/base";
 import crypto from "node:crypto";
@@ -128,7 +129,8 @@ export async function createAccount() {
 
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
-    return bundlerClient.sendUserOp(op, walletClient, publicClient);
+    const vc = new ViemClient(publicClient, publicClient, walletClient);
+    return bundlerClient.sendUserOp(op, vc);
   };
 
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
