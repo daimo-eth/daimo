@@ -277,6 +277,7 @@ function createKeyRotation(args: {
     change: args.change,
     address: args.from,
     blockNumber: 0n,
+    transactionIndex: 0,
     transactionHash: args.isDeploymentLog ? "0x42" : "0x0",
     logIndex: 0,
     account: args.from,
