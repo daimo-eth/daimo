@@ -219,7 +219,10 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"]
+          "filter_arg": [
+            "833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "1B85deDe8178E18CdE599B4C9d913534553C3dBf"
+          ]
         }
       ],
       "event": {
