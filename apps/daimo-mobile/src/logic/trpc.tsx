@@ -107,9 +107,9 @@ function getOpts(daimoChain: DaimoChain) {
           clearTimeout(timeoutID);
 
           // Log
-          const ms = performance.now() - startMs;
+          const ms = (performance.now() - startMs) | 0;
           const method = init.method || "GET";
-          console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}`);
+          console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}ms`);
 
           return ret;
         },

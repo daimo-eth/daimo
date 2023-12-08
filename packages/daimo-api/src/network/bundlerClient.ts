@@ -4,6 +4,7 @@ import {
   daimoTransferInflatorABI,
 } from "@daimo/bulk";
 import { UserOpHex, assert } from "@daimo/common";
+import { entryPointABI } from "@daimo/contract";
 import { BundlerJsonRpcProvider, Constants } from "userop";
 import {
   Account,
@@ -75,18 +76,46 @@ export class BundlerClient {
 
   async sendUserOp(
     op: UserOpHex,
-    walletClient: WalletClient<Transport, Chain, Account>
+    walletClient: WalletClient<Transport, Chain, Account>,
+    publicClient: PublicClient
   ) {
     console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
-
-    // TEST: compress the op, send via Bulk
     try {
       const compressed = this.compress(op);
-      return await this.sendCompressedOpToBulk(compressed, walletClient);
+      // Simultanously get the opHash (view function) and submit the bundle
+      const [opHash] = await Promise.all([
+        this.getOpHash(op, publicClient),
+        this.sendCompressedOpToBulk(compressed, walletClient),
+      ]);
+      console.log(`[BUNDLER] submitted compressed op ${opHash}`);
+      return opHash;
     } catch (e) {
       console.log(`[BUNDLER] cant send compressed, falling back: ${e}`);
       return await this.sendUserOpToProvider(op);
     }
+  }
+
+  async getOpHash(op: UserOpHex, publicClient: PublicClient) {
+    return publicClient.readContract({
+      abi: entryPointABI,
+      address: Constants.ERC4337.EntryPoint as Address,
+      functionName: "getUserOpHash",
+      args: [
+        {
+          callData: op.callData,
+          callGasLimit: hexToBigInt(op.callGasLimit),
+          initCode: op.initCode,
+          maxFeePerGas: hexToBigInt(op.maxFeePerGas),
+          maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
+          preVerificationGas: hexToBigInt(op.preVerificationGas),
+          verificationGasLimit: hexToBigInt(op.verificationGasLimit),
+          nonce: hexToBigInt(op.nonce),
+          paymasterAndData: op.paymasterAndData,
+          sender: op.sender,
+          signature: op.signature,
+        },
+      ],
+    });
   }
 
   compress(op: UserOpHex) {

@@ -128,7 +128,7 @@ export async function createAccount() {
 
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
-    return bundlerClient.sendUserOp(op, walletClient);
+    return bundlerClient.sendUserOp(op, walletClient, publicClient);
   };
 
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
