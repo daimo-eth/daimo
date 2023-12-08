@@ -43,7 +43,7 @@ export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
   // Compression settings
-  private inflatorAddr: Address = "0x5de22070e6ceeed13c14d435fdba51c2eb3aa7a1";
+  private inflatorAddr: Address = "0xc4616e117C97088c991AE0ddDead010e384C00d4";
   private inflatorID: number | undefined;
   private inflatorCoinAddr: Address | undefined;
   private inflatorPaymaster: Address | undefined;
@@ -91,7 +91,9 @@ export class BundlerClient {
 
   compress(op: UserOpHex) {
     if (this.inflatorID == null || this.inflatorCoinAddr == null) {
-      throw new Error("can't compress, missing inflator info");
+      throw new Error("can't compress, inflator info not loaded");
+    } else if (this.inflatorID === 0) {
+      throw new Error(`can't compress. register inflator ${this.inflatorAddr}`);
     }
 
     const ret: Hex[] = [numberToHex(this.inflatorID, { size: 4 })];
