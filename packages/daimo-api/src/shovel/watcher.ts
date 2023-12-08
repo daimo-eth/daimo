@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { chainConfig } from "../env";
 
@@ -6,12 +6,30 @@ interface indexer {
   load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
 }
 
+const dbConfig: ClientConfig = {
+  connectionString: process.env.SHOVEL_DATABASE_URL,
+  connectionTimeoutMillis: 5000,
+  query_timeout: 5000,
+  statement_timeout: 5000,
+  database: process.env.SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
+};
+
+const poolConfig: PoolConfig = {
+  ...dbConfig,
+  max: 8,
+  idleTimeoutMillis: 60000,
+};
+
 export class Watcher {
   private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
   private batchSize = 10000n;
 
   private indexers: indexer[] = [];
-  private pg: Pool = new Pool({ connectionString: "postgres:///shovel_full" });
+  private pg: Pool;
+
+  constructor() {
+    this.pg = new Pool(poolConfig);
+  }
 
   add(...i: indexer[]) {
     this.indexers.push(...i);
