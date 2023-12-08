@@ -4,7 +4,6 @@ import {
   daimoTransferInflatorABI,
 } from "@daimo/bulk";
 import { UserOpHex, assert } from "@daimo/common";
-import { daimoPaymasterAddress } from "@daimo/contract";
 import { BundlerJsonRpcProvider, Constants } from "userop";
 import {
   Account,
@@ -17,6 +16,7 @@ import {
   concatHex,
   hexToBigInt,
   isHex,
+  numberToHex,
   stringToHex,
   toHex,
 } from "viem";
@@ -43,9 +43,10 @@ export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
   // Compression settings
-  private inflatorAddr: Address = "0x531033e5eA309EF20771a7313991fC732A28a844";
+  private inflatorAddr: Address = "0x5de22070e6ceeed13c14d435fdba51c2eb3aa7a1";
   private inflatorID: number | undefined;
   private inflatorCoinAddr: Address | undefined;
+  private inflatorPaymaster: Address | undefined;
 
   constructor(bundlerRpcUrl: string, private vc?: ViemClient) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
@@ -64,6 +65,11 @@ export class BundlerClient {
       address: this.inflatorAddr,
       functionName: "coinAddr",
     });
+    this.inflatorPaymaster = await publicClient.readContract({
+      abi: daimoTransferInflatorABI,
+      address: this.inflatorAddr,
+      functionName: "paymaster",
+    });
     console.log(`[BUNDLER] init done. inflatorID: ${this.inflatorID}`);
   }
 
@@ -76,27 +82,27 @@ export class BundlerClient {
     // TEST: compress the op, send via Bulk
     try {
       const compressed = this.compress(op);
-      return this.sendCompressedOpToBulk(compressed, walletClient);
+      return await this.sendCompressedOpToBulk(compressed, walletClient);
     } catch (e) {
       console.log(`[BUNDLER] cant send compressed, falling back: ${e}`);
-      return this.sendUserOpToProvider(op);
+      return await this.sendUserOpToProvider(op);
     }
   }
 
   compress(op: UserOpHex) {
     if (this.inflatorID == null || this.inflatorCoinAddr == null) {
-      throw new Error("cant compress, missing inflator info");
+      throw new Error("can't compress, missing inflator info");
     }
 
-    const ret: Hex[] = [];
+    const ret: Hex[] = [numberToHex(this.inflatorID, { size: 4 })];
 
     // sender
     ret.push(op.sender);
 
     // nonce
-    let m = /^0x0{16}(................................)0{16}$/i.exec(op.nonce);
-    if (!m) throw new Error("cant compress, bad nonce: " + op.nonce);
-    ret.push(`0x${m[1]}`);
+    let m = /^0x(.*)0{16}$/i.exec(op.nonce);
+    if (!m) throw new Error("can't compress, bad nonce: " + op.nonce);
+    ret.push(numberToHex(hexToBigInt(`0x${m[1]}`), { size: 16 }));
 
     // gas
     ret.push(toHex(hexToBigInt(op.preVerificationGas), { size: 4 }));
@@ -120,19 +126,13 @@ export class BundlerClient {
         "0000000000000000000000000000000000000000000000000000(.{12})",
         "00000000000000000000000000000000000000000000000000000000",
         "$",
-      ].join(),
+      ].join(""),
       "i"
     );
     m = calldataRegex.exec(op.callData);
-    if (!m) throw new Error("cant compress, bad callData: " + op.callData);
+    if (!m) throw new Error("can't compress, bad callData: " + op.callData);
     ret.push(`0x${m[1]}`); // to
     ret.push(`0x${m[2]}`); // amount
-
-    // paymaster signature
-    const paymasterRegex = new RegExp(`${daimoPaymasterAddress}(.{130})$`, "i");
-    m = paymasterRegex.exec(op.paymasterAndData);
-    if (!m) throw new Error("cant compress, bad paym.:" + op.paymasterAndData);
-    ret.push(`0x${m[1]}`); // paymaster sig r,s,v
 
     // op signature
     const sigRegex = new RegExp(
@@ -152,18 +152,25 @@ export class BundlerClient {
         "000000000000000000000000000000000000000000000000000000000000005a",
         stringToHex('{"type":"webauthn.get","challenge":"').slice(2),
         "(.{104})", // authenticator challenge
-        '"}',
+        stringToHex('"}').slice(2),
         "000000000000",
         "$",
-      ].join(),
+      ].join(""),
       "i"
     );
     m = sigRegex.exec(op.signature);
-    if (!m) throw new Error("cant compress, bad signature: " + op.signature);
+    if (!m) throw new Error("can't compress, bad signature: " + op.signature);
     ret.push(`0x${m[1]}`); // sig version, validUntil, keySlot
     ret.push(`0x${m[2]}`); // sig r
     ret.push(`0x${m[3]}`); // sig s
     ret.push(`0x${m[4]}`); // authenticator challenge
+
+    // paymaster signature, if present
+    const paymasterAddr = this.inflatorPaymaster;
+    const paymasterRegex = new RegExp(`${paymasterAddr}(.*)$`, "i");
+    m = paymasterRegex.exec(op.paymasterAndData);
+    if (!m) throw new Error("can't compress, bad paym.:" + op.paymasterAndData);
+    ret.push(`0x${m[1]}`); // paymaster data
 
     return concatHex(ret);
   }

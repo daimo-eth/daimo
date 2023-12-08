@@ -15,7 +15,7 @@
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
     "@coinbase/cbpay-js": "^1.8.0",
-    "@daimo/bulk": "^0.1.0",
+    "@daimo/bulk": "^0.1.4",
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",

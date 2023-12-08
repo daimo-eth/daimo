@@ -171,7 +171,9 @@ async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
   const ticketHex = concatHex([sender.addr, validUntilHex]);
   assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
   const ticketHash = keccak256(ticketHex);
-  console.log(`[PAYMASTER] sign ${ticketHex} with ${signer.address}`);
+  console.log(
+    `[PAYMASTER] sign ${ticketHex} ${ticketHash} with ${signer.address}`
+  );
 
   const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
   const sigHex = concatHex([
@@ -182,7 +184,10 @@ async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
   assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
 
   // Experimentally try the new MetaPaymaster-sponsored Daimo paymaster.
-  const paymasterAddr = daimoPaymasterAddress;
+  const paymasterAddr =
+    chainConfig.chainL2.id === 8453
+      ? daimoPaymasterAddress
+      : "0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877";
 
   const ret = concatHex([paymasterAddr, sigHex, validUntilHex]);
   assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");
