@@ -14,22 +14,12 @@ import { chainConfig } from "../env";
 export class NoteIndexer {
   private notes: Map<Address, DaimoNoteStatus> = new Map();
 
-  private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
-
   constructor(private nameReg: NameRegistry) {}
-
-  addListener(listener: (log: DaimoNoteStatus[]) => void) {
-    this.listeners.push(listener);
-  }
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const logs: DaimoNoteStatus[] = [];
     logs.push(...(await this.loadCreated(pg, from, to)));
     logs.push(...(await this.loadRedeemed(pg, from, to)));
-
-    const ls = this.listeners;
-    console.log(`[NOTE] ${logs.length} logs for ${ls.length} listeners`);
-    ls.forEach((l) => l(logs));
   }
 
   private async loadCreated(
@@ -133,7 +123,7 @@ export class NoteIndexer {
         }
         // Mark as redeemed
         assertNotNull(log.redeemer, "redeemer is null");
-        assertNotNull(log.from, "fromis null");
+        assertNotNull(log.from, "from is null");
         note.status = log.redeemer === log.from ? "cancelled" : "claimed";
         note.claimer = await this.nameReg.getEAccount(log.redeemer);
         return note;
