@@ -7,6 +7,7 @@ import { chainConfig } from "../env";
 export interface KeyChange {
   change: "added" | "removed";
   blockNumber: bigint;
+  transactionIndex: number;
   transactionHash: Hex;
   logIndex: number;
   address: Address;
@@ -27,8 +28,10 @@ export class KeyRegistry {
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
     changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
     const sortedChanges = changes!.sort((a, b) => {
-      const diff = a.blockNumber - b.blockNumber;
-      if (diff !== 0n) return Number(diff);
+      const bdiff = a.blockNumber - b.blockNumber;
+      if (bdiff !== 0n) return Number(bdiff);
+      const tdiff = a.transactionIndex - b.transactionIndex;
+      if (tdiff !== 0) return Number(tdiff);
       return a.logIndex - b.logIndex;
     });
     for (const change of sortedChanges) {
@@ -105,13 +108,13 @@ export class KeyRegistry {
         where block_num >= $1 and block_num <= $2
         and chain_id = $3
         group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
-        order by block_num, tx_idx, log_idx asc
       `,
       [from, to, chainConfig.chainL2.id]
     );
     return result.rows.map((row) => ({
       change,
       blockNumber: BigInt(row.block_num),
+      transactionIndex: row.tx_idx,
       transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
       logIndex: row.log_idx,
       address: bytesToHex(row.log_addr, { size: 20 }),
