@@ -6,7 +6,14 @@ import {
 import { daimoChainFromId, erc20ABI } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
-import { Address, Hex, numberToHex, toBytes } from "viem";
+import {
+  Address,
+  Hex,
+  bytesToHex,
+  getAddress,
+  numberToHex,
+  toBytes,
+} from "viem";
 
 import { OpIndexer } from "./opIndexer";
 import { chainConfig } from "../env";
@@ -37,14 +44,14 @@ export class CoinIndexer {
       `
         select
           block_num,
-          encode(block_hash, 'hex') as block_hash,
-          encode(tx_hash, 'hex') as tx_hash,
+          block_hash,
+          tx_hash,
           tx_idx,
           log_idx,
-          encode(log_addr, 'hex') as log_addr,
+          log_addr,
 
-          encode(f, 'hex') as "from",
-          encode(t, 'hex') as "to",
+          f as "from",
+          t as "to",
           v as "value"
         from transfers
         where block_num >= $1
@@ -56,14 +63,14 @@ export class CoinIndexer {
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {
-        blockHash: row.block_hash,
+        blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
-        transactionHash: row.tx_hash,
+        transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: row.tx_idx,
         logIndex: row.log_idx,
-        address: row.log_addr,
-        from: row.from,
-        to: row.to,
+        address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
+        from: getAddress(bytesToHex(row.from, { size: 20 })),
+        to: getAddress(bytesToHex(row.to, { size: 20 })),
         value: BigInt(row.value),
       };
     });
