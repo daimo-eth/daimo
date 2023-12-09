@@ -55,6 +55,9 @@ export const ss = {
       alignItems: "center",
       justifyContent: "center",
     },
+    padH8: {
+      paddingHorizontal: 8,
+    },
     padH16: {
       paddingHorizontal: 16,
     },

@@ -1,6 +1,8 @@
 import {
   amountToDollars,
   DaimoNoteStatus,
+  EAccount,
+  getAccountName,
   OpStatus,
   timeString,
   TrackedNote,
@@ -17,22 +19,18 @@ import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
-import { TitleAmount } from "../shared/Amount";
+import { AccountBubble } from "../shared/AccountBubble";
+import { SubtitleAmountChange } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
+import { ButtonCircle } from "../shared/ButtonCircle";
 import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { AddrText } from "../shared/addr";
+import { getCachedEAccount } from "../shared/addr";
 import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import {
-  TextBody,
-  TextCenter,
-  TextError,
-  TextH3,
-  TextLight,
-} from "../shared/text";
+import { TextBody, TextError, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
@@ -71,7 +69,7 @@ function HistoryOpScreenInner({
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Transfer" onBack={useExitBack()} />
-      <Spacer h={64} />
+      <Spacer h={32} />
       <TransferBody account={account} op={op} />
       <Spacer h={64} />
       <View style={ss.container.padH16}>
@@ -117,7 +115,7 @@ function LinkToExplorer({
   const explorer = chainConfig.chainL2.blockExplorers!.default;
   const url = `${explorer.url}/tx/${txHash}`;
 
-  const openURL = useCallback(() => Linking.openURL(url), []);
+  const openURL = useCallback(() => Linking.openURL(url), [url]);
 
   return <ButtonBig onPress={openURL} type="subtle" title="View on explorer" />;
 }
@@ -139,25 +137,18 @@ function TransferBody({
       op.to === account.address
   );
 
-  const kv: [string, ReactNode][] = [];
-
+  let other: EAccount;
+  let amountChange: bigint;
   const sentByUs = op.from === account.address;
   if (sentByUs) {
-    kv.push([
-      "Recipient",
-      <TextBody>
-        <AddrText addr={op.to} />
-      </TextBody>,
-    ]);
+    other = getCachedEAccount(op.to);
+    amountChange = -BigInt(op.amount);
   } else {
-    kv.push([
-      "Sender",
-      <TextBody>
-        <AddrText addr={op.from} />
-      </TextBody>,
-    ]);
+    other = getCachedEAccount(op.from);
+    amountChange = BigInt(op.amount);
   }
 
+  const kv: [string, ReactNode][] = [];
   if (matchingTrackedRequest != null) {
     const amount = amountToDollars(BigInt(matchingTrackedRequest.amount));
     kv.push(["Amount you requested", <TextBody>{amount}</TextBody>]);
@@ -166,7 +157,10 @@ function TransferBody({
   kv.push(["Date", <TextBody>{timeString(op.timestamp)}</TextBody>]);
 
   if (op.feeAmount !== undefined) {
-    const feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
+    let feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
+    if (op.feeAmount > 0 && feeStr === "$0.00") {
+      feeStr = "< $0.01";
+    }
     const feeElem =
       feeStr === "$0.00" ? (
         <>
@@ -186,12 +180,27 @@ function TransferBody({
   kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
   kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
 
+  const nav = useNav();
+  const goToAccount = useCallback(() => {
+    nav.navigate("HomeTab", { screen: "Account", params: { eAcc: other } });
+  }, [nav, other]);
+
   return (
     <View>
-      <TextCenter>
-        <TextLight>{sentByUs ? "Sent" : "Received"}</TextLight>
-      </TextCenter>
-      <TitleAmount amount={BigInt(op.amount)} />
+      <View
+        style={{
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <ButtonCircle size={64} onPress={goToAccount}>
+          <AccountBubble eAcc={other} size={64} fontSize={24} transparent />
+        </ButtonCircle>
+        <Spacer h={8} />
+        <TextH3>{getAccountName(other)}</TextH3>
+      </View>
+      <Spacer h={16} />
+      <SubtitleAmountChange amount={amountChange} />
       <Spacer h={32} />
       <View style={styles.kvWrap}>
         <View style={styles.kvList}>

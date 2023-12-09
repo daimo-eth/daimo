@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -158,6 +159,7 @@ function HomeTab() {
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
+        <HomeStack.Screen name="Account" component={AccountScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

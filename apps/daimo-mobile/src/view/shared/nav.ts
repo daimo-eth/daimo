@@ -3,6 +3,7 @@ import {
   DaimoLinkAccount,
   DaimoLinkNote,
   DaimoLinkRequest,
+  EAccount,
   TransferOpEvent,
   parseDaimoLink,
 } from "@daimo/common";
@@ -21,6 +22,7 @@ export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
   HistoryOp: { op: TransferOpEvent };
+  Account: { eAcc: EAccount } | { link: DaimoLinkAccount };
 };
 
 export type ParamListSend = {
@@ -119,7 +121,10 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       nav.reset({ routes: [{ name: "SettingsTab", params: { screen } }] });
       break;
     }
-    case "account":
+    case "account": {
+      nav.navigate("HomeTab", { screen: "Account", params: { link } });
+      break;
+    }
     case "request": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
       break;

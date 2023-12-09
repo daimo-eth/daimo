@@ -1,31 +1,37 @@
-import { ReactNode } from "react";
-import { StyleSheet, TouchableHighlight } from "react-native";
+import { ReactNode, useMemo } from "react";
+import { TouchableHighlight } from "react-native";
 
 import { touchHighlightUnderlay } from "./style";
 
 export function ButtonCircle({
   onPress,
+  size,
+  margin,
   children,
 }: {
   onPress: () => void;
+  size: number;
+  margin?: number;
   children: ReactNode;
 }) {
+  const style = useMemo(
+    () => ({
+      width: size,
+      height: size,
+      borderRadius: size,
+      margin,
+    }),
+    [size]
+  );
+
   return (
     <TouchableHighlight
       onPress={onPress}
-      style={styles.buttonCircle}
-      hitSlop={12}
+      style={style}
+      hitSlop={16}
       {...touchHighlightUnderlay.subtle}
     >
       {children}
     </TouchableHighlight>
   );
 }
-const styles = StyleSheet.create({
-  buttonCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    margin: 16,
-  },
-});

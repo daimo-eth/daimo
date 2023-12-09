@@ -26,7 +26,7 @@ interface SwipeUpDownProps {
   swipeHeight: number;
   onShowMini?: () => void;
   onShowFull?: () => void;
-  refreshing: boolean;
+  disabled?: boolean;
 }
 
 const screenDimensions = Dimensions.get("window");
@@ -37,7 +37,7 @@ export type SwipeUpDownRef = {
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   (
-    { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, refreshing },
+    { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, disabled },
     ref
   ) => {
     const ins = useSafeAreaInsets();
@@ -113,8 +113,8 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         animatedIndex={animatedIndex}
         animateOnMount={false}
         enablePanDownToClose={false}
-        enableHandlePanningGesture={!refreshing}
-        enableContentPanningGesture={!refreshing}
+        enableHandlePanningGesture={!disabled}
+        enableContentPanningGesture={!disabled}
       >
         <Animated.View
           style={[styles.itemMiniWrapper, itemMiniStyle]}

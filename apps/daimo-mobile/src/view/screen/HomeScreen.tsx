@@ -1,10 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
-import { useIsFocused } from "@react-navigation/native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Dimensions,
-  Platform,
   RefreshControl,
   StyleSheet,
   TouchableHighlight,
@@ -14,14 +11,12 @@ import {
 import Animated, {
   Layout,
   useAnimatedScrollHandler,
-  useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchTab";
 import { useWarmCache } from "../../action/useSendAsync";
-import useTabBarHeight from "../../common/useTabBarHeight";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
@@ -32,10 +27,10 @@ import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
-import { SwipeUpDown, SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useInitNavLinks, useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
+import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
 export default function HomeScreen() {
@@ -44,37 +39,14 @@ export default function HomeScreen() {
 }
 
 function HomeScreenInner({ account }: { account: Account }) {
-  const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const scrollRef = useRef<Animated.ScrollView>(null);
   const isScrollDragged = useRef<boolean>(false);
-  const nav = useNav();
-  const isFocused = useIsFocused();
-  const tabBarHeight = useTabBarHeight();
   const ins = useSafeAreaInsets();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const translationY = useSharedValue(0);
-  const screenHeight =
-    screenDimensions.height -
-    tabBarHeight -
-    (Platform.OS === "android" ? 16 : 0);
 
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
-
-  // Hide history when tapping the home tab.
-  useEffect(() => {
-    if (nav.getParent()) {
-      // @ts-ignore
-      const unsub = nav.getParent().addListener("tabPress", (e: Event) => {
-        if (isFocused && bottomSheetRef.current) {
-          e.preventDefault();
-          bottomSheetRef.current.collapse();
-        }
-      });
-      return unsub;
-    }
-  }, [nav, isFocused]);
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(
@@ -86,6 +58,11 @@ function HomeScreenInner({ account }: { account: Account }) {
     keySlot,
     account.homeChainId
   );
+
+  // Show search results when search is focused.
+  const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
+
+  // Outer scroll: pull to refresh
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -97,15 +74,6 @@ function HomeScreenInner({ account }: { account: Account }) {
     }
   }, []);
 
-  // Show search results when search is focused.
-  const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
-
-  // Show history
-  const histListMini = (
-    <HistoryListSwipe account={account} showDate={false} maxToShow={5} />
-  );
-  const histListFull = <HistoryListSwipe account={account} showDate />;
-
   const onScrollBeginDrag = () => {
     isScrollDragged.current = true;
   };
@@ -115,28 +83,22 @@ function HomeScreenInner({ account }: { account: Account }) {
       scrollRef.current.scrollTo({ y: 0, animated: true });
     }
   };
-
-  const onOpenTransactionsModal = () => {
-    setIsModalOpen(true);
-  };
-  const onCloseTransactionsModal = () => {
-    setIsModalOpen(false);
-  };
-
   const scrollHandler = useAnimatedScrollHandler((event) => {
     if (event.contentOffset.y < 0) {
       translationY.value = event.contentOffset.y;
     }
   });
 
-  const bottomSheetScrollStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: -translationY.value,
-        },
-      ],
-    };
+  // Show history
+  const histListMini = (
+    <HistoryListSwipe account={account} showDate={false} maxToShow={5} />
+  );
+  const histListFull = <HistoryListSwipe account={account} showDate />;
+  const { bottomSheet, isBottomSheetOpen } = useSwipeUpDown({
+    itemMini: histListMini,
+    itemFull: histListFull,
+    translationY,
+    disabled: refreshing,
   });
 
   // Handle incoming applinks
@@ -157,12 +119,12 @@ function HomeScreenInner({ account }: { account: Account }) {
         showsVerticalScrollIndicator={false}
         scrollToOverflowEnabled={false}
         scrollsToTop={false}
-        scrollEnabled={searchPrefix == null && !isModalOpen}
+        scrollEnabled={searchPrefix == null && !isBottomSheetOpen}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{
-          height: screenHeight,
+          height: screenDimensions.height,
         }}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
@@ -193,26 +155,7 @@ function HomeScreenInner({ account }: { account: Account }) {
           </>
         )}
       </Animated.ScrollView>
-      {searchPrefix == null && (
-        <Animated.View
-          style={[
-            { height: screenHeight },
-            styles.bottomSheetContainer,
-            bottomSheetScrollStyle,
-          ]}
-          pointerEvents="box-none"
-        >
-          <SwipeUpDown
-            ref={bottomSheetRef}
-            itemMini={histListMini}
-            itemFull={histListFull}
-            swipeHeight={screenDimensions.height / 3}
-            onShowFull={onOpenTransactionsModal}
-            onShowMini={onCloseTransactionsModal}
-            refreshing={refreshing}
-          />
-        </Animated.View>
-      )}
+      {searchPrefix == null && bottomSheet}
     </View>
   );
 }
@@ -318,10 +261,6 @@ const styles = StyleSheet.create({
   amountAndButtons: {
     flexDirection: "column",
     alignItems: "center",
-  },
-  bottomSheetContainer: {
-    position: "absolute",
-    width: SCREEN_WIDTH,
   },
   buttonRow: {
     flexDirection: "row",

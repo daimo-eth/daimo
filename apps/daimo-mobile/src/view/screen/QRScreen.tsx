@@ -102,7 +102,7 @@ function ShareButton({ name }: { name: string }) {
   };
 
   return (
-    <ButtonCircle onPress={shareAccountLink}>
+    <ButtonCircle onPress={shareAccountLink} size={50} margin={16}>
       <View style={styles.shareCircle}>
         <Octicons name="share" size={24} color={color.midnight} />
       </View>

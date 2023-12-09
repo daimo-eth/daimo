@@ -1,4 +1,5 @@
 import {
+  EAccount,
   TransferOpEvent,
   assert,
   getAccountName,
@@ -40,14 +41,22 @@ export function HistoryListSwipe({
   account,
   showDate,
   maxToShow,
+  otherAcc,
 }: {
   account: Account;
   showDate: boolean;
   maxToShow?: number;
+  otherAcc?: EAccount;
 }) {
   const ins = useSafeAreaInsets();
 
-  const ops = account.recentTransfers.slice().reverse();
+  // Get relevant transfers in reverse chronological order
+  let ops = account.recentTransfers.slice().reverse();
+  if (otherAcc != null) {
+    const otherAddr = otherAcc.addr;
+    ops = ops.filter((t) => t.from === otherAddr || t.to === otherAddr);
+  }
+
   if (ops.length === 0) {
     return (
       <View>
@@ -68,16 +77,20 @@ export function HistoryListSwipe({
     />
   );
 
+  // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
+    const title =
+      otherAcc == null ? "Transaction history" : `Transactions between you`;
     return (
       <View style={styles.historyListBody}>
-        <HeaderRow key="h0" title="Transaction history" />
+        <HeaderRow key="h0" title={title} />
         {ops.slice(0, maxToShow).map(renderRow)}
         <View style={styles.transferBorder} />
       </View>
     );
   }
 
+  // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
   const rows: (TransferRenderObject | HeaderObject)[] = [];
 
