@@ -36,7 +36,7 @@ export class Watcher {
   }
 
   async init() {
-    this.indexRange(this.latest, await this.getShovelLatest());
+    await this.indexRange(this.latest, await this.getShovelLatest());
   }
 
   async watch() {
