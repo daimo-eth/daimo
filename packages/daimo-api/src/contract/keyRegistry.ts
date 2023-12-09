@@ -117,8 +117,8 @@ export class KeyRegistry {
       transactionIndex: row.tx_idx,
       transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
       logIndex: row.log_idx,
-      address: bytesToHex(row.log_addr, { size: 20 }),
-      account: bytesToHex(row.account, { size: 20 }),
+      address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
+      account: getAddress(bytesToHex(row.account, { size: 20 })),
       keySlot: row.key_slot,
       key: row.key.map((k: Buffer) => bytesToHex(k)) as [Hex, Hex],
     }));

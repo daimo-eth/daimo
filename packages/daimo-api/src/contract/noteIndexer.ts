@@ -5,7 +5,7 @@ import {
   getEAccountStr,
 } from "@daimo/common";
 import { Pool } from "pg";
-import { Address, bytesToHex } from "viem";
+import { Address, bytesToHex, getAddress } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
@@ -47,8 +47,10 @@ export class NoteIndexer {
         return {
           transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
           logIndex: r.log_idx,
-          from: bytesToHex(r.f, { size: 20 }),
-          ephemeralOwner: bytesToHex(r.ephemeral_owner, { size: 20 }),
+          from: getAddress(bytesToHex(r.f, { size: 20 })),
+          ephemeralOwner: getAddress(
+            bytesToHex(r.ephemeral_owner, { size: 20 })
+          ),
           amount: BigInt(r.amount),
         };
       })
@@ -105,8 +107,10 @@ export class NoteIndexer {
           transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
           logIndex: r.log_idx,
           from: bytesToHex(r.f, { size: 20 }),
-          redeemer: bytesToHex(r.redeemer, { size: 20 }),
-          ephemeralOwner: bytesToHex(r.ephemeral_owner, { size: 20 }),
+          redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
+          ephemeralOwner: getAddress(
+            bytesToHex(r.ephemeral_owner, { size: 20 })
+          ),
           amount: BigInt(r.amount),
         };
       })
