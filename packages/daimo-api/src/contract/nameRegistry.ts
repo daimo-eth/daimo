@@ -43,6 +43,7 @@ specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
 interface Registration {
+  blockNumber: bigint;
   name: string;
   addr: Address;
 }
@@ -61,7 +62,7 @@ export class NameRegistry {
   async load(pg: Pool, from: bigint, to: bigint) {
     const result = await pg.query(
       `
-        select addr, name
+        select block_num, addr, name
         from names
         where block_num >= $1
         and block_num <= $2
@@ -71,6 +72,7 @@ export class NameRegistry {
     );
     const names = result.rows.map((r) => {
       return {
+        blockNumber: r.block_num,
         name: bytesToString(r.name, { size: 32 }),
         addr: getAddress(bytesToHex(r.addr, { size: 20 })),
       };
@@ -102,6 +104,7 @@ export class NameRegistry {
   async search(prefix: string): Promise<DAccount[]> {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
+      .map((a) => ({ addr: a.addr, name: a.name }))
       .filter((a) => a.name.startsWith(prefix))
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 10);
