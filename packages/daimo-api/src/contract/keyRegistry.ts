@@ -27,14 +27,12 @@ export class KeyRegistry {
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
     changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
-    const sortedChanges = changes!.sort((a, b) => {
+    changes!.sort((a, b) => {
       const bdiff = a.blockNumber - b.blockNumber;
       if (bdiff !== 0n) return Number(bdiff);
-      const tdiff = a.transactionIndex - b.transactionIndex;
-      if (tdiff !== 0) return Number(tdiff);
       return a.logIndex - b.logIndex;
     });
-    for (const change of sortedChanges) {
+    for (const change of changes) {
       const addr = getAddress(change.address);
       if (this.addrToLogs.get(addr) === undefined) {
         this.addrToLogs.set(addr, []);
