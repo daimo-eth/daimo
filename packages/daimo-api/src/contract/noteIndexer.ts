@@ -13,6 +13,7 @@ import { chainConfig } from "../env";
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
   private notes: Map<Address, DaimoNoteStatus> = new Map();
+  private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
 
   constructor(private nameReg: NameRegistry) {}
 
@@ -24,6 +25,13 @@ export class NoteIndexer {
     console.log(
       `[NOTE] Loaded ${logs.length} notes in ${Date.now() - startTime}ms`
     );
+    // Finally, invoke listeners to send notifications etc.
+    const ls = this.listeners;
+    ls.forEach((l) => l(logs));
+  }
+
+  addListener(listener: (log: DaimoNoteStatus[]) => void) {
+    this.listeners.push(listener);
   }
 
   private async loadCreated(

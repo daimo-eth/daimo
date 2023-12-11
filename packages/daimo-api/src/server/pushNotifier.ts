@@ -40,9 +40,9 @@ export class PushNotifier {
   ) {}
 
   async init() {
-    //this.coinIndexer.addListener(this.handleTransfers);
-    //this.noteIndexer.addListener(this.handleNoteOps);
-    //this.keyReg.addListener(this.handleKeyRotations);
+    this.coinIndexer.addListener(this.handleTransfers);
+    this.noteIndexer.addListener(this.handleNoteOps);
+    this.keyReg.addListener(this.handleKeyRotations);
 
     // Load Expo push notification tokens
     const rows = await this.db.loadPushTokens();

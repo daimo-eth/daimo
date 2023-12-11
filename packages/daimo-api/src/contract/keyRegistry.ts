@@ -23,6 +23,12 @@ export class KeyRegistry {
   private addrToKeyData = new Map<Address, KeyData[]>();
   private addrToDeploymentTxHash = new Map<Address, Hex>();
 
+  private listeners: ((logs: KeyChange[]) => void)[] = [];
+
+  addListener(listener: (logs: KeyChange[]) => void) {
+    this.listeners.push(listener);
+  }
+
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
     const changes: KeyChange[] = [];
@@ -81,6 +87,7 @@ export class KeyRegistry {
         Date.now() - startTime
       }ms`
     );
+    this.listeners.forEach((l) => l(changes));
   }
 
   private async loadKeyChange(
