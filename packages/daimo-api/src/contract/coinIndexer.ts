@@ -40,6 +40,7 @@ export class CoinIndexer {
   constructor(private client: ViemClient, private opIndexer: OpIndexer) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
     const result = await pg.query(
       `
         select
@@ -74,7 +75,11 @@ export class CoinIndexer {
         value: BigInt(row.value),
       };
     });
-    console.log(`[COIN] loaded ${logs.length} transfers ${from} ${to}`);
+    console.log(
+      `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${
+        Date.now() - startTime
+      }ms`
+    );
     this.allTransfers.push(...logs);
     this.listeners.forEach((l) => l(logs));
   }

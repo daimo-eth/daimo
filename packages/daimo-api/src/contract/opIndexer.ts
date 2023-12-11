@@ -17,6 +17,7 @@ export class OpIndexer {
   private nonceMetadataToTxes: Map<Hex, Hex[]> = new Map();
 
   async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
     const result = await pg.query(
       `
         select tx_hash, log_idx, op_nonce, op_hash
@@ -50,6 +51,9 @@ export class OpIndexer {
         : [userOp.transactionHash];
       this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
     });
+    console.log(
+      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
+    );
   }
 
   /**

@@ -60,6 +60,7 @@ export class NameRegistry {
   constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
     const result = await pg.query(
       `
         select block_num, addr, name
@@ -77,9 +78,11 @@ export class NameRegistry {
         addr: getAddress(bytesToHex(r.addr, { size: 20 })),
       };
     });
-    console.log(`[NAME-REG] parsed ${names.length} named account(s)`);
     this.logs.push(...names);
     names.forEach(this.cacheAccount);
+    console.log(
+      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`
+    );
   }
 
   /** Cache an account in memory. */

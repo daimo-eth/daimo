@@ -17,9 +17,13 @@ export class NoteIndexer {
   constructor(private nameReg: NameRegistry) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
     const logs: DaimoNoteStatus[] = [];
     logs.push(...(await this.loadCreated(pg, from, to)));
     logs.push(...(await this.loadRedeemed(pg, from, to)));
+    console.log(
+      `[NOTE] Loaded ${logs.length} notes in ${Date.now() - startTime}ms`
+    );
   }
 
   private async loadCreated(

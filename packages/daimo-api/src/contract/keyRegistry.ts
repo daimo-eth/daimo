@@ -24,6 +24,7 @@ export class KeyRegistry {
   private addrToDeploymentTxHash = new Map<Address, Hex>();
 
   async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
     changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
@@ -75,6 +76,11 @@ export class KeyRegistry {
         } key(s) for ${addr}`
       );
     }
+    console.log(
+      `[KEY-REG] loaded ${changes.length} key changes in ${
+        Date.now() - startTime
+      }ms`
+    );
   }
 
   private async loadKeyChange(
