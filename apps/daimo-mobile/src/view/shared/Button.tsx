@@ -4,9 +4,18 @@ import {
   Text,
   TextStyle,
   TouchableHighlight,
+  View,
   ViewStyle,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
+import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
 
 interface TextButtonProps {
@@ -18,6 +27,79 @@ interface TextButtonProps {
 
 interface ButtonProps extends TextButtonProps {
   type: "primary" | "success" | "danger" | "subtle";
+}
+
+interface LongPressButtonProps extends ButtonProps {
+  duration: number;
+}
+
+export function LongPressBigButton(props: LongPressButtonProps) {
+  const buttonScale = useSharedValue(1);
+  const animatedCircleProgress = useSharedValue(0);
+
+  const style = useStyle(buttonStyles.big, props);
+  const touchUnderlay = useTouchUnderlay(props.type);
+  const disabledStyle = useMemo(
+    () => ({ ...style.button, opacity: 0.5 }),
+    [style.button]
+  );
+
+  const longPress = Gesture.LongPress()
+    .minDuration(props.duration)
+    .enabled(!props.disabled || false)
+    .onBegin(() => {
+      buttonScale.value = withTiming(0.97, { duration: props.duration });
+      animatedCircleProgress.value = withTiming(1, {
+        duration: props.duration,
+      });
+    })
+    .onFinalize((_, success) => {
+      if (success && props.onPress) {
+        runOnJS(props.onPress)();
+      } else {
+        buttonScale.value = withTiming(1);
+        animatedCircleProgress.value = withTiming(0);
+      }
+    });
+
+  const buttonStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonScale.value }],
+    };
+  });
+
+  return (
+    <GestureDetector gesture={longPress}>
+      <Animated.View
+        style={[
+          props.disabled ? disabledStyle : style.button,
+          buttonStyle,
+          {
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "row",
+          },
+        ]}
+        {...(touchUnderlay || touchHighlightUnderlay.subtle)}
+      >
+        <View
+          style={{
+            width: "100%",
+            position: "absolute",
+            height: "100%",
+            justifyContent: "center",
+          }}
+        >
+          <AnimatedCircle
+            progress={animatedCircleProgress}
+            strokeWidth={3}
+            size={12}
+          />
+        </View>
+        <Text style={style.title}>{props.title?.toUpperCase()}</Text>
+      </Animated.View>
+    </GestureDetector>
+  );
 }
 
 export function ButtonBig(props: ButtonProps) {

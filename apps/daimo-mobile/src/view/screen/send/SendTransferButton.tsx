@@ -21,7 +21,7 @@ import {
 import { Account } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
-import { ButtonBig } from "../../shared/Button";
+import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { navResetToHome, useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
@@ -100,11 +100,12 @@ function SendTransferButtonInner({
       case "idle":
       case "error":
         return (
-          <ButtonBig
+          <LongPressBigButton
             title="CONFIRM AND SEND"
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
+            duration={400}
           />
         );
       case "loading":
