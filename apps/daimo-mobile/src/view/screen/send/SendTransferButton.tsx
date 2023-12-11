@@ -2,6 +2,7 @@ import {
   EAccount,
   OpStatus,
   assert,
+  canSendTo,
   dollarsToAmount,
   hasAccountName,
 } from "@daimo/common";
@@ -87,6 +88,8 @@ function SendTransferButtonInner({
       return "Insufficient funds";
     } else if (account.address === recipient.addr) {
       return "Can't send to yourself";
+    } else if (!canSendTo(recipient)) {
+      return "Can't send to this account";
     } else if (Number(dollarsStr) === 0) {
       return "Enter an amount";
     } else {

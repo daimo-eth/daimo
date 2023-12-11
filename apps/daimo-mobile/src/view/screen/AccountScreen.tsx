@@ -1,4 +1,9 @@
-import { DaimoLinkAccount, EAccount, getAccountName } from "@daimo/common";
+import {
+  DaimoLinkAccount,
+  EAccount,
+  canSendTo,
+  getAccountName,
+} from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
@@ -100,6 +105,7 @@ function AccountScreenBody({
     Linking.openURL(url);
   }, [account, eAcc]);
 
+  const canSend = canSendTo(eAcc);
   const send = useCallback(() => {
     const recipient = addLastSendTime(account, eAcc);
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
@@ -158,7 +164,7 @@ function AccountScreenBody({
       </View>
       <Spacer h={42} />
       <View style={ss.container.padH8}>
-        <ButtonBig type="primary" title="Send" onPress={send} />
+        {canSend && <ButtonBig type="primary" title="Send" onPress={send} />}
       </View>
       <Spacer h={32} />
       {bottomSheet}
