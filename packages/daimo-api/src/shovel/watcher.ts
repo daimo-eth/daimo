@@ -42,11 +42,14 @@ export class Watcher {
   async watch() {
     setInterval(async () => {
       const shovelLatest = await this.getShovelLatest();
-      this.latest = await this.index(
+      const localLatest = await this.index(
         this.latest + 1n,
         shovelLatest,
         this.batchSize
       );
+      // localLatest <= 0 when there are no new blocks in shovel
+      // or, for whatever reason, we are ahead of shovel.
+      if (localLatest > this.latest) this.latest = localLatest;
     }, 1000);
   }
 
