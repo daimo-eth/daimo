@@ -8,6 +8,7 @@ import {
   guessTimestampFromNum,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import * as SplashScreen from "expo-splash-screen";
 import { Hex } from "viem";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
@@ -24,7 +25,23 @@ import { Account, getAccountManager } from "../model/account";
 //   ...occasionally otherwise
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
-  maybeSync(true);
+  maybeSync(true)
+    .then((success) => {
+      if (!success) {
+        updateNetworkState(() => {
+          // set fail to 3 because at 2 it would remove offline banner
+          // for one try even if sync failed
+          return { status: "offline", syncAttemptsFailed: 3 };
+        });
+      }
+    })
+    .finally(() => {
+      // create small delay to let interface render becuase this callback
+      // run right after getting data so the interface still got to adapt
+      setTimeout(() => {
+        SplashScreen.hideAsync();
+      }, 300);
+    });
   setInterval(maybeSync, 1_000);
 }
 
@@ -42,7 +59,7 @@ function hasPendingOps(account: Account) {
   );
 }
 
-function maybeSync(fromScratch?: boolean) {
+async function maybeSync(fromScratch?: boolean) {
   const manager = getAccountManager();
   if (manager.currentAccount == null) return;
   const account = manager.currentAccount;
@@ -62,13 +79,16 @@ function maybeSync(fromScratch?: boolean) {
   }
 
   if (fromScratch) {
-    resync(`initial sync from scratch`, true);
+    return await resync(`initial sync from scratch`, true);
   } else if (lastPushNotificationS + 10 > nowS) {
-    resync(`push notification ${nowS - lastPushNotificationS}s ago`);
+    return await resync(
+      `push notification ${nowS - lastPushNotificationS}s ago`
+    );
   } else if (lastSyncS + intervalS > nowS) {
     console.log(`[SYNC] skipping sync, attempted sync recently`);
+    return false;
   } else {
-    resync(`interval ${intervalS}s`);
+    return await resync(`interval ${intervalS}s`);
   }
 }
 
