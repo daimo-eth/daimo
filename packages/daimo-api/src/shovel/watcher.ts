@@ -55,12 +55,16 @@ export class Watcher {
   }
 
   private async index(start: bigint, stop: bigint, n: bigint): Promise<bigint> {
+    const t0 = Date.now();
     const delta = stop - start;
     if (delta <= 0n) return 0n;
     const limit = delta > n ? n : delta;
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     await Promise.all(
       this.indexers.map((i) => i.load(this.pg, start, start + limit))
+    );
+    console.log(
+      `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
     return start + limit;
   }
