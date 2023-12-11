@@ -1,16 +1,12 @@
-import { DaimoLinkNote, EAccount } from "@daimo/common";
+import { DaimoLinkNote, DaimoNoteStatus, EAccount } from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
-import { Address, Hex, getAddress, numberToHex } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
-import { TransferLog } from "../src/contract/coinIndexer";
-import {
-  KeyRegistry,
-  SigningKeyAddedOrRemovedLog,
-} from "../src/contract/keyRegistry";
+import { Transfer } from "../src/contract/coinIndexer";
+import { KeyRegistry, KeyChange } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
-import { NoteOpLog } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { PushNotifier } from "../src/server/pushNotifier";
 
@@ -22,7 +18,7 @@ test("PushNotifier", async () => {
   const pn = createNotifierAliceBob();
 
   await test("transfer between two Daimo accounts", async () => {
-    const input: TransferLog[] = [
+    const input: Transfer[] = [
       createTransfer({ from: addrAlice, to: addrBob, value: 1000000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -38,7 +34,7 @@ test("PushNotifier", async () => {
   });
 
   await test("transfer to external address", async () => {
-    const input: TransferLog[] = [
+    const input: Transfer[] = [
       createTransfer({ from: addrAlice, to: addrCharlie, value: 690000n }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -50,7 +46,7 @@ test("PushNotifier", async () => {
   });
 
   await test("transfer fulfilling request", async () => {
-    const input: TransferLog[] = [
+    const input: Transfer[] = [
       createTransfer({
         from: addrCharlie,
         to: addrAlice,
@@ -77,15 +73,12 @@ test("PushNotifier", async () => {
   };
 
   await test("send payment link", async () => {
-    const input: NoteOpLog[] = [
+    const input: DaimoNoteStatus[] = [
       {
-        type: "create",
-        noteStatus: {
-          status: "confirmed",
-          sender: { addr: addrAlice, name: "alice" },
-          dollars: "1.00",
-          link: paymentLinkFromAlice,
-        },
+        status: "confirmed",
+        sender: { addr: addrAlice, name: "alice" },
+        dollars: "1.00",
+        link: paymentLinkFromAlice,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -97,16 +90,13 @@ test("PushNotifier", async () => {
   });
 
   await test("claim payment link", async () => {
-    const input: NoteOpLog[] = [
+    const input: DaimoNoteStatus[] = [
       {
-        type: "claim",
-        noteStatus: {
-          status: "claimed",
-          sender: { addr: addrAlice, name: "alice" },
-          claimer: { addr: addrBob, name: "bob" },
-          dollars: "1.00",
-          link: paymentLinkFromAlice,
-        },
+        status: "claimed",
+        sender: { addr: addrAlice, name: "alice" },
+        claimer: { addr: addrBob, name: "bob" },
+        dollars: "1.00",
+        link: paymentLinkFromAlice,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -124,18 +114,18 @@ test("PushNotifier", async () => {
   });
 
   await test("simple remove device", async () => {
-    const input: SigningKeyAddedOrRemovedLog[] = [
+    const input: KeyChange[] = [
       createKeyRotation({
         from: addrAlice,
         keySlot: 0,
         isDeploymentLog: true,
-        eventName: "SigningKeyAdded",
+        change: "added",
       }),
       createKeyRotation({
         from: addrAlice,
         keySlot: 0,
         isDeploymentLog: false,
-        eventName: "SigningKeyRemoved",
+        change: "removed",
       }),
     ];
     const output = pn.getPushMessagesFromKeyRotations(input);
@@ -147,36 +137,36 @@ test("PushNotifier", async () => {
   });
 
   await test("complex add/removes", async () => {
-    const input: SigningKeyAddedOrRemovedLog[] = [
+    const input: KeyChange[] = [
       createKeyRotation({
         from: addrBob,
         keySlot: 0,
         isDeploymentLog: true,
-        eventName: "SigningKeyAdded",
+        change: "added",
       }),
       createKeyRotation({
         from: addrAlice,
         keySlot: 0,
         isDeploymentLog: true,
-        eventName: "SigningKeyAdded",
+        change: "added",
       }),
       createKeyRotation({
         from: addrBob,
         keySlot: 128,
         isDeploymentLog: false,
-        eventName: "SigningKeyAdded",
+        change: "added",
       }),
       createKeyRotation({
         from: addrBob,
         keySlot: 0,
         isDeploymentLog: false,
-        eventName: "SigningKeyRemoved",
+        change: "removed",
       }),
       createKeyRotation({
         from: addrBob,
         keySlot: 25,
         isDeploymentLog: false,
-        eventName: "SigningKeyAdded",
+        change: "added",
       }),
     ];
     const output = pn.getPushMessagesFromKeyRotations(input);
@@ -194,16 +184,13 @@ test("PushNotifier", async () => {
   });
 
   await test("cancel payment link", async () => {
-    const input: NoteOpLog[] = [
+    const input: DaimoNoteStatus[] = [
       {
-        type: "claim",
-        noteStatus: {
-          status: "cancelled",
-          sender: { addr: addrAlice, name: "alice" },
-          claimer: { addr: addrAlice, name: "alice" },
-          dollars: "4.20",
-          link: paymentLinkFromAlice,
-        },
+        status: "cancelled",
+        sender: { addr: addrAlice, name: "alice" },
+        claimer: { addr: addrAlice, name: "alice" },
+        dollars: "4.20",
+        link: paymentLinkFromAlice,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -241,7 +228,7 @@ function createNotifierAliceBob() {
   } as unknown as OpIndexer;
 
   const stubKeyReg = {
-    isDeploymentKeyRotationLog: (log: SigningKeyAddedOrRemovedLog): boolean => {
+    isDeploymentKeyRotationLog: (log: KeyChange): boolean => {
       return log.transactionHash === "0x42";
     },
   } as unknown as KeyRegistry;
@@ -266,23 +253,17 @@ function createTransfer(args: {
   to: Address;
   value: bigint;
   isRequestResponse?: boolean;
-}): TransferLog {
+}): Transfer {
   return {
     address: "0x0",
     blockHash: "0x0",
     blockNumber: 0n,
     transactionHash: args.isRequestResponse ? "0x42" : "0x0",
     transactionIndex: 0,
-    data: "0x0",
     logIndex: 0,
-    removed: false,
-    args: {
-      from: args.from,
-      to: args.to,
-      value: args.value,
-    },
-    eventName: "Transfer",
-    topics: [args.from, args.to, numberToHex(args.value)],
+    from: args.from,
+    to: args.to,
+    value: args.value,
   };
 }
 
@@ -290,23 +271,17 @@ function createKeyRotation(args: {
   from: Address;
   keySlot: number;
   isDeploymentLog: boolean;
-  eventName: "SigningKeyAdded" | "SigningKeyRemoved";
-}): SigningKeyAddedOrRemovedLog {
+  change: "added" | "removed";
+}): KeyChange {
   return {
+    change: args.change,
     address: args.from,
-    blockHash: "0x0",
     blockNumber: 0n,
-    transactionHash: args.isDeploymentLog ? "0x42" : "0x0",
     transactionIndex: 0,
-    data: "0x0",
+    transactionHash: args.isDeploymentLog ? "0x42" : "0x0",
     logIndex: 0,
-    removed: false,
-    args: {
-      account: args.from,
-      key: ["0x0", "0x0"],
-      keySlot: args.keySlot,
-    },
-    eventName: args.eventName,
-    topics: ["0x0", "0x0"],
+    account: args.from,
+    keySlot: args.keySlot,
+    key: ["0x0", "0x0"],
   };
 }

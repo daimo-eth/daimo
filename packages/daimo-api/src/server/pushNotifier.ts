@@ -1,5 +1,6 @@
 import {
   AddrLabel,
+  DaimoNoteStatus,
   assert,
   assertNotNull,
   getAccountName,
@@ -9,13 +10,10 @@ import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
-import { CoinIndexer, TransferLog } from "../contract/coinIndexer";
-import {
-  KeyRegistry,
-  SigningKeyAddedOrRemovedLog,
-} from "../contract/keyRegistry";
+import { CoinIndexer, Transfer } from "../contract/coinIndexer";
+import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
-import { NoteIndexer, NoteOpLog } from "../contract/noteIndexer";
+import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
@@ -43,9 +41,7 @@ export class PushNotifier {
 
   async init() {
     this.coinIndexer.addListener(this.handleTransfers);
-
     this.noteIndexer.addListener(this.handleNoteOps);
-
     this.keyReg.addListener(this.handleKeyRotations);
 
     // Load Expo push notification tokens
@@ -58,19 +54,19 @@ export class PushNotifier {
     this.isInitialized = true;
   }
 
-  private handleNoteOps = async (logs: NoteOpLog[]) => {
+  private handleNoteOps = async (logs: DaimoNoteStatus[]) => {
     console.log(`[PUSH] got ${logs.length} note ops`);
     const messages = this.getPushMessagesFromNoteOps(logs);
     this.maybeSendNotifications(messages);
   };
 
-  private handleTransfers = async (logs: TransferLog[]) => {
+  private handleTransfers = async (logs: Transfer[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
     this.maybeSendNotifications(messages);
   };
 
-  private handleKeyRotations = async (logs: SigningKeyAddedOrRemovedLog[]) => {
+  private handleKeyRotations = async (logs: KeyChange[]) => {
     console.log(`[PUSH] got ${logs.length} key rotations`);
     const messages = this.getPushMessagesFromKeyRotations(logs);
     this.maybeSendNotifications(messages);
@@ -103,10 +99,10 @@ export class PushNotifier {
     }
   }
 
-  async getPushMessagesFromTransfers(logs: TransferLog[]) {
+  async getPushMessagesFromTransfers(logs: Transfer[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      const { from, to, value } = log.args;
+      const { from, to, value } = log;
       const amount = Number(value);
 
       const logId = `${log.transactionHash}:${log.logIndex}`;
@@ -232,22 +228,22 @@ export class PushNotifier {
     ];
   }
 
-  getPushMessagesFromNoteOps(logs: NoteOpLog[]) {
+  getPushMessagesFromNoteOps(logs: DaimoNoteStatus[]) {
     const symbol = chainConfig.tokenSymbol;
 
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      if (log.type === "create") {
+      if (log.status === "confirmed") {
         // To Alice: "You sent $3.50 to a payment link"
-        const { sender, dollars } = log.noteStatus;
+        const { sender, dollars } = log;
         const title = `Sent $${dollars}`;
         const body = `You sent ${dollars} ${symbol} to a payment link`;
         messages.push(...this.getPushMessages(sender.addr, title, body));
-      } else if (log.noteStatus.status === "claimed") {
+      } else if (log.status === "claimed") {
         // To Bob: "You received $1.00 from alice"
         // To Alice: "Bob claimed your $1.00 payment link"
-        const claimer = assertNotNull(log.noteStatus.claimer);
-        const { sender, dollars } = log.noteStatus;
+        const claimer = assertNotNull(log.claimer);
+        const { sender, dollars } = log;
         assert(sender.addr !== claimer.addr);
         messages.push(
           ...this.getPushMessages(
@@ -265,9 +261,9 @@ export class PushNotifier {
         );
       } else {
         // To Alice: "You cancelled your $1.00 payment link"
-        const { sender, dollars } = log.noteStatus;
-        assert(log.noteStatus.status === "cancelled");
-        assert(log.noteStatus.claimer?.addr === sender.addr);
+        const { sender, dollars } = log;
+        assert(log.status === "cancelled");
+        assert(log.claimer?.addr === sender.addr);
         messages.push(
           ...this.getPushMessages(
             sender.addr,
@@ -281,21 +277,21 @@ export class PushNotifier {
     return messages;
   }
 
-  getPushMessagesFromKeyRotations(logs: SigningKeyAddedOrRemovedLog[]) {
+  getPushMessagesFromKeyRotations(logs: KeyChange[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
       const addr = getAddress(log.address);
-      const keyLabel = getSlotLabel(log.args.keySlot);
+      const keyLabel = getSlotLabel(log.keySlot);
 
       // Skip notifications for account creation
       if (this.keyReg.isDeploymentKeyRotationLog(log)) continue;
 
-      if (log.eventName === "SigningKeyAdded") {
+      if (log.change === "added") {
         const title = `${keyLabel} added`;
         const body = `You added ${keyLabel} to your account`;
         messages.push(...this.getPushMessages(addr, title, body));
       } else {
-        assert(log.eventName === "SigningKeyRemoved");
+        assert(log.change === "removed");
         const title = `${keyLabel} removed`;
         const body = `You removed ${keyLabel} from your account`;
         messages.push(...this.getPushMessages(addr, title, body));

@@ -1,139 +1,139 @@
 import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
-import { Address, Hex, Log, getAbiItem, getAddress } from "viem";
+import { Pool } from "pg";
+import { Address, Hex, bytesToHex, getAddress } from "viem";
 
-import { ViemClient } from "../network/viemClient";
+import { chainConfig } from "../env";
 
-const signingKeyAddedEvent = getAbiItem({
-  abi: daimoAccountABI,
-  name: "SigningKeyAdded",
-});
-const signingKeyRemovedEvent = getAbiItem({
-  abi: daimoAccountABI,
-  name: "SigningKeyRemoved",
-});
-
-type SigningKeyAddedLog = Log<
-  bigint,
-  number,
-  false,
-  typeof signingKeyAddedEvent,
-  true
->;
-type SigningKeyRemovedLog = Log<
-  bigint,
-  number,
-  false,
-  typeof signingKeyRemovedEvent,
-  true
->;
-
-export type SigningKeyAddedOrRemovedLog =
-  | SigningKeyAddedLog
-  | SigningKeyRemovedLog;
+export interface KeyChange {
+  change: "added" | "removed";
+  blockNumber: bigint;
+  transactionIndex: number;
+  transactionHash: Hex;
+  logIndex: number;
+  address: Address;
+  account: Address;
+  keySlot: number;
+  key: [Hex, Hex];
+}
 
 export class KeyRegistry {
-  /* In-memory indexer, for now. */
+  private addrToLogs = new Map<Address, KeyChange[]>();
+
   private keyToAddr = new Map<Hex, Address>();
-  private addrToLogs = new Map<Address, SigningKeyAddedOrRemovedLog[]>();
   private addrToKeyData = new Map<Address, KeyData[]>();
   private addrToDeploymentTxHash = new Map<Address, Hex>();
 
-  private listeners: ((logs: SigningKeyAddedOrRemovedLog[]) => void)[] = [];
+  private listeners: ((logs: KeyChange[]) => void)[] = [];
 
-  constructor(private vc: ViemClient) {}
-
-  async init() {
-    await this.vc.pipeLogs(
-      {
-        event: signingKeyAddedEvent,
-      },
-      this.parseLogs
-    );
-
-    await this.vc.pipeLogs(
-      {
-        event: signingKeyRemovedEvent,
-      },
-      this.parseLogs
-    );
-    console.log(`[KEY-REG] watching logs`);
-  }
-
-  /** Listener is invoked for all key rotation events. */
-  addListener(listener: (logs: SigningKeyAddedOrRemovedLog[]) => void) {
+  addListener(listener: (logs: KeyChange[]) => void) {
     this.listeners.push(listener);
   }
 
-  /** Unsubscribe from new key rotations. */
-  removeListener(listener: (logs: SigningKeyAddedOrRemovedLog[]) => void) {
-    this.listeners = this.listeners.filter((l) => l !== listener);
-  }
-
-  /** Parses account key add/remove logs, first on init() and then on subscription. */
-  parseLogs = (logs: SigningKeyAddedOrRemovedLog[]) => {
-    const addrToNewLogs: Map<Address, SigningKeyAddedOrRemovedLog[]> =
-      new Map();
-    for (const log of logs) {
-      const addr = getAddress(log.address);
-      const logs = addrToNewLogs.get(addr) || [];
-      addrToNewLogs.set(addr, logs.concat([log]));
-    }
-
-    for (const addr of addrToNewLogs.keys()) {
-      const newLogs = addrToNewLogs.get(addr)!;
+  async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
+    const changes: KeyChange[] = [];
+    changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
+    changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
+    changes!.sort((a, b) => {
+      const bdiff = a.blockNumber - b.blockNumber;
+      if (bdiff !== 0n) return Number(bdiff);
+      return a.logIndex - b.logIndex;
+    });
+    for (const change of changes) {
+      const addr = getAddress(change.address);
       if (this.addrToLogs.get(addr) === undefined) {
         this.addrToLogs.set(addr, []);
       }
-      this.addrToLogs.get(addr)!.push(...newLogs);
+      this.addrToLogs.get(addr)!.push(change);
 
-      this.cacheAddressProperties(addr);
-    }
-
-    this.listeners.forEach((l) => l(logs));
-  };
-
-  /** Cache an address's key properties in memory. */
-  cacheAddressProperties = (addr: Address) => {
-    // deterministically sort all logs
-    const sortedLogs = this.addrToLogs.get(addr)!.sort((a, b) => {
-      const diff = a.blockNumber - b.blockNumber;
-      if (diff !== 0n) return Number(diff);
-      return a.logIndex - b.logIndex;
-    });
-
-    const currentKeyData: Map<string, KeyData> = new Map();
-    for (const log of sortedLogs) {
-      if (!log.args.key) throw new Error("[API] Invalid event, no key");
-      const slot = log.args.keySlot;
-      const derKey = contractFriendlyKeyToDER(log.args.key);
-
-      if (log.eventName === "SigningKeyAdded") {
-        currentKeyData.set(derKey, {
-          pubKey: derKey,
-          addedAt: Number(log.blockNumber),
-          slot,
-        });
-
-        if (!this.addrToDeploymentTxHash.has(addr)) {
-          this.addrToDeploymentTxHash.set(addr, log.transactionHash);
+      if (!change.key) throw new Error("[KEY-REG] Invalid event, no key");
+      const slot = change.keySlot;
+      const derKey = contractFriendlyKeyToDER(change.key);
+      switch (change.change) {
+        case "added": {
+          if (!this.addrToDeploymentTxHash.has(addr)) {
+            this.addrToDeploymentTxHash.set(addr, change.transactionHash);
+          }
+          if (!this.addrToKeyData.has(addr)) {
+            this.addrToKeyData.set(addr, []);
+          }
+          this.addrToKeyData.get(addr)!.push({
+            pubKey: derKey,
+            addedAt: Number(change.blockNumber),
+            slot,
+          });
+          this.keyToAddr.set(derKey, addr);
+          break;
         }
-      } else if (log.eventName === "SigningKeyRemoved") {
-        currentKeyData.delete(derKey);
+        case "removed": {
+          const keyData = this.addrToKeyData.get(addr);
+          if (!keyData) throw new Error("[KEY-REG] Invalid event, no key data");
+          this.addrToKeyData.set(
+            addr,
+            keyData.filter((k) => k.pubKey !== derKey)
+          );
+          this.keyToAddr.delete(derKey);
+          break;
+        }
       }
-    }
-
-    this.addrToKeyData.set(addr, [...currentKeyData.values()]);
-
-    for (const keyData of currentKeyData.values()) {
-      this.keyToAddr.set(keyData.pubKey, addr);
+      console.log(
+        `[KEY-REG] cached ${
+          this.addrToKeyData.get(addr)?.length
+        } key(s) for ${addr}`
+      );
     }
     console.log(
-      `[KEY-REG] cached ${
-        this.addrToKeyData.get(addr)?.length
-      } key(s) for ${addr}`
+      `[KEY-REG] loaded ${changes.length} key changes in ${
+        Date.now() - startTime
+      }ms`
     );
-  };
+    this.listeners.forEach((l) => l(changes));
+  }
+
+  private async loadKeyChange(
+    pg: Pool,
+    from: bigint,
+    to: bigint,
+    change: "added" | "removed"
+  ): Promise<KeyChange[]> {
+    let table: string = "";
+    if (change === "added") {
+      table = "key_added";
+    } else if (change === "removed") {
+      table = "key_removed";
+    } else {
+      throw new Error(`Invalid key change ${change}`);
+    }
+    const result = await pg.query(
+      `
+        select
+          block_num,
+          tx_idx,
+          tx_hash,
+          log_idx,
+          log_addr,
+          account,
+          key_slot,
+          array_agg(key) as key
+        from ${table}
+        where block_num >= $1 and block_num <= $2
+        and chain_id = $3
+        group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
+      `,
+      [from, to, chainConfig.chainL2.id]
+    );
+    return result.rows.map((row) => ({
+      change,
+      blockNumber: BigInt(row.block_num),
+      transactionIndex: row.tx_idx,
+      transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
+      logIndex: row.log_idx,
+      address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
+      account: getAddress(bytesToHex(row.account, { size: 20 })),
+      keySlot: row.key_slot,
+      key: row.key.map((k: Buffer) => bytesToHex(k)) as [Hex, Hex],
+    }));
+  }
 
   /** Find address by DER key */
   async resolveKey(key: Hex): Promise<Address | null> {
@@ -145,7 +145,7 @@ export class KeyRegistry {
     return this.addrToKeyData.get(addr) || null;
   }
 
-  isDeploymentKeyRotationLog(log: SigningKeyAddedOrRemovedLog) {
+  isDeploymentKeyRotationLog(log: KeyChange) {
     const addr = getAddress(log.address);
     const deploymentTxHash = this.addrToDeploymentTxHash.get(addr);
     assert(deploymentTxHash !== undefined, "No deployment tx hash");
