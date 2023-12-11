@@ -1,15 +1,12 @@
 import {
   KeyData,
-  formatDaimoLink,
   getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import Octicons from "@expo/vector-icons/Octicons";
-import * as Clipboard from "expo-clipboard";
 import * as Notifications from "expo-notifications";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Linking,
   ScrollView,
@@ -24,6 +21,7 @@ import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount, useAccount } from "../../model/account";
 import { AccountBubble } from "../shared/AccountBubble";
+import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { PendingDot } from "../shared/PendingDot";
@@ -91,39 +89,13 @@ function AccountHero({ account }: { account: Account }) {
   const tokenSymbol = chainConfig.tokenSymbol;
   const l2Name = chainConfig.chainL2.name;
 
-  const acctUrl = formatDaimoLink({ type: "account", account: account.name });
-  const [justCopied, setJustCopied] = useState(false);
-  const copy = useCallback(async () => {
-    await Clipboard.setStringAsync(acctUrl);
-    setJustCopied(true);
-    setTimeout(() => setJustCopied(false), 1000);
-  }, [acctUrl]);
+  const eAcc = toEAccount(account);
 
   return (
     <View style={styles.accountHero}>
-      <AccountBubble eAcc={toEAccount(account)} size={64} />
+      <AccountBubble eAcc={eAcc} size={64} />
       <View>
-        <TouchableHighlight
-          {...touchHighlightUnderlay.subtle}
-          style={{
-            paddingVertical: 4,
-            paddingHorizontal: 8,
-            marginLeft: -8,
-            borderRadius: 4,
-          }}
-          hitSlop={16}
-          onPress={copy}
-        >
-          <TextH3>
-            {account.name}
-            <Spacer w={8} />
-            <Octicons
-              name={justCopied ? "check" : "copy"}
-              color={color.grayDark}
-              size={16}
-            />
-          </TextH3>
-        </TouchableHighlight>
+        <AccountCopyLinkButton eAcc={eAcc} />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
           <TextH3 color={color.gray3}>
             {tokenSymbol} · {l2Name}{" "}

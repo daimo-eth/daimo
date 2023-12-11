@@ -59,7 +59,7 @@ export function HistoryListSwipe({
   }
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
-  const linkTo = otherAcc == null ? "account" : "op";
+  const linkTo = "op"; // Option to link to AccountPage instead.
 
   if (ops.length === 0) {
     return (

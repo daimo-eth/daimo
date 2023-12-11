@@ -1,14 +1,8 @@
-import {
-  DaimoLinkAccount,
-  EAccount,
-  canSendTo,
-  getAccountName,
-} from "@daimo/common";
+import { DaimoLinkAccount, EAccount, canSendTo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
 import { ActivityIndicator, Linking, View } from "react-native";
-import { TouchableHighlight } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
 
 import { env } from "../../logic/env";
@@ -16,6 +10,7 @@ import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { addLastSendTime } from "../../sync/recipients";
 import { AccountBubble } from "../shared/AccountBubble";
+import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { ButtonBig } from "../shared/Button";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import {
@@ -26,8 +21,8 @@ import {
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
 import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextH2, TextH3 } from "../shared/text";
+import { color, ss } from "../shared/style";
+import { TextH3 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -145,7 +140,7 @@ function AccountScreenBody({
       >
         <AccountBubble eAcc={eAcc} size={64} fontSize={24} />
         <Spacer h={16} />
-        <TextH2>{getAccountName(eAcc)}</TextH2>
+        <AccountCopyLinkButton eAcc={eAcc} />
         <Spacer h={8} />
         <TextH3 color={color.gray3}>{coinChain}</TextH3>
       </View>
