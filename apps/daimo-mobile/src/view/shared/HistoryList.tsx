@@ -6,6 +6,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { useCallback } from "react";
 import {
   Platform,
   StyleSheet,
@@ -164,8 +165,9 @@ function TransferRow({
   const amountDelta = from === address ? -transfer.amount : transfer.amount;
 
   const nav = useNav();
-  const viewOp = () =>
+  const viewOp = useCallback(() => {
     nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
+  }, [transfer]);
 
   const isPending = transfer.status === "pending";
   const textCol = isPending ? color.gray3 : color.midnight;

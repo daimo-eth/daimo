@@ -73,7 +73,7 @@ export function useSwipeUpDown({
         ref={bottomSheetRef}
         itemMini={itemMini}
         itemFull={itemFull}
-        swipeHeight={screenDimensions.height / 3}
+        swipeHeight={(screenDimensions.height / Math.PI) | 0}
         onShowFull={onOpenTransactionsModal}
         onShowMini={onCloseTransactionsModal}
         disabled={disabled}

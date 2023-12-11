@@ -148,25 +148,19 @@ function AccountScreenBody({
         <TextH2>{getAccountName(eAcc)}</TextH2>
         <Spacer h={8} />
         <TextH3 color={color.gray3}>{coinChain}</TextH3>
-        <Spacer h={4} />
-        <TouchableHighlight
-          {...touchHighlightUnderlay.subtle}
-          style={{
-            padding: 4,
-            paddingHorizontal: 8,
-            borderRadius: 4,
-          }}
-          hitSlop={8}
-          onPress={openExplorer}
-        >
-          <TextH3 color={color.primary}>View on Block Explorer</TextH3>
-        </TouchableHighlight>
       </View>
-      <Spacer h={42} />
+      <Spacer h={24} />
       <View style={ss.container.padH8}>
-        {canSend && <ButtonBig type="primary" title="Send" onPress={send} />}
+        {canSend && <ButtonBig type="primary" title="SEND" onPress={send} />}
       </View>
-      <Spacer h={32} />
+      <Spacer h={16} />
+      <View style={ss.container.padH8}>
+        <ButtonBig
+          type="subtle"
+          title="VIEW ON BLOCK EXPLORER"
+          onPress={openExplorer}
+        />
+      </View>
       {bottomSheet}
     </>
   );
