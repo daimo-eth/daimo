@@ -42,11 +42,12 @@ export class Watcher {
   async watch() {
     setInterval(async () => {
       const shovelLatest = await this.getShovelLatest();
-      this.latest = await this.index(
+      const localLatest = await this.index(
         this.latest + 1n,
         shovelLatest,
         this.batchSize
       );
+      if (localLatest > this.latest) this.latest = localLatest;
     }, 1000);
   }
 
