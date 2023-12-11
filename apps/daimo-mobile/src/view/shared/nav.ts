@@ -30,6 +30,7 @@ export type ParamListSend = {
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
   SendLink: { lagAutoFocus: boolean };
+  Account: { eAcc: EAccount };
 };
 
 export type ParamListReceive = {

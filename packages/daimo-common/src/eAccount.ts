@@ -36,6 +36,14 @@ export function getAccountName(acc: EAccount): string {
   return addr.slice(0, 6) + "…" + addr.slice(-4);
 }
 
+/** Whether we can (potentially) send funds to this address. */
+export function canSendTo(acc: EAccount): boolean {
+  // Daimo accounts, ENS & bare addresses can receive funds.
+  if (acc.label == null) return true;
+  // Certain labelled accounts cannot.
+  return ![AddrLabel.PaymentLink, AddrLabel.Paymaster].includes(acc.label);
+}
+
 /** Gets a Daimo name, ENS name or full account address. */
 export function getAccountNameOrAddress(acc: EAccount): string {
   const str = acc.name || acc.ensName;

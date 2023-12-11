@@ -1,5 +1,6 @@
 import {
   amountToDollars,
+  canSendTo,
   DaimoNoteStatus,
   EAccount,
   getAccountName,
@@ -180,11 +181,6 @@ function TransferBody({
   kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
   kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
 
-  const nav = useNav();
-  const goToAccount = useCallback(() => {
-    nav.navigate("HomeTab", { screen: "Account", params: { eAcc: other } });
-  }, [nav, other]);
-
   return (
     <View>
       <View
@@ -193,9 +189,7 @@ function TransferBody({
           alignItems: "center",
         }}
       >
-        <ButtonCircle size={64} onPress={goToAccount}>
-          <AccountBubble eAcc={other} size={64} fontSize={24} transparent />
-        </ButtonCircle>
+        <AccountButton eAcc={other} />
         <Spacer h={8} />
         <TextH3>{getAccountName(other)}</TextH3>
       </View>
@@ -223,6 +217,26 @@ function TransferBody({
       </View>
     </View>
   );
+}
+
+function AccountButton({ eAcc }: { eAcc: EAccount }) {
+  const nav = useNav();
+  const goToAccount = useCallback(() => {
+    nav.navigate("HomeTab", { screen: "Account", params: { eAcc } });
+  }, [nav, eAcc]);
+
+  const accountBubble = (
+    <AccountBubble eAcc={eAcc} size={64} fontSize={24} transparent />
+  );
+  if (canSendTo(eAcc)) {
+    return (
+      <ButtonCircle size={64} onPress={goToAccount}>
+        {accountBubble}
+      </ButtonCircle>
+    );
+  } else {
+    return accountBubble;
+  }
 }
 
 const styles = StyleSheet.create({

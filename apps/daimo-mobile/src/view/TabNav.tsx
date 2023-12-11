@@ -145,6 +145,7 @@ function SendTab() {
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="QR" component={QRScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
+        <HomeStack.Screen name="Account" component={AccountScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );

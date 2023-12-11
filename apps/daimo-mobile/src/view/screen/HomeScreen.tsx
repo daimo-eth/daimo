@@ -142,6 +142,7 @@ function HomeScreenInner({ account }: { account: Account }) {
           <SearchResults
             prefix={searchPrefix}
             style={{ marginHorizontal: 0 }}
+            mode="account"
             lagAutoFocus
           />
         )}

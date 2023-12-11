@@ -258,7 +258,7 @@ function RecipientDisplay({
 
   const nav = useNav();
   const goToAccount = useCallback(() => {
-    nav.navigate("HomeTab", {
+    nav.navigate("SendTab", {
       screen: "Account",
       params: { eAcc: recipient },
     });
