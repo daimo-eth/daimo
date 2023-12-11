@@ -6,7 +6,6 @@ import * as Notifications from "expo-notifications";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -195,6 +194,8 @@ function getNext(
   }
 }
 
+const AMOUNT_OF_SLIDES = 4;
+
 function IntroPages({ onNext }: { onNext: () => void }) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -215,6 +216,7 @@ function IntroPages({ onNext }: { onNext: () => void }) {
         style={styles.introPageScroll}
         onScroll={updatePageBubble}
         scrollEventThrottle={32}
+        contentContainerStyle={{ width: `${AMOUNT_OF_SLIDES * 100}%` }}
       >
         <IntroPage title="Welcome to Daimo">
           <TextParagraph>
@@ -267,7 +269,14 @@ function IntroPage({
   children: ReactNode;
 }) {
   return (
-    <View style={styles.introPage}>
+    <View
+      style={[
+        styles.introPage,
+        {
+          width: `${100 / AMOUNT_OF_SLIDES}%`,
+        },
+      ]}
+    >
       <TextCenter>
         <TextH1>{title}</TextH1>
       </TextCenter>
@@ -588,8 +597,6 @@ function LoadingScreen({
   );
 }
 
-const screenDimensions = Dimensions.get("screen");
-
 const styles = StyleSheet.create({
   onboardingScreen: {
     flex: 1,
@@ -604,7 +611,6 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   introPage: {
-    width: screenDimensions.width,
     padding: 32,
   },
   introText: {

@@ -4,6 +4,7 @@ import {
   ReactNode,
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -44,9 +45,16 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const tabBarHeight = useTabBarHeight();
     const bottomRef = useRef<BottomSheet>(null);
 
-    const maxHeight = screenDimensions.height - ins.top - ins.bottom;
-    const posYMini = swipeHeight;
-    const posYFull = maxHeight - tabBarHeight;
+    const [posYMini, setPosYMini] = useState(swipeHeight);
+    const [posYFull, setPosYFull] = useState(
+      screenDimensions.height - ins.top - ins.bottom - tabBarHeight
+    );
+
+    useEffect(() => {
+      const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
+      setPosYMini(swipeHeight);
+      setPosYFull(maxHeightOffset - tabBarHeight);
+    });
 
     const [isMini, setIsMini] = useState(true);
 
