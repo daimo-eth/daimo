@@ -21,8 +21,8 @@ export type QRScreenOptions = "PAY ME" | "SCAN";
 export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
-  HistoryOp: { op: TransferOpEvent };
   Account: { eAcc: EAccount } | { link: DaimoLinkAccount };
+  HistoryOp: { op: TransferOpEvent };
 };
 
 export type ParamListSend = {
@@ -31,6 +31,7 @@ export type ParamListSend = {
   QR: { option: QRScreenOptions | undefined };
   SendLink: { lagAutoFocus: boolean };
   Account: { eAcc: EAccount };
+  HistoryOp: { op: TransferOpEvent };
 };
 
 export type ParamListReceive = {

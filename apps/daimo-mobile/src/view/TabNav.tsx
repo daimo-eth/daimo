@@ -146,6 +146,7 @@ function SendTab() {
         <SendStack.Screen name="QR" component={QRScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
@@ -159,8 +160,8 @@ function HomeTab() {
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
-        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

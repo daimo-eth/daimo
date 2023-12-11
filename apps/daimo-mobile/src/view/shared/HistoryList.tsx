@@ -58,6 +58,9 @@ export function HistoryListSwipe({
     ops = ops.filter((t) => t.from === otherAddr || t.to === otherAddr);
   }
 
+  // Link to either the op (zoomed in) or the other account (zoomed out)
+  const linkTo = otherAcc == null ? "account" : "op";
+
   if (ops.length === 0) {
     return (
       <View>
@@ -74,7 +77,7 @@ export function HistoryListSwipe({
       key={getTransferId(t)}
       transfer={t}
       address={account.address}
-      showDate={showDate}
+      {...{ linkTo, showDate }}
     />
   );
 
@@ -131,7 +134,12 @@ export function HistoryListSwipe({
           return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <TransferRow transfer={item.t} address={account.address} showDate />
+          <TransferRow
+            transfer={item.t}
+            address={account.address}
+            showDate
+            {...{ linkTo }}
+          />
         );
       }}
     />
@@ -149,10 +157,12 @@ function HeaderRow({ title }: { title: string }) {
 function TransferRow({
   transfer,
   address,
+  linkTo,
   showDate,
 }: {
   transfer: TransferOpEvent;
   address: Address;
+  linkTo: "op" | "account";
   showDate?: boolean;
 }) {
   assert(transfer.amount > 0);
@@ -166,8 +176,16 @@ function TransferRow({
 
   const nav = useNav();
   const viewOp = useCallback(() => {
-    nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
-  }, [transfer]);
+    // Workaround: react-navigation typescript types are broken.
+    // currentTab is eg "SendNav", is NOT in fact a ParamListTab,
+    const currentTab = nav.getState().routes[0].name;
+    const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
+    if (linkTo === "op") {
+      nav.navigate(newTab, { screen: "HistoryOp", params: { op: transfer } });
+    } else {
+      nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
+    }
+  }, [nav, transfer, linkTo, otherAcc]);
 
   const isPending = transfer.status === "pending";
   const textCol = isPending ? color.gray3 : color.midnight;
