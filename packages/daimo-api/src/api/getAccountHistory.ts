@@ -75,10 +75,10 @@ export async function getAccountHistory(
   }
 
   // Get the latest block + current balance.
-  const lastBlk = await watcher.latestBlock();
+  const lastBlk = watcher.latestBlock();
   if (lastBlk == null) throw new Error("No latest block");
   const lastBlock = Number(lastBlk.number);
-  const lastBlockTimestamp = Number(lastBlk.timestamp);
+  const lastBlockTimestamp = lastBlk.timestamp;
   const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
   // TODO: get userops, including reverted ones. Show failed sends.

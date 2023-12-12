@@ -55,7 +55,7 @@ async function main() {
     db
   );
 
-  const shovelWatcher = new Watcher(vc);
+  const shovelWatcher = new Watcher();
   shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
 
   // Initialize in background

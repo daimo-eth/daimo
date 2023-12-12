@@ -16,7 +16,7 @@ async function main() {
   const keyReg = new KeyRegistry();
   const noteIndexer = new NoteIndexer(nameReg);
 
-  const shovelWatcher = new Watcher(vc);
+  const shovelWatcher = new Watcher();
   shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
 
   const { startBlock, lastBlockNum } = {
