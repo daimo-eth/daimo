@@ -50,6 +50,7 @@ export function SendSuccessScreen({ route }: Props) {
         disabled
         showAmountAvailable={false}
         autoFocus={false}
+        lagAutoFocus={false}
       />
       <TextCenter>
         <TextLight>Sent to </TextLight>
