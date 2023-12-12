@@ -168,6 +168,7 @@ export function createRouter(
           name,
           pubKeyHex,
           invCode,
+          watcher,
           nameReg,
           accountFactory,
           faucet,

@@ -43,6 +43,27 @@ export class Watcher {
     };
   }
 
+  async waitFor(blockNumber: bigint, tries: number): Promise<boolean> {
+    const t0 = Date.now();
+    for (let i = 0; i < tries; i++) {
+      if (this.latest >= blockNumber) {
+        console.log(
+          `[SHOVEL] waiting for block ${blockNumber}, found after ${
+            Date.now() - t0
+          }ms`
+        );
+        return true;
+      }
+      await new Promise((res) => setTimeout(res, 250));
+    }
+    console.log(
+      `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${
+        this.latest
+      } after ${Date.now() - t0}ms`
+    );
+    return false;
+  }
+
   async init() {
     await this.indexRange(this.latest, await this.getShovelLatest());
   }
