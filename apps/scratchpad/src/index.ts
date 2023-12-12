@@ -63,11 +63,8 @@ async function metrics() {
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);
   const signups = new Map<string, number>();
   const daimoChain = daimoChainFromId(vc.publicClient.chain.id);
-  for (const log of nameReg.logs.sort(
-    (a, b) => Number(a.blockNumber) - Number(b.blockNumber)
-  )) {
-    const ts = guessTimestampFromNum(log.blockNumber, daimoChain);
-    addMetric(signups, ts, 1);
+  for (const log of nameReg.logs.sort((a, b) => a.timestamp - b.timestamp)) {
+    addMetric(signups, log.timestamp, 1);
   }
 
   const { tokenSymbol, tokenAddress } = chainConfig;
