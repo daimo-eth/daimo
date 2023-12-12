@@ -27,7 +27,6 @@ async function main() {
 
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv();
-  await vc.init();
   const bundlerClient = getBundlerClientFromEnv();
   bundlerClient.init(vc.publicClient);
 
