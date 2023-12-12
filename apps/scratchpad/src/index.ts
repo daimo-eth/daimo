@@ -52,7 +52,6 @@ function metricsDesc() {
 
 async function metrics() {
   const vc = getViemClientFromEnv();
-  await vc.init();
 
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
   const nameReg = new NameRegistry(vc, new Set([]));
