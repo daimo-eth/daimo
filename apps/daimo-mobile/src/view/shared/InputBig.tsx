@@ -6,8 +6,9 @@ import {
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
-  View,
+  ViewStyle,
 } from "react-native";
+import Animated, { Layout } from "react-native-reanimated";
 
 import { color, ss } from "./style";
 
@@ -23,6 +24,7 @@ export function InputBig({
   center,
   autoFocus,
   innerRef,
+  style,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -33,6 +35,7 @@ export function InputBig({
   center?: boolean;
   autoFocus?: boolean;
   innerRef?: RefObject<TextInput>;
+  style?: ViewStyle;
 }) {
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {
@@ -55,7 +58,10 @@ export function InputBig({
 
   return (
     <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
-      <View style={isFocused ? styles.inputRowFocused : styles.inputRow}>
+      <Animated.View
+        layout={Layout}
+        style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}
+      >
         <TextInput
           ref={ref}
           placeholder={placeholder}
@@ -74,11 +80,11 @@ export function InputBig({
           onBlur={onInputBlur}
         />
         {icon && (
-          <View style={styles.inputIcon}>
+          <Animated.View style={styles.inputIcon} layout={Layout}>
             <Octicons name={icon} size={18} color={color.primary} />
-          </View>
+          </Animated.View>
         )}
-      </View>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 }
@@ -121,5 +127,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 13,
     right: 20,
+    width: 16,
+    alignContent: "center",
+    justifyContent: "center",
   },
 });

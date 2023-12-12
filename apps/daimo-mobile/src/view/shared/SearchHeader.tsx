@@ -1,7 +1,9 @@
 import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { RefObject, useCallback, useState } from "react";
+import { Keyboard, StyleSheet, TextInput, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { AccountBubble } from "./AccountBubble";
 import { ButtonCircle } from "./ButtonCircle";
@@ -20,6 +22,7 @@ export function SearchHeader({
   setPrefix: (prefix?: string) => void;
   innerRef?: RefObject<TextInput>;
 }) {
+  const [isFocused, setIsFocused] = useState(false);
   const nav = useNav();
 
   // Left side: account bubble
@@ -41,23 +44,58 @@ export function SearchHeader({
 
   return (
     <View style={styles.header}>
-      <ButtonCircle size={50} margin={16} onPress={goToAccount}>
-        <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
-      </ButtonCircle>
+      <Animated.View
+        style={{
+          marginRight: 16,
+          height: 50,
+          justifyContent: "center",
+        }}
+        entering={FadeIn}
+        exiting={FadeOut}
+      >
+        {isFocused ? (
+          <Animated.View entering={FadeIn} exiting={FadeOut} key="back">
+            <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
+              <Octicons name="arrow-left" size={30} color={color.midnight} />
+            </TouchableOpacity>
+          </Animated.View>
+        ) : (
+          <Animated.View entering={FadeIn} exiting={FadeOut} key="icon">
+            <ButtonCircle size={50} onPress={goToAccount}>
+              <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
+            </ButtonCircle>
+          </Animated.View>
+        )}
+      </Animated.View>
       <InputBig
         icon="search"
         placeholder="Search for user..."
         value={prefix || ""}
         onChange={setPrefix}
-        onFocus={() => setPrefix("")}
-        onBlur={() => setPrefix(undefined)}
+        onFocus={() => {
+          setIsFocused(true);
+          setPrefix("");
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          setPrefix(undefined);
+        }}
         innerRef={innerRef}
+        style={{ zIndex: 10 }}
       />
-      <ButtonCircle size={50} margin={16} onPress={goToQR}>
-        <View style={styles.qrCircle}>
-          <Octicons name="apps" size={24} color={color.midnight} />
-        </View>
-      </ButtonCircle>
+      {!isFocused && (
+        <Animated.View
+          style={{ marginLeft: 16 }}
+          entering={FadeIn}
+          exiting={FadeOut}
+        >
+          <ButtonCircle size={50} onPress={goToQR}>
+            <View style={styles.qrCircle}>
+              <Octicons name="apps" size={24} color={color.midnight} />
+            </View>
+          </ButtonCircle>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -67,6 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginHorizontal: 16,
   },
   qrCircle: {
     width: 50,
