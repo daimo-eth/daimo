@@ -61,7 +61,7 @@ export function TabNav() {
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={(props) => getTabOptions(ins, props)}
-      backBehavior="none"
+      backBehavior="initialRoute"
       tabBarPosition="bottom"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} />
