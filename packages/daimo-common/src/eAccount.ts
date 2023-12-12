@@ -6,6 +6,8 @@ export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
   name: z.string().optional(),
+  /** Daimo account registration time */
+  timestamp: z.number().optional(),
   /** Label for special addresses like the faucet */
   label: z.nativeEnum(AddrLabel).optional(),
   /** ENS name */

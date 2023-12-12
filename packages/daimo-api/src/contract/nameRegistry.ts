@@ -3,6 +3,7 @@ import {
   DAccount,
   DaimoAccountCall,
   EAccount,
+  guessTimestampFromNum,
   isValidName,
   validateName,
 } from "@daimo/common";
@@ -43,7 +44,7 @@ specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
 interface Registration {
-  blockNumber: bigint;
+  timestamp: number;
   name: string;
   addr: Address;
 }
@@ -51,8 +52,8 @@ interface Registration {
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
   /* In-memory indexer, for now. */
-  private nameToAddr = new Map<string, Address>();
-  private addrToName = new Map<Address, string>();
+  private nameToReg = new Map<string, Registration>();
+  private addrToReg = new Map<Address, Registration>();
   private accounts: DAccount[] = [];
 
   logs: Registration[] = [];
@@ -73,7 +74,7 @@ export class NameRegistry {
     );
     const names = result.rows.map((r) => {
       return {
-        blockNumber: r.block_num,
+        timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),
         name: bytesToString(r.name, { size: 32 }),
         addr: getAddress(bytesToHex(r.addr, { size: 20 })),
       };
@@ -86,21 +87,21 @@ export class NameRegistry {
   }
 
   /** Cache an account in memory. */
-  private cacheAccount = (acc: DAccount) => {
-    if (!isValidName(acc.name)) {
-      console.log(`[NAME-REG] skipping invalid name ${acc.name}`);
+  private cacheAccount = (reg: Registration) => {
+    if (!isValidName(reg.name)) {
+      console.log(`[NAME-REG] skipping invalid name ${reg.name}`);
       return;
     }
 
-    console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
-    this.nameToAddr.set(acc.name, acc.addr);
+    console.log(`[NAME-REG] caching ${reg.name} -> ${reg.addr}`);
+    this.nameToReg.set(reg.name, reg);
 
-    if (this.nameBlacklist.has(acc.name)) {
-      console.log(`[NAME-REG] hiding blacklisted name ${acc.name}`);
+    if (this.nameBlacklist.has(reg.name)) {
+      console.log(`[NAME-REG] hiding blacklisted name ${reg.name}`);
       return;
     }
-    this.addrToName.set(acc.addr, acc.name);
-    this.accounts.push(acc);
+    this.addrToReg.set(reg.addr, reg);
+    this.accounts.push(reg);
   };
 
   /** Find accounts whose names start with a prefix */
@@ -131,24 +132,27 @@ export class NameRegistry {
 
   /** On successfully registering a name, cache it. */
   onSuccessfulRegister = (name: string, address: Address) => {
-    this.cacheAccount({ name, addr: address });
+    this.cacheAccount({ name, addr: address, timestamp: Date.now() });
   };
 
   /** Find wallet address for a given Daimo name, or undefined if not found. */
   resolveName(name: string): Address | undefined {
-    return this.nameToAddr.get(name);
+    return this.nameToReg.get(name)?.addr;
   }
 
   /** Find name, or undefined if not a Daimo account. */
   resolveDaimoNameForAddr(addr: Address): string | undefined {
-    return this.addrToName.get(addr);
+    return this.addrToReg.get(addr)?.name;
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */
   async getEAccount(address: Address): Promise<EAccount> {
     // First, look for a Daimo name
-    const name = this.addrToName.get(address);
-    if (name) return { addr: address, name };
+    const reg = this.addrToReg.get(address);
+    if (reg) {
+      const { addr, name, timestamp } = reg;
+      return { addr, name, timestamp } as EAccount;
+    }
 
     // Then, a special labelled address, e.g. faucet
     const label = specialAddrLabels[address];

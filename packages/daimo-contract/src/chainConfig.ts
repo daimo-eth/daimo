@@ -15,6 +15,7 @@ export function daimoChainFromId(chainId: number): DaimoChain {
 }
 
 export interface ChainConfig {
+  daimoChain: DaimoChain;
   chainL1: Chain;
   chainL2: Chain;
   tokenAddress: Address;
@@ -27,6 +28,7 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
   switch (daimoChain) {
     case "base":
       return {
+        daimoChain,
         chainL1: mainnet,
         chainL2: base,
         tokenAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -36,6 +38,7 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
       };
     case "baseGoerli":
       return {
+        daimoChain,
         chainL1: mainnet, // ENS resolution = eth mainnet, read-only
         chainL2: baseGoerli,
         tokenAddress: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf",

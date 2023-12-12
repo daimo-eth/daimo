@@ -1,4 +1,10 @@
-import { DaimoLinkAccount, EAccount, canSendTo } from "@daimo/common";
+import {
+  DaimoLinkAccount,
+  EAccount,
+  canSendTo,
+  getAccountName,
+  timeMonth,
+} from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect } from "react";
@@ -126,7 +132,9 @@ function AccountScreenBody({
   });
 
   // TODO: show other accounts coin+chain, once we support multiple.
-  const subtitle = `Joined TODO`;
+  const subtitle = eAcc.timestamp
+    ? `Joined ${timeMonth(eAcc.timestamp)}`
+    : getAccountName({ addr: eAcc.addr });
 
   return (
     <>
