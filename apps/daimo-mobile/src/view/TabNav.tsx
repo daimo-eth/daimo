@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
@@ -146,6 +147,8 @@ function SendTab() {
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
         <SendStack.Screen name="SendSuccess" component={SendSuccessScreen} />
+        <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
@@ -159,6 +162,7 @@ function HomeTab() {
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
+        <HomeStack.Screen name="Account" component={AccountScreen} />
         <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>

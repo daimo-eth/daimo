@@ -89,10 +89,9 @@
     "stream-browserify": "^3.0.0",
     "text-encoding-polyfill": "^0.6.7",
     "ts-unused-exports": "^9.0.4",
-    "typescript": "^5.1.6",
+    "typescript": "5.2.2",
     "viem": "^1.16.0",
-    "expo-haptics": "~12.4.0",
-    "expo-file-system": "~15.4.5"
+    "expo-haptics": "~12.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

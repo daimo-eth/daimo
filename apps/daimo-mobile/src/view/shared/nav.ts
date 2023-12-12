@@ -3,6 +3,7 @@ import {
   DaimoLinkAccount,
   DaimoLinkNote,
   DaimoLinkRequest,
+  EAccount,
   TransferOpEvent,
   parseDaimoLink,
 } from "@daimo/common";
@@ -20,6 +21,7 @@ export type QRScreenOptions = "PAY ME" | "SCAN";
 export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
+  Account: { eAcc: EAccount } | { link: DaimoLinkAccount };
   HistoryOp: { op: TransferOpEvent };
 };
 
@@ -29,6 +31,8 @@ export type ParamListSend = {
   QR: { option: QRScreenOptions | undefined };
   SendLink: { lagAutoFocus: boolean };
   SendSuccess: SendNavProp;
+  Account: { eAcc: EAccount };
+  HistoryOp: { op: TransferOpEvent };
 };
 
 export type ParamListReceive = {
@@ -120,7 +124,10 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       nav.reset({ routes: [{ name: "SettingsTab", params: { screen } }] });
       break;
     }
-    case "account":
+    case "account": {
+      nav.navigate("HomeTab", { screen: "Account", params: { link } });
+      break;
+    }
     case "request": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
       break;

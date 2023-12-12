@@ -2,6 +2,7 @@ import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
@@ -12,6 +13,7 @@ import RNShake from "react-native-shake";
 import { useSendDebugLog } from "./common/useSendDebugLog";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
+import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
 import { ButtonMed } from "./view/shared/Button";
 import ScrollPellet from "./view/shared/ScrollPellet";
@@ -19,8 +21,11 @@ import Spacer from "./view/shared/Spacer";
 import { color } from "./view/shared/style";
 import { TextH3, TextLight } from "./view/shared/text";
 
+SplashScreen.preventAutoHideAsync();
+
 export default function App() {
   console.log("[APP] rendering");
+  const [account] = useAccount();
 
   // Display notifications, listen for push notifications
   useInitNotifications();
@@ -31,6 +36,15 @@ export default function App() {
   // White background to avoid between-tab flicker
   let theme = DefaultTheme;
   theme = { ...theme, colors: { ...theme.colors, background: color.white } };
+
+  useEffect(() => {
+    if (account == null) return;
+
+    const nowS = Math.floor(Date.now() / 1000);
+    if (nowS - account.lastBlockTimestamp < 60 * 10) {
+      SplashScreen.hideAsync();
+    }
+  }, []);
 
   return (
     <RpcProvider>

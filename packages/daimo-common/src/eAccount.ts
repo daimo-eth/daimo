@@ -6,6 +6,8 @@ export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
   name: z.string().optional(),
+  /** Daimo account registration time */
+  timestamp: z.number().optional(),
   /** Label for special addresses like the faucet */
   label: z.nativeEnum(AddrLabel).optional(),
   /** ENS name */
@@ -34,6 +36,14 @@ export function getAccountName(acc: EAccount): string {
 
   const { addr } = acc;
   return addr.slice(0, 6) + "…" + addr.slice(-4);
+}
+
+/** Whether we can (potentially) send funds to this address. */
+export function canSendTo(acc: EAccount): boolean {
+  // Daimo accounts, ENS & bare addresses can receive funds.
+  if (acc.label == null) return true;
+  // Certain labelled accounts cannot.
+  return ![AddrLabel.PaymentLink, AddrLabel.Paymaster].includes(acc.label);
 }
 
 /** Gets a Daimo name, ENS name or full account address. */

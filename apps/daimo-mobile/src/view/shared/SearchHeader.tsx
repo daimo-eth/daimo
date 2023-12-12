@@ -41,7 +41,7 @@ export function SearchHeader({
 
   return (
     <View style={styles.header}>
-      <ButtonCircle onPress={goToAccount}>
+      <ButtonCircle size={50} margin={16} onPress={goToAccount}>
         <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
       </ButtonCircle>
       <InputBig
@@ -53,7 +53,7 @@ export function SearchHeader({
         onBlur={() => setPrefix(undefined)}
         innerRef={innerRef}
       />
-      <ButtonCircle onPress={goToQR}>
+      <ButtonCircle size={50} margin={16} onPress={goToQR}>
         <View style={styles.qrCircle}>
           <Octicons name="apps" size={24} color={color.midnight} />
         </View>

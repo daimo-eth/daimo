@@ -3,6 +3,7 @@ import {
   DAccount,
   DaimoAccountCall,
   EAccount,
+  guessTimestampFromNum,
   isValidName,
   validateName,
 } from "@daimo/common";
@@ -10,27 +11,19 @@ import {
   daimoEphemeralNotesAddress,
   nameRegistryProxyConfig,
 } from "@daimo/contract";
+import { Pool } from "pg";
 import {
   Address,
-  Log,
+  bytesToHex,
+  bytesToString,
   encodeFunctionData,
-  getAbiItem,
   getAddress,
-  hexToString,
   isAddress,
 } from "viem";
 import { normalize } from "viem/ens";
 
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-
-const registeredName = "Registered";
-const registeredEvent = getAbiItem({
-  abi: nameRegistryProxyConfig.abi,
-  name: registeredName,
-});
-
-type RegisteredLog = Log<bigint, number, false, typeof registeredEvent, true>;
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
@@ -50,65 +43,72 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
+interface Registration {
+  timestamp: number;
+  name: string;
+  addr: Address;
+}
+
 /* Interface to the NameRegistry contract. */
 export class NameRegistry {
   /* In-memory indexer, for now. */
-  private nameToAddr = new Map<string, Address>();
-  private addrToName = new Map<Address, string>();
+  private nameToReg = new Map<string, Registration>();
+  private addrToReg = new Map<Address, Registration>();
   private accounts: DAccount[] = [];
 
-  public logs: RegisteredLog[] = [];
+  logs: Registration[] = [];
 
   constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
 
-  /** Init: index logs from chain, get all names so far */
-  async init() {
-    await this.vc.pipeLogs(
-      {
-        address: nameRegistryProxyConfig.address,
-        event: registeredEvent,
-      },
-      this.parseLogs
+  async load(pg: Pool, from: bigint, to: bigint) {
+    const startTime = Date.now();
+    const result = await pg.query(
+      `
+        select block_num, addr, name
+        from names
+        where block_num >= $1
+        and block_num <= $2
+        and chain_id = $3
+      `,
+      [from, to, chainConfig.chainL2.id]
+    );
+    const names = result.rows.map((r) => {
+      return {
+        timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),
+        name: bytesToString(r.name, { size: 32 }),
+        addr: getAddress(bytesToHex(r.addr, { size: 20 })),
+      };
+    });
+    this.logs.push(...names);
+    names.forEach(this.cacheAccount);
+    console.log(
+      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`
     );
   }
 
-  /** Parses Registered event logs, first in init(), then on subscription. */
-  parseLogs = async (logs: RegisteredLog[]) => {
-    this.logs.push(...logs);
-
-    const accounts = logs
-      .map((l) => l.args)
-      .map((a) => ({
-        name: hexToString(a.name, { size: 32 }),
-        addr: getAddress(a.addr),
-      }));
-    console.log(`[NAME-REG] parsed ${accounts.length} named account(s)`);
-
-    accounts.forEach(this.cacheAccount);
-  };
-
   /** Cache an account in memory. */
-  private cacheAccount = (acc: DAccount) => {
-    if (!isValidName(acc.name)) {
-      console.log(`[NAME-REG] skipping invalid name ${acc.name}`);
+  private cacheAccount = (reg: Registration) => {
+    if (!isValidName(reg.name)) {
+      console.log(`[NAME-REG] skipping invalid name ${reg.name}`);
       return;
     }
 
-    console.log(`[NAME-REG] caching ${acc.name} -> ${acc.addr}`);
-    this.nameToAddr.set(acc.name, acc.addr);
+    console.log(`[NAME-REG] caching ${reg.name} -> ${reg.addr}`);
+    this.nameToReg.set(reg.name, reg);
 
-    if (this.nameBlacklist.has(acc.name)) {
-      console.log(`[NAME-REG] hiding blacklisted name ${acc.name}`);
+    if (this.nameBlacklist.has(reg.name)) {
+      console.log(`[NAME-REG] hiding blacklisted name ${reg.name}`);
       return;
     }
-    this.addrToName.set(acc.addr, acc.name);
-    this.accounts.push(acc);
+    this.addrToReg.set(reg.addr, reg);
+    this.accounts.push(reg);
   };
 
   /** Find accounts whose names start with a prefix */
   async search(prefix: string): Promise<DAccount[]> {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
+      .map((a) => ({ addr: a.addr, name: a.name }))
       .filter((a) => a.name.startsWith(prefix))
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 10);
@@ -132,24 +132,27 @@ export class NameRegistry {
 
   /** On successfully registering a name, cache it. */
   onSuccessfulRegister = (name: string, address: Address) => {
-    this.cacheAccount({ name, addr: address });
+    this.cacheAccount({ name, addr: address, timestamp: Date.now() });
   };
 
   /** Find wallet address for a given Daimo name, or undefined if not found. */
   resolveName(name: string): Address | undefined {
-    return this.nameToAddr.get(name);
+    return this.nameToReg.get(name)?.addr;
   }
 
   /** Find name, or undefined if not a Daimo account. */
   resolveDaimoNameForAddr(addr: Address): string | undefined {
-    return this.addrToName.get(addr);
+    return this.addrToReg.get(addr)?.name;
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */
   async getEAccount(address: Address): Promise<EAccount> {
     // First, look for a Daimo name
-    const name = this.addrToName.get(address);
-    if (name) return { addr: address, name };
+    const reg = this.addrToReg.get(address);
+    if (reg) {
+      const { addr, name, timestamp } = reg;
+      return { addr, name, timestamp } as EAccount;
+    }
 
     // Then, a special labelled address, e.g. faucet
     const label = specialAddrLabels[address];

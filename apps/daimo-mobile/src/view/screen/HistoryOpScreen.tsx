@@ -1,6 +1,7 @@
 import {
   amountToDollars,
   DaimoNoteStatus,
+  EAccount,
   OpStatus,
   timeString,
   TrackedNote,
@@ -17,12 +18,12 @@ import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
-import { TitleAmount } from "../shared/Amount";
+import { SubtitleAmountChange } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { AddrText } from "../shared/addr";
+import { getCachedEAccount } from "../shared/addr";
 import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
@@ -71,7 +72,7 @@ function HistoryOpScreenInner({
   return (
     <View style={ss.container.screen}>
       <ScreenHeader title="Transfer" onBack={useExitBack()} />
-      <Spacer h={64} />
+      <Spacer h={32} />
       <TransferBody account={account} op={op} />
       <Spacer h={64} />
       <View style={ss.container.padH16}>
@@ -117,9 +118,11 @@ function LinkToExplorer({
   const explorer = chainConfig.chainL2.blockExplorers!.default;
   const url = `${explorer.url}/tx/${txHash}`;
 
-  const openURL = useCallback(() => Linking.openURL(url), []);
+  const openURL = useCallback(() => Linking.openURL(url), [url]);
 
-  return <ButtonBig onPress={openURL} type="subtle" title="View on explorer" />;
+  return (
+    <ButtonBig onPress={openURL} type="subtle" title="VIEW ON BLOCK EXPLORER" />
+  );
 }
 
 function TransferBody({
@@ -139,25 +142,18 @@ function TransferBody({
       op.to === account.address
   );
 
-  const kv: [string, ReactNode][] = [];
-
+  let other: EAccount;
+  let amountChange: bigint;
   const sentByUs = op.from === account.address;
   if (sentByUs) {
-    kv.push([
-      "Recipient",
-      <TextBody>
-        <AddrText addr={op.to} />
-      </TextBody>,
-    ]);
+    other = getCachedEAccount(op.to);
+    amountChange = -BigInt(op.amount);
   } else {
-    kv.push([
-      "Sender",
-      <TextBody>
-        <AddrText addr={op.from} />
-      </TextBody>,
-    ]);
+    other = getCachedEAccount(op.from);
+    amountChange = BigInt(op.amount);
   }
 
+  const kv: [string, ReactNode][] = [];
   if (matchingTrackedRequest != null) {
     const amount = amountToDollars(BigInt(matchingTrackedRequest.amount));
     kv.push(["Amount you requested", <TextBody>{amount}</TextBody>]);
@@ -166,7 +162,10 @@ function TransferBody({
   kv.push(["Date", <TextBody>{timeString(op.timestamp)}</TextBody>]);
 
   if (op.feeAmount !== undefined) {
-    const feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
+    let feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
+    if (op.feeAmount > 0 && feeStr === "$0.00") {
+      feeStr = "< $0.01";
+    }
     const feeElem =
       feeStr === "$0.00" ? (
         <>
@@ -186,12 +185,22 @@ function TransferBody({
   kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
   kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
 
+  // Summarize what happened
+  let verb;
+  if (other.label === "payment link") {
+    verb = sentByUs ? "Created link" : "Claimed link";
+  } else {
+    verb = sentByUs ? "Sent transfer" : "Received transfer";
+  }
+
   return (
     <View>
+      <Spacer h={32} />
       <TextCenter>
-        <TextLight>{sentByUs ? "Sent" : "Received"}</TextLight>
+        <TextLight>{verb}</TextLight>
       </TextCenter>
-      <TitleAmount amount={BigInt(op.amount)} />
+      <Spacer h={4} />
+      <SubtitleAmountChange amount={amountChange} />
       <Spacer h={32} />
       <View style={styles.kvWrap}>
         <View style={styles.kvList}>

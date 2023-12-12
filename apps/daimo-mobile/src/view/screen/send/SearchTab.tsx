@@ -47,24 +47,26 @@ export function SearchTab({
         />
       </View>
       <Spacer h={16} />
-      <SearchResults prefix={prefix} />
+      <SearchResults prefix={prefix} mode="send" />
     </>
   );
 }
 
 export function SearchResults({
   prefix,
+  mode,
   style,
   lagAutoFocus,
 }: {
   prefix: string;
+  mode: "send" | "account";
   style?: ViewStyle;
   lagAutoFocus?: boolean;
 }) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
     <View style={[styles.resultsWrap, style]}>
-      <Inner prefix={prefix.trim().toLowerCase()} lagAutoFocus={lagAutoFocus} />
+      <Inner prefix={prefix.trim().toLowerCase()} {...{ lagAutoFocus, mode }} />
     </View>
   );
 }
@@ -72,10 +74,12 @@ export function SearchResults({
 function SearchResultsScroll({
   account,
   prefix,
+  mode,
   lagAutoFocus,
 }: {
   account: Account;
   prefix: string;
+  mode: "send" | "account";
   lagAutoFocus?: boolean;
 }) {
   const res = useRecipientSearch(account, prefix);
@@ -99,7 +103,7 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <RecipientRow key={r.addr} recipient={r} lagAutoFocus={lagAutoFocus} />
+        <RecipientRow key={r.addr} recipient={r} {...{ lagAutoFocus, mode }} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
@@ -136,21 +140,28 @@ function NoSearchResults({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
 
 function RecipientRow({
   recipient,
+  mode,
   lagAutoFocus,
 }: {
   recipient: Recipient;
+  mode: "send" | "account";
   lagAutoFocus?: boolean;
 }) {
   const eAccStr = getEAccountStr(recipient);
   const nav = useNav();
-  const payAccount = useCallback(
-    () =>
+  const goToAccount = useCallback(() => {
+    if (mode === "account") {
+      nav.navigate("HomeTab", {
+        screen: "Account",
+        params: { eAcc: recipient },
+      });
+    } else {
       nav.navigate("SendTab", {
         screen: "SendTransfer",
         params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
-      }),
-    [eAccStr]
-  );
+      });
+    }
+  }, [eAccStr, mode]);
 
   const name = getAccountName(recipient);
   const nowS = Date.now() / 1e3;
@@ -159,7 +170,7 @@ function RecipientRow({
     `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
 
   return (
-    <Row onPress={payAccount}>
+    <Row onPress={goToAccount}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
           <AccountBubble eAcc={recipient} size={36} />

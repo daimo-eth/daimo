@@ -22,6 +22,7 @@ import { Recipient, addLastSendTime } from "../../../sync/recipients";
 import { AccountBubble } from "../../shared/AccountBubble";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
+import { ButtonCircle } from "../../shared/ButtonCircle";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -255,9 +256,19 @@ function RecipientDisplay({
   const { originalMatch } = recipient;
   const showOrig = originalMatch != null && originalMatch !== disp;
 
+  const nav = useNav();
+  const goToAccount = useCallback(() => {
+    nav.navigate("SendTab", {
+      screen: "Account",
+      params: { eAcc: recipient },
+    });
+  }, [nav, recipient]);
+
   return (
     <View style={styles.recipientDisp}>
-      <AccountBubble eAcc={recipient} size={64} />
+      <ButtonCircle size={64} onPress={goToAccount}>
+        <AccountBubble eAcc={recipient} size={64} transparent />
+      </ButtonCircle>
       <Spacer h={16} />
       {isRequest && <TextLight>Requested by</TextLight>}
       {isRequest && <Spacer h={8} />}

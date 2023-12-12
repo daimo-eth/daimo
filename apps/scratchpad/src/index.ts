@@ -52,26 +52,18 @@ function metricsDesc() {
 
 async function metrics() {
   const vc = getViemClientFromEnv();
-  await vc.init();
 
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
   const nameReg = new NameRegistry(vc, new Set([]));
-  const opIndexer = new OpIndexer(vc);
+  const opIndexer = new OpIndexer();
   const coinIndexer = new CoinIndexer(vc, opIndexer);
-
-  console.log(`[METRICS] initializing indexers...`);
-  await Promise.all([nameReg.init(), opIndexer.init()]);
-  await Promise.all([coinIndexer.init()]);
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);
   const signups = new Map<string, number>();
   const daimoChain = daimoChainFromId(vc.publicClient.chain.id);
-  for (const log of nameReg.logs.sort(
-    (a, b) => Number(a.blockNumber) - Number(b.blockNumber)
-  )) {
-    const ts = guessTimestampFromNum(log.blockNumber, daimoChain);
-    addMetric(signups, ts, 1);
+  for (const log of nameReg.logs.sort((a, b) => a.timestamp - b.timestamp)) {
+    addMetric(signups, log.timestamp, 1);
   }
 
   const { tokenSymbol, tokenAddress } = chainConfig;
@@ -79,8 +71,8 @@ async function metrics() {
   const transfers = new Map<string, number>();
   coinIndexer.pipeAllTransfers(async (logs) => {
     for (const log of logs) {
-      const from = nameReg.resolveDaimoNameForAddr(log.args.from);
-      const to = nameReg.resolveDaimoNameForAddr(log.args.to);
+      const from = nameReg.resolveDaimoNameForAddr(log.from);
+      const to = nameReg.resolveDaimoNameForAddr(log.to);
       if (from == null && to == null) continue;
       const ts = guessTimestampFromNum(log.blockNumber!, daimoChain);
       addMetric(transfers, ts, 1);

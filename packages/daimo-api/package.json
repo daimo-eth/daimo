@@ -15,6 +15,7 @@
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
     "@coinbase/cbpay-js": "^1.8.0",
+    "@daimo/bulk": "^0.1.4",
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",
@@ -24,7 +25,6 @@
     "@trpc/server": "^10.43.2",
     "@types/cors": "^2.8.16",
     "@types/geoip-lite": "^1.4.2",
-    "abitype": "^0.9.2",
     "await-lock": "^2.2.2",
     "cors": "^2.8.5",
     "cron": "^3.1.4",
@@ -45,6 +45,6 @@
     "tape": "^5.6.3",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.1.6"
+    "typescript": "5.2.2"
   }
 }

@@ -20,8 +20,10 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
+import { Watcher } from "../shovel/watcher";
 
 export function createRouter(
+  watcher: Watcher,
   vc: ViemClient,
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
@@ -123,6 +125,7 @@ export function createRouter(
         return getAccountHistory(
           address,
           sinceBlockNum,
+          watcher,
           vc,
           coinIndexer,
           nameReg,
@@ -165,6 +168,7 @@ export function createRouter(
           name,
           pubKeyHex,
           invCode,
+          watcher,
           nameReg,
           accountFactory,
           faucet,
@@ -190,7 +194,7 @@ export function createRouter(
         span.setAttribute("op.paymaster", op.paymasterAndData);
 
         try {
-          return await bundlerClient.sendUserOp(op);
+          return await bundlerClient.sendUserOp(op, vc);
         } catch (e: any) {
           const em = e.message || "no error message";
           span.setAttribute("op.send_err", em);

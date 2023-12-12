@@ -1,20 +1,21 @@
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
+import { ViemClient } from "@daimo/api/src/network/viemClient";
 import { UserOpHex } from "@daimo/common";
 import {
+  daimoAccountABI,
   daimoAccountFactoryConfig,
   daimoEphemeralNotesAddress,
+  daimoPaymasterAddress,
   entryPointABI,
   erc20ABI,
-  daimoPaymasterAddress,
-  daimoAccountABI,
 } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
   DaimoNonceType,
   DaimoOpSender,
-  SigningCallback,
   OpSenderCallback,
+  SigningCallback,
 } from "@daimo/userop";
 import { base64urlnopad } from "@scure/base";
 import crypto from "node:crypto";
@@ -47,6 +48,15 @@ export async function createAccount() {
   const chain = chainConfig.chainL2;
   const publicClient = createPublicClient({ chain, transport: http() });
   console.log(`Connected to ${chain.name}, ${publicClient.transport.url}`);
+
+  const funderPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
+  const funderAccount = privateKeyToAccount(funderPrivKey);
+  console.log(`Faucet account: ${funderAccount.address}`);
+  const walletClient = createWalletClient({
+    account: funderAccount,
+    chain,
+    transport: http(),
+  });
 
   // Generate keypair
   const p256 = { name: "ECDSA", namedCurve: "P-256", hash: "SHA-256" };
@@ -119,7 +129,8 @@ export async function createAccount() {
 
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
-    return bundlerClient.sendUserOp(op);
+    const vc = new ViemClient(publicClient, publicClient, walletClient);
+    return bundlerClient.sendUserOp(op, vc);
   };
 
   const pubKey = Buffer.from(pubKeyHex.substring(56), "hex");
@@ -136,15 +147,6 @@ export async function createAccount() {
     ...daimoAccountFactoryConfig,
     functionName: "getAddress",
     args,
-  });
-
-  const funderPrivKey = `0x${process.env.DAIMO_API_PRIVATE_KEY}` as const;
-  const funderAccount = privateKeyToAccount(funderPrivKey);
-  console.log(`Faucet account: ${funderAccount.address}`);
-  const walletClient = createWalletClient({
-    account: funderAccount,
-    chain,
-    transport: http(),
   });
 
   // Deploy account

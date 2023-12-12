@@ -1,10 +1,13 @@
 import {
+  EAccount,
   TransferOpEvent,
   assert,
+  canSendTo,
   getAccountName,
   timeAgo,
 } from "@daimo/common";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { useCallback } from "react";
 import {
   Platform,
   StyleSheet,
@@ -40,14 +43,26 @@ export function HistoryListSwipe({
   account,
   showDate,
   maxToShow,
+  otherAcc,
 }: {
   account: Account;
   showDate: boolean;
   maxToShow?: number;
+  otherAcc?: EAccount;
 }) {
   const ins = useSafeAreaInsets();
 
-  const ops = account.recentTransfers.slice().reverse();
+  // Get relevant transfers in reverse chronological order
+  let ops = account.recentTransfers.slice().reverse();
+  if (otherAcc != null) {
+    const otherAddr = otherAcc.addr;
+    ops = ops.filter((t) => t.from === otherAddr || t.to === otherAddr);
+  }
+
+  // Link to either the op (zoomed in) or the other account (zoomed out)
+  // const linkTo = "op"; // Option to link to AccountPage instead.
+  const linkTo = otherAcc == null ? "account" : "op";
+
   if (ops.length === 0) {
     return (
       <View>
@@ -64,20 +79,24 @@ export function HistoryListSwipe({
       key={getTransferId(t)}
       transfer={t}
       address={account.address}
-      showDate={showDate}
+      {...{ linkTo, showDate }}
     />
   );
 
+  // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
+    const title =
+      otherAcc == null ? "Transaction history" : `Transactions between you`;
     return (
       <View style={styles.historyListBody}>
-        <HeaderRow key="h0" title="Transaction history" />
+        <HeaderRow key="h0" title={title} />
         {ops.slice(0, maxToShow).map(renderRow)}
         <View style={styles.transferBorder} />
       </View>
     );
   }
 
+  // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
   const rows: (TransferRenderObject | HeaderObject)[] = [];
 
@@ -117,7 +136,12 @@ export function HistoryListSwipe({
           return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <TransferRow transfer={item.t} address={account.address} showDate />
+          <TransferRow
+            transfer={item.t}
+            address={account.address}
+            showDate
+            {...{ linkTo }}
+          />
         );
       }}
     />
@@ -135,10 +159,12 @@ function HeaderRow({ title }: { title: string }) {
 function TransferRow({
   transfer,
   address,
+  linkTo,
   showDate,
 }: {
   transfer: TransferOpEvent;
   address: Address;
+  linkTo: "op" | "account";
   showDate?: boolean;
 }) {
   assert(transfer.amount > 0);
@@ -151,8 +177,17 @@ function TransferRow({
   const amountDelta = from === address ? -transfer.amount : transfer.amount;
 
   const nav = useNav();
-  const viewOp = () =>
-    nav.navigate("HomeTab", { screen: "HistoryOp", params: { op: transfer } });
+  const viewOp = useCallback(() => {
+    // Workaround: react-navigation typescript types are broken.
+    // currentTab is eg "SendNav", is NOT in fact a ParamListTab,
+    const currentTab = nav.getState().routes[0].name;
+    const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
+    if (linkTo === "op" || !canSendTo(otherAcc)) {
+      nav.navigate(newTab, { screen: "HistoryOp", params: { op: transfer } });
+    } else {
+      nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
+    }
+  }, [nav, transfer, linkTo, otherAcc]);
 
   const isPending = transfer.status === "pending";
   const textCol = isPending ? color.gray3 : color.midnight;

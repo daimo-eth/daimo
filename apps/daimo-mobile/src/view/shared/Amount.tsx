@@ -42,27 +42,15 @@ export function getAmountText({
 }
 
 /** Displays eg "$1.23" or "$1,23" as H1 or H2. */
-export function TitleAmount({
-  amount,
-  size,
-}: {
-  amount: bigint;
-  size?: "h1" | "h2";
-}) {
+export function TitleAmount({ amount }: { amount: bigint }) {
   if (!(amount >= 0)) throw new Error("Invalid amount");
 
   const symbol = "$";
   const [dollars, cents] = amountToDollars(amount).split(".");
 
-  const [style, styleSym] = (() => {
-    switch (size) {
-      default:
-        return [styles.hero, styles.heroSmall] as const;
-    }
-  })();
   return (
-    <Text style={style}>
-      <Text style={styleSym}>{symbol}</Text>
+    <Text style={styles.title}>
+      <Text style={styles.titleSmall}>{symbol}</Text>
       <Spacer w={4} />
       {dollars}
       {amountSeparator}
@@ -71,15 +59,45 @@ export function TitleAmount({
   );
 }
 
+/** Display eg. "+ $1.23" (green)  or "- $10.00" (black). */
+export function SubtitleAmountChange({ amount }: { amount: bigint }) {
+  const sign = amount >= 0 ? "+ " : "- ";
+  const symbol = "$";
+  const absAmount = amount >= 0 ? amount : -amount;
+  const [dollars, cents] = amountToDollars(absAmount).split(".");
+
+  return (
+    <Text style={styles.subtitle}>
+      <Text style={styles.subtitleSmall}>
+        {sign} {symbol}
+      </Text>
+      <Spacer w={2} />
+      {dollars}
+      {amountSeparator}
+      {cents}
+    </Text>
+  );
+}
+
 const styles = StyleSheet.create({
-  hero: {
+  title: {
     fontSize: 48,
     fontVariant: ["tabular-nums"],
     color: color.midnight,
     fontWeight: "600",
     textAlign: "center",
   },
-  heroSmall: {
+  titleSmall: {
     fontSize: 42,
+  },
+  subtitle: {
+    fontSize: 40,
+    fontVariant: ["tabular-nums"],
+    color: color.midnight,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  subtitleSmall: {
+    fontSize: 36,
   },
 });

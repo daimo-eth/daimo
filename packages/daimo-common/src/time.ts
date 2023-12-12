@@ -12,7 +12,7 @@ export function timeAgo(sinceS: number, nowS: number, long?: boolean) {
   return `${days}d` + (long ? ` ago` : ``);
 }
 
-/** Returns eg "Aug 4 2023, 4:00pm" */
+/** Returns eg "12/11/2023, 10:44" */
 export function timeString(s: number) {
   const date = new Date(s * 1000);
   return date.toLocaleString([], {
@@ -21,6 +21,16 @@ export function timeString(s: number) {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    dayPeriod: "short",
+  });
+}
+
+/** Returns eg "Aug 2023" */
+export function timeMonth(s: number) {
+  const date = new Date(s * 1000);
+  return date.toLocaleString([], {
+    month: "short",
+    year: "numeric",
   });
 }
 

@@ -98,7 +98,7 @@ export function AppOrWalletCTA({
             {isLoading
               ? "SENDING"
               : isSuccess
-              ? "VIEW ON EXPLORER ↗"
+              ? "VIEW ON BLOCK EXPLORER"
               : secondaryTitle}
           </SecondaryButton>
           <div className="h-4" />

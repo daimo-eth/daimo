@@ -2,6 +2,7 @@ import {
   EAccount,
   OpStatus,
   assert,
+  canSendTo,
   dollarsToAmount,
   hasAccountName,
 } from "@daimo/common";
@@ -21,7 +22,7 @@ import {
 import { Account } from "../../../model/account";
 import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
-import { ButtonBig } from "../../shared/Button";
+import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
@@ -87,6 +88,8 @@ function SendTransferButtonInner({
       return "Insufficient funds";
     } else if (account.address === recipient.addr) {
       return "Can't send to yourself";
+    } else if (!canSendTo(recipient)) {
+      return "Can't send to this account";
     } else if (Number(dollarsStr) === 0) {
       return "Enter an amount";
     } else {
@@ -100,11 +103,12 @@ function SendTransferButtonInner({
       case "idle":
       case "error":
         return (
-          <ButtonBig
+          <LongPressBigButton
             title="CONFIRM AND SEND"
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
+            duration={400}
           />
         );
       case "loading":

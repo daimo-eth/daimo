@@ -13,13 +13,13 @@ import { Constants } from "userop";
 import { Hex, formatEther } from "viem";
 
 import { Telemetry } from "./telemetry";
-import { CoinIndexer, TransferLog } from "../contract/coinIndexer";
+import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 
 export class Crontab {
-  private transfersQueue: TransferLog[] = [];
+  private transfersQueue: Transfer[] = [];
   private cronJobs: CronJob[] = [];
 
   constructor(
@@ -52,7 +52,7 @@ export class Crontab {
     );
   };
 
-  private pipeTransfers = (logs: TransferLog[]) => {
+  private pipeTransfers = (logs: Transfer[]) => {
     this.transfersQueue = this.transfersQueue.concat(logs);
     this.pruneTransfers();
   };
@@ -109,25 +109,21 @@ export class Crontab {
   async postRecentTransfers() {
     this.pruneTransfers();
     for (const transfer of this.transfersQueue) {
-      const fromName = this.nameRegistry.resolveDaimoNameForAddr(
-        transfer.args.from
-      );
-      const toName = this.nameRegistry.resolveDaimoNameForAddr(
-        transfer.args.to
-      );
+      const fromName = this.nameRegistry.resolveDaimoNameForAddr(transfer.from);
+      const toName = this.nameRegistry.resolveDaimoNameForAddr(transfer.to);
 
       if (fromName == null && toName == null) continue;
 
       const fromDisplayName = getAccountName(
-        await this.nameRegistry.getEAccount(transfer.args.from)
+        await this.nameRegistry.getEAccount(transfer.from)
       );
       const toDisplayName = getAccountName(
-        await this.nameRegistry.getEAccount(transfer.args.to)
+        await this.nameRegistry.getEAccount(transfer.to)
       );
 
       this.telemetry.recordClippy(
         `Transfer: ${fromDisplayName} -> ${toDisplayName} $${amountToDollars(
-          transfer.args.value
+          transfer.value
         )}`
       );
     }
