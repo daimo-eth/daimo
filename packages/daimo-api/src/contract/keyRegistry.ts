@@ -141,8 +141,8 @@ export class KeyRegistry {
   }
 
   /** Find all keys and metadata for a daimo account address */
-  async resolveAddressKeys(addr: Address): Promise<KeyData[] | null> {
-    return this.addrToKeyData.get(addr) || null;
+  async resolveAddressKeys(addr: Address): Promise<KeyData[]> {
+    return this.addrToKeyData.get(addr) || [];
   }
 
   isDeploymentKeyRotationLog(log: KeyChange) {
