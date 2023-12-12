@@ -125,10 +125,8 @@ function AccountScreenBody({
     translationY,
   });
 
-  // TODO: use other accounts coin+chain, not ours
-  // This is only relevant once we support more than one.
-  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
-  const coinChain = `${chainConfig.tokenSymbol} · ${chainConfig.chainL2.name}`;
+  // TODO: show other accounts coin+chain, once we support multiple.
+  const subtitle = `Joined TODO`;
 
   return (
     <>
@@ -140,9 +138,9 @@ function AccountScreenBody({
       >
         <AccountBubble eAcc={eAcc} size={64} fontSize={24} />
         <Spacer h={16} />
-        <AccountCopyLinkButton eAcc={eAcc} />
+        <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
         <Spacer h={8} />
-        <TextH3 color={color.gray3}>{coinChain}</TextH3>
+        <TextH3 color={color.gray3}>{subtitle}</TextH3>
       </View>
       <Spacer h={24} />
       <View style={ss.container.padH8}>

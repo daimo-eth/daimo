@@ -95,7 +95,7 @@ function AccountHero({ account }: { account: Account }) {
     <View style={styles.accountHero}>
       <AccountBubble eAcc={eAcc} size={64} />
       <View>
-        <AccountCopyLinkButton eAcc={eAcc} />
+        <AccountCopyLinkButton eAcc={eAcc} size="h3" />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
           <TextH3 color={color.gray3}>
             {tokenSymbol} · {l2Name}{" "}

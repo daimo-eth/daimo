@@ -6,15 +6,23 @@ import {
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import Spacer from "./Spacer";
 import { color, touchHighlightUnderlay } from "./style";
-import { TextH2 } from "./text";
+import { TextH2, TextH3 } from "./text";
 
 /** Displays an EAccount, and lets you copy a Daimo deeplink to it. */
-export function AccountCopyLinkButton({ eAcc }: { eAcc: EAccount }) {
+export function AccountCopyLinkButton({
+  eAcc,
+  size,
+  center,
+}: {
+  eAcc: EAccount;
+  size: "h2" | "h3";
+  center?: boolean;
+}) {
   const acctUrl = formatDaimoLink({
     type: "account",
     account: getEAccountStr(eAcc),
@@ -26,6 +34,11 @@ export function AccountCopyLinkButton({ eAcc }: { eAcc: EAccount }) {
     setTimeout(() => setJustCopied(false), 1000);
   }, [acctUrl]);
 
+  // Size
+  const Elem = size === "h2" ? TextH2 : TextH3;
+  const iconSize = size === "h2" ? 18 : 16;
+  const iconStyle = useMemo(() => ({ width: iconSize }), [iconSize]);
+
   return (
     <TouchableHighlight
       {...touchHighlightUnderlay.subtle}
@@ -33,18 +46,18 @@ export function AccountCopyLinkButton({ eAcc }: { eAcc: EAccount }) {
       hitSlop={16}
       onPress={copy}
     >
-      <TextH2>
-        <Spacer w={16} />
+      <Elem>
+        {center && <Spacer w={iconSize} />}
         {getAccountName(eAcc)}
         <Spacer w={8} />
-        <View style={styles.copyIcon}>
+        <View style={iconStyle}>
           <Octicons
             name={justCopied ? "check" : "copy"}
             color={color.grayDark}
-            size={18}
+            size={iconSize}
           />
         </View>
-      </TextH2>
+      </Elem>
     </TouchableHighlight>
   );
 }
@@ -55,8 +68,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginLeft: -8,
     borderRadius: 4,
-  },
-  copyIcon: {
-    width: 18,
   },
 });

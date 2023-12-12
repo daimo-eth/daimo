@@ -2,6 +2,7 @@ import {
   EAccount,
   TransferOpEvent,
   assert,
+  canSendTo,
   getAccountName,
   timeAgo,
 } from "@daimo/common";
@@ -59,7 +60,8 @@ export function HistoryListSwipe({
   }
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
-  const linkTo = "op"; // Option to link to AccountPage instead.
+  // const linkTo = "op"; // Option to link to AccountPage instead.
+  const linkTo = otherAcc == null ? "account" : "op";
 
   if (ops.length === 0) {
     return (
@@ -180,7 +182,7 @@ function TransferRow({
     // currentTab is eg "SendNav", is NOT in fact a ParamListTab,
     const currentTab = nav.getState().routes[0].name;
     const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
-    if (linkTo === "op") {
+    if (linkTo === "op" || !canSendTo(otherAcc)) {
       nav.navigate(newTab, { screen: "HistoryOp", params: { op: transfer } });
     } else {
       nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });

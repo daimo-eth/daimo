@@ -1,9 +1,7 @@
 import {
   amountToDollars,
-  canSendTo,
   DaimoNoteStatus,
   EAccount,
-  getAccountName,
   OpStatus,
   timeString,
   TrackedNote,
@@ -20,18 +18,22 @@ import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
-import { AccountBubble } from "../shared/AccountBubble";
 import { SubtitleAmountChange } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
-import { ButtonCircle } from "../shared/ButtonCircle";
 import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { getCachedEAccount } from "../shared/addr";
 import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
-import { TextBody, TextError, TextH3, TextLight } from "../shared/text";
+import {
+  TextBody,
+  TextCenter,
+  TextError,
+  TextH3,
+  TextLight,
+} from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
@@ -183,19 +185,21 @@ function TransferBody({
   kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
   kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
 
+  // Summarize what happened
+  let verb;
+  if (other.label === "payment link") {
+    verb = sentByUs ? "Created link" : "Claimed link";
+  } else {
+    verb = sentByUs ? "Sent transfer" : "Received transfer";
+  }
+
   return (
     <View>
-      <View
-        style={{
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <AccountButton eAcc={other} />
-        <Spacer h={8} />
-        <TextH3>{getAccountName(other)}</TextH3>
-      </View>
-      <Spacer h={16} />
+      <Spacer h={32} />
+      <TextCenter>
+        <TextLight>{verb}</TextLight>
+      </TextCenter>
+      <Spacer h={4} />
       <SubtitleAmountChange amount={amountChange} />
       <Spacer h={32} />
       <View style={styles.kvWrap}>
@@ -219,26 +223,6 @@ function TransferBody({
       </View>
     </View>
   );
-}
-
-function AccountButton({ eAcc }: { eAcc: EAccount }) {
-  const nav = useNav();
-  const goToAccount = useCallback(() => {
-    nav.navigate("HomeTab", { screen: "Account", params: { eAcc } });
-  }, [nav, eAcc]);
-
-  const accountBubble = (
-    <AccountBubble eAcc={eAcc} size={64} fontSize={24} transparent />
-  );
-  if (canSendTo(eAcc)) {
-    return (
-      <ButtonCircle size={64} onPress={goToAccount}>
-        {accountBubble}
-      </ButtonCircle>
-    );
-  } else {
-    return accountBubble;
-  }
 }
 
 const styles = StyleSheet.create({
