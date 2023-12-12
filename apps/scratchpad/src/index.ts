@@ -64,10 +64,9 @@ async function metrics() {
   const signups = new Map<string, number>();
   const daimoChain = daimoChainFromId(vc.publicClient.chain.id);
   for (const log of nameReg.logs.sort(
-    (a, b) => Number(a.blockNumber) - Number(b.blockNumber)
+    (a, b) => Number(a.timestamp) - Number(b.timestamp)
   )) {
-    const ts = guessTimestampFromNum(log.blockNumber, daimoChain);
-    addMetric(signups, ts, 1);
+    addMetric(signups, log.timestamp, 1);
   }
 
   const { tokenSymbol, tokenAddress } = chainConfig;
