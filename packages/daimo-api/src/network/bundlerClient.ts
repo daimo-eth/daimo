@@ -13,7 +13,6 @@ import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
 import { OpIndexer } from "../contract/opIndexer";
 import { chainConfig } from "../env";
-import { Telemetry } from "../server/telemetry";
 
 interface GasEstimate {
   preVerificationGas: Hex;
@@ -188,7 +187,7 @@ export class BundlerClient {
 }
 
 /** Requires DAIMO_BUNDLER_RPC_URL. */
-export function getBundlerClientFromEnv(opIndexer: OpIndexer) {
+export function getBundlerClientFromEnv(opIndexer?: OpIndexer) {
   const rpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
   assert(rpcUrl !== "", "DAIMO_BUNDLER_RPC env var missing");
   return new BundlerClient(rpcUrl, opIndexer);
