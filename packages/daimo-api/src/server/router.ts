@@ -20,8 +20,10 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
+import { Watcher } from "../shovel/watcher";
 
 export function createRouter(
+  watcher: Watcher,
   vc: ViemClient,
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
@@ -123,6 +125,7 @@ export function createRouter(
         return getAccountHistory(
           address,
           sinceBlockNum,
+          watcher,
           vc,
           coinIndexer,
           nameReg,

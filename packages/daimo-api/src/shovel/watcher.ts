@@ -1,3 +1,4 @@
+import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { chainConfig } from "../env";
@@ -33,6 +34,13 @@ export class Watcher {
 
   add(...i: indexer[]) {
     this.indexers.push(...i);
+  }
+
+  latestBlock(): { number: bigint; timestamp: number } {
+    return {
+      number: this.latest,
+      timestamp: guessTimestampFromNum(this.latest, chainConfig.daimoChain),
+    };
   }
 
   async init() {
