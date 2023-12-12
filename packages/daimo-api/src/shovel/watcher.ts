@@ -2,7 +2,6 @@ import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { chainConfig } from "../env";
-import { ViemClient } from "../network/viemClient";
 
 interface indexer {
   load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
