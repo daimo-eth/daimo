@@ -43,6 +43,14 @@ export class Watcher {
     };
   }
 
+  async waitFor(blockNumber: bigint, tries: number): Promise<boolean> {
+    for (let i = 0; i < tries; i++) {
+      if (this.latest >= blockNumber) return true;
+      await new Promise((res) => setTimeout(res, 250));
+    }
+    return false;
+  }
+
   async init() {
     await this.indexRange(this.latest, await this.getShovelLatest());
   }

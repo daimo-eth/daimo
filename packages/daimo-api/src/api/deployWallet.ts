@@ -8,12 +8,14 @@ import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { chainConfig } from "../env";
 import { Telemetry } from "../server/telemetry";
+import { Watcher } from "../shovel/watcher";
 import { retryBackoff } from "../utils/retryBackoff";
 
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
   invCode: string | undefined,
+  watcher: Watcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
   faucet: Faucet,
@@ -65,6 +67,13 @@ export async function deployWallet(
     () => accountFactory.deploy(pubKeyHex, initCalls),
     5
   );
+
+  const processed = await watcher.waitFor(deployReceipt.blockNumber, 8);
+  if (!processed) {
+    console.log(
+      `[API] Deploy tx ${deployReceipt.transactionHash} not processed`
+    );
+  }
 
   // If it worked, cache the name <> address mapping immediately.
   if (deployReceipt.status === "success") {
