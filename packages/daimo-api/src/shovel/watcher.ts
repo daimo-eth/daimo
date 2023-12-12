@@ -1,6 +1,8 @@
 import { ClientConfig, Pool, PoolConfig } from "pg";
+import { Block } from "viem";
 
 import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
 
 interface indexer {
   load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
@@ -22,17 +24,30 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
+  private latestCachedBlock: Block | undefined;
   private batchSize = 10000n;
+  private vc: ViemClient;
 
   private indexers: indexer[] = [];
   private pg: Pool;
 
-  constructor() {
+  constructor(vc: ViemClient) {
     this.pg = new Pool(poolConfig);
+    this.vc = vc;
   }
 
   add(...i: indexer[]) {
     this.indexers.push(...i);
+  }
+
+  async latestBlock(): Promise<Block> {
+    if (this.latestCachedBlock?.number === this.latest) {
+      return this.latestCachedBlock;
+    }
+    this.latestCachedBlock = await this.vc.publicClient.getBlock({
+      blockNumber: this.latest,
+    });
+    return this.latestCachedBlock;
   }
 
   async init() {

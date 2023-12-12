@@ -55,11 +55,12 @@ async function main() {
     db
   );
 
+  const shovelWatcher = new Watcher(vc);
+  shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
+
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    const shovelWatcher = new Watcher();
-    shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
     await shovelWatcher.init();
     shovelWatcher.watch();
 
@@ -71,6 +72,7 @@ async function main() {
 
   console.log(`[API] serving...`);
   const router = createRouter(
+    shovelWatcher,
     vc,
     bundlerClient,
     coinIndexer,

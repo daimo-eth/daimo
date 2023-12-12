@@ -15,6 +15,7 @@ import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../network/viemClient";
+import { Watcher } from "../shovel/watcher";
 
 export interface AccountHistoryResult {
   address: Address;
@@ -51,6 +52,7 @@ export interface SuggestedAction {
 export async function getAccountHistory(
   address: Address,
   sinceBlockNum: number,
+  watcher: Watcher,
   vc: ViemClient,
   coinIndexer: CoinIndexer,
   nameReg: NameRegistry,
@@ -73,7 +75,7 @@ export async function getAccountHistory(
   }
 
   // Get the latest block + current balance.
-  const lastBlk = vc.getLastBlock();
+  const lastBlk = await watcher.latestBlock();
   if (lastBlk == null) throw new Error("No latest block");
   const lastBlock = Number(lastBlk.number);
   const lastBlockTimestamp = Number(lastBlk.timestamp);
