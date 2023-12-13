@@ -114,7 +114,7 @@ export class KeyRegistry {
           log_addr,
           account,
           key_slot,
-          array_agg(key) as key
+          array_agg(key order by abi_idx asc) as key
         from ${table}
         where block_num >= $1 and block_num <= $2
         and chain_id = $3
