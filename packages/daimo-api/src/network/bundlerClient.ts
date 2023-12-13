@@ -88,9 +88,10 @@ export class BundlerClient {
         this.sendCompressedOpToBulk(compressed, viemClient),
       ]);
 
-      try {
+      if (this.opIndexer) {
+        const opStart = Date.now();
         const span = trace.getTracer("daimo-api").startSpan("bundler.submit");
-        this.opIndexer?.addCallback(opHash, (userOp) => {
+        this.opIndexer.addCallback(opHash, (userOp) => {
           span.setAttributes({
             opHash: userOp.hash,
             txHash: userOp.transactionHash,
@@ -98,8 +99,7 @@ export class BundlerClient {
           });
           span.end();
         });
-      } catch (e) {
-        console.log(`[BUNDLER] error on telemetry callback ${opHash} ${e}`);
+        console.log(`[BUNDLER] user op completed in ${Date.now() - opStart}ms`);
       }
 
       console.log(`[BUNDLER] submitted compressed op ${opHash}`);
