@@ -5,11 +5,13 @@ import {
 } from "@daimo/bulk";
 import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
+import { trace } from "@opentelemetry/api";
 import { BundlerJsonRpcProvider, Constants } from "userop";
 import { Address, Hex, PublicClient, hexToBigInt, isHex } from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
+import { OpIndexer } from "../contract/opIndexer";
 import { chainConfig } from "../env";
 
 interface GasEstimate {
@@ -34,7 +36,7 @@ export class BundlerClient {
   // Compression settings
   private compressionInfo: CompressionInfo | undefined;
 
-  constructor(bundlerRpcUrl: string, private vc?: ViemClient) {
+  constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
   }
 
@@ -85,6 +87,23 @@ export class BundlerClient {
         this.getOpHash(op, viemClient.publicClient),
         this.sendCompressedOpToBulk(compressed, viemClient),
       ]);
+
+      if (this.opIndexer) {
+        const opStart = Date.now();
+        const span = trace.getTracer("daimo-api").startSpan("bundler.submit");
+        this.opIndexer.addCallback(opHash, (userOp) => {
+          span.setAttributes({
+            "op.hash": userOp.hash,
+            "op.tx_hash": userOp.transactionHash,
+            "op.log_index": userOp.logIndex,
+          });
+          span.end();
+          console.log(
+            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`
+          );
+        });
+      }
+
       console.log(`[BUNDLER] submitted compressed op ${opHash}`);
       return opHash;
     } catch (e) {
@@ -170,8 +189,8 @@ export class BundlerClient {
 }
 
 /** Requires DAIMO_BUNDLER_RPC_URL. */
-export function getBundlerClientFromEnv(vc?: ViemClient) {
+export function getBundlerClientFromEnv(opIndexer?: OpIndexer) {
   const rpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
   assert(rpcUrl !== "", "DAIMO_BUNDLER_RPC env var missing");
-  return new BundlerClient(rpcUrl, vc);
+  return new BundlerClient(rpcUrl, opIndexer);
 }

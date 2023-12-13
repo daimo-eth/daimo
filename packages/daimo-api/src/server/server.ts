@@ -27,8 +27,6 @@ async function main() {
 
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv();
-  const bundlerClient = getBundlerClientFromEnv();
-  bundlerClient.init(vc.publicClient);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
@@ -38,9 +36,13 @@ async function main() {
   const keyReg = new KeyRegistry();
   const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
   const opIndexer = new OpIndexer();
-  const paymaster = new Paymaster(vc, bundlerClient, db);
   const coinIndexer = new CoinIndexer(vc, opIndexer);
   const noteIndexer = new NoteIndexer(nameReg);
+
+  const bundlerClient = getBundlerClientFromEnv(opIndexer);
+  bundlerClient.init(vc.publicClient);
+
+  const paymaster = new Paymaster(vc, bundlerClient, db);
   const faucet = new Faucet(vc, coinIndexer, db);
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);

@@ -11,10 +11,30 @@ interface UserOp {
   hash: Hex;
 }
 
+type OpCallback = (userOp: UserOp) => void;
+
 /* User operation indexer. Used to track fulfilled requests. */
 export class OpIndexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
   private nonceMetadataToTxes: Map<Hex, Hex[]> = new Map();
+
+  private callbacks: Map<Hex, OpCallback[]> = new Map();
+
+  addCallback(hash: Hex, cb: OpCallback) {
+    const cbs = this.callbacks.get(hash);
+    if (!cbs) {
+      this.callbacks.set(hash, [cb]);
+      return;
+    }
+    cbs.push(cb);
+  }
+
+  callback(userOp: UserOp) {
+    const cbs = this.callbacks.get(userOp.hash);
+    if (!cbs) return;
+    cbs.forEach((cb) => cb(userOp));
+    this.callbacks.delete(userOp.hash);
+  }
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
@@ -50,6 +70,7 @@ export class OpIndexer {
         ? [...curTxes, userOp.transactionHash]
         : [userOp.transactionHash];
       this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
+      this.callback(userOp);
     });
     console.log(
       `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
