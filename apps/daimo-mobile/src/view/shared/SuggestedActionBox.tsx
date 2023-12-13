@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 16,
     marginHorizontal: 16,
+    marginBottom: 16,
   },
   bubbleIcon: {
     backgroundColor: color.primary,

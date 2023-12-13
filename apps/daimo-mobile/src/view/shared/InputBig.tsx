@@ -14,6 +14,8 @@ import { color, ss } from "./style";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
 
+const layoutAnimation = Layout.duration(150);
+
 export function InputBig({
   value,
   onChange,
@@ -59,7 +61,7 @@ export function InputBig({
   return (
     <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
       <Animated.View
-        layout={Layout}
+        layout={layoutAnimation}
         style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}
       >
         <TextInput
@@ -80,7 +82,7 @@ export function InputBig({
           onBlur={onInputBlur}
         />
         {icon && (
-          <Animated.View style={styles.inputIcon} layout={Layout}>
+          <Animated.View style={styles.inputIcon} layout={layoutAnimation}>
             <Octicons name={icon} size={18} color={color.primary} />
           </Animated.View>
         )}

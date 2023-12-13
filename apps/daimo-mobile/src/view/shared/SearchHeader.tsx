@@ -1,6 +1,6 @@
 import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useState } from "react";
+import { RefObject, useCallback } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -12,6 +12,9 @@ import { useNav } from "./nav";
 import { color } from "./style";
 import { useAccount } from "../../model/account";
 
+const fadeIn = FadeIn.duration(150);
+const fadeOut = FadeOut.duration(150);
+
 /** Prefix is undefined when not focused, "" or longer when focused. */
 export function SearchHeader({
   prefix,
@@ -22,7 +25,7 @@ export function SearchHeader({
   setPrefix: (prefix?: string) => void;
   innerRef?: RefObject<TextInput>;
 }) {
-  const [isFocused, setIsFocused] = useState(false);
+  const isFocused = prefix != null;
   const nav = useNav();
 
   // Left side: account bubble
@@ -50,17 +53,17 @@ export function SearchHeader({
           height: 50,
           justifyContent: "center",
         }}
-        entering={FadeIn}
-        exiting={FadeOut}
+        entering={fadeIn}
+        exiting={fadeOut}
       >
         {isFocused ? (
-          <Animated.View entering={FadeIn} exiting={FadeOut} key="back">
+          <Animated.View entering={fadeIn} exiting={fadeOut} key="back">
             <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
               <Octicons name="arrow-left" size={30} color={color.midnight} />
             </TouchableOpacity>
           </Animated.View>
         ) : (
-          <Animated.View entering={FadeIn} exiting={FadeOut} key="icon">
+          <Animated.View entering={fadeIn} exiting={fadeOut} key="icon">
             <ButtonCircle size={50} onPress={goToAccount}>
               <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
             </ButtonCircle>
@@ -72,14 +75,8 @@ export function SearchHeader({
         placeholder="Search for user..."
         value={prefix || ""}
         onChange={setPrefix}
-        onFocus={() => {
-          setIsFocused(true);
-          setPrefix("");
-        }}
-        onBlur={() => {
-          setIsFocused(false);
-          setPrefix(undefined);
-        }}
+        onFocus={() => setPrefix("")}
+        onBlur={() => setPrefix(undefined)}
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
