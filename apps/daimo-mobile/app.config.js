@@ -22,7 +22,7 @@ export default {
     iosDisplayInForeground: true,
   },
   ios: {
-    supportsTablet: false,
+    supportsTablet: true,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
     buildNumber: `${BUILD_NUM}`,
     associatedDomains: [

@@ -124,13 +124,13 @@ export default function OnboardingScreen({
         <UseExistingPage onNext={next} onPrev={prev} daimoChain={daimoChain} />
       )}
       {page === "new-allow-notifications" && (
-        <AllowNotifications onNext={next} />
+        <AllowNotificationsPage onNext={next} />
       )}
       {page === "existing-allow-notifications" && (
-        <AllowNotifications onNext={next} />
+        <AllowNotificationsPage onNext={next} />
       )}
       {page === "new-loading" && (
-        <LoadingScreen
+        <CreateAccountSpinnerPage
           loadingStatus={createStatus}
           loadingMessage={createMessage}
           onNext={next}
@@ -194,7 +194,38 @@ function getNext(
   }
 }
 
-const AMOUNT_OF_SLIDES = 4;
+const tokenSymbol = "USDC";
+const introPages = [
+  <IntroPage title="Welcome to Daimo">
+    <TextParagraph>
+      Daimo is a global payments app that runs on Ethereum. Send and receive
+      USDC on Base mainnet.
+    </TextParagraph>
+  </IntroPage>,
+  <IntroPage title={tokenSymbol}>
+    <TextParagraph>
+      You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
+      {tokenSymbol} is $1.
+    </TextParagraph>
+    <View style={ss.container.marginHNeg16}>
+      <InfoLink
+        url="https://www.circle.com/en/usdc"
+        title="Learn how it works here"
+      />
+    </View>
+  </IntroPage>,
+  <IntroPage title="Yours alone">
+    <TextParagraph>
+      Daimo stores money via cryptographic secrets. There's no bank.
+    </TextParagraph>
+  </IntroPage>,
+  <IntroPage title="On Ethereum">
+    <TextParagraph>
+      Daimo runs on Base, an Ethereum rollup. This lets you send money securely,
+      anywhere in the world.
+    </TextParagraph>
+  </IntroPage>,
+];
 
 function IntroPages({ onNext }: { onNext: () => void }) {
   const [pageIndex, setPageIndex] = useState(0);
@@ -203,8 +234,6 @@ function IntroPages({ onNext }: { onNext: () => void }) {
     const page = Math.round(contentOffset.x / layoutMeasurement.width);
     setPageIndex(page);
   };
-
-  const tokenSymbol = "USDC";
 
   return (
     <View style={styles.introPages}>
@@ -216,41 +245,19 @@ function IntroPages({ onNext }: { onNext: () => void }) {
         style={styles.introPageScroll}
         onScroll={updatePageBubble}
         scrollEventThrottle={32}
-        contentContainerStyle={{ width: `${AMOUNT_OF_SLIDES * 100}%` }}
+        contentContainerStyle={{ width: `${introPages.length * 100}%` }}
       >
-        <IntroPage title="Welcome to Daimo">
-          <TextParagraph>
-            Daimo is a global payments app that runs on Ethereum. Send and
-            receive USDC on Base mainnet.
-          </TextParagraph>
-        </IntroPage>
-        <IntroPage title={tokenSymbol}>
-          <TextParagraph>
-            You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
-            {tokenSymbol} is $1.
-          </TextParagraph>
-          <View style={ss.container.marginHNeg16}>
-            <InfoLink
-              url="https://www.circle.com/en/usdc"
-              title="Learn how it works here"
-            />
+        {introPages.map((page, i) => (
+          <View style={{ width: `${100 / introPages.length}%` }} key={i}>
+            {page}
           </View>
-        </IntroPage>
-        <IntroPage title="Yours alone">
-          <TextParagraph>
-            Daimo stores money via cryptographic secrets. There's no bank.
-          </TextParagraph>
-        </IntroPage>
-        <IntroPage title="On Ethereum">
-          <TextParagraph>
-            Daimo runs on Base, an Ethereum rollup. This lets you send money
-            securely, anywhere in the world.
-          </TextParagraph>
-        </IntroPage>
+        ))}
       </ScrollView>
       <Spacer h={32} />
-      <View style={styles.introButtonsWrap}>
-        <ButtonBig type="primary" title="Enter" onPress={onNext} />
+      <View style={styles.introButtonsCenter}>
+        <View style={styles.introButtonsWrap}>
+          <ButtonBig type="primary" title="Enter" onPress={onNext} />
+        </View>
       </View>
     </View>
   );
@@ -269,14 +276,7 @@ function IntroPage({
   children: ReactNode;
 }) {
   return (
-    <View
-      style={[
-        styles.introPage,
-        {
-          width: `${100 / AMOUNT_OF_SLIDES}%`,
-        },
-      ]}
-    >
+    <View style={styles.introPage}>
       <TextCenter>
         <TextH1>{title}</TextH1>
       </TextCenter>
@@ -522,7 +522,7 @@ function SetupKeyPage({
   );
 }
 
-function AllowNotifications({ onNext }: { onNext: () => void }) {
+function AllowNotificationsPage({ onNext }: { onNext: () => void }) {
   const requestPermission = async () => {
     if (!Device.isDevice) {
       window.alert("Push notifications unsupported in simulator.");
@@ -562,7 +562,7 @@ function AllowNotifications({ onNext }: { onNext: () => void }) {
   );
 }
 
-function LoadingScreen({
+function CreateAccountSpinnerPage({
   loadingStatus,
   loadingMessage,
   onNext,
@@ -612,13 +612,22 @@ const styles = StyleSheet.create({
   },
   introPage: {
     padding: 32,
+    maxWidth: 480,
+    alignSelf: "center",
   },
   introText: {
     ...ss.text.body,
     lineHeight: 24,
   },
-  introButtonsWrap: {
+  introButtonsCenter: {
     paddingHorizontal: 24,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  introButtonsWrap: {
+    flexGrow: 1,
+    maxWidth: 480,
   },
   paddedPage: {
     paddingTop: 64,

@@ -8,8 +8,7 @@
       "ios": {
         "buildConfiguration": "Debug",
         "resourceClass": "large",
-        "simulator": true,
-        "supportsTablet": true
+        "simulator": true
       },
       "env": {
         "DAIMO_DOMAIN": "daimo.com",
@@ -25,8 +24,7 @@
         "gradleCommand": ":app:assembleDebug"
       },
       "ios": {
-        "buildConfiguration": "Debug",
-        "supportsTablet": true
+        "buildConfiguration": "Debug"
       },
       "env": {
         "DAIMO_DOMAIN": "daimo.com",
@@ -37,9 +35,6 @@
     "prod": {
       "resourceClass": "large",
       "node": "20.3.0",
-      "ios": {
-        "supportsTablet": true
-      },
       "env": {
         "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
         "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
