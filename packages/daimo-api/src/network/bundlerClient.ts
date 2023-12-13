@@ -93,9 +93,9 @@ export class BundlerClient {
         const span = trace.getTracer("daimo-api").startSpan("bundler.submit");
         this.opIndexer.addCallback(opHash, (userOp) => {
           span.setAttributes({
-            opHash: userOp.hash,
-            txHash: userOp.transactionHash,
-            logIndex: userOp.logIndex,
+            "op.hash": userOp.hash,
+            "op.tx_hash": userOp.transactionHash,
+            "op.log_index": userOp.logIndex,
           });
           span.end();
           console.log(

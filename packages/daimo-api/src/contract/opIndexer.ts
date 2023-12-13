@@ -26,7 +26,7 @@ export class OpIndexer {
       this.callbacks.set(hash, [cb]);
       return;
     }
-    this.callbacks.get(hash)!.push(cb);
+    cbs.push(cb);
   }
 
   callback(userOp: UserOp) {
