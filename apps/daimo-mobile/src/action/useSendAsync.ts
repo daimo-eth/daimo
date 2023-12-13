@@ -7,6 +7,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
+import * as Haptics from "expo-haptics";
 import { useCallback, useEffect } from "react";
 import { Address, Hex } from "viem";
 
@@ -66,6 +67,9 @@ export function useSendAsync({
       !!passkeyAccount,
       sendFn
     );
+
+    // Vibrate on success
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     // Add pending op and named accounts to history
     if (pendingOp) {
