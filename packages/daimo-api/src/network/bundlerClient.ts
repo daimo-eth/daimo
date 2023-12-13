@@ -98,8 +98,10 @@ export class BundlerClient {
             logIndex: userOp.logIndex,
           });
           span.end();
+          console.log(
+            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`
+          );
         });
-        console.log(`[BUNDLER] user op completed in ${Date.now() - opStart}ms`);
       }
 
       console.log(`[BUNDLER] submitted compressed op ${opHash}`);
