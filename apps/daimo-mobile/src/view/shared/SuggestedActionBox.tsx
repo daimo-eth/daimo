@@ -21,8 +21,6 @@ import { TextBody, TextMeta } from "./text";
 import { env } from "../../logic/env";
 import { getAccountManager, useAccount } from "../../model/account";
 
-const ICON_X_SIZE = 24;
-
 export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const nav = useNav();
   const [account] = useAccount();
@@ -36,7 +34,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const y = useSharedValue(-100);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(1);
-  const xPosition = useSharedValue({ x: 0, y: 0 });
+  const xButtonPos = useSharedValue({ x: 0 });
   const wasCancelled = useSharedValue(false);
 
   // Track when we do the action or dismiss it.
@@ -105,12 +103,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (event, ctx: { startX: number; eventCancelled: boolean }) => {
       ctx.eventCancelled = false;
-      if (
-        event.x > xPosition.value.x &&
-        event.x < xPosition.value.x + ICON_X_SIZE &&
-        event.y < xPosition.value.y + ICON_X_SIZE &&
-        event.y > xPosition.value.y
-      ) {
+      if (event.x > xButtonPos.value.x) {
         ctx.eventCancelled = true;
       }
       if (!ctx.eventCancelled) {
@@ -192,19 +185,16 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
             <TextMeta>{title}</TextMeta>
             <TextMeta color={color.grayDark}>{subtitle}</TextMeta>
           </View>
-          <View
+          <TouchableOpacity
+            onPress={onPressX}
             style={styles.bubbleExit}
             onLayout={(e) => {
-              xPosition.value = {
-                x: e.nativeEvent.layout.x,
-                y: e.nativeEvent.layout.y,
-              };
+              xButtonPos.value = e.nativeEvent.layout;
             }}
+            hitSlop={16}
           >
-            <TouchableOpacity onPress={onPressX}>
-              <Octicons name="x" size={ICON_X_SIZE} color={color.grayDark} />
-            </TouchableOpacity>
-          </View>
+            <Octicons name="x" size={24} color={color.grayDark} />
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </PanGestureHandler>
@@ -236,12 +226,11 @@ const styles = StyleSheet.create({
     borderRadius: 32,
   },
   bubbleExit: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
-    height: "100%",
-    borderRadius: 32,
-    marginRight: 2,
+    alignSelf: "stretch",
+    flexDirection: "column",
+    justifyContent: "center",
+    paddingRight: 12,
+    marginRight: -8,
   },
   bubbleText: {
     flex: 1,
