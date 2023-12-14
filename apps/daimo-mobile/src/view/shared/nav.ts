@@ -10,7 +10,7 @@ import {
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { addEventListener, getInitialURL } from "expo-linking";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";
@@ -79,23 +79,28 @@ export function useInitNavLinks() {
   const [account] = useAccount();
   const accountMissing = account == null;
 
-  // Handle the link that opened this app, if any.
-  const openedInitialURL = useRef(false);
-
+  // Handle deeplinks
   useEffect(() => {
     if (accountMissing || deepLinkInitialised) return;
-    console.log(`[NAV] listening for deep links, account ${account.name}`);
 
+    const currentTab = nav.getState().key;
+    console.log(`[NAV] ready to init? current tab: ${currentTab}`);
+    if (currentTab !== "HomeTab") return;
+
+    console.log(`[NAV] listening for deep links, account ${account.name}`);
     deepLinkInitialised = true;
     getInitialURL().then((url) => {
       if (url == null) return;
-      if (openedInitialURL.current) return;
       handleDeepLink(nav, url);
-      openedInitialURL.current = true;
     });
 
     addEventListener("url", ({ url }) => handleDeepLink(nav, url));
-  }, [accountMissing]);
+  }, [accountMissing, nav]);
+
+  // Log nav changes
+  nav.addListener("state", (e) => {
+    console.log(`[NAV] state update: ` + e.data.state.key);
+  });
 }
 
 export function handleDeepLink(nav: MainNav, url: string) {
