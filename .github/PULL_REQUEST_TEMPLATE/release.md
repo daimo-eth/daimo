@@ -43,12 +43,12 @@ just outright bugs.
 - [ ] Request faucet
 - [ ] Notification appears on faucet send
 - [ ] Send payment
-- [ ] Create Payment Link, open in browser
+- [ ] Create Payment Link
 - [ ] Cancel Payment Link
 - [ ] Tap Payment Link, ensure it opens in-app
 - [ ] Add device + Use existing onboarding (test transactions work on both devices)
 - [ ] Remove device
-- [ ] Create Request, open in browser
+- [ ] Create Request
 - [ ] Open History
 - [ ] Tap transaction, view in block explorer
 - [ ] Account screen: Send Debug Log
@@ -67,6 +67,9 @@ just outright bugs.
 - [ ] Log back into prod account
 - [ ] Send a transfer
 - [ ] Notification appears on confirmation
+- [ ] Create Payment Link, open in browser.
+- [ ] Reclaim link. Refresh page in browser, ensure status shows correctly.
+- [ ] Tap link. Ensure opens in app, status shows correctly.
 
 ### Promote release
 
