@@ -83,9 +83,9 @@ export function useInitNavLinks() {
   useEffect(() => {
     if (accountMissing || deepLinkInitialised) return;
 
-    const currentTab = nav.getState().key;
+    const currentTab = nav.getState().routes[0]?.name || "";
     console.log(`[NAV] ready to init? current tab: ${currentTab}`);
-    if (currentTab !== "HomeTab") return;
+    if (!currentTab.startsWith("Home")) return;
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
     deepLinkInitialised = true;
@@ -98,9 +98,18 @@ export function useInitNavLinks() {
   }, [accountMissing, nav]);
 
   // Log nav changes
-  nav.addListener("state", (e) => {
-    console.log(`[NAV] state update: ` + e.data.state.key);
-  });
+  let root = nav;
+  while (root.getParent() != null) root = root.getParent();
+  useEffect(() => {
+    console.log(`[NAV] listening for state changes`);
+    return root.addListener("state", (e) => {
+      const { state } = e.data;
+      const tab = state.routes[state.index];
+      const ps = [tab.name, tab.params?.screen, tab.params?.params];
+      // Prints eg. "HomeTab","Account",{"eAcc":{"name":"amelie",<...>}}]
+      console.log(`[NAV] new: ` + JSON.stringify(ps.filter((p) => p != null)));
+    });
+  }, [root]);
 }
 
 export function handleDeepLink(nav: MainNav, url: string) {
