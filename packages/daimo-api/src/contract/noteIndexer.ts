@@ -118,7 +118,7 @@ export class NoteIndexer {
         return {
           transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
           logIndex: r.log_idx,
-          from: bytesToHex(r.f, { size: 20 }),
+          from: getAddress(bytesToHex(r.f, { size: 20 })),
           redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
           ephemeralOwner: getAddress(
             bytesToHex(r.ephemeral_owner, { size: 20 })
