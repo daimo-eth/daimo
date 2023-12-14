@@ -37,6 +37,8 @@ export class KeyRegistry {
     changes!.sort((a, b) => {
       const bdiff = a.blockNumber - b.blockNumber;
       if (bdiff !== 0n) return Number(bdiff);
+      const tdiff = a.transactionIndex - b.transactionIndex;
+      if (tdiff !== 0) return tdiff;
       return a.logIndex - b.logIndex;
     });
     for (const change of changes) {
