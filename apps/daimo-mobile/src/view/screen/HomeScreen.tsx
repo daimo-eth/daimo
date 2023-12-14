@@ -109,10 +109,7 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   return (
     <View>
-      <OfflineHeader
-        shouldAddPaddingWhenOnline={false}
-        shouldRemovePaddingWhenOffline
-      />
+      <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
       <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}

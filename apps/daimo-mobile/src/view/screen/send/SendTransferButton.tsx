@@ -104,7 +104,7 @@ function SendTransferButtonInner({
       case "error":
         return (
           <LongPressBigButton
-            title="CONFIRM AND SEND"
+            title="HOLD TO SEND"
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}

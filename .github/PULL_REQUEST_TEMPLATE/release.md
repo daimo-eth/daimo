@@ -22,9 +22,7 @@ Watch all of the following interactions closely for jank and UX regressions, not
 just outright bugs.
 
 - [ ] Install from private TestFlight
-- [ ] Create account
-- [ ] Request faucet
-- [ ] Notification appears on faucet send
+- [ ] Create testnet account. Faucet should appear automatically.
 - [ ] Send payment
 - [ ] Create Payment Link, open in browser
 - [ ] Cancel Payment Link
@@ -63,6 +61,12 @@ just outright bugs.
 - [ ] Prod website deploys correctly
 - [ ] Logs clean
 - [ ] Honeycomb clean
+
+### Prod smoke test
+
+- [ ] Log back into prod account
+- [ ] Send a transfer
+- [ ] Notification appears on confirmation
 
 ### Promote release
 
