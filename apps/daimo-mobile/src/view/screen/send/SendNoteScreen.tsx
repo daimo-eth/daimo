@@ -40,7 +40,7 @@ export function SendNoteScreen({ route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send Link" onBack={goBack} />
+        <ScreenHeader title="Send Link" onBack={goBack} onExit={goHome} />
         <Spacer h={8} />
         <InfoBox
           title="Pay by sending a link"
