@@ -6,15 +6,13 @@ import {
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
+  View,
   ViewStyle,
 } from "react-native";
-import Animated, { Layout } from "react-native-reanimated";
 
 import { color, ss } from "./style";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
-
-const layoutAnimation = Layout.duration(150);
 
 export function InputBig({
   value,
@@ -60,8 +58,7 @@ export function InputBig({
 
   return (
     <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
-      <Animated.View
-        layout={layoutAnimation}
+      <View
         style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}
       >
         <TextInput
@@ -82,11 +79,11 @@ export function InputBig({
           onBlur={onInputBlur}
         />
         {icon && (
-          <Animated.View style={styles.inputIcon} layout={layoutAnimation}>
+          <View style={styles.inputIcon}>
             <Octicons name={icon} size={18} color={color.primary} />
-          </Animated.View>
+          </View>
         )}
-      </Animated.View>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
