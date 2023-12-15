@@ -1,15 +1,22 @@
 import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { AccountBubble } from "./AccountBubble";
+import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
-import { InputBig } from "./InputBig";
 import { useNav } from "./nav";
 import { color } from "./style";
 import { useAccount } from "../../model/account";
+
+const animationConfig = { duration: 150 };
 
 /** Prefix is undefined when not focused, "" or longer when focused. */
 export function SearchHeader({
@@ -21,8 +28,46 @@ export function SearchHeader({
   setPrefix: (prefix?: string) => void;
   innerRef?: RefObject<TextInput>;
 }) {
-  const isFocused = prefix != null;
+  const isFocused = useSharedValue(prefix != null);
   const nav = useNav();
+
+  useEffect(() => {
+    isFocused.value = prefix != null;
+  }, [prefix]);
+
+  const qrButton = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      opacity: isFocused.value ? withTiming(0) : withTiming(1),
+      zIndex: isFocused.value ? 0 : 10,
+      elevation: isFocused.value ? 0 : 10,
+      right: 0,
+    };
+  });
+
+  const accountButton = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      opacity: isFocused.value
+        ? withTiming(0, animationConfig)
+        : withTiming(1, animationConfig),
+      zIndex: isFocused.value ? 0 : 10,
+      elevation: isFocused.value ? 0 : 10,
+      left: 0,
+    };
+  });
+
+  const backButton = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      opacity: isFocused.value
+        ? withTiming(1, animationConfig)
+        : withTiming(0, animationConfig),
+      zIndex: isFocused.value ? 12 : 0,
+      elevation: isFocused.value ? 12 : 0,
+      left: 0,
+    };
+  });
 
   // Left side: account bubble
   const goToAccount = useCallback(
@@ -43,22 +88,17 @@ export function SearchHeader({
 
   return (
     <View style={styles.header}>
-      <View style={styles.leftButtonWrapper}>
-        {isFocused ? (
-          <View key="back">
-            <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
-              <Octicons name="arrow-left" size={30} color={color.midnight} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View key="icon">
-            <ButtonCircle size={50} onPress={goToAccount}>
-              <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
-            </ButtonCircle>
-          </View>
-        )}
-      </View>
-      <InputBig
+      <Animated.View key="back" style={backButton}>
+        <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
+          <Octicons name="arrow-left" size={30} color={color.midnight} />
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View key="icon" style={accountButton}>
+        <ButtonCircle size={50} onPress={goToAccount}>
+          <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
+        </ButtonCircle>
+      </Animated.View>
+      <AnimatedSearchInput
         icon="search"
         placeholder="Search for user..."
         value={prefix || ""}
@@ -68,15 +108,13 @@ export function SearchHeader({
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
-      {!isFocused && (
-        <View style={{ marginLeft: 16 }}>
-          <ButtonCircle size={50} onPress={goToQR}>
-            <View style={styles.qrCircle}>
-              <Octicons name="apps" size={24} color={color.midnight} />
-            </View>
-          </ButtonCircle>
-        </View>
-      )}
+      <Animated.View style={[{ marginLeft: 16 }, qrButton]}>
+        <ButtonCircle size={50} onPress={goToQR}>
+          <View style={styles.qrCircle}>
+            <Octicons name="apps" size={24} color={color.midnight} />
+          </View>
+        </ButtonCircle>
+      </Animated.View>
     </View>
   );
 }
@@ -84,7 +122,7 @@ export function SearchHeader({
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 16,
   },
@@ -97,10 +135,5 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-  },
-  leftButtonWrapper: {
-    marginRight: 16,
-    height: 50,
-    justifyContent: "center",
   },
 });
