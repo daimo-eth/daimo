@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   RefreshControl,
@@ -42,7 +42,17 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
-  const [isActionVisible, setIsActionVisible] = useState(true);
+  const [isActionVisible, setIsActionVisible] = useState(false);
+
+  useEffect(() => {
+    const showActionTimeout = setTimeout(() => {
+      setIsActionVisible(true);
+    }, 1500);
+
+    return () => {
+      clearTimeout(showActionTimeout);
+    };
+  }, []);
 
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
