@@ -24,6 +24,11 @@ const widgetConfigBase: WidgetConfig = {
     default: "en",
     allow: ["en"],
   },
+  sdkConfig: {
+    defaultRouteOptions: {
+      allowSwitchChain: false,
+    },
+  },
 };
 
 export function Widget({
