@@ -39,11 +39,6 @@ function getUrl(props: LinkProps): string {
   return `${daimoLinkBase}/${path}`;
 }
 
-function getDirectDeeplink(props: LinkProps): string {
-  const path = (props.params.slug || []).join("/");
-  return `daimo://${path}`;
-}
-
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(getUrl(props));
   if (titleDesc == null) return defaultMeta;
@@ -68,8 +63,6 @@ async function LinkPageInner(props: LinkProps) {
       description: "Payments on Ethereum",
     };
 
-  const directDeepLink = getDirectDeeplink(props);
-
   return (
     <main className="max-w-md mx-auto px-4">
       <center>
@@ -89,9 +82,7 @@ async function LinkPageInner(props: LinkProps) {
           </>
         )}
         <div className="h-9" />
-        <CallToAction
-          {...{ description, walletActionLinkStatus, directDeepLink }}
-        />
+        <CallToAction {...{ description, walletActionLinkStatus }} />
       </center>
     </main>
   );
@@ -143,6 +134,13 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
         description: "Couldn't load request status",
       };
+    } else if (link.type === "notev2") {
+      return {
+        name: `${link.sender}`,
+        action: `sent you`,
+        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+        description: "Couldn't load payment link",
+      };
     } else {
       assert(link.type === "note");
       return {
@@ -182,7 +180,8 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         };
       }
     }
-    case "note": {
+    case "note":
+    case "notev2": {
       const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
       switch (status) {
         case "pending":

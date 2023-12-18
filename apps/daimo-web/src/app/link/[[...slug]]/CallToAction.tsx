@@ -1,6 +1,7 @@
 "use client";
 
-import { DaimoLinkStatus } from "@daimo/common";
+import { DaimoLinkStatus, daimoLinkBase } from "@daimo/common";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
@@ -9,14 +10,22 @@ import { PrimaryOpenInAppButton } from "../../../components/buttons";
 export function CallToAction({
   description,
   walletActionLinkStatus,
-  directDeepLink,
 }: {
   description: string;
   walletActionLinkStatus?: DaimoLinkStatus;
-  directDeepLink: string;
 }) {
   // If we've connected another wallet, hide the Open in Daimo button.
   const { isConnected } = useAccount();
+
+  const [directDeepLink, setDirectDeepLink] = useState<string>("");
+
+  useEffect(() => {
+    const directDeepLink = window.location.href.replace(
+      daimoLinkBase,
+      "daimo:/"
+    );
+    setDirectDeepLink(directDeepLink);
+  }, [directDeepLink]);
 
   return (
     <>
