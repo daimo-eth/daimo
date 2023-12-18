@@ -166,6 +166,7 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
 }
 
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const cbUrl = generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
     destinationWallets: [
@@ -177,11 +178,12 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     ],
     defaultExperience: "send",
   });
+
   return [
     {
       cta: "Bridge from any wallet",
       url: `https://daimo.com/bridge/${account.name}`,
     },
-    { cta: "Deposit from Coinbase", url: cbUrl },
+    //{ cta: "Deposit from Coinbase", url: cbUrl },
   ];
 }
