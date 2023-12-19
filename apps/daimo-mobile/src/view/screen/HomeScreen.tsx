@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   RefreshControl,
@@ -9,7 +9,6 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  Layout,
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
@@ -43,6 +42,17 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
+  const [isActionVisible, setIsActionVisible] = useState(false);
+
+  useEffect(() => {
+    const showActionTimeout = setTimeout(() => {
+      setIsActionVisible(true);
+    }, 1500);
+
+    return () => {
+      clearTimeout(showActionTimeout);
+    };
+  }, []);
 
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
@@ -64,6 +74,8 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   // Outer scroll: pull to refresh
   const [refreshing, setRefreshing] = useState(false);
+
+  const onHideSuggestedAction = () => setIsActionVisible(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -131,8 +143,12 @@ function HomeScreenInner({ account }: { account: Account }) {
       >
         <Spacer h={Math.max(16, ins.top)} />
         {account.suggestedActions.length > 0 &&
-          netState.status !== "offline" && (
-            <SuggestedActionBox action={account.suggestedActions[0]} />
+          netState.status !== "offline" &&
+          isActionVisible && (
+            <SuggestedActionBox
+              action={account.suggestedActions[0]}
+              onHideAction={onHideSuggestedAction}
+            />
           )}
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
@@ -145,11 +161,13 @@ function HomeScreenInner({ account }: { account: Account }) {
         )}
         {searchPrefix == null && account != null && (
           <>
-            {account.suggestedActions.length === 0 && <Spacer h={64} />}
+            {!(
+              account.suggestedActions.length > 0 &&
+              netState.status !== "offline" &&
+              isActionVisible
+            ) && <Spacer h={64} />}
             <Spacer h={12} />
-            <Animated.View layout={Layout}>
-              <AmountAndButtons account={account} />
-            </Animated.View>
+            <AmountAndButtons account={account} />
           </>
         )}
       </Animated.ScrollView>

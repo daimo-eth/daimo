@@ -21,7 +21,13 @@ import { TextBody, TextMeta } from "./text";
 import { env } from "../../logic/env";
 import { getAccountManager, useAccount } from "../../model/account";
 
-export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
+export function SuggestedActionBox({
+  action,
+  onHideAction,
+}: {
+  action: SuggestedAction;
+  onHideAction?(): void;
+}) {
   const nav = useNav();
   const [account] = useAccount();
 
@@ -66,6 +72,7 @@ export function SuggestedActionBox({ action }: { action: SuggestedAction }) {
     console.log(`[SUGGESTED] dismissing ${action.id}: ${action.title}`);
 
     setIsVisible(false);
+    onHideAction?.();
     getAccountManager().transform((account) => ({
       ...account,
       dismissedActionIDs: [...account.dismissedActionIDs, action.id],
