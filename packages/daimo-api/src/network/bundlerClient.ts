@@ -11,7 +11,7 @@ import { trace } from "@opentelemetry/api";
 import { BundlerJsonRpcProvider, Constants } from "userop";
 import { Address, Hex, PublicClient, hexToBigInt, isHex } from "viem";
 
-import { CompressionInfo, compressBundle } from "./bundleCompression";
+import { CompressionInfo, compressOp } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
 import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
@@ -81,6 +81,7 @@ export class BundlerClient {
     this.compressionInfo = {
       inflatorAddr: perOpInflatorAddress,
       inflatorID,
+      opInflatorAddr,
       opInflatorID,
       opInflatorCoinAddr,
       opInflatorPaymaster,
@@ -95,11 +96,11 @@ export class BundlerClient {
     console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
     try {
       assert(nameReg != null, "nameReg required");
-      const compressed = this.compress(op, nameReg);
+      const compressed = this.compressOp(op, nameReg);
       // Simultanously get the opHash (view function) and submit the bundle
       const [opHash] = await Promise.all([
         this.getOpHash(op, viemClient.publicClient),
-        this.sendCompressedBundle(compressed, viemClient),
+        this.sendCompressedOpToBundler(compressed),
       ]);
 
       if (this.opIndexer) {
@@ -139,11 +140,27 @@ export class BundlerClient {
     });
   }
 
-  compress(op: UserOpHex, nameReg: NameRegistry) {
+  compressOp(op: UserOpHex, nameReg: NameRegistry) {
     if (this.compressionInfo == null) {
       throw new Error("can't compress, inflator info not loaded");
     }
-    return compressBundle(op, this.compressionInfo, nameReg);
+    return compressOp(op, this.compressionInfo, nameReg);
+  }
+
+  async sendCompressedOpToBundler(compressed: Hex) {
+    const { compressionInfo } = this;
+    assert(compressionInfo != null, "can't send compressed, info not loaded");
+
+    const n = compressed.length / 2 - 1;
+    console.log(`[BUNDLER] sending pimlico_sendCompressedOp, ${n} bytes`);
+
+    const method = "pimlico_sendCompressedUserOperation";
+    const result = await this.provider.send(method, [
+      compressed,
+      compressionInfo.opInflatorAddr,
+      Constants.ERC4337.EntryPoint,
+    ]);
+    console.log(`[BUNDLER] ${method} result: ${JSON.stringify(result)}`);
   }
 
   /// Send compressed userop. This is about 4x cheaper than sending uncompressed

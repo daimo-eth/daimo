@@ -17,6 +17,7 @@ import { NameRegistry } from "../contract/nameRegistry";
 export interface CompressionInfo {
   inflatorAddr: Address;
   inflatorID: number;
+  opInflatorAddr: Address;
   opInflatorID: number;
   opInflatorCoinAddr: Address;
   opInflatorPaymaster: Address;
@@ -44,7 +45,7 @@ export function compressBundle(
   return concatHex(ret);
 }
 
-function compressOp(
+export function compressOp(
   op: UserOpHex,
   info: CompressionInfo,
   nameReg: NameRegistry
