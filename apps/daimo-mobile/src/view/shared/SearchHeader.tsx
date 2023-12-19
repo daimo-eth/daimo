@@ -3,7 +3,6 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { RefObject, useCallback } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { AccountBubble } from "./AccountBubble";
 import { ButtonCircle } from "./ButtonCircle";
@@ -11,9 +10,6 @@ import { InputBig } from "./InputBig";
 import { useNav } from "./nav";
 import { color } from "./style";
 import { useAccount } from "../../model/account";
-
-const fadeIn = FadeIn.duration(150);
-const fadeOut = FadeOut.duration(150);
 
 /** Prefix is undefined when not focused, "" or longer when focused. */
 export function SearchHeader({
@@ -47,29 +43,21 @@ export function SearchHeader({
 
   return (
     <View style={styles.header}>
-      <Animated.View
-        style={{
-          marginRight: 16,
-          height: 50,
-          justifyContent: "center",
-        }}
-        entering={fadeIn}
-        exiting={fadeOut}
-      >
+      <View style={styles.leftButtonWrapper}>
         {isFocused ? (
-          <Animated.View entering={fadeIn} exiting={fadeOut} key="back">
+          <View key="back">
             <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
               <Octicons name="arrow-left" size={30} color={color.midnight} />
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         ) : (
-          <Animated.View entering={fadeIn} exiting={fadeOut} key="icon">
+          <View key="icon">
             <ButtonCircle size={50} onPress={goToAccount}>
               <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
             </ButtonCircle>
-          </Animated.View>
+          </View>
         )}
-      </Animated.View>
+      </View>
       <InputBig
         icon="search"
         placeholder="Search for user..."
@@ -81,17 +69,13 @@ export function SearchHeader({
         style={{ zIndex: 10 }}
       />
       {!isFocused && (
-        <Animated.View
-          style={{ marginLeft: 16 }}
-          entering={FadeIn}
-          exiting={FadeOut}
-        >
+        <View style={{ marginLeft: 16 }}>
           <ButtonCircle size={50} onPress={goToQR}>
             <View style={styles.qrCircle}>
               <Octicons name="apps" size={24} color={color.midnight} />
             </View>
           </ButtonCircle>
-        </Animated.View>
+        </View>
       )}
     </View>
   );
@@ -113,5 +97,10 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+  },
+  leftButtonWrapper: {
+    marginRight: 16,
+    height: 50,
+    justifyContent: "center",
   },
 });
