@@ -24,7 +24,7 @@ import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ButtonCircle } from "../../shared/ButtonCircle";
 import { InfoBox } from "../../shared/InfoBox";
-import { ScreenHeader } from "../../shared/ScreenHeader";
+import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import {
@@ -52,13 +52,14 @@ export default function SendScreen({ route }: Props) {
     else if (nav.canGoBack()) nav.goBack();
     else navResetToHome(nav);
   }, [nav, dollars, recipient]);
+  const goHome = useExitToHome();
 
   useDisableTabSwipe(nav);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send to" onBack={goBack} />
+        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
         <Spacer h={8} />
         {!recipient && link && <SendLoadRecipient {...{ link }} />}
         {recipient && dollars == null && (
@@ -258,10 +259,7 @@ function RecipientDisplay({
 
   const nav = useNav();
   const goToAccount = useCallback(() => {
-    nav.navigate("SendTab", {
-      screen: "Account",
-      params: { eAcc: recipient },
-    });
+    nav.navigate("SendTab", { screen: "Account", params: { eAcc: recipient } });
   }, [nav, recipient]);
 
   return (
