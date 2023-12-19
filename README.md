@@ -55,11 +55,19 @@ The mission is to make an excellent experience. Payments should be fast, secure,
   Yes, Daimo is and will always be open-source under GPLv3. We're here to collaborate. We want to make self-custody fast, safe, and easy. <a target="_blank" href="https://github.com/daimo-eth/daimo">See more on our Github.</a>
   </details>
 
-### Audits
+### Security
+
+#### Audits
+
+Past audits of the Daimo codebase can be found in the `audits` folder:
 
 - [Veridise audit 2023 Oct: Daimo](./audits/2023-10-veridise-daimo.pdf)
 - [Veridise audit 2023 Oct: P-256 verifier](./audits/2023-10-veridise-p256.pdf)
 - [Veridise audit 2023 Nov: WebAuthn verifier](./audits/2023-11-veridise-webauthn.pdf)
+
+#### Bug Bounty Program
+
+Daimo hosts a bug bounty program on [Immunefi](https://immunefi.com/bounty/daimo/). Learn more on [SECURITY.md](./SECURITY.md).
 
 ### Development
 
