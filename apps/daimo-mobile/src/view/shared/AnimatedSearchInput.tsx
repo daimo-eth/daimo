@@ -72,7 +72,7 @@ export function AnimatedSearchInput({
     let closedWidth = SCREEN_WIDTH - screenMargins - icons;
     let openWidth = SCREEN_WIDTH - screenMargins - backIcon;
 
-    if (measure(wrapperRef)) {
+    if (measure(wrapperRef) && measure(wrapperRef).width > 0) {
       const componentWidth = measure(wrapperRef).width;
       closedWidth = componentWidth - icons;
       openWidth = componentWidth - backIcon;
