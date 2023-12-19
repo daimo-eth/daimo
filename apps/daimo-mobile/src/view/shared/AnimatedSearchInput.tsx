@@ -2,6 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { RefObject, useCallback, useRef, useState } from "react";
 import {
   Dimensions,
+  LayoutChangeEvent,
   Platform,
   StyleSheet,
   TextInput,
@@ -10,7 +11,6 @@ import {
   ViewStyle,
 } from "react-native";
 import Animated, {
-  measure,
   useAnimatedRef,
   useAnimatedStyle,
   withTiming,
@@ -65,18 +65,13 @@ export function AnimatedSearchInput({
     ref.current?.focus();
   }, [ref]);
 
+  const [width, setWidth] = useState(SCREEN_WIDTH - 16 * 2);
+
   const wrapperStyle = useAnimatedStyle(() => {
-    const screenMargins = 16 * 2;
     const icons = (50 + 16) * 2;
     const backIcon = 30 + 8;
-    let closedWidth = SCREEN_WIDTH - screenMargins - icons;
-    let openWidth = SCREEN_WIDTH - screenMargins - backIcon;
-
-    if (measure(wrapperRef)) {
-      const componentWidth = measure(wrapperRef).width;
-      closedWidth = componentWidth - icons;
-      openWidth = componentWidth - backIcon;
-    }
+    const closedWidth = width - icons;
+    const openWidth = width - backIcon;
 
     return {
       width: isFocused
@@ -88,8 +83,17 @@ export function AnimatedSearchInput({
     };
   });
 
+  const onLayout = (event: LayoutChangeEvent) => {
+    setWidth(event.nativeEvent.layout.width);
+  };
+
   return (
-    <View style={styles.wrapperStyle} ref={wrapperRef} pointerEvents="box-none">
+    <View
+      style={styles.wrapperStyle}
+      ref={wrapperRef}
+      pointerEvents="box-none"
+      onLayout={onLayout}
+    >
       <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
         <Animated.View
           style={[
