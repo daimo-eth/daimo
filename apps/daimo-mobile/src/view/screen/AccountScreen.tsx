@@ -144,7 +144,7 @@ function AccountScreenBody({
           alignItems: "center",
         }}
       >
-        <AccountBubble eAcc={eAcc} size={64} fontSize={24} />
+        <AccountBubble eAcc={eAcc} size={64} />
         <Spacer h={16} />
         <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
         <Spacer h={8} />

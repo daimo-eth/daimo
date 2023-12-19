@@ -189,7 +189,7 @@ function ExtraRows({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
     <>
       <ExtraRow
         title="Send via link"
-        inside={<Octicons name="link" size={16} color={color.primary} />}
+        inside={<Octicons name="link" size={14} color={color.primary} />}
         onPress={() =>
           nav.navigate("SendTab", {
             screen: "SendLink",
@@ -199,7 +199,7 @@ function ExtraRows({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
       />
       <ExtraRow
         title="Scan QR code"
-        inside={<Octicons name="apps" size={16} color={color.primary} />}
+        inside={<Octicons name="apps" size={14} color={color.primary} />}
         onPress={() =>
           nav.navigate("SendTab", {
             screen: "QR",
@@ -224,7 +224,9 @@ function ExtraRow({
     <Row key={title} onPress={onPress}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
-          <Bubble inside={inside} size={36} />
+          <Bubble size={36} fontSize={14}>
+            {inside}
+          </Bubble>
           <TextBody>{title}</TextBody>
         </View>
       </View>
