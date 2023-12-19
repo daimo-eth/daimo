@@ -101,8 +101,8 @@ export function LongPressBigButton(props: LongPressButtonProps) {
         </View>
         <Text style={style.title}>{props.title?.toUpperCase()}</Text>
         {props.showBiometricIcon && (
-          <View style={styles.biometricIcon}>
-            <Image source={FadeIdIcon} style={{ height: 24, width: 24 }} />
+          <View style={styles.biometricIconContainer}>
+            <Image source={FadeIdIcon} style={styles.biometricIcon} />
           </View>
         )}
       </Animated.View>
@@ -268,5 +268,14 @@ const buttonStyles = {
 };
 
 const styles = StyleSheet.create({
-  biometricIcon: { width: 0, left: 8, height: 0, justifyContent: "center" },
+  biometricIconContainer: {
+    width: 0,
+    left: 8,
+    height: 0,
+    justifyContent: "center",
+  },
+  biometricIcon: {
+    height: 24,
+    width: 24,
+  },
 });
