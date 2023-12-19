@@ -65,7 +65,7 @@ export function SearchHeader({
         ) : (
           <Animated.View entering={fadeIn} exiting={fadeOut} key="icon">
             <ButtonCircle size={50} onPress={goToAccount}>
-              <AccountBubble eAcc={eAcc} size={50} fontSize={20} transparent />
+              <AccountBubble eAcc={eAcc} size={50} transparent />
             </ButtonCircle>
           </Animated.View>
         )}

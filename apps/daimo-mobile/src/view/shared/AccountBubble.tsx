@@ -8,28 +8,42 @@ import { color } from "./style";
 export function AccountBubble({
   eAcc,
   size,
-  fontSize,
   isPending,
   transparent,
 }: {
   eAcc: EAccount;
   size: number;
-  fontSize?: number;
   isPending?: boolean;
   transparent?: boolean;
 }) {
   const name = getAccountName(eAcc);
+
+  const fontSize = (function () {
+    switch (size) {
+      case 64:
+        return 24;
+      case 50:
+        return 20;
+      case 36:
+        return 14;
+      default:
+        throw new Error(`Invalid size: ${size}`);
+    }
+  })();
+
   const letter = (function () {
     if (name.startsWith("0x")) {
       return "0x";
     } else if (eAcc.label != null) {
       switch (eAcc.label) {
         case AddrLabel.Faucet:
-          return <Octicons name="download" size={16} color={color.primary} />;
+          return (
+            <Octicons name="download" size={fontSize} color={color.primary} />
+          );
         case AddrLabel.PaymentLink:
-          return <Octicons name="link" size={16} color={color.primary} />;
+          return <Octicons name="link" size={fontSize} color={color.primary} />;
         case AddrLabel.Coinbase:
-          return <Octicons name="plus" size={16} color={color.primary} />;
+          return <Octicons name="plus" size={fontSize} color={color.primary} />;
         default:
           return "?";
       }
@@ -40,32 +54,24 @@ export function AccountBubble({
   })();
 
   return (
-    <Bubble
-      inside={letter}
-      size={size}
-      fontSize={fontSize}
-      isPending={isPending}
-      transparent={transparent}
-    />
+    <Bubble {...{ size, isPending, transparent, fontSize }}>{letter}</Bubble>
   );
 }
 
 export function Bubble({
-  inside,
   size,
-  fontSize,
   isPending,
   transparent,
+  fontSize,
+  children,
 }: {
-  inside: string | React.JSX.Element;
   size: number;
-  fontSize?: number;
   isPending?: boolean;
   transparent?: boolean;
+  fontSize: number;
+  children: React.ReactNode;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
-
-  if (fontSize == null) fontSize = size / 2 + 1;
 
   const style: ViewStyle = useMemo(
     () => ({
@@ -95,7 +101,7 @@ export function Bubble({
   return (
     <View style={style}>
       <Text style={textStyle} numberOfLines={1}>
-        {inside}
+        {children}
       </Text>
     </View>
   );
