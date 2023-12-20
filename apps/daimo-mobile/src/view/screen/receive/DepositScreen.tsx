@@ -22,7 +22,7 @@ import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
-import { useExitToHome } from "../../shared/nav";
+import { useNav } from "../../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBold, TextLight, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -32,12 +32,21 @@ export default function DepositScreen() {
   const [tab, setTab] = useState<Tab>("DEPOSIT");
   const tabs = useRef(["DEPOSIT", "WITHDRAW"] as Tab[]).current;
 
+  const nav = useNav();
+  const goHome = useCallback(() => {
+    nav.navigate("HomeTab", { screen: "Home" });
+    // No jank while the screen is swiping away
+    setTimeout(() => {
+      setTab("DEPOSIT");
+    }, 400);
+  }, [nav]);
+
   const DepositInner = useWithAccount(DepositScreenInner);
   const WithdrawInner = useWithAccount(WithdrawScreen);
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" onExit={useExitToHome()} />
+      <ScreenHeader title="Deposit" onExit={goHome} />
       <Spacer h={8} />
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
