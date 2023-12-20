@@ -20,11 +20,10 @@ export function CallToAction({
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
   useEffect(() => {
-    const directDeepLink = window.location.href.replace(
-      daimoLinkBase,
-      "daimo:/"
-    );
-    setDirectDeepLink(directDeepLink);
+    // Must be loaded client-side to capture the hash part of the URL
+    // for ephemeral notes.
+    const { href } = window.location;
+    setDirectDeepLink(href.replace(daimoLinkBase, "daimo:/"));
   }, [directDeepLink]);
 
   return (
