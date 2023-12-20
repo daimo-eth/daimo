@@ -27,9 +27,14 @@ import { useEphemeralSignature } from "../../../logic/note";
 import { Account } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListReceive, useDisableTabSwipe, useNav } from "../../shared/nav";
+import {
+  ParamListReceive,
+  useDisableTabSwipe,
+  useExitToHome,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import {
   TextBody,

@@ -24,13 +24,13 @@ import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ButtonCircle } from "../../shared/ButtonCircle";
 import { InfoBox } from "../../shared/InfoBox";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import {
   ParamListSend,
-  navResetToHome,
   useDisableTabSwipe,
+  useExitToHome,
   useNav,
 } from "../../shared/nav";
 import { ss } from "../../shared/style";
@@ -45,14 +45,14 @@ export default function SendScreen({ route }: Props) {
     route.params || {};
 
   const nav = useNav();
+  const goHome = useExitToHome();
   const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
       nav.navigate("SendTab", { screen: "SendTransfer", params });
     if (dollars != null) goTo({ recipient });
     else if (nav.canGoBack()) nav.goBack();
-    else navResetToHome(nav);
+    else goHome();
   }, [nav, dollars, recipient]);
-  const goHome = useExitToHome();
 
   useDisableTabSwipe(nav);
 

@@ -11,9 +11,14 @@ import { SendNoteButton } from "./SendNoteButton";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListSend, useDisableTabSwipe, useNav } from "../../shared/nav";
+import {
+  ParamListSend,
+  useDisableTabSwipe,
+  useExitToHome,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 

@@ -19,14 +19,16 @@ import { AccountBubble } from "../shared/AccountBubble";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { ButtonBig } from "../shared/Button";
 import { HistoryListSwipe } from "../shared/HistoryList";
-import {
-  ScreenHeader,
-  useExitBack,
-  useExitToHome,
-} from "../shared/ScreenHeader";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
-import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
+import {
+  ParamListHome,
+  useDisableTabSwipe,
+  useExitBack,
+  useExitToHome,
+  useNav,
+} from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextH3 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";

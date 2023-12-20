@@ -24,7 +24,7 @@ import { Recipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { navResetToHome, useNav } from "../../shared/nav";
+import { useExitToHome } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
@@ -137,10 +137,10 @@ function SendTransferButtonInner({
   })();
 
   // On success, go home, show newly created transaction
-  const nav = useNav();
+  const goHome = useExitToHome();
   useEffect(() => {
     if (status !== "success") return;
-    navResetToHome(nav);
+    goHome();
   }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;

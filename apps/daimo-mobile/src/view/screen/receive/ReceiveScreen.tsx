@@ -19,10 +19,11 @@ import { generatePrivateKey } from "viem/accounts";
 import { Account, useAccount } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import {
   ParamListReceive,
+  useExitToHome,
   useFocusOnScreenTransitionEnd,
   useNav,
 } from "../../shared/nav";
