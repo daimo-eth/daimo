@@ -39,11 +39,6 @@ function getUrl(props: LinkProps): string {
   return `${daimoLinkBase}/${path}`;
 }
 
-function getDirectDeeplink(props: LinkProps): string {
-  const path = (props.params.slug || []).join("/");
-  return `daimo://${path}`;
-}
-
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const titleDesc = await loadTitleDesc(getUrl(props));
   if (titleDesc == null) return defaultMeta;
@@ -68,8 +63,6 @@ async function LinkPageInner(props: LinkProps) {
       description: "Payments on Ethereum",
     };
 
-  const directDeepLink = getDirectDeeplink(props);
-
   return (
     <main className="max-w-md mx-auto px-4">
       <center>
@@ -89,9 +82,7 @@ async function LinkPageInner(props: LinkProps) {
           </>
         )}
         <div className="h-9" />
-        <CallToAction
-          {...{ description, walletActionLinkStatus, directDeepLink }}
-        />
+        <CallToAction {...{ description, walletActionLinkStatus }} />
       </center>
     </main>
   );

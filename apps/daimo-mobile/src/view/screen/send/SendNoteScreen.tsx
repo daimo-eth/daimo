@@ -11,9 +11,14 @@ import { SendNoteButton } from "./SendNoteButton";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListSend, useDisableTabSwipe, useNav } from "../../shared/nav";
+import {
+  ParamListSend,
+  useDisableTabSwipe,
+  useExitToHome,
+  useNav,
+} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 
@@ -34,7 +39,16 @@ export function SendNoteScreen({ route }: Props) {
 
   const nav = useNav();
   const goHome = useExitToHome();
-  const goBack = nav.canGoBack() ? nav.goBack : goHome;
+  const resetAmount = useCallback(() => {
+    setAmountChosen(false);
+    setNoteDollars(0);
+    textInputRef.current?.focus();
+  }, []);
+  const goBack = useCallback(() => {
+    if (amountChosen) resetAmount();
+    else if (nav.canGoBack()) nav.goBack();
+    else goHome();
+  }, [nav, amountChosen]);
   useDisableTabSwipe(nav);
 
   return (
@@ -51,15 +65,29 @@ export function SendNoteScreen({ route }: Props) {
           <TextLight>Enter amount</TextLight>
         </TextCenter>
         <Spacer h={24} />
-        <AmountChooser
-          dollars={noteDollars}
-          onSetDollars={setNoteDollars}
-          showAmountAvailable={!amountChosen}
-          autoFocus
-          lagAutoFocus={lagAutoFocus}
-          disabled={amountChosen}
-          innerRef={textInputRef}
-        />
+        {!amountChosen && (
+          <AmountChooser
+            dollars={noteDollars}
+            onSetDollars={setNoteDollars}
+            showAmountAvailable
+            autoFocus
+            lagAutoFocus={lagAutoFocus}
+            disabled={amountChosen}
+            innerRef={textInputRef}
+          />
+        )}
+        {amountChosen && (
+          <AmountChooser
+            dollars={noteDollars}
+            onSetDollars={setNoteDollars}
+            disabled
+            showAmountAvailable={false}
+            autoFocus={false}
+            lagAutoFocus={false}
+            onFocus={resetAmount}
+          />
+        )}
+
         <Spacer h={32} />
         {!amountChosen && (
           <ButtonBig

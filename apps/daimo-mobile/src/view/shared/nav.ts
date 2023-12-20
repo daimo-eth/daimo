@@ -10,7 +10,8 @@ import {
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { addEventListener, getInitialURL } from "expo-linking";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { useAccount } from "../../model/account";
@@ -154,8 +155,23 @@ async function goTo(nav: MainNav, link: DaimoLink) {
   }
 }
 
-export function navResetToHome(nav: MainNav) {
-  nav.reset({ routes: [{ name: "HomeTab" }] });
+export function useExitToHome() {
+  const nav = useNav();
+  return useCallback(() => {
+    nav.navigate("HomeTab", { screen: "Home" });
+    if (!nav.canGoBack()) return;
+    if (Platform.OS === "ios") {
+      setTimeout(() => nav.popToTop(), 400);
+    } else {
+      nav.popToTop();
+    }
+  }, []);
+}
+
+export function useExitBack() {
+  const nav = useNav();
+  const goBack = useCallback(() => nav.goBack(), []);
+  return nav.canGoBack() ? goBack : undefined;
 }
 
 export function useDisableTabSwipe(nav: MainNav) {

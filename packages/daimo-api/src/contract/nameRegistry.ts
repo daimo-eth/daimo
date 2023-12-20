@@ -132,7 +132,7 @@ export class NameRegistry {
 
   /** On successfully registering a name, cache it. */
   onSuccessfulRegister = (name: string, address: Address) => {
-    this.cacheAccount({ name, addr: address, timestamp: Date.now() });
+    this.cacheAccount({ name, addr: address, timestamp: Date.now() / 1e3 });
   };
 
   /** Find wallet address for a given Daimo name, or undefined if not found. */

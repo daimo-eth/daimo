@@ -2,7 +2,7 @@ import { dollarsToAmount, formatDaimoLink } from "@daimo/common";
 import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
 import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -19,7 +19,7 @@ import { generatePrivateKey } from "viem/accounts";
 import { Account, useAccount } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import {
   ParamListReceive,
@@ -56,6 +56,15 @@ function RequestScreenInner({
   const isFocused = useIsFocused();
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
+
+  const goHome = useCallback(() => {
+    nav.navigate("HomeTab", { screen: "Home" });
+    // No jank while the screen is swiping away
+    setTimeout(() => {
+      setStatus("creating");
+      setDollars(0);
+    }, 400);
+  }, [nav]);
 
   // Work around react-navigation autofocus bug
   useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
@@ -100,7 +109,7 @@ function RequestScreenInner({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Request" onExit={useExitToHome()} />
+        <ScreenHeader title="Request" onExit={goHome} />
         <Spacer h={96} />
         <TextCenter>
           <TextLight>Enter amount to request</TextLight>

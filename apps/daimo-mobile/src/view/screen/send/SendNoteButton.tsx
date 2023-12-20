@@ -25,7 +25,7 @@ import {
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
-import { ButtonBig } from "../../shared/Button";
+import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
@@ -184,11 +184,12 @@ function SendNoteButtonInner({
       case "idle":
       case "error":
         return (
-          <ButtonBig
+          <LongPressBigButton
             type="primary"
-            title="CONFIRM PAYMENT LINK"
+            title="HOLD TO CONFIRM"
             onPress={exec}
             disabled={sendDisabled}
+            duration={400}
           />
         );
       case "loading":
@@ -197,7 +198,7 @@ function SendNoteButtonInner({
         return (
           <ButtonBig
             type="success"
-            title="Send Payment Link"
+            title="SEND PAYMENT LINK"
             onPress={sendNote}
           />
         );

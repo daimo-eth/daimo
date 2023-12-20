@@ -5,10 +5,11 @@ import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
-import { ScreenHeader, useExitToHome } from "../../shared/ScreenHeader";
+import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import {
   ParamListSend,
+  useExitToHome,
   useFocusOnScreenTransitionEnd,
   useNav,
 } from "../../shared/nav";

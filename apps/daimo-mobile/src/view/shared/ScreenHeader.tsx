@@ -4,7 +4,6 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { OctName } from "./InputBig";
 import { OfflineHeader } from "./OfflineHeader";
-import { useNav } from "./nav";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextH3 } from "./text";
 
@@ -30,17 +29,6 @@ export function ScreenHeader({
       </View>
     </>
   );
-}
-
-export function useExitToHome() {
-  const nav = useNav();
-  return useCallback(() => nav.navigate("HomeTab", { screen: "Home" }), []);
-}
-
-export function useExitBack() {
-  const nav = useNav();
-  const goBack = useCallback(() => nav.goBack(), []);
-  return nav.canGoBack() ? goBack : undefined;
 }
 
 /** Shows a nav button if `show`, blank placeholder otherwise. */

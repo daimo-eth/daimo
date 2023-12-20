@@ -21,10 +21,15 @@ import { syncFindSameOp } from "../../sync/sync";
 import { SubtitleAmountChange } from "../shared/Amount";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
-import { ScreenHeader, useExitBack } from "../shared/ScreenHeader";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { getCachedEAccount } from "../shared/addr";
-import { ParamListHome, useDisableTabSwipe, useNav } from "../shared/nav";
+import {
+  ParamListHome,
+  useDisableTabSwipe,
+  useExitBack,
+  useNav,
+} from "../shared/nav";
 import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
 import { ss } from "../shared/style";
 import {

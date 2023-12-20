@@ -25,9 +25,9 @@ import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { PendingDot } from "../shared/PendingDot";
-import { ScreenHeader, useExitToHome } from "../shared/ScreenHeader";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useNav } from "../shared/nav";
+import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextH3, TextLight, TextMeta } from "../shared/text";
 

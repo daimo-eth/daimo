@@ -15,11 +15,7 @@ import QRCode from "react-native-qrcode-svg";
 import { useAccount } from "../../model/account";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { Scanner } from "../shared/Scanner";
-import {
-  ScreenHeader,
-  useExitBack,
-  useExitToHome,
-} from "../shared/ScreenHeader";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
@@ -27,6 +23,8 @@ import {
   ParamListHome,
   QRScreenOptions,
   useDisableTabSwipe,
+  useExitBack,
+  useExitToHome,
   useNav,
 } from "../shared/nav";
 import { color, ss } from "../shared/style";
