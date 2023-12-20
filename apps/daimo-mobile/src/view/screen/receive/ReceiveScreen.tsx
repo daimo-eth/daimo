@@ -23,7 +23,6 @@ import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import {
   ParamListReceive,
-  useExitToHome,
   useFocusOnScreenTransitionEnd,
   useNav,
 } from "../../shared/nav";
