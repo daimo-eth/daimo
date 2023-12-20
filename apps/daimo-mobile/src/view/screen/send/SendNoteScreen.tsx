@@ -39,7 +39,6 @@ export function SendNoteScreen({ route }: Props) {
 
   const nav = useNav();
   const goHome = useExitToHome();
-  // const goBack = nav.canGoBack() ? nav.goBack : goHome;
   const resetAmount = useCallback(() => {
     setAmountChosen(false);
     setNoteDollars(0);
