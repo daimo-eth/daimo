@@ -138,6 +138,12 @@ function AmountInput({
   const otherRef = useRef<TextInput>(null);
   const ref = innerRef || otherRef;
 
+  // Controlled component, but with state to allow typing "0", "0.", etc.
+  useEffect(() => {
+    if (ref.current?.isFocused()) return;
+    setStrVal(dollars <= 0 ? "" : fmt(dollars));
+  }, [dollars]);
+
   const focus = useCallback(() => {
     ref.current?.focus();
     if (onFocus) onFocus();
