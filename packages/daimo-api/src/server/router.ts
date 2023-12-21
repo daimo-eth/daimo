@@ -128,6 +128,7 @@ export function createRouter(
           watcher,
           vc,
           coinIndexer,
+          noteIndexer,
           nameReg,
           keyReg,
           paymaster

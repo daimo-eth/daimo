@@ -1,11 +1,13 @@
 import {
   amountToDollars,
+  DaimoLinkNoteV2,
   DaimoNoteStatus,
-  EAccount,
+  DisplayOpEvent,
   OpStatus,
   timeString,
-  TrackedNote,
-  TransferOpEvent,
+  PaymentLinkOpEvent,
+  getAccountName,
+  assert,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
@@ -23,7 +25,6 @@ import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { getCachedEAccount } from "../shared/addr";
 import {
   ParamListHome,
   useDisableTabSwipe,
@@ -62,17 +63,7 @@ function HistoryOpScreenInner({
   let { op } = route.params;
   op = syncFindSameOp(op.opHash, account.recentTransfers) || op;
 
-  // If we sent a note, show the note screen.
-  // TODO: annotate note info directly on op via sync
-  // This approach works, but means we can never expire "pendingNotes"
-  // even when they are no longer pending.
-  const pendingNote =
-    op.opHash && account.pendingNotes.find((n) => n.opHash === op.opHash);
-
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
-
-  const shouldShowNote =
-    pendingNote && [OpStatus.confirmed, OpStatus.finalized].includes(op.status);
 
   return (
     <View style={ss.container.screen}>
@@ -86,21 +77,39 @@ function HistoryOpScreenInner({
         )}
       </View>
       <Spacer h={16} />
-      {shouldShowNote && <NoteView account={account} note={pendingNote} />}
+      {op.type === "createLink" &&
+        [OpStatus.confirmed, OpStatus.finalized].includes(op.status) && (
+          <NoteView account={account} note={op} />
+        )}
     </View>
   );
 }
 
-function NoteView({ account, note }: { account: Account; note: TrackedNote }) {
+function NoteView({
+  account,
+  note,
+}: {
+  account: Account;
+  note: PaymentLinkOpEvent;
+}) {
   const daimoChain = daimoChainFromId(account.homeChainId);
-  const noteFetch = useFetchLinkStatus(note, daimoChain)!;
+  const link: DaimoLinkNoteV2 = {
+    type: "notev2",
+    seq: note.noteStatus!.seq!,
+    sender: getAccountName(note.noteStatus!.sender),
+    dollars: amountToDollars(note.amount),
+    seed: "",
+  };
+  const noteFetch = useFetchLinkStatus(link, daimoChain)!;
   const noteStatus = noteFetch.data as DaimoNoteStatus | undefined;
 
   return (
     <View>
       {noteFetch.isFetching && <Spinner />}
       {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
-      {noteStatus && <NoteDisplay {...{ account, noteStatus }} hideAmount />}
+      {noteStatus && noteStatus.status === "confirmed" && (
+        <NoteDisplay {...{ account, noteStatus }} hideAmount />
+      )}
     </View>
   );
 }
@@ -135,7 +144,7 @@ function TransferBody({
   op,
 }: {
   account: Account;
-  op: TransferOpEvent;
+  op: DisplayOpEvent;
 }) {
   const opRequestId = op.nonceMetadata
     ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
@@ -147,16 +156,8 @@ function TransferBody({
       op.to === account.address
   );
 
-  let other: EAccount;
-  let amountChange: bigint;
   const sentByUs = op.from === account.address;
-  if (sentByUs) {
-    other = getCachedEAccount(op.to);
-    amountChange = -BigInt(op.amount);
-  } else {
-    other = getCachedEAccount(op.from);
-    amountChange = BigInt(op.amount);
-  }
+  const amountChange = sentByUs ? -BigInt(op.amount) : BigInt(op.amount);
 
   const kv: [string, ReactNode][] = [];
   if (matchingTrackedRequest != null) {
@@ -192,8 +193,26 @@ function TransferBody({
 
   // Summarize what happened
   let verb;
-  if (other.label === "payment link") {
-    verb = sentByUs ? "Created link" : "Claimed link";
+  if (op.type === "createLink") {
+    assert(
+      op.noteStatus.sender.addr === account.address,
+      "link not created by self"
+    );
+    if (op.noteStatus.claimer) {
+      if (op.noteStatus.claimer.addr === account.address) {
+        verb = "Link reclaimed";
+      } else {
+        verb = "Link claimed by " + getAccountName(op.noteStatus.claimer);
+      }
+    } else {
+      verb = "Link created";
+    }
+  } else if (op.type === "claimLink") {
+    if (op.noteStatus.sender.addr === account.address) {
+      verb = "Link reclaimed";
+    } else {
+      verb = "Link sent by " + getAccountName(op.noteStatus.sender);
+    }
   } else {
     verb = sentByUs ? "Sent transfer" : "Received transfer";
   }

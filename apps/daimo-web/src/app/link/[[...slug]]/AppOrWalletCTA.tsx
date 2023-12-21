@@ -4,6 +4,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   getNoteClaimSignature,
+  getNoteClaimSignatureFromSeed,
 } from "@daimo/common";
 import { daimoEphemeralNotesConfig } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -58,14 +59,10 @@ export function AppOrWalletCTA({
       try {
         if (!address) return;
 
-        // Ephemeral private key is not readable server side.
-        const ephPrivateKey = window.location.hash.slice(1) as Hex;
+        // URL hash part is not readable server side.
+        const hash = window.location.hash.slice(1) as Hex;
 
-        const action = await linkStatusToAction(
-          linkStatus,
-          address,
-          ephPrivateKey
-        );
+        const action = await linkStatusToAction(linkStatus, address, hash);
         setAction(action);
       } catch (e: any) {
         setCreationError(e.message);
@@ -193,7 +190,7 @@ type Action = {
 async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
-  ephPrivateKey: Hex | undefined
+  urlHash: Hex | undefined
 ): Promise<Action> {
   switch (linkStatus.link.type) {
     case "request": {
@@ -216,7 +213,7 @@ async function linkStatusToAction(
       const signature = await getNoteClaimSignature(
         sender.addr,
         selfAddress,
-        ephPrivateKey
+        urlHash
       );
 
       return {
@@ -224,6 +221,22 @@ async function linkStatusToAction(
           ...daimoEphemeralNotesConfig,
           functionName: "claimNote" as const,
           args: [linkStatus.link.ephemeralOwner, signature] as const,
+        },
+      };
+    }
+    case "notev2": {
+      const { sender, ephemeralOwner } = linkStatus as DaimoNoteStatus;
+      const signature = await getNoteClaimSignatureFromSeed(
+        sender.addr,
+        selfAddress,
+        urlHash
+      );
+
+      return {
+        wagmiPrep: {
+          ...daimoEphemeralNotesConfig,
+          functionName: "claimNote" as const,
+          args: [ephemeralOwner, signature] as const,
         },
       };
     }

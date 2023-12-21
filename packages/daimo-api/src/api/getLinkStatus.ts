@@ -70,7 +70,7 @@ export async function getLinkStatus(
     }
 
     case "note": {
-      const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
+      const ret = noteIndexer.getNoteStatusByOwner(link.ephemeralOwner);
       if (ret == null) {
         const sender = await nameReg.getEAccountFromStr(link.previewSender);
         if (sender == null) {
@@ -78,9 +78,30 @@ export async function getLinkStatus(
         }
         const pending: DaimoNoteStatus = {
           status: "pending",
+          ephemeralOwner: link.ephemeralOwner,
           link,
           sender,
           dollars: link.previewDollars,
+        };
+        return pending;
+      }
+      return ret;
+    }
+
+    case "notev2": {
+      const sender = await nameReg.getEAccountFromStr(link.sender);
+      if (sender == null) {
+        throw new Error(`Note sender not found: ${link.sender}`);
+      }
+      const ret = noteIndexer.getNoteStatusBySeq(sender.addr, link.seq);
+      if (ret == null) {
+        const pending: DaimoNoteStatus = {
+          status: "pending",
+          ephemeralOwner: undefined,
+          link,
+          sender,
+          seq: link.seq,
+          dollars: link.dollars,
         };
         return pending;
       }

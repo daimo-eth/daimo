@@ -23,11 +23,11 @@ export function createEmptyAccount(
     lastBlockTimestamp: 0,
     lastBlock: 0,
     lastFinalizedBlock: 0,
+    nextNoteSeq: 0,
 
     namedAccounts: [],
     recentTransfers: [],
     trackedRequests: [],
-    pendingNotes: [],
     accountKeys: [],
     pendingKeyRotation: [],
     recommendedExchanges: [],

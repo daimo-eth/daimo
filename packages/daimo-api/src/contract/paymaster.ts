@@ -135,9 +135,7 @@ export class Paymaster {
   ): Promise<ChainGasConstants> {
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
-    const isSponsored =
-      sender.name != null &&
-      (await this.db.checkPaymasterWhitelist(sender.name));
+    const isSponsored = false;
     const paymasterAndData = isSponsored
       ? await getPaymasterWithSignature(sender)
       : chainConfig.pimlicoPaymasterAddress;

@@ -45,23 +45,23 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/note/foo/1.23/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+    "https://example.com/link/n/foo/1.23/3#rqNoihPnZKa7g51uoUctj",
     {
-      type: "note",
-      previewSender: "foo",
-      previewDollars: "1.23",
-      ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-      ephemeralPrivateKey: undefined,
+      type: "notev2",
+      sender: "foo",
+      dollars: "1.23",
+      seq: 3,
+      seed: "rqNoihPnZKa7g51uoUctj",
     },
   ],
   [
-    "https://example.com/link/note/bar.eth/4.20/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x1234",
+    "https://example.com/link/n/bar.eth/4.20/1",
     {
-      type: "note",
-      previewSender: "bar.eth",
-      previewDollars: "4.20",
-      ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-      ephemeralPrivateKey: "0x1234",
+      type: "notev2",
+      sender: "bar.eth",
+      dollars: "4.20",
+      seq: 1,
+      seed: undefined,
     },
   ],
   ["https://example.com/link", null],
@@ -130,8 +130,9 @@ test("DaimoLink from https://daimo.xyz legacy URL", () => {
 });
 
 test("DaimoLink normalization", () => {
+  // Ensure addresses always end up checksummed
   for (const [url, link] of testCases) {
-    // Ensure addresses always end up checksummed
+    if (link?.type === "notev2") continue; // Base58 encoding is case sensitive
     assert.deepStrictEqual(parseDaimoLink(url.toLowerCase()), link);
   }
 
@@ -153,14 +154,14 @@ test("DaimoLink normalization", () => {
 
 test("DaimoLink note backcompat", () => {
   const oldUrl =
-    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x1234";
+    "https://example.com/link/note/foo/1.23/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
   const link = parseDaimoLink(oldUrl)!;
   assert.deepStrictEqual(link, {
     type: "note",
-    previewSender: "unknown",
-    previewDollars: "0.00",
+    previewSender: "foo",
+    previewDollars: "1.23",
     ephemeralOwner: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-    ephemeralPrivateKey: "0x1234",
+    ephemeralPrivateKey: undefined,
   });
 });
 

@@ -1,10 +1,10 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   ChainGasConstants,
+  DisplayOpEvent,
   EAccount,
   KeyData,
   RecommendedExchange,
-  TransferOpEvent,
   assert,
   hasAccountName,
 } from "@daimo/common";
@@ -13,6 +13,7 @@ import { Address, hexToBytes } from "viem";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
+import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../network/viemClient";
 import { Watcher } from "../shovel/watcher";
@@ -25,11 +26,12 @@ export interface AccountHistoryResult {
   lastBlock: number;
   lastBlockTimestamp: number;
   lastBalance: `${bigint}`;
+  nextNoteSeq: number;
 
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: TransferOpEvent[];
+  transferLogs: DisplayOpEvent[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
 
@@ -55,6 +57,7 @@ export async function getAccountHistory(
   watcher: Watcher,
   vc: ViemClient,
   coinIndexer: CoinIndexer,
+  noteIndexer: NoteIndexer,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster
@@ -81,6 +84,8 @@ export async function getAccountHistory(
   const lastBlockTimestamp = lastBlk.timestamp;
   const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
+  const nextNoteSeq = noteIndexer.getNextSeq(address);
+
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
@@ -98,6 +103,10 @@ export async function getAccountHistory(
   transferLogs.forEach((log) => {
     addrs.add(log.from);
     addrs.add(log.to);
+    if (log.type === "claimLink" || log.type === "createLink") {
+      if (log.noteStatus.claimer) addrs.add(log.noteStatus.claimer.addr);
+      addrs.add(log.noteStatus.sender.addr);
+    }
   });
   const namedAccounts = (
     await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
@@ -121,6 +130,7 @@ export async function getAccountHistory(
     lastBlock,
     lastBlockTimestamp,
     lastBalance: `${lastBalance}`,
+    nextNoteSeq,
 
     chainGasConstants,
     recommendedExchanges,

@@ -1,4 +1,6 @@
 import {
+  PaymentLinkOpEvent,
+  DisplayOpEvent,
   OpStatus,
   TransferOpEvent,
   guessTimestampFromNum,
@@ -15,6 +17,7 @@ import {
   toBytes,
 } from "viem";
 
+import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
@@ -37,7 +40,11 @@ export class CoinIndexer {
 
   private listeners: ((transfers: Transfer[]) => void)[] = [];
 
-  constructor(private client: ViemClient, private opIndexer: OpIndexer) {}
+  constructor(
+    private client: ViemClient,
+    private opIndexer: OpIndexer,
+    private noteIndexer: NoteIndexer
+  ) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
@@ -124,7 +131,7 @@ export class CoinIndexer {
     addr: Address;
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
-  }): TransferOpEvent[] {
+  }): DisplayOpEvent[] {
     let relevantTransfers = this.allTransfers.filter(
       (log) => log.from === addr || log.to === addr
     );
@@ -148,10 +155,10 @@ export class CoinIndexer {
     return transferOps;
   }
 
-  /* Populates atomic properties of logs to convert it Op Event.
-   * Does not account for fees since they involve multiple logs.
+  /* Populates atomic properties of logs to convert it to an Op Event.
+   * Does not account for fees since they involve multiple transfer logs.
    */
-  private attachTransferOpProperties(log: Transfer): TransferOpEvent {
+  private attachTransferOpProperties(log: Transfer): DisplayOpEvent {
     const {
       blockNumber,
       blockHash,
@@ -168,9 +175,12 @@ export class CoinIndexer {
           numberToHex(userOp.nonce, { size: 32 })
         )?.metadata.toHex()
       : undefined;
+    const noteInfo = this.noteIndexer.getNoteStatusbyLogCoordinate(
+      transactionHash,
+      logIndex - 1
+    );
 
-    return {
-      type: "transfer",
+    const partialOp = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
@@ -187,6 +197,34 @@ export class CoinIndexer {
       nonceMetadata,
       opHash,
     };
+
+    const opEvent = (() => {
+      if (!noteInfo) {
+        return {
+          type: "transfer",
+          ...partialOp,
+        } as TransferOpEvent;
+      }
+
+      const [noteStatus, noteEventType] = noteInfo;
+      if (noteEventType === "create") {
+        return {
+          type: "createLink",
+          noteStatus,
+          ...partialOp,
+        } as PaymentLinkOpEvent;
+      } else if (noteEventType === "claim") {
+        return {
+          type: "claimLink",
+          noteStatus,
+          ...partialOp,
+        } as PaymentLinkOpEvent;
+      } else {
+        throw new Error(`Unexpected note event type: ${noteEventType}`);
+      }
+    })();
+
+    return opEvent;
   }
 
   /* Attach fee amounts to transfer ops and filter out transfers involving
@@ -194,8 +232,8 @@ export class CoinIndexer {
    * TODO: unit test this function
    */
   private attachFeeAmounts(
-    transferOpsIncludingPaymaster: TransferOpEvent[]
-  ): TransferOpEvent[] {
+    transferOpsIncludingPaymaster: DisplayOpEvent[]
+  ): DisplayOpEvent[] {
     // Map of opHash to fee amount paid to paymaster address
     const opHashToFee = new Map<Hex, number>();
     for (const op of transferOpsIncludingPaymaster) {

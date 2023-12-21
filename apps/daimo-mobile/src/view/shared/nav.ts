@@ -4,8 +4,9 @@ import {
   DaimoLinkNote,
   DaimoLinkRequest,
   EAccount,
-  TransferOpEvent,
+  DisplayOpEvent,
   parseDaimoLink,
+  DaimoLinkNoteV2,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -23,7 +24,7 @@ export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
   Account: { eAcc: EAccount } | { link: DaimoLinkAccount };
-  HistoryOp: { op: TransferOpEvent };
+  HistoryOp: { op: DisplayOpEvent };
 };
 
 export type ParamListSend = {
@@ -32,13 +33,13 @@ export type ParamListSend = {
   QR: { option: QRScreenOptions | undefined };
   SendLink: { lagAutoFocus: boolean };
   Account: { eAcc: EAccount };
-  HistoryOp: { op: TransferOpEvent };
+  HistoryOp: { op: DisplayOpEvent };
 };
 
 export type ParamListReceive = {
   Receive: { autoFocus: boolean };
   RequestSend: undefined;
-  Note: { link: DaimoLinkNote };
+  Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
 };
 
 export type ParamListSettings = {
@@ -147,6 +148,10 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       break;
     }
     case "note": {
+      nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
+      break;
+    }
+    case "notev2": {
       nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
       break;
     }

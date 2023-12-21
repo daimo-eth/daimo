@@ -1,6 +1,6 @@
 import {
+  DisplayOpEvent,
   EAccount,
-  TransferOpEvent,
   assert,
   canSendTo,
   getAccountName,
@@ -33,10 +33,10 @@ interface HeaderObject {
   id: string;
   month: string;
 }
-interface TransferRenderObject {
+interface DisplayOpRenderObject {
   isHeader: false;
   id: string;
-  t: TransferOpEvent;
+  op: DisplayOpEvent;
 }
 
 export function HistoryListSwipe({
@@ -56,7 +56,10 @@ export function HistoryListSwipe({
   let ops = account.recentTransfers.slice().reverse();
   if (otherAcc != null) {
     const otherAddr = otherAcc.addr;
-    ops = ops.filter((t) => t.from === otherAddr || t.to === otherAddr);
+    ops = ops.filter((op) => {
+      const [from, to] = getFromTo(op);
+      return from === otherAddr || to === otherAddr;
+    });
   }
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
@@ -74,10 +77,10 @@ export function HistoryListSwipe({
     );
   }
 
-  const renderRow = (t: TransferOpEvent) => (
+  const renderRow = (t: DisplayOpEvent) => (
     <TransferRow
-      key={getTransferId(t)}
-      transfer={t}
+      key={getDisplayOpId(t)}
+      displayOp={t}
       address={account.address}
       {...{ linkTo, showDate }}
     />
@@ -98,12 +101,12 @@ export function HistoryListSwipe({
 
   // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
-  const rows: (TransferRenderObject | HeaderObject)[] = [];
+  const rows: (DisplayOpRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
-  for (const t of ops) {
-    const month = new Date(t.timestamp * 1000).toLocaleString("default", {
+  for (const op of ops) {
+    const month = new Date(op.timestamp * 1000).toLocaleString("default", {
       year: "numeric",
       month: "long",
     });
@@ -118,8 +121,8 @@ export function HistoryListSwipe({
     }
     rows.push({
       isHeader: false,
-      id: getTransferId(t),
-      t,
+      id: getDisplayOpId(op),
+      op,
     });
   }
 
@@ -137,7 +140,7 @@ export function HistoryListSwipe({
         }
         return (
           <TransferRow
-            transfer={item.t}
+            displayOp={item.op}
             address={account.address}
             showDate
             {...{ linkTo }}
@@ -156,25 +159,39 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
+function getFromTo(op: DisplayOpEvent): [Address, Address] {
+  if (op.type === "transfer") {
+    return [getAddress(op.from), getAddress(op.to)];
+  } else {
+    if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
+      // Self-transfer via payment link shows up as two payment link transfers
+      return [getAddress(op.from), getAddress(op.to)];
+    }
+    return [
+      op.noteStatus.sender.addr,
+      op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
+    ];
+  }
+}
+
 function TransferRow({
-  transfer,
+  displayOp,
   address,
   linkTo,
   showDate,
 }: {
-  transfer: TransferOpEvent;
+  displayOp: DisplayOpEvent;
   address: Address;
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
-  assert(transfer.amount > 0);
-  const from = getAddress(transfer.from);
-  const to = getAddress(transfer.to);
+  assert(displayOp.amount > 0);
+  const [from, to] = getFromTo(displayOp);
   assert([from, to].includes(address));
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
-  const amountDelta = from === address ? -transfer.amount : transfer.amount;
+  const amountDelta = from === address ? -displayOp.amount : displayOp.amount;
 
   const nav = useNav();
   const viewOp = useCallback(() => {
@@ -183,13 +200,13 @@ function TransferRow({
     const currentTab = nav.getState().routes[0].name;
     const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
     if (linkTo === "op" || !canSendTo(otherAcc)) {
-      nav.navigate(newTab, { screen: "HistoryOp", params: { op: transfer } });
+      nav.navigate(newTab, { screen: "HistoryOp", params: { op: displayOp } });
     } else {
       nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
     }
-  }, [nav, transfer, linkTo, otherAcc]);
+  }, [nav, displayOp, linkTo, otherAcc]);
 
-  const isPending = transfer.status === "pending";
+  const isPending = displayOp.status === "pending";
   const textCol = isPending ? color.gray3 : color.midnight;
 
   return (
@@ -207,7 +224,7 @@ function TransferRow({
           </View>
           <TransferAmountDate
             amount={amountDelta}
-            timestamp={transfer.timestamp}
+            timestamp={displayOp.timestamp}
             showDate={showDate}
             {...{ isPending }}
           />
@@ -258,7 +275,7 @@ function TransferAmountDate({
   );
 }
 
-function getTransferId(t: TransferOpEvent): string {
+function getDisplayOpId(t: DisplayOpEvent): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
