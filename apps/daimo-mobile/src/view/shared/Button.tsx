@@ -18,7 +18,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
-import FadeIdIcon from "../../../assets/face-id.png";
+import FaceIdIcon from "../../../assets/face-id.png";
 
 interface TextButtonProps {
   title?: string;
@@ -102,7 +102,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
         <Text style={style.title}>{props.title?.toUpperCase()}</Text>
         {props.showBiometricIcon && (
           <View style={styles.biometricIconContainer}>
-            <Image source={FadeIdIcon} style={styles.biometricIcon} />
+            <Image source={FaceIdIcon} style={styles.biometricIcon} />
           </View>
         )}
       </Animated.View>
