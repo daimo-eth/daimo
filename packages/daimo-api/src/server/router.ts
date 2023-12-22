@@ -1,4 +1,8 @@
 import { zAddress, zHex, zUserOpHex } from "@daimo/common";
+import {
+  daimoEphemeralNotesV2ABI,
+  daimoEphemeralNotesV2Address,
+} from "@daimo/contract";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
@@ -221,6 +225,28 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode } = opts.input;
         return faucet.verifyInviteCode(inviteCode);
+      }),
+
+    claimEphemeralNoteSponsored: publicProcedure
+      .input(
+        z.object({
+          ephemeralOwner: zAddress,
+          recipient: zAddress,
+          signature: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const ephemeralOwner = getAddress(opts.input.ephemeralOwner);
+        const recipient = getAddress(opts.input.recipient);
+        const signature = opts.input.signature;
+
+        const claimTxHash = await vc.writeContract({
+          abi: daimoEphemeralNotesV2ABI,
+          address: daimoEphemeralNotesV2Address,
+          functionName: "claimNoteRecipient",
+          args: [ephemeralOwner, recipient, signature],
+        });
+        return claimTxHash;
       }),
   });
 }

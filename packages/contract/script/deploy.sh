@@ -23,6 +23,9 @@ forge script script/DeployNameRegistry.s.sol --fork-url $RPC_URL --private-key $
 # Deploy Ephemeral Notes using Test USDC
 forge script script/DeployEphemeralNotes.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
 
+# Deploy Ephemeral Notes V2 using Test USDC
+forge script script/DeployEphemeralNotesV2.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+
 # From DeployAccountFactory
 ADDR_ACCOUNT_FACTORY="0xF9D643f5645C6140b8EEb7eF42878b71eBfEe40b"
 

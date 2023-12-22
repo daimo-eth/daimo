@@ -210,7 +210,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   // TODO: store validUntil directly on the op
   const stillPending = oldPending.filter(
     (t) =>
-      syncFindSameOp(t.opHash, recentTransfers) == null &&
+      syncFindSameOp(t.opHash, t.txHash, recentTransfers) == null &&
       t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
@@ -273,10 +273,14 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
 export function syncFindSameOp(
   opHash: Hex | undefined,
+  txHash: Hex | undefined,
   ops: DisplayOpEvent[]
 ): DisplayOpEvent | null {
-  if (opHash == null) return null;
-  return ops.find((r) => opHash === r.opHash) || null;
+  return (
+    ops.find(
+      (r) => (opHash && opHash === r.opHash) || (txHash && txHash === r.txHash)
+    ) || null
+  );
 }
 
 /** Update contacts based on recent interactions */

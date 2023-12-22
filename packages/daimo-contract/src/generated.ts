@@ -19,112 +19,7 @@ export const daimoAccountABI = [
       },
     ],
   },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'entryPoint',
-        internalType: 'contract IEntryPoint',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'AccountInitialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
-      {
-        name: 'key',
-        internalType: 'bytes32[2]',
-        type: 'bytes32[2]',
-        indexed: false,
-      },
-    ],
-    name: 'SigningKeyAdded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
-      {
-        name: 'key',
-        internalType: 'bytes32[2]',
-        type: 'bytes32[2]',
-        indexed: false,
-      },
-    ],
-    name: 'SigningKeyRemoved',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
+  { stateMutability: 'payable', type: 'receive' },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -347,7 +242,112 @@ export const daimoAccountABI = [
       { name: '', internalType: 'contract DaimoVerifier', type: 'address' },
     ],
   },
-  { stateMutability: 'payable', type: 'receive' },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'AccountInitialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'contract IAccount',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'key',
+        internalType: 'bytes32[2]',
+        type: 'bytes32[2]',
+        indexed: false,
+      },
+    ],
+    name: 'SigningKeyAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'contract IAccount',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'key',
+        internalType: 'bytes32[2]',
+        type: 'bytes32[2]',
+        indexed: false,
+      },
+    ],
+    name: 'SigningKeyRemoved',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -465,6 +465,44 @@ export const daimoEphemeralNotesABI = [
     ],
   },
   {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: '_signature', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'claimNote',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: '_amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'createNote',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'notes',
+    outputs: [
+      { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'token',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -506,14 +544,46 @@ export const daimoEphemeralNotesABI = [
     ],
     name: 'NoteRedeemed',
   },
+] as const
+
+export const daimoEphemeralNotesAddress =
+  '0x4AdcA7cB84497c9c4c308063D2f219C7b6041183' as const
+
+export const daimoEphemeralNotesConfig = {
+  address: daimoEphemeralNotesAddress,
+  abi: daimoEphemeralNotesABI,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoEphemeralNotesV2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoEphemeralNotesV2ABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_token', internalType: 'contract IERC20', type: 'address' },
+    ],
+  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+      { name: 'recipient', internalType: 'address', type: 'address' },
       { name: '_signature', internalType: 'bytes', type: 'bytes' },
     ],
-    name: 'claimNote',
+    name: 'claimNoteRecipient',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
+    ],
+    name: 'claimNoteSelf',
     outputs: [],
   },
   {
@@ -544,14 +614,56 @@ export const daimoEphemeralNotesABI = [
     name: 'token',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'note',
+        internalType: 'struct Note',
+        type: 'tuple',
+        components: [
+          { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+    ],
+    name: 'NoteCreated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'note',
+        internalType: 'struct Note',
+        type: 'tuple',
+        components: [
+          { name: 'ephemeralOwner', internalType: 'address', type: 'address' },
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+      {
+        name: 'redeemer',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'NoteRedeemed',
+  },
 ] as const
 
-export const daimoEphemeralNotesAddress =
-  '0x4AdcA7cB84497c9c4c308063D2f219C7b6041183' as const
+export const daimoEphemeralNotesV2Address =
+  '0x594bc666500fAeD35DC741F45a35C571399560d8' as const
 
-export const daimoEphemeralNotesConfig = {
-  address: daimoEphemeralNotesAddress,
-  abi: daimoEphemeralNotesABI,
+export const daimoEphemeralNotesV2Config = {
+  address: daimoEphemeralNotesV2Address,
+  abi: daimoEphemeralNotesV2ABI,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -560,87 +672,6 @@ export const daimoEphemeralNotesConfig = {
 
 export const daimoNameRegistryABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'name', internalType: 'bytes32', type: 'bytes32', indexed: true },
-      { name: 'addr', internalType: 'address', type: 'address', indexed: true },
-    ],
-    name: 'Registered',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -745,6 +776,87 @@ export const daimoNameRegistryABI = [
     name: 'upgradeToAndCall',
     outputs: [],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'name', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      { name: 'addr', internalType: 'address', type: 'address', indexed: true },
+    ],
+    name: 'Registered',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
 ] as const
 
 export const daimoNameRegistryAddress =
@@ -768,6 +880,8 @@ export const daimoNameRegistryProxyABI = [
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
   },
+  { stateMutability: 'payable', type: 'fallback' },
+  { stateMutability: 'payable', type: 'receive' },
   {
     type: 'event',
     anonymous: false,
@@ -813,8 +927,6 @@ export const daimoNameRegistryProxyABI = [
     ],
     name: 'Upgraded',
   },
-  { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
 ] as const
 
 export const daimoNameRegistryProxyAddress =
@@ -1089,78 +1201,6 @@ export const daimoPaymasterConfig = {
 export const daimoVerifierABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
   {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
-  {
     stateMutability: 'view',
     type: 'function',
     inputs: [],
@@ -1235,6 +1275,78 @@ export const daimoVerifierABI = [
     name: 'verifySignature',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1250,6 +1362,8 @@ export const daimoVerifierProxyABI = [
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
   },
+  { stateMutability: 'payable', type: 'fallback' },
+  { stateMutability: 'payable', type: 'receive' },
   {
     type: 'event',
     anonymous: false,
@@ -1295,8 +1409,6 @@ export const daimoVerifierProxyABI = [
     ],
     name: 'Upgraded',
   },
-  { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1312,6 +1424,8 @@ export const erc1967ProxyABI = [
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
   },
+  { stateMutability: 'payable', type: 'fallback' },
+  { stateMutability: 'payable', type: 'receive' },
   {
     type: 'event',
     anonymous: false,
@@ -1357,8 +1471,6 @@ export const erc1967ProxyABI = [
     ],
     name: 'Upgraded',
   },
-  { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1425,46 +1537,6 @@ export const erc20ABI = [
       { name: 'name_', internalType: 'string', type: 'string' },
       { name: 'symbol_', internalType: 'string', type: 'string' },
     ],
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'owner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'spender',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'value',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Approval',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'from', internalType: 'address', type: 'address', indexed: true },
-      { name: 'to', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'value',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Transfer',
   },
   {
     stateMutability: 'view',
@@ -1562,6 +1634,46 @@ export const erc20ABI = [
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'spender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Approval',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address', indexed: true },
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Transfer',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1569,382 +1681,7 @@ export const erc20ABI = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const entryPointABI = [
-  {
-    type: 'error',
-    inputs: [
-      { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-      { name: 'paid', internalType: 'uint256', type: 'uint256' },
-      { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-      { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-      { name: 'targetSuccess', internalType: 'bool', type: 'bool' },
-      { name: 'targetResult', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'ExecutionResult',
-  },
-  {
-    type: 'error',
-    inputs: [
-      { name: 'opIndex', internalType: 'uint256', type: 'uint256' },
-      { name: 'reason', internalType: 'string', type: 'string' },
-    ],
-    name: 'FailedOp',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
-    name: 'SenderAddressResult',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'aggregator', internalType: 'address', type: 'address' }],
-    name: 'SignatureValidationFailed',
-  },
-  {
-    type: 'error',
-    inputs: [
-      {
-        name: 'returnInfo',
-        internalType: 'struct IEntryPoint.ReturnInfo',
-        type: 'tuple',
-        components: [
-          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
-          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
-          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'senderInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'factoryInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'paymasterInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'ValidationResult',
-  },
-  {
-    type: 'error',
-    inputs: [
-      {
-        name: 'returnInfo',
-        internalType: 'struct IEntryPoint.ReturnInfo',
-        type: 'tuple',
-        components: [
-          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
-          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
-          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'senderInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'factoryInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'paymasterInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'aggregatorInfo',
-        internalType: 'struct IEntryPoint.AggregatorStakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'aggregator', internalType: 'address', type: 'address' },
-          {
-            name: 'stakeInfo',
-            internalType: 'struct IStakeManager.StakeInfo',
-            type: 'tuple',
-            components: [
-              { name: 'stake', internalType: 'uint256', type: 'uint256' },
-              {
-                name: 'unstakeDelaySec',
-                internalType: 'uint256',
-                type: 'uint256',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    name: 'ValidationResultWithAggregation',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'userOpHash',
-        internalType: 'bytes32',
-        type: 'bytes32',
-        indexed: true,
-      },
-      {
-        name: 'sender',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'factory',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'paymaster',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AccountDeployed',
-  },
-  { type: 'event', anonymous: false, inputs: [], name: 'BeforeExecution' },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'totalDeposit',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Deposited',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'aggregator',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'SignatureAggregatorChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'totalStaked',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      {
-        name: 'unstakeDelaySec',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'StakeLocked',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'withdrawTime',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'StakeUnlocked',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'withdrawAddress',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'StakeWithdrawn',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'userOpHash',
-        internalType: 'bytes32',
-        type: 'bytes32',
-        indexed: true,
-      },
-      {
-        name: 'sender',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'paymaster',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'nonce',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      { name: 'success', internalType: 'bool', type: 'bool', indexed: false },
-      {
-        name: 'actualGasCost',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      {
-        name: 'actualGasUsed',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'UserOperationEvent',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'userOpHash',
-        internalType: 'bytes32',
-        type: 'bytes32',
-        indexed: true,
-      },
-      {
-        name: 'sender',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'nonce',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      {
-        name: 'revertReason',
-        internalType: 'bytes',
-        type: 'bytes',
-        indexed: false,
-      },
-    ],
-    name: 'UserOperationRevertReason',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'withdrawAddress',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Withdrawn',
-  },
+  { stateMutability: 'payable', type: 'receive' },
   {
     stateMutability: 'view',
     type: 'function',
@@ -2364,7 +2101,382 @@ export const entryPointABI = [
     name: 'withdrawTo',
     outputs: [],
   },
-  { stateMutability: 'payable', type: 'receive' },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'factory',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'paymaster',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AccountDeployed',
+  },
+  { type: 'event', anonymous: false, inputs: [], name: 'BeforeExecution' },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'totalDeposit',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Deposited',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'aggregator',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'SignatureAggregatorChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'totalStaked',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'unstakeDelaySec',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'StakeLocked',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'withdrawTime',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'StakeUnlocked',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'withdrawAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'StakeWithdrawn',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'paymaster',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'nonce',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      { name: 'success', internalType: 'bool', type: 'bool', indexed: false },
+      {
+        name: 'actualGasCost',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'actualGasUsed',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'UserOperationEvent',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'nonce',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'revertReason',
+        internalType: 'bytes',
+        type: 'bytes',
+        indexed: false,
+      },
+    ],
+    name: 'UserOperationRevertReason',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'withdrawAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Withdrawn',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
+      { name: 'paid', internalType: 'uint256', type: 'uint256' },
+      { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
+      { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
+      { name: 'targetSuccess', internalType: 'bool', type: 'bool' },
+      { name: 'targetResult', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'ExecutionResult',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'opIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'reason', internalType: 'string', type: 'string' },
+    ],
+    name: 'FailedOp',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
+    name: 'SenderAddressResult',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'aggregator', internalType: 'address', type: 'address' }],
+    name: 'SignatureValidationFailed',
+  },
+  {
+    type: 'error',
+    inputs: [
+      {
+        name: 'returnInfo',
+        internalType: 'struct IEntryPoint.ReturnInfo',
+        type: 'tuple',
+        components: [
+          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
+          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
+          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
+          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
+          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
+          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      {
+        name: 'senderInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'factoryInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'paymasterInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'ValidationResult',
+  },
+  {
+    type: 'error',
+    inputs: [
+      {
+        name: 'returnInfo',
+        internalType: 'struct IEntryPoint.ReturnInfo',
+        type: 'tuple',
+        components: [
+          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
+          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
+          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
+          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
+          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
+          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      {
+        name: 'senderInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'factoryInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'paymasterInfo',
+        internalType: 'struct IStakeManager.StakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'stake', internalType: 'uint256', type: 'uint256' },
+          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'aggregatorInfo',
+        internalType: 'struct IEntryPoint.AggregatorStakeInfo',
+        type: 'tuple',
+        components: [
+          { name: 'aggregator', internalType: 'address', type: 'address' },
+          {
+            name: 'stakeInfo',
+            internalType: 'struct IStakeManager.StakeInfo',
+            type: 'tuple',
+            components: [
+              { name: 'stake', internalType: 'uint256', type: 'uint256' },
+              {
+                name: 'unstakeDelaySec',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    name: 'ValidationResultWithAggregation',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2390,46 +2502,6 @@ export const iMetaPaymasterABI = [
 
 export const testUsdcABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'owner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'spender',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'value',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Approval',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'from', internalType: 'address', type: 'address', indexed: true },
-      { name: 'to', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'value',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-    ],
-    name: 'Transfer',
-  },
   {
     stateMutability: 'view',
     type: 'function',
@@ -2525,5 +2597,45 @@ export const testUsdcABI = [
     ],
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'spender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Approval',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address', indexed: true },
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Transfer',
   },
 ] as const

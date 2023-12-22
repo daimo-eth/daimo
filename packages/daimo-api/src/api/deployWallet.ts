@@ -1,5 +1,5 @@
 import { DaimoAccountCall } from "@daimo/common";
-import { daimoEphemeralNotesAddress, erc20ABI } from "@daimo/contract";
+import { daimoEphemeralNotesV2Address, erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
@@ -40,7 +40,7 @@ export async function deployWallet(
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [daimoEphemeralNotesAddress, maxUint256],
+        args: [daimoEphemeralNotesV2Address, maxUint256],
       }),
     },
     {

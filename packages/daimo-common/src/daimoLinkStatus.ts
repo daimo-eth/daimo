@@ -54,6 +54,10 @@ export type DaimoNoteStatus = {
   status: DaimoNoteState;
   sender: EAccount;
   id?: string;
+  /* Ephemeral notes contract address, used to distinguish between likes from
+   * contract DaimoEphemeralNotes vs. DaimoEphemeralNotesV2
+   */
+  contractAddress: Address;
   ephemeralOwner?: Address;
   claimer?: EAccount;
   dollars: `${number}`;

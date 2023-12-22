@@ -6,7 +6,11 @@ import {
   assert,
   dollarsToAmount,
 } from "@daimo/common";
-import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
+import {
+  daimoChainFromId,
+  daimoEphemeralNotesAddress,
+  daimoEphemeralNotesV2Address,
+} from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect } from "react";
@@ -19,6 +23,9 @@ import { NamedError } from "../logic/log";
 import { getWrappedPasskeySigner } from "../logic/passkey";
 import { Account, getAccountManager, useAccount } from "../model/account";
 
+/** Action identifier, tuple of [opHash, txHash]. */
+export type ActionIdentifier = [Hex | undefined, Hex | undefined];
+
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
 
@@ -29,12 +36,17 @@ export const SEND_DEADLINE_SECS = 120;
 export function useSendAsync({
   dollarsToSend,
   sendFn,
+  customHandler,
   pendingOp,
   accountTransform,
   passkeyAccount,
 }: {
   dollarsToSend: number;
   sendFn: SendOpFn;
+  /** Custom handler that overrides sendAsync, used to claim
+   *  ephemeral notes without requesting a user signature / face ID.
+   */
+  customHandler?: (setAS: SetActStatus) => Promise<ActionIdentifier>;
   pendingOp?: OpEvent;
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
@@ -61,20 +73,17 @@ export function useSendAsync({
     );
     assert(account != null, "No account");
 
-    const handle = await sendAsync(
-      setAS,
-      account,
-      keySlot,
-      !!passkeyAccount,
-      sendFn
-    );
+    const [opHash, txHash] = customHandler
+      ? await customHandler(setAS)
+      : await sendAsync(setAS, account, keySlot, !!passkeyAccount, sendFn);
 
     // Vibrate on success
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     // Add pending op and named accounts to history
     if (pendingOp) {
-      pendingOp.opHash = handle as Hex;
+      pendingOp.opHash = opHash;
+      pendingOp.txHash = txHash;
       pendingOp.timestamp = Math.floor(Date.now() / 1e3);
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
@@ -178,6 +187,7 @@ function loadOpSender({
       tokenAddress: env(daimoChain).chainConfig.tokenAddress,
       tokenDecimals: env(daimoChain).chainConfig.tokenDecimals,
       notesAddress: daimoEphemeralNotesAddress,
+      notesAddressV2: daimoEphemeralNotesV2Address,
       accountAddress: address,
       accountSigner: signer,
       opSender: sender,
@@ -195,7 +205,7 @@ async function sendAsync(
   keySlot: number | undefined,
   usePasskey: boolean,
   sendFn: SendOpFn
-) {
+): Promise<ActionIdentifier> {
   try {
     if (keySlot === undefined && !usePasskey)
       throw new Error("No key slot or passkey");
@@ -212,10 +222,10 @@ async function sendAsync(
     });
 
     setAS("loading", "Signing...");
-    const handle = await sendFn(opSender);
+    const opHash = await sendFn(opSender);
     setAS("success", "Accepted");
 
-    return handle;
+    return [opHash, undefined];
   } catch (e: any) {
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");
