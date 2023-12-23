@@ -9,10 +9,10 @@ import { Watcher } from "../src/shovel/watcher";
 async function main() {
   const vc = getViemClientFromEnv();
   const opIndexer = new OpIndexer();
-  const coinIndexer = new CoinIndexer(vc, opIndexer);
   const nameReg = new NameRegistry(vc, new Set<string>());
-  const keyReg = new KeyRegistry();
   const noteIndexer = new NoteIndexer(nameReg);
+  const coinIndexer = new CoinIndexer(vc, opIndexer, noteIndexer);
+  const keyReg = new KeyRegistry();
 
   const shovelWatcher = new Watcher();
   shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);

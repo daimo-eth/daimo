@@ -1,10 +1,14 @@
 import {
   AddrLabel,
   DaimoLink,
+  DaimoNoteState,
   EAccount,
   OpStatus,
   dollarsToAmount,
   formatDaimoLink,
+  generateNoteSeedAddress,
+  getNoteEphPrivKeyFromSeed,
+  getNoteId,
 } from "@daimo/common";
 import { daimoEphemeralNotesAddress } from "@daimo/contract";
 import {
@@ -13,10 +17,8 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
-import { Hex } from "viem";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 import {
   transferAccountTransform,
@@ -44,57 +46,50 @@ function SendNoteButtonInner({
   account: Account;
   dollars: number;
 }) {
-  const [ephemeralPrivKey] = useState<Hex>(generatePrivateKey);
-  const ephemeralOwner = useMemo(
-    () => privateKeyToAccount(ephemeralPrivKey).address,
-    [ephemeralPrivKey]
-  );
+  const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
+  const noteId = getNoteId(noteAddress);
 
   const [nonce] = useState(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
-  const addPendingNote = transferAccountTransform([
-    {
-      addr: daimoEphemeralNotesAddress,
-      label: AddrLabel.PaymentLink,
-    } as EAccount,
-  ]);
-
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
-      return opSender.createEphemeralNote(ephemeralOwner, `${dollars}`, {
+      return opSender.createEphemeralNote(noteAddress, `${dollars}`, {
         nonce,
         chainGasConstants: account.chainGasConstants,
       });
     },
     pendingOp: {
-      type: "transfer",
+      type: "createLink",
       status: OpStatus.pending,
       from: account.address,
       to: daimoEphemeralNotesAddress,
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),
+      noteStatus: {
+        link: {
+          type: "note",
+          previewSender: account.name,
+          previewDollars: `${dollars}`,
+          ephemeralOwner: noteAddress,
+          ephemeralPrivateKey: getNoteEphPrivKeyFromSeed(noteSeed),
+        },
+        status: DaimoNoteState.Pending,
+        sender: { addr: account.address, name: account.name },
+        dollars: `${dollars}`,
+        ephemeralOwner: noteAddress,
+        id: noteId,
+      },
     },
-    accountTransform: (account, pendingOp) => {
-      const newAccount = addPendingNote(account, pendingOp);
-      return {
-        ...newAccount,
-        pendingNotes: [
-          ...newAccount.pendingNotes,
-          {
-            type: "note",
-            ephemeralOwner,
-            ephemeralPrivateKey: ephemeralPrivKey,
-            previewDollars: `${dollars}`,
-            previewSender: account.name,
-            opHash: pendingOp.opHash,
-          },
-        ],
-      };
-    },
+    accountTransform: transferAccountTransform([
+      {
+        addr: daimoEphemeralNotesAddress,
+        label: AddrLabel.PaymentLink,
+      } as EAccount,
+    ]),
   });
 
   const sendDisabledReason =
@@ -135,8 +130,8 @@ function SendNoteButtonInner({
         type: "note",
         previewSender: account.name,
         previewDollars: `${dollars}`,
-        ephemeralOwner,
-        ephemeralPrivateKey: ephemeralPrivKey,
+        ephemeralOwner: noteAddress,
+        ephemeralPrivateKey: getNoteEphPrivKeyFromSeed(noteSeed),
       };
       const url = formatDaimoLink(link);
 
@@ -170,7 +165,7 @@ function SendNoteButtonInner({
     } catch (error: any) {
       console.error("[APP] Note share error:", error);
     }
-  }, [ephemeralOwner, ephemeralPrivKey, status]);
+  }, [status]);
 
   // As soon as payment link is created, show share sheet
   // TODO: move this to a dispatcher

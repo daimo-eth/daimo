@@ -1,4 +1,5 @@
 import {
+  DisplayOpEvent,
   EAccount,
   OpEvent,
   UserOpHex,
@@ -88,11 +89,11 @@ export function useSendAsync({
   return { ...as, exec, cost };
 }
 
-/** Regular transfer account transform. Adds pending transfer to history and
- *  merges any new named accounts. */
+/** Regular transfer / payment link account transform. Adds pending
+ *  transfer to history and merges any new named accounts. */
 export function transferAccountTransform(namedAccounts: EAccount[]) {
-  return (account: Account, pendingOp: OpEvent) => {
-    assert(pendingOp.type === "transfer");
+  return (account: Account, pendingOp: OpEvent): Account => {
+    assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
       account.namedAccounts.find((a) => a.addr === addr);
@@ -101,7 +102,10 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 
     return {
       ...account,
-      recentTransfers: [...account.recentTransfers, pendingOp],
+      recentTransfers: [
+        ...account.recentTransfers,
+        pendingOp as DisplayOpEvent,
+      ],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
     };
   };

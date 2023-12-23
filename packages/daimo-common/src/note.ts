@@ -1,5 +1,10 @@
-import { Address, Hex, keccak256 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { base58 } from "@scure/base";
+import { Address, Hex, getAddress, hexToBytes, keccak256 } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+
+export function getNoteId(ephemeralOwner: Address) {
+  return base58.encode(hexToBytes(ephemeralOwner)).slice(0, 5);
+}
 
 export async function getNoteClaimSignature(
   sender: Address,
@@ -15,6 +20,43 @@ export async function getNoteClaimSignature(
     message: { raw: message },
   });
   return signature;
+}
+
+export async function getNoteClaimSignatureFromSeed(
+  sender: Address,
+  recipient: Address,
+  seed: string | undefined
+) {
+  if (recipient === sender) return dummySignature;
+  if (!seed) throw new Error("Cannot claim without seed");
+
+  const hexSeed = base58.decode(seed);
+  const notePrivateKey = keccak256(hexSeed);
+
+  return getNoteClaimSignature(sender, recipient, notePrivateKey);
+}
+
+export function generateNoteSeedAddress(): [string, Address] {
+  const hexSeed = generatePrivateKey().slice(
+    0,
+    2 + Number(128 / 4) // One hex is 4 bits
+  ) as Hex; // 128-bit cryptographic random seed.
+
+  const seed = base58.encode(hexToBytes(hexSeed));
+
+  const notePrivateKey = keccak256(hexSeed);
+  const noteAddress = getAddress(
+    privateKeyToAccount(notePrivateKey).address
+  ) as Address;
+
+  return [seed, noteAddress];
+}
+
+// Remove on link upgrade
+export function getNoteEphPrivKeyFromSeed(seed: string) {
+  const hexSeed = base58.decode(seed);
+  const notePrivateKey = keccak256(hexSeed);
+  return notePrivateKey;
 }
 
 // TODO: remove once EphemeralNote contract no longer requires it.

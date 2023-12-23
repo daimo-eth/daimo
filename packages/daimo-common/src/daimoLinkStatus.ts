@@ -1,4 +1,11 @@
-import { DaimoLinkAccount, DaimoLinkNote, DaimoLinkRequest } from "./daimoLink";
+import { Address } from "viem";
+
+import {
+  DaimoLinkAccount,
+  DaimoLinkNote,
+  DaimoLinkNoteV2,
+  DaimoLinkRequest,
+} from "./daimoLink";
 import { EAccount } from "./eAccount";
 
 export type DaimoLinkStatus =
@@ -27,19 +34,27 @@ export type DaimoRequestStatus = {
 };
 
 /**
+ * Pending means the note hasn't yet been created onchain. Confirmed means
+ * it's been created and is waiting to be claimed. Cancelled means claimed
+ * back by the original sender, and claimed means claimed by anyone else.
+ */
+export enum DaimoNoteState {
+  Pending = "pending",
+  Confirmed = "confirmed",
+  Claimed = "claimed",
+  Cancelled = "cancelled",
+}
+
+/**
  * Tracks details about a Note.
  * All of this information can be looked up onchain given `link`.
  */
 export type DaimoNoteStatus = {
-  link: DaimoLinkNote;
-
-  /**
-   * Pending means the note hasn't yet been created onchain. Confirmed means
-   * it's been created and is waiting to be claimed. Cancelled means claimed
-   * back by the original sender, and claimed means claimed by anyone else.
-   */
-  status: "pending" | "confirmed" | "claimed" | "cancelled";
+  link: DaimoLinkNote | DaimoLinkNoteV2;
+  status: DaimoNoteState;
   sender: EAccount;
+  id?: string;
+  ephemeralOwner?: Address;
   claimer?: EAccount;
   dollars: `${number}`;
 };

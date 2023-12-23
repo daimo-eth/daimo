@@ -5,6 +5,7 @@ import {
   EAccount,
   dollarsToAmount,
   parseDaimoLink,
+  DaimoNoteState,
 } from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 
@@ -70,17 +71,38 @@ export async function getLinkStatus(
     }
 
     case "note": {
-      const ret = await noteIndexer.getNoteStatus(link.ephemeralOwner);
+      const ret = noteIndexer.getNoteStatusDeprecatedLink(link.ephemeralOwner);
       if (ret == null) {
         const sender = await nameReg.getEAccountFromStr(link.previewSender);
         if (sender == null) {
           throw new Error(`Note sender not found: ${link.previewSender}`);
         }
         const pending: DaimoNoteStatus = {
-          status: "pending",
+          status: DaimoNoteState.Pending,
+          ephemeralOwner: link.ephemeralOwner,
           link,
           sender,
           dollars: link.previewDollars,
+        };
+        return pending;
+      }
+      return ret;
+    }
+
+    case "notev2": {
+      const sender = await nameReg.getEAccountFromStr(link.sender);
+      if (sender == null) {
+        throw new Error(`Note sender not found: ${link.sender}`);
+      }
+      const ret = noteIndexer.getNoteStatusById(sender.addr, link.id);
+      if (ret == null) {
+        const pending: DaimoNoteStatus = {
+          status: DaimoNoteState.Pending,
+          ephemeralOwner: undefined,
+          link,
+          sender,
+          id: link.id,
+          dollars: link.dollars,
         };
         return pending;
       }

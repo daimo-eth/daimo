@@ -1,6 +1,7 @@
 import {
+  DisplayOpEvent,
   EAccount,
-  TransferOpEvent,
+  OpStatus,
   assert,
   canSendTo,
   getAccountName,
@@ -16,7 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Address, getAddress } from "viem";
+import { Address } from "viem";
 
 import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
@@ -33,10 +34,10 @@ interface HeaderObject {
   id: string;
   month: string;
 }
-interface TransferRenderObject {
+interface DisplayOpRenderObject {
   isHeader: false;
   id: string;
-  t: TransferOpEvent;
+  op: DisplayOpEvent;
 }
 
 export function HistoryListSwipe({
@@ -56,7 +57,10 @@ export function HistoryListSwipe({
   let ops = account.recentTransfers.slice().reverse();
   if (otherAcc != null) {
     const otherAddr = otherAcc.addr;
-    ops = ops.filter((t) => t.from === otherAddr || t.to === otherAddr);
+    ops = ops.filter((op) => {
+      const [from, to] = getFromTo(op);
+      return from === otherAddr || to === otherAddr;
+    });
   }
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
@@ -74,10 +78,10 @@ export function HistoryListSwipe({
     );
   }
 
-  const renderRow = (t: TransferOpEvent) => (
-    <TransferRow
-      key={getTransferId(t)}
-      transfer={t}
+  const renderRow = (t: DisplayOpEvent) => (
+    <DisplayOpRow
+      key={getDisplayOpId(t)}
+      displayOp={t}
       address={account.address}
       {...{ linkTo, showDate }}
     />
@@ -98,12 +102,12 @@ export function HistoryListSwipe({
 
   // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
-  const rows: (TransferRenderObject | HeaderObject)[] = [];
+  const rows: (DisplayOpRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
-  for (const t of ops) {
-    const month = new Date(t.timestamp * 1000).toLocaleString("default", {
+  for (const op of ops) {
+    const month = new Date(op.timestamp * 1000).toLocaleString("default", {
       year: "numeric",
       month: "long",
     });
@@ -118,8 +122,8 @@ export function HistoryListSwipe({
     }
     rows.push({
       isHeader: false,
-      id: getTransferId(t),
-      t,
+      id: getDisplayOpId(op),
+      op,
     });
   }
 
@@ -136,8 +140,8 @@ export function HistoryListSwipe({
           return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <TransferRow
-            transfer={item.t}
+          <DisplayOpRow
+            displayOp={item.op}
             address={account.address}
             showDate
             {...{ linkTo }}
@@ -156,25 +160,39 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
-function TransferRow({
-  transfer,
+function getFromTo(op: DisplayOpEvent): [Address, Address] {
+  if (op.type === "transfer") {
+    return [op.from, op.to];
+  } else {
+    if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
+      // Self-transfer via payment link shows up as two payment link transfers
+      return [op.from, op.to];
+    }
+    return [
+      op.noteStatus.sender.addr,
+      op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
+    ];
+  }
+}
+
+function DisplayOpRow({
+  displayOp,
   address,
   linkTo,
   showDate,
 }: {
-  transfer: TransferOpEvent;
+  displayOp: DisplayOpEvent;
   address: Address;
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
-  assert(transfer.amount > 0);
-  const from = getAddress(transfer.from);
-  const to = getAddress(transfer.to);
+  assert(displayOp.amount > 0);
+  const [from, to] = getFromTo(displayOp);
   assert([from, to].includes(address));
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
-  const amountDelta = from === address ? -transfer.amount : transfer.amount;
+  const amountDelta = from === address ? -displayOp.amount : displayOp.amount;
 
   const nav = useNav();
   const viewOp = useCallback(() => {
@@ -183,13 +201,13 @@ function TransferRow({
     const currentTab = nav.getState().routes[0].name;
     const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
     if (linkTo === "op" || !canSendTo(otherAcc)) {
-      nav.navigate(newTab, { screen: "HistoryOp", params: { op: transfer } });
+      nav.navigate(newTab, { screen: "HistoryOp", params: { op: displayOp } });
     } else {
       nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
     }
-  }, [nav, transfer, linkTo, otherAcc]);
+  }, [nav, displayOp, linkTo, otherAcc]);
 
-  const isPending = transfer.status === "pending";
+  const isPending = displayOp.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
 
   return (
@@ -197,9 +215,9 @@ function TransferRow({
       <TouchableHighlight
         onPress={viewOp}
         {...touchHighlightUnderlay.subtle}
-        style={styles.transferRowWrap}
+        style={styles.displayOpRowWrap}
       >
-        <View style={styles.transferRow}>
+        <View style={styles.displayOpRow}>
           <View style={styles.transferOtherAccount}>
             <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
             <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
@@ -207,7 +225,7 @@ function TransferRow({
           </View>
           <TransferAmountDate
             amount={amountDelta}
-            timestamp={transfer.timestamp}
+            timestamp={displayOp.timestamp}
             showDate={showDate}
             {...{ isPending }}
           />
@@ -258,7 +276,7 @@ function TransferAmountDate({
   );
 }
 
-function getTransferId(t: TransferOpEvent): string {
+function getDisplayOpId(t: DisplayOpEvent): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
@@ -278,10 +296,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: color.grayLight,
   },
-  transferRowWrap: {
+  displayOpRowWrap: {
     marginHorizontal: -24,
   },
-  transferRow: {
+  displayOpRow: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     flexDirection: "row",

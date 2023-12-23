@@ -1,4 +1,9 @@
-import { DaimoLinkNote, DaimoNoteStatus, EAccount } from "@daimo/common";
+import {
+  DaimoLinkNote,
+  DaimoNoteState,
+  DaimoNoteStatus,
+  EAccount,
+} from "@daimo/common";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
@@ -75,7 +80,7 @@ test("PushNotifier", async () => {
   await test("send payment link", async () => {
     const input: DaimoNoteStatus[] = [
       {
-        status: "confirmed",
+        status: DaimoNoteState.Confirmed,
         sender: { addr: addrAlice, name: "alice" },
         dollars: "1.00",
         link: paymentLinkFromAlice,
@@ -92,7 +97,7 @@ test("PushNotifier", async () => {
   await test("claim payment link", async () => {
     const input: DaimoNoteStatus[] = [
       {
-        status: "claimed",
+        status: DaimoNoteState.Claimed,
         sender: { addr: addrAlice, name: "alice" },
         claimer: { addr: addrBob, name: "bob" },
         dollars: "1.00",
@@ -186,7 +191,7 @@ test("PushNotifier", async () => {
   await test("cancel payment link", async () => {
     const input: DaimoNoteStatus[] = [
       {
-        status: "cancelled",
+        status: DaimoNoteState.Cancelled,
         sender: { addr: addrAlice, name: "alice" },
         claimer: { addr: addrAlice, name: "alice" },
         dollars: "4.20",

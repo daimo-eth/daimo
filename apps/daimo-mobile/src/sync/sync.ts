@@ -1,13 +1,12 @@
 import { AccountHistoryResult } from "@daimo/api";
 import {
+  DisplayOpEvent,
   EAccount,
   OpStatus,
-  TransferOpEvent,
   amountToDollars,
   assert,
-  guessTimestampFromNum,
 } from "@daimo/common";
-import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 import { Hex } from "viem";
 
@@ -190,11 +189,9 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   );
 
   // Add newly onchain transfers
-  const daimoChain = daimoChainFromId(account.homeChainId);
   const recentTransfers = addTransfers(
     oldFinalizedTransfers,
-    result.transferLogs,
-    daimoChain
+    result.transferLogs
   );
 
   // Mark finalized
@@ -206,7 +203,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
   // Match pending transfers
   const oldPending = account.recentTransfers.filter(
-    (t) => t.status === "pending"
+    (t) => t.status === OpStatus.pending
   );
 
   // Match pending transfers
@@ -267,7 +264,8 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
         newBlock: result.lastBlock,
         newBalance: amountToDollars(BigInt(result.lastBalance)),
         newTransfers: recentTransfers.length,
-        nPending: recentTransfers.filter((t) => t.status === "pending").length,
+        nPending: recentTransfers.filter((t) => t.status === OpStatus.pending)
+          .length,
       })
   );
   return ret;
@@ -275,8 +273,8 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
 export function syncFindSameOp(
   opHash: Hex | undefined,
-  ops: TransferOpEvent[]
-): TransferOpEvent | null {
+  ops: DisplayOpEvent[]
+): DisplayOpEvent | null {
   if (opHash == null) return null;
   return ops.find((r) => opHash === r.opHash) || null;
 }
@@ -301,39 +299,15 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
-  old: TransferOpEvent[],
-  logs: TransferOpEvent[],
-  daimoChain: DaimoChain
-): TransferOpEvent[] {
-  // Start with old, finalized transfers
-  const ret = [...old];
-
+  old: DisplayOpEvent[],
+  logs: DisplayOpEvent[]
+): DisplayOpEvent[] {
   // Sort new logs
   logs.sort((a, b) => {
     if (a.blockNumber !== b.blockNumber) return a.blockNumber! - b.blockNumber!;
     return a.logIndex! - b.logIndex!;
   });
 
-  // Add new transfers since previous lastFinalizedBlock
-  for (const transfer of logs) {
-    ret.push({
-      type: "transfer",
-      status: OpStatus.confirmed,
-
-      from: transfer.from,
-      to: transfer.to,
-      amount: Number(transfer.amount),
-      nonceMetadata: transfer.nonceMetadata,
-
-      timestamp: guessTimestampFromNum(transfer.blockNumber!, daimoChain),
-      txHash: transfer.txHash,
-      blockNumber: transfer.blockNumber,
-      blockHash: transfer.blockHash,
-      logIndex: transfer.logIndex,
-      opHash: transfer.opHash,
-      feeAmount: transfer.feeAmount,
-    });
-  }
-
-  return ret;
+  // old finalized logs + new logs
+  return [...old, ...logs];
 }

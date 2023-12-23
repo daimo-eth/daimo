@@ -89,7 +89,7 @@ function getOpts(daimoChain: DaimoChain) {
             if (func === "deployWallet") return 60_000; // 1 minute
             else return 10_000; // default: 10 seconds
           })();
-          console.log(`[TRPC] fetching ${url}, timout ${timeout}ms`, init);
+          console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
           const controller = new AbortController();
           const timeoutID = setTimeout(() => {
             console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);

@@ -15,6 +15,7 @@ export type DaimoLink =
   | DaimoLinkAccount
   | DaimoLinkRequest
   | DaimoLinkNote
+  | DaimoLinkNoteV2
   | DaimoLinkSettings;
 
 /** Represents any Ethereum address */
@@ -36,14 +37,23 @@ export type DaimoLinkRequest = {
 /** Represents a Payment Link. Works like cash, redeemable onchain. */
 export type DaimoLinkNote = {
   type: "note";
-  /** Sender eAccountStr. To verify, look up ephememeralOwner onchain */
+  /** Sender eAccountStr. To verify, look up ephemeralOwner onchain */
   previewSender: string;
-  /** To verify, look up ephememeralOwner onchain */
+  /** To verify, look up ephemeralOwner onchain */
   previewDollars: DollarStr;
   /** The ephemeral (burner) public key associated with this claimable note. */
   ephemeralOwner: Address;
   /** The ephemeral (burner) private key, from the hash portion of the URL. */
   ephemeralPrivateKey?: Hex;
+};
+
+export type DaimoLinkNoteV2 = {
+  type: "notev2";
+
+  sender: string;
+  dollars: DollarStr;
+  id: string;
+  seed?: string;
 };
 
 export type DaimoLinkSettings = {
@@ -83,6 +93,16 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
         link.previewSender,
         link.previewDollars,
         link.ephemeralOwner + (hash || ""),
+      ].join("/");
+    }
+    case "notev2": {
+      const hash = link.seed && `#${link.seed}`;
+      return [
+        linkBase,
+        "n",
+        link.sender,
+        link.dollars,
+        link.id + (hash || ""),
       ].join("/");
     }
     case "settings": {
@@ -138,32 +158,49 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       return { type: "request", requestId, recipient, dollars };
     }
     case "note": {
-      let previewSender: string, previewDollars: `${number}`, ephem: string;
-      if (parts.length === 2) {
-        // backcompat with old notes
-        [previewSender, previewDollars] = ["unknown", "0.00"];
-        ephem = parts[1];
-      } else if (parts.length === 4) {
-        previewSender = parts[1];
+      if (parts.length === 4) {
+        // backcompat with old links
+        const previewSender = parts[1];
         const parsedDollars = zDollarStr.safeParse(parts[2]);
         if (!parsedDollars.success) return null;
-        previewDollars = parseFloat(parsedDollars.data).toFixed(2) as DollarStr;
-        ephem = parts[3];
+        const previewDollars = parseFloat(parsedDollars.data).toFixed(
+          2
+        ) as DollarStr;
+        const hashParts = parts[3].split("#");
+        if (hashParts.length > 2) return null;
+        const ephemeralOwner = getAddress(hashParts[0]);
+        const ephemeralPrivateKey =
+          hashParts.length < 2 ? undefined : zHex.parse(hashParts[1]);
+        return {
+          type: "note",
+          previewSender,
+          previewDollars,
+          ephemeralOwner,
+          ephemeralPrivateKey,
+        };
       } else return null;
+    }
+    case "n": {
+      // new links
+      if (parts.length === 4) {
+        const sender = parts[1];
 
-      // Parse ephemeral owner and private key
-      const hashParts = ephem.split("#");
-      if (hashParts.length > 2) return null;
-      const ephemeralOwner = getAddress(hashParts[0]);
-      const ephemeralPrivateKey =
-        hashParts.length < 2 ? undefined : zHex.parse(hashParts[1]);
-      return {
-        type: "note",
-        previewSender,
-        previewDollars,
-        ephemeralOwner,
-        ephemeralPrivateKey,
-      };
+        const parsedDollars = zDollarStr.safeParse(parts[2]);
+        if (!parsedDollars.success) return null;
+        const dollars = parseFloat(parsedDollars.data).toFixed(2) as DollarStr;
+
+        const hashParts = parts[3].split("#");
+        if (hashParts.length > 2) return null;
+        const id = hashParts[0];
+        const seed = hashParts[1];
+        return {
+          type: "notev2",
+          sender,
+          dollars,
+          id,
+          seed,
+        };
+      } else return null;
     }
     case "settings": {
       if (!["add-device", "add-passkey", undefined].includes(parts[1])) {

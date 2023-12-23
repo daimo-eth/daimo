@@ -36,8 +36,8 @@ async function main() {
   const keyReg = new KeyRegistry();
   const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
   const opIndexer = new OpIndexer();
-  const coinIndexer = new CoinIndexer(vc, opIndexer);
   const noteIndexer = new NoteIndexer(nameReg);
+  const coinIndexer = new CoinIndexer(vc, opIndexer, noteIndexer);
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
   bundlerClient.init(vc.publicClient);

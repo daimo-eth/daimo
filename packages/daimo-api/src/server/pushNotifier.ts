@@ -1,5 +1,6 @@
 import {
   AddrLabel,
+  DaimoNoteState,
   DaimoNoteStatus,
   assert,
   assertNotNull,
@@ -233,13 +234,13 @@ export class PushNotifier {
 
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      if (log.status === "confirmed") {
+      if (log.status === DaimoNoteState.Confirmed) {
         // To Alice: "You sent $3.50 to a payment link"
         const { sender, dollars } = log;
         const title = `Sent $${dollars}`;
         const body = `You sent ${dollars} ${symbol} to a payment link`;
         messages.push(...this.getPushMessages(sender.addr, title, body));
-      } else if (log.status === "claimed") {
+      } else if (log.status === DaimoNoteState.Claimed) {
         // To Bob: "You received $1.00 from alice"
         // To Alice: "Bob claimed your $1.00 payment link"
         const claimer = assertNotNull(log.claimer);
@@ -262,7 +263,7 @@ export class PushNotifier {
       } else {
         // To Alice: "You cancelled your $1.00 payment link"
         const { sender, dollars } = log;
-        assert(log.status === "cancelled");
+        assert(log.status === DaimoNoteState.Cancelled);
         assert(log.claimer?.addr === sender.addr);
         messages.push(
           ...this.getPushMessages(

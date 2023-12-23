@@ -134,6 +134,13 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
         description: "Couldn't load request status",
       };
+    } else if (link.type === "notev2") {
+      return {
+        name: `${link.sender}`,
+        action: `sent you`,
+        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+        description: "Couldn't load payment link",
+      };
     } else {
       assert(link.type === "note");
       return {
@@ -173,7 +180,8 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         };
       }
     }
-    case "note": {
+    case "note":
+    case "notev2": {
       const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
       switch (status) {
         case "pending":

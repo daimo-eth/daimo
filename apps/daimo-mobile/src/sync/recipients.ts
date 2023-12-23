@@ -32,7 +32,11 @@ export function useRecipientSearch(account: Account, prefix: string) {
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   for (const t of transfersNewToOld) {
     if (t.from !== account.address) continue;
-    const other = t.to;
+    const other =
+      t.type === "claimLink" || t.type === "createLink"
+        ? t.noteStatus.claimer?.addr
+        : t.to;
+    if (other == null || other === account.address) continue;
     if (recentsByAddr.has(other)) continue;
 
     const acc = getCachedEAccount(other);

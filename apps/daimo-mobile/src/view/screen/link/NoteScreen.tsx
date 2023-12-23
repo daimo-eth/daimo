@@ -1,9 +1,10 @@
 import {
   AddrLabel,
-  DaimoLinkNote,
+  DaimoNoteState,
   DaimoNoteStatus,
   EAccount,
   OpStatus,
+  assert,
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
@@ -57,8 +58,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
   useDisableTabSwipe(nav);
 
   const { link } = route.params;
-  const { ephemeralPrivateKey, ephemeralOwner } = link as DaimoLinkNote;
-  console.log(`[NOTE] rendering note ${ephemeralOwner}`);
+  console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
 
   const noteFetch = useFetchLinkStatus(
     link,
@@ -69,9 +69,9 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
 
   const title = (function (): string {
     switch (noteStatus?.status) {
-      case "claimed":
+      case DaimoNoteState.Claimed:
         return "Claimed Link";
-      case "cancelled":
+      case DaimoNoteState.Cancelled:
         return "Cancelled Link";
       default:
         return "Payment Link";
@@ -85,7 +85,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
         {noteFetch.isFetching && <Spinner />}
         {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
         {noteStatus && (
-          <NoteDisplay {...{ account, ephemeralPrivateKey, noteStatus }} />
+          <NoteDisplay {...{ account, noteStatus: { ...noteStatus, link } }} />
         )}
       </ScrollView>
     </View>
@@ -102,7 +102,6 @@ function Spinner() {
 
 interface NoteDisplayProps {
   noteStatus: DaimoNoteStatus;
-  ephemeralPrivateKey?: `0x${string}`;
 }
 
 /// Displays a note: amount, status, and button to claim.
@@ -116,7 +115,6 @@ export function NoteDisplay(
 function NoteDisplayInner({
   account,
   noteStatus,
-  ephemeralPrivateKey,
   hideAmount,
 }: NoteDisplayProps & { account: Account; hideAmount?: boolean }) {
   // Where the note came from
@@ -125,21 +123,19 @@ function NoteDisplayInner({
       ? "You sent"
       : getAccountName(noteStatus.sender) + " sent";
 
-  // The note itself
-  const { ephemeralOwner } = noteStatus.link;
-
-  // Signature to claim the note
+  // The note itself and signature
+  const ephemeralOwner = noteStatus.ephemeralOwner!;
   const ephemeralSignature = useEphemeralSignature(
     noteStatus.sender.addr,
     account.address,
-    ephemeralPrivateKey
+    noteStatus.link.type === "note"
+      ? noteStatus.link.ephemeralPrivateKey
+      : undefined,
+    noteStatus.link.type === "notev2" ? noteStatus.link.seed : undefined
   );
 
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);
-  const nonce = useMemo(
-    () => new DaimoNonce(nonceMetadata),
-    [ephemeralOwner, ephemeralPrivateKey]
-  );
+  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [ephemeralOwner]);
 
   const sendFn = async (opSender: DaimoOpSender) => {
     console.log(`[ACTION] claiming note ${ephemeralOwner}`);
@@ -149,51 +145,60 @@ function NoteDisplayInner({
     });
   };
 
-  // Add pending transaction immediately
+  const isOwnSentNote = noteStatus.sender.addr === account.address;
+
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
     pendingOp: {
-      type: "transfer",
+      type: "claimLink",
       status: OpStatus.pending,
       from: daimoEphemeralNotesAddress,
       to: account.address,
       amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonceMetadata.toHex(),
+      noteStatus: {
+        ...noteStatus,
+        status: isOwnSentNote
+          ? DaimoNoteState.Cancelled
+          : DaimoNoteState.Claimed,
+        claimer: { addr: account.address, name: account.name },
+      },
     },
     accountTransform: transferAccountTransform([
       {
         addr: daimoEphemeralNotesAddress,
         label: AddrLabel.PaymentLink,
       } as EAccount,
+      noteStatus.sender,
     ]),
   });
-  console.log(`[NOTE] rendering NoteDisplay, status ${status} ${message}`);
+  console.log(
+    `[NOTE] rendering NoteDisplay, status ${status} ${message} ${JSON.stringify(
+      noteStatus
+    )} ${ephemeralSignature}`
+  );
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);
   const netDollarsReceivedStr = getAmountText({ dollars: netRecv });
-  const isOwnSentNote = noteStatus.sender.addr === account.address;
 
   // On success, go home, show newly created transaction
-  const nav = useNav();
+  const goHome = useExitToHome();
   useEffect(() => {
     if (status !== "success") return;
-    nav.navigate("HomeTab", { screen: "Home" });
+    goHome();
   }, [status]);
 
   const statusMessage = (function (): ReactNode {
     switch (noteStatus.status) {
-      case "claimed":
+      case DaimoNoteState.Claimed:
         return (
           <TextBold>Claimed by {getAccountName(noteStatus.claimer!)}</TextBold>
         );
-      case "cancelled":
-        if (isOwnSentNote) {
-          return <TextBody>You reclaimed this payment link</TextBody>;
-        } else {
-          return <TextError>Cancelled by sender</TextError>;
-        }
+      case DaimoNoteState.Cancelled:
+        assert(isOwnSentNote, "cancelled note not sent by user");
+        return <TextBody>You reclaimed this payment link</TextBody>;
       default:
       // Pending note, available to claim
     }
@@ -219,7 +224,7 @@ function NoteDisplayInner({
     // Pending notes are not yet claimable.
     // Claimed and cancelled notes are no longer claimable.
     // Only "confirmed" notes are claimable.
-    const isClaimable = noteStatus.status === "confirmed";
+    const isClaimable = noteStatus.status === DaimoNoteState.Confirmed;
 
     switch (status) {
       case "idle":

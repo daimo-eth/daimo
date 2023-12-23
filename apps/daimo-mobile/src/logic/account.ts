@@ -27,7 +27,6 @@ export function createEmptyAccount(
     namedAccounts: [],
     recentTransfers: [],
     trackedRequests: [],
-    pendingNotes: [],
     accountKeys: [],
     pendingKeyRotation: [],
     recommendedExchanges: [],
