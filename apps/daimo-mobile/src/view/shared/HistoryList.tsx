@@ -197,7 +197,7 @@ function DisplayOpRow({
   const nav = useNav();
   const viewOp = useCallback(() => {
     // Workaround: react-navigation typescript types are broken.
-    // currentTab is eg "SendNav", is NOT in fact a ParamListTab,
+    // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
     const currentTab = nav.getState().routes[0].name;
     const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
     if (linkTo === "op" || !canSendTo(otherAcc)) {

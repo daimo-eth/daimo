@@ -56,16 +56,21 @@ export function createRouter(
     return opts.next();
   });
 
+  const readyMiddleware = trpcT.middleware(async (opts) => {
+    if (!notifier.isInitialized) {
+      throw new Error("not ready");
+    }
+    return opts.next();
+  });
+
   const publicProcedure = trpcT.procedure
     .use(corsMiddleware)
-    .use(tracerMiddleware);
+    .use(tracerMiddleware)
+    .use(readyMiddleware);
 
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
-      // Push Notifier is the last service to load.
-      const isReady = notifier.isInitialized;
-      console.log(`[API] health check. ready? ${isReady}`);
-      if (!isReady) throw new Error("not ready");
+      // See readyMiddleware
       return "healthy";
     }),
 

@@ -4,7 +4,6 @@ import {
   DaimoNoteStatus,
   EAccount,
   OpStatus,
-  assert,
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
@@ -194,11 +193,14 @@ function NoteDisplayInner({
     switch (noteStatus.status) {
       case DaimoNoteState.Claimed:
         return (
-          <TextBold>Claimed by {getAccountName(noteStatus.claimer!)}</TextBold>
+          <TextBold>Accepted by {getAccountName(noteStatus.claimer!)}</TextBold>
         );
       case DaimoNoteState.Cancelled:
-        assert(isOwnSentNote, "cancelled note not sent by user");
-        return <TextBody>You reclaimed this payment link</TextBody>;
+        if (isOwnSentNote) {
+          return <TextBody>You cancelled this payment link</TextBody>;
+        } else {
+          return <TextError>Cancelled by sender</TextError>;
+        }
       default:
       // Pending note, available to claim
     }
@@ -209,7 +211,7 @@ function NoteDisplayInner({
         } else if (isOwnSentNote) {
           return `Cancel this link, reclaiming ${netDollarsReceivedStr}`;
         } else {
-          return `Claim this link, receiving ${netDollarsReceivedStr}`;
+          return `Accept this link, receiving ${netDollarsReceivedStr}`;
         }
       case "loading":
         return message;
@@ -232,7 +234,7 @@ function NoteDisplayInner({
           return (
             <ButtonBig
               type="primary"
-              title="Reclaim"
+              title="Cancel"
               onPress={exec}
               disabled={!isClaimable || netRecv === 0}
             />

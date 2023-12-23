@@ -24,12 +24,16 @@ export function TextBody(props: TextProps & { color?: string }) {
   return <Text {...props} style={useStyle(ss.text.body, props)} />;
 }
 
+export function TextBodyCaps(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.bodyCaps, props)} />;
+}
+
 export function TextMeta(props: TextProps & { color?: string }) {
   return <Text {...props} style={useStyle(ss.text.metadata, props)} />;
 }
 
-export function TextPara(props: TextProps) {
-  return <Text {...props} style={ss.text.para} />;
+export function TextPara(props: TextProps & { color?: string }) {
+  return <Text {...props} style={useStyle(ss.text.para, props)} />;
 }
 
 export function TextLight(props: TextProps) {

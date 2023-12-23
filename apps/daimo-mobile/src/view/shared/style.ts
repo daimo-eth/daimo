@@ -90,6 +90,12 @@ export const ss = {
       fontSize: 16,
       fontWeight: "600",
     },
+    bodyCaps: {
+      ...textBase,
+      fontSize: 16,
+      fontWeight: "600",
+      letterSpacing: 0.6,
+    },
     para: {
       ...textBase,
       fontSize: 16,

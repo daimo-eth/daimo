@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { OctName } from "./InputBig";
@@ -12,7 +12,7 @@ export function ScreenHeader({
   onBack,
   onExit,
 }: {
-  title: string;
+  title: ReactNode;
   onBack?: () => void;
   onExit?: () => void;
 }) {

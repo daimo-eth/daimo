@@ -1,45 +1,53 @@
 import {
-  amountToDollars,
   DaimoLinkNoteV2,
+  DaimoNoteState,
   DaimoNoteStatus,
   DisplayOpEvent,
+  EAccount,
+  OpEvent,
   OpStatus,
-  timeString,
   PaymentLinkOpEvent,
+  amountToDollars,
   getAccountName,
-  assert,
-  DaimoNoteState,
+  timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
-import { DaimoNonceMetadata } from "@daimo/userop";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ReactNode, useCallback } from "react";
-import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
+import React, { useCallback } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  StyleSheet,
+  View,
+} from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
-import { SubtitleAmountChange } from "../shared/Amount";
-import { Badge } from "../shared/Badge";
+import { AccountBubble } from "../shared/AccountBubble";
+import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
+import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { getCachedEAccount } from "../shared/addr";
 import {
   ParamListHome,
   useDisableTabSwipe,
   useExitBack,
   useNav,
 } from "../shared/nav";
-import { OpStatusIndicator, OpStatusName } from "../shared/opStatus";
-import { ss } from "../shared/style";
+import { color, ss } from "../shared/style";
 import {
   TextBody,
+  TextBodyCaps,
   TextCenter,
   TextError,
   TextH3,
-  TextLight,
+  TextPara,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -68,10 +76,10 @@ function HistoryOpScreenInner({
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Transfer" onBack={useExitBack()} />
-      <Spacer h={32} />
+      <ScreenHeader title={<DaimoLogo />} onBack={useExitBack()} />
+      <Spacer h={16} />
       <TransferBody account={account} op={op} />
-      <Spacer h={64} />
+      <Spacer h={36} />
       <View style={ss.container.padH16}>
         {op.txHash && (
           <LinkToExplorer {...{ chainConfig }} txHash={op.txHash} />
@@ -84,6 +92,11 @@ function HistoryOpScreenInner({
         )}
     </View>
   );
+}
+
+function DaimoLogo() {
+  const source = require("../../../assets/daimo-logo-small.png");
+  return <Image source={source} />;
 }
 
 function NoteView({
@@ -135,9 +148,7 @@ function LinkToExplorer({
 
   const openURL = useCallback(() => Linking.openURL(url), [url]);
 
-  return (
-    <ButtonBig onPress={openURL} type="subtle" title="VIEW ON BLOCK EXPLORER" />
-  );
+  return <ButtonBig onPress={openURL} type="subtle" title="VIEW ON EXPLORER" />;
 }
 
 function TransferBody({
@@ -147,133 +158,110 @@ function TransferBody({
   account: Account;
   op: DisplayOpEvent;
 }) {
-  const opRequestId = op.nonceMetadata
-    ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
-    : undefined;
-  const matchingTrackedRequest = account.trackedRequests.find(
-    (req) =>
-      req.requestId === opRequestId &&
-      req.amount === `${op.amount}` &&
-      op.to === account.address
-  );
+  // TODO: show if this transfer filled our request.
+  // const opRequestId = op.nonceMetadata
+  //   ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
+  //   : undefined;
+  // const matchingTrackedRequest = account.trackedRequests.find(
+  //   (req) =>
+  //     req.requestId === opRequestId &&
+  //     req.amount === `${op.amount}` &&
+  //     op.to === account.address
+  // );
 
+  let other: EAccount;
   const sentByUs = op.from === account.address;
-  const amountChange = sentByUs ? -BigInt(op.amount) : BigInt(op.amount);
-
-  const kv: [string, ReactNode][] = [];
-  if (matchingTrackedRequest != null) {
-    const amount = amountToDollars(BigInt(matchingTrackedRequest.amount));
-    kv.push(["Amount you requested", <TextBody>{amount}</TextBody>]);
+  if (sentByUs) {
+    other = getCachedEAccount(op.to);
+  } else {
+    other = getCachedEAccount(op.from);
   }
-
-  kv.push(["Date", <TextBody>{timeString(op.timestamp)}</TextBody>]);
-
-  if (op.feeAmount !== undefined) {
-    let feeStr = "$" + amountToDollars(BigInt(op.feeAmount));
-    if (op.feeAmount > 0 && feeStr === "$0.00") {
-      feeStr = "< $0.01";
-    }
-    const feeElem =
-      feeStr === "$0.00" ? (
-        <>
-          <TextBody>{feeStr}</TextBody>
-          <Spacer w={8} />
-          <Badge>FREE</Badge>
-        </>
-      ) : (
-        <TextBody>{feeStr}</TextBody>
-      );
-    kv.push(["Fee", feeElem]);
-  }
+  const isPayLink = other.label === "payment link";
+  const verb = isPayLink
+    ? sentByUs
+      ? "Created link"
+      : "Claimed link"
+    : sentByUs
+    ? "Sent"
+    : "Received";
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  const coinName = chainConfig.tokenSymbol;
-  const chainName = chainConfig.chainL2.name;
-  kv.push(["Currency", <TextBody>{coinName}</TextBody>]);
-  kv.push(["Chain", <TextBody>{chainName}</TextBody>]);
-
-  // Summarize what happened
-  let verb;
-  if (op.type === "createLink") {
-    assert(
-      op.noteStatus.sender.addr === account.address,
-      "link not created by self"
-    );
-    if (op.noteStatus.claimer) {
-      if (op.noteStatus.claimer.addr === account.address) {
-        verb = "Link reclaimed";
-      } else {
-        verb = "Link claimed by " + getAccountName(op.noteStatus.claimer);
-      }
-    } else {
-      verb = "Link created";
-    }
-  } else if (op.type === "claimLink") {
-    if (op.noteStatus.sender.addr === account.address) {
-      verb = "Link reclaimed";
-    } else {
-      verb = "Link sent by " + getAccountName(op.noteStatus.sender);
-    }
-  } else {
-    verb = sentByUs ? "Sent transfer" : "Received transfer";
-  }
+  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  const chainName = chainConfig.chainL2.name.toUpperCase();
 
   return (
-    <View>
-      <Spacer h={32} />
+    <View style={ss.container.padH16}>
       <TextCenter>
-        <TextLight>{verb}</TextLight>
+        <TextH3 color={color.grayDark}>{verb}</TextH3>
       </TextCenter>
       <Spacer h={4} />
-      <SubtitleAmountChange amount={amountChange} />
+      <TitleAmount amount={BigInt(op.amount)} />
+      <Spacer h={8} />
+      <TextCenter>
+        <TextBodyCaps color={color.grayMid}>
+          <FeeText amount={op.feeAmount} /> • {coinName} • {chainName}
+        </TextBodyCaps>
+      </TextCenter>
       <Spacer h={32} />
-      <View style={styles.kvWrap}>
-        <View style={styles.kvList}>
-          {kv.map(([k, v]) => (
-            <View key={k} style={styles.kvRow}>
-              <View style={styles.kvKey}>
-                <TextLight>{k}</TextLight>
-              </View>
-              {v}
-            </View>
-          ))}
+      <OpRow op={op} otherAcc={other} />
+      <View style={styles.transferBorder} />
+    </View>
+  );
+}
+
+function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
+  const isPending = op.status === "pending";
+  const textDark = isPending ? color.gray3 : color.midnight;
+  const textLight = isPending ? color.gray3 : color.grayMid;
+
+  const date = timeString(op.timestamp);
+
+  return (
+    <View style={styles.transferBorder}>
+      <View style={styles.transferRowWrap}>
+        <View style={styles.transferRow}>
+          <View style={styles.transferOtherAccount}>
+            <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
+            <TextBody color={textDark}>{getAccountName(otherAcc)}</TextBody>
+            {isPending && <PendingDot />}
+          </View>
+          <TextPara color={textLight}>{date}</TextPara>
         </View>
-      </View>
-      <Spacer h={32} />
-      <View style={styles.statusRow}>
-        <OpStatusIndicator status={op.status} size={24} />
-        <TextH3>
-          <OpStatusName status={op.status} />
-        </TextH3>
       </View>
     </View>
   );
 }
 
+function FeeText({ amount }: { amount?: number }) {
+  if (amount == null) {
+    return "PENDING";
+  }
+
+  let feeStr = "$" + amountToDollars(amount);
+  if (amount > 0 && feeStr === "$0.00") {
+    feeStr = "< $0.01";
+  }
+  return feeStr === "$0.00" ? "NO FEE" : feeStr + " FEE";
+}
+
 const styles = StyleSheet.create({
-  kvWrap: {
-    flexDirection: "row",
-    justifyContent: "center",
+  transferBorder: {
+    borderTopWidth: 1,
+    borderColor: color.grayLight,
   },
-  kvList: {
-    flexDirection: "column",
-    gap: 8,
+  transferRowWrap: {
+    marginHorizontal: -24,
   },
-  kvRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  kvKey: {
-    width: 128,
-  },
-  kvVal: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  statusRow: {
+  transferRow: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+  },
+  transferOtherAccount: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
 });

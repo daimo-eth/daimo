@@ -59,26 +59,6 @@ export function TitleAmount({ amount }: { amount: bigint }) {
   );
 }
 
-/** Display eg. "+ $1.23" (green)  or "- $10.00" (black). */
-export function SubtitleAmountChange({ amount }: { amount: bigint }) {
-  const sign = amount >= 0 ? "+ " : "- ";
-  const symbol = "$";
-  const absAmount = amount >= 0 ? amount : -amount;
-  const [dollars, cents] = amountToDollars(absAmount).split(".");
-
-  return (
-    <Text style={styles.subtitle}>
-      <Text style={styles.subtitleSmall}>
-        {sign} {symbol}
-      </Text>
-      <Spacer w={2} />
-      {dollars}
-      {amountSeparator}
-      {cents}
-    </Text>
-  );
-}
-
 const styles = StyleSheet.create({
   title: {
     fontSize: 48,
