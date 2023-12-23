@@ -109,6 +109,7 @@ function SendTransferButtonInner({
             type="primary"
             disabled={disabled}
             duration={400}
+            showBiometricIcon
           />
         );
       case "loading":

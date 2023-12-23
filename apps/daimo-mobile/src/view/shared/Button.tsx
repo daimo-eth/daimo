@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import {
+  Image,
   StyleSheet,
   Text,
   TextStyle,
@@ -17,6 +18,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
+import FaceIdIcon from "../../../assets/face-id.png";
 
 interface TextButtonProps {
   title?: string;
@@ -31,6 +33,7 @@ interface ButtonProps extends TextButtonProps {
 
 interface LongPressButtonProps extends ButtonProps {
   duration: number;
+  showBiometricIcon?: boolean;
 }
 
 export function LongPressBigButton(props: LongPressButtonProps) {
@@ -97,6 +100,11 @@ export function LongPressBigButton(props: LongPressButtonProps) {
           />
         </View>
         <Text style={style.title}>{props.title?.toUpperCase()}</Text>
+        {props.showBiometricIcon && (
+          <View style={styles.biometricIconContainer}>
+            <Image source={FaceIdIcon} style={styles.biometricIcon} />
+          </View>
+        )}
       </Animated.View>
     </GestureDetector>
   );
@@ -258,3 +266,16 @@ const buttonStyles = {
     },
   }),
 };
+
+const styles = StyleSheet.create({
+  biometricIconContainer: {
+    width: 0,
+    left: 8,
+    height: 0,
+    justifyContent: "center",
+  },
+  biometricIcon: {
+    height: 24,
+    width: 24,
+  },
+});
