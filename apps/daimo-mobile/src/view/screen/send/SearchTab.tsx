@@ -26,19 +26,21 @@ import { useWithAccount } from "../../shared/withAccount";
 
 /** Find someone you've already paid, a Daimo user by name, or any Ethereum account by ENS. */
 export function SearchTab({
+  prefix,
+  setPrefix,
   autoFocus,
-  textInnerRef,
+  textInputRef,
 }: {
-  autoFocus: boolean;
-  textInnerRef: React.RefObject<TextInput>;
+  prefix: string;
+  setPrefix: (prefix: string) => void;
+  autoFocus?: boolean;
+  textInputRef: React.RefObject<TextInput>;
 }) {
-  const [prefix, setPrefix] = useState("");
-
   return (
     <>
       <View style={{ flexGrow: 0 }}>
         <InputBig
-          innerRef={textInnerRef}
+          innerRef={textInputRef}
           autoFocus={autoFocus}
           icon="search"
           placeholder="Search user, ENS, or address..."
