@@ -71,7 +71,7 @@ export async function getLinkStatus(
     }
 
     case "note": {
-      const ret = noteIndexer.getNoteStatusByOwner(link.ephemeralOwner);
+      const ret = noteIndexer.getNoteStatusDeprecatedLink(link.ephemeralOwner);
       if (ret == null) {
         const sender = await nameReg.getEAccountFromStr(link.previewSender);
         if (sender == null) {

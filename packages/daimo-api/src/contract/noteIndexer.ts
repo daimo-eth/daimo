@@ -186,6 +186,21 @@ export class NoteIndexer {
     return this.notes.get(ephemeralOwner) || null;
   }
 
+  // DEPRECATED: get note status with old link format
+  getNoteStatusDeprecatedLink(ephemeralOwner: Address): DaimoNoteStatus | null {
+    const newNoteStatus = this.notes.get(ephemeralOwner);
+    if (newNoteStatus == null) return null;
+    return {
+      ...newNoteStatus,
+      link: {
+        type: "note",
+        ephemeralOwner: newNoteStatus.ephemeralOwner!,
+        previewSender: getEAccountStr(newNoteStatus.sender),
+        previewDollars: newNoteStatus.dollars,
+      },
+    };
+  }
+
   getNoteStatusbyLogCoordinate(transactionHash: Hex, logIndex: number) {
     const eve = this.logCoordinateToNoteEvent.get(
       logCoordinateKey(transactionHash, logIndex)
