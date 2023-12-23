@@ -1,8 +1,10 @@
 import {
+  DaimoNoteState,
   DaimoNoteStatus,
   amountToDollars,
   assertNotNull,
   getEAccountStr,
+  getNoteId,
 } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
@@ -15,9 +17,14 @@ function logCoordinateKey(transactionHash: Hex, logIndex: number) {
   return transactionHash + ":" + logIndex;
 }
 
+function senderIdKey(sender: Address, id: string) {
+  return sender + ":" + id;
+}
+
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
-  private senderToSeqOwners: Map<Address, Address[]> = new Map();
+  // Map (sender, id) -> ephemeralOwner
+  private senderIdToOwner: Map<string, Address> = new Map();
 
   private notes: Map<Address, DaimoNoteStatus> = new Map();
   private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
@@ -82,17 +89,17 @@ export class NoteIndexer {
           `dupe NoteCreated: ${log.ephemeralOwner} ${log.transactionHash} ${log.logIndex}`
         );
       }
-      const seq = this.getNextSeq(log.from);
+      const id = getNoteId(log.ephemeralOwner);
       const sender = await this.nameReg.getEAccount(log.from);
       const dollars = amountToDollars(log.amount);
       const newNote: DaimoNoteStatus = {
-        status: "confirmed",
+        status: DaimoNoteState.Confirmed,
         dollars,
-        seq,
+        id,
         ephemeralOwner: log.ephemeralOwner,
         link: {
           type: "notev2",
-          seq,
+          id,
           sender: getEAccountStr(sender),
           dollars,
         },
@@ -100,11 +107,7 @@ export class NoteIndexer {
       };
       this.notes.set(log.ephemeralOwner, newNote);
 
-      this.senderToSeqOwners.set(log.from, [
-        ...(this.senderToSeqOwners.get(log.from) || []),
-        log.ephemeralOwner,
-      ]);
-
+      this.senderIdToOwner.set(senderIdKey(log.from, id), log.ephemeralOwner);
       this.logCoordinateToNoteEvent.set(
         logCoordinateKey(log.transactionHash, log.logIndex),
         [log.ephemeralOwner, "create"]
@@ -156,7 +159,7 @@ export class NoteIndexer {
         const note = this.notes.get(log.ephemeralOwner);
         if (note == null) {
           throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
-        } else if (note.status !== "confirmed") {
+        } else if (note.status !== DaimoNoteState.Confirmed) {
           throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
         } else if (note.dollars !== amountToDollars(log.amount)) {
           throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
@@ -169,7 +172,10 @@ export class NoteIndexer {
         );
         assertNotNull(log.redeemer, "redeemer is null");
         assertNotNull(log.from, "from is null");
-        note.status = log.redeemer === log.from ? "cancelled" : "claimed";
+        note.status =
+          log.redeemer === log.from
+            ? DaimoNoteState.Cancelled
+            : DaimoNoteState.Claimed;
         note.claimer = await this.nameReg.getEAccount(log.redeemer);
         return note;
       });
@@ -188,15 +194,9 @@ export class NoteIndexer {
   }
 
   /** Gets note status, or null if the note is not yet indexed. */
-  getNoteStatusBySeq(sender: Address, seq: number) {
-    const owners = this.senderToSeqOwners.get(sender);
-    const ephemeralOwner = owners ? owners[seq] : null;
-    console.log(`[NOTE] getNoteStatusBySeq ${sender} ${seq} ${ephemeralOwner}`);
+  getNoteStatusById(sender: Address, id: string) {
+    const ephemeralOwner = this.senderIdToOwner.get(senderIdKey(sender, id));
     const ret = ephemeralOwner && this.notes.get(ephemeralOwner);
     return ret || null;
-  }
-
-  getNextSeq(sender: Address) {
-    return this.senderToSeqOwners.get(sender)?.length || 0;
   }
 }

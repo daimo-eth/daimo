@@ -1,12 +1,13 @@
 import {
   AddrLabel,
   DaimoLink,
+  DaimoNoteState,
   EAccount,
-  OpEvent,
   OpStatus,
   dollarsToAmount,
   formatDaimoLink,
   generateNoteSeedAddress,
+  getNoteId,
 } from "@daimo/common";
 import { daimoEphemeralNotesAddress } from "@daimo/contract";
 import {
@@ -45,22 +46,11 @@ function SendNoteButtonInner({
   dollars: number;
 }) {
   const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
+  const noteId = getNoteId(noteAddress);
 
   const [nonce] = useState(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
-
-  const createLinkAccountTransform = (account: Account, pendingOp: OpEvent) => {
-    return {
-      ...transferAccountTransform([
-        {
-          addr: daimoEphemeralNotesAddress,
-          label: AddrLabel.PaymentLink,
-        } as EAccount,
-      ])(account, pendingOp),
-      nextNoteSeq: account.nextNoteSeq + 1,
-    };
-  };
 
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
@@ -83,17 +73,22 @@ function SendNoteButtonInner({
           type: "notev2",
           sender: account.name,
           dollars: `${dollars}`,
-          seq: account.nextNoteSeq,
+          id: noteId,
           seed: noteSeed,
         },
-        status: "pending",
+        status: DaimoNoteState.Pending,
         sender: { addr: account.address, name: account.name },
         dollars: `${dollars}`,
         ephemeralOwner: noteAddress,
-        seq: account.nextNoteSeq,
+        id: noteId,
       },
     },
-    accountTransform: createLinkAccountTransform,
+    accountTransform: transferAccountTransform([
+      {
+        addr: daimoEphemeralNotesAddress,
+        label: AddrLabel.PaymentLink,
+      } as EAccount,
+    ]),
   });
 
   const sendDisabledReason =
@@ -134,7 +129,7 @@ function SendNoteButtonInner({
         type: "notev2",
         sender: account.name,
         dollars: `${dollars}`,
-        seq: account.nextNoteSeq,
+        id: noteId,
         seed: noteSeed,
       };
       const url = formatDaimoLink(link);

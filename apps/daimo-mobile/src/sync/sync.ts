@@ -203,7 +203,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 
   // Match pending transfers
   const oldPending = account.recentTransfers.filter(
-    (t) => t.status === "pending"
+    (t) => t.status === OpStatus.pending
   );
 
   // Match pending transfers
@@ -214,13 +214,6 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
       t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
-
-  const nextNoteSeq = Math.max(
-    result.nextNoteSeq,
-    ...stillPending.map((op) =>
-      op.type === "createLink" ? (op.noteStatus?.seq || 0) + 1 : 0
-    )
-  );
 
   let namedAccounts: EAccount[];
   if (result.sinceBlockNum === 0) {
@@ -249,7 +242,6 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     lastBlock: result.lastBlock,
     lastBlockTimestamp: result.lastBlockTimestamp,
     lastFinalizedBlock: result.lastFinalizedBlock,
-    nextNoteSeq,
 
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges || [],
@@ -272,8 +264,8 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
         newBlock: result.lastBlock,
         newBalance: amountToDollars(BigInt(result.lastBalance)),
         newTransfers: recentTransfers.length,
-        nextNoteSeq,
-        nPending: recentTransfers.filter((t) => t.status === "pending").length,
+        nPending: recentTransfers.filter((t) => t.status === OpStatus.pending)
+          .length,
       })
   );
   return ret;

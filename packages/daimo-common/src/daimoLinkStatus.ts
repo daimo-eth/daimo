@@ -34,20 +34,26 @@ export type DaimoRequestStatus = {
 };
 
 /**
+ * Pending means the note hasn't yet been created onchain. Confirmed means
+ * it's been created and is waiting to be claimed. Cancelled means claimed
+ * back by the original sender, and claimed means claimed by anyone else.
+ */
+export enum DaimoNoteState {
+  Pending = "pending",
+  Confirmed = "confirmed",
+  Claimed = "claimed",
+  Cancelled = "cancelled",
+}
+
+/**
  * Tracks details about a Note.
  * All of this information can be looked up onchain given `link`.
  */
 export type DaimoNoteStatus = {
   link: DaimoLinkNote | DaimoLinkNoteV2;
-
-  /**
-   * Pending means the note hasn't yet been created onchain. Confirmed means
-   * it's been created and is waiting to be claimed. Cancelled means claimed
-   * back by the original sender, and claimed means claimed by anyone else.
-   */
-  status: "pending" | "confirmed" | "claimed" | "cancelled";
+  status: DaimoNoteState;
   sender: EAccount;
-  seq?: number;
+  id?: string;
   ephemeralOwner?: Address;
   claimer?: EAccount;
   dollars: `${number}`;

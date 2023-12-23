@@ -45,22 +45,22 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/n/foo/1.23/3#rqNoihPnZKa7g51uoUctj",
+    "https://example.com/link/n/foo/1.23/JrXdV#rqNoihPnZKa7g51uoUctj",
     {
       type: "notev2",
       sender: "foo",
       dollars: "1.23",
-      seq: 3,
+      id: "JrXdV",
       seed: "rqNoihPnZKa7g51uoUctj",
     },
   ],
   [
-    "https://example.com/link/n/bar.eth/4.20/1",
+    "https://example.com/link/n/bar.eth/4.20/rqNoi",
     {
       type: "notev2",
       sender: "bar.eth",
       dollars: "4.20",
-      seq: 1,
+      id: "rqNoi",
       seed: undefined,
     },
   ],

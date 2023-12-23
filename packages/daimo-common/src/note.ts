@@ -2,6 +2,10 @@ import { base58 } from "@scure/base";
 import { Address, Hex, getAddress, hexToBytes, keccak256 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
+export function getNoteId(ephemeralOwner: Address) {
+  return base58.encode(hexToBytes(ephemeralOwner)).slice(0, 5);
+}
+
 export async function getNoteClaimSignature(
   sender: Address,
   recipient: Address,

@@ -8,6 +8,7 @@ import {
   PaymentLinkOpEvent,
   getAccountName,
   assert,
+  DaimoNoteState,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { DaimoNonceMetadata } from "@daimo/userop";
@@ -95,7 +96,7 @@ function NoteView({
   const daimoChain = daimoChainFromId(account.homeChainId);
   const link: DaimoLinkNoteV2 = {
     type: "notev2",
-    seq: note.noteStatus!.seq!,
+    id: note.noteStatus!.id!,
     sender: getAccountName(note.noteStatus!.sender),
     dollars: amountToDollars(note.amount),
     seed: "",
@@ -107,7 +108,7 @@ function NoteView({
     <View>
       {noteFetch.isFetching && <Spinner />}
       {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
-      {noteStatus && noteStatus.status === "confirmed" && (
+      {noteStatus && noteStatus.status === DaimoNoteState.Confirmed && (
         <NoteDisplay {...{ account, noteStatus }} hideAmount />
       )}
     </View>

@@ -1,6 +1,7 @@
 import {
   DisplayOpEvent,
   EAccount,
+  OpStatus,
   assert,
   canSendTo,
   getAccountName,
@@ -16,7 +17,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Address, getAddress } from "viem";
+import { Address } from "viem";
 
 import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
@@ -78,7 +79,7 @@ export function HistoryListSwipe({
   }
 
   const renderRow = (t: DisplayOpEvent) => (
-    <TransferRow
+    <DisplayOpRow
       key={getDisplayOpId(t)}
       displayOp={t}
       address={account.address}
@@ -139,7 +140,7 @@ export function HistoryListSwipe({
           return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <TransferRow
+          <DisplayOpRow
             displayOp={item.op}
             address={account.address}
             showDate
@@ -161,11 +162,11 @@ function HeaderRow({ title }: { title: string }) {
 
 function getFromTo(op: DisplayOpEvent): [Address, Address] {
   if (op.type === "transfer") {
-    return [getAddress(op.from), getAddress(op.to)];
+    return [op.from, op.to];
   } else {
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
       // Self-transfer via payment link shows up as two payment link transfers
-      return [getAddress(op.from), getAddress(op.to)];
+      return [op.from, op.to];
     }
     return [
       op.noteStatus.sender.addr,
@@ -174,7 +175,7 @@ function getFromTo(op: DisplayOpEvent): [Address, Address] {
   }
 }
 
-function TransferRow({
+function DisplayOpRow({
   displayOp,
   address,
   linkTo,
@@ -206,7 +207,7 @@ function TransferRow({
     }
   }, [nav, displayOp, linkTo, otherAcc]);
 
-  const isPending = displayOp.status === "pending";
+  const isPending = displayOp.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
 
   return (
@@ -214,9 +215,9 @@ function TransferRow({
       <TouchableHighlight
         onPress={viewOp}
         {...touchHighlightUnderlay.subtle}
-        style={styles.transferRowWrap}
+        style={styles.displayOpRowWrap}
       >
-        <View style={styles.transferRow}>
+        <View style={styles.displayOpRow}>
           <View style={styles.transferOtherAccount}>
             <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
             <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
@@ -295,10 +296,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: color.grayLight,
   },
-  transferRowWrap: {
+  displayOpRowWrap: {
     marginHorizontal: -24,
   },
-  transferRow: {
+  displayOpRow: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     flexDirection: "row",

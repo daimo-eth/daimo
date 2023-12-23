@@ -1,5 +1,6 @@
 import {
   AddrLabel,
+  DaimoNoteState,
   DaimoNoteStatus,
   EAccount,
   OpStatus,
@@ -68,9 +69,9 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
 
   const title = (function (): string {
     switch (noteStatus?.status) {
-      case "claimed":
+      case DaimoNoteState.Claimed:
         return "Claimed Link";
-      case "cancelled":
+      case DaimoNoteState.Cancelled:
         return "Cancelled Link";
       default:
         return "Payment Link";
@@ -159,7 +160,9 @@ function NoteDisplayInner({
       nonceMetadata: nonceMetadata.toHex(),
       noteStatus: {
         ...noteStatus,
-        status: isOwnSentNote ? "cancelled" : "claimed",
+        status: isOwnSentNote
+          ? DaimoNoteState.Cancelled
+          : DaimoNoteState.Claimed,
         claimer: { addr: account.address, name: account.name },
       },
     },
@@ -189,11 +192,11 @@ function NoteDisplayInner({
 
   const statusMessage = (function (): ReactNode {
     switch (noteStatus.status) {
-      case "claimed":
+      case DaimoNoteState.Claimed:
         return (
           <TextBold>Claimed by {getAccountName(noteStatus.claimer!)}</TextBold>
         );
-      case "cancelled":
+      case DaimoNoteState.Cancelled:
         assert(isOwnSentNote, "cancelled note not sent by user");
         return <TextBody>You reclaimed this payment link</TextBody>;
       default:
@@ -221,7 +224,7 @@ function NoteDisplayInner({
     // Pending notes are not yet claimable.
     // Claimed and cancelled notes are no longer claimable.
     // Only "confirmed" notes are claimable.
-    const isClaimable = noteStatus.status === "confirmed";
+    const isClaimable = noteStatus.status === DaimoNoteState.Confirmed;
 
     switch (status) {
       case "idle":

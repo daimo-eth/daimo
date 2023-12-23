@@ -5,6 +5,10 @@ import {
 import { useEffect, useState } from "react";
 import { Address, Hex } from "viem";
 
+/* Generate signature that allows claiming a payment link from either the
+ * ephemeral private key or the seed, or neither (dummy signature) if the
+ * sender is the claimer.
+ */
 export function useEphemeralSignature(
   sender: Address,
   recipient: Address,

@@ -26,7 +26,6 @@ export interface AccountHistoryResult {
   lastBlock: number;
   lastBlockTimestamp: number;
   lastBalance: `${bigint}`;
-  nextNoteSeq: number;
 
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
@@ -84,8 +83,6 @@ export async function getAccountHistory(
   const lastBlockTimestamp = lastBlk.timestamp;
   const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
 
-  const nextNoteSeq = noteIndexer.getNextSeq(address);
-
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
@@ -130,7 +127,6 @@ export async function getAccountHistory(
     lastBlock,
     lastBlockTimestamp,
     lastBalance: `${lastBalance}`,
-    nextNoteSeq,
 
     chainGasConstants,
     recommendedExchanges,

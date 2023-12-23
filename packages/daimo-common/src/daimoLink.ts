@@ -37,9 +37,9 @@ export type DaimoLinkRequest = {
 /** Represents a Payment Link. Works like cash, redeemable onchain. */
 export type DaimoLinkNote = {
   type: "note";
-  /** Sender eAccountStr. To verify, look up ephememeralOwner onchain */
+  /** Sender eAccountStr. To verify, look up ephemeralOwner onchain */
   previewSender: string;
-  /** To verify, look up ephememeralOwner onchain */
+  /** To verify, look up ephemeralOwner onchain */
   previewDollars: DollarStr;
   /** The ephemeral (burner) public key associated with this claimable note. */
   ephemeralOwner: Address;
@@ -52,7 +52,7 @@ export type DaimoLinkNoteV2 = {
 
   sender: string;
   dollars: DollarStr;
-  seq: number;
+  id: string;
   seed?: string;
 };
 
@@ -102,7 +102,7 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
         "n",
         link.sender,
         link.dollars,
-        link.seq + (hash || ""),
+        link.id + (hash || ""),
       ].join("/");
     }
     case "settings": {
@@ -191,13 +191,13 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
 
         const hashParts = parts[3].split("#");
         if (hashParts.length > 2) return null;
-        const seq = parseInt(hashParts[0], 10);
+        const id = hashParts[0];
         const seed = hashParts[1];
         return {
           type: "notev2",
           sender,
           dollars,
-          seq,
+          id,
           seed,
         };
       } else return null;
