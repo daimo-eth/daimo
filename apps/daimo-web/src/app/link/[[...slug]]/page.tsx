@@ -190,17 +190,19 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             name: `${getAccountName(sender)}`,
             action: `sent you`,
             dollars: `${dollars}`,
-            description: "Claim with Daimo",
+            description: "Accept with Daimo",
             walletActionLinkStatus: res,
           };
         }
         case "claimed": {
-          const claim = claimer ? getAccountName(claimer) : "(missing claimer)";
+          const claim = claimer
+            ? getAccountName(claimer)
+            : "(missing receiver)";
           return {
             name: `${getAccountName(sender)}`,
             action: `sent`,
             dollars: `${dollars}`,
-            description: `Claimed by ${claim}`,
+            description: `Accepted by ${claim}`,
           };
         }
         case "cancelled": {
@@ -208,7 +210,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             name: `${getAccountName(sender)}`,
             action: `cancelled send`,
             dollars: `${dollars}`,
-            description: `Reclaimed by ${getAccountName(sender)}`,
+            description: `Cancelled by ${getAccountName(sender)}`,
           };
         }
         default: {

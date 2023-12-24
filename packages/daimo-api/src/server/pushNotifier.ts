@@ -242,17 +242,17 @@ export class PushNotifier {
         messages.push(...this.getPushMessages(sender.addr, title, body));
       } else if (log.status === DaimoNoteState.Claimed) {
         // To Bob: "You received $1.00 from alice"
-        // To Alice: "Bob claimed your $1.00 payment link"
+        // To Alice: "Bob accepted your $1.00 payment link"
         const claimer = assertNotNull(log.claimer);
         const { sender, dollars } = log;
         assert(sender.addr !== claimer.addr);
         messages.push(
           ...this.getPushMessages(
             sender.addr,
-            `$${dollars} claimed`,
+            `$${dollars} sent`,
             `${getAccountName(
               claimer
-            )} claimed your ${dollars} ${symbol} payment link`
+            )} accepted your ${dollars} ${symbol} payment link`
           ),
           ...this.getPushMessages(
             claimer.addr,
@@ -268,7 +268,7 @@ export class PushNotifier {
         messages.push(
           ...this.getPushMessages(
             sender.addr,
-            `$${dollars} claimed`,
+            `Recollected $${dollars}`,
             `You cancelled your ${dollars} ${symbol} payment link`
           )
         );

@@ -189,7 +189,7 @@ function TransferBody({
   const verb = isPayLink
     ? sentByUs
       ? "Created link"
-      : "Claimed link"
+      : "Accepted link"
     : sentByUs
     ? "Sent"
     : "Received";

@@ -76,7 +76,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const title = (function (): string {
     switch (noteStatus?.status) {
       case DaimoNoteState.Claimed:
-        return "Claimed Link";
+        return "Accepted Link";
       case DaimoNoteState.Cancelled:
         return "Cancelled Link";
       default:
@@ -149,13 +149,13 @@ function NoteDisplayInner({
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
   const customHandler = isV2RecipientClaim
     ? async (setAS: SetActStatus) => {
-        setAS("loading", "Accepting note...");
+        setAS("loading", "Accepting link...");
         const txHash = await rpcFunc.claimEphemeralNoteSponsored.mutate({
           ephemeralOwner,
           recipient: account.address,
           signature: ephemeralSignature,
         });
-        setAS("success", "Accepted note");
+        setAS("success", "Accepted link");
         return { txHash } as PendingOpEventID;
       }
     : undefined;
@@ -253,7 +253,7 @@ function NoteDisplayInner({
         if (netRecv === 0) {
           return `Gas too high to claim`;
         } else if (isOwnSentNote) {
-          return `Cancel this link, reclaiming ${netDollarsReceivedStr}`;
+          return `Cancel this link, recollecting ${netDollarsReceivedStr}`;
         } else {
           return `Accept this link, receiving ${netDollarsReceivedStr}`;
         }
