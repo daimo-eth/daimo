@@ -3,10 +3,15 @@ import {
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestStatus,
+  assert,
   getNoteClaimSignature,
   getNoteClaimSignatureFromSeed,
 } from "@daimo/common";
-import { daimoEphemeralNotesConfig } from "@daimo/contract";
+import {
+  daimoEphemeralNotesConfig,
+  daimoEphemeralNotesV2Address,
+  daimoEphemeralNotesV2Config,
+} from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useMemo, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
@@ -42,7 +47,7 @@ export function AppOrWalletCTA({
   const humanReadableError = useMemo(() => {
     if (creationError !== undefined) return creationError;
 
-    if (!error) return undefined;
+    if (!error || !error.message) return undefined;
     if (error.message.match(/ERC20: transfer amount exceeds balance/)) {
       return "Not enough USDC in wallet";
     } else if (error.message.match(/note does not exist/)) {
@@ -60,7 +65,7 @@ export function AppOrWalletCTA({
         if (!address) return;
 
         // URL hash part is not readable server side.
-        const hash = window.location.hash.slice(1) as Hex;
+        const hash = window.location.hash.slice(1);
 
         const action = await linkStatusToAction(linkStatus, address, hash);
         setAction(action);
@@ -187,10 +192,24 @@ type Action = {
   };
 };
 
+async function getNoteSignature(
+  linkType: "note" | "notev2",
+  sender: Address,
+  recipient: Address,
+  urlHash: string
+) {
+  if (linkType === "note") {
+    // Deprecated notes link
+    return getNoteClaimSignature(sender, recipient, urlHash as Hex);
+  } else {
+    return getNoteClaimSignatureFromSeed(sender, recipient, urlHash);
+  }
+}
+
 async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
-  urlHash: Hex | undefined
+  urlHash: string
 ): Promise<Action> {
   switch (linkStatus.link.type) {
     case "request": {
@@ -208,37 +227,39 @@ async function linkStatusToAction(
         },
       };
     }
-    case "note": {
-      const { sender } = linkStatus as DaimoNoteStatus;
-      const signature = await getNoteClaimSignature(
-        sender.addr,
-        selfAddress,
-        urlHash
-      );
-
-      return {
-        wagmiPrep: {
-          ...daimoEphemeralNotesConfig,
-          functionName: "claimNote" as const,
-          args: [linkStatus.link.ephemeralOwner, signature] as const,
-        },
-      };
-    }
+    case "note":
     case "notev2": {
-      const { sender, ephemeralOwner } = linkStatus as DaimoNoteStatus;
-      const signature = await getNoteClaimSignatureFromSeed(
+      const { sender, contractAddress, ephemeralOwner } =
+        linkStatus as DaimoNoteStatus;
+
+      const signature = await getNoteSignature(
+        linkStatus.link.type,
         sender.addr,
         selfAddress,
         urlHash
       );
 
-      return {
-        wagmiPrep: {
-          ...daimoEphemeralNotesConfig,
-          functionName: "claimNote" as const,
-          args: [ephemeralOwner, signature] as const,
-        },
-      };
+      if (contractAddress === daimoEphemeralNotesV2Address) {
+        assert(
+          selfAddress !== sender.addr,
+          "sender shouldn't be claiming their own note on web"
+        );
+        return {
+          wagmiPrep: {
+            ...daimoEphemeralNotesV2Config,
+            functionName: "claimNoteRecipient" as const,
+            args: [ephemeralOwner, selfAddress, signature] as const,
+          },
+        };
+      } else {
+        return {
+          wagmiPrep: {
+            ...daimoEphemeralNotesConfig,
+            functionName: "claimNote" as const,
+            args: [ephemeralOwner, signature] as const,
+          },
+        };
+      }
     }
     default: {
       throw new Error(

@@ -3,11 +3,16 @@ import {
   DaimoNoteState,
   DaimoNoteStatus,
   EAccount,
+  PendingOpEventID,
   OpStatus,
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import { daimoChainFromId, daimoEphemeralNotesAddress } from "@daimo/contract";
+import {
+  daimoChainFromId,
+  daimoEphemeralNotesAddress,
+  daimoEphemeralNotesV2Address,
+} from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -18,10 +23,12 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 
+import { SetActStatus } from "../../../action/actStatus";
 import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
+import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { Account } from "../../../model/account";
@@ -136,12 +143,48 @@ function NoteDisplayInner({
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);
   const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [ephemeralOwner]);
 
+  const isV2RecipientClaim =
+    noteStatus.contractAddress === daimoEphemeralNotesV2Address &&
+    noteStatus.sender.addr !== account.address;
+  const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
+  const customHandler = isV2RecipientClaim
+    ? async (setAS: SetActStatus) => {
+        setAS("loading", "Accepting note...");
+        const txHash = await rpcFunc.claimEphemeralNoteSponsored.mutate({
+          ephemeralOwner,
+          recipient: account.address,
+          signature: ephemeralSignature,
+        });
+        setAS("success", "Accepted note");
+        return { txHash } as PendingOpEventID;
+      }
+    : undefined;
+
   const sendFn = async (opSender: DaimoOpSender) => {
-    console.log(`[ACTION] claiming note ${ephemeralOwner}`);
-    return opSender.claimEphemeralNote(ephemeralOwner, ephemeralSignature, {
+    const opMetadata = {
       nonce,
       chainGasConstants: account.chainGasConstants,
-    });
+    };
+    if (noteStatus.contractAddress === daimoEphemeralNotesAddress) {
+      console.log(`[ACTION] claiming note ${ephemeralOwner}`);
+      return opSender.claimEphemeralNoteV1(
+        ephemeralOwner,
+        ephemeralSignature,
+        opMetadata
+      );
+    } else {
+      if (noteStatus.sender.addr === account.address) {
+        console.log(`[ACTION] claiming notev2 self ${ephemeralOwner}`);
+        return opSender.claimEphemeralNoteSelf(ephemeralOwner, opMetadata);
+      } else {
+        console.log(`[ACTION] claiming notev2 recipient ${ephemeralOwner}`);
+        return opSender.claimEphemeralNoteRecipient(
+          ephemeralOwner,
+          ephemeralSignature,
+          opMetadata
+        );
+      }
+    }
   };
 
   const isOwnSentNote = noteStatus.sender.addr === account.address;
@@ -149,10 +192,11 @@ function NoteDisplayInner({
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
+    customHandler,
     pendingOp: {
       type: "claimLink",
       status: OpStatus.pending,
-      from: daimoEphemeralNotesAddress,
+      from: noteStatus.contractAddress,
       to: account.address,
       amount: Number(dollarsToAmount(noteStatus.dollars)),
       timestamp: Date.now() / 1e3,
@@ -167,7 +211,7 @@ function NoteDisplayInner({
     },
     accountTransform: transferAccountTransform([
       {
-        addr: daimoEphemeralNotesAddress,
+        addr: noteStatus.contractAddress,
         label: AddrLabel.PaymentLink,
       } as EAccount,
       noteStatus.sender,

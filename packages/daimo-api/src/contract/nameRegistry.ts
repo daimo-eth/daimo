@@ -9,6 +9,7 @@ import {
 } from "@daimo/common";
 import {
   daimoEphemeralNotesAddress,
+  daimoEphemeralNotesV2Address,
   nameRegistryProxyConfig,
 } from "@daimo/contract";
 import { Pool } from "pg";
@@ -41,6 +42,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x6dcBCe46a8B494c885D0e7b6817d2b519dF64467": AddrLabel.Coinbase,
 };
 specialAddrLabels[daimoEphemeralNotesAddress] = AddrLabel.PaymentLink;
+specialAddrLabels[daimoEphemeralNotesV2Address] = AddrLabel.PaymentLink;
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
 interface Registration {

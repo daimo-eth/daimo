@@ -3,12 +3,12 @@ import {
   DisplayOpEvent,
   EAccount,
   OpStatus,
+  PendingOpEventID,
   amountToDollars,
   assert,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
-import { Hex } from "viem";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
 import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
@@ -210,8 +210,8 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
   // TODO: store validUntil directly on the op
   const stillPending = oldPending.filter(
     (t) =>
-      syncFindSameOp(t.opHash, recentTransfers) == null &&
-      t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
+      syncFindSameOp({ opHash: t.opHash, txHash: t.txHash }, recentTransfers) ==
+        null && t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
 
@@ -272,11 +272,16 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 }
 
 export function syncFindSameOp(
-  opHash: Hex | undefined,
+  id: PendingOpEventID,
   ops: DisplayOpEvent[]
 ): DisplayOpEvent | null {
-  if (opHash == null) return null;
-  return ops.find((r) => opHash === r.opHash) || null;
+  return (
+    ops.find(
+      (r) =>
+        (id.opHash && id.opHash === r.opHash) ||
+        (id.txHash && id.txHash === r.txHash)
+    ) || null
+  );
 }
 
 /** Update contacts based on recent interactions */

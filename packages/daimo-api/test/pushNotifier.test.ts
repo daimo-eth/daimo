@@ -4,6 +4,7 @@ import {
   DaimoNoteStatus,
   EAccount,
 } from "@daimo/common";
+import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
@@ -84,6 +85,7 @@ test("PushNotifier", async () => {
         sender: { addr: addrAlice, name: "alice" },
         dollars: "1.00",
         link: paymentLinkFromAlice,
+        contractAddress: daimoEphemeralNotesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -102,6 +104,7 @@ test("PushNotifier", async () => {
         claimer: { addr: addrBob, name: "bob" },
         dollars: "1.00",
         link: paymentLinkFromAlice,
+        contractAddress: daimoEphemeralNotesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -196,6 +199,7 @@ test("PushNotifier", async () => {
         claimer: { addr: addrAlice, name: "alice" },
         dollars: "4.20",
         link: paymentLinkFromAlice,
+        contractAddress: daimoEphemeralNotesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);

@@ -4,8 +4,16 @@ import {
   zUserOpHex,
 } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
+import { erc20ABI } from "@daimo/contract";
 import { Constants, Utils } from "userop";
-import { Address, Hex, encodeFunctionData, getAddress, parseUnits } from "viem";
+import {
+  Address,
+  Hex,
+  encodeFunctionData,
+  getAddress,
+  maxUint256,
+  parseUnits,
+} from "viem";
 
 import { OpSenderCallback, SigningCallback } from "./callback";
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
@@ -18,7 +26,9 @@ interface DaimoOpConfig {
   /** Decimals for that token. */
   tokenDecimals: number;
   /** EphemeralNotes instance. The stablecoin used must match tokenAddress. */
-  notesAddress: `0x${string}`;
+  notesAddress: Address;
+  /** EphemeralNotesV2 instance. The stablecoin used must match tokenAddress. */
+  notesAddressV2: Address;
   /** Daimo account address. */
   accountAddress: Address;
   /** Signs userops. Must, in some form, check user presence. */
@@ -155,39 +165,52 @@ export class DaimoOpSender {
     return this.sendUserOp(op);
   }
 
-  /** Creates an ephemeral note with given value. Returns userOpHash. */
+  /** Creates an ephemeral note V2 with given value. Returns userOpHash. */
   public async createEphemeralNote(
-    ephemeralOwner: `0x${string}`,
+    ephemeralOwner: Hex,
     amount: `${number}`,
+    approveFirst: boolean,
     opMetadata: DaimoOpMetadata
   ) {
-    const { tokenDecimals, notesAddress } = this.opConfig;
+    const { tokenDecimals, tokenAddress, notesAddressV2 } = this.opConfig;
 
     const parsedAmount = parseUnits(amount, tokenDecimals);
     console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: notesAddress,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesABI,
-            functionName: "createNote",
-            args: [ephemeralOwner, parsedAmount],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const executions = [
+      {
+        dest: notesAddressV2,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: Contracts.daimoEphemeralNotesV2ABI,
+          functionName: "createNote",
+          args: [ephemeralOwner, parsedAmount],
+        }),
+      },
+    ];
+
+    if (approveFirst) {
+      executions.unshift({
+        // Approve notes contract infinite spending on behalf of the account
+        dest: tokenAddress,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: erc20ABI,
+          functionName: "approve",
+          args: [notesAddressV2, maxUint256],
+        }),
+      });
+    }
+
+    const op = this.opBuilder.executeBatch(executions, opMetadata);
 
     return this.sendUserOp(op);
   }
 
   /** Claims an ephemeral note. Returns userOpHash. */
-  public async claimEphemeralNote(
-    ephemeralOwner: `0x${string}`,
-    signature: `0x${string}`,
+  public async claimEphemeralNoteV1(
+    ephemeralOwner: Hex,
+    signature: Hex,
     opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
@@ -201,6 +224,57 @@ export class DaimoOpSender {
             abi: Contracts.daimoEphemeralNotesABI,
             functionName: "claimNote",
             args: [ephemeralOwner, signature],
+          }),
+        },
+      ],
+      opMetadata
+    );
+
+    return this.sendUserOp(op);
+  }
+
+  public claimEphemeralNoteSelf(
+    ephemeralOwner: Hex,
+    opMetadata: DaimoOpMetadata
+  ) {
+    console.log(`[OP] cancel ephemeral note V2 ${ephemeralOwner}`);
+
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: this.opConfig.notesAddressV2,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.daimoEphemeralNotesV2ABI,
+            functionName: "claimNoteSelf",
+            args: [ephemeralOwner],
+          }),
+        },
+      ],
+      opMetadata
+    );
+
+    return this.sendUserOp(op);
+  }
+
+  public async claimEphemeralNoteRecipient(
+    ephemeralOwner: Hex,
+    signature: Hex,
+    opMetadata: DaimoOpMetadata
+  ) {
+    console.log(`[OP] claim ephemeral note v2 ${ephemeralOwner}`);
+
+    const { accountAddress, notesAddressV2 } = this.opConfig;
+
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: notesAddressV2,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.daimoEphemeralNotesV2ABI,
+            functionName: "claimNoteRecipient",
+            args: [ephemeralOwner, accountAddress, signature],
           }),
         },
       ],

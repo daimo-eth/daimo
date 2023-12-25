@@ -62,7 +62,8 @@ export class NoteIndexer {
           log_idx,
           f,
           ephemeral_owner,
-          amount
+          amount,
+          log_addr
         from note_created
         where block_num >= $1
         and block_num <= $2
@@ -78,6 +79,7 @@ export class NoteIndexer {
         from: getAddress(bytesToHex(r.f, { size: 20 })),
         ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
         amount: BigInt(r.amount),
+        logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
       };
     });
 
@@ -96,6 +98,7 @@ export class NoteIndexer {
         status: DaimoNoteState.Confirmed,
         dollars,
         id,
+        contractAddress: log.logAddr,
         ephemeralOwner: log.ephemeralOwner,
         link: {
           type: "notev2",
@@ -130,7 +133,8 @@ export class NoteIndexer {
           f,
           redeemer,
           ephemeral_owner,
-          amount
+          amount,
+          log_addr
       from note_redeemed
       where block_num >= $1
       and block_num <= $2
@@ -149,6 +153,7 @@ export class NoteIndexer {
             bytesToHex(r.ephemeral_owner, { size: 20 })
           ),
           amount: BigInt(r.amount),
+          logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
         };
       })
       .map(async (log) => {

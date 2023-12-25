@@ -6,6 +6,7 @@ import { z } from "zod";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
+import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
@@ -221,6 +222,28 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode } = opts.input;
         return faucet.verifyInviteCode(inviteCode);
+      }),
+
+    claimEphemeralNoteSponsored: publicProcedure
+      .input(
+        z.object({
+          ephemeralOwner: zAddress,
+          recipient: zAddress,
+          signature: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const ephemeralOwner = getAddress(opts.input.ephemeralOwner);
+        const recipient = getAddress(opts.input.recipient);
+        const signature = opts.input.signature;
+
+        return claimEphemeralNoteSponsored(
+          vc,
+          noteIndexer,
+          ephemeralOwner,
+          recipient,
+          signature
+        );
       }),
   });
 }

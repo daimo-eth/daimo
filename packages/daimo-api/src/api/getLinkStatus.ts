@@ -7,6 +7,7 @@ import {
   parseDaimoLink,
   DaimoNoteState,
 } from "@daimo/common";
+import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -79,6 +80,7 @@ export async function getLinkStatus(
         }
         const pending: DaimoNoteStatus = {
           status: DaimoNoteState.Pending,
+          contractAddress: daimoEphemeralNotesV2Address,
           ephemeralOwner: link.ephemeralOwner,
           link,
           sender,
@@ -98,6 +100,7 @@ export async function getLinkStatus(
       if (ret == null) {
         const pending: DaimoNoteStatus = {
           status: DaimoNoteState.Pending,
+          contractAddress: daimoEphemeralNotesV2Address,
           ephemeralOwner: undefined,
           link,
           sender,
