@@ -3,7 +3,7 @@ import { foundry } from "@wagmi/cli/plugins";
 
 import latestAccountFactory from "../contract/broadcast/DeployAccountFactory.s.sol/8453/run-latest.json";
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
-import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/84531/run-latest.json";
+import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/8453/run-latest.json";
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
 import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/8453/deploy-latest.json";
 
