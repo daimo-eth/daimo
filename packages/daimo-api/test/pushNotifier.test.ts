@@ -111,10 +111,10 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 2);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "$1.00 claimed");
+    assert.strictEqual(output[0].title, "$1.00 sent");
     assert.strictEqual(
       output[0].body,
-      "bob claimed your 1.00 USDC payment link"
+      "bob accepted your 1.00 USDC payment link"
     );
     assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
     assert.strictEqual(output[1].title, "Received $1.00");
@@ -206,7 +206,7 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "$4.20 claimed");
+    assert.strictEqual(output[0].title, "Reclaimed $4.20");
     assert.strictEqual(
       output[0].body,
       "You cancelled your 4.20 USDC payment link"

@@ -58,7 +58,7 @@ export function SendNoteScreen({ route }: Props) {
         <Spacer h={8} />
         <InfoBox
           title="Pay by sending a link"
-          subtitle="Anyone with the link can claim it"
+          subtitle="Anyone with the link can accept it"
         />
         <Spacer h={32} />
         <TextCenter>
