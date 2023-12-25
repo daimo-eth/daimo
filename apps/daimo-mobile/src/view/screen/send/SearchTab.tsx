@@ -1,6 +1,6 @@
 import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   Platform,
   ScrollView,
