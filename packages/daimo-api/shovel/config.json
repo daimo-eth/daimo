@@ -2,28 +2,18 @@
   "pg_url": "$DATABASE_URL",
   "eth_sources": [
     {
-      "name": "base",
-      "chain_id": 8453,
-      "url": "$BASE_RPC_URL",
-      "batch_size": 10,
-      "concurrency": 4
-    },
-    {
-      "name": "base-goerli",
-      "chain_id": 84531,
-      "url": "$BASE_GOERLI_RPC_URL",
-      "batch_size": 10,
-      "concurrency": 4
+      "name": "$CHAIN_NAME",
+      "chain_id": "$CHAIN_ID",
+      "url": "$CHAIN_RPC_URL",
+      "batch_size": "10",
+      "concurrency": "4"
     }
   ],
   "integrations": [
     {
       "name": "names",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "names",
         "columns": [
@@ -75,10 +65,7 @@
     {
       "name": "key_added",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "key_added",
         "columns": [
@@ -132,10 +119,7 @@
     {
       "name": "key_removed",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "key_removed",
         "columns": [
@@ -189,10 +173,7 @@
     {
       "name": "transfers",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "transfers",
         "columns": [
@@ -244,10 +225,7 @@
     {
       "name": "note_created",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "note_created",
         "columns": [
@@ -302,10 +280,7 @@
     {
       "name": "note_redeemed",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "note_redeemed",
         "columns": [
@@ -366,10 +341,7 @@
     {
       "name": "erc4337_user_op",
       "enabled": true,
-      "sources": [
-        { "name": "base", "start": 5700000 },
-        { "name": "base-goerli", "start": 8750000 }
-      ],
+      "sources": [{ "name": "$CHAIN_NAME", "start": "$CHAIN_START_BLOCK" }],
       "table": {
         "name": "erc4337_user_op",
         "columns": [
