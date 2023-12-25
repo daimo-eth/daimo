@@ -2,6 +2,7 @@ import {
   DisplayOpEvent,
   EAccount,
   OpEvent,
+  PendingOpEventID,
   UserOpHex,
   assert,
   dollarsToAmount,
@@ -23,9 +24,6 @@ import { NamedError } from "../logic/log";
 import { getWrappedPasskeySigner } from "../logic/passkey";
 import { Account, getAccountManager, useAccount } from "../model/account";
 
-/** Action identifier, tuple of [opHash, txHash]. */
-export type ActionIdentifier = [Hex | undefined, Hex | undefined];
-
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
 
@@ -46,7 +44,7 @@ export function useSendAsync({
   /** Custom handler that overrides sendAsync, used to claim
    *  ephemeral notes without requesting a user signature / face ID.
    */
-  customHandler?: (setAS: SetActStatus) => Promise<ActionIdentifier>;
+  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEventID>;
   pendingOp?: OpEvent;
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
@@ -73,7 +71,7 @@ export function useSendAsync({
     );
     assert(account != null, "No account");
 
-    const [opHash, txHash] = customHandler
+    const { opHash, txHash } = customHandler
       ? await customHandler(setAS)
       : await sendAsync(setAS, account, keySlot, !!passkeyAccount, sendFn);
 
@@ -205,7 +203,7 @@ async function sendAsync(
   keySlot: number | undefined,
   usePasskey: boolean,
   sendFn: SendOpFn
-): Promise<ActionIdentifier> {
+): Promise<PendingOpEventID> {
   try {
     if (keySlot === undefined && !usePasskey)
       throw new Error("No key slot or passkey");
@@ -221,11 +219,11 @@ async function sendAsync(
       chainId: homeChainId,
     });
 
-    setAS("loading", "Signing...");
+    setAS("loading", "Authorizing...");
     const opHash = await sendFn(opSender);
     setAS("success", "Accepted");
 
-    return [opHash, undefined];
+    return { opHash };
   } catch (e: any) {
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");

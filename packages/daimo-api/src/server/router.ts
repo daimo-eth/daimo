@@ -1,8 +1,4 @@
 import { zAddress, zHex, zUserOpHex } from "@daimo/common";
-import {
-  daimoEphemeralNotesV2ABI,
-  daimoEphemeralNotesV2Address,
-} from "@daimo/contract";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
@@ -10,6 +6,7 @@ import { z } from "zod";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
+import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
@@ -240,13 +237,13 @@ export function createRouter(
         const recipient = getAddress(opts.input.recipient);
         const signature = opts.input.signature;
 
-        const claimTxHash = await vc.writeContract({
-          abi: daimoEphemeralNotesV2ABI,
-          address: daimoEphemeralNotesV2Address,
-          functionName: "claimNoteRecipient",
-          args: [ephemeralOwner, recipient, signature],
-        });
-        return claimTxHash;
+        return claimEphemeralNoteSponsored(
+          vc,
+          noteIndexer,
+          ephemeralOwner,
+          recipient,
+          signature
+        );
       }),
   });
 }

@@ -23,6 +23,16 @@ export type OpEvent = TransferOpEvent | PaymentLinkOpEvent | KeyRotationOpEvent;
 export type DisplayOpEvent = TransferOpEvent | PaymentLinkOpEvent;
 
 /**
+ *  Unique identifier for a pending OpEvent. For a pending op, we (usually)
+ *  only know either the opHash or the txHash. Set only one of them in this
+ *  type to uniquely identify a pending user action.
+ */
+export type PendingOpEventID = {
+  opHash?: Hex;
+  txHash?: Hex;
+};
+
+/**
  * Represents a transfer of tokens from one address to another.
  *
  * There's a surprising amount of complexity to the state of a transfer.

@@ -70,7 +70,11 @@ function HistoryOpScreenInner({
   // A pending op always has an opHash (since its initiated by the user's
   // account).
   let { op } = route.params;
-  op = syncFindSameOp(op.opHash, op.txHash, account.recentTransfers) || op;
+  op =
+    syncFindSameOp(
+      { opHash: op.opHash, txHash: op.txHash },
+      account.recentTransfers
+    ) || op;
 
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 

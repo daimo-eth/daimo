@@ -3,6 +3,7 @@ import {
   DaimoNoteState,
   DaimoNoteStatus,
   EAccount,
+  PendingOpEventID,
   OpStatus,
   dollarsToAmount,
   getAccountName,
@@ -24,7 +25,6 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 
 import { SetActStatus } from "../../../action/actStatus";
 import {
-  ActionIdentifier,
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
@@ -156,7 +156,7 @@ function NoteDisplayInner({
           signature: ephemeralSignature,
         });
         setAS("success", "Accepted note");
-        return [undefined, txHash] as ActionIdentifier;
+        return { txHash } as PendingOpEventID;
       }
     : undefined;
 

@@ -26,9 +26,9 @@ interface DaimoOpConfig {
   /** Decimals for that token. */
   tokenDecimals: number;
   /** EphemeralNotes instance. The stablecoin used must match tokenAddress. */
-  notesAddress: `0x${string}`;
+  notesAddress: Address;
   /** EphemeralNotesV2 instance. The stablecoin used must match tokenAddress. */
-  notesAddressV2: `0x${string}`;
+  notesAddressV2: Address;
   /** Daimo account address. */
   accountAddress: Address;
   /** Signs userops. Must, in some form, check user presence. */
@@ -167,7 +167,7 @@ export class DaimoOpSender {
 
   /** Creates an ephemeral note V2 with given value. Returns userOpHash. */
   public async createEphemeralNote(
-    ephemeralOwner: `0x${string}`,
+    ephemeralOwner: Hex,
     amount: `${number}`,
     approveFirst: boolean,
     opMetadata: DaimoOpMetadata
@@ -209,8 +209,8 @@ export class DaimoOpSender {
 
   /** Claims an ephemeral note. Returns userOpHash. */
   public async claimEphemeralNoteV1(
-    ephemeralOwner: `0x${string}`,
-    signature: `0x${string}`,
+    ephemeralOwner: Hex,
+    signature: Hex,
     opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
@@ -234,10 +234,10 @@ export class DaimoOpSender {
   }
 
   public claimEphemeralNoteSelf(
-    ephemeralOwner: `0x${string}`,
+    ephemeralOwner: Hex,
     opMetadata: DaimoOpMetadata
   ) {
-    console.log(`[OP] self claim ephemeral note V2 ${ephemeralOwner}`);
+    console.log(`[OP] cancel ephemeral note V2 ${ephemeralOwner}`);
 
     const op = this.opBuilder.executeBatch(
       [
@@ -258,11 +258,11 @@ export class DaimoOpSender {
   }
 
   public async claimEphemeralNoteRecipient(
-    ephemeralOwner: `0x${string}`,
-    signature: `0x${string}`,
+    ephemeralOwner: Hex,
+    signature: Hex,
     opMetadata: DaimoOpMetadata
   ) {
-    console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
+    console.log(`[OP] claim ephemeral note v2 ${ephemeralOwner}`);
 
     const { accountAddress, notesAddressV2 } = this.opConfig;
 
