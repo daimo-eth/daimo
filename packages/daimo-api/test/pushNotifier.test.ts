@@ -206,7 +206,7 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Recollected $4.20");
+    assert.strictEqual(output[0].title, "Reclaimed $4.20");
     assert.strictEqual(
       output[0].body,
       "You cancelled your 4.20 USDC payment link"

@@ -253,7 +253,7 @@ function NoteDisplayInner({
         if (netRecv === 0) {
           return `Gas too high to claim`;
         } else if (isOwnSentNote) {
-          return `Cancel this link, recollecting ${netDollarsReceivedStr}`;
+          return `Cancel this link, reclaiming ${netDollarsReceivedStr}`;
         } else {
           return `Accept this link, receiving ${netDollarsReceivedStr}`;
         }

@@ -268,7 +268,7 @@ export class PushNotifier {
         messages.push(
           ...this.getPushMessages(
             sender.addr,
-            `Recollected $${dollars}`,
+            `Reclaimed $${dollars}`,
             `You cancelled your ${dollars} ${symbol} payment link`
           )
         );
