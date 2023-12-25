@@ -29,7 +29,7 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextH3, TextLight, TextMeta } from "../shared/text";
+import { TextBody, TextLight, TextMeta } from "../shared/text";
 
 export function SettingsScreen() {
   const [account] = useAccount();
@@ -49,12 +49,12 @@ export function SettingsScreen() {
         <AccountSection account={account} />
         <Spacer h={32} />
         <DevicesSection account={account} />
-        <Spacer h={8} />
+        <Spacer h={24} />
         <TextButton
           title={showDetails ? "Hide details" : "Show details"}
           onPress={() => setShowDetails(!showDetails)}
         />
-        <Spacer h={8} />
+        <Spacer h={16} />
         {showDetails && <DetailsSection account={account} />}
       </ScrollView>
     </View>
@@ -73,7 +73,7 @@ function AccountSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <AccountHero account={account} />
-      <Spacer h={16} />
+      <Spacer h={24} />
       <ButtonMed
         type="subtle"
         title="View account on explorer"
@@ -97,10 +97,10 @@ function AccountHero({ account }: { account: Account }) {
       <View>
         <AccountCopyLinkButton eAcc={eAcc} size="h3" />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-          <TextH3 color={color.gray3}>
-            {tokenSymbol} · {l2Name}{" "}
-            {chainConfig.chainL2.testnet && <Badge>TESTNET</Badge>}
-          </TextH3>
+          <TextBody color={color.gray3}>
+            {tokenSymbol} · {l2Name}
+            {chainConfig.chainL2.testnet && <> · TESTNET</>}
+          </TextBody>
         </View>
       </View>
     </View>
@@ -152,7 +152,7 @@ function DevicesSection({ account }: { account: Account }) {
         style={styles.listBody}
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
-      <Spacer h={16} />
+      <Spacer h={24} />
       <ButtonMed type="primary" title="CREATE BACKUP" onPress={createBackup} />
       <Spacer h={16} />
       <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
@@ -205,7 +205,14 @@ function DeviceRow({
             {pendingRemoval && <PendingDot />}
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={color.gray3}>{dispTime}</TextMeta>
+            {!isCurrentDevice && (
+              <TextMeta color={color.gray3}>{dispTime}</TextMeta>
+            )}
+            {!isCurrentDevice && <Spacer w={16} />}
+            <TextMeta color={pendingRemoval ? color.gray3 : color.primary}>
+              {isCurrentDevice && "Log out"}
+              {!isCurrentDevice && "Remove"}
+            </TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -262,7 +269,7 @@ function DetailsSection({ account }: { account: Account }) {
           <KV key={k} label={k} value={v} />
         ))}
       </View>
-      {!account.pushToken && <Spacer h={8} />}
+      <Spacer h={24} />
       {!account.pushToken && (
         <ButtonMed
           type="subtle"
@@ -270,7 +277,7 @@ function DetailsSection({ account }: { account: Account }) {
           onPress={enableNotifications}
         />
       )}
-      <Spacer h={16} />
+      {!account.pushToken && <Spacer h={16} />}
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
       <Spacer h={32} />
     </View>
@@ -283,7 +290,7 @@ function KV({ label, value }: { label: string; value: string }) {
       <View style={styles.kvKey}>
         <TextMeta color={color.grayDark}>{label}</TextMeta>
       </View>
-      <TextMeta>{value}</TextMeta>
+      <TextMeta color={color.gray3}>{value}</TextMeta>
     </View>
   );
 }
@@ -309,7 +316,6 @@ const styles = StyleSheet.create({
     borderColor: color.grayLight,
   },
   headerRow: {
-    paddingTop: 16,
     paddingBottom: 8,
     paddingHorizontal: 2,
   },
@@ -328,10 +334,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   rowRight: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    gap: 2,
+    flexDirection: "row",
   },
   kvList: {
     flexDirection: "column",
