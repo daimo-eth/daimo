@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 
 import { color, ss } from "./style";
 
-const defaultColor = color.midnight;
+const defaultColor = color.grayMid;
 const defaultBgColor = color.grayLight;
 
 export function Badge({

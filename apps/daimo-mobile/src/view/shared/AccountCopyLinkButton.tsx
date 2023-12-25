@@ -7,7 +7,7 @@ import {
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useMemo, useState } from "react";
-import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { Platform, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import Spacer from "./Spacer";
 import { color, touchHighlightUnderlay } from "./style";
@@ -37,7 +37,8 @@ export function AccountCopyLinkButton({
   // Size
   const Elem = size === "h2" ? TextH2 : TextH3;
   const iconSize = size === "h2" ? 18 : 16;
-  const iconStyle = useMemo(() => ({ width: iconSize }), [iconSize]);
+  const base = Platform.OS === "ios" ? { paddingBottom: 2 } : {};
+  const iconStyle = useMemo(() => ({ ...base, width: iconSize }), [iconSize]);
 
   return (
     <TouchableHighlight

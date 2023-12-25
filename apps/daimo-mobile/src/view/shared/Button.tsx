@@ -241,7 +241,7 @@ const buttonStyles = {
   med: StyleSheet.create({
     button: {
       paddingHorizontal: 16,
-      paddingVertical: 12,
+      paddingVertical: 16,
       borderRadius: 6,
       backgroundColor: color.primaryBgLight,
     },
