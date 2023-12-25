@@ -13,7 +13,7 @@ const slotTypeToFirstSlot = {
 };
 
 // Top two bits of slot denote the type.
-function getSlotType(slot: number): SlotType | undefined {
+export function getSlotType(slot: number): SlotType | undefined {
   if (slot > 255) return undefined;
 
   const slotType = slot & 0xc0;
@@ -27,20 +27,6 @@ function getSlotType(slot: number): SlotType | undefined {
   else return undefined;
 }
 
-// diff is the index of key wrt first slot of its type
-// convert diff to a human readable string (A, B, C, ... Z, AA, AB, ...)
-function getSlotCharCode(diff: number): string {
-  const base = 26;
-  let result = "";
-  let n = diff + 1; // 1-indexed
-  while (n > 0) {
-    const rem = (n - 1) % base;
-    result = String.fromCharCode(65 + rem) + result;
-    n = Math.floor((n - 1) / base);
-  }
-  return result;
-}
-
 // slots 0 - 63 are for mobile devices
 // slots 64 - 127 are for computer devices
 // slots 128 - 255 are for passkey backups
@@ -48,8 +34,8 @@ export function getSlotLabel(slot: number): string {
   const slotType = getSlotType(slot);
   assert(slotType !== undefined, "Invalid slot");
 
-  const prefix = slotType + " ";
-  return prefix + getSlotCharCode(slot - slotTypeToFirstSlot[slotType]);
+  const index = slot - slotTypeToFirstSlot[slotType] + 1;
+  return index === 1 ? slotType : `${slotType} ${index}`;
 }
 
 export function findUnusedSlot(allUsedSlots: number[], type: SlotType): number {
