@@ -4,11 +4,11 @@ import test from "node:test";
 import { SlotType, findUnusedSlot, getSlotLabel } from "../src/keySlot";
 
 const testCases: [number, string][] = [
-  [0, "Phone A"],
-  [25, "Phone Z"],
-  [26, "Phone AA"],
-  [129, "Passkey Backup B"],
-  [65, "Computer B"],
+  [0, "Phone"],
+  [25, "Phone 26"],
+  [26, "Phone 27"],
+  [129, "Passkey Backup 2"],
+  [65, "Computer 2"],
 ];
 
 test("describes identifiers correctly", () => {
