@@ -6,7 +6,7 @@ import {
   daimoAccountFactoryConfig,
   daimoEphemeralNotesAddress,
   daimoEphemeralNotesV2Address,
-  daimoPaymasterAddress,
+  daimoPaymasterV2Address,
   entryPointABI,
   erc20ABI,
 } from "@daimo/contract";
@@ -205,7 +205,7 @@ export async function createAccount() {
       maxPriorityFeePerGas: "1000000",
       maxFeePerGas: "100000050",
       estimatedFee: 0.1,
-      paymasterAddress: daimoPaymasterAddress,
+      paymasterAddress: daimoPaymasterV2Address,
       preVerificationGas: "0",
     },
   });

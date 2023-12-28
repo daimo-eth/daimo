@@ -5,7 +5,7 @@ import {
   assert,
   assertNotNull,
 } from "@daimo/common";
-import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
+import { daimoChainFromId, daimoPaymasterV2Address } from "@daimo/contract";
 import {
   Hex,
   concatHex,
@@ -186,7 +186,7 @@ async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
   // Experimentally try the new MetaPaymaster-sponsored Daimo paymaster.
   const paymasterAddr =
     chainConfig.chainL2.id === 8453
-      ? daimoPaymasterAddress
+      ? daimoPaymasterV2Address
       : "0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877";
 
   const ret = concatHex([paymasterAddr, sigHex, validUntilHex]);

@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoPaymaster.sol";
+import "../src/DaimoVerifier.sol";
 import "openzeppelin-contracts/contracts/utils/Create2.sol";
 
 /// Manager script for DaimoVerifier. Meant for one-time use,
