@@ -87,7 +87,7 @@ export class CoinIndexer {
         Date.now() - startTime
       }ms`
     );
-    this.allTransfers.push(...logs);
+    this.allTransfers = this.allTransfers.concat(logs);
     this.listeners.forEach((l) => l(logs));
   }
 
