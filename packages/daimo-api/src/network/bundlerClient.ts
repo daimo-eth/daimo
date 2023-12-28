@@ -1,7 +1,9 @@
 import {
   bundleBulkerABI,
   bundleBulkerAddress,
-  daimoTransferInflatorABI,
+  daimoOpInflatorABI,
+  perOpInflatorABI,
+  perOpInflatorAddress,
 } from "@daimo/bulk";
 import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
@@ -11,6 +13,7 @@ import { Address, Hex, PublicClient, hexToBigInt, isHex } from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
+import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
 import { chainConfig } from "../env";
 
@@ -43,45 +46,56 @@ export class BundlerClient {
   async init(publicClient: PublicClient) {
     console.log(`[BUNDLER] init, loading compression info`);
 
-    const inflatorAddr = lookup(
-      [84531, "0xc4616e117C97088c991AE0ddDead010e384C00d4" as Address],
-      [8453, "0xc581c9ce986E348c8b8c47bA6CC7d51b47AE330e" as Address]
+    const opInflatorAddr = lookup(
+      [84531, "0xb742F6BC849020F1a7180fDFe02662F8Bce9d9C4" as Address],
+      [8453, "0x8ABD51A785160481DB9E638eE71A3F4Ec4B996D8" as Address]
     )(chainConfig.chainL2.id);
 
-    const [inflatorID, inflatorCoinAddr, inflatorPaymaster] = await Promise.all(
-      [
+    const [inflatorID, opInflatorID, opInflatorCoinAddr, opInflatorPaymaster] =
+      await Promise.all([
         publicClient.readContract({
           abi: bundleBulkerABI,
           address: bundleBulkerAddress,
           functionName: "inflatorToID",
-          args: [inflatorAddr],
+          args: [perOpInflatorAddress],
         }),
         publicClient.readContract({
-          abi: daimoTransferInflatorABI,
-          address: inflatorAddr,
+          abi: perOpInflatorABI,
+          address: perOpInflatorAddress,
+          functionName: "inflatorToID",
+          args: [opInflatorAddr],
+        }),
+        publicClient.readContract({
+          abi: daimoOpInflatorABI,
+          address: opInflatorAddr,
           functionName: "coinAddr",
         }),
         publicClient.readContract({
-          abi: daimoTransferInflatorABI,
-          address: inflatorAddr,
+          abi: daimoOpInflatorABI,
+          address: opInflatorAddr,
           functionName: "paymaster",
         }),
-      ]
-    );
+      ]);
     console.log(`[BUNDLER] init done. inflatorID: ${inflatorID}`);
 
     this.compressionInfo = {
-      inflatorAddr,
+      inflatorAddr: perOpInflatorAddress,
       inflatorID,
-      inflatorCoinAddr,
-      inflatorPaymaster,
+      opInflatorID,
+      opInflatorCoinAddr,
+      opInflatorPaymaster,
     };
   }
 
-  async sendUserOp(op: UserOpHex, viemClient: ViemClient) {
+  async sendUserOp(
+    op: UserOpHex,
+    viemClient: ViemClient,
+    nameReg?: NameRegistry
+  ) {
     console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
     try {
-      const compressed = this.compress(op);
+      assert(nameReg != null, "nameReg required");
+      const compressed = this.compress(op, nameReg);
       // Simultanously get the opHash (view function) and submit the bundle
       const [opHash] = await Promise.all([
         this.getOpHash(op, viemClient.publicClient),
@@ -135,11 +149,11 @@ export class BundlerClient {
     });
   }
 
-  compress(op: UserOpHex) {
+  compress(op: UserOpHex, nameReg: NameRegistry) {
     if (this.compressionInfo == null) {
       throw new Error("can't compress, inflator info not loaded");
     }
-    return compressBundle(op, this.compressionInfo);
+    return compressBundle(op, this.compressionInfo, nameReg);
   }
 
   async sendCompressedOpToBulk(compressed: Hex, viemClient: ViemClient) {
