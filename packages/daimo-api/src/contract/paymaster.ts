@@ -1,26 +1,11 @@
-import {
-  ChainGasConstants,
-  EAccount,
-  UserOpHex,
-  assert,
-  assertNotNull,
-} from "@daimo/common";
-import { daimoChainFromId, daimoPaymasterAddress } from "@daimo/contract";
-import {
-  Hex,
-  concatHex,
-  hexToBigInt,
-  hexToBytes,
-  keccak256,
-  numberToHex,
-  toHex,
-} from "viem";
-import { sign } from "viem/accounts";
+import { ChainGasConstants, EAccount, UserOpHex } from "@daimo/common";
+import { daimoChainFromId, daimoPaymasterV2Address } from "@daimo/contract";
+import { hexToBigInt } from "viem";
 
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
-import { ViemClient, getEOA } from "../network/viemClient";
+import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
@@ -136,10 +121,11 @@ export class Paymaster {
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
     const isSponsored =
+      !chainConfig.chainL2.testnet &&
       sender.name != null &&
       (await this.db.checkPaymasterWhitelist(sender.name));
     const paymasterAndData = isSponsored
-      ? await getPaymasterWithSignature(sender)
+      ? daimoPaymasterV2Address
       : chainConfig.pimlicoPaymasterAddress;
 
     // TODO: estimate real Pimlico fee for non-sponsored ops.
@@ -157,41 +143,6 @@ export class Paymaster {
       preVerificationGas: gas.preVerificationGas.toString(),
     };
   }
-}
-
-const signerPrivateKey = assertNotNull(
-  process.env.DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY,
-  "Missing DAIMO_PAYMASTER_SIGNER_PRIVATE_KEY"
-) as Hex;
-const signer = getEOA(signerPrivateKey);
-
-async function getPaymasterWithSignature(sender: EAccount): Promise<Hex> {
-  const validUntil = (Date.now() / 1000 + 5 * 60) | 0; // 5 minute validity
-  const validUntilHex = numberToHex(validUntil, { size: 6 });
-  const ticketHex = concatHex([sender.addr, validUntilHex]);
-  assert(hexToBytes(ticketHex).length === 26, "paymaster: invalid ticket len");
-  const ticketHash = keccak256(ticketHex);
-  console.log(
-    `[PAYMASTER] sign ${ticketHex} ${ticketHash} with ${signer.address}`
-  );
-
-  const sig = await sign({ hash: ticketHash, privateKey: signerPrivateKey });
-  const sigHex = concatHex([
-    toHex(sig.v, { size: 1 }),
-    toHex(hexToBigInt(sig.r), { size: 32 }),
-    toHex(hexToBigInt(sig.s), { size: 32 }),
-  ]);
-  assert(sigHex.length === 65 * 2 + 2, "paymaster: invalid sig length");
-
-  // Experimentally try the new MetaPaymaster-sponsored Daimo paymaster.
-  const paymasterAddr =
-    chainConfig.chainL2.id === 8453
-      ? daimoPaymasterAddress
-      : "0x6f0F82fAFac7B5D8C269B02d408F094bAC6CF877";
-
-  const ret = concatHex([paymasterAddr, sigHex, validUntilHex]);
-  assert(ret.length === 91 * 2 + 2, "paymaster: invalid ret length");
-  return ret;
 }
 
 function getDummyOp(): UserOpHex {

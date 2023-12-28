@@ -938,10 +938,10 @@ export const daimoNameRegistryProxyConfig = {
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DaimoPaymaster
+// DaimoPaymasterV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoPaymasterABI = [
+export const daimoPaymasterV2ABI = [
   {
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -969,18 +969,18 @@ export const daimoPaymasterABI = [
     outputs: [],
   },
   {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'bundlerWhitelist',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
     stateMutability: 'payable',
     type: 'function',
     inputs: [],
     name: 'deposit',
     outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'destWhitelist',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'view',
@@ -1043,24 +1043,8 @@ export const daimoPaymasterABI = [
       { name: 'addresses', internalType: 'address[]', type: 'address[]' },
       { name: 'isWhitelisted', internalType: 'bool', type: 'bool' },
     ],
-    name: 'setDestAddressWhitelist',
+    name: 'setBundlerWhitelist',
     outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: '_ticketSigner', internalType: 'address', type: 'address' },
-    ],
-    name: 'setTicketSigner',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'ticketSigner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -1186,12 +1170,12 @@ export const daimoPaymasterABI = [
   },
 ] as const
 
-export const daimoPaymasterAddress =
-  '0xedb395b8BD78788A57e3C8eD9b748f9CC29C2864' as const
+export const daimoPaymasterV2Address =
+  '0xac5917075b3ED3a6a4516398800f3f64FCf4631E' as const
 
-export const daimoPaymasterConfig = {
-  address: daimoPaymasterAddress,
-  abi: daimoPaymasterABI,
+export const daimoPaymasterV2Config = {
+  address: daimoPaymasterV2Address,
+  abi: daimoPaymasterV2ABI,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

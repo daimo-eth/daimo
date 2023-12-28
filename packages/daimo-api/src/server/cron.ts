@@ -5,7 +5,7 @@ import {
 } from "@daimo/common";
 import {
   daimoChainFromId,
-  daimoPaymasterAddress,
+  daimoPaymasterV2Address,
   entryPointABI,
 } from "@daimo/contract";
 import { CronJob } from "cron";
@@ -78,7 +78,7 @@ export class Crontab {
       address: Constants.ERC4337.EntryPoint as Hex,
       abi: entryPointABI,
       functionName: "getDepositInfo",
-      args: [daimoPaymasterAddress],
+      args: [daimoPaymasterV2Address],
     });
 
     const depositEth = Number(formatEther(depositInfo.deposit));
@@ -86,7 +86,7 @@ export class Crontab {
 
     await this.sendLowBalanceMessage(
       depositEth,
-      `Paymaster ${daimoPaymasterAddress} ETH`,
+      `Paymaster ${daimoPaymasterV2Address} ETH`,
       0.03,
       0.01
     );

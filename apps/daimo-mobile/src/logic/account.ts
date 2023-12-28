@@ -1,4 +1,4 @@
-import { DaimoChain, daimoPaymasterAddress } from "@daimo/contract";
+import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { env } from "./env";
@@ -37,7 +37,7 @@ export function createEmptyAccount(
       maxPriorityFeePerGas: "0",
       maxFeePerGas: "0",
       estimatedFee: 0,
-      paymasterAddress: daimoPaymasterAddress,
+      paymasterAddress: daimoPaymasterV2Address,
       preVerificationGas: "0",
     },
 

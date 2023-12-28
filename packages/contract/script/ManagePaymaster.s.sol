@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoPaymaster.sol";
+import "../src/DaimoPaymasterV2.sol";
 import "openzeppelin-contracts/contracts/utils/Create2.sol";
 
 contract DeployPaymasterScript is Script {
@@ -19,54 +19,39 @@ contract DeployPaymasterScript is Script {
         vm.startBroadcast();
 
         // Use CREATE2
-        new DaimoPaymaster{salt: 0}(entryPoint, msg.sender, metaPaymaster);
+        new DaimoPaymasterV2{salt: 0}(entryPoint, msg.sender, metaPaymaster);
 
         vm.stopBroadcast();
     }
 
-    function start(DaimoPaymaster paymaster) public payable {
-        // start by staking paymaster: this is currently commented out
-        // because Pimlico doesn't seem to be using it.
-        // paymaster.addStake{value: 0.05 ether}(86400);
-
+    function start(DaimoPaymasterV2 paymaster) public payable {
         // deposit for paymaster
-        // unnecessary with metapaymaster
-        // addDeposit(paymaster);
+        addDeposit(paymaster);
 
         // whitelist destinations for paymaster
-        whitelistDests(paymaster);
+        whitelistBundler(paymaster);
     }
 
-    function addDeposit(DaimoPaymaster paymaster) public payable {
+    function addDeposit(DaimoPaymasterV2 paymaster) public payable {
         console.log("previous deposit:", paymaster.getDeposit());
 
         vm.startBroadcast();
-        paymaster.deposit{value: 0.01 ether}();
+        paymaster.deposit{value: 0.005 ether}();
         vm.stopBroadcast();
 
         console.log("new deposit:", paymaster.getDeposit());
     }
 
-    function whitelistDests(DaimoPaymaster paymaster) public {
-        // whitelist destination addresses
-        address[] memory dests = new address[](3);
-        dests[0] = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913; // Base USDC
-        dests[1] = 0x1B85deDe8178E18CdE599B4C9d913534553C3dBf; // CREATE-2ed Base Goerli testnet USDC
-        dests[2] = 0x4AdcA7cB84497c9c4c308063D2f219C7b6041183; // CREATE-2ed DaimoEphemeralNotes
-        // note that the name registry contract is not called by the account directly
+    function whitelistBundler(DaimoPaymasterV2 paymaster) public {
+        address[] memory bundlers = new address[](1);
+        bundlers[0] = 0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7; // Daimo API
 
         vm.startBroadcast();
-        paymaster.setDestAddressWhitelist(dests, true);
+        paymaster.setBundlerWhitelist(bundlers, true);
         vm.stopBroadcast();
     }
 
-    function setTicketSigner(DaimoPaymaster paymaster, address signer) public {
-        vm.startBroadcast();
-        paymaster.setTicketSigner(signer);
-        vm.stopBroadcast();
-    }
-
-    function stop(DaimoPaymaster paymaster) public {
+    function stop(DaimoPaymasterV2 paymaster) public {
         uint256 currentDeposit = paymaster.getDeposit();
 
         vm.startBroadcast();
