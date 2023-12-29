@@ -30,7 +30,7 @@ interface IMetaPaymaster {
 /// while still retaining strong censorship resistance for a reasonable price.
 contract DaimoPaymasterV2 is BasePaymaster {
     mapping(address => bool) public bundlerWhitelist;
-    IMetaPaymaster public immutable metaPaymaster;
+    IMetaPaymaster public metaPaymaster;
 
     uint256 private constant POST_OP_OVERHEAD = 34982;
 
@@ -41,11 +41,9 @@ contract DaimoPaymasterV2 is BasePaymaster {
 
     constructor(
         IEntryPoint _entryPoint,
-        address _owner,
-        IMetaPaymaster _metaPaymaster
+        address _owner
     ) BasePaymaster(_entryPoint) {
         transferOwnership(_owner);
-        metaPaymaster = _metaPaymaster;
     }
 
     function setBundlerWhitelist(
@@ -55,6 +53,10 @@ contract DaimoPaymasterV2 is BasePaymaster {
         for (uint256 i = 0; i < addresses.length; i++) {
             bundlerWhitelist[addresses[i]] = isWhitelisted;
         }
+    }
+
+    function setMetaPaymaster(IMetaPaymaster _metaPaymaster) public onlyOwner {
+        metaPaymaster = _metaPaymaster;
     }
 
     function _validatePaymasterUserOp(
@@ -79,6 +81,9 @@ contract DaimoPaymasterV2 is BasePaymaster {
         bytes calldata context,
         uint256 actualGasCost
     ) internal override {
+        if (metaPaymaster == IMetaPaymaster(address(0))) {
+            return;
+        }
         if (mode == PostOpMode.postOpReverted) {
             return;
         }
