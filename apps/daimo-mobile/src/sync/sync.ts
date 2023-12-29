@@ -160,10 +160,10 @@ async function fetchSync(
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
   // Validation
-  assert(result.address === account.address);
-  assert(result.sinceBlockNum === sinceBlockNum);
-  assert(result.lastBlock >= result.sinceBlockNum);
-  assert(result.lastBlockTimestamp > 0);
+  assert(result.address === account.address, "wrong address");
+  assert(result.sinceBlockNum === sinceBlockNum, "wrong sinceBlockNum");
+  assert(result.lastBlock >= result.sinceBlockNum, "invalid lastBlock");
+  assert(result.lastBlockTimestamp > 0, "invalid lastBlockTimestamp");
   assert(
     result.chainGasConstants.paymasterAddress.length % 2 === 0,
     `invalid paymasterAndData ${result.chainGasConstants.paymasterAddress}`

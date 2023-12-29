@@ -99,7 +99,7 @@ export class BundlerClient {
       // Simultanously get the opHash (view function) and submit the bundle
       const [opHash] = await Promise.all([
         this.getOpHash(op, viemClient.publicClient),
-        this.sendCompressedOpToBulk(compressed, viemClient),
+        this.sendCompressedBundle(compressed, viemClient),
       ]);
 
       if (this.opIndexer) {
@@ -122,7 +122,11 @@ export class BundlerClient {
       return opHash;
     } catch (e) {
       console.log(`[BUNDLER] cant send compressed, falling back: ${e}`);
-      return await this.sendUserOpToProvider(op);
+      const [opHash] = await Promise.all([
+        this.getOpHash(op, viemClient.publicClient),
+        this.sendUncompressedBundle(op, viemClient),
+      ]);
+      return opHash;
     }
   }
 
@@ -131,21 +135,7 @@ export class BundlerClient {
       abi: entryPointABI,
       address: Constants.ERC4337.EntryPoint as Address,
       functionName: "getUserOpHash",
-      args: [
-        {
-          callData: op.callData,
-          callGasLimit: hexToBigInt(op.callGasLimit),
-          initCode: op.initCode,
-          maxFeePerGas: hexToBigInt(op.maxFeePerGas),
-          maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
-          preVerificationGas: hexToBigInt(op.preVerificationGas),
-          verificationGasLimit: hexToBigInt(op.verificationGasLimit),
-          nonce: hexToBigInt(op.nonce),
-          paymasterAndData: op.paymasterAndData,
-          sender: op.sender,
-          signature: op.signature,
-        },
-      ],
+      args: [userOpFromHex(op)],
     });
   }
 
@@ -156,7 +146,8 @@ export class BundlerClient {
     return compressBundle(op, this.compressionInfo, nameReg);
   }
 
-  async sendCompressedOpToBulk(compressed: Hex, viemClient: ViemClient) {
+  /// Send compressed userop. This is about 4x cheaper than sending uncompressed
+  async sendCompressedBundle(compressed: Hex, viemClient: ViemClient) {
     const txHash = await viemClient.writeContract({
       abi: bundleBulkerABI,
       address: bundleBulkerAddress,
@@ -166,12 +157,17 @@ export class BundlerClient {
     return txHash;
   }
 
-  async sendUserOpToProvider(op: UserOpHex) {
-    const args = [op, Constants.ERC4337.EntryPoint];
-    const opHash = await this.provider.send("eth_sendUserOperation", args);
-    assert(isHex(opHash));
-    console.log(`[BUNDLER] submitted userOpHash: ${opHash}`);
-    return opHash;
+  /// Send uncompressed. Used for ops for which we don't yet have an inflator.
+  async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
+    const beneficiary = viemClient.walletClient.account.address;
+    const txHash = await viemClient.writeContract({
+      abi: entryPointABI,
+      address: Constants.ERC4337.EntryPoint as Address,
+      functionName: "handleOps",
+      args: [[userOpFromHex(op)], beneficiary],
+    });
+    console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
+    return txHash;
   }
 
   async estimatePreVerificationGas(op: UserOpHex) {
@@ -207,4 +203,20 @@ export function getBundlerClientFromEnv(opIndexer?: OpIndexer) {
   const rpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
   assert(rpcUrl !== "", "DAIMO_BUNDLER_RPC env var missing");
   return new BundlerClient(rpcUrl, opIndexer);
+}
+
+function userOpFromHex(op: UserOpHex) {
+  return {
+    callData: op.callData,
+    callGasLimit: hexToBigInt(op.callGasLimit),
+    initCode: op.initCode,
+    maxFeePerGas: hexToBigInt(op.maxFeePerGas),
+    maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
+    preVerificationGas: hexToBigInt(op.preVerificationGas),
+    verificationGasLimit: hexToBigInt(op.verificationGasLimit),
+    nonce: hexToBigInt(op.nonce),
+    paymasterAndData: op.paymasterAndData,
+    sender: op.sender,
+    signature: op.signature,
+  };
 }
