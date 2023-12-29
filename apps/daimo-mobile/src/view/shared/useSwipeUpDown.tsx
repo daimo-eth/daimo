@@ -1,6 +1,6 @@
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Dimensions, Platform, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
@@ -47,9 +47,6 @@ export function useSwipeUpDown({
     }
   }, [nav, isFocused]);
 
-  const onOpenTransactionsModal = () => setIsOpen(true);
-  const onCloseTransactionsModal = () => setIsOpen(false);
-
   const bottomSheetScrollStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -74,8 +71,8 @@ export function useSwipeUpDown({
         itemMini={itemMini}
         itemFull={itemFull}
         swipeHeight={(screenDimensions.height / 3.5) | 0}
-        onShowFull={onOpenTransactionsModal}
-        onShowMini={onCloseTransactionsModal}
+        onShowFull={useCallback(() => setIsOpen(true), [])}
+        onShowMini={useCallback(() => setIsOpen(false), [])}
         disabled={disabled}
       />
     </Animated.View>
