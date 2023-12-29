@@ -190,7 +190,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       {isCurrentDevice && (
         <InfoBox
           title="You're using this device now"
-          subtitle="Deleting it will remove your access to this account"
+          subtitle="Removing it from this account will log you out"
         />
       )}
       <Spacer h={64} />
