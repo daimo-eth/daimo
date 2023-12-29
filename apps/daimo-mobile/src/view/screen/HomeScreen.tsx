@@ -44,19 +44,15 @@ function HomeScreenInner({ account }: { account: Account }) {
   const translationY = useSharedValue(0);
   const [isActionVisible, setIsActionVisible] = useState(false);
 
-  useEffect(() => {
-    const showActionTimeout = setTimeout(() => {
-      setIsActionVisible(true);
-    }, 1500);
-
-    return () => {
-      clearTimeout(showActionTimeout);
-    };
-  }, []);
-
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
+
+  // Show suggested action when available.
+  useEffect(() => {
+    const showActionTimeout = setTimeout(() => setIsActionVisible(true), 1500);
+    return () => clearTimeout(showActionTimeout);
+  }, []);
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(

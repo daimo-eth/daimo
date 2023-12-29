@@ -35,6 +35,7 @@ import {
   ParamListSend,
   ParamListSettings,
   ParamListTab,
+  useNav,
 } from "./shared/nav";
 import { color } from "./shared/style";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
@@ -155,6 +156,16 @@ function SendTab() {
 const HomeStack = createNativeStackNavigator<ParamListHome>();
 
 function HomeTab() {
+  // When tapping Home again, navigate to the top of the stack.
+  const nav = useNav();
+  useEffect(() => {
+    // @ts-ignore
+    const unsub = nav.addListener("tabPress", () => {
+      nav.navigate("HomeTab", { screen: "Home" });
+    });
+    return unsub;
+  });
+
   return (
     <HomeStack.Navigator initialRouteName="Home" screenOptions={noHeaders}>
       <HomeStack.Group>
