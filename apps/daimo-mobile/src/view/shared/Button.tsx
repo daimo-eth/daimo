@@ -51,18 +51,18 @@ export function LongPressBigButton(props: LongPressButtonProps) {
     .minDuration(props.duration)
     .enabled(!props.disabled || false)
     .onBegin(() => {
-      buttonScale.value = withTiming(0.97, { duration: props.duration });
+      buttonScale.value = withTiming(0.97, { duration: props.duration }, () => {
+        console.log("[BUTTON] LongPresButton pressed");
+        props.onPress && runOnJS(props.onPress)();
+      });
       animatedCircleProgress.value = withTiming(1, {
         duration: props.duration,
       });
     })
     .onFinalize((_, success) => {
-      if (success && props.onPress) {
-        runOnJS(props.onPress)();
-      } else {
-        buttonScale.value = withTiming(1);
-        animatedCircleProgress.value = withTiming(0);
-      }
+      console.log("[BUTTON] LongPressButton onFinalize");
+      buttonScale.value = withTiming(1);
+      animatedCircleProgress.value = withTiming(0);
     });
 
   const buttonStyle = useAnimatedStyle(() => {
