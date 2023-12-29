@@ -952,11 +952,6 @@ export const daimoPaymasterV2ABI = [
         type: 'address',
       },
       { name: '_owner', internalType: 'address', type: 'address' },
-      {
-        name: '_metaPaymaster',
-        internalType: 'contract IMetaPaymaster',
-        type: 'address',
-      },
     ],
   },
   {
@@ -1044,6 +1039,19 @@ export const daimoPaymasterV2ABI = [
       { name: 'isWhitelisted', internalType: 'bool', type: 'bool' },
     ],
     name: 'setBundlerWhitelist',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: '_metaPaymaster',
+        internalType: 'contract IMetaPaymaster',
+        type: 'address',
+      },
+    ],
+    name: 'setMetaPaymaster',
     outputs: [],
   },
   {
@@ -1171,7 +1179,7 @@ export const daimoPaymasterV2ABI = [
 ] as const
 
 export const daimoPaymasterV2Address =
-  '0xac5917075b3ED3a6a4516398800f3f64FCf4631E' as const
+  '0xa9E1CCB08053e4f5daBb506718352389C1547462' as const
 
 export const daimoPaymasterV2Config = {
   address: daimoPaymasterV2Address,
