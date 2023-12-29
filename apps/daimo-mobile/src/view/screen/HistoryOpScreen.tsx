@@ -99,11 +99,11 @@ function HistoryOpScreenInner({
 }
 
 function DaimoLogo() {
-  const source = require("../../../assets/daimo-logo-small.png");
+  const source = require("../../../assets/icon.png");
   // Must wrap in a View for correct centering on Android
   return (
     <View>
-      <Image source={source} />
+      <Image source={source} style={{ height: 36, width: 36 }} />
     </View>
   );
 }
