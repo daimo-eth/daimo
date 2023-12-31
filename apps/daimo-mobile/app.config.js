@@ -1,7 +1,7 @@
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.4.7";
-const BUILD_NUM = 94;
+const VERSION = "1.4.8";
+const BUILD_NUM = 95;
 
 export default {
   owner: "daimo",
