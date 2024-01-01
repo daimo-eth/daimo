@@ -1,7 +1,7 @@
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
 const VERSION = "1.4.8";
-const BUILD_NUM = 95;
+const BUILD_NUM = 96;
 
 export default {
   owner: "daimo",
@@ -92,7 +92,7 @@ export default {
           kotlinVersion: "1.8.0",
         },
         ios: {
-          deploymentTarget: "15.0",
+          deploymentTarget: "15.8",
         },
       },
     ],
