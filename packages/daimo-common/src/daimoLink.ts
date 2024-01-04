@@ -16,7 +16,8 @@ export type DaimoLink =
   | DaimoLinkRequest
   | DaimoLinkNote
   | DaimoLinkNoteV2
-  | DaimoLinkSettings;
+  | DaimoLinkSettings
+  | DaimoLinkInvite;
 
 /** Represents any Ethereum address */
 export type DaimoLinkAccount = {
@@ -59,6 +60,11 @@ export type DaimoLinkNoteV2 = {
 export type DaimoLinkSettings = {
   type: "settings";
   screen?: "add-device" | "add-passkey";
+};
+
+export type DaimoLinkInvite = {
+  type: "invite";
+  code: string;
 };
 
 // Returns a shareable https://daimo.com/... deep link.
@@ -108,6 +114,9 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
     case "settings": {
       if (link.screen == null) return `${linkBase}/settings`;
       else return `${linkBase}/settings/${link.screen}`;
+    }
+    case "invite": {
+      return `${linkBase}/invite/${link.code}`;
     }
   }
 }
@@ -208,6 +217,11 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       }
       const screen = parts[1] as "add-device" | "add-passkey" | undefined;
       return { type: "settings", screen };
+    }
+    case "invite": {
+      if (parts.length !== 2) return null;
+      const code = parts[1];
+      return { type: "invite", code };
     }
     default:
       return null;

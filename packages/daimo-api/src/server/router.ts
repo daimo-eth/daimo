@@ -101,7 +101,14 @@ export function createRouter(
       .input(z.object({ url: z.string() }))
       .query(async (opts) => {
         const { url } = opts.input;
-        return getLinkStatus(url, nameReg, opIndexer, coinIndexer, noteIndexer);
+        return getLinkStatus(
+          url,
+          nameReg,
+          opIndexer,
+          coinIndexer,
+          noteIndexer,
+          faucet
+        );
       }),
 
     lookupEthereumAccountByKey: publicProcedure
@@ -161,20 +168,30 @@ export function createRouter(
         z.object({
           name: z.string(),
           pubKeyHex: zHex,
-          invCode: z.string().optional(),
+          inviteLink: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { name, pubKeyHex, invCode } = opts.input;
+        const { name, pubKeyHex, inviteLink } = opts.input;
         telemetry.recordUserAction(opts.ctx, {
           name: "deployWallet",
           accountName: name,
           keys: {},
         });
+        const inviteLinkStatus = inviteLink
+          ? await getLinkStatus(
+              inviteLink,
+              nameReg,
+              opIndexer,
+              coinIndexer,
+              noteIndexer,
+              faucet
+            )
+          : undefined;
         const address = await deployWallet(
           name,
           pubKeyHex,
-          invCode,
+          inviteLinkStatus,
           watcher,
           nameReg,
           accountFactory,
@@ -217,6 +234,7 @@ export function createRouter(
         telemetry.recordUserAction(opts.ctx, action);
       }),
 
+    // DEPRECATED
     verifyInviteCode: publicProcedure
       .input(z.object({ inviteCode: z.string() }))
       .query(async (opts) => {

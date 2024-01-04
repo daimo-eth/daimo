@@ -6,11 +6,13 @@ import {
   dollarsToAmount,
   parseDaimoLink,
   DaimoNoteState,
+  DaimoInviteStatus,
 } from "@daimo/common";
 import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 
 import { CoinIndexer } from "../contract/coinIndexer";
+import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
@@ -20,7 +22,8 @@ export async function getLinkStatus(
   nameReg: NameRegistry,
   opIndexer: OpIndexer,
   coinIndexer: CoinIndexer,
-  noteIndexer: NoteIndexer
+  noteIndexer: NoteIndexer,
+  faucet: Faucet
 ): Promise<DaimoLinkStatus> {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -109,6 +112,16 @@ export async function getLinkStatus(
         };
         return pending;
       }
+      return ret;
+    }
+
+    case "invite": {
+      const inviteCode = link.code;
+      const isValid = await faucet.verifyInviteCode(inviteCode);
+      const ret: DaimoInviteStatus = {
+        link,
+        isValid,
+      };
       return ret;
     }
 

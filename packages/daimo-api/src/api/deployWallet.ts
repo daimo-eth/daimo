@@ -1,4 +1,10 @@
-import { DaimoAccountCall } from "@daimo/common";
+import {
+  DaimoAccountCall,
+  DaimoInviteStatus,
+  DaimoLinkStatus,
+  DaimoNoteState,
+  DaimoNoteStatus,
+} from "@daimo/common";
 import { daimoEphemeralNotesV2Address, erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
@@ -14,7 +20,7 @@ import { retryBackoff } from "../utils/retryBackoff";
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
-  invCode: string | undefined,
+  inviteLinkStatus: DaimoLinkStatus | undefined,
   watcher: Watcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
@@ -23,8 +29,19 @@ export async function deployWallet(
   paymaster: Paymaster
 ): Promise<Address> {
   // For now, invite code is required
-  const invCodeSuccess = invCode && (await faucet.useInviteCode(invCode));
-  if (!invCodeSuccess) {
+  const invSuccess = (function () {
+    if (!inviteLinkStatus) return false;
+    if (inviteLinkStatus.link.type === "invite") {
+      return (inviteLinkStatus as DaimoInviteStatus).isValid;
+    } else if (inviteLinkStatus.link.type === "notev2") {
+      return (
+        (inviteLinkStatus as DaimoNoteStatus).status ===
+        DaimoNoteState.Confirmed
+      );
+    } else return false;
+  })();
+
+  if (!invSuccess) {
     throw new Error("Invalid invite code");
   }
 
@@ -79,7 +96,7 @@ export async function deployWallet(
   if (deployReceipt.status === "success") {
     nameReg.onSuccessfulRegister(name, address);
 
-    if (invCode && chainConfig.chainL2.testnet) {
+    if (chainConfig.chainL2.testnet) {
       const dollars = 50;
       console.log(`[API] faucet req: $${dollars} USDC for ${name} ${address}`);
       faucet.request(address, dollars); // Kick off in background
@@ -89,9 +106,14 @@ export async function deployWallet(
   }
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
+  const inviteMeta =
+    inviteLinkStatus?.link.type +
+    (inviteLinkStatus?.link.type === "invite"
+      ? ` ${inviteLinkStatus.link.code}`
+      : "");
   const url = `${explorer}/address/${address}`;
   telemetry.recordClippy(
-    `New user ${name} with invite code ${invCode} at ${url}`,
+    `New user ${name} with invite code ${inviteMeta} at ${url}`,
     "celebrate"
   );
 
