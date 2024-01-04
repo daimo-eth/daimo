@@ -66,7 +66,6 @@ function AppBody() {
   useEffect(() => {
     const subscription = RNShake.addListener(() => {
       bottomSheetRef.current?.expand();
-      setIsDebugModalOpen(true);
     });
 
     return () => {
@@ -86,11 +85,7 @@ function AppBody() {
     []
   );
 
-  const onChangeIndex = (index: number) => {
-    if (index === -1) {
-      setIsDebugModalOpen(false);
-    }
-  };
+  const onChangeIndex = (index: number) => setIsDebugModalOpen(index > -1);
 
   const [sendDL] = useSendDebugLog();
 
