@@ -8,9 +8,10 @@ import {
   daimoPaymasterV2Address,
   entryPointABI,
 } from "@daimo/contract";
+import { daimoPaymasterV2ABI } from "@daimo/contract/dist/generated";
 import { CronJob } from "cron";
 import { Constants } from "userop";
-import { Hex, formatEther } from "viem";
+import { Hex, formatEther, getAddress } from "viem";
 
 import { Telemetry } from "./telemetry";
 import { CoinIndexer, Transfer } from "../contract/coinIndexer";
@@ -74,6 +75,18 @@ export class Crontab {
   }
 
   async checkPaymasterDeposit() {
+    const metaPaymaster = await this.vc.publicClient.readContract({
+      address: daimoPaymasterV2Address,
+      abi: daimoPaymasterV2ABI,
+      functionName: "metaPaymaster",
+    });
+
+    const isMetaPaymasterEnabled =
+      getAddress(metaPaymaster) !==
+      getAddress("0x0000000000000000000000000000000000000000");
+
+    console.log(`[CRON] checked meta paymaster ${isMetaPaymasterEnabled}`);
+
     const depositInfo = await this.vc.publicClient.readContract({
       address: Constants.ERC4337.EntryPoint as Hex,
       abi: entryPointABI,
@@ -87,8 +100,8 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterV2Address} ETH`,
-      0.03,
-      0.01
+      isMetaPaymasterEnabled ? 0.01 : 0.03,
+      isMetaPaymasterEnabled ? 0.005 : 0.01
     );
   }
 
