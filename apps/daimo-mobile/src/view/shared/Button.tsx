@@ -52,8 +52,10 @@ export function LongPressBigButton(props: LongPressButtonProps) {
     .enabled(!props.disabled || false)
     .onBegin(() => {
       buttonScale.value = withTiming(0.97, { duration: props.duration }, () => {
-        console.log("[BUTTON] LongPresButton pressed");
-        props.onPress && runOnJS(props.onPress)();
+        if (buttonScale.value === 0.97) {
+          console.log("[BUTTON] LongPresButton pressed");
+          props.onPress && runOnJS(props.onPress)();
+        }
       });
       animatedCircleProgress.value = withTiming(1, {
         duration: props.duration,
