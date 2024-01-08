@@ -4,7 +4,7 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -59,6 +59,7 @@ export default function App() {
 
 function AppBody() {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isDebugModalOpen, setIsDebugModalOpen] = useState(false);
 
   const snapPoints = useMemo(() => ["33%"], []);
 
@@ -76,7 +77,7 @@ function AppBody() {
     (props: BottomSheetDefaultBackdropProps) => (
       <BottomSheetBackdrop
         {...props}
-        disappearsOnIndex={-1}
+        disappearsOnIndex={-0.9}
         appearsOnIndex={0}
         pressBehavior="close"
       />
@@ -84,29 +85,37 @@ function AppBody() {
     []
   );
 
+  const onChangeIndex = (index: number) => setIsDebugModalOpen(index > -1);
+
   const [sendDL] = useSendDebugLog();
 
   return (
     <SafeAreaProvider>
       <TabNav />
       <StatusBar style="auto" />
-      <BottomSheet
-        handleComponent={ScrollPellet}
-        backdropComponent={renderBackdrop}
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose
+      <View
+        style={styles.bottomSheetWrapper}
+        pointerEvents={isDebugModalOpen ? "auto" : "none"}
       >
-        <View style={styles.contentContainer}>
-          <Spacer h={16} />
-          <TextH3>Did something go wrong?</TextH3>
-          <Spacer h={12} />
-          <TextLight>Help us realize what's going wrong.</TextLight>
-          <Spacer h={32} />
-          <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
-        </View>
-      </BottomSheet>
+        <BottomSheet
+          handleComponent={ScrollPellet}
+          backdropComponent={renderBackdrop}
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={snapPoints}
+          onChange={onChangeIndex}
+          enablePanDownToClose
+        >
+          <View style={styles.contentContainer}>
+            <Spacer h={16} />
+            <TextH3>Did something go wrong?</TextH3>
+            <Spacer h={12} />
+            <TextLight>Help us realize what's going wrong.</TextLight>
+            <Spacer h={32} />
+            <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
+          </View>
+        </BottomSheet>
+      </View>
     </SafeAreaProvider>
   );
 }
@@ -116,5 +125,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: "center",
     alignItems: "stretch",
+  },
+  bottomSheetWrapper: {
+    position: "absolute",
+    height: "100%",
+    width: "100%",
   },
 });
