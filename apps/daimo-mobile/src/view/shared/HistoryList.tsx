@@ -56,6 +56,7 @@ export function HistoryListSwipe({
       return from === otherAddr || to === otherAddr;
     });
   }
+  console.log(`[HIST] HistoryListSwipe ${account.name}, ${ops.length} ops}`);
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
   // const linkTo = "op"; // Option to link to AccountPage instead.

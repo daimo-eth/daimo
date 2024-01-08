@@ -1,5 +1,6 @@
+import { OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   RefreshControl,
@@ -54,6 +55,7 @@ function HomeScreenInner({ account }: { account: Account }) {
     const showActionTimeout = setTimeout(() => setIsActionVisible(true), 1500);
     return () => clearTimeout(showActionTimeout);
   }, []);
+  const onHideSuggestedAction = () => setIsActionVisible(false);
 
   // Initialize DaimoOpSender immediately for speed.
   const keySlot = account.accountKeys.find(
@@ -71,8 +73,6 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   // Outer scroll: pull to refresh
   const [refreshing, setRefreshing] = useState(false);
-
-  const onHideSuggestedAction = () => setIsActionVisible(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -98,11 +98,23 @@ function HomeScreenInner({ account }: { account: Account }) {
     }
   });
 
-  // Show history
-  const histListMini = (
-    <HistoryListSwipe account={account} showDate={false} maxToShow={5} />
+  // Re-render HistoryListSwipe only transfer count or status changes.
+  const statusCountsStr = JSON.stringify(
+    Object.keys(OpStatus).map((key) => [
+      key,
+      account.recentTransfers.filter(({ status }) => status === key).length,
+    ])
   );
-  const histListFull = <HistoryListSwipe account={account} showDate />;
+  const histListMini = useMemo(
+    () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
+    [statusCountsStr]
+  );
+  const histListFull = useMemo(
+    () => <HistoryListSwipe account={account} showDate />,
+    [statusCountsStr]
+  );
+
+  // Show history
   const { bottomSheet, isBottomSheetOpen } = useSwipeUpDown({
     itemMini: histListMini,
     itemFull: histListFull,
