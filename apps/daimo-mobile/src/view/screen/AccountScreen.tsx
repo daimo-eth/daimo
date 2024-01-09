@@ -111,7 +111,10 @@ function AccountScreenBody({
   const canSend = canSendTo(eAcc);
   const send = useCallback(() => {
     const recipient = addLastSendTime(account, eAcc);
-    nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
+    nav.navigate("SendTab", {
+      screen: "SendTransfer",
+      params: { recipient, lagAutoFocus: true },
+    });
   }, [nav, eAcc, account]);
 
   // Bottom sheet: show transactions between us and this account
