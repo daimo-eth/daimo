@@ -9,13 +9,13 @@ import { createEnclaveKey, loadEnclaveKey } from "../logic/enclave";
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
     case "SOFTWARE":
-      return "Key generated in software";
+      return "Device key generated in software";
     case "TRUSTED_ENVIRONMENT":
-      return "Key generated in trusted hardware";
+      return "Device key generated in trusted hardware";
     case "HARDWARE_ENCLAVE":
       return Platform.OS === "ios"
-        ? "🔒  Key generated in Secure Enclave"
-        : "🔒  Key generated in hardware enclave";
+        ? "🔒  Device key generated in Secure Enclave"
+        : "🔒  Device key generated in hardware enclave";
   }
 }
 

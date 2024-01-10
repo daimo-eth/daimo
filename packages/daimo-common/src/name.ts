@@ -5,6 +5,7 @@ export function isValidName(name: string): boolean {
 export function validateName(name: string): string {
   if (name.length < 3) throw new Error("Too short");
   if (name.length > 32) throw new Error("Too long");
+  if (!/^[a-z]/.test(name)) throw new Error("Must start with lowercase letter");
   if (!isValidName(name)) throw new Error("Lowercase letters and numbers only");
   return name;
 }

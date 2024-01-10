@@ -140,14 +140,14 @@ export function InvitePage({
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Octicons name="mail" size={40} color={color.midnight} />
         </View>
-        <Spacer h={32} />
+        <Spacer h={24} />
         <TextCenter>
           <IntroTextParagraph>
             Daimo is currently invite-only. Type your invite code below or paste
             it from a link.{"\n"}Don't have one? Join the waitlist.
           </IntroTextParagraph>
         </TextCenter>
-        <Spacer h={48} />
+        <Spacer h={32} />
         <InputBig
           placeholder="enter invite code"
           value={text}
@@ -190,7 +190,7 @@ export function InvitePage({
 
 const styles = StyleSheet.create({
   paddedPage: {
-    paddingTop: 64,
+    paddingTop: 36,
     paddingHorizontal: 24,
   },
 });
