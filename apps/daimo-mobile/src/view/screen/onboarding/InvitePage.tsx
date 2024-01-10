@@ -22,7 +22,7 @@ import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
-import { TextCenter, TextH1, TextLight } from "../../shared/text";
+import { TextCenter, TextLight } from "../../shared/text";
 
 export function InvitePage({
   onNext,
@@ -131,22 +131,16 @@ export function InvitePage({
         <Spacer h={32} />
         <TextCenter>
           <IntroTextParagraph>
-            Daimo is currently invite-only. Paste your invite code below or open
-            it from browser. Don't have one? Join the waitlist.
+            Daimo is currently invite-only. Type your invite code below or paste
+            it from a link.{"\n"}Don't have one? Join the waitlist.
           </IntroTextParagraph>
         </TextCenter>
-        <Spacer h={32} />
-        <TextCenter>
-          <TextH1>
-            <TextLight>{status}</TextLight>
-          </TextH1>
-        </TextCenter>
-        <Spacer h={16} />
+        <Spacer h={48} />
         <InputBig
           placeholder="enter invite code"
           value={text}
           onChange={onChange}
-          center={text.length < 12} // Workaround for Android centering bug
+          center={text.length < 16} // Workaround for Android centering bug
         />
         <Spacer h={16} />
         {hasNotStartedTyping ? (
@@ -157,13 +151,18 @@ export function InvitePage({
             <Spacer h={16} />
             <ButtonBig
               type="primary"
-              title="Paste invite from browser"
+              title="Paste invite from link"
               onPress={fetchClipboard}
             />
+            <Spacer h={16} />
+            <TextButton title="Join waitlist" onPress={linkToWaitlist} />
           </>
         ) : (
           <>
-            <Spacer h={36} />
+            <TextCenter>
+              <TextLight>{status}</TextLight>
+            </TextCenter>
+            <Spacer h={16} />
             <ButtonBig
               type="primary"
               title="Submit"
@@ -172,8 +171,6 @@ export function InvitePage({
             />
           </>
         )}
-        <Spacer h={16} />
-        <TextButton title="Join waitlist" onPress={linkToWaitlist} />
       </View>
     </View>
   );
