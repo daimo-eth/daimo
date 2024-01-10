@@ -22,7 +22,7 @@ import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
-import { TextCenter, TextLight } from "../../shared/text";
+import { TextCenter, TextH1, TextLight } from "../../shared/text";
 
 export function InvitePage({
   onNext,
@@ -39,17 +39,20 @@ export function InvitePage({
     inviteLink: DaimoLinkInvite | DaimoLinkNoteV2 | undefined
   ) => void;
 }) {
-  const [hasSuggestedClipboard, setHasSuggestedClipboard] = useState(
-    !!inviteLink
+  // Handle invite links from deep link opens.
+  const [text, setText] = useState(
+    inviteLink ? formatDaimoLink(inviteLink) : ""
   );
-  const [text, setText] = useState("");
   const [isValid, setIsValid] = useState(!!inviteLink);
   const [sender, setSender] = useState<EAccount | undefined>(undefined);
-  const [isTestnet, setIsTestnet] = useState(
-    !!inviteLink &&
-      inviteLink.type === "invite" &&
-      inviteLink.code === "testnet"
-  );
+
+  // HACK: Workaround for testnet to never query API
+  const isTestnet = text === "testnet";
+  useEffect(() => {
+    if (isTestnet) setIsValid(true);
+  }, [isTestnet]);
+
+  const hasNotStartedTyping = text === "" && !isValid;
 
   const onChange = (newText: string) => {
     setInviteLink(getInvitePasteLink(newText));
@@ -65,16 +68,13 @@ export function InvitePage({
     if (linkStatus.data.link.type === "notev2") {
       const noteStatus = linkStatus.data as DaimoNoteStatus;
       setIsValid(noteStatus.status === DaimoNoteState.Confirmed);
-      setIsTestnet(false);
       setSender(noteStatus.sender);
     } else if (linkStatus.data.link.type === "invite") {
       const inviteStatus = linkStatus.data as DaimoInviteStatus;
       setIsValid(inviteStatus.isValid);
-      setIsTestnet(inviteStatus.link.code === "testnet");
-      setSender(undefined); // TODO
+      setSender(undefined); // TODO: Add senders to invite codes
     } else {
       setIsValid(false);
-      setIsTestnet(false);
       setSender(undefined);
     }
   }, [linkStatus]);
@@ -83,7 +83,7 @@ export function InvitePage({
     <Octicons {...{ name, color }} size={14} />
   );
   const status = (function () {
-    if (!linkStatus) {
+    if (!linkStatus || hasNotStartedTyping) {
       return " ";
     } else if (linkStatus.data == null) {
       return "...";
@@ -106,10 +106,8 @@ export function InvitePage({
   };
 
   const fetchClipboard = async () => {
-    if (hasSuggestedClipboard || isValid) return;
     const pasteText = await Clipboard.getStringAsync();
     if (pasteText) onChange(pasteText);
-    setHasSuggestedClipboard(true);
   };
 
   useEffect(() => {
@@ -137,29 +135,43 @@ export function InvitePage({
             it from browser. Don't have one? Join the waitlist.
           </IntroTextParagraph>
         </TextCenter>
-        <Spacer h={16} />
+        <Spacer h={32} />
         <TextCenter>
-          <TextLight>{status}</TextLight>
+          <TextH1>
+            <TextLight>{status}</TextLight>
+          </TextH1>
         </TextCenter>
         <Spacer h={16} />
-        {isValid ? (
-          <Spacer h={52} />
-        ) : (
-          <InputBig
-            placeholder="enter invite code"
-            value={text}
-            onChange={onChange}
-            onFocus={fetchClipboard}
-            center
-          />
-        )}
-        <Spacer h={16} />
-        <ButtonBig
-          type="primary"
-          title="Submit"
-          onPress={() => onNext({ isTestnet })}
-          disabled={!isValid}
+        <InputBig
+          placeholder="enter invite code"
+          value={text}
+          onChange={onChange}
+          center={text.length < 12} // Workaround for Android centering bug
         />
+        <Spacer h={16} />
+        {hasNotStartedTyping ? (
+          <>
+            <TextCenter>
+              <TextLight>or</TextLight>
+            </TextCenter>
+            <Spacer h={16} />
+            <ButtonBig
+              type="primary"
+              title="Paste invite from browser"
+              onPress={fetchClipboard}
+            />
+          </>
+        ) : (
+          <>
+            <Spacer h={36} />
+            <ButtonBig
+              type="primary"
+              title="Submit"
+              onPress={() => onNext({ isTestnet })}
+              disabled={!isValid}
+            />
+          </>
+        )}
         <Spacer h={16} />
         <TextButton title="Join waitlist" onPress={linkToWaitlist} />
       </View>
