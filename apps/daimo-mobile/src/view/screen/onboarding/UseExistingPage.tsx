@@ -13,7 +13,6 @@ import { Hex, hexToBytes } from "viem";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { ActStatus } from "../../../action/actStatus";
-import { useExistingAccount } from "../../../action/useExistingAccount";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { createEmptyAccount } from "../../../logic/account";
 import { env } from "../../../logic/env";
@@ -34,35 +33,37 @@ import {
 import { QRCodeBox } from "../QRScreen";
 
 export function UseExistingPage({
+  useExistingStatus,
+  useExistingMessage,
+  useExistingPubKeyHex,
   onNext,
   onPrev,
   daimoChain,
 }: {
+  useExistingStatus: ActStatus;
+  useExistingMessage: string;
+  useExistingPubKeyHex: Hex | undefined;
   onNext: () => void;
   onPrev?: () => void;
   daimoChain: DaimoChain;
 }) {
-  // Use existing account spin loops and waits for this device to show up
-  // in some on-chain account.
-  const { status, message, pubKeyHex } = useExistingAccount(daimoChain);
-
   useEffect(() => {
-    if (status === "success") onNext();
-  }, [status]);
+    if (useExistingStatus === "success") onNext();
+  }, [useExistingStatus]);
 
-  if (pubKeyHex === undefined) return null;
+  if (useExistingPubKeyHex === undefined) return null;
 
   return (
     <View>
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
         <Spacer h={24} />
-        <QRCodeBox value={createAddDeviceString(pubKeyHex)} />
+        <QRCodeBox value={createAddDeviceString(useExistingPubKeyHex)} />
         <Spacer h={16} />
         <TextCenter>
-          {status !== "error" && (
+          {useExistingStatus !== "error" && (
             <TextLight>
-              <EmojiToOcticon size={16} text={message} />
+              <EmojiToOcticon size={16} text={useExistingMessage} />
             </TextLight>
           )}
         </TextCenter>
@@ -79,7 +80,7 @@ export function UseExistingPage({
         </TextCenter>
         <Spacer h={16} />
         <RestoreFromBackupButton
-          pubKeyHex={pubKeyHex}
+          pubKeyHex={useExistingPubKeyHex}
           daimoChain={daimoChain}
         />
       </View>
