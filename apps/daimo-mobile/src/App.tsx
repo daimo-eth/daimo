@@ -38,10 +38,8 @@ export default function App() {
   theme = { ...theme, colors: { ...theme.colors, background: color.white } };
 
   useEffect(() => {
-    if (account == null) return;
-
     const nowS = Math.floor(Date.now() / 1000);
-    if (nowS - account.lastBlockTimestamp < 60 * 10) {
+    if (account == null || nowS - account.lastBlockTimestamp < 60 * 10) {
       SplashScreen.hideAsync();
     }
   }, []);
