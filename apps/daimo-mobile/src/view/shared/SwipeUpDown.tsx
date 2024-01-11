@@ -126,7 +126,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         enablePanDownToClose={false}
         enableHandlePanningGesture={!disabled}
         enableContentPanningGesture={!disabled}
-        activeOffsetX={[-1, SCREEN_WIDTH]}
+        activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
       >
         <Animated.View
