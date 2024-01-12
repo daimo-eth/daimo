@@ -67,6 +67,18 @@ export default {
         ],
         category: ["BROWSABLE", "DEFAULT"],
       },
+      {
+        action: "NDEF_DISCOVERED",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: "daimo.com",
+            pathPrefix: "/link",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
     ],
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
@@ -119,6 +131,7 @@ export default {
           "Allows Daimo to find and pay your friends. Your contacts remain private and are never uploaded or shared.",
       },
     ],
+    ["react-native-nfc-manager"],
     ["./android-deeplink-config-plugin", "custom"],
   ],
 };
