@@ -28,9 +28,11 @@ export async function createPasskey(
     env(daimoChain).passkeyDomain
   );
   const passkeyName = `${accountName}.${keySlot}`;
-  const passkeyDisplayTitle = `${accountName} ${getSlotLabel(
-    keySlot
-  ).toLowerCase()}`; // Don't show metadata to the user
+
+  // Display title shows lowercase slot name, eg "alice passkey backup"
+  const slotLabel = getSlotLabel(keySlot).toLowerCase();
+  const passkeyDisplayTitle = `${accountName} ${slotLabel}`;
+
   const challengeB64 = btoa(`create key ${accountName} ${keySlot}`);
 
   const result = await Log.promise(
