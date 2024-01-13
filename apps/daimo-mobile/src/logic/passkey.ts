@@ -1,4 +1,4 @@
-import { parseAndNormalizeSig } from "@daimo/common";
+import { getSlotLabel, parseAndNormalizeSig } from "@daimo/common";
 import { DaimoChain, daimoAccountABI } from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
@@ -28,7 +28,11 @@ export async function createPasskey(
     env(daimoChain).passkeyDomain
   );
   const passkeyName = `${accountName}.${keySlot}`;
-  const passkeyDisplayTitle = accountName; // Don't show metadata to the user
+
+  // Display title shows lowercase slot name, eg "alice passkey backup"
+  const slotLabel = getSlotLabel(keySlot).toLowerCase();
+  const passkeyDisplayTitle = `${accountName} ${slotLabel}`;
+
   const challengeB64 = btoa(`create key ${accountName} ${keySlot}`);
 
   const result = await Log.promise(
