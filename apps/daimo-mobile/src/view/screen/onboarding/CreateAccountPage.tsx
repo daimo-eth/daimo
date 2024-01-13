@@ -14,6 +14,7 @@ import { ActStatus } from "../../../action/actStatus";
 import { env } from "../../../logic/env";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
+import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
 import {
@@ -58,6 +59,13 @@ export function CreateAccountPage({
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Octicons name="person" size={40} color={color.midnight} />
           </View>
+          <Spacer h={24} />
+          <TextCenter>
+            <IntroTextParagraph>
+              Your username is what you'll go by on Daimo. Choose wisely — once
+              you get a name, you can't change it.
+            </IntroTextParagraph>
+          </TextCenter>
           <Spacer h={32} />
           <View style={styles.namePickerWrap}>
             {status === "idle" && (
@@ -69,6 +77,7 @@ export function CreateAccountPage({
               />
             )}
           </View>
+          <Spacer h={16} />
           <TextCenter>
             {status === "error" && <TextError>{message}</TextError>}
             {status !== "error" && (
@@ -128,7 +137,7 @@ function NamePicker({
     } else if (result.error) {
       return <>{oct("alert")} offline?</>; // name valid, other error
     } else if (result.isSuccess && result.data) {
-      return <>{oct("alert")} sorry, that name is taken</>; // name taken
+      return <>{oct("alert")} sorry, that username is taken</>; // name taken
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true; // name valid & available
       return <>{oct("check-circle", color.successDark)} available</>;
@@ -145,11 +154,11 @@ function NamePicker({
         center
         autoFocus
       />
-      <Spacer h={8} />
+      <Spacer h={16} />
       <TextCenter>
         <TextLight>{status}</TextLight>
       </TextCenter>
-      <Spacer h={8} />
+      <Spacer h={16} />
       <ButtonBig
         type="primary"
         title="Create"
@@ -165,7 +174,7 @@ const styles = StyleSheet.create({
     height: 168,
   },
   createAccountPage: {
-    paddingTop: 96,
+    paddingTop: 36,
     paddingHorizontal: 24,
   },
 });

@@ -56,7 +56,7 @@ export function UseExistingPage({
     <View>
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
-        <Spacer h={32} />
+        <Spacer h={24} />
         <QRCodeBox value={createAddDeviceString(pubKeyHex)} />
         <Spacer h={16} />
         <TextCenter>
@@ -66,18 +66,18 @@ export function UseExistingPage({
             </TextLight>
           )}
         </TextCenter>
-        <Spacer h={32} />
+        <Spacer h={24} />
         <TextCenter>
           <TextPara>
             Add this {env(daimoChain).deviceType} to an existing account. Scan
             the QR code above with your other device.
           </TextPara>
         </TextCenter>
-        <Spacer h={32} />
+        <Spacer h={16} />
         <TextCenter>
           <TextLight>or</TextLight>
         </TextCenter>
-        <Spacer h={32} />
+        <Spacer h={16} />
         <RestoreFromBackupButton
           pubKeyHex={pubKeyHex}
           daimoChain={daimoChain}

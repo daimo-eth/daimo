@@ -72,6 +72,7 @@ export function InputBig({
           numberOfLines={1}
           autoCapitalize="none"
           autoCorrect={false}
+          spellCheck={false}
           autoFocus={autoFocus}
           secureTextEntry={needsAndroidWorkaround}
           keyboardType={needsAndroidWorkaround ? "visible-password" : "default"}
