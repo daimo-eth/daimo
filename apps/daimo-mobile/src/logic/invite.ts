@@ -10,14 +10,6 @@ export function getInvitePasteLink(
 ): DaimoLinkInvite | DaimoLinkNoteV2 | undefined {
   // Check if its a valid Daimo link
   const link = parseDaimoLink(text);
-  if (link) {
-    if (link.type === "invite" || link.type === "notev2") return link;
-    else {
-      console.log(`[INVITE] ignoring link of type ${link.type}`);
-      return undefined;
-    }
-  }
-
-  // Assume its an invite code
+  if (link && (link.type === "invite" || link.type === "notev2")) return link;
   return { type: "invite", code: text };
 }

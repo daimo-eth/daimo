@@ -39,6 +39,7 @@ export function InvitePage({
     inviteLink: DaimoLinkInvite | DaimoLinkNoteV2 | undefined
   ) => void;
 }) {
+  // We haven't picked a daimoChain yet so calls default to prod.
   // Handle invite links from deep link opens.
   const [text, setText] = useState(
     inviteLink ? formatDaimoLink(inviteLink) : ""
@@ -59,15 +60,26 @@ export function InvitePage({
     setText(newText);
   };
 
-  // We haven't picked a daimoChain yet so this defaults to prod.
-  const linkStatus = useFetchLinkStatus(inviteLink, daimoChain);
+  // Strip seed from note links if they have one.
+  const strippedInviteLink =
+    inviteLink?.type === "notev2"
+      ? {
+          seed: undefined,
+          ...inviteLink,
+        }
+      : inviteLink;
+  const linkStatus = useFetchLinkStatus(strippedInviteLink, daimoChain);
 
   useEffect(() => {
     if (!linkStatus || linkStatus.data == null) return;
 
     if (linkStatus.data.link.type === "notev2") {
       const noteStatus = linkStatus.data as DaimoNoteStatus;
-      setIsValid(noteStatus.status === DaimoNoteState.Confirmed);
+      setIsValid(
+        noteStatus.status === DaimoNoteState.Confirmed &&
+          inviteLink?.type === "notev2" &&
+          inviteLink.seed !== undefined
+      );
       setSender(noteStatus.sender);
     } else if (linkStatus.data.link.type === "invite") {
       const inviteStatus = linkStatus.data as DaimoInviteStatus;

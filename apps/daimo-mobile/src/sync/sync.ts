@@ -28,9 +28,7 @@ export function startSync() {
     .then((status) => {
       if (status === "failed") {
         updateNetworkState(() => {
-          // HACK: mark offline if splash screen sync fails due to network state
-          // by setting syncAttemptsFailed to 3
-          return { status: "offline", syncAttemptsFailed: 3 };
+          return { status: "offline", syncAttemptsFailed: 1 };
         });
       }
     })

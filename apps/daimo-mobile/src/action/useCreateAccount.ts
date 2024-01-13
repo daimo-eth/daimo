@@ -110,7 +110,9 @@ export function useCreateAccount(
 
         console.log(`[CREATE] Claimed note in background: ${claimTxHash}`);
       };
-      claimNote();
+      claimNote().catch((e) =>
+        console.error(`[CREATE] error claiming note`, e)
+      );
     }
   }, [result.isSuccess, result.isError]);
 
