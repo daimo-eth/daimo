@@ -13,6 +13,7 @@ import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
 import { useCreateAccount } from "../../../action/useCreateAccount";
+import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInvitePasteLink } from "../../../logic/invite";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
@@ -93,6 +94,21 @@ export default function OnboardingScreen({
     message: createMessage,
   } = useCreateAccount(name, inviteLink, daimoChain);
 
+  // Use existing account spin loops and waits for the device key to show up
+  // in any on-chain account.
+  const {
+    status: useExistingStatus,
+    message: useExistingMessage,
+    pubKeyHex: useExistingPubKeyHex,
+  } = useExistingAccount(daimoChain);
+
+  const existingNext = getNext(
+    "existing",
+    goTo,
+    setDaimoChain,
+    onOnboardingComplete
+  );
+
   const reset = () => {
     pageStack.length = 0;
     goTo("intro");
@@ -103,7 +119,14 @@ export default function OnboardingScreen({
 
   return (
     <View style={styles.onboardingScreen}>
-      {page === "intro" && <IntroPages onNext={next} />}
+      {page === "intro" && (
+        <IntroPages
+          useExistingStatus={useExistingStatus}
+          useExistingPubKeyHex={useExistingPubKeyHex}
+          existingNext={existingNext}
+          onNext={next}
+        />
+      )}
       {page === "create-invite" && (
         <InvitePage
           onNext={next}
@@ -129,7 +152,14 @@ export default function OnboardingScreen({
         />
       )}
       {page === "existing" && (
-        <UseExistingPage onNext={next} onPrev={prev} daimoChain={daimoChain} />
+        <UseExistingPage
+          useExistingStatus={useExistingStatus}
+          useExistingMessage={useExistingMessage}
+          useExistingPubKeyHex={useExistingPubKeyHex}
+          onNext={next}
+          onPrev={prev}
+          daimoChain={daimoChain}
+        />
       )}
       {page === "new-allow-notifications" && (
         <AllowNotificationsPage onNext={next} />

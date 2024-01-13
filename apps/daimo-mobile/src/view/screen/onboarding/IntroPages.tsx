@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -6,7 +6,9 @@ import {
   View,
   StyleSheet,
 } from "react-native";
+import { Hex } from "viem";
 
+import { ActStatus } from "../../../action/actStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -15,8 +17,14 @@ import { color, ss } from "../../shared/style";
 import { TextCenter, TextH1 } from "../../shared/text";
 
 export function IntroPages({
+  useExistingStatus,
+  useExistingPubKeyHex,
+  existingNext,
   onNext,
 }: {
+  useExistingStatus: ActStatus;
+  useExistingPubKeyHex: Hex | undefined;
+  existingNext: () => void;
   onNext: ({ choice }: { choice: "create" | "existing" }) => void;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
@@ -25,6 +33,10 @@ export function IntroPages({
     const page = Math.round(contentOffset.x / layoutMeasurement.width);
     setPageIndex(page);
   };
+
+  useEffect(() => {
+    if (useExistingPubKeyHex && useExistingStatus === "success") existingNext();
+  }, [useExistingStatus]);
 
   return (
     <View style={styles.onboardingPage}>
