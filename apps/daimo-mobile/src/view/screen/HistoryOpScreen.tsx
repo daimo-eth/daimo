@@ -233,7 +233,11 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
       <View style={styles.transferRowWrap}>
         <View style={styles.transferRow}>
           <View style={styles.transferOtherAccount}>
-            <AccountBubble eAcc={otherAcc} size={36} {...{ isPending }} />
+            <AccountBubble
+              recipient={{ type: "account", ...otherAcc }}
+              size={36}
+              {...{ isPending }}
+            />
             <TextBody color={textDark}>{getAccountName(otherAcc)}</TextBody>
             {isPending && <PendingDot />}
           </View>

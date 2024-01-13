@@ -17,7 +17,7 @@ import {
   DaimoOpSender,
 } from "@daimo/userop";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Platform, Share, ShareAction } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 import {
   transferAccountTransform,
@@ -32,18 +32,31 @@ import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
-/** Creates a Note. User picks amount, then sends message via ShareSheet. */
-export function SendNoteButton({ dollars }: { dollars: number }) {
-  const Inner = useWithAccount(SendNoteButtonInner);
-  return <Inner dollars={dollars} />;
+export type ExternalAction = {
+  type: "sms" | "mail" | "share";
+  exec: (url: string, dollars: number) => Promise<boolean>;
+};
+
+/** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
+export function NoteActionButton({
+  dollars,
+  externalAction,
+}: {
+  dollars: number;
+  externalAction: ExternalAction;
+}) {
+  const Inner = useWithAccount(NoteActionButtonInner);
+  return <Inner dollars={dollars} externalAction={externalAction} />;
 }
 
-function SendNoteButtonInner({
+function NoteActionButtonInner({
   account,
   dollars,
+  externalAction,
 }: {
   account: Account;
   dollars: number;
+  externalAction: ExternalAction;
 }) {
   const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
   const noteId = getNoteId(noteAddress);
@@ -123,7 +136,7 @@ function SendNoteButtonInner({
       case "error":
         return <TextError>{message}</TextError>;
       case "success":
-        return sendViaAppStr;
+        return externalAction.type === "share" ? sendViaAppStr : null;
       default:
         return null;
     }
@@ -134,49 +147,41 @@ function SendNoteButtonInner({
   const sendNote = useCallback(async () => {
     if (status !== "success") return;
 
-    try {
-      const link: DaimoLink = {
-        type: "notev2",
-        sender: account.name,
-        dollars: `${dollars}`,
-        id: noteId,
-        seed: noteSeed,
-      };
-      const url = formatDaimoLink(link);
+    const link: DaimoLink = {
+      type: "notev2",
+      sender: account.name,
+      dollars: `${dollars}`,
+      id: noteId,
+      seed: noteSeed,
+    };
+    const url = formatDaimoLink(link);
 
-      let result: ShareAction;
-      if (Platform.OS === "android") {
-        result = await Share.share({ message: url });
-      } else {
-        result = await Share.share({ url }); // Default behavior for iOS
-      }
+    const didShare = await externalAction.exec(url, dollars);
+    console.log(`[SEND NOTE] external action executed: ${didShare}`);
 
-      nav.reset({
-        routes: [
-          {
-            name: "SendTab",
-            params: { screen: "SendNav", params: {} },
-          },
-        ],
-      });
-      nav.navigate("HomeTab", { screen: "Home" });
-
-      // sharedAction is only available on iOS
-      // For Android we don't know if it was shared or not
-      if (result.action === Share.sharedAction && Platform.OS === "ios") {
-        console.log(
-          "[APP] Note shared with activity type ",
-          result.activityType || "unknown"
-        );
-      } else if (result.action === Share.dismissedAction) {
-        console.log("[APP] Note share reverted");
-      }
-    } catch (error: any) {
-      console.error("[APP] Note share error:", error);
-    }
+    nav.reset({
+      routes: [
+        {
+          name: "SendTab",
+          params: { screen: "SendNav", params: {} },
+        },
+      ],
+    });
+    nav.navigate("HomeTab", { screen: "Home" });
   }, [status]);
 
-  // As soon as payment link is created, show share sheet
+  const externalActionButtonTitle = (function () {
+    switch (externalAction.type) {
+      case "sms":
+        return "SEND SMS";
+      case "mail":
+        return "SEND MAIL";
+      case "share":
+        return "SEND PAYMENT LINK";
+    }
+  })();
+
+  // As soon as payment link is created, trigger external action
   // TODO: move this to a dispatcher
   useEffect(() => {
     if (status !== "success") return;
@@ -202,7 +207,7 @@ function SendNoteButtonInner({
         return (
           <ButtonBig
             type="success"
-            title="SEND PAYMENT LINK"
+            title={externalActionButtonTitle}
             onPress={sendNote}
           />
         );
