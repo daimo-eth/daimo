@@ -25,12 +25,10 @@ import { Account, getAccountManager } from "../model/account";
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
   maybeSync(true)
-    .then((success) => {
-      if (!success) {
+    .then((status) => {
+      if (status === "failed") {
         updateNetworkState(() => {
-          // set fail to 3 because at 2 it would remove offline banner
-          // for one try even if sync failed
-          return { status: "offline", syncAttemptsFailed: 3 };
+          return { status: "offline", syncAttemptsFailed: 1 };
         });
       }
     })
@@ -58,9 +56,11 @@ function hasPendingOps(account: Account) {
   );
 }
 
-async function maybeSync(fromScratch?: boolean) {
+type SyncStatus = "success" | "failed" | "skipped" | "skipped";
+
+async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
   const manager = getAccountManager();
-  if (manager.currentAccount == null) return;
+  if (manager.currentAccount == null) return "skipped";
   const account = manager.currentAccount;
 
   // Synced recently? Wait first.
@@ -85,14 +85,17 @@ async function maybeSync(fromScratch?: boolean) {
     );
   } else if (lastSyncS + intervalS > nowS) {
     console.log(`[SYNC] skipping sync, attempted sync recently`);
-    return false;
+    return "skipped";
   } else {
     return await resync(`interval ${intervalS}s`);
   }
 }
 
 /** Gets latest balance & history for this account, in the background. */
-export async function resync(reason: string, fromScratch?: boolean) {
+export async function resync(
+  reason: string,
+  fromScratch?: boolean
+): Promise<SyncStatus> {
   const manager = getAccountManager();
   const accOld = manager.currentAccount;
   assert(!!accOld, `no account, skipping sync: ${reason}`);
@@ -107,7 +110,7 @@ export async function resync(reason: string, fromScratch?: boolean) {
     console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
     manager.setCurrentAccount(accNew);
     // We are automatically marked online when any RPC req succeeds
-    return true;
+    return "success";
   } catch (e) {
     console.error(`[SYNC] FAILED ${accOld.name}`, e);
     // Mark offline
@@ -118,7 +121,7 @@ export async function resync(reason: string, fromScratch?: boolean) {
         status: syncAttemptsFailed > 3 ? "offline" : "online",
       };
     });
-    return false;
+    return "failed";
   }
 }
 

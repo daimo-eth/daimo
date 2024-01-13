@@ -7,10 +7,8 @@ export function useFetchLinkStatus(
   link: DaimoLink | undefined,
   daimoChain: DaimoChain
 ) {
-  if (!link) return undefined;
-
-  const url = formatDaimoLink(link);
+  const url = link ? formatDaimoLink(link) : undefined;
   const rpcHook = env(daimoChain).rpcHook;
-  const ret = rpcHook.getLinkStatus.useQuery({ url });
+  const ret = rpcHook.getLinkStatus.useQuery({ url: url! }, { enabled: !!url });
   return ret;
 }

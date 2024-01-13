@@ -2,6 +2,7 @@ import { Address } from "viem";
 
 import {
   DaimoLinkAccount,
+  DaimoLinkInvite,
   DaimoLinkNote,
   DaimoLinkNoteV2,
   DaimoLinkRequest,
@@ -11,7 +12,8 @@ import { EAccount } from "./eAccount";
 export type DaimoLinkStatus =
   | DaimoAccountStatus
   | DaimoRequestStatus
-  | DaimoNoteStatus;
+  | DaimoNoteStatus
+  | DaimoInviteStatus;
 
 /**
  * Summarizes a link to any Ethereum account.
@@ -61,4 +63,14 @@ export type DaimoNoteStatus = {
   ephemeralOwner?: Address;
   claimer?: EAccount;
   dollars: `${number}`;
+};
+
+/**
+ * Tracks details about an invite.
+ * This information is tracked offchain by the API server.
+ */
+export type DaimoInviteStatus = {
+  link: DaimoLinkInvite;
+  isValid: boolean;
+  sender?: EAccount;
 };

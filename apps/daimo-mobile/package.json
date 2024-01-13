@@ -63,6 +63,7 @@
     "expo-device": "^5.2.1",
     "expo-file-system": "~15.4.5",
     "expo-font": "^11.4.0",
+    "expo-haptics": "~12.4.0",
     "expo-linking": "~5.0.2",
     "expo-local-authentication": "~13.4.1",
     "expo-localization": "^14.3.0",
@@ -90,8 +91,7 @@
     "text-encoding-polyfill": "^0.6.7",
     "ts-unused-exports": "^9.0.4",
     "typescript": "5.2.2",
-    "viem": "^1.19.15",
-    "expo-haptics": "~12.4.0"
+    "viem": "^1.19.15"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -116,6 +116,7 @@ function NoteView({
   note: PaymentLinkOpEvent;
 }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
+  // Strip seed from link
   const link: DaimoLinkNoteV2 = {
     type: "notev2",
     id: note.noteStatus!.id!,

@@ -7,7 +7,6 @@ import {
   dollarsToAmount,
   formatDaimoLink,
   generateNoteSeedAddress,
-  getNoteEphPrivKeyFromSeed,
   getNoteId,
 } from "@daimo/common";
 import { daimoEphemeralNotesV2Address } from "@daimo/contract";
@@ -80,11 +79,11 @@ function SendNoteButtonInner({
       nonceMetadata: nonce.metadata.toHex(),
       noteStatus: {
         link: {
-          type: "note",
-          previewSender: account.name,
-          previewDollars: `${dollars}`,
-          ephemeralOwner: noteAddress,
-          ephemeralPrivateKey: getNoteEphPrivKeyFromSeed(noteSeed),
+          type: "notev2",
+          sender: account.name,
+          dollars: `${dollars}`,
+          id: noteId,
+          seed: noteSeed,
         },
         status: DaimoNoteState.Pending,
         sender: { addr: account.address, name: account.name },
@@ -137,11 +136,11 @@ function SendNoteButtonInner({
 
     try {
       const link: DaimoLink = {
-        type: "note",
-        previewSender: account.name,
-        previewDollars: `${dollars}`,
-        ephemeralOwner: noteAddress,
-        ephemeralPrivateKey: getNoteEphPrivKeyFromSeed(noteSeed),
+        type: "notev2",
+        sender: account.name,
+        dollars: `${dollars}`,
+        id: noteId,
+        seed: noteSeed,
       };
       const url = formatDaimoLink(link);
 
