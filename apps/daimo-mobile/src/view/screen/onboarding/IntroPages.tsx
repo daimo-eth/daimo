@@ -73,8 +73,7 @@ const tokenSymbol = "USDC";
 const introPages = [
   <IntroPage title="Welcome to Daimo">
     <IntroTextParagraph>
-      Daimo is a global payments app that runs on Ethereum. Send and receive
-      USDC on Base mainnet.
+      Daimo is a global payments app that runs on Ethereum.
     </IntroTextParagraph>
   </IntroPage>,
   <IntroPage title={tokenSymbol}>
