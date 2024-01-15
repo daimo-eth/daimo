@@ -54,7 +54,7 @@ export default function OnboardingScreen({
     setPage(newPage);
   };
   const goToPrev = () => pageStack.length > 0 && setPage(pageStack.pop()!);
-  const [daimoChain, setDaimoChain] = useState<DaimoChain>("baseGoerli");
+  const [daimoChain, setDaimoChain] = useState<DaimoChain>("base");
 
   const next = getNext(page, goTo, setDaimoChain, onOnboardingComplete);
   const prev = pageStack.length === 0 ? undefined : goToPrev;

@@ -168,11 +168,12 @@ export function createRouter(
         z.object({
           name: z.string(),
           pubKeyHex: zHex,
+          invCode: z.string().optional(),
           inviteLink: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { name, pubKeyHex, inviteLink } = opts.input;
+        const { name, pubKeyHex, invCode, inviteLink } = opts.input;
         telemetry.recordUserAction(opts.ctx, {
           name: "deployWallet",
           accountName: name,
@@ -188,9 +189,13 @@ export function createRouter(
               faucet
             )
           : undefined;
+        const invCodeSuccess = invCode
+          ? await faucet.useInviteCode(invCode)
+          : false;
         const address = await deployWallet(
           name,
           pubKeyHex,
+          invCodeSuccess,
           inviteLinkStatus,
           watcher,
           nameReg,
