@@ -1,9 +1,7 @@
 import { Alert, Platform, Share, ShareAction } from "react-native";
 
-export async function shareSheetURL(
-  url: string,
-  dollars: number
-): Promise<boolean> {
+// Share via system share sheet = user picks messaging app
+export async function shareURL(url: string): Promise<boolean> {
   try {
     let result: ShareAction;
     if (Platform.OS === "android") {

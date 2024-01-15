@@ -22,7 +22,7 @@ import {
   useFocusOnScreenTransitionEnd,
   useNav,
 } from "../../shared/nav";
-import { shareSheetURL } from "../../shared/shareSheetURL";
+import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -79,7 +79,7 @@ function RequestScreenInner({
       requestId,
     });
 
-    const didShare = await shareSheetURL(url, dollars);
+    const didShare = await shareURL(url);
     console.log(`[REQUEST] action ${didShare}`);
 
     if (didShare) {

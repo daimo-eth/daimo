@@ -11,6 +11,7 @@ import {
 import { ExternalAction, NoteActionButton } from "./NoteActionButton";
 import { RecipientDisplay } from "./RecipientDisplay";
 import { useAccount } from "../../../model/account";
+import { ExternalRecipient } from "../../../sync/recipients";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
@@ -23,7 +24,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../shared/nav";
-import { shareSheetURL } from "../../shared/shareSheetURL";
+import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 
@@ -61,39 +62,13 @@ export function SendNoteScreen({ route }: Props) {
 
   const [externalAction, setExternalAction] = useState<ExternalAction>({
     type: "share",
-    exec: shareSheetURL,
+    exec: shareURL,
   });
 
   useEffect(() => {
     if (!recipient) return;
 
-    const testAndGetComposer = async (): Promise<ExternalAction> => {
-      const composer =
-        recipient.type === "email"
-          ? await composeEmail(recipient.email)
-          : await composeSMS(recipient.phoneNumber);
-
-      if (!composer) {
-        return {
-          type: "share",
-          exec: shareSheetURL,
-        };
-      } else {
-        return {
-          type: recipient.type === "email" ? "mail" : "sms",
-          exec: async (url: string, dollars: number) => {
-            return composer({
-              type: "paymentLink",
-              url,
-              senderName: account.name,
-              dollars,
-            });
-          },
-        };
-      }
-    };
-
-    testAndGetComposer().then(setExternalAction);
+    getSendLinkAction(recipient, account.name).then(setExternalAction);
   }, [recipient, noteDollars]);
 
   return (
@@ -157,4 +132,33 @@ export function SendNoteScreen({ route }: Props) {
       </View>
     </TouchableWithoutFeedback>
   );
+}
+
+async function getSendLinkAction(
+  recipient: ExternalRecipient,
+  senderName: string
+): Promise<ExternalAction> {
+  const composer =
+    recipient.type === "email"
+      ? await composeEmail(recipient.email)
+      : await composeSMS(recipient.phoneNumber);
+
+  if (!composer) {
+    return {
+      type: "share",
+      exec: shareURL,
+    };
+  } else {
+    return {
+      type: recipient.type === "email" ? "mail" : "sms",
+      exec: async (url: string, dollars: number) => {
+        return composer({
+          type: "paymentLink",
+          url,
+          senderName,
+          dollars,
+        });
+      },
+    };
+  }
 }
