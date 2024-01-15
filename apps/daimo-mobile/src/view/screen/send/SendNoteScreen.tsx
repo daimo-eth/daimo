@@ -10,8 +10,8 @@ import {
 
 import { ExternalAction, NoteActionButton } from "./NoteActionButton";
 import { RecipientDisplay } from "./RecipientDisplay";
+import { MsgContact } from "../../../logic/daimoContacts";
 import { useAccount } from "../../../model/account";
-import { ExternalRecipient } from "../../../sync/recipients";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
@@ -135,7 +135,7 @@ export function SendNoteScreen({ route }: Props) {
 }
 
 async function getSendLinkAction(
-  recipient: ExternalRecipient,
+  recipient: MsgContact,
   senderName: string
 ): Promise<ExternalAction> {
   const composer =

@@ -8,13 +8,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { AccountBubble } from "./AccountBubble";
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
+import { ContactBubble } from "./ContactBubble";
 import { useNav } from "./nav";
 import { color } from "./style";
+import { EAccountContact } from "../../logic/daimoContacts";
 import { useAccount } from "../../model/account";
-import { Recipient } from "../../sync/recipients";
 
 const animationConfig = { duration: 150 };
 
@@ -84,8 +84,8 @@ export function SearchHeader({
 
   const [account] = useAccount();
   if (account == null) return null;
-  const eAcc: Recipient = {
-    type: "account",
+  const eAcc: EAccountContact = {
+    type: "eAcc",
     addr: account.address,
     name: account.name,
   };
@@ -99,7 +99,7 @@ export function SearchHeader({
       </Animated.View>
       <Animated.View key="icon" style={accountButton}>
         <ButtonCircle size={50} onPress={goToAccount}>
-          <AccountBubble recipient={eAcc} size={50} transparent />
+          <ContactBubble contact={eAcc} size={50} transparent />
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput

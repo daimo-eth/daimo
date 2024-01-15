@@ -112,6 +112,13 @@ export default {
           "Allows Daimo to scan QR codes to pay other users or add new devices to your account.",
       },
     ],
+    [
+      "expo-contacts",
+      {
+        contactsPermission:
+          "Allows Daimo to find and pay your friends. Your contacts remain private and are never uploaded or shared.",
+      },
+    ],
     ["./android-deeplink-config-plugin", "custom"],
   ],
 };
