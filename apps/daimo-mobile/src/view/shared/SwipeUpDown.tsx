@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  SCREEN_WIDTH,
+} from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import {
   ReactNode,
@@ -123,6 +126,8 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         enablePanDownToClose={false}
         enableHandlePanningGesture={!disabled}
         enableContentPanningGesture={!disabled}
+        activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
+        activeOffsetY={[-10, 10]}
       >
         <Animated.View
           style={[styles.itemMiniWrapper, itemMiniStyle]}
