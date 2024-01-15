@@ -21,6 +21,25 @@ function senderIdKey(sender: Address, id: string) {
   return sender + ":" + id;
 }
 
+interface NoteCreatedLog {
+  transactionHash: Hex;
+  logIndex: number;
+  from: Address;
+  ephemeralOwner: Address;
+  amount: bigint;
+  logAddr: Address;
+}
+
+interface NoteRedeemedLog {
+  transactionHash: Hex;
+  logIndex: number;
+  from: Address;
+  redeemer: Address;
+  ephemeralOwner: Address;
+  amount: bigint;
+  logAddr: Address;
+}
+
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
   // Map (sender, id) -> ephemeralOwner
@@ -72,52 +91,52 @@ export class NoteIndexer {
     `,
       [from, to, chainConfig.chainL2.id]
     );
-    const logs = result.rows.map((r) => {
-      return {
-        transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-        logIndex: r.log_idx,
-        from: getAddress(bytesToHex(r.f, { size: 20 })),
-        ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
-        amount: BigInt(r.amount),
-        logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
-      };
-    });
+    const logs = result.rows.map(rowToNoteCreatedeLog);
 
-    const notes: DaimoNoteStatus[] = [];
-    for (const log of logs) {
-      console.log(`[NOTE] NoteCreated ${log.ephemeralOwner}`);
-      if (this.notes.get(log.ephemeralOwner) != null) {
-        throw new Error(
-          `dupe NoteCreated: ${log.ephemeralOwner} ${log.transactionHash} ${log.logIndex}`
-        );
+    const promises = logs.map(async (l) => {
+      try {
+        return this.handleNoteCreated(l);
+      } catch (e) {
+        console.error(`[NOTE] Error handling NoteCreated: ${e}`);
+        return null;
       }
-      const id = getNoteId(log.ephemeralOwner);
-      const sender = await this.nameReg.getEAccount(log.from);
-      const dollars = amountToDollars(log.amount);
-      const newNote: DaimoNoteStatus = {
-        status: DaimoNoteState.Confirmed,
-        dollars,
-        id,
-        contractAddress: log.logAddr,
-        ephemeralOwner: log.ephemeralOwner,
-        link: {
-          type: "notev2",
-          id,
-          sender: getEAccountStr(sender),
-          dollars,
-        },
-        sender,
-      };
-      this.notes.set(log.ephemeralOwner, newNote);
+    });
+    const statuses = (await Promise.all(promises)).filter((n) => n != null);
+    return statuses as DaimoNoteStatus[];
+  }
 
-      this.senderIdToOwner.set(senderIdKey(log.from, id), log.ephemeralOwner);
-      this.logCoordinateToNoteEvent.set(
-        logCoordinateKey(log.transactionHash, log.logIndex),
-        [log.ephemeralOwner, "create"]
-      );
-      notes.push(newNote);
+  private async handleNoteCreated(
+    log: NoteCreatedLog
+  ): Promise<DaimoNoteStatus> {
+    console.log(`[NOTE] NoteCreated ${log.ephemeralOwner}`);
+    if (this.notes.get(log.ephemeralOwner) != null) {
+      throw new Error(`bad NoteCreated: ${log.ephemeralOwner} exists`);
     }
-    return notes;
+    const id = getNoteId(log.ephemeralOwner);
+    const sender = await this.nameReg.getEAccount(log.from);
+    const dollars = amountToDollars(log.amount);
+    const newNote: DaimoNoteStatus = {
+      status: DaimoNoteState.Confirmed,
+      dollars,
+      id,
+      contractAddress: log.logAddr,
+      ephemeralOwner: log.ephemeralOwner,
+      link: {
+        type: "notev2",
+        id,
+        sender: getEAccountStr(sender),
+        dollars,
+      },
+      sender,
+    };
+    this.notes.set(log.ephemeralOwner, newNote);
+
+    this.senderIdToOwner.set(senderIdKey(log.from, id), log.ephemeralOwner);
+    this.logCoordinateToNoteEvent.set(
+      logCoordinateKey(log.transactionHash, log.logIndex),
+      [log.ephemeralOwner, "create"]
+    );
+    return newNote;
   }
 
   private async loadRedeemed(
@@ -142,49 +161,47 @@ export class NoteIndexer {
     `,
       [from, to, chainConfig.chainL2.id]
     );
-    const logs = result.rows
-      .map((r) => {
-        return {
-          transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-          logIndex: r.log_idx,
-          from: getAddress(bytesToHex(r.f, { size: 20 })),
-          redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
-          ephemeralOwner: getAddress(
-            bytesToHex(r.ephemeral_owner, { size: 20 })
-          ),
-          amount: BigInt(r.amount),
-          logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
-        };
-      })
-      .map(async (log) => {
-        console.log(`[NOTE] NoteRedeemed ${log.ephemeralOwner}`);
-        const logInfo = () =>
-          `[${log.transactionHash} ${log.logIndex} ${log.ephemeralOwner}]`;
-        // Find and sanity check the Note that was redeemed
-        const note = this.notes.get(log.ephemeralOwner);
-        if (note == null) {
-          throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
-        } else if (note.status !== DaimoNoteState.Confirmed) {
-          throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
-        } else if (note.dollars !== amountToDollars(log.amount)) {
-          throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
-        }
-        // Mark as redeemed
+    const logs = result.rows.map(rowToNoteRedeemedLog);
 
-        this.logCoordinateToNoteEvent.set(
-          logCoordinateKey(log.transactionHash, log.logIndex),
-          [log.ephemeralOwner, "claim"]
-        );
-        assertNotNull(log.redeemer, "redeemer is null");
-        assertNotNull(log.from, "from is null");
-        note.status =
-          log.redeemer === log.from
-            ? DaimoNoteState.Cancelled
-            : DaimoNoteState.Claimed;
-        note.claimer = await this.nameReg.getEAccount(log.redeemer);
-        return note;
-      });
-    return await Promise.all(logs);
+    const promises = logs.map(async (l) => {
+      try {
+        return this.handleNoteRedeemed(l);
+      } catch (e) {
+        console.error(`[NOTE] Error handling NoteRedeemed: ${e}`);
+        return null;
+      }
+    });
+    const statuses = (await Promise.all(promises)).filter((n) => n != null);
+    return statuses as DaimoNoteStatus[];
+  }
+
+  async handleNoteRedeemed(log: NoteRedeemedLog): Promise<DaimoNoteStatus> {
+    console.log(`[NOTE] NoteRedeemed ${log.ephemeralOwner}`);
+    const logInfo = () =>
+      `[${log.transactionHash} ${log.logIndex} ${log.ephemeralOwner}]`;
+    // Find and sanity check the Note that was redeemed
+    const note = this.notes.get(log.ephemeralOwner);
+    if (note == null) {
+      throw new Error(`bad NoteRedeemed, missing note: ${logInfo()}`);
+    } else if (note.status !== DaimoNoteState.Confirmed) {
+      throw new Error(`bad NoteRedeemed, already claimed: ${logInfo()}`);
+    } else if (note.dollars !== amountToDollars(log.amount)) {
+      throw new Error(`bad NoteRedeemed, wrong amount: ${logInfo()}`);
+    }
+
+    // Mark as redeemed
+    this.logCoordinateToNoteEvent.set(
+      logCoordinateKey(log.transactionHash, log.logIndex),
+      [log.ephemeralOwner, "claim"]
+    );
+    assertNotNull(log.redeemer, "redeemer is null");
+    assertNotNull(log.from, "from is null");
+    note.status =
+      log.redeemer === log.from
+        ? DaimoNoteState.Cancelled
+        : DaimoNoteState.Claimed;
+    note.claimer = await this.nameReg.getEAccount(log.redeemer);
+    return note;
   }
 
   getNoteStatusByOwner(ephemeralOwner: Address): DaimoNoteStatus | null {
@@ -219,4 +236,27 @@ export class NoteIndexer {
     const ret = ephemeralOwner && this.notes.get(ephemeralOwner);
     return ret || null;
   }
+}
+
+function rowToNoteCreatedeLog(r: any): NoteCreatedLog {
+  return {
+    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+    logIndex: r.log_idx,
+    from: getAddress(bytesToHex(r.f, { size: 20 })),
+    ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
+    amount: BigInt(r.amount),
+    logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+  };
+}
+
+function rowToNoteRedeemedLog(r: any): NoteRedeemedLog {
+  return {
+    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+    logIndex: r.log_idx,
+    from: getAddress(bytesToHex(r.f, { size: 20 })),
+    redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
+    ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
+    amount: BigInt(r.amount),
+    logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+  };
 }
