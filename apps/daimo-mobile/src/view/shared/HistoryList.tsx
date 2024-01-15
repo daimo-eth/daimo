@@ -19,14 +19,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Address } from "viem";
 
-import { AccountBubble } from "./AccountBubble";
 import { getAmountText } from "./Amount";
+import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
-import { getCachedEAccount } from "./addr";
 import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
+import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
 
 interface HeaderObject {
@@ -219,8 +219,8 @@ function DisplayOpRow({
       >
         <View style={styles.displayOpRow}>
           <View style={styles.transferOtherAccount}>
-            <AccountBubble
-              recipient={{ type: "account", ...otherAcc }}
+            <ContactBubble
+              contact={{ type: "eAcc", ...otherAcc }}
               size={36}
               {...{ isPending }}
             />

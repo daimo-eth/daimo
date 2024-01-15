@@ -15,8 +15,8 @@ import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
+import { EAccountContact, SystemContact } from "../../logic/daimoContacts";
 import { useAccount } from "../../model/account";
-import { AccountRecipient, ExternalRecipient } from "../../sync/recipients";
 
 export type QRScreenOptions = "PAY ME" | "SCAN";
 
@@ -31,7 +31,7 @@ export type ParamListSend = {
   SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
-  SendLink: { recipient?: ExternalRecipient; lagAutoFocus: boolean };
+  SendLink: { recipient?: SystemContact; lagAutoFocus: boolean };
   Account: { eAcc: EAccount };
   HistoryOp: { op: DisplayOpEvent };
 };
@@ -51,7 +51,7 @@ export type ParamListSettings = {
 
 interface SendNavProp {
   link?: DaimoLinkAccount | DaimoLinkRequest;
-  recipient?: AccountRecipient;
+  recipient?: EAccountContact;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
   lagAutoFocus?: boolean;

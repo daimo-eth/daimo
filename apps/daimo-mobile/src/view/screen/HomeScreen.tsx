@@ -14,8 +14,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SearchResults } from "./send/SearchTab";
+import { SearchResults } from "./send/SearchResults";
 import { useWarmCache } from "../../action/useSendAsync";
+import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
@@ -115,6 +116,8 @@ function HomeScreenInner({ account }: { account: Account }) {
   // No suggested actions when offline.
   const netState = useNetworkState();
 
+  const contactsAccess = useContactsPermission();
+
   return (
     <View>
       <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
@@ -149,6 +152,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
         {searchPrefix != null && (
           <SearchResults
+            contactsAccess={contactsAccess}
             prefix={searchPrefix}
             style={{ marginHorizontal: 0 }}
             mode="account"

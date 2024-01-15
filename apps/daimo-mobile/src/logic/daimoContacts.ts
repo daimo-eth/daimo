@@ -10,64 +10,70 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
-import { env } from "../logic/env";
+import { getCachedEAccount } from "./addr";
+import { env } from "./env";
+import { useSystemContactsSearch } from "./systemContacts";
 import { Account } from "../model/account";
-import { getCachedEAccount } from "../view/shared/addr";
 
-export interface AccountRecipient extends EAccount {
-  type: "account";
-  originalMatch?: string;
+interface BaseDaimoContact {
   lastSendTime?: number;
 }
 
-interface EmailRecipient {
+export interface EAccountContact extends EAccount, BaseDaimoContact {
+  type: "eAcc";
+  originalMatch?: string;
+}
+
+interface EmailContact extends BaseDaimoContact {
   type: "email";
   email: EmailAddress;
-  name?: string; // TODO: populate from contact book
-  lastSendTime?: number;
+  name?: string;
 }
 
-interface PhoneNumberRecipient {
+interface PhoneNumberContact extends BaseDaimoContact {
   type: "phoneNumber";
   phoneNumber: PhoneNumber;
   name?: string;
-  lastSendTime?: number;
 }
 
-export type Recipient =
-  | AccountRecipient
-  | EmailRecipient
-  | PhoneNumberRecipient;
+// A DaimoContact is a "contact" of the user in the app.
+// Includes EAccounts and system contacts (email, phone number) with added
+// context about the contact based on user's own context. (lastSendTime, etc.)
+export type DaimoContact = EAccountContact | EmailContact | PhoneNumberContact;
 
-export type ExternalRecipient = EmailRecipient | PhoneNumberRecipient;
+// An ExternalRecipient is a contact that is not a EAccount. (i.e. not an
+// on-chain account)
+export type SystemContact = EmailContact | PhoneNumberContact;
 
-// todo: rename recipient to contact or friend
-
-/** Adds lastSendTime to an EAccount using account's recentTransfers */
+/** Convert EAccount to EAccountContact */
 export function addLastSendTime(
   account: Account,
   recipientEAcc: EAccount | EAccountSearchResult
-): AccountRecipient {
+): EAccountContact {
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   const lastSendTime = transfersNewToOld.find(
     (t) => t.from === account.address && t.to === recipientEAcc.addr
   )?.timestamp;
-  return { type: "account", ...recipientEAcc, lastSendTime };
+  return { type: "eAcc", ...recipientEAcc, lastSendTime };
 }
 
-export function getRecipientName(r: Recipient) {
-  if (r.type === "account") return getAccountName(r);
+export function getContactName(r: DaimoContact) {
+  if (r.type === "eAcc") return getAccountName(r);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
-export function useRecipientSearch(account: Account, prefix: string) {
+export function useRecipientSearch(
+  account: Account,
+  prefix: string,
+  searchContacts: boolean
+) {
   prefix = prefix.toLowerCase();
 
   // Load recent recipients
-  const recents = [] as Recipient[];
-  const recentsByAddr = new Map<Address, Recipient>();
+  const recents = [] as DaimoContact[];
+  const recentsByAddr = new Map<Address, DaimoContact>();
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   for (const t of transfersNewToOld) {
     if (t.from !== account.address) continue;
@@ -85,17 +91,21 @@ export function useRecipientSearch(account: Account, prefix: string) {
     // TODO: show note claimer as recipient.
     if (acc.label != null) continue;
 
-    const r: Recipient = { type: "account", ...acc, lastSendTime: t.timestamp };
+    const r: EAccountContact = {
+      type: "eAcc",
+      ...acc,
+      lastSendTime: t.timestamp,
+    };
 
     recents.push(r);
     recentsByAddr.set(other, r);
   }
 
   // Always show recent recipients first
-  const recipients: Recipient[] = [];
-  const looseMatchRecents: Recipient[] = [];
+  const recipients: DaimoContact[] = [];
+  const looseMatchRecents: DaimoContact[] = [];
   for (const r of recents) {
-    const name = getRecipientName(r).toLowerCase();
+    const name = getContactName(r).toLowerCase();
     if (prefix === "") {
       recipients.push(r); // Show ALL recent recipients
     } else if (name.startsWith(prefix)) {
@@ -106,6 +116,7 @@ export function useRecipientSearch(account: Account, prefix: string) {
   }
   if (recipients.length === 0) recipients.push(...looseMatchRecents);
 
+  // If we have a valid phone number or email prefix, show it as a recipient
   if (zEmailAddress.safeParse(prefix).success) {
     recipients.push({ type: "email", email: prefix });
   }
@@ -121,26 +132,31 @@ export function useRecipientSearch(account: Account, prefix: string) {
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     for (const account of res.data) {
-      if (
-        recipients.find((r) => r.type === "account" && r.addr === account.addr)
-      )
+      if (recipients.find((r) => r.type === "eAcc" && r.addr === account.addr))
         continue;
 
       // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);
       if (recent) {
         recipients.push({
-          type: "account",
+          type: "eAcc",
           ...account,
           lastSendTime: recent.lastSendTime,
         });
       } else {
-        recipients.push({ type: "account", ...account });
+        recipients.push({ type: "eAcc", ...account });
       }
     }
-    const sortKey = (r: Recipient) => r.lastSendTime || 0;
+    const sortKey = (r: DaimoContact) => r.lastSendTime || 0;
     recipients.sort((a, b) => sortKey(b) - sortKey(a));
   }
+
+  // Search contacts by name
+  const systemContacts = useSystemContactsSearch(
+    prefix,
+    searchContacts && enabled
+  );
+  if (systemContacts.length) recipients.push(...systemContacts);
 
   return {
     isSearching: enabled,

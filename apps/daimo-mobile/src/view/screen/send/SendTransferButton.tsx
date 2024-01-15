@@ -19,8 +19,8 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
+import { EAccountContact } from "../../../logic/daimoContacts";
 import { Account } from "../../../model/account";
-import { AccountRecipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
@@ -29,7 +29,7 @@ import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 interface SendTransferButtonProps {
-  recipient: AccountRecipient;
+  recipient: EAccountContact;
   dollars: number;
   requestId?: `${bigint}`;
 }

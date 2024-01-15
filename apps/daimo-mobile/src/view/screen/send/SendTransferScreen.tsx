@@ -17,13 +17,13 @@ import {
 
 import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
+import {
+  EAccountContact,
+  addLastSendTime,
+  getContactName,
+} from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
-import {
-  AccountRecipient,
-  addLastSendTime,
-  getRecipientName,
-} from "../../../sync/recipients";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
@@ -138,7 +138,7 @@ function SendChooseAmount({
   onCancel,
   lagAutoFocus,
 }: {
-  recipient: AccountRecipient;
+  recipient: EAccountContact;
   onCancel: () => void;
   lagAutoFocus?: boolean;
 }) {
@@ -158,7 +158,7 @@ function SendChooseAmount({
   if (recipient.lastSendTime == null) {
     infoBubble = (
       <InfoBox
-        title={`First time paying ${getRecipientName(recipient)}`}
+        title={`First time paying ${getContactName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />
     );
@@ -201,7 +201,7 @@ function SendConfirm({
   dollars,
   requestId,
 }: {
-  recipient: AccountRecipient;
+  recipient: EAccountContact;
   dollars: `${number}`;
   requestId?: `${bigint}`;
 }) {

@@ -16,7 +16,7 @@ import { MMKV } from "react-native-mmkv";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
-import { cacheEAccounts } from "../view/shared/addr";
+import { cacheEAccounts } from "../logic/addr";
 
 /**
  * Singleton account key.

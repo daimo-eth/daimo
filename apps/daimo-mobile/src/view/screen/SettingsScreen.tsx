@@ -20,10 +20,10 @@ import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount, useAccount } from "../../model/account";
-import { AccountBubble } from "../shared/AccountBubble";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
+import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -93,7 +93,7 @@ function AccountHero({ account }: { account: Account }) {
 
   return (
     <View style={styles.accountHero}>
-      <AccountBubble recipient={{ type: "account", ...eAcc }} size={64} />
+      <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
       <View>
         <AccountCopyLinkButton eAcc={eAcc} size="h3" />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>

@@ -11,13 +11,13 @@ import { useCallback, useEffect } from "react";
 import { ActivityIndicator, Linking, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
+import { addLastSendTime } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
-import { addLastSendTime } from "../../sync/recipients";
-import { AccountBubble } from "../shared/AccountBubble";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { ButtonBig } from "../shared/Button";
+import { ContactBubble } from "../shared/ContactBubble";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -149,7 +149,7 @@ function AccountScreenBody({
           alignItems: "center",
         }}
       >
-        <AccountBubble recipient={{ type: "account", ...eAcc }} size={64} />
+        <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
         <Spacer h={16} />
         <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
         <Spacer h={8} />

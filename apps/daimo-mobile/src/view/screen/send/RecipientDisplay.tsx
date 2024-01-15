@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 
-import { Recipient, getRecipientName } from "../../../sync/recipients";
-import { AccountBubble } from "../../shared/AccountBubble";
+import { DaimoContact, getContactName } from "../../../logic/daimoContacts";
 import { ButtonCircle } from "../../shared/ButtonCircle";
+import { ContactBubble } from "../../shared/ContactBubble";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { TextH3, TextLight } from "../../shared/text";
@@ -12,12 +12,12 @@ export function RecipientDisplay({
   recipient,
   isRequest,
 }: {
-  recipient: Recipient;
+  recipient: DaimoContact;
   isRequest?: boolean;
 }) {
   // Show who we're sending to
-  const isAccount = recipient.type === "account";
-  const disp = getRecipientName(recipient);
+  const isAccount = recipient.type === "eAcc";
+  const disp = getContactName(recipient);
   const subtitle = isAccount ? recipient.originalMatch : recipient.name;
   const showSubtitle = subtitle != null && subtitle !== disp;
 
@@ -33,7 +33,7 @@ export function RecipientDisplay({
   return (
     <View style={styles.recipientDisp}>
       <ButtonCircle size={64} onPress={goToAccount}>
-        <AccountBubble recipient={recipient} size={64} transparent />
+        <ContactBubble contact={recipient} size={64} transparent />
       </ButtonCircle>
       <Spacer h={16} />
       {isRequest && <TextLight>Requested by</TextLight>}

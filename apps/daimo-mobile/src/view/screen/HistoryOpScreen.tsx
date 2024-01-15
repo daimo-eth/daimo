@@ -23,17 +23,17 @@ import {
 } from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
+import { getCachedEAccount } from "../../logic/addr";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
-import { AccountBubble } from "../shared/AccountBubble";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
+import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { getCachedEAccount } from "../shared/addr";
 import {
   ParamListHome,
   useDisableTabSwipe,
@@ -233,8 +233,8 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
       <View style={styles.transferRowWrap}>
         <View style={styles.transferRow}>
           <View style={styles.transferOtherAccount}>
-            <AccountBubble
-              recipient={{ type: "account", ...otherAcc }}
+            <ContactBubble
+              contact={{ type: "eAcc", ...otherAcc }}
               size={36}
               {...{ isPending }}
             />

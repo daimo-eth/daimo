@@ -4,20 +4,20 @@ import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { color } from "./style";
-import { Recipient, getRecipientName } from "../../sync/recipients";
+import { DaimoContact, getContactName } from "../../logic/daimoContacts";
 
-export function AccountBubble({
-  recipient,
+export function ContactBubble({
+  contact,
   size,
   isPending,
   transparent,
 }: {
-  recipient: Recipient;
+  contact: DaimoContact;
   size: number;
   isPending?: boolean;
   transparent?: boolean;
 }) {
-  const name = getRecipientName(recipient);
+  const name = getContactName(contact);
 
   const fontSize = (function () {
     switch (size) {
@@ -33,14 +33,14 @@ export function AccountBubble({
   })();
 
   const letter = (function () {
-    if (recipient.type === "email") {
+    if (contact.type === "email") {
       return <Octicons name="mail" size={fontSize} color={color.primary} />;
-    } else if (recipient.type === "phoneNumber") {
+    } else if (contact.type === "phoneNumber") {
       return <Octicons name="person" size={fontSize} color={color.primary} />;
     } else if (name.startsWith("0x")) {
       return "0x";
-    } else if (recipient.label != null) {
-      switch (recipient.label) {
+    } else if (contact.label != null) {
+      switch (contact.label) {
         case AddrLabel.Faucet:
           return (
             <Octicons name="download" size={fontSize} color={color.primary} />
