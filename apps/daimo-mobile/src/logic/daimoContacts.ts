@@ -41,9 +41,9 @@ interface PhoneNumberContact extends BaseDaimoContact {
 // context about the contact based on user's own context. (lastSendTime, etc.)
 export type DaimoContact = EAccountContact | EmailContact | PhoneNumberContact;
 
-// An ExternalRecipient is a contact that is not a EAccount. (i.e. not an
+// A MsgContact is a contact that is not a EAccount. (i.e. not an
 // on-chain account)
-export type SystemContact = EmailContact | PhoneNumberContact;
+export type MsgContact = EmailContact | PhoneNumberContact;
 
 /** Convert EAccount to EAccountContact */
 export function addLastSendTime(
@@ -156,7 +156,7 @@ export function useRecipientSearch(
     prefix,
     searchContacts && enabled
   );
-  if (systemContacts.length) recipients.push(...systemContacts);
+  if (systemContacts.length > 0) recipients.push(...systemContacts);
 
   return {
     isSearching: enabled,

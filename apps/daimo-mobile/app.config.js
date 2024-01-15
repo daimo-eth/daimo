@@ -115,7 +115,8 @@ export default {
     [
       "expo-contacts",
       {
-        contactsPermission: "Allows Daimo to find and pay your friends.",
+        contactsPermission:
+          "Allows Daimo to find and pay your friends. Your contacts remain private and are never uploaded or shared.",
       },
     ],
     ["./android-deeplink-config-plugin", "custom"],

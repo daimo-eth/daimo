@@ -15,7 +15,7 @@ import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
-import { EAccountContact, SystemContact } from "../../logic/daimoContacts";
+import { EAccountContact, MsgContact } from "../../logic/daimoContacts";
 import { useAccount } from "../../model/account";
 
 export type QRScreenOptions = "PAY ME" | "SCAN";
@@ -31,7 +31,7 @@ export type ParamListSend = {
   SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
-  SendLink: { recipient?: SystemContact; lagAutoFocus: boolean };
+  SendLink: { recipient?: MsgContact; lagAutoFocus: boolean };
   Account: { eAcc: EAccount };
   HistoryOp: { op: DisplayOpEvent };
 };

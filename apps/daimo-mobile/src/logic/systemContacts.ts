@@ -1,9 +1,8 @@
-import { assert } from "@daimo/common";
 import * as Contacts from "expo-contacts";
 import { useEffect, useState } from "react";
 import { Alert, Linking } from "react-native";
 
-import { SystemContact } from "./daimoContacts";
+import { MsgContact } from "./daimoContacts";
 
 export interface ContactsAccess {
   permission: Contacts.PermissionResponse | undefined;
@@ -15,17 +14,23 @@ export function useContactsPermission(): ContactsAccess {
     Contacts.PermissionResponse | undefined
   >();
 
+  const fetchPermissions = async () => {
+    await Contacts.getPermissionsAsync().then(setContactsPermission);
+  };
+
   useEffect(() => {
-    Contacts.getPermissionsAsync().then(setContactsPermission);
+    fetchPermissions();
   }, []);
 
   const ask = async () => {
-    assert(!!contactsPermission, "Contacts permission not loaded");
+    // Refresh permission state before prompting.
+    const latestContactPermission = await Contacts.getPermissionsAsync();
 
-    if (!contactsPermission.granted) {
-      await requestContactsAccess(contactsPermission.canAskAgain);
+    if (!latestContactPermission.granted) {
+      await requestContactsAccess(latestContactPermission.canAskAgain);
     }
-    Contacts.getPermissionsAsync().then(setContactsPermission);
+
+    fetchPermissions();
   };
 
   return { permission: contactsPermission, ask };
@@ -38,8 +43,8 @@ function requestContactsAccess(canAskAgain: boolean) {
   // Step 1: Ask with our own prompt, re-assuring user.
   return new Promise<void>((resolve) => {
     Alert.alert(
-      "Daimo Would Like to Access Your Contacts",
-      "Your contacts are accessed locally to find and pay friends with Daimo.\n\nThey are never uploaded to our servers.",
+      "Daimo Local Contacts",
+      "Daimo would like to access your contacts to find and pay friends. Your contacts remain private and are never uploaded or shared.",
       [
         {
           text: `Continue`,
@@ -100,8 +105,8 @@ async function askOpenSettings(resolve: (value: void) => void) {
 export function useSystemContactsSearch(
   prefix: string,
   enabled: boolean
-): SystemContact[] {
-  const [recipients, setRecipients] = useState<SystemContact[]>([]);
+): MsgContact[] {
+  const [recipients, setRecipients] = useState<MsgContact[]>([]);
 
   useEffect(() => {
     const search = async (nameSearchTerm: string) => {
@@ -112,13 +117,12 @@ export function useSystemContactsSearch(
         pageSize: 5,
       });
 
-      const matches = [] as SystemContact[];
+      const matches = [] as MsgContact[];
       for (const contact of data) {
         const name = contact.name;
-        if (name == null || !name.toLowerCase().includes(nameSearchTerm))
-          continue;
+        if (name == null) continue;
 
-        // Show atmost one email and one phone number per contact.
+        // Show at most one email and one phone number per contact.
         for (const phone of contact.phoneNumbers ?? []) {
           if (phone.number) {
             matches.push({
