@@ -20,7 +20,7 @@ import {
   useSendAsync,
 } from "../../../action/useSendAsync";
 import { Account } from "../../../model/account";
-import { Recipient } from "../../../sync/recipients";
+import { AccountRecipient } from "../../../sync/recipients";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
@@ -29,7 +29,7 @@ import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 interface SendTransferButtonProps {
-  recipient: Recipient;
+  recipient: AccountRecipient;
   dollars: number;
   requestId?: `${bigint}`;
 }

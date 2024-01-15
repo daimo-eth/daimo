@@ -1,4 +1,3 @@
-import { EAccount } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { RefObject, useCallback, useEffect } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
@@ -15,6 +14,7 @@ import { ButtonCircle } from "./ButtonCircle";
 import { useNav } from "./nav";
 import { color } from "./style";
 import { useAccount } from "../../model/account";
+import { Recipient } from "../../sync/recipients";
 
 const animationConfig = { duration: 150 };
 
@@ -84,7 +84,11 @@ export function SearchHeader({
 
   const [account] = useAccount();
   if (account == null) return null;
-  const eAcc: EAccount = { addr: account.address, name: account.name };
+  const eAcc: Recipient = {
+    type: "account",
+    addr: account.address,
+    name: account.name,
+  };
 
   return (
     <View style={styles.header}>
@@ -95,7 +99,7 @@ export function SearchHeader({
       </Animated.View>
       <Animated.View key="icon" style={accountButton}>
         <ButtonCircle size={50} onPress={goToAccount}>
-          <AccountBubble eAcc={eAcc} size={50} transparent />
+          <AccountBubble recipient={eAcc} size={50} transparent />
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput

@@ -1,4 +1,4 @@
-import { getAccountName, getEAccountStr, timeAgo } from "@daimo/common";
+import { timeAgo } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback } from "react";
 import {
@@ -12,7 +12,11 @@ import {
 } from "react-native";
 
 import { Account } from "../../../model/account";
-import { Recipient, useRecipientSearch } from "../../../sync/recipients";
+import {
+  Recipient,
+  getRecipientName,
+  useRecipientSearch,
+} from "../../../sync/recipients";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { AccountBubble, Bubble } from "../../shared/AccountBubble";
 import { ButtonMed } from "../../shared/Button";
@@ -43,7 +47,7 @@ export function SearchTab({
           innerRef={textInputRef}
           autoFocus={autoFocus}
           icon="search"
-          placeholder="Search user, ENS, or address..."
+          placeholder="Search user, ENS, email, or phone..."
           value={prefix}
           onChange={setPrefix}
         />
@@ -104,8 +108,8 @@ function SearchResultsScroll({
           </TextLight>
         </View>
       )}
-      {res.recipients.map((r) => (
-        <RecipientRow key={r.addr} recipient={r} {...{ lagAutoFocus, mode }} />
+      {res.recipients.map((r, index) => (
+        <RecipientRow key={index} recipient={r} {...{ lagAutoFocus, mode }} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
@@ -149,23 +153,34 @@ function RecipientRow({
   mode: "send" | "account";
   lagAutoFocus?: boolean;
 }) {
-  const eAccStr = getEAccountStr(recipient);
+  const name = getRecipientName(recipient);
   const nav = useNav();
   const goToAccount = useCallback(() => {
-    if (mode === "account") {
-      nav.navigate("HomeTab", {
-        screen: "Account",
-        params: { eAcc: recipient },
-      });
-    } else {
-      nav.navigate("SendTab", {
-        screen: "SendTransfer",
-        params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
-      });
+    switch (recipient.type) {
+      case "email":
+      case "phoneNumber": {
+        nav.navigate("SendTab", {
+          screen: "SendLink",
+          params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
+        });
+        return;
+      }
+      case "account": {
+        if (mode === "account") {
+          nav.navigate("HomeTab", {
+            screen: "Account",
+            params: { eAcc: recipient },
+          });
+        } else {
+          nav.navigate("SendTab", {
+            screen: "SendTransfer",
+            params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
+          });
+        }
+      }
     }
-  }, [eAccStr, mode]);
+  }, [name, mode]);
 
-  const name = getAccountName(recipient);
   const nowS = Date.now() / 1e3;
   const lastSendStr =
     recipient.lastSendTime &&
@@ -175,7 +190,7 @@ function RecipientRow({
     <Row onPress={goToAccount}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
-          <AccountBubble eAcc={recipient} size={36} />
+          <AccountBubble recipient={recipient} size={36} />
           <TextBody>{name}</TextBody>
         </View>
         <TextLight>{lastSendStr}</TextLight>

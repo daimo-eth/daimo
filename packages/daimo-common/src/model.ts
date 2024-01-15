@@ -82,3 +82,16 @@ export const zRecommendedExchange = z.object({
 });
 
 export type RecommendedExchange = z.infer<typeof zRecommendedExchange>;
+
+export const zEmailAddress = z.string().email();
+
+export type EmailAddress = z.infer<typeof zEmailAddress>;
+
+// From https://stackoverflow.com/a/29767609
+const phoneNumberRegex = new RegExp(
+  /^\+?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4,6}$/im
+);
+
+export const zPhoneNumber = z.string().regex(phoneNumberRegex);
+
+export type PhoneNumber = z.infer<typeof zPhoneNumber>;

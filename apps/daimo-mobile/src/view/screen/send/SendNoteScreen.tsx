@@ -1,5 +1,6 @@
+import { assert } from "@daimo/common";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
   TextInput,
@@ -7,25 +8,30 @@ import {
   View,
 } from "react-native";
 
-import { SendNoteButton } from "./SendNoteButton";
+import { ExternalAction, NoteActionButton } from "./NoteActionButton";
+import { RecipientDisplay } from "./RecipientDisplay";
+import { useAccount } from "../../../model/account";
+import { ExternalRecipient } from "../../../sync/recipients";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
+import { composeEmail, composeSMS } from "../../shared/composeSend";
 import {
   ParamListSend,
   useDisableTabSwipe,
   useExitToHome,
   useNav,
 } from "../../shared/nav";
+import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
 
 export function SendNoteScreen({ route }: Props) {
-  const { lagAutoFocus } = route.params || {};
+  const { recipient, lagAutoFocus } = route.params || {};
 
   // Send Payment Link shows available secure messaging apps
   const [noteDollars, setNoteDollars] = useState(0);
@@ -51,6 +57,20 @@ export function SendNoteScreen({ route }: Props) {
   }, [nav, amountChosen]);
   useDisableTabSwipe(nav);
 
+  const [account] = useAccount();
+  assert(account != null);
+
+  const [externalAction, setExternalAction] = useState<ExternalAction>({
+    type: "share",
+    exec: shareURL,
+  });
+
+  useEffect(() => {
+    if (!recipient) return;
+
+    getSendLinkAction(recipient, account.name).then(setExternalAction);
+  }, [recipient, noteDollars]);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
@@ -58,12 +78,18 @@ export function SendNoteScreen({ route }: Props) {
         <Spacer h={8} />
         <InfoBox
           title="Pay by sending a link"
-          subtitle="Anyone with the link can accept it"
+          subtitle="Daimo invite included with money"
         />
         <Spacer h={32} />
-        <TextCenter>
-          <TextLight>Enter amount</TextLight>
-        </TextCenter>
+        {recipient ? (
+          <RecipientDisplay recipient={recipient} />
+        ) : (
+          <>
+            <TextCenter>
+              <TextLight>Enter amount</TextLight>
+            </TextCenter>
+          </>
+        )}
         <Spacer h={24} />
         {!amountChosen && (
           <AmountChooser
@@ -97,8 +123,42 @@ export function SendNoteScreen({ route }: Props) {
             onPress={onChooseAmount}
           />
         )}
-        {amountChosen && <SendNoteButton dollars={noteDollars} />}
+        {amountChosen && (
+          <NoteActionButton
+            dollars={noteDollars}
+            externalAction={externalAction}
+          />
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
+}
+
+async function getSendLinkAction(
+  recipient: ExternalRecipient,
+  senderName: string
+): Promise<ExternalAction> {
+  const composer =
+    recipient.type === "email"
+      ? await composeEmail(recipient.email)
+      : await composeSMS(recipient.phoneNumber);
+
+  if (!composer) {
+    return {
+      type: "share",
+      exec: shareURL,
+    };
+  } else {
+    return {
+      type: recipient.type === "email" ? "mail" : "sms",
+      exec: async (url: string, dollars: number) => {
+        return composer({
+          type: "paymentLink",
+          url,
+          senderName,
+          dollars,
+        });
+      },
+    };
+  }
 }

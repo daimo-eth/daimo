@@ -1,22 +1,23 @@
-import { AddrLabel, EAccount, getAccountName } from "@daimo/common";
+import { AddrLabel } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { color } from "./style";
+import { Recipient, getRecipientName } from "../../sync/recipients";
 
 export function AccountBubble({
-  eAcc,
+  recipient,
   size,
   isPending,
   transparent,
 }: {
-  eAcc: EAccount;
+  recipient: Recipient;
   size: number;
   isPending?: boolean;
   transparent?: boolean;
 }) {
-  const name = getAccountName(eAcc);
+  const name = getRecipientName(recipient);
 
   const fontSize = (function () {
     switch (size) {
@@ -32,10 +33,14 @@ export function AccountBubble({
   })();
 
   const letter = (function () {
-    if (name.startsWith("0x")) {
+    if (recipient.type === "email") {
+      return <Octicons name="mail" size={fontSize} color={color.primary} />;
+    } else if (recipient.type === "phoneNumber") {
+      return <Octicons name="person" size={fontSize} color={color.primary} />;
+    } else if (name.startsWith("0x")) {
       return "0x";
-    } else if (eAcc.label != null) {
-      switch (eAcc.label) {
+    } else if (recipient.label != null) {
+      switch (recipient.label) {
         case AddrLabel.Faucet:
           return (
             <Octicons name="download" size={fontSize} color={color.primary} />

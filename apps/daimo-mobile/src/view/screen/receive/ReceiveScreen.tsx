@@ -4,11 +4,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useRef, useState } from "react";
 import {
-  Alert,
   Keyboard,
-  Platform,
-  Share,
-  ShareAction,
   TextInput,
   TouchableWithoutFeedback,
   View,
@@ -26,6 +22,7 @@ import {
   useFocusOnScreenTransitionEnd,
   useNav,
 } from "../../shared/nav";
+import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -70,39 +67,27 @@ function RequestScreenInner({
   useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
 
   const sendRequest = async () => {
-    try {
-      textInputRef.current?.blur();
-      setStatus("sending");
+    textInputRef.current?.blur();
+    setStatus("sending");
 
-      const requestId = generateRequestID();
+    const requestId = generateRequestID();
 
-      const url = formatDaimoLink({
-        type: "request",
-        recipient: account.name,
-        dollars: `${dollars}`,
-        requestId,
-      });
+    const url = formatDaimoLink({
+      type: "request",
+      recipient: account.name,
+      dollars: `${dollars}`,
+      requestId,
+    });
 
-      let result: ShareAction;
-      if (Platform.OS === "android") {
-        result = await Share.share({ message: url });
-      } else {
-        result = await Share.share({ url }); // Default behavior for iOS
-      }
+    const didShare = await shareURL(url);
+    console.log(`[REQUEST] action ${didShare}`);
 
-      console.log(`[REQUEST] action ${result.action}`);
-      if (result.action === Share.sharedAction) {
-        console.log(`[REQUEST] shared, activityType: ${result.activityType}`);
-        setStatus("sent");
-        trackRequest(requestId, dollars);
-        nav.navigate("HomeTab", { screen: "Home" });
-      } else if (result.action === Share.dismissedAction) {
-        // Only on iOS
-        console.log(`[REQUEST] share dismissed`);
-        setStatus("creating");
-      }
-    } catch (error: any) {
-      Alert.alert(error.message);
+    if (didShare) {
+      setStatus("sent");
+      trackRequest(requestId, dollars);
+      nav.navigate("HomeTab", { screen: "Home" });
+    } else {
+      setStatus("creating");
     }
   };
 

@@ -15,14 +15,17 @@ import {
   View,
 } from "react-native";
 
+import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
-import { Recipient, addLastSendTime } from "../../../sync/recipients";
-import { AccountBubble } from "../../shared/AccountBubble";
+import {
+  AccountRecipient,
+  addLastSendTime,
+  getRecipientName,
+} from "../../../sync/recipients";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
-import { ButtonCircle } from "../../shared/ButtonCircle";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -34,7 +37,6 @@ import {
   useNav,
 } from "../../shared/nav";
 import { ss } from "../../shared/style";
-import { TextH3, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
@@ -136,7 +138,7 @@ function SendChooseAmount({
   onCancel,
   lagAutoFocus,
 }: {
-  recipient: Recipient;
+  recipient: AccountRecipient;
   onCancel: () => void;
   lagAutoFocus?: boolean;
 }) {
@@ -156,7 +158,7 @@ function SendChooseAmount({
   if (recipient.lastSendTime == null) {
     infoBubble = (
       <InfoBox
-        title={`First time paying ${getAccountName(recipient)}`}
+        title={`First time paying ${getRecipientName(recipient)}`}
         subtitle="Ensure the recipient is correct"
       />
     );
@@ -199,7 +201,7 @@ function SendConfirm({
   dollars,
   requestId,
 }: {
-  recipient: Recipient;
+  recipient: AccountRecipient;
   dollars: `${number}`;
   requestId?: `${bigint}`;
 }) {
@@ -245,43 +247,7 @@ function SendConfirm({
   );
 }
 
-function RecipientDisplay({
-  recipient,
-  isRequest,
-}: {
-  recipient: Recipient;
-  isRequest?: boolean;
-}) {
-  // Show who we're sending to
-  const disp = getAccountName(recipient);
-  const { originalMatch } = recipient;
-  const showOrig = originalMatch != null && originalMatch !== disp;
-
-  const nav = useNav();
-  const goToAccount = useCallback(() => {
-    nav.navigate("SendTab", { screen: "Account", params: { eAcc: recipient } });
-  }, [nav, recipient]);
-
-  return (
-    <View style={styles.recipientDisp}>
-      <ButtonCircle size={64} onPress={goToAccount}>
-        <AccountBubble eAcc={recipient} size={64} transparent />
-      </ButtonCircle>
-      <Spacer h={16} />
-      {isRequest && <TextLight>Requested by</TextLight>}
-      {isRequest && <Spacer h={8} />}
-      <TextH3>{disp}</TextH3>
-      {showOrig && <Spacer h={8} />}
-      {showOrig && <TextLight>{originalMatch}</TextLight>}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  recipientDisp: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
   buttonRow: {
     flexDirection: "row",
     gap: 18,

@@ -35,7 +35,7 @@ export default {
       usesNonExemptEncryption: false,
     },
     infoPlist: {
-      LSApplicationQueriesSchemes: ["whatsapp", "sgnl", "tg"],
+      LSApplicationQueriesSchemes: ["whatsapp", "sgnl", "tg", "mailto", "sms"],
     },
   },
   android: {
@@ -112,5 +112,6 @@ export default {
           "Allows Daimo to scan QR codes to pay other users or add new devices to your account.",
       },
     ],
+    ["./android-deeplink-config-plugin", "custom"],
   ],
 };

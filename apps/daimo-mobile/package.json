@@ -34,6 +34,7 @@
     "@daimo/expo-passkeys": "*",
     "@daimo/userop": "*",
     "@ethersproject/shims": "^5.7.0",
+    "@expo/config-plugins": "^7.2.5",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
     "@gorhom/bottom-sheet": "^4",

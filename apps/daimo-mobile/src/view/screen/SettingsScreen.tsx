@@ -93,7 +93,7 @@ function AccountHero({ account }: { account: Account }) {
 
   return (
     <View style={styles.accountHero}>
-      <AccountBubble eAcc={eAcc} size={64} />
+      <AccountBubble recipient={{ type: "account", ...eAcc }} size={64} />
       <View>
         <AccountCopyLinkButton eAcc={eAcc} size="h3" />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
