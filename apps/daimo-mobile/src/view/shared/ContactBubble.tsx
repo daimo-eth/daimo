@@ -105,7 +105,7 @@ export function Bubble({
 
   return (
     <View style={style}>
-      <Text style={textStyle} numberOfLines={1}>
+      <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
         {children}
       </Text>
     </View>

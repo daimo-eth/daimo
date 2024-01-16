@@ -25,7 +25,12 @@ import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
 import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
-import { TextBody, TextCenter, TextLight } from "./text";
+import {
+  MAX_FONT_SIZE_MULTIPLIER,
+  TextBody,
+  TextCenter,
+  TextLight,
+} from "./text";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
 
@@ -155,7 +160,12 @@ export function HistoryListSwipe({
 function HeaderRow({ title }: { title: string }) {
   return (
     <View style={styles.rowHeader}>
-      <Text style={[ss.text.body, { color: color.gray3 }]}>{title}</Text>
+      <Text
+        style={[ss.text.body, { color: color.gray3 }]}
+        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+      >
+        {title}
+      </Text>
     </View>
   );
 }
@@ -272,10 +282,18 @@ function TransferAmountDate({
 
   return (
     <View style={styles.transferAmountDate}>
-      <Text style={[ss.text.metadata, { color: amountCol }]}>
+      <Text
+        style={[ss.text.metadata, { color: amountCol }]}
+        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+      >
         {sign} {dollarStr}
       </Text>
-      <Text style={[ss.text.metadataLight, { color: textCol }]}>{timeStr}</Text>
+      <Text
+        style={[ss.text.metadataLight, { color: textCol }]}
+        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+      >
+        {timeStr}
+      </Text>
     </View>
   );
 }

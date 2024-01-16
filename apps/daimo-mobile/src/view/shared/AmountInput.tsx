@@ -15,7 +15,7 @@ import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
 import { useNav } from "./nav";
 import { color, ss } from "./style";
-import { TextCenter, TextLight } from "./text";
+import { MAX_FONT_SIZE_MULTIPLIER, TextCenter, TextLight } from "./text";
 import { useAccount } from "../../model/account";
 
 // Input components allows entry in range $0.01 to $99,999.99
@@ -165,7 +165,12 @@ function AmountInput({
   return (
     <TouchableWithoutFeedback onPress={focus}>
       <View style={styles.amountInputWrap}>
-        <Text style={styles.amountDollar}>$</Text>
+        <Text
+          style={styles.amountDollar}
+          maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+        >
+          $
+        </Text>
         <TextInput
           ref={ref}
           style={styles.amountInput}

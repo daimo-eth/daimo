@@ -24,7 +24,12 @@ import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import { TextBold, TextLight, TextPara } from "../../shared/text";
+import {
+  MAX_FONT_SIZE_MULTIPLIER,
+  TextBold,
+  TextLight,
+  TextPara,
+} from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Tab = "DEPOSIT" | "WITHDRAW";
@@ -167,7 +172,11 @@ function AddressCopier({
         {...touchHighlightUnderlay.subtle}
       >
         <View style={styles.addressView}>
-          <Text style={[styles.addressMono, { color: col }]} numberOfLines={1}>
+          <Text
+            style={[styles.addressMono, { color: col }]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+          >
             {addr}
           </Text>
           <Octicons name="copy" size={16} color={col} />
