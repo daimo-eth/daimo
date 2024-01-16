@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -44,13 +45,16 @@ function HomeScreenInner({ account }: { account: Account }) {
   const isScrollDragged = useRef<boolean>(false);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
-  const [isActionVisible, setIsActionVisible] = useState(false);
+
+  // Hack to prevent pull-to-refresh from moving up instead of down.
+  const preventOverscrollOffset = useSharedValue(0);
 
   console.log(
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
 
   // Show suggested action when available.
+  const [isActionVisible, setIsActionVisible] = useState(false);
   useEffect(() => {
     const showActionTimeout = setTimeout(() => setIsActionVisible(true), 1500);
     return () => clearTimeout(showActionTimeout);
@@ -95,8 +99,16 @@ function HomeScreenInner({ account }: { account: Account }) {
   const scrollHandler = useAnimatedScrollHandler((event) => {
     if (event.contentOffset.y < 0) {
       translationY.value = event.contentOffset.y;
+    } else {
+      translationY.value = 0;
+      preventOverscrollOffset.value = event.contentOffset.y;
     }
   });
+
+  // Hack to prevent pull-to-refresh from moving up instead of down.
+  const preventOverscrollStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: preventOverscrollOffset.value }],
+  }));
 
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
@@ -152,36 +164,38 @@ function HomeScreenInner({ account }: { account: Account }) {
         scrollEventThrottle={8}
         keyboardShouldPersistTaps="handled"
       >
-        <Spacer h={Math.max(16, ins.top)} />
-        {account.suggestedActions.length > 0 &&
-          netState.status !== "offline" &&
-          isActionVisible && (
-            <SuggestedActionBox
-              action={account.suggestedActions[0]}
-              onHideAction={onHideSuggestedAction}
+        <Animated.View style={preventOverscrollStyle}>
+          <Spacer h={Math.max(16, ins.top)} />
+          {account.suggestedActions.length > 0 &&
+            netState.status !== "offline" &&
+            isActionVisible && (
+              <SuggestedActionBox
+                action={account.suggestedActions[0]}
+                onHideAction={onHideSuggestedAction}
+              />
+            )}
+          <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
+          {searchPrefix != null && (
+            <SearchResults
+              contactsAccess={contactsAccess}
+              prefix={searchPrefix}
+              style={{ marginHorizontal: 0 }}
+              mode="account"
+              lagAutoFocus
             />
           )}
-        <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
-        {searchPrefix != null && (
-          <SearchResults
-            contactsAccess={contactsAccess}
-            prefix={searchPrefix}
-            style={{ marginHorizontal: 0 }}
-            mode="account"
-            lagAutoFocus
-          />
-        )}
-        {searchPrefix == null && account != null && (
-          <>
-            {!(
-              account.suggestedActions.length > 0 &&
-              netState.status !== "offline" &&
-              isActionVisible
-            ) && <Spacer h={64} />}
-            <Spacer h={12} />
-            <AmountAndButtons account={account} />
-          </>
-        )}
+          {searchPrefix == null && account != null && (
+            <>
+              {!(
+                account.suggestedActions.length > 0 &&
+                netState.status !== "offline" &&
+                isActionVisible
+              ) && <Spacer h={64} />}
+              <Spacer h={12} />
+              <AmountAndButtons account={account} />
+            </>
+          )}
+        </Animated.View>
       </Animated.ScrollView>
       {searchPrefix == null && bottomSheet}
     </View>
