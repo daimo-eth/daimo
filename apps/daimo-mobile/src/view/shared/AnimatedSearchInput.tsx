@@ -18,6 +18,7 @@ import Animated, {
 
 import { OctName } from "./InputBig";
 import { color, ss } from "./style";
+import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const animationConfig = { duration: 150 };
@@ -111,6 +112,7 @@ export function AnimatedSearchInput({
             style={center ? styles.inputCentered : styles.input}
             multiline={Platform.OS === "android" && center}
             numberOfLines={1}
+            maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
             autoCapitalize="none"
             autoCorrect={false}
             autoFocus={autoFocus}

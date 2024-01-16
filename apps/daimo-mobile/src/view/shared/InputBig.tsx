@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { color, ss } from "./style";
+import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
 
@@ -70,6 +71,7 @@ export function InputBig({
           style={center ? styles.inputCentered : styles.input}
           multiline={Platform.OS === "android" && center}
           numberOfLines={1}
+          maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
           autoCapitalize="none"
           autoCorrect={false}
           spellCheck={false}

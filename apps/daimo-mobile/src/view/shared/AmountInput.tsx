@@ -178,6 +178,7 @@ function AmountInput({
           placeholder="0"
           placeholderTextColor={color.grayMid}
           numberOfLines={1}
+          maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
           focusable={!disabled}
           editable={!disabled}
           selectTextOnFocus
