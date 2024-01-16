@@ -4,7 +4,7 @@ import { Text, TextProps, TextStyle } from "react-native";
 
 import { color, ss } from "./style";
 
-export const MAX_FONT_SIZE_MULTIPLIER = 1.3;
+export const MAX_FONT_SIZE_MULTIPLIER = 1.4;
 
 function useStyle(baseStyle: TextStyle, { color }: { color?: string }) {
   return useMemo(() => [baseStyle, { color }], [baseStyle, color]);
