@@ -32,10 +32,8 @@ import { chainConfig } from "../../../env";
 export function AppOrWalletCTA({
   linkStatus,
   description,
-  directDeepLink,
 }: {
   linkStatus: DaimoLinkStatus;
-  directDeepLink?: string;
   description: string;
 }) {
   const { address, isConnected } = useAccount();
@@ -81,14 +79,9 @@ export function AppOrWalletCTA({
   const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
   const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
 
-  const isInvitePaymentLink = linkStatus.link.type === "notev2";
-
   return (
     <center>
-      <PrimaryOpenInAppButton
-        disabled={isLoading || isSuccess}
-        inviteDeepLink={isInvitePaymentLink ? directDeepLink : undefined}
-      />
+      <PrimaryOpenInAppButton disabled={isLoading || isSuccess} />
       <div className="h-4" />
       {isConnected && humanReadableError === undefined && (
         <>

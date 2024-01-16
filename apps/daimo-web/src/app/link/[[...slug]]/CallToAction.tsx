@@ -26,15 +26,12 @@ export function CallToAction({
     setDirectDeepLink(href.replace(daimoLinkBase, "daimo:/"));
   }, [directDeepLink]);
 
-  const isInvitePaymentLink = walletActionLinkStatus?.link.type === "notev2";
-
   return (
     <>
       {walletActionLinkStatus ? (
         <AppOrWalletCTA
           linkStatus={walletActionLinkStatus}
           description={description}
-          directDeepLink={directDeepLink}
         />
       ) : (
         <>
@@ -48,8 +45,7 @@ export function CallToAction({
           href={directDeepLink}
           className="block text-center text-primaryLight tracking-wider font-bold py-5"
         >
-          ALREADY HAVE IT? OPEN {isInvitePaymentLink ? "INVITE" : "LINK"} IN
-          DAIMO
+          ALREADY HAVE IT? OPEN IN DAIMO
         </a>
       )}
     </>
