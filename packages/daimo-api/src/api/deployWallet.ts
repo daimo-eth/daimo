@@ -20,6 +20,7 @@ import { retryBackoff } from "../utils/retryBackoff";
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
+  invCodeSuccess: boolean | undefined,
   inviteLinkStatus: DaimoLinkStatus | undefined,
   watcher: Watcher,
   nameReg: NameRegistry,
@@ -28,8 +29,9 @@ export async function deployWallet(
   telemetry: Telemetry,
   paymaster: Paymaster
 ): Promise<Address> {
-  // For now, invite code is required
+  // For now, invite is required
   const invSuccess = (function () {
+    if (invCodeSuccess) return true;
     if (!inviteLinkStatus) return false;
     if (inviteLinkStatus.link.type === "invite") {
       return (inviteLinkStatus as DaimoInviteStatus).isValid;
