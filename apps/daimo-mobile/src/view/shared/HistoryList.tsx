@@ -9,13 +9,7 @@ import {
 } from "@daimo/common";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useCallback } from "react";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, TouchableHighlight, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Address } from "viem";
 
@@ -25,12 +19,7 @@ import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
 import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
-import {
-  MAX_FONT_SIZE_MULTIPLIER,
-  TextBody,
-  TextCenter,
-  TextLight,
-} from "./text";
+import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
 
@@ -160,12 +149,9 @@ export function HistoryListSwipe({
 function HeaderRow({ title }: { title: string }) {
   return (
     <View style={styles.rowHeader}>
-      <Text
-        style={[ss.text.body, { color: color.gray3 }]}
-        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
-      >
+      <DaimoText style={[ss.text.body, { color: color.gray3 }]}>
         {title}
-      </Text>
+      </DaimoText>
     </View>
   );
 }
@@ -282,18 +268,12 @@ function TransferAmountDate({
 
   return (
     <View style={styles.transferAmountDate}>
-      <Text
-        style={[ss.text.metadata, { color: amountCol }]}
-        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
-      >
+      <DaimoText style={[ss.text.metadata, { color: amountCol }]}>
         {sign} {dollarStr}
-      </Text>
-      <Text
-        style={[ss.text.metadataLight, { color: textCol }]}
-        maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
-      >
+      </DaimoText>
+      <DaimoText style={[ss.text.metadataLight, { color: textCol }]}>
         {timeStr}
-      </Text>
+      </DaimoText>
     </View>
   );
 }

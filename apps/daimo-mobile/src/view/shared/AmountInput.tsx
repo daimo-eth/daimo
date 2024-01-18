@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
   StyleSheet,
-  Text,
   TextInput,
   TextInputEndEditingEventData,
   TouchableWithoutFeedback,
@@ -15,7 +14,12 @@ import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
 import { useNav } from "./nav";
 import { color, ss } from "./style";
-import { MAX_FONT_SIZE_MULTIPLIER, TextCenter, TextLight } from "./text";
+import {
+  DaimoText,
+  MAX_FONT_SIZE_MULTIPLIER,
+  TextCenter,
+  TextLight,
+} from "./text";
 import { useAccount } from "../../model/account";
 
 // Input components allows entry in range $0.01 to $99,999.99
@@ -165,12 +169,7 @@ function AmountInput({
   return (
     <TouchableWithoutFeedback onPress={focus}>
       <View style={styles.amountInputWrap}>
-        <Text
-          style={styles.amountDollar}
-          maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
-        >
-          $
-        </Text>
+        <DaimoText style={styles.amountDollar}>$</DaimoText>
         <TextInput
           ref={ref}
           style={styles.amountInput}

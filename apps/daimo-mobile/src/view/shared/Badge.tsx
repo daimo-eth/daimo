@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 
 import { color, ss } from "./style";
-import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
+import { DaimoText } from "./text";
 
 const defaultColor = color.grayMid;
 const defaultBgColor = color.grayLight;
@@ -40,9 +40,7 @@ export function Badge({
 
   return (
     <View style={styleWrap}>
-      <Text style={styleText} maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}>
-        {children}
-      </Text>
+      <DaimoText style={styleText}>{children}</DaimoText>
     </View>
   );
 }

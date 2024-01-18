@@ -10,36 +10,36 @@ function useStyle(baseStyle: TextStyle, { color }: { color?: string }) {
   return useMemo(() => [baseStyle, { color }], [baseStyle, color]);
 }
 
-const TextWrapped = (props: TextProps) => {
+export const DaimoText = (props: TextProps) => {
   return <Text {...props} maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER} />;
 };
 
 export function TextH1(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.h1, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.h1, props)} />;
 }
 
 export function TextH2(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.h2, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.h2, props)} />;
 }
 
 export function TextH3(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.h3, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.h3, props)} />;
 }
 
 export function TextBody(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.body, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.body, props)} />;
 }
 
 export function TextBodyCaps(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.bodyCaps, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.bodyCaps, props)} />;
 }
 
 export function TextMeta(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.metadata, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.metadata, props)} />;
 }
 
 export function TextPara(props: TextProps & { color?: string }) {
-  return <TextWrapped {...props} style={useStyle(ss.text.para, props)} />;
+  return <DaimoText {...props} style={useStyle(ss.text.para, props)} />;
 }
 
 export function TextLight(props: TextProps) {
@@ -47,15 +47,15 @@ export function TextLight(props: TextProps) {
 }
 
 export function TextBold(props: TextProps) {
-  return <TextWrapped {...props} style={ss.text.bold} />;
+  return <DaimoText {...props} style={ss.text.bold} />;
 }
 
 export function TextCenter(props: TextProps) {
-  return <TextWrapped {...props} style={ss.text.center} />;
+  return <DaimoText {...props} style={ss.text.center} />;
 }
 
 export function TextError(props: TextProps) {
-  return <TextWrapped {...props} style={ss.text.error} />;
+  return <DaimoText {...props} style={ss.text.error} />;
 }
 
 type OcticonName = React.ComponentProps<typeof Octicons>["name"];

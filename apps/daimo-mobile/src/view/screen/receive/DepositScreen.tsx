@@ -7,7 +7,6 @@ import {
   Linking,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableHighlight,
   View,
 } from "react-native";
@@ -24,12 +23,7 @@ import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
-import {
-  MAX_FONT_SIZE_MULTIPLIER,
-  TextBold,
-  TextLight,
-  TextPara,
-} from "../../shared/text";
+import { DaimoText, TextBold, TextLight, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Tab = "DEPOSIT" | "WITHDRAW";
@@ -172,13 +166,12 @@ function AddressCopier({
         {...touchHighlightUnderlay.subtle}
       >
         <View style={styles.addressView}>
-          <Text
+          <DaimoText
             style={[styles.addressMono, { color: col }]}
             numberOfLines={1}
-            maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
           >
             {addr}
-          </Text>
+          </DaimoText>
           <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
