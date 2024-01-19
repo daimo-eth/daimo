@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 
 import { color, ss } from "./style";
+import { DaimoText } from "./text";
 
 const defaultColor = color.grayMid;
 const defaultBgColor = color.grayLight;
@@ -39,7 +40,7 @@ export function Badge({
 
   return (
     <View style={styleWrap}>
-      <Text style={styleText}>{children}</Text>
+      <DaimoText style={styleText}>{children}</DaimoText>
     </View>
   );
 }

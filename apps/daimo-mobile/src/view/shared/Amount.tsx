@@ -4,6 +4,7 @@ import { StyleSheet, Text } from "react-native";
 
 import Spacer from "./Spacer";
 import { color } from "./style";
+import { DaimoText } from "./text";
 
 /** 1.23 or 1,23 depending on user locale */
 export const amountSeparator = getLocales()[0].decimalSeparator || ".";
@@ -49,13 +50,13 @@ export function TitleAmount({ amount }: { amount: bigint }) {
   const [dollars, cents] = amountToDollars(amount).split(".");
 
   return (
-    <Text style={styles.title}>
+    <DaimoText style={styles.title}>
       <Text style={styles.titleSmall}>{symbol}</Text>
       <Spacer w={4} />
       {dollars}
       {amountSeparator}
       {cents}
-    </Text>
+    </DaimoText>
   );
 }
 

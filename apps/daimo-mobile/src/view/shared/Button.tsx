@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import {
   Image,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableHighlight,
   View,
@@ -18,6 +17,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
+import { DaimoText } from "./text";
 import FaceIdIcon from "../../../assets/face-id.png";
 
 interface TextButtonProps {
@@ -101,7 +101,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
             size={12}
           />
         </View>
-        <Text style={style.title}>{props.title?.toUpperCase()}</Text>
+        <DaimoText style={style.title}>{props.title?.toUpperCase()}</DaimoText>
         {props.showBiometricIcon && (
           <View style={styles.biometricIconContainer}>
             <Image source={FaceIdIcon} style={styles.biometricIcon} />
@@ -208,7 +208,7 @@ function Button(
   );
 
   const child = props.title ? (
-    <Text style={props.style.title}>{props.title.toUpperCase()}</Text>
+    <DaimoText style={props.style.title}>{props.title.toUpperCase()}</DaimoText>
   ) : (
     props.children
   );
