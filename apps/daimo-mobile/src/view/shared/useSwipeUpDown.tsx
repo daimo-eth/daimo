@@ -1,6 +1,6 @@
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { Dimensions, Platform, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
@@ -15,11 +15,13 @@ export function useSwipeUpDown({
   itemFull,
   translationY,
   disabled,
+  bottomSheetRef,
 }: {
   itemMini: ReactNode;
   itemFull: ReactNode;
   translationY: Animated.SharedValue<number>;
   disabled?: boolean;
+  bottomSheetRef: React.RefObject<SwipeUpDownRef>;
 }) {
   const [isBottomSheetOpen, setIsOpen] = useState(false);
 
@@ -32,7 +34,6 @@ export function useSwipeUpDown({
 
   // Hide bottom sheet when tapping a bottom tab.
   const nav = useNav();
-  const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const isFocused = useIsFocused();
   useEffect(() => {
     if (nav.getParent()) {

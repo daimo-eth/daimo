@@ -13,14 +13,8 @@ import {
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Linking,
-  StyleSheet,
-  View,
-} from "react-native";
+import React, { useCallback, useContext } from "react";
+import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { getCachedEAccount } from "../../logic/addr";
@@ -34,12 +28,8 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import {
-  ParamListHome,
-  useDisableTabSwipe,
-  useExitBack,
-  useNav,
-} from "../shared/nav";
+import { CallbackContext } from "../shared/SwipeUpDown";
+import { ParamListTab, useDisableTabSwipe, useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import {
   TextBody,
@@ -51,7 +41,7 @@ import {
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListHome, "HistoryOp">;
+type Props = NativeStackScreenProps<ParamListTab, "BottomSheetHistoryOp">;
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -62,6 +52,7 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
+  const moveShouldOpenBottomSheet = useContext(CallbackContext);
   const nav = useNav();
   useDisableTabSwipe(nav);
 
@@ -80,7 +71,16 @@ function HistoryOpScreenInner({
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title={<DaimoLogo />} onBack={useExitBack()} />
+      <ScreenHeader
+        title="Transfer"
+        onExit={() => {
+          moveShouldOpenBottomSheet(false);
+          if (nav.canGoBack()) {
+            nav.goBack();
+          }
+        }}
+        hideOfflineHeader
+      />
       <Spacer h={16} />
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
@@ -94,16 +94,6 @@ function HistoryOpScreenInner({
         [OpStatus.confirmed, OpStatus.finalized].includes(op.status) && (
           <NoteView account={account} note={op} />
         )}
-    </View>
-  );
-}
-
-function DaimoLogo() {
-  const source = require("../../../assets/icon.png");
-  // Must wrap in a View for correct centering on Android
-  return (
-    <View>
-      <Image source={source} style={{ height: 36, width: 36 }} />
     </View>
   );
 }
@@ -207,7 +197,11 @@ function TransferBody({
         <TextH3 color={color.grayDark}>{verb}</TextH3>
       </TextCenter>
       <Spacer h={4} />
-      <TitleAmount amount={BigInt(op.amount)} />
+      <TitleAmount
+        amount={BigInt(op.amount)}
+        preSymbol={sentByUs ? "-" : "+"}
+        style={sentByUs ? { color: "black" } : { color: color.success }}
+      />
       <Spacer h={8} />
       <TextCenter>
         <TextBodyCaps color={color.grayMid}>

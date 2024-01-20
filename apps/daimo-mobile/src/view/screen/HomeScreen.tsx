@@ -29,6 +29,7 @@ import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
+import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { useInitNavLinks, useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
@@ -43,6 +44,7 @@ export default function HomeScreen() {
 function HomeScreenInner({ account }: { account: Account }) {
   const scrollRef = useRef<Animated.ScrollView>(null);
   const isScrollDragged = useRef<boolean>(false);
+  const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
 
@@ -132,6 +134,7 @@ function HomeScreenInner({ account }: { account: Account }) {
     itemFull: histListFull,
     translationY,
     disabled: refreshing,
+    bottomSheetRef,
   });
 
   // Handle incoming applinks
