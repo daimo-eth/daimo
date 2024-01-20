@@ -25,6 +25,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
+import { useNav } from "./nav";
 import { color } from "./style";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import { HistoryOpScreen } from "../screen/HistoryOpScreen";
@@ -33,7 +34,7 @@ const Stack = createNativeStackNavigator();
 export const CallbackContext = createContext((shouldOpen: boolean) => {});
 const noHeaders: NativeStackNavigationOptions = {
   headerShown: false,
-  animation: "fade_from_bottom",
+  animation: "fade",
 };
 
 interface SwipeUpDownProps {
@@ -79,8 +80,8 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const [isMini, setIsMini] = useState(true);
 
+    // When user selects a transaction, open the bottom sheet part way.
     const animatedIndex = useSharedValue(0);
-
     const opScreenOpen = () => {
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(2);
@@ -90,15 +91,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         bottomRef.current?.snapToIndex(1);
       }
     };
-
     const opScreenCollapse = () => {
-      setSnapPoints([posYMini, posYFull - 1, posYFull]);
+      setSnapPoints([posYMini, posYFull, posYFull]);
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(0);
       }
     };
-
     const moveBottomSheet = (shouldOpen: boolean) => {
+      console.log(`[SWIPE] moveBottomSheet ${shouldOpen}`);
       if (shouldOpen) {
         opScreenOpen();
       } else {
@@ -121,10 +121,15 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       onShowFull?.();
     };
 
+    const nav = useNav();
+
     const showMini = () => {
       console.log(`[SWIPE] showMini ${posYMini}`);
       setIsMini(true);
       onShowMini?.();
+
+      // react-native-nav typescript types broken
+      (nav as any).navigate("BottomSheetList");
     };
 
     const renderBackdrop = useCallback(
@@ -194,7 +199,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
               />
               <Stack.Screen
                 name="BottomSheetHistoryOp"
-                component={HistoryOpScreen}
+                component={HistoryOpScreen as any}
               />
             </Stack.Group>
           </Stack.Navigator>

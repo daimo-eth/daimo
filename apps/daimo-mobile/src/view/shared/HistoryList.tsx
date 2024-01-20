@@ -207,7 +207,7 @@ function DisplayOpRow({
       const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
       if (isLinkToOp || !canSendTo(otherAcc)) {
         moveShouldOpenBottomSheet(true);
-        nav.navigate("BottomSheetHistoryOp", {
+        (nav as any).navigate("BottomSheetHistoryOp", {
           op: displayOp,
           shouldAddInset: false,
         });

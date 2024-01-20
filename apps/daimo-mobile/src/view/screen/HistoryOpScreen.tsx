@@ -29,7 +29,11 @@ import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { CallbackContext } from "../shared/SwipeUpDown";
-import { ParamListTab, useDisableTabSwipe, useNav } from "../shared/nav";
+import {
+  ParamListBottomSheet,
+  useDisableTabSwipe,
+  useNav,
+} from "../shared/nav";
 import { color, ss } from "../shared/style";
 import {
   TextBody,
@@ -41,7 +45,10 @@ import {
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListTab, "BottomSheetHistoryOp">;
+type Props = NativeStackScreenProps<
+  ParamListBottomSheet,
+  "BottomSheetHistoryOp"
+>;
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);

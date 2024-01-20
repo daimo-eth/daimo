@@ -17,7 +17,6 @@ import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
-import { HistoryOpScreen } from "./screen/HistoryOpScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
@@ -148,7 +147,6 @@ function SendTab() {
         <SendStack.Screen name="QR" component={QRScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
-        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
@@ -173,7 +171,6 @@ function HomeTab() {
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
-        <HomeStack.Screen name="HistoryOp" component={HistoryOpScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );
