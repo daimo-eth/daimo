@@ -15,14 +15,12 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
   return { ipAddr, userAgent, daimoPlatform, daimoVersion, span, ...opts };
 };
 
-type TrpcReqContext = Awaited<ReturnType<typeof createContext>>;
-
 export function onTrpcError({
   error,
   ctx,
 }: {
   error: TRPCError;
-  ctx?: TrpcReqContext;
+  ctx?: TrpcRequestContext;
 }) {
   const err = `${error.code} ${error.name} ${error.message}`;
   if (ctx) {
