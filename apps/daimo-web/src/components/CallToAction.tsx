@@ -1,11 +1,11 @@
 "use client";
 
-import { DaimoLinkStatus, daimoLinkBase } from "@daimo/common";
+import { DaimoLinkStatus, daimoLinkBase, daimoLinkBaseV2 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
-import { PrimaryOpenInAppButton } from "../../../components/buttons";
+import { PrimaryOpenInAppButton } from "./buttons";
 
 export function CallToAction({
   description,
@@ -23,7 +23,9 @@ export function CallToAction({
     // Must be loaded client-side to capture the hash part of the URL
     // for ephemeral notes.
     const { href } = window.location;
-    setDirectDeepLink(href.replace(daimoLinkBase, "daimo:/"));
+    setDirectDeepLink(
+      href.replace(daimoLinkBase, "daimo:/").replace(daimoLinkBaseV2, "daimo:/")
+    );
   }, [directDeepLink]);
 
   const isInvitePaymentLink = walletActionLinkStatus?.link.type === "notev2";

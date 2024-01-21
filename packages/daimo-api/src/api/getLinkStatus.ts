@@ -7,6 +7,8 @@ import {
   parseDaimoLink,
   DaimoNoteState,
   DaimoInviteStatus,
+  DaimoLinkRequest,
+  assert,
 } from "@daimo/common";
 import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
@@ -123,6 +125,35 @@ export async function getLinkStatus(
         isValid,
       };
       return ret;
+    }
+
+    case "tag": {
+      // Tag links serve as simple redirects to other links on the API level.
+      // Currently, they get redirected to returning a request status.
+      const id = link.id;
+      if (id === "rwe") {
+        const randomRequestId = `${BigInt(
+          Math.floor(Math.random() * 1e12)
+        )}` as `${bigint}`;
+        const acc = await nameReg.getEAccountFromStr("daimo");
+        assert(acc != null && acc.name != null);
+
+        const requestLink: DaimoLinkRequest = {
+          type: "request",
+          recipient: acc.name,
+          dollars: "1",
+          requestId: randomRequestId,
+        };
+
+        const ret: DaimoRequestStatus = {
+          link: requestLink,
+          recipient: acc,
+          requestId: randomRequestId,
+        };
+        return ret;
+      } else {
+        throw new Error(`Unknown tag id: ${id}`);
+      }
     }
 
     default:

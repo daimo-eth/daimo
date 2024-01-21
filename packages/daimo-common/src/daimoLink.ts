@@ -6,6 +6,10 @@ import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 export const daimoDomain =
   process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
+export const daimoLinkBaseV2 = daimoDomain
+  ? `https://${daimoDomain}/l`
+  : "http://localhost:3001/l";
+
 export const daimoLinkBase = daimoDomain
   ? `https://${daimoDomain}/link`
   : "http://localhost:3001/link";
@@ -17,7 +21,8 @@ export type DaimoLink =
   | DaimoLinkNote
   | DaimoLinkNoteV2
   | DaimoLinkSettings
-  | DaimoLinkInvite;
+  | DaimoLinkInvite
+  | DaimoLinkTag;
 
 /** Represents any Ethereum address */
 export type DaimoLinkAccount = {
@@ -65,6 +70,11 @@ export type DaimoLinkSettings = {
 export type DaimoLinkInvite = {
   type: "invite";
   code: string;
+};
+
+export type DaimoLinkTag = {
+  type: "tag";
+  id: string;
 };
 
 // Returns a shareable https://daimo.com/... deep link.
@@ -118,6 +128,9 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
     case "invite": {
       return `${linkBase}/invite/${link.code}`;
     }
+    case "tag": {
+      return `${linkBase}/t/${link.id}`;
+    }
   }
 }
 
@@ -139,7 +152,12 @@ export function parseDaimoLink(link: string): DaimoLink | null {
 
 function parseDaimoLinkInner(link: string): DaimoLink | null {
   let suffix: string | undefined;
-  const prefixes = [`${daimoLinkBase}/`, "daimo://", "https://daimo.xyz/link/"];
+  const prefixes = [
+    `${daimoLinkBase}/`,
+    `${daimoLinkBaseV2}/`, // New shorter link prefix
+    "daimo://",
+    "https://daimo.xyz/link/", // Backcompat with old domain
+  ];
   for (const prefix of prefixes) {
     if (link.startsWith(prefix)) {
       suffix = link.substring(prefix.length);
@@ -222,6 +240,11 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       if (parts.length !== 2) return null;
       const code = parts[1];
       return { type: "invite", code };
+    }
+    case "t": {
+      if (parts.length !== 2) return null;
+      const id = parts[1];
+      return { type: "tag", id };
     }
     default:
       return null;
