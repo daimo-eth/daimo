@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  DaimoLinkStatus,
-  daimoLinkBase,
-  daimoLinkBaseFuture,
-} from "@daimo/common";
+import { DaimoLinkStatus, daimoLinkBase, daimoLinkBaseV2 } from "@daimo/common";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -28,9 +24,7 @@ export function CallToAction({
     // for ephemeral notes.
     const { href } = window.location;
     setDirectDeepLink(
-      href
-        .replace(daimoLinkBase, "daimo:/")
-        .replace(daimoLinkBaseFuture, "daimo:/")
+      href.replace(daimoLinkBase, "daimo:/").replace(daimoLinkBaseV2, "daimo:/")
     );
   }, [directDeepLink]);
 

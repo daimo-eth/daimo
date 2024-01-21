@@ -5,7 +5,7 @@ import {
   DaimoRequestStatus,
   assert,
   daimoDomain,
-  daimoLinkBase,
+  daimoLinkBaseV2,
   getAccountName,
   parseDaimoLink,
 } from "@daimo/common";
@@ -36,7 +36,7 @@ const defaultMeta = metadata("Daimo", "Payments on Ethereum");
 
 function getUrl(props: LinkProps): string {
   const path = (props.params.slug || []).join("/");
-  return `${daimoLinkBase}/${path}`;
+  return `${daimoLinkBaseV2}/${path}`;
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {

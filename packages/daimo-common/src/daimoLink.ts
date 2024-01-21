@@ -6,7 +6,7 @@ import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 export const daimoDomain =
   process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
-export const daimoLinkBaseFuture = daimoDomain
+export const daimoLinkBaseV2 = daimoDomain
   ? `https://${daimoDomain}/l`
   : "http://localhost:3001/l";
 
@@ -154,7 +154,7 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
   let suffix: string | undefined;
   const prefixes = [
     `${daimoLinkBase}/`,
-    `${daimoLinkBaseFuture}/`, // New shorter link prefix
+    `${daimoLinkBaseV2}/`, // New shorter link prefix
     "daimo://",
     "https://daimo.xyz/link/", // Backcompat with old domain
   ];
