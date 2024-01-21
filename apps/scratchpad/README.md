@@ -10,10 +10,6 @@ npm start  # shows available commands
 
 Play with userops and account abstraction infrastructure.
 
-### Test the Secure Enclave
-
-For that, run the `daimo-testbed` Expo app.
-
 ### Mailing list export
 
 Open mailing list in Notion, click Export, choose Markdown and CSV.
