@@ -4,12 +4,16 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import {
+  NativeStackNavigationOptions,
+  createNativeStackNavigator,
+} from "@react-navigation/native-stack";
+import {
   ReactNode,
+  createContext,
   forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -21,8 +25,17 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
+import { useNav } from "./nav";
 import { color } from "./style";
 import useTabBarHeight from "../../common/useTabBarHeight";
+import { HistoryOpScreen } from "../screen/HistoryOpScreen";
+
+const Stack = createNativeStackNavigator();
+export const CallbackContext = createContext((shouldOpen: boolean) => {});
+const noHeaders: NativeStackNavigationOptions = {
+  headerShown: false,
+  animation: "fade",
+};
 
 interface SwipeUpDownProps {
   itemMini: ReactNode;
@@ -37,6 +50,7 @@ const screenDimensions = Dimensions.get("window");
 
 export type SwipeUpDownRef = {
   collapse: () => void;
+  expand: () => void;
 };
 
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
@@ -52,6 +66,11 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const [posYFull, setPosYFull] = useState(
       screenDimensions.height - ins.top - ins.bottom - tabBarHeight
     );
+    const [snapPoints, setSnapPoints] = useState([
+      posYMini,
+      posYFull - 1,
+      posYFull,
+    ]);
 
     useEffect(() => {
       const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
@@ -61,11 +80,38 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const [isMini, setIsMini] = useState(true);
 
+    // When user selects a transaction, open the bottom sheet part way.
     const animatedIndex = useSharedValue(0);
+    const opScreenOpen = () => {
+      if (animatedIndex.value === 1) {
+        bottomRef.current?.snapToIndex(2);
+      }
+      setSnapPoints([posYMini, 450, posYFull]);
+      if (animatedIndex.value === 0) {
+        bottomRef.current?.snapToIndex(1);
+      }
+    };
+    const opScreenCollapse = () => {
+      setSnapPoints([posYMini, posYFull, posYFull]);
+      if (animatedIndex.value === 1) {
+        bottomRef.current?.snapToIndex(0);
+      }
+    };
+    const moveBottomSheet = (shouldOpen: boolean) => {
+      console.log(`[SWIPE] moveBottomSheet ${shouldOpen}`);
+      if (shouldOpen) {
+        opScreenOpen();
+      } else {
+        opScreenCollapse();
+      }
+    };
 
     useImperativeHandle(ref, () => ({
       collapse() {
         bottomRef.current?.collapse();
+      },
+      expand() {
+        bottomRef.current?.expand();
       },
     }));
 
@@ -75,16 +121,16 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       onShowFull?.();
     };
 
+    const nav = useNav();
+
     const showMini = () => {
       console.log(`[SWIPE] showMini ${posYMini}`);
       setIsMini(true);
       onShowMini?.();
-    };
 
-    const snapPoints = useMemo(
-      () => [posYMini, posYFull],
-      [posYMini, posYFull]
-    );
+      // react-native-nav typescript types broken
+      (nav as any).navigate("BottomSheetList");
+    };
 
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (
@@ -113,6 +159,18 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       };
     });
 
+    const TransactionList = () => (
+      <>
+        <Animated.View
+          style={[styles.itemMiniWrapper, itemMiniStyle]}
+          pointerEvents={isMini ? "auto" : "none"}
+        >
+          {itemMini}
+        </Animated.View>
+        {itemFull}
+      </>
+    );
+
     return (
       <BottomSheet
         ref={bottomRef}
@@ -129,13 +187,23 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
       >
-        <Animated.View
-          style={[styles.itemMiniWrapper, itemMiniStyle]}
-          pointerEvents={isMini ? "auto" : "none"}
-        >
-          {itemMini}
-        </Animated.View>
-        {itemFull}
+        <CallbackContext.Provider value={moveBottomSheet}>
+          <Stack.Navigator
+            initialRouteName="BottomSheetList"
+            screenOptions={noHeaders}
+          >
+            <Stack.Group>
+              <Stack.Screen
+                name="BottomSheetList"
+                component={TransactionList}
+              />
+              <Stack.Screen
+                name="BottomSheetHistoryOp"
+                component={HistoryOpScreen as any}
+              />
+            </Stack.Group>
+          </Stack.Navigator>
+        </CallbackContext.Provider>
       </BottomSheet>
     );
   }

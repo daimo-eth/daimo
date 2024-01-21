@@ -7,7 +7,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -21,6 +21,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorRowCentered } from "../shared/error";
 import {
   ParamListHome,
@@ -100,6 +101,7 @@ function AccountScreenBody({
 }) {
   const nav = useNav();
   useDisableTabSwipe(nav);
+  const bottomSheetRef = useRef<SwipeUpDownRef>(null);
 
   const openExplorer = useCallback(() => {
     const { chainConfig } = env(daimoChainFromId(account.homeChainId));
@@ -134,6 +136,7 @@ function AccountScreenBody({
     itemMini: histListMini,
     itemFull: histListFull,
     translationY,
+    bottomSheetRef,
   });
 
   // TODO: show other accounts coin+chain, once we support multiple.

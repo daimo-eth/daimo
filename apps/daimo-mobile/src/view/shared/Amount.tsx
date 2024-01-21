@@ -1,6 +1,6 @@
 import { amountToDollars } from "@daimo/common";
 import { getLocales } from "expo-localization";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, TextStyle } from "react-native";
 
 import Spacer from "./Spacer";
 import { color } from "./style";
@@ -43,15 +43,26 @@ export function getAmountText({
 }
 
 /** Displays eg "$1.23" or "$1,23" as H1 or H2. */
-export function TitleAmount({ amount }: { amount: bigint }) {
+export function TitleAmount({
+  amount,
+  style,
+  preSymbol,
+}: {
+  amount: bigint;
+  style?: TextStyle;
+  preSymbol?: string;
+}) {
   if (!(amount >= 0)) throw new Error("Invalid amount");
 
   const symbol = "$";
   const [dollars, cents] = amountToDollars(amount).split(".");
 
   return (
-    <DaimoText style={styles.title}>
-      <Text style={styles.titleSmall}>{symbol}</Text>
+    <DaimoText style={[styles.title, style]}>
+      <Text style={styles.titleSmall}>
+        {preSymbol}
+        {symbol}
+      </Text>
       <Spacer w={4} />
       {dollars}
       {amountSeparator}

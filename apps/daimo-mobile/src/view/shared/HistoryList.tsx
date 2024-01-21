@@ -1,4 +1,5 @@
 import {
+  AddrLabel,
   DisplayOpEvent,
   EAccount,
   OpStatus,
@@ -8,8 +9,12 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { useCallback } from "react";
-import { Platform, StyleSheet, TouchableHighlight, View } from "react-native";
+import { useCallback, useContext } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import {
+  TouchableOpacity,
+  TouchableHighlight,
+} from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Address } from "viem";
 
@@ -17,6 +22,7 @@ import { getAmountText } from "./Amount";
 import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
+import { CallbackContext } from "./SwipeUpDown";
 import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
@@ -186,23 +192,31 @@ function DisplayOpRow({
   assert(displayOp.amount > 0);
   const [from, to] = getFromTo(displayOp);
   assert([from, to].includes(address));
+  const moveShouldOpenBottomSheet = useContext(CallbackContext);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
   const amountDelta = from === address ? -displayOp.amount : displayOp.amount;
 
   const nav = useNav();
-  const viewOp = useCallback(() => {
-    // Workaround: react-navigation typescript types are broken.
-    // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
-    const currentTab = nav.getState().routes[0].name;
-    const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
-    if (linkTo === "op" || !canSendTo(otherAcc)) {
-      nav.navigate(newTab, { screen: "HistoryOp", params: { op: displayOp } });
-    } else {
-      nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
-    }
-  }, [nav, displayOp, linkTo, otherAcc]);
+  const viewOp = useCallback(
+    (isLinkToOp: boolean) => {
+      // Workaround: react-navigation typescript types are broken.
+      // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
+      const currentTab = nav.getState().routes[0].name;
+      const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
+      if (isLinkToOp || !canSendTo(otherAcc)) {
+        moveShouldOpenBottomSheet(true);
+        (nav as any).navigate("BottomSheetHistoryOp", {
+          op: displayOp,
+          shouldAddInset: false,
+        });
+      } else {
+        nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
+      }
+    },
+    [nav, displayOp, linkTo, otherAcc]
+  );
 
   const isPending = displayOp.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
@@ -210,17 +224,25 @@ function DisplayOpRow({
   return (
     <View style={styles.transferBorder}>
       <TouchableHighlight
-        onPress={viewOp}
+        onPress={() => viewOp(true)}
         {...touchHighlightUnderlay.subtle}
         style={styles.displayOpRowWrap}
       >
         <View style={styles.displayOpRow}>
           <View style={styles.transferOtherAccount}>
-            <ContactBubble
-              contact={{ type: "eAcc", ...otherAcc }}
-              size={36}
-              {...{ isPending }}
-            />
+            <TouchableOpacity
+              onPress={() => viewOp(false)}
+              disabled={
+                linkTo === "op" || otherAcc.label === AddrLabel.PaymentLink
+              }
+            >
+              <ContactBubble
+                contact={{ type: "eAcc", ...otherAcc }}
+                size={36}
+                {...{ isPending }}
+              />
+            </TouchableOpacity>
+
             <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
             {isPending && <PendingDot />}
           </View>
@@ -298,6 +320,7 @@ const styles = StyleSheet.create({
   transferBorder: {
     borderTopWidth: 1,
     borderColor: color.grayLight,
+    backgroundColor: "white",
   },
   displayOpRowWrap: {
     marginHorizontal: -24,

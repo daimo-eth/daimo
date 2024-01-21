@@ -11,17 +11,19 @@ export function ScreenHeader({
   title,
   onBack,
   onExit,
+  hideOfflineHeader,
 }: {
   title: ReactNode;
   onBack?: () => void;
   onExit?: () => void;
+  hideOfflineHeader?: boolean;
 }) {
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
 
   return (
     <>
-      <OfflineHeader />
+      {!hideOfflineHeader && <OfflineHeader />}
       <View style={styles.screenHead}>
         <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
         <TextH3>{title}</TextH3>
