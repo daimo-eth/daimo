@@ -11,6 +11,10 @@
           {
             "/": "/link/*",
             "comment": "Matches all /link URLs"
+          },
+          {
+            "/": "/l/*",
+            "comment": "Matches all /l URLs"
           }
         ]
       }

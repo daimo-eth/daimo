@@ -7,16 +7,15 @@ import {
   DisplayOpEvent,
   parseDaimoLink,
   DaimoLinkNoteV2,
+  DaimoLinkTag,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { addEventListener, getInitialURL } from "expo-linking";
 import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { EAccountContact, MsgContact } from "../../logic/daimoContacts";
-import { useAccount } from "../../model/account";
 
 export type QRScreenOptions = "PAY ME" | "SCAN";
 
@@ -50,7 +49,7 @@ export type ParamListSettings = {
 };
 
 interface SendNavProp {
-  link?: DaimoLinkAccount | DaimoLinkRequest;
+  link?: DaimoLinkAccount | DaimoLinkRequest | DaimoLinkTag;
   recipient?: EAccountContact;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
@@ -80,47 +79,6 @@ export function useNav<
 }
 
 export type MainNav = ReturnType<typeof useNav>;
-
-let deepLinkInitialised = false;
-
-/** Handle incoming app deep links. */
-export function useInitNavLinks() {
-  const nav = useNav();
-  const [account] = useAccount();
-  const accountMissing = account == null;
-
-  // Handle deeplinks
-  useEffect(() => {
-    if (accountMissing || deepLinkInitialised) return;
-
-    const currentTab = nav.getState().routes[0]?.name || "";
-    console.log(`[NAV] ready to init? current tab: ${currentTab}`);
-    if (!currentTab.startsWith("Home")) return;
-
-    console.log(`[NAV] listening for deep links, account ${account.name}`);
-    deepLinkInitialised = true;
-    getInitialURL().then((url) => {
-      if (url == null) return;
-      handleDeepLink(nav, url);
-    });
-
-    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
-  }, [accountMissing, nav]);
-
-  // Log nav changes
-  let root = nav;
-  while (root.getParent() != null) root = root.getParent();
-  useEffect(() => {
-    console.log(`[NAV] listening for state changes`);
-    return root.addListener("state", (e) => {
-      const { state } = e.data;
-      const tab = state.routes[state.index];
-      const ps = [tab.name, tab.params?.screen, tab.params?.params];
-      // Prints eg. "HomeTab","Account",{"eAcc":{"name":"amelie",<...>}}]
-      console.log(`[NAV] new: ` + JSON.stringify(ps.filter((p) => p != null)));
-    });
-  }, [root]);
-}
 
 export function handleDeepLink(nav: MainNav, url: string) {
   const link = parseDaimoLink(url);
@@ -161,6 +119,10 @@ async function goTo(nav: MainNav, link: DaimoLink) {
     }
     case "notev2": {
       nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
+      break;
+    }
+    case "tag": {
+      nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
       break;
     }
     default:

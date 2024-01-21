@@ -1,4 +1,3 @@
-// SOON TO BE DEPRECATED FOR SHORTER LINKS /l/
 import {
   DaimoAccountStatus,
   DaimoLinkStatus,

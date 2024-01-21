@@ -1,7 +1,7 @@
 import { DaimoLinkInvite, DaimoLinkNoteV2, assertNotNull } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
-import { addEventListener, getInitialURL } from "expo-linking";
+import { addEventListener } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
@@ -14,6 +14,7 @@ import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
+import { getInitialURLOrTag } from "../../../logic/deeplink";
 import { getInvitePasteLink } from "../../../logic/invite";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
@@ -74,7 +75,7 @@ export default function OnboardingScreen({
 
   // During onboarding, listen for payment or invite link invites
   useEffect(() => {
-    getInitialURL().then((url) => {
+    getInitialURLOrTag().then((url) => {
       if (url == null) return;
       processLink(url);
     });

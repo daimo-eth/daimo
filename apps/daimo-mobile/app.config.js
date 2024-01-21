@@ -79,6 +79,30 @@ export default {
         ],
         category: ["BROWSABLE", "DEFAULT"],
       },
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: "daimo.com",
+            pathPrefix: "/l",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+      {
+        action: "NDEF_DISCOVERED",
+        autoVerify: true,
+        data: [
+          {
+            scheme: "https",
+            host: "daimo.com",
+            pathPrefix: "/l",
+          },
+        ],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
     ],
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",

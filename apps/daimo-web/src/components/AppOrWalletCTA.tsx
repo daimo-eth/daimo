@@ -1,4 +1,5 @@
 "use client";
+
 import {
   DaimoLinkStatus,
   DaimoNoteStatus,
@@ -23,11 +24,8 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
-import {
-  PrimaryOpenInAppButton,
-  SecondaryButton,
-} from "../../../components/buttons";
-import { chainConfig } from "../../../env";
+import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
+import { chainConfig } from "../env";
 
 export function AppOrWalletCTA({
   linkStatus,

@@ -1,5 +1,6 @@
 import { OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { addEventListener } from "expo-linking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
@@ -18,8 +19,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SearchResults } from "./send/SearchResults";
 import { useWarmCache } from "../../action/useSendAsync";
+import { getInitialURLOrTag } from "../../logic/deeplink";
 import { useContactsPermission } from "../../logic/systemContacts";
-import { Account } from "../../model/account";
+import { Account, useAccount } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
@@ -30,7 +32,7 @@ import { SearchHeader } from "../shared/SearchHeader";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { useInitNavLinks, useNav } from "../shared/nav";
+import { handleDeepLink, useNav } from "../shared/nav";
 import { color, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
@@ -282,6 +284,47 @@ function IconButton({
       </View>
     </View>
   );
+}
+
+let deepLinkInitialised = false;
+
+/** Handle incoming app deep links. */
+function useInitNavLinks() {
+  const nav = useNav();
+  const [account] = useAccount();
+  const accountMissing = account == null;
+
+  // Handle deeplinks
+  useEffect(() => {
+    if (accountMissing || deepLinkInitialised) return;
+
+    const currentTab = nav.getState().routes[0]?.name || "";
+    console.log(`[NAV] ready to init? current tab: ${currentTab}`);
+    if (!currentTab.startsWith("Home")) return;
+
+    console.log(`[NAV] listening for deep links, account ${account.name}`);
+    deepLinkInitialised = true;
+    getInitialURLOrTag().then((url) => {
+      if (url == null) return;
+      handleDeepLink(nav, url);
+    });
+
+    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+  }, [accountMissing, nav]);
+
+  // Log nav changes
+  let root = nav;
+  while (root.getParent() != null) root = root.getParent();
+  useEffect(() => {
+    console.log(`[NAV] listening for state changes`);
+    return root.addListener("state", (e) => {
+      const { state } = e.data;
+      const tab = state.routes[state.index];
+      const ps = [tab.name, tab.params?.screen, tab.params?.params];
+      // Prints eg. "HomeTab","Account",{"eAcc":{"name":"amelie",<...>}}]
+      console.log(`[NAV] new: ` + JSON.stringify(ps.filter((p) => p != null)));
+    });
+  }, [root]);
 }
 
 const screenDimensions = Dimensions.get("screen");
