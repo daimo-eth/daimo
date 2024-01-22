@@ -171,10 +171,24 @@ function RecipientRow({
     }
   }, [name, mode]);
 
-  const nowS = Date.now() / 1e3;
-  const lastSendStr =
-    recipient.lastSendTime &&
-    `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`;
+  const lightText = (function () {
+    switch (recipient.type) {
+      case "email":
+        return recipient.name ? recipient.email : undefined;
+      case "phoneNumber":
+        return recipient.name ? recipient.phoneNumber : undefined;
+      case "eAcc": {
+        const nowS = Date.now() / 1e3;
+        return recipient.lastSendTime
+          ? `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`
+          : undefined;
+      }
+    }
+  })();
+  const shortenedLightText =
+    lightText && lightText?.length > 15
+      ? lightText.slice(0, 15) + "…"
+      : lightText;
 
   return (
     <Row onPress={goToAccount}>
@@ -183,7 +197,7 @@ function RecipientRow({
           <ContactBubble contact={recipient} size={36} />
           <TextBody>{name}</TextBody>
         </View>
-        <TextLight>{lastSendStr}</TextLight>
+        <TextLight>{shortenedLightText}</TextLight>
       </View>
     </Row>
   );

@@ -18,7 +18,18 @@ export function RecipientDisplay({
   // Show who we're sending to
   const isAccount = recipient.type === "eAcc";
   const disp = getContactName(recipient);
-  const subtitle = isAccount ? recipient.originalMatch : recipient.name;
+
+  const subtitle = (function () {
+    switch (recipient.type) {
+      case "eAcc":
+        return recipient.originalMatch;
+      case "phoneNumber":
+        return recipient.phoneNumber;
+      case "email":
+        return recipient.email;
+    }
+  })();
+
   const showSubtitle = subtitle != null && subtitle !== disp;
 
   const nav = useNav();
