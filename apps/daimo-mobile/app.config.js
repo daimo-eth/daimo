@@ -45,7 +45,7 @@ export default {
       : "./google-services.json",
     intentFilters: [
       {
-        action: "VIEW",
+        action: ["VIEW", "NDEF_DISCOVERED"],
         autoVerify: true,
         data: [
           {
@@ -69,31 +69,7 @@ export default {
         category: ["BROWSABLE", "DEFAULT"],
       },
       {
-        action: "NDEF_DISCOVERED",
-        autoVerify: true,
-        data: [
-          {
-            scheme: "https",
-            host: "daimo.com",
-            pathPrefix: "/link",
-          },
-        ],
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-      {
-        action: "VIEW",
-        autoVerify: true,
-        data: [
-          {
-            scheme: "https",
-            host: "daimo.com",
-            pathPrefix: "/l",
-          },
-        ],
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-      {
-        action: "NDEF_DISCOVERED",
+        action: ["VIEW", "NDEF_DISCOVERED"],
         autoVerify: true,
         data: [
           {
