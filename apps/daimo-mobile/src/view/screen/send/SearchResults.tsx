@@ -5,50 +5,45 @@ import { useCallback } from "react";
 import {
   Platform,
   ScrollView,
+  StyleSheet,
   TouchableHighlight,
   View,
-  ViewStyle,
-  StyleSheet,
 } from "react-native";
 
 import {
-  useRecipientSearch,
   DaimoContact,
   getContactName,
+  useRecipientSearch,
 } from "../../../logic/daimoContacts";
 import { ContactsAccess } from "../../../logic/systemContacts";
 import { Account } from "../../../model/account";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { ButtonMed } from "../../shared/Button";
-import { ContactBubble, Bubble } from "../../shared/ContactBubble";
+import { Bubble, ContactBubble } from "../../shared/ContactBubble";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
 import { color, touchHighlightUnderlay } from "../../shared/style";
-import { TextLight, TextCenter, TextBody } from "../../shared/text";
+import { TextBody, TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 export function SearchResults({
   contactsAccess,
   prefix,
   mode,
-  style,
   lagAutoFocus,
 }: {
   contactsAccess: ContactsAccess;
   prefix: string;
   mode: "send" | "account";
-  style?: ViewStyle;
   lagAutoFocus?: boolean;
 }) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
-    <View style={[styles.resultsWrap, style]}>
-      <Inner
-        prefix={prefix.trim().toLowerCase()}
-        {...{ lagAutoFocus, mode, contactsAccess }}
-      />
-    </View>
+    <Inner
+      prefix={prefix.trim().toLowerCase()}
+      {...{ lagAutoFocus, mode, contactsAccess }}
+    />
   );
 }
 
@@ -291,10 +286,6 @@ function Row({
 }
 
 const styles = StyleSheet.create({
-  resultsWrap: {
-    flex: 1,
-    marginHorizontal: -16,
-  },
   resultsScroll: {
     flexDirection: "column",
     alignSelf: "stretch",

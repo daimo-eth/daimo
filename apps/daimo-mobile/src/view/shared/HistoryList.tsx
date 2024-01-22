@@ -12,8 +12,8 @@ import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useCallback, useContext } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import {
-  TouchableOpacity,
   TouchableHighlight,
+  TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Address } from "viem";
@@ -22,12 +22,12 @@ import { getAmountText } from "./Amount";
 import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
-import { CallbackContext } from "./SwipeUpDown";
 import { useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
+import { ToggleBottomSheetContext } from "../screen/HistoryOpScreen";
 
 interface HeaderObject {
   isHeader: true;
@@ -192,7 +192,7 @@ function DisplayOpRow({
   assert(displayOp.amount > 0);
   const [from, to] = getFromTo(displayOp);
   assert([from, to].includes(address));
-  const moveShouldOpenBottomSheet = useContext(CallbackContext);
+  const toggleBottomSheet = useContext(ToggleBottomSheetContext);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
@@ -206,7 +206,7 @@ function DisplayOpRow({
       const currentTab = nav.getState().routes[0].name;
       const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
       if (isLinkToOp || !canSendTo(otherAcc)) {
-        moveShouldOpenBottomSheet(true);
+        toggleBottomSheet(true);
         (nav as any).navigate("BottomSheetHistoryOp", {
           op: displayOp,
           shouldAddInset: false,

@@ -9,7 +9,6 @@ import {
 } from "@react-navigation/native-stack";
 import {
   ReactNode,
-  createContext,
   forwardRef,
   useCallback,
   useEffect,
@@ -28,10 +27,13 @@ import ScrollPellet from "./ScrollPellet";
 import { useNav } from "./nav";
 import { color } from "./style";
 import useTabBarHeight from "../../common/useTabBarHeight";
-import { HistoryOpScreen } from "../screen/HistoryOpScreen";
+import {
+  HistoryOpScreen,
+  ToggleBottomSheetContext,
+} from "../screen/HistoryOpScreen";
 
 const Stack = createNativeStackNavigator();
-export const CallbackContext = createContext((shouldOpen: boolean) => {});
+
 const noHeaders: NativeStackNavigationOptions = {
   headerShown: false,
   animation: "fade",
@@ -82,7 +84,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     // When user selects a transaction, open the bottom sheet part way.
     const animatedIndex = useSharedValue(0);
-    const opScreenOpen = () => {
+    const sheetExpand = () => {
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(2);
       }
@@ -91,18 +93,20 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         bottomRef.current?.snapToIndex(1);
       }
     };
-    const opScreenCollapse = () => {
+    const sheetCollapse = () => {
       setSnapPoints([posYMini, posYFull, posYFull]);
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(0);
       }
     };
-    const moveBottomSheet = (shouldOpen: boolean) => {
-      console.log(`[SWIPE] moveBottomSheet ${shouldOpen}`);
-      if (shouldOpen) {
-        opScreenOpen();
+
+    // When user opens a transfer inside the bottom sheet, sheet expands.
+    const toggleBottomSheet = (expand: boolean) => {
+      console.log(`[SWIPE] toggleBottomSheet ${expand}`);
+      if (expand) {
+        sheetExpand();
       } else {
-        opScreenCollapse();
+        sheetCollapse();
       }
     };
 
@@ -187,7 +191,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
       >
-        <CallbackContext.Provider value={moveBottomSheet}>
+        <ToggleBottomSheetContext.Provider value={toggleBottomSheet}>
           <Stack.Navigator
             initialRouteName="BottomSheetList"
             screenOptions={noHeaders}
@@ -203,7 +207,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
               />
             </Stack.Group>
           </Stack.Navigator>
-        </CallbackContext.Provider>
+        </ToggleBottomSheetContext.Provider>
       </BottomSheet>
     );
   }

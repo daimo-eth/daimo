@@ -4,6 +4,7 @@ import { SearchResults } from "./SearchResults";
 import { useContactsPermission } from "../../../logic/systemContacts";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
+import { ss } from "../../shared/style";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
  *  or a system contact with phone number or email. */
@@ -37,11 +38,13 @@ export function SearchTab({
         />
       </View>
       <Spacer h={16} />
-      <SearchResults
-        contactsAccess={contactsAccess}
-        prefix={prefix}
-        mode="send"
-      />
+      <View style={ss.container.marginHNeg16}>
+        <SearchResults
+          contactsAccess={contactsAccess}
+          prefix={prefix}
+          mode="send"
+        />
+      </View>
     </>
   );
 }

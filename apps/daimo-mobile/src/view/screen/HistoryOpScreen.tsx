@@ -13,7 +13,7 @@ import {
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useContext } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
@@ -28,7 +28,6 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { CallbackContext } from "../shared/SwipeUpDown";
 import {
   ParamListBottomSheet,
   useDisableTabSwipe,
@@ -50,6 +49,8 @@ type Props = NativeStackScreenProps<
   "BottomSheetHistoryOp"
 >;
 
+export const ToggleBottomSheetContext = createContext((expand: boolean) => {});
+
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
   return <Inner {...props} />;
@@ -59,7 +60,7 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
-  const moveShouldOpenBottomSheet = useContext(CallbackContext);
+  const toggleBottomSheet = useContext(ToggleBottomSheetContext);
   const nav = useNav();
   useDisableTabSwipe(nav);
 
@@ -81,7 +82,7 @@ function HistoryOpScreenInner({
       <ScreenHeader
         title="Transfer"
         onExit={() => {
-          moveShouldOpenBottomSheet(false);
+          toggleBottomSheet(false); // Collapse to small height
           if (nav.canGoBack()) {
             nav.goBack();
           }

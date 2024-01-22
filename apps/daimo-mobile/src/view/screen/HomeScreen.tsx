@@ -184,7 +184,6 @@ function HomeScreenInner({ account }: { account: Account }) {
             <SearchResults
               contactsAccess={contactsAccess}
               prefix={searchPrefix}
-              style={{ marginHorizontal: 0 }}
               mode="account"
               lagAutoFocus
             />
