@@ -15,6 +15,7 @@ import { generatePrivateKey } from "viem/accounts";
 import { Account, useAccount } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
+import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import {
@@ -95,7 +96,12 @@ function RequestScreenInner({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Request" onExit={goHome} />
-        <Spacer h={96} />
+        <Spacer h={8} />
+        <InfoBox
+          title="Send a request link"
+          subtitle="Request USDC from someone using any messaging app"
+        />
+        <Spacer h={64} />
         <TextCenter>
           <TextLight>Enter amount to request</TextLight>
         </TextCenter>
