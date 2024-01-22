@@ -22,6 +22,7 @@ export async function composeEmail(
 ): Promise<ComposeSend | undefined> {
   // Test if we can email first
   const testOpenString = encodingFunction(`mailto:${email}`);
+  console.log(`[COMPOSE] testOpenString ${testOpenString}`);
   if (!(await Linking.canOpenURL(testOpenString))) return undefined;
 
   return async (sendParams: ComposeParams) => {
@@ -57,6 +58,7 @@ export async function composeSMS(
   const testOpenString = encodingFunction(
     `sms:${phoneNumber}${smsDivider}body=test`
   );
+  console.log(`[COMPOSE] testOpenString ${testOpenString}`);
   if (!(await Linking.canOpenURL(testOpenString))) return undefined;
 
   return async (sendParams: ComposeParams) => {
