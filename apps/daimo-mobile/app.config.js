@@ -156,7 +156,12 @@ export default {
           "Allows Daimo to find and pay your friends. Your contacts remain private and are never uploaded or shared.",
       },
     ],
-    ["react-native-nfc-manager"],
+    [
+      "react-native-nfc-manager",
+      {
+        includeNdefEntitlement: false,
+      },
+    ],
     ["./android-deeplink-config-plugin", "custom"],
   ],
 };
