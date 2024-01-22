@@ -175,9 +175,8 @@ function RecipientRow({
     switch (recipient.type) {
       case "email":
         return recipient.name ? recipient.email : undefined;
-      case "phoneNumber": {
+      case "phoneNumber":
         return recipient.name ? recipient.phoneNumber : undefined;
-      }
       case "eAcc": {
         const nowS = Date.now() / 1e3;
         return recipient.lastSendTime
