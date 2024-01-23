@@ -14,33 +14,33 @@ type ComposeParams = PaymentLinkComposeParams;
 
 type ComposeSend = (sendParams: ComposeParams) => Promise<boolean>;
 
-const encodingFunction = Platform.OS === "ios" ? encodeURI : encodeURIComponent;
-const smsDivider = Platform.OS === "ios" ? "&" : "?";
-
 export async function composeEmail(
   email: EmailAddress
 ): Promise<ComposeSend | undefined> {
   // Test if we can email first
-  const testOpenString = encodingFunction(`mailto:${email}`);
-  console.log(`[COMPOSE] testOpenString ${testOpenString}`);
-  if (!(await Linking.canOpenURL(testOpenString))) return undefined;
+  const testOpenString =
+    Platform.OS === "android"
+      ? `mailto:${email}`
+      : encodeURI(`mailto:${email}`);
+
+  const canOpen = await Linking.canOpenURL(testOpenString);
+  console.log(`[COMPOSE] testOpenString ${testOpenString}: ${canOpen}`);
+  if (!canOpen) return undefined;
 
   return async (sendParams: ComposeParams) => {
     const { url, senderName, dollars, recipientName } = sendParams;
     const dollarStr = `${dollars.toFixed(2)}`;
     const recipientStr = recipientName || email;
     const subject = `${senderName} sent you $${dollarStr}`;
-    const body = `Hi ${recipientStr},
+    const body = `Hi ${recipientStr},\r\n\r\n${senderName} sent you $${dollarStr} USDC and invited you to join Daimo.\r\n\r\nVisit here to accept: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`;
 
-${senderName} sent you $${dollarStr} USDC and invited you to join Daimo.
-
-Visit here to accept: ${url}
-
-Daimo is a global payments app that lets you send and receive USDC on Ethereum.`;
-
-    const openString = encodingFunction(
-      `mailto:${email}?subject=${subject}&body=${body}`
-    );
+    const openString = (function () {
+      if (Platform.OS === "android")
+        return `mailto:${email}?subject=${encodeURIComponent(
+          subject
+        )}&body=${encodeURIComponent(body)}`;
+      else return encodeURI(`mailto:${email}?subject=${subject}&body=${body}`);
+    })();
 
     if (await Linking.canOpenURL(openString)) {
       await Linking.openURL(openString);
@@ -55,21 +55,26 @@ export async function composeSMS(
   phoneNumber: PhoneNumber
 ): Promise<ComposeSend | undefined> {
   // Test if we can SMS first
-  const testOpenString = encodingFunction(
-    `sms:${phoneNumber}${smsDivider}body=test`
-  );
-  console.log(`[COMPOSE] testOpenString ${testOpenString}`);
-  if (!(await Linking.canOpenURL(testOpenString))) return undefined;
+  const testOpenString =
+    Platform.OS === "android"
+      ? `sms:${phoneNumber}?body=test`
+      : encodeURI(`sms:${phoneNumber}&body=test`);
+  const canOpen = await Linking.canOpenURL(testOpenString);
+
+  console.log(`[COMPOSE] testOpenString ${testOpenString}: ${canOpen}`);
+  if (!canOpen) return undefined;
 
   return async (sendParams: ComposeParams) => {
     const { url, senderName, dollars } = sendParams;
     const dollarStr = `${dollars.toFixed(2)}`;
 
-    const body = `${senderName} sent you $${dollarStr} USDC and invited you to join Daimo. Visit here to accept: ${url}`;
+    const body = `${senderName} sent you $${dollarStr} USDC and invited you to join Daimo: ${url}`;
 
-    const openString = encodingFunction(
-      `sms:${phoneNumber}${smsDivider}body=${body}`
-    );
+    const openString = (function () {
+      if (Platform.OS === "android")
+        return `sms:${phoneNumber}?body=${encodeURIComponent(body)}`;
+      else return encodeURI(`sms:${phoneNumber}&body=${body}`);
+    })();
 
     if (await Linking.canOpenURL(openString)) {
       await Linking.openURL(openString);
