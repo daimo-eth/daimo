@@ -29,7 +29,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ErrorRowCentered } from "../../shared/error";
+import { ErrorBanner } from "../../shared/error";
 import {
   ParamListSend,
   useDisableTabSwipe,
@@ -128,7 +128,13 @@ function SendLoadRecipientInner({
   return (
     <View style={ss.container.center}>
       {status.isLoading && <ActivityIndicator size="large" />}
-      {status.error && <ErrorRowCentered error={status.error} />}
+      {status.error && (
+        <ErrorBanner
+          error={status.error}
+          displayTitle="Transfer not possible"
+          displayMessage="Fix errors in your link or download the latest version of the app"
+        />
+      )}
     </View>
   );
 }

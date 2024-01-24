@@ -1,5 +1,6 @@
 import { assertUnreachable } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet";
 import {
   MaterialTopTabNavigationOptions,
   createMaterialTopTabNavigator,
@@ -9,14 +10,19 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import { useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, Animated } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
+import { ErrorScreen } from "./screen/ErrorScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
@@ -30,6 +36,7 @@ import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { OctName } from "./shared/InputBig";
 import {
   ParamListHome,
+  ParamListMain,
   ParamListReceive,
   ParamListSend,
   ParamListSettings,
@@ -40,22 +47,13 @@ import { color } from "./shared/style";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccount } from "../model/account";
 
+const { add, multiply } = Animated;
+
 const Tab = createMaterialTopTabNavigator<ParamListTab>();
+const MainStack = createStackNavigator<ParamListMain>();
 
-export function TabNav() {
+function TabNavigator() {
   const ins = useSafeAreaInsets();
-
-  // Track whether we've onboarded. If not, show OnboardingScreen.
-  const [account] = useAccount();
-  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
-  useEffect(() => {
-    // This is a latch: if we clear the account, go back to onboarding.
-    if (isOnboarded && account == null) setIsOnboarded(false);
-  }, [isOnboarded, account]);
-  // Stay onboarding till it's complete.
-  const onOnboardingComplete = () => setIsOnboarded(true);
-
-  if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
 
   return (
     <Tab.Navigator
@@ -70,6 +68,105 @@ export function TabNav() {
       <Tab.Screen name="SendTab" component={SendTab} />
       <Tab.Screen name="SettingsTab" component={SettingsTab} />
     </Tab.Navigator>
+  );
+}
+
+export function TabNav() {
+  // Track whether we've onboarded. If not, show OnboardingScreen.
+  const [account] = useAccount();
+  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
+  useEffect(() => {
+    // This is a latch: if we clear the account, go back to onboarding.
+    if (isOnboarded && account == null) setIsOnboarded(false);
+  }, [isOnboarded, account]);
+  // Stay onboarding till it's complete.
+  const onOnboardingComplete = () => setIsOnboarded(true);
+
+  if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
+
+  function forModalPresentationIOS({
+    current, // Animated node representing the progress value of the current screen
+    next, // Animated node representing the progress value of the next screen.
+    inverted, // Animated node representing multiplier when direction is inverted (-1 - inverted, 1 - normal).
+    layouts: { screen }, // Layout measurements of the whole screen.
+  }: {
+    current: {
+      progress: Animated.AnimatedInterpolation<number>;
+    };
+    next?: {
+      progress: Animated.AnimatedInterpolation<number>;
+    };
+    inverted: Animated.AnimatedInterpolation<-1 | 1>;
+    layouts: {
+      screen: { width: number; height: number };
+    };
+  }) {
+    const progress = add(
+      current.progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 1],
+        extrapolate: "clamp",
+      }),
+      next
+        ? next.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+            extrapolate: "clamp",
+          })
+        : 0
+    );
+
+    const translateY = multiply(
+      progress.interpolate({
+        inputRange: [0, 1, 2],
+        outputRange: [screen.height, 0, 0],
+      }),
+      inverted
+    );
+
+    const overlayOpacity = progress.interpolate({
+      inputRange: [0, 1, 1.0001, 2],
+      outputRange: [0, 0.3, 1, 1],
+    });
+
+    return {
+      cardStyle: {
+        transform: [{ translateY }],
+      },
+      overlayStyle: { opacity: overlayOpacity },
+    };
+  }
+
+  return (
+    <MainStack.Navigator initialRouteName="MainTabNav">
+      <MainStack.Group>
+        <MainStack.Screen
+          name="MainTabNav"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </MainStack.Group>
+      <MainStack.Group
+        screenOptions={{
+          presentation: "modal",
+          headerShown: false,
+          cardStyle: {
+            backgroundColor: "transparent",
+          },
+        }}
+      >
+        <MainStack.Screen
+          name="LinkErrorModal"
+          component={ErrorScreen}
+          options={{
+            ...TransitionPresets.ModalPresentationIOS,
+            detachPreviousScreen: false,
+            gestureResponseDistance: WINDOW_HEIGHT,
+            cardStyleInterpolator: forModalPresentationIOS,
+          }}
+        />
+      </MainStack.Group>
+    </MainStack.Navigator>
   );
 }
 

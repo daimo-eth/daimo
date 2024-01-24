@@ -24,6 +24,7 @@ import image from "../shared/image";
 import {
   ParamListHome,
   QRScreenOptions,
+  defaultError,
   useDisableTabSwipe,
   useExitBack,
   useExitToHome,
@@ -145,12 +146,13 @@ function parseQRData(data: string) {
 
 function QRScan() {
   const [handled, setHandled] = useState(false);
+  const nav = useNav();
 
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
     if (handled) return;
 
     const link = parseQRData(data);
-    if (link == null) return;
+    if (link == null) return nav.navigate("LinkErrorModal", defaultError);
     setHandled(true);
     console.log(`[SCAN] opening URL ${link}`);
     await Linking.openURL(link);

@@ -23,7 +23,7 @@ import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { ErrorRowCentered } from "../shared/error";
+import { ErrorBanner } from "../shared/error";
 import {
   ParamListHome,
   useDisableTabSwipe,
@@ -90,7 +90,13 @@ function AccountScreenLoader({
   return (
     <View style={ss.container.center}>
       {status.isLoading && <ActivityIndicator size="large" />}
-      {status.error && <ErrorRowCentered error={status.error} />}
+      {status.error && (
+        <ErrorBanner
+          error={status.error}
+          displayTitle="Account not found"
+          displayMessage="Fix errors in your link or download the latest version of the app"
+        />
+      )}
     </View>
   );
 }

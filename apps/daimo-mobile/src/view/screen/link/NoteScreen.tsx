@@ -32,6 +32,7 @@ import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
+import { ErrorBanner } from "../../shared/error";
 import {
   ParamListReceive,
   useDisableTabSwipe,
@@ -83,7 +84,13 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
       <ScreenHeader title={title} onExit={useExitToHome()} />
       <ScrollView bounces={false}>
         {noteFetch.isFetching && <Spinner />}
-        {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
+        {noteFetch.error && (
+          <ErrorBanner
+            error={noteFetch.error}
+            displayTitle="Payment link not found"
+            displayMessage="Fix errors in your link or download the latest version of the app"
+          />
+        )}
         {noteStatus && (
           <NoteDisplayInner
             {...{ account, noteStatus: { ...noteStatus, link } }}

@@ -26,6 +26,28 @@ export type ParamListHome = {
   HistoryOp: { op: DisplayOpEvent };
 };
 
+type ParamListError = {
+  displayTitle: string;
+  displayMessage: string;
+  showDownloadButton?: boolean;
+  screen?: string;
+  params?: any;
+};
+
+export type ParamListMain = {
+  MainTabNav: ParamListTab;
+  LinkErrorModal: ParamListError;
+};
+
+type NavigatorParamList = {
+  LinkErrorModal: ParamListError;
+  DepositTab: undefined;
+  ReceiveTab: NavigatorScreenParams<ParamListReceive>;
+  HomeTab: NavigatorScreenParams<ParamListHome>;
+  SendTab: NavigatorScreenParams<ParamListSend>;
+  SettingsTab: { screen: keyof ParamListSettings; params?: any };
+};
+
 export type ParamListSend = {
   SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
@@ -64,10 +86,20 @@ export type ParamListTab = {
   SettingsTab: { screen: keyof ParamListSettings; params?: any };
 };
 
+export const defaultError = {
+  type: "error" as "error",
+  displayTitle: "This link is unsupported",
+  displayMessage:
+    "Check if you have an old version of the app or if there are any errors in your URL",
+  showDownloadButton: true,
+};
+
 export function useNav<
-  RouteName extends keyof ParamListTab = keyof ParamListTab
+  RouteName extends keyof NavigatorParamList = keyof NavigatorParamList
 >() {
-  return useNavigation<NativeStackNavigationProp<ParamListTab, RouteName>>();
+  return useNavigation<
+    NativeStackNavigationProp<NavigatorParamList, RouteName>
+  >();
 }
 
 export type MainNav = ReturnType<typeof useNav>;
@@ -76,6 +108,7 @@ export function handleDeepLink(nav: MainNav, url: string) {
   const link = parseDaimoLink(url);
   if (link == null) {
     console.log(`[NAV] skipping unparseable link ${url}`);
+    nav.navigate("LinkErrorModal", defaultError);
     return;
   }
 
