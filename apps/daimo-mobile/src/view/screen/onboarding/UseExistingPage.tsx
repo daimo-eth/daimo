@@ -13,6 +13,7 @@ import { Hex, hexToBytes } from "viem";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { ActStatus } from "../../../action/actStatus";
+import { DeviceKeyStatus } from "../../../action/key";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { createEmptyAccount } from "../../../logic/account";
 import { env } from "../../../logic/env";
@@ -35,14 +36,14 @@ import { QRCodeBox } from "../QRScreen";
 export function UseExistingPage({
   useExistingStatus,
   useExistingMessage,
-  useExistingPubKeyHex,
+  keyStatus,
   onNext,
   onPrev,
   daimoChain,
 }: {
   useExistingStatus: ActStatus;
   useExistingMessage: string;
-  useExistingPubKeyHex: Hex | undefined;
+  keyStatus: DeviceKeyStatus;
   onNext: () => void;
   onPrev?: () => void;
   daimoChain: DaimoChain;
@@ -51,14 +52,25 @@ export function UseExistingPage({
     if (useExistingStatus === "success") onNext();
   }, [useExistingStatus]);
 
-  if (useExistingPubKeyHex === undefined) return null;
-
+  if (keyStatus.pubKeyHex === undefined) {
+    return (
+      <View>
+        <OnboardingHeader title="Existing Account" onPrev={onPrev} />
+        <View style={styles.useExistingPage}>
+          <Spacer h={24} />
+          <TextCenter>
+            <TextBody>Generating keys...</TextBody>
+          </TextCenter>
+        </View>
+      </View>
+    );
+  }
   return (
     <View>
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
         <Spacer h={24} />
-        <QRCodeBox value={createAddDeviceString(useExistingPubKeyHex)} />
+        <QRCodeBox value={createAddDeviceString(keyStatus.pubKeyHex)} />
         <Spacer h={16} />
         <TextCenter>
           {useExistingStatus !== "error" && (
@@ -80,7 +92,7 @@ export function UseExistingPage({
         </TextCenter>
         <Spacer h={16} />
         <RestoreFromBackupButton
-          pubKeyHex={useExistingPubKeyHex}
+          pubKeyHex={keyStatus.pubKeyHex}
           daimoChain={daimoChain}
         />
       </View>
