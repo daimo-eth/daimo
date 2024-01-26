@@ -303,7 +303,7 @@ function useInitNavLinks() {
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
     deepLinkInitialised = true;
-    getInitialURLOrTag().then((url) => {
+    getInitialURLOrTag(false).then((url) => {
       if (url == null) return;
       handleDeepLink(nav, url);
     });
