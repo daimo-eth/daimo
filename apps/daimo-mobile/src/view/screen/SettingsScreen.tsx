@@ -6,7 +6,7 @@ import {
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
-import React, { useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import {
   Linking,
   ScrollView,
@@ -24,12 +24,13 @@ import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
+import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextLight, TextMeta } from "../shared/text";
+import { DaimoText, TextBody, TextLight, TextMeta } from "../shared/text";
 
 export function SettingsScreen() {
   const [account] = useAccount();
@@ -49,7 +50,6 @@ export function SettingsScreen() {
         <AccountSection account={account} />
         <Spacer h={32} />
         <DevicesSection account={account} />
-        <Spacer h={24} />
         <TextButton
           title={showDetails ? "Hide details" : "Show details"}
           onPress={() => setShowDetails(!showDetails)}
@@ -153,9 +153,40 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={24} />
-      <ButtonMed type="primary" title="CREATE BACKUP" onPress={createBackup} />
-      <Spacer h={16} />
+      <ButtonInfo
+        title="Create a Backup"
+        message="Safely back up account to your password manager"
+        icon={<ClockIcon style={{ top: 7 }} />}
+      />
+      <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
+      <View style={styles.separator} />
+      <ButtonInfo
+        title="Add a Device"
+        message="Use your Daimo account on another device"
+        icon={<PlusIcon style={{ top: 7 }} />}
+      />
       <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
+      <View style={styles.separator} />
+    </View>
+  );
+}
+
+function ButtonInfo({
+  icon,
+  title,
+  message,
+}: {
+  icon: ReactNode;
+  title: string;
+  message: string;
+}) {
+  return (
+    <View style={styles.buttonInfoContainer}>
+      {icon}
+      <View style={styles.messageContainer}>
+        <TextBody color={color.midnight}>{title}</TextBody>
+        <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
+      </View>
     </View>
   );
 }
@@ -323,6 +354,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: color.grayLight,
   },
+  separator: {
+    borderTopWidth: 1,
+    borderColor: color.grayLight,
+    marginVertical: 24,
+  },
   rowWrap: {
     marginHorizontal: -24,
   },
@@ -353,5 +389,19 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 16,
     backgroundColor: color.yellow,
+  },
+  messageContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  infoMessageText: {
+    fontSize: 16,
+    lineHeight: 20,
+    color: color.gray3,
+    fontWeight: "500",
+  },
+  buttonInfoContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
   },
 });
