@@ -2,17 +2,19 @@ import { DaimoChain } from "@daimo/contract";
 import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
-import { useLoadOrCreateEnclaveKey } from "./key";
+import { DeviceKeyStatus } from "./key";
 import { createEmptyAccount } from "../logic/account";
 import { env } from "../logic/env";
 import { useTime } from "../logic/time";
 import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
-export function useExistingAccount(daimoChain: DaimoChain) {
+export function useExistingAccount(
+  daimoChain: DaimoChain,
+  keyStatus: DeviceKeyStatus
+) {
   const [as, setAS] = useActStatus();
 
   const enclaveKeyName = defaultEnclaveKeyName;
-  const pubKeyHex = useLoadOrCreateEnclaveKey(setAS, enclaveKeyName);
   const rpcFunc = env(daimoChain).rpcFunc;
 
   const ts = useTime(2);
@@ -20,13 +22,18 @@ export function useExistingAccount(daimoChain: DaimoChain) {
   // Once account is found, save the account
   const [account, setAccount] = useAccount();
 
+  // Set account status if key status changes
+  useEffect(() => {
+    setAS(keyStatus.status, keyStatus.message);
+  }, [keyStatus.status]);
+
   // TODO: Does TRPC have a better way to "watch" an endpoint?
   useEffect(() => {
     (async () => {
-      if (account || !pubKeyHex) return; // Either hasn't started or already loaded
+      if (account || !keyStatus.pubKeyHex) return; // Either hasn't started or already loaded
 
       const result = await rpcFunc.lookupEthereumAccountByKey.query({
-        pubKeyHex,
+        pubKeyHex: keyStatus.pubKeyHex,
       });
 
       if (result && result.name) {
@@ -35,7 +42,7 @@ export function useExistingAccount(daimoChain: DaimoChain) {
           createEmptyAccount(
             {
               enclaveKeyName,
-              enclavePubKey: pubKeyHex,
+              enclavePubKey: keyStatus.pubKeyHex,
               name: result.name,
               address: result.addr,
             },
@@ -47,5 +54,5 @@ export function useExistingAccount(daimoChain: DaimoChain) {
     })();
   }, [ts]);
 
-  return { ...as, pubKeyHex };
+  return as;
 }

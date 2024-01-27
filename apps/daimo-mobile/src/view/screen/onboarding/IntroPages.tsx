@@ -6,9 +6,9 @@ import {
   View,
   StyleSheet,
 } from "react-native";
-import { Hex } from "viem";
 
 import { ActStatus } from "../../../action/actStatus";
+import { DeviceKeyStatus } from "../../../action/key";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -18,12 +18,12 @@ import { TextCenter, TextH1 } from "../../shared/text";
 
 export function IntroPages({
   useExistingStatus,
-  useExistingPubKeyHex,
+  keyStatus,
   existingNext,
   onNext,
 }: {
   useExistingStatus: ActStatus;
-  useExistingPubKeyHex: Hex | undefined;
+  keyStatus: DeviceKeyStatus;
   existingNext: () => void;
   onNext: ({ choice }: { choice: "create" | "existing" }) => void;
 }) {
@@ -35,7 +35,7 @@ export function IntroPages({
   };
 
   useEffect(() => {
-    if (useExistingPubKeyHex && useExistingStatus === "success") existingNext();
+    if (keyStatus.pubKeyHex && useExistingStatus === "success") existingNext();
   }, [useExistingStatus]);
 
   return (

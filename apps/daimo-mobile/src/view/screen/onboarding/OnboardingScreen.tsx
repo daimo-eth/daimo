@@ -12,6 +12,7 @@ import { InvitePage } from "./InvitePage";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
+import { useLoadOrCreateEnclaveKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInitialURLOrTag } from "../../../logic/deeplink";
@@ -87,21 +88,20 @@ export default function OnboardingScreen({
 
   console.log(`[ONBOARDING] chainId ${daimoChain}`);
 
+  const keyStatus = useLoadOrCreateEnclaveKey();
+
   // Create an account as soon as possible, hiding latency
   const {
     exec: createExec,
     reset: createReset,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name, inviteLink, daimoChain);
+  } = useCreateAccount(name, inviteLink, daimoChain, keyStatus);
 
   // Use existing account spin loops and waits for the device key to show up
   // in any on-chain account.
-  const {
-    status: useExistingStatus,
-    message: useExistingMessage,
-    pubKeyHex: useExistingPubKeyHex,
-  } = useExistingAccount(daimoChain);
+  const { status: useExistingStatus, message: useExistingMessage } =
+    useExistingAccount(daimoChain, keyStatus);
 
   const existingNext = getNext(
     "existing",
@@ -123,7 +123,7 @@ export default function OnboardingScreen({
       {page === "intro" && (
         <IntroPages
           useExistingStatus={useExistingStatus}
-          useExistingPubKeyHex={useExistingPubKeyHex}
+          keyStatus={keyStatus}
           existingNext={existingNext}
           onNext={next}
         />
@@ -156,7 +156,7 @@ export default function OnboardingScreen({
         <UseExistingPage
           useExistingStatus={useExistingStatus}
           useExistingMessage={useExistingMessage}
-          useExistingPubKeyHex={useExistingPubKeyHex}
+          keyStatus={keyStatus}
           onNext={next}
           onPrev={prev}
           daimoChain={daimoChain}

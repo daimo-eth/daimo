@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
-import { SetActStatus } from "./actStatus";
+import { ActStatus, SetActStatus, useActStatus } from "./actStatus";
 import { createEnclaveKey, loadEnclaveKey } from "../logic/enclave";
+import { defaultEnclaveKeyName } from "../model/account";
 
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
@@ -49,18 +50,25 @@ async function loadKey(setAS: SetActStatus, enclaveKeyName: string) {
   }
 }
 
-export function useLoadOrCreateEnclaveKey(
-  setAS: SetActStatus,
-  enclaveKeyName: string
-) {
+// Current device's key status: either loaded or created, or when errored.
+export type DeviceKeyStatus = {
+  pubKeyHex: Hex | undefined;
+  status: ActStatus;
+  message: string;
+};
+
+export function useLoadOrCreateEnclaveKey(): DeviceKeyStatus {
+  const enclaveKeyName = defaultEnclaveKeyName;
+
   const [pubKeyHex, setPubKeyHex] = useState<Hex>();
+  const [keyStatus, setKeyStatus] = useActStatus();
 
   // Load or create enclave key immediately, in the idle state
   useEffect(() => {
-    loadKey(setAS, enclaveKeyName).then((loadedKeyInfo) => {
+    loadKey(setKeyStatus, enclaveKeyName).then((loadedKeyInfo) => {
       console.log(`[ACTION] loaded key info ${JSON.stringify(loadedKeyInfo)}`);
       if (loadedKeyInfo && !loadedKeyInfo.pubKeyHex) {
-        createKey(setAS, enclaveKeyName, loadedKeyInfo.hwSecLevel).then(
+        createKey(setKeyStatus, enclaveKeyName, loadedKeyInfo.hwSecLevel).then(
           (newPublicKey) => {
             console.log(`[ACTION] created public key ${newPublicKey}`);
             setPubKeyHex(newPublicKey);
@@ -70,5 +78,5 @@ export function useLoadOrCreateEnclaveKey(
     });
   }, [enclaveKeyName]);
 
-  return pubKeyHex;
+  return { pubKeyHex, ...keyStatus };
 }
