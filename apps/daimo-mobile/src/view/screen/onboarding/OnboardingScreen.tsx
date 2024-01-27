@@ -75,7 +75,7 @@ export default function OnboardingScreen({
 
   // During onboarding, listen for payment or invite link invites
   useEffect(() => {
-    getInitialURLOrTag().then((url) => {
+    getInitialURLOrTag(true).then((url) => {
       if (url == null) return;
       processLink(url);
     });
