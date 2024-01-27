@@ -154,16 +154,16 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <Spacer h={24} />
       <ButtonInfo
-        title="Create a Backup"
-        message="Safely back up account to your password manager"
-        icon={<ClockIcon style={{ top: 7 }} />}
+        title="Create a Passkey Backup"
+        message="Secured by your password manager"
+        icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
       <ButtonInfo
         title="Add a Device"
-        message="Use your Daimo account on another device"
-        icon={<PlusIcon style={{ top: 7 }} />}
+        message="Use your account on another device"
+        icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
       />
       <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
       <View style={styles.separator} />
