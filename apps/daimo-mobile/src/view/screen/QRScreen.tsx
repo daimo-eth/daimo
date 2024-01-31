@@ -8,9 +8,11 @@ import {
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
+import * as Haptics from "expo-haptics";
 import { useRef, useState } from "react";
 import { Linking, Platform, Share, StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { getAddress, isAddress } from "viem";
 
 import { useAccount } from "../../model/account";
 import { ButtonCircle } from "../shared/ButtonCircle";
@@ -124,20 +126,35 @@ export function QRCodeBox({ value }: { value: string }) {
   );
 }
 
+// Parse QR codes from Daimo or other wallets
+// Works around potential deep linking / AASA bugs by using direct links only
+function parseQRData(data: string) {
+  if (isAddress(data)) {
+    const addr = getAddress(data); // Convert to checksummed address
+    console.log(`[SCAN] opening address ${addr}`);
+    return formatDaimoLinkDirect({
+      type: "account",
+      account: addr,
+    });
+  } else {
+    const universalURL = parseDaimoLink(data);
+    // Workaround potential deep linking / AASA bugs by using direct links only
+    return universalURL ? formatDaimoLinkDirect(universalURL) : null;
+  }
+}
+
 function QRScan() {
   const [handled, setHandled] = useState(false);
 
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
     if (handled) return;
 
-    const daimoLink = parseDaimoLink(data);
-    if (daimoLink == null) return;
+    const link = parseQRData(data);
+    if (link == null) return;
     setHandled(true);
-
-    const directLink = formatDaimoLinkDirect(daimoLink);
-    console.log(`[SCAN] opening URL ${directLink}`);
-
-    Linking.openURL(directLink);
+    console.log(`[SCAN] opening URL ${link}`);
+    await Linking.openURL(link);
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
   return <Scanner handleBarCodeScanned={handleBarCodeScanned} />;
