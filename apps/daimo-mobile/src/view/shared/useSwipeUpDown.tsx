@@ -25,13 +25,6 @@ export function useSwipeUpDown({
 }) {
   const [isBottomSheetOpen, setIsOpen] = useState(false);
 
-  // Dimensions
-  const tabBarHeight = useTabBarHeight();
-  const screenHeight =
-    screenDimensions.height -
-    tabBarHeight -
-    (Platform.OS === "android" ? 16 : 0);
-
   // Hide bottom sheet when tapping a bottom tab.
   const nav = useNav();
   const isFocused = useIsFocused();
@@ -60,11 +53,7 @@ export function useSwipeUpDown({
 
   const bottomSheet = (
     <Animated.View
-      style={[
-        { height: screenHeight },
-        styles.bottomSheetContainer,
-        bottomSheetScrollStyle,
-      ]}
+      style={[styles.bottomSheetContainer, bottomSheetScrollStyle]}
       pointerEvents="box-none"
     >
       <SwipeUpDown
@@ -88,6 +77,7 @@ export function useSwipeUpDown({
 const styles = StyleSheet.create({
   bottomSheetContainer: {
     position: "absolute",
-    width: SCREEN_WIDTH,
+    height: "100%",
+    width: "100%",
   },
 });
