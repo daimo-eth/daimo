@@ -1,12 +1,10 @@
-import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { useIsFocused } from "@react-navigation/native";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { Dimensions, Platform, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { SwipeUpDown, SwipeUpDownRef } from "./SwipeUpDown";
 import { useNav } from "./nav";
-import useTabBarHeight from "../../common/useTabBarHeight";
 
 const screenDimensions = Dimensions.get("screen");
 
