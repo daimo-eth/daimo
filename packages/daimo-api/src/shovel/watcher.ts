@@ -9,9 +9,9 @@ interface indexer {
 
 const dbConfig: ClientConfig = {
   connectionString: process.env.SHOVEL_DATABASE_URL,
-  connectionTimeoutMillis: 5000,
-  query_timeout: 5000,
-  statement_timeout: 5000,
+  connectionTimeoutMillis: 10000,
+  query_timeout: 10000,
+  statement_timeout: 10000,
   database: process.env.SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
 };
 
