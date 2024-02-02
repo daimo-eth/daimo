@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 3.9.2"
+    "version": ">= 3.9.2",
+    "appVersionSource": "remote"
   },
   "build": {
     "sim": {
@@ -32,9 +33,10 @@
         "DAIMO_APP_VARIANT": "dev"
       }
     },
-    "prod": {
+    "production": {
       "resourceClass": "large",
       "node": "20.3.0",
+      "autoIncrement": true,
       "env": {
         "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
         "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
@@ -45,14 +47,13 @@
     }
   },
   "submit": {
-    "prod": {
+    "production": {
       "ios": {
         "ascAppId": "6459700343",
         "companyName": "Daimo, Inc"
       },
       "android": {
-        "track": "internal",
-        "releaseStatus": "draft"
+        "track": "internal"
       }
     }
   }
