@@ -71,9 +71,6 @@ function HistoryOpScreenInner({ account, op }: Props) {
         title="Transfer"
         onExit={() => {
           toggleBottomSheet(false); // Collapse to small height
-          if (nav.canGoBack()) {
-            nav.goBack();
-          }
         }}
         hideOfflineHeader
       />
