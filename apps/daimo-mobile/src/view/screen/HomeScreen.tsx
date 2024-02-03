@@ -1,4 +1,4 @@
-import { OpStatus } from "@daimo/common";
+import { DisplayOpEvent, OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -49,6 +49,9 @@ function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
+  const [selectedHistoryOp, setSelectedHistoryOp] = useState<
+    DisplayOpEvent | undefined
+  >();
 
   // Hack to prevent pull-to-refresh from moving up instead of down.
   const preventOverscrollOffset = useSharedValue(0);
@@ -121,12 +124,30 @@ function HomeScreenInner({ account }: { account: Account }) {
       account.recentTransfers.filter(({ status }) => status === key).length,
     ])
   );
+
+  const onSelectHistoryOp = useCallback((op: DisplayOpEvent) => {
+    setSelectedHistoryOp(op);
+  }, []);
+
   const histListMini = useMemo(
-    () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
+    () => (
+      <HistoryListSwipe
+        account={account}
+        showDate={false}
+        maxToShow={5}
+        onSelectHistoryOp={onSelectHistoryOp}
+      />
+    ),
     [statusCountsStr]
   );
   const histListFull = useMemo(
-    () => <HistoryListSwipe account={account} showDate />,
+    () => (
+      <HistoryListSwipe
+        account={account}
+        showDate
+        onSelectHistoryOp={onSelectHistoryOp}
+      />
+    ),
     [statusCountsStr]
   );
 
@@ -137,6 +158,8 @@ function HomeScreenInner({ account }: { account: Account }) {
     translationY,
     disabled: refreshing,
     bottomSheetRef,
+    account,
+    selectedHistoryOp,
   });
 
   // Handle incoming applinks

@@ -45,11 +45,13 @@ export function HistoryListSwipe({
   showDate,
   maxToShow,
   otherAcc,
+  onSelectHistoryOp,
 }: {
   account: Account;
   showDate: boolean;
   maxToShow?: number;
   otherAcc?: EAccount;
+  onSelectHistoryOp(op: DisplayOpEvent): void;
 }) {
   const ins = useSafeAreaInsets();
 
@@ -84,6 +86,7 @@ export function HistoryListSwipe({
       key={getDisplayOpId(t)}
       displayOp={t}
       address={account.address}
+      onSelectHistoryOp={onSelectHistoryOp}
       {...{ linkTo, showDate }}
     />
   );
@@ -145,6 +148,7 @@ export function HistoryListSwipe({
             displayOp={item.op}
             address={account.address}
             showDate
+            onSelectHistoryOp={onSelectHistoryOp}
             {...{ linkTo }}
           />
         );
@@ -183,11 +187,13 @@ function DisplayOpRow({
   address,
   linkTo,
   showDate,
+  onSelectHistoryOp,
 }: {
   displayOp: DisplayOpEvent;
   address: Address;
   linkTo: "op" | "account";
   showDate?: boolean;
+  onSelectHistoryOp(op: DisplayOpEvent): void;
 }) {
   assert(displayOp.amount > 0);
   const [from, to] = getFromTo(displayOp);
@@ -207,10 +213,7 @@ function DisplayOpRow({
       const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
       if (isLinkToOp || !canSendTo(otherAcc)) {
         toggleBottomSheet(true);
-        (nav as any).navigate("BottomSheetHistoryOp", {
-          op: displayOp,
-          shouldAddInset: false,
-        });
+        onSelectHistoryOp(displayOp);
       } else {
         nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
       }
