@@ -15,9 +15,7 @@ import {
 } from "react";
 import { Dimensions, StyleSheet, ViewProps } from "react-native";
 import Animated, {
-  runOnJS,
   useAnimatedProps,
-  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -73,11 +71,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const [posYFull, setPosYFull] = useState(
       screenDimensions.height - ins.top - ins.bottom - tabBarHeight
     );
-    const [snapPoints, setSnapPoints] = useState([
-      posYMini,
-      posYFull - 1,
-      posYFull,
-    ]);
+    const snapPoints = useSharedValue([posYMini, posYFull - 1, posYFull]);
 
     useEffect(() => {
       const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
@@ -94,33 +88,26 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(2);
       }
-      setSnapPoints([posYMini, 450, posYFull]);
-      if (animatedIndex.value === 0) {
-        bottomRef.current?.snapToIndex(1);
-        historyOpOpacity.value = 1;
-      }
-      historyOpOpacity.value = withTiming(1);
+      snapPoints.value = [posYMini, 450, posYFull];
+      // skip one frame to let snapPoints addapt
+      // without it it works perfectly fine
+      // but the backdrop is gray right away without smooth transition
+      setTimeout(() => {
+        if (animatedIndex.value === 0) {
+          bottomRef.current?.snapToIndex(1);
+          historyOpOpacity.value = 1;
+        }
+        historyOpOpacity.value = withTiming(1);
+      }, 20);
     };
     const sheetCollapse = () => {
-      setSnapPoints([posYMini, posYFull, posYFull]);
+      snapPoints.value = [posYMini, posYFull, posYFull];
       if (animatedIndex.value === 1) {
         bottomRef.current?.snapToIndex(0);
       } else {
         historyOpOpacity.value = withTiming(0);
       }
     };
-
-    useAnimatedReaction(
-      () => {
-        return animatedIndex.value === 0;
-      },
-      (isBottomSheetAtBottom) => {
-        if (isBottomSheetAtBottom) {
-          runOnJS(setSnapPoints)([posYMini, posYFull, posYFull]);
-          historyOpOpacity.value = 0;
-        }
-      }
-    );
 
     // When user opens a transfer inside the bottom sheet, sheet expands.
     const toggleBottomSheet = (expand: boolean) => {
@@ -149,6 +136,8 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const showMini = () => {
       console.log(`[SWIPE] showMini ${posYMini}`);
+      snapPoints.value = [posYMini, posYFull, posYFull];
+      historyOpOpacity.value = 0;
       setIsMini(true);
       onShowMini?.();
     };
@@ -176,7 +165,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const itemMiniStyle = useAnimatedStyle(() => {
       return {
-        opacity: 1 - animatedIndex.value * 3,
+        opacity: 1 - animatedIndex.value * 2,
       };
     });
 
