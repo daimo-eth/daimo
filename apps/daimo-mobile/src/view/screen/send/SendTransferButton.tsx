@@ -26,26 +26,17 @@ import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { useExitToHome } from "../../shared/nav";
 import { TextError } from "../../shared/text";
-import { useWithAccount } from "../../shared/withAccount";
 
-interface SendTransferButtonProps {
-  recipient: EAccountContact;
-  dollars: number;
-  requestId?: `${bigint}`;
-}
-
-export function SendTransferButton(props: SendTransferButtonProps) {
-  const Inner = useWithAccount(SendTransferButtonInner);
-  return <Inner {...props} />;
-}
-
-function SendTransferButtonInner({
+export function SendTransferButton({
   account,
   recipient,
   dollars,
-  requestId,
-}: SendTransferButtonProps & { account: Account }) {
-  console.log(`[SEND] rendering SendButton ${dollars} ${requestId}`);
+}: {
+  account: Account;
+  recipient: EAccountContact;
+  dollars: number;
+}) {
+  console.log(`[SEND] rendering SendButton ${dollars}`);
 
   // Get exact amount. No partial cents.
   assert(dollars >= 0);
@@ -53,10 +44,10 @@ function SendTransferButtonInner({
   const dollarsStr = dollars.toFixed(maxDecimals) as `${number}`;
 
   // Generate nonce
-  const nonceMetadata = requestId
-    ? new DaimoNonceMetadata(DaimoNonceType.RequestResponse, BigInt(requestId))
-    : new DaimoNonceMetadata(DaimoNonceType.Send);
-  const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [requestId]);
+  const nonce = useMemo(
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send)),
+    []
+  );
 
   // On exec, request signature from device enclave, send transfer.
   const { status, message, cost, exec } = useSendAsync({
@@ -76,7 +67,6 @@ function SendTransferButtonInner({
       amount: Number(dollarsToAmount(dollarsStr)),
       status: OpStatus.pending,
       timestamp: 0,
-      nonceMetadata: nonceMetadata.toHex(),
     },
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []

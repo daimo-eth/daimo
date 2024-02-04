@@ -1,20 +1,20 @@
 import {
-  DaimoAccountStatus,
-  DaimoLink,
   DaimoRequestStatus,
+  DaimoRequestV2Status,
+  assertNotNull,
   getAccountName,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 
+import { FulfillRequestButton } from "./FulfillRequestButton";
 import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
@@ -26,12 +26,14 @@ import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
+import { CenterSpinner } from "../../shared/CenterSpinner";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ErrorBanner } from "../../shared/error";
+import { ErrorRowCentered } from "../../shared/error";
 import {
   ParamListSend,
+  SendNavProp,
   useDisableTabSwipe,
   useExitToHome,
   useNav,
@@ -43,8 +45,25 @@ type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
-  const { link, recipient, dollars, requestId, lagAutoFocus } =
-    route.params || {};
+  const Inner = useWithAccount(SendScreenInner);
+  return <Inner {...route.params} />;
+}
+
+function SendScreenInner({
+  link,
+  recipient,
+  dollars,
+  lagAutoFocus,
+  account,
+}: SendNavProp & { account: Account }) {
+  assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
+
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const requestFetch = useFetchLinkStatus(link, daimoChain);
+  const requestStatus = requestFetch.data as
+    | DaimoRequestStatus
+    | DaimoRequestV2Status
+    | null;
 
   const nav = useNav();
   const goHome = useExitToHome();
@@ -58,84 +77,61 @@ export default function SendScreen({ route }: Props) {
 
   useDisableTabSwipe(nav);
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={ss.container.screen}>
-        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
-        <Spacer h={8} />
-        {!recipient && link && <SendLoadRecipient {...{ link }} />}
-        {recipient && dollars == null && (
+  const sendDisplay = (() => {
+    if (link) {
+      if (requestFetch.isFetching) return <CenterSpinner />;
+      else if (requestFetch.error)
+        return <ErrorRowCentered error={requestFetch.error} />;
+      else if (requestStatus) {
+        if (requestStatus.link.type === "requestv2") {
+          const recipientContact = addLastSendTime(
+            account,
+            requestStatus.recipient
+          );
+          return (
+            <SendConfirm
+              account={account}
+              recipient={recipientContact}
+              dollars={requestStatus.link.dollars}
+              requestStatus={requestStatus as DaimoRequestV2Status}
+            />
+          );
+        } else {
+          // Backcompat with old request links
+          const recipientContact = addLastSendTime(
+            account,
+            requestStatus.recipient
+          );
+          return (
+            <SendConfirm
+              account={account}
+              recipient={recipientContact}
+              dollars={requestStatus.link.dollars}
+            />
+          );
+        }
+      } else return <CenterSpinner />;
+    } else if (recipient) {
+      if (dollars == null)
+        return (
           <SendChooseAmount
             recipient={recipient}
             onCancel={goBack}
             lagAutoFocus={lagAutoFocus}
           />
-        )}
-        {recipient && dollars != null && (
-          <SendConfirm {...{ recipient, dollars, requestId }} />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
-  );
-}
-
-function SendLoadRecipient({ link }: { link: DaimoLink }) {
-  const Inner = useWithAccount(SendLoadRecipientInner);
-  return <Inner link={link} />;
-}
-
-function SendLoadRecipientInner({
-  account,
-  link,
-}: {
-  account: Account;
-  link: DaimoLink;
-}) {
-  const nav = useNav();
-
-  const status = useFetchLinkStatus(
-    link,
-    daimoChainFromId(account.homeChainId)
-  )!;
-  useEffect(() => {
-    if (status.data == null) return;
-    const { data } = status;
-    switch (data.link.type) {
-      case "account": {
-        const { account: recipientEAcc } = data as DaimoAccountStatus;
-        const recipient = addLastSendTime(account, recipientEAcc);
-        nav.navigate("SendTab", {
-          screen: "SendTransfer",
-          params: { recipient },
-        });
-        break;
-      }
-      case "request": {
-        // TODO: handle fulfilledBy (request already completed)
-        const { recipient: recipientEAcc, requestId } =
-          data as DaimoRequestStatus;
-        const recipient = addLastSendTime(account, recipientEAcc);
-        const { dollars } = data.link;
-        nav.navigate("SendTab", {
-          screen: "SendTransfer",
-          params: { recipient, requestId, dollars },
-        });
-        break;
-      }
-    }
-  }, [status]);
+        );
+      else return <SendConfirm {...{ account, recipient, dollars }} />;
+    } else throw new Error("unreachable");
+  })();
 
   return (
-    <View style={ss.container.center}>
-      {status.isLoading && <ActivityIndicator size="large" />}
-      {status.error && (
-        <ErrorBanner
-          error={status.error}
-          displayTitle="Transfer not possible"
-          displayMessage="Fix errors in your link or download the latest version of the app"
-        />
-      )}
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={ss.container.screen}>
+        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
+        <Spacer h={8} />
+        {sendDisplay}
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -203,16 +199,18 @@ function SendChooseAmount({
 }
 
 function SendConfirm({
+  account,
   recipient,
   dollars,
-  requestId,
+  requestStatus,
 }: {
+  account: Account;
   recipient: EAccountContact;
   dollars: `${number}`;
-  requestId?: `${bigint}`;
+  requestStatus?: DaimoRequestV2Status;
 }) {
   const nDollars = parseFloat(dollars);
-  const isRequest = requestId != null;
+  const isRequest = !!requestStatus;
 
   // Warn if paying new account
   let infoBubble = <Spacer h={32} />;
@@ -231,12 +229,21 @@ function SendConfirm({
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
 
+  const button = (() => {
+    if (isRequest)
+      return <FulfillRequestButton {...{ account, requestStatus }} />;
+    else
+      return (
+        <SendTransferButton {...{ account, recipient, dollars: nDollars }} />
+      );
+  })();
+
   return (
     <View>
       <Spacer h={8} />
       {infoBubble}
       <Spacer h={32} />
-      <RecipientDisplay {...{ recipient, isRequest }} />
+      <RecipientDisplay recipient={recipient} isRequest={isRequest} />
       <Spacer h={24} />
       <AmountChooser
         dollars={nDollars}
@@ -248,7 +255,7 @@ function SendConfirm({
         onFocus={onFocus}
       />
       <Spacer h={32} />
-      <SendTransferButton {...{ recipient, dollars: nDollars, requestId }} />
+      {button}
     </View>
   );
 }

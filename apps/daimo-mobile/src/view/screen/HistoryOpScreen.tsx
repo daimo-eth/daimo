@@ -13,7 +13,7 @@ import {
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import React, { createContext, useCallback, useContext } from "react";
-import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { getCachedEAccount } from "../../logic/addr";
@@ -23,6 +23,7 @@ import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
+import { CenterSpinner } from "../shared/CenterSpinner";
 import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -112,19 +113,11 @@ function NoteView({
 
   return (
     <View>
-      {noteFetch.isFetching && <Spinner />}
+      {noteFetch.isFetching && <CenterSpinner />}
       {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
       {noteStatus && noteStatus.status === DaimoNoteState.Confirmed && (
         <NoteDisplay {...{ account, noteStatus }} hideAmount />
       )}
-    </View>
-  );
-}
-
-function Spinner() {
-  return (
-    <View style={ss.container.center}>
-      <ActivityIndicator size="large" />
     </View>
   );
 }
@@ -153,17 +146,6 @@ function TransferBody({
   account: Account;
   op: DisplayOpEvent;
 }) {
-  // TODO: show if this transfer filled our request.
-  // const opRequestId = op.nonceMetadata
-  //   ? DaimoNonceMetadata.fromHex(op.nonceMetadata)?.identifier.toString()
-  //   : undefined;
-  // const matchingTrackedRequest = account.trackedRequests.find(
-  //   (req) =>
-  //     req.requestId === opRequestId &&
-  //     req.amount === `${op.amount}` &&
-  //     op.to === account.address
-  // );
-
   let other: EAccount;
   const sentByUs = op.from === account.address;
   if (sentByUs) {
@@ -172,13 +154,17 @@ function TransferBody({
     other = getCachedEAccount(op.from);
   }
   const isPayLink = other.label === "payment link";
-  const verb = isPayLink
-    ? sentByUs
-      ? "Created link"
-      : "Accepted link"
-    : sentByUs
-    ? "Sent"
-    : "Received";
+  const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
+
+  const verb = (() => {
+    if (isPayLink) {
+      return sentByUs ? "Created link" : "Accepted link";
+    } else if (isRequestResponse) {
+      return sentByUs ? "Fulfilled request" : "Received request";
+    } else {
+      return sentByUs ? "Sent" : "Received";
+    }
+  })();
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();

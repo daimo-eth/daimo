@@ -18,6 +18,9 @@ export const pimlicoPaymasterAbi = parseAbi([
 
 export {
   daimoAccountABI,
+  daimoRequestABI,
+  daimoRequestAddress,
+  daimoRequestConfig,
   daimoAccountFactoryABI,
   daimoAccountFactoryAddress,
   daimoAccountFactoryConfig,

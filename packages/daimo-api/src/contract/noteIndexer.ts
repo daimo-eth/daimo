@@ -11,16 +11,8 @@ import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
+import { senderIdKey, logCoordinateKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
-
-// log coordinate key: [transactionHash, logIndex]
-function logCoordinateKey(transactionHash: Hex, logIndex: number) {
-  return transactionHash + ":" + logIndex;
-}
-
-function senderIdKey(sender: Address, id: string) {
-  return sender + ":" + id;
-}
 
 interface NoteLog {
   blockNum: number;

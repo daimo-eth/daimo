@@ -12,6 +12,7 @@ import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
+import { RequestIndexer } from "./requestIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -37,7 +38,8 @@ export class CoinIndexer {
   constructor(
     private client: ViemClient,
     private opIndexer: OpIndexer,
-    private noteIndexer: NoteIndexer
+    private noteIndexer: NoteIndexer,
+    private requestIndexer: RequestIndexer
   ) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
@@ -177,6 +179,12 @@ export class CoinIndexer {
       logIndex - 1
     );
 
+    const requestStatus =
+      this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
+        transactionHash,
+        logIndex - 1
+      );
+
     const partialOp = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
@@ -200,6 +208,7 @@ export class CoinIndexer {
         return {
           type: "transfer",
           ...partialOp,
+          requestStatus,
         } as TransferOpEvent;
       }
 

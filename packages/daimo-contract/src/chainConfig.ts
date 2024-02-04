@@ -70,7 +70,7 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         tokenAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
         tokenSymbol: "USDC",
         tokenDecimals: 6,
-        pimlicoPaymasterAddress: "0x0000000000dd6dd248ab5487218e1c2d7fbb29c9",
+        pimlicoPaymasterAddress: "0x0000000000dd6Dd248Ab5487218e1C2D7fbB29c9",
         notesV1Address: assertNotNull(notesV1AddressMap.get(baseSepolia.id)),
         notesV2Address: assertNotNull(notesV2AddressMap.get(baseSepolia.id)),
       };

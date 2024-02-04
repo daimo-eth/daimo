@@ -18,6 +18,7 @@ export const daimoLinkBase = daimoDomain
 export type DaimoLink =
   | DaimoLinkAccount
   | DaimoLinkRequest
+  | DaimoLinkRequestV2
   | DaimoLinkNote
   | DaimoLinkNoteV2
   | DaimoLinkSettings
@@ -35,6 +36,15 @@ export type DaimoLinkAccount = {
 export type DaimoLinkRequest = {
   type: "request";
   requestId: BigIntStr;
+  /** Requester eAccountStr */
+  recipient: string;
+  dollars: DollarStr;
+};
+
+/** Represents a request for $x to be paid to y address. */
+export type DaimoLinkRequestV2 = {
+  type: "requestv2";
+  id: string;
   /** Requester eAccountStr */
   recipient: string;
   dollars: DollarStr;
@@ -100,6 +110,9 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
         link.dollars,
         link.requestId.toString(),
       ].join("/");
+    }
+    case "requestv2": {
+      return [linkBase, "r", link.recipient, link.dollars, link.id].join("/");
     }
     case "note": {
       const hash = link.ephemeralPrivateKey && `#${link.ephemeralPrivateKey}`;
@@ -183,6 +196,17 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
 
       if (dollars === "0.00") return null;
       return { type: "request", requestId, recipient, dollars };
+    }
+    case "r": {
+      // new request links
+      if (parts.length !== 4) return null;
+      const recipient = parts[1];
+      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
+      if (!(dollarNum > 0)) return null;
+      const dollars = dollarNum.toFixed(2) as DollarStr;
+      const id = parts[3];
+      if (dollars === "0.00") return null;
+      return { type: "requestv2", id, recipient, dollars };
     }
     case "note": {
       if (parts.length === 4) {

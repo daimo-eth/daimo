@@ -30,6 +30,7 @@ import { useEphemeralSignature } from "../../../logic/note";
 import { Account } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
+import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
@@ -83,7 +84,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
     <View style={ss.container.screen}>
       <ScreenHeader title={title} onExit={useExitToHome()} />
       <ScrollView bounces={false}>
-        {noteFetch.isFetching && <Spinner />}
+        {noteFetch.isFetching && <CenterSpinner />}
         {noteFetch.error && (
           <ErrorBanner
             error={noteFetch.error}
@@ -97,14 +98,6 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
           />
         )}
       </ScrollView>
-    </View>
-  );
-}
-
-function Spinner() {
-  return (
-    <View style={ss.container.center}>
-      <ActivityIndicator size="large" />
     </View>
   );
 }
