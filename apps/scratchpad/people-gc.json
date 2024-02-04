@@ -1,0 +1,752 @@
+[
+  {
+    "fid": 88,
+    "username": "worm.eth",
+    "displayName": "🪱",
+    "pfp": {
+      "url": "https://i.imgur.com/bpL5JXB.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Verified account",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 8468,
+    "followingCount": 182,
+    "activeOnFcNetwork": true,
+    "referrerUsername": "adam",
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 155,
+    "username": "will",
+    "displayName": "Will Papper",
+    "pfp": {
+      "url": "https://i.imgur.com/fDHtyad.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Co-founder of @syndicate. Creator of $AGLD, Core Team at ConstitutionDAO",
+        "mentions": ["syndicate"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 1369,
+    "followingCount": 164,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 363,
+    "username": "nibnalin.eth",
+    "displayName": "nibnalin.eth",
+    "pfp": {
+      "url": "https://openseauserdata.com/files/ac52bb77474e0518403d4dcc2f8e6cd6.svg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "(un)real world ethereum @daimo\n\nhttps://nibnalin.me",
+        "mentions": ["daimo"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "SF, CA, USA"
+      }
+    },
+    "followerCount": 241,
+    "followingCount": 218,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 473,
+    "username": "matthew",
+    "displayName": "Matthew",
+    "pfp": {
+      "url": "https://i.imgur.com/uwD4rUh.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "builder hubscout.xyz, @event, citycaster.xyz, and farchat.xyz",
+        "mentions": ["event"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 33814,
+    "followingCount": 2391,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 639,
+    "username": "sathaxe",
+    "displayName": "kartik ✨",
+    "pfp": {
+      "url": "https://lh3.googleusercontent.com/1idqWUEI8s27S8cWloN0G6RdaAv4XYvjmwZzI0LAdniLoJBFZ1pab0tovZjVmyKatFflwnP2mydT_yCSfctZZHCMaukDUYA_PYTB",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Dad, builder, and occasional\ninvestor | sathaxe.twitter | www.purplepandabook.com 💜🐼",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 471,
+    "followingCount": 280,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": true,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 646,
+    "username": "0xshash",
+    "displayName": "Shashank",
+    "pfp": {
+      "url": "https://i.imgur.com/hPxTiLn.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Risk @Stripe prev: wallets @bitski/ search @airbnb",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 520,
+    "followingCount": 384,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 922,
+    "username": "segall",
+    "displayName": "Max",
+    "pfp": {
+      "url": "https://i.seadn.io/gcs/files/69f3b77bd5ebe2cff4d4dff722b7b45e.png?w=500&auto=format",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "🏃👨‍💻🦁 | Building @privy",
+        "mentions": ["privy"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 662,
+    "followingCount": 273,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 1593,
+    "username": "thatguyintech",
+    "displayName": "albert",
+    "pfp": {
+      "url": "https://i.imgur.com/VdAXtu8.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Founding Engineer @ deform.cc, ex-DevRel Lead @ Alchemy, ex-Senior SWE @ Samsara, youtube.com/thatguyintech, i'm thatguyintech.twitter",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 831,
+    "followingCount": 203,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 1735,
+    "username": "asylum",
+    "displayName": "p3shoemaker",
+    "pfp": {
+      "url": "https://i.imgur.com/taIg0Di.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Fascinated with the puzzle that is modern society ",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 86,
+    "followingCount": 128,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 1948,
+    "username": "sarahz",
+    "displayName": "sarah z",
+    "pfp": {
+      "url": "https://lh3.googleusercontent.com/bwIXVkrTH0YZ58lKpzn_SDm-nFmql06kXgYuOwJzvyqRW8eBtk-NzIKzz6vF2W_Lh0cSxTGVnbi0iVVsSOEkElGJiwTZFOxfdxmj",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "learning ⋆ haegeez.twitter",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 176,
+    "followingCount": 172,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 3457,
+    "username": "beylin",
+    "displayName": "Mark Beylin",
+    "pfp": {
+      "url": "https://i.imgur.com/lDOK9C8.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Crypto product builder, pre-seed investing @ Boost.VC",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 96,
+    "followingCount": 283,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 3602,
+    "username": "amir",
+    "displayName": "Amir Bandeali",
+    "pfp": {
+      "url": "https://i.seadn.io/gae/_RduiRKJlrGI_JaJVV6RtAH9O880Fic7nZPOrxcFKbcsLn40bPkAFKKsvxhLkpSRsboDb0vFe7h1YDojUvjwa83O3OuNCEQtys-x?w=500&auto=format",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Building 0x.org & matcha.xyz",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 295,
+    "followingCount": 279,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 3854,
+    "username": "darrylyeo",
+    "displayName": "Darryl Yeo 🛠️",
+    "pfp": {
+      "url": "https://lh3.googleusercontent.com/aDoZOILQ0sqiFJOXVsdV2AmuU2cSQibSOa6-EehpX-O6vvY9S0cdNwlVO5H60WXTwNJx978c5vFogC7D1iEF3PM8pStespChorpp",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "founder/decentralized data wrangler @blockhead・/frontend dev・UI/UX abstractionist・DeFi/web3 builder・dropout・23・prev dYdX・x.com/darryl__yeo",
+        "mentions": ["blockhead"],
+        "channelMentions": ["frontend"]
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 1121,
+    "followingCount": 1156,
+    "activeOnFcNetwork": true,
+    "referrerUsername": "dwr.eth",
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 4240,
+    "username": "abi",
+    "displayName": "Abi",
+    "pfp": {
+      "url": "https://i.imgur.com/y6vZ6TR.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "pushin 🅿️roduct @zerion | seeding social graph & hydra ventures | self-custodial hooman | FC since Jan 26, 2024 | ex product @wolfram mathematica/alpha",
+        "mentions": ["zerion"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 374,
+    "followingCount": 512,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 4525,
+    "username": "emo.eth",
+    "displayName": "emo.eth",
+    "pfp": {
+      "url": "https://i.imgur.com/hIA63C3.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "building something new. prev: protocol @ opensea, seaport & stuff. professional @slokh and @0xalexander fanboy",
+        "mentions": ["slokh", "0xalexander"]
+      },
+      "location": {
+        "placeId": "ChIJA-2qKIt9hYARZ5N1NdUVtHE",
+        "description": "Oakland, CA, USA"
+      }
+    },
+    "followerCount": 583,
+    "followingCount": 251,
+    "activeOnFcNetwork": true,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 5445,
+    "username": "mars",
+    "displayName": "mario gomez-hall",
+    "pfp": {
+      "url": "https://i.imgur.com/807aRkn.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "building seedstash.xyz, the easy way to join web3 without worry.\npreviously designed @lyft and @square\nmariohall.com",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "ChIJA-2qKIt9hYARZ5N1NdUVtHE",
+        "description": "Oakland, CA, USA"
+      }
+    },
+    "followerCount": 15,
+    "followingCount": 25,
+    "activeOnFcNetwork": false,
+    "referrerUsername": "dwr.eth",
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 5820,
+    "username": "unhappiimochii",
+    "displayName": "Catherine Chang",
+    "pfp": {
+      "url": "https://i.imgur.com/9OUSDL9.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "⭐️ ceo & design @deformapp\n🐧 pudgypenguins #5440, SF huddle lead \n💙 atlassian alum \n🐻 berkeley alum",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 211,
+    "followingCount": 41,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 6361,
+    "username": "0xpaul",
+    "displayName": "paul",
+    "pfp": {
+      "url": "https://i.seadn.io/gae/r0QX6cm10zMduNxxmnfnPA-SrsTn5lFjcIF9KZb6uBHJykjcJx5iWdO3HXsQcJ19IcCUWwwgPgLsSD_kFQBNLlip8feKS0P_IYCK?w=500&auto=format",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Builder. Ex-Amazon.",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 29,
+    "followingCount": 20,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 6989,
+    "username": "afra",
+    "displayName": "afra",
+    "pfp": {
+      "url": "https://i.imgur.com/IEGiC0Y.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "ineffective accelerationism/\nbackpain negentropy/ with mask network",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJORy6nXuwj4ARz3b1NVL1Hw4",
+        "description": "Palo Alto, CA, USA"
+      }
+    },
+    "followerCount": 197,
+    "followingCount": 200,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 8220,
+    "username": "pal",
+    "displayName": "pal",
+    "pfp": {
+      "url": "https://i.seadn.io/gae/D3aWv8-5ydALbVU9QIY4k5o3wBa03qegX4VFx2t1uVOVzzXrRXDGaF-EF-1Ueg4oQxLVcKvgsa86rec06GdEd7XQT-ywC9yNMP7sYA?w=500&auto=format",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Head of Engineering @ Bitwise | Arsenal fan, cyclist, poker enthusiast | @purple #143 🟪 ",
+        "mentions": ["purple"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJOwg_06VPwokRYv534QaPC8g",
+        "description": "New York, NY, USA"
+      }
+    },
+    "followerCount": 448,
+    "followingCount": 297,
+    "activeOnFcNetwork": true,
+    "referrerUsername": "noun40",
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 10336,
+    "username": "stevech",
+    "displayName": "Shumo",
+    "pfp": {
+      "url": "https://i.imgur.com/EgfHifn.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Founder of NEBRA",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 17,
+    "followingCount": 12,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 192291,
+    "username": "darylx",
+    "displayName": "Daryl",
+    "pfp": {
+      "url": "https://i.imgur.com/TEjYXc1.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Gaming @Base",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 153,
+    "followingCount": 98,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 196346,
+    "username": "janclarin.eth",
+    "displayName": "jan",
+    "pfp": {
+      "url": "https://i.imgur.com/BRNIQKy.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "codes at opensea.io. prev google. views are my own.",
+        "mentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 93,
+    "followingCount": 119,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 210538,
+    "username": "keikumata",
+    "displayName": "kei.eth",
+    "pfp": {
+      "url": "https://i.imgur.com/vgXJgO1.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "co-founder @deform | pudgypenguins #6152 | prev engineer #1 @ Lumos | prev engineer @ Microsoft Azure k8s & blockchain | Duke ECE/CS | 🇯🇵🇸🇬",
+        "mentions": ["deform"],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 244,
+    "followingCount": 136,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 217234,
+    "username": "jessicalin",
+    "displayName": "jessicalin.eth",
+    "pfp": {
+      "url": "https://i.imgur.com/d9gNV0z.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Devrel @ 0x.org 👩🏻‍💻 hey_its_jlin.twitter 🥊 muay thai 🫛 shill me your best snack",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 11,
+    "followingCount": 85,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 231695,
+    "username": "cryptopoopai",
+    "displayName": "Poo @ CryptoPoop.AI",
+    "pfp": {
+      "url": "https://i.imgur.com/ikKhINo.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Our mission is to provide entertainment with 💩. We aspire to create as much joy and as little negativity as possible. Enjoy!",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 15,
+    "followingCount": 67,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 254213,
+    "username": "apoorved",
+    "displayName": "Krish",
+    "pfp": {
+      "url": "https://i.imgur.com/DI9Yl3D.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "Base(d) CB Web3 MAXI 💙 Hacker 🥷🏼 Burner ❤️‍🔥",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+        "description": "San Francisco, CA, USA"
+      }
+    },
+    "followerCount": 10,
+    "followingCount": 17,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  },
+  {
+    "fid": 269190,
+    "username": "evanchen",
+    "displayName": "Evan C",
+    "pfp": {
+      "url": "https://i.imgur.com/0Z1xjEd.jpg",
+      "verified": false
+    },
+    "profile": {
+      "bio": {
+        "text": "on chain @ Kindred Ventures",
+        "mentions": [],
+        "channelMentions": []
+      },
+      "location": {
+        "placeId": "",
+        "description": ""
+      }
+    },
+    "followerCount": 18,
+    "followingCount": 65,
+    "activeOnFcNetwork": false,
+    "viewerContext": {
+      "following": false,
+      "followedBy": false
+    }
+  }
+]
