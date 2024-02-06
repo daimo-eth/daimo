@@ -1,16 +1,15 @@
 import {
+  DaimoInviteStatus,
+  DaimoLinkRequest,
   DaimoLinkStatus,
+  DaimoNoteState,
   DaimoNoteStatus,
   DaimoRequestStatus,
   EAccount,
+  assert,
   dollarsToAmount,
   parseDaimoLink,
-  DaimoNoteState,
-  DaimoInviteStatus,
-  DaimoLinkRequest,
-  assert,
 } from "@daimo/common";
-import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -18,6 +17,7 @@ import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
+import { chainConfig } from "../env";
 
 export async function getLinkStatus(
   url: string,
@@ -85,7 +85,7 @@ export async function getLinkStatus(
         }
         const pending: DaimoNoteStatus = {
           status: DaimoNoteState.Pending,
-          contractAddress: daimoEphemeralNotesV2Address,
+          contractAddress: chainConfig.notesV2Address,
           ephemeralOwner: link.ephemeralOwner,
           link,
           sender,
@@ -105,7 +105,7 @@ export async function getLinkStatus(
       if (ret == null) {
         const pending: DaimoNoteStatus = {
           status: DaimoNoteState.Pending,
-          contractAddress: daimoEphemeralNotesV2Address,
+          contractAddress: chainConfig.notesV2Address,
           ephemeralOwner: undefined,
           link,
           sender,

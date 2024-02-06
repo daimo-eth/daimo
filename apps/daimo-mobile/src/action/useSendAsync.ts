@@ -5,12 +5,13 @@ import {
   PendingOpEventID,
   UserOpHex,
   assert,
+  assertNotNull,
   dollarsToAmount,
 } from "@daimo/common";
 import {
   daimoChainFromId,
-  daimoEphemeralNotesAddress,
-  daimoEphemeralNotesV2Address,
+  notesV1AddressMap,
+  notesV2AddressMap,
 } from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import * as Haptics from "expo-haptics";
@@ -180,12 +181,13 @@ function loadOpSender({
       `[SEND] loading DaimoOpSender ${address} ${enclaveKeyName} ${keySlot}`
     );
 
+    const chainConfig = env(daimoChain).chainConfig;
     return await DaimoOpSender.init({
       chainId,
-      tokenAddress: env(daimoChain).chainConfig.tokenAddress,
-      tokenDecimals: env(daimoChain).chainConfig.tokenDecimals,
-      notesAddress: daimoEphemeralNotesAddress,
-      notesAddressV2: daimoEphemeralNotesV2Address,
+      tokenAddress: chainConfig.tokenAddress,
+      tokenDecimals: chainConfig.tokenDecimals,
+      notesAddressV1: assertNotNull(notesV1AddressMap.get(chainId)),
+      notesAddressV2: assertNotNull(notesV2AddressMap.get(chainId)),
       accountAddress: address,
       accountSigner: signer,
       opSender: sender,

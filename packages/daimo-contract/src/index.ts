@@ -18,18 +18,14 @@ export const pimlicoPaymasterAbi = parseAbi([
 
 export {
   daimoAccountABI,
-  daimoEphemeralNotesABI,
-  daimoEphemeralNotesAddress,
-  daimoEphemeralNotesConfig,
-  daimoEphemeralNotesV2ABI,
-  daimoEphemeralNotesV2Address,
-  daimoEphemeralNotesV2Config,
   daimoAccountFactoryABI,
   daimoAccountFactoryAddress,
   daimoAccountFactoryConfig,
+  daimoEphemeralNotesABI,
+  daimoEphemeralNotesV2ABI,
   daimoPaymasterV2Address,
-  erc20ABI,
   entryPointABI,
+  erc20ABI,
 } from "./generated";
 
 export * from "./chainConfig";

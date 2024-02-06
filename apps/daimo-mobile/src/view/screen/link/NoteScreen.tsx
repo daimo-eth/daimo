@@ -3,16 +3,12 @@ import {
   DaimoNoteState,
   DaimoNoteStatus,
   EAccount,
-  PendingOpEventID,
   OpStatus,
+  PendingOpEventID,
   dollarsToAmount,
   getAccountName,
 } from "@daimo/common";
-import {
-  daimoChainFromId,
-  daimoEphemeralNotesAddress,
-  daimoEphemeralNotesV2Address,
-} from "@daimo/contract";
+import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -66,11 +62,9 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const { link } = route.params;
   console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
 
-  const noteFetch = useFetchLinkStatus(
-    link,
-    daimoChainFromId(account.homeChainId)
-  )!;
-
+  // Connect to the relevant DaimoEphemeralNotes[V2] contract info
+  const chain = daimoChainFromId(account.homeChainId);
+  const noteFetch = useFetchLinkStatus(link, chain)!;
   const noteStatus = noteFetch.data as DaimoNoteStatus | undefined;
 
   const title = (function (): string {
@@ -91,7 +85,9 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
         {noteFetch.isFetching && <Spinner />}
         {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
         {noteStatus && (
-          <NoteDisplay {...{ account, noteStatus: { ...noteStatus, link } }} />
+          <NoteDisplayInner
+            {...{ account, noteStatus: { ...noteStatus, link } }}
+          />
         )}
       </ScrollView>
     </View>
@@ -144,7 +140,7 @@ function NoteDisplayInner({
   const nonce = useMemo(() => new DaimoNonce(nonceMetadata), [ephemeralOwner]);
 
   const isV2RecipientClaim =
-    noteStatus.contractAddress === daimoEphemeralNotesV2Address &&
+    noteStatus.link.type === "notev2" &&
     noteStatus.sender.addr !== account.address;
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
   const customHandler = isV2RecipientClaim
@@ -165,7 +161,7 @@ function NoteDisplayInner({
       nonce,
       chainGasConstants: account.chainGasConstants,
     };
-    if (noteStatus.contractAddress === daimoEphemeralNotesAddress) {
+    if (noteStatus.contractAddress === opSender.opConfig.notesAddressV1) {
       console.log(`[ACTION] claiming note ${ephemeralOwner}`);
       return opSender.claimEphemeralNoteV1(
         ephemeralOwner,

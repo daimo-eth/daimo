@@ -12,13 +12,17 @@ See also the EIP-7212 [P256Verifier](https://github.com/daimo-eth/p256-verifier)
 ### Testing
 
 ```
-forge test --fork-url "https://base-goerli.publicnode.com"
+foundryup
+```
+
+```
+forge test --fork-url "https://base-sepolia.publicnode.com"
 ```
 
 Before making a PR, update detailed coverage:
 
 ```
-forge coverage --report lcov --fork-url "https://base-goerli.publicnode.com"
+forge coverage --report lcov --fork-url "https://base-sepolia.publicnode.com"
 ```
 
 You can see line-by-line coverage in VSCode using the recommended extension. Run

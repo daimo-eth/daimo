@@ -16,7 +16,7 @@ const account: Account = {
   name: "test",
   address: "0x0000000000000000000000000000000000000123",
 
-  homeChainId: 84531, // Base Goerli
+  homeChainId: 84531, // Base Goerli (old testnet)
   homeCoinAddress: "0x1B85deDe8178E18CdE599B4C9d913534553C3dBf",
 
   lastBalance: BigInt(123),

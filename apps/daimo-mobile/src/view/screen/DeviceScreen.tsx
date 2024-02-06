@@ -129,7 +129,7 @@ export function DeviceScreen({ route, navigation }: Props) {
   const canRemove =
     account.accountKeys.length > 1 ||
     account.lastBalance < dollarsToAmount(1) ||
-    account.homeChainId === 84531; // Testnet
+    account.homeChainId === 84532; // Testnet
 
   const statusMessage = (function (): ReactNode {
     switch (status) {

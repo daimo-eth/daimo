@@ -12,7 +12,7 @@ import { updateNetworkStateOnline } from "../sync/networkState";
 
 const apiUrlT =
   process.env.DAIMO_APP_API_URL_TESTNET || process.env.DAIMO_APP_API_URL;
-const apiUrlTestnetWithChain = `${apiUrlT}/chain/84531`;
+const apiUrlTestnetWithChain = `${apiUrlT}/chain/84532`;
 const apiUrlM =
   process.env.DAIMO_APP_API_URL_MAINNET || process.env.DAIMO_APP_API_URL;
 const apiUrlMainnetWithChain = `${apiUrlM}/chain/8453`;
@@ -51,7 +51,7 @@ function chooseChain<T>({
   testnet: T;
 }): T {
   assert(
-    ["base", "baseGoerli"].includes(daimoChain),
+    ["base", "baseSepolia"].includes(daimoChain),
     `Unsupported chain: ${daimoChain}`
   );
   if (daimoChain === "base") return mainnet;
@@ -119,15 +119,15 @@ function getOpts(daimoChain: DaimoChain) {
   };
 }
 
-const rpcHookMainnetClient = rpcHookMainnet.trpc.createClient(getOpts("base"));
-const rpcHookTestnetClient = rpcHookTestnet.trpc.createClient(
-  getOpts("baseGoerli")
-);
+const optsMainnet = getOpts("base");
+const optsTestnet = getOpts("baseSepolia");
+const rpcHookMainnetClient = rpcHookMainnet.trpc.createClient(optsMainnet);
+const rpcHookTestnetClient = rpcHookTestnet.trpc.createClient(optsTestnet);
 
 type RpcClient = typeof rpcHookMainnetClient | typeof rpcHookTestnetClient;
 
-const rpcFuncMainnet = createTRPCProxyClient<AppRouter>(getOpts("base"));
-const rpcFuncTestnet = createTRPCProxyClient<AppRouter>(getOpts("baseGoerli"));
+const rpcFuncMainnet = createTRPCProxyClient<AppRouter>(optsMainnet);
+const rpcFuncTestnet = createTRPCProxyClient<AppRouter>(optsTestnet);
 
 export function getRpcFunc(daimoChain: DaimoChain) {
   return chooseChain({

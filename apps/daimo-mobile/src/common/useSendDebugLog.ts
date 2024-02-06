@@ -29,7 +29,7 @@ export function useSendDebugLog(
   }, []);
 
   // Get phone and app info.
-  const daimoChain = daimoChainFromId(account?.homeChainId || 84531);
+  const daimoChain = daimoChainFromId(account?.homeChainId || 84532);
   const envObj = env(daimoChain);
   const envKV: Record<string, string> = {
     Platform: `${Platform.OS} ${Platform.Version} ${envObj.deviceType}`,

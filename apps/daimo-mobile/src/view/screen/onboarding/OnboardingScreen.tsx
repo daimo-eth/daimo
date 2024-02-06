@@ -208,7 +208,7 @@ function getNext(
     case "create-invite":
       return (input) => {
         const { isTestnet } = assertNotNull(input);
-        setDaimoChain(assertNotNull(isTestnet) ? "baseGoerli" : "base");
+        setDaimoChain(assertNotNull(isTestnet) ? "baseSepolia" : "base");
 
         if (Platform.OS !== "android") goToPage("create");
         else goToPage("create-try-enclave");

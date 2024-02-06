@@ -26,7 +26,7 @@ interface DaimoOpConfig {
   /** Decimals for that token. */
   tokenDecimals: number;
   /** EphemeralNotes instance. The stablecoin used must match tokenAddress. */
-  notesAddress: Address;
+  notesAddressV1: Address;
   /** EphemeralNotesV2 instance. The stablecoin used must match tokenAddress. */
   notesAddressV2: Address;
   /** Daimo account address. */
@@ -45,7 +45,7 @@ interface DaimoOpConfig {
  */
 export class DaimoOpSender {
   private constructor(
-    private opConfig: DaimoOpConfig,
+    public opConfig: DaimoOpConfig,
     private opBuilder: DaimoOpBuilder
   ) {}
 
@@ -62,7 +62,7 @@ export class DaimoOpSender {
         accountAddress,
         tokenAddress,
         tokenDecimals,
-        notesAddress: opConfig.notesAddress,
+        notesAddressV1: opConfig.notesAddressV1,
       })})}`
     );
 
@@ -218,7 +218,7 @@ export class DaimoOpSender {
     const op = this.opBuilder.executeBatch(
       [
         {
-          dest: this.opConfig.notesAddress,
+          dest: this.opConfig.notesAddressV1,
           value: 0n,
           data: encodeFunctionData({
             abi: Contracts.daimoEphemeralNotesABI,

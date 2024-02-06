@@ -26,6 +26,7 @@ function getDeviceType(): "computer" | "phone" {
       return "phone";
   }
 }
+
 export function env(daimoChain: DaimoChain) {
   const chainConfig = getChainConfig(daimoChain);
   return {

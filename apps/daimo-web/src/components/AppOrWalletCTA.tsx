@@ -5,13 +5,15 @@ import {
   DaimoNoteStatus,
   DaimoRequestStatus,
   assert,
+  assertNotNull,
   getNoteClaimSignature,
   getNoteClaimSignatureFromSeed,
 } from "@daimo/common";
 import {
-  daimoEphemeralNotesConfig,
-  daimoEphemeralNotesV2Address,
-  daimoEphemeralNotesV2Config,
+  daimoEphemeralNotesABI,
+  daimoEphemeralNotesV2ABI,
+  notesV1AddressMap,
+  notesV2AddressMap,
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useMemo, useState } from "react";
@@ -216,6 +218,8 @@ async function linkStatusToAction(
   selfAddress: Address,
   urlHash: string
 ): Promise<Action> {
+  const chainId = chainConfig.chainL2.id;
+
   switch (linkStatus.link.type) {
     case "request": {
       const { recipient } = linkStatus as DaimoRequestStatus;
@@ -234,8 +238,7 @@ async function linkStatusToAction(
     }
     case "note":
     case "notev2": {
-      const { sender, contractAddress, ephemeralOwner } =
-        linkStatus as DaimoNoteStatus;
+      const { sender, ephemeralOwner } = linkStatus as DaimoNoteStatus;
 
       const signature = await getNoteSignature(
         linkStatus.link.type,
@@ -244,14 +247,15 @@ async function linkStatusToAction(
         urlHash
       );
 
-      if (contractAddress === daimoEphemeralNotesV2Address) {
+      if (linkStatus.link.type === "notev2") {
         assert(
           selfAddress !== sender.addr,
           "sender shouldn't be claiming their own note on web"
         );
         return {
           wagmiPrep: {
-            ...daimoEphemeralNotesV2Config,
+            abi: daimoEphemeralNotesV2ABI,
+            address: assertNotNull(notesV2AddressMap.get(chainId)),
             functionName: "claimNoteRecipient" as const,
             args: [ephemeralOwner, selfAddress, signature] as const,
           },
@@ -259,7 +263,8 @@ async function linkStatusToAction(
       } else {
         return {
           wagmiPrep: {
-            ...daimoEphemeralNotesConfig,
+            abi: daimoEphemeralNotesABI,
+            address: assertNotNull(notesV1AddressMap.get(chainId)),
             functionName: "claimNote" as const,
             args: [ephemeralOwner, signature] as const,
           },

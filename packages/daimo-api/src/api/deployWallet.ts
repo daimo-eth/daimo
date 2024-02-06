@@ -5,7 +5,7 @@ import {
   DaimoNoteState,
   DaimoNoteStatus,
 } from "@daimo/common";
-import { daimoEphemeralNotesV2Address, erc20ABI } from "@daimo/contract";
+import { erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
@@ -59,7 +59,7 @@ export async function deployWallet(
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [daimoEphemeralNotesV2Address, maxUint256],
+        args: [chainConfig.notesV2Address, maxUint256],
       }),
     },
     {
@@ -99,7 +99,7 @@ export async function deployWallet(
     nameReg.onSuccessfulRegister(name, address);
 
     if (chainConfig.chainL2.testnet) {
-      const dollars = 50;
+      const dollars = 0.05;
       console.log(`[API] faucet req: $${dollars} USDC for ${name} ${address}`);
       faucet.request(address, dollars); // Kick off in background
     }

@@ -9,13 +9,13 @@
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
-    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0"
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
     "@coinbase/cbpay-js": "^1.8.0",
-    "@daimo/bulk": "^0.2.4",
+    "@daimo/bulk": "^0.3.1",
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",

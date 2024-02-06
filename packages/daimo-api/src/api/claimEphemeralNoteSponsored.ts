@@ -1,11 +1,9 @@
 import { DaimoNoteState } from "@daimo/common";
-import {
-  daimoEphemeralNotesV2ABI,
-  daimoEphemeralNotesV2Address,
-} from "@daimo/contract";
+import { daimoEphemeralNotesV2ABI } from "@daimo/contract";
 import { Address, Hex, keccak256, verifyMessage } from "viem";
 
 import { NoteIndexer } from "../contract/noteIndexer";
+import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 
 export async function claimEphemeralNoteSponsored(
@@ -32,7 +30,7 @@ export async function claimEphemeralNoteSponsored(
 
   const claimTxHash = await vc.writeContract({
     abi: daimoEphemeralNotesV2ABI,
-    address: daimoEphemeralNotesV2Address,
+    address: chainConfig.notesV2Address,
     functionName: "claimNoteRecipient",
     args: [ephemeralOwner, recipient, signature],
   });

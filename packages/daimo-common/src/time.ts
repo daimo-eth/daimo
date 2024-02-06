@@ -40,8 +40,8 @@ export function guessTimestampFromNum(
 ) {
   if (typeof blockNum === "bigint") blockNum = Number(blockNum);
   switch (chain) {
-    case "baseGoerli":
-      return 1675193616 + blockNum * 2;
+    case "baseSepolia":
+      return 1695768288 + blockNum * 2;
     case "base":
       return 1686789347 + blockNum * 2;
     default:

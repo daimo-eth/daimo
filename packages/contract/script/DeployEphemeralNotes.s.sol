@@ -6,9 +6,15 @@ import "../src/DaimoEphemeralNotes.sol";
 
 contract DeployEphemeralNotesScript is Script {
     function run() public {
+        address coinAddress = address(0x0);
+        if (block.chainid == 84532) {
+            coinAddress = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
+        }
+
+
         vm.startBroadcast();
         // DaimoEphemeralNotes defaults to USDC on Base.
-        new DaimoEphemeralNotes{salt: 0}(IERC20(address(0x0)));
+        new DaimoEphemeralNotes{salt: 0}(IERC20(coinAddress));
         vm.stopBroadcast();
     }
 

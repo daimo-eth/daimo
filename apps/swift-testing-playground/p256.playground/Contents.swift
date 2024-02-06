@@ -53,9 +53,9 @@ func base64ToBase64url(base64: String) -> String {
 
 var messageHex = (
     "01" + // version
-//     "00003B9ACA00" + // validUntil
-    "000000000000" + // validUntil
-    "cef2863e6be232ac99eef76f754acda25d51cec80009102e0df7af9f9078cd61" // userOpHash
+     "00003B9ACA00" + // validUntil 1e9
+//     "000000000000" + // validUntil
+    "c09eff100c833882cd94bc6b5d2e0d45af6ec978eb7f4a2e5174696bfee87488" // userOpHash
 )
 
 // isValidSignature ERC1271 test
@@ -64,6 +64,7 @@ var messageHex = (
 let challengeB64 = Data(fromHexEncodedString: messageHex)!.base64EncodedString()
 let challengeB64URL = base64ToBase64url(base64: challengeB64)
 let clientDataJSON = "{\"type\":\"webauthn.get\",\"challenge\":\"\(challengeB64URL)\",\"origin\":\"https://daimo.xyz\"}";
+print("clientDataJSON", clientDataJSON);
 let clientDataHash = SHA256.hash(data: Data(clientDataJSON.utf8))
 let clientDataHashString = clientDataHash.compactMap { String(format: "%02x", $0) }.joined()
 print("clientDataHash", clientDataHashString);

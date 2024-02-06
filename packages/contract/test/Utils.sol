@@ -12,7 +12,7 @@ library Utils {
         bytes memory challenge,
         uint256 r,
         uint256 s
-    ) public pure returns (Signature memory) {
+    ) public view returns (Signature memory) {
         string memory challengeb64url = Base64URL.encode(challenge);
         string memory clientDataJSON = string(
             abi.encodePacked(
@@ -21,6 +21,8 @@ library Utils {
                 '","origin":"https://daimo.xyz"}'
             )
         );
+        console2.log("clientDataJSON:", clientDataJSON);
+        
         uint256 challengeLocation = 23;
         uint256 responseTypeLocation = 1;
 

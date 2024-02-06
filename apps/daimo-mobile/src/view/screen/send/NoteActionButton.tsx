@@ -4,12 +4,13 @@ import {
   DaimoNoteState,
   EAccount,
   OpStatus,
+  assertNotNull,
   dollarsToAmount,
   formatDaimoLink,
   generateNoteSeedAddress,
   getNoteId,
 } from "@daimo/common";
-import { daimoEphemeralNotesV2Address } from "@daimo/contract";
+import { notesV2AddressMap } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -65,8 +66,10 @@ function NoteActionButtonInner({
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
+  const notesV2Addr = assertNotNull(notesV2AddressMap.get(account.homeChainId));
+
   const notesV2isApproved = account.recentTransfers.some(
-    (op) => op.type === "createLink" && op.to === daimoEphemeralNotesV2Address
+    (op) => op.type === "createLink" && op.to === notesV2Addr
   );
 
   const { status, message, cost, exec } = useSendAsync({
@@ -86,7 +89,7 @@ function NoteActionButtonInner({
       type: "createLink",
       status: OpStatus.pending,
       from: account.address,
-      to: daimoEphemeralNotesV2Address,
+      to: notesV2Addr,
       amount: Number(dollarsToAmount(dollars)),
       timestamp: Date.now() / 1e3,
       nonceMetadata: nonce.metadata.toHex(),
@@ -101,14 +104,14 @@ function NoteActionButtonInner({
         status: DaimoNoteState.Pending,
         sender: { addr: account.address, name: account.name },
         dollars: `${dollars}`,
-        contractAddress: daimoEphemeralNotesV2Address,
+        contractAddress: notesV2Addr,
         ephemeralOwner: noteAddress,
         id: noteId,
       },
     },
     accountTransform: transferAccountTransform([
       {
-        addr: daimoEphemeralNotesV2Address,
+        addr: notesV2Addr,
         label: AddrLabel.PaymentLink,
       } as EAccount,
     ]),

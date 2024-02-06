@@ -9,17 +9,13 @@ import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
 import { trace } from "@opentelemetry/api";
 import { BundlerJsonRpcProvider, Constants } from "userop";
-import { Address, Hex, PublicClient, hexToBigInt, isHex } from "viem";
+import { Address, Hex, PublicClient, hexToBigInt } from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
 import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
 import { chainConfig } from "../env";
-
-interface GasEstimate {
-  preVerificationGas: Hex;
-}
 
 interface GasPriceParams {
   maxFeePerGas: Hex;
@@ -47,7 +43,7 @@ export class BundlerClient {
     console.log(`[BUNDLER] init, loading compression info`);
 
     const opInflatorAddr = lookup(
-      [84531, "0xb742F6BC849020F1a7180fDFe02662F8Bce9d9C4" as Address],
+      [84532, "0xf51Da0D79cB71B5b1f7990547838743065aA0c0d" as Address],
       [8453, "0x8ABD51A785160481DB9E638eE71A3F4Ec4B996D8" as Address]
     )(chainConfig.chainL2.id);
 
@@ -148,11 +144,9 @@ export class BundlerClient {
 
   /// Send compressed userop. This is about 4x cheaper than sending uncompressed
   async sendCompressedBundle(compressed: Hex, viemClient: ViemClient) {
-    const txHash = await viemClient.writeContract({
-      abi: bundleBulkerABI,
-      address: bundleBulkerAddress,
-      functionName: "submit",
-      args: [compressed],
+    const txHash = await viemClient.walletClient.sendTransaction({
+      to: bundleBulkerAddress,
+      data: compressed,
     });
     return txHash;
   }
@@ -171,18 +165,12 @@ export class BundlerClient {
   }
 
   async estimatePreVerificationGas(op: UserOpHex) {
-    const args = [op, Constants.ERC4337.EntryPoint];
-    const gasEstimate = (await this.provider.send(
-      "eth_estimateUserOperationGas",
-      args
-    )) as GasEstimate;
-    console.log(
-      `[BUNDLER] estimated userOp gas: ${JSON.stringify(op)}: ${JSON.stringify(
-        gasEstimate
-      )}`
-    );
-    assert(isHex(gasEstimate.preVerificationGas));
-    return hexToBigInt(gasEstimate.preVerificationGas);
+    // const args = [op, Constants.ERC4337.EntryPoint];
+
+    // TODO: compute preVerificationGas from the op
+    // Use Pimlico forumla: https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/utils/validation.ts#L305-L368
+    // x Optimism formula: https://optimistic.etherscan.io/address/0xc0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3000f#code
+    return 1_000_000;
   }
 
   async getUserOperationGasPriceParams() {

@@ -4,21 +4,23 @@ import {
   DaimoNoteStatus,
   EAccount,
 } from "@daimo/common";
-import { daimoEphemeralNotesV2Address } from "@daimo/contract";
 import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
 import { Address, Hex, getAddress } from "viem";
 
 import { Transfer } from "../src/contract/coinIndexer";
-import { KeyRegistry, KeyChange } from "../src/contract/keyRegistry";
+import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { OpIndexer } from "../src/contract/opIndexer";
+import { chainConfig } from "../src/env";
 import { PushNotifier } from "../src/server/pushNotifier";
 
 const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
 const addrBob = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93");
 const addrCharlie = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b95");
+
+const notesV2Address = chainConfig.notesV2Address;
 
 test("PushNotifier", async () => {
   const pn = createNotifierAliceBob();
@@ -85,7 +87,7 @@ test("PushNotifier", async () => {
         sender: { addr: addrAlice, name: "alice" },
         dollars: "1.00",
         link: paymentLinkFromAlice,
-        contractAddress: daimoEphemeralNotesV2Address,
+        contractAddress: notesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -104,7 +106,7 @@ test("PushNotifier", async () => {
         claimer: { addr: addrBob, name: "bob" },
         dollars: "1.00",
         link: paymentLinkFromAlice,
-        contractAddress: daimoEphemeralNotesV2Address,
+        contractAddress: notesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
@@ -199,7 +201,7 @@ test("PushNotifier", async () => {
         claimer: { addr: addrAlice, name: "alice" },
         dollars: "4.20",
         link: paymentLinkFromAlice,
-        contractAddress: daimoEphemeralNotesV2Address,
+        contractAddress: notesV2Address,
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
