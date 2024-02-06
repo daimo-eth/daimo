@@ -23,6 +23,7 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
+  private srcName = chainConfig.chainL2.testnet ? "base-goerli" : "base";
   private batchSize = 100000n;
 
   private indexers: indexer[] = [];
@@ -107,13 +108,8 @@ export class Watcher {
 
   async getShovelLatest(): Promise<bigint> {
     const result = await this.pg.query(
-      `
-      select max(num) as num
-      from shovel.task_updates
-      where chain_id = $1
-      and backfill = false;
-    `,
-      [chainConfig.chainL2.id]
+      `select num from shovel.latest where src_name = $1 `,
+      [this.srcName]
     );
     return BigInt(result.rows[0].num);
   }
