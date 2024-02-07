@@ -89,15 +89,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         bottomRef.current?.snapToIndex(2);
       }
       snapPoints.value = [posYMini, 450, posYFull];
-      // skip one frame to let snapPoints addapt
+      // skip one frame to let snapPoints adapt
       // without it it works perfectly fine
       // but the backdrop is gray right away without smooth transition
       setTimeout(() => {
         if (animatedIndex.value === 0) {
           bottomRef.current?.snapToIndex(1);
-          historyOpOpacity.value = 1;
         }
-        historyOpOpacity.value = withTiming(1);
+        historyOpOpacity.value = animatedIndex.value === 0 ? 1 : withTiming(1);
       }, 20);
     };
     const sheetCollapse = () => {
