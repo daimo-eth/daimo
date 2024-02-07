@@ -15,7 +15,9 @@ import {
 } from "react";
 import { Dimensions, StyleSheet, ViewProps } from "react-native";
 import Animated, {
+  runOnJS,
   useAnimatedProps,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -72,6 +74,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       screenDimensions.height - ins.top - ins.bottom - tabBarHeight
     );
     const snapPoints = useSharedValue([posYMini, posYFull - 1, posYFull]);
+    const nextSnapPoint = useSharedValue(-1);
 
     useEffect(() => {
       const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
@@ -85,28 +88,42 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     // When user selects a transaction, open the bottom sheet part way.
     const animatedIndex = useSharedValue(0);
     const sheetExpand = () => {
+      historyOpOpacity.value = animatedIndex.value === 0 ? 1 : withTiming(1);
       if (animatedIndex.value === 1) {
-        bottomRef.current?.snapToIndex(2);
+        nextSnapPoint.value = 2;
       }
       snapPoints.value = [posYMini, 450, posYFull];
-      // skip one frame to let snapPoints adapt
-      // without it it works perfectly fine
-      // but the backdrop is gray right away without smooth transition
-      setTimeout(() => {
-        if (animatedIndex.value === 0) {
-          bottomRef.current?.snapToIndex(1);
-        }
-        historyOpOpacity.value = animatedIndex.value === 0 ? 1 : withTiming(1);
-      }, 20);
+      if (animatedIndex.value === 0) {
+        nextSnapPoint.value = 1;
+      }
     };
     const sheetCollapse = () => {
-      snapPoints.value = [posYMini, posYFull, posYFull];
       if (animatedIndex.value === 1) {
-        bottomRef.current?.snapToIndex(0);
+        snapToIndex(0);
       } else {
         historyOpOpacity.value = withTiming(0);
       }
+      snapPoints.value = [posYMini, posYFull, posYFull];
     };
+
+    const snapToIndex = (index: number) => {
+      bottomRef.current?.snapToIndex(index);
+    };
+
+    useAnimatedReaction(
+      () => {
+        return {
+          snapIndex: nextSnapPoint.value,
+          shouldSnap: nextSnapPoint.value !== -1,
+        };
+      },
+      ({ snapIndex, shouldSnap }) => {
+        if (shouldSnap) {
+          runOnJS(snapToIndex)(snapIndex);
+          nextSnapPoint.value = -1;
+        }
+      }
+    );
 
     // When user opens a transfer inside the bottom sheet, sheet expands.
     const toggleBottomSheet = (expand: boolean) => {
@@ -201,14 +218,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetY={[-10, 10]}
       >
         <ToggleBottomSheetContext.Provider value={toggleBottomSheet}>
-          {selectedHistoryOp && (
-            <Animated.View
-              style={historyOpContainer}
-              animatedProps={animatedProps}
-            >
+          <Animated.View
+            style={historyOpContainer}
+            animatedProps={animatedProps}
+          >
+            {selectedHistoryOp && (
               <HistoryOpScreen op={selectedHistoryOp} account={account} />
-            </Animated.View>
-          )}
+            )}
+          </Animated.View>
           <Animated.View
             style={[styles.itemMiniWrapper, itemMiniStyle]}
             pointerEvents={isMini ? "auto" : "none"}
