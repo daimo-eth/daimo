@@ -76,6 +76,7 @@ just outright bugs.
 BEFORE merging this PR,
 
 - [ ] Push to public TestFlight + Play Store open test track.
+- [ ] Bump version number for next development cycle.
 
 Production mainnet releases will eventually trail TestFlight by at least a week
 to allow longer and more thorough testing.

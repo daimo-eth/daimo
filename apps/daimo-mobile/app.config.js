@@ -1,7 +1,6 @@
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.5.2";
-const BUILD_NUM = 105;
+const VERSION = "1.5.3";
 
 export default {
   owner: "daimo",
@@ -24,7 +23,6 @@ export default {
   ios: {
     supportsTablet: true,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    buildNumber: `${BUILD_NUM}`,
     associatedDomains: [
       "applinks:daimo.xyz",
       "applinks:daimo.com",
@@ -87,7 +85,6 @@ export default {
     },
     softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    versionCode: BUILD_NUM,
   },
   extra: {
     eas: {
