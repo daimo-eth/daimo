@@ -87,7 +87,6 @@ export class NoteIndexer {
         where block_num >= $1
         and block_num <= $2
         and chain_id = $3
-        order by (block_num, tx_idx, log_idx) asc
     `,
       [from, to, chainConfig.chainL2.id]
     );
