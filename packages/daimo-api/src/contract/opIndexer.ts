@@ -46,6 +46,10 @@ export class OpIndexer {
       `,
       [from, to, chainConfig.chainL2.id]
     );
+    console.log(
+      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
+    );
+
     result.rows.forEach((row) => {
       const userOp: UserOp = {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
@@ -73,7 +77,7 @@ export class OpIndexer {
       this.callback(userOp);
     });
     console.log(
-      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
+      `[OP] processed ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );
   }
 

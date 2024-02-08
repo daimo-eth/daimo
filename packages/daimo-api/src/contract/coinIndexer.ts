@@ -14,6 +14,7 @@ import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
 
 export interface Transfer {
   address: Hex;
@@ -41,8 +42,12 @@ export class CoinIndexer {
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
-    const result = await pg.query(
-      `
+
+    const result = await retryBackoff(
+      `coinIndexer-logs-query-${from}-${to}`,
+      () =>
+        pg.query(
+          `
         select
           block_num,
           block_hash,
@@ -57,7 +62,9 @@ export class CoinIndexer {
         where block_num >= $1
         and block_num <= $2;
       `,
-      [from, to]
+          [from, to]
+        ),
+      5
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {
