@@ -9,9 +9,9 @@ interface indexer {
 
 const dbConfig: ClientConfig = {
   connectionString: process.env.SHOVEL_DATABASE_URL,
-  connectionTimeoutMillis: 5000,
-  query_timeout: 5000,
-  statement_timeout: 5000,
+  connectionTimeoutMillis: 10000,
+  query_timeout: 10000,
+  statement_timeout: 10000,
   database: process.env.SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
 };
 
@@ -23,7 +23,7 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
-  private batchSize = 100000n;
+  private batchSize = 50000n;
 
   private indexers: indexer[] = [];
   private pg: Pool;
