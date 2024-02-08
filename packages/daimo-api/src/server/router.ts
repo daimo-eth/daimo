@@ -1,5 +1,6 @@
 import { zAddress, zHex, zUserOpHex } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
+import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -58,8 +59,10 @@ export function createRouter(
   });
 
   const readyMiddleware = trpcT.middleware(async (opts) => {
+    // Don't serve requests until we're ready.
+    // This avoids confusing UI state in local development.
     if (!notifier.isInitialized) {
-      throw new Error("not ready");
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
     }
     return opts.next();
   });

@@ -22,8 +22,10 @@ function senderIdKey(sender: Address, id: string) {
 }
 
 interface NoteCreatedLog {
-  transactionHash: Hex;
+  blockNum: number;
+  transactionIndex: number;
   logIndex: number;
+  transactionHash: Hex;
   from: Address;
   ephemeralOwner: Address;
   amount: bigint;
@@ -31,14 +33,18 @@ interface NoteCreatedLog {
 }
 
 interface NoteRedeemedLog {
-  transactionHash: Hex;
+  blockNum: number;
+  transactionIndex: number;
   logIndex: number;
+  transactionHash: Hex;
   from: Address;
   redeemer: Address;
   ephemeralOwner: Address;
   amount: bigint;
   logAddr: Address;
 }
+
+type NoteLog = NoteCreatedLog | NoteRedeemedLog;
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
@@ -54,15 +60,22 @@ export class NoteIndexer {
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
-    const logs: DaimoNoteStatus[] = [];
+    const logs: NoteLog[] = [];
     logs.push(...(await this.loadCreated(pg, from, to)));
     logs.push(...(await this.loadRedeemed(pg, from, to)));
+    logs.sort((a, b) => {
+      const l = a.blockNum - b.blockNum;
+      if (l !== 0) return l;
+      return a.logIndex - b.logIndex;
+    });
+
+    const notes: DaimoNoteStatus[] = await this.handleNoteLogs(logs);
     console.log(
       `[NOTE] Loaded ${logs.length} notes in ${Date.now() - startTime}ms`
     );
     // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;
-    ls.forEach((l) => l(logs));
+    ls.forEach((l) => l(notes));
   }
 
   addListener(listener: (log: DaimoNoteStatus[]) => void) {
@@ -73,12 +86,14 @@ export class NoteIndexer {
     pg: Pool,
     from: bigint,
     to: bigint
-  ): Promise<DaimoNoteStatus[]> {
+  ): Promise<NoteLog[]> {
     const result = await pg.query(
       `
         select
-          tx_hash,
+          block_num,
+          tx_idx,
           log_idx,
+          tx_hash,
           f,
           ephemeral_owner,
           amount,
@@ -91,18 +106,7 @@ export class NoteIndexer {
     `,
       [from, to, chainConfig.chainL2.id]
     );
-    const logs = result.rows.map(rowToNoteCreatedeLog);
-
-    const promises = logs.map(async (l) => {
-      try {
-        return this.handleNoteCreated(l);
-      } catch (e) {
-        console.error(`[NOTE] Error handling NoteCreated: ${e}`);
-        return null;
-      }
-    });
-    const statuses = (await Promise.all(promises)).filter((n) => n != null);
-    return statuses as DaimoNoteStatus[];
+    return result.rows.map(rowToNoteCreatedLog);
   }
 
   private async handleNoteCreated(
@@ -143,12 +147,14 @@ export class NoteIndexer {
     pg: Pool,
     from: bigint,
     to: bigint
-  ): Promise<DaimoNoteStatus[]> {
+  ): Promise<NoteLog[]> {
     const result = await pg.query(
       `
         select
-          tx_hash,
+          block_num,
+          tx_idx,
           log_idx,
+          tx_hash,
           f,
           redeemer,
           ephemeral_owner,
@@ -161,18 +167,20 @@ export class NoteIndexer {
     `,
       [from, to, chainConfig.chainL2.id]
     );
-    const logs = result.rows.map(rowToNoteRedeemedLog);
+    return result.rows.map(rowToNoteRedeemedLog);
+  }
 
-    const promises = logs.map(async (l) => {
+  async handleNoteLogs(logs: NoteLog[]): Promise<DaimoNoteStatus[]> {
+    const statuses = [] as DaimoNoteStatus[];
+    for (const l of logs) {
       try {
-        return this.handleNoteRedeemed(l);
+        if ("redeemer" in l) statuses.push(await this.handleNoteRedeemed(l));
+        else statuses.push(await this.handleNoteCreated(l));
       } catch (e) {
-        console.error(`[NOTE] Error handling NoteRedeemed: ${e}`);
-        return null;
+        console.error(`[NOTE] Error handling NoteLog: ${e} ${l}`);
       }
-    });
-    const statuses = (await Promise.all(promises)).filter((n) => n != null);
-    return statuses as DaimoNoteStatus[];
+    }
+    return statuses;
   }
 
   async handleNoteRedeemed(log: NoteRedeemedLog): Promise<DaimoNoteStatus> {
@@ -238,10 +246,12 @@ export class NoteIndexer {
   }
 }
 
-function rowToNoteCreatedeLog(r: any): NoteCreatedLog {
+function rowToNoteCreatedLog(r: any): NoteCreatedLog {
   return {
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+    blockNum: r.block_num,
+    transactionIndex: r.tx_idx,
     logIndex: r.log_idx,
+    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
     from: getAddress(bytesToHex(r.f, { size: 20 })),
     ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
     amount: BigInt(r.amount),
@@ -251,8 +261,10 @@ function rowToNoteCreatedeLog(r: any): NoteCreatedLog {
 
 function rowToNoteRedeemedLog(r: any): NoteRedeemedLog {
   return {
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+    blockNum: r.block_num,
+    transactionIndex: r.tx_idx,
     logIndex: r.log_idx,
+    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
     from: getAddress(bytesToHex(r.f, { size: 20 })),
     redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
     ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
