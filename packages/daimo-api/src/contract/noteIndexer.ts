@@ -21,30 +21,18 @@ function senderIdKey(sender: Address, id: string) {
   return sender + ":" + id;
 }
 
-interface NoteCreatedLog {
+interface NoteLog {
   blockNum: number;
   transactionIndex: number;
   logIndex: number;
   transactionHash: Hex;
   from: Address;
+  // Null for NoteCreated, non-null for NoteRedeemed
+  redeemer: Address | null;
   ephemeralOwner: Address;
   amount: bigint;
   logAddr: Address;
 }
-
-interface NoteRedeemedLog {
-  blockNum: number;
-  transactionIndex: number;
-  logIndex: number;
-  transactionHash: Hex;
-  from: Address;
-  redeemer: Address;
-  ephemeralOwner: Address;
-  amount: bigint;
-  logAddr: Address;
-}
-
-type NoteLog = NoteCreatedLog | NoteRedeemedLog;
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer {
@@ -59,42 +47,37 @@ export class NoteIndexer {
   constructor(private nameReg: NameRegistry) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
-    const startTime = Date.now();
-    const logs: NoteLog[] = [];
-    logs.push(...(await this.loadCreated(pg, from, to)));
-    logs.push(...(await this.loadRedeemed(pg, from, to)));
-    logs.sort((a, b) => {
-      const l = a.blockNum - b.blockNum;
-      if (l !== 0) return l;
-      return a.logIndex - b.logIndex;
-    });
+    // Load notes contract event logs
+    const startMs = Date.now();
+    const logs = await this.loadNoteLogs(pg, from, to);
+    console.log(`[NOTE] ${Date.now() - startMs}ms: loaded ${logs.length} logs`);
 
+    // Update in-memory note statuses
     const notes: DaimoNoteStatus[] = await this.handleNoteLogs(logs);
-    console.log(
-      `[NOTE] Loaded ${logs.length} notes in ${Date.now() - startTime}ms`
-    );
-    // Finally, invoke listeners to send notifications etc.
-    const ls = this.listeners;
-    ls.forEach((l) => l(notes));
+
+    // Finally, invoke listeners to send notifications etc
+    this.listeners.forEach((l) => l(notes));
   }
 
   addListener(listener: (log: DaimoNoteStatus[]) => void) {
     this.listeners.push(listener);
   }
 
-  private async loadCreated(
+  private async loadNoteLogs(
     pg: Pool,
     from: bigint,
     to: bigint
   ): Promise<NoteLog[]> {
     const result = await pg.query(
       `
+      select * from (
         select
           block_num,
           tx_idx,
           log_idx,
           tx_hash,
           f,
+          null as redeemer,
           ephemeral_owner,
           amount,
           log_addr
@@ -102,16 +85,43 @@ export class NoteIndexer {
         where block_num >= $1
         and block_num <= $2
         and chain_id = $3
-        order by (block_num, tx_idx, log_idx) asc
+        union 
+        select
+          block_num,
+          tx_idx,
+          log_idx,
+          tx_hash,
+          f,
+          redeemer,
+          ephemeral_owner,
+          amount,
+          log_addr
+        from note_redeemed
+        where block_num >= $1
+        and block_num <= $2
+        and chain_id = $3
+      ) as notelogs
+      order by (block_num, tx_idx, log_idx) asc
     `,
       [from, to, chainConfig.chainL2.id]
     );
-    return result.rows.map(rowToNoteCreatedLog);
+    return result.rows.map(rowToNoteLog);
   }
 
-  private async handleNoteCreated(
-    log: NoteCreatedLog
-  ): Promise<DaimoNoteStatus> {
+  async handleNoteLogs(logs: NoteLog[]): Promise<DaimoNoteStatus[]> {
+    const statuses = [] as DaimoNoteStatus[];
+    for (const l of logs) {
+      try {
+        if (l.redeemer == null) statuses.push(await this.handleNoteCreated(l));
+        else statuses.push(await this.handleNoteRedeemed(l));
+      } catch (e) {
+        console.error(`[NOTE] Error handling NoteLog: ${e} ${l}`);
+      }
+    }
+    return statuses;
+  }
+
+  private async handleNoteCreated(log: NoteLog): Promise<DaimoNoteStatus> {
     console.log(`[NOTE] NoteCreated ${log.ephemeralOwner}`);
     if (this.notes.get(log.ephemeralOwner) != null) {
       throw new Error(`bad NoteCreated: ${log.ephemeralOwner} exists`);
@@ -143,47 +153,7 @@ export class NoteIndexer {
     return newNote;
   }
 
-  private async loadRedeemed(
-    pg: Pool,
-    from: bigint,
-    to: bigint
-  ): Promise<NoteLog[]> {
-    const result = await pg.query(
-      `
-        select
-          block_num,
-          tx_idx,
-          log_idx,
-          tx_hash,
-          f,
-          redeemer,
-          ephemeral_owner,
-          amount,
-          log_addr
-      from note_redeemed
-      where block_num >= $1
-      and block_num <= $2
-      and chain_id = $3
-    `,
-      [from, to, chainConfig.chainL2.id]
-    );
-    return result.rows.map(rowToNoteRedeemedLog);
-  }
-
-  async handleNoteLogs(logs: NoteLog[]): Promise<DaimoNoteStatus[]> {
-    const statuses = [] as DaimoNoteStatus[];
-    for (const l of logs) {
-      try {
-        if ("redeemer" in l) statuses.push(await this.handleNoteRedeemed(l));
-        else statuses.push(await this.handleNoteCreated(l));
-      } catch (e) {
-        console.error(`[NOTE] Error handling NoteLog: ${e} ${l}`);
-      }
-    }
-    return statuses;
-  }
-
-  async handleNoteRedeemed(log: NoteRedeemedLog): Promise<DaimoNoteStatus> {
+  async handleNoteRedeemed(log: NoteLog): Promise<DaimoNoteStatus> {
     console.log(`[NOTE] NoteRedeemed ${log.ephemeralOwner}`);
     const logInfo = () =>
       `[${log.transactionHash} ${log.logIndex} ${log.ephemeralOwner}]`;
@@ -208,7 +178,7 @@ export class NoteIndexer {
       log.redeemer === log.from
         ? DaimoNoteState.Cancelled
         : DaimoNoteState.Claimed;
-    note.claimer = await this.nameReg.getEAccount(log.redeemer);
+    note.claimer = await this.nameReg.getEAccount(assertNotNull(log.redeemer));
     return note;
   }
 
@@ -246,27 +216,14 @@ export class NoteIndexer {
   }
 }
 
-function rowToNoteCreatedLog(r: any): NoteCreatedLog {
+function rowToNoteLog(r: any): NoteLog {
   return {
     blockNum: r.block_num,
     transactionIndex: r.tx_idx,
     logIndex: r.log_idx,
     transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
     from: getAddress(bytesToHex(r.f, { size: 20 })),
-    ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
-    amount: BigInt(r.amount),
-    logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
-  };
-}
-
-function rowToNoteRedeemedLog(r: any): NoteRedeemedLog {
-  return {
-    blockNum: r.block_num,
-    transactionIndex: r.tx_idx,
-    logIndex: r.log_idx,
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-    from: getAddress(bytesToHex(r.f, { size: 20 })),
-    redeemer: getAddress(bytesToHex(r.redeemer, { size: 20 })),
+    redeemer: r.redeemer && getAddress(bytesToHex(r.redeemer, { size: 20 })),
     ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
     amount: BigInt(r.amount),
     logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
