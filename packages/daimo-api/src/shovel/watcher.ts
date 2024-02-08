@@ -23,7 +23,7 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   private latest = chainConfig.chainL2.testnet ? 8750000n : 5700000n;
-  private batchSize = 50000n;
+  private batchSize = 15000n;
 
   private indexers: indexer[] = [];
   private pg: Pool;
