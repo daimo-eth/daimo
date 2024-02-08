@@ -1,21 +1,14 @@
 import {
-  PaymentLinkOpEvent,
   DisplayOpEvent,
   OpStatus,
+  PaymentLinkOpEvent,
   TransferOpEvent,
   guessTimestampFromNum,
 } from "@daimo/common";
 import { daimoChainFromId, erc20ABI } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
-import {
-  Address,
-  Hex,
-  bytesToHex,
-  getAddress,
-  numberToHex,
-  toBytes,
-} from "viem";
+import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
@@ -57,17 +50,14 @@ export class CoinIndexer {
           tx_idx,
           log_idx,
           log_addr,
-
           f as "from",
           t as "to",
           v as "value"
         from transfers
         where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-        and log_addr = $4;
+        and block_num <= $2;
       `,
-      [from, to, chainConfig.chainL2.id, toBytes(chainConfig.tokenAddress)]
+      [from, to]
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {

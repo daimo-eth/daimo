@@ -101,7 +101,7 @@ export class NoteIndexer {
         and block_num <= $2
         and chain_id = $3
       ) as notelogs
-      order by (block_num, tx_idx, log_idx) asc
+      order by block_num asc, tx_idx asc, log_idx asc
     `,
       [from, to, chainConfig.chainL2.id]
     );
