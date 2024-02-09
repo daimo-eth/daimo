@@ -37,7 +37,7 @@
     "@expo/config-plugins": "^7.2.5",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^13.0.0",
-    "@gorhom/bottom-sheet": "^4",
+    "@gorhom/bottom-sheet": "^4.6.0",
     "@react-native-segmented-control/segmented-control": "2.4.1",
     "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.6",
