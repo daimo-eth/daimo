@@ -87,6 +87,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     // When user selects a transaction, open the bottom sheet part way.
     const animatedIndex = useSharedValue(0);
+    const animatedPosition = useSharedValue(0);
     const sheetExpand = () => {
       historyOpOpacity.value = animatedIndex.value === 0 ? 1 : withTiming(1);
       if (animatedIndex.value === 1) {
@@ -182,6 +183,13 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const itemMiniStyle = useAnimatedStyle(() => {
       return {
         opacity: 1 - animatedIndex.value * 2,
+        transform: [{ translateY: Math.max(0, animatedIndex.value * 600) }],
+      };
+    });
+
+    const itemFullStyle = useAnimatedStyle(() => {
+      return {
+        opacity: Math.min(1, animatedIndex.value),
       };
     });
 
@@ -210,12 +218,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         onChange={handleSheetChanges}
         backdropComponent={renderBackdrop}
         animatedIndex={animatedIndex}
+        animatedPosition={animatedPosition}
         animateOnMount={false}
         enablePanDownToClose={false}
         enableHandlePanningGesture={!disabled}
         enableContentPanningGesture={!disabled}
         activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
+        animationConfigs={ANIMATION_CONFIG}
       >
         <ToggleBottomSheetContext.Provider value={toggleBottomSheet}>
           <Animated.View
@@ -232,7 +242,9 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
           >
             {itemMini}
           </Animated.View>
-          {itemFull}
+          <Animated.View style={[{ flex: 1 }, itemFullStyle]}>
+            {itemFull}
+          </Animated.View>
         </ToggleBottomSheetContext.Provider>
       </BottomSheet>
     );
@@ -247,3 +259,10 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
   },
 });
+
+const ANIMATION_CONFIG = {
+  stiffness: 160,
+  damping: 18,
+  mass: 1,
+  restDisplacement: 1,
+};
