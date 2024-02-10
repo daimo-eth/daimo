@@ -12,7 +12,6 @@ import {
   timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 
@@ -28,11 +27,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import {
-  ParamListBottomSheet,
-  useDisableTabSwipe,
-  useNav,
-} from "../shared/nav";
+import { useDisableTabSwipe, useNav } from "../shared/nav";
 import { color, ss } from "../shared/style";
 import {
   TextBody,
@@ -44,10 +39,7 @@ import {
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
-type Props = NativeStackScreenProps<
-  ParamListBottomSheet,
-  "BottomSheetHistoryOp"
->;
+type Props = { account: Account; op: DisplayOpEvent };
 
 export const ToggleBottomSheetContext = createContext((expand: boolean) => {});
 
@@ -56,10 +48,7 @@ export function HistoryOpScreen(props: Props) {
   return <Inner {...props} />;
 }
 
-function HistoryOpScreenInner({
-  account,
-  route,
-}: Props & { account: Account }) {
+function HistoryOpScreenInner({ account, op }: Props) {
   const toggleBottomSheet = useContext(ToggleBottomSheetContext);
   const nav = useNav();
   useDisableTabSwipe(nav);
@@ -68,7 +57,6 @@ function HistoryOpScreenInner({
   // while the op is pending, and it confirms, the screen should update.
   // A pending op always has an opHash (since its initiated by the user's
   // account).
-  let { op } = route.params;
   op =
     syncFindSameOp(
       { opHash: op.opHash, txHash: op.txHash },
@@ -83,9 +71,6 @@ function HistoryOpScreenInner({
         title="Transfer"
         onExit={() => {
           toggleBottomSheet(false); // Collapse to small height
-          if (nav.canGoBack()) {
-            nav.goBack();
-          }
         }}
         hideOfflineHeader
       />

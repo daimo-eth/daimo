@@ -108,15 +108,7 @@ export class Watcher {
 
   async getShovelLatest(): Promise<bigint> {
     const result = await retryBackoff(`shovel-latest-query`, () =>
-      this.pg.query(
-        `
-      select max(num) as num
-      from shovel.task_updates
-      where chain_id = $1
-      and backfill = false;
-    `,
-        [chainConfig.chainL2.id]
-      )
+      this.pg.query(`select num from shovel.latest`)
     );
     return BigInt(result.rows[0].num);
   }

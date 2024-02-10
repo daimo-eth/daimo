@@ -1,12 +1,12 @@
-import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import { DisplayOpEvent } from "@daimo/common";
 import { useIsFocused } from "@react-navigation/native";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { Dimensions, Platform, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { SwipeUpDown, SwipeUpDownRef } from "./SwipeUpDown";
 import { useNav } from "./nav";
-import useTabBarHeight from "../../common/useTabBarHeight";
+import { Account } from "../../model/account";
 
 const screenDimensions = Dimensions.get("screen");
 
@@ -16,21 +16,18 @@ export function useSwipeUpDown({
   translationY,
   disabled,
   bottomSheetRef,
+  account,
+  selectedHistoryOp,
 }: {
   itemMini: ReactNode;
   itemFull: ReactNode;
   translationY: Animated.SharedValue<number>;
   disabled?: boolean;
   bottomSheetRef: React.RefObject<SwipeUpDownRef>;
+  account: Account;
+  selectedHistoryOp?: DisplayOpEvent;
 }) {
   const [isBottomSheetOpen, setIsOpen] = useState(false);
-
-  // Dimensions
-  const tabBarHeight = useTabBarHeight();
-  const screenHeight =
-    screenDimensions.height -
-    tabBarHeight -
-    (Platform.OS === "android" ? 16 : 0);
 
   // Hide bottom sheet when tapping a bottom tab.
   const nav = useNav();
@@ -60,11 +57,7 @@ export function useSwipeUpDown({
 
   const bottomSheet = (
     <Animated.View
-      style={[
-        { height: screenHeight },
-        styles.bottomSheetContainer,
-        bottomSheetScrollStyle,
-      ]}
+      style={[styles.bottomSheetContainer, bottomSheetScrollStyle]}
       pointerEvents="box-none"
     >
       <SwipeUpDown
@@ -75,6 +68,8 @@ export function useSwipeUpDown({
         onShowFull={useCallback(() => setIsOpen(true), [])}
         onShowMini={useCallback(() => setIsOpen(false), [])}
         disabled={disabled}
+        account={account}
+        selectedHistoryOp={selectedHistoryOp}
       />
     </Animated.View>
   );
@@ -88,6 +83,7 @@ export function useSwipeUpDown({
 const styles = StyleSheet.create({
   bottomSheetContainer: {
     position: "absolute",
-    width: SCREEN_WIDTH,
+    height: "100%",
+    width: "100%",
   },
 });

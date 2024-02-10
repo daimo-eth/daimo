@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
   },
   bubbleText: {
     flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: "column",
   },
 });

@@ -64,14 +64,6 @@ export type ParamListTab = {
   SettingsTab: { screen: keyof ParamListSettings; params?: any };
 };
 
-export type ParamListBottomSheet = {
-  BottomSheetList: undefined;
-  BottomSheetHistoryOp: {
-    op: DisplayOpEvent;
-    shouldAddInset: boolean;
-  };
-};
-
 export function useNav<
   RouteName extends keyof ParamListTab = keyof ParamListTab
 >() {

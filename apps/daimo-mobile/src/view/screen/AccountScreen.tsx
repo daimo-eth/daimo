@@ -1,5 +1,6 @@
 import {
   DaimoLinkAccount,
+  DisplayOpEvent,
   EAccount,
   canSendTo,
   getAccountName,
@@ -7,8 +8,8 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useRef } from "react";
-import { ActivityIndicator, Linking, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
 import { addLastSendTime } from "../../logic/daimoContacts";
@@ -49,8 +50,10 @@ function AccountScreenInner(props: Props & { account: Account }) {
   const { params } = props.route;
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader title="Account" onBack={goBack || goHome} />
+    <View style={[ss.container.screen, styles.noPadding]}>
+      <View style={styles.screenPadding}>
+        <ScreenHeader title="Account" onBack={goBack || goHome} />
+      </View>
       <Spacer h={32} />
       {"link" in params && (
         <AccountScreenLoader account={props.account} link={params.link} />
@@ -102,6 +105,9 @@ function AccountScreenBody({
   const nav = useNav();
   useDisableTabSwipe(nav);
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const [selectedHistoryOp, setSelectedHistoryOp] = useState<
+    DisplayOpEvent | undefined
+  >();
 
   const openExplorer = useCallback(() => {
     const { chainConfig } = env(daimoChainFromId(account.homeChainId));
@@ -119,6 +125,10 @@ function AccountScreenBody({
     });
   }, [nav, eAcc, account]);
 
+  const onSelectHistoryOp = useCallback((op: DisplayOpEvent) => {
+    setSelectedHistoryOp(op);
+  }, []);
+
   // Bottom sheet: show transactions between us and this account
   const translationY = useSharedValue(0);
   const histListMini = (
@@ -127,16 +137,24 @@ function AccountScreenBody({
       otherAcc={eAcc}
       showDate={false}
       maxToShow={5}
+      onSelectHistoryOp={onSelectHistoryOp}
     />
   );
   const histListFull = (
-    <HistoryListSwipe account={account} otherAcc={eAcc} showDate />
+    <HistoryListSwipe
+      account={account}
+      otherAcc={eAcc}
+      showDate
+      onSelectHistoryOp={onSelectHistoryOp}
+    />
   );
   const { bottomSheet } = useSwipeUpDown({
     itemMini: histListMini,
     itemFull: histListFull,
     translationY,
     bottomSheetRef,
+    account,
+    selectedHistoryOp,
   });
 
   // TODO: show other accounts coin+chain, once we support multiple.
@@ -146,31 +164,41 @@ function AccountScreenBody({
 
   return (
     <>
-      <View
-        style={{
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
+      <View style={styles.screenPadding}>
+        <View style={styles.mainContent}>
+          <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
+          <Spacer h={16} />
+          <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
+          <Spacer h={8} />
+          <TextH3 color={color.gray3}>{subtitle}</TextH3>
+        </View>
+        <Spacer h={24} />
+        <View style={ss.container.padH8}>
+          {canSend && <ButtonBig type="primary" title="SEND" onPress={send} />}
+        </View>
         <Spacer h={16} />
-        <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
-        <Spacer h={8} />
-        <TextH3 color={color.gray3}>{subtitle}</TextH3>
-      </View>
-      <Spacer h={24} />
-      <View style={ss.container.padH8}>
-        {canSend && <ButtonBig type="primary" title="SEND" onPress={send} />}
-      </View>
-      <Spacer h={16} />
-      <View style={ss.container.padH8}>
-        <ButtonBig
-          type="subtle"
-          title="VIEW ON BLOCK EXPLORER"
-          onPress={openExplorer}
-        />
+        <View style={ss.container.padH8}>
+          <ButtonBig
+            type="subtle"
+            title="VIEW ON BLOCK EXPLORER"
+            onPress={openExplorer}
+          />
+        </View>
       </View>
       {bottomSheet}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  mainContent: {
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  noPadding: {
+    paddingHorizontal: 0,
+  },
+  screenPadding: {
+    paddingHorizontal: 16,
+  },
+});
