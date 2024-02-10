@@ -2,6 +2,7 @@ import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { chainConfig } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 interface indexer {
   load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
@@ -106,14 +107,16 @@ export class Watcher {
   }
 
   async getShovelLatest(): Promise<bigint> {
-    const result = await this.pg.query(
-      `
+    const result = await retryBackoff(`shovel-latest-query`, () =>
+      this.pg.query(
+        `
       select max(num) as num
       from shovel.task_updates
       where chain_id = $1
       and backfill = false;
     `,
-      [chainConfig.chainL2.id]
+        [chainConfig.chainL2.id]
+      )
     );
     return BigInt(result.rows[0].num);
   }

@@ -11,6 +11,7 @@ import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 // log coordinate key: [transactionHash, logIndex]
 function logCoordinateKey(transactionHash: Hex, logIndex: number) {
@@ -68,8 +69,11 @@ export class NoteIndexer {
     from: bigint,
     to: bigint
   ): Promise<NoteLog[]> {
-    const result = await pg.query(
-      `
+    const result = await retryBackoff(
+      `noteIndexer-logs-query-${from}-${to}`,
+      () =>
+        pg.query(
+          `
       select * from (
         select
           block_num,
@@ -103,7 +107,8 @@ export class NoteIndexer {
       ) as notelogs
       order by block_num asc, tx_idx asc, log_idx asc
     `,
-      [from, to, chainConfig.chainL2.id]
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     return result.rows.map(rowToNoteLog);
   }

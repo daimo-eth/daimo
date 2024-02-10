@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { chainConfig } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 export interface KeyChange {
   change: "added" | "removed";
@@ -106,8 +107,9 @@ export class KeyRegistry {
     } else {
       throw new Error(`Invalid key change ${change}`);
     }
-    const result = await pg.query(
-      `
+    const result = await retryBackoff(`keyRegistry-logs-query-${table}`, () =>
+      pg.query(
+        `
         select
           block_num,
           tx_idx,
@@ -122,7 +124,8 @@ export class KeyRegistry {
         and chain_id = $3
         group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
       `,
-      [from, to, chainConfig.chainL2.id]
+        [from, to, chainConfig.chainL2.id]
+      )
     );
     return result.rows.map((row) => ({
       change,

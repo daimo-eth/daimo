@@ -25,6 +25,7 @@ import { normalize } from "viem/ens";
 
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
@@ -64,15 +65,19 @@ export class NameRegistry {
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
-    const result = await pg.query(
-      `
+    const result = await retryBackoff(
+      `nameRegistry-logs-query-${from}-${to}`,
+      () =>
+        pg.query(
+          `
         select block_num, addr, name
         from names
         where block_num >= $1
         and block_num <= $2
         and chain_id = $3
       `,
-      [from, to, chainConfig.chainL2.id]
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     const names = result.rows.map((r) => {
       return {

@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { chainConfig } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 interface UserOp {
   transactionHash: Hex;
@@ -38,13 +39,17 @@ export class OpIndexer {
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
-    const result = await pg.query(
-      `
+    const result = await retryBackoff(
+      `opIndexer-logs-query-${from}-${to}`,
+      () =>
+        pg.query(
+          `
         select tx_hash, log_idx, op_nonce, op_hash
         from erc4337_user_op
         where block_num >= $1 and block_num <= $2 and chain_id = $3
       `,
-      [from, to, chainConfig.chainL2.id]
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     console.log(
       `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
