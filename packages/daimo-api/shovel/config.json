@@ -245,7 +245,9 @@
           "filter_op": "contains",
           "filter_arg": [
             "4AdcA7cB84497c9c4c308063D2f219C7b6041183",
-            "594bc666500fAeD35DC741F45a35C571399560d8"
+            "594bc666500fAeD35DC741F45a35C571399560d8",
+            "fBdb4f1172AaDADdFe4233550e9cD5E4aA1Dae00",
+            "f823d42B543ec9785f973E9Aa3187E42248F4874"
           ]
         }
       ],
@@ -302,7 +304,9 @@
           "filter_op": "contains",
           "filter_arg": [
             "4AdcA7cB84497c9c4c308063D2f219C7b6041183",
-            "594bc666500fAeD35DC741F45a35C571399560d8"
+            "594bc666500fAeD35DC741F45a35C571399560d8",
+            "fBdb4f1172AaDADdFe4233550e9cD5E4aA1Dae00",
+            "f823d42B543ec9785f973E9Aa3187E42248F4874"
           ]
         }
       ],
