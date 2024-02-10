@@ -39,7 +39,9 @@ export class Paymaster {
 
   addToWhitelist(name: string) {
     // Run in background, don't await
-    this.db.insertPaymasterWhiteslist(name);
+    retryBackoff(`insertPaymasterWhiteslist`, () =>
+      this.db.insertPaymasterWhiteslist(name)
+    );
   }
 
   // Since our various gas limits corresponding to the userop are nearly fixed,
@@ -123,7 +125,9 @@ export class Paymaster {
     const isSponsored =
       !chainConfig.chainL2.testnet &&
       sender.name != null &&
-      (await this.db.checkPaymasterWhitelist(sender.name));
+      (await retryBackoff(`incrementInviteCodeUseCount`, () =>
+        this.db.checkPaymasterWhitelist(sender.name!)
+      ));
     const paymasterAndData = isSponsored
       ? daimoPaymasterV2Address
       : chainConfig.pimlicoPaymasterAddress;

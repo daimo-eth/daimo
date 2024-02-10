@@ -6,6 +6,7 @@ import { CoinIndexer, Transfer } from "./coinIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
 
 export type FaucetStatus =
   | "unavailable"
@@ -40,13 +41,19 @@ export class Faucet {
   async useInviteCode(invCode: string): Promise<boolean> {
     if (chainConfig.chainL2.testnet && invCode === "testnet") return true;
 
-    await this.db.incrementInviteCodeUseCount(invCode);
-    const code = await this.db.loadInviteCode(invCode);
+    await retryBackoff(`incrementInviteCodeUseCount`, () =>
+      this.db.incrementInviteCodeUseCount(invCode)
+    );
+    const code = await retryBackoff(`loadInviteCode`, () =>
+      this.db.loadInviteCode(invCode)
+    );
     return code != null && code.useCount <= code.maxUses;
   }
 
   async verifyInviteCode(invCode: string): Promise<boolean> {
-    const code = await this.db.loadInviteCode(invCode);
+    const code = await retryBackoff(`loadInviteCode`, () =>
+      this.db.loadInviteCode(invCode)
+    );
     if (code == null) return false;
     const { useCount, maxUses } = code;
     if (useCount >= maxUses) return false;

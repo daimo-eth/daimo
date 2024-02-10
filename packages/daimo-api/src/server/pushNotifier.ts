@@ -18,6 +18,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 const pushEnabled = process.env.DAIMO_PUSH_ENABLED === "true";
 
@@ -46,7 +47,9 @@ export class PushNotifier {
     this.keyReg.addListener(this.handleKeyRotations);
 
     // Load Expo push notification tokens
-    const rows = await this.db.loadPushTokens();
+    const rows = await retryBackoff(`loadPushTokens`, () =>
+      this.db.loadPushTokens()
+    );
     console.log(`[PUSH] loaded ${rows.length} push tokens from DB`);
     for (const row of rows) {
       this.cachePushToken(getAddress(row.address), row.pushtoken);
@@ -161,7 +164,9 @@ export class PushNotifier {
     this.cachePushToken(addr, pushToken);
 
     await Promise.all([
-      this.db.savePushToken({ address: addr, pushtoken: pushToken }),
+      retryBackoff(`savePushToken`, () =>
+        this.db.savePushToken({ address: addr, pushtoken: pushToken })
+      ),
       this.maybeSendNotifications([
         {
           to: pushToken,
