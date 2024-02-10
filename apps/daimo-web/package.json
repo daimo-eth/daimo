@@ -31,7 +31,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "NODE_OPTIONS=\"--max-old-space-size=1536\" next build",
     "start": "next start",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",
     "export": "next export"
