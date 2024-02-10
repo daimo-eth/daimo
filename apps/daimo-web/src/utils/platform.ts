@@ -1,3 +1,5 @@
+import { appStoreLinks } from "@daimo/common";
+
 export type PlatformType = "ios" | "android" | "other";
 
 export function detectPlatform(ua: string): PlatformType {
@@ -14,17 +16,17 @@ export function detectPlatform(ua: string): PlatformType {
 export const downloadMetadata = {
   ios: {
     title: "Download on App Store",
-    url: "https://apps.apple.com/us/app/daimo/id6459700343",
+    url: appStoreLinks.ios,
     image: "/badge-app-store.svg",
   },
   android: {
     title: "Get it on Google Play",
-    url: "https://play.google.com/store/apps/details?id=com.daimo",
+    url: appStoreLinks.android,
     image: "/badge-play-store.svg",
   },
   other: {
     title: "Download on App Store",
-    url: "https://apps.apple.com/us/app/daimo/id6459700343",
+    url: appStoreLinks.ios,
     image: "/badge-app-store.svg",
   },
 };

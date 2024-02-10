@@ -1,5 +1,6 @@
+import { appStoreLinks } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { StyleSheet, View } from "react-native";
+import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
@@ -37,11 +38,12 @@ export function ErrorBanner({
 }) {
   const nav = useNav();
   const goHomeScreen = () => nav.popToTop();
-  const goAppStore = () => {};
-  console.log(
-    `[ERROR] rendering ${error?.message || "Unknown message"}`,
-    error
-  );
+  const goAppStore = () => {
+    if (Platform.OS === "android") Linking.openURL(appStoreLinks.android);
+    else Linking.openURL(appStoreLinks.ios);
+  };
+
+  console.log(`[ERROR] rendering ${error?.message || "unknown error"}`, error);
 
   return (
     <View style={styles.container}>

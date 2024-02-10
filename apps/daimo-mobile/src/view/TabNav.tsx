@@ -11,11 +11,13 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import {
-  createStackNavigator,
+  StackCardInterpolationProps,
+  StackCardStyleInterpolator,
   TransitionPresets,
+  createStackNavigator,
 } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
-import { Platform, Animated } from "react-native";
+import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
@@ -84,23 +86,13 @@ export function TabNav() {
 
   if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
 
-  function forModalPresentationIOS({
-    current, // Animated node representing the progress value of the current screen
-    next, // Animated node representing the progress value of the next screen.
-    inverted, // Animated node representing multiplier when direction is inverted (-1 - inverted, 1 - normal).
-    layouts: { screen }, // Layout measurements of the whole screen.
-  }: {
-    current: {
-      progress: Animated.AnimatedInterpolation<number>;
-    };
-    next?: {
-      progress: Animated.AnimatedInterpolation<number>;
-    };
-    inverted: Animated.AnimatedInterpolation<-1 | 1>;
-    layouts: {
-      screen: { width: number; height: number };
-    };
-  }) {
+  // Error modal slides up from the bottom, greying out the app below.
+  const errorModalInterpolatorIOS: StackCardStyleInterpolator = ({
+    current,
+    next,
+    inverted,
+    layouts: { screen },
+  }: StackCardInterpolationProps) => {
     const progress = add(
       current.progress.interpolate({
         inputRange: [0, 1],
@@ -135,7 +127,7 @@ export function TabNav() {
       },
       overlayStyle: { opacity: overlayOpacity },
     };
-  }
+  };
 
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">
@@ -162,7 +154,7 @@ export function TabNav() {
             ...TransitionPresets.ModalPresentationIOS,
             detachPreviousScreen: false,
             gestureResponseDistance: WINDOW_HEIGHT,
-            cardStyleInterpolator: forModalPresentationIOS,
+            cardStyleInterpolator: errorModalInterpolatorIOS,
           }}
         />
       </MainStack.Group>

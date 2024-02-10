@@ -12,3 +12,4 @@ export * from "./eAccount";
 export * from "./note";
 export * from "./keySlot";
 export * from "./func";
+export * from "./appStoreLinks";
