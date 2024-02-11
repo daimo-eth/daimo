@@ -76,11 +76,11 @@ export async function deployWallet(
     },
     nameReg.getRegisterNameCall(name), // Register name
   ];
+  const approvals = `Approving ${chainConfig.notesV2Address} and ${chainConfig.pimlicoPaymasterAddress}`;
 
   // TODO: put a check for the counterfactual address on client side so the server is not trusted.
   const address = await accountFactory.getAddress(pubKeyHex, initCalls);
-
-  console.log(`[API] Deploying account for ${name}, address ${address}`);
+  console.log(`[API] Deploying account ${name} at ${address}. ${approvals}`);
   const deployReceipt = await retryBackoff(
     `deployWallet-${name}-${pubKeyHex}`,
     () => accountFactory.deploy(pubKeyHex, initCalls),
@@ -99,7 +99,7 @@ export async function deployWallet(
     nameReg.onSuccessfulRegister(name, address);
 
     if (chainConfig.chainL2.testnet) {
-      const dollars = 0.05;
+      const dollars = 0.5;
       console.log(`[API] faucet req: $${dollars} USDC for ${name} ${address}`);
       faucet.request(address, dollars); // Kick off in background
     }

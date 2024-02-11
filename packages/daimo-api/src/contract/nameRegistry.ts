@@ -37,6 +37,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // All historical paymaster addresses
   "0x13f490FafBb206440F25760A10C21A6220017fFa": AddrLabel.Paymaster,
   "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56": AddrLabel.Paymaster,
+  "0x0000000000dd6Dd248Ab5487218e1C2D7fbB29c9": AddrLabel.Paymaster,
   // Known Coinbase Pay addresses on Base
   "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A": AddrLabel.Coinbase,
   "0x6dcBCe46a8B494c885D0e7b6817d2b519dF64467": AddrLabel.Coinbase,

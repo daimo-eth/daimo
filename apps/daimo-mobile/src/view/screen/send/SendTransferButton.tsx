@@ -121,19 +121,30 @@ function SendTransferButtonInner({
 
   const statusMessage = (function (): ReactNode {
     switch (status) {
-      case "idle":
-        if (sendDisabledReason != null)
+      case "idle": {
+        const totalStr = getAmountText({ dollars: cost.totalDollars });
+        const hasFee = cost.feeDollars > 0;
+        if (sendDisabledReason === "Insufficient funds" && hasFee) {
+          return <TextError>You need at least {totalStr} to send</TextError>;
+        } else if (sendDisabledReason === "Insufficient funds") {
+          return <TextError>Insufficient funds</TextError>;
+        } else if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return null;
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
-      case "loading":
+        } else if (hasFee) {
+          return `Total with fees ${totalStr}`;
+        } else {
+          return null;
+        }
+      }
+      case "loading": {
         return message;
-      case "error":
+      }
+      case "error": {
         return <TextError>{message}</TextError>;
-      default:
+      }
+      default: {
         return null;
+      }
     }
   })();
 
