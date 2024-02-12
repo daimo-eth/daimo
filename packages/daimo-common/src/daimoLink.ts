@@ -89,7 +89,7 @@ export type DaimoLinkTag = {
 
 // Returns a shareable https://daimo.com/... deep link.
 export function formatDaimoLink(link: DaimoLink) {
-  return formatDaimoLinkInner(link, daimoLinkBase);
+  return formatDaimoLinkInner(link, daimoLinkBaseV2);
 }
 
 // Returns a direct daimo:// deep link, not shareable.
