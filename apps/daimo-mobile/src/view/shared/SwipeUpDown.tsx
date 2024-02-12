@@ -216,6 +216,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         enableContentPanningGesture={!disabled}
         activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
+        animationConfigs={ANIMATION_CONFIG}
       >
         <ToggleBottomSheetContext.Provider value={toggleBottomSheet}>
           <Animated.View
@@ -238,6 +239,13 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     );
   }
 );
+
+const ANIMATION_CONFIG = {
+  stiffness: 160,
+  damping: 18,
+  mass: 1,
+  restDisplacement: 1,
+};
 
 const styles = StyleSheet.create({
   itemMiniWrapper: {
