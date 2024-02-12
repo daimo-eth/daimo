@@ -1,6 +1,6 @@
 import { Address, Hex } from "viem";
 
-import { DaimoNoteStatus } from "./daimoLinkStatus";
+import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
 
 /**
  * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
@@ -72,6 +72,9 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** Userop nonce, if this transfer occurred in a userop */
   nonceMetadata?: Hex;
+
+  /** Request metadata, if this transfer fulfilled a request */
+  requestStatus?: DaimoRequestV2Status;
 }
 
 export interface PaymentLinkOpEvent extends OpEventBase {

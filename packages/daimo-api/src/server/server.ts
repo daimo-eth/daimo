@@ -15,6 +15,7 @@ import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
@@ -37,7 +38,13 @@ async function main() {
   const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
-  const coinIndexer = new CoinIndexer(vc, opIndexer, noteIndexer);
+  const requestIndexer = new RequestIndexer(nameReg);
+  const coinIndexer = new CoinIndexer(
+    vc,
+    opIndexer,
+    noteIndexer,
+    requestIndexer
+  );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
   bundlerClient.init(vc.publicClient);
@@ -51,13 +58,20 @@ async function main() {
     coinIndexer,
     nameReg,
     noteIndexer,
-    opIndexer,
+    requestIndexer,
     keyReg,
     db
   );
 
   const shovelWatcher = new Watcher();
-  shovelWatcher.add(nameReg, keyReg, coinIndexer, noteIndexer, opIndexer);
+  shovelWatcher.add(
+    nameReg,
+    keyReg,
+    coinIndexer,
+    noteIndexer,
+    requestIndexer,
+    opIndexer
+  );
 
   // Initialize in background
   (async () => {
@@ -78,6 +92,7 @@ async function main() {
     bundlerClient,
     coinIndexer,
     noteIndexer,
+    requestIndexer,
     opIndexer,
     nameReg,
     keyReg,

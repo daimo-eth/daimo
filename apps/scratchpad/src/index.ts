@@ -2,6 +2,7 @@ import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
+import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
@@ -58,7 +59,13 @@ async function metrics() {
   const nameReg = new NameRegistry(vc, new Set([]));
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
-  const coinIndexer = new CoinIndexer(vc, opIndexer, noteIndexer);
+  const requestIndexer = new RequestIndexer(nameReg);
+  const coinIndexer = new CoinIndexer(
+    vc,
+    opIndexer,
+    noteIndexer,
+    requestIndexer
+  );
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
   console.log(`[METRICS] compiling signups ${nameRegistryProxyConfig.address}`);

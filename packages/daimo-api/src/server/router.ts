@@ -1,4 +1,4 @@
-import { zAddress, zHex, zUserOpHex } from "@daimo/common";
+import { zAddress, zBigIntStr, zHex, zUserOpHex } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
@@ -8,6 +8,7 @@ import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
+import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
@@ -20,6 +21,7 @@ import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { Watcher } from "../shovel/watcher";
@@ -30,6 +32,7 @@ export function createRouter(
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
+  requestIndexer: RequestIndexer,
   opIndexer: OpIndexer,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
@@ -104,14 +107,7 @@ export function createRouter(
       .input(z.object({ url: z.string() }))
       .query(async (opts) => {
         const { url } = opts.input;
-        return getLinkStatus(
-          url,
-          nameReg,
-          opIndexer,
-          coinIndexer,
-          noteIndexer,
-          faucet
-        );
+        return getLinkStatus(url, nameReg, noteIndexer, requestIndexer, faucet);
       }),
 
     lookupEthereumAccountByKey: publicProcedure
@@ -186,9 +182,8 @@ export function createRouter(
           ? await getLinkStatus(
               inviteLink,
               nameReg,
-              opIndexer,
-              coinIndexer,
               noteIndexer,
+              requestIndexer,
               faucet
             )
           : undefined;
@@ -269,6 +264,26 @@ export function createRouter(
           ephemeralOwner,
           recipient,
           signature
+        );
+      }),
+
+    createRequestSponsored: publicProcedure
+      .input(
+        z.object({
+          idString: z.string(),
+          recipient: zAddress,
+          amount: zBigIntStr,
+        })
+      )
+      .mutation(async (opts) => {
+        const { idString, recipient, amount } = opts.input;
+
+        return createRequestSponsored(
+          vc,
+          requestIndexer,
+          idString,
+          recipient,
+          amount
         );
       }),
   });

@@ -1,4 +1,5 @@
 import {
+  DaimoAccountCall,
   UserOpHex,
   derKeytoContractFriendlyKey,
   zUserOpHex,
@@ -90,6 +91,22 @@ export class DaimoOpSender {
     return this.opConfig.opSender(hexOp);
   }
 
+  private getTokenApproveCall(
+    dest: Address,
+    amount: bigint = maxUint256 // defaults to infinite
+  ): DaimoAccountCall {
+    return {
+      // Approve contract `amount` spending on behalf of the account
+      dest: this.opConfig.tokenAddress,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: erc20ABI,
+        functionName: "approve",
+        args: [dest, amount],
+      }),
+    };
+  }
+
   /** Adds an account signing key. Returns userOpHash. */
   public async addSigningKey(
     slot: number,
@@ -172,7 +189,7 @@ export class DaimoOpSender {
     approveFirst: boolean,
     opMetadata: DaimoOpMetadata
   ) {
-    const { tokenDecimals, tokenAddress, notesAddressV2 } = this.opConfig;
+    const { tokenDecimals, notesAddressV2 } = this.opConfig;
 
     const parsedAmount = parseUnits(amount, tokenDecimals);
     console.log(`[OP] create ${parsedAmount} note for ${ephemeralOwner}`);
@@ -190,16 +207,7 @@ export class DaimoOpSender {
     ];
 
     if (approveFirst) {
-      executions.unshift({
-        // Approve notes contract infinite spending on behalf of the account
-        dest: tokenAddress,
-        value: 0n,
-        data: encodeFunctionData({
-          abi: erc20ABI,
-          functionName: "approve",
-          args: [notesAddressV2, maxUint256],
-        }),
-      });
+      executions.unshift(this.getTokenApproveCall(notesAddressV2));
     }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
@@ -280,6 +288,33 @@ export class DaimoOpSender {
       ],
       opMetadata
     );
+
+    return this.sendUserOp(op);
+  }
+
+  public async approveAndFulfillRequest(
+    id: bigint,
+    amount: `${number}`, // in the native unit of the token
+    opMetadata: DaimoOpMetadata
+  ) {
+    console.log(`[OP] fulfill request ${id} ${amount}`);
+
+    const parsedAmount = parseUnits(amount, this.opConfig.tokenDecimals);
+
+    const executions: DaimoAccountCall[] = [
+      this.getTokenApproveCall(Contracts.daimoRequestAddress, parsedAmount),
+      {
+        dest: Contracts.daimoRequestAddress,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: Contracts.daimoRequestConfig.abi,
+          functionName: "fulfillRequest",
+          args: [id],
+        }),
+      },
+    ];
+
+    const op = this.opBuilder.executeBatch(executions, opMetadata);
 
     return this.sendUserOp(op);
   }

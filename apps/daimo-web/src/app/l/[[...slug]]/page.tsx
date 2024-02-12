@@ -2,7 +2,9 @@ import {
   DaimoAccountStatus,
   DaimoLinkStatus,
   DaimoNoteStatus,
+  DaimoRequestState,
   DaimoRequestStatus,
+  DaimoRequestV2Status,
   assert,
   daimoDomain,
   daimoLinkBaseV2,
@@ -127,7 +129,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         name: `${link.account}`,
         description: "Couldn't load account",
       };
-    } else if (link.type === "request") {
+    } else if (link.type === "request" || link.type === "requestv2") {
       return {
         name: `${link.recipient}`,
         action: `is requesting`,
@@ -178,6 +180,42 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           dollars: `${res.link.dollars}`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
+      }
+    }
+    case "requestv2": {
+      const { recipient, fulfilledBy, status } = res as DaimoRequestV2Status;
+      const name = getAccountName(recipient);
+
+      switch (status) {
+        case DaimoRequestState.Pending:
+        case DaimoRequestState.Created: {
+          return {
+            name: `${name}`,
+            action: `is requesting`,
+            dollars: `${res.link.dollars}`,
+            description: "Pay with Daimo",
+            walletActionLinkStatus: res,
+          };
+        }
+        case DaimoRequestState.Cancelled: {
+          return {
+            name: `${name}`,
+            action: `cancelled request`,
+            dollars: `${res.link.dollars}`,
+            description: `Cancelled by ${getAccountName(recipient)}`,
+          };
+        }
+        case DaimoRequestState.Fulfilled: {
+          return {
+            name: `${name}`,
+            action: `requested`,
+            dollars: `${res.link.dollars}`,
+            description: `Paid by ${getAccountName(fulfilledBy!)}`,
+          };
+        }
+        default: {
+          throw new Error(`unexpected DaimoRequestState ${status}`);
+        }
       }
     }
     case "note":

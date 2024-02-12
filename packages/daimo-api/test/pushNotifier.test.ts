@@ -2,9 +2,10 @@ import {
   DaimoLinkNote,
   DaimoNoteState,
   DaimoNoteStatus,
+  DaimoRequestState,
+  DaimoRequestV2Status,
   EAccount,
 } from "@daimo/common";
-import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import assert from "node:assert";
 import test from "node:test";
 import { Address, Hex, getAddress } from "viem";
@@ -12,7 +13,7 @@ import { Address, Hex, getAddress } from "viem";
 import { Transfer } from "../src/contract/coinIndexer";
 import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
-import { OpIndexer } from "../src/contract/opIndexer";
+import { RequestIndexer } from "../src/contract/requestIndexer";
 import { chainConfig } from "../src/env";
 import { PushNotifier } from "../src/server/pushNotifier";
 
@@ -227,16 +228,26 @@ function createNotifierAliceBob() {
     },
   } as unknown as NameRegistry;
 
-  const stubOpIndexer = {
-    fetchNonceMetadata: (
-      txHash: Hex,
-      queryLogIndex: number
-    ): Hex | undefined => {
-      if (txHash === "0x42")
-        return new DaimoNonceMetadata(DaimoNonceType.RequestResponse).toHex();
-      return undefined;
+  const stubRequestIndexer = {
+    getRequestStatusByFulfillLogCoordinate: (
+      transactionHash: Hex,
+      logIndex: number
+    ): DaimoRequestV2Status | null => {
+      if (transactionHash === "0x42") {
+        return {
+          link: {
+            type: "requestv2",
+            id: "0x42",
+            recipient: "bob",
+            dollars: "5.00",
+          },
+          recipient: { addr: addrBob, name: "bob" },
+          status: DaimoRequestState.Fulfilled,
+          metadata: "0x",
+        };
+      } else return null;
     },
-  } as unknown as OpIndexer;
+  } as unknown as RequestIndexer;
 
   const stubKeyReg = {
     isDeploymentKeyRotationLog: (log: KeyChange): boolean => {
@@ -249,7 +260,7 @@ function createNotifierAliceBob() {
     nullAny,
     stubNameReg,
     nullAny,
-    stubOpIndexer,
+    stubRequestIndexer,
     stubKeyReg,
     nullAny
   );

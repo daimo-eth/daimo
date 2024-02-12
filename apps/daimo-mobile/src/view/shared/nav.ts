@@ -8,6 +8,7 @@ import {
   parseDaimoLink,
   DaimoLinkNoteV2,
   DaimoLinkTag,
+  DaimoLinkRequestV2,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -70,8 +71,12 @@ export type ParamListSettings = {
   Device: { pubKey: Hex };
 };
 
-interface SendNavProp {
-  link?: DaimoLinkAccount | DaimoLinkRequest | DaimoLinkTag;
+export interface SendNavProp {
+  link?:
+    | DaimoLinkAccount
+    | DaimoLinkRequest
+    | DaimoLinkRequestV2
+    | DaimoLinkTag;
   recipient?: EAccountContact;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
@@ -134,7 +139,8 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       nav.navigate("HomeTab", { screen: "Account", params: { link } });
       break;
     }
-    case "request": {
+    case "request":
+    case "requestv2": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
       break;
     }

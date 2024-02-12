@@ -3,6 +3,7 @@ import { KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
+import { RequestIndexer } from "../src/contract/requestIndexer";
 import { getViemClientFromEnv } from "../src/network/viemClient";
 import { Watcher } from "../src/shovel/watcher";
 
@@ -11,7 +12,13 @@ async function main() {
   const opIndexer = new OpIndexer();
   const nameReg = new NameRegistry(vc, new Set<string>());
   const noteIndexer = new NoteIndexer(nameReg);
-  const coinIndexer = new CoinIndexer(vc, opIndexer, noteIndexer);
+  const requestIndexer = new RequestIndexer(nameReg);
+  const coinIndexer = new CoinIndexer(
+    vc,
+    opIndexer,
+    noteIndexer,
+    requestIndexer
+  );
   const keyReg = new KeyRegistry();
 
   const shovelWatcher = new Watcher();
@@ -29,7 +36,6 @@ async function main() {
   console.log({
     allTransfers: coinIndexer["allTransfers"].length,
     txHashToSortedUserOps: opIndexer["txHashToSortedUserOps"].size,
-    nonceMetadataToTxes: opIndexer["nonceMetadataToTxes"].size,
     accounts: nameReg["accounts"].length,
     notes: noteIndexer["notes"].size,
     keyToAddr: keyReg["keyToAddr"].size,

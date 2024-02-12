@@ -1,4 +1,4 @@
-import { DaimoNonce, DaimoNonceMetadata } from "@daimo/userop";
+import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
@@ -17,7 +17,6 @@ type OpCallback = (userOp: UserOp) => void;
 /* User operation indexer. Used to track fulfilled requests. */
 export class OpIndexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
-  private nonceMetadataToTxes: Map<Hex, Hex[]> = new Map();
 
   private callbacks: Map<Hex, OpCallback[]> = new Map();
 
@@ -74,11 +73,6 @@ export class OpIndexer {
       )?.metadata.toHex();
       if (!nonceMetadata) return;
 
-      const curTxes = this.nonceMetadataToTxes.get(nonceMetadata);
-      const newTxes = curTxes
-        ? [...curTxes, userOp.transactionHash]
-        : [userOp.transactionHash];
-      this.nonceMetadataToTxes.set(nonceMetadata, newTxes);
       this.callback(userOp);
     });
     console.log(
@@ -97,23 +91,5 @@ export class OpIndexer {
       }
     }
     return undefined;
-  }
-
-  /**
-   * Interpret a (txHash, queryLogIndex) as having originated from a Daimo Account userop and fetch the nonce metadata of it.
-   */
-  fetchNonceMetadata(txHash: Hex, queryLogIndex: number): Hex | undefined {
-    const log = this.fetchUserOpLog(txHash, queryLogIndex);
-    if (!log) return undefined;
-    return DaimoNonce.fromHex(
-      numberToHex(log.nonce, { size: 32 })
-    )?.metadata.toHex();
-  }
-
-  /**
-   * Fetch all transaction hashes that match the queried nonce metadata.
-   */
-  fetchTxHashes(nonceMetadata: DaimoNonceMetadata): Hex[] {
-    return this.nonceMetadataToTxes.get(nonceMetadata.toHex()) ?? [];
   }
 }

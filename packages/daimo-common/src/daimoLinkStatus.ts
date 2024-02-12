@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 
 import {
   DaimoLinkAccount,
@@ -6,12 +6,14 @@ import {
   DaimoLinkNote,
   DaimoLinkNoteV2,
   DaimoLinkRequest,
+  DaimoLinkRequestV2,
 } from "./daimoLink";
 import { EAccount } from "./eAccount";
 
 export type DaimoLinkStatus =
   | DaimoAccountStatus
   | DaimoRequestStatus
+  | DaimoRequestV2Status
   | DaimoNoteStatus
   | DaimoInviteStatus;
 
@@ -32,6 +34,33 @@ export type DaimoRequestStatus = {
 
   recipient: EAccount;
   requestId: `${bigint}`;
+  fulfilledBy?: EAccount;
+};
+
+/**
+ * Pending means the request hasn't yet been created onchain.
+ * Created means it's been created and is waiting to be fulfilled.
+ * Cancelled means cancelled by the original sender, and fulfilled means
+ * fulfilled by anyone.
+ */
+export enum DaimoRequestState {
+  Pending = "pending",
+  Created = "created",
+  Fulfilled = "fulfilled",
+  Cancelled = "cancelled",
+}
+
+/**
+ * Tracks details about a request for payment.
+ * All of this information can be looked up onchain given `link`.
+ */
+export type DaimoRequestV2Status = {
+  link: DaimoLinkRequestV2;
+
+  recipient: EAccount;
+  creator?: EAccount;
+  status: DaimoRequestState;
+  metadata: Hex;
   fulfilledBy?: EAccount;
 };
 

@@ -7,7 +7,6 @@ import {
   getAccountName,
   getSlotLabel,
 } from "@daimo/common";
-import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
 
@@ -15,7 +14,7 @@ import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
-import { OpIndexer } from "../contract/opIndexer";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -36,7 +35,7 @@ export class PushNotifier {
     private coinIndexer: CoinIndexer,
     private nameReg: NameRegistry,
     private noteIndexer: NoteIndexer,
-    private opIndexer: OpIndexer,
+    private requestIndexer: RequestIndexer,
     private keyReg: KeyRegistry,
     private db: DB
   ) {}
@@ -123,15 +122,11 @@ export class PushNotifier {
         continue;
       }
 
-      const nonceMetadata = this.opIndexer.fetchNonceMetadata(
-        log.transactionHash,
-        log.logIndex
-      );
-
-      const receivingRequestedMoney =
-        nonceMetadata !== undefined &&
-        DaimoNonceMetadata.fromHex(nonceMetadata)?.nonceType ===
-          DaimoNonceType.RequestResponse;
+      const requestStatus =
+        this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
+          log.transactionHash,
+          log.logIndex - 1
+        );
 
       const [a, b] = await Promise.all([
         this.getPushMessagesFromTransfer(
@@ -146,7 +141,7 @@ export class PushNotifier {
           to,
           from,
           BigInt(amount),
-          receivingRequestedMoney
+          requestStatus != null
         ),
       ]);
       messages.push(...a, ...b);

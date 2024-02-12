@@ -4,27 +4,26 @@ import {
   DaimoLinkStatus,
   DaimoNoteState,
   DaimoNoteStatus,
+  DaimoRequestState,
   DaimoRequestStatus,
+  DaimoRequestV2Status,
   EAccount,
   assert,
-  dollarsToAmount,
+  decodeRequestIdString,
   parseDaimoLink,
 } from "@daimo/common";
-import { DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 
-import { CoinIndexer } from "../contract/coinIndexer";
 import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
-import { OpIndexer } from "../contract/opIndexer";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { chainConfig } from "../env";
 
 export async function getLinkStatus(
   url: string,
   nameReg: NameRegistry,
-  opIndexer: OpIndexer,
-  coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
+  requestIndexer: RequestIndexer,
   faucet: Faucet
 ): Promise<DaimoLinkStatus> {
   const link = parseDaimoLink(url);
@@ -46,26 +45,8 @@ export async function getLinkStatus(
     case "request": {
       const acc = await getEAccountFromStr(link.recipient);
 
-      // Check if already fulfilled
-      const fulfilledNonceMetadata = new DaimoNonceMetadata(
-        DaimoNonceType.RequestResponse,
-        BigInt(link.requestId)
-      );
-      const potentialFulfillTxes = opIndexer.fetchTxHashes(
-        fulfilledNonceMetadata
-      );
-      const relevantTransfers = coinIndexer.filterTransfers({
-        addr: acc.addr,
-        txHashes: potentialFulfillTxes,
-      });
-      const expectedAmount = dollarsToAmount(parseFloat(link.dollars));
-      const fulfillTxes = relevantTransfers.filter(
-        (t) => t.to === acc.addr && BigInt(t.amount) === expectedAmount
-      );
-      const fulfilledBy =
-        fulfillTxes.length > 0
-          ? await nameReg.getEAccount(fulfillTxes[0].from)
-          : undefined;
+      // Request V1 is deprecated, assume status is pending.
+      const fulfilledBy = undefined;
 
       const ret: DaimoRequestStatus = {
         link,
@@ -74,6 +55,25 @@ export async function getLinkStatus(
         fulfilledBy,
       };
       return ret;
+    }
+
+    case "requestv2": {
+      const idString = link.id;
+      const id = decodeRequestIdString(idString);
+      const ret = requestIndexer.getRequestStatusById(id);
+      if (ret == null) {
+        const recipient = await getEAccountFromStr(link.recipient);
+        const pending: DaimoRequestV2Status = {
+          link,
+          recipient,
+          creator: undefined,
+          status: DaimoRequestState.Pending,
+          metadata: `0x`,
+        };
+        return pending;
+      } else {
+        return ret;
+      }
     }
 
     case "note": {
