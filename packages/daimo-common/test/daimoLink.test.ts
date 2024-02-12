@@ -10,24 +10,24 @@ import {
 
 const testCases: [string, DaimoLink | null][] = [
   [
-    "https://example.com/link/settings/add-passkey",
+    "https://example.com/l/settings/add-passkey",
     { type: "settings", screen: "add-passkey" },
   ],
   [
-    "https://example.com/link/account/dcposch",
+    "https://example.com/l/account/dcposch",
     { type: "account", account: "dcposch" },
   ],
   [
-    "https://example.com/link/account/dcposch.eth",
+    "https://example.com/l/account/dcposch.eth",
     { type: "account", account: "dcposch.eth" },
   ],
   [
-    "https://example.com/link/account/0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
+    "https://example.com/l/account/0x061b0a794945fe0ff4b764bfb926317f3cfc8b93",
     { type: "account", account: "0x061b0a794945fe0ff4b764bfb926317f3cfc8b93" },
   ],
-  ["https://example.com/link/account/0x0", { type: "account", account: "0x0" }],
+  ["https://example.com/l/account/0x0", { type: "account", account: "0x0" }],
   [
-    "https://example.com/link/request/dcposch/1.23/123",
+    "https://example.com/l/request/dcposch/1.23/123",
     {
       type: "request",
       recipient: "dcposch",
@@ -36,7 +36,7 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/request/dcposch.eth/4.20/555",
+    "https://example.com/l/request/dcposch.eth/4.20/555",
     {
       type: "request",
       recipient: "dcposch.eth",
@@ -45,7 +45,7 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/n/foo/1.23/JrXdV#rqNoihPnZKa7g51uoUctj",
+    "https://example.com/l/n/foo/1.23/JrXdV#rqNoihPnZKa7g51uoUctj",
     {
       type: "notev2",
       sender: "foo",
@@ -55,7 +55,7 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://example.com/link/n/bar.eth/4.20/rqNoi",
+    "https://example.com/l/n/bar.eth/4.20/rqNoi",
     {
       type: "notev2",
       sender: "bar.eth",
@@ -64,36 +64,54 @@ const testCases: [string, DaimoLink | null][] = [
       seed: undefined,
     },
   ],
-  ["https://example.com/link", null],
-  ["https://example.com/link/foo", null],
-  ["https://example.com/link/account", null],
-  ["https://example.com/link/request", null],
-  ["https://example.com/link/request/", null],
-  ["https://example.com/link/request/0x0", null],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1/123",
+    "https://example.com/l/r/foo/1.23/Sh4J3o7iau",
+    {
+      type: "requestv2",
+      recipient: "foo",
+      dollars: "1.23",
+      id: "Sh4J3o7iau",
+    },
+  ],
+  [
+    "https://example.com/l/r/bar.eth/22.00/2d1pzPgSTRZ",
+    {
+      type: "requestv2",
+      recipient: "bar.eth",
+      dollars: "22.00",
+      id: "2d1pzPgSTRZ",
+    },
+  ],
+  ["https://example.com/l", null],
+  ["https://example.com/l/foo", null],
+  ["https://example.com/l/account", null],
+  ["https://example.com/l/request", null],
+  ["https://example.com/l/request/", null],
+  ["https://example.com/l/request/0x0", null],
+  [
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1/123",
     null,
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93///1.1",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93///1.1",
     null,
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12/123",
     null,
   ],
   [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001/123",
     null,
   ],
-  ["https://example.com/link/note/", null],
-  ["https://example.com/link/note/0x0", null],
+  ["https://example.com/l/note/", null],
+  ["https://example.com/l/note/0x0", null],
   [
-    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#foo",
+    "https://example.com/l/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#foo",
     null,
   ],
   [
-    "https://example.com/link/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x0#",
+    "https://example.com/l/note/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93#0x0#",
     null,
   ],
 ];
@@ -129,22 +147,32 @@ test("DaimoLink from https://daimo.xyz legacy URL", () => {
   });
 });
 
+test("DaimoLink from /link/ legacy prefix", () => {
+  const url =
+    "https://example.com/link/account/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
+  assert.deepStrictEqual(parseDaimoLink(url), {
+    type: "account",
+    account: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+  });
+});
+
 test("DaimoLink normalization", () => {
   // Ensure addresses always end up checksummed
   for (const [url, link] of testCases) {
-    if (link?.type === "notev2") continue; // Base58 encoding is case sensitive
+    // Base58 encoding is case sensitive
+    if (["notev2", "requestv2"].includes(link?.type ?? "")) continue;
     assert.deepStrictEqual(parseDaimoLink(url.toLowerCase()), link);
   }
 
   // Ensure that amount is normalized
   const variants = [
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
   ];
   const correct =
-    "https://example.com/link/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00/123";
+    "https://example.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00/123";
 
   for (const variant of variants) {
     const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);
@@ -154,7 +182,7 @@ test("DaimoLink normalization", () => {
 
 test("DaimoLink note backcompat", () => {
   const oldUrl =
-    "https://example.com/link/note/foo/1.23/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
+    "https://example.com/l/note/foo/1.23/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93";
   const link = parseDaimoLink(oldUrl)!;
   assert.deepStrictEqual(link, {
     type: "note",
@@ -173,7 +201,7 @@ test("DaimoLink format direct link", () => {
     if (link == null) continue;
     assert.equal(
       formatDaimoLinkDirect(link),
-      url.replace("https://example.com/link/", "daimo://")
+      url.replace("https://example.com/l/", "daimo://")
     );
   }
 });
