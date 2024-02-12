@@ -11,13 +11,11 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import {
-  StackCardInterpolationProps,
-  StackCardStyleInterpolator,
   TransitionPresets,
   createStackNavigator,
 } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
-import { Animated, Platform } from "react-native";
+import { Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
@@ -48,8 +46,6 @@ import {
 import { color } from "./shared/style";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccount } from "../model/account";
-
-const { add, multiply } = Animated;
 
 const Tab = createMaterialTopTabNavigator<ParamListTab>();
 const MainStack = createStackNavigator<ParamListMain>();
@@ -86,49 +82,6 @@ export function TabNav() {
 
   if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
 
-  // Error modal slides up from the bottom, greying out the app below.
-  const errorModalInterpolatorIOS: StackCardStyleInterpolator = ({
-    current,
-    next,
-    inverted,
-    layouts: { screen },
-  }: StackCardInterpolationProps) => {
-    const progress = add(
-      current.progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 1],
-        extrapolate: "clamp",
-      }),
-      next
-        ? next.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-            extrapolate: "clamp",
-          })
-        : 0
-    );
-
-    const translateY = multiply(
-      progress.interpolate({
-        inputRange: [0, 1, 2],
-        outputRange: [screen.height, 0, 0],
-      }),
-      inverted
-    );
-
-    const overlayOpacity = progress.interpolate({
-      inputRange: [0, 1, 1.0001, 2],
-      outputRange: [0, 0.3, 1, 1],
-    });
-
-    return {
-      cardStyle: {
-        transform: [{ translateY }],
-      },
-      overlayStyle: { opacity: overlayOpacity },
-    };
-  };
-
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">
       <MainStack.Group>
@@ -154,7 +107,6 @@ export function TabNav() {
             ...TransitionPresets.ModalPresentationIOS,
             detachPreviousScreen: false,
             gestureResponseDistance: WINDOW_HEIGHT,
-            cardStyleInterpolator: errorModalInterpolatorIOS,
           }}
         />
       </MainStack.Group>
