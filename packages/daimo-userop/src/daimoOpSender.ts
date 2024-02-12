@@ -93,10 +93,10 @@ export class DaimoOpSender {
 
   private getTokenApproveCall(
     dest: Address,
-    amount: bigint = maxUint256
+    amount: bigint = maxUint256 // defaults to infinite
   ): DaimoAccountCall {
     return {
-      // Approve contract infinite spending on behalf of the account
+      // Approve contract `amount` spending on behalf of the account
       dest: this.opConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
