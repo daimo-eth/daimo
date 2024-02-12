@@ -1,6 +1,6 @@
 import { decodeRequestIdString } from "@daimo/common";
 import { daimoRequestABI, daimoRequestAddress } from "@daimo/contract";
-import { Address, Hex, numberToHex } from "viem";
+import { Address, Hex } from "viem";
 
 import { RequestIndexer } from "../contract/requestIndexer";
 import { ViemClient } from "../network/viemClient";
@@ -19,7 +19,7 @@ export async function createRequestSponsored(
     throw new Error("request ID already exists");
   }
 
-  const metadata = numberToHex(0n, { size: 32 }); // TODO: Use metadata in rich requests
+  const metadata = "0x00"; // TODO: Use metadata in rich requests
   const requestTxHash = await vc.writeContract({
     abi: daimoRequestABI,
     address: daimoRequestAddress,

@@ -43,18 +43,14 @@ export function FulfillRequestButton({
     []
   );
 
-  const approveFirst = !account.recentTransfers.some(
-    (op) => op.type === "transfer" && op.from === account.address
-  );
-
-  // On exec, request signature from device enclave, fulfill request.
+  // On exec, request signature from device enclave, approve contract, fulfill request.
   const { status, message, cost, exec } = useSendAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       console.log(`[ACTION] fulfilling request ${requestIdString}`);
-      return opSender.fulfillRequest(
+      return opSender.approveAndFulfillRequest(
         decodeRequestIdString(requestIdString),
-        approveFirst,
+        `${dollars}`,
         {
           nonce,
           chainGasConstants: account.chainGasConstants,

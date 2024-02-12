@@ -106,7 +106,7 @@ export class RequestIndexer {
 
     const recipient = await this.nameReg.getEAccount(log.recipient);
 
-    // Anyone is allowed to create a request for any recipient on-chain.
+    // TODO: Anyone is allowed to create a request for any recipient on-chain.
     // In future, this could lead to potential spam attacks, so we can use
     // the creator field to filter whitelisted creators.
     const creator = await this.nameReg.getEAccount(log.creator);
@@ -227,7 +227,7 @@ function rowToRequestCreatedLog(r: any): RequestCreatedLog {
     recipient: getAddress(bytesToHex(r.recipient, { size: 20 })),
     creator: getAddress(bytesToHex(r.creator, { size: 20 })),
     amount: BigInt(r.amount),
-    metadata: bytesToHex(r.metadata, { size: 32 }),
+    metadata: bytesToHex(r.metadata),
     logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
   };
 }

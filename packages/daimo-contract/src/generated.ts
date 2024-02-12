@@ -1205,7 +1205,7 @@ export const daimoRequestABI = [
       { name: 'id', internalType: 'uint256', type: 'uint256' },
       { name: 'recipient', internalType: 'address', type: 'address' },
       { name: 'amount', internalType: 'uint256', type: 'uint256' },
-      { name: 'metadata', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'metadata', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'createRequest',
     outputs: [],
@@ -1284,8 +1284,8 @@ export const daimoRequestABI = [
       },
       {
         name: 'metadata',
-        internalType: 'bytes32',
-        type: 'bytes32',
+        internalType: 'bytes',
+        type: 'bytes',
         indexed: false,
       },
     ],
@@ -1308,7 +1308,7 @@ export const daimoRequestABI = [
 ] as const
 
 export const daimoRequestAddress =
-  '0x56385fA7b038C0f3345c2dd15fE8BE4F44126F81' as const
+  '0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869' as const
 
 export const daimoRequestConfig = {
   address: daimoRequestAddress,

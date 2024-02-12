@@ -4,7 +4,7 @@ import { DaimoLinkStatus } from "@daimo/common";
 import { useState } from "react";
 
 import { PrimaryOpenInAppButton } from "./buttons";
-import { SecondaryFlow } from "./SecondaryFlow";
+import { ConnectWalletFlow } from "./ConnectWalletFlow";
 
 export function AppOrWalletCTA({
   linkStatus,
@@ -26,7 +26,7 @@ export function AppOrWalletCTA({
         inviteDeepLink={isInvitePaymentLink ? directDeepLink : undefined}
       />
       <div className="h-4" />
-      <SecondaryFlow
+      <ConnectWalletFlow
         linkStatus={linkStatus}
         description={description}
         setSecondary={() => setIsUsingSecondaryFlow(true)}

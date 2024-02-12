@@ -31,7 +31,83 @@ import {
 import { SecondaryButton } from "./buttons";
 import { chainConfig } from "../env";
 
-function SecondaryWagmiButton({
+export function ConnectWalletFlow({
+  linkStatus,
+  description,
+  setSecondary,
+}: {
+  linkStatus: DaimoLinkStatus;
+  description: string;
+  setSecondary: () => void;
+}) {
+  const { address, isConnected } = useAccount();
+  const [creationError, setCreationError] = useState<string>();
+
+  const [action, setAction] = useState<WagmiPrep[]>();
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const descriptionVerb = description.split(" ")[0].toUpperCase();
+  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
+  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!address) return;
+
+        // URL hash part is not readable server side.
+        const hash = window.location.hash.slice(1);
+
+        const action = await linkStatusToAction(linkStatus, address, hash);
+        console.log("action", action);
+        setAction(action);
+      } catch (e: any) {
+        setCreationError(e.message);
+      }
+    })();
+  }, [linkStatus, address]);
+
+  const incrementStep = useMemo(() => {
+    if (currentStep < (action?.length ?? 0) - 1)
+      return () => setCurrentStep(currentStep + 1);
+    else return undefined;
+  }, [currentStep, action]);
+
+  const buttons = (() => {
+    if (action === undefined) return undefined;
+    return action.map((wagmiPrep, i) => {
+      return (
+        <WagmiButton
+          key={i}
+          title={secondaryTitle}
+          wagmiPrep={wagmiPrep}
+          incrementStep={incrementStep}
+          setSecondary={setSecondary}
+        />
+      );
+    });
+  })();
+
+  return (
+    <>
+      {creationError !== undefined && (
+        <>
+          <SecondaryButton disabled buttonType="danger">
+            {creationError.toUpperCase()}
+          </SecondaryButton>
+          <div className="h-4" />
+        </>
+      )}
+      {isConnected && buttons ? (
+        buttons[currentStep]
+      ) : (
+        <CustomConnectButton title={secondaryConnectTitle} />
+      )}
+    </>
+  );
+}
+
+function WagmiButton({
   title,
   wagmiPrep,
   incrementStep,
@@ -101,82 +177,6 @@ function SecondaryWagmiButton({
           </SecondaryButton>
           <div className="h-4" />
         </>
-      )}
-    </>
-  );
-}
-
-export function SecondaryFlow({
-  linkStatus,
-  description,
-  setSecondary,
-}: {
-  linkStatus: DaimoLinkStatus;
-  description: string;
-  setSecondary: () => void;
-}) {
-  const { address, isConnected } = useAccount();
-  const [creationError, setCreationError] = useState<string>();
-
-  const [action, setAction] = useState<WagmiPrep[]>();
-  const [currentStep, setCurrentStep] = useState(0);
-
-  const descriptionVerb = description.split(" ")[0].toUpperCase();
-  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
-  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (!address) return;
-
-        // URL hash part is not readable server side.
-        const hash = window.location.hash.slice(1);
-
-        const action = await linkStatusToAction(linkStatus, address, hash);
-        console.log("action", action);
-        setAction(action);
-      } catch (e: any) {
-        setCreationError(e.message);
-      }
-    })();
-  }, [linkStatus, address]);
-
-  const incrementStep = useMemo(() => {
-    if (currentStep < (action?.length ?? 0) - 1)
-      return () => setCurrentStep(currentStep + 1);
-    else return undefined;
-  }, [currentStep, action]);
-
-  const buttons = (() => {
-    if (action === undefined) return undefined;
-    return action.map((wagmiPrep, i) => {
-      return (
-        <SecondaryWagmiButton
-          key={i}
-          title={secondaryTitle}
-          wagmiPrep={wagmiPrep}
-          incrementStep={incrementStep}
-          setSecondary={setSecondary}
-        />
-      );
-    });
-  })();
-
-  return (
-    <>
-      {creationError !== undefined && (
-        <>
-          <SecondaryButton disabled buttonType="danger">
-            {creationError.toUpperCase()}
-          </SecondaryButton>
-          <div className="h-4" />
-        </>
-      )}
-      {isConnected && buttons ? (
-        buttons[currentStep]
-      ) : (
-        <CustomConnectButton title={secondaryConnectTitle} />
       )}
     </>
   );

@@ -91,7 +91,10 @@ export class DaimoOpSender {
     return this.opConfig.opSender(hexOp);
   }
 
-  private getTokenApproveCall(dest: Address): DaimoAccountCall {
+  private getTokenApproveCall(
+    dest: Address,
+    amount: bigint = maxUint256
+  ): DaimoAccountCall {
     return {
       // Approve contract infinite spending on behalf of the account
       dest: this.opConfig.tokenAddress,
@@ -99,7 +102,7 @@ export class DaimoOpSender {
       data: encodeFunctionData({
         abi: erc20ABI,
         functionName: "approve",
-        args: [dest, maxUint256],
+        args: [dest, amount],
       }),
     };
   }
@@ -289,14 +292,17 @@ export class DaimoOpSender {
     return this.sendUserOp(op);
   }
 
-  public async fulfillRequest(
+  public async approveAndFulfillRequest(
     id: bigint,
-    approveFirst: boolean,
+    amount: `${number}`, // in the native unit of the token
     opMetadata: DaimoOpMetadata
   ) {
-    console.log(`[OP] fullfill request ${id}`);
+    console.log(`[OP] fulfill request ${id} ${amount}`);
+
+    const parsedAmount = parseUnits(amount, this.opConfig.tokenDecimals);
 
     const executions: DaimoAccountCall[] = [
+      this.getTokenApproveCall(Contracts.daimoRequestAddress, parsedAmount),
       {
         dest: Contracts.daimoRequestAddress,
         value: 0n,
@@ -307,12 +313,6 @@ export class DaimoOpSender {
         }),
       },
     ];
-
-    if (approveFirst) {
-      executions.unshift(
-        this.getTokenApproveCall(Contracts.daimoRequestAddress)
-      );
-    }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 

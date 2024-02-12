@@ -275,7 +275,6 @@ function ReceiveTab() {
     >
       <ReceiveStack.Group>
         <ReceiveStack.Screen name="Receive" component={ReceiveScreen} />
-        {/* <ReceiveStack.Screen name="Receive" component={ReceiveScreenV2} /> */}
         <ReceiveStack.Screen name="Note" component={NoteScreen} />
       </ReceiveStack.Group>
     </ReceiveStack.Navigator>
