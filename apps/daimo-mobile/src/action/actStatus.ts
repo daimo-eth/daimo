@@ -22,7 +22,7 @@ export interface ActHandle {
 }
 
 /** Tracks progress of a user action. */
-export function useActStatus() {
+export function useActStatus(name: string) {
   const [as, set] = useState({ status: "idle" as ActStatus, message: "" });
 
   const startTime = useRef(0);
@@ -43,10 +43,10 @@ export function useActStatus() {
       }
       const elapsedMs = Date.now() - startTime.current;
       console.log(
-        `[ACTION] ${elapsedMs}ms: ${as.status} > ${status} ${message}`
+        `[ACTION] ${name} - ${elapsedMs}ms: ${as.status} > ${status} ${message}`
       );
       if (status !== "loading") {
-        console.log(`[ACTION] ${status}, total time ${elapsedMs}ms`);
+        console.log(`[ACTION] ${name} - ${status}, total time ${elapsedMs}ms`);
       }
 
       set({ status, message });

@@ -10,20 +10,20 @@ export function AppOrWalletCTA({
   linkStatus,
   description,
   directDeepLink,
+  isInvite,
 }: {
   linkStatus: DaimoLinkStatus;
   directDeepLink?: string;
   description: string;
+  isInvite: boolean;
 }) {
   const [isUsingSecondaryFlow, setIsUsingSecondaryFlow] = useState(false);
-
-  const isInvitePaymentLink = linkStatus.link.type === "notev2";
 
   return (
     <center>
       <PrimaryOpenInAppButton
         disabled={isUsingSecondaryFlow}
-        inviteDeepLink={isInvitePaymentLink ? directDeepLink : undefined}
+        inviteDeepLink={isInvite ? directDeepLink : undefined}
       />
       <div className="h-4" />
       <ConnectWalletFlow

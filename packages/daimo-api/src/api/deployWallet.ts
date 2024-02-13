@@ -1,9 +1,8 @@
 import {
   DaimoAccountCall,
-  DaimoInviteStatus,
   DaimoLinkStatus,
-  DaimoNoteState,
-  DaimoNoteStatus,
+  formatDaimoLink,
+  getInviteStatus,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
@@ -20,7 +19,7 @@ import { retryBackoff } from "../utils/retryBackoff";
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
-  invCodeSuccess: boolean | undefined,
+  invCodeSuccess: boolean | undefined, // Deprecated
   inviteLinkStatus: DaimoLinkStatus | undefined,
   watcher: Watcher,
   nameReg: NameRegistry,
@@ -33,14 +32,7 @@ export async function deployWallet(
   const invSuccess = (function () {
     if (invCodeSuccess) return true;
     if (!inviteLinkStatus) return false;
-    if (inviteLinkStatus.link.type === "invite") {
-      return (inviteLinkStatus as DaimoInviteStatus).isValid;
-    } else if (inviteLinkStatus.link.type === "notev2") {
-      return (
-        (inviteLinkStatus as DaimoNoteStatus).status ===
-        DaimoNoteState.Confirmed
-      );
-    } else return false;
+    else return getInviteStatus(inviteLinkStatus).isValid;
   })();
 
   if (!invSuccess) {
@@ -108,11 +100,9 @@ export async function deployWallet(
   }
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
-  const inviteMeta =
-    inviteLinkStatus?.link.type +
-    (inviteLinkStatus?.link.type === "invite"
-      ? ` ${inviteLinkStatus.link.code}`
-      : "");
+  const inviteMeta = inviteLinkStatus
+    ? formatDaimoLink(inviteLinkStatus.link)
+    : "old version";
   const url = `${explorer}/address/${address}`;
   telemetry.recordClippy(
     `New user ${name} with invite code ${inviteMeta} at ${url}`,

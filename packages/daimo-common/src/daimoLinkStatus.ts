@@ -35,6 +35,7 @@ export type DaimoRequestStatus = {
   recipient: EAccount;
   requestId: `${bigint}`;
   fulfilledBy?: EAccount;
+  isValidInvite?: boolean;
 };
 
 /**
@@ -62,6 +63,7 @@ export type DaimoRequestV2Status = {
   status: DaimoRequestState;
   metadata: Hex;
   fulfilledBy?: EAccount;
+  isValidInvite?: boolean;
 };
 
 /**
