@@ -1,6 +1,5 @@
 import {
   DaimoLinkAccount,
-  DisplayOpEvent,
   EAccount,
   canSendTo,
   getAccountName,
@@ -8,7 +7,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -111,9 +110,6 @@ function AccountScreenBody({
   const nav = useNav();
   useDisableTabSwipe(nav);
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-  const [selectedHistoryOp, setSelectedHistoryOp] = useState<
-    DisplayOpEvent | undefined
-  >();
 
   const openExplorer = useCallback(() => {
     const { chainConfig } = env(daimoChainFromId(account.homeChainId));
@@ -131,10 +127,6 @@ function AccountScreenBody({
     });
   }, [nav, eAcc, account]);
 
-  const onSelectHistoryOp = useCallback((op: DisplayOpEvent) => {
-    setSelectedHistoryOp(op);
-  }, []);
-
   // Bottom sheet: show transactions between us and this account
   const translationY = useSharedValue(0);
   const histListMini = (
@@ -143,24 +135,16 @@ function AccountScreenBody({
       otherAcc={eAcc}
       showDate={false}
       maxToShow={5}
-      onSelectHistoryOp={onSelectHistoryOp}
     />
   );
   const histListFull = (
-    <HistoryListSwipe
-      account={account}
-      otherAcc={eAcc}
-      showDate
-      onSelectHistoryOp={onSelectHistoryOp}
-    />
+    <HistoryListSwipe account={account} otherAcc={eAcc} showDate />
   );
   const { bottomSheet } = useSwipeUpDown({
     itemMini: histListMini,
     itemFull: histListFull,
     translationY,
     bottomSheetRef,
-    account,
-    selectedHistoryOp,
   });
 
   // TODO: show other accounts coin+chain, once we support multiple.

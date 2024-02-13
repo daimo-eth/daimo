@@ -13,6 +13,7 @@ import {
   timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
@@ -30,7 +31,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { navToAccountPage, useNav } from "../shared/nav";
+import { ParamListBottomSheet, navToAccountPage, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
@@ -42,7 +43,10 @@ import {
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
-type Props = { account: Account; op: DisplayOpEvent };
+type Props = NativeStackScreenProps<
+  ParamListBottomSheet,
+  "BottomSheetHistoryOp"
+>;
 
 export const ToggleBottomSheetContext = createContext((expand: boolean) => {});
 
@@ -51,13 +55,17 @@ export function HistoryOpScreen(props: Props) {
   return <Inner {...props} />;
 }
 
-function HistoryOpScreenInner({ account, op }: Props) {
+function HistoryOpScreenInner({
+  account,
+  route,
+}: Props & { account: Account }) {
   const toggleBottomSheet = useContext(ToggleBottomSheetContext);
 
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
   // A pending op always has an opHash (since its initiated by the user's
   // account).
+  let { op } = route.params;
   op =
     syncFindSameOp(
       { opHash: op.opHash, txHash: op.txHash },
@@ -66,12 +74,17 @@ function HistoryOpScreenInner({ account, op }: Props) {
 
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 
+  const nav = useNav();
+
   return (
     <View style={ss.container.screen}>
       <ScreenHeader
         title="Transfer"
         onExit={() => {
           toggleBottomSheet(false); // Collapse to small height
+          if (nav.canGoBack()) {
+            nav.goBack();
+          }
         }}
         hideOfflineHeader
       />
