@@ -213,3 +213,12 @@ export function useFocusOnScreenTransitionEnd(
     return unsubscribe;
   }, [isFocused, autoFocus]);
 }
+
+// Open account page within the same tab.
+export function navToAccountPage(account: EAccount, nav: MainNav) {
+  // Workaround: react-navigation typescript types are broken.
+  // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
+  const currentTab = nav.getState().routes[0].name;
+  const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
+  nav.navigate(newTab, { screen: "Account", params: { eAcc: account } });
+}
