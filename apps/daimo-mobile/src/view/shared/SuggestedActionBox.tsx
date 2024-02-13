@@ -40,7 +40,7 @@ export function SuggestedActionBox({
   const y = useSharedValue(-100);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(1);
-  const xButtonPos = useSharedValue({ x: 0 });
+  const xButtonPos = useSharedValue(0);
   const wasCancelled = useSharedValue(false);
 
   // Track when we do the action or dismiss it.
@@ -110,7 +110,7 @@ export function SuggestedActionBox({
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (event, ctx: { startX: number; eventCancelled: boolean }) => {
       ctx.eventCancelled = false;
-      if (event.x > xButtonPos.value.x) {
+      if (event.x > xButtonPos.value) {
         ctx.eventCancelled = true;
       }
       if (!ctx.eventCancelled) {
@@ -181,7 +181,12 @@ export function SuggestedActionBox({
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
       <Animated.View style={[styles.animatedWrapper, animatedStyle]}>
-        <View style={styles.bubble}>
+        <View
+          style={styles.bubble}
+          onLayout={(e) => {
+            xButtonPos.value = e.nativeEvent.layout.width - 40;
+          }}
+        >
           <View style={styles.bubbleIcon}>
             {!icon && <TextBody color={color.white}>i</TextBody>}
             {icon && (
@@ -195,9 +200,6 @@ export function SuggestedActionBox({
           <TouchableOpacity
             onPress={onPressX}
             style={styles.bubbleExit}
-            onLayout={(e) => {
-              xButtonPos.value = e.nativeEvent.layout;
-            }}
             hitSlop={16}
           >
             <Octicons name="x" size={24} color={color.grayDark} />
