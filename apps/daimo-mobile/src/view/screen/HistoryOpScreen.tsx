@@ -8,12 +8,14 @@ import {
   OpStatus,
   PaymentLinkOpEvent,
   amountToDollars,
+  canSendTo,
   getAccountName,
   timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import React, { createContext, useCallback, useContext } from "react";
 import { Linking, StyleSheet, View } from "react-native";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { getCachedEAccount } from "../../logic/addr";
@@ -28,8 +30,8 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useDisableTabSwipe, useNav } from "../shared/nav";
-import { color, ss } from "../shared/style";
+import { navToAccountPage, useDisableTabSwipe, useNav } from "../shared/nav";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
   TextBodyCaps,
@@ -171,7 +173,7 @@ function TransferBody({
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
   return (
-    <View style={ss.container.padH16}>
+    <View>
       <TextCenter>
         <TextH3 color={color.grayDark}>{verb}</TextH3>
       </TextCenter>
@@ -201,9 +203,20 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
 
   const date = timeString(op.timestamp);
 
+  const nav = useNav();
+
+  const viewAccount = useCallback(() => {
+    navToAccountPage(otherAcc, nav);
+  }, [nav, otherAcc]);
+
   return (
     <View style={styles.transferBorder}>
-      <View style={styles.transferRowWrap}>
+      <TouchableHighlight
+        onPress={viewAccount}
+        disabled={!canSendTo(otherAcc)}
+        {...touchHighlightUnderlay.subtle}
+        style={styles.transferRowWrap}
+      >
         <View style={styles.transferRow}>
           <View style={styles.transferOtherAccount}>
             <ContactBubble
@@ -216,7 +229,7 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
           </View>
           <TextPara color={textLight}>{date}</TextPara>
         </View>
-      </View>
+      </TouchableHighlight>
     </View>
   );
 }

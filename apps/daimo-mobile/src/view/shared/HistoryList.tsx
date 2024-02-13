@@ -22,7 +22,7 @@ import { getAmountText } from "./Amount";
 import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
-import { useNav } from "./nav";
+import { navToAccountPage, useNav } from "./nav";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
 import { getCachedEAccount } from "../../logic/addr";
@@ -207,15 +207,11 @@ function DisplayOpRow({
   const nav = useNav();
   const viewOp = useCallback(
     (isLinkToOp: boolean) => {
-      // Workaround: react-navigation typescript types are broken.
-      // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
-      const currentTab = nav.getState().routes[0].name;
-      const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
       if (isLinkToOp || !canSendTo(otherAcc)) {
         toggleBottomSheet(true);
         onSelectHistoryOp(displayOp);
       } else {
-        nav.navigate(newTab, { screen: "Account", params: { eAcc: otherAcc } });
+        navToAccountPage(otherAcc, nav);
       }
     },
     [nav, displayOp, linkTo, otherAcc]
