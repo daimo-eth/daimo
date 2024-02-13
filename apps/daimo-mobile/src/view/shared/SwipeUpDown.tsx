@@ -7,15 +7,8 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import {
-  ReactNode,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import * as Haptics from "expo-haptics";
+import { ReactNode, forwardRef, useCallback, useMemo, useState } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -24,15 +17,16 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
-import { useNav } from "./nav";
+import { ParamListBottomSheet, useNav } from "./nav";
 import { color } from "./style";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,
-  ToggleBottomSheetContext,
+  ChangeBottomSheetSnapsContext,
 } from "../screen/HistoryOpScreen";
 
-const Stack = createNativeStackNavigator();
+const BottomSheetStackNavigator =
+  createNativeStackNavigator<ParamListBottomSheet>();
 
 const noHeaders: NativeStackNavigationOptions = {
   headerShown: false,
@@ -62,104 +56,61 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   ) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useTabBarHeight();
-    const bottomRef = useRef<BottomSheet>(null);
 
-    const [posYMini, setPosYMini] = useState(swipeHeight);
-    const [posYFull, setPosYFull] = useState(
-      screenDimensions.height - ins.top - ins.bottom - tabBarHeight
-    );
-    const [snapPoints, setSnapPoints] = useState([
-      posYMini,
-      posYFull - 1,
-      posYFull,
-    ]);
+    const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
+    const [snapPointCount, setSnapPointCount] = useState<2 | 3>(3);
 
-    useEffect(() => {
-      const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
-      setPosYMini(swipeHeight);
-      setPosYFull(maxHeightOffset - tabBarHeight);
-    });
+    const snapPoints = useMemo(() => {
+      if (snapPointCount === 2) {
+        return [450, maxHeightOffset - tabBarHeight];
+      } else {
+        return [swipeHeight, 450, maxHeightOffset - tabBarHeight];
+      }
+    }, [maxHeightOffset, snapPointCount]);
 
     const [isMini, setIsMini] = useState(true);
 
-    // When user selects a transaction, open the bottom sheet part way.
-    const animatedIndex = useSharedValue(0);
-    const sheetExpand = () => {
-      if (animatedIndex.value === 1) {
-        bottomRef.current?.snapToIndex(2);
-      }
-      setSnapPoints([posYMini, 450, posYFull]);
-      if (animatedIndex.value === 0) {
-        bottomRef.current?.snapToIndex(1);
-      }
-    };
-    const sheetCollapse = () => {
-      setSnapPoints([posYMini, posYFull, posYFull]);
-      if (animatedIndex.value === 1) {
-        bottomRef.current?.snapToIndex(0);
-      }
-    };
-
-    // When user opens a transfer inside the bottom sheet, sheet expands.
-    const toggleBottomSheet = (expand: boolean) => {
-      console.log(`[SWIPE] toggleBottomSheet ${expand}`);
-      if (expand) {
-        sheetExpand();
-      } else {
-        sheetCollapse();
-      }
-    };
-
-    useImperativeHandle(ref, () => ({
-      collapse() {
-        bottomRef.current?.collapse();
-      },
-      expand() {
-        bottomRef.current?.expand();
-      },
-    }));
+    const nav = useNav();
 
     const showFull = () => {
-      console.log(`[SWIPE] showFull ${posYFull}`);
       setIsMini(false);
       onShowFull?.();
     };
 
-    const nav = useNav();
-
     const showMini = () => {
-      console.log(`[SWIPE] showMini ${posYMini}`);
-      setIsMini(true);
-      onShowMini?.();
-
       // react-native-nav typescript types broken
       (nav as any).navigate("BottomSheetList");
+
+      setIsMini(true);
+      onShowMini?.();
     };
 
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (
         <BottomSheetBackdrop
           {...props}
-          disappearsOnIndex={0}
-          appearsOnIndex={1}
+          disappearsOnIndex={snapPointCount - 3}
+          appearsOnIndex={snapPointCount - 2}
           pressBehavior="none" // Disable fully closing to swipeIndex -1
         />
       ),
-      []
+      [snapPointCount]
     );
 
     const handleSheetChanges = (snapIndex: number) => {
       console.log(`[SWIPE] snapIndex ${snapIndex}`);
-      if (snapIndex < 1) {
+      Haptics.selectionAsync();
+      if (snapPointCount === 3 && snapIndex < 1) {
         showMini();
       } else {
         showFull();
       }
     };
 
+    const animatedIndex = useSharedValue(0);
     const itemMiniStyle = useAnimatedStyle(() => {
       return {
-        opacity: 1 - animatedIndex.value * 3,
+        opacity: 1 - animatedIndex.value,
       };
     });
 
@@ -177,7 +128,6 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     return (
       <BottomSheet
-        ref={bottomRef}
         index={0}
         snapPoints={snapPoints}
         handleComponent={ScrollPellet}
@@ -192,23 +142,23 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetY={[-10, 10]}
         animationConfigs={ANIMATION_CONFIG}
       >
-        <ToggleBottomSheetContext.Provider value={toggleBottomSheet}>
-          <Stack.Navigator
+        <ChangeBottomSheetSnapsContext.Provider value={setSnapPointCount}>
+          <BottomSheetStackNavigator.Navigator
             initialRouteName="BottomSheetList"
             screenOptions={noHeaders}
           >
-            <Stack.Group>
-              <Stack.Screen
+            <BottomSheetStackNavigator.Group>
+              <BottomSheetStackNavigator.Screen
                 name="BottomSheetList"
                 component={TransactionList}
               />
-              <Stack.Screen
+              <BottomSheetStackNavigator.Screen
                 name="BottomSheetHistoryOp"
-                component={HistoryOpScreen as any}
+                component={HistoryOpScreen}
               />
-            </Stack.Group>
-          </Stack.Navigator>
-        </ToggleBottomSheetContext.Provider>
+            </BottomSheetStackNavigator.Group>
+          </BottomSheetStackNavigator.Navigator>
+        </ChangeBottomSheetSnapsContext.Provider>
       </BottomSheet>
     );
   }
