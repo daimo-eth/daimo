@@ -63,7 +63,6 @@ export default function OnboardingScreen({
   const [name, setName] = useState("");
 
   const [inviteLink, setInviteLink] = useState<DaimoLink>();
-  const [startedCreating, setStartedCreating] = useState(false);
 
   const processLink = (url: string) => {
     const recievedLink = getInvitePasteLink(url);
@@ -75,7 +74,7 @@ export default function OnboardingScreen({
   // During onboarding, listen for payment or invite link invites
   useEffect(() => {
     getInitialURLOrTag(true).then((url) => {
-      if (!url) return;
+      if (url == null) return;
       processLink(url);
     });
 
@@ -96,6 +95,8 @@ export default function OnboardingScreen({
 
   // Use existing account spin loops and waits for the device key to show up
   // in any on-chain account.
+  const startedCreating = page !== "create" && !page.startsWith("new-");
+
   const { status: useExistingStatus, message: useExistingMessage } =
     useExistingAccount(daimoChain, keyStatus, startedCreating);
 
@@ -112,13 +113,7 @@ export default function OnboardingScreen({
     setName("");
     setInviteLink(undefined);
     createReset && createReset();
-    setStartedCreating(false);
   };
-
-  useEffect(() => {
-    if (page === "create") setStartedCreating(true);
-    if (page === "intro") setStartedCreating(false);
-  }, [page]);
 
   return (
     <View style={styles.onboardingScreen}>
