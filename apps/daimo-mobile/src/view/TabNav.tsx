@@ -87,6 +87,7 @@ export function TabNav() {
   if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
 
   // Error modal slides up from the bottom, greying out the app below.
+  // This custom interpolator recreates the native background effect.
   const forModalPresentationIOS: StackCardStyleInterpolator = ({
     current,
     next,
