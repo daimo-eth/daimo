@@ -51,7 +51,7 @@ export function useSendAsync({
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
   passkeyAccount?: Account;
 }): ActHandle {
-  const [as, setAS] = useActStatus();
+  const [as, setAS] = useActStatus("useSendAsync");
 
   const [deviceAccount] = useAccount();
   const account = passkeyAccount || deviceAccount;

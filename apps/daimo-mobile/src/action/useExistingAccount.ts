@@ -10,9 +10,10 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 
 export function useExistingAccount(
   daimoChain: DaimoChain,
-  keyStatus: DeviceKeyStatus
+  keyStatus: DeviceKeyStatus,
+  alreadyCreating: boolean
 ) {
-  const [as, setAS] = useActStatus();
+  const [as, setAS] = useActStatus("useExistingAccount");
 
   const enclaveKeyName = defaultEnclaveKeyName;
   const rpcFunc = env(daimoChain).rpcFunc;
@@ -29,6 +30,8 @@ export function useExistingAccount(
 
   // TODO: Does TRPC have a better way to "watch" an endpoint?
   useEffect(() => {
+    if (alreadyCreating) return; // Disable use existing check if already creating
+
     (async () => {
       if (account || !keyStatus.pubKeyHex) return; // Either hasn't started or already loaded
 

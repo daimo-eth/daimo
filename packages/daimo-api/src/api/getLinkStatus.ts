@@ -149,6 +149,7 @@ export async function getLinkStatus(
           link: requestLink,
           recipient: acc,
           requestId: randomRequestId,
+          isValidInvite: true,
         };
         return ret;
       } else {

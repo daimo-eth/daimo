@@ -61,7 +61,7 @@ export function useLoadOrCreateEnclaveKey(): DeviceKeyStatus {
   const enclaveKeyName = defaultEnclaveKeyName;
 
   const [pubKeyHex, setPubKeyHex] = useState<Hex>();
-  const [keyStatus, setKeyStatus] = useActStatus();
+  const [keyStatus, setKeyStatus] = useActStatus("useLoadOrCreateEnclaveKey");
 
   // Load or create enclave key immediately, in the idle state
   useEffect(() => {

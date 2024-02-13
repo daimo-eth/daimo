@@ -1,4 +1,4 @@
-import { DaimoLinkInvite, DaimoLinkNoteV2, assertNotNull } from "@daimo/common";
+import { DaimoLink, assertNotNull, getInvitePasteLink } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
@@ -16,7 +16,6 @@ import { useLoadOrCreateEnclaveKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInitialURLOrTag } from "../../../logic/deeplink";
-import { getInvitePasteLink } from "../../../logic/invite";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../model/account";
@@ -63,9 +62,8 @@ export default function OnboardingScreen({
   // User enters their name
   const [name, setName] = useState("");
 
-  const [inviteLink, setInviteLink] = useState<
-    DaimoLinkInvite | DaimoLinkNoteV2
-  >();
+  const [inviteLink, setInviteLink] = useState<DaimoLink>();
+  const [startedCreating, setStartedCreating] = useState(false);
 
   const processLink = (url: string) => {
     const recievedLink = getInvitePasteLink(url);
@@ -77,7 +75,7 @@ export default function OnboardingScreen({
   // During onboarding, listen for payment or invite link invites
   useEffect(() => {
     getInitialURLOrTag(true).then((url) => {
-      if (url == null) return;
+      if (!url) return;
       processLink(url);
     });
 
@@ -85,8 +83,6 @@ export default function OnboardingScreen({
 
     return () => subscription.remove();
   }, []);
-
-  console.log(`[ONBOARDING] chainId ${daimoChain}`);
 
   const keyStatus = useLoadOrCreateEnclaveKey();
 
@@ -101,7 +97,7 @@ export default function OnboardingScreen({
   // Use existing account spin loops and waits for the device key to show up
   // in any on-chain account.
   const { status: useExistingStatus, message: useExistingMessage } =
-    useExistingAccount(daimoChain, keyStatus);
+    useExistingAccount(daimoChain, keyStatus, startedCreating);
 
   const existingNext = getNext(
     "existing",
@@ -116,7 +112,13 @@ export default function OnboardingScreen({
     setName("");
     setInviteLink(undefined);
     createReset && createReset();
+    setStartedCreating(false);
   };
+
+  useEffect(() => {
+    if (page === "create") setStartedCreating(true);
+    if (page === "intro") setStartedCreating(false);
+  }, [page]);
 
   return (
     <View style={styles.onboardingScreen}>

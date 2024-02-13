@@ -1,6 +1,11 @@
 "use client";
 
-import { DaimoLinkStatus, daimoLinkBase, daimoLinkBaseV2 } from "@daimo/common";
+import {
+  DaimoLinkStatus,
+  daimoLinkBase,
+  daimoLinkBaseV2,
+  getInviteStatus,
+} from "@daimo/common";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -19,6 +24,12 @@ export function CallToAction({
 
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
+  const isInvite = (() => {
+    return walletActionLinkStatus
+      ? getInviteStatus(walletActionLinkStatus).isValid
+      : false;
+  })();
+
   useEffect(() => {
     // Must be loaded client-side to capture the hash part of the URL
     // for ephemeral notes.
@@ -28,8 +39,6 @@ export function CallToAction({
     );
   }, [directDeepLink]);
 
-  const isInvitePaymentLink = walletActionLinkStatus?.link.type === "notev2";
-
   return (
     <>
       {walletActionLinkStatus ? (
@@ -37,6 +46,7 @@ export function CallToAction({
           linkStatus={walletActionLinkStatus}
           description={description}
           directDeepLink={directDeepLink}
+          isInvite={isInvite}
         />
       ) : (
         <>
@@ -50,8 +60,7 @@ export function CallToAction({
           href={directDeepLink}
           className="block text-center text-primaryLight tracking-wider font-bold py-5"
         >
-          ALREADY HAVE IT? OPEN {isInvitePaymentLink ? "INVITE" : "LINK"} IN
-          DAIMO
+          ALREADY HAVE IT? OPEN {isInvite ? "INVITE" : "LINK"} IN DAIMO
         </a>
       )}
     </>

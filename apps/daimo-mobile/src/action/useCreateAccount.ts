@@ -1,6 +1,5 @@
 import {
-  DaimoLinkInvite,
-  DaimoLinkNoteV2,
+  DaimoLink,
   DaimoNoteStatus,
   assert,
   formatDaimoLink,
@@ -18,11 +17,11 @@ import { defaultEnclaveKeyName, useAccount } from "../model/account";
 /** Deploys a new contract wallet and registers it under a given username. */
 export function useCreateAccount(
   name: string,
-  inviteLink: DaimoLinkInvite | DaimoLinkNoteV2 | undefined,
+  inviteLink: DaimoLink | undefined,
   daimoChain: DaimoChain,
   keyStatus: DeviceKeyStatus
 ): ActHandle {
-  const [as, setAS] = useActStatus();
+  const [as, setAS] = useActStatus("useCreateAccount");
 
   const { rpcFunc, rpcHook } = env(daimoChain);
 

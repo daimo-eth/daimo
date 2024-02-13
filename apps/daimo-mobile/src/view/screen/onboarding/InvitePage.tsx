@@ -1,12 +1,10 @@
 import {
-  DaimoInviteStatus,
-  DaimoLinkInvite,
-  DaimoLinkNoteV2,
-  DaimoNoteState,
-  DaimoNoteStatus,
+  DaimoLink,
   EAccount,
   formatDaimoLink,
   getEAccountStr,
+  getInvitePasteLink,
+  getInviteStatus,
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -15,7 +13,6 @@ import { useEffect, useState } from "react";
 import { Linking, View, StyleSheet } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
-import { getInvitePasteLink } from "../../../logic/invite";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
@@ -34,10 +31,8 @@ export function InvitePage({
   onNext: ({ isTestnet }: { isTestnet: boolean }) => void;
   onPrev?: () => void;
   daimoChain: DaimoChain;
-  inviteLink: DaimoLinkInvite | DaimoLinkNoteV2 | undefined;
-  setInviteLink: (
-    inviteLink: DaimoLinkInvite | DaimoLinkNoteV2 | undefined
-  ) => void;
+  inviteLink: DaimoLink | undefined;
+  setInviteLink: (inviteLink: DaimoLink | undefined) => void;
 }) {
   // We haven't picked a daimoChain yet so calls default to prod.
   // Handle invite links from deep link opens.
@@ -73,22 +68,9 @@ export function InvitePage({
   useEffect(() => {
     if (!linkStatus || linkStatus.data == null) return;
 
-    if (linkStatus.data.link.type === "notev2") {
-      const noteStatus = linkStatus.data as DaimoNoteStatus;
-      setIsValid(
-        noteStatus.status === DaimoNoteState.Confirmed &&
-          inviteLink?.type === "notev2" &&
-          inviteLink.seed !== undefined
-      );
-      setSender(noteStatus.sender);
-    } else if (linkStatus.data.link.type === "invite") {
-      const inviteStatus = linkStatus.data as DaimoInviteStatus;
-      setIsValid(inviteStatus.isValid);
-      setSender(undefined); // TODO: Add senders to invite codes
-    } else {
-      setIsValid(false);
-      setSender(undefined);
-    }
+    const inviteStatus = getInviteStatus(linkStatus.data);
+    setIsValid(inviteStatus.isValid);
+    setSender(inviteStatus.sender);
   }, [linkStatus]);
 
   const oct = (name: OctName, color?: string) => (
@@ -125,11 +107,11 @@ export function InvitePage({
   useEffect(() => {
     if (!inviteLink) return;
 
-    if (inviteLink.type === "notev2") {
+    if (inviteLink.type === "invite") {
+      setText(inviteLink.code);
+    } else {
       // shorten displayed link from cleaned up url
       setText(formatDaimoLink(inviteLink));
-    } else {
-      setText(inviteLink.code);
     }
   }, [inviteLink]);
 

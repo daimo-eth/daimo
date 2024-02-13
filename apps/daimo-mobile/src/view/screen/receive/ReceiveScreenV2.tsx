@@ -55,7 +55,7 @@ function RequestScreenInnerV2({
   const [dollars, setDollars] = useState(0);
 
   // On successful send, go home
-  const [as, setAS] = useActStatus();
+  const [as, setAS] = useActStatus("requestv2");
 
   const isFocused = useIsFocused();
   const nav = useNav();
