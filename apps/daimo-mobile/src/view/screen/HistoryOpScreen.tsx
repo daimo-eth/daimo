@@ -30,7 +30,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { navToAccountPage, useDisableTabSwipe, useNav } from "../shared/nav";
+import { navToAccountPage, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
@@ -53,8 +53,6 @@ export function HistoryOpScreen(props: Props) {
 
 function HistoryOpScreenInner({ account, op }: Props) {
   const toggleBottomSheet = useContext(ToggleBottomSheetContext);
-  const nav = useNav();
-  useDisableTabSwipe(nav);
 
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
