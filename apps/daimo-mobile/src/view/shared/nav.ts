@@ -99,6 +99,14 @@ export const defaultError = {
   showDownloadButton: true,
 };
 
+export type ParamListBottomSheet = {
+  BottomSheetList: undefined;
+  BottomSheetHistoryOp: {
+    op: DisplayOpEvent;
+    shouldAddInset: boolean;
+  };
+};
+
 export function useNav<
   RouteName extends keyof NavigatorParamList = keyof NavigatorParamList
 >() {

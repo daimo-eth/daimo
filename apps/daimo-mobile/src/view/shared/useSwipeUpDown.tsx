@@ -1,4 +1,3 @@
-import { DisplayOpEvent } from "@daimo/common";
 import { useIsFocused } from "@react-navigation/native";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { Dimensions, StyleSheet } from "react-native";
@@ -6,7 +5,6 @@ import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { SwipeUpDown, SwipeUpDownRef } from "./SwipeUpDown";
 import { useNav } from "./nav";
-import { Account } from "../../model/account";
 
 const screenDimensions = Dimensions.get("screen");
 
@@ -16,16 +14,12 @@ export function useSwipeUpDown({
   translationY,
   disabled,
   bottomSheetRef,
-  account,
-  selectedHistoryOp,
 }: {
   itemMini: ReactNode;
   itemFull: ReactNode;
   translationY: Animated.SharedValue<number>;
   disabled?: boolean;
   bottomSheetRef: React.RefObject<SwipeUpDownRef>;
-  account: Account;
-  selectedHistoryOp?: DisplayOpEvent;
 }) {
   const [isBottomSheetOpen, setIsOpen] = useState(false);
 
@@ -68,8 +62,6 @@ export function useSwipeUpDown({
         onShowFull={useCallback(() => setIsOpen(true), [])}
         onShowMini={useCallback(() => setIsOpen(false), [])}
         disabled={disabled}
-        account={account}
-        selectedHistoryOp={selectedHistoryOp}
       />
     </Animated.View>
   );
