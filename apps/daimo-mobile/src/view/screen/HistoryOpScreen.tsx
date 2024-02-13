@@ -48,7 +48,9 @@ type Props = NativeStackScreenProps<
   "BottomSheetHistoryOp"
 >;
 
-export const ToggleBottomSheetContext = createContext((expand: boolean) => {});
+export const ChangeBottomSheetSnapsContext = createContext(
+  (snaps: 2 | 3) => {}
+);
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -59,7 +61,7 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
-  const toggleBottomSheet = useContext(ToggleBottomSheetContext);
+  const changeBottomSheetSnaps = useContext(ChangeBottomSheetSnapsContext);
 
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
@@ -81,8 +83,8 @@ function HistoryOpScreenInner({
       <ScreenHeader
         title="Transfer"
         onExit={() => {
-          toggleBottomSheet(false); // Collapse to small height
           if (nav.canGoBack()) {
+            changeBottomSheetSnaps(3);
             nav.goBack();
           }
         }}
