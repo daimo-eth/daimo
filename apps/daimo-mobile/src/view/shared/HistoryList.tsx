@@ -27,7 +27,7 @@ import { color, ss, touchHighlightUnderlay } from "./style";
 import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
-import { ChangeBottomSheetSnapsContext } from "../screen/HistoryOpScreen";
+import { SetBottomSheetSnapPointCount } from "../screen/HistoryOpScreen";
 
 interface HeaderObject {
   isHeader: true;
@@ -192,7 +192,7 @@ function DisplayOpRow({
   assert(displayOp.amount > 0);
   const [from, to] = getFromTo(displayOp);
   assert([from, to].includes(address));
-  const changeBottomSheetSnaps = useContext(ChangeBottomSheetSnapsContext);
+  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
@@ -202,7 +202,7 @@ function DisplayOpRow({
   const viewOp = useCallback(
     (isLinkToOp: boolean) => {
       if (isLinkToOp || !canSendTo(otherAcc)) {
-        changeBottomSheetSnaps(2);
+        setBottomSheetSnapPointCount(2);
         (nav as any).navigate("BottomSheetHistoryOp", {
           op: displayOp,
           shouldAddInset: false,

@@ -48,9 +48,11 @@ type Props = NativeStackScreenProps<
   "BottomSheetHistoryOp"
 >;
 
-export const ChangeBottomSheetSnapsContext = createContext(
-  (snaps: 2 | 3) => {}
-);
+// Allows the HistoryOpScreen to change the bottom sheet snap point count.
+// This allows the bottom sheet to be dismissed when the user exits the detail
+// screen and only display the half screen snap point when the user is on the
+// detail screen.
+export const SetBottomSheetSnapPointCount = createContext((snaps: 2 | 3) => {});
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -61,7 +63,7 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
-  const changeBottomSheetSnaps = useContext(ChangeBottomSheetSnapsContext);
+  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
 
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
@@ -84,7 +86,7 @@ function HistoryOpScreenInner({
         title="Transfer"
         onExit={() => {
           if (nav.canGoBack()) {
-            changeBottomSheetSnaps(3);
+            setBottomSheetSnapPointCount(3);
             nav.goBack();
           }
         }}

@@ -7,7 +7,6 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import * as Haptics from "expo-haptics";
 import { ReactNode, forwardRef, useCallback, useMemo, useState } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
@@ -22,7 +21,7 @@ import { color } from "./style";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,
-  ChangeBottomSheetSnapsContext,
+  SetBottomSheetSnapPointCount,
 } from "../screen/HistoryOpScreen";
 
 const BottomSheetStackNavigator =
@@ -99,7 +98,6 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const handleSheetChanges = (snapIndex: number) => {
       console.log(`[SWIPE] snapIndex ${snapIndex}`);
-      Haptics.selectionAsync();
       if (snapPointCount === 3 && snapIndex < 1) {
         showMini();
       } else {
@@ -142,7 +140,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetY={[-10, 10]}
         animationConfigs={ANIMATION_CONFIG}
       >
-        <ChangeBottomSheetSnapsContext.Provider value={setSnapPointCount}>
+        <SetBottomSheetSnapPointCount.Provider value={setSnapPointCount}>
           <BottomSheetStackNavigator.Navigator
             initialRouteName="BottomSheetList"
             screenOptions={noHeaders}
@@ -158,7 +156,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
               />
             </BottomSheetStackNavigator.Group>
           </BottomSheetStackNavigator.Navigator>
-        </ChangeBottomSheetSnapsContext.Provider>
+        </SetBottomSheetSnapPointCount.Provider>
       </BottomSheet>
     );
   }
