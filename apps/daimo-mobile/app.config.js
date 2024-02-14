@@ -32,9 +32,18 @@ export default {
     config: {
       usesNonExemptEncryption: false,
     },
+    requireFullScreen: true,
     infoPlist: {
       LSApplicationQueriesSchemes: ["whatsapp", "sgnl", "tg", "mailto", "sms"],
       NFCReaderUsageDescription: "Daimo uses NFC for tap-to-pay checkout.",
+      UIRequiresFullScreen: true,
+      UISupportsTrueScreenSizeOnMac: false,
+      "UISupportedInterfaceOrientations~ipad": [
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationPortraitUpsideDown",
+        "UIInterfaceOrientationLandscapeLeft",
+        "UIInterfaceOrientationLandscapeRight",
+      ],
     },
   },
   android: {
