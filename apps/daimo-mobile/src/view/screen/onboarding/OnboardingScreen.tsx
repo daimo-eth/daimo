@@ -95,7 +95,7 @@ export default function OnboardingScreen({
 
   // Use existing account spin loops and waits for the device key to show up
   // in any on-chain account.
-  const startedCreating = page !== "create" && !page.startsWith("new-");
+  const startedCreating = page === "create" || page.startsWith("new-");
 
   const { status: useExistingStatus, message: useExistingMessage } =
     useExistingAccount(daimoChain, keyStatus, startedCreating);
