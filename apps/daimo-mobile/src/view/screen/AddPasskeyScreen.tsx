@@ -78,6 +78,12 @@ export function AddPasskeyScreen() {
       case "loading":
         return message;
       case "error":
+        if (
+          message.includes("User cancelled") || // Android
+          message.includes("User canceled") // iOS
+        ) {
+          return "Cancelled";
+        }
         return <TextError>{message}</TextError>;
       default:
         return null;
@@ -95,7 +101,7 @@ export function AddPasskeyScreen() {
       case "success":
         return <ButtonBig type="success" title="Success" disabled />;
       case "error":
-        return <ButtonBig type="danger" title="Error" disabled />;
+        return <ButtonBig type="primary" title="Retry" onPress={exec} />;
     }
   })();
 
