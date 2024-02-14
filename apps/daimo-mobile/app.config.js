@@ -43,7 +43,7 @@ export default {
       : "./google-services.json",
     intentFilters: [
       {
-        action: ["VIEW", "NDEF_DISCOVERED"],
+        action: "VIEW",
         autoVerify: true,
         data: [
           {
@@ -67,7 +67,7 @@ export default {
         category: ["BROWSABLE", "DEFAULT"],
       },
       {
-        action: ["VIEW", "NDEF_DISCOVERED"],
+        action: "VIEW",
         autoVerify: true,
         data: [
           {
