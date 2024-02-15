@@ -32,7 +32,7 @@ type TitleDesc = {
   action?: string;
   dollars?: `${number}`;
   description: string;
-  walletActionLinkStatus?: DaimoLinkStatus;
+  linkStatus?: DaimoLinkStatus;
 };
 
 const defaultMeta = metadata("Daimo", "Payments on Ethereum");
@@ -60,7 +60,7 @@ export default async function LinkPage(props: LinkProps) {
 }
 
 async function LinkPageInner(props: LinkProps) {
-  const { name, action, dollars, description, walletActionLinkStatus } =
+  const { name, action, dollars, description, linkStatus } =
     (await loadTitleDesc(getUrl(props))) || {
       title: "Daimo",
       description: "Payments on Ethereum",
@@ -70,10 +70,9 @@ async function LinkPageInner(props: LinkProps) {
     <main className="max-w-md mx-auto px-4">
       <center>
         <div className="h-16" />
-        <Image src="/logo-web.png" alt="Daimo" width="96" height="96" />
+        <Image src="/logo-web.png" alt="Daimo" height="96" />
 
         <div className="h-12" />
-
         <div className="text-xl font-semibold">
           {name && <span>{name}</span>}
           {action && <span className="text-grayMid">{" " + action}</span>}
@@ -85,7 +84,7 @@ async function LinkPageInner(props: LinkProps) {
           </>
         )}
         <div className="h-9" />
-        <CallToAction {...{ description, walletActionLinkStatus }} />
+        <CallToAction {...{ description, linkStatus }} searchParams={{}} />
       </center>
     </main>
   );
@@ -172,7 +171,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           action: `is requesting`,
           dollars: `${res.link.dollars}`,
           description: "Pay with Daimo",
-          walletActionLinkStatus: res,
+          linkStatus: res,
         };
       } else {
         return {
@@ -195,7 +194,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `is requesting`,
             dollars: `${res.link.dollars}`,
             description: "Pay with Daimo",
-            walletActionLinkStatus: res,
+            linkStatus: res,
           };
         }
         case DaimoRequestState.Cancelled: {
@@ -230,7 +229,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `sent you`,
             dollars: `${dollars}`,
             description: "Accept with Daimo",
-            walletActionLinkStatus: res,
+            linkStatus: res,
           };
         }
         case "claimed": {

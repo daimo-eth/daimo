@@ -11,13 +11,16 @@ import { useAccount } from "wagmi";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
 import { PrimaryOpenInAppButton } from "./buttons";
+import { UrlSearchParams } from "../utils/url";
 
 export function CallToAction({
   description,
-  walletActionLinkStatus,
+  linkStatus,
+  searchParams,
 }: {
   description: string;
-  walletActionLinkStatus?: DaimoLinkStatus;
+  linkStatus?: DaimoLinkStatus;
+  searchParams: UrlSearchParams;
 }) {
   // If we've connected another wallet, hide the Open in Daimo button.
   const { isConnected } = useAccount();
@@ -25,9 +28,7 @@ export function CallToAction({
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
   const isInvite = (() => {
-    return walletActionLinkStatus
-      ? getInviteStatus(walletActionLinkStatus).isValid
-      : false;
+    return linkStatus ? getInviteStatus(linkStatus).isValid : false;
   })();
 
   useEffect(() => {
@@ -41,12 +42,13 @@ export function CallToAction({
 
   return (
     <>
-      {walletActionLinkStatus ? (
+      {linkStatus ? (
         <AppOrWalletCTA
-          linkStatus={walletActionLinkStatus}
+          linkStatus={linkStatus}
           description={description}
           directDeepLink={directDeepLink}
           isInvite={isInvite}
+          searchParams={searchParams}
         />
       ) : (
         <>
