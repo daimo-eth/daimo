@@ -3,16 +3,16 @@ import { Hex, getAddress } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
-export const daimoDomain =
-  process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
+const daimoDomain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
 
-export const daimoLinkBaseV2 = daimoDomain
-  ? `https://${daimoDomain}/l`
-  : "http://localhost:3001/l";
+export const daimoDomainAddress = (() => {
+  if (!daimoDomain) return "http://localhost:3001";
+  else if (daimoDomain?.startsWith("localhost")) return `http://${daimoDomain}`;
+  else return `https://${daimoDomain}`;
+})();
 
-export const daimoLinkBase = daimoDomain
-  ? `https://${daimoDomain}/link`
-  : "http://localhost:3001/link";
+export const daimoLinkBaseV2 = `${daimoDomainAddress}/l`;
+export const daimoLinkBase = `${daimoDomainAddress}/link`;
 
 /** Represents a Daimo app deep-link */
 export type DaimoLink =

@@ -7,7 +7,7 @@ import {
   DaimoRequestStatus,
   DaimoRequestV2Status,
   assert,
-  daimoDomain,
+  daimoDomainAddress,
   daimoLinkBaseV2,
   getAccountName,
   parseDaimoLink,
@@ -35,11 +35,30 @@ type TitleDesc = {
   walletActionLinkStatus?: DaimoLinkStatus;
 };
 
-const defaultMeta = metadata("Daimo", "Payments on Ethereum");
+const defaultMeta = metadata(
+  "Daimo",
+  "Payments on Ethereum",
+  `${daimoDomainAddress}/logo-link-preview.png`
+);
 
 function getUrl(props: LinkProps): string {
   const path = (props.params.slug || []).join("/");
   return `${daimoLinkBaseV2}/${path}`;
+}
+
+function getPreviewURL(
+  name: string | undefined,
+  action: string | undefined,
+  dollars: `${number}` | undefined
+) {
+  if (!name) return `${daimoDomainAddress}/logo-link-preview.png`;
+
+  const URIencodedAction = action ? encodeURIComponent(action) : undefined;
+  let previewURL = `${daimoDomainAddress}/preview?name=${name}`;
+  if (URIencodedAction)
+    previewURL = previewURL.concat(`&action=${URIencodedAction}`);
+  if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
+  return previewURL;
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
@@ -48,7 +67,8 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const { name, action, dollars } = titleDesc;
   const prefixedDollars = dollars && `$${dollars}`;
   const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
-  return metadata(title, titleDesc.description);
+  const previewURL = getPreviewURL(name, action, dollars);
+  return metadata(title, titleDesc.description, previewURL);
 }
 
 export default async function LinkPage(props: LinkProps) {
@@ -91,7 +111,11 @@ async function LinkPageInner(props: LinkProps) {
   );
 }
 
-function metadata(title: string, description: string): Metadata {
+function metadata(
+  title: string,
+  description: string,
+  previewURL: string
+): Metadata {
   return {
     title,
     description,
@@ -104,7 +128,7 @@ function metadata(title: string, description: string): Metadata {
       siteName: title,
       images: [
         {
-          url: `https://${daimoDomain}/logo-link-preview.png`,
+          url: previewURL,
           alt: "Daimo",
         },
       ],

@@ -13,6 +13,7 @@
     "@trpc/server": "^10.43.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@vercel/og": "^0.6.2",
     "autoprefixer": "^10.4.14",
     "depcheck": "^1.4.3",
     "encoding": "^0.1.13",
@@ -30,7 +31,7 @@
     "wagmi": "^1.4.12"
   },
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "DAIMO_DOMAIN=localhost:3001 next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",
