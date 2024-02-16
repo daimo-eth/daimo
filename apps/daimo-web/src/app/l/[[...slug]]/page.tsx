@@ -45,6 +45,8 @@ function getUrl(props: LinkProps): string {
   return `${daimoLinkBaseV2}/${path}`;
 }
 
+// Generates a OpenGraph link preview image URL
+// The image itself is also generated dynamically -- see preview/route.tsx
 function getPreviewURL(
   name: string | undefined,
   action: string | undefined,
@@ -52,10 +54,10 @@ function getPreviewURL(
 ) {
   if (!name) return `${daimoDomainAddress}/logo-link-preview.png`;
 
-  const URIencodedAction = action ? encodeURIComponent(action) : undefined;
+  const uriEncodedAction = action ? encodeURIComponent(action) : undefined;
   let previewURL = `${daimoDomainAddress}/preview?name=${name}`;
-  if (URIencodedAction)
-    previewURL = previewURL.concat(`&action=${URIencodedAction}`);
+  if (uriEncodedAction)
+    previewURL = previewURL.concat(`&action=${uriEncodedAction}`);
   if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
   return previewURL;
 }

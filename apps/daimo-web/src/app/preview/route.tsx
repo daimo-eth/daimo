@@ -4,6 +4,7 @@ import { ImageResponse } from "@vercel/og";
 
 export const runtime = "edge";
 
+// Generate link preview image
 // Note that a lot of usual CSS is unsupported, including tailwind.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
