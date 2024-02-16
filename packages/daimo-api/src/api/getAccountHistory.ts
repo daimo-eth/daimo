@@ -171,6 +171,14 @@ function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
   return ret;
 }
 
+function getRampNetworkURL(account: EAccount) {
+  const hostApikey = "kkkkdu9jsw3dbc3qnf8o2bvmzoxkp63mrz27hrma";
+  const hostAppName = "Daimo";
+  const hostLogoUrl = "https://daimo.com/assets/icon-ramp.png";
+  const swapAsset = "BASE_USDC";
+  return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}`;
+}
+
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   const cbUrl = generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
@@ -190,5 +198,6 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
       url: `https://daimo.com/bridge/${account.name}`,
     },
     { cta: "Deposit from Coinbase", url: cbUrl },
+    { cta: "Deposit from Ramp", url: getRampNetworkURL(account) },
   ];
 }
