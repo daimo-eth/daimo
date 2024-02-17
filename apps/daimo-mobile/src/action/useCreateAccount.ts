@@ -10,9 +10,12 @@ import { useEffect } from "react";
 
 import { ActHandle, useActStatus } from "./actStatus";
 import { DeviceKeyStatus } from "./key";
-import { createEmptyAccount } from "../logic/account";
 import { env } from "../logic/env";
-import { defaultEnclaveKeyName, useAccount } from "../model/account";
+import {
+  createEmptyAccount,
+  defaultEnclaveKeyName,
+  useAccount,
+} from "../model/account";
 
 /** Deploys a new contract wallet and registers it under a given username. */
 export function useCreateAccount(

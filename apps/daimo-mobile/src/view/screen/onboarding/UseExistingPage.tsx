@@ -1,4 +1,4 @@
-import { assert, SlotType, findUnusedSlot } from "@daimo/common";
+import { SlotType, assert, findUnusedSlot } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -15,11 +15,14 @@ import { OnboardingHeader } from "./OnboardingHeader";
 import { ActStatus } from "../../../action/actStatus";
 import { DeviceKeyStatus } from "../../../action/key";
 import { useSendAsync } from "../../../action/useSendAsync";
-import { createEmptyAccount } from "../../../logic/account";
 import { env } from "../../../logic/env";
 import { createAddDeviceString } from "../../../logic/key";
 import { requestPasskeySignature } from "../../../logic/passkey";
-import { Account, defaultEnclaveKeyName } from "../../../model/account";
+import {
+  Account,
+  createEmptyAccount,
+  defaultEnclaveKeyName,
+} from "../../../model/account";
 import { hydrateAccount } from "../../../sync/sync";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";

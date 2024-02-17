@@ -10,16 +10,15 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
 
-import { useSendDebugLog } from "./common/useSendDebugLog";
+import { Dispatcher, DispatcherContext } from "./action/dispatch";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
-import { ButtonMed } from "./view/shared/Button";
 import ScrollPellet from "./view/shared/ScrollPellet";
-import Spacer from "./view/shared/Spacer";
 import { color } from "./view/shared/style";
-import { TextH3, TextLight } from "./view/shared/text";
+import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
+import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,22 +54,44 @@ export default function App() {
   );
 }
 
+const globalBottomSheetHeights = {
+  debug: "33%",
+  connectFarcaster: "66%",
+} as const;
+
+type GlobalBottomSheet = null | keyof typeof globalBottomSheetHeights;
+
 function AppBody() {
+  // Global dispatcher
+  const dispatcher = useMemo(() => new Dispatcher(), []);
+
+  // Global bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isDebugModalOpen, setIsDebugModalOpen] = useState(false);
+  const [bottomSheet, setBottomSheet] = useState<GlobalBottomSheet>(null);
+  const snapPoints = useMemo(
+    () => (bottomSheet ? [globalBottomSheetHeights[bottomSheet]] : ["10%"]),
+    [bottomSheet]
+  );
 
-  const snapPoints = useMemo(() => ["33%"], []);
-
+  // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
-    const subscription = RNShake.addListener(() => {
-      bottomSheetRef.current?.expand();
-    });
-
-    return () => {
-      subscription.remove();
-    };
+    const subscription = RNShake.addListener(() => setBottomSheet("debug"));
+    return () => subscription.remove();
   }, []);
 
+  // Open bottom sheet when requested
+  useEffect(() => {
+    console.log(`[APP] bottomSheet=${bottomSheet}`);
+    if (bottomSheet) bottomSheetRef.current?.expand();
+    else bottomSheetRef.current?.close();
+  }, [bottomSheet]);
+
+  // Close bottom sheet when user swipes it away
+  const onChangeIndex = useCallback((index: number) => {
+    if (index < 0) setBottomSheet(null);
+  }, []);
+
+  // Dark backdrop for bottom sheet
   const renderBackdrop = useCallback(
     (props: BottomSheetDefaultBackdropProps) => (
       <BottomSheetBackdrop
@@ -83,50 +104,42 @@ function AppBody() {
     []
   );
 
-  const onChangeIndex = (index: number) => setIsDebugModalOpen(index > -1);
-
-  const [sendDL] = useSendDebugLog();
+  // Handle dispatch > open bottom sheet
+  const openFC = () => setBottomSheet("connectFarcaster");
+  useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
 
   return (
-    <SafeAreaProvider>
-      <TabNav />
-      <StatusBar style="auto" />
-      <View
-        style={styles.bottomSheetWrapper}
-        pointerEvents={isDebugModalOpen ? "auto" : "none"}
-      >
-        <BottomSheet
-          handleComponent={ScrollPellet}
-          backdropComponent={renderBackdrop}
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={snapPoints}
-          onChange={onChangeIndex}
-          enablePanDownToClose
+    <DispatcherContext.Provider value={dispatcher}>
+      <SafeAreaProvider>
+        <TabNav />
+        <StatusBar style="auto" />
+        <View
+          style={styles.bottomSheetWrapper}
+          pointerEvents={bottomSheet != null ? "auto" : "none"}
         >
-          <View style={styles.contentContainer}>
-            <Spacer h={16} />
-            <TextH3>Did something go wrong?</TextH3>
-            <Spacer h={12} />
-            <TextLight>Help us realize what's going wrong.</TextLight>
-            <Spacer h={32} />
-            <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
-          </View>
-        </BottomSheet>
-      </View>
-    </SafeAreaProvider>
+          <BottomSheet
+            handleComponent={ScrollPellet}
+            backdropComponent={renderBackdrop}
+            ref={bottomSheetRef}
+            index={-1}
+            snapPoints={snapPoints}
+            onChange={onChangeIndex}
+            enablePanDownToClose
+          >
+            {bottomSheet === "debug" && <DebugBottomSheet />}
+            {bottomSheet === "connectFarcaster" && <FarcasterBottomSheet />}
+          </BottomSheet>
+        </View>
+      </SafeAreaProvider>
+    </DispatcherContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    alignSelf: "center",
-    alignItems: "stretch",
-  },
   bottomSheetWrapper: {
     position: "absolute",
     height: "100%",
     width: "100%",
+    alignItems: "center",
   },
 });

@@ -25,8 +25,11 @@
     "eas-build-post-install": "cd ../.. && npm run build:mobile"
   },
   "dependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/plugin-transform-private-methods": "^7.23.3",
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@daimo/api": "*",
+    "@daimo/auth-client": "^0.1.0",
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@daimo/expo-enclave": "*",
@@ -95,9 +98,6 @@
     "ts-unused-exports": "^9.0.4",
     "typescript": "5.2.2",
     "viem": "^1.19.15"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0"
   },
   "eslintConfig": {
     "extends": [

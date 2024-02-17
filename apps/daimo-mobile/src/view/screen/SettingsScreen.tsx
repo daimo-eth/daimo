@@ -6,7 +6,7 @@ import {
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
-import React, { ReactNode, useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
   Linking,
   ScrollView,
@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 
+import { DispatcherContext } from "../../action/dispatch";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
@@ -70,13 +71,22 @@ function AccountSection({ account }: { account: Account }) {
     Linking.openURL(url);
   }, [account]);
 
+  const dispatcher = useContext(DispatcherContext);
+  const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
+
   return (
     <View style={styles.sectionWrap}>
       <AccountHero account={account} />
       <Spacer h={24} />
       <ButtonMed
+        type="primary"
+        title="CONNECT FARCASTER"
+        onPress={connectFarc}
+      />
+      <Spacer h={16} />
+      <ButtonMed
         type="subtle"
-        title="View account on explorer"
+        title="VIEW ACCOUNT ON EXPLORER"
         onPress={linkToExplorer}
       />
     </View>

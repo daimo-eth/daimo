@@ -11,12 +11,14 @@ import {
   TransferOpEvent,
   assert,
 } from "@daimo/common";
+import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { cacheEAccounts } from "../logic/addr";
+import { env } from "../logic/env";
 
 /**
  * Singleton account key.
@@ -501,4 +503,45 @@ export function serializeAccount(account: Account | null): string {
   };
 
   return JSON.stringify(model);
+}
+
+export function createEmptyAccount(
+  inputAccount: {
+    enclaveKeyName: string;
+    enclavePubKey: Hex;
+    name: string;
+    address: Address;
+  },
+  daimoChain: DaimoChain
+): Account {
+  return {
+    ...inputAccount,
+
+    homeChainId: env(daimoChain).chainConfig.chainL2.id,
+    homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
+
+    lastBalance: BigInt(0),
+    lastBlockTimestamp: 0,
+    lastBlock: 0,
+    lastFinalizedBlock: 0,
+
+    namedAccounts: [],
+    recentTransfers: [],
+    trackedRequests: [],
+    accountKeys: [],
+    pendingKeyRotation: [],
+    recommendedExchanges: [],
+    suggestedActions: [],
+    dismissedActionIDs: [],
+
+    chainGasConstants: {
+      maxPriorityFeePerGas: "0",
+      maxFeePerGas: "0",
+      estimatedFee: 0,
+      paymasterAddress: daimoPaymasterV2Address,
+      preVerificationGas: "0",
+    },
+
+    pushToken: null,
+  };
 }

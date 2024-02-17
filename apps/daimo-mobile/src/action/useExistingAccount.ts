@@ -3,10 +3,13 @@ import { useEffect } from "react";
 
 import { useActStatus } from "./actStatus";
 import { DeviceKeyStatus } from "./key";
-import { createEmptyAccount } from "../logic/account";
 import { env } from "../logic/env";
 import { useTime } from "../logic/time";
-import { defaultEnclaveKeyName, useAccount } from "../model/account";
+import {
+  createEmptyAccount,
+  defaultEnclaveKeyName,
+  useAccount,
+} from "../model/account";
 
 export function useExistingAccount(
   daimoChain: DaimoChain,
