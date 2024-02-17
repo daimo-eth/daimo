@@ -131,6 +131,8 @@ function metadata(
         {
           url: previewURL,
           alt: "Daimo",
+          width: 1200,
+          height: 630,
         },
       ],
       type: "website",
