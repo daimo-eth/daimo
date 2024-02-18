@@ -60,6 +60,16 @@ export class DB {
           CREATE TABLE IF NOT EXISTS paymaster_whitelist (
             name VARCHAR(32) PRIMARY KEY
           );
+
+          CREATE TABLE IF NOT EXISTS linked_account (
+            linked_type VARCHAR(32) NOT NULL, -- eg "farcaster"
+            linked_id VARCHAR(64), -- eg "0x123a..."
+            address CHAR(42), -- our Daimo account address
+            signed_json TEXT, -- signed by us, includes sig from linked account
+            signature_hex TEXT, -- ERC-1271 signature
+            PRIMARY KEY (address, linked_type),
+            UNIQUE (linked_type, linked_id)
+          );
       `);
     await client.end();
   }
@@ -83,6 +93,23 @@ export class DB {
       `INSERT INTO pushtoken (pushtoken, address) VALUES ($1, $2)
        ON CONFLICT (pushtoken) DO UPDATE SET address = $2`,
       [token.pushtoken, token.address]
+    );
+    client.release();
+  }
+
+  async saveLinkedAccount(row: LinkedAccountRow) {
+    console.log(
+      `[DB] inserting linked: ${row.linkedType} ${row.linkedId} ${row.address}`
+    );
+    const client = await this.pool.connect();
+
+    // TODO: in same statement,
+    // INSERT INTO linked_account where linked_type = $1 and linked_id = $2
+    // DELETE from linked_account where linked_type = $1 and address = $3
+    await client.query(
+      `INSERT INTO linked_account (linked_type, linked_id, address, signed_json, signature_hex)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [row.linkedType, row.linkedId, row.address, row.signedJson, row.signature]
     );
     client.release();
   }
@@ -182,4 +209,12 @@ interface RawInviteCodeRow {
   use_count: number;
   max_uses: number;
   zupass_email: string | null;
+}
+
+interface LinkedAccountRow {
+  linkedType: string;
+  linkedId: string;
+  address: string;
+  signedJson: string;
+  signature: string;
 }

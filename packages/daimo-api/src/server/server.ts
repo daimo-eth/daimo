@@ -89,6 +89,7 @@ async function main() {
   const router = createRouter(
     shovelWatcher,
     vc,
+    db,
     bundlerClient,
     coinIndexer,
     noteIndexer,

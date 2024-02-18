@@ -23,6 +23,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
+import { DB } from "../db/db";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { Watcher } from "../shovel/watcher";
@@ -30,6 +31,7 @@ import { Watcher } from "../shovel/watcher";
 export function createRouter(
   watcher: Watcher,
   vc: ViemClient,
+  db: DB,
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
@@ -298,7 +300,7 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { addr, linkedAccountJSON, signature } = opts.input;
-        return profileLinkAccount(addr, linkedAccountJSON, signature, vc);
+        return profileLinkAccount(addr, linkedAccountJSON, signature, vc, db);
       }),
   });
 }
