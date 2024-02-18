@@ -95,3 +95,24 @@ const phoneNumberRegex = new RegExp(
 export const zPhoneNumber = z.string().regex(phoneNumberRegex);
 
 export type PhoneNumber = z.infer<typeof zPhoneNumber>;
+
+export interface LinkedAccount {
+  type: string;
+}
+
+// Farcaster profile summary, linked to Daimo account via signature.
+// The Daimo address is the nonce in the signed message.
+export const zFarcasterLinkedAccount = z.object({
+  type: z.literal("farcaster"),
+  fid: z.number(),
+  custody: zAddress,
+  message: z.string(),
+  signature: zHex,
+  verifications: z.array(zAddress),
+  username: z.string().optional(),
+  displayName: z.string().optional(),
+  pfpUrl: z.string().optional(),
+  bio: z.string().optional(),
+});
+
+export type FarcasterLinkedAccount = z.infer<typeof zFarcasterLinkedAccount>;

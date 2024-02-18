@@ -6,6 +6,7 @@ import {
   EAccount,
   KeyData,
   KeyRotationOpEvent,
+  LinkedAccount,
   RecommendedExchange,
   TrackedRequest,
   TransferOpEvent,
@@ -75,6 +76,9 @@ export type Account = {
   suggestedActions: SuggestedAction[];
   /** IDs of suggested actions that have been dismissed */
   dismissedActionIDs: string[];
+
+  /** Linked accounts (via mutual sig) for rich profiles, eg Farcaster. */
+  linkedAccounts: LinkedAccount[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -227,6 +231,8 @@ interface AccountV12 extends StoredModel {
   chainGasConstants: ChainGasConstants;
 
   pushToken: string | null;
+
+  linkedAccounts?: LinkedAccount[];
 }
 
 /** Loads and saves Daimo account data from storage. Notifies listeners. */
@@ -344,6 +350,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       chainGasConstants: { ...a.chainGasConstants, preVerificationGas: "0" },
 
       pushToken: a.pushToken,
+
+      linkedAccounts: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -374,6 +382,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       chainGasConstants: a.chainGasConstants,
 
       pushToken: a.pushToken,
+
+      linkedAccounts: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -404,6 +414,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       chainGasConstants: a.chainGasConstants,
 
       pushToken: a.pushToken,
+
+      linkedAccounts: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -435,6 +447,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       chainGasConstants: a.chainGasConstants,
 
       pushToken: a.pushToken,
+
+      linkedAccounts: [],
     };
   }
   assert(model.storageVersion === 12, "Unknown account storage version");
@@ -466,6 +480,8 @@ export function parseAccount(accountJSON?: string): Account | null {
     chainGasConstants: a.chainGasConstants,
 
     pushToken: a.pushToken,
+
+    linkedAccounts: a.linkedAccounts || [],
   };
 }
 
@@ -500,6 +516,8 @@ export function serializeAccount(account: Account | null): string {
     chainGasConstants: account.chainGasConstants,
 
     pushToken: account.pushToken,
+
+    linkedAccounts: account.linkedAccounts,
   };
 
   return JSON.stringify(model);
@@ -543,5 +561,7 @@ export function createEmptyAccount(
     },
 
     pushToken: null,
+
+    linkedAccounts: [],
   };
 }

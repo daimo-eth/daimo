@@ -2,52 +2,75 @@ import {
   AppClient,
   createAppClient,
   viemConnector,
-} from "@farcaster/auth-client";
+  StatusAPIResponse,
+} from "@daimo/auth-client";
+import { FarcasterLinkedAccount, assertNotNull } from "@daimo/common";
+import { Address, Hex } from "viem";
 
-class FarcasterConnector {
-  appClient: AppClient | undefined;
+// Utility to connect to Farcaster.
+// See https://docs.farcaster.xyz/auth-kit/client/introduction
+export class FarcasterClient {
+  // Returns eg "@alice" or "#1234"
+  static getDispUsername(profile: FarcasterLinkedAccount): string {
+    if (profile.username != null) return `@${profile.username}`;
+    else return `#${profile.fid}`;
+  }
 
+  private appClient: AppClient | undefined;
   private init(): AppClient {
     if (this.appClient != null) return this.appClient;
 
     console.log(`[FARCASTER] initializing`);
     this.appClient = createAppClient({
       relay: "https://relay.farcaster.xyz",
-      ethereum: viemConnector({
-        rpcUrl: "https://mainnet.optimism.io",
-      }),
+      ethereum: viemConnector({ rpcUrl: "https://mainnet.optimism.io" }),
     });
 
     return this.appClient;
   }
 
-  async connect() {
+  async connect({ nonce }: { nonce: string }) {
     const appClient = this.init();
 
-    const { data } = await appClient.createChannel({
-      siweUri: "https://daimo.com/connect/farcaster",
+    console.log(`[FARCASTER] opening login channel, nonce ${nonce}`);
+    const resp = await appClient.createChannel({
       domain: "daimo.com",
+      siweUri: "https://daimo.com",
+      nonce,
     });
 
-    const status = await appClient.watchStatus({
-      channelToken,
-    });
+    if (resp.isError) {
+      console.error(`[FARCASTER] channel create error`, resp.error);
+      throw resp.error;
+    }
 
-    // Example response:
-    // {
-    //   "state": "completed",
-    //   "nonce": "AMXoFHQLhxFUMhIFI",
-    //   "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Connect\n\nURI: https://daimo.com/connect/farcaster\nVersion: 1\nChain ID: 10\nNonce: AMXoFHQLhxFUMhIFI\nIssued At: 2024-02-16T20:55:27.360Z\nResources:\n- farcaster://fid/56",
-    //   "signature": "0x74f54cc5f10d4abc7d4b4e6a410dc9ceb208923ae48763564ae7236b2c5a356c6a52de6c3b4cb42080483cc5f2c071e88b0f043d1a205428edce26689cf722a21b",
-    //   "fid": 56,
-    //   "username": "dcposch.eth",
-    //   "displayName": "dcposch.eth",
-    //   "bio": "real world ethereum\ngithub.com/daimo-eth/daimo",
-    //   "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
-    //   "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
-    //   "verifications": [
-    //     "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d"
-    //   ]
-    // }
+    console.log(`[FARCASTER] got channel token ${resp.data.channelToken}`);
+    return resp.data;
+  }
+
+  async watchStatus({ channelToken }: { channelToken: string }) {
+    const appClient = this.init();
+    console.log(`[FARCASTER] watching status for channel ${channelToken}`);
+    const ret = await appClient.watchStatus({ channelToken });
+
+    if (ret.isError) console.error(`[FARCASTER] login failed`, ret.error);
+    else console.log(`[FARCASTER] login success`, JSON.stringify(ret.data));
+
+    return ret;
+  }
+
+  static getLinkedAccount(data: StatusAPIResponse): FarcasterLinkedAccount {
+    return {
+      type: "farcaster",
+      fid: assertNotNull(data.fid, "Missing FID"),
+      custody: assertNotNull(data.custody, "Missing Farcaster custody address"),
+      message: assertNotNull(data.message, "Missing Farcaster sig message"),
+      signature: assertNotNull(data.signature, "Missing Farcaster sig"),
+      verifications: data.verifications || [],
+      username: data.username,
+      displayName: data.displayName,
+      pfpUrl: data.pfpUrl,
+      bio: data.bio,
+    };
   }
 }

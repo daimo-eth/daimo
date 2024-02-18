@@ -111,7 +111,15 @@ function ShareButton({ name }: { name: string }) {
   );
 }
 
-export function QRCodeBox({ value }: { value: string }) {
+export function QRCodeBox({
+  value,
+  logoURI,
+}: {
+  value: string;
+  logoURI?: string;
+}) {
+  if (logoURI == null) logoURI = image.qrLogo;
+
   return (
     <View style={styles.qrBackground}>
       <View style={styles.qrWrap}>
@@ -119,7 +127,7 @@ export function QRCodeBox({ value }: { value: string }) {
           value={value}
           color={color.midnight}
           size={192}
-          logo={{ uri: image.qrLogo }}
+          logo={{ uri: logoURI }}
           logoSize={72}
         />
       </View>

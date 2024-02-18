@@ -12,6 +12,7 @@ import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
+import { profileLinkAccount } from "../api/profile";
 import { search } from "../api/search";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -285,6 +286,19 @@ export function createRouter(
           recipient,
           amount
         );
+      }),
+
+    profileLinkAccount: publicProcedure
+      .input(
+        z.object({
+          addr: zAddress,
+          linkedAccountJSON: z.string(),
+          signature: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const { addr, linkedAccountJSON, signature } = opts.input;
+        return profileLinkAccount(addr, linkedAccountJSON, signature, vc);
       }),
   });
 }

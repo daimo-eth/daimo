@@ -1,5 +1,7 @@
 import {
+  FarcasterLinkedAccount,
   KeyData,
+  LinkedAccount,
   getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
@@ -25,6 +27,7 @@ import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
+import { FarcasterBubble } from "../shared/FarcasterBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -76,7 +79,7 @@ function AccountSection({ account }: { account: Account }) {
 
   return (
     <View style={styles.sectionWrap}>
-      <AccountHero account={account} />
+      <AccountHeader account={account} />
       <Spacer h={24} />
       <ButtonMed
         type="primary"
@@ -93,7 +96,7 @@ function AccountSection({ account }: { account: Account }) {
   );
 }
 
-function AccountHero({ account }: { account: Account }) {
+function AccountHeader({ account }: { account: Account }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
@@ -112,9 +115,46 @@ function AccountHero({ account }: { account: Account }) {
             {chainConfig.chainL2.testnet && <> · TESTNET</>}
           </TextBody>
         </View>
+        <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
       </View>
     </View>
   );
+}
+
+function LinkedAccountsRow({
+  linkedAccounts,
+}: {
+  linkedAccounts: Account["linkedAccounts"];
+}) {
+  if (linkedAccounts.length === 0) {
+    return (
+      <View
+        style={{
+          backgroundColor: color.ivoryDark,
+          height: 20,
+          borderRadius: 10,
+        }}
+      >
+        <TextBody color={color.gray3}>NO SOCIALS CONNECTED</TextBody>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      {linkedAccounts.map((acc, i) => (
+        <LinkedAccountBubble key={i} acc={acc} />
+      ))}
+    </View>
+  );
+}
+
+function LinkedAccountBubble({ acc }: { acc: LinkedAccount }) {
+  if (acc.type === "farcaster") {
+    return <FarcasterBubble fcAccount={acc as FarcasterLinkedAccount} />;
+  } else {
+    throw new Error(`Unsupported linked account ${acc.type}`);
+  }
 }
 
 function DevicesSection({ account }: { account: Account }) {
