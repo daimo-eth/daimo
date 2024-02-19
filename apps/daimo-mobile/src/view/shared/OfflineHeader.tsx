@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Platform, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Spacer from "./Spacer";
@@ -12,9 +13,13 @@ import { useNetworkState } from "../../sync/networkState";
 export function OfflineHeader({
   dontTakeUpSpace,
   offlineExtraMarginBottom,
+  onPress,
+  title,
 }: {
   dontTakeUpSpace?: boolean;
   offlineExtraMarginBottom?: number;
+  onPress?(): void;
+  title?: string;
 }) {
   const netState = useNetworkState();
   const isOffline = netState.status === "offline";
@@ -44,13 +49,21 @@ export function OfflineHeader({
           <Spacer h={16} />
         ) /* Some Androids have a camera excluded from the safe insets. */
       }
-      {isOffline && (
-        <TextBody color={color.midnight}>
-          <Octicons name="alert" size={14} />
-          <Spacer w={8} />
-          Offline
-        </TextBody>
-      )}
+      <TouchableOpacity disabled={!onPress} onPress={onPress}>
+        {title && (
+          <TextBody color={color.midnight}>
+            <Spacer w={8} />
+            {title}
+          </TextBody>
+        )}
+        {isOffline && !title && (
+          <TextBody color={color.midnight}>
+            <Octicons name="alert" size={14} />
+            <Spacer w={8} />
+            Offline
+          </TextBody>
+        )}
+      </TouchableOpacity>
       {isOffline && <Spacer h={8} />}
     </View>
   );
