@@ -20,9 +20,13 @@ import { useEffect, useState } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import RNShake from "react-native-shake";
+import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
+import { useAccount } from "../model/account";
 import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
+import { DebugLogScreen } from "./screen/DebugLogScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { ErrorScreen } from "./screen/ErrorScreen";
 import HomeScreen from "./screen/HomeScreen";
@@ -46,8 +50,6 @@ import {
   useNav,
 } from "./shared/nav";
 import { color } from "./shared/style";
-import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
-import { useAccount } from "../model/account";
 
 const { add, multiply } = Animated;
 
@@ -75,16 +77,24 @@ function TabNavigator() {
 
 export function TabNav() {
   // Track whether we've onboarded. If not, show OnboardingScreen.
+  const nav = useNav();
   const [account] = useAccount();
   const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
   useEffect(() => {
     // This is a latch: if we clear the account, go back to onboarding.
     if (isOnboarded && account == null) setIsOnboarded(false);
   }, [isOnboarded, account]);
-  // Stay onboarding till it's complete.
-  const onOnboardingComplete = () => setIsOnboarded(true);
 
-  if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
+
+  useEffect(() => {
+    const subscription = RNShake.addListener(() => {
+      nav.navigate("DebugLogModal")
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   // Error modal slides up from the bottom, greying out the app below.
   // This custom interpolator recreates the native background effect.
@@ -131,8 +141,13 @@ export function TabNav() {
   };
 
   return (
-    <MainStack.Navigator initialRouteName="MainTabNav">
+    <MainStack.Navigator initialRouteName={isOnboarded ? "MainTabNav" : "OnboardingScreen" }>
       <MainStack.Group>
+      <MainStack.Screen
+          name="OnboardingScreen"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
         <MainStack.Screen
           name="MainTabNav"
           component={TabNavigator}
@@ -148,6 +163,16 @@ export function TabNav() {
           },
         }}
       >
+        <MainStack.Screen
+          name="DebugLogModal"
+          component={DebugLogScreen}
+          options={{
+            ...TransitionPresets.ModalPresentationIOS,
+            detachPreviousScreen: false,
+            gestureResponseDistance: WINDOW_HEIGHT,
+            cardStyleInterpolator: forModalPresentationIOS,
+          }}
+        />
         <MainStack.Screen
           name="LinkErrorModal"
           component={ErrorScreen}

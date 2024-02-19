@@ -5,12 +5,6 @@ import { addEventListener } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
-import { AllowNotificationsPage } from "./AllowNotificationsPage";
-import { CreateAccountPage } from "./CreateAccountPage";
-import { IntroPages } from "./IntroPages";
-import { InvitePage } from "./InvitePage";
-import { OnboardingHeader } from "./OnboardingHeader";
-import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
 import { useLoadOrCreateEnclaveKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
@@ -21,6 +15,7 @@ import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
+import { MainNav, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import {
   EmojiToOcticon,
@@ -29,6 +24,12 @@ import {
   TextError,
   TextLight,
 } from "../../shared/text";
+import { AllowNotificationsPage } from "./AllowNotificationsPage";
+import { CreateAccountPage } from "./CreateAccountPage";
+import { IntroPages } from "./IntroPages";
+import { InvitePage } from "./InvitePage";
+import { OnboardingHeader } from "./OnboardingHeader";
+import { UseExistingPage } from "./UseExistingPage";
 
 type OnboardPage =
   | "intro"
@@ -41,11 +42,7 @@ type OnboardPage =
   | "existing-allow-notifications"
   | "new-loading";
 
-export default function OnboardingScreen({
-  onOnboardingComplete,
-}: {
-  onOnboardingComplete: () => void;
-}) {
+export default function OnboardingScreen() {
   // Navigation with a back button
   // TODO: consider splitting into components and just using StackNavigation
   const [page, setPage] = useState<OnboardPage>("intro");
@@ -56,8 +53,9 @@ export default function OnboardingScreen({
   };
   const goToPrev = () => pageStack.length > 0 && setPage(pageStack.pop()!);
   const [daimoChain, setDaimoChain] = useState<DaimoChain>("base");
+  const nav = useNav();
 
-  const next = getNext(page, goTo, setDaimoChain, onOnboardingComplete);
+  const next = getNext(page, goTo, setDaimoChain, nav);
   const prev = pageStack.length === 0 ? undefined : goToPrev;
   // User enters their name
   const [name, setName] = useState("");
@@ -104,7 +102,7 @@ export default function OnboardingScreen({
     "existing",
     goTo,
     setDaimoChain,
-    onOnboardingComplete
+    nav
   );
 
   const reset = () => {
@@ -181,7 +179,7 @@ function getNext(
   page: OnboardPage,
   goToPage: (p: OnboardPage) => void,
   setDaimoChain: (daimoChain: DaimoChain) => void,
-  onOnboardingComplete: () => void
+  nav: MainNav
 ): ({
   choice,
   isTestnet,
@@ -222,7 +220,7 @@ function getNext(
       return fnGoTo("new-loading");
     case "existing-allow-notifications":
     case "new-loading":
-      return onOnboardingComplete;
+      return () => nav.reset({ routes: [{ name: "MainTabNav" }] });
     default:
       throw new Error(`unreachable ${page}`);
   }

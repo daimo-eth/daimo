@@ -2,13 +2,13 @@ import {
   DaimoLink,
   DaimoLinkAccount,
   DaimoLinkNote,
-  DaimoLinkRequest,
-  EAccount,
-  DisplayOpEvent,
-  parseDaimoLink,
   DaimoLinkNoteV2,
-  DaimoLinkTag,
+  DaimoLinkRequest,
   DaimoLinkRequestV2,
+  DaimoLinkTag,
+  DisplayOpEvent,
+  EAccount,
+  parseDaimoLink,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -37,11 +37,15 @@ type ParamListError = {
 
 export type ParamListMain = {
   MainTabNav: ParamListTab;
+  OnboardingScreen: ParamListTab;
   LinkErrorModal: ParamListError;
+  DebugLogModal: undefined;
 };
 
 type NavigatorParamList = {
+  MainTabNav: ParamListTab;
   LinkErrorModal: ParamListError;
+  DebugLogModal: undefined;
   DepositTab: undefined;
   ReceiveTab: NavigatorScreenParams<ParamListReceive>;
   HomeTab: NavigatorScreenParams<ParamListHome>;
