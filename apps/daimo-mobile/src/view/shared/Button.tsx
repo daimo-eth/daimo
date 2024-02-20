@@ -16,11 +16,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
-import FaceIdIcon from "../../../assets/face-id.png";
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
 import { DaimoText } from "./text";
+import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
+import FaceIdIcon from "../../../assets/face-id.png";
 
 interface TextButtonProps {
   title?: string;
@@ -135,9 +135,9 @@ export function ButtonMed(props: ButtonProps) {
 
 export function TextButton(props: TextButtonProps) {
   return (
-    <Button 
-      {...props} 
-      style={useStyle(buttonStyles.small, props)} 
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.small, props)}
       icon={FaceIdPrimaryIcon}
     />
   );
@@ -207,7 +207,7 @@ function Button(
   props: TextButtonProps & {
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
-    icon?: ImageSourcePropType
+    icon?: ImageSourcePropType;
   }
 ) {
   const disabledStyle = useMemo(
@@ -299,5 +299,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-  }
+  },
 });

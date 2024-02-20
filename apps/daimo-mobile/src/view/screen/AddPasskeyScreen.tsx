@@ -94,7 +94,7 @@ export function AddPasskeyScreen() {
     switch (status) {
       case "idle":
         return (
-          <ButtonBig 
+          <ButtonBig
             type="primary"
             title="Create Backup"
             onPress={exec}
