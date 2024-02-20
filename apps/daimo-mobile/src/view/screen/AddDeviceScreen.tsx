@@ -1,7 +1,7 @@
 import {
   OpStatus,
-  assert,
   SlotType,
+  assert,
   findUnusedSlot,
   getSlotLabel,
 } from "@daimo/common";
@@ -115,7 +115,14 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   const button = (function () {
     switch (status) {
       case "idle":
-        return <ButtonBig type="primary" title="Add Device" onPress={exec} />;
+        return (
+          <ButtonBig
+            type="primary"
+            title="Add Device"
+            onPress={exec}
+            showBiometricIcon
+          />
+        );
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":

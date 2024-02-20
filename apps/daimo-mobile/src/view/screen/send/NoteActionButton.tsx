@@ -202,6 +202,7 @@ function NoteActionButtonInner({
             onPress={exec}
             disabled={sendDisabled}
             duration={400}
+            showBiometricIcon
           />
         );
       case "loading":

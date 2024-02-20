@@ -94,7 +94,12 @@ export function AddPasskeyScreen() {
     switch (status) {
       case "idle":
         return (
-          <ButtonBig type="primary" title="Create Backup" onPress={exec} />
+          <ButtonBig 
+            type="primary"
+            title="Create Backup"
+            onPress={exec}
+            showBiometricIcon
+          />
         );
       case "loading":
         return <ActivityIndicator size="large" />;
