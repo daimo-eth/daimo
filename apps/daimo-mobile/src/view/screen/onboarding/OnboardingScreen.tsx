@@ -304,6 +304,7 @@ function SetupKeyPage({
             type="primary"
             title={askToSetPin ? "Try again" : "Generate"}
             onPress={trySignatureGeneration}
+            showBiometricIcon={Platform.OS === "android" && !askToSetPin}
           />
         )}
         {error && (
