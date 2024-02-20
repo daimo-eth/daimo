@@ -3,7 +3,6 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -55,16 +54,3 @@ function AppBody() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    alignSelf: "center",
-    alignItems: "stretch",
-  },
-  bottomSheetWrapper: {
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-  },
-});

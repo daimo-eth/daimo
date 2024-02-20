@@ -19,10 +19,8 @@ import {
 import { useEffect, useState } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
-
 import RNShake from "react-native-shake";
-import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
-import { useAccount } from "../model/account";
+
 import { AccountScreen } from "./screen/AccountScreen";
 import { AddDeviceScreen } from "./screen/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
@@ -50,6 +48,8 @@ import {
   useNav,
 } from "./shared/nav";
 import { color } from "./shared/style";
+import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
+import { useAccount } from "../model/account";
 
 const { add, multiply } = Animated;
 
@@ -85,10 +85,9 @@ export function TabNav() {
     if (isOnboarded && account == null) setIsOnboarded(false);
   }, [isOnboarded, account]);
 
-
   useEffect(() => {
     const subscription = RNShake.addListener(() => {
-      nav.navigate("DebugLogModal")
+      nav.navigate("DebugLogModal");
     });
 
     return () => {
@@ -141,9 +140,11 @@ export function TabNav() {
   };
 
   return (
-    <MainStack.Navigator initialRouteName={isOnboarded ? "MainTabNav" : "OnboardingScreen" }>
+    <MainStack.Navigator
+      initialRouteName={isOnboarded ? "MainTabNav" : "OnboardingScreen"}
+    >
       <MainStack.Group>
-      <MainStack.Screen
+        <MainStack.Screen
           name="OnboardingScreen"
           component={OnboardingScreen}
           options={{ headerShown: false }}

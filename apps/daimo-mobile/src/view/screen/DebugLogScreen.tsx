@@ -22,13 +22,13 @@ export function DebugLogScreen() {
           },
         ]}
       >
-      <ScrollPellet />
-      <Spacer h={16} />
-      <TextH3>Did something go wrong?</TextH3>
-      <Spacer h={12} />
-      <TextLight>Help us realize what's going wrong.</TextLight>
-      <Spacer h={32} />
-      <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
+        <ScrollPellet />
+        <Spacer h={16} />
+        <TextH3>Did something go wrong?</TextH3>
+        <Spacer h={12} />
+        <TextLight>Help us realize what's going wrong.</TextLight>
+        <Spacer h={32} />
+        <ButtonMed type="subtle" title="Send debug log" onPress={sendDL} />
       </View>
     </View>
   );

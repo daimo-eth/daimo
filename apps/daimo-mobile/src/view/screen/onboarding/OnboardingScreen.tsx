@@ -5,6 +5,12 @@ import { addEventListener } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
+import { AllowNotificationsPage } from "./AllowNotificationsPage";
+import { CreateAccountPage } from "./CreateAccountPage";
+import { IntroPages } from "./IntroPages";
+import { InvitePage } from "./InvitePage";
+import { OnboardingHeader } from "./OnboardingHeader";
+import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
 import { useLoadOrCreateEnclaveKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
@@ -24,12 +30,6 @@ import {
   TextError,
   TextLight,
 } from "../../shared/text";
-import { AllowNotificationsPage } from "./AllowNotificationsPage";
-import { CreateAccountPage } from "./CreateAccountPage";
-import { IntroPages } from "./IntroPages";
-import { InvitePage } from "./InvitePage";
-import { OnboardingHeader } from "./OnboardingHeader";
-import { UseExistingPage } from "./UseExistingPage";
 
 type OnboardPage =
   | "intro"
@@ -98,12 +98,7 @@ export default function OnboardingScreen() {
   const { status: useExistingStatus, message: useExistingMessage } =
     useExistingAccount(daimoChain, keyStatus, startedCreating);
 
-  const existingNext = getNext(
-    "existing",
-    goTo,
-    setDaimoChain,
-    nav
-  );
+  const existingNext = getNext("existing", goTo, setDaimoChain, nav);
 
   const reset = () => {
     pageStack.length = 0;
