@@ -8,8 +8,6 @@ import {
   View,
 } from "react-native";
 
-import { ExternalAction, NoteActionButton } from "./NoteActionButton";
-import { RecipientDisplay } from "./RecipientDisplay";
 import { MsgContact } from "../../../logic/daimoContacts";
 import { useAccount } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -27,6 +25,8 @@ import {
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
+import { ExternalAction, NoteActionButton } from "./NoteActionButton";
+import { RecipientDisplay } from "./RecipientDisplay";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
 
@@ -121,6 +121,7 @@ export function SendNoteScreen({ route }: Props) {
             title="Create Payment Link"
             disabled={!(noteDollars > 0)}
             onPress={onChooseAmount}
+            showBiometricIcon
           />
         )}
         {amountChosen && (
