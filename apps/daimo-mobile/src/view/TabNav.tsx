@@ -82,7 +82,10 @@ export function TabNav() {
   const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
   useEffect(() => {
     // This is a latch: if we clear the account, go back to onboarding.
-    if (isOnboarded && account == null) setIsOnboarded(false);
+    if (isOnboarded && account == null) {
+      setIsOnboarded(false)
+      nav.reset({ routes: [{ name: "OnboardingScreen" }] })
+    }
   }, [isOnboarded, account]);
 
   useEffect(() => {

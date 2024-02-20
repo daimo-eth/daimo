@@ -44,6 +44,7 @@ export type ParamListMain = {
 
 type NavigatorParamList = {
   MainTabNav: ParamListTab;
+  OnboardingScreen: ParamListTab;
   LinkErrorModal: ParamListError;
   DebugLogModal: undefined;
   DepositTab: undefined;
