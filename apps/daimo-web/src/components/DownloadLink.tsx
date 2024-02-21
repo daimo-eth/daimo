@@ -11,7 +11,7 @@ export function DownloadLink() {
     <Link
       href={link}
       target="_blank"
-      className="text-primaryLight font-semibold text-sm"
+      className="text-white font-semibold text-sm px-9 py-5 bg-primaryLight rounded-lg"
     >
       Download
     </Link>

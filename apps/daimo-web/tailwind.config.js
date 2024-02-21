@@ -11,7 +11,7 @@ module.exports = {
       yellow: "#FFDC62",
       success: "#0CA01B",
       primary: "#007aff",
-      primaryLight: "#2888f7",
+      primaryLight: "#144B44",
       white: "#ffffff",
       ivory: "#fafafa",
       ivoryDark: "#f2f2f2",
@@ -22,7 +22,7 @@ module.exports = {
     extend: {
       fontFamily: {
         // Add CSS variables
-        sans: ['var(--font-neue-montreal)'],
+        sans: ["var(--font-neue-montreal)"],
       },
     },
   },
