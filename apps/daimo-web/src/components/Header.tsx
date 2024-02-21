@@ -1,25 +1,15 @@
-import Image from "next/image";
-
 import { DownloadLink } from "./DownloadLink";
+import { Logo } from "./icons/Logo";
 import { LinkBold } from "./typography";
 
 export function Header() {
   return (
     <header className="bg-white py-5">
       <div className="m-auto max-w-screen-xl px-8 flex justify-between items-stretch">
-        <HeaderLogo />
+        <Logo height={24} width={24} color={"black"} />
         <HeaderNav />
       </div>
     </header>
-  );
-}
-
-function HeaderLogo() {
-  return (
-    <div className="flex gap-2 items-center">
-      <Image src="/logo-web-favicon.png" width={24} height={24} alt={"Logo"} />
-      <LinkBold href="/">Daimo</LinkBold>
-    </div>
   );
 }
 
