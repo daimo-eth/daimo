@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { TextBold } from "./typography";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 export function DownloadLink() {
@@ -11,9 +12,9 @@ export function DownloadLink() {
     <Link
       href={link}
       target="_blank"
-      className="text-white font-semibold text-sm px-9 py-5 bg-primaryLight rounded-lg"
+      className="px-9 py-5 bg-primaryLight rounded-lg"
     >
-      Download
+      <TextBold>Download</TextBold>
     </Link>
   );
 }
