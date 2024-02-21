@@ -1,26 +1,33 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { DownloadLinkButton } from "../components/DownloadLink";
 import { Spacer } from "../components/layout";
 
 export function SectionHero() {
   return (
-    <section className="bg-[url('/assets/landing-hero-bg.png')] bg-cover bg-no-repeat py-16 md:py-32 overflow-hidden">
-      <div className="m-auto max-w-screen-xl px-8 h-[54rem] md:h-[32rem] flex overflow-visible gap-16 md:gap-32 flex-col md:flex-row">
-        <div className="w-[24rem] ml-8 md:mt-24">
-          <HeroH1>Your dollars, worldwide</HeroH1>
-          <Spacer h={8} />
-          <HeroH2>Pay people or receive USDC anywhere.</HeroH2>
-          <div className="h-6 md:h-12" />
-          <DownloadLinkButton />
+    <section className="overflow-hidden pb-28">
+      <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row md:gap-16 overflow-visible border rounded-[48px] border-white/30 bg-[#000000]/20 py-16 px-12">
+        <div className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12">
+          <HeroH1>Pay or receive USDC anywhere.</HeroH1>
+          <HeroH2>
+            Store money using secure hardware on your phone. Yours alone, like
+            cash.
+          </HeroH2>
+          <div className="flex flex-row items-center space-x-6 pt-6 md:pt-8">
+            <DownloadLinkButton />
+            <Link className="font-bold text-white text-2xl" href="#faq">
+              Learn More<span className="font-extralight">&nbsp;&#8595;</span>
+            </Link>
+          </div>
         </div>
-        <div className="basis-0 flex-grow relative">
+        <div className="flex-1 flex justify-center md:justify-end relative">
           <Image
-            src="/assets/landing-screenshots.png"
-            width={1154}
-            height={750}
+            src="/assets/hero-screenshot.png"
+            width={327} // Consider removing these if you're using Tailwind for responsiveness
+            height={588} // Same as above, control size with Tailwind if possible
             alt="Screenshots"
-            className="h-[32rem] w-[49.28rem] max-w-none absolute"
+            className="w-full max-w-[200px] md:max-w-sm " // Adjust this for different breakpoints
           />
         </div>
       </div>
@@ -30,16 +37,12 @@ export function SectionHero() {
 
 function HeroH1({ children }: { children: React.ReactNode }) {
   return (
-    <h1 className="text-[32px] md:text-[4rem] font-semibold text-midnight leading-tight">
+    <h1 className="text-[84px] font-semibold text-white leading-[84px] ">
       {children}
     </h1>
   );
 }
 
 function HeroH2({ children }: { children: React.ReactNode }) {
-  return (
-    <h1 className="text-[20px] md:text-[2.5rem] font-medium text-grayMid leading-tight">
-      {children}
-    </h1>
-  );
+  return <h1 className="text-[32px] text-grayLight">{children}</h1>;
 }

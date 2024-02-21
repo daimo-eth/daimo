@@ -4,8 +4,7 @@ import { LinkBold } from "./typography";
 
 export function Header() {
   return (
-    // TODO: remove bg color once image background is added
-    <header className="bg-primaryLight/80 py-12">
+    <header className="py-12">
       <div className="m-auto max-w-screen-xl px-8 flex justify-between items-stretch">
         <Logo height={24} width={24} color={"white"} />
         <HeaderNav />
