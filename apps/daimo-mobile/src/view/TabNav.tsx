@@ -35,6 +35,7 @@ import ReceiveScreen from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
+import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
 import {
   ParamListHome,
@@ -200,7 +201,9 @@ function getTabOptions(
     case "ReceiveTab":
       return { title: "Request", tabBarIcon: getIcon("download"), ...opts };
     case "HomeTab":
-      return { title: "Home", tabBarIcon: getIcon("home"), ...opts };
+      return { title: "Home", tabBarIcon: ({ color }) => {
+        return <IconHome color={color} />;
+      }, ...opts };
     case "SendTab":
       return { title: "Send", tabBarIcon: getIcon("paper-airplane"), ...opts };
     case "SettingsTab":
