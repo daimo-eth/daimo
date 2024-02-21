@@ -16,11 +16,11 @@ export function Header() {
 function HeaderNav() {
   return (
     <nav className="flex gap-8 md:gap-16 items-center">
-      <LinkBold href="#faq">FAQ</LinkBold>
       <LinkBold href="/blog">Blog</LinkBold>
       <LinkBold href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
       </LinkBold>
+      <LinkBold href="#faq">FAQ</LinkBold>
       <DownloadLink />
     </nav>
   );
