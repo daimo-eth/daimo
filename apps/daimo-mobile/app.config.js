@@ -12,8 +12,8 @@ export default {
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    resizeMode: "cover",
+    backgroundColor: "#000000",
   },
   assetBundlePatterns: ["assets/*"],
   scheme: "daimo",
@@ -90,7 +90,7 @@ export default {
     ],
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#14B174",
     },
     softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",

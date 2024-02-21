@@ -2,7 +2,7 @@ import { Platform, StyleSheet, TextStyle } from "react-native";
 
 /** Match daimo-web tailwind config. Same name = refers to the same color. */
 export const color = {
-  primary: "#007aff",
+  primary: "#14B174",
   primaryBgLight: "#aaccff",
   danger: "#f35369",
   warningLight: "#ffeeb3",
