@@ -1,8 +1,8 @@
 import { createContext } from "react";
 
-export type Action = { name: "connectFarcaster" };
+type Action = { name: "connectFarcaster" };
 
-export type ActionName = Action["name"];
+type ActionName = Action["name"];
 
 // Dispatcher. Coordinates global state.
 // TODO: route account updates through here.

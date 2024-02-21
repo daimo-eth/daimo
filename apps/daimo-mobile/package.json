@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.20.0",
-    "@babel/plugin-transform-private-methods": "^7.23.3",
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@daimo/api": "*",
     "@daimo/auth-client": "^0.1.0",
