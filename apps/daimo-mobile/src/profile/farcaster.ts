@@ -1,11 +1,10 @@
 import {
   AppClient,
+  StatusAPIResponse,
   createAppClient,
   viemConnector,
-  StatusAPIResponse,
 } from "@daimo/auth-client";
 import { FarcasterLinkedAccount, assertNotNull } from "@daimo/common";
-import { Address, Hex } from "viem";
 
 // Utility to connect to Farcaster.
 // See https://docs.farcaster.xyz/auth-kit/client/introduction
@@ -62,8 +61,9 @@ export class FarcasterClient {
   static getLinkedAccount(data: StatusAPIResponse): FarcasterLinkedAccount {
     return {
       type: "farcaster",
+      id: assertNotNull(data.custody, "Missing Farcaster custody address"),
       fid: assertNotNull(data.fid, "Missing FID"),
-      custody: assertNotNull(data.custody, "Missing Farcaster custody address"),
+      custody: assertNotNull(data.custody),
       message: assertNotNull(data.message, "Missing Farcaster sig message"),
       signature: assertNotNull(data.signature, "Missing Farcaster sig"),
       verifications: data.verifications || [],

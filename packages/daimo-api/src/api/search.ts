@@ -2,6 +2,7 @@ import { EAccountSearchResult, getAccountName } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 import { normalize } from "viem/ens";
 
+import { ProfileCache } from "./profile";
 import { NameRegistry } from "../contract/nameRegistry";
 import { ViemClient } from "../network/viemClient";
 
@@ -10,8 +11,9 @@ import { ViemClient } from "../network/viemClient";
 export async function search(
   prefix: string,
   vc: ViemClient,
-  nameReg: NameRegistry
-) {
+  nameReg: NameRegistry,
+  profileCache: ProfileCache
+): Promise<EAccountSearchResult[]> {
   prefix = prefix.trim();
   if (prefix.startsWith("@")) prefix = prefix.slice(1);
 
@@ -32,6 +34,11 @@ export async function search(
   } else {
     const dAccounts = await nameReg.search(prefix);
     ret = dAccounts.map((d) => ({ ...d, originalMatch: d.name }));
+  }
+
+  // Add linked accounts
+  for (const r of ret) {
+    r.linkedAccounts = profileCache.getLinkedAccounts(r.addr);
   }
 
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);

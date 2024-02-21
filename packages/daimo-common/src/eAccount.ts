@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { AddrLabel, zAddress } from "./model";
+import { AddrLabel, zAddress, zLinkedAccount } from "./model";
 
 export const zEAccount = z.object({
   addr: zAddress,
@@ -12,6 +12,8 @@ export const zEAccount = z.object({
   label: z.nativeEnum(AddrLabel).optional(),
   /** ENS name */
   ensName: z.string().optional(),
+  /** Linked profiles for a Daimo account */
+  linkedAccounts: z.array(zLinkedAccount).optional(),
 });
 
 /** EAccount represents any Ethereum address + display name(s). */

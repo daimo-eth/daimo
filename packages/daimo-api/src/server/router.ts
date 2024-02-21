@@ -12,7 +12,7 @@ import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
-import { profileLinkAccount } from "../api/profile";
+import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -20,7 +20,6 @@ import { Faucet } from "../contract/faucet";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
-import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
@@ -36,7 +35,7 @@ export function createRouter(
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
   requestIndexer: RequestIndexer,
-  opIndexer: OpIndexer,
+  profileCache: ProfileCache,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
@@ -88,7 +87,7 @@ export function createRouter(
       .input(z.object({ prefix: z.string() }))
       .query(async (opts) => {
         const { prefix } = opts.input;
-        const ret = await search(prefix, vc, nameReg);
+        const ret = await search(prefix, vc, nameReg, profileCache);
         return ret;
       }),
 
@@ -143,7 +142,7 @@ export function createRouter(
           watcher,
           vc,
           coinIndexer,
-          noteIndexer,
+          profileCache,
           nameReg,
           keyReg,
           paymaster
@@ -300,7 +299,7 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { addr, linkedAccountJSON, signature } = opts.input;
-        return profileLinkAccount(addr, linkedAccountJSON, signature, vc, db);
+        return profileCache.linkAccount(addr, linkedAccountJSON, signature);
       }),
   });
 }

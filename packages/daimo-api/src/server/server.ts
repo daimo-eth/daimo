@@ -7,6 +7,7 @@ import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
 import { createContext, onTrpcError } from "./trpc";
+import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { Faucet } from "../contract/faucet";
@@ -73,6 +74,8 @@ async function main() {
     opIndexer
   );
 
+  const profileCache = new ProfileCache(vc, db);
+
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
@@ -83,6 +86,9 @@ async function main() {
 
     console.log(`[API] initializing push notifications...`);
     await Promise.all([notifier.init(), faucet.init(), crontab.init()]);
+
+    console.log(`[API] initializing profile cache...`);
+    await profileCache.init();
   })();
 
   console.log(`[API] serving...`);
@@ -94,7 +100,7 @@ async function main() {
     coinIndexer,
     noteIndexer,
     requestIndexer,
-    opIndexer,
+    profileCache,
     nameReg,
     keyReg,
     paymaster,

@@ -99,7 +99,7 @@ export class DB {
 
   async saveLinkedAccount(row: LinkedAccountRow) {
     console.log(
-      `[DB] inserting linked: ${row.linkedType} ${row.linkedId} ${row.address}`
+      `[DB] inserting linked_account: ${row.linked_type} ${row.linked_id} ${row.address}`
     );
     const client = await this.pool.connect();
 
@@ -109,9 +109,27 @@ export class DB {
     await client.query(
       `INSERT INTO linked_account (linked_type, linked_id, address, signed_json, signature_hex)
        VALUES ($1, $2, $3, $4, $5)`,
-      [row.linkedType, row.linkedId, row.address, row.signedJson, row.signature]
+      [
+        row.linked_type,
+        row.linked_id,
+        row.address,
+        row.signed_json,
+        row.signature_hex,
+      ]
     );
     client.release();
+  }
+
+  async loadLinkedAccounts(): Promise<LinkedAccountRow[]> {
+    console.log(`[DB] loading linked accounts`);
+    const client = await this.pool.connect();
+    const result = await client.query<LinkedAccountRow>(
+      `SELECT linked_type, linked_id, address, signed_json, signature_hex FROM linked_account`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} linked accounts`);
+    return result.rows;
   }
 
   async loadNameBlacklist(): Promise<Set<string>> {
@@ -212,9 +230,9 @@ interface RawInviteCodeRow {
 }
 
 interface LinkedAccountRow {
-  linkedType: string;
-  linkedId: string;
+  linked_type: string;
+  linked_id: string;
   address: string;
-  signedJson: string;
-  signature: string;
+  signed_json: string;
+  signature_hex: string;
 }

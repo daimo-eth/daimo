@@ -4,16 +4,17 @@ import {
   DisplayOpEvent,
   EAccount,
   KeyData,
+  LinkedAccount,
   RecommendedExchange,
   assert,
   hasAccountName,
 } from "@daimo/common";
 import { Address, hexToBytes } from "viem";
 
+import { ProfileCache } from "./profile";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
-import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../network/viemClient";
 import { Watcher } from "../shovel/watcher";
@@ -33,6 +34,7 @@ export interface AccountHistoryResult {
   transferLogs: DisplayOpEvent[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
+  linkedAccounts: LinkedAccount[];
 
   suggestedActions: SuggestedAction[];
 }
@@ -56,7 +58,7 @@ export async function getAccountHistory(
   watcher: Watcher,
   vc: ViemClient,
   coinIndexer: CoinIndexer,
-  noteIndexer: NoteIndexer,
+  profileCache: ProfileCache,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster
@@ -119,6 +121,9 @@ export async function getAccountHistory(
   // Prefetch info required to deposit to your Daimo account.
   const recommendedExchanges = fetchRecommendedExchanges(eAcc);
 
+  // Get linked accounts
+  const linkedAccounts = profileCache.getLinkedAccounts(address);
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -135,6 +140,7 @@ export async function getAccountHistory(
     transferLogs,
     namedAccounts,
     accountKeys,
+    linkedAccounts,
   };
 
   // Suggest an action to the user, like backing up their account

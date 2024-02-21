@@ -1,7 +1,5 @@
 import {
-  FarcasterLinkedAccount,
   KeyData,
-  LinkedAccount,
   getSlotLabel,
   guessTimestampFromNum,
   timeAgo,
@@ -27,8 +25,8 @@ import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
-import { FarcasterBubble } from "../shared/FarcasterBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
+import { LinkedAccountBubble } from "../shared/LinkedAccountBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -147,14 +145,6 @@ function LinkedAccountsRow({
       ))}
     </View>
   );
-}
-
-function LinkedAccountBubble({ acc }: { acc: LinkedAccount }) {
-  if (acc.type === "farcaster") {
-    return <FarcasterBubble fcAccount={acc as FarcasterLinkedAccount} />;
-  } else {
-    throw new Error(`Unsupported linked account ${acc.type}`);
-  }
 }
 
 function DevicesSection({ account }: { account: Account }) {

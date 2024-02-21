@@ -12,6 +12,7 @@ import {
 
 import {
   DaimoContact,
+  EAccountContact,
   getContactName,
   useRecipientSearch,
 } from "../../../logic/daimoContacts";
@@ -20,6 +21,7 @@ import { Account } from "../../../model/account";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { ButtonMed } from "../../shared/Button";
 import { Bubble, ContactBubble } from "../../shared/ContactBubble";
+import { LinkedAccountBubble } from "../../shared/LinkedAccountBubble";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { useNav } from "../../shared/nav";
@@ -190,11 +192,27 @@ function RecipientRow({
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
           <ContactBubble contact={recipient} size={36} />
-          <TextBody>{name}</TextBody>
+          <View style={{ flexDirection: "column" }}>
+            <TextBody>{name}</TextBody>
+            {recipient.type === "eAcc" && (
+              <ProfileLinks recipient={recipient} />
+            )}
+          </View>
         </View>
         <TextLight>{shortenedLightText}</TextLight>
       </View>
     </Row>
+  );
+}
+
+function ProfileLinks({ recipient }: { recipient: EAccountContact }) {
+  const links = recipient.linkedAccounts || [];
+  return (
+    <View style={{ flexDirection: "row" }}>
+      {links.map((link, index) => (
+        <LinkedAccountBubble key={index} acc={link} />
+      ))}
+    </View>
   );
 }
 

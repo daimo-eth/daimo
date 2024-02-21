@@ -256,6 +256,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     namedAccounts,
     accountKeys: result.accountKeys || [],
     pendingKeyRotation: stillPendingKeyRotation,
+    linkedAccounts: result.linkedAccounts,
   };
 
   console.log(
