@@ -201,9 +201,13 @@ function getTabOptions(
     case "ReceiveTab":
       return { title: "Request", tabBarIcon: getIcon("download"), ...opts };
     case "HomeTab":
-      return { title: "Home", tabBarIcon: ({ color }) => {
-        return <IconHome color={color} />;
-      }, ...opts };
+      return {
+        title: "Home",
+        tabBarIcon: ({ color }) => {
+          return <IconHome color={color} />;
+        },
+        ...opts,
+      };
     case "SendTab":
       return { title: "Send", tabBarIcon: getIcon("paper-airplane"), ...opts };
     case "SettingsTab":
