@@ -21,7 +21,6 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        // Add CSS variables
         sans: ["var(--font-neue-montreal)"],
       },
     },

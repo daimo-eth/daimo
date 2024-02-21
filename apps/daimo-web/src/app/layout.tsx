@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Daimo",
   description: "Stablecoin payments app",
   icons: {
-    icon: "/logo-web-favicon.png",
+    icon: "/logo-web-favicon.png", // todo
   },
 };
 
@@ -19,7 +19,7 @@ const neueMontreal = localFont({
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${neueMontreal.className} font-sans`}>
+    <html lang="en" className={`${neueMontreal.className}`}>
       <body>{children}</body>
     </html>
   );
