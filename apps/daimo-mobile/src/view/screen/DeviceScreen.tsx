@@ -157,6 +157,7 @@ export function DeviceScreen({ route, navigation }: Props) {
             title="Remove Device"
             onPress={removeDevice}
             disabled={!canRemove}
+            showBiometricIcon
           />
         );
       case "loading":

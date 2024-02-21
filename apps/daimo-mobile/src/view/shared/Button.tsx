@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import {
   Image,
+  ImageSourcePropType,
   StyleSheet,
   TextStyle,
   TouchableHighlight,
@@ -18,6 +19,7 @@ import Animated, {
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
 import { DaimoText } from "./text";
+import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
 
 interface TextButtonProps {
@@ -25,6 +27,7 @@ interface TextButtonProps {
   children?: React.ReactNode;
   onPress?: () => void;
   disabled?: boolean;
+  showBiometricIcon?: boolean;
 }
 
 interface ButtonProps extends TextButtonProps {
@@ -79,11 +82,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
         style={[
           props.disabled ? disabledStyle : style.button,
           buttonStyle,
-          {
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "row",
-          },
+          styles.centerContent,
         ]}
         {...(touchUnderlay || touchHighlightUnderlay.subtle)}
       >
@@ -118,6 +117,7 @@ export function ButtonBig(props: ButtonProps) {
       {...props}
       style={useStyle(buttonStyles.big, props)}
       touchUnderlay={useTouchUnderlay(props.type)}
+      icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
     />
   );
 }
@@ -128,12 +128,19 @@ export function ButtonMed(props: ButtonProps) {
       {...props}
       style={useStyle(buttonStyles.med, props)}
       touchUnderlay={useTouchUnderlay(props.type)}
+      icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
     />
   );
 }
 
 export function TextButton(props: TextButtonProps) {
-  return <Button {...props} style={useStyle(buttonStyles.small, props)} />;
+  return (
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.small, props)}
+      icon={FaceIdPrimaryIcon}
+    />
+  );
 }
 
 function useStyle(base: ButtonStyle, props: TextButtonProps) {
@@ -200,6 +207,7 @@ function Button(
   props: TextButtonProps & {
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
+    icon?: ImageSourcePropType;
   }
 ) {
   const disabledStyle = useMemo(
@@ -220,7 +228,14 @@ function Button(
       disabled={props.disabled}
       {...(props.touchUnderlay || touchHighlightUnderlay.subtle)}
     >
-      {child}
+      <View style={styles.centerContent}>
+        {child}
+        {props.showBiometricIcon && props.icon && (
+          <View style={styles.biometricIconContainer}>
+            <Image source={props.icon} style={styles.biometricIcon} />
+          </View>
+        )}
+      </View>
     </TouchableHighlight>
   );
 }
@@ -279,5 +294,10 @@ const styles = StyleSheet.create({
   biometricIcon: {
     height: 24,
     width: 24,
+  },
+  centerContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
   },
 });
