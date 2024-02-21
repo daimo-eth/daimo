@@ -13,7 +13,7 @@ export default {
   splash: {
     image: "./assets/splash.png",
     resizeMode: "cover",
-    backgroundColor: "#000000",
+    backgroundColor: "#14B174",
   },
   assetBundlePatterns: ["assets/*"],
   scheme: "daimo",
@@ -91,6 +91,7 @@ export default {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundImage: "./assets/adaptive-back.png",
+      backgroundColor: "#14B174",
     },
     softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
