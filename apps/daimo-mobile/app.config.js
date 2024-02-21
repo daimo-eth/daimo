@@ -90,7 +90,7 @@ export default {
     ],
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#14B174",
+      backgroundImage: "./assets/adaptive-back.png",
     },
     softwareKeyboardLayoutMode: "pan",
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
