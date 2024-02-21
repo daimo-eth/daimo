@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
@@ -11,9 +12,14 @@ export const metadata: Metadata = {
   },
 };
 
+const neueMontreal = localFont({
+  src: "../fonts/PPNeueMontreal-Book.otf",
+  variable: "--font-neue-montreal",
+});
+
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${neueMontreal.className} font-sans`}>
       <body>{children}</body>
     </html>
   );

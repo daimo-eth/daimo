@@ -19,6 +19,12 @@ module.exports = {
       grayMid: "#717171",
       midnight: "#262626",
     },
+    extend: {
+      fontFamily: {
+        // Add CSS variables
+        sans: ['var(--font-neue-montreal)'],
+      },
+    },
   },
   plugins: [],
 };
