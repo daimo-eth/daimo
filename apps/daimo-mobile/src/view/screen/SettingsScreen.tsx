@@ -8,7 +8,6 @@ import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
-  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -22,23 +21,21 @@ import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount, useAccount } from "../../model/account";
-import { FarcasterClient } from "../../profile/farcaster";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
-import { ButtonMed, TextButton } from "../shared/Button";
+import { BadgeButton, ButtonMed, TextButton } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
+import { FarcasterButton } from "../shared/FarcasterBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import image from "../shared/image";
 import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
   TextBody,
   TextBodyMedium,
-  TextBtnCaps,
   TextColor,
   TextLight,
   TextMeta,
@@ -150,46 +147,12 @@ function LinkedAccountsRow({
   const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
 
   if (linkedAccounts.length === 0) {
-    return <DarkButton title="NO SOCIALS CONNECTED" />;
+    return <BadgeButton title="NO SOCIALS CONNECTED" />;
   }
 
   // Generalize once needed
   const fcAccount = linkedAccounts[0];
-  const username = FarcasterClient.getDispUsername(fcAccount).toUpperCase();
-
-  return (
-    <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-      <DarkButton onPress={connectFarc} title={username} />
-      <Image
-        source={{ uri: image.iconFarcaster }}
-        style={{ width: 16, height: 16 }}
-      />
-    </View>
-  );
-}
-
-function DarkButton({
-  title,
-  onPress,
-}: {
-  title: string;
-  onPress?: () => void;
-}) {
-  return (
-    <TouchableHighlight
-      onPress={onPress}
-      style={{
-        backgroundColor: color.ivoryDark,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 8,
-      }}
-      hitSlop={24}
-      {...touchHighlightUnderlay.subtle}
-    >
-      <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>
-    </TouchableHighlight>
-  );
+  return <FarcasterButton fcAccount={fcAccount} onPress={connectFarc} />;
 }
 
 function DevicesSection({ account }: { account: Account }) {

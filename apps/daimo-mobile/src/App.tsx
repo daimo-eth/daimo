@@ -108,6 +108,8 @@ function AppBody() {
   // Handle dispatch > open bottom sheet
   const openFC = () => setBottomSheet("connectFarcaster");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
+  const hideSheet = () => setBottomSheet(null);
+  useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
   return (
     <DispatcherContext.Provider value={dispatcher}>

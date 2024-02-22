@@ -168,7 +168,6 @@ function SendChooseAmount({
 
   return (
     <View>
-      <Spacer h={8} />
       {infoBubble}
       <Spacer h={32} />
       <RecipientDisplay recipient={recipient} />
@@ -240,7 +239,6 @@ function SendConfirm({
 
   return (
     <View>
-      <Spacer h={8} />
       {infoBubble}
       <Spacer h={32} />
       <RecipientDisplay recipient={recipient} isRequest={isRequest} />

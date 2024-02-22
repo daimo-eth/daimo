@@ -36,9 +36,15 @@ export async function search(
     ret = dAccounts.map((d) => ({ ...d, originalMatch: d.name }));
   }
 
-  // Add linked accounts
+  // Add linked accounts to search results
   for (const r of ret) {
     r.linkedAccounts = profileCache.getLinkedAccounts(r.addr);
+  }
+  const linkedAccountsRes = await profileCache.searchLinkedAccounts(prefix);
+  for (const l of linkedAccountsRes) {
+    const addr = getAddress(l.addr);
+    const eAcc = await nameReg.getEAccount(addr);
+    ret.push({ ...eAcc, linkedAccounts: [l.linkedAccount], originalMatch: "" });
   }
 
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);

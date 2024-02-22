@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { DaimoContact, getContactName } from "../../../logic/daimoContacts";
 import { ButtonCircle } from "../../shared/ButtonCircle";
 import { ContactBubble } from "../../shared/ContactBubble";
+import { FarcasterBubble } from "../../shared/FarcasterBubble";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { TextH3, TextLight } from "../../shared/text";
@@ -22,7 +23,11 @@ export function RecipientDisplay({
   const subtitle = (function () {
     switch (recipient.type) {
       case "eAcc":
-        return recipient.originalMatch;
+        if (recipient.linkedAccounts?.length) {
+          return <FarcasterBubble fcAccount={recipient.linkedAccounts[0]} />;
+        } else {
+          return recipient.originalMatch;
+        }
       case "phoneNumber":
         return recipient.phoneNumber;
       case "email":

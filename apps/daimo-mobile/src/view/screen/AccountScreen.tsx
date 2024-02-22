@@ -18,6 +18,7 @@ import { Account } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { ButtonBig } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
+import { FarcasterButton } from "../shared/FarcasterBubble";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -31,7 +32,7 @@ import {
   useNav,
 } from "../shared/nav";
 import { color, ss } from "../shared/style";
-import { TextH3 } from "../shared/text";
+import { TextBody } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -152,6 +153,9 @@ function AccountScreenBody({
     ? `Joined ${timeMonth(eAcc.timestamp)}`
     : getAccountName({ addr: eAcc.addr });
 
+  // Show linked accounts
+  const fcAccount = (eAcc.linkedAccounts || [])[0];
+
   return (
     <>
       <View style={styles.screenPadding}>
@@ -159,8 +163,13 @@ function AccountScreenBody({
           <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
           <Spacer h={16} />
           <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
-          <Spacer h={8} />
-          <TextH3 color={color.gray3}>{subtitle}</TextH3>
+          <Spacer h={4} />
+          <TextBody color={color.gray3}>{subtitle}</TextBody>
+          {fcAccount && (
+            <>
+              <FarcasterButton fcAccount={fcAccount} />
+            </>
+          )}
         </View>
         <Spacer h={24} />
         <View style={ss.container.padH8}>

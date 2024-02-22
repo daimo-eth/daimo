@@ -124,6 +124,18 @@ export class ProfileCache {
     return this.linkedAccounts.get(addr) || [];
   }
 
+  searchLinkedAccounts(prefix: string): ProfileLink[] {
+    if (prefix.length < 2) return [];
+    console.log();
+    return this.links.filter((l) => {
+      const { username, displayName } = l.linkedAccount;
+      return (
+        (username || "").startsWith(prefix) ||
+        (displayName || "").startsWith(prefix)
+      );
+    });
+  }
+
   private indexLinkedAccount(link: ProfileLink) {
     // Remove conflicting links
     this.links = this.links.filter(

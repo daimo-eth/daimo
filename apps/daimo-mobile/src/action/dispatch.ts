@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-type Action = { name: "connectFarcaster" };
+type Action = { name: "connectFarcaster" } | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];
 

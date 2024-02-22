@@ -18,7 +18,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
-import { DaimoText } from "./text";
+import { DaimoText, TextBtnCaps } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
 
@@ -140,6 +140,30 @@ export function TextButton(props: TextButtonProps) {
       style={useStyle(buttonStyles.small, props)}
       icon={FaceIdPrimaryIcon}
     />
+  );
+}
+
+export function BadgeButton({
+  title,
+  onPress,
+}: {
+  title: string;
+  onPress?: () => void;
+}) {
+  return (
+    <TouchableHighlight
+      onPress={onPress}
+      style={{
+        backgroundColor: color.ivoryDark,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 8,
+      }}
+      hitSlop={24}
+      {...touchHighlightUnderlay.subtle}
+    >
+      <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>
+    </TouchableHighlight>
   );
 }
 

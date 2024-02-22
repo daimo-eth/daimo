@@ -6,21 +6,23 @@ import {
   now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { useEffect, useState } from "react";
-import { Image, Linking, View } from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { Linking, View } from "react-native";
 import { stringToBytes } from "viem";
 
+import { DispatcherContext } from "../../action/dispatch";
 import { signAsync } from "../../action/sign";
 import { env } from "../../logic/env";
 import { Account, getAccountManager } from "../../model/account";
 import { FarcasterClient } from "../../profile/farcaster";
 import { QRCodeBox } from "../screen/QRScreen";
 import { ButtonMed } from "../shared/Button";
+import { FarcasterButton } from "../shared/FarcasterBubble";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
 import image from "../shared/image";
-import { color, ss } from "../shared/style";
-import { TextBody, TextBtnCaps, TextH3, TextLight } from "../shared/text";
+import { ss } from "../shared/style";
+import { TextBody, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 // Connect Farcaster
@@ -114,6 +116,9 @@ function LinkFarcasterSection({
   })();
   const fcUsername = FarcasterClient.getDispUsername(fcAcc);
 
+  // Once done, hide the bottom sheet
+  const dispatcher = useContext(DispatcherContext);
+
   const linkFC = async () => {
     console.log("[FARCASTER] link profile");
     const action: OffchainAction = {
@@ -122,6 +127,7 @@ function LinkFarcasterSection({
       link: { addr: account.address, linkedAccount: fcAcc },
     };
     await updateProfileLinks(account, action);
+    dispatcher.dispatch({ name: "hideBottomSheet" });
   };
 
   const unlinkFC = async () => {
@@ -132,6 +138,7 @@ function LinkFarcasterSection({
       linkID: { addr: account.address, type: "farcaster", id: fcAcc.id },
     };
     await updateProfileLinks(account, action);
+    dispatcher.dispatch({ name: "hideBottomSheet" });
   };
 
   return (
@@ -169,31 +176,14 @@ async function updateProfileLinks(account: Account, action: OffchainAction) {
 }
 
 function ProfilePreview({ fcAccount }: { fcAccount: FarcasterLinkedAccount }) {
-  const username = FarcasterClient.getDispUsername(fcAccount).toUpperCase();
-
   return (
     <View
       style={{
         flexDirection: "row",
-        gap: 8,
-        alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <View
-        style={{
-          backgroundColor: color.ivoryDark,
-          paddingHorizontal: 12,
-          paddingVertical: 4,
-          borderRadius: 8,
-        }}
-      >
-        <TextBtnCaps color={color.grayDark}>{username}</TextBtnCaps>
-      </View>
-      <Image
-        source={{ uri: image.iconFarcaster }}
-        style={{ width: 16, height: 16 }}
-      />
+      <FarcasterButton fcAccount={fcAccount} />
     </View>
   );
 }
