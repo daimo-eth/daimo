@@ -27,7 +27,7 @@ export function SectionFAQ({ faq }: { faq: FAQ[] }) {
         }
       `}</style>
         <div className="m-auto max-w-screen-xl px-8 section-faq">
-          <h1 className="text-[77px] tracking-tight">
+          <h1 className="text-[32px] md:text-[50px] lg:text-[77px] tracking-tight">
             Frequently asked questions
           </h1>
           <Spacer h={48} />
@@ -51,13 +51,12 @@ function Question({
   answerHtml: string;
 }) {
   const [isOpen, setIsOpen] = useState(false); // Add this line to track open state
-
   const toggleOpen = () => setIsOpen(!isOpen); // This function toggles the open state
 
   return (
     <li className="border-b border-grayLight">
       <details className="group" onToggle={toggleOpen}>
-        <summary className="text-[22px] text-[#323232] leading-none cursor-pointer py-8 flex justify-between items-center">
+        <summary className="text-[16px] md:text-[22px] text-[#323232] leading-none cursor-pointer py-8 flex justify-between items-center">
           {question}
           <span
             className={`text-[#14b174] transform transition-transform ${
@@ -68,7 +67,7 @@ function Question({
           </span>
         </summary>
         <p
-          className="text-[22px] text-[#777] leading-snug"
+          className="text-[16px] md:text-[22px] text-[#777] leading-snug"
           dangerouslySetInnerHTML={{ __html: answerHtml }}
         />
         <Spacer h={16} />
