@@ -67,7 +67,6 @@ export function SendNoteScreen({ route }: Props) {
 
   useEffect(() => {
     if (!recipient) return;
-
     getSendLinkAction(recipient, account.name).then(setExternalAction);
   }, [recipient, noteDollars]);
 

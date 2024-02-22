@@ -60,7 +60,7 @@ export function AmountChooser({
         lagAutoFocus={lagAutoFocus}
         onFocus={onFocus}
       />
-      <Spacer h={8} />
+      <Spacer h={4} />
       <TextCenter>
         <TextLight>
           {showAmountAvailable ? `${dollarStr} available` : " "}

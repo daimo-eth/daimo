@@ -195,7 +195,10 @@ function RecipientRow({
           <View style={{ flexDirection: "column" }}>
             <TextBody>{name}</TextBody>
             {recipient.type === "eAcc" && (
-              <ProfileLinks recipient={recipient} />
+              <>
+                <Spacer h={2} />
+                <ProfileLinks recipient={recipient} />
+              </>
             )}
           </View>
         </View>
@@ -319,7 +322,7 @@ const styles = StyleSheet.create({
   },
   resultRow: {
     paddingHorizontal: 24,
-    paddingVertical: 12,
+    height: 64,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

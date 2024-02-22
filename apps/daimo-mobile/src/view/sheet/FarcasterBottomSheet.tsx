@@ -21,7 +21,7 @@ import { FarcasterButton } from "../shared/FarcasterBubble";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
 import image from "../shared/image";
-import { ss } from "../shared/style";
+import { color, ss } from "../shared/style";
 import { TextBody, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -68,11 +68,16 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
 
   const isLoading = fcAccount == null && !error && !data;
   const hasFcAccount = fcAccount != null || (!error && data);
+  const header = (function () {
+    if (!error && data) return "Your account is verified";
+    else if (fcAccount != null) return "Your account is linked";
+    else return "Connect Farcaster";
+  })();
   return (
     <View style={ss.container.screen}>
       <View style={ss.container.padH16}>
         <Spacer h={16} />
-        <TextH3>{hasFcAccount ? "Connected" : "Connect Farcaster"}</TextH3>
+        <TextH3>{header}</TextH3>
         <Spacer h={12} />
         {isLoading && url == null && <TextLight>Loading...</TextLight>}
         {isLoading && url != null && <FarcasterQRButton url={url} />}
@@ -143,10 +148,10 @@ function LinkFarcasterSection({
 
   return (
     <View>
-      <TextBody>Welcome, {fcUsername}</TextBody>
-      <Spacer h={32} />
+      <TextBody color={color.grayMid}>Welcome, {fcUsername}</TextBody>
+      <Spacer h={64} />
       <ProfilePreview fcAccount={fcAcc} />
-      <Spacer h={32} />
+      <Spacer h={64} />
       <ButtonMed
         type="primary"
         title={linkedAcc ? "REMOVE FROM PROFILE" : "ADD TO PROFILE"}

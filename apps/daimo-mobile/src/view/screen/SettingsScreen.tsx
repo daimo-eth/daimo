@@ -130,9 +130,7 @@ function AccountHeader({ account }: { account: Account }) {
             )}
           </TextBodyMedium>
         </View>
-        <Spacer h={8} />
         <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
-        <Spacer h={8} />
       </View>
     </View>
   );

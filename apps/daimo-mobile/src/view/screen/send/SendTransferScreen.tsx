@@ -165,13 +165,15 @@ function SendChooseAmount({
       />
     );
   }
+  const hasLinkedAccounts =
+    recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
   return (
     <View>
       {infoBubble}
       <Spacer h={32} />
       <RecipientDisplay recipient={recipient} />
-      <Spacer h={24} />
+      <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
         dollars={dollars}
         onSetDollars={setDollars}
@@ -236,13 +238,15 @@ function SendConfirm({
         <SendTransferButton {...{ account, recipient, dollars: nDollars }} />
       );
   })();
+  const hasLinkedAccounts =
+    recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
   return (
     <View>
       {infoBubble}
       <Spacer h={32} />
       <RecipientDisplay recipient={recipient} isRequest={isRequest} />
-      <Spacer h={24} />
+      <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
         dollars={nDollars}
         onSetDollars={useCallback(() => {}, [])}

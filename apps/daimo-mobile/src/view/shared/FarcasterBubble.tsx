@@ -5,7 +5,7 @@ import { BadgeButton } from "./Button";
 import Spacer from "./Spacer";
 import image from "./image";
 import { color } from "./style";
-import { TextMeta } from "./text";
+import { TextBtnCaps, TextMeta } from "./text";
 import { FarcasterClient } from "../../profile/farcaster";
 
 export function FarcasterButton({
@@ -25,21 +25,22 @@ export function FarcasterButton({
   }
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        gap: 8,
-        alignItems: "center",
-        justifyContent: align,
-        paddingVertical: 8,
-      }}
-    >
-      <BadgeButton onPress={onPress} title={username} />
-      <Image
-        source={{ uri: image.iconFarcaster }}
-        style={{ width: 16, height: 16, zIndex: -1 }}
-      />
-    </View>
+    <BadgeButton onPress={onPress}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 8,
+          alignItems: "center",
+          justifyContent: align,
+        }}
+      >
+        <Image
+          source={{ uri: image.iconFarcaster }}
+          style={{ width: 16, height: 16, zIndex: -1 }}
+        />
+        <TextBtnCaps color={color.grayDark}>{username}</TextBtnCaps>
+      </View>
+    </BadgeButton>
   );
 }
 
@@ -52,12 +53,12 @@ export function FarcasterBubble({
 
   return (
     <View style={styles.row}>
+      <TextMeta color={color.grayMid}>{dispUsername}</TextMeta>
+      <Spacer w={4} />
       <Image
         source={{ uri: image.iconFarcaster }}
         style={{ width: 12, height: 12 }}
       />
-      <Spacer w={2} />
-      <TextMeta color={color.grayMid}>{dispUsername}</TextMeta>
     </View>
   );
 }

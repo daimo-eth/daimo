@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -145,25 +145,29 @@ export function TextButton(props: TextButtonProps) {
 
 export function BadgeButton({
   title,
+  children,
   onPress,
 }: {
-  title: string;
+  title?: string;
+  children?: ReactNode;
   onPress?: () => void;
 }) {
   return (
-    <TouchableHighlight
-      onPress={onPress}
-      style={{
-        backgroundColor: color.ivoryDark,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 8,
-      }}
-      hitSlop={24}
-      {...touchHighlightUnderlay.subtle}
-    >
-      <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>
-    </TouchableHighlight>
+    <View style={{ paddingVertical: 8 }}>
+      <TouchableHighlight
+        onPress={onPress}
+        style={{
+          backgroundColor: color.ivoryDark,
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderRadius: 8,
+        }}
+        hitSlop={24}
+        {...touchHighlightUnderlay.subtle}
+      >
+        {children || <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>}
+      </TouchableHighlight>
+    </View>
   );
 }
 

@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { DaimoContact, getContactName } from "../../../logic/daimoContacts";
 import { ButtonCircle } from "../../shared/ButtonCircle";
 import { ContactBubble } from "../../shared/ContactBubble";
-import { FarcasterBubble } from "../../shared/FarcasterBubble";
+import { FarcasterButton } from "../../shared/FarcasterBubble";
 import Spacer from "../../shared/Spacer";
 import { useNav } from "../../shared/nav";
 import { TextH3, TextLight } from "../../shared/text";
@@ -24,7 +24,7 @@ export function RecipientDisplay({
     switch (recipient.type) {
       case "eAcc":
         if (recipient.linkedAccounts?.length) {
-          return <FarcasterBubble fcAccount={recipient.linkedAccounts[0]} />;
+          return <FarcasterButton fcAccount={recipient.linkedAccounts[0]} />;
         } else {
           return recipient.originalMatch;
         }
@@ -51,11 +51,11 @@ export function RecipientDisplay({
       <ButtonCircle size={64} onPress={goToAccount}>
         <ContactBubble contact={recipient} size={64} transparent />
       </ButtonCircle>
-      <Spacer h={16} />
+      <Spacer h={8} />
       {isRequest && <TextLight>Requested by</TextLight>}
-      {isRequest && <Spacer h={8} />}
+      {isRequest && <Spacer h={4} />}
       <TextH3>{disp}</TextH3>
-      {showSubtitle && <Spacer h={8} />}
+      {showSubtitle && <Spacer h={4} />}
       {showSubtitle && <TextLight>{subtitle}</TextLight>}
     </View>
   );
