@@ -23,6 +23,10 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-neue-montreal)"],
       },
+      backgroundImage: {
+        "midnight-gradient":
+          "linear-gradient(to bottom, #FFFFFF 30%, #ABF99E 50%, #111111 70%)",
+      },
     },
   },
   plugins: [],
