@@ -1,58 +1,42 @@
 import Image from "next/image";
 
-import { Spacer } from "../components/layout";
-import { TextH1 } from "../components/typography";
+import { PixelBackground } from "../components/PixelBackground";
 
 export function SectionWhyDaimo() {
   return (
-    <section className="bg-white pt-24 md:bg-ivory md:py-24">
-      <div className="m-auto max-w-screen-xl px-8">
-        <TextH1>Why Daimo</TextH1>
-        <Spacer h={48} />
-        <div className="flex gap-16 md:gap-8 xl:gap-16 flex-col items-stretch md:flex-row">
-          <WhyPellet
-            icon="/assets/ionicon-hardware-chip.svg"
-            title="Secure"
-            copy="Store money using secure hardware on your phone. Yours alone, like cash."
-          />
-          <WhyPellet
-            icon="/assets/ionicon-earth.svg"
-            title="Global"
-            copy="Receive USDC from anyone. Send anywhere, including to .eth addresses."
-          />
-          <WhyPellet
-            icon="/assets/ionicon-checkmark-circle.svg"
-            title="Snappy"
-            copy="Transfers are instant on rollups, with all the security of Ethereum under the hood."
+    <section className="bg-white w-full flex">
+      <div className="flex flex-col justify-center flex-1 bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat px-20 py-24">
+        <h2 className="font-medium text-[77px] text-[#111111]">Why Daimo?</h2>
+        <p className="font-medium text-[24px] text-[#535353]">
+          Secure, audited, and fully open source.
+          <br />
+          The safest, fastest way to stablecoin.
+        </p>
+        <div className="flex justify-center">
+          <Image
+            src="/assets/why-daimo-secure.png"
+            width={800}
+            height={800}
+            alt="Why Daimo"
+            className="w-[260px] pt-14"
           />
         </div>
       </div>
+      <div className="flex flex-col justify-center flex-1 px-20 z-10">
+        <h3 className="font-medium text-[48px] text-[#111111]">
+          Your keys, your coins.
+        </h3>
+        <div className="text-[#777] text-[24px] flex flex-col space-y-4 max-w-sm">
+          <p>No seed phrase.</p>
+          <p>
+            Keys live in secure hardware on your phone. Secure passkey backups.
+          </p>
+          <p>The freedom of self-custody, easier than ever before.</p>
+        </div>
+        <div className="absolute -z-10">
+          <PixelBackground />
+        </div>
+      </div>
     </section>
-  );
-}
-
-function WhyPellet({
-  icon,
-  title,
-  copy,
-}: {
-  icon: string;
-  title: string;
-  copy: string;
-}) {
-  return (
-    <div className="bg-ivoryDark rounded-lg p-16 md:max-w-md basis-0 flex-1">
-      <Image
-        src={icon}
-        width={72}
-        height={72}
-        alt={title}
-        className="w-20 h-20"
-      />
-      <Spacer h={36} />
-      <TextH1>{title}</TextH1>
-      <Spacer h={36} />
-      <p className="text-grayMid text-2xl">{copy}</p>
-    </div>
   );
 }
