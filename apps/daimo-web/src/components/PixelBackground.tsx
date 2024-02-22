@@ -3,11 +3,11 @@ export function PixelBackground(
 ) {
   return (
     <svg
-      width="764"
-      height="761"
+      className="w-full h-auto"
       viewBox="0 0 764 761"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       <mask
         id="mask0_31_9266"

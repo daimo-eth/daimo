@@ -4,7 +4,7 @@ import { PixelBackground } from "../components/PixelBackground";
 
 export function SectionWhyDaimo() {
   return (
-    <section className="bg-white w-full flex">
+    <section className="bg-white w-full flex overflow-clip">
       <div className="flex flex-col justify-center flex-1 bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat px-20 py-24">
         <h2 className="font-medium text-[77px] text-[#111111]">Why Daimo?</h2>
         <p className="font-medium text-[24px] text-[#535353]">
@@ -22,7 +22,7 @@ export function SectionWhyDaimo() {
           />
         </div>
       </div>
-      <div className="flex flex-col justify-center flex-1 px-20 z-10">
+      <div className="relative flex flex-col justify-center flex-1 px-20 z-10">
         <h3 className="font-medium text-[48px] text-[#111111]">
           Your keys, your coins.
         </h3>
@@ -33,7 +33,7 @@ export function SectionWhyDaimo() {
           </p>
           <p>The freedom of self-custody, easier than ever before.</p>
         </div>
-        <div className="absolute -z-10">
+        <div className="absolute inset-0 flex justify-center items-center -z-10">
           <PixelBackground />
         </div>
       </div>
