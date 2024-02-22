@@ -1,6 +1,7 @@
 import {
   LinkedAccount,
   ProfileLink,
+  ProfileLinkID,
   assertEqual,
   zFarcasterLinkedAccount,
   zOffchainAction,
@@ -47,9 +48,9 @@ export class ProfileCache {
     // Execute
     switch (action.type) {
       case "profileLink":
-        return this.linkAccount(addr, action.link.linkedAccount, signature);
+        return this.linkAccount(addr, action.link.linkedAccount);
       case "profileUnlink":
-        throw new Error("Unlink not implemented");
+        return this.unlinkAccount(addr, action.linkID);
       default:
         throw new Error(`Unsupported offchain action ${actionJSON}`);
     }
@@ -81,18 +82,39 @@ export class ProfileCache {
 
   async linkAccount(
     addr: Address,
-    linkedAccount: LinkedAccount,
-    signature: Hex
+    linkedAccount: LinkedAccount
   ): Promise<LinkedAccount[]> {
     const linkedAccJSON = JSON.stringify(linkedAccount);
     console.log(`[PROFILE] linking: ${linkedAccJSON} to addr: ${addr}`);
 
     // Save to DB
-    await linkAccount(addr, linkedAccount, signature, this.vc, this.db);
+    await linkAccount(addr, linkedAccount, this.db);
 
     // Index in memory
     const link: ProfileLink = { addr, linkedAccount };
     this.indexLinkedAccount(link);
+
+    // Return all accounts for this address
+    return this.getLinkedAccounts(addr);
+  }
+
+  async unlinkAccount(
+    addr: Address,
+    linkID: ProfileLinkID
+  ): Promise<LinkedAccount[]> {
+    console.log(`[PROFILE] unlinking ${linkID.type} ${linkID.id} from ${addr}`);
+
+    // Remove from DB
+    await this.db.deleteLinkedAccount(linkID);
+
+    // Remove from memory
+    this.links = this.links.filter(
+      (l) =>
+        l.addr !== linkID.addr ||
+        l.linkedAccount.type !== linkID.type ||
+        l.linkedAccount.id !== linkID.id
+    );
+    this.reindex();
 
     // Return all accounts for this address
     return this.getLinkedAccounts(addr);
@@ -120,13 +142,11 @@ export class ProfileCache {
 async function linkAccount(
   addr: Address,
   linkedAcc: LinkedAccount,
-  signature: Hex,
-  vc: ViemClient,
   db: DB
 ): Promise<LinkedAccount> {
   switch (linkedAcc.type) {
     case "farcaster":
-      return linkFarcaster(addr, linkedAcc, signature, db);
+      return linkFarcaster(addr, linkedAcc, db);
     default:
       throw new Error(`Unsupported linked account type: ${linkedAcc.type}`);
   }
@@ -135,7 +155,6 @@ async function linkAccount(
 async function linkFarcaster(
   addr: Address,
   linkedAcc: LinkedAccount,
-  signature: Hex,
   db: DB
 ): Promise<LinkedAccount> {
   // Save to DB

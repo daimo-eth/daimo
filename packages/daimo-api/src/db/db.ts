@@ -1,3 +1,4 @@
+import { ProfileLinkID } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
@@ -132,6 +133,16 @@ export class DB {
       `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
        VALUES ($1, $2, $3, $4)`,
       [row.linked_type, row.linked_id, row.address, row.account_json]
+    );
+    client.release();
+  }
+
+  async deleteLinkedAccount(linkID: ProfileLinkID) {
+    console.log(`[DB] deleting linked_account: ${linkID.type} ${linkID.id}`);
+    const client = await this.pool.connect();
+    await client.query(
+      `DELETE FROM linked_account WHERE linked_type = $1 AND linked_id = $2 AND address = $3`,
+      [linkID.type, linkID.id, linkID.addr]
     );
     client.release();
   }
