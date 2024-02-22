@@ -37,12 +37,12 @@ export function SectionHero() {
 
 function HeroH1({ children }: { children: React.ReactNode }) {
   return (
-    <h1 className="text-[84px] font-semibold text-white leading-[84px] ">
+    <h1 className="text-[84px] font-medium text-white leading-[84px] ">
       {children}
     </h1>
   );
 }
 
 function HeroH2({ children }: { children: React.ReactNode }) {
-  return <h1 className="text-[32px] text-grayLight">{children}</h1>;
+  return <h1 className="text-[32px] font-medium text-grayLight">{children}</h1>;
 }

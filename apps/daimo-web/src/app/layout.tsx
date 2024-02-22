@@ -13,13 +13,35 @@ export const metadata: Metadata = {
 };
 
 const neueMontreal = localFont({
-  src: "../fonts/PPNeueMontreal-Book.otf",
+  src: [
+    {
+      path: "../fonts/PPNeueMontreal-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/PPNeueMontreal-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/PPNeueMontreal-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../fonts/PPNeueMontreal-BoldItalic.woff2",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  display: "swap",
   variable: "--font-neue-montreal",
 });
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${neueMontreal.className}`}>
+    <html lang="en" className={`${neueMontreal.variable} font-sans`}>
       <body>{children}</body>
     </html>
   );
