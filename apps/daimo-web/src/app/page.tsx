@@ -19,7 +19,6 @@ export default function HomePage() {
       <SectionWhyDaimo />
       <SectionTestimonial />
       <SectionFAQ faq={parseFAQs(readmeMD)} />
-      <SectionTeam />
       <Footer />
     </>
   );
