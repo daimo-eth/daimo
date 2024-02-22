@@ -2,10 +2,10 @@ import { Spacer } from "../components/layout";
 
 export function SectionTestimonial() {
   return (
-    <section className="bg-[#144B44] py-32 m-4 rounded-2xl min-h-[80vh] relative overflow-hidden">
-      <div className="max-w-screen-xl px-16 md:px-32">
+    <section className="bg-[#144B44] py-20 lg:py-32 lg:m-4 lg:rounded-2xl  relative  overflow-hidden">
+      <div className="relative max-w-screen-xl px-16 md:px-32 z-10">
         <QuoteIcon />
-        <div className="text-[84px] leading-[71px] -tracking-[3px] font-medium text-white pt-[49px]">
+        <div className="text-[40px] leading-[35px] lg:text-[84px] lg:leading-[71px] lg:-tracking-[3px] font-medium text-white pt-[49px]">
           There are these apps that just feel good to use but you can&apos;t
           exactly describe why. Daimo is one of those.
         </div>
@@ -21,7 +21,7 @@ export function SectionTestimonial() {
           </a>
         </p>
       </div>
-      <div className="absolute right-10 -bottom-4 overflow-hidden">
+      <div className="absolute top-10 left-32 lg:right-10 lg:-bottom-4 lg:top-auto lg:left-auto overflow-clip z-0">
         <BackgroundAccent />
       </div>
     </section>
@@ -56,13 +56,13 @@ function BackgroundAccent() {
     >
       <path
         d="M716.041 2H263.235C118.959 2 2 118.959 2 263.235V624.609C2 754.457 107.263 859.72 237.111 859.72V859.72C366.959 859.72 472.222 754.457 472.222 624.609V428.683"
-        stroke="#AAAAAA"
-        stroke-width="3"
+        className="stroke-[#aaa]/20"
+        strokeWidth="3"
       />
       <path
         d="M2.00574 1060L454.812 1060C599.088 1060 716.047 943.041 716.047 798.765L716.047 437.391C716.047 307.543 610.784 202.28 480.936 202.28V202.28C351.088 202.28 245.825 307.543 245.825 437.391L245.825 633.317"
-        stroke="#AAAAAA"
-        stroke-width="3"
+        className="stroke-[#aaa]/20"
+        strokeWidth="3"
       />
     </svg>
   );
