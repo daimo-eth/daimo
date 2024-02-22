@@ -3,7 +3,7 @@ import { TextBold, LinkBold } from "./typography";
 
 export function Footer() {
   return (
-    <header className="bg-[#111] py-10">
+    <header className="bg-[#111] py-16">
       <div className="flex pb-10 justify-center">
         <Logo height={24} width={24} color={"white"} />
       </div>
