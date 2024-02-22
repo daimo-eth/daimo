@@ -6,6 +6,7 @@ import {
   assert,
   canSendTo,
   getAccountName,
+  now,
   timeAgo,
 } from "@daimo/common";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
@@ -278,7 +279,7 @@ function TransferAmountDate({
       day: "numeric",
     });
   } else {
-    const nowS = Date.now() / 1e3;
+    const nowS = now();
     timeStr = timeAgo(timestamp, nowS);
   }
 

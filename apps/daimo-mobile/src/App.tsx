@@ -1,3 +1,4 @@
+import { now } from "@daimo/common";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
@@ -37,7 +38,7 @@ export default function App() {
   theme = { ...theme, colors: { ...theme.colors, background: color.white } };
 
   useEffect(() => {
-    const nowS = Math.floor(Date.now() / 1000);
+    const nowS = now();
     if (account == null || nowS - account.lastBlockTimestamp < 60 * 10) {
       SplashScreen.hideAsync();
     }

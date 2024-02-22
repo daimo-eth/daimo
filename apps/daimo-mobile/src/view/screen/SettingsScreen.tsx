@@ -8,6 +8,7 @@ import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -21,18 +22,27 @@ import { env } from "../../logic/env";
 import { getPushNotificationManager } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount, useAccount } from "../../model/account";
+import { FarcasterClient } from "../../profile/farcaster";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ButtonMed, TextButton } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
-import { LinkedAccountBubble } from "../shared/LinkedAccountBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import image from "../shared/image";
 import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { DaimoText, TextBody, TextLight, TextMeta } from "../shared/text";
+import {
+  DaimoText,
+  TextBody,
+  TextBodyMedium,
+  TextBtnCaps,
+  TextColor,
+  TextLight,
+  TextMeta,
+} from "../shared/text";
 
 export function SettingsScreen() {
   const [account] = useAccount();
@@ -78,13 +88,17 @@ function AccountSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <AccountHeader account={account} />
-      <Spacer h={24} />
-      <ButtonMed
-        type="primary"
-        title="CONNECT FARCASTER"
-        onPress={connectFarc}
-      />
       <Spacer h={16} />
+      {account.linkedAccounts.length === 0 && (
+        <>
+          <ButtonMed
+            type="primary"
+            title="CONNECT FARCASTER"
+            onPress={connectFarc}
+          />
+          <Spacer h={16} />
+        </>
+      )}
       <ButtonMed
         type="subtle"
         title="VIEW ACCOUNT ON EXPLORER"
@@ -99,6 +113,7 @@ function AccountHeader({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
   const l2Name = chainConfig.chainL2.name;
+  const isTestnet = chainConfig.chainL2.testnet;
 
   const eAcc = toEAccount(account);
 
@@ -107,13 +122,20 @@ function AccountHeader({ account }: { account: Account }) {
       <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
       <View>
         <AccountCopyLinkButton eAcc={eAcc} size="h3" />
+        <Spacer h={2} />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-          <TextBody color={color.gray3}>
-            {tokenSymbol} · {l2Name}
-            {chainConfig.chainL2.testnet && <> · TESTNET</>}
-          </TextBody>
+          <TextBodyMedium color={color.gray3}>
+            {tokenSymbol} ·{" "}
+            {isTestnet ? (
+              <TextColor color={color.success}>{l2Name}</TextColor>
+            ) : (
+              l2Name
+            )}
+          </TextBodyMedium>
         </View>
+        <Spacer h={8} />
         <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
+        <Spacer h={8} />
       </View>
     </View>
   );
@@ -124,26 +146,49 @@ function LinkedAccountsRow({
 }: {
   linkedAccounts: Account["linkedAccounts"];
 }) {
+  const dispatcher = useContext(DispatcherContext);
+  const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
+
   if (linkedAccounts.length === 0) {
-    return (
-      <View
-        style={{
-          backgroundColor: color.ivoryDark,
-          height: 20,
-          borderRadius: 10,
-        }}
-      >
-        <TextBody color={color.gray3}>NO SOCIALS CONNECTED</TextBody>
-      </View>
-    );
+    return <DarkButton title="NO SOCIALS CONNECTED" />;
   }
 
+  // Generalize once needed
+  const fcAccount = linkedAccounts[0];
+  const username = FarcasterClient.getDispUsername(fcAccount).toUpperCase();
+
   return (
-    <View style={{ flexDirection: "row", gap: 8 }}>
-      {linkedAccounts.map((acc, i) => (
-        <LinkedAccountBubble key={i} acc={acc} />
-      ))}
+    <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+      <DarkButton onPress={connectFarc} title={username} />
+      <Image
+        source={{ uri: image.iconFarcaster }}
+        style={{ width: 16, height: 16 }}
+      />
     </View>
+  );
+}
+
+function DarkButton({
+  title,
+  onPress,
+}: {
+  title: string;
+  onPress?: () => void;
+}) {
+  return (
+    <TouchableHighlight
+      onPress={onPress}
+      style={{
+        backgroundColor: color.ivoryDark,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 8,
+      }}
+      hitSlop={24}
+      {...touchHighlightUnderlay.subtle}
+    >
+      <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>
+    </TouchableHighlight>
   );
 }
 
@@ -378,7 +423,6 @@ const styles = StyleSheet.create({
   sectionWrap: {},
   accountHero: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 16,
   },
   listBody: {

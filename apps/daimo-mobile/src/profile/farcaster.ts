@@ -1,3 +1,5 @@
+// Farcaster AuthKit is currently broken on React Native.
+// Use our fork of auth-client instead.
 import {
   AppClient,
   StatusAPIResponse,

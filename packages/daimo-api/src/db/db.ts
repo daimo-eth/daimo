@@ -65,10 +65,19 @@ export class DB {
             linked_type VARCHAR(32) NOT NULL, -- eg "farcaster"
             linked_id VARCHAR(64), -- eg "0x123a..."
             address CHAR(42), -- our Daimo account address
-            signed_json TEXT, -- signed by us, includes sig from linked account
-            signature_hex TEXT, -- ERC-1271 signature
+            account_json TEXT, -- the linked social media account
             PRIMARY KEY (address, linked_type),
             UNIQUE (linked_type, linked_id)
+          );
+
+          CREATE TABLE IF NOT EXISTS offchain_action (
+            id SERIAL PRIMARY KEY,
+            address CHAR(42), -- our Daimo account address
+            time BIGINT NOT NULL, -- action timestamp, extracted from action
+            type VARCHAR(32) NOT NULL, -- action type, extracted from action
+            action_json TEXT NOT NULL, -- action, ERC1271-signed by the account
+            signature_hex TEXT NOT NULL,
+            UNIQUE (address, time, type)
           );
       `);
     await client.end();
@@ -97,6 +106,19 @@ export class DB {
     client.release();
   }
 
+  async saveOffchainAction(row: OffchainActionRow) {
+    console.log(
+      `[DB] inserting offchain action ${row.type} ${row.time} ${row.address}`
+    );
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO offchain_action (address, time, type, action_json, signature_hex)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [row.address, row.time, row.type, row.action_json, row.signature_hex]
+    );
+    client.release();
+  }
+
   async saveLinkedAccount(row: LinkedAccountRow) {
     console.log(
       `[DB] inserting linked_account: ${row.linked_type} ${row.linked_id} ${row.address}`
@@ -107,15 +129,9 @@ export class DB {
     // INSERT INTO linked_account where linked_type = $1 and linked_id = $2
     // DELETE from linked_account where linked_type = $1 and address = $3
     await client.query(
-      `INSERT INTO linked_account (linked_type, linked_id, address, signed_json, signature_hex)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [
-        row.linked_type,
-        row.linked_id,
-        row.address,
-        row.signed_json,
-        row.signature_hex,
-      ]
+      `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
+       VALUES ($1, $2, $3, $4)`,
+      [row.linked_type, row.linked_id, row.address, row.account_json]
     );
     client.release();
   }
@@ -124,7 +140,7 @@ export class DB {
     console.log(`[DB] loading linked accounts`);
     const client = await this.pool.connect();
     const result = await client.query<LinkedAccountRow>(
-      `SELECT linked_type, linked_id, address, signed_json, signature_hex FROM linked_account`
+      `SELECT linked_type, linked_id, address, account_json FROM linked_account`
     );
     client.release();
 
@@ -233,6 +249,14 @@ interface LinkedAccountRow {
   linked_type: string;
   linked_id: string;
   address: string;
-  signed_json: string;
+  account_json: string;
+}
+
+interface OffchainActionRow {
+  id: number;
+  address: string;
+  time: number;
+  type: string;
+  action_json: string;
   signature_hex: string;
 }

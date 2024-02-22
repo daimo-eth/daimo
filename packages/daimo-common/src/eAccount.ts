@@ -1,6 +1,7 @@
 import z from "zod";
 
-import { AddrLabel, zAddress, zLinkedAccount } from "./model";
+import { AddrLabel, zAddress } from "./model";
+import { zLinkedAccount } from "./profileLink";
 
 export const zEAccount = z.object({
   addr: zAddress,

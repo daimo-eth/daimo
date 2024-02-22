@@ -1,4 +1,4 @@
-import { timeAgo } from "@daimo/common";
+import { now, timeAgo } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Contacts from "expo-contacts";
 import { useCallback } from "react";
@@ -175,7 +175,7 @@ function RecipientRow({
       case "phoneNumber":
         return recipient.name ? recipient.phoneNumber : undefined;
       case "eAcc": {
-        const nowS = Date.now() / 1e3;
+        const nowS = now();
         return recipient.lastSendTime
           ? `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`
           : undefined;

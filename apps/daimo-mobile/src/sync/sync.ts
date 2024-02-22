@@ -6,6 +6,7 @@ import {
   PendingOpEventID,
   amountToDollars,
   assert,
+  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
@@ -64,7 +65,7 @@ async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
   const account = manager.currentAccount;
 
   // Synced recently? Wait first.
-  const nowS = Date.now() / 1e3;
+  const nowS = now();
   let intervalS = 10;
 
   // Sync faster for 1. pending ops, and 2. recently-failed sync

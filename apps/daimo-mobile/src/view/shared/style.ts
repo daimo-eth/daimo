@@ -96,11 +96,22 @@ export const ss = {
       fontWeight: "600",
       letterSpacing: 0.6,
     },
+    bodyMedium: {
+      ...textBase,
+      fontSize: 16,
+      fontWeight: "500",
+    },
     para: {
       ...textBase,
       fontSize: 16,
       fontWeight: "500",
       lineHeight: 28,
+    },
+    btnCaps: {
+      ...textBase,
+      fontSize: 14,
+      fontWeight: "700",
+      letterSpacing: 0.8,
     },
     metadata: {
       ...textBase,

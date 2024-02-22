@@ -2,6 +2,7 @@ import {
   DaimoAccountCall,
   UserOpHex,
   derKeytoContractFriendlyKey,
+  now,
   zUserOpHex,
 } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
@@ -76,7 +77,7 @@ export class DaimoOpSender {
 
   /** Submits a user op to bundler. Returns userOpHash. */
   public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<Hex> {
-    const nowS = Math.floor(Date.now() / 1e3);
+    const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
       .setValidUntil(validUntil)

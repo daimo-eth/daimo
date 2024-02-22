@@ -1,5 +1,10 @@
 import { DaimoChain } from "@daimo/contract";
 
+/** Returns current unix time, in seconds */
+export function now() {
+  return Math.floor(Date.now() / 1000);
+}
+
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */
 export function timeAgo(sinceS: number, nowS: number, long?: boolean) {
   const seconds = Math.floor(nowS - sinceS);

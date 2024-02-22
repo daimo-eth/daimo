@@ -289,17 +289,17 @@ export function createRouter(
         );
       }),
 
-    profileLinkAccount: publicProcedure
+    updateProfileLinks: publicProcedure
       .input(
         z.object({
           addr: zAddress,
-          linkedAccountJSON: z.string(),
+          actionJSON: z.string(),
           signature: zHex,
         })
       )
       .mutation(async (opts) => {
-        const { addr, linkedAccountJSON, signature } = opts.input;
-        return profileCache.linkAccount(addr, linkedAccountJSON, signature);
+        const { addr, actionJSON, signature } = opts.input;
+        return profileCache.updateProfileLinks(addr, actionJSON, signature);
       }),
   });
 }

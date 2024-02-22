@@ -34,6 +34,10 @@ export function TextBodyCaps(props: TextProps & { color?: string }) {
   return <DaimoText {...props} style={useStyle(ss.text.bodyCaps, props)} />;
 }
 
+export function TextBodyMedium(props: TextProps & { color?: string }) {
+  return <DaimoText {...props} style={useStyle(ss.text.bodyMedium, props)} />;
+}
+
 export function TextMeta(props: TextProps & { color?: string }) {
   return <DaimoText {...props} style={useStyle(ss.text.metadata, props)} />;
 }
@@ -42,8 +46,17 @@ export function TextPara(props: TextProps & { color?: string }) {
   return <DaimoText {...props} style={useStyle(ss.text.para, props)} />;
 }
 
+export function TextBtnCaps(props: TextProps & { color?: string }) {
+  return <DaimoText {...props} style={useStyle(ss.text.btnCaps, props)} />;
+}
+
 export function TextLight(props: TextProps) {
   return <TextBody {...props} color={color.gray3} />;
+}
+
+export function TextColor(props: TextProps & { color: string }) {
+  const style = useMemo(() => [{ color: props.color }], [props.color]);
+  return <DaimoText {...props} style={style} />;
 }
 
 export function TextBold(props: TextProps) {

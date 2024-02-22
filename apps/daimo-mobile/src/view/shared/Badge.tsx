@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { color, ss } from "./style";
-import { DaimoText } from "./text";
+import { color } from "./style";
+import { TextBtnCaps } from "./text";
 
 const defaultColor = color.grayMid;
-const defaultBgColor = color.grayLight;
+const defaultBgColor = color.ivoryDark;
 
 export function Badge({
   children,
@@ -23,24 +23,15 @@ export function Badge({
     () => ({
       backgroundColor: bgColor,
       borderRadius: 4,
-      paddingVertical: 2,
-      paddingHorizontal: 6,
+      paddingVertical: 4,
+      paddingHorizontal: 8,
     }),
     [bgColor]
   );
 
-  const styleText = useMemo(
-    () => ({
-      ...ss.text.metadata,
-      lineHeight: 18,
-      color,
-    }),
-    []
-  );
-
   return (
     <View style={styleWrap}>
-      <DaimoText style={styleText}>{children}</DaimoText>
+      <TextBtnCaps color={color}>{children}</TextBtnCaps>
     </View>
   );
 }
