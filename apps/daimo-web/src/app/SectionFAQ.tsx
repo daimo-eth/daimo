@@ -7,8 +7,8 @@ import { FAQ } from "../utils/parseFAQ";
 
 export function SectionFAQ({ faq }: { faq: FAQ[] }) {
   return (
-    <section className="bg-midnight-gradient py-24" id="faq">
-      <div className="m-3 bg-white">
+    <section className="bg-midnight-gradient pt-24" id="faq">
+      <div className="mx-3 bg-white">
         <style>{`
         details > summary {
           list-style: none;
