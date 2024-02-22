@@ -23,6 +23,7 @@ export type DaimoLinkStatus =
 export type DaimoAccountStatus = {
   link: DaimoLinkAccount;
   account: EAccount;
+  inviter?: EAccount;
 };
 
 /**
@@ -103,5 +104,6 @@ export type DaimoNoteStatus = {
 export type DaimoInviteStatus = {
   link: DaimoLinkInvite;
   isValid: boolean;
+  bonusDollars?: number;
   sender?: EAccount;
 };

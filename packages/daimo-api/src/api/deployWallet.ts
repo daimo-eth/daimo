@@ -8,10 +8,11 @@ import { erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
-import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { chainConfig } from "../env";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
+import { InviteGraph } from "../offchain/inviteGraph";
 import { Telemetry } from "../server/telemetry";
 import { Watcher } from "../shovel/watcher";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -19,21 +20,18 @@ import { retryBackoff } from "../utils/retryBackoff";
 export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
-  invCodeSuccess: boolean | undefined, // Deprecated
-  inviteLinkStatus: DaimoLinkStatus | undefined,
+  inviteLinkStatus: DaimoLinkStatus,
+  deviceAttestationString: Hex | undefined,
   watcher: Watcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
-  faucet: Faucet,
+  inviteCodeTracker: InviteCodeTracker,
   telemetry: Telemetry,
-  paymaster: Paymaster
+  paymaster: Paymaster,
+  inviteGraph: InviteGraph
 ): Promise<Address> {
   // For now, invite is required
-  const invSuccess = (function () {
-    if (invCodeSuccess) return true;
-    if (!inviteLinkStatus) return false;
-    else return getInviteStatus(inviteLinkStatus).isValid;
-  })();
+  const invSuccess = getInviteStatus(inviteLinkStatus).isValid;
 
   if (!invSuccess) {
     throw new Error("Invalid invite code");
@@ -86,23 +84,24 @@ export async function deployWallet(
     );
   }
 
-  // If it worked, cache the name <> address mapping immediately.
-  if (deployReceipt.status === "success") {
-    nameReg.onSuccessfulRegister(name, address);
-
-    if (chainConfig.chainL2.testnet) {
-      const dollars = 0.5;
-      console.log(`[API] faucet req: $${dollars} USDC for ${name} ${address}`);
-      faucet.request(address, dollars); // Kick off in background
-    }
-  } else {
+  if (deployReceipt.status !== "success") {
     throw new Error(`Couldn't create ${name}: ${deployReceipt.status}`);
   }
 
+  // If it worked, process and cache the account metadata in the background.
+  nameReg.onSuccessfulRegister(name, address);
+  inviteGraph.processDeployWallet(address, inviteLinkStatus);
+
+  if (inviteLinkStatus.link.type === "invite") {
+    inviteCodeTracker.useInviteCode(
+      address,
+      deviceAttestationString,
+      inviteLinkStatus.link.code
+    );
+  }
+
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
-  const inviteMeta = inviteLinkStatus
-    ? formatDaimoLink(inviteLinkStatus.link)
-    : "old version";
+  const inviteMeta = formatDaimoLink(inviteLinkStatus.link);
   const url = `${explorer}/address/${address}`;
   telemetry.recordClippy(
     `New user ${name} with invite code ${inviteMeta} at ${url}`,

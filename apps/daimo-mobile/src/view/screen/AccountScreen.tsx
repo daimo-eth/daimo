@@ -3,6 +3,7 @@ import {
   EAccount,
   canSendTo,
   getAccountName,
+  getAddressContraction,
   timeMonth,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
@@ -26,6 +27,7 @@ import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
 import {
   ParamListHome,
+  navToAccountPage,
   useDisableTabSwipe,
   useExitBack,
   useExitToHome,
@@ -59,7 +61,11 @@ function AccountScreenInner(props: Props & { account: Account }) {
         <AccountScreenLoader account={props.account} link={params.link} />
       )}
       {"eAcc" in params && (
-        <AccountScreenBody account={props.account} eAcc={params.eAcc} />
+        <AccountScreenBody
+          account={props.account}
+          eAcc={params.eAcc}
+          inviterEAcc={params.inviterEAcc}
+        />
       )}
     </View>
   );
@@ -83,7 +89,7 @@ function AccountScreenLoader({
     console.log(`[ACCOUNT] loaded account: ${JSON.stringify(status.data)}`);
     nav.navigate("HomeTab", {
       screen: "Account",
-      params: { eAcc: status.data.account },
+      params: { eAcc: status.data.account, inviterEAcc: status.data.inviter },
     });
   }, [status.data]);
 
@@ -104,9 +110,11 @@ function AccountScreenLoader({
 function AccountScreenBody({
   account,
   eAcc,
+  inviterEAcc,
 }: {
   account: Account;
   eAcc: EAccount;
+  inviterEAcc?: EAccount;
 }) {
   const nav = useNav();
   useDisableTabSwipe(nav);
@@ -148,10 +156,34 @@ function AccountScreenBody({
     bottomSheetRef,
   });
 
+  const onInviterPress = useCallback(() => {
+    if (!inviterEAcc) return;
+    navToAccountPage(inviterEAcc, nav);
+  }, [inviterEAcc, nav]);
+
   // TODO: show other accounts coin+chain, once we support multiple.
-  const subtitle = eAcc.timestamp
-    ? `Joined ${timeMonth(eAcc.timestamp)}`
-    : getAccountName({ addr: eAcc.addr });
+  const subtitle = (() => {
+    if (inviterEAcc)
+      return (
+        <TextBody color={color.gray3}>
+          Invited by{" "}
+          <TextBody color={color.midnight} onPress={onInviterPress}>
+            {getAccountName(inviterEAcc)}
+          </TextBody>
+        </TextBody>
+      );
+    else if (eAcc.timestamp)
+      return (
+        <TextBody color={color.gray3}>
+          Joined {timeMonth(eAcc.timestamp)}
+        </TextBody>
+      );
+    return (
+      <TextBody color={color.gray3}>
+        {getAddressContraction(eAcc.addr)}
+      </TextBody>
+    );
+  })();
 
   // Show linked accounts
   const fcAccount = (eAcc.linkedAccounts || [])[0];
@@ -164,7 +196,7 @@ function AccountScreenBody({
           <Spacer h={16} />
           <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
           <Spacer h={4} />
-          <TextBody color={color.gray3}>{subtitle}</TextBody>
+          {subtitle}
           {fcAccount && (
             <>
               <FarcasterButton fcAccount={fcAccount} />

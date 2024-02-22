@@ -16,7 +16,6 @@ import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
-import { Faucet } from "../contract/faucet";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -25,6 +24,8 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
+import { InviteGraph } from "../offchain/inviteGraph";
 import { Watcher } from "../shovel/watcher";
 
 export function createRouter(
@@ -39,7 +40,8 @@ export function createRouter(
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
-  faucet: Faucet,
+  inviteCodeTracker: InviteCodeTracker,
+  inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
   telemetry: Telemetry
@@ -109,7 +111,13 @@ export function createRouter(
       .input(z.object({ url: z.string() }))
       .query(async (opts) => {
         const { url } = opts.input;
-        return getLinkStatus(url, nameReg, noteIndexer, requestIndexer, faucet);
+        return getLinkStatus(
+          url,
+          nameReg,
+          noteIndexer,
+          requestIndexer,
+          inviteCodeTracker
+        );
       }),
 
     lookupEthereumAccountByKey: publicProcedure
@@ -169,40 +177,37 @@ export function createRouter(
         z.object({
           name: z.string(),
           pubKeyHex: zHex,
-          invCode: z.string().optional(),
-          inviteLink: z.string().optional(),
+          inviteLink: z.string(),
+          deviceAttestationString: zHex.optional(),
         })
       )
       .mutation(async (opts) => {
-        const { name, pubKeyHex, invCode, inviteLink } = opts.input;
+        const { name, pubKeyHex, inviteLink, deviceAttestationString } =
+          opts.input;
         telemetry.recordUserAction(opts.ctx, {
           name: "deployWallet",
           accountName: name,
           keys: {},
         });
-        const inviteLinkStatus = inviteLink
-          ? await getLinkStatus(
-              inviteLink,
-              nameReg,
-              noteIndexer,
-              requestIndexer,
-              faucet
-            )
-          : undefined;
-        const invCodeSuccess = invCode
-          ? await faucet.useInviteCode(invCode)
-          : false;
+        const inviteLinkStatus = await getLinkStatus(
+          inviteLink,
+          nameReg,
+          noteIndexer,
+          requestIndexer,
+          inviteCodeTracker
+        );
         const address = await deployWallet(
           name,
           pubKeyHex,
-          invCodeSuccess,
           inviteLinkStatus,
+          deviceAttestationString,
           watcher,
           nameReg,
           accountFactory,
-          faucet,
+          inviteCodeTracker,
           telemetry,
-          paymaster
+          paymaster,
+          inviteGraph
         );
         return { status: "success", address };
       }),
@@ -237,14 +242,6 @@ export function createRouter(
       .mutation(async (opts) => {
         const { action } = opts.input;
         telemetry.recordUserAction(opts.ctx, action);
-      }),
-
-    // DEPRECATED
-    verifyInviteCode: publicProcedure
-      .input(z.object({ inviteCode: z.string() }))
-      .query(async (opts) => {
-        const { inviteCode } = opts.input;
-        return faucet.verifyInviteCode(inviteCode);
       }),
 
     claimEphemeralNoteSponsored: publicProcedure

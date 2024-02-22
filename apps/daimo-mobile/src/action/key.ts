@@ -5,7 +5,10 @@ import { Hex } from "viem";
 
 import { ActStatus, SetActStatus, useActStatus } from "./actStatus";
 import { createEnclaveKey, loadEnclaveKey } from "../logic/enclave";
-import { defaultEnclaveKeyName } from "../model/account";
+import {
+  defaultEnclaveKeyName,
+  deviceAttestationKeyName,
+} from "../model/account";
 
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
@@ -57,18 +60,16 @@ export type DeviceKeyStatus = {
   message: string;
 };
 
-export function useLoadOrCreateEnclaveKey(): DeviceKeyStatus {
-  const enclaveKeyName = defaultEnclaveKeyName;
-
+function useLoadOrCreateEnclaveKey(keyName: string): DeviceKeyStatus {
   const [pubKeyHex, setPubKeyHex] = useState<Hex>();
   const [keyStatus, setKeyStatus] = useActStatus("useLoadOrCreateEnclaveKey");
 
   // Load or create enclave key immediately, in the idle state
   useEffect(() => {
-    loadKey(setKeyStatus, enclaveKeyName).then((loadedKeyInfo) => {
+    loadKey(setKeyStatus, keyName).then((loadedKeyInfo) => {
       console.log(`[ACTION] loaded key info ${JSON.stringify(loadedKeyInfo)}`);
       if (loadedKeyInfo && !loadedKeyInfo.pubKeyHex) {
-        createKey(setKeyStatus, enclaveKeyName, loadedKeyInfo.hwSecLevel).then(
+        createKey(setKeyStatus, keyName, loadedKeyInfo.hwSecLevel).then(
           (newPublicKey) => {
             console.log(`[ACTION] created public key ${newPublicKey}`);
             setPubKeyHex(newPublicKey);
@@ -76,7 +77,19 @@ export function useLoadOrCreateEnclaveKey(): DeviceKeyStatus {
         );
       } else setPubKeyHex(loadedKeyInfo?.pubKeyHex);
     });
-  }, [enclaveKeyName]);
+  }, [keyName]);
 
   return { pubKeyHex, ...keyStatus };
+}
+
+export function useAccountKey(): DeviceKeyStatus {
+  return useLoadOrCreateEnclaveKey(defaultEnclaveKeyName);
+}
+
+// Poor man's device attestation. True device attestation is often not available
+// on some devices, so we use a poor man's version of it -- a key created on
+// device keychain/keystore once and never deleted. Most devices make it
+// quite hard to delete a key, so it can serve as a poor man's sybil protection.
+export function useDeviceAttestationKey(): DeviceKeyStatus {
+  return useLoadOrCreateEnclaveKey(deviceAttestationKeyName);
 }

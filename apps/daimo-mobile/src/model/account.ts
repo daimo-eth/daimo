@@ -28,6 +28,16 @@ import { env } from "../logic/env";
 export const defaultEnclaveKeyName =
   process.env.DAIMO_APP_VARIANT === "dev" ? "daimo-dev-12" : "daimo-12";
 
+/**
+ * Poor man's device attestation key name.
+ * Fixed key created once and never deleted -- used as an alternate to
+ * device attestations.
+ */
+export const deviceAttestationKeyName =
+  process.env.DAIMO_APP_VARIANT === "dev"
+    ? "daimo-attestation-dev"
+    : "daimo-attestation";
+
 /** Account data stored on device. */
 export type Account = {
   /** Local device signing key name */

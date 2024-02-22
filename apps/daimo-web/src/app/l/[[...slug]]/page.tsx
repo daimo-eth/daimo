@@ -1,5 +1,6 @@
 import {
   DaimoAccountStatus,
+  DaimoInviteStatus,
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestState,
@@ -31,7 +32,7 @@ type TitleDesc = {
   action?: string;
   dollars?: `${number}`;
   description: string;
-  walletActionLinkStatus?: DaimoLinkStatus;
+  linkStatus?: DaimoLinkStatus;
 };
 
 const defaultMeta = metadata(
@@ -81,7 +82,7 @@ export default async function LinkPage(props: LinkProps) {
 }
 
 async function LinkPageInner(props: LinkProps) {
-  const { name, action, dollars, description, walletActionLinkStatus } =
+  const { name, action, dollars, description, linkStatus } =
     (await loadTitleDesc(getUrl(props))) || {
       title: "Daimo",
       description: "Payments on Ethereum",
@@ -106,7 +107,7 @@ async function LinkPageInner(props: LinkProps) {
           </>
         )}
         <div className="h-9" />
-        <CallToAction {...{ description, walletActionLinkStatus }} />
+        <CallToAction {...{ description, linkStatus }} />
       </center>
     </main>
   );
@@ -199,7 +200,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           action: `is requesting`,
           dollars: `${res.link.dollars}`,
           description: "Pay with Daimo",
-          walletActionLinkStatus: res,
+          linkStatus: res,
         };
       } else {
         return {
@@ -222,7 +223,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `is requesting`,
             dollars: `${res.link.dollars}`,
             description: "Pay with Daimo",
-            walletActionLinkStatus: res,
+            linkStatus: res,
           };
         }
         case DaimoRequestState.Cancelled: {
@@ -257,7 +258,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `sent you`,
             dollars: `${dollars}`,
             description: "Accept with Daimo",
-            walletActionLinkStatus: res,
+            linkStatus: res,
           };
         }
         case "claimed": {
@@ -283,6 +284,22 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           throw new Error(`unexpected DaimoNoteStatus ${status}`);
         }
       }
+    }
+    case "invite": {
+      const { sender, bonusDollars, isValid } = res as DaimoInviteStatus;
+
+      const description = (() => {
+        if (!isValid) return "Invite expired";
+        if (bonusDollars)
+          return `Sign up and we'll send you both $${bonusDollars} USDC`;
+        return "Get Daimo to send or receive payments";
+      })();
+      return {
+        name: `${sender ? getAccountName(sender) : "daimo"}`,
+        action: `invited you`,
+        description,
+        linkStatus: res,
+      };
     }
     default: {
       return null;

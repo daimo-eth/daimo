@@ -1,5 +1,6 @@
 import { ProfileLinkID } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
+import { Address, getAddress } from "viem";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {
@@ -51,6 +52,8 @@ export class DB {
             max_uses INT NOT NULL DEFAULT 1
           );
           ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS inviter CHAR(42) DEFAULT NULL;
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents INT DEFAULT 0 NOT NULL;
 
           CREATE TABLE IF NOT EXISTS name_blacklist (
             name VARCHAR(32) PRIMARY KEY
@@ -79,6 +82,16 @@ export class DB {
             action_json TEXT NOT NULL, -- action, ERC1271-signed by the account
             signature_hex TEXT NOT NULL,
             UNIQUE (address, time, type)
+          );
+
+          CREATE TABLE IF NOT EXISTS invitegraph (
+            invitee CHAR(42) PRIMARY KEY,
+            inviter CHAR(42) NOT NULL
+          );
+
+          -- Used to prevent double-claiming faucet bonuses
+          CREATE TABLE IF NOT EXISTS used_faucet_attestations (
+            attestation CHAR(184) PRIMARY KEY
           );
       `);
     await client.end();
@@ -200,7 +213,7 @@ export class DB {
     console.log(`[DB] loading invite code ${code}`);
     const client = await this.pool.connect();
     const result = await client.query<RawInviteCodeRow>(
-      `SELECT code, use_count, max_uses, zupass_email FROM invitecode WHERE code = $1`,
+      `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents FROM invitecode WHERE code = $1`,
       [code]
     );
     client.release();
@@ -212,6 +225,8 @@ export class DB {
       useCount: row.use_count,
       maxUses: row.max_uses,
       zupassEmail: row.zupass_email,
+      inviter: row.inviter ? getAddress(row.inviter) : null,
+      bonusDollars: row.bonus_cents / 100,
     };
   }
 
@@ -235,6 +250,51 @@ export class DB {
     );
     client.release();
   }
+
+  async loadInviteGraph(): Promise<InviteGraphRow[]> {
+    console.log(`[DB] loading invite graph`);
+    const client = await this.pool.connect();
+    const result = await client.query<InviteGraphRow>(
+      `SELECT invitee, inviter FROM invitegraph`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} invite graph rows`);
+    return result.rows;
+  }
+
+  async insertInviteGraph(rows: InviteGraphRow) {
+    console.log(`[DB] inserting invite graph`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO invitegraph (invitee, inviter) VALUES ($1, $2)`,
+      [rows.invitee, rows.inviter]
+    );
+    client.release();
+  }
+
+  async insertFaucetAttestation(attestation: string) {
+    console.log(`[DB] inserting faucet attestation`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO used_faucet_attestations (attestation) VALUES ($1)
+       ON CONFLICT (attestation) DO NOTHING`,
+      [attestation]
+    );
+    client.release();
+  }
+
+  async isFaucetAttestationUsed(attestation: string): Promise<boolean> {
+    console.log(`[DB] checking faucet attestation`);
+    const client = await this.pool.connect();
+    const result = await client.query<{ attestation: string }>(
+      `SELECT attestation FROM used_faucet_attestations WHERE attestation = $1`,
+      [attestation]
+    );
+    client.release();
+
+    return result.rows.length > 0;
+  }
 }
 
 interface PushTokenRow {
@@ -242,11 +302,13 @@ interface PushTokenRow {
   address: string;
 }
 
-interface InviteCodeRow {
+export interface InviteCodeRow {
   code: string;
   useCount: number;
   maxUses: number;
   zupassEmail: string | null;
+  inviter: Address | null;
+  bonusDollars: number;
 }
 
 interface RawInviteCodeRow {
@@ -254,6 +316,13 @@ interface RawInviteCodeRow {
   use_count: number;
   max_uses: number;
   zupass_email: string | null;
+  inviter: string | null;
+  bonus_cents: number; // in cents so we can use INT Postgres type
+}
+
+export interface InviteGraphRow {
+  invitee: Address;
+  inviter: Address;
 }
 
 interface LinkedAccountRow {

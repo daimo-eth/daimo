@@ -36,7 +36,7 @@ export function getInviteStatus(linkStatus: DaimoLinkStatus): LinkInviteStatus {
 
     return {
       isValid: inviteStatus.isValid,
-      sender: undefined, // TODO: Add senders to invite codes
+      sender: inviteStatus.sender,
     };
   } else if (
     linkStatus.link.type === "request" ||

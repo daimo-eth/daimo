@@ -3,7 +3,9 @@ import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
+import { DB } from "@daimo/api/src/db/db";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
+import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
 import csv from "csvtojson";
@@ -56,7 +58,9 @@ async function metrics() {
   const vc = getViemClientFromEnv();
 
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
-  const nameReg = new NameRegistry(vc, new Set([]));
+  const db = new DB();
+  const inviteGraph = new InviteGraph(db);
+  const nameReg = new NameRegistry(vc, inviteGraph, new Set([]));
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);

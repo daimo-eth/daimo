@@ -12,7 +12,7 @@ import { InvitePage } from "./InvitePage";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
-import { useLoadOrCreateEnclaveKey } from "../../../action/key";
+import { useAccountKey, useDeviceAttestationKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInitialURLOrTag } from "../../../logic/deeplink";
@@ -83,7 +83,9 @@ export default function OnboardingScreen({
     return () => subscription.remove();
   }, []);
 
-  const keyStatus = useLoadOrCreateEnclaveKey();
+  const keyStatus = useAccountKey();
+
+  const deviceAttestationKeyStatus = useDeviceAttestationKey();
 
   // Create an account as soon as possible, hiding latency
   const {
@@ -91,7 +93,13 @@ export default function OnboardingScreen({
     reset: createReset,
     status: createStatus,
     message: createMessage,
-  } = useCreateAccount(name, inviteLink, daimoChain, keyStatus);
+  } = useCreateAccount(
+    name,
+    inviteLink,
+    daimoChain,
+    keyStatus,
+    deviceAttestationKeyStatus
+  );
 
   // Use existing account spin loops and waits for the device key to show up
   // in any on-chain account.
