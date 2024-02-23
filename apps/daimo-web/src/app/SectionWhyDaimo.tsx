@@ -120,6 +120,26 @@ function FeaturesDesktop() {
         <div className="relative">
           <PixelBackground className="absolute top-[0px] left-[-100px] z-[-5]" />
         </div>
+        <div className="my-6 flex justify-center gap-3">
+          {features.map((feature, featureIndex) => (
+            <button
+              type="button"
+              key={featureIndex}
+              className={clsx(
+                "relative h-0.5 w-4 rounded-full",
+                featureIndex === selectedIndex
+                  ? "bg-primaryLight"
+                  : "bg-grayLight"
+              )}
+              aria-label={`Go to slide ${featureIndex + 1}`}
+              onClick={() => {
+                setSelectedIndex(featureIndex);
+              }}
+            >
+              <span className="absolute -inset-x-1.5 -inset-y-3" />
+            </button>
+          ))}
+        </div>
         <Tab.List className="border-b border-b-grayMid/40 py-4 flex flex-row justify-between z-50">
           {features.map((feature, featureIndex) => (
             <Tab as={Fragment} key={feature.name}>
