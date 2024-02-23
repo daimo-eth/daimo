@@ -82,9 +82,9 @@ function FeaturesDesktop() {
       as="div"
       selectedIndex={selectedIndex}
       onChange={onChange}
-      className="w-full grid grid-cols-2 items-center justify-items-center "
+      className="w-full grid grid-cols-2 items-center justify-items-center"
     >
-      <div className="flex flex-col flex-1 w-full justify-center items-center bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat min-h-[80vh]">
+      <div className="flex flex-col flex-1 w-full justify-center items-center bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat min-h-[80vh] py-24">
         <div>
           <h2 className="font-medium text-[32px] px-20 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
             Why Daimo?
@@ -155,7 +155,7 @@ function FeaturesDesktop() {
             </Tab>
           ))}
         </Tab.List>
-        <Tab.Panels className="min-h-[30vh]">
+        <Tab.Panels className="min-h-[35vh]">
           <AnimatePresence initial={false}>
             {features.map((feature, featureIndex) => (
               <Tab.Panel
