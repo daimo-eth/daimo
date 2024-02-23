@@ -85,13 +85,15 @@ function FeaturesDesktop() {
       className="w-full grid grid-cols-2 items-center justify-items-center "
     >
       <div className="flex flex-col flex-1 w-full justify-center items-center bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat min-h-[80vh]">
-        <h2 className="font-medium text-[32px] px-20 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
-          Why Daimo?
-        </h2>
-        <p className="font-medium text-center text-sm md:text-[18px] px-20 lg:text-[24px] text-[#535353] pb-8 leading-snug max-w-xl ">
-          Secure, audited, and fully open source. The safest, fastest way to
-          stablecoin.
-        </p>
+        <div>
+          <h2 className="font-medium text-[32px] px-20 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
+            Why Daimo?
+          </h2>
+          <p className="font-medium text-left text-sm md:text-[18px] px-20 lg:text-[24px] text-[#535353] pb-8 leading-snug max-w-xl ">
+            Secure, audited, and fully open source. The safest, fastest way to
+            stablecoin.
+          </p>
+        </div>
         <div className="flex flex-row justify-center items-center space-x-4 lg:space-x-10">
           <div
             onClick={goToPreviousTab}
