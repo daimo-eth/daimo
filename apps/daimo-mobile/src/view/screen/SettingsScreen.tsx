@@ -149,7 +149,7 @@ function LinkedAccountsRow({
   }
 
   // Generalize once needed
-  const fcAccount = linkedAccounts[0];
+  const fcAccount = linkedAccounts[1];
   return <FarcasterButton fcAccount={fcAccount} onPress={connectFarc} />;
 }
 

@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -16,6 +17,7 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
+import { ErrorFallback } from "./view/screen/ErrorScreen";
 import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
@@ -114,7 +116,9 @@ function AppBody() {
   return (
     <DispatcherContext.Provider value={dispatcher}>
       <SafeAreaProvider>
-        <TabNav />
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <TabNav />
+        </ErrorBoundary>
         <StatusBar style="auto" />
         <View
           style={styles.bottomSheetWrapper}

@@ -6,7 +6,7 @@ import {
   now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Linking, View } from "react-native";
 import { stringToBytes } from "viem";
 
@@ -89,6 +89,10 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
 }
 
 function FarcasterQRButton({ url }: { url: string }) {
+  const openInWarpcast = useCallback(() => {
+    Linking.openURL(url);
+  }, [url]);
+  useEffect(openInWarpcast, []);
   return (
     <>
       <QRCodeBox value={url} logoURI={image.qrLogoFarcaster} />
@@ -96,7 +100,7 @@ function FarcasterQRButton({ url }: { url: string }) {
       <ButtonMed
         type="subtle"
         title="OPEN IN WARPCAST"
-        onPress={() => Linking.openURL(url)}
+        onPress={openInWarpcast}
       />
     </>
   );

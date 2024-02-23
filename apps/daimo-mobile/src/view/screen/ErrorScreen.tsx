@@ -2,10 +2,13 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useSendDebugLog } from "../../common/useSendDebugLog";
+import { ButtonBig } from "../shared/Button";
 import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { ErrorBanner } from "../shared/error";
 import { ParamListMain } from "../shared/nav";
+import { ss } from "../shared/style";
 
 type Props = NativeStackScreenProps<ParamListMain, "LinkErrorModal">;
 
@@ -30,6 +33,24 @@ export function ErrorScreen(props: Props) {
           displayTitle={displayTitle}
           displayMessage={displayMessage}
           showDownloadButton={showDownloadButton}
+        />
+      </View>
+    </View>
+  );
+}
+
+export function ErrorFallback() {
+  const [sendDebugLog] = useSendDebugLog();
+  return (
+    <View style={ss.container.screen}>
+      <View style={ss.container.padH8}>
+        <Spacer h={192} />
+        <ErrorBanner displayTitle="An error occurred" />
+        <Spacer h={16} />
+        <ButtonBig
+          title="SEND DEBUG LOG"
+          onPress={sendDebugLog}
+          type="subtle"
         />
       </View>
     </View>

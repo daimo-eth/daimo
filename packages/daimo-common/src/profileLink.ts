@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { zAddress, zHex } from ".";
+import { zAddress, zHex } from "./model";
 
 // Farcaster profile summary, linked to Daimo account via signature.
 // The Daimo address is the nonce in the signed message.
