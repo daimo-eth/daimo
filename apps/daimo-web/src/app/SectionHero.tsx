@@ -10,12 +10,12 @@ import {
 
 export function SectionHero() {
   return (
-    <section className="overflow-hidden md:pb-28">
+    <section className="overflow-hidden md:pb-28 px-8 m-auto max-w-screen-xl bg-[#000000]/20 lg:bg-[#000]/0">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="max-w-screen-xl mx-auto flex flex-col md:flex-row md:gap-16 overflow-visible lg:border lg:rounded-[48px] border-white/30 lg:bg-[#000000]/20 py-16 px-12"
+        className="flex flex-col md:flex-row md:gap-16 overflow-visible lg:border lg:rounded-[48px] border-white/30 lg:bg-[#000000]/20 py-16 lg:pl-[96px] lg:pr-[60px]"
       >
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -23,15 +23,19 @@ export function SectionHero() {
           transition={{ duration: 0.5, delay: 0.3, ease: "easeInOut" }}
           className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12"
         >
-          <HeroH1>Pay or receive USDC anywhere.</HeroH1>
+          <HeroH1>Pay&nbsp;or&nbsp;receive USDC anywhere.</HeroH1>
           <HeroH2>
             Store money using secure hardware on your phone. Yours alone, like
             cash.
           </HeroH2>
-          <div className="hidden md:flex flex-row items-center space-x-6 pt-6 md:pt-8">
+          <div className="hidden md:flex md:flex-row md:items-center md:space-x-[36px] md:pt-8">
             <DownloadLinkButton />
-            <Link className="font-bold text-white text-2xl" href="#features">
-              Learn More<span className="font-extralight">&nbsp;&#8595;</span>
+            <Link
+              className="font-bold text-white text-2xl whitespace-nowrap "
+              href="#features"
+            >
+              Learn More
+              <span className="pl-4 font-extralight">&nbsp;&#8595;</span>
             </Link>
           </div>
         </motion.div>
@@ -39,9 +43,9 @@ export function SectionHero() {
           initial={{ opacity: 0, y: -60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-          className="flex-1 flex justify-center md:justify-end relative"
+          className="flex-1 flex justify-center items-center md:justify-end relative"
         >
-          <div className="mx-auto w-full max-w-[366px] py-6">
+          <div className="mx-auto w-full max-w-[366px] py-6 min-w-[250px]">
             <Image
               src="/assets/hero-screenshot.png"
               width={327}
