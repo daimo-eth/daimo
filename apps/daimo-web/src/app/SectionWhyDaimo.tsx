@@ -196,7 +196,28 @@ function FeaturesMobile() {
         Secure, audited, and fully open source. The safest, fastest way to
         stablecoin.
       </p>
-      <div className="my-6 pb-3 flex justify-between px-6 border-b border-grayLight">
+      <div className="my-6 flex justify-center gap-3">
+        {features.map((_, featureIndex) => (
+          <button
+            type="button"
+            key={featureIndex}
+            className={clsx(
+              "relative h-0.5 w-4 rounded-full",
+              featureIndex === activeIndex ? "bg-primaryLight" : "bg-grayLight"
+            )}
+            aria-label={`Go to slide ${featureIndex + 1}`}
+            onClick={() => {
+              slideRefs.current[featureIndex].scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+              });
+            }}
+          >
+            <span className="absolute -inset-x-1.5 -inset-y-3" />
+          </button>
+        ))}
+      </div>
+      <div className="my-6 pb-6 flex justify-between px-6 border-b border-grayLight">
         {features.map((feature, featureIndex) => (
           <button
             type="button"
@@ -219,7 +240,7 @@ function FeaturesMobile() {
       </div>
       <div
         ref={slideContainerRef}
-        className="flex snap-x snap-mandatory -space-x-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 [scrollbar-width:none] sm:-space-x-6 [&::-webkit-scrollbar]:hidden px-[-24px] "
+        className="flex snap-x snap-mandatory -space-x-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-12 [scrollbar-width:none] sm:-space-x-6 [&::-webkit-scrollbar]:hidden px-[-24px] "
       >
         {features.map((feature, featureIndex) => (
           <div
@@ -252,27 +273,6 @@ function FeaturesMobile() {
               </div>
             </div>
           </div>
-        ))}
-      </div>
-      <div className="my-6 flex justify-center gap-3">
-        {features.map((_, featureIndex) => (
-          <button
-            type="button"
-            key={featureIndex}
-            className={clsx(
-              "relative h-0.5 w-4 rounded-full",
-              featureIndex === activeIndex ? "bg-primaryLight" : "bg-grayLight"
-            )}
-            aria-label={`Go to slide ${featureIndex + 1}`}
-            onClick={() => {
-              slideRefs.current[featureIndex].scrollIntoView({
-                block: "nearest",
-                inline: "nearest",
-              });
-            }}
-          >
-            <span className="absolute -inset-x-1.5 -inset-y-3" />
-          </button>
         ))}
       </div>
     </div>
