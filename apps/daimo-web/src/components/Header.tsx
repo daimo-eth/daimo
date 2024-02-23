@@ -75,7 +75,7 @@ function MobileNav() {
                     className="absolute inset-x-0 top-0 z-0 origin-top rounded-b-2xl bg-gray-50 px-6 pb-6 pt-32 shadow-2xl shadow-gray-900/20 bg-white"
                   >
                     <div className="absolute top-10">
-                      <Logo height={24} width={24} color={"#14B174"} />
+                      <Logo height={24} width={24} color={"#144B44"} />
                     </div>
                     <div className="space-y-4">
                       <MobileNavLink href="/#features">Blog</MobileNavLink>
@@ -131,7 +131,7 @@ function MobileNavLink(
   return (
     <Popover.Button
       as={Link}
-      className="block text-base font-medium leading-7 tracking-tight text-[#144B44]"
+      className="block text-lg font-semibold leading-7 tracking-tight text-[#144B44]"
       {...props}
     />
   );
