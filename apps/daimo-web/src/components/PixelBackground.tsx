@@ -3,7 +3,7 @@ export function PixelBackground(
 ) {
   return (
     <svg
-      className="w-full h-auto"
+      className="w-auto h-full"
       viewBox="0 0 764 761"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
