@@ -212,7 +212,7 @@ function FeaturesMobile() {
   }, [slideContainerRef, slideRefs]);
 
   return (
-    <div className="flex flex-col pt-10 min-h-[90vh] bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat">
+    <div className="flex flex-col pt-10 min-h-[90vh]">
       <h2 className="text-3xl font-medium px-6">Why Daimo?</h2>
       <p className="mt-4 text-grayMid pb-8 px-6">
         Secure, audited, and fully open source. The safest, fastest way to
@@ -239,7 +239,7 @@ function FeaturesMobile() {
           </button>
         ))}
       </div>
-      <div className="my-6 pb-6 flex justify-between px-6 border-b border-grayLight">
+      <div className="my-6 flex justify-between px-6 ">
         {features.map((feature, featureIndex) => (
           <button
             type="button"
@@ -262,7 +262,7 @@ function FeaturesMobile() {
       </div>
       <div
         ref={slideContainerRef}
-        className="flex snap-x snap-mandatory -space-x-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-12 [scrollbar-width:none] sm:-space-x-6 [&::-webkit-scrollbar]:hidden px-[-24px] "
+        className="pt-12 flex snap-x snap-mandatory -space-x-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-12 [scrollbar-width:none] sm:-space-x-6 [&::-webkit-scrollbar]:hidden px-[-24px]  bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat"
       >
         {features.map((feature, featureIndex) => (
           <div
