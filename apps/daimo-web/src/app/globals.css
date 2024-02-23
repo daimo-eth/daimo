@@ -8,6 +8,10 @@
   background: #fff;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   overscroll-behavior-y: none;
   position: relative;
