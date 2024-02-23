@@ -1,7 +1,7 @@
 // SOON TO BE DEPRECATED FOR SHORTER LINKS /l/
 import {
   DaimoAccountStatus,
-  DaimoInviteStatus,
+  DaimoInviteCodeStatus,
   DaimoLinkStatus,
   DaimoNoteStatus,
   DaimoRequestState,
@@ -287,16 +287,23 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
       }
     }
     case "invite": {
-      const { sender, bonusDollars, isValid } = res as DaimoInviteStatus;
+      const { inviter, bonusDollarsInvitee, bonusDollarsInviter, isValid } =
+        res as DaimoInviteCodeStatus;
 
       const description = (() => {
         if (!isValid) return "Invite expired";
-        if (bonusDollars)
-          return `Sign up and we'll send you both $${bonusDollars} USDC`;
-        return "Get Daimo to send or receive payments";
+        if (
+          bonusDollarsInvitee &&
+          bonusDollarsInviter &&
+          bonusDollarsInvitee === bonusDollarsInviter
+        ) {
+          return `Sign up and we'll send you both $${bonusDollarsInvitee} USDC`;
+        } else if (bonusDollarsInvitee) {
+          return `Sign up and we'll send you $${bonusDollarsInvitee} USDC`;
+        } else return "Get Daimo to send or receive payments";
       })();
       return {
-        name: `${sender ? getAccountName(sender) : "daimo"}`,
+        name: `${inviter ? getAccountName(inviter) : "daimo"}`,
         action: `invited you`,
         description,
         linkStatus: res,

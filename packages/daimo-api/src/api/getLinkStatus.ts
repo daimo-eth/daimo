@@ -1,5 +1,5 @@
 import {
-  DaimoInviteStatus,
+  DaimoInviteCodeStatus,
   DaimoLinkRequest,
   DaimoLinkStatus,
   DaimoNoteState,
@@ -121,18 +121,8 @@ export async function getLinkStatus(
     }
 
     case "invite": {
-      const inviteCode = link.code;
-      const { isValid, bonusDollars, senderAddress } =
-        await inviteCodeTracker.getInviteCodeStatus(inviteCode);
-      const sender = senderAddress
-        ? await nameReg.getEAccount(senderAddress)
-        : undefined;
-      const ret: DaimoInviteStatus = {
-        link,
-        isValid,
-        bonusDollars,
-        sender,
-      };
+      const ret: DaimoInviteCodeStatus =
+        await inviteCodeTracker.getInviteCodeStatus(link);
       return ret;
     }
 

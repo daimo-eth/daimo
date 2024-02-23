@@ -23,7 +23,7 @@ export function useCreateAccount(
   inviteLink: DaimoLink | undefined,
   daimoChain: DaimoChain,
   keyStatus: DeviceKeyStatus,
-  deviceAttestationKeyStatus: DeviceKeyStatus
+  deviceAPIKeyStatus: DeviceKeyStatus
 ): ActHandle {
   const [as, setAS] = useActStatus("useCreateAccount");
 
@@ -39,11 +39,11 @@ export function useCreateAccount(
   const exec = async () => {
     if (
       !keyStatus.pubKeyHex ||
-      !deviceAttestationKeyStatus.pubKeyHex ||
+      !deviceAPIKeyStatus.pubKeyHex ||
       !sanitisedInviteLink
     ) {
       console.log(
-        `[CREATE] missing data for useCreateAccount ${keyStatus} ${deviceAttestationKeyStatus} ${sanitisedInviteLink}`
+        `[CREATE] missing data for useCreateAccount ${keyStatus} ${deviceAPIKeyStatus} ${sanitisedInviteLink}`
       );
       setAS("error", "Missing data");
       return;
@@ -53,7 +53,7 @@ export function useCreateAccount(
       name,
       pubKeyHex: keyStatus.pubKeyHex,
       inviteLink: sanitisedInviteLink,
-      deviceAttestationString: deviceAttestationKeyStatus.pubKeyHex,
+      deviceAttestationString: deviceAPIKeyStatus.pubKeyHex,
     });
   };
 

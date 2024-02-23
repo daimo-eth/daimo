@@ -12,7 +12,7 @@ import { InvitePage } from "./InvitePage";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
-import { useAccountKey, useDeviceAttestationKey } from "../../../action/key";
+import { useEnclaveKey, useDeviceAPIKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInitialURLOrTag } from "../../../logic/deeplink";
@@ -83,9 +83,9 @@ export default function OnboardingScreen({
     return () => subscription.remove();
   }, []);
 
-  const keyStatus = useAccountKey();
+  const keyStatus = useEnclaveKey();
 
-  const deviceAttestationKeyStatus = useDeviceAttestationKey();
+  const deviceAPIKeyStatus = useDeviceAPIKey();
 
   // Create an account as soon as possible, hiding latency
   const {
@@ -98,7 +98,7 @@ export default function OnboardingScreen({
     inviteLink,
     daimoChain,
     keyStatus,
-    deviceAttestationKeyStatus
+    deviceAPIKeyStatus
   );
 
   // Use existing account spin loops and waits for the device key to show up

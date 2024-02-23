@@ -5,10 +5,7 @@ import { Hex } from "viem";
 
 import { ActStatus, SetActStatus, useActStatus } from "./actStatus";
 import { createEnclaveKey, loadEnclaveKey } from "../logic/enclave";
-import {
-  defaultEnclaveKeyName,
-  deviceAttestationKeyName,
-} from "../model/account";
+import { defaultEnclaveKeyName, deviceAPIKeyName } from "../model/account";
 
 function getKeySecurityMessage(hwSecLevel: ExpoEnclave.HardwareSecurityLevel) {
   switch (hwSecLevel) {
@@ -82,14 +79,16 @@ function useLoadOrCreateEnclaveKey(keyName: string): DeviceKeyStatus {
   return { pubKeyHex, ...keyStatus };
 }
 
-export function useAccountKey(): DeviceKeyStatus {
+// Primary account enclave key
+export function useEnclaveKey(): DeviceKeyStatus {
   return useLoadOrCreateEnclaveKey(defaultEnclaveKeyName);
 }
 
-// Poor man's device attestation. True device attestation is often not available
-// on some devices, so we use a poor man's version of it -- a key created on
-// device keychain/keystore once and never deleted. Most devices make it
-// quite hard to delete a key, so it can serve as a poor man's sybil protection.
-export function useDeviceAttestationKey(): DeviceKeyStatus {
-  return useLoadOrCreateEnclaveKey(deviceAttestationKeyName);
+// Device API key: Poor man's device attestation. True device attestation is
+// often not available on some devices, so we use a poor man's version of it
+// -- a key created on device keychain/keystore once and never deleted. Most
+// devices make it quite hard to delete a key, so it can serve as a poor man's
+// sybil protection.
+export function useDeviceAPIKey(): DeviceKeyStatus {
+  return useLoadOrCreateEnclaveKey(deviceAPIKeyName);
 }

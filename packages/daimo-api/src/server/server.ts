@@ -36,7 +36,6 @@ async function main() {
   await db.createTables();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
-  const inviteCodeTracker = new InviteCodeTracker(vc, db);
   const inviteGraph = new InviteGraph(db);
 
   const keyReg = new KeyRegistry();
@@ -45,6 +44,7 @@ async function main() {
     inviteGraph,
     await db.loadNameBlacklist()
   );
+  const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);

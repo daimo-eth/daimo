@@ -2,7 +2,7 @@ import { Address, Hex } from "viem";
 
 import {
   DaimoLinkAccount,
-  DaimoLinkInvite,
+  DaimoLinkInviteCode,
   DaimoLinkNote,
   DaimoLinkNoteV2,
   DaimoLinkRequest,
@@ -15,7 +15,7 @@ export type DaimoLinkStatus =
   | DaimoRequestStatus
   | DaimoRequestV2Status
   | DaimoNoteStatus
-  | DaimoInviteStatus;
+  | DaimoInviteCodeStatus;
 
 /**
  * Summarizes a link to any Ethereum account.
@@ -101,9 +101,10 @@ export type DaimoNoteStatus = {
  * Tracks details about an invite.
  * This information is tracked offchain by the API server.
  */
-export type DaimoInviteStatus = {
-  link: DaimoLinkInvite;
+export type DaimoInviteCodeStatus = {
+  link: DaimoLinkInviteCode;
   isValid: boolean;
-  bonusDollars?: number;
-  sender?: EAccount;
+  bonusDollarsInvitee?: number;
+  bonusDollarsInviter?: number;
+  inviter?: EAccount;
 };

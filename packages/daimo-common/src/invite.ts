@@ -1,6 +1,6 @@
 import { DaimoLink, parseDaimoLink } from "./daimoLink";
 import {
-  DaimoInviteStatus,
+  DaimoInviteCodeStatus,
   DaimoLinkStatus,
   DaimoNoteState,
   DaimoNoteStatus,
@@ -32,11 +32,11 @@ export function getInviteStatus(linkStatus: DaimoLinkStatus): LinkInviteStatus {
       sender: noteStatus.sender,
     };
   } else if (linkStatus.link.type === "invite") {
-    const inviteStatus = linkStatus as DaimoInviteStatus;
+    const inviteStatus = linkStatus as DaimoInviteCodeStatus;
 
     return {
       isValid: inviteStatus.isValid,
-      sender: inviteStatus.sender,
+      sender: inviteStatus.inviter,
     };
   } else if (
     linkStatus.link.type === "request" ||

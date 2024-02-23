@@ -1,9 +1,4 @@
-import {
-  DaimoInviteStatus,
-  DaimoLinkStatus,
-  DaimoNoteStatus,
-  DaimoRequestStatus,
-} from "@daimo/common";
+import { DaimoLinkStatus, getInviteStatus } from "@daimo/common";
 import { Address } from "viem";
 
 import { DB, InviteGraphRow } from "../db/db";
@@ -53,20 +48,7 @@ export class InviteGraph {
   }
 
   processDeployWallet(address: Address, inviteLinkStatus: DaimoLinkStatus) {
-    const inviter = (() => {
-      switch (inviteLinkStatus.link.type) {
-        case "note":
-        case "notev2":
-          return (inviteLinkStatus as DaimoNoteStatus).sender.addr;
-        case "request":
-        case "requestv2":
-          return (inviteLinkStatus as DaimoRequestStatus).recipient.addr;
-        case "invite":
-          return (inviteLinkStatus as DaimoInviteStatus).sender?.addr;
-        default:
-          return undefined;
-      }
-    })();
+    const inviter = getInviteStatus(inviteLinkStatus).sender?.addr;
 
     if (inviter) {
       this.addEdge({ inviter, invitee: address });

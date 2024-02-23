@@ -53,7 +53,8 @@ export class DB {
           );
           ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
           ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS inviter CHAR(42) DEFAULT NULL;
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents INT DEFAULT 0 NOT NULL;
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_invitee INT DEFAULT 0 NOT NULL;
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_inviter INT DEFAULT 0 NOT NULL;
 
           CREATE TABLE IF NOT EXISTS name_blacklist (
             name VARCHAR(32) PRIMARY KEY
@@ -84,9 +85,10 @@ export class DB {
             UNIQUE (address, time, type)
           );
 
-          CREATE TABLE IF NOT EXISTS invitegraph (
+          CREATE TABLE IF NOT EXISTS invite_graph (
             invitee CHAR(42) PRIMARY KEY,
-            inviter CHAR(42) NOT NULL
+            inviter CHAR(42) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW()
           );
 
           -- Used to prevent double-claiming faucet bonuses
@@ -226,7 +228,8 @@ export class DB {
       maxUses: row.max_uses,
       zupassEmail: row.zupass_email,
       inviter: row.inviter ? getAddress(row.inviter) : null,
-      bonusDollars: row.bonus_cents / 100,
+      bonusDollarsInvitee: row.bonus_cents_invitee / 100,
+      bonusDollarsInviter: row.bonus_cents_inviter / 100,
     };
   }
 
@@ -255,7 +258,7 @@ export class DB {
     console.log(`[DB] loading invite graph`);
     const client = await this.pool.connect();
     const result = await client.query<InviteGraphRow>(
-      `SELECT invitee, inviter FROM invitegraph`
+      `SELECT invitee, inviter FROM invite_graph`
     );
     client.release();
 
@@ -267,7 +270,7 @@ export class DB {
     console.log(`[DB] inserting invite graph`);
     const client = await this.pool.connect();
     await client.query(
-      `INSERT INTO invitegraph (invitee, inviter) VALUES ($1, $2)`,
+      `INSERT INTO invite_graph (invitee, inviter) VALUES ($1, $2)`,
       [rows.invitee, rows.inviter]
     );
     client.release();
@@ -308,7 +311,8 @@ export interface InviteCodeRow {
   maxUses: number;
   zupassEmail: string | null;
   inviter: Address | null;
-  bonusDollars: number;
+  bonusDollarsInvitee: number;
+  bonusDollarsInviter: number;
 }
 
 interface RawInviteCodeRow {
@@ -317,7 +321,8 @@ interface RawInviteCodeRow {
   max_uses: number;
   zupass_email: string | null;
   inviter: string | null;
-  bonus_cents: number; // in cents so we can use INT Postgres type
+  bonus_cents_invitee: number; // in cents so we can use INT Postgres type
+  bonus_cents_inviter: number;
 }
 
 export interface InviteGraphRow {
