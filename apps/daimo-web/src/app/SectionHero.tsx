@@ -8,7 +8,7 @@ import {
 
 export function SectionHero() {
   return (
-    <section className="overflow-hidden pb-28">
+    <section className="overflow-hidden  md:pb-28">
       <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row md:gap-16 overflow-visible lg:border lg:rounded-[48px] border-white/30 lg:bg-[#000000]/20 py-16 px-12">
         <div className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12">
           <HeroH1>Pay or receive USDC anywhere.</HeroH1>
@@ -18,7 +18,7 @@ export function SectionHero() {
           </HeroH2>
           <div className="hidden md:flex flex-row items-center space-x-6 pt-6 md:pt-8">
             <DownloadLinkButton />
-            <Link className="font-bold text-white text-2xl" href="#faq">
+            <Link className="font-bold text-white text-2xl" href="#features">
               Learn More<span className="font-extralight">&nbsp;&#8595;</span>
             </Link>
           </div>
