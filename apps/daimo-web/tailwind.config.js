@@ -18,6 +18,7 @@ module.exports = {
       grayLight: "#D6D6D6",
       grayMid: "#717171",
       midnight: "#262626",
+      black: "#000000",
     },
     extend: {
       fontFamily: {
