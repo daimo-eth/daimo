@@ -20,6 +20,11 @@ const neueMontreal = localFont({
       style: "normal",
     },
     {
+      path: "../fonts/PPNeueMontreal-Book.woff",
+      weight: "500",
+      style: "normal",
+    },
+    {
       path: "../fonts/PPNeueMontreal-Bold.woff2",
       weight: "700",
       style: "normal",
