@@ -27,7 +27,7 @@ module.exports = {
       },
       backgroundImage: {
         "midnight-gradient":
-          "linear-gradient(to bottom, #FFFFFF 30%, #ABF99E 50%, #111111 70%)",
+          "linear-gradient(to bottom, #FFFFFF 30%, #14B174 50%, #111111 70%)",
       },
     },
   },
