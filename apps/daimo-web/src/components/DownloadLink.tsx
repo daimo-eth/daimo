@@ -26,13 +26,13 @@ export function DownloadLinkButton() {
     <Link
       href={link}
       target="_blank"
-      className="flex items-center space-x-4 rounded-lg py-7 px-9 bg-primaryLight text-white font-semibold md:text-2xl tracking-tight"
+      className="flex items-center space-x-4 rounded-lg py-[15px] px-[36px] bg-primaryLight text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[267px] "
     >
-      <div>{title}</div>
+      <div>Download</div>
       <Image
         src={"/assets/daimo-qr-download.png"}
-        width={48}
-        height={48}
+        width={72}
+        height={72}
         alt="QR Code"
       />
     </Link>
