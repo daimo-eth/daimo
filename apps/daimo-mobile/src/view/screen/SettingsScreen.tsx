@@ -149,7 +149,7 @@ function LinkedAccountsRow({
   }
 
   // Generalize once needed
-  const fcAccount = linkedAccounts[1];
+  const fcAccount = linkedAccounts[0];
   return <FarcasterButton fcAccount={fcAccount} onPress={connectFarc} />;
 }
 
@@ -278,7 +278,9 @@ function DeviceRow({
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
             <TextBody color={textCol}>{dispName}</TextBody>
             {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
-            {isCurrentDevice && !pendingRemoval && <Badge>THIS DEVICE</Badge>}
+            {isCurrentDevice && !pendingRemoval && (
+              <Badge color={color.grayMid}>THIS DEVICE</Badge>
+            )}
             {pendingRemoval && <PendingDot />}
           </View>
           <View style={styles.rowRight}>

@@ -10,6 +10,14 @@ import { getHardwareSec } from "../logic/enclave";
 import { env } from "../logic/env";
 import { Account, getAccountManager, serializeAccount } from "../model/account";
 import { amountSeparator } from "../view/shared/Amount";
+import { ButtonMed } from "../view/shared/Button";
+
+export function SendDebugLogButton() {
+  const [sendDebugLog] = useSendDebugLog();
+  return (
+    <ButtonMed title="SEND DEBUG LOG" onPress={sendDebugLog} type="subtle" />
+  );
+}
 
 /**
  * Returns a function to send a complete debug log + env summary.

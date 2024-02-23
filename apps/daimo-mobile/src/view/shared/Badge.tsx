@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { color } from "./style";
 import { TextBtnCaps } from "./text";
 
-const defaultColor = color.grayMid;
+const defaultColor = color.grayDark;
 const defaultBgColor = color.ivoryDark;
 
 export function Badge({

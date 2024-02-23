@@ -2,8 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useSendDebugLog } from "../../common/useSendDebugLog";
-import { ButtonBig } from "../shared/Button";
+import { SendDebugLogButton } from "../../common/useSendDebugLog";
 import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { ErrorBanner } from "../shared/error";
@@ -39,19 +38,24 @@ export function ErrorScreen(props: Props) {
   );
 }
 
-export function ErrorFallback() {
-  const [sendDebugLog] = useSendDebugLog();
+export function renderErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
   return (
     <View style={ss.container.screen}>
       <View style={ss.container.padH8}>
         <Spacer h={192} />
-        <ErrorBanner displayTitle="An error occurred" />
-        <Spacer h={16} />
-        <ButtonBig
-          title="SEND DEBUG LOG"
-          onPress={sendDebugLog}
-          type="subtle"
+        <ErrorBanner
+          displayTitle="An error occurred"
+          error={error}
+          onGoHome={resetErrorBoundary}
         />
+        <Spacer h={16} />
+        <SendDebugLogButton />
       </View>
     </View>
   );

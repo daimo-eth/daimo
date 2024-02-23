@@ -17,7 +17,7 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
-import { ErrorFallback } from "./view/screen/ErrorScreen";
+import { renderErrorFallback } from "./view/screen/ErrorScreen";
 import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
@@ -115,29 +115,29 @@ function AppBody() {
 
   return (
     <DispatcherContext.Provider value={dispatcher}>
-      <SafeAreaProvider>
-        <ErrorBoundary fallback={<ErrorFallback />}>
+      <ErrorBoundary fallbackRender={renderErrorFallback}>
+        <SafeAreaProvider>
           <TabNav />
-        </ErrorBoundary>
-        <StatusBar style="auto" />
-        <View
-          style={styles.bottomSheetWrapper}
-          pointerEvents={bottomSheet != null ? "auto" : "none"}
-        >
-          <BottomSheet
-            handleComponent={ScrollPellet}
-            backdropComponent={renderBackdrop}
-            ref={bottomSheetRef}
-            index={-1}
-            snapPoints={snapPoints}
-            onChange={onChangeIndex}
-            enablePanDownToClose
+          <StatusBar style="auto" />
+          <View
+            style={styles.bottomSheetWrapper}
+            pointerEvents={bottomSheet != null ? "auto" : "none"}
           >
-            {bottomSheet === "debug" && <DebugBottomSheet />}
-            {bottomSheet === "connectFarcaster" && <FarcasterBottomSheet />}
-          </BottomSheet>
-        </View>
-      </SafeAreaProvider>
+            <BottomSheet
+              handleComponent={ScrollPellet}
+              backdropComponent={renderBackdrop}
+              ref={bottomSheetRef}
+              index={-1}
+              snapPoints={snapPoints}
+              onChange={onChangeIndex}
+              enablePanDownToClose
+            >
+              {bottomSheet === "debug" && <DebugBottomSheet />}
+              {bottomSheet === "connectFarcaster" && <FarcasterBottomSheet />}
+            </BottomSheet>
+          </View>
+        </SafeAreaProvider>
+      </ErrorBoundary>
     </DispatcherContext.Provider>
   );
 }

@@ -30,14 +30,16 @@ export function ErrorBanner({
   displayTitle,
   displayMessage,
   showDownloadButton,
+  onGoHome,
 }: {
   error?: { message?: string };
   displayTitle: string;
   displayMessage?: string;
   showDownloadButton?: boolean;
+  onGoHome?: () => void;
 }) {
   const nav = useNav();
-  const goHomeScreen = () => nav.popToTop();
+  const goHomeScreen = onGoHome || (() => nav.popToTop());
   const goAppStore = () => {
     if (Platform.OS === "android") Linking.openURL(appStoreLinks.android);
     else Linking.openURL(appStoreLinks.ios);
