@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Daimo",
   description: "Stablecoin payments app",
   icons: {
-    icon: "/logo-web-favicon.png", // todo
+    icon: "/logo-web-favicon.png",
   },
 };
 
