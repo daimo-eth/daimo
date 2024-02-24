@@ -296,14 +296,14 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           bonusDollarsInviter &&
           bonusDollarsInvitee === bonusDollarsInviter
         ) {
-          return `Sign up and we'll send you both $${bonusDollarsInvitee} USDC`;
+          return `Accept their invite and we'll send you both $${bonusDollarsInvitee} USDC`;
         } else if (bonusDollarsInvitee) {
-          return `Sign up and we'll send you $${bonusDollarsInvitee} USDC`;
+          return `Accept their invite and we'll send you $${bonusDollarsInvitee} USDC`;
         } else return "Get Daimo to send or receive payments";
       })();
       return {
         name: `${inviter ? getAccountName(inviter) : "daimo"}`,
-        action: `invited you`,
+        action: `invited you to Daimo`,
         description,
         linkStatus: res,
       };

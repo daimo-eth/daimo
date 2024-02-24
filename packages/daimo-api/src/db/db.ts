@@ -215,7 +215,7 @@ export class DB {
     console.log(`[DB] loading invite code ${code}`);
     const client = await this.pool.connect();
     const result = await client.query<RawInviteCodeRow>(
-      `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents FROM invitecode WHERE code = $1`,
+      `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter FROM invitecode WHERE code = $1`,
       [code]
     );
     client.release();

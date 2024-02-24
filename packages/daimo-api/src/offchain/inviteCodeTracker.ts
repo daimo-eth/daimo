@@ -37,39 +37,37 @@ export class InviteCodeTracker {
 
     if (isFaucetAttestationUsed) {
       console.log(
-        `[INVITE] faucet attestation ${code} ${deviceAttestationString} already used`
+        `[INVITE] faucet attestation ${JSON.stringify(
+          code
+        )} ${deviceAttestationString} already used`
       );
 
       // Exit if mainnet double claim is attempted.
       if (!chainConfig.chainL2.testnet) return false;
     }
 
-    await Promise.all([
-      () => {
-        if (code.bonusDollarsInvitee === 0) return;
-        console.log(
-          `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
-        );
-        this.vc.writeContract({
-          abi: erc20ABI,
-          address: chainConfig.tokenAddress,
-          functionName: "transfer",
-          args: [invitee, dollarsToAmount(code.bonusDollarsInvitee)],
-        });
-      },
-      () => {
-        if (!code.inviter || code.bonusDollarsInviter === 0) return;
-        console.log(
-          `[INVITE] sending faucet to inviter ${code.inviter} ${code.bonusDollarsInviter}`
-        );
-        this.vc.writeContract({
-          abi: erc20ABI,
-          address: chainConfig.tokenAddress,
-          functionName: "transfer",
-          args: [code.inviter, dollarsToAmount(code.bonusDollarsInviter)],
-        });
-      },
-    ]);
+    if (code.bonusDollarsInvitee > 0) {
+      console.log(
+        `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
+      );
+      await this.vc.writeContract({
+        abi: erc20ABI,
+        address: chainConfig.tokenAddress,
+        functionName: "transfer",
+        args: [invitee, dollarsToAmount(code.bonusDollarsInvitee)],
+      });
+    }
+    if (code.inviter && code.bonusDollarsInviter > 0) {
+      console.log(
+        `[INVITE] sending faucet to inviter ${code.inviter} ${code.bonusDollarsInviter}`
+      );
+      await this.vc.writeContract({
+        abi: erc20ABI,
+        address: chainConfig.tokenAddress,
+        functionName: "transfer",
+        args: [code.inviter, dollarsToAmount(code.bonusDollarsInviter)],
+      });
+    }
 
     if (deviceAttestationString) {
       await this.db.insertFaucetAttestation(deviceAttestationString);
