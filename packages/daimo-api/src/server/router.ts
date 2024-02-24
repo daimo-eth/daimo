@@ -14,6 +14,7 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
+import { getTagRedirect, setTagRedirect } from "../api/tagRedirect";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -35,7 +36,7 @@ export function createRouter(
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
-  requestIndexer: RequestIndexer,
+  reqIndexer: RequestIndexer,
   profileCache: ProfileCache,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
@@ -115,8 +116,9 @@ export function createRouter(
           url,
           nameReg,
           noteIndexer,
-          requestIndexer,
-          inviteCodeTracker
+          reqIndexer,
+          inviteCodeTracker,
+          db
         );
       }),
 
@@ -193,8 +195,9 @@ export function createRouter(
           inviteLink,
           nameReg,
           noteIndexer,
-          requestIndexer,
-          inviteCodeTracker
+          reqIndexer,
+          inviteCodeTracker,
+          db
         );
         const address = await deployWallet(
           name,
@@ -279,7 +282,7 @@ export function createRouter(
 
         return createRequestSponsored(
           vc,
-          requestIndexer,
+          reqIndexer,
           idString,
           recipient,
           amount
@@ -297,6 +300,22 @@ export function createRouter(
       .mutation(async (opts) => {
         const { addr, actionJSON, signature } = opts.input;
         return profileCache.updateProfileLinks(addr, actionJSON, signature);
+      }),
+
+    getTagRedirect: publicProcedure
+      .input(z.object({ tag: z.string() }))
+      .query(async (opts) => {
+        const { tag } = opts.input;
+        return getTagRedirect(tag, db);
+      }),
+
+    updateTagRedirect: publicProcedure
+      .input(
+        z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
+      )
+      .mutation(async (opts) => {
+        const { tag, link, updateToken } = opts.input;
+        return setTagRedirect(tag, link, updateToken, db);
       }),
   });
 }

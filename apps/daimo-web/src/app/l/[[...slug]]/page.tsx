@@ -6,7 +6,6 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
-  assert,
   daimoDomainAddress,
   daimoLinkBaseV2,
   getAccountName,
@@ -153,33 +152,41 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         name: "Daimo",
         description: "Unrecognized link",
       };
-    } else if (link.type === "account") {
-      return {
-        name: `${link.account}`,
-        description: "Couldn't load account",
-      };
-    } else if (link.type === "request" || link.type === "requestv2") {
-      return {
-        name: `${link.recipient}`,
-        action: `is requesting`,
-        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load request status",
-      };
-    } else if (link.type === "notev2") {
-      return {
-        name: `${link.sender}`,
-        action: `sent you`,
-        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load payment link",
-      };
-    } else {
-      assert(link.type === "note");
-      return {
-        name: `${link.previewSender}`,
-        action: `sent you`,
-        dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load payment link",
-      };
+    }
+
+    switch (link.type) {
+      case "account":
+        return {
+          name: `${link.account}`,
+          description: "Couldn't load account",
+        };
+      case "request":
+      case "requestv2":
+        return {
+          name: `${link.recipient}`,
+          action: `is requesting`,
+          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+          description: "Couldn't load request status",
+        };
+      case "notev2":
+        return {
+          name: `${link.sender}`,
+          action: `sent you`,
+          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+          description: "Couldn't load payment link",
+        };
+      case "note":
+        return {
+          name: `${link.previewSender}`,
+          action: `sent you`,
+          dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
+          description: "Couldn't load payment link",
+        };
+      default:
+        return {
+          name: "Daimo",
+          description: "Unhandled link type: " + link.type,
+        };
     }
   }
 
@@ -309,7 +316,10 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
       };
     }
     default: {
-      return null;
+      return {
+        name: "Daimo",
+        description: "Unhandled link status for type: " + res.link.type,
+      };
     }
   }
 }

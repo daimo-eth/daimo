@@ -1,6 +1,5 @@
 import {
   DaimoInviteCodeStatus,
-  DaimoLinkRequest,
   DaimoLinkStatus,
   DaimoNoteState,
   DaimoNoteStatus,
@@ -13,9 +12,11 @@ import {
   parseDaimoLink,
 } from "@daimo/common";
 
+import { getTagRedirect } from "./tagRedirect";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { RequestIndexer } from "../contract/requestIndexer";
+import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 
@@ -24,7 +25,8 @@ export async function getLinkStatus(
   nameReg: NameRegistry,
   noteIndexer: NoteIndexer,
   requestIndexer: RequestIndexer,
-  inviteCodeTracker: InviteCodeTracker
+  inviteCodeTracker: InviteCodeTracker,
+  db: DB
 ): Promise<DaimoLinkStatus> {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -130,30 +132,21 @@ export async function getLinkStatus(
       // Tag links serve as simple redirects to other links on the API level.
       // Currently, they get redirected to returning a request status.
       const id = link.id;
-      if (id === "rwe") {
-        const randomRequestId = `${BigInt(
-          Math.floor(Math.random() * 1e12)
-        )}` as `${bigint}`;
-        const acc = await nameReg.getEAccountFromStr("daimo");
-        assert(acc != null && acc.name != null);
+      const redir = await getTagRedirect(id, db);
+      assert(redir != null, `Unknown tag id: ${id}`);
 
-        const requestLink: DaimoLinkRequest = {
-          type: "request",
-          recipient: acc.name,
-          dollars: "1",
-          requestId: randomRequestId,
-        };
+      const redirLink = parseDaimoLink(redir);
+      assert(redirLink != null, `Invalid tag redirect: ${id} -> ${redir}`);
+      assert(redirLink.type !== "tag", `Tag redirect loop: ${id} -> ${redir}`);
 
-        const ret: DaimoRequestStatus = {
-          link: requestLink,
-          recipient: acc,
-          requestId: randomRequestId,
-          isValidInvite: true,
-        };
-        return ret;
-      } else {
-        throw new Error(`Unknown tag id: ${id}`);
-      }
+      return await getLinkStatus(
+        redir,
+        nameReg,
+        noteIndexer,
+        requestIndexer,
+        inviteCodeTracker,
+        db
+      );
     }
 
     default:

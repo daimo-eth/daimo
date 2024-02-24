@@ -94,6 +94,18 @@ export class DB {
           -- Used to prevent double-claiming faucet bonuses
           CREATE TABLE IF NOT EXISTS used_faucet_attestations (
             attestation CHAR(184) PRIMARY KEY
+          CREATE TABLE IF NOT EXISTS tag_redirect (
+            tag VARCHAR(32) PRIMARY KEY, -- tag, eg "foo" in daimo.com/l/t/foo
+            link VARCHAR(256) NOT NULL, -- redirect URL
+            update_token VARCHAR(64) DEFAULT NULL -- if set, the link can only be updated with this token
+          );
+
+          CREATE TABLE IF NOT EXISTS tag_redirect_history (
+            id SERIAL PRIMARY KEY,
+            time TIMESTAMP NOT NULL DEFAULT NOW(),
+            tag VARCHAR(32) NOT NULL, -- new or existing tag
+            link VARCHAR(256) NOT NULL, -- new link
+            update_token VARCHAR(64) DEFAULT NULL -- token used for this update
           );
       `);
     await client.end();
@@ -119,6 +131,34 @@ export class DB {
        ON CONFLICT (pushtoken) DO UPDATE SET address = $2`,
       [token.pushtoken, token.address]
     );
+    client.release();
+  }
+
+  async loadTagRedirect(tag: string): Promise<TagRedirectRow | null> {
+    console.log(`[DB] loading tag redirect: ${tag}`);
+    const client = await this.pool.connect();
+    const result = await client.query<TagRedirectRow>(
+      `SELECT tag, link, update_token FROM tag_redirect WHERE tag = $1`,
+      [tag]
+    );
+    client.release();
+    return result.rows[0] || null;
+  }
+
+  async saveTagRedirect(tag: string, link: string) {
+    console.log(`[DB] inserting tag redirect: ${tag} -> ${link}`);
+    const client = await this.pool.connect();
+    const res = await client.query(
+      `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
+       ON CONFLICT (tag) DO UPDATE SET link = $2`,
+      [tag, link]
+    );
+    if (res.rowCount > 0) {
+      await client.query(
+        `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
+        [tag, link]
+      );
+    }
     client.release();
   }
 
@@ -344,4 +384,10 @@ interface OffchainActionRow {
   type: string;
   action_json: string;
   signature_hex: string;
+}
+
+interface TagRedirectRow {
+  tag: string;
+  link: string;
+  update_token: string | null;
 }
