@@ -190,7 +190,9 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
     }
   }
 
-  switch (res.link.type) {
+  // Handle link status
+  const resLinkType = res.link.type;
+  switch (resLinkType) {
     case "account": {
       const { account } = res as DaimoAccountStatus;
       return {
@@ -318,7 +320,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
     default: {
       return {
         name: "Daimo",
-        description: "Unhandled link status for type: " + res.link.type,
+        description: "Unhandled link status for type: " + resLinkType,
       };
     }
   }

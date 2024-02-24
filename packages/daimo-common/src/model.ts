@@ -96,3 +96,9 @@ const phoneNumberRegex = new RegExp(
 export const zPhoneNumber = z.string().regex(phoneNumberRegex);
 
 export type PhoneNumber = z.infer<typeof zPhoneNumber>;
+
+export interface TagRedirectEvent {
+  time: number;
+  tag: string;
+  link: string;
+}

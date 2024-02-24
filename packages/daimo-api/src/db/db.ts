@@ -1,4 +1,4 @@
-import { ProfileLinkID } from "@daimo/common";
+import { ProfileLinkID, TagRedirectEvent } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, getAddress } from "viem";
 
@@ -94,6 +94,8 @@ export class DB {
           -- Used to prevent double-claiming faucet bonuses
           CREATE TABLE IF NOT EXISTS used_faucet_attestations (
             attestation CHAR(184) PRIMARY KEY
+          );
+          
           CREATE TABLE IF NOT EXISTS tag_redirect (
             tag VARCHAR(32) PRIMARY KEY, -- tag, eg "foo" in daimo.com/l/t/foo
             link VARCHAR(256) NOT NULL, -- redirect URL
@@ -143,6 +145,23 @@ export class DB {
     );
     client.release();
     return result.rows[0] || null;
+  }
+
+  async loadTagRedirectHist(tag: string): Promise<TagRedirectEvent[]> {
+    console.log(`[DB] loading tag redirect history: ${tag}`);
+    const client = await this.pool.connect();
+    const result = await client.query(
+      `SELECT tag, link, time
+       FROM tag_redirect_history WHERE tag = $1
+       ORDER BY time DESC LIMIT 10`,
+      [tag]
+    );
+    client.release();
+    return result.rows.map((row) => ({
+      time: Math.floor(new Date(row.time).getTime() / 1000),
+      tag: row.tag,
+      link: row.link,
+    }));
   }
 
   async saveTagRedirect(tag: string, link: string) {

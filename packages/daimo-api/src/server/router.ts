@@ -1,4 +1,14 @@
-import { zAddress, zBigIntStr, zHex, zUserOpHex } from "@daimo/common";
+import {
+  DaimoLinkRequestV2,
+  amountToDollars,
+  encodeRequestId,
+  formatDaimoLink,
+  generateRequestId,
+  zAddress,
+  zBigIntStr,
+  zHex,
+  zUserOpHex,
+} from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
@@ -14,7 +24,12 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
-import { getTagRedirect, setTagRedirect } from "../api/tagRedirect";
+import {
+  getTagRedirect,
+  getTagRedirectHist,
+  setTagRedirect,
+  verifyTagUpdateToken,
+} from "../api/tagRedirect";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -316,6 +331,50 @@ export function createRouter(
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
         return setTagRedirect(tag, link, updateToken, db);
+      }),
+
+    getTagHistory: publicProcedure
+      .input(z.object({ tag: z.string() }))
+      .query(async (opts) => {
+        const { tag } = opts.input;
+        return getTagRedirectHist(tag, db);
+      }),
+
+    updateTagToNewRequest: publicProcedure
+      .input(
+        z.object({
+          tag: z.string(),
+          updateToken: z.string(),
+          recipient: zAddress,
+          amount: zBigIntStr,
+        })
+      )
+      .mutation(async (opts) => {
+        const { tag, updateToken, recipient, amount } = opts.input;
+
+        await verifyTagUpdateToken(tag, updateToken, db);
+        const id = generateRequestId();
+        const idString = encodeRequestId(id);
+
+        await createRequestSponsored(
+          vc,
+          reqIndexer,
+          idString,
+          recipient,
+          amount
+        );
+
+        const reqLink: DaimoLinkRequestV2 = {
+          type: "requestv2",
+          id: idString,
+          dollars: amountToDollars(BigInt(amount)),
+          recipient,
+        };
+        const url = formatDaimoLink(reqLink);
+
+        await setTagRedirect(tag, url, updateToken, db);
+
+        return url;
       }),
   });
 }

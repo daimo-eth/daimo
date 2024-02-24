@@ -6,7 +6,9 @@ export function now() {
 }
 
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */
-export function timeAgo(sinceS: number, nowS: number, long?: boolean) {
+export function timeAgo(sinceS: number, nowS?: number, long?: boolean) {
+  if (nowS == null) nowS = now();
+
   const seconds = Math.floor(nowS - sinceS);
   if (seconds < 60) return long ? `just now` : `now`;
   const minutes = Math.floor(seconds / 60);
