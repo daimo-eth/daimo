@@ -22,7 +22,8 @@ export function useCreateAccount(
   name: string,
   inviteLink: DaimoLink | undefined,
   daimoChain: DaimoChain,
-  keyStatus: DeviceKeyStatus
+  keyStatus: DeviceKeyStatus,
+  deviceAPIKeyStatus: DeviceKeyStatus
 ): ActHandle {
   const [as, setAS] = useActStatus("useCreateAccount");
 
@@ -36,12 +37,23 @@ export function useCreateAccount(
   // On exec, create contract onchain, claiming name.
   const result = rpcHook.deployWallet.useMutation();
   const exec = async () => {
-    if (!keyStatus.pubKeyHex) return;
+    if (
+      !keyStatus.pubKeyHex ||
+      !deviceAPIKeyStatus.pubKeyHex ||
+      !sanitisedInviteLink
+    ) {
+      console.log(
+        `[CREATE] missing data for useCreateAccount ${keyStatus} ${deviceAPIKeyStatus} ${sanitisedInviteLink}`
+      );
+      setAS("error", "Missing data");
+      return;
+    }
     setAS("loading", "Creating account...");
     result.mutate({
       name,
       pubKeyHex: keyStatus.pubKeyHex,
       inviteLink: sanitisedInviteLink,
+      deviceAttestationString: deviceAPIKeyStatus.pubKeyHex,
     });
   };
 

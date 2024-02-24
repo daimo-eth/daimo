@@ -13,7 +13,7 @@ import {
 /// For the opposite test, see BundleBulker.t.sol in the bulk repo.
 test("compress example bundle", () => {
   // from, to must both be named accounts
-  const nameReg = new NameRegistry(null as any, new Set([]));
+  const nameReg = new NameRegistry(null as any, null as any, new Set([]));
   nameReg.onSuccessfulRegister(
     "alice",
     "0x8bFfa71A959AF0b15C6eaa10d244d80BF23cb6A2"

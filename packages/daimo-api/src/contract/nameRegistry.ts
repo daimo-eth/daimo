@@ -21,6 +21,7 @@ import { normalize } from "viem/ens";
 
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { InviteGraph } from "../offchain/inviteGraph";
 import { retryBackoff } from "../utils/retryBackoff";
 
 const specialAddrLabels: { [_: Address]: AddrLabel } = {
@@ -60,7 +61,11 @@ export class NameRegistry {
 
   logs: Registration[] = [];
 
-  constructor(private vc: ViemClient, private nameBlacklist: Set<string>) {}
+  constructor(
+    private vc: ViemClient,
+    private inviteGraph: InviteGraph,
+    private nameBlacklist: Set<string>
+  ) {}
 
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
@@ -157,7 +162,8 @@ export class NameRegistry {
     const reg = this.addrToReg.get(address);
     if (reg) {
       const { addr, name, timestamp } = reg;
-      return { addr, name, timestamp } as EAccount;
+      const inviter = this.inviteGraph.getInviter(address);
+      return { addr, name, timestamp, inviter } as EAccount;
     }
 
     // Then, a special labelled address, e.g. faucet
@@ -196,7 +202,7 @@ export class NameRegistry {
       }
     } else if (isAddress(eAccStr)) {
       const addr = getAddress(eAccStr);
-      return { addr } as EAccount;
+      return await this.getEAccount(addr);
     } else {
       const daimoAddress = this.resolveName(eAccStr);
       if (daimoAddress) {

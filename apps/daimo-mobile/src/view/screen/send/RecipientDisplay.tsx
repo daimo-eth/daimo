@@ -6,7 +6,7 @@ import { ButtonCircle } from "../../shared/ButtonCircle";
 import { ContactBubble } from "../../shared/ContactBubble";
 import { FarcasterButton } from "../../shared/FarcasterBubble";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
+import { navToAccountPage, useNav } from "../../shared/nav";
 import { TextH3, TextLight } from "../../shared/text";
 
 export function RecipientDisplay({
@@ -39,11 +39,9 @@ export function RecipientDisplay({
 
   const nav = useNav();
   const goToAccount = useCallback(() => {
-    if (isAccount)
-      nav.navigate("SendTab", {
-        screen: "Account",
-        params: { eAcc: recipient },
-      });
+    if (isAccount) {
+      navToAccountPage(recipient, nav);
+    }
   }, [nav, recipient]);
 
   return (

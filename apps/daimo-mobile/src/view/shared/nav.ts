@@ -9,6 +9,7 @@ import {
   DisplayOpEvent,
   EAccount,
   parseDaimoLink,
+  getEAccountStr,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -23,7 +24,9 @@ export type QRScreenOptions = "PAY ME" | "SCAN";
 export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
-  Account: { eAcc: EAccount } | { link: DaimoLinkAccount };
+  Account:
+    | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
+    | { link: DaimoLinkAccount };
   HistoryOp: { op: DisplayOpEvent };
 };
 
@@ -54,7 +57,9 @@ export type ParamListSend = {
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
   SendLink: { recipient?: MsgContact; lagAutoFocus: boolean };
-  Account: { eAcc: EAccount };
+  Account:
+    | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
+    | { link: DaimoLinkAccount };
   HistoryOp: { op: DisplayOpEvent };
 };
 
@@ -228,5 +233,9 @@ export function navToAccountPage(account: EAccount, nav: MainNav) {
   // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
   const currentTab = nav.getState().routes[0].name;
   const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
-  nav.navigate(newTab, { screen: "Account", params: { eAcc: account } });
+  const accountLink = {
+    type: "account",
+    account: getEAccountStr(account),
+  } as DaimoLinkAccount;
+  nav.navigate(newTab, { screen: "Account", params: { link: accountLink } });
 }

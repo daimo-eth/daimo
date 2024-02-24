@@ -14,21 +14,20 @@ import { PrimaryOpenInAppButton } from "./buttons";
 
 export function CallToAction({
   description,
-  walletActionLinkStatus,
+  linkStatus,
 }: {
   description: string;
-  walletActionLinkStatus?: DaimoLinkStatus;
+  linkStatus?: DaimoLinkStatus;
 }) {
   // If we've connected another wallet, hide the Open in Daimo button.
   const { isConnected } = useAccount();
 
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
-  const isInvite = (() => {
-    return walletActionLinkStatus
-      ? getInviteStatus(walletActionLinkStatus).isValid
-      : false;
-  })();
+  const isInvite = !!linkStatus && getInviteStatus(linkStatus).isValid;
+  const isWalletAction =
+    !!linkStatus &&
+    ["request", "requestv2", "note", "notev2"].includes(linkStatus.link.type);
 
   useEffect(() => {
     // Must be loaded client-side to capture the hash part of the URL
@@ -41,9 +40,9 @@ export function CallToAction({
 
   return (
     <>
-      {walletActionLinkStatus ? (
+      {isWalletAction ? (
         <AppOrWalletCTA
-          linkStatus={walletActionLinkStatus}
+          linkStatus={linkStatus}
           description={description}
           directDeepLink={directDeepLink}
           isInvite={isInvite}
@@ -52,7 +51,9 @@ export function CallToAction({
         <>
           <h1 className="text-xl font-semibold text-grayMid">{description}</h1>
           <div className="h-4" />
-          <PrimaryOpenInAppButton />
+          <PrimaryOpenInAppButton
+            inviteDeepLink={isInvite ? directDeepLink : undefined}
+          />
         </>
       )}
       {!isConnected && (

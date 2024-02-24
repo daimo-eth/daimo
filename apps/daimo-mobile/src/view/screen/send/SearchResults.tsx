@@ -24,7 +24,7 @@ import { Bubble, ContactBubble } from "../../shared/ContactBubble";
 import { LinkedAccountBubble } from "../../shared/LinkedAccountBubble";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { useNav } from "../../shared/nav";
+import { navToAccountPage, useNav } from "../../shared/nav";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -154,10 +154,7 @@ function RecipientRow({
       }
       case "eAcc": {
         if (mode === "account") {
-          nav.navigate("HomeTab", {
-            screen: "Account",
-            params: { eAcc: recipient },
-          });
+          navToAccountPage(recipient, nav);
         } else {
           nav.navigate("SendTab", {
             screen: "SendTransfer",

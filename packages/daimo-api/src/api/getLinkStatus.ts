@@ -1,5 +1,5 @@
 import {
-  DaimoInviteStatus,
+  DaimoInviteCodeStatus,
   DaimoLinkRequest,
   DaimoLinkStatus,
   DaimoNoteState,
@@ -13,18 +13,18 @@ import {
   parseDaimoLink,
 } from "@daimo/common";
 
-import { Faucet } from "../contract/faucet";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { chainConfig } from "../env";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 
 export async function getLinkStatus(
   url: string,
   nameReg: NameRegistry,
   noteIndexer: NoteIndexer,
   requestIndexer: RequestIndexer,
-  faucet: Faucet
+  inviteCodeTracker: InviteCodeTracker
 ): Promise<DaimoLinkStatus> {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -39,8 +39,11 @@ export async function getLinkStatus(
 
   switch (link.type) {
     case "account": {
-      const acc = await getEAccountFromStr(link.account);
-      return { link, account: acc };
+      const account = await getEAccountFromStr(link.account);
+      const inviter = account.inviter
+        ? await nameReg.getEAccount(account.inviter)
+        : undefined;
+      return { link, account, inviter };
     }
     case "request": {
       const acc = await getEAccountFromStr(link.recipient);
@@ -118,12 +121,8 @@ export async function getLinkStatus(
     }
 
     case "invite": {
-      const inviteCode = link.code;
-      const isValid = await faucet.verifyInviteCode(inviteCode);
-      const ret: DaimoInviteStatus = {
-        link,
-        isValid,
-      };
+      const ret: DaimoInviteCodeStatus =
+        await inviteCodeTracker.getInviteCodeStatus(link);
       return ret;
     }
 

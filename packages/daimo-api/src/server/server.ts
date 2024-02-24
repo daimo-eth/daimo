@@ -10,7 +10,6 @@ import { createContext, onTrpcError } from "./trpc";
 import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
-import { Faucet } from "../contract/faucet";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -21,6 +20,8 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { getViemClientFromEnv } from "../network/viemClient";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
+import { InviteGraph } from "../offchain/inviteGraph";
 import { Watcher } from "../shovel/watcher";
 
 async function main() {
@@ -35,8 +36,15 @@ async function main() {
   await db.createTables();
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
+  const inviteGraph = new InviteGraph(db);
+
   const keyReg = new KeyRegistry();
-  const nameReg = new NameRegistry(vc, await db.loadNameBlacklist());
+  const nameReg = new NameRegistry(
+    vc,
+    inviteGraph,
+    await db.loadNameBlacklist()
+  );
+  const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);
@@ -51,7 +59,6 @@ async function main() {
   bundlerClient.init(vc.publicClient);
 
   const paymaster = new Paymaster(vc, bundlerClient, db);
-  const faucet = new Faucet(vc, coinIndexer, db);
   const accountFactory = new AccountFactory(vc);
   const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
 
@@ -82,10 +89,11 @@ async function main() {
     await shovelWatcher.init();
     shovelWatcher.watch();
 
-    await paymaster.init();
+    await Promise.all([paymaster.init(), inviteGraph.init()]);
 
     console.log(`[API] initializing push notifications...`);
-    await Promise.all([notifier.init(), faucet.init(), crontab.init()]);
+
+    await Promise.all([notifier.init(), crontab.init()]);
 
     console.log(`[API] initializing profile cache...`);
     await profileCache.init();
@@ -104,7 +112,8 @@ async function main() {
     nameReg,
     keyReg,
     paymaster,
-    faucet,
+    inviteCodeTracker,
+    inviteGraph,
     notifier,
     accountFactory,
     monitor

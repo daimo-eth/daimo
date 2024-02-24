@@ -101,11 +101,10 @@ function Content({
             justifyContent: "flex-start",
             flexDirection: "column",
             fontSize: 48,
-            color: "#717171",
           }}
         >
           <div>{name}</div>
-          {action && <div>{action}</div>}
+          {action && <div style={{ color: "#717171" }}>{action}</div>}
         </div>
         {dollars && (
           <div

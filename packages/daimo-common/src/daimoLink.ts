@@ -22,7 +22,7 @@ export type DaimoLink =
   | DaimoLinkNote
   | DaimoLinkNoteV2
   | DaimoLinkSettings
-  | DaimoLinkInvite
+  | DaimoLinkInviteCode
   | DaimoLinkTag;
 
 /** Represents any Ethereum address */
@@ -77,7 +77,7 @@ export type DaimoLinkSettings = {
   screen?: "add-device" | "add-passkey";
 };
 
-export type DaimoLinkInvite = {
+export type DaimoLinkInviteCode = {
   type: "invite";
   code: string;
 };
