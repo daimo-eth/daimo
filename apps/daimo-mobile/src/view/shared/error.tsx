@@ -4,7 +4,7 @@ import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
-import { useNav } from "./nav";
+import { useExitToHome } from "./nav";
 import { color } from "./style";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 
@@ -38,8 +38,8 @@ export function ErrorBanner({
   showDownloadButton?: boolean;
   onGoHome?: () => void;
 }) {
-  const nav = useNav();
-  const goHomeScreen = onGoHome || (() => nav.popToTop());
+  const exitToHome = useExitToHome();
+  const goHomeScreen = onGoHome || exitToHome;
   const goAppStore = () => {
     if (Platform.OS === "android") Linking.openURL(appStoreLinks.android);
     else Linking.openURL(appStoreLinks.ios);
