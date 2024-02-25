@@ -33,7 +33,7 @@ const items: POSItem[] = [
   { name: "🍜 Ramen", price: 6 },
 ];
 
-const storeAddress = getAddress("0xFBfa6A0D1F44b60d7CCA4b95d5a2CfB15246DB0D");
+const storeAddress = getAddress("0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D");
 const tag = "ecd";
 
 export default function CafePOSPage(props: {

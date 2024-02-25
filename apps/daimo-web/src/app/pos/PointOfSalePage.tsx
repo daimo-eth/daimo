@@ -113,7 +113,7 @@ function NewOrderForm({
 
   return (
     <div className="flex flex-col items-stretch">
-      <TextH3Subtle>New Order</TextH3Subtle>
+      <TextH3Subtle>NEW ORDER</TextH3Subtle>
       <Spacer h={16} />
       <div className="flex flex-wrap gap-2">
         {items.map((item) => (
@@ -128,7 +128,7 @@ function NewOrderForm({
         onClick={placeOrder}
         disabled={mut.isLoading || mut.isSuccess || order.length === 0}
       >
-        <TextBold>Place Order</TextBold>
+        <TextH1>Place Order</TextH1>
       </button>
       <Spacer h={8} />
       <center>
@@ -170,7 +170,9 @@ function AddItemButton({
       className={`${col} w-36 h-24 rounded-lg py-4 flex flex-col items-center gap-2 select-none`}
       onClick={count === 0 ? add : undefined}
     >
-      <TextBold>{item.name}</TextBold>
+      <p className="ext-md font-semibold text-midnight  whitespace-nowrap text-ellipsis">
+        {item.name}
+      </p>
       {count === 0 && <TextH1>${item.price.toFixed(2)}</TextH1>}
       {count > 0 && (
         <div className="flex flex-row text-[1.75rem] font-semibold">
@@ -203,7 +205,7 @@ function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
 
   return (
     <div>
-      <TextH3Subtle>Recent Orders</TextH3Subtle>
+      <TextH3Subtle>LATEST ORDERS</TextH3Subtle>
       <Spacer h={16} />
       {orders == null && <TextBold>Loading...</TextBold>}
       {isError && <TextError>{error.message}</TextError>}
@@ -243,24 +245,30 @@ function Order({
   const isCancelled = stat?.status === DaimoRequestState.Cancelled;
 
   // Display whether order is paid
-  const font = `font-semibold  ` + (index === 0 ? `text-xl` : `text-md`);
+  const font = `font-semibold  text-xl`; // + (index === 0 ? `text-xl` : `text-md`);
   return (
-    <div className={`flex flex-row ${font} text-midnight gap-4`}>
+    <div className={`flex flex-row ${font} text-midnight gap-4 items-center`}>
       <div className="w-12 text-center">
         {stat == null && <TextBold>⋯</TextBold>}
         {isOrdered && "🟡"}
         {isFulfilled && "✅"}
         {isCancelled && "❌"}
       </div>
-      <div className="w-32">
-        {isOrdered && "Ordered"}
-        {isFulfilled && "Paid"}
-        {isCancelled && "Cancelled"}
-        {link.memo || ""}
+      <div className="w-52">
+        <p className={"text-sm font-semibold text-midnight"}>
+          {isOrdered && "Unpaid"}
+          {isFulfilled && "Paid"}
+          {isCancelled && "Cancelled"}
+        </p>
+        <p className={"overflow-hidden whitespace-nowrap text-ellipsis"}>
+          {link.memo || ""}
+        </p>
       </div>
-      <div className="w-16 text-right">${Number(link.dollars).toFixed(2)}</div>
-      <div className="w-16 text-center">{timeAgo(order.time)}</div>
-      <div className="w-16 text-center">
+      <div className="w-16 text-right">
+        <TextBold>{timeAgo(order.time, now(), true)}</TextBold>$
+        {Number(link.dollars).toFixed(2)}
+      </div>
+      <div className="w-16 text-right">
         <a className="text-primary" href={order.link} target="_blank">
           link
         </a>

@@ -32,6 +32,7 @@ type TitleDesc = {
   dollars?: `${number}`;
   description: string;
   linkStatus?: DaimoLinkStatus;
+  memo?: string;
 };
 
 const defaultMeta = metadata(
@@ -42,7 +43,10 @@ const defaultMeta = metadata(
 
 function getUrl(props: LinkProps): string {
   const path = (props.params.slug || []).join("/");
-  return `${daimoLinkBaseV2}/${path}`;
+  const queryString = new URLSearchParams(
+    props.searchParams as Record<string, string>
+  ).toString();
+  return `${daimoLinkBaseV2}/${path}?${queryString}`;
 }
 
 // Generates a OpenGraph link preview image URL
@@ -81,7 +85,7 @@ export default async function LinkPage(props: LinkProps) {
 }
 
 async function LinkPageInner(props: LinkProps) {
-  const { name, action, dollars, description, linkStatus } =
+  const { name, action, dollars, description, linkStatus, memo } =
     (await loadTitleDesc(getUrl(props))) || {
       title: "Daimo",
       description: "Payments on Ethereum",
@@ -103,6 +107,12 @@ async function LinkPageInner(props: LinkProps) {
           <>
             <div className="h-4" />
             <div className="text-6xl font-semibold">${dollars}</div>
+          </>
+        )}
+        {memo && (
+          <>
+            <div className="h-4" />
+            <p className="text-xl italic font-semibold text-grayMid">{memo}</p>
           </>
         )}
         <div className="h-9" />
@@ -167,6 +177,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           action: `is requesting`,
           dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
           description: "Couldn't load request status",
+          memo: link.type === "requestv2" ? link.memo : undefined,
         };
       case "notev2":
         return {
@@ -233,6 +244,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             dollars: `${res.link.dollars}`,
             description: "Pay with Daimo",
             linkStatus: res,
+            memo: res.link.memo,
           };
         }
         case DaimoRequestState.Cancelled: {
@@ -241,6 +253,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `cancelled request`,
             dollars: `${res.link.dollars}`,
             description: `Cancelled by ${getAccountName(recipient)}`,
+            memo: res.link.memo,
           };
         }
         case DaimoRequestState.Fulfilled: {
@@ -249,6 +262,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: `requested`,
             dollars: `${res.link.dollars}`,
             description: `Paid by ${getAccountName(fulfilledBy!)}`,
+            memo: res.link.memo,
           };
         }
         default: {

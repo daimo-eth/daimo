@@ -5,7 +5,7 @@ export function now() {
   return Math.floor(Date.now() / 1000);
 }
 
-/** Returns "now", "1m", "2h", etc. Long form: "just now", "1m go", ... */
+/** Returns "now", "1m", "2h", etc. Long form: "just now", "1m ago", ... */
 export function timeAgo(sinceS: number, nowS?: number, long?: boolean) {
   if (nowS == null) nowS = now();
 

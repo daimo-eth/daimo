@@ -178,7 +178,7 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
   ];
   const prefix = prefixes.find((p) => link.startsWith(p));
   if (prefix == null) return null;
-  const url = new URL(link.replace(prefix, `scheme://domain/`));
+  const url = new URL(link.replace(prefix, `https://domain.com/`));
   console.log(`[LINK] normalized ${link} to ${url.href}`);
 
   const suffix = url.pathname.substring(1);
