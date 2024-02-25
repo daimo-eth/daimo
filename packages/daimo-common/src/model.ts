@@ -77,6 +77,7 @@ export const zUserOpHex = z.object({
 export type UserOpHex = z.infer<typeof zUserOpHex>;
 
 export const zRecommendedExchange = z.object({
+  title: z.string().optional(),
   cta: z.string(),
   url: z.string(),
 });
