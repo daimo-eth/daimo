@@ -145,6 +145,7 @@ export default {
         includeNdefEntitlement: false,
       },
     ],
+    ["react-native-email-link"],
     ["./android-deeplink-config-plugin", "custom"],
   ],
 };

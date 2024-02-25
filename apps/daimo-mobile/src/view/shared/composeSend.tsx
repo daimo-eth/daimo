@@ -1,5 +1,6 @@
 import { EmailAddress, PhoneNumber } from "@daimo/common";
 import { Linking, Platform } from "react-native";
+import { getEmailClients, openComposer } from "react-native-email-link";
 
 type PaymentLinkComposeParams = {
   type: "paymentLink";
@@ -18,14 +19,9 @@ export async function composeEmail(
   email: EmailAddress
 ): Promise<ComposeSend | undefined> {
   // Test if we can email first
-  const testOpenString =
-    Platform.OS === "android"
-      ? `mailto:${email}`
-      : encodeURI(`mailto:${email}`);
-
-  const canOpen = await Linking.canOpenURL(testOpenString);
-  console.log(`[COMPOSE] testOpenString ${testOpenString}: ${canOpen}`);
-  if (!canOpen) return undefined;
+  const emailClients = await getEmailClients();
+  console.log(`[COMPOSE] emailClients ${JSON.stringify(emailClients)}`);
+  if (emailClients.length === 0) return undefined;
 
   return async (sendParams: ComposeParams) => {
     const { url, senderName, dollars, recipientName } = sendParams;
@@ -34,20 +30,20 @@ export async function composeEmail(
     const subject = `${senderName} sent you $${dollarStr}`;
     const body = `Hi ${recipientStr},\r\n\r\n${senderName} sent you $${dollarStr} USDC and invited you to join Daimo.\r\n\r\nVisit here to accept: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`;
 
-    const openString = (function () {
-      if (Platform.OS === "android")
-        return `mailto:${email}?subject=${encodeURIComponent(
-          subject
-        )}&body=${encodeURIComponent(body)}`;
-      else return encodeURI(`mailto:${email}?subject=${subject}&body=${body}`);
-    })();
+    // Open email client directly if there's only one
+    const appId = emailClients.length === 1 ? emailClients[0].id : undefined;
 
-    if (await Linking.canOpenURL(openString)) {
-      await Linking.openURL(openString);
-      return true;
-    } else {
-      return false;
-    }
+    const appUsed = await openComposer({
+      defaultEmailLabel: "Apple Mail", // Only used on iOS
+      body,
+      subject,
+      to: email,
+      app: appId,
+      removeText: true,
+    });
+    console.log(`[COMPOSE] appUsed ${appUsed}`);
+
+    return appUsed != null;
   };
 }
 
