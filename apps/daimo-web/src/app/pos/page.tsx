@@ -23,7 +23,7 @@ const items: POSItem[] = [
   { name: "☕️ Cappucino", price: 5 },
   { name: "❄️ Iced Coffee", price: 4 },
   { name: "🧋 Iced Latte", price: 5 },
-  { name: "☕️ Latte", price: 5 },
+  { name: "🍼 Oat Milk", price: 0.5 },
   { name: "🍗 Broth", price: 6 },
 ];
 

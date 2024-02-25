@@ -123,6 +123,30 @@ export function createRouter(
         return nameReg.getEAccount(addr) || null;
       }),
 
+    // Get status for a batch of deeplinks (request, payment link, etc)
+    getLinkStatusBatch: publicProcedure
+      .input(
+        z.object({
+          urls: z.array(z.string()),
+        })
+      )
+      .query(async (opts) => {
+        const { urls } = opts.input;
+        const promises = urls.map((url) =>
+          getLinkStatus(
+            url,
+            nameReg,
+            noteIndexer,
+            reqIndexer,
+            inviteCodeTracker,
+            db
+          )
+        );
+        const ret = await Promise.all(promises);
+        return ret;
+      }),
+
+    // Get status for a single deeplink (request, payment link, etc)
     getLinkStatus: publicProcedure
       .input(z.object({ url: z.string() }))
       .query(async (opts) => {

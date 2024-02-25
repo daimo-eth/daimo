@@ -7,7 +7,7 @@ export async function retryBackoff<T>(
     try {
       return await fn();
     } catch (e) {
-      console.log(`[CHAIN] ${name} retry ${i} after error: ${e}`);
+      console.log(`[RETRY] ${name} retry ${i} after error: ${e}`);
       await new Promise((r) => setTimeout(r, 250 * 2 ** i));
     }
   }
