@@ -94,6 +94,10 @@ function AppBody() {
     if (index < 0) setBottomSheet(null);
   }, []);
 
+  const onClose = useCallback(() => {
+    setBottomSheet(null);
+  }, []);
+
   // Dark backdrop for bottom sheet
   const renderBackdrop = useCallback(
     (props: BottomSheetDefaultBackdropProps) => (
@@ -130,6 +134,7 @@ function AppBody() {
               index={-1}
               snapPoints={snapPoints}
               onChange={onChangeIndex}
+              onClose={onClose}
               enablePanDownToClose
             >
               {bottomSheet === "debug" && <DebugBottomSheet />}
