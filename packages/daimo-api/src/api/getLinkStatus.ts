@@ -77,7 +77,8 @@ export async function getLinkStatus(
         };
         return pending;
       } else {
-        return ret;
+        // Re-inject offchain parts of th link, such as the memo
+        return { ...ret, link };
       }
     }
 

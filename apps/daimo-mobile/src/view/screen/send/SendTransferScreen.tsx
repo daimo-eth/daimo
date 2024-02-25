@@ -245,7 +245,11 @@ function SendConfirm({
     <View>
       {infoBubble}
       <Spacer h={32} />
-      <RecipientDisplay recipient={recipient} isRequest={isRequest} />
+      <RecipientDisplay
+        recipient={recipient}
+        isRequest={isRequest}
+        requestMemo={requestStatus?.link?.memo}
+      />
       <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
         dollars={nDollars}

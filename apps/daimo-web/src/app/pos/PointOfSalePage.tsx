@@ -86,7 +86,18 @@ function NewOrderForm({
   const placeOrder = () => {
     const recipient = storeAddress;
     const amount = "" + dollarsToAmount(total);
-    mut.mutate({ tag, updateToken, recipient, amount });
+
+    // Format memo, eg "cappucino, 2x iced coffee"
+    const itenNames = new Set(order.map((item) => item.name));
+    const parts = [];
+    for (const name of itenNames) {
+      const count = order.filter((item) => item.name === name).length;
+      if (count === 1) parts.push(`${name}`);
+      else parts.push(`${count}x ${name}`);
+    }
+    const memo = parts.join(", ");
+
+    mut.mutate({ tag, updateToken, recipient, amount, memo });
   };
 
   // Reset after placing order
@@ -245,6 +256,7 @@ function Order({
         {isOrdered && "Ordered"}
         {isFulfilled && "Paid"}
         {isCancelled && "Cancelled"}
+        {link.memo || ""}
       </div>
       <div className="w-16 text-right">${Number(link.dollars).toFixed(2)}</div>
       <div className="w-16 text-center">{timeAgo(order.time)}</div>

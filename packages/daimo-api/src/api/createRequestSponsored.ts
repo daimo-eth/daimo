@@ -5,15 +5,21 @@ import { Address, Hex } from "viem";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { ViemClient } from "../network/viemClient";
 
+interface RequestV2Input {
+  idString: string;
+  recipient: Address;
+  amount: `${bigint}`;
+}
+
 export async function createRequestSponsored(
   vc: ViemClient,
   requestIndexer: RequestIndexer,
-  idString: string,
-  recipient: Address,
-  amount: `${bigint}`
+  input: RequestV2Input
 ): Promise<Hex> {
-  const id = decodeRequestIdString(idString);
+  const { idString, recipient, amount } = input;
+
   // Verify ID is unused
+  const id = decodeRequestIdString(idString);
   const requestStatus = requestIndexer.getRequestStatusById(id);
   if (requestStatus) {
     throw new Error("request ID already exists");

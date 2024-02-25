@@ -12,9 +12,11 @@ import { TextH3, TextLight } from "../../shared/text";
 export function RecipientDisplay({
   recipient,
   isRequest,
+  requestMemo,
 }: {
   recipient: DaimoContact;
   isRequest?: boolean;
+  requestMemo?: string;
 }) {
   // Show who we're sending to
   const isAccount = recipient.type === "eAcc";
@@ -23,7 +25,9 @@ export function RecipientDisplay({
   const subtitle = (function () {
     switch (recipient.type) {
       case "eAcc":
-        if (recipient.linkedAccounts?.length) {
+        if (requestMemo) {
+          return requestMemo;
+        } else if (recipient.linkedAccounts?.length) {
           return <FarcasterButton fcAccount={recipient.linkedAccounts[0]} />;
         } else {
           return recipient.originalMatch;

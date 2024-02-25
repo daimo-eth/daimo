@@ -319,13 +319,11 @@ export function createRouter(
       .mutation(async (opts) => {
         const { idString, recipient, amount } = opts.input;
 
-        return createRequestSponsored(
-          vc,
-          reqIndexer,
+        return createRequestSponsored(vc, reqIndexer, {
           idString,
           recipient,
-          amount
-        );
+          amount,
+        });
       }),
 
     updateProfileLinks: publicProcedure
@@ -371,28 +369,27 @@ export function createRouter(
           updateToken: z.string(),
           recipient: zAddress,
           amount: zBigIntStr,
+          memo: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { tag, updateToken, recipient, amount } = opts.input;
+        const { tag, updateToken, recipient, amount, memo } = opts.input;
 
         await verifyTagUpdateToken(tag, updateToken, db);
-        const id = generateRequestId();
-        const idString = encodeRequestId(id);
 
-        await createRequestSponsored(
-          vc,
-          reqIndexer,
+        const idString = encodeRequestId(generateRequestId());
+        await createRequestSponsored(vc, reqIndexer, {
           idString,
           recipient,
-          amount
-        );
+          amount,
+        });
 
         const reqLink: DaimoLinkRequestV2 = {
           type: "requestv2",
           id: idString,
           dollars: amountToDollars(BigInt(amount)),
           recipient,
+          memo,
         };
         const url = formatDaimoLink(reqLink);
 

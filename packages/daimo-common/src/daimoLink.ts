@@ -48,6 +48,8 @@ export type DaimoLinkRequestV2 = {
   /** Requester eAccountStr */
   recipient: string;
   dollars: DollarStr;
+  /* Optional memo */
+  memo?: string;
 };
 
 /** Represents a Payment Link. Works like cash, redeemable onchain. */
@@ -112,7 +114,11 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
       ].join("/");
     }
     case "requestv2": {
-      return [linkBase, "r", link.recipient, link.dollars, link.id].join("/");
+      const base = [linkBase, "r", link.recipient, link.dollars, link.id].join(
+        "/"
+      );
+      if (link.memo) return `${base}?memo=${encodeURIComponent(link.memo)}`;
+      else return base;
     }
     case "note": {
       const hash = link.ephemeralPrivateKey && `#${link.ephemeralPrivateKey}`;
@@ -164,20 +170,18 @@ export function parseDaimoLink(link: string): DaimoLink | null {
 }
 
 function parseDaimoLinkInner(link: string): DaimoLink | null {
-  let suffix: string | undefined;
   const prefixes = [
     `${daimoLinkBase}/`,
     `${daimoLinkBaseV2}/`, // New shorter link prefix
     "daimo://",
     "https://daimo.xyz/link/", // Backcompat with old domain
   ];
-  for (const prefix of prefixes) {
-    if (link.startsWith(prefix)) {
-      suffix = link.substring(prefix.length);
-    }
-  }
-  if (suffix == null) return null;
+  const prefix = prefixes.find((p) => link.startsWith(p));
+  if (prefix == null) return null;
+  const url = new URL(link.replace(prefix, `scheme://domain/`));
+  console.log(`[LINK] normalized ${link} to ${url.href}`);
 
+  const suffix = url.pathname.substring(1);
   const parts = suffix.split("/");
 
   switch (parts[0]) {
@@ -205,8 +209,16 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       if (!(dollarNum > 0)) return null;
       const dollars = dollarNum.toFixed(2) as DollarStr;
       const id = parts[3];
+      const memo = url.searchParams.get("memo");
       if (dollars === "0.00") return null;
-      return { type: "requestv2", id, recipient, dollars };
+      const ret = {
+        type: "requestv2",
+        id,
+        recipient,
+        dollars,
+      } as DaimoLinkRequestV2;
+      if (memo) ret.memo = memo;
+      return ret;
     }
     case "note": {
       if (parts.length === 4) {
@@ -217,9 +229,10 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
         const previewDollars = parseFloat(parsedDollars.data).toFixed(
           2
         ) as DollarStr;
-        const hashParts = parts[3].split("#");
+        const ephemeralOwner = getAddress(parts[3]);
+
+        const hashParts = url.hash.split("#");
         if (hashParts.length > 2) return null;
-        const ephemeralOwner = getAddress(hashParts[0]);
         const ephemeralPrivateKey =
           hashParts.length < 2 ? undefined : zHex.parse(hashParts[1]);
         return {
@@ -239,10 +252,10 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
         const parsedDollars = zDollarStr.safeParse(parts[2]);
         if (!parsedDollars.success) return null;
         const dollars = parseFloat(parsedDollars.data).toFixed(2) as DollarStr;
+        const id = parts[3];
 
-        const hashParts = parts[3].split("#");
+        const hashParts = url.hash.split("#");
         if (hashParts.length > 2) return null;
-        const id = hashParts[0];
         const seed = hashParts[1];
         return {
           type: "notev2",

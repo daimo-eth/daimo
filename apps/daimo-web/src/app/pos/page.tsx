@@ -19,12 +19,18 @@ export async function generateMetadata(): Promise<Metadata> {
 const title = "✳️ Daimo × Edge City Cafe";
 
 const items: POSItem[] = [
-  { name: "🍵 Tea", price: 5 },
-  { name: "☕️ Cappucino", price: 5 },
-  { name: "❄️ Iced Coffee", price: 4 },
-  { name: "🧋 Iced Latte", price: 5 },
-  { name: "🍼 Oat Milk", price: 0.5 },
-  { name: "🍗 Broth", price: 6 },
+  { name: "☕️ Espresso", price: 4 },
+  { name: "☕️ Latte", price: 6 },
+
+  { name: "🍵 Matcha Latte", price: 6 },
+  { name: "🦴 Bone Broth", price: 8 },
+
+  { name: "☕️ Cold Brew", price: 5 },
+  { name: "🫖 Hot Tea", price: 5 },
+
+  { name: "💦 Pellegrino", price: 6 },
+  { name: "🍞 Oatmeal", price: 6 },
+  { name: "🍜 Ramen", price: 6 },
 ];
 
 const storeAddress = getAddress("0xFBfa6A0D1F44b60d7CCA4b95d5a2CfB15246DB0D");

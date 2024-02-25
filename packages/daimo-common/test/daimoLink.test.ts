@@ -82,6 +82,16 @@ const testCases: [string, DaimoLink | null][] = [
       id: "2d1pzPgSTRZ",
     },
   ],
+  [
+    "https://example.com/l/r/alice/9.87/2d1pzPgSTRZ?memo=Hello%20world",
+    {
+      type: "requestv2",
+      recipient: "alice",
+      dollars: "9.87",
+      id: "2d1pzPgSTRZ",
+      memo: "Hello world",
+    },
+  ],
   ["https://example.com/l", null],
   ["https://example.com/l/foo", null],
   ["https://example.com/l/account", null],
