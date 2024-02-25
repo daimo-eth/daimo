@@ -120,7 +120,6 @@ export function SendNoteScreen({ route }: Props) {
             title="Create Payment Link"
             disabled={!(noteDollars > 0)}
             onPress={onChooseAmount}
-            showBiometricIcon
           />
         )}
         {amountChosen && (
