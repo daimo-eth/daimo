@@ -45,6 +45,20 @@ export type DaimoContact = EAccountContact | EmailContact | PhoneNumberContact;
 // on-chain account)
 export type MsgContact = EmailContact | PhoneNumberContact;
 
+// Get a unique key for a DaimoContact, used for component key.
+// EAccounts are unique by address, emails and phone numbers are unique by
+// email or phone number, guaranteed by our systemContacts search function.
+export function getDaimoContactKey(contact: DaimoContact): string {
+  switch (contact.type) {
+    case "eAcc":
+      return contact.addr;
+    case "email":
+      return contact.email;
+    case "phoneNumber":
+      return contact.phoneNumber;
+  }
+}
+
 /** Convert EAccount to EAccountContact */
 export function addLastSendTime(
   account: Account,

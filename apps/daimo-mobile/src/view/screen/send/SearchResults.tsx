@@ -14,6 +14,7 @@ import {
   DaimoContact,
   EAccountContact,
   getContactName,
+  getDaimoContactKey,
   useRecipientSearch,
 } from "../../../logic/daimoContacts";
 import { ContactsAccess } from "../../../logic/systemContacts";
@@ -95,8 +96,12 @@ function SearchResultsScroll({
           </TextLight>
         </View>
       )}
-      {res.recipients.map((r, index) => (
-        <RecipientRow key={index} recipient={r} {...{ lagAutoFocus, mode }} />
+      {res.recipients.map((r) => (
+        <RecipientRow
+          key={getDaimoContactKey(r)}
+          recipient={r}
+          {...{ lagAutoFocus, mode }}
+        />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&

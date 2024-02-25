@@ -102,6 +102,10 @@ async function askOpenSettings(resolve: (value: void) => void) {
   );
 }
 
+// Search user system contacts for a string, returning a list of matches.
+// User's system contacts can be messy, so we show at most one email and
+// at most one phone number per contact. Additionally, skip duplicate phone
+// numbers or emails across two different contact names.
 export function useSystemContactsSearch(
   prefix: string,
   enabled: boolean
@@ -122,9 +126,13 @@ export function useSystemContactsSearch(
         const name = contact.name;
         if (name == null) continue;
 
-        // Show at most one email and one phone number per contact.
         for (const phone of contact.phoneNumbers ?? []) {
-          if (phone.number) {
+          if (
+            phone.number &&
+            !matches.some(
+              (c) => c.type === "phoneNumber" && c.phoneNumber === phone.number
+            )
+          ) {
             matches.push({
               type: "phoneNumber",
               phoneNumber: phone.number,
@@ -135,7 +143,10 @@ export function useSystemContactsSearch(
         }
 
         for (const email of contact.emails ?? []) {
-          if (email.email) {
+          if (
+            email.email &&
+            !matches.some((c) => c.type === "email" && c.email === email.email)
+          ) {
             matches.push({ type: "email", email: email.email, name });
             break;
           }
