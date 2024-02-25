@@ -200,10 +200,19 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
 
   return [
     {
+      title: "Transfer another token to Daimo",
       cta: "Bridge from any wallet",
       url: `https://daimo.com/bridge/${account.name}`,
     },
-    { cta: "Deposit from Coinbase", url: cbUrl },
-    { cta: "Deposit from Ramp", url: getRampNetworkURL(account) },
+    {
+      title: "Transfer from Coinbase & other options",
+      cta: "Deposit from Coinbase",
+      url: cbUrl,
+    },
+    {
+      title: "Cards, banks, & international options",
+      cta: "Buy USDC from Ramp",
+      url: getRampNetworkURL(account),
+    },
   ];
 }

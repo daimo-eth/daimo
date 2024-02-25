@@ -82,10 +82,9 @@ function OnrampsSection({ account }: { account: Account }) {
 
   return (
     <View>
-      <HeaderRow title="Recommended exchanges" />
-
       {account.recommendedExchanges.map((rec, idx) => (
         <View key={idx}>
+          <HeaderRow title={rec.title || "Loading"} />
           <ButtonMed
             type={idx > 0 ? "subtle" : "primary"}
             title={rec.cta}
@@ -183,7 +182,6 @@ function AddressCopier({
 function HeaderRow({ title }: { title: string }) {
   return (
     <>
-      <Spacer h={16} />
       <TextLight>{title}</TextLight>
       <Spacer h={16} />
     </>
