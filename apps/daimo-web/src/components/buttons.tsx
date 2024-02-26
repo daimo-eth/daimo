@@ -39,7 +39,7 @@ export function PrimaryOpenInAppButton({
     >
       {justCopied
         ? "COPIED, REDIRECTING..."
-        : (inviteDeepLink ? "COPY INVITE AND " : "") + "GET DAIMO"}
+        : (inviteDeepLink ? "COPY INVITE AND " : "") + "INSTALL DAIMO"}
     </button>
   );
 }
@@ -72,6 +72,42 @@ export function SecondaryButton({
       className={
         "tracking-wider font-bold py-5 w-full rounded-md border-2 " +
         buttonColors
+      }
+      onClick={onClick}
+      type="button"
+    >
+      {children}
+    </button>
+  );
+}
+
+export function TextButton({
+  children,
+  onClick,
+  buttonType,
+  disabled,
+}: {
+  onClick?: () => void;
+  children: React.ReactNode;
+  buttonType?: "danger" | "success";
+  disabled?: boolean;
+}) {
+  const textColors = (() => {
+    switch (buttonType) {
+      case "danger":
+        return "text-danger";
+      case "success":
+        return "text-success";
+      default:
+        return "text-primaryLight";
+    }
+  })();
+
+  return (
+    <button
+      disabled={disabled}
+      className={
+        "block text-center tracking-wider font-semibold py-8 " + textColors
       }
       onClick={onClick}
       type="button"

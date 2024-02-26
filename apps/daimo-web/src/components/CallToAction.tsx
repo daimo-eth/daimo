@@ -7,7 +7,6 @@ import {
   getInviteStatus,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
 import { PrimaryOpenInAppButton } from "./buttons";
@@ -19,9 +18,6 @@ export function CallToAction({
   description: string;
   linkStatus?: DaimoLinkStatus;
 }) {
-  // If we've connected another wallet, hide the Open in Daimo button.
-  const { isConnected } = useAccount();
-
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
   const isInvite = !!linkStatus && getInviteStatus(linkStatus).isValid;
@@ -55,14 +51,6 @@ export function CallToAction({
             inviteDeepLink={isInvite ? directDeepLink : undefined}
           />
         </>
-      )}
-      {!isConnected && (
-        <a
-          href={directDeepLink}
-          className="block text-center text-primaryLight tracking-wider font-bold py-5"
-        >
-          ALREADY HAVE IT? OPEN {isInvite ? "INVITE" : "LINK"} IN DAIMO
-        </a>
       )}
     </>
   );
