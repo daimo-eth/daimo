@@ -15,7 +15,7 @@ export function SectionHero() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="flex flex-col md:flex-row md:gap-16 overflow-visible lg:border lg:rounded-[48px] border-white/30 lg:bg-[#000000]/20 py-16 lg:pl-[96px] lg:pr-[60px]"
+        className="flex flex-col md:flex-row md:gap-4 lg:gap-8 overflow-clip lg:border lg:rounded-[48px] border-white/30 lg:bg-[#000000]/20 py-16 lg:pl-[96px] lg:pr-[60px]"
       >
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -28,7 +28,7 @@ export function SectionHero() {
             Store money using secure hardware on your phone. Yours alone, like
             cash.
           </HeroH2>
-          <div className="hidden md:flex md:flex-row md:items-center md:space-x-[36px] md:pt-8">
+          <div className="hidden md:flex md:flex-row md:items-center md:space-x-[20px] lg:space-x-[36px] md:pt-8">
             <DownloadLinkButton />
             <Link
               className="font-bold text-white text-2xl whitespace-nowrap "
@@ -43,15 +43,22 @@ export function SectionHero() {
           initial={{ opacity: 0, y: -60 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
-          className="flex-1 flex justify-center items-center md:justify-end relative"
+          className="flex-1 flex justify-center items-center md:justify-end "
         >
-          <div className="mx-auto w-full max-w-[366px] py-6 min-w-[250px]">
+          <div className="py-6 relative w-[360px] h-[707px]">
             <Image
-              src="/assets/hero-screenshot.png"
-              width={327}
-              height={588}
-              layout="responsive"
+              src="/assets/demo.gif"
+              width={400}
+              height={707}
               alt="Daimo Application Screenshot"
+              className="absolute"
+            />
+            <Image
+              src="/assets/frame.png"
+              width={400}
+              height={707}
+              alt="Daimo Application Screenshot"
+              className="absolute"
             />
           </div>
         </motion.div>

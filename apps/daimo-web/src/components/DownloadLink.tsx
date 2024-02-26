@@ -26,7 +26,7 @@ export function DownloadLinkButton() {
     <Link
       href={link}
       target="_blank"
-      className="flex items-center space-x-4 rounded-lg py-[15px] px-[36px] bg-primaryLight text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[267px] "
+      className="flex items-center space-x-2 lg:space-x-4 rounded-lg py-[15px] px-[36px] bg-primaryLight text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[240px] "
     >
       <div>Download</div>
       <Image

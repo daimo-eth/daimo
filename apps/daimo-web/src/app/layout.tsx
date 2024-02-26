@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo-web-favicon.png",
   },
+  viewport: "width=device-width, initial-scale=1, minimum-scale=0.4",
 };
 
 const neueMontreal = localFont({
