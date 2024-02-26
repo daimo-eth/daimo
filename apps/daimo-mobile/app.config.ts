@@ -1,8 +1,10 @@
+import type { ExpoConfig } from "@expo/config";
+
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
 const VERSION = "1.5.5";
 
-export default {
+const config: ExpoConfig = {
   owner: "daimo",
   name: IS_DEV ? "Daimo Dev" : "Daimo",
   slug: "daimo",
@@ -150,3 +152,5 @@ export default {
     ["./android-deeplink-config-plugin", "custom"],
   ],
 };
+
+export default config;
