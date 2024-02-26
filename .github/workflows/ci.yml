@@ -30,8 +30,8 @@ jobs:
           version: nightly
 
       - run: |
-          forge test -vvv --fork-url "https://base-sepolia.publicnode.com"
-          forge coverage --report lcov --fork-url "https://base-sepolia.publicnode.com"
+          forge test -vvv --fork-url "https://base-sepolia-rpc.publicnode.com"
+          forge coverage --report lcov --fork-url "https://base-sepolia-rpc.publicnode.com"
           git diff --exit-code
         working-directory: ./packages/contract
 
