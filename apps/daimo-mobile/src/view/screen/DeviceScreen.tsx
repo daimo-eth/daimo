@@ -2,6 +2,7 @@ import {
   OpStatus,
   assert,
   dollarsToAmount,
+  formatFeeAmountOrNull,
   getSlotLabel,
   guessTimestampFromNum,
   now,
@@ -136,7 +137,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     switch (status) {
       case "idle":
         if (canRemove) {
-          return `Fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+          return formatFeeAmountOrNull(cost.totalDollars);
         } else {
           return `This is your only device. Transfer your balance elsewhere before removing.`;
         }

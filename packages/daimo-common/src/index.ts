@@ -3,6 +3,7 @@ export * from "./daimoLink";
 export * from "./daimoLinkStatus";
 export * from "./model";
 export * from "./assert";
+export * from "./format";
 export * from "./op";
 export * from "./key";
 export * from "./name";

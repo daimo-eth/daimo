@@ -1,4 +1,11 @@
-import { OpStatus, SlotType, assert, findUnusedSlot, now } from "@daimo/common";
+import {
+  OpStatus,
+  SlotType,
+  assert,
+  findUnusedSlot,
+  formatFeeAmountOrNull,
+  now,
+} from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -74,7 +81,7 @@ export function AddPasskeyScreen() {
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        return `Fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+        return formatFeeAmountOrNull(cost.totalDollars);
       case "loading":
         return message;
       case "error":

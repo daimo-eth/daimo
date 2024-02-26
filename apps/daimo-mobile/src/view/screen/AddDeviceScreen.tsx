@@ -3,6 +3,7 @@ import {
   SlotType,
   assert,
   findUnusedSlot,
+  formatFeeAmountOrNull,
   getSlotLabel,
   now,
 } from "@daimo/common";
@@ -103,7 +104,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        return `Fee: ${getAmountText({ dollars: cost.totalDollars })}`;
+        return formatFeeAmountOrNull(cost.totalDollars);
       case "loading":
         return message;
       case "error":
