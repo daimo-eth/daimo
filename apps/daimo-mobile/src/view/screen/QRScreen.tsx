@@ -128,7 +128,7 @@ export function QRCodeBox({
           color={color.midnight}
           size={192}
           logo={{ uri: logoURI }}
-          logoSize={72}
+          logoSize={64}
         />
       </View>
     </View>

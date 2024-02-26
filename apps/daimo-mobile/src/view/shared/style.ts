@@ -2,13 +2,13 @@ import { Platform, StyleSheet, TextStyle } from "react-native";
 
 /** Match daimo-web tailwind config. Same name = refers to the same color. */
 export const color = {
-  primary: "#14B174",
+  primary: "#13915F",
   primaryBgLight: "#CCF3D7",
   danger: "#f35369",
   warningLight: "#ffeeb3",
   yellow: "#FFDC62",
-  success: "#0CA01B",
-  successDark: "#009900",
+  success: "#14B174",
+  successDark: "#13915F",
   white: "#ffffff",
   ivoryLight: "#f9f9f9",
   ivoryDark: "#f2f2f2",

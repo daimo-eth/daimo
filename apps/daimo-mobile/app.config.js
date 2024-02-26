@@ -11,9 +11,9 @@ export default {
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
   splash: {
-    image: "./assets/splash.png",
+    image: "./assets/splash-screen.png",
     resizeMode: "cover",
-    backgroundColor: "#14B174",
+    backgroundColor: "#13915F",
   },
   assetBundlePatterns: ["assets/*"],
   scheme: "daimo",
@@ -47,6 +47,15 @@ export default {
     },
   },
   android: {
+    package: IS_DEV ? "com.daimo.dev" : "com.daimo",
+    icon: "./assets/icon-circle.png",
+    backgroundColor: "#ffffff",
+    adaptiveIcon: {
+      foregroundImage: "./assets/ic_launcher.svg",
+      backgroundColor: "#13915F",
+      backgroundImage: "./assets/ic_launcher_background.svg",
+    },
+    softwareKeyboardLayoutMode: "pan",
     googleServicesFile: IS_DEV
       ? "./google-services-dev.json"
       : "./google-services.json",
@@ -88,13 +97,6 @@ export default {
         category: ["BROWSABLE", "DEFAULT"],
       },
     ],
-    adaptiveIcon: {
-      foregroundImage: "./assets/adaptive-icon.png",
-      backgroundImage: "./assets/adaptive-back.png",
-      backgroundColor: "#14B174",
-    },
-    softwareKeyboardLayoutMode: "pan",
-    package: IS_DEV ? "com.daimo.dev" : "com.daimo",
   },
   extra: {
     eas: {
