@@ -19,7 +19,6 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { useSendAsync } from "../../action/useSendAsync";
 import { createPasskey } from "../../logic/passkey";
 import { useAccount } from "../../model/account";
-import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";

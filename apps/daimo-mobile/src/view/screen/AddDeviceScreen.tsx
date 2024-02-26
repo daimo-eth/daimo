@@ -21,7 +21,6 @@ import { Hex } from "viem";
 import { useSendAsync } from "../../action/useSendAsync";
 import { parseAddDeviceString } from "../../logic/key";
 import { Account } from "../../model/account";
-import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { Scanner } from "../shared/Scanner";
 import { ScreenHeader } from "../shared/ScreenHeader";

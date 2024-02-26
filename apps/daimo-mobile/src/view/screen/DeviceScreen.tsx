@@ -22,7 +22,6 @@ import { ActivityIndicator, Alert, View } from "react-native";
 import { useSendAsync } from "../../action/useSendAsync";
 import { deleteEnclaveKey } from "../../logic/enclave";
 import { useAccount } from "../../model/account";
-import { getAmountText } from "../shared/Amount";
 import { ButtonBig } from "../shared/Button";
 import { InfoBox } from "../shared/InfoBox";
 import { ScreenHeader } from "../shared/ScreenHeader";

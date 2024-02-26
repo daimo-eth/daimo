@@ -3,5 +3,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "include": ["./*.js", "./src/**/*", "./test/**/*"]
+  "include": ["./*.js", "./src/**/*", "./test/**/*", "app.config.ts"]
 }
