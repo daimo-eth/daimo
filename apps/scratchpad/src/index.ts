@@ -1,3 +1,4 @@
+import { ProfileCache } from "@daimo/api/src/api/profile";
 import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
@@ -60,7 +61,8 @@ async function metrics() {
   console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
   const db = new DB();
   const inviteGraph = new InviteGraph(db);
-  const nameReg = new NameRegistry(vc, inviteGraph, new Set([]));
+  const profileCache = new ProfileCache(vc, db);
+  const nameReg = new NameRegistry(vc, inviteGraph, profileCache, new Set([]));
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);

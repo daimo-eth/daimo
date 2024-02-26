@@ -37,11 +37,13 @@ async function main() {
 
   console.log(`[API] using wallet ${vc.walletClient.account.address}`);
   const inviteGraph = new InviteGraph(db);
+  const profileCache = new ProfileCache(vc, db);
 
   const keyReg = new KeyRegistry();
   const nameReg = new NameRegistry(
     vc,
     inviteGraph,
+    profileCache,
     await db.loadNameBlacklist()
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
@@ -80,8 +82,6 @@ async function main() {
     requestIndexer,
     opIndexer
   );
-
-  const profileCache = new ProfileCache(vc, db);
 
   // Initialize in background
   (async () => {

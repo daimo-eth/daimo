@@ -19,6 +19,7 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
+import { ProfileCache } from "../api/profile";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -42,6 +43,7 @@ const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // Known Coinbase Pay addresses on Base
   "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A": AddrLabel.Coinbase,
   "0x6dcBCe46a8B494c885D0e7b6817d2b519dF64467": AddrLabel.Coinbase,
+  "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
 };
 
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
@@ -64,6 +66,7 @@ export class NameRegistry {
   constructor(
     private vc: ViemClient,
     private inviteGraph: InviteGraph,
+    private profileCache: ProfileCache,
     private nameBlacklist: Set<string>
   ) {}
 
@@ -163,7 +166,8 @@ export class NameRegistry {
     if (reg) {
       const { addr, name, timestamp } = reg;
       const inviter = this.inviteGraph.getInviter(address);
-      return { addr, name, timestamp, inviter } as EAccount;
+      const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
+      return { addr, name, timestamp, inviter, linkedAccounts } as EAccount;
     }
 
     // Then, a special labelled address, e.g. faucet
