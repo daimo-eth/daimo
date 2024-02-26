@@ -28,7 +28,7 @@ import {
   erc20ABI,
 } from "wagmi";
 
-import { SecondaryButton } from "./buttons";
+import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
 
 export function ConnectWalletFlow({
@@ -216,27 +216,22 @@ function CustomConnectButton({ title }: { title: string }): JSX.Element {
             {(() => {
               if (!connected) {
                 return (
-                  <SecondaryButton onClick={openConnectModal}>
-                    {title}
-                  </SecondaryButton>
+                  <TextButton onClick={openConnectModal}>{title}</TextButton>
                 );
               }
 
               if (chain.unsupported) {
                 return (
-                  <SecondaryButton onClick={openChainModal} buttonType="danger">
+                  <TextButton onClick={openChainModal} buttonType="danger">
                     WRONG NETWORK
-                  </SecondaryButton>
+                  </TextButton>
                 );
               }
 
               return (
-                <button
-                  onClick={openConnectModal}
-                  className="tracking-wider text-primaryLight font-semibold"
-                >
+                <TextButton onClick={openConnectModal}>
                   CONNECTED TO {account.displayName.toUpperCase()}
-                </button>
+                </TextButton>
               );
             })()}
           </div>
