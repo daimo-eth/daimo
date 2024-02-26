@@ -36,7 +36,6 @@ export function AppOrWalletCTA({
           ALREADY HAVE IT? OPEN {isInvite ? "INVITE" : "LINK"} IN APP
         </SecondaryButton>
       )}
-      <div className="h-4" />
       <ConnectWalletFlow
         linkStatus={linkStatus}
         description={description}
