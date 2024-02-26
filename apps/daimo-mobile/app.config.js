@@ -48,12 +48,11 @@ export default {
   },
   android: {
     package: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    icon: "./assets/icon-circle.png",
     backgroundColor: "#ffffff",
     adaptiveIcon: {
-      foregroundImage: "./assets/ic_launcher.svg",
+      foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#13915F",
-      backgroundImage: "./assets/ic_launcher_background.svg",
+      backgroundImage: "./assets/adaptive-icon-background.png",
     },
     softwareKeyboardLayoutMode: "pan",
     googleServicesFile: IS_DEV
