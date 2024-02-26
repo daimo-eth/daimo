@@ -7,6 +7,7 @@ import {
   PendingOpEventID,
   dollarsToAmount,
   getAccountName,
+  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
@@ -195,7 +196,7 @@ function NoteDisplayInner({
       from: noteStatus.contractAddress,
       to: account.address,
       amount: Number(dollarsToAmount(noteStatus.dollars)),
-      timestamp: Date.now() / 1e3,
+      timestamp: now(),
       nonceMetadata: nonceMetadata.toHex(),
       noteStatus: {
         ...noteStatus,

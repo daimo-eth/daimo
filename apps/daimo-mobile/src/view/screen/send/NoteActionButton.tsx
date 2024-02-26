@@ -9,6 +9,7 @@ import {
   formatDaimoLink,
   generateNoteSeedAddress,
   getNoteId,
+  now,
 } from "@daimo/common";
 import { notesV2AddressMap } from "@daimo/contract";
 import {
@@ -91,7 +92,7 @@ function NoteActionButtonInner({
       from: account.address,
       to: notesV2Addr,
       amount: Number(dollarsToAmount(dollars)),
-      timestamp: Date.now() / 1e3,
+      timestamp: now(),
       nonceMetadata: nonce.metadata.toHex(),
       noteStatus: {
         link: {

@@ -4,6 +4,7 @@ import {
   assert,
   findUnusedSlot,
   getSlotLabel,
+  now,
 } from "@daimo/common";
 import {
   DaimoNonce,
@@ -88,7 +89,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
       status: OpStatus.pending,
       slot: nextSlot,
       rotationType: "add",
-      timestamp: Date.now() / 1e3,
+      timestamp: now(),
     },
     accountTransform: (acc, pendingOp) => {
       assert(pendingOp.type === "keyRotation");

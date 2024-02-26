@@ -5,6 +5,7 @@ import {
   EAccount,
   guessTimestampFromNum,
   isValidName,
+  now,
   validateName,
 } from "@daimo/common";
 import { nameRegistryProxyConfig } from "@daimo/contract";
@@ -146,7 +147,7 @@ export class NameRegistry {
 
   /** On successfully registering a name, cache it. */
   onSuccessfulRegister = (name: string, address: Address) => {
-    this.cacheAccount({ name, addr: address, timestamp: Date.now() / 1e3 });
+    this.cacheAccount({ name, addr: address, timestamp: now() });
   };
 
   /** Find wallet address for a given Daimo name, or undefined if not found. */

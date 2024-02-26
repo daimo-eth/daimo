@@ -1,4 +1,4 @@
-import { OpStatus, SlotType, assert, findUnusedSlot } from "@daimo/common";
+import { OpStatus, SlotType, assert, findUnusedSlot, now } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
@@ -60,7 +60,7 @@ export function AddPasskeyScreen() {
       status: OpStatus.pending,
       slot: nextSlot,
       rotationType: "add",
-      timestamp: Date.now() / 1e3,
+      timestamp: now(),
     },
     accountTransform: (acc, pendingOp) => {
       assert(pendingOp.type === "keyRotation");

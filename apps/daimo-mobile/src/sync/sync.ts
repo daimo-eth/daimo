@@ -47,7 +47,7 @@ let lastSyncS = 0;
 let lastPushNotificationS = 0;
 
 export function syncAfterPushNotification() {
-  lastPushNotificationS = Date.now() / 1e3;
+  lastPushNotificationS = now();
 }
 
 function hasPendingOps(account: Account) {
@@ -102,7 +102,7 @@ export async function resync(
   assert(!!accOld, `no account, skipping sync: ${reason}`);
 
   console.log(`[SYNC] RESYNC ${accOld.name}, ${reason}`);
-  lastSyncS = Date.now() / 1e3;
+  lastSyncS = now();
 
   try {
     const res = await fetchSync(accOld, fromScratch);

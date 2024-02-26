@@ -4,6 +4,7 @@ import {
   dollarsToAmount,
   getSlotLabel,
   guessTimestampFromNum,
+  now,
   timeString,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
@@ -73,7 +74,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       status: OpStatus.pending,
       slot: device!.slot,
       rotationType: "remove",
-      timestamp: Date.now() / 1e3,
+      timestamp: now(),
     },
     accountTransform: (acc, pendingOp) => {
       assert(pendingOp.type === "keyRotation");

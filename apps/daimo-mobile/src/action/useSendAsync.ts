@@ -7,6 +7,7 @@ import {
   assert,
   assertNotNull,
   dollarsToAmount,
+  now,
 } from "@daimo/common";
 import {
   daimoChainFromId,
@@ -83,7 +84,7 @@ export function useSendAsync({
     if (pendingOp) {
       pendingOp.opHash = opHash;
       pendingOp.txHash = txHash;
-      pendingOp.timestamp = Math.floor(Date.now() / 1e3);
+      pendingOp.timestamp = now();
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
       if (accountTransform) {
