@@ -119,11 +119,7 @@ export class Paymaster {
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
     const isSponsored =
-      !chainConfig.chainL2.testnet &&
-      sender.name != null &&
-      (await retryBackoff(`incrementInviteCodeUseCount`, () =>
-        this.db.checkPaymasterWhitelist(sender.name!)
-      ));
+      chainConfig.chainL2.testnet || (await this.shouldSponsor(sender.name));
     const paymasterAndData = isSponsored
       ? daimoPaymasterV2Address
       : chainConfig.pimlicoPaymasterAddress;
@@ -142,6 +138,13 @@ export class Paymaster {
       maxFeePerGas: gas.maxFeePerGas.toString(),
       preVerificationGas: gas.preVerificationGas.toString(),
     };
+  }
+
+  async shouldSponsor(name?: string): Promise<boolean> {
+    if (name == null) return false;
+    return await retryBackoff(`checkPaymasterWhitelist`, () =>
+      this.db.checkPaymasterWhitelist(name!)
+    );
   }
 }
 
