@@ -7,8 +7,6 @@ import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { PixelBackground } from "../components/PixelBackground";
-
 const features = [
   {
     name: "Secure",
@@ -117,8 +115,15 @@ function FeaturesDesktop() {
         </div>
       </div>
       <div className="flex flex-col justify-center max-w-md">
-        <div className="relative">
-          <PixelBackground className="absolute top-[0px] left-[-100px] z-[-5]" />
+        <div className="relative w-auto h-full">
+          <Image
+            className="absolute top-[0px] left-[-100px] z-[-5]"
+            width={800}
+            height={800}
+            alt="Pixel Background"
+            src="/pixel-bg.svg"
+            layout="cover"
+          />
         </div>
         <div className="my-6 flex justify-center gap-3">
           {features.map((feature, featureIndex) => (
