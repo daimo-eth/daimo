@@ -23,7 +23,7 @@ export function SectionHero() {
           transition={{ duration: 0.5, delay: 0.3, ease: "easeInOut" }}
           className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12"
         >
-          <HeroH1>Pay&nbsp;or&nbsp;receive USDC anywhere.</HeroH1>
+          <HeroH1>Pay or receive USDC anywhere.</HeroH1>
           <HeroH2>
             Store money using secure hardware on your phone. Yours alone, like
             cash.
@@ -45,7 +45,7 @@ export function SectionHero() {
           transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
           className="flex-1 flex justify-center items-center md:justify-end "
         >
-          <div className="py-6 relative w-[360px] h-[707px]">
+          <div className="py-6 relative w-full max-w-[330px] max-h-[620px] min-h-[462px] h-[calc(100vw_*_0.92_+_220px)] sm:w-[330px] sm:h-[640px] md:h-[600px] lg:w-[400px] lg:h-[740px]">
             <Image
               src="/assets/demo.gif"
               width={400}

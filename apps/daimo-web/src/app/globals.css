@@ -15,7 +15,6 @@ html {
 body {
   overscroll-behavior-y: none;
   position: relative;
-  min-width: 430px;
 }
 
 /** Adjust the root font size for large screens, medium, and mobile. */
