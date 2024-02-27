@@ -164,6 +164,9 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
+// Gets the logical from and to-addresses for a given op
+// If the op creates a payment link, to = payment link until claimed, then it's
+// the address of the claimer.
 function getFromTo(op: DisplayOpEvent): [Address, Address] {
   if (op.type === "transfer") {
     return [op.from, op.to];
@@ -217,6 +220,18 @@ function DisplayOpRow({
 
   const isPending = displayOp.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
+
+  // Title = counterparty name
+  let opTitle = getAccountName(otherAcc);
+  if (
+    opTitle === AddrLabel.PaymentLink &&
+    displayOp.type === "claimLink" &&
+    displayOp.noteStatus.sender.addr === address &&
+    displayOp.noteStatus.claimer?.addr === address
+  ) {
+    // Special case: we cancelled our own payment link
+    opTitle = "cancelled link";
+  }
 
   return (
     <View style={styles.transferBorder}>
