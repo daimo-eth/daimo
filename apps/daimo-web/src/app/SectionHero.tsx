@@ -46,6 +46,7 @@ export function SectionHero() {
           className="flex-1 flex justify-center items-center md:justify-end "
         >
           <div className="py-6 relative w-full max-w-[330px] max-h-[620px] min-h-[462px] h-[calc(100vw_*_0.92_+_220px)] sm:w-[330px] sm:h-[640px] md:h-[600px] lg:w-[400px] lg:h-[740px]">
+            <PhoneScreenBackground className="absolute" />
             <Image
               src="/assets/demo.gif"
               width={400}
@@ -67,6 +68,26 @@ export function SectionHero() {
         </div>
       </motion.div>
     </section>
+  );
+}
+
+// A white background behind the phone frame while the gif is loading
+function PhoneScreenBackground(
+  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string }
+) {
+  return (
+    <svg
+      className="w-full h-full"
+      viewBox="0 0 750 1326"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M79 103H680V1211.31C680 1245.93 651.934 1274 617.313 1274H141.687C107.066 1274 79 1245.93 79 1211.31V103Z"
+        fill={props.color || "#FFF"}
+      />
+    </svg>
   );
 }
 
