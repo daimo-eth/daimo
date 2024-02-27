@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 
 import "@rainbow-me/rainbowkit/styles.css";
+import { neueMontreal } from "../fonts/font";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,40 +10,18 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo-web-favicon.png",
   },
+  openGraph: {
+    images: [
+      {
+        url: "/logo-link-preview.png",
+        alt: "Daimo",
+        width: 128,
+        height: 105,
+      },
+    ],
+  },
   viewport: "width=device-width, initial-scale=1, minimum-scale=0.4",
 };
-
-const neueMontreal = localFont({
-  src: [
-    {
-      path: "../fonts/PPNeueMontreal-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../fonts/PPNeueMontreal-Book.woff",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../fonts/PPNeueMontreal-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../fonts/PPNeueMontreal-Italic.woff2",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "../fonts/PPNeueMontreal-BoldItalic.woff2",
-      weight: "700",
-      style: "italic",
-    },
-  ],
-  display: "swap",
-  variable: "--font-neue-montreal",
-});
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
