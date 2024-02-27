@@ -34,13 +34,17 @@ export function LinkBold({
 }
 
 export function TextBold({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm font-semibold text-midnight">{children}</p>;
+  return (
+    <p className="text-[16px] tracking-[1%] leading-[20.8px] font-bold text-white">
+      {children}
+    </p>
+  );
 }
 
 export function TextError({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm font-semibold text-danger">{children}</p>;
+  return <p className="text-base font-semibold text-danger">{children}</p>;
 }
 
 export function TextLight({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm font-medium text-grayMid">{children}</p>;
+  return <p className="text-base font-medium text-grayMid">{children}</p>;
 }

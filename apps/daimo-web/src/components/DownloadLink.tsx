@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { TextBold } from "./typography";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 export function DownloadLink() {
@@ -11,22 +13,28 @@ export function DownloadLink() {
     <Link
       href={link}
       target="_blank"
-      className="text-primaryLight font-semibold text-sm"
+      className="px-9 py-5 bg-primaryLight rounded-lg"
     >
-      Download
+      <TextBold>Download</TextBold>
     </Link>
   );
 }
 
 export function DownloadLinkButton() {
-  const [title, link] = useDownloadTitleLink();
+  const [, link] = useDownloadTitleLink();
   return (
     <Link
       href={link}
       target="_blank"
-      className="inline-block rounded-lg py-7 px-9 bg-primaryLight text-white font-semibold md:text-xl tracking-wider"
+      className="flex items-center space-x-2 lg:space-x-4 rounded-lg py-[15px] px-[36px] bg-primaryLight text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[240px] "
     >
-      {title}
+      <div>Download</div>
+      <Image
+        src={"/assets/daimo-qr-download.png"}
+        width={72}
+        height={72}
+        alt="QR Code"
+      />
     </Link>
   );
 }
@@ -47,4 +55,17 @@ function useDownloadTitleLink() {
   }, []);
 
   return [title, link];
+}
+
+export function DownloadLinkButtonMobileNav() {
+  const [title, link] = useDownloadTitleLink();
+  return (
+    <Link
+      href={link}
+      target="_blank"
+      className="flex items-center justify-center space-x-4 rounded-lg py-4 px-9 bg-primaryLight text-white font-medium md:text-lg tracking-tight"
+    >
+      <div>{title}</div>
+    </Link>
+  );
 }

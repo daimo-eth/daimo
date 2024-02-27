@@ -11,13 +11,24 @@ module.exports = {
       yellow: "#FFDC62",
       success: "#0CA01B",
       primary: "#007aff",
-      primaryLight: "#2888f7",
+      primaryLight: "#144B44",
       white: "#ffffff",
       ivory: "#fafafa",
       ivoryDark: "#f2f2f2",
-      grayLight: "#e2e2e2",
+      grayLight: "#D6D6D6",
       grayMid: "#717171",
       midnight: "#262626",
+      black: "#000000",
+      royalblue: "#022F61",
+    },
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-neue-montreal)"],
+      },
+      backgroundImage: {
+        "midnight-gradient":
+          "linear-gradient(to bottom, #FFFFFF 30%, #14B174 50%, #111111 70%)",
+      },
     },
   },
   plugins: [],
