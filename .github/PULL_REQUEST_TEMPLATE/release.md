@@ -14,7 +14,6 @@
 - [ ] Testnet API deployed correctly
 - [ ] Testnet webapp deployed correctly
 - [ ] Logs look clean
-- [ ] Test Honeycomb looks clean
 
 ### iOS
 
@@ -22,7 +21,8 @@ Watch all of the following interactions closely for jank and UX regressions, not
 just outright bugs.
 
 - [ ] Install from private TestFlight
-- [ ] Create testnet account. Faucet should appear automatically.
+- [ ] Create testnet account
+- [ ] Faucet + notification should appear automatically.
 - [ ] Send payment
 - [ ] Create Payment Link, open in browser
 - [ ] Cancel Payment Link
@@ -40,8 +40,7 @@ just outright bugs.
 - [ ] Install from Play Store closed track
 - [ ] Clear account (create one first, if necessary)
 - [ ] Create account
-- [ ] Request faucet
-- [ ] Notification appears on faucet send
+- [ ] Faucet + notification should appear automatically
 - [ ] Send payment
 - [ ] Create Payment Link
 - [ ] Cancel Payment Link
@@ -75,7 +74,7 @@ just outright bugs.
 
 BEFORE merging this PR,
 
-- [ ] Push to public TestFlight + Play Store open test track.
+- [ ] Push to App Store + Play Store, INCLUDING TestFlight + Open test track.
 - [ ] Bump version number for next development cycle.
 
 Production mainnet releases will eventually trail TestFlight by at least a week
