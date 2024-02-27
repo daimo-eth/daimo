@@ -14,7 +14,7 @@ export const zFarcasterLinkedAccount = z.object({
   custody: zAddress,
   message: z.string(),
   signature: zHex,
-  verifications: z.array(zAddress),
+  verifications: z.array(z.string()),
   username: z.string().optional(),
   displayName: z.string().optional(),
   pfpUrl: z.string().optional(),
