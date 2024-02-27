@@ -255,7 +255,7 @@ function DisplayOpRow({
               />
             </TouchableOpacity>
 
-            <TextBody color={textCol}>{getAccountName(otherAcc)}</TextBody>
+            <TextBody color={textCol}>{opTitle}</TextBody>
             {isPending && <PendingDot />}
           </View>
           <TransferAmountDate

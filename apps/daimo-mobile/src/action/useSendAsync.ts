@@ -67,6 +67,9 @@ export function useSendAsync({
   const cost = { feeDollars, totalDollars: dollarsToSend + feeDollars };
 
   const exec = useCallback(async () => {
+    console.log(
+      `[SEND] sending userOp. account: ${account?.name}, total cost: $${cost.totalDollars}`
+    );
     assert(
       passkeyAccount !== undefined || keySlot != null,
       "No key slot or passkey"
