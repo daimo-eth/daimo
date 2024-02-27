@@ -219,7 +219,7 @@ export function createRouter(
           name: z.string(),
           pubKeyHex: zHex,
           inviteLink: z.string(),
-          deviceAttestationString: zHex.optional(),
+          deviceAttestationString: zHex,
         })
       )
       .mutation(async (opts) => {
