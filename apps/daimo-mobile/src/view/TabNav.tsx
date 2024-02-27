@@ -2,9 +2,9 @@ import { assertUnreachable } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet";
 import {
-  MaterialTopTabNavigationOptions,
-  createMaterialTopTabNavigator,
-} from "@react-navigation/material-top-tabs";
+  BottomTabNavigationOptions,
+  createBottomTabNavigator,
+} from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import {
   NativeStackNavigationOptions,
@@ -17,7 +17,7 @@ import {
   createStackNavigator,
 } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
-import { Animated, Platform } from "react-native";
+import { Animated } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
@@ -52,10 +52,14 @@ import { useAccount } from "../model/account";
 
 const { add, multiply } = Animated;
 
-const Tab = createMaterialTopTabNavigator<ParamListTab>();
+const Tab = createBottomTabNavigator<ParamListTab>();
 const MainStack = createStackNavigator<ParamListMain>();
 
 function TabNavigator() {
+  const opts: BottomTabNavigationOptions = {
+    tabBarHideOnKeyboard: true,
+  };
+
   const ins = useSafeAreaInsets();
 
   return (
@@ -63,13 +67,12 @@ function TabNavigator() {
       initialRouteName="HomeTab"
       screenOptions={(props) => getTabOptions(ins, props)}
       backBehavior="initialRoute"
-      tabBarPosition="bottom"
     >
-      <Tab.Screen name="DepositTab" component={DepositTab} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} />
-      <Tab.Screen name="HomeTab" component={HomeTab} />
-      <Tab.Screen name="SendTab" component={SendTab} />
-      <Tab.Screen name="SettingsTab" component={SettingsTab} />
+      <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
+      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
+      <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
+      <Tab.Screen name="SendTab" component={SendTab} options={opts} />
+      <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
     </Tab.Navigator>
   );
 }
@@ -167,9 +170,9 @@ export function TabNav() {
 function getTabOptions(
   safeInsets: EdgeInsets,
   { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
-): MaterialTopTabNavigationOptions {
-  const opts: MaterialTopTabNavigationOptions = {
-    animationEnabled: Platform.OS === "ios", // android text input breaks if enabled
+): BottomTabNavigationOptions {
+  const opts: BottomTabNavigationOptions = {
+    headerShown: false,
     tabBarStyle: {
       height: TAB_BAR_HEIGHT + safeInsets.bottom,
       paddingBottom: safeInsets.bottom,
@@ -187,13 +190,11 @@ function getTabOptions(
     },
     tabBarActiveTintColor: color.primary,
     tabBarInactiveTintColor: color.grayMid,
-    tabBarIndicatorStyle: {
-      opacity: 0,
-    },
     tabBarIconStyle: {
       alignItems: "center",
     },
     tabBarAllowFontScaling: false,
+    lazy: false,
   };
   switch (route.name) {
     case "DepositTab":

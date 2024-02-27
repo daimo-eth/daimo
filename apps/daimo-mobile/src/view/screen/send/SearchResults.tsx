@@ -34,19 +34,14 @@ export function SearchResults({
   contactsAccess,
   prefix,
   mode,
-  lagAutoFocus,
 }: {
   contactsAccess: ContactsAccess;
   prefix: string;
   mode: "send" | "account";
-  lagAutoFocus?: boolean;
 }) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
-    <Inner
-      prefix={prefix.trim().toLowerCase()}
-      {...{ lagAutoFocus, mode, contactsAccess }}
-    />
+    <Inner prefix={prefix.trim().toLowerCase()} {...{ mode, contactsAccess }} />
   );
 }
 
@@ -55,13 +50,11 @@ function SearchResultsScroll({
   contactsAccess,
   prefix,
   mode,
-  lagAutoFocus,
 }: {
   contactsAccess: ContactsAccess;
   account: Account;
   prefix: string;
   mode: "send" | "account";
-  lagAutoFocus?: boolean;
 }) {
   const { permission: contactsPermission, ask: requestContactsPermission } =
     contactsAccess;
@@ -86,7 +79,6 @@ function SearchResultsScroll({
         <ExtraRows
           contactsPermission={contactsPermission}
           requestContactsPermission={requestContactsPermission}
-          lagAutoFocus={lagAutoFocus}
         />
       )}
       {res.recipients.length > 0 && (
@@ -97,27 +89,23 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <RecipientRow
-          key={getDaimoContactKey(r)}
-          recipient={r}
-          {...{ lagAutoFocus, mode }}
-        />
+        <RecipientRow key={getDaimoContactKey(r)} recipient={r} mode={mode} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
-        prefix !== "" && <NoSearchResults lagAutoFocus={lagAutoFocus} />}
+        prefix !== "" && <NoSearchResults />}
       <Spacer h={32} />
       {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>
   );
 }
 
-function NoSearchResults({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
+function NoSearchResults() {
   const nav = useNav();
   const sendPaymentLink = () =>
     nav.navigate("SendTab", {
       screen: "SendLink",
-      params: { lagAutoFocus: lagAutoFocus ?? false },
+      params: {},
     });
 
   return (
@@ -139,11 +127,9 @@ function NoSearchResults({ lagAutoFocus }: { lagAutoFocus?: boolean }) {
 function RecipientRow({
   recipient,
   mode,
-  lagAutoFocus,
 }: {
   recipient: DaimoContact;
   mode: "send" | "account";
-  lagAutoFocus?: boolean;
 }) {
   const name = getContactName(recipient);
   const nav = useNav();
@@ -153,7 +139,7 @@ function RecipientRow({
       case "phoneNumber": {
         nav.navigate("SendTab", {
           screen: "SendLink",
-          params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
+          params: { recipient },
         });
         return;
       }
@@ -163,7 +149,7 @@ function RecipientRow({
         } else {
           nav.navigate("SendTab", {
             screen: "SendTransfer",
-            params: { recipient, lagAutoFocus: lagAutoFocus ?? false },
+            params: { recipient },
           });
         }
       }
@@ -224,11 +210,9 @@ function ProfileLinks({ recipient }: { recipient: EAccountContact }) {
 function ExtraRows({
   contactsPermission,
   requestContactsPermission,
-  lagAutoFocus,
 }: {
   contactsPermission: Contacts.PermissionResponse;
   requestContactsPermission: () => void;
-  lagAutoFocus?: boolean;
 }) {
   const nav = useNav();
 
@@ -247,7 +231,7 @@ function ExtraRows({
         onPress={() =>
           nav.navigate("SendTab", {
             screen: "SendLink",
-            params: { lagAutoFocus: lagAutoFocus ?? false },
+            params: {},
           })
         }
       />

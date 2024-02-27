@@ -1,4 +1,3 @@
-import { useIsFocused } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -12,7 +11,6 @@ import {
 
 import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
-import { useNav } from "./nav";
 import { color, ss } from "./style";
 import {
   DaimoText,
@@ -30,7 +28,6 @@ export function AmountChooser({
   onSetDollars,
   showAmountAvailable,
   autoFocus,
-  lagAutoFocus,
   disabled,
   innerRef,
   onFocus,
@@ -39,7 +36,6 @@ export function AmountChooser({
   onSetDollars: (dollars: number) => void;
   showAmountAvailable: boolean;
   autoFocus: boolean;
-  lagAutoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
   onFocus?: () => void;
@@ -57,7 +53,6 @@ export function AmountChooser({
         disabled={disabled}
         innerRef={innerRef}
         autoFocus={autoFocus}
-        lagAutoFocus={lagAutoFocus}
         onFocus={onFocus}
       />
       <Spacer h={4} />
@@ -75,7 +70,6 @@ function AmountInput({
   onChange,
   innerRef,
   autoFocus,
-  lagAutoFocus,
   disabled,
   onFocus,
 }: {
@@ -83,7 +77,6 @@ function AmountInput({
   onChange: (dollars: number) => void;
   innerRef?: React.RefObject<TextInput>;
   autoFocus?: boolean;
-  lagAutoFocus?: boolean;
   disabled?: boolean;
   onFocus?: () => void;
 }) {
@@ -153,19 +146,6 @@ function AmountInput({
     if (onFocus) onFocus();
   }, [ref, onFocus]);
 
-  const isFocused = useIsFocused();
-  const nav = useNav();
-
-  useEffect(() => {
-    // Re-focus after screen transition animations finish.
-    // This is a workaround for a bug in react-navigation where autoFocus
-    // doesn't persist across screen animations.
-    nav.addListener("transitionEnd", () => {
-      if (lagAutoFocus && isFocused) focus();
-      if (!isFocused) ref.current?.blur();
-    });
-  }, [isFocused, lagAutoFocus]);
-
   return (
     <TouchableWithoutFeedback onPress={focus}>
       <View style={styles.amountInputWrap}>
@@ -181,7 +161,7 @@ function AmountInput({
           focusable={!disabled}
           editable={!disabled}
           selectTextOnFocus
-          autoFocus={lagAutoFocus ? false : autoFocus ?? true}
+          autoFocus={autoFocus}
           value={strVal}
           onChangeText={change}
           onEndEditing={onBlur} /* called on blur, works on Android */

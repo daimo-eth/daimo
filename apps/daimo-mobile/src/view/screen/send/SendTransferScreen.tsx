@@ -34,7 +34,6 @@ import { ErrorRowCentered } from "../../shared/error";
 import {
   ParamListSend,
   SendNavProp,
-  useDisableTabSwipe,
   useExitToHome,
   useNav,
 } from "../../shared/nav";
@@ -53,7 +52,6 @@ function SendScreenInner({
   link,
   recipient,
   dollars,
-  lagAutoFocus,
   account,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
@@ -74,8 +72,6 @@ function SendScreenInner({
     else if (nav.canGoBack()) nav.goBack();
     else goHome();
   }, [nav, dollars, recipient]);
-
-  useDisableTabSwipe(nav);
 
   const sendDisplay = (() => {
     if (link) {
@@ -113,13 +109,7 @@ function SendScreenInner({
       } else return <CenterSpinner />;
     } else if (recipient) {
       if (dollars == null)
-        return (
-          <SendChooseAmount
-            recipient={recipient}
-            onCancel={goBack}
-            lagAutoFocus={lagAutoFocus}
-          />
-        );
+        return <SendChooseAmount recipient={recipient} onCancel={goBack} />;
       else return <SendConfirm {...{ account, recipient, dollars }} />;
     } else throw new Error("unreachable");
   })();
@@ -138,11 +128,9 @@ function SendScreenInner({
 function SendChooseAmount({
   recipient,
   onCancel,
-  lagAutoFocus,
 }: {
   recipient: EAccountContact;
   onCancel: () => void;
-  lagAutoFocus?: boolean;
 }) {
   // Select how much
   const [dollars, setDollars] = useState(0);
@@ -179,7 +167,6 @@ function SendChooseAmount({
         onSetDollars={setDollars}
         showAmountAvailable
         autoFocus
-        lagAutoFocus={lagAutoFocus ?? false}
       />
       <Spacer h={32} />
       <View style={styles.buttonRow}>
@@ -257,7 +244,6 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
-        lagAutoFocus={false}
         onFocus={onFocus}
       />
       <Spacer h={32} />

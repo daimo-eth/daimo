@@ -28,7 +28,6 @@ import { ErrorBanner } from "../shared/error";
 import {
   ParamListHome,
   navToAccountPage,
-  useDisableTabSwipe,
   useExitBack,
   useExitToHome,
   useNav,
@@ -117,7 +116,6 @@ function AccountScreenBody({
   inviterEAcc?: EAccount;
 }) {
   const nav = useNav();
-  useDisableTabSwipe(nav);
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
 
   const openExplorer = useCallback(() => {
@@ -132,7 +130,7 @@ function AccountScreenBody({
     const recipient = addLastSendTime(account, eAcc);
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { recipient, lagAutoFocus: true },
+      params: { recipient },
     });
   }, [nav, eAcc, account]);
 

@@ -5,7 +5,6 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -24,11 +23,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import {
-  ParamListReceive,
-  useFocusOnScreenTransitionEnd,
-  useNav,
-} from "../../shared/nav";
+import { ParamListReceive, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
@@ -57,21 +52,14 @@ function RequestScreenInnerV2({
   // On successful send, go home
   const [as, setAS] = useActStatus("requestv2");
 
-  const isFocused = useIsFocused();
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
 
   const goHome = useCallback(() => {
-    nav.navigate("HomeTab", { screen: "Home" });
-    // No jank while the screen is swiping away
-    setTimeout(() => {
-      setAS("idle");
-      setDollars(0);
-    }, 400);
+    setAS("idle");
+    setDollars(0);
+    nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] });
   }, [nav]);
-
-  // Work around react-navigation autofocus bug
-  useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
 
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
   const sendRequest = async () => {
@@ -122,7 +110,6 @@ function RequestScreenInnerV2({
           onSetDollars={setDollars}
           showAmountAvailable={false}
           autoFocus={false}
-          lagAutoFocus={false}
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
         />
