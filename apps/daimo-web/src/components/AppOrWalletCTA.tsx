@@ -28,13 +28,16 @@ export function AppOrWalletCTA({
       />
       <div className="h-4" />
       {!isUsingSecondaryFlow && (
-        <SecondaryButton
-          onClick={() => {
-            window.open(directDeepLink, "_blank");
-          }}
-        >
-          ALREADY HAVE IT? OPEN {isInvite ? "INVITE" : "LINK"} IN APP
-        </SecondaryButton>
+        <>
+          <SecondaryButton
+            onClick={() => {
+              window.open(directDeepLink, "_blank");
+            }}
+          >
+            OPEN IN APP
+          </SecondaryButton>
+          <div className="h-4" />
+        </>
       )}
       <ConnectWalletFlow
         linkStatus={linkStatus}
