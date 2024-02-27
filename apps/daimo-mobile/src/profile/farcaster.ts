@@ -49,15 +49,38 @@ export class FarcasterClient {
     return resp.data;
   }
 
-  async watchStatus({ channelToken }: { channelToken: string }) {
+  async watchStatus({
+    channelToken,
+  }: {
+    channelToken: string;
+  }): Promise<StatusAPIResponse> {
     const appClient = this.init();
     console.log(`[FARCASTER] watching status for channel ${channelToken}`);
-    const ret = await appClient.watchStatus({ channelToken });
 
-    if (ret.isError) console.error(`[FARCASTER] login failed`, ret.error);
-    else console.log(`[FARCASTER] login success`, JSON.stringify(ret.data));
-
-    return ret;
+    // Poll for status
+    // Do not use watchStatus--it breaks on first dropped connection.
+    const delayMs = 1000; // 1 second
+    const maxRetries = 300; // 5 minutes
+    for (let retry = 1; retry <= maxRetries; retry++) {
+      try {
+        console.log(
+          `[FARCASTER] polling status for channel ${channelToken}, try #${retry}`
+        );
+        const resp = await appClient.status({ channelToken });
+        if (resp.isError) {
+          console.error(`[FARCASTER] status error`, resp.error);
+        } else {
+          const { state } = resp.data;
+          console.log(`[FARCASTER] status ${state}`);
+          if (state === "completed") return resp.data;
+        }
+      } catch (e) {
+        console.error(`[FARCASTER] polling status error`, e);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    console.error(`[FARCASTER] polling status timed out`);
+    throw new Error(`Farcaster connection timed out`);
   }
 
   static getLinkedAccount(data: StatusAPIResponse): FarcasterLinkedAccount {

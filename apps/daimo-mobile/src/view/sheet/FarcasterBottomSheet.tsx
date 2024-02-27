@@ -60,9 +60,12 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
       }
 
       // Wait for the user to open farcaster app and connect
-      const status = await fc.watchStatus({ channelToken });
-      if (status.isError) setError(status.error);
-      else setData(status.data);
+      try {
+        const status = await fc.watchStatus({ channelToken });
+        setData(status);
+      } catch (e: any) {
+        setError(e);
+      }
     })();
   }, [fcAccount == null]);
 
