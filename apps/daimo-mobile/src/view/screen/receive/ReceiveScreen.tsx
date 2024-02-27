@@ -1,6 +1,5 @@
 import { dollarsToAmount, formatDaimoLink } from "@daimo/common";
 import { MAX_NONCE_ID_SIZE_BITS } from "@daimo/userop";
-import { useIsFocused } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -18,11 +17,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import {
-  ParamListReceive,
-  useFocusOnScreenTransitionEnd,
-  useNav,
-} from "../../shared/nav";
+import { ParamListReceive, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
@@ -52,21 +47,14 @@ function RequestScreenInner({
   );
   const trackRequest = useTrackRequest();
 
-  const isFocused = useIsFocused();
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
 
   const goHome = useCallback(() => {
-    nav.navigate("HomeTab", { screen: "Home" });
-    // No jank while the screen is swiping away
-    setTimeout(() => {
-      setStatus("creating");
-      setDollars(0);
-    }, 400);
+    setStatus("creating");
+    setDollars(0);
+    nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] });
   }, [nav]);
-
-  // Work around react-navigation autofocus bug
-  useFocusOnScreenTransitionEnd(textInputRef, nav, isFocused, autoFocus);
 
   const sendRequest = async () => {
     textInputRef.current?.blur();
@@ -111,8 +99,7 @@ function RequestScreenInner({
           dollars={dollars}
           onSetDollars={setDollars}
           showAmountAvailable={false}
-          autoFocus={false}
-          lagAutoFocus={false}
+          autoFocus={autoFocus}
           innerRef={textInputRef}
           disabled={status !== "creating"}
         />

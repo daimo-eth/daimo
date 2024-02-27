@@ -25,7 +25,7 @@ import { ButtonBig } from "../shared/Button";
 import { Scanner } from "../shared/Scanner";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useDisableTabSwipe, useNav } from "../shared/nav";
+import { useNav } from "../shared/nav";
 import { ss } from "../shared/style";
 import {
   TextBold,
@@ -135,7 +135,6 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
 
   const nav = useNav();
   const goBack = () => nav.goBack();
-  useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>

@@ -13,8 +13,7 @@ import {
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback, useEffect } from "react";
-import { Platform } from "react-native";
+import { useCallback } from "react";
 import { Hex } from "viem";
 
 import { EAccountContact, MsgContact } from "../../logic/daimoContacts";
@@ -56,7 +55,7 @@ export type ParamListSend = {
   SendNav: { autoFocus: boolean };
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
-  SendLink: { recipient?: MsgContact; lagAutoFocus: boolean };
+  SendLink: { recipient?: MsgContact };
   Account:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
@@ -85,7 +84,7 @@ export interface SendNavProp {
   recipient?: EAccountContact;
   dollars?: `${number}`;
   requestId?: `${bigint}`;
-  lagAutoFocus?: boolean;
+  autoFocus?: boolean;
 }
 
 export type ParamListTab = {
@@ -177,13 +176,8 @@ async function goTo(nav: MainNav, link: DaimoLink) {
 export function useExitToHome() {
   const nav = useNav();
   return useCallback(() => {
-    nav.navigate("HomeTab", { screen: "Home" });
-    if (!nav.canGoBack()) return;
-    if (Platform.OS === "ios") {
-      setTimeout(() => nav.popToTop(), 400);
-    } else {
-      nav.popToTop();
-    }
+    console.log(`[NAV] exiting with reset to home`);
+    nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] });
   }, []);
 }
 
@@ -191,40 +185,6 @@ export function useExitBack() {
   const nav = useNav();
   const goBack = useCallback(() => nav.goBack(), []);
   return nav.canGoBack() ? goBack : undefined;
-}
-
-export function useDisableTabSwipe(nav: MainNav) {
-  useEffect(() => {
-    const p = nav.getParent();
-    if (p == null) return;
-
-    p.setOptions({ swipeEnabled: false });
-    return () => p.setOptions({ swipeEnabled: true });
-  }, [nav]);
-}
-
-/* We can't use `autoLagFocus` because tabs persist state, so we need to use
- * a seperate hook that clears tab state without unmounting the component.
- * Assumes current nav has a params for `autoFocus`. */
-export function useFocusOnScreenTransitionEnd(
-  ref: React.RefObject<any>,
-  nav: MainNav,
-  isFocused: boolean,
-  autoFocus: boolean
-) {
-  useEffect(() => {
-    const unsubscribe = nav.addListener("transitionEnd", () => {
-      if (isFocused && autoFocus) {
-        ref.current?.focus();
-
-        // Now, wipe the autoFocus flag so that switching tab and coming back
-        // doesn't keep focusing the input.
-        nav.setParams({ autoFocus: false } as any);
-      }
-    });
-
-    return unsubscribe;
-  }, [isFocused, autoFocus]);
 }
 
 // Open account page within the same tab.

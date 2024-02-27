@@ -35,12 +35,7 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
-import {
-  ParamListReceive,
-  useDisableTabSwipe,
-  useExitToHome,
-  useNav,
-} from "../../shared/nav";
+import { ParamListReceive, useExitToHome } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import {
   TextBody,
@@ -59,9 +54,6 @@ export default function NoteScreen(props: Props) {
 }
 
 function NoteScreenInner({ route, account }: Props & { account: Account }) {
-  const nav = useNav();
-  useDisableTabSwipe(nav);
-
   const { link } = route.params;
   console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
 

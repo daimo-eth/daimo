@@ -22,12 +22,7 @@ import { useAccount } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import {
-  useDisableTabSwipe,
-  useExitBack,
-  useExitToHome,
-  useNav,
-} from "../shared/nav";
+import { useExitBack, useExitToHome } from "../shared/nav";
 import { ss } from "../shared/style";
 import { TextCenter, TextError, TextLight, TextPara } from "../shared/text";
 
@@ -119,10 +114,8 @@ export function AddPasskeyScreen() {
   const cloudName =
     Platform.OS === "ios" ? "iCloud Keychain" : "Google Password Manager";
 
-  const nav = useNav();
   const goBack = useExitBack();
   const goHome = useExitToHome();
-  useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>

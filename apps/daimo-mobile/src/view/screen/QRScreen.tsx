@@ -25,7 +25,6 @@ import {
   ParamListHome,
   QRScreenOptions,
   defaultError,
-  useDisableTabSwipe,
   useExitBack,
   useExitToHome,
   useNav,
@@ -43,9 +42,6 @@ export function QRScreen(props: Props) {
 
   const goBack = useExitBack();
   const goHome = useExitToHome();
-
-  const nav = useNav();
-  useDisableTabSwipe(nav);
 
   return (
     <View style={ss.container.screen}>
