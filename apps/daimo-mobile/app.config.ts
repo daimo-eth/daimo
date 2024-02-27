@@ -142,12 +142,6 @@ const config: ExpoConfig = {
           "Allows Daimo to find and pay your friends. Your contacts remain private and are never uploaded or shared.",
       },
     ],
-    [
-      "react-native-nfc-manager",
-      {
-        includeNdefEntitlement: false,
-      },
-    ],
     ["react-native-email-link"],
     ["./android-deeplink-config-plugin", "custom"],
   ],
