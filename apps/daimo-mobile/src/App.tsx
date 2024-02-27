@@ -57,12 +57,23 @@ export default function App() {
   );
 }
 
-const globalBottomSheetHeights = {
-  debug: "33%",
-  connectFarcaster: "66%",
+const bottomSheetSettings = {
+  debug: {
+    snapPoints: ["33%"],
+    enableSwipeClose: true,
+  },
+  connectFarcaster: {
+    snapPoints: ["66%"],
+    enableSwipeClose: true,
+  },
+  linkFarcaster: {
+    snapPoints: ["66%"],
+    enableSwipeClose: false,
+  },
 } as const;
+const defaultSnapPoints = ["10%"];
 
-type GlobalBottomSheet = null | keyof typeof globalBottomSheetHeights;
+type GlobalBottomSheet = null | keyof typeof bottomSheetSettings;
 
 function AppBody() {
   // Global dispatcher
@@ -71,10 +82,9 @@ function AppBody() {
   // Global bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheet, setBottomSheet] = useState<GlobalBottomSheet>(null);
-  const snapPoints = useMemo(
-    () => (bottomSheet ? [globalBottomSheetHeights[bottomSheet]] : ["10%"]),
-    [bottomSheet]
-  );
+  const settings = bottomSheet && bottomSheetSettings[bottomSheet];
+  const snapPoints = settings?.snapPoints || defaultSnapPoints;
+  const enableSwipeClose = settings?.enableSwipeClose || false;
 
   // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
@@ -113,7 +123,9 @@ function AppBody() {
 
   // Handle dispatch > open bottom sheet
   const openFC = () => setBottomSheet("connectFarcaster");
+  const linkFC = () => setBottomSheet("linkFarcaster");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
+  useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
@@ -135,10 +147,11 @@ function AppBody() {
               snapPoints={snapPoints}
               onChange={onChangeIndex}
               onClose={onClose}
-              enablePanDownToClose
+              enablePanDownToClose={enableSwipeClose}
             >
               {bottomSheet === "debug" && <DebugBottomSheet />}
-              {bottomSheet === "connectFarcaster" && <FarcasterBottomSheet />}
+              {(bottomSheet === "connectFarcaster" ||
+                bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
             </BottomSheet>
           </View>
         </SafeAreaProvider>

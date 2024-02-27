@@ -16,7 +16,7 @@ import { env } from "../../logic/env";
 import { Account, getAccountManager } from "../../model/account";
 import { FarcasterClient } from "../../profile/farcaster";
 import { QRCodeBox } from "../screen/QRScreen";
-import { ButtonMed } from "../shared/Button";
+import { ButtonMed, TextButton } from "../shared/Button";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
@@ -127,6 +127,9 @@ function LinkFarcasterSection({
 
   // Once done, hide the bottom sheet
   const dispatcher = useContext(DispatcherContext);
+  useEffect(() => dispatcher.dispatch({ name: "linkFarcaster" }), []);
+
+  const cancelFC = () => dispatcher.dispatch({ name: "hideBottomSheet" });
 
   const linkFC = async () => {
     console.log("[FARCASTER] link profile");
@@ -161,6 +164,8 @@ function LinkFarcasterSection({
         title={linkedAcc ? "REMOVE FROM PROFILE" : "ADD TO PROFILE"}
         onPress={linkedAcc ? unlinkFC : linkFC}
       />
+      <Spacer h={16} />
+      <TextButton title="CANCEL" onPress={cancelFC} />
     </View>
   );
 }
