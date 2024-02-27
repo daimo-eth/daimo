@@ -1,6 +1,5 @@
 import { SectionFAQ } from "./SectionFAQ";
 import { SectionHero } from "./SectionHero";
-import { SectionTeam } from "./SectionTeam";
 import { SectionTestimonial } from "./SectionTestimonial";
 import { SectionWhyDaimo } from "./SectionWhyDaimo";
 import readmeMD from "../../../../README.md";

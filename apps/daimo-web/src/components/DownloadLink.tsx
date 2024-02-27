@@ -21,7 +21,7 @@ export function DownloadLink() {
 }
 
 export function DownloadLinkButton() {
-  const [title, link] = useDownloadTitleLink();
+  const [, link] = useDownloadTitleLink();
   return (
     <Link
       href={link}
