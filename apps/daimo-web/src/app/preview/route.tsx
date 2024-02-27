@@ -136,7 +136,7 @@ function Footer() {
     >
       <img
         alt="Daimo"
-        src={`${daimoDomainAddress}/logo-scalable.svg`}
+        src={`${daimoDomainAddress}/logo-link-preview-scalable.svg`}
         height="100%"
         style={{ marginRight: "24px" }}
       />
@@ -166,7 +166,7 @@ function UserBubble({ name }: { name: string }) {
         height: "256px",
         borderRadius: "9999px",
         backgroundColor: "white",
-        border: "1px solid #007aff",
+        border: "1px solid #13915F",
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
@@ -174,7 +174,7 @@ function UserBubble({ name }: { name: string }) {
     >
       <div
         style={{
-          color: "#007aff",
+          color: "#13915F",
           fontSize: "128px",
           fontWeight: "bold",
           textAlign: "center",
