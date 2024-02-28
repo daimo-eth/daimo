@@ -66,9 +66,7 @@ export class InviteCodeTracker {
       });
     }
 
-    if (deviceAttestationString) {
-      await this.db.insertFaucetAttestation(deviceAttestationString);
-    }
+    await this.db.insertFaucetAttestation(deviceAttestationString);
 
     return true;
   }
