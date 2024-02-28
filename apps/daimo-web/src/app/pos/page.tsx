@@ -20,17 +20,16 @@ const title = "✳️ Daimo × Edge City Cafe";
 
 const items: POSItem[] = [
   { name: "☕️ Espresso", price: 4 },
+  { name: "☕️ Cortado", price: 5 },
   { name: "☕️ Latte", price: 6 },
 
   { name: "🍵 Matcha Latte", price: 6 },
   { name: "🦴 Bone Broth", price: 8 },
-
   { name: "☕️ Cold Brew", price: 5 },
-  { name: "🫖 Hot Tea", price: 5 },
 
+  { name: "🫖 Tea", price: 5 },
   { name: "💦 Pellegrino", price: 6 },
   { name: "🍞 Oatmeal", price: 6 },
-  { name: "🍜 Ramen", price: 6 },
 ];
 
 const storeAddress = getAddress("0x8FdA17665A52A98D7c60D1527aDD42f0723B8515");

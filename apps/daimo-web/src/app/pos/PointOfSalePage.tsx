@@ -48,7 +48,7 @@ export function PointOfSalePage({
   const orders = data && data.filter((o) => o.time > time1HAgo);
 
   return (
-    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch">
+    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch relative px-[4%]">
       <TextH1>{title}</TextH1>
       <Spacer h={32} />
       <NewOrderForm
@@ -167,7 +167,7 @@ function AddItemButton({
 
   return (
     <button
-      className={`${col} w-36 h-24 rounded-lg py-4 flex flex-col items-center gap-2 select-none`}
+      className={`${col} w-[30%] h-24 rounded-lg py-4 flex flex-col items-center gap-2 select-none`}
       onClick={count === 0 ? add : undefined}
     >
       <p className="ext-md font-semibold text-midnight  whitespace-nowrap text-ellipsis">
