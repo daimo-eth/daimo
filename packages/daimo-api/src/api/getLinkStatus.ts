@@ -140,7 +140,7 @@ export async function getLinkStatus(
       assert(redirLink != null, `Invalid tag redirect: ${id} -> ${redir}`);
       assert(redirLink.type !== "tag", `Tag redirect loop: ${id} -> ${redir}`);
 
-      return await getLinkStatus(
+      const ret = await getLinkStatus(
         redir,
         nameReg,
         noteIndexer,
@@ -148,6 +148,13 @@ export async function getLinkStatus(
         inviteCodeTracker,
         db
       );
+
+      // For now, all tag requests are a valid invite.
+      // User can scan tag > guaranteed they'll be able to install the app.
+      if (ret.link.type === "request") {
+        (ret as DaimoRequestStatus).isValidInvite = true;
+      }
+      return ret;
     }
 
     default:
