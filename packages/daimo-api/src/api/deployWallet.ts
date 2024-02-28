@@ -21,7 +21,7 @@ export async function deployWallet(
   name: string,
   pubKeyHex: Hex,
   inviteLinkStatus: DaimoLinkStatus,
-  deviceAttestationString: Hex | undefined,
+  deviceAttestationString: Hex,
   watcher: Watcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,

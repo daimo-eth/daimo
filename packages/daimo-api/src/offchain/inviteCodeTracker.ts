@@ -26,14 +26,11 @@ export class InviteCodeTracker {
   async requestFaucet(
     invitee: Address,
     code: InviteCodeRow,
-    deviceAttestationString: Hex | undefined
+    deviceAttestationString: Hex
   ): Promise<boolean> {
-    // TODO: For backwards compatibility, we currently accept the lack of a
-    // device attestation string. This should be disabled in future when clients
-    // are up to date and expected to send one.
-    const isFaucetAttestationUsed = deviceAttestationString
-      ? await this.db.isFaucetAttestationUsed(deviceAttestationString)
-      : false;
+    const isFaucetAttestationUsed = await this.db.isFaucetAttestationUsed(
+      deviceAttestationString
+    );
 
     if (isFaucetAttestationUsed) {
       console.log(
@@ -69,9 +66,7 @@ export class InviteCodeTracker {
       });
     }
 
-    if (deviceAttestationString) {
-      await this.db.insertFaucetAttestation(deviceAttestationString);
-    }
+    await this.db.insertFaucetAttestation(deviceAttestationString);
 
     return true;
   }
@@ -80,7 +75,7 @@ export class InviteCodeTracker {
   // and perform faucet request for invitee and inviter, if applicable.
   async useInviteCode(
     invitee: Address,
-    deviceAttestationString: Hex | undefined,
+    deviceAttestationString: Hex,
     invCode: string
   ): Promise<boolean> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
