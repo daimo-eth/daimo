@@ -145,7 +145,7 @@ function LinkedAccountsRow({
   const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
 
   if (linkedAccounts.length === 0) {
-    return <BadgeButton title="NO SOCIALS CONNECTED" />;
+    return <BadgeButton title="NO SOCIALS CONNECTED" onPress={connectFarc} />;
   }
 
   // Generalize once needed
