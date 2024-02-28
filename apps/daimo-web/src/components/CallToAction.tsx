@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
-import { PrimaryOpenInAppButton } from "./buttons";
+import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 
 export function CallToAction({
   description,
@@ -50,6 +50,14 @@ export function CallToAction({
           <PrimaryOpenInAppButton
             inviteDeepLink={isInvite ? directDeepLink : undefined}
           />
+          <div className="h-4" />
+          <SecondaryButton
+            onClick={() => {
+              window.open(directDeepLink, "_blank");
+            }}
+          >
+            OPEN IN APP
+          </SecondaryButton>
         </>
       )}
     </>
