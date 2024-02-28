@@ -35,7 +35,7 @@ export function PointOfSalePage({
 }: {
   tag: string;
   updateToken: string;
-  title: string;
+  title?: string;
   items: POSItem[];
   storeAddress: Address;
 }) {
@@ -48,14 +48,14 @@ export function PointOfSalePage({
   const orders = data && data.filter((o) => o.time > time1HAgo);
 
   return (
-    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch relative px-[4%]">
-      <TextH1>{title}</TextH1>
-      <Spacer h={32} />
+    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch px-[4%]">
+      {title && <TextH1>{title}</TextH1>}
+      {title && <Spacer h={32} />}
       <NewOrderForm
         {...{ items, tag, updateToken, storeAddress }}
         onCreated={refetch}
       />
-      <Spacer h={32} />
+      <Spacer h={16} />
       {isError && <TextError>{error.message}</TextError>}
       {!isError && <RecentOrders orders={orders} />}
     </main>
@@ -122,7 +122,7 @@ function NewOrderForm({
       </div>
       <Spacer h={16} />
       <TextH1>Total: ${total.toFixed(2)}</TextH1>
-      <Spacer h={32} />
+      <Spacer h={16} />
       <button
         className="bg-grayLight rounded-lg p-4 flex flex-col items-center disabled:opacity-25"
         onClick={placeOrder}
@@ -163,19 +163,20 @@ function AddItemButton({
   }, [order, setOrder, item.name]);
 
   const count = order.filter((i) => i.name === item.name).length;
-  const col = count > 0 ? "bg-primaryLight" : "bg-grayLight";
 
-  return (
-    <button
-      className={`${col} w-[30%] h-24 rounded-lg py-4 flex flex-col items-center gap-2 select-none`}
-      onClick={count === 0 ? add : undefined}
-    >
+  const inner = (
+    <>
+      {" "}
       <p className="ext-md font-semibold text-midnight  whitespace-nowrap text-ellipsis">
         {item.name}
       </p>
-      {count === 0 && <TextH1>${item.price.toFixed(2)}</TextH1>}
+      {count === 0 && (
+        <div className="text-[1.25rem] font-semibold">
+          ${item.price.toFixed(2)}
+        </div>
+      )}
       {count > 0 && (
-        <div className="flex flex-row text-[1.75rem] font-semibold">
+        <div className="flex flex-row text-[1.25rem] font-semibold">
           <button className="px-5" onClick={sub}>
             -
           </button>
@@ -185,8 +186,27 @@ function AddItemButton({
           </button>
         </div>
       )}
-    </button>
+    </>
   );
+
+  if (count === 0) {
+    return (
+      <button
+        className={`bg-grayLight w-[31.5%] h-16 rounded-lg py-2 flex flex-col items-center select-none relative`}
+        onClick={count === 0 ? add : undefined}
+      >
+        {inner}
+      </button>
+    );
+  } else {
+    return (
+      <div
+        className={`bg-success w-[31.5%] h-16 rounded-lg py-2 flex flex-col items-center select-none relative`}
+      >
+        {inner}
+      </div>
+    );
+  }
 }
 
 function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
