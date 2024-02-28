@@ -18,6 +18,16 @@ export class ProfileCache {
 
   constructor(private vc: ViemClient, private db: DB) {}
 
+  static getDispUsername(link: LinkedAccount): string {
+    switch (link.type) {
+      case "farcaster":
+        if (link.username != null) return `@${link.username}`;
+        else return `#${link.fid}`;
+      default:
+        throw new Error(`Unknown link type ${link.type}`);
+    }
+  }
+
   // API handler
   async updateProfileLinks(addr: Address, actionJSON: string, signature: Hex) {
     // Verify ERC-1271-signed offchain action
@@ -129,10 +139,9 @@ export class ProfileCache {
     console.log();
     return this.links.filter((l) => {
       const { username, displayName } = l.linkedAccount;
-      return (
-        (username || "").startsWith(prefix) ||
-        (displayName || "").startsWith(prefix)
-      );
+      const match = (s: string) =>
+        s.startsWith(prefix) || (prefix.length > 3 && s.includes(prefix));
+      return match(username || "") || match(displayName || "");
     });
   }
 

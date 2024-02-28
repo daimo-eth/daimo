@@ -35,6 +35,18 @@ export async function search(
     const dAccounts = await nameReg.search(prefix);
     ret = dAccounts.map((d) => ({ ...d, originalMatch: d.name }));
   }
+  // Add Farcaster results
+  if (prefix.length > 1) {
+    const linkedAccs = profileCache.searchLinkedAccounts(prefix);
+    for (const link of linkedAccs) {
+      const eAcc = nameReg.getDaimoAccount(link.addr);
+      if (eAcc == null) continue;
+      ret.push({
+        ...eAcc,
+        originalMatch: ProfileCache.getDispUsername(link.linkedAccount),
+      });
+    }
+  }
 
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);
   return ret;

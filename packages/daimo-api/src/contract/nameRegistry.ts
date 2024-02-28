@@ -124,7 +124,11 @@ export class NameRegistry {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
       .map((a) => ({ addr: a.addr, name: a.name }))
-      .filter((a) => a.name.startsWith(prefix))
+      .filter(
+        (a) =>
+          a.name.startsWith(prefix) ||
+          (prefix.length > 3 && a.name.includes(prefix))
+      )
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 10);
   }
@@ -160,16 +164,21 @@ export class NameRegistry {
     return this.addrToReg.get(addr)?.name;
   }
 
+  getDaimoAccount(address: Address): EAccount | undefined {
+    const reg = this.addrToReg.get(address);
+    if (reg == null) return undefined;
+
+    const { addr, name, timestamp } = reg;
+    const inviter = this.inviteGraph.getInviter(address);
+    const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
+    return { addr, name, timestamp, inviter, linkedAccounts };
+  }
+
   /** Gets an Ethereum account, including name, ENS, label if available. */
   async getEAccount(address: Address): Promise<EAccount> {
     // First, look for a Daimo name
-    const reg = this.addrToReg.get(address);
-    if (reg) {
-      const { addr, name, timestamp } = reg;
-      const inviter = this.inviteGraph.getInviter(address);
-      const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
-      return { addr, name, timestamp, inviter, linkedAccounts } as EAccount;
-    }
+    const dAcc = this.getDaimoAccount(address);
+    if (dAcc) return dAcc;
 
     // Then, a special labelled address, e.g. faucet
     const label = specialAddrLabels[address];
