@@ -13,7 +13,7 @@ export const neueMontreal = localFont({
       style: "normal",
     },
     {
-      path: "./PPNeueMontreal-Book.woff",
+      path: "./PPNeueMontreal-SemiBold.woff2",
       weight: "600",
       style: "normal",
     },

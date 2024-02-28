@@ -107,7 +107,7 @@ export function TextButton({
     <button
       disabled={disabled}
       className={
-        "block text-center tracking-wider font-bold py-8 " + textColors
+        "block text-center tracking-wider font-semibold py-8 " + textColors
       }
       onClick={onClick}
       type="button"
