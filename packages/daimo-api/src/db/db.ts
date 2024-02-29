@@ -200,9 +200,13 @@ export class DB {
     );
     const client = await this.pool.connect();
 
-    // TODO: in same statement,
-    // INSERT INTO linked_account where linked_type = $1 and linked_id = $2
-    // DELETE from linked_account where linked_type = $1 and address = $3
+    await client.query(
+      `DELETE FROM linked_account
+       WHERE (linked_type = $1 AND linked_id = $2)
+       OR (linked_type = $1 AND address = $3)`,
+      [row.linked_type, row.linked_id, row.address]
+    );
+
     await client.query(
       `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
        VALUES ($1, $2, $3, $4)`,
