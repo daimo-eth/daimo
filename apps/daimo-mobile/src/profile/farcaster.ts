@@ -21,10 +21,12 @@ export class FarcasterClient {
   private init(): AppClient {
     if (this.appClient != null) return this.appClient;
 
-    console.log(`[FARCASTER] initializing`);
+    const optimismRpcUrl =
+      process.env.DAIMO_OPTIMISM_RPC_URL || "https://mainnet.optimism.io";
+    console.log(`[FARCASTER] initializing, optimism RPC: ${optimismRpcUrl}`);
     this.appClient = createAppClient({
       relay: "https://relay.farcaster.xyz",
-      ethereum: viemConnector({ rpcUrl: "https://mainnet.optimism.io" }),
+      ethereum: viemConnector({ rpcUrl: optimismRpcUrl }),
     });
 
     return this.appClient;

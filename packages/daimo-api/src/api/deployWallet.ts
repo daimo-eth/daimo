@@ -98,24 +98,7 @@ export async function deployWallet(
   let sendFaucet = false;
   if (inviteLinkStatus.link.type === "invite") {
     const { requestInfo } = ctx;
-    try {
-      const faucetRes = await fetch(
-        "https://daimo-faucet.onrender.com/faucet",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.DAIMO_FAUCET_API_KEY || "",
-          },
-          body: JSON.stringify(requestInfo),
-        }
-      );
-      const faucetJson = await faucetRes.json();
-      sendFaucet = faucetJson.sendFaucet;
-      console.log(`[API] queried faucet API, got ${sendFaucet}`, requestInfo);
-    } catch (e: any) {
-      console.error(`[API] error querying faucet API`, e);
-    }
+    sendFaucet = await queryFaucetAntiSpamApi(requestInfo);
 
     inviteCodeTracker.useInviteCode(
       address,
@@ -134,4 +117,27 @@ export async function deployWallet(
   );
 
   return address;
+}
+
+async function queryFaucetAntiSpamApi(reqInfo: RequestInfo): Promise<boolean> {
+  const faucetApiUrl = process.env.DAIMO_FAUCET_API_URL || "";
+  if (faucetApiUrl === "") return false;
+
+  let sendFaucet = false;
+  try {
+    const faucetRes = await fetch(faucetApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.DAIMO_FAUCET_API_KEY || "",
+      },
+      body: JSON.stringify(reqInfo),
+    });
+    const faucetJson = await faucetRes.json();
+    sendFaucet = !!faucetJson.sendFaucet;
+    console.log(`[API] queried ${faucetApiUrl}, got ${sendFaucet}`, reqInfo);
+  } catch (e: any) {
+    console.error(`[API] error querying faucet API`, faucetApiUrl, e);
+  }
+  return sendFaucet;
 }
