@@ -29,9 +29,11 @@ jobs:
         with:
           version: nightly
 
-      - run: |
-          forge test -vvv --fork-url "https://base-sepolia-rpc.publicnode.com"
-          forge coverage --report lcov --fork-url "https://base-sepolia-rpc.publicnode.com"
+      - env:
+          BASE_SEPOLIA_RPC: ${{ secrets.BASE_SEPOLIA_RPC }}
+        run: |
+          forge test -vvv --fork-url "$BASE_SEPOLIA_RPC"
+          forge coverage --report lcov --fork-url "$BASE_SEPOLIA_RPC"
           git diff --exit-code
         working-directory: ./packages/contract
 
