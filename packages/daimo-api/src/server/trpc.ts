@@ -7,9 +7,9 @@ export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
 /** Request context */
 export const createContext = async (opts: CreateHTTPContextOptions) => {
   const ipAddr = getXForwardedIP(opts) || opts.req.socket.remoteAddress || "";
-  const userAgent = opts.req.headers["user-agent"] || "";
-  const daimoPlatform = opts.req.headers["x-daimo-platform"] || "";
-  const daimoVersion = opts.req.headers["x-daimo-version"] || "";
+  const userAgent = getHeader(opts.req.headers["user-agent"]);
+  const daimoPlatform = getHeader(opts.req.headers["x-daimo-platform"]);
+  const daimoVersion = getHeader(opts.req.headers["x-daimo-version"]);
   const span = null as Span | null;
   const requestInfo = {} as any;
 
@@ -23,6 +23,11 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
     ...opts,
   };
 };
+
+function getHeader(h: string | string[] | undefined) {
+  if (Array.isArray(h)) return h[0];
+  else return h || "";
+}
 
 export function onTrpcError({
   error,

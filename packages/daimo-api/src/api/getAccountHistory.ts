@@ -6,10 +6,12 @@ import {
   KeyData,
   LinkedAccount,
   RecommendedExchange,
+  appStoreLinks,
   assert,
   hasAccountName,
 } from "@daimo/common";
-import { Address, hexToBytes } from "viem";
+import semverLt from "semver/functions/lt";
+import { Address } from "viem";
 
 import { ProfileCache } from "./profile";
 import { CoinIndexer } from "../contract/coinIndexer";
@@ -17,6 +19,8 @@ import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../network/viemClient";
+import { getAppVersionTracker } from "../server/appVersion";
+import { TrpcRequestContext } from "../server/trpc";
 import { Watcher } from "../shovel/watcher";
 
 export interface AccountHistoryResult {
@@ -53,6 +57,7 @@ export interface SuggestedAction {
  * This RPC is the primary way the app stays synced to the chain.
  */
 export async function getAccountHistory(
+  ctx: TrpcRequestContext,
   address: Address,
   sinceBlockNum: number,
   watcher: Watcher,
@@ -144,30 +149,46 @@ export async function getAccountHistory(
   };
 
   // Suggest an action to the user, like backing up their account
-  const suggestedActions = getSuggestedActions(eAcc, ret);
+  const suggestedActions = getSuggestedActions(eAcc, ret, ctx);
 
   return { ...ret, suggestedActions };
 }
 
-function getSuggestedActions(eAcc: EAccount, hist: AccountHistoryResult) {
+function getSuggestedActions(
+  eAcc: EAccount,
+  hist: AccountHistoryResult,
+  ctx: TrpcRequestContext
+) {
   const ret: SuggestedAction[] = [];
 
+  // Not on latest version? Ask them to upgrade.
+  const latestVersion = getAppVersionTracker().getLatestVersion();
+  const { daimoPlatform, daimoVersion } = ctx;
+  const appVersion = daimoVersion.split(" ")[0];
+  if (latestVersion == null) {
+    console.log(`[API] no latest app version available`);
+  } else if (semverLt(appVersion, latestVersion)) {
+    ret.push({
+      id: `2024-02-update-${appVersion}-to-${latestVersion}`,
+      title: "Upgrade Available",
+      subtitle: `Tap to update to ${latestVersion}`,
+      url: appStoreLinks[daimoPlatform.startsWith("ios") ? "ios" : "android"],
+    });
+  }
+
+  // If account is not backed up, asked them to create a backup
   if (hist.accountKeys.length === 1) {
-    if (hist.lastBalance !== "0" || hexToBytes(eAcc.addr)[0] < 0x80) {
-      // A/B test: half of accounts asked to "Secure your account" immediately.
-      // Other half are asked only once they have a balance.
-      ret.push({
-        id: "passkey-backup-new-account",
-        title: "Secure your account",
-        subtitle: "Keep your account safe with a passkey backup",
-        url: `daimo://settings/add-passkey`,
-      });
-    }
+    ret.push({
+      id: "2024-02-passkey-backup",
+      title: "Secure Your Account",
+      subtitle: "Keep your account safe with a passkey backup",
+      url: `daimo://settings/add-passkey`,
+    });
   }
 
   // Active accounts: ask them to join our TG
   ret.push({
-    id: "2023-12-join-tg-5",
+    id: "2023-12-join-tg-6",
     icon: "comment-discussion",
     title: "Feedback? Ideas?",
     subtitle: "Join our Telegram group.",
