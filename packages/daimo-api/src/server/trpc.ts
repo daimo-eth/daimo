@@ -11,8 +11,17 @@ export const createContext = async (opts: CreateHTTPContextOptions) => {
   const daimoPlatform = opts.req.headers["x-daimo-platform"] || "";
   const daimoVersion = opts.req.headers["x-daimo-version"] || "";
   const span = null as Span | null;
+  const requestInfo = {} as any;
 
-  return { ipAddr, userAgent, daimoPlatform, daimoVersion, span, ...opts };
+  return {
+    ipAddr,
+    userAgent,
+    daimoPlatform,
+    daimoVersion,
+    span,
+    requestInfo,
+    ...opts,
+  };
 };
 
 export function onTrpcError({

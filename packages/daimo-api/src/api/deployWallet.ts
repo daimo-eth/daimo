@@ -14,10 +14,12 @@ import { chainConfig } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { Telemetry } from "../server/telemetry";
+import { TrpcRequestContext } from "../server/trpc";
 import { Watcher } from "../shovel/watcher";
 import { retryBackoff } from "../utils/retryBackoff";
 
 export async function deployWallet(
+  ctx: TrpcRequestContext,
   name: string,
   pubKeyHex: Hex,
   inviteLinkStatus: DaimoLinkStatus,
@@ -92,11 +94,34 @@ export async function deployWallet(
   nameReg.onSuccessfulRegister(name, address);
   inviteGraph.processDeployWallet(address, inviteLinkStatus);
 
+  // Send starter USDC only for invite links, and check for spam.
+  let sendFaucet = false;
   if (inviteLinkStatus.link.type === "invite") {
+    const { requestInfo } = ctx;
+    try {
+      const faucetRes = await fetch(
+        "https://daimo-faucet.onrender.com/faucet",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.DAIMO_FAUCET_API_KEY || "",
+          },
+          body: JSON.stringify(requestInfo),
+        }
+      );
+      const faucetJson = await faucetRes.json();
+      sendFaucet = faucetJson.sendFaucet;
+      console.log(`[API] queried faucet API, got ${sendFaucet}`, requestInfo);
+    } catch (e: any) {
+      console.error(`[API] error querying faucet API`, e);
+    }
+
     inviteCodeTracker.useInviteCode(
       address,
       deviceAttestationString,
-      inviteLinkStatus.link.code
+      inviteLinkStatus.link.code,
+      sendFaucet
     );
   }
 

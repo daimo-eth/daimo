@@ -76,7 +76,8 @@ export class InviteCodeTracker {
   async useInviteCode(
     invitee: Address,
     deviceAttestationString: Hex,
-    invCode: string
+    invCode: string,
+    maybeSendFaucet: boolean
   ): Promise<boolean> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
       this.db.incrementInviteCodeUseCount(invCode)
@@ -86,11 +87,9 @@ export class InviteCodeTracker {
     );
 
     if (code != null && code.useCount <= code.maxUses) {
-      const faucetStatus = await this.requestFaucet(
-        invitee,
-        code,
-        deviceAttestationString
-      );
+      const faucetStatus = maybeSendFaucet
+        ? await this.requestFaucet(invitee, code, deviceAttestationString)
+        : "SKIPPED";
 
       console.log(`[INVITE] faucet status: ${faucetStatus}`);
 

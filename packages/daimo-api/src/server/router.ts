@@ -239,6 +239,7 @@ export function createRouter(
           db
         );
         const address = await deployWallet(
+          opts.ctx,
           name,
           pubKeyHex,
           inviteLinkStatus,
@@ -259,15 +260,18 @@ export function createRouter(
       .mutation(async (opts) => {
         const { op } = opts.input;
         const span = opts.ctx.span!;
-        span.setAttribute("op.sender", op.sender);
         const senderName = nameReg.resolveDaimoNameForAddr(op.sender);
-        span.setAttribute("op.sender_name", senderName || "");
-        span.setAttribute("op.nonce", op.nonce);
         const h = hexToNumber;
-        span.setAttribute("op.call_gas_limit", h(op.callGasLimit));
-        span.setAttribute("op.pre_ver_gas", h(op.preVerificationGas));
-        span.setAttribute("op.ver_gas_limit", h(op.verificationGasLimit));
-        span.setAttribute("op.paymaster", op.paymasterAndData);
+        const reqInfo = {
+          "op.sender": op.sender,
+          "op.sender_name": senderName || "",
+          "op.nonce": h(op.nonce),
+          "op.call_gas_limit": h(op.callGasLimit),
+          "op.pre_ver_gas": h(op.preVerificationGas),
+          "op.ver_gas_limit": h(op.verificationGasLimit),
+          "op.paymaster": op.paymasterAndData,
+        };
+        span.setAttributes(reqInfo);
 
         try {
           return await bundlerClient.sendUserOp(op, vc, nameReg);

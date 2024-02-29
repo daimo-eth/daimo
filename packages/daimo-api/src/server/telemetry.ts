@@ -61,14 +61,16 @@ export class Telemetry {
   startApiSpan(ctx: TrpcRequestContext, type: string, path: string) {
     const span = this.tracerApi.startSpan(`trpc.${type}`);
     const ipCountry = getIpCountry(ctx.ipAddr);
-    span.setAttributes({
+    const requestInfo = {
       "rpc.path": path,
       "rpc.ip_addr": ctx.ipAddr,
       "rpc.ip_country": ipCountry,
       "rpc.user_agent": ctx.userAgent,
       "app.platform": ctx.daimoPlatform,
       "app.version": ctx.daimoVersion,
-    });
+    };
+    span.setAttributes(requestInfo);
+    ctx.requestInfo = { ...ctx.requestInfo, ...requestInfo };
     return span;
   }
 
