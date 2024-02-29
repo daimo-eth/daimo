@@ -7,8 +7,9 @@ import {
   daimoChainFromId,
   daimoPaymasterV2Address,
   entryPointABI,
+  daimoPaymasterV2ABI,
+  erc20ABI,
 } from "@daimo/contract";
-import { daimoPaymasterV2ABI } from "@daimo/contract/dist/generated";
 import { CronJob } from "cron";
 import { Constants } from "userop";
 import { Hex, formatEther, getAddress } from "viem";
@@ -111,11 +112,29 @@ export class Crontab {
       address: faucetAddr,
     });
     const balanceEth = Number(formatEther(balance));
+    console.log(`[CRON] checked faucet ETH balance ${balanceEth}`);
+
     await this.sendLowBalanceMessage(
       balanceEth,
       `Faucet ${faucetAddr} ETH`,
       0.05,
       0.005
+    );
+
+    const balanceUSDC = await this.vc.publicClient.readContract({
+      abi: erc20ABI,
+      address: chainConfig.tokenAddress,
+      functionName: "balanceOf",
+      args: [faucetAddr],
+    });
+    const balanceDollars = Number(amountToDollars(balanceUSDC));
+    console.log(`[CRON] checked faucet USDC balance ${balanceDollars}`);
+
+    await this.sendLowBalanceMessage(
+      balanceDollars,
+      `Faucet ${faucetAddr} USDC`,
+      250,
+      25
     );
   }
 

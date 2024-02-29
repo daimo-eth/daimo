@@ -27,6 +27,7 @@ export {
   daimoEphemeralNotesABI,
   daimoEphemeralNotesV2ABI,
   daimoPaymasterV2Address,
+  daimoPaymasterV2ABI,
   entryPointABI,
   erc20ABI,
 } from "./generated";
