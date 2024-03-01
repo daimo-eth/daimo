@@ -186,6 +186,7 @@ export function createRouter(
         const { sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
         return getAccountHistory(
+          opts.ctx,
           address,
           sinceBlockNum,
           watcher,

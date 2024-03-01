@@ -43,32 +43,37 @@ export class InviteCodeTracker {
       if (!chainConfig.chainL2.testnet) return false;
     }
 
+    // Try sending bonus
     if (code.bonusDollarsInvitee > 0) {
       console.log(
         `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
       );
-      await this.vc.writeContract({
-        abi: erc20ABI,
-        address: chainConfig.tokenAddress,
-        functionName: "transfer",
-        args: [invitee, dollarsToAmount(code.bonusDollarsInvitee)],
-      });
+      await this.trySendUSDC(invitee, code.bonusDollarsInvitee);
     }
     if (code.inviter && code.bonusDollarsInviter > 0) {
       console.log(
         `[INVITE] sending faucet to inviter ${code.inviter} ${code.bonusDollarsInviter}`
       );
-      await this.vc.writeContract({
-        abi: erc20ABI,
-        address: chainConfig.tokenAddress,
-        functionName: "transfer",
-        args: [code.inviter, dollarsToAmount(code.bonusDollarsInviter)],
-      });
+      await this.trySendUSDC(code.inviter, code.bonusDollarsInviter);
     }
 
     await this.db.insertFaucetAttestation(deviceAttestationString);
 
     return true;
+  }
+
+  // Try sending USDC to an address. Prints error if unsuccessful.
+  async trySendUSDC(to: Address, dollars: number) {
+    try {
+      await this.vc.writeContract({
+        abi: erc20ABI,
+        address: chainConfig.tokenAddress,
+        functionName: "transfer",
+        args: [to, dollarsToAmount(dollars)],
+      });
+    } catch (e) {
+      console.log(`[INVITE] failed to send USDC to ${to}: ${e}`);
+    }
   }
 
   // Increment an invite's usage count, if it's valid and not yet used,

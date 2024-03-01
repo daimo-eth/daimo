@@ -2,6 +2,7 @@ import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
 import http from "http";
 
+import { getAppVersionTracker } from "./appVersion";
 import { Crontab } from "./cron";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
@@ -97,6 +98,9 @@ async function main() {
 
     console.log(`[API] initializing profile cache...`);
     await profileCache.init();
+
+    console.log(`[API] track latest app version...`);
+    await getAppVersionTracker().init();
   })();
 
   console.log(`[API] serving...`);
