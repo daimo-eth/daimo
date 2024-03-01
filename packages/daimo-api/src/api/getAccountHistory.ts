@@ -1,5 +1,6 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
+  AddrLabel,
   ChainGasConstants,
   DisplayOpEvent,
   EAccount,
@@ -16,7 +17,7 @@ import { Address } from "viem";
 import { ProfileCache } from "./profile";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
-import { NameRegistry } from "../contract/nameRegistry";
+import { NameRegistry, specialAddrLabels } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
 import { ViemClient } from "../network/viemClient";
 import { getAppVersionTracker } from "../server/appVersion";
@@ -186,14 +187,27 @@ function getSuggestedActions(
     });
   }
 
-  // Active accounts: ask them to join our TG
-  ret.push({
-    id: "2023-12-join-tg-6",
-    icon: "comment-discussion",
-    title: "Feedback? Ideas?",
-    subtitle: "Join our Telegram group.",
-    url: `https://t.me/+to2ghQJfgic0YjA9`,
+  // Active account: has recieved transfer from another user in "recent"
+  // transfer logs. The recency condition means that it will be dismissed
+  // automatically if transferLogs are empty (eg, user leaves app open for
+  // a while).
+  const hasReceived = hist.transferLogs.some((log) => {
+    return (
+      log.type === "transfer" &&
+      log.to === eAcc.addr &&
+      specialAddrLabels[log.from] !== AddrLabel.Faucet
+    );
   });
+
+  if (hasReceived) {
+    ret.push({
+      id: "2023-12-join-tg-5",
+      icon: "comment-discussion",
+      title: "Feedback? Ideas?",
+      subtitle: "Join our Telegram group.",
+      url: `https://t.me/+to2ghQJfgic0YjA9`,
+    });
+  }
 
   return ret;
 }

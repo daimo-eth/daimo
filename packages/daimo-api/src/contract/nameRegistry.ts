@@ -26,7 +26,7 @@ import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { retryBackoff } from "../utils/retryBackoff";
 
-const specialAddrLabels: { [_: Address]: AddrLabel } = {
+export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
   // All historical notes ("payment link") contract addresses
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
