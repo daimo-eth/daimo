@@ -1,4 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { useState } from "react";
 import { Platform, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,22 +8,20 @@ import Spacer from "./Spacer";
 import { color } from "./style";
 import { TextBody } from "./text";
 import { useNetworkState } from "../../sync/networkState";
+import { resync } from "../../sync/sync";
 
 /// By default, OfflineHeader takes up the top SafeArea, plus a bit more when offline.
 /// Set
 export function OfflineHeader({
   dontTakeUpSpace,
   offlineExtraMarginBottom,
-  onPress,
-  title,
 }: {
   dontTakeUpSpace?: boolean;
   offlineExtraMarginBottom?: number;
-  onPress?(): void;
-  title?: string;
 }) {
+  const [refreshing, setRefreshing] = useState(false);
   const netState = useNetworkState();
-  const isOffline = netState.status === "offline";
+  const isOffline = netState.status !== "offline";
 
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
@@ -42,6 +41,12 @@ export function OfflineHeader({
 
   const isAndroid = Platform.OS === "android";
 
+  const onPressHeader = async () => {
+    setRefreshing(true);
+    await resync("Home screen pull refresh");
+    setRefreshing(false);
+  };
+
   return (
     <View style={style}>
       {
@@ -49,14 +54,14 @@ export function OfflineHeader({
           <Spacer h={16} />
         ) /* Some Androids have a camera excluded from the safe insets. */
       }
-      <TouchableOpacity disabled={!onPress} onPress={onPress}>
-        {title && (
+      <TouchableOpacity onPress={onPressHeader}>
+        {refreshing && (
           <TextBody color={color.midnight}>
             <Spacer w={8} />
-            {title}
+            Retrying...
           </TextBody>
         )}
-        {isOffline && !title && (
+        {isOffline && !refreshing && (
           <TextBody color={color.midnight}>
             <Octicons name="alert" size={14} />
             <Spacer w={8} />

@@ -14,8 +14,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -40,8 +38,6 @@ import { TextBody, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
-const AnimatedRefreshControl = Animated.createAnimatedComponent(RefreshControl);
-
 export default function HomeScreen() {
   const Inner = useWithAccount(HomeScreenInner);
   return <Inner />;
@@ -53,7 +49,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
   const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
-  const refreshOpacity = useSharedValue(1);
 
   // Hack to prevent pull-to-refresh from moving up instead of down.
   const preventOverscrollOffset = useSharedValue(0);
@@ -86,12 +81,10 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   // Outer scroll: pull to refresh
   const [refreshing, setRefreshing] = useState(false);
-  const [showRetryingTitle, setShowRetryingTitle] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await resync("Home screen pull refresh");
-    setShowRetryingTitle(false);
     setRefreshing(false);
     if (scrollRef.current && !isScrollDragged.current) {
       scrollRef.current.scrollTo({ y: 0, animated: true });
@@ -154,27 +147,9 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   const contactsAccess = useContactsPermission();
 
-  const refreshAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: refreshOpacity.value,
-  }));
-
-  const forceRefresh = () => {
-    if (!refreshing) {
-      refreshOpacity.value = 0;
-      setShowRetryingTitle(true);
-      onRefresh();
-      refreshOpacity.value = withDelay(300, withTiming(1));
-    }
-  };
-
   return (
     <View>
-      <OfflineHeader
-        dontTakeUpSpace
-        offlineExtraMarginBottom={16}
-        onPress={forceRefresh}
-        title={showRetryingTitle ? "Retrying..." : undefined}
-      />
+      <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
       <Animated.ScrollView
         ref={scrollRef}
         showsHorizontalScrollIndicator={false}
@@ -183,11 +158,7 @@ function HomeScreenInner({ account }: { account: Account }) {
         scrollsToTop={false}
         scrollEnabled={searchPrefix == null && !isBottomSheetOpen}
         refreshControl={
-          <AnimatedRefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            style={refreshAnimatedStyle}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={{
           height: screenDimensions.height,
