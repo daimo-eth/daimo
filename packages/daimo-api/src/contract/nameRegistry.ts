@@ -3,6 +3,7 @@ import {
   DAccount,
   DaimoAccountCall,
   EAccount,
+  assertNotNull,
   guessTimestampFromNum,
   isValidName,
   now,
@@ -123,7 +124,7 @@ export class NameRegistry {
   async search(prefix: string): Promise<DAccount[]> {
     // Slow, linear time search. Replace with DB past a few hundred accounts.
     return this.accounts
-      .map((a) => ({ addr: a.addr, name: a.name }))
+      .map((a) => assertNotNull(this.getDaimoAccount(a.addr)))
       .filter(
         (a) =>
           a.name.startsWith(prefix) ||
@@ -164,7 +165,7 @@ export class NameRegistry {
     return this.addrToReg.get(addr)?.name;
   }
 
-  getDaimoAccount(address: Address): EAccount | undefined {
+  getDaimoAccount(address: Address): (EAccount & { name: string }) | undefined {
     const reg = this.addrToReg.get(address);
     if (reg == null) return undefined;
 

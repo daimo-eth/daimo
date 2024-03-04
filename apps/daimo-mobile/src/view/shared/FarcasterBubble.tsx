@@ -53,12 +53,12 @@ export function FarcasterBubble({
 
   return (
     <View style={styles.row}>
-      <TextMeta color={color.grayMid}>{dispUsername}</TextMeta>
-      <Spacer w={4} />
       <Image
         source={{ uri: image.iconFarcaster }}
         style={{ width: 12, height: 12 }}
       />
+      <Spacer w={4} />
+      <TextMeta color={color.grayMid}>{dispUsername}</TextMeta>
     </View>
   );
 }
