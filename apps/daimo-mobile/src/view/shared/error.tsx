@@ -111,5 +111,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     marginTop: 24,
+    paddingHorizontal: 24,
   },
 });

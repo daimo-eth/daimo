@@ -1,6 +1,7 @@
 import {
   DaimoLink,
   DaimoLinkAccount,
+  DaimoLinkInviteCode,
   DaimoLinkNote,
   DaimoLinkNoteV2,
   DaimoLinkRequest,
@@ -8,8 +9,8 @@ import {
   DaimoLinkTag,
   DisplayOpEvent,
   EAccount,
-  parseDaimoLink,
   getEAccountStr,
+  parseDaimoLink,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -25,7 +26,7 @@ export type ParamListHome = {
   QR: { option: QRScreenOptions | undefined };
   Account:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
-    | { link: DaimoLinkAccount };
+    | { link: DaimoLinkAccount | DaimoLinkInviteCode };
   HistoryOp: { op: DisplayOpEvent };
 };
 
@@ -168,6 +169,10 @@ async function goTo(nav: MainNav, link: DaimoLink) {
     }
     case "tag": {
       nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
+      break;
+    }
+    case "invite": {
+      nav.navigate("HomeTab", { screen: "Account", params: { link } });
       break;
     }
     default:

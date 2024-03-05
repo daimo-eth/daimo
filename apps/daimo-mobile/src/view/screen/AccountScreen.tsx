@@ -1,6 +1,9 @@
+import { getTeamDaimoFaucetAcc } from "@daimo/api/src/contract/nameRegistry";
 import {
   DaimoLinkAccount,
+  DaimoLinkInviteCode,
   EAccount,
+  assert,
   canSendTo,
   getAccountName,
   getAddressContraction,
@@ -75,31 +78,48 @@ function AccountScreenLoader({
   link,
 }: {
   account: Account;
-  link: DaimoLinkAccount;
+  link: DaimoLinkAccount | DaimoLinkInviteCode;
 }) {
+  console.log(`[ACCOUNT] loading account from link`, link);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const status = useFetchLinkStatus(link, daimoChain)!;
-  console.log(`[ACCOUNT] loading account from link: ${link.account}`);
 
   const nav = useNav();
   useEffect(() => {
     if (status.data == null) return;
-    if (!("account" in status.data)) return;
+
+    // Get account, or inviter
+    let eAcc: EAccount | undefined, inviterEAcc: EAccount | undefined;
+    if ("account" in status.data) {
+      eAcc = status.data.account;
+      inviterEAcc = status.data.inviter;
+    } else if ("inviter" in status.data) {
+      eAcc = status.data.inviter || getTeamDaimoFaucetAcc();
+    }
+    assert(eAcc != null, "No account or inviter");
+
+    // Show account
     console.log(`[ACCOUNT] loaded account: ${JSON.stringify(status.data)}`);
-    nav.navigate("Account", {
-      eAcc: status.data.account,
-      inviterEAcc: status.data.inviter,
-    });
+    nav.navigate("Account", { eAcc, inviterEAcc });
   }, [status.data]);
+
+  assert(["account", "invite"].includes(link.type), "Bad link type");
 
   return (
     <View style={ss.container.center}>
       {status.isLoading && <ActivityIndicator size="large" />}
-      {status.error && (
+      {status.error && link.type === "account" && (
         <ErrorBanner
           error={status.error}
           displayTitle="Account not found"
-          displayMessage="Fix errors in your link or download the latest version of the app"
+          displayMessage={`Couldn't load account ${link.account}`}
+        />
+      )}
+      {status.error && link.type === "invite" && (
+        <ErrorBanner
+          error={status.error}
+          displayTitle="Invite not found"
+          displayMessage={`Couldn't load invite ${link.code}`}
         />
       )}
     </View>

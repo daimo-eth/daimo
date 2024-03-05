@@ -28,7 +28,6 @@ import { InviteGraph } from "../offchain/inviteGraph";
 import { retryBackoff } from "../utils/retryBackoff";
 
 export const specialAddrLabels: { [_: Address]: AddrLabel } = {
-  "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7": AddrLabel.Faucet,
   // All historical notes ("payment link") contract addresses
   "0x37Ac8550dA1E8d227266966A0b4925dfae648f7f": AddrLabel.PaymentLink,
   "0x450E09fc6C2a9bC4230D4e6f3d7131CCa48b48Ce": AddrLabel.PaymentLink,
@@ -47,6 +46,12 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x6dcBCe46a8B494c885D0e7b6817d2b519dF64467": AddrLabel.Coinbase,
   "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
 };
+
+const teamDaimoFaucetAddr = "0x2a6d311394184EeB6Df8FBBF58626B085374Ffe7";
+specialAddrLabels[teamDaimoFaucetAddr] = AddrLabel.Faucet;
+export function getTeamDaimoFaucetAcc(): EAccount {
+  return { addr: teamDaimoFaucetAddr, label: AddrLabel.Faucet };
+}
 
 specialAddrLabels[chainConfig.pimlicoPaymasterAddress] = AddrLabel.Paymaster;
 
