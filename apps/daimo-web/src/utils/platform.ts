@@ -1,4 +1,4 @@
-import { appStoreLinks } from "@daimo/common";
+import { appStoreLinks, daimoDomainAddress } from "@daimo/common";
 
 export type PlatformType = "ios" | "android" | "other";
 
@@ -12,10 +12,14 @@ export function detectPlatform(ua: string): PlatformType {
   return "other";
 }
 
-// Mac app store 👀
 export const downloadMetadata = {
   ios: {
     title: "Download on App Store",
+    url: appStoreLinks.ios,
+    image: "/badge-app-store.svg",
+  },
+  mac: {
+    title: "Download on Mac App Store",
     url: appStoreLinks.ios,
     image: "/badge-app-store.svg",
   },
@@ -25,8 +29,7 @@ export const downloadMetadata = {
     image: "/badge-play-store.svg",
   },
   other: {
-    title: "Download on App Store",
-    url: appStoreLinks.ios,
-    image: "/badge-app-store.svg",
+    title: "Download on App Store or Google Play",
+    url: `${daimoDomainAddress}/download/other`,
   },
 };

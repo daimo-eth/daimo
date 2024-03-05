@@ -29,17 +29,57 @@ export function PrimaryOpenInAppButton({
   };
 
   return (
-    <button
-      className={
-        (justCopied ? "bg-success" : "bg-primaryLight") +
-        " tracking-wider text-white font-bold py-5 w-full rounded-md disabled:opacity-50"
-      }
+    <PrimaryButton
       disabled={disabled}
       onClick={onClick}
+      buttonType={justCopied ? "success" : undefined}
     >
       {justCopied
         ? "COPIED, REDIRECTING..."
         : (inviteDeepLink ? "COPY INVITE AND " : "") + "INSTALL DAIMO"}
+    </PrimaryButton>
+  );
+}
+
+type ButtonProps = {
+  onClick?: () => void;
+  children: React.ReactNode;
+  buttonType?: "danger" | "success";
+  disabled?: boolean;
+};
+
+function getButtonTextAndBorder(buttonType?: "danger" | "success") {
+  switch (buttonType) {
+    case "danger":
+      return "text-danger border-danger";
+    case "success":
+      return "text-success border-success";
+    default:
+      return "text-primaryLight border-primaryLight";
+  }
+}
+
+export function PrimaryButton({
+  onClick,
+  children,
+  buttonType,
+  disabled,
+}: ButtonProps) {
+  const background =
+    buttonType === "success" ? "bg-success" : "bg-primaryLight";
+
+  return (
+    <button
+      className={
+        "tracking-wider text-white font-bold py-5 w-full rounded-md disabled:opacity-50 " +
+        background +
+        " " +
+        getButtonTextAndBorder(buttonType)
+      }
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {children}
     </button>
   );
 }
@@ -49,29 +89,13 @@ export function SecondaryButton({
   children,
   buttonType,
   disabled,
-}: {
-  onClick?: () => void;
-  children: React.ReactNode;
-  buttonType?: "danger" | "success";
-  disabled?: boolean;
-}) {
-  const buttonColors = (() => {
-    switch (buttonType) {
-      case "danger":
-        return "text-danger border-danger";
-      case "success":
-        return "text-success border-success";
-      default:
-        return "text-primaryLight border-primaryLight";
-    }
-  })();
-
+}: ButtonProps) {
   return (
     <button
       disabled={disabled}
       className={
         "tracking-wider font-bold py-5 w-full rounded-md border-2 " +
-        buttonColors
+        getButtonTextAndBorder(buttonType)
       }
       onClick={onClick}
       type="button"
