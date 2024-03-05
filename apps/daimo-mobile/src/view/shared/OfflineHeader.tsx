@@ -21,7 +21,7 @@ export function OfflineHeader({
 }) {
   const [refreshing, setRefreshing] = useState(false);
   const netState = useNetworkState();
-  const isOffline = netState.status !== "offline";
+  const isOffline = netState.status === "offline";
 
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
