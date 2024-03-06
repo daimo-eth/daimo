@@ -17,6 +17,7 @@ import { Account } from "../model/account";
 
 interface BaseDaimoContact {
   lastSendTime?: number;
+  lastRecvTime?: number;
 }
 
 export interface EAccountContact extends EAccount, BaseDaimoContact {
@@ -60,15 +61,18 @@ export function getDaimoContactKey(contact: DaimoContact): string {
 }
 
 /** Convert EAccount to EAccountContact */
-export function addLastSendTime(
+export function addLastSendRecvTime(
   account: Account,
-  recipientEAcc: EAccount | EAccountSearchResult
+  otherEAcc: EAccount | EAccountSearchResult
 ): EAccountContact {
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   const lastSendTime = transfersNewToOld.find(
-    (t) => t.from === account.address && t.to === recipientEAcc.addr
+    (t) => t.from === account.address && t.to === otherEAcc.addr
   )?.timestamp;
-  return { type: "eAcc", ...recipientEAcc, lastSendTime };
+  const lastRecvTime = transfersNewToOld.find(
+    (t) => t.to === account.address && t.from === otherEAcc.addr
+  )?.timestamp;
+  return { type: "eAcc", ...otherEAcc, lastSendTime, lastRecvTime };
 }
 
 export function getContactName(r: DaimoContact) {
@@ -85,16 +89,18 @@ export function useRecipientSearch(
 ) {
   prefix = prefix.toLowerCase();
 
-  // Load recent recipients
+  // Load recent recipients (addrs we've sent $ to) & senders (...received from)
   const recents = [] as DaimoContact[];
   const recentsByAddr = new Map<Address, DaimoContact>();
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   for (const t of transfersNewToOld) {
-    if (t.from !== account.address) continue;
-    const other =
-      t.type === "claimLink" || t.type === "createLink"
-        ? t.noteStatus.claimer?.addr
-        : t.to;
+    const other = (function () {
+      if (t.from === account.address) {
+        return t.type === "createLink" ? t.noteStatus.claimer?.addr : t.to;
+      } else if (t.to === account.address) {
+        return t.type === "claimLink" ? t.noteStatus.sender.addr : t.from;
+      }
+    })();
     if (other == null || other === account.address) continue;
     if (recentsByAddr.has(other)) continue;
 
@@ -108,8 +114,9 @@ export function useRecipientSearch(
     const r: EAccountContact = {
       type: "eAcc",
       ...acc,
-      lastSendTime: t.timestamp,
     };
+    if (t.from === account.address) r.lastSendTime = t.timestamp;
+    else r.lastRecvTime = t.timestamp;
 
     recents.push(r);
     recentsByAddr.set(other, r);

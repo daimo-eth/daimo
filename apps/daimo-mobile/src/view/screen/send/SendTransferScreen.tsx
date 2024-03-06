@@ -19,7 +19,7 @@ import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   EAccountContact,
-  addLastSendTime,
+  addLastSendRecvTime,
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
@@ -79,29 +79,22 @@ function SendScreenInner({
       else if (requestFetch.error)
         return <ErrorRowCentered error={requestFetch.error} />;
       else if (requestStatus) {
+        const recipient = addLastSendRecvTime(account, requestStatus.recipient);
         if (requestStatus.link.type === "requestv2") {
-          const recipientContact = addLastSendTime(
-            account,
-            requestStatus.recipient
-          );
           return (
             <SendConfirm
               account={account}
-              recipient={recipientContact}
+              recipient={recipient}
               dollars={requestStatus.link.dollars}
               requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
         } else {
           // Backcompat with old request links
-          const recipientContact = addLastSendTime(
-            account,
-            requestStatus.recipient
-          );
           return (
             <SendConfirm
               account={account}
-              recipient={recipientContact}
+              recipient={recipient}
               dollars={requestStatus.link.dollars}
             />
           );

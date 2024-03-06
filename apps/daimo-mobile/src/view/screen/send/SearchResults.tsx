@@ -83,9 +83,7 @@ function SearchResultsScroll({
       )}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
-          <TextLight>
-            {recentsOnly ? "Recent recipients" : "Search results"}
-          </TextLight>
+          <TextLight>{recentsOnly ? "Recents" : "Search results"}</TextLight>
         </View>
       )}
       {res.recipients.map((r) => (
@@ -164,15 +162,17 @@ function RecipientRow({
         return recipient.name ? recipient.phoneNumber : undefined;
       case "eAcc": {
         const nowS = now();
-        return recipient.lastSendTime
-          ? `Sent ${timeAgo(recipient.lastSendTime, nowS, true)}`
-          : undefined;
+        const { lastSendTime, lastRecvTime } = recipient;
+        if (lastSendTime) return `Sent ${timeAgo(lastSendTime, nowS, true)}`;
+        if (lastRecvTime)
+          return `Received ${timeAgo(lastRecvTime, nowS, true)}`;
+        return undefined;
       }
     }
   })();
   const shortenedLightText =
-    lightText && lightText?.length > 15
-      ? lightText.slice(0, 15) + "…"
+    lightText && lightText?.length > 17
+      ? lightText.slice(0, 16) + "…"
       : lightText;
 
   return (

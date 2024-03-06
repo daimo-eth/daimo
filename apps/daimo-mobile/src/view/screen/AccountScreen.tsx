@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
-import { addLastSendTime } from "../../logic/daimoContacts";
+import { addLastSendRecvTime } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
@@ -147,7 +147,7 @@ function AccountScreenBody({
 
   const canSend = canSendTo(eAcc);
   const send = useCallback(() => {
-    const recipient = addLastSendTime(account, eAcc);
+    const recipient = addLastSendRecvTime(account, eAcc);
     nav.navigate("SendTab", {
       screen: "SendTransfer",
       params: { recipient },
