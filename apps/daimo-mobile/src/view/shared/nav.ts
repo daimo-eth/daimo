@@ -111,12 +111,14 @@ export type ParamListBottomSheet = {
   };
 };
 
-export function useNav<
-  RouteName extends keyof NavigatorParamList = keyof NavigatorParamList
->() {
-  return useNavigation<
-    NativeStackNavigationProp<NavigatorParamList, RouteName>
-  >();
+type AllRoutes = NavigatorParamList &
+  ParamListHome &
+  ParamListSend &
+  ParamListReceive &
+  ParamListSettings;
+
+export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
+  return useNavigation<NativeStackNavigationProp<AllRoutes, RouteName>>();
 }
 
 export type MainNav = ReturnType<typeof useNav>;
