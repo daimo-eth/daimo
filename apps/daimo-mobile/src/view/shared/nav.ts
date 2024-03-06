@@ -191,8 +191,6 @@ export function useExitBack() {
 
 // Open account page within the same tab.
 export function navToAccountPage(account: EAccount, nav: MainNav) {
-  // Workaround: react-navigation typescript types are broken.
-  // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
   const accountLink = {
     type: "account",
     account: getEAccountStr(account),
