@@ -317,6 +317,18 @@ export class DB {
     client.release();
   }
 
+  async getInviteCodeForAddress(address: Address): Promise<string | undefined> {
+    console.log(`[DB] getting invite code for address`);
+    const client = await this.pool.connect();
+    const result = await client.query<{ code: string }>(
+      `SELECT code FROM invitecode WHERE inviter = $1`,
+      [address]
+    );
+    client.release();
+
+    return result.rows.length > 0 ? result.rows[0].code : undefined;
+  }
+
   async loadInviteGraph(): Promise<InviteGraphRow[]> {
     console.log(`[DB] loading invite graph`);
     const client = await this.pool.connect();
@@ -333,7 +345,7 @@ export class DB {
     console.log(`[DB] inserting invite graph`);
     const client = await this.pool.connect();
     await client.query(
-      `INSERT INTO invite_graph (invitee, inviter) VALUES ($1, $2)`,
+      `INSERT INTO invite_graph (invitee, inviter) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
       [rows.invitee, rows.inviter]
     );
     client.release();
