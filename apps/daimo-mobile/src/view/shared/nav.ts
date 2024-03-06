@@ -191,11 +191,10 @@ export function useExitBack() {
 export function navToAccountPage(account: EAccount, nav: MainNav) {
   // Workaround: react-navigation typescript types are broken.
   // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
-  const currentTab = nav.getState().routes[0].name;
-  const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
   const accountLink = {
     type: "account",
     account: getEAccountStr(account),
   } as DaimoLinkAccount;
-  nav.navigate(newTab, { screen: "Account", params: { link: accountLink } });
+
+  nav.push("Account", { link: accountLink });
 }
