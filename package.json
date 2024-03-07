@@ -28,6 +28,10 @@
     "packages/*",
     "apps/*"
   ],
+  "overrides": {
+    "react-native": "0.73.4",
+    "@types/react-native": "0.73.0"
+  },
   "engines": {
     "node": ">=20.3.0",
     "npm": ">=9.6.7"

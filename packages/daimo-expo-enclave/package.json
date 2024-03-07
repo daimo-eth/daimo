@@ -25,9 +25,7 @@
   "author": "Daimo",
   "devDependencies": {
     "@types/react": "^18.2.15",
-    "@types/react-native": "^0.72.2",
-    "expo-module-scripts": "^3.0.11",
-    "expo-modules-core": "^1.5.11"
+    "expo-module-scripts": "^3.0.11"
   },
   "peerDependencies": {
     "expo": "*",
