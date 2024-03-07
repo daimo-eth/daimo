@@ -32,7 +32,7 @@ interface RequestFulfilledLog {
 
 /* Request contract. Tracks request creation and fulfillment. */
 export class RequestIndexer {
-  private requests: Map<bigint, DaimoRequestV2Status> = new Map();
+  public requests: Map<bigint, DaimoRequestV2Status> = new Map();
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 

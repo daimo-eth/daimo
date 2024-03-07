@@ -153,7 +153,7 @@ export class DB {
     const result = await client.query(
       `SELECT tag, link, time
        FROM tag_redirect_history WHERE tag = $1
-       ORDER BY time DESC LIMIT 10`,
+       ORDER BY time DESC`,
       [tag]
     );
     client.release();

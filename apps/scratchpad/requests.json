@@ -1,0 +1,898 @@
+[
+  {
+    "dollars": "4.00",
+    "fulfillerName": "nibnalin",
+    "memo": "☕️ Espresso",
+    "requestId": "MHb5nP7d3UQ",
+    "tagTime": "February 28, 2024 at 1:38:09 AM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "security",
+    "memo": "☕️ Cold Brew",
+    "requestId": "9FGnXSHyPZ",
+    "tagTime": "February 28, 2024 at 4:41:52 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dcposch",
+    "memo": "☕️ Latte",
+    "requestId": "3bJbrV3M8BS",
+    "tagTime": "February 28, 2024 at 4:52:37 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "rob",
+    "memo": "☕️ Latte",
+    "requestId": "MZByFSXf1a7",
+    "tagTime": "February 28, 2024 at 5:00:40 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dcposch",
+    "memo": "☕️ Latte",
+    "requestId": "Vo9FU5rvtwp",
+    "tagTime": "February 28, 2024 at 5:05:26 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "freddy",
+    "memo": "☕️ Espresso",
+    "requestId": "QtYGrZrKs41",
+    "tagTime": "February 28, 2024 at 5:20:53 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "tharriesjones",
+    "memo": "☕️ Latte",
+    "requestId": "xngo2QR4iJ",
+    "tagTime": "February 28, 2024 at 5:27:11 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dleon",
+    "memo": "☕️ Latte",
+    "requestId": "Zuz7ApDeX7Y",
+    "tagTime": "February 28, 2024 at 5:28:40 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "angelos",
+    "memo": "☕️ Latte",
+    "requestId": "B4irygM6Ddm",
+    "tagTime": "February 28, 2024 at 5:29:11 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "spkateryna",
+    "memo": "☕️ Latte",
+    "requestId": "S5xE6D7hed",
+    "tagTime": "February 28, 2024 at 5:37:03 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "joshgarza",
+    "memo": "☕️ Latte",
+    "requestId": "E9E4xQ6ZiJu",
+    "tagTime": "February 28, 2024 at 5:39:07 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "niccary",
+    "memo": "☕️ Latte",
+    "requestId": "72D3WFrV5tM",
+    "tagTime": "February 28, 2024 at 5:40:14 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "benb",
+    "memo": "☕️ Latte",
+    "requestId": "QtvrjATaw7s",
+    "tagTime": "February 28, 2024 at 5:43:48 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "jusfinb",
+    "memo": "☕️ Latte",
+    "requestId": "fFqoXM5Q8CN",
+    "tagTime": "February 28, 2024 at 5:45:44 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "mohan",
+    "memo": "☕️ Latte",
+    "requestId": "PT75UnU72Bu",
+    "tagTime": "February 28, 2024 at 5:46:35 PM"
+  },
+  {
+    "dollars": "8.00",
+    "fulfillerName": "ytox",
+    "memo": "🦴 Bone Broth",
+    "requestId": "Bm4CL7FUqm1",
+    "tagTime": "February 28, 2024 at 5:47:44 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dcposch",
+    "memo": "☕️ Latte",
+    "requestId": "ajSEHeZayG",
+    "tagTime": "February 28, 2024 at 6:05:20 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "hannahjojo",
+    "memo": "☕️ Latte",
+    "requestId": "KuoKMYkZaGZ",
+    "tagTime": "February 28, 2024 at 6:06:55 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "carusoyay",
+    "memo": "☕️ Espresso",
+    "requestId": "UWMnmoHaAFL",
+    "tagTime": "February 28, 2024 at 6:11:41 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "timour",
+    "memo": "🫖 Tea",
+    "requestId": "haasZFGcaY7",
+    "tagTime": "February 28, 2024 at 6:17:55 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "uper",
+    "memo": "☕️ Latte",
+    "requestId": "FeDc1739Yid",
+    "tagTime": "February 28, 2024 at 6:24:13 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "johnpg45",
+    "memo": "☕️ Latte",
+    "requestId": "j1JHs9E4kQW",
+    "tagTime": "February 28, 2024 at 6:42:40 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "nikhil",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "9ipJWNpevoZ",
+    "tagTime": "February 28, 2024 at 6:44:34 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "god",
+    "memo": "☕️ Latte",
+    "requestId": "Uic7HsxFLx",
+    "tagTime": "February 28, 2024 at 6:46:16 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "magicmuse",
+    "memo": "☕️ Latte",
+    "requestId": "HMjmFy2FKFG",
+    "tagTime": "February 28, 2024 at 6:49:58 PM"
+  },
+  {
+    "dollars": "9.00",
+    "fulfillerName": "kbl",
+    "memo": "☕️ Espresso, ☕️ Cortado",
+    "requestId": "YpDBWKCTjgz",
+    "tagTime": "February 28, 2024 at 6:50:39 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "lew",
+    "memo": "☕️ Latte",
+    "requestId": "XcF4svvAasE",
+    "tagTime": "February 28, 2024 at 6:51:50 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dimi",
+    "memo": "☕️ Latte",
+    "requestId": "RUUJE6kQekb",
+    "tagTime": "February 28, 2024 at 7:03:24 PM"
+  },
+  {
+    "dollars": "9.00",
+    "fulfillerName": "sumersareen",
+    "memo": "☕️ Cortado, ☕️ Espresso",
+    "requestId": "NwDJnX1tgFG",
+    "tagTime": "February 28, 2024 at 7:05:05 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "shayonsengupta",
+    "memo": "☕️ Cold Brew",
+    "requestId": "L8aoG7LJoVk",
+    "tagTime": "February 28, 2024 at 7:12:13 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "jbrktt",
+    "memo": "☕️ Espresso",
+    "requestId": "gaDTU2mUdBU",
+    "tagTime": "February 28, 2024 at 7:54:32 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "kenn",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "KEYqZn2487F",
+    "tagTime": "February 28, 2024 at 7:58:51 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "gpt3",
+    "memo": "☕️ Cold Brew",
+    "requestId": "dDVj7gGwy5V",
+    "tagTime": "February 28, 2024 at 7:13:43 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "reidstend",
+    "memo": "☕️ Cortado",
+    "requestId": "NgjRyjs3hWB",
+    "tagTime": "February 28, 2024 at 7:19:44 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "caleb",
+    "memo": "☕️ Cold Brew",
+    "requestId": "jW3d4wtjdnF",
+    "tagTime": "February 28, 2024 at 7:24:00 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "helenag",
+    "memo": "☕️ Cortado",
+    "requestId": "cDhhAxkZSAn",
+    "tagTime": "February 28, 2024 at 7:24:25 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "chpiatt",
+    "memo": "☕️ Cold Brew",
+    "requestId": "3GcGmbHU8TW",
+    "tagTime": "February 28, 2024 at 7:26:24 PM"
+  },
+  {
+    "dollars": "10.00",
+    "fulfillerName": "anna",
+    "memo": "☕️ Espresso, ☕️ Latte",
+    "requestId": "aG1u5XZHMjL",
+    "tagTime": "February 28, 2024 at 7:37:40 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "tyronemichael",
+    "memo": "☕️ Latte",
+    "requestId": "7AgocwSDBSN",
+    "tagTime": "February 28, 2024 at 7:39:34 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "hanna",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "FHMa8fDCXkp",
+    "tagTime": "February 28, 2024 at 7:43:06 PM"
+  },
+  {
+    "dollars": "10.00",
+    "fulfillerName": "megaara",
+    "memo": "🫖 Tea, ☕️ Cold Brew",
+    "requestId": "BmhinWwpxwB",
+    "tagTime": "February 28, 2024 at 7:45:02 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "ejrogers",
+    "memo": "☕️ Cold Brew",
+    "requestId": "615yrcEmoEN",
+    "tagTime": "February 28, 2024 at 7:55:06 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "fm201",
+    "memo": "☕️ Latte",
+    "requestId": "BDd8x687cEM",
+    "tagTime": "February 28, 2024 at 7:55:59 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "stefaan",
+    "memo": "☕️ Latte",
+    "requestId": "a5RF2NYUM5P",
+    "tagTime": "February 28, 2024 at 7:59:20 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "inapie",
+    "memo": "☕️ Latte",
+    "requestId": "giuddWgn7Rp",
+    "tagTime": "February 28, 2024 at 8:00:01 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "grady",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "5PpNVcgFTVF",
+    "tagTime": "February 28, 2024 at 8:02:09 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "kingfishersmediallc",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "2FDP4qSu9XJ",
+    "tagTime": "February 28, 2024 at 8:04:30 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "brucestarlove",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "JAQNfB9AtPM",
+    "tagTime": "February 28, 2024 at 8:05:05 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "brucestarlove",
+    "memo": "☕️ Espresso",
+    "requestId": "SY28j2kxAeg",
+    "tagTime": "February 28, 2024 at 8:05:54 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "promptrotator",
+    "memo": "☕️ Latte",
+    "requestId": "QhHYMdGT2qA",
+    "tagTime": "February 28, 2024 at 8:12:15 PM"
+  },
+  {
+    "dollars": "10.00",
+    "fulfillerName": "vincentweisser",
+    "memo": "☕️ Latte, ☕️ Espresso",
+    "requestId": "XSWFUKencCd",
+    "tagTime": "February 28, 2024 at 8:15:46 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "ronan",
+    "memo": "☕️ Latte",
+    "requestId": "QNveF3CcFHZ",
+    "tagTime": "February 28, 2024 at 8:17:06 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "cutbank",
+    "memo": "🍵 Matcha Latte",
+    "requestId": "Cd68iawM3Vv",
+    "tagTime": "February 28, 2024 at 8:19:34 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "feulf",
+    "memo": "☕️ Cortado",
+    "requestId": "HCvcw2o43R6",
+    "tagTime": "February 28, 2024 at 8:24:37 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "cytonomy",
+    "memo": "☕️ Latte",
+    "requestId": "JrDcbX7Dy2u",
+    "tagTime": "February 28, 2024 at 8:27:47 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "laudiacay",
+    "memo": "☕️ Latte",
+    "requestId": "VT67f54vmhB",
+    "tagTime": "February 28, 2024 at 8:28:59 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "richardblythman",
+    "memo": "☕️ Cortado",
+    "requestId": "bv19WPRRPAB",
+    "tagTime": "February 28, 2024 at 8:30:17 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "mrmasa",
+    "memo": "💦 Pellegrino",
+    "requestId": "XRpD3VUzFvA",
+    "tagTime": "February 28, 2024 at 8:31:09 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "totorovirus",
+    "memo": "☕️ Cold Brew",
+    "requestId": "64LMkCUvJsZ",
+    "tagTime": "February 28, 2024 at 8:31:36 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "ashleylin",
+    "memo": "🍵 Matcha Lt.",
+    "requestId": "h4SGYdiQLyG",
+    "tagTime": "February 28, 2024 at 8:33:44 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "bougey",
+    "memo": "💦 Pellegrino",
+    "requestId": "2z1ZFNnUQ8i",
+    "tagTime": "February 28, 2024 at 8:35:18 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "keeganselby",
+    "memo": "☕️ Flat White",
+    "requestId": "ci9Kiw7VGvd",
+    "tagTime": "February 28, 2024 at 8:38:55 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dana",
+    "memo": "☕️ Latte",
+    "requestId": "bzrHRroF6LC",
+    "tagTime": "February 28, 2024 at 9:06:57 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "hycguu",
+    "memo": "💦 Box Water",
+    "requestId": "DAUGQRxXynB",
+    "tagTime": "February 28, 2024 at 9:09:17 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "onchainoj",
+    "memo": "☕️ Latte",
+    "requestId": "S83tiVi31Nk",
+    "tagTime": "February 28, 2024 at 9:10:54 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "persianpariah",
+    "memo": "☕️ Latte",
+    "requestId": "GyVe7ESa9NA",
+    "tagTime": "February 28, 2024 at 9:12:06 PM"
+  },
+  {
+    "dollars": "9.00",
+    "fulfillerName": "mc158",
+    "memo": "🍫 Bar, 🫖 Tea",
+    "requestId": "KjcCi9dF8VE",
+    "tagTime": "February 28, 2024 at 9:15:29 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "daimojay",
+    "memo": "☕️ Cortado",
+    "requestId": "4DGL2B2m6xh",
+    "tagTime": "February 28, 2024 at 9:17:10 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "nicklinck",
+    "memo": "☕️ Flat White",
+    "requestId": "QEo1XBcbT42",
+    "tagTime": "February 28, 2024 at 9:29:26 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "saltonrice",
+    "memo": "☕️ Cortado",
+    "requestId": "81MQxHhzow",
+    "tagTime": "February 28, 2024 at 9:50:05 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "jimi",
+    "memo": "💦 Pellegrino",
+    "requestId": "EvkL28TodvK",
+    "tagTime": "February 28, 2024 at 9:27:12 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "saltonrice",
+    "memo": "☕️ Cortado",
+    "requestId": "6Jk9qiewmyo",
+    "tagTime": "February 28, 2024 at 9:48:33 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "nusoc",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "LHAecciEmo3",
+    "tagTime": "February 28, 2024 at 10:01:06 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dcposch",
+    "memo": "☕️ Latte",
+    "requestId": "9unPQp5RGhM",
+    "tagTime": "February 29, 2024 at 5:22:27 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "hanna",
+    "memo": "🍵 Matcha Lt.",
+    "requestId": "LN7WVaAXHCh",
+    "tagTime": "February 29, 2024 at 5:27:19 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "yitong",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "RCstWrs5yvK",
+    "tagTime": "February 29, 2024 at 5:29:13 PM"
+  },
+  {
+    "dollars": "16.00",
+    "fulfillerName": "janine",
+    "memo": "2x 🦴 Bone Broth",
+    "requestId": "TgnWBYetnbw",
+    "tagTime": "February 29, 2024 at 6:14:53 PM"
+  },
+  {
+    "dollars": "8.00",
+    "fulfillerName": "hanna",
+    "memo": "🦴 Bone Broth",
+    "requestId": "R5Na5HCxQQF",
+    "tagTime": "February 29, 2024 at 9:14:21 PM"
+  },
+  {
+    "dollars": "8.00",
+    "fulfillerName": "gegereno",
+    "memo": "🦴 Bone Broth",
+    "requestId": "LucJbsJpHb",
+    "tagTime": "February 29, 2024 at 9:19:55 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "yalor",
+    "memo": "💦 Pellegrino",
+    "requestId": "gYADeSDoA4j",
+    "tagTime": "February 29, 2024 at 9:54:14 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "ian5v",
+    "memo": "💦 Pellegrino",
+    "requestId": "WkMgquDR4A2",
+    "tagTime": "February 29, 2024 at 10:04:55 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "tomasruta",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "5TsSUB1s9u9",
+    "tagTime": "March 2, 2024 at 5:48:06 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "robknight",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "CQuYc6jgRFG",
+    "tagTime": "March 2, 2024 at 6:01:39 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "rgv",
+    "memo": "☕️ Latte",
+    "requestId": "SRseQgQzYtg",
+    "tagTime": "March 2, 2024 at 6:03:19 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dcposch",
+    "memo": "☕️ Latte",
+    "requestId": "CxmYLMH538L",
+    "tagTime": "March 2, 2024 at 6:30:05 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "timour",
+    "memo": "☕️ Latte",
+    "requestId": "DSrftrua1Yw",
+    "tagTime": "March 2, 2024 at 6:33:26 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "reillycapps",
+    "memo": "🫖 Tea",
+    "requestId": "fKM2YEpDKx3",
+    "tagTime": "March 2, 2024 at 6:36:08 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "nader",
+    "memo": "☕️ Latte",
+    "requestId": "BmJAY588z2B",
+    "tagTime": "March 2, 2024 at 6:45:27 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "alek",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "jaaboKuq5nD",
+    "tagTime": "March 2, 2024 at 6:51:08 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "albinmrc",
+    "memo": "☕️ Cortado",
+    "requestId": "DC8DW1TpqNy",
+    "tagTime": "March 2, 2024 at 6:57:21 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "albinmrc",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "SGiG7JMUx6Y",
+    "tagTime": "March 2, 2024 at 7:14:21 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "danette",
+    "memo": "🍵 Matcha Lt.",
+    "requestId": "2z9fTeJmpEz",
+    "tagTime": "March 2, 2024 at 7:17:14 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "nibnalin",
+    "memo": "☕️ Latte",
+    "requestId": "hJ9rLUzh8qv",
+    "tagTime": "March 2, 2024 at 7:24:00 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "hanna",
+    "memo": "🍵 Matcha Lt.",
+    "requestId": "KnhhCVsN3Ry",
+    "tagTime": "March 2, 2024 at 7:32:10 PM"
+  },
+  {
+    "dollars": "12.00",
+    "fulfillerName": "carlbeek",
+    "memo": "2x ☕️ Flat White",
+    "requestId": "iEMHGEbitSd",
+    "tagTime": "March 2, 2024 at 7:34:28 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "jacob",
+    "memo": "☕️ Cortado",
+    "requestId": "QK285zV7CqN",
+    "tagTime": "March 2, 2024 at 7:41:01 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "faraaz",
+    "memo": "☕️ Latte",
+    "requestId": "YLLytktiyNf",
+    "tagTime": "March 2, 2024 at 7:44:00 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "carsoncase",
+    "memo": "☕️ Flat White",
+    "requestId": "7T5qrTrzGRc",
+    "tagTime": "March 2, 2024 at 7:45:26 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "dknox",
+    "memo": "☕️ Latte",
+    "requestId": "7fJc8s1fWc2",
+    "tagTime": "March 2, 2024 at 7:46:50 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "colenftwizard",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "L2uMsp5FZy5",
+    "tagTime": "March 2, 2024 at 7:47:24 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "janine",
+    "memo": "🦴 Bone Broth",
+    "requestId": "UQ8QFAvaEiX",
+    "tagTime": "March 2, 2024 at 8:00:14 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "sunbh",
+    "memo": "🫖 Tea",
+    "requestId": "HwnX14qhmQS",
+    "tagTime": "March 2, 2024 at 8:05:43 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "bumblefudge",
+    "memo": "💦 Pellegrino",
+    "requestId": "JBKuHF5Kmx2",
+    "tagTime": "March 2, 2024 at 8:06:39 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "robknight",
+    "memo": "☕️ Espresso",
+    "requestId": "CMUjGXty2a4",
+    "tagTime": "March 2, 2024 at 8:21:18 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "chlolands",
+    "memo": "💦 Pellegrino",
+    "requestId": "X8n2gpQhALJ",
+    "tagTime": "March 2, 2024 at 8:49:20 PM"
+  },
+  {
+    "dollars": "12.00",
+    "fulfillerName": "faraaz",
+    "memo": "2x ☕️ Latte",
+    "requestId": "aZgyvY6LjPe",
+    "tagTime": "March 2, 2024 at 8:53:17 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "sunbh",
+    "memo": "🫖 Tea",
+    "requestId": "HMFyd6wYMmU",
+    "tagTime": "March 2, 2024 at 8:56:11 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "turboblitz",
+    "memo": "💦 Pellegrino",
+    "requestId": "4HVDnexJ5Np",
+    "tagTime": "March 2, 2024 at 9:13:31 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "paradox",
+    "memo": "☕️ Latte",
+    "requestId": "9zy3d6KTC8k",
+    "tagTime": "March 2, 2024 at 9:17:37 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "rachel",
+    "memo": "☕️ Latte",
+    "requestId": "ggg7ZM7UUet",
+    "tagTime": "March 2, 2024 at 9:37:11 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "kingyam",
+    "memo": "💦 Pellegrino",
+    "requestId": "i88nKwsnMaj",
+    "tagTime": "March 2, 2024 at 10:50:09 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "aliyajypsy",
+    "memo": "🦴 Bone Broth",
+    "requestId": "Cx9Lm7j6NuZ",
+    "tagTime": "March 2, 2024 at 10:57:31 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "aliyajypsy",
+    "memo": "🍫 Bar",
+    "requestId": "i9gmgM4YdsX",
+    "tagTime": "March 2, 2024 at 10:59:16 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "abi",
+    "memo": "☕️ Latte",
+    "requestId": "av2hqUAWEDE",
+    "tagTime": "March 3, 2024 at 4:40:27 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "sodofi",
+    "memo": "☕️ Latte",
+    "requestId": "exgV5cAtKm5",
+    "tagTime": "March 3, 2024 at 5:57:52 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "reillycapps",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "JgoVFDwwyfv",
+    "tagTime": "March 3, 2024 at 6:08:20 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "david",
+    "memo": "☕️ Latte",
+    "requestId": "2ZRVksZtx8o",
+    "tagTime": "March 3, 2024 at 7:11:29 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "spkateryna",
+    "memo": "☕️ Espresso",
+    "requestId": "Kr1Nm34eN1r",
+    "tagTime": "March 3, 2024 at 7:18:01 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "timour",
+    "memo": "☕️ Latte",
+    "requestId": "ZmvsCxCZ5xF",
+    "tagTime": "March 3, 2024 at 7:50:44 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "arjunk",
+    "memo": "🦴 Bone Broth",
+    "requestId": "VVy7DWTDzkC",
+    "tagTime": "March 3, 2024 at 7:51:14 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "grin",
+    "memo": "☕️ Cortado",
+    "requestId": "JBLkNZ7FYyR",
+    "tagTime": "March 3, 2024 at 8:17:44 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "arjunk",
+    "memo": "☕️ Cortado",
+    "requestId": "dZSu688XCy5",
+    "tagTime": "March 3, 2024 at 9:22:00 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "vanessa",
+    "memo": "☕️ Latte",
+    "requestId": "iaCDw5MZhLT",
+    "tagTime": "March 3, 2024 at 9:30:34 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "vanessa",
+    "memo": "☕️ Espresso",
+    "requestId": "2hqiMZXXRHb",
+    "tagTime": "March 3, 2024 at 9:31:33 PM"
+  },
+  {
+    "dollars": "6.00",
+    "fulfillerName": "techieteee",
+    "memo": "☕️ Latte",
+    "requestId": "EDsnE5L8AuR",
+    "tagTime": "March 3, 2024 at 10:10:50 PM"
+  },
+  {
+    "dollars": "5.00",
+    "fulfillerName": "itmnft",
+    "memo": "☕️ Filtered/CB",
+    "requestId": "SFGBhzNasXQ",
+    "tagTime": "March 3, 2024 at 10:27:22 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "cshg",
+    "memo": "☕️ Espresso",
+    "requestId": "b7Bj1MhUfEc",
+    "tagTime": "March 3, 2024 at 10:38:34 PM"
+  },
+  {
+    "dollars": "4.00",
+    "fulfillerName": "carsoncase",
+    "memo": "☕️ Espresso",
+    "requestId": "iJNRDicokzf",
+    "tagTime": "March 3, 2024 at 11:33:24 PM"
+  }
+]
