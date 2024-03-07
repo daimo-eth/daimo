@@ -86,9 +86,9 @@ function AccountScreenLoader({
     if (status.data == null) return;
     if (!("account" in status.data)) return;
     console.log(`[ACCOUNT] loaded account: ${JSON.stringify(status.data)}`);
-    nav.navigate("HomeTab", {
-      screen: "Account",
-      params: { eAcc: status.data.account, inviterEAcc: status.data.inviter },
+    nav.navigate("Account", {
+      eAcc: status.data.account,
+      inviterEAcc: status.data.inviter,
     });
   }, [status.data]);
 

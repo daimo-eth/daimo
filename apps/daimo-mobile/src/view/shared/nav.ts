@@ -111,12 +111,14 @@ export type ParamListBottomSheet = {
   };
 };
 
-export function useNav<
-  RouteName extends keyof NavigatorParamList = keyof NavigatorParamList
->() {
-  return useNavigation<
-    NativeStackNavigationProp<NavigatorParamList, RouteName>
-  >();
+type AllRoutes = NavigatorParamList &
+  ParamListHome &
+  ParamListSend &
+  ParamListReceive &
+  ParamListSettings;
+
+export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
+  return useNavigation<NativeStackNavigationProp<AllRoutes, RouteName>>();
 }
 
 export type MainNav = ReturnType<typeof useNav>;
@@ -189,13 +191,10 @@ export function useExitBack() {
 
 // Open account page within the same tab.
 export function navToAccountPage(account: EAccount, nav: MainNav) {
-  // Workaround: react-navigation typescript types are broken.
-  // currentTab is eg "SendNav", is NOT in fact a ParamListTab:
-  const currentTab = nav.getState().routes[0].name;
-  const newTab = currentTab.startsWith("Send") ? "SendTab" : "HomeTab";
   const accountLink = {
     type: "account",
     account: getEAccountStr(account),
   } as DaimoLinkAccount;
-  nav.navigate(newTab, { screen: "Account", params: { link: accountLink } });
+
+  nav.push("Account", { link: accountLink });
 }
