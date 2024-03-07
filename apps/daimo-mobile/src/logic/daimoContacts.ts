@@ -83,13 +83,7 @@ export function getContactName(r: DaimoContact) {
 }
 
 export function getContactProfilePicture(r: DaimoContact) {
-  const image = undefined;
-
-  if (r.type === "eAcc") {
-    return r.profilePicture;
-  }
-
-  return image;
+  return r.type === "eAcc" ? r.profilePicture : undefined;
 }
 
 export function useRecipientSearch(
