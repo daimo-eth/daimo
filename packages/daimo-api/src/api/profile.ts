@@ -134,6 +134,10 @@ export class ProfileCache {
     return this.linkedAccounts.get(addr) || [];
   }
 
+  getProfilePicture(linkedAccounts: LinkedAccount[]) {
+    return linkedAccounts?.[0]?.pfpUrl;
+  }
+
   searchLinkedAccounts(prefix: string): ProfileLink[] {
     if (prefix.length < 2) return [];
     console.log();

@@ -184,7 +184,10 @@ export class NameRegistry {
     const { addr, name, timestamp } = reg;
     const inviter = this.inviteGraph.getInviter(address);
     const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
-    return { addr, name, timestamp, inviter, linkedAccounts };
+    // In the future, we can get this image from multiple sources.
+    // In that case, we will have to determine the order of preference.
+    const profilePicture = this.profileCache.getProfilePicture(linkedAccounts);
+    return { addr, name, timestamp, inviter, linkedAccounts, profilePicture };
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */

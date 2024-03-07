@@ -40,6 +40,7 @@ export interface AccountHistoryResult {
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
+  profilePicture?: string;
 
   suggestedActions: SuggestedAction[];
 }
@@ -130,6 +131,9 @@ export async function getAccountHistory(
   // Get linked accounts
   const linkedAccounts = profileCache.getLinkedAccounts(address);
 
+  // Get pfps from linked accounts
+  const profilePicture = profileCache.getProfilePicture(linkedAccounts);
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -147,6 +151,7 @@ export async function getAccountHistory(
     namedAccounts,
     accountKeys,
     linkedAccounts,
+    profilePicture,
   };
 
   // Suggest an action to the user, like backing up their account

@@ -160,6 +160,7 @@ async function fetchSync(
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges,
     suggestedActions: result.suggestedActions,
+    profilePicture: result.profilePicture,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -258,6 +259,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     accountKeys: result.accountKeys || [],
     pendingKeyRotation: stillPendingKeyRotation,
     linkedAccounts: result.linkedAccounts || [],
+    profilePicture: result.profilePicture,
   };
 
   console.log(

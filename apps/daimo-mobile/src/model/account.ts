@@ -87,13 +87,16 @@ export type Account = {
 
   /** Linked accounts (via mutual sig) for rich profiles, eg Farcaster. */
   linkedAccounts: LinkedAccount[];
+
+  /** Profile picture */
+  profilePicture?: string;
 };
 
 export function toEAccount(account: Account): EAccount {
   return {
     addr: account.address,
     name: account.name,
-    profilePicture: account.linkedAccounts?.[0]?.pfpUrl,
+    profilePicture: account.profilePicture,
   };
 }
 
@@ -289,6 +292,7 @@ class AccountManager {
   }
 
   setCurrentAccount = (account: Account | null) => {
+    console.log({ account });
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
 
     // Cache accounts so that addresses show up with correct display names.
