@@ -11,11 +11,13 @@ export function ContactBubble({
   size,
   isPending,
   transparent,
+  customStyle,
 }: {
   contact: DaimoContact;
   size: number;
   isPending?: boolean;
   transparent?: boolean;
+  customStyle?: ViewStyle;
 }) {
   const name = getContactName(contact);
 
@@ -59,7 +61,9 @@ export function ContactBubble({
   })();
 
   return (
-    <Bubble {...{ size, isPending, transparent, fontSize }}>{letter}</Bubble>
+    <Bubble {...{ size, isPending, transparent, fontSize, customStyle }}>
+      {letter}
+    </Bubble>
   );
 }
 
@@ -68,12 +72,14 @@ export function Bubble({
   isPending,
   transparent,
   fontSize,
+  customStyle,
   children,
 }: {
   size: number;
   isPending?: boolean;
   transparent?: boolean;
   fontSize: number;
+  customStyle?: ViewStyle;
   children: React.ReactNode;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
@@ -88,8 +94,9 @@ export function Bubble({
       borderColor: col,
       alignItems: "center",
       justifyContent: "center",
+      ...customStyle,
     }),
-    [size, col]
+    [size, col, customStyle]
   );
 
   const textStyle: TextStyle = useMemo(

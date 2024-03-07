@@ -115,6 +115,7 @@ export function AnimatedSearchInput({
             maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
             autoCapitalize="none"
             autoCorrect={false}
+            spellCheck={false}
             autoFocus={autoFocus}
             secureTextEntry={needsAndroidWorkaround}
             keyboardType={

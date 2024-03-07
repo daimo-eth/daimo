@@ -121,7 +121,7 @@ export async function deployWallet(
 
 async function queryFaucetAntiSpamApi(reqInfo: RequestInfo): Promise<boolean> {
   const faucetApiUrl = process.env.DAIMO_FAUCET_API_URL || "";
-  if (faucetApiUrl === "") return false;
+  if (faucetApiUrl === "") return true;
 
   let sendFaucet = false;
   try {

@@ -5,8 +5,7 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -23,30 +22,18 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListReceive, useNav } from "../../shared/nav";
+import { useExitBack, useExitToHome, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListReceive, "Receive">;
-
-// Dead code for now
-// Will replace RecieveScreen in the next version.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ReceiveScreenV2({ route }: Props) {
-  const { autoFocus } = route.params || {};
+export function ReceiveScreenV2() {
   const Inner = useWithAccount(RequestScreenInnerV2);
-  return <Inner autoFocus={!!autoFocus} />;
+  return <Inner />;
 }
 
-function RequestScreenInnerV2({
-  account,
-  autoFocus,
-}: {
-  account: Account;
-  autoFocus: boolean;
-}) {
+function RequestScreenInnerV2({ account }: { account: Account }) {
   const [dollars, setDollars] = useState(0);
 
   // On successful send, go home
@@ -54,12 +41,6 @@ function RequestScreenInnerV2({
 
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
-
-  const goHome = useCallback(() => {
-    setAS("idle");
-    setDollars(0);
-    nav.reset({ routes: [{ name: "HomeTab", params: { screen: "Home" } }] });
-  }, [nav]);
 
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
   const sendRequest = async () => {
@@ -91,10 +72,13 @@ function RequestScreenInnerV2({
     nav.navigate("HomeTab", { screen: "Home" });
   };
 
+  const goBack = useExitBack();
+  const goHome = useExitToHome();
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Request" onExit={goHome} />
+        <ScreenHeader title="Request" onBack={goBack || goHome} />
         <Spacer h={8} />
         <InfoBox
           title="Send a request link"
@@ -109,9 +93,9 @@ function RequestScreenInnerV2({
           dollars={dollars}
           onSetDollars={setDollars}
           showAmountAvailable={false}
-          autoFocus={false}
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
+          autoFocus
         />
         <Spacer h={32} />
         <View style={ss.container.padH16}>

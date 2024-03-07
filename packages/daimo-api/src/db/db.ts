@@ -317,11 +317,23 @@ export class DB {
     client.release();
   }
 
+  async getInviteCodeForAddress(address: Address): Promise<string | undefined> {
+    console.log(`[DB] getting invite code for address`);
+    const client = await this.pool.connect();
+    const result = await client.query<{ code: string }>(
+      `SELECT code FROM invitecode WHERE inviter = $1`,
+      [address]
+    );
+    client.release();
+
+    return result.rows.length > 0 ? result.rows[0].code : undefined;
+  }
+
   async loadInviteGraph(): Promise<InviteGraphRow[]> {
     console.log(`[DB] loading invite graph`);
     const client = await this.pool.connect();
     const result = await client.query<InviteGraphRow>(
-      `SELECT invitee, inviter FROM invite_graph`
+      `SELECT invitee, inviter FROM invite_graph ORDER BY created_at`
     );
     client.release();
 

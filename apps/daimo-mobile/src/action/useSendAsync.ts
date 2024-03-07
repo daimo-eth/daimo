@@ -1,8 +1,9 @@
 import {
+  DaimoInviteCodeStatus,
   DisplayOpEvent,
   EAccount,
   OpEvent,
-  PendingOpEventID,
+  PendingOpEvent,
   UserOpHex,
   assert,
   assertNotNull,
@@ -17,7 +18,7 @@ import {
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect } from "react";
-import { Address, Hex } from "viem";
+import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { env } from "../logic/env";
@@ -27,7 +28,7 @@ import { getWrappedPasskeySigner } from "../logic/passkey";
 import { Account, getAccountManager, useAccount } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
-type SendOpFn = (opSender: DaimoOpSender) => Promise<Hex>;
+type SendOpFn = (opSender: DaimoOpSender) => Promise<PendingOpEvent>;
 
 /** Default send deadline, in seconds. Determines validUntil for each op. */
 export const SEND_DEADLINE_SECS = 120;
@@ -46,7 +47,7 @@ export function useSendAsync({
   /** Custom handler that overrides sendAsync, used to claim
    *  ephemeral notes without requesting a user signature / face ID.
    */
-  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEventID>;
+  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
   pendingOp?: OpEvent;
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
@@ -76,7 +77,7 @@ export function useSendAsync({
     );
     assert(account != null, "No account");
 
-    const { opHash, txHash } = customHandler
+    const pendingOpEventData = customHandler
       ? await customHandler(setAS)
       : await sendAsync(setAS, account, keySlot, !!passkeyAccount, sendFn);
 
@@ -85,14 +86,18 @@ export function useSendAsync({
 
     // Add pending op and named accounts to history
     if (pendingOp) {
-      pendingOp.opHash = opHash;
-      pendingOp.txHash = txHash;
+      pendingOp.opHash = pendingOpEventData.opHash;
+      pendingOp.txHash = pendingOpEventData.txHash;
       pendingOp.timestamp = now();
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
       if (accountTransform) {
         getAccountManager().transform((a) => accountTransform(a, pendingOp));
       }
+
+      getAccountManager().transform((a) =>
+        authenticatedDataAccountTransform(a, pendingOpEventData)
+      );
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
     }
@@ -120,6 +125,27 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
       ],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
     };
+  };
+}
+
+function authenticatedDataAccountTransform(
+  account: Account,
+  pendingOpEventData: PendingOpEvent
+): Account {
+  console.log(
+    `[SEND] attaching authenticated data: ${JSON.stringify(pendingOpEventData)}`
+  );
+  const inviteLinkStatus: DaimoInviteCodeStatus | null =
+    pendingOpEventData.inviteCode
+      ? {
+          link: { type: "invite", code: pendingOpEventData.inviteCode },
+          isValid: false, // initialize false, filled on sync
+        }
+      : null;
+
+  return {
+    ...account,
+    inviteLinkStatus,
   };
 }
 
@@ -177,7 +203,7 @@ function loadOpSender({
 
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
-    return rpcFunc.sendUserOp.mutate({ op });
+    return rpcFunc.sendUserOpV2.mutate({ op });
   };
 
   promise = (async () => {
@@ -209,7 +235,7 @@ async function sendAsync(
   keySlot: number | undefined,
   usePasskey: boolean,
   sendFn: SendOpFn
-): Promise<PendingOpEventID> {
+): Promise<PendingOpEvent> {
   try {
     if (keySlot === undefined && !usePasskey)
       throw new Error("No key slot or passkey");
@@ -226,10 +252,10 @@ async function sendAsync(
     });
 
     setAS("loading", "Authorizing...");
-    const opHash = await sendFn(opSender);
+    const pendingOpEventData = await sendFn(opSender);
     setAS("success", "Accepted");
 
-    return { opHash };
+    return pendingOpEventData;
   } catch (e: any) {
     if (keySlot === undefined) {
       setAS("error", "Device removed from account");

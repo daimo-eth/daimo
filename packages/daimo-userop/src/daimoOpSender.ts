@@ -1,5 +1,6 @@
 import {
   DaimoAccountCall,
+  PendingOpEvent,
   UserOpHex,
   derKeytoContractFriendlyKey,
   now,
@@ -75,8 +76,8 @@ export class DaimoOpSender {
     return getAddress(this.opBuilder.getSender());
   }
 
-  /** Submits a user op to bundler. Returns userOpHash. */
-  public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<Hex> {
+  /** Submits a user op to bundler. Returns PendingOpEvent. */
+  public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<PendingOpEvent> {
     const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
