@@ -292,7 +292,6 @@ class AccountManager {
   }
 
   setCurrentAccount = (account: Account | null) => {
-    console.log({ account });
     console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
 
     // Cache accounts so that addresses show up with correct display names.
