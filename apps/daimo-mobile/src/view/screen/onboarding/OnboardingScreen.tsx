@@ -12,7 +12,7 @@ import { InvitePage } from "./InvitePage";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { UseExistingPage } from "./UseExistingPage";
 import { ActStatus } from "../../../action/actStatus";
-import { useEnclaveKey, useDeviceAPIKey } from "../../../action/key";
+import { useDeviceAPIKey, useEnclaveKey } from "../../../action/key";
 import { useCreateAccount } from "../../../action/useCreateAccount";
 import { useExistingAccount } from "../../../action/useExistingAccount";
 import { getInitialURLOrTag } from "../../../logic/deeplink";
@@ -131,6 +131,7 @@ export default function OnboardingScreen({
           keyStatus={keyStatus}
           existingNext={existingNext}
           onNext={next}
+          setInviteLink={setInviteLink}
         />
       )}
       {page === "create-invite" && (
@@ -194,7 +195,7 @@ function getNext(
   choice,
   isTestnet,
 }?: {
-  choice?: "create" | "existing";
+  choice?: "create" | "existing" | "create-with-invite";
   isTestnet?: boolean;
 }) => void {
   const fnGoTo = (p: OnboardPage) => () => goToPage(p);
@@ -203,12 +204,16 @@ function getNext(
       return (input) => {
         const { choice } = assertNotNull(input);
         // Android goes through an extra onboarding step
-        if (choice === "create") goToPage("create-invite");
-        else {
+        if (choice === "create") {
+          goToPage("create-invite");
+        } else if (choice === "create-with-invite") {
+          if (Platform.OS !== "android") goToPage("create");
+          else goToPage("create-try-enclave");
+        } else if (choice === "existing") {
           // Use existing
           if (Platform.OS !== "android") goToPage("existing");
           else goToPage("existing-try-enclave");
-        }
+        } else throw new Error(`Unknown choice: ${choice}`);
       };
     case "create-invite":
       return (input) => {

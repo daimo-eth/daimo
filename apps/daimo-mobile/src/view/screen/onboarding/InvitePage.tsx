@@ -48,8 +48,6 @@ export function InvitePage({
     if (isTestnet) setIsValid(true);
   }, [isTestnet]);
 
-  const hasNotStartedTyping = text === "" && !isValid;
-
   const onChange = (newText: string) => {
     setInviteLink(getInvitePasteLink(newText));
     setText(newText);
@@ -76,6 +74,9 @@ export function InvitePage({
   const oct = (name: OctName, color?: string) => (
     <Octicons {...{ name, color }} size={14} />
   );
+
+  // Show invite status (valid/invalid) once user starts typing
+  const hasNotStartedTyping = text === "" && !isValid;
   const status = (function () {
     if (!linkStatus || hasNotStartedTyping) {
       return " ";

@@ -56,7 +56,7 @@ export function CallToAction({
               window.open(directDeepLink, "_blank");
             }}
           >
-            OPEN IN APP
+            ALREADY HAVE IT? OPEN IN APP
           </SecondaryButton>
         </>
       )}

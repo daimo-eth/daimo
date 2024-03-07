@@ -1,10 +1,12 @@
+import { DaimoLink, getInvitePasteLink } from "@daimo/common";
+import * as Clipboard from "expo-clipboard";
 import { ReactNode, useEffect, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
-  View,
   StyleSheet,
+  View,
 } from "react-native";
 
 import { ActStatus } from "../../../action/actStatus";
@@ -14,18 +16,24 @@ import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
-import { TextCenter, TextH1 } from "../../shared/text";
+import { TextCenter, TextError, TextH1 } from "../../shared/text";
 
 export function IntroPages({
   useExistingStatus,
   keyStatus,
   existingNext,
   onNext,
+  setInviteLink,
 }: {
   useExistingStatus: ActStatus;
   keyStatus: DeviceKeyStatus;
   existingNext: () => void;
-  onNext: ({ choice }: { choice: "create" | "existing" }) => void;
+  onNext: ({
+    choice,
+  }: {
+    choice: "create" | "existing" | "create-with-invite";
+  }) => void;
+  setInviteLink: (link?: DaimoLink) => void;
 }) {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -37,6 +45,20 @@ export function IntroPages({
   useEffect(() => {
     if (keyStatus.pubKeyHex && useExistingStatus === "success") existingNext();
   }, [useExistingStatus]);
+
+  // Paste invite
+  const [pasteLinkError, setPasteLinkError] = useState("");
+  const pasteInviteLink = async () => {
+    const str = await Clipboard.getStringAsync();
+    console.log("[INTRO] paste invite link: ", str);
+    try {
+      setInviteLink(getInvitePasteLink(str));
+      onNext({ choice: "create-with-invite" });
+    } catch (e: any) {
+      console.warn(`[INTRO] can't parse invite link: '${str}'`, e.getMessage());
+      setPasteLinkError("Copy link & try again.");
+    }
+  };
 
   return (
     <View style={styles.onboardingPage}>
@@ -62,14 +84,26 @@ export function IntroPages({
           <View style={styles.introButtonsWrap}>
             <ButtonBig
               type="primary"
-              title="Create Account"
+              title="ACCEPT INVITE"
+              onPress={pasteInviteLink}
+            />
+            {pasteLinkError && (
+              <TextCenter>
+                <Spacer h={8} />
+                <TextError>{pasteLinkError}</TextError>
+              </TextCenter>
+            )}
+            <Spacer h={16} />
+            <ButtonBig
+              type="subtle"
+              title="CREATE ACCOUNT"
               onPress={() => {
                 onNext({ choice: "create" });
               }}
             />
             <Spacer h={16} />
             <TextButton
-              title="Already have an account?"
+              title="ALREADY HAVE AN ACCOUNT?"
               onPress={() => {
                 onNext({ choice: "existing" });
               }}
