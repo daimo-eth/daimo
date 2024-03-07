@@ -16,6 +16,8 @@ export const pimlicoPaymasterAbi = parseAbi([
   "function token() view returns (address)",
 ]);
 
+export const teamDaimoFaucetAddr = "0x2a6d311394184EeB6Df8FBBF58626B085374Ffe7";
+
 export {
   daimoAccountABI,
   daimoRequestABI,

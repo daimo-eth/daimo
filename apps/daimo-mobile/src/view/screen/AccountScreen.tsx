@@ -1,5 +1,5 @@
-import { getTeamDaimoFaucetAcc } from "@daimo/api/src/contract/nameRegistry";
 import {
+  AddrLabel,
   DaimoLinkAccount,
   DaimoLinkInviteCode,
   EAccount,
@@ -9,7 +9,7 @@ import {
   getAddressContraction,
   timeMonth,
 } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
+import { daimoChainFromId, teamDaimoFaucetAddr } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
@@ -124,6 +124,10 @@ function AccountScreenLoader({
       )}
     </View>
   );
+}
+
+function getTeamDaimoFaucetAcc(): EAccount {
+  return { addr: teamDaimoFaucetAddr, label: AddrLabel.Faucet };
 }
 
 function AccountScreenBody({

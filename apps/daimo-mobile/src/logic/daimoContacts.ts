@@ -122,7 +122,7 @@ export function useRecipientSearch(
     recentsByAddr.set(other, r);
   }
 
-  // Always show recent recipients first
+  // Always show recent contacts first
   const recipients: DaimoContact[] = [];
   const looseMatchRecents: DaimoContact[] = [];
   for (const r of recents) {
