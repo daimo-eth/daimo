@@ -1,10 +1,14 @@
 import { AddrLabel } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import { Text, TextStyle, View, ViewStyle } from "react-native";
+import { Text, TextStyle, View, ViewStyle, Image } from "react-native";
 
 import { color } from "./style";
-import { DaimoContact, getContactName } from "../../logic/daimoContacts";
+import {
+  DaimoContact,
+  getContactName,
+  getContactProfilePicture,
+} from "../../logic/daimoContacts";
 
 export function ContactBubble({
   contact,
@@ -18,6 +22,7 @@ export function ContactBubble({
   transparent?: boolean;
 }) {
   const name = getContactName(contact);
+  const image = getContactProfilePicture(contact);
 
   const fontSize = (function () {
     switch (size) {
@@ -59,7 +64,9 @@ export function ContactBubble({
   })();
 
   return (
-    <Bubble {...{ size, isPending, transparent, fontSize }}>{letter}</Bubble>
+    <Bubble {...{ size, image, isPending, transparent, fontSize }}>
+      {letter}
+    </Bubble>
   );
 }
 
@@ -68,12 +75,14 @@ export function Bubble({
   isPending,
   transparent,
   fontSize,
+  image,
   children,
 }: {
   size: number;
   isPending?: boolean;
   transparent?: boolean;
   fontSize: number;
+  image?: string;
   children: React.ReactNode;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
@@ -84,10 +93,11 @@ export function Bubble({
       height: size - 1,
       borderRadius: 99,
       backgroundColor: transparent ? "transparent" : color.white,
-      borderWidth: 1,
+      borderWidth: image ? 0 : 1,
       borderColor: col,
       alignItems: "center",
       justifyContent: "center",
+      overflow: "hidden",
     }),
     [size, col]
   );
@@ -105,9 +115,16 @@ export function Bubble({
 
   return (
     <View style={style}>
-      <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
-        {children}
-      </Text>
+      {image ? (
+        <Image
+          source={{ uri: image }}
+          style={{ width: "100%", height: "100%" }}
+        />
+      ) : (
+        <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
+          {children}
+        </Text>
+      )}
     </View>
   );
 }

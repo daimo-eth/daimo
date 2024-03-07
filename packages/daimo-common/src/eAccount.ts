@@ -18,6 +18,8 @@ export const zEAccount = z.object({
   ensName: z.string().optional(),
   /** Linked profiles for a Daimo account */
   linkedAccounts: z.array(zLinkedAccount).optional(),
+  /** Profile picture */
+  profilePicture: z.string().optional(),
 });
 
 /** EAccount represents any Ethereum address + display name(s). */

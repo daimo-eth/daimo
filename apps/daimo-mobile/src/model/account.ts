@@ -90,7 +90,11 @@ export type Account = {
 };
 
 export function toEAccount(account: Account): EAccount {
-  return { addr: account.address, name: account.name };
+  return {
+    addr: account.address,
+    name: account.name,
+    profilePicture: account.linkedAccounts?.[0]?.pfpUrl,
+  };
 }
 
 // Pre-v9 chain gas constants
