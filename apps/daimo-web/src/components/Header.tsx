@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { DownloadLink, DownloadLinkButtonMobileNav } from "./DownloadLink";
 import { Logo } from "./icons/Logo";
-import { LinkBold } from "./typography";
+import { LinkSemiBold } from "./typography";
 
 export function Header() {
   return (
@@ -23,11 +23,11 @@ export function Header() {
 function HeaderNav() {
   return (
     <nav className="gap-8 md:gap-16 items-center hidden lg:flex">
-      <LinkBold href="/blog">Blog</LinkBold>
-      <LinkBold href="https://github.com/daimo-eth/daimo" target="_blank">
+      <LinkSemiBold href="/blog">Blog</LinkSemiBold>
+      <LinkSemiBold href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
-      </LinkBold>
-      <LinkBold href="#faq">FAQ</LinkBold>
+      </LinkSemiBold>
+      <LinkSemiBold href="#faq">FAQ</LinkSemiBold>
       <DownloadLink />
     </nav>
   );

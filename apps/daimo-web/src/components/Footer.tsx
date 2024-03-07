@@ -1,5 +1,5 @@
 import { Logo } from "./icons/Logo";
-import { TextBold, LinkBold } from "./typography";
+import { TextBold, LinkSemiBold } from "./typography";
 
 export function Footer() {
   return (
@@ -19,11 +19,11 @@ function FooterNav() {
   return (
     <div>
       <nav className="flex gap-8 md:gap-16">
-        <LinkBold href="/blog">Blog</LinkBold>
-        <LinkBold href="https://github.com/daimo-eth/daimo" target="_blank">
+        <LinkSemiBold href="/blog">Blog</LinkSemiBold>
+        <LinkSemiBold href="https://github.com/daimo-eth/daimo" target="_blank">
           Github
-        </LinkBold>
-        <LinkBold href="#faq">FAQ</LinkBold>
+        </LinkSemiBold>
+        <LinkSemiBold href="#faq">FAQ</LinkSemiBold>
       </nav>
     </div>
   );

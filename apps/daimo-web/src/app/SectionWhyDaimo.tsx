@@ -122,7 +122,6 @@ function FeaturesDesktop() {
             height={800}
             alt="Pixel Background"
             src="/pixel-bg.svg"
-            layout="cover"
           />
         </div>
         <div className="my-6 flex justify-center gap-3">
@@ -283,7 +282,6 @@ function FeaturesMobile() {
                     width={800}
                     height={800}
                     alt="Feature Image"
-                    layout="responsive"
                   />
                 </div>
                 {feature.comingSoon && (
