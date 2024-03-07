@@ -207,6 +207,7 @@ function AccountScreenBody({
     );
   })();
 
+  // Show linked accounts
   const fcAccount = (eAcc.linkedAccounts || [])[0];
 
   return (
