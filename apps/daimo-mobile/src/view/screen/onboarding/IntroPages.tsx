@@ -50,7 +50,7 @@ export function IntroPages({
   const [pasteLinkError, setPasteLinkError] = useState("");
   const pasteInviteLink = async () => {
     const str = await Clipboard.getStringAsync();
-    console.log("[INTRO] paste invite link: ", str);
+    console.log(`[INTRO] paste invite link: '${str}'`);
     try {
       setInviteLink(getInvitePasteLink(str));
       onNext({ choice: "create-with-invite" });

@@ -5,6 +5,7 @@ import {
   getEAccountStr,
   getInvitePasteLink,
   getInviteStatus,
+  stripSeedFromNoteLink,
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -34,6 +35,75 @@ export function InvitePage({
   inviteLink: DaimoLink | undefined;
   setInviteLink: (inviteLink: DaimoLink | undefined) => void;
 }) {
+  const linkToWaitlist = () => {
+    const url = `https://daimo.com/waitlist`;
+    Linking.openURL(url);
+  };
+
+  const [pasteLinkError, setPasteLinkError] = useState("");
+  const pasteInviteLink = async () => {
+    const str = await Clipboard.getStringAsync();
+    console.log(`[INVITE] paste invite link: '${str}'`);
+    try {
+      setInviteLink(getInvitePasteLink(str));
+      onNext({ isTestnet: false });
+    } catch (e: any) {
+      console.warn(`[INTRO] can't parse invite link: '${str}'`, e.getMessage());
+      setPasteLinkError("Copy link & try again.");
+    }
+  };
+
+  // Enter manually
+  const [mode, setMode] = useState("paste" as "paste" | "enter");
+  const enterManually = () => setMode("enter");
+
+  return (
+    <View>
+      <OnboardingHeader title="Invite" onPrev={onPrev} />
+      <View style={styles.paddedPage}>
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <Octicons name="mail" size={40} color={color.midnight} />
+        </View>
+        <Spacer h={24} />
+        <TextCenter>
+          <IntroTextParagraph>
+            Daimo is currently invite-only. Type your invite code below or paste
+            it from a link.{"\n"}Don't have one? Join the waitlist.
+          </IntroTextParagraph>
+        </TextCenter>
+        <Spacer h={32} />
+        {mode === "paste" && (
+          <>
+            <ButtonBig
+              type="primary"
+              title="Paste invite from link"
+              onPress={pasteInviteLink}
+            />
+            <Spacer h={16} />
+            <TextButton title="Enter code manually" onPress={enterManually} />
+          </>
+        )}
+        {mode === "enter" && (
+          <EnterCodeForm
+            {...{ onNext, daimoChain, inviteLink, setInviteLink }}
+          />
+        )}
+      </View>
+    </View>
+  );
+}
+
+function EnterCodeForm({
+  onNext,
+  daimoChain,
+  inviteLink,
+  setInviteLink,
+}: {
+  onNext: ({ isTestnet }: { isTestnet: boolean }) => void;
+  daimoChain: DaimoChain;
+  inviteLink: DaimoLink | undefined;
+  setInviteLink: (inviteLink: DaimoLink | undefined) => void;
+}) {
   // We haven't picked a daimoChain yet so calls default to prod.
   // Handle invite links from deep link opens.
   const [text, setText] = useState(
@@ -54,13 +124,7 @@ export function InvitePage({
   };
 
   // Strip seed from note links if they have one.
-  const strippedInviteLink =
-    inviteLink?.type === "notev2"
-      ? {
-          seed: undefined,
-          ...inviteLink,
-        }
-      : inviteLink;
+  const strippedInviteLink = inviteLink && stripSeedFromNoteLink(inviteLink);
   const linkStatus = useFetchLinkStatus(strippedInviteLink, daimoChain);
 
   useEffect(() => {
@@ -95,78 +159,25 @@ export function InvitePage({
     }
   })();
 
-  const linkToWaitlist = () => {
-    const url = `https://daimo.com/waitlist`;
-    Linking.openURL(url);
-  };
-
-  const fetchClipboard = async () => {
-    const pasteText = await Clipboard.getStringAsync();
-    if (pasteText) onChange(pasteText);
-  };
-
-  useEffect(() => {
-    if (!inviteLink) return;
-
-    if (inviteLink.type === "invite") {
-      setText(inviteLink.code);
-    } else {
-      // shorten displayed link from cleaned up url
-      setText(formatDaimoLink(inviteLink));
-    }
-  }, [inviteLink]);
-
   return (
     <View>
-      <OnboardingHeader title="Invite" onPrev={onPrev} />
-      <View style={styles.paddedPage}>
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
-          <Octicons name="mail" size={40} color={color.midnight} />
-        </View>
-        <Spacer h={24} />
-        <TextCenter>
-          <IntroTextParagraph>
-            Daimo is currently invite-only. Type your invite code below or paste
-            it from a link.{"\n"}Don't have one? Join the waitlist.
-          </IntroTextParagraph>
-        </TextCenter>
-        <Spacer h={32} />
-        <InputBig
-          placeholder="enter invite code"
-          value={text}
-          onChange={onChange}
-          center={text.length < 16} // Workaround for Android centering bug
-        />
-        <Spacer h={16} />
-        {hasNotStartedTyping ? (
-          <>
-            <TextCenter>
-              <TextLight>or</TextLight>
-            </TextCenter>
-            <Spacer h={16} />
-            <ButtonBig
-              type="primary"
-              title="Paste invite from link"
-              onPress={fetchClipboard}
-            />
-            <Spacer h={16} />
-            <TextButton title="Join waitlist" onPress={linkToWaitlist} />
-          </>
-        ) : (
-          <>
-            <TextCenter>
-              <TextLight>{status}</TextLight>
-            </TextCenter>
-            <Spacer h={16} />
-            <ButtonBig
-              type="primary"
-              title="Submit"
-              onPress={() => onNext({ isTestnet })}
-              disabled={!isValid}
-            />
-          </>
-        )}
-      </View>
+      <InputBig
+        placeholder="enter invite code"
+        value={text}
+        onChange={onChange}
+        center={text.length < 16} // Workaround for Android centering bug
+      />
+      <Spacer h={16} />
+      <TextCenter>
+        <TextLight>{status}</TextLight>
+      </TextCenter>
+      <Spacer h={16} />
+      <ButtonBig
+        type="primary"
+        title="Submit"
+        onPress={() => onNext({ isTestnet })}
+        disabled={!isValid}
+      />
     </View>
   );
 }
