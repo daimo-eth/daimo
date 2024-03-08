@@ -13,8 +13,7 @@ import { ButtonCircle } from "./ButtonCircle";
 import { ContactBubble } from "./ContactBubble";
 import { useNav } from "./nav";
 import { color } from "./style";
-import { EAccountContact } from "../../logic/daimoContacts";
-import { useAccount } from "../../model/account";
+import { toEAccountContact, useAccount } from "../../model/account";
 
 const animationConfig = { duration: 150 };
 
@@ -84,11 +83,7 @@ export function SearchHeader({
 
   const [account] = useAccount();
   if (account == null) return null;
-  const eAcc: EAccountContact = {
-    type: "eAcc",
-    addr: account.address,
-    name: account.name,
-  };
+  const eAcc = toEAccountContact(account);
 
   return (
     <View style={styles.header}>

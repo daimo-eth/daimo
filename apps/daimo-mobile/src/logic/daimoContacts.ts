@@ -82,6 +82,10 @@ export function getContactName(r: DaimoContact) {
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
+export function getContactProfilePicture(r: DaimoContact) {
+  return r.type === "eAcc" ? r.profilePicture : undefined;
+}
+
 export function useRecipientSearch(
   account: Account,
   prefix: string,

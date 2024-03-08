@@ -161,6 +161,7 @@ async function fetchSync(
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges,
     suggestedActions: result.suggestedActions,
+    profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus,
     invitees: result.invitees,
   };
@@ -261,6 +262,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     accountKeys: result.accountKeys || [],
     pendingKeyRotation: stillPendingKeyRotation,
     linkedAccounts: result.linkedAccounts || [],
+    profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus || null,
     invitees: result.invitees || [],
   };

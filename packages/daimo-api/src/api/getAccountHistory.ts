@@ -48,6 +48,7 @@ export interface AccountHistoryResult {
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
+  profilePicture?: string;
 
   suggestedActions: SuggestedAction[];
   inviteLinkStatus: DaimoInviteCodeStatus | null;
@@ -161,6 +162,9 @@ export async function getAccountHistory(
     inviteeAddrs.map((addr) => nameReg.getEAccount(addr))
   );
 
+  // Get pfps from linked accounts
+  const profilePicture = profileCache.getProfilePicture(address);
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -178,6 +182,7 @@ export async function getAccountHistory(
     namedAccounts,
     accountKeys,
     linkedAccounts,
+    profilePicture,
     inviteLinkStatus,
     invitees,
   };

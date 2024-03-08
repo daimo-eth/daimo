@@ -1,10 +1,15 @@
 import { AddrLabel } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { color } from "./style";
-import { DaimoContact, getContactName } from "../../logic/daimoContacts";
+import {
+  DaimoContact,
+  getContactName,
+  getContactProfilePicture,
+} from "../../logic/daimoContacts";
 
 export function ContactBubble({
   contact,
@@ -18,6 +23,7 @@ export function ContactBubble({
   transparent?: boolean;
 }) {
   const name = getContactName(contact);
+  const image = getContactProfilePicture(contact);
 
   const fontSize = (function () {
     switch (size) {
@@ -59,7 +65,9 @@ export function ContactBubble({
   })();
 
   return (
-    <Bubble {...{ size, isPending, transparent, fontSize }}>{letter}</Bubble>
+    <Bubble {...{ size, image, isPending, transparent, fontSize }}>
+      {letter}
+    </Bubble>
   );
 }
 
@@ -68,12 +76,14 @@ export function Bubble({
   isPending,
   transparent,
   fontSize,
+  image,
   children,
 }: {
   size: number;
   isPending?: boolean;
   transparent?: boolean;
   fontSize: number;
+  image?: string;
   children: React.ReactNode;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
@@ -88,6 +98,7 @@ export function Bubble({
       borderColor: col,
       alignItems: "center",
       justifyContent: "center",
+      overflow: "hidden",
     }),
     [size, col]
   );
@@ -103,11 +114,25 @@ export function Bubble({
     [size, col]
   );
 
+  const imageStyle: ImageStyle = useMemo(
+    () => ({
+      position: "absolute",
+      height: size,
+      width: size,
+      borderRadius: size / 2,
+      zIndex: 5,
+    }),
+    [size]
+  );
+
   return (
-    <View style={style}>
-      <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
-        {children}
-      </Text>
+    <View style={{ width: size, height: size }}>
+      <Image source={image} style={imageStyle} />
+      <View style={style}>
+        <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
+          {children}
+        </Text>
+      </View>
     </View>
   );
 }
