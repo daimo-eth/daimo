@@ -3,7 +3,11 @@
 module.exports = {
   versionGroups: [
     {
-      packages: ["@daimo/expo-enclave", "@daimo/expo-passkeys"],
+      packages: [
+        "@daimo/expo-enclave",
+        "@daimo/expo-passkeys",
+        "@daimo/expo-app-delegate",
+      ],
       dependencies: ["expo", "react", "react-native"],
       pinVersion: "*",
       label: "Peer dependencies of the re-usable Expo modules.",
