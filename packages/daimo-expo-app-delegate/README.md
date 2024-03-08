@@ -1,6 +1,9 @@
 # @daimo/expo-app-delegate
 
-Daimo's custom AppDelegate
+Daimo's custom AppDelegate. This makes Expo iOS apps look nice on Mac Catalyst
+by restricting the app window size to a particular fixed size.
+
+More about Swift AppDelegate in Expo: https://docs.expo.dev/modules/appdelegate-subscribers/
 
 # API documentation
 
@@ -25,8 +28,6 @@ npm install @daimo/expo-app-delegate
 
 Run `npx pod-install` after installing the npm package.
 
-
-
 # Contributing
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).
+Contributions are very welcome! Please refer to guidelines described in the [contributing guide](https://github.com/expo/expo#contributing).

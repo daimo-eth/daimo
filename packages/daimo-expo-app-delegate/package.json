@@ -25,7 +25,7 @@
     "url": "https://github.com/daimo-eth/daimo/issues"
   },
   "author": "Nalin Bhardwaj <github@nibnalin.me> (https://github.com/nalinbhardwaj)",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/daimo-eth/daimo#readme",
   "devDependencies": {
     "@types/react": "^18.2.15",
