@@ -225,11 +225,7 @@ function ReferralButtonsFooter({
   inviteCodeStatus: DaimoInviteCodeStatus;
 }) {
   const { link, bonusDollarsInvitee, bonusDollarsInviter } = inviteCodeStatus;
-
-  const onShare = useCallback(async () => {
-    const url = formatDaimoLink(link);
-    shareURL(url);
-  }, [link]);
+  const url = formatDaimoLink(link);
 
   const bonusSubtitle = (() => {
     if (
@@ -260,27 +256,32 @@ function ReferralButtonsFooter({
             <TextLight>Invite Code</TextLight>
           </TextCenter>
           <Spacer h={8} />
-          <InviteCodeCopier code={link.code} />
+          <InviteCodeCopier code={link.code} url={url} />
         </View>
         <View style={styles.referralHalfScreen}>
           <TextCenter>
             <TextLight>Invite Link</TextLight>
           </TextCenter>
           <Spacer h={8} />
-          <ButtonBig type="primary" title="Share Link" onPress={onShare} />
+          <ButtonBig
+            type="primary"
+            title="Share Link"
+            onPress={() => shareURL(url)}
+          />
         </View>
       </View>
     </View>
   );
 }
 
-function InviteCodeCopier({ code }: { code: string }) {
+function InviteCodeCopier({ code, url }: { code: string; url: string }) {
   const [justCopied, setJustCopied] = useState(false);
+
   const copy = useCallback(async () => {
-    await Clipboard.setStringAsync(code);
+    await Clipboard.setStringAsync(url);
     setJustCopied(true);
     setTimeout(() => setJustCopied(false), 1000);
-  }, [code]);
+  }, [url]);
 
   return (
     <TouchableHighlight
