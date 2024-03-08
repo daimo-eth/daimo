@@ -84,12 +84,12 @@ function FeaturesDesktop() {
     >
       <div className="flex flex-col flex-1 w-full justify-center items-center bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat min-h-[80vh] py-24">
         <div>
-          <h2 className="font-medium text-[32px] px-20 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
+          <h2 className="font-medium text-[32px] px-10 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
             Why Daimo?
           </h2>
-          <p className="font-medium text-left text-sm md:text-[18px] px-20 lg:text-[24px] text-[#535353] pb-8 leading-snug tracking-wide max-w-xl ">
-            Secure, audited, and fully open source. The safest, fastest way to
-            stablecoin.
+          <p className="font-normal text-left text-sm md:text-[18px] px-10 lg:text-[24px] text-[#535353] pb-8 leading-snug tracking-wide max-w-xl ">
+            Secure, audited, and fully open source.<br></br>
+            The safest, fastest way to stablecoin.
           </p>
         </div>
         <div className="flex flex-row justify-center items-center space-x-4 lg:space-x-10">
