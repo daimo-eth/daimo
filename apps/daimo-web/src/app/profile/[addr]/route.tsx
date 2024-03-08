@@ -6,7 +6,6 @@ import { rpc } from "../../../utils/rpc";
 export async function GET(_: Request, { params }: any) {
   try {
     const res = await rpc.getEthereumAccount.query({ addr: params.addr });
-
     const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
 
     if (profilePicture) {
@@ -22,6 +21,8 @@ export async function GET(_: Request, { params }: any) {
 
       return response;
     }
+
+    return NextResponse.json({ error: "No image found" }, { status: 400 });
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
   }
