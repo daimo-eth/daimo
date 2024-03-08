@@ -23,6 +23,7 @@
     "eslint-config-next": "^13.5.4",
     "framer-motion": "^11.0.5",
     "lokijs": "^1.5.12",
+    "lru-cache": "^10.2.0",
     "marked": "^9.0.3",
     "next": "^13.5.4",
     "pino-pretty": "^10.2.3",

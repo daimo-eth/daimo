@@ -20,6 +20,7 @@ import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { cacheEAccounts } from "../logic/addr";
+import { EAccountContact } from "../logic/daimoContacts";
 import { env } from "../logic/env";
 
 /**
@@ -103,6 +104,10 @@ export function toEAccount(account: Account): EAccount {
     name: account.name,
     profilePicture: account.profilePicture,
   };
+}
+
+export function toEAccountContact(account: Account): EAccountContact {
+  return { type: "eAcc", ...toEAccount(account) };
 }
 
 // Pre-v9 chain gas constants
