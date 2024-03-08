@@ -136,7 +136,7 @@ export class ProfileCache {
   }
 
   getProfilePicture(addr: Address) {
-    return `${daimoDomainAddress}/profile/${addr}/pfp.png`;
+    return `${daimoDomainAddress}/profile/${addr}/pfp.jpg`;
   }
 
   searchLinkedAccounts(prefix: string): ProfileLink[] {
