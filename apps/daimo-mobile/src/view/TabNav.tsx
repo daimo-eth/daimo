@@ -17,7 +17,7 @@ import {
   createStackNavigator,
 } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
-import { Animated } from "react-native";
+import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
@@ -26,12 +26,13 @@ import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/DeviceScreen";
 import { ErrorScreen } from "./screen/ErrorScreen";
 import HomeScreen from "./screen/HomeScreen";
+import { InviteScreen } from "./screen/InviteScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
-import ReceiveScreen from "./screen/receive/ReceiveScreen";
+import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
@@ -39,8 +40,8 @@ import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
 import {
   ParamListHome,
+  ParamListInvite,
   ParamListMain,
-  ParamListReceive,
   ParamListSend,
   ParamListSettings,
   ParamListTab,
@@ -57,7 +58,10 @@ const MainStack = createStackNavigator<ParamListMain>();
 
 function TabNavigator() {
   const opts: BottomTabNavigationOptions = {
-    tabBarHideOnKeyboard: true,
+    // On Android, the tab bar jumps above the keyboard. This prevents that.
+    // But on iOS, enabling this option can cause the screen to resize when the
+    // keyboard transitions, making the transitions look a bit janky.
+    tabBarHideOnKeyboard: Platform.OS === "android",
   };
 
   const ins = useSafeAreaInsets();
@@ -69,7 +73,7 @@ function TabNavigator() {
       backBehavior="initialRoute"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
-      <Tab.Screen name="ReceiveTab" component={ReceiveTab} options={opts} />
+      <Tab.Screen name="InviteTab" component={InviteTab} options={opts} />
       <Tab.Screen name="HomeTab" component={HomeTab} options={opts} />
       <Tab.Screen name="SendTab" component={SendTab} options={opts} />
       <Tab.Screen name="SettingsTab" component={SettingsTab} options={opts} />
@@ -177,6 +181,7 @@ function getTabOptions(
       height: TAB_BAR_HEIGHT + safeInsets.bottom,
       paddingBottom: safeInsets.bottom,
     },
+    tabBarLabelPosition: "below-icon",
     tabBarItemStyle: {
       paddingTop: 16,
       height: 76,
@@ -199,8 +204,8 @@ function getTabOptions(
   switch (route.name) {
     case "DepositTab":
       return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
-    case "ReceiveTab":
-      return { title: "Request", tabBarIcon: getIcon("download"), ...opts };
+    case "InviteTab":
+      return { title: "Invite", tabBarIcon: getIcon("mail"), ...opts };
     case "HomeTab":
       return {
         title: "Home",
@@ -269,24 +274,23 @@ function HomeTab() {
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="Note" component={NoteScreen} />
+        <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );
 }
 
-const ReceiveStack = createNativeStackNavigator<ParamListReceive>();
+const InviteStack = createNativeStackNavigator<ParamListInvite>();
 
-function ReceiveTab() {
+function InviteTab() {
   return (
-    <ReceiveStack.Navigator
-      initialRouteName="Receive"
-      screenOptions={noHeaders}
-    >
-      <ReceiveStack.Group>
-        <ReceiveStack.Screen name="Receive" component={ReceiveScreen} />
-        <ReceiveStack.Screen name="Note" component={NoteScreen} />
-      </ReceiveStack.Group>
-    </ReceiveStack.Navigator>
+    <InviteStack.Navigator initialRouteName="Invite" screenOptions={noHeaders}>
+      <InviteStack.Group>
+        <InviteStack.Screen name="Invite" component={InviteScreen} />
+        <HomeStack.Screen name="Account" component={AccountScreen} />
+      </InviteStack.Group>
+    </InviteStack.Navigator>
   );
 }
 

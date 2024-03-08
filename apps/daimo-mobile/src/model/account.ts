@@ -1,6 +1,7 @@
 import { SuggestedAction } from "@daimo/api";
 import {
   ChainGasConstants,
+  DaimoInviteCodeStatus,
   DaimoLinkNote,
   DisplayOpEvent,
   EAccount,
@@ -87,9 +88,13 @@ export type Account = {
 
   /** Linked accounts (via mutual sig) for rich profiles, eg Farcaster. */
   linkedAccounts: LinkedAccount[];
-
   /** Profile picture */
   profilePicture?: string;
+
+  /** Invite link (where the user is the inviter) and its status */
+  inviteLinkStatus: DaimoInviteCodeStatus | null;
+  /** Invitees of user */
+  invitees: EAccount[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -250,6 +255,38 @@ interface AccountV12 extends StoredModel {
   linkedAccounts?: LinkedAccount[];
 }
 
+interface AccountV13 extends StoredModel {
+  storageVersion: 13;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: DisplayOpEvent[];
+  trackedRequests: TrackedRequest[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
+  recommendedExchanges: RecommendedExchange[];
+  suggestedActions: SuggestedAction[];
+  dismissedActionIDs: string[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+  linkedAccounts: LinkedAccount[];
+  inviteLinkStatus: DaimoInviteCodeStatus | null;
+  invitees: EAccount[];
+}
+
 /** Loads and saves Daimo account data from storage. Notifies listeners. */
 export function getAccountManager(): AccountManager {
   if (_accountManager == null) {
@@ -367,6 +404,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       pushToken: a.pushToken,
 
       linkedAccounts: [],
+      inviteLinkStatus: null,
+      invitees: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -399,6 +438,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       pushToken: a.pushToken,
 
       linkedAccounts: [],
+      inviteLinkStatus: null,
+      invitees: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -431,6 +472,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       pushToken: a.pushToken,
 
       linkedAccounts: [],
+      inviteLinkStatus: null,
+      invitees: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -464,10 +507,46 @@ export function parseAccount(accountJSON?: string): Account | null {
       pushToken: a.pushToken,
 
       linkedAccounts: [],
+      inviteLinkStatus: null,
+      invitees: [],
+    };
+  } else if (model.storageVersion === 12) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
+    const a = model as AccountV12;
+
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      trackedRequests: a.trackedRequests,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: a.recommendedExchanges,
+      suggestedActions: a.suggestedActions,
+      dismissedActionIDs: a.dismissedActionIDs,
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+      linkedAccounts: [],
+      inviteLinkStatus: null,
+      invitees: [],
     };
   }
-  assert(model.storageVersion === 12, "Unknown account storage version");
-  const a = model as AccountV12;
+  assert(model.storageVersion === 13, "Unknown account storage version");
+  const a = model as AccountV13;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -497,14 +576,16 @@ export function parseAccount(accountJSON?: string): Account | null {
     pushToken: a.pushToken,
 
     linkedAccounts: a.linkedAccounts || [],
+    inviteLinkStatus: a.inviteLinkStatus,
+    invitees: a.invitees,
   };
 }
 
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV12 = {
-    storageVersion: 12,
+  const model: AccountV13 = {
+    storageVersion: 13,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -533,6 +614,8 @@ export function serializeAccount(account: Account | null): string {
     pushToken: account.pushToken,
 
     linkedAccounts: account.linkedAccounts,
+    inviteLinkStatus: account.inviteLinkStatus,
+    invitees: account.invitees,
   };
 
   return JSON.stringify(model);
@@ -578,5 +661,7 @@ export function createEmptyAccount(
     pushToken: null,
 
     linkedAccounts: [],
+    inviteLinkStatus: null,
+    invitees: [],
   };
 }

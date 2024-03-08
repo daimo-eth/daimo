@@ -28,6 +28,8 @@ export type ParamListHome = {
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
   HistoryOp: { op: DisplayOpEvent };
+  Receive: { autoFocus: boolean };
+  Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
 };
 
 type ParamListError = {
@@ -46,7 +48,7 @@ export type ParamListMain = {
 type NavigatorParamList = {
   LinkErrorModal: ParamListError;
   DepositTab: undefined;
-  ReceiveTab: NavigatorScreenParams<ParamListReceive>;
+  InviteTab: NavigatorScreenParams<ParamListInvite>;
   HomeTab: NavigatorScreenParams<ParamListHome>;
   SendTab: NavigatorScreenParams<ParamListSend>;
   SettingsTab: { screen: keyof ParamListSettings; params?: any };
@@ -63,10 +65,11 @@ export type ParamListSend = {
   HistoryOp: { op: DisplayOpEvent };
 };
 
-export type ParamListReceive = {
-  Receive: { autoFocus: boolean };
-  RequestSend: undefined;
-  Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
+export type ParamListInvite = {
+  Invite: undefined;
+  Account:
+    | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
+    | { link: DaimoLinkAccount };
 };
 
 export type ParamListSettings = {
@@ -90,7 +93,7 @@ export interface SendNavProp {
 
 export type ParamListTab = {
   DepositTab: undefined;
-  ReceiveTab: NavigatorScreenParams<ParamListReceive>;
+  InviteTab: NavigatorScreenParams<ParamListInvite>;
   HomeTab: NavigatorScreenParams<ParamListHome>;
   SendTab: NavigatorScreenParams<ParamListSend>;
   SettingsTab: { screen: keyof ParamListSettings; params?: any };
@@ -115,7 +118,7 @@ export type ParamListBottomSheet = {
 type AllRoutes = NavigatorParamList &
   ParamListHome &
   ParamListSend &
-  ParamListReceive &
+  ParamListInvite &
   ParamListSettings;
 
 export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
@@ -160,11 +163,11 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       break;
     }
     case "note": {
-      nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
+      nav.navigate("HomeTab", { screen: "Note", params: { link } });
       break;
     }
     case "notev2": {
-      nav.navigate("ReceiveTab", { screen: "Note", params: { link } });
+      nav.navigate("HomeTab", { screen: "Note", params: { link } });
       break;
     }
     case "tag": {

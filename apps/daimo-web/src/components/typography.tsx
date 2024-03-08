@@ -17,7 +17,7 @@ export function TextH3Subtle({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function LinkBold({
+export function LinkSemiBold({
   href,
   target,
   children,
@@ -28,14 +28,22 @@ export function LinkBold({
 }) {
   return (
     <Link href={href} target={target}>
-      <TextBold>{children}</TextBold>
+      <TextSemiBold>{children}</TextSemiBold>
     </Link>
+  );
+}
+
+export function TextSemiBold({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[16px] tracking-[1px] leading-[20.8px] font-semibold text-white">
+      {children}
+    </p>
   );
 }
 
 export function TextBold({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[16px] tracking-[1%] leading-[20.8px] font-bold text-white">
+    <p className="text-[16px] tracking-none leading-[20.8px] font-bold text-white">
       {children}
     </p>
   );

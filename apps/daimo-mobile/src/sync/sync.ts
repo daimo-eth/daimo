@@ -3,7 +3,7 @@ import {
   DisplayOpEvent,
   EAccount,
   OpStatus,
-  PendingOpEventID,
+  PendingOpEvent,
   amountToDollars,
   assert,
   now,
@@ -144,6 +144,7 @@ async function fetchSync(
   const rpcFunc = env(daimoChain).rpcFunc;
   const result = await rpcFunc.getAccountHistory.query({
     address: account.address,
+    inviteCode: account.inviteLinkStatus?.link.code,
     sinceBlockNum,
   });
   const syncSummary = {
@@ -161,6 +162,8 @@ async function fetchSync(
     recommendedExchanges: result.recommendedExchanges,
     suggestedActions: result.suggestedActions,
     profilePicture: result.profilePicture,
+    inviteLinkStatus: result.inviteLinkStatus,
+    invitees: result.invitees,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -260,6 +263,8 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     pendingKeyRotation: stillPendingKeyRotation,
     linkedAccounts: result.linkedAccounts || [],
     profilePicture: result.profilePicture,
+    inviteLinkStatus: result.inviteLinkStatus || null,
+    invitees: result.invitees || [],
   };
 
   console.log(
@@ -279,7 +284,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
 }
 
 export function syncFindSameOp(
-  id: PendingOpEventID,
+  id: PendingOpEvent,
   ops: DisplayOpEvent[]
 ): DisplayOpEvent | null {
   return (

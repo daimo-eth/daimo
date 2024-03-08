@@ -4,7 +4,7 @@ import {
   DaimoNoteStatus,
   EAccount,
   OpStatus,
-  PendingOpEventID,
+  PendingOpEvent,
   dollarsToAmount,
   getAccountName,
   now,
@@ -35,7 +35,7 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
-import { ParamListReceive, useExitToHome } from "../../shared/nav";
+import { ParamListHome, useExitToHome } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import {
   TextBody,
@@ -46,7 +46,7 @@ import {
 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListReceive, "Note">;
+type Props = NativeStackScreenProps<ParamListHome, "Note">;
 
 export default function NoteScreen(props: Props) {
   const Inner = useWithAccount(NoteScreenInner);
@@ -145,7 +145,7 @@ function NoteDisplayInner({
           signature: ephemeralSignature,
         });
         setAS("success", "Accepted link");
-        return { txHash } as PendingOpEventID;
+        return { txHash } as PendingOpEvent;
       }
     : undefined;
 

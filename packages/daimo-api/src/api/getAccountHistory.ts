@@ -2,6 +2,7 @@ import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
   AddrLabel,
   ChainGasConstants,
+  DaimoInviteCodeStatus,
   DisplayOpEvent,
   EAccount,
   KeyData,
@@ -9,17 +10,24 @@ import {
   RecommendedExchange,
   appStoreLinks,
   assert,
+  formatDaimoLink,
   hasAccountName,
 } from "@daimo/common";
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
+import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry, specialAddrLabels } from "../contract/nameRegistry";
+import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
+import { RequestIndexer } from "../contract/requestIndexer";
+import { DB } from "../db/db";
 import { ViemClient } from "../network/viemClient";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
+import { InviteGraph } from "../offchain/inviteGraph";
 import { getAppVersionTracker } from "../server/appVersion";
 import { TrpcRequestContext } from "../server/trpc";
 import { Watcher } from "../shovel/watcher";
@@ -43,6 +51,8 @@ export interface AccountHistoryResult {
   profilePicture?: string;
 
   suggestedActions: SuggestedAction[];
+  inviteLinkStatus: DaimoInviteCodeStatus | null;
+  invitees: EAccount[];
 }
 
 export interface SuggestedAction {
@@ -61,14 +71,20 @@ export interface SuggestedAction {
 export async function getAccountHistory(
   ctx: TrpcRequestContext,
   address: Address,
+  inviteCode: string | undefined,
   sinceBlockNum: number,
   watcher: Watcher,
   vc: ViemClient,
   coinIndexer: CoinIndexer,
   profileCache: ProfileCache,
+  noteIndexer: NoteIndexer,
+  requestIndexer: RequestIndexer,
+  inviteCodeTracker: InviteCodeTracker,
+  inviteGraph: InviteGraph,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
-  paymaster: Paymaster
+  paymaster: Paymaster,
+  db: DB
 ): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
   const eAcc = await nameReg.getEAccount(address);
@@ -130,6 +146,21 @@ export async function getAccountHistory(
 
   // Get linked accounts
   const linkedAccounts = profileCache.getLinkedAccounts(address);
+  const inviteLinkStatus = inviteCode
+    ? ((await getLinkStatus(
+        formatDaimoLink({ type: "invite", code: inviteCode }),
+        nameReg,
+        noteIndexer,
+        requestIndexer,
+        inviteCodeTracker,
+        db
+      )) as DaimoInviteCodeStatus)
+    : null;
+
+  const inviteeAddrs = inviteGraph.getInvitees(address);
+  const invitees = await Promise.all(
+    inviteeAddrs.map((addr) => nameReg.getEAccount(addr))
+  );
 
   // Get pfps from linked accounts
   const profilePicture = profileCache.getProfilePicture(address);
@@ -152,6 +183,8 @@ export async function getAccountHistory(
     accountKeys,
     linkedAccounts,
     profilePicture,
+    inviteLinkStatus,
+    invitees,
   };
 
   // Suggest an action to the user, like backing up their account

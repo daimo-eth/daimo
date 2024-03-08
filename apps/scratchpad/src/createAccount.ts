@@ -1,6 +1,11 @@
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
 import { ViemClient } from "@daimo/api/src/network/viemClient";
-import { UserOpHex, assert, assertNotNull } from "@daimo/common";
+import {
+  PendingOpEvent,
+  UserOpHex,
+  assert,
+  assertNotNull,
+} from "@daimo/common";
 import {
   daimoAccountABI,
   daimoAccountFactoryConfig,
@@ -129,9 +134,9 @@ export async function createAccount() {
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
     const vc = new ViemClient(publicClient, publicClient, walletClient);
-    const hash = bundlerClient.getOpHash(op, vc.publicClient);
+    const hash = await bundlerClient.getOpHash(op, vc.publicClient);
     console.log(`NOT sending userOp. Hash: ${hash}`);
-    return hash;
+    return { opHash: hash } as PendingOpEvent;
     // return bundlerClient.sendUserOp(op, vc);
   };
 

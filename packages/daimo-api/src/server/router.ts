@@ -24,6 +24,7 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
+import { sendUserOpV2 } from "../api/sendUserOpV2";
 import {
   getTagRedirect,
   getTagRedirectHist,
@@ -179,23 +180,30 @@ export function createRouter(
       .input(
         z.object({
           address: zAddress,
+          inviteCode: z.string().optional(),
           sinceBlockNum: z.number(),
         })
       )
       .query(async (opts) => {
-        const { sinceBlockNum } = opts.input;
+        const { inviteCode, sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
         return getAccountHistory(
           opts.ctx,
           address,
+          inviteCode,
           sinceBlockNum,
           watcher,
           vc,
           coinIndexer,
           profileCache,
+          noteIndexer,
+          reqIndexer,
+          inviteCodeTracker,
+          inviteGraph,
           nameReg,
           keyReg,
-          paymaster
+          paymaster,
+          db
         );
       }),
 
@@ -256,6 +264,7 @@ export function createRouter(
         return { status: "success", address };
       }),
 
+    // DEPRECATED
     sendUserOp: publicProcedure
       .input(z.object({ op: zUserOpHex }))
       .mutation(async (opts) => {
@@ -282,6 +291,21 @@ export function createRouter(
           telemetry.recordClippy(`❌ sendUserOp ${senderName}: ${em}`, "error");
           throw e;
         }
+      }),
+
+    sendUserOpV2: publicProcedure
+      .input(z.object({ op: zUserOpHex }))
+      .mutation(async (opts) => {
+        const { op } = opts.input;
+        return sendUserOpV2(
+          op,
+          nameReg,
+          bundlerClient,
+          inviteCodeTracker,
+          telemetry,
+          vc,
+          opts.ctx
+        );
       }),
 
     logAction: publicProcedure

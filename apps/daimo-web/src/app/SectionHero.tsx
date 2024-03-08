@@ -31,10 +31,10 @@ export function SectionHero() {
           <div className="hidden md:flex md:flex-row md:items-center md:space-x-[20px] lg:space-x-[36px] md:pt-8">
             <DownloadLinkButton />
             <Link
-              className="font-bold text-white text-2xl whitespace-nowrap "
+              className="font-semibold text-white text-2xl whitespace-nowrap"
               href="#features"
             >
-              Learn More
+              Learn more
               <span className="pl-4 font-extralight">&nbsp;&#8595;</span>
             </Link>
           </div>

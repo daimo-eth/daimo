@@ -1,4 +1,4 @@
-import { UserOpHex } from "@daimo/common";
+import { PendingOpEvent, UserOpHex } from "@daimo/common";
 import { Hex } from "viem";
 
 // Message signature, along with key slot identifying the signing keypair.
@@ -15,4 +15,4 @@ export type SigningCallback = (msgHex: Hex) => Promise<SigResponse>;
  * Submits a signed userop, returning the userOpHash once the bundler accepts.
  * Throws an error otherwise. Does NOT wait for the op to be confirmed onchain.
  */
-export type OpSenderCallback = (op: UserOpHex) => Promise<Hex>;
+export type OpSenderCallback = (op: UserOpHex) => Promise<PendingOpEvent>;
