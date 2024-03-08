@@ -3,7 +3,11 @@ import sharp from "sharp";
 
 import { rpc } from "../../../utils/rpc";
 
-export async function GET(_: Request, { params }: any) {
+type Context = {
+  params: { addr: string };
+};
+
+export async function GET(_: Request, { params }: Context) {
   try {
     const res = await rpc.getEthereumAccount.query({ addr: params.addr });
     const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
