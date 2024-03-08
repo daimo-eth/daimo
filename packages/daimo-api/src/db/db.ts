@@ -317,11 +317,14 @@ export class DB {
     client.release();
   }
 
-  async getInviteCodeForAddress(address: Address): Promise<string | undefined> {
+  // Returns the invite code for a sender with most available uses left.
+  async getBestInviteCodeForSender(
+    address: Address
+  ): Promise<string | undefined> {
     console.log(`[DB] getting invite code for address`);
     const client = await this.pool.connect();
     const result = await client.query<{ code: string }>(
-      `SELECT code FROM invitecode WHERE inviter = $1`,
+      `SELECT code FROM invitecode WHERE inviter = $1 ORDER BY max_uses - use_count DESC LIMIT 1`,
       [address]
     );
     client.release();

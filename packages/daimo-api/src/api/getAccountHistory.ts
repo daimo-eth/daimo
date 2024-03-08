@@ -156,11 +156,9 @@ export async function getAccountHistory(
       )) as DaimoInviteCodeStatus)
     : null;
 
-  const invitees: EAccount[] = await Promise.all(
-    inviteGraph.getInvitees(address).map(async (addr) => {
-      const eAcc = await nameReg.getEAccount(addr);
-      return eAcc;
-    })
+  const inviteeAddrs = inviteGraph.getInvitees(address);
+  const invitees = await Promise.all(
+    inviteeAddrs.map((addr) => nameReg.getEAccount(addr))
   );
 
   const ret: AccountHistoryResult = {

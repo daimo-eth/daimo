@@ -124,9 +124,11 @@ export class InviteCodeTracker {
     };
   }
 
-  async getInviteCodeForSender(sender: Address): Promise<string | undefined> {
-    return await retryBackoff(`getInviteCodeForAddress`, () =>
-      this.db.getInviteCodeForAddress(sender)
+  async getBestInviteCodeForSender(
+    sender: Address
+  ): Promise<string | undefined> {
+    return await retryBackoff(`getBestInviteCodeForSender`, () =>
+      this.db.getBestInviteCodeForSender(sender)
     );
   }
 }

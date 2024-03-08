@@ -58,6 +58,9 @@ const MainStack = createStackNavigator<ParamListMain>();
 
 function TabNavigator() {
   const opts: BottomTabNavigationOptions = {
+    // On Android, the tab bar jumps above the keyboard. This prevents that.
+    // But on iOS, enabling this option can cause the screen to resize when the
+    // keyboard transitions, making the transitions look a bit janky.
     tabBarHideOnKeyboard: Platform.OS === "android",
   };
 

@@ -96,7 +96,7 @@ export function useSendAsync({
       }
 
       getAccountManager().transform((a) =>
-        authenticatedDataAccountTransform(a, pendingOpEventData)
+        addInviteLinkStatus(a, pendingOpEventData)
       );
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
@@ -128,12 +128,17 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
   };
 }
 
-function authenticatedDataAccountTransform(
+// Adds invite link status to account
+// The invite link status is attached to sendUserOp since being able to send a
+// userop successfully authenticates the user to the API.
+function addInviteLinkStatus(
   account: Account,
   pendingOpEventData: PendingOpEvent
 ): Account {
   console.log(
-    `[SEND] attaching authenticated data: ${JSON.stringify(pendingOpEventData)}`
+    `[SEND] attaching authenticate invite link status: ${JSON.stringify(
+      pendingOpEventData
+    )}`
   );
   const inviteLinkStatus: DaimoInviteCodeStatus | null =
     pendingOpEventData.inviteCode

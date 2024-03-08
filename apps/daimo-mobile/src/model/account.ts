@@ -88,7 +88,7 @@ export type Account = {
 
   /** Linked accounts (via mutual sig) for rich profiles, eg Farcaster. */
   linkedAccounts: LinkedAccount[];
-  /** Invite link and it's status */
+  /** Invite link (where the user is the inviter) and its status */
   inviteLinkStatus: DaimoInviteCodeStatus | null;
   /** Invitees of user */
   invitees: EAccount[];

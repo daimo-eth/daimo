@@ -33,7 +33,7 @@ export async function sendUserOpV2(
 
     // Creating a valid userop authenticates the user, so we can attach
     // private data like user's unique inviteCode in the response.
-    const inviteCode = await inviteCodeTracker.getInviteCodeForSender(
+    const inviteCode = await inviteCodeTracker.getBestInviteCodeForSender(
       op.sender
     );
     return {

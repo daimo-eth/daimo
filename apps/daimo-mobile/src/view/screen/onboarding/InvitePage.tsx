@@ -160,7 +160,7 @@ export function InvitePage({
             <ButtonBig
               type="primary"
               title="Submit"
-              onPress={() => onNext({ isTestnet: true })}
+              onPress={() => onNext({ isTestnet })}
               disabled={!isValid}
             />
           </>

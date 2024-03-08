@@ -70,14 +70,12 @@ function InviteeBubble({ invitee }: { invitee: EAccount }) {
     navToAccountPage(invitee, nav);
   }, [invitee, nav]);
 
-  const size = 64;
-
   return (
     <View style={styles.inviteeBubbleContainer}>
-      <ButtonCircle size={size} onPress={onPress}>
+      <ButtonCircle size={64} onPress={onPress}>
         <ContactBubble
           contact={{ type: "eAcc", ...invitee }}
-          size={size}
+          size={64}
           transparent
         />
       </ButtonCircle>
@@ -170,7 +168,7 @@ function LockedHeader() {
 
 function LockedFooter() {
   const nav = useNav();
-  const sendPaymentLink = () =>
+  const goToSend = () =>
     nav.navigate("SendTab", {
       screen: "SendNav",
       params: { autoFocus: true },
@@ -190,7 +188,7 @@ function LockedFooter() {
         </TextBody>
       </TextCenter>
       <Spacer h={32} />
-      <ButtonMed type="primary" title="SEND" onPress={sendPaymentLink} />
+      <ButtonMed type="primary" title="SEND" onPress={goToSend} />
     </View>
   );
 }
@@ -233,18 +231,18 @@ function ReferralButtonsFooter({
     shareURL(url);
   }, [link]);
 
-  const subtitle = (() => {
+  const bonusSubtitle = (() => {
     if (
       bonusDollarsInvitee &&
       bonusDollarsInviter &&
       bonusDollarsInvitee === bonusDollarsInviter
     ) {
-      return `we'll send you both $${bonusDollarsInvitee} USDC`;
+      return ` and we'll send you both $${bonusDollarsInvitee} USDC`;
     } else if (bonusDollarsInvitee) {
-      return `we'll send them $${bonusDollarsInvitee} USDC`;
+      return ` and we'll send them $${bonusDollarsInvitee} USDC`;
     } else if (bonusDollarsInviter) {
-      return `we'll send you $${bonusDollarsInviter} USDC`;
-    }
+      return ` and we'll send you $${bonusDollarsInviter} USDC`;
+    } else return "";
   })();
 
   return (
@@ -252,19 +250,19 @@ function ReferralButtonsFooter({
       <Spacer h={32} />
       <TextCenter>
         <TextLight>
-          You'll get credit for the invite on their profile and {subtitle}
+          You'll get credit for the invite on their profile{bonusSubtitle}
         </TextLight>
       </TextCenter>
       <Spacer h={32} />
       <View style={styles.referralButtons}>
-        <View style={{ width: "50%", paddingHorizontal: 8 }}>
+        <View style={styles.referralHalfScreen}>
           <TextCenter>
             <TextLight>Invite Code</TextLight>
           </TextCenter>
           <Spacer h={8} />
           <InviteCodeCopier code={link.code} />
         </View>
-        <View style={{ width: "50%", paddingHorizontal: 8 }}>
+        <View style={styles.referralHalfScreen}>
           <TextCenter>
             <TextLight>Invite Link</TextLight>
           </TextCenter>
@@ -320,6 +318,10 @@ const styles = StyleSheet.create({
   },
   referralButtons: {
     flexDirection: "row",
+  },
+  referralHalfScreen: {
+    width: "50%",
+    paddingHorizontal: 8,
   },
   codeCopier: {
     paddingHorizontal: 24,

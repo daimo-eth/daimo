@@ -108,7 +108,7 @@ export function DeviceScreen({ route, navigation }: Props) {
 
   useEffect(() => {
     (async () => {
-      if (status !== "loading" || !account) return;
+      if (status !== "success" || !account) return;
       const { enclaveKeyName, enclavePubKey } = account;
 
       if (devicePubkey === enclavePubKey) {
