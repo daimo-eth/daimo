@@ -3,10 +3,10 @@ import { useMemo } from "react";
 import { Platform, View } from "react-native";
 
 import { AddKeySlotButton } from "./AddKeySlotButton";
-import { useAccount } from "../../../model/account";
+import { useExitBack, useExitToHome } from "../../../common/nav";
+import { useAccount } from "../../../logic/accountManager";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useExitBack, useExitToHome } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextPara } from "../../shared/text";
 

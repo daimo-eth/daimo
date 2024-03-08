@@ -25,6 +25,7 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
+import { ParamListHome, useExitToHome } from "../../../common/nav";
 import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
@@ -35,7 +36,6 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
-import { ParamListHome, useExitToHome } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import {
   TextBody,

@@ -16,13 +16,13 @@ import {
 
 import InviteBackground from "../../../assets/invite-background.png";
 import InviteCover from "../../../assets/invite-cover.png";
+import { navToAccountPage, useExitToHome, useNav } from "../../common/nav";
 import { Account } from "../../model/account";
 import { ButtonBig, ButtonMed } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { ContactBubble } from "../shared/ContactBubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { navToAccountPage, useExitToHome, useNav } from "../shared/nav";
 import { shareURL } from "../shared/shareURL";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {

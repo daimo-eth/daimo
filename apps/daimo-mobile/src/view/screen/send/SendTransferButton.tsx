@@ -19,12 +19,12 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
+import { useExitToHome } from "../../../common/nav";
 import { EAccountContact } from "../../../logic/daimoContacts";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { useExitToHome } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 
 export function SendTransferButton({

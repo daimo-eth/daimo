@@ -24,8 +24,8 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
-import { ParamListBottomSheet, useNav } from "./nav";
 import { color } from "./style";
+import { ParamListBottomSheet, useNav } from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,

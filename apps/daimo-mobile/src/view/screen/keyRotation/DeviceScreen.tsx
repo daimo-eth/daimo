@@ -20,13 +20,12 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendAsync } from "../../../action/useSendAsync";
-import { deleteEnclaveKey } from "../../../logic/enclave";
-import { useAccount } from "../../../model/account";
+import { ParamListSettings, useNav } from "../../../common/nav";
+import { getAccountManager, useAccount } from "../../../logic/accountManager";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListSettings, useNav } from "../../shared/nav";
 import { color, ss } from "../../shared/style";
 import {
   TextBody,
@@ -39,7 +38,7 @@ import {
 type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 
 export function DeviceScreen({ route, navigation }: Props) {
-  const [account, setAccount] = useAccount();
+  const [account] = useAccount();
   const nav = useNav();
 
   const { pubKey: devicePubkey } = route.params;
@@ -102,25 +101,15 @@ export function DeviceScreen({ route, navigation }: Props) {
 
     async function removeKey() {
       console.log(`[DEVICE] Removing device ${devicePubkey}`);
-      exec();
+      await exec();
     }
   }, []);
 
+  // If we removed this device's key onchain, delete it locally and log out.
   useEffect(() => {
-    (async () => {
-      if (status !== "success" || !account) return;
-      const { enclaveKeyName, enclavePubKey } = account;
-
-      if (devicePubkey === enclavePubKey) {
-        console.log(
-          `[USER] deleted device key onchain; deleting locally ${enclaveKeyName}`
-        );
-        await deleteEnclaveKey(enclaveKeyName);
-
-        setAccount(null);
-        nav.navigate("HomeTab", { screen: "Home" });
-      }
-    })();
+    if (status !== "success" || !account) return;
+    if (devicePubkey !== account.enclavePubKey) return;
+    getAccountManager().deleteAccountAndKey();
   }, [status]);
 
   if (!account || !device) return null;

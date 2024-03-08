@@ -4,7 +4,7 @@ import { Dimensions, StyleSheet } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { SwipeUpDown, SwipeUpDownRef } from "./SwipeUpDown";
-import { useNav } from "./nav";
+import { useNav } from "../../common/nav";
 
 const screenDimensions = Dimensions.get("screen");
 

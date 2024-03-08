@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { useActStatus } from "../../../action/actStatus";
+import { useExitBack, useExitToHome, useNav } from "../../../common/nav";
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -22,7 +23,6 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useExitBack, useExitToHome, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";

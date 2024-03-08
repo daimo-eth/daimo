@@ -4,9 +4,9 @@ import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
-import { useExitToHome } from "./nav";
 import { color } from "./style";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
+import { useExitToHome } from "../../common/nav";
 
 export function ErrorRowCentered({ error }: { error: { message?: string } }) {
   let message = error.message ?? "Unknown error";
@@ -111,6 +111,5 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     marginTop: 24,
-    paddingHorizontal: 24,
   },
 });

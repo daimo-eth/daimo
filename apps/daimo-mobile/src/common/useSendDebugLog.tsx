@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { Platform, Share, ShareContent } from "react-native";
 
 import { getDebugLog } from "./debugLog";
+import { getAccountManager } from "../logic/accountManager";
 import { getHardwareSec } from "../logic/enclave";
 import { env } from "../logic/env";
-import { Account, getAccountManager, serializeAccount } from "../model/account";
+import { Account, serializeAccount } from "../model/account";
 import { amountSeparator } from "../view/shared/Amount";
 import { ButtonMed } from "../view/shared/Button";
 
@@ -27,7 +28,7 @@ export function useSendDebugLog(
   account?: Account | null
 ): [() => Promise<void>, Record<string, string>] {
   if (account === undefined) {
-    account = getAccountManager().currentAccount;
+    account = getAccountManager().getAccount();
   }
 
   // Get security level of key storage.

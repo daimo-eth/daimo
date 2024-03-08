@@ -3,10 +3,10 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import { AppState, Platform } from "react-native";
 
+import { getAccountManager, useAccount } from "./accountManager";
 import { env } from "./env";
 import { Log } from "./log";
 import { askOpenSettings } from "./settings";
-import { getAccountManager, useAccount } from "../model/account";
 import { syncAfterPushNotification } from "../sync/sync";
 
 /** Registers push notifications, if we have permission & haven't already. */
@@ -73,7 +73,7 @@ class PushNotificationManager {
           lightColor: "#FF231F7C",
         });
       }
-      if (this.accountManager.currentAccount == null) {
+      if (this.accountManager.getAccount() == null) {
         console.log("[NOTIFY] no account, skipping savePushToken");
         return;
       }
@@ -91,7 +91,8 @@ class PushNotificationManager {
   };
 
   private async savePushTokenInner() {
-    if (this.accountManager.currentAccount == null) {
+    const account = this.accountManager.getAccount();
+    if (account == null) {
       throw new Error("No account");
     }
 
@@ -99,12 +100,12 @@ class PushNotificationManager {
     const token = await Notifications.getExpoPushTokenAsync({
       projectId: "1eff7c6e-e88b-4e35-8b31-eab7e6814904",
     });
-    if (token.data === this.accountManager.currentAccount.pushToken) {
+    if (token.data === account?.pushToken) {
       console.log(`[NOTIFY] push token ${token.data} already saved`);
       return;
     }
 
-    const { address, name, homeChainId } = this.accountManager.currentAccount;
+    const { address, name, homeChainId } = account;
     const rpcFunc = env(daimoChainFromId(homeChainId)).rpcFunc;
     console.log(`[NOTIFY] saving push token ${token.data} for account ${name}`);
     await Log.promise(
@@ -112,8 +113,7 @@ class PushNotificationManager {
       rpcFunc.registerPushToken.mutate({ address, token: token.data })
     );
 
-    const acc = this.accountManager.currentAccount;
-    this.accountManager.setCurrentAccount({ ...acc, pushToken: token.data });
+    this.accountManager.transform((acc) => ({ ...acc, pushToken: token.data }));
   }
 }
 

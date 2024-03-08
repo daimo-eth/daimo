@@ -13,11 +13,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
+import { useAccount } from "./logic/accountManager";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
-import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
-import { renderErrorFallback } from "./view/screen/ErrorScreen";
+import { renderErrorFallback } from "./view/screen/errorScreens";
 import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";

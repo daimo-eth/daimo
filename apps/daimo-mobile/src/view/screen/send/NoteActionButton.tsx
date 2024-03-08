@@ -25,12 +25,12 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
+import { useNav } from "../../../common/nav";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { useNav } from "../../shared/nav";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 

@@ -11,9 +11,10 @@ import Animated, {
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { ContactBubble } from "./ContactBubble";
-import { useNav } from "./nav";
 import { color } from "./style";
-import { toEAccountContact, useAccount } from "../../model/account";
+import { useNav } from "../../common/nav";
+import { useAccount } from "../../logic/accountManager";
+import { toEAccountContact } from "../../model/account";
 
 const animationConfig = { duration: 150 };
 

@@ -42,6 +42,10 @@ export class CoinIndexer {
     private requestIndexer: RequestIndexer
   ) {}
 
+  public status() {
+    return { numTransfers: this.allTransfers.length };
+  }
+
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
 

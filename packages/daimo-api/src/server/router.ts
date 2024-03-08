@@ -86,7 +86,10 @@ export function createRouter(
     // Don't serve requests until we're ready.
     // This avoids confusing UI state in local development.
     if (!notifier.isInitialized) {
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "not ready",
+      });
     }
     return opts.next();
   });
