@@ -11,6 +11,7 @@ type Context = {
 const pfpCache = new LRUCache<string, Blob>({
   ttl: 1000 * 60 * 60 * 24, // Cached pfps should last one day
   ttlAutopurge: false, // For perf, let items fall out naturally
+  max: 1000,
 });
 
 export async function GET(_: Request, { params }: Context) {
