@@ -19,6 +19,7 @@ export async function GET(_: Request, { params }: Context) {
 
   try {
     let resultBlob: Blob | undefined = undefined;
+    let contentType: string | undefined = undefined;
     const cachedBlob = pfpCache.get(addr);
 
     if (pfpCache.get(addr)) {
@@ -29,18 +30,21 @@ export async function GET(_: Request, { params }: Context) {
 
       if (profilePicture) {
         const data = await fetch(profilePicture);
+        contentType = data.headers.get("Content-Type") ?? undefined;
         const blob = await data.blob();
         const arrayBuffer = await blob.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         const result = await sharp(buffer).resize(64, 64).toBuffer();
-        resultBlob = new Blob([result], { type: "image/jpeg" });
+        resultBlob = new Blob([result], { type: contentType });
       }
     }
 
     if (resultBlob) {
       const response = new NextResponse(resultBlob);
-      response.headers.set("Content-Type", "image/jpeg");
+      if (contentType) {
+        response.headers.set("Content-Type", contentType);
+      }
       return response;
     }
 
