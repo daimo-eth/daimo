@@ -3,8 +3,7 @@ import sharp from "sharp";
 
 import { rpc } from "../../../utils/rpc";
 
-// @ts-ignore
-export async function GET(request: Request, { params }) {
+export async function GET(_: Request, { params }: any) {
   try {
     const res = await rpc.getEthereumAccount.query({ addr: params.addr });
 

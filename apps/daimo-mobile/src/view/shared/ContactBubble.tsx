@@ -1,7 +1,8 @@
 import { AddrLabel } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { Image } from "expo-image";
 import { useMemo } from "react";
-import { Text, TextStyle, View, ViewStyle, Image } from "react-native";
+import { Text, TextStyle, View, ViewStyle } from "react-native";
 
 import { color } from "./style";
 import {
@@ -116,10 +117,7 @@ export function Bubble({
   return (
     <View style={style}>
       {image ? (
-        <Image
-          source={{ uri: image }}
-          style={{ width: "100%", height: "100%" }}
-        />
+        <Image source={image} style={{ width: "100%", height: "100%" }} />
       ) : (
         <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
           {children}
