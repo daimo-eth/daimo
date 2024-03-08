@@ -7,16 +7,16 @@ export function SectionTestimonial() {
       <div className="bg-[#144B44] py-20 lg:py-32 lg:m-4 lg:rounded-2xl relative  overflow-hidden">
         <div className="relative max-w-screen-xl px-16 md:px-32 z-10">
           <QuoteIcon />
-          <div className="text-[40px] leading-[35px] lg:text-[84px] lg:leading-[71px] lg:-tracking-[3px] font-medium text-white pt-[49px]">
+          <div className="text-[40px] leading-[35px] lg:text-[84px] lg:leading-[71px] lg:-tracking-[3px] font-normal text-white pt-[49px]">
             There are these apps that just feel good to use but you can&apos;t
             exactly describe why. Daimo is one of those.
           </div>
           <Spacer h={24} />
-          <div className="text-2xl tracking-[1px] font-medium text-white">
+          <div className="text-2xl tracking-[1px] font-light text-white">
             Kristof Gazso
           </div>
           <Spacer h={8} />
-          <p className="text-2xl tracking-[1px] font-medium text-[#aaa]">
+          <p className="text-2xl tracking-[1px] font-light text-[#aaa]">
             ERC-4337 coauthor, founder of{" "}
             <a href="https://pimlico.io" target="blank" className="underline">
               Pimlico

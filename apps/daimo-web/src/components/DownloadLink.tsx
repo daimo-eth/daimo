@@ -63,7 +63,7 @@ export function DownloadLinkButtonMobileNav() {
     <Link
       href={link}
       target="_blank"
-      className="flex items-center justify-center space-x-4 rounded-lg py-4 px-9 bg-primaryLight text-white font-medium md:text-lg tracking-tight"
+      className="flex items-center justify-center space-x-4 rounded-lg py-4 px-9 bg-primaryLight text-white font-bold md:text-lg tracking-snug"
     >
       <div>{title}</div>
     </Link>

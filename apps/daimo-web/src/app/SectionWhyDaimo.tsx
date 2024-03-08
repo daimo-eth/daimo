@@ -87,7 +87,7 @@ function FeaturesDesktop() {
           <h2 className="font-medium text-[32px] px-20 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
             Why Daimo?
           </h2>
-          <p className="font-medium text-left text-sm md:text-[18px] px-20 lg:text-[24px] text-[#535353] pb-8 leading-snug max-w-xl ">
+          <p className="font-medium text-left text-sm md:text-[18px] px-20 lg:text-[24px] text-[#535353] pb-8 leading-snug tracking-wide max-w-xl ">
             Secure, audited, and fully open source. The safest, fastest way to
             stablecoin.
           </p>
@@ -124,13 +124,13 @@ function FeaturesDesktop() {
             src="/pixel-bg.svg"
           />
         </div>
-        <div className="my-6 flex justify-center gap-3">
-          {features.map((feature, featureIndex) => (
+        <div className="my-6 flex justify-center gap-6">
+          {features.map((_, featureIndex) => (
             <button
               type="button"
               key={featureIndex}
               className={clsx(
-                "relative h-0.5 w-4 rounded-full",
+                "relative h-2 w-2 rounded-full",
                 featureIndex === selectedIndex
                   ? "bg-primaryLight"
                   : "bg-grayLight"
@@ -139,17 +139,15 @@ function FeaturesDesktop() {
               onClick={() => {
                 setSelectedIndex(featureIndex);
               }}
-            >
-              <span className="absolute -inset-x-1.5 -inset-y-3" />
-            </button>
+            ></button>
           ))}
         </div>
         <Tab.List className="border-b border-b-grayMid/40 py-4 flex flex-row justify-between z-50">
-          {features.map((feature, featureIndex) => (
+          {features.map((feature) => (
             <Tab as={Fragment} key={feature.name}>
               {({ selected }) => (
                 <div
-                  className={`text-center font-bold text-[24px] cursor-pointer ${
+                  className={`text-center font-semibold text-[24px] cursor-pointer ${
                     selected ? "text-[#144B44]" : "text-[#AAAAAA]"
                   } transition-colors`}
                 >
@@ -168,6 +166,11 @@ function FeaturesDesktop() {
                   selectedIndex === featureIndex ? "block" : "hidden"
                 } p-8`}
               >
+                {feature.comingSoon && (
+                  <p className="py-2 text-base font-bold tracking-widest text-royalblue">
+                    COMING SOON
+                  </p>
+                )}
                 <h3 className="text-[38px] font-medium">{feature.title}</h3>
                 {feature.description.map((description, i) => (
                   <p key={i} className="mt-2 text-xl text-[#777]">
@@ -222,13 +225,13 @@ function FeaturesMobile() {
         Secure, audited, and fully open source. The safest, fastest way to
         stablecoin.
       </p>
-      <div className="my-6 flex justify-center gap-3">
+      <div className="my-6 flex justify-center gap-4">
         {features.map((_, featureIndex) => (
           <button
             type="button"
             key={featureIndex}
             className={clsx(
-              "relative h-0.5 w-4 rounded-full",
+              "relative h-2 w-2 rounded-full",
               featureIndex === activeIndex ? "bg-primaryLight" : "bg-grayLight"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
@@ -249,8 +252,10 @@ function FeaturesMobile() {
             type="button"
             key={featureIndex}
             className={clsx(
-              "relative font-bold",
-              featureIndex === activeIndex ? "text-midnight" : "text-grayMid"
+              "relative font-semibold",
+              featureIndex === activeIndex
+                ? "text-primaryLight"
+                : "text-grayMid"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
             onClick={() => {
@@ -285,9 +290,7 @@ function FeaturesMobile() {
                   />
                 </div>
                 {feature.comingSoon && (
-                  <p className="py-1 text-xs text-royalblue uppercase">
-                    Coming Soon
-                  </p>
+                  <p className="py-1 text-xs text-royalblue">COMING SOON</p>
                 )}
                 <h3 className="text-3xl font-medium text-black sm:text-3xl">
                   {feature.title}
