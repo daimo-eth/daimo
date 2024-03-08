@@ -19,22 +19,22 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
-import { useSendAsync } from "../../action/useSendAsync";
-import { deleteEnclaveKey } from "../../logic/enclave";
-import { useAccount } from "../../model/account";
-import { ButtonBig } from "../shared/Button";
-import { InfoBox } from "../shared/InfoBox";
-import { ScreenHeader } from "../shared/ScreenHeader";
-import Spacer from "../shared/Spacer";
-import { ParamListSettings, useNav } from "../shared/nav";
-import { color, ss } from "../shared/style";
+import { useSendAsync } from "../../../action/useSendAsync";
+import { deleteEnclaveKey } from "../../../logic/enclave";
+import { useAccount } from "../../../model/account";
+import { ButtonBig } from "../../shared/Button";
+import { InfoBox } from "../../shared/InfoBox";
+import { ScreenHeader } from "../../shared/ScreenHeader";
+import Spacer from "../../shared/Spacer";
+import { ParamListSettings, useNav } from "../../shared/nav";
+import { color, ss } from "../../shared/style";
 import {
   TextBody,
   TextCenter,
   TextError,
   TextH3,
   TextLight,
-} from "../shared/text";
+} from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 

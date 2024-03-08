@@ -21,14 +21,14 @@ import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
-import { AddDeviceScreen } from "./screen/AddDeviceScreen";
-import { AddPasskeyScreen } from "./screen/AddPasskeyScreen";
-import { DeviceScreen } from "./screen/DeviceScreen";
 import { ErrorScreen } from "./screen/ErrorScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
+import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
+import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
+import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
