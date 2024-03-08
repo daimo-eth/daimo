@@ -7,8 +7,10 @@ export async function GET(_: Request, { params }: any) {
   try {
     const res = await rpc.getEthereumAccount.query({ addr: params.addr });
 
-    if (res.profilePicture) {
-      const data = await fetch(res.profilePicture);
+    const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
+
+    if (profilePicture) {
+      const data = await fetch(profilePicture);
       const blob = await data.blob();
       const arrayBuffer = await blob.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);

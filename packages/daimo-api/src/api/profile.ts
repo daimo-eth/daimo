@@ -3,6 +3,7 @@ import {
   ProfileLink,
   ProfileLinkID,
   assertEqual,
+  daimoDomainAddress,
   zFarcasterLinkedAccount,
   zOffchainAction,
 } from "@daimo/common";
@@ -134,8 +135,8 @@ export class ProfileCache {
     return this.linkedAccounts.get(addr) || [];
   }
 
-  getProfilePicture(linkedAccounts: LinkedAccount[]) {
-    return linkedAccounts?.[0]?.pfpUrl;
+  getProfilePicture(addr: Address) {
+    return `${daimoDomainAddress}/profile/${addr}`;
   }
 
   searchLinkedAccounts(prefix: string): ProfileLink[] {

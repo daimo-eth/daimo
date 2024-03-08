@@ -132,7 +132,7 @@ export async function getAccountHistory(
   const linkedAccounts = profileCache.getLinkedAccounts(address);
 
   // Get pfps from linked accounts
-  const profilePicture = profileCache.getProfilePicture(linkedAccounts);
+  const profilePicture = profileCache.getProfilePicture(address);
 
   const ret: AccountHistoryResult = {
     address,

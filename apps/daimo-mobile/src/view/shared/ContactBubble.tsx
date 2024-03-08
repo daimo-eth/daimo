@@ -1,6 +1,6 @@
 import { AddrLabel } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { Image } from "expo-image";
+import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
@@ -94,7 +94,7 @@ export function Bubble({
       height: size - 1,
       borderRadius: 99,
       backgroundColor: transparent ? "transparent" : color.white,
-      borderWidth: image ? 0 : 1,
+      borderWidth: 1,
       borderColor: col,
       alignItems: "center",
       justifyContent: "center",
@@ -114,15 +114,25 @@ export function Bubble({
     [size, col]
   );
 
+  const imageStyle: ImageStyle = useMemo(
+    () => ({
+      position: "absolute",
+      height: size,
+      width: size,
+      borderRadius: size / 2,
+      zIndex: 5,
+    }),
+    [size]
+  );
+
   return (
-    <View style={style}>
-      {image ? (
-        <Image source={image} style={{ width: "100%", height: "100%" }} />
-      ) : (
+    <View style={{ width: size, height: size }}>
+      <Image source={image} style={imageStyle} />
+      <View style={style}>
         <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
           {children}
         </Text>
-      )}
+      </View>
     </View>
   );
 }

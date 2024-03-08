@@ -186,7 +186,7 @@ export class NameRegistry {
     const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
     // In the future, we can get this image from multiple sources.
     // In that case, we will have to determine the order of preference.
-    const profilePicture = this.profileCache.getProfilePicture(linkedAccounts);
+    const profilePicture = this.profileCache.getProfilePicture(addr);
     return { addr, name, timestamp, inviter, linkedAccounts, profilePicture };
   }
 
