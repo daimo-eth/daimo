@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 
 import { rpc } from "../../../utils/rpc";
 
@@ -9,8 +10,13 @@ export async function GET(request: Request, { params }) {
 
     if (res.profilePicture) {
       const data = await fetch(res.profilePicture);
+      const blob = await data.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-      const response = new NextResponse(await data.blob());
+      const result = await sharp(buffer).resize(64, 64).toBuffer();
+      const resultBlob = new Blob([result], { type: "image/jpeg" });
+      const response = new NextResponse(resultBlob);
       response.headers.set("Content-Type", "image/jpeg");
 
       return response;
