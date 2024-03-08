@@ -110,16 +110,25 @@ export class InviteCodeTracker {
       this.db.loadInviteCode(inviteLink.code)
     );
 
-    const isValid = code ? code.useCount < code.maxUses : false;
+    const usesLeft = code ? code.maxUses - code.useCount : 0;
     const inviter = code?.inviter
       ? await this.nameReg.getEAccount(code.inviter)
       : undefined;
     return {
       link: inviteLink,
-      isValid,
+      isValid: usesLeft > 0,
+      usesLeft,
       bonusDollarsInvitee: code?.bonusDollarsInvitee || 0,
       bonusDollarsInviter: code?.bonusDollarsInviter || 0,
       inviter,
     };
+  }
+
+  async getBestInviteCodeForSender(
+    sender: Address
+  ): Promise<string | undefined> {
+    return await retryBackoff(`getBestInviteCodeForSender`, () =>
+      this.db.getBestInviteCodeForSender(sender)
+    );
   }
 }

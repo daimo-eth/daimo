@@ -14,6 +14,7 @@ export class InviteGraph {
   async init() {
     console.log(`[INVITE GRAPH] init`);
 
+    // Get edges sorted by creation time
     const rows = await retryBackoff(`loadInviteGraph`, () =>
       this.db.loadInviteGraph()
     );
@@ -25,6 +26,7 @@ export class InviteGraph {
     return this.inviters.get(address);
   }
 
+  // Get all invitees of a given inviter, sorted by creation time
   getInvitees(address: Address): Address[] {
     return this.invitees.get(address) || [];
   }

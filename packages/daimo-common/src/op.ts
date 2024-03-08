@@ -23,13 +23,16 @@ export type OpEvent = TransferOpEvent | PaymentLinkOpEvent | KeyRotationOpEvent;
 export type DisplayOpEvent = TransferOpEvent | PaymentLinkOpEvent;
 
 /**
- *  Unique identifier for a pending OpEvent. For a pending op, we (usually)
+ *  Fetched data for a pending OpEvent. For a pending op, we (usually)
  *  only know either the opHash or the txHash. Set only one of them in this
  *  type to uniquely identify a pending user action.
+ *  Additionally include data that the API may have pre-fetched for the now
+ *  authenticated user.
  */
-export type PendingOpEventID = {
+export type PendingOpEvent = {
   opHash?: Hex;
   txHash?: Hex;
+  inviteCode?: string;
 };
 
 /**
