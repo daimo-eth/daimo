@@ -13,6 +13,7 @@ import {
 import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 
@@ -21,6 +22,10 @@ import { color, ss } from "./style";
 import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
+const INITIAL_WIDTH = SCREEN_WIDTH - 16 * 2;
+const ICONS = (50 + 16) * 2;
+const BACK_ICON = 30 + 8;
+
 const animationConfig = { duration: 150 };
 
 export function AnimatedSearchInput({
@@ -46,12 +51,24 @@ export function AnimatedSearchInput({
   innerRef?: RefObject<TextInput>;
   style?: ViewStyle;
 }) {
+  const closedWidth = useSharedValue(INITIAL_WIDTH - ICONS);
+  const openWidth = useSharedValue(INITIAL_WIDTH - BACK_ICON);
+  const animatedWidth = useSharedValue(closedWidth.value);
+
+  const closedLeft = 0;
+  const openLeft = BACK_ICON / 2;
+  const animatedLeft = useSharedValue(closedLeft);
+
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {
+    animatedWidth.value = withTiming(openWidth.value, animationConfig);
+    animatedLeft.value = withTiming(openLeft, animationConfig);
     setIsFocused(true);
     onFocus?.();
   }, []);
   const onInputBlur = useCallback(() => {
+    animatedWidth.value = withTiming(closedWidth.value, animationConfig);
+    animatedLeft.value = withTiming(closedLeft, animationConfig);
     setIsFocused(false);
     onBlur?.();
   }, []);
@@ -66,26 +83,22 @@ export function AnimatedSearchInput({
     ref.current?.focus();
   }, [ref]);
 
-  const [width, setWidth] = useState(SCREEN_WIDTH - 16 * 2);
-
   const wrapperStyle = useAnimatedStyle(() => {
-    const icons = (50 + 16) * 2;
-    const backIcon = 30 + 8;
-    const closedWidth = width - icons;
-    const openWidth = width - backIcon;
-
     return {
-      width: isFocused
-        ? withTiming(openWidth, animationConfig)
-        : withTiming(closedWidth, animationConfig),
-      left: isFocused
-        ? withTiming(backIcon / 2, animationConfig)
-        : withTiming(0, animationConfig),
+      width: animatedWidth.value,
+      left: animatedLeft.value,
     };
   });
 
   const onLayout = (event: LayoutChangeEvent) => {
-    setWidth(event.nativeEvent.layout.width);
+    const newClosedWidth = event.nativeEvent.layout.width - ICONS;
+    const newOpenWidth = event.nativeEvent.layout.width - BACK_ICON;
+
+    closedWidth.value = newClosedWidth;
+    openWidth.value = newOpenWidth;
+
+    animatedWidth.value = isFocused ? newOpenWidth : newClosedWidth;
+    animatedLeft.value = isFocused ? openLeft : closedLeft;
   };
 
   return (
