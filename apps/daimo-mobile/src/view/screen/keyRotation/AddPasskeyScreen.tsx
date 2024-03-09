@@ -35,7 +35,8 @@ export function AddPasskeyScreen() {
       <Spacer h={32} />
       <View style={ss.container.padH16}>
         <TextPara>
-          Back up your account by saving a secure passkey in {cloudName}.
+          Back up your account by saving a secure passkey in your password
+          manager, for example {cloudName} or 1Password.
         </TextPara>
         <Spacer h={8} />
         <TextPara>
