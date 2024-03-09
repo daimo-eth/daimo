@@ -1,12 +1,13 @@
 import * as Contacts from "expo-contacts";
 import { useEffect, useState } from "react";
-import { Alert, Linking } from "react-native";
+import { Alert } from "react-native";
 
 import { MsgContact } from "./daimoContacts";
+import { askOpenSettings } from "./settings";
 
 export interface ContactsAccess {
   permission: Contacts.PermissionResponse | undefined;
-  ask: () => void;
+  ask: () => Promise<void>;
 }
 
 export function useContactsPermission(): ContactsAccess {
@@ -50,7 +51,7 @@ function requestContactsAccess(canAskAgain: boolean) {
           text: `Continue`,
           onPress: () => {
             if (canAskAgain) askSystem(resolve);
-            else askOpenSettings(resolve);
+            else askOpenSettings("contacts", resolve);
           },
         },
         {
@@ -70,36 +71,6 @@ function askSystem(resolve: (value: void) => void) {
   Contacts.requestPermissionsAsync().then(() => {
     resolve();
   });
-}
-
-async function askOpenSettings(resolve: (value: void) => void) {
-  // Step 2: If user says yes to our own prompt but previously denied system
-  // prompt, ask them to open settings.
-  Alert.alert(
-    "Enable access in Settings",
-    "Visit Settings > Daimo and enable contacts.",
-    [
-      {
-        text: "Continue",
-        onPress: () => {
-          Linking.openSettings().then(async () => {
-            // On iOS, the app is reset by the OS when access is changed from
-            // settings, so this isn't triggered. On Android, we wait a
-            // few seconds to let user open settings, then resolve.
-            await new Promise((f) => setTimeout(f, 5000));
-            resolve();
-          });
-        },
-      },
-      {
-        text: "Cancel",
-        style: "cancel",
-        onPress: () => {
-          resolve();
-        },
-      },
-    ]
-  );
 }
 
 // Search user system contacts for a string, returning a list of matches.
