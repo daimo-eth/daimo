@@ -93,7 +93,7 @@ function PhoneScreenBackground(
 
 function HeroH1({ children }: { children: React.ReactNode }) {
   return (
-    <h1 className="text-center md:text-left text-4xl md:text-5xl lg:text-[84px] font-medium text-white lg:leading-[84px] ">
+    <h1 className="text-center md:text-left text-4xl md:text-5xl lg:text-[84px] font-regular text-white lg:leading-[84px] ">
       {children}
     </h1>
   );
