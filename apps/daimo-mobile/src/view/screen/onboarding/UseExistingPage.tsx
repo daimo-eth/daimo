@@ -55,6 +55,9 @@ export function UseExistingPage({
     if (useExistingStatus === "success") onNext();
   }, [useExistingStatus]);
 
+  const slotType =
+    env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
+
   if (keyStatus.pubKeyHex === undefined) {
     return (
       <View>
@@ -68,34 +71,37 @@ export function UseExistingPage({
       </View>
     );
   }
+
   return (
     <View>
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
-        <Spacer h={24} />
-        <QRCodeBox value={createAddDeviceString(keyStatus.pubKeyHex)} />
+        <Spacer h={16} />
+        <QRCodeBox
+          value={createAddDeviceString(keyStatus.pubKeyHex, slotType)}
+        />
         <Spacer h={16} />
         <TextCenter>
-          {useExistingStatus !== "error" && (
+          {useExistingStatus === "error" ? (
             <TextLight>
               <EmojiToOcticon size={16} text={useExistingMessage} />
             </TextLight>
+          ) : (
+            <TextPara>
+              Add this {env(daimoChain).deviceType} to an existing account. Go
+              to Daimo {`>`} Settings {`>`} Add Device on your other device to
+              scan the QR code.
+            </TextPara>
           )}
         </TextCenter>
         <Spacer h={24} />
         <TextCenter>
-          <TextPara>
-            Add this {env(daimoChain).deviceType} to an existing account. Scan
-            the QR code above with your other device.
-          </TextPara>
-        </TextCenter>
-        <Spacer h={16} />
-        <TextCenter>
           <TextLight>or</TextLight>
         </TextCenter>
-        <Spacer h={16} />
+        <Spacer h={24} />
         <RestoreFromBackupButton
           pubKeyHex={keyStatus.pubKeyHex}
+          slotType={slotType}
           daimoChain={daimoChain}
         />
       </View>
@@ -105,9 +111,11 @@ export function UseExistingPage({
 
 function RestoreFromBackupButton({
   pubKeyHex,
+  slotType,
   daimoChain,
 }: {
   pubKeyHex: Hex;
+  slotType: SlotType;
   daimoChain: DaimoChain;
 }) {
   const [passkeyAccount, setPasskeyAccount] = useState<Account | undefined>(
@@ -119,9 +127,7 @@ function RestoreFromBackupButton({
       passkeyAccount
         ? findUnusedSlot(
             passkeyAccount.accountKeys.map((k) => k.slot),
-            env(daimoChain).deviceType === "phone"
-              ? SlotType.Phone
-              : SlotType.Computer
+            slotType
           )
         : null,
     [passkeyAccount]

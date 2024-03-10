@@ -1,4 +1,9 @@
-import { isDERPubKey, assert, parseAndNormalizeSig } from "@daimo/common";
+import {
+  isDERPubKey,
+  assert,
+  parseAndNormalizeSig,
+  SlotType,
+} from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { SigningCallback } from "@daimo/userop";
@@ -17,18 +22,29 @@ import {
 import { Log } from "./log";
 
 // Parses the custom URI from the Add Device QR code.
-export function parseAddDeviceString(addString: string): Hex {
-  const [prefix, pubKey] = addString.split(":");
-  assert(prefix === "addkey");
+export function parseAddDeviceString(addString: string): [Hex, SlotType] {
+  const prefix = addString.split(":")[0];
+
+  if (prefix === "addkey") {
+    // Backcompat with old version of the app
+    const pubKey = addString.split(":")[1];
+    assert(isHex(pubKey));
+    assert(isDERPubKey(pubKey));
+    return [pubKey, SlotType.Phone];
+  }
+
+  assert(prefix === "addkeyV2");
+  const [pubKey, slot] = addString.split(":").slice(1);
   assert(isHex(pubKey));
   assert(isDERPubKey(pubKey));
-  return pubKey;
+  assert(slot in SlotType);
+  return [pubKey, slot as SlotType];
 }
 
 // Creates a custom URI for the Add Device QR code.
-export function createAddDeviceString(pubKey: Hex): string {
+export function createAddDeviceString(pubKey: Hex, slot: SlotType): string {
   assert(isDERPubKey(pubKey));
-  return `addkey:${pubKey}`;
+  return `addkeyV2:${pubKey}:${slot}`;
 }
 
 // Creates minimal Webauthn signatures using a hardware enclave key.
