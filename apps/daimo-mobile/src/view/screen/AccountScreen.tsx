@@ -200,6 +200,12 @@ function AccountScreenBody({
           Joined {timeMonth(eAcc.timestamp)}
         </TextBody>
       );
+    else if (getAccountName(eAcc) !== getAddressContraction(eAcc.addr))
+      return (
+        <TextBody color={color.gray3}>
+          {getAddressContraction(eAcc.addr)}
+        </TextBody>
+      );
     return null;
   })();
 
