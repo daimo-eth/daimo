@@ -2,7 +2,7 @@ import { Alert, Linking } from "react-native";
 
 // Ask to open settings to enable `type` access.
 export async function askOpenSettings(
-  type: "contacts" | "notifications",
+  type: "contacts" | "notifications" | "camera",
   resolve: (value: void) => void
 ) {
   Alert.alert(

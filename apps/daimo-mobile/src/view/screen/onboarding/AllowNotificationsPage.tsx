@@ -7,10 +7,7 @@ import { View, StyleSheet } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { env } from "../../../logic/env";
-import {
-  getPushNotificationManager,
-  useNotificationsAccess,
-} from "../../../logic/notify";
+import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
@@ -30,13 +27,9 @@ export function AllowNotificationsPage({
   const [displayMacVideo, setDisplayMacVideo] = useState<boolean>(false);
 
   const allowNotifications = async () => {
-    if (!notificationsAccess.permission?.granted) {
-      console.log(`[ONBOARDING] requesting notifications access`);
-      setDisplayMacVideo(env(daimoChain).deviceType === "computer");
-      await notificationsAccess.ask();
-    }
-
-    getPushNotificationManager().maybeSavePushTokenForAccount();
+    console.log(`[ONBOARDING] requesting notifications access`);
+    setDisplayMacVideo(env(daimoChain).deviceType === "computer");
+    await notificationsAccess.ask();
 
     onNext();
   };

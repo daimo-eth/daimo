@@ -53,7 +53,7 @@ export function useInitNotifications() {
 
 let pushNotificationManager = null as null | PushNotificationManager;
 
-export function getPushNotificationManager() {
+function getPushNotificationManager() {
   if (pushNotificationManager == null) {
     pushNotificationManager = new PushNotificationManager();
   }
@@ -89,16 +89,6 @@ class PushNotificationManager {
     } catch (e) {
       console.error(`[NOTIFY] failed to save push token`, e);
     }
-  };
-
-  savePushTokenForAccount = async () => {
-    const permission = await Notifications.getPermissionsAsync();
-    if (!permission.granted) {
-      throw new Error(
-        "Notifications pemission denied. You can change this in Settings."
-      );
-    }
-    await this.savePushTokenInner();
   };
 
   private async savePushTokenInner() {
@@ -155,11 +145,14 @@ export function useNotificationsAccess(): NotificationsAccess {
     }
 
     fetchPermissions();
+    getPushNotificationManager().maybeSavePushTokenForAccount();
   };
 
   return { permission, ask };
 }
 
+// Ask for push notifications access, either via a direct prompt or by asking
+// to open system settings.
 async function requestNotificationsAccess(canAskAgain: boolean) {
   if (!Device.isDevice) {
     console.log(`[NOTIFY] not on a real device, skipping notification request`);
