@@ -1,8 +1,7 @@
 import { daimoChainFromId } from "@daimo/contract";
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
-import { Alert, AppState, Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import { env } from "./env";
 import { Log } from "./log";
@@ -154,23 +153,6 @@ export function useNotificationsAccess(): NotificationsAccess {
 // Ask for push notifications access, either via a direct prompt or by asking
 // to open system settings.
 async function requestNotificationsAccess(canAskAgain: boolean) {
-  if (!Device.isDevice) {
-    console.log(`[NOTIFY] not on a real device, skipping notification request`);
-    Alert.alert(
-      "Push notifications not supported in simulator",
-      undefined,
-      [
-        {
-          text: `Continue`,
-        },
-      ],
-      { cancelable: false }
-    );
-    return;
-  }
-
   if (canAskAgain) await Notifications.requestPermissionsAsync();
-  else {
-    await askOpenSettings("notifications", () => {});
-  }
+  else await askOpenSettings("notifications", () => {});
 }
