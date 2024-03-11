@@ -53,6 +53,15 @@ just outright bugs.
 - [ ] Account screen: Send Debug Log
 - [ ] Debug log looks clean
 
+### macOS
+
+Smoke test, particularly for visual regressions:
+
+- [ ] Install from Testflight
+- [ ] Send payment
+- [ ] Share invite link
+- [ ] Delete account and restore from passkey backup
+
 ### Push to prod
 
 - [ ] Push to `prod`

@@ -1,10 +1,11 @@
 import { daimoChainFromId } from "@daimo/contract";
 import * as Notifications from "expo-notifications";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import { env } from "./env";
 import { Log } from "./log";
+import { askOpenSettings } from "./settings";
 import { getAccountManager, useAccount } from "../model/account";
 import { syncAfterPushNotification } from "../sync/sync";
 
@@ -49,13 +50,13 @@ export function useInitNotifications() {
   }, [address]);
 }
 
-let pushNotitificationManager = null as null | PushNotificationManager;
+let pushNotificationManager = null as null | PushNotificationManager;
 
-export function getPushNotificationManager() {
-  if (pushNotitificationManager == null) {
-    pushNotitificationManager = new PushNotificationManager();
+function getPushNotificationManager() {
+  if (pushNotificationManager == null) {
+    pushNotificationManager = new PushNotificationManager();
   }
-  return pushNotitificationManager;
+  return pushNotificationManager;
 }
 
 class PushNotificationManager {
@@ -89,16 +90,6 @@ class PushNotificationManager {
     }
   };
 
-  savePushTokenForAccount = async () => {
-    const permission = await Notifications.getPermissionsAsync();
-    if (!permission.granted) {
-      throw new Error(
-        "Notifications pemission denied. You can change this in Settings."
-      );
-    }
-    await this.savePushTokenInner();
-  };
-
   private async savePushTokenInner() {
     if (this.accountManager.currentAccount == null) {
       throw new Error("No account");
@@ -124,4 +115,44 @@ class PushNotificationManager {
     const acc = this.accountManager.currentAccount;
     this.accountManager.setCurrentAccount({ ...acc, pushToken: token.data });
   }
+}
+
+interface NotificationsAccess {
+  permission: Notifications.PermissionResponse | undefined;
+  ask: () => Promise<void>;
+}
+
+export function useNotificationsAccess(): NotificationsAccess {
+  const [permission, setPermission] = useState<
+    Notifications.PermissionResponse | undefined
+  >();
+
+  const fetchPermissions = async () => {
+    await Notifications.getPermissionsAsync().then(setPermission);
+  };
+
+  useEffect(() => {
+    fetchPermissions();
+  }, []);
+
+  const ask = async () => {
+    // Refresh permission state before prompting.
+    const latestPermission = await Notifications.getPermissionsAsync();
+
+    if (!latestPermission.granted) {
+      await requestNotificationsAccess(latestPermission.canAskAgain);
+    }
+
+    fetchPermissions();
+    getPushNotificationManager().maybeSavePushTokenForAccount();
+  };
+
+  return { permission, ask };
+}
+
+// Ask for push notifications access, either via a direct prompt or by asking
+// to open system settings.
+async function requestNotificationsAccess(canAskAgain: boolean) {
+  if (canAskAgain) await Notifications.requestPermissionsAsync();
+  else await askOpenSettings("notifications", () => {});
 }

@@ -168,10 +168,10 @@ export default function OnboardingScreen({
         />
       )}
       {page === "new-allow-notifications" && (
-        <AllowNotificationsPage onNext={next} />
+        <AllowNotificationsPage onNext={next} daimoChain={daimoChain} />
       )}
       {page === "existing-allow-notifications" && (
-        <AllowNotificationsPage onNext={next} />
+        <AllowNotificationsPage onNext={next} daimoChain={daimoChain} />
       )}
       {page === "new-loading" && (
         <CreateAccountSpinnerPage

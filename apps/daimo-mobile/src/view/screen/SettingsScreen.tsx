@@ -5,7 +5,6 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import * as Notifications from "expo-notifications";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -18,7 +17,7 @@ import {
 import { DispatcherContext } from "../../action/dispatch";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../logic/env";
-import { getPushNotificationManager } from "../../logic/notify";
+import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount, useAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
@@ -325,15 +324,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 }
 
 function DetailsSection({ account }: { account: Account }) {
-  const enableNotifications = async () => {
-    await Notifications.requestPermissionsAsync();
-    try {
-      getPushNotificationManager().savePushTokenForAccount();
-    } catch (e: any) {
-      console.error(e);
-      window.alert(e.message);
-    }
-  };
+  const { ask } = useNotificationsAccess();
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
 
@@ -350,11 +341,7 @@ function DetailsSection({ account }: { account: Account }) {
       </View>
       <Spacer h={24} />
       {!account.pushToken && (
-        <ButtonMed
-          type="subtle"
-          title="Enable notifications"
-          onPress={enableNotifications}
-        />
+        <ButtonMed type="subtle" title="Enable notifications" onPress={ask} />
       )}
       {!account.pushToken && <Spacer h={16} />}
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
