@@ -16,6 +16,7 @@ import { ViemClient } from "../network/viemClient";
 export class ProfileCache {
   private links: ProfileLink[] = [];
   private linkedAccounts: Map<Address, LinkedAccount[]> = new Map();
+  private fidToAddress: Map<number, Address> = new Map();
 
   constructor(private vc: ViemClient, private db: DB) {}
 
@@ -88,6 +89,7 @@ export class ProfileCache {
       const linked = this.linkedAccounts.get(link.addr) || [];
       linked.push(link.linkedAccount);
       this.linkedAccounts.set(link.addr, linked);
+      this.fidToAddress.set(link.linkedAccount.fid, link.addr);
     }
   }
 
@@ -133,6 +135,10 @@ export class ProfileCache {
 
   getLinkedAccounts(addr: Address): LinkedAccount[] {
     return this.linkedAccounts.get(addr) || [];
+  }
+
+  getAddress(fid: number): Address | undefined {
+    return this.fidToAddress.get(fid);
   }
 
   getProfilePicture(addr: Address) {

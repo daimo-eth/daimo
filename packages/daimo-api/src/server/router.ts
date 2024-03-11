@@ -168,6 +168,11 @@ export function createRouter(
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
         return addr ? await nameReg.getEAccount(addr) : null;
       }),
+    lookupEthereumAccountByFid: publicProcedure
+      .input(z.object({ fid: z.number() }))
+      .query(async () => {
+        throw new Error("TODO not implemented");
+      }),
 
     lookupAddressKeys: publicProcedure
       .input(z.object({ addr: zAddress }))
