@@ -25,12 +25,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    associatedDomains: [
-      "applinks:daimo.xyz",
-      "applinks:daimo.com",
-      "webcredentials:daimo.xyz",
-      "webcredentials:daimo.com",
-    ],
+    associatedDomains: ["applinks:daimo.com", "webcredentials:daimo.com"],
     config: {
       usesNonExemptEncryption: false,
     },
