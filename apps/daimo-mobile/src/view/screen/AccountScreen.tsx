@@ -200,11 +200,13 @@ function AccountScreenBody({
           Joined {timeMonth(eAcc.timestamp)}
         </TextBody>
       );
-    return (
-      <TextBody color={color.gray3}>
-        {getAddressContraction(eAcc.addr)}
-      </TextBody>
-    );
+    else if (getAccountName(eAcc) !== getAddressContraction(eAcc.addr))
+      return (
+        <TextBody color={color.gray3}>
+          {getAddressContraction(eAcc.addr)}
+        </TextBody>
+      );
+    return null;
   })();
 
   // Show linked accounts
