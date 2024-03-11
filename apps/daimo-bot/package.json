@@ -1,0 +1,21 @@
+{
+  "name": "@daimo/bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/api/index.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@farcaster/hub-nodejs": "^0.11.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "typescript": "^5.4.2"
+  }
+}
