@@ -255,7 +255,8 @@ function getRampNetworkURL(account: EAccount) {
   const hostAppName = "Daimo";
   const hostLogoUrl = "https://daimo.com/assets/icon-ramp.png";
   const swapAsset = "BASE_USDC";
-  return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}`;
+  const finalUrl = "daimo://";
+  return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}&finalUrl=${finalUrl}`;
 }
 
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
