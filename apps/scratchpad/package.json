@@ -4,14 +4,12 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "test": "tsc --noEmit",
-    "start:farcaster": "ts-node src/farcaster/gRpc/index.ts"
+    "test": "tsc --noEmit"
   },
   "dependencies": {
     "@daimo/api": "*",
     "@daimo/contract": "*",
     "@daimo/userop": "*",
-    "@farcaster/hub-nodejs": "^0.11.6",
     "@scure/base": "^1.1.3",
     "@trpc/client": "^10.43.2",
     "@trpc/server": "^10.43.2",
