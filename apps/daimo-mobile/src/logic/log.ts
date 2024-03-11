@@ -45,18 +45,19 @@ export class Log {
     type: string,
     fn: () => Promise<T>,
     retries: number,
-    matchError?: (e: NamedError) => boolean
+    matchError?: (e: string) => boolean
   ) {
     for (let i = 0; i < retries; i++) {
-      const ret = fn();
       try {
-        this.promise(type, ret);
-        return ret;
+        return await this.promise(type, fn());
       } catch (e: any) {
-        if (matchError && matchError(e)) {
+        if (matchError && matchError(getErrMessage(e))) {
           console.log(`[LOG] ${type} trial ${i} error ${getErrMessage(e)}`);
-          setTimeout(() => {}, i * 300);
+          await new Promise((r) => setTimeout(r, 200 * 2 ** i));
         } else {
+          console.log(
+            `[LOG] ${type} skipping retry ${i} error ${getErrMessage(e)}`
+          );
           throw new NamedError(getErrMessage(e), type);
         }
       }

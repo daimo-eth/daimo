@@ -3,7 +3,6 @@ import { DaimoChain, daimoAccountABI } from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
 import { base64 } from "@scure/base";
-import { Platform } from "react-native";
 import {
   Hex,
   bytesToHex,
@@ -16,24 +15,9 @@ import { env } from "./env";
 import { Log } from "./log";
 import { parseCreateResponse, parseSignResponse } from "./passkeyParsers";
 
-// Workaround for iOS bug with passkeys: prefetch AASA
-export async function prefetchAASA() {
-  if (Platform.OS !== "ios" && Platform.OS !== "macos") return;
-
-  const result = await fetch(
-    "https://app-site-association.cdn-apple.com/a/v1/daimo.com" // Apple CDN URL
-  );
-
-  if (!result.ok) {
-    console.log("[PASSKEY] Failed to prefetch AASA", result);
-  }
-}
-
-function matchAASAError(e: any) {
-  return (
-    e.message.includes("JV8PYC9QV4.com.daimo") &&
-    e.message.includes("daimo.com")
-  );
+function matchAASABugError(e: string) {
+  // Match without english text since iOS errors are localized to device language
+  return e.includes("JV8PYC9QV4.com.daimo") && e.includes("daimo.com");
 }
 
 // Wrapper for Expo module native passkey creation
@@ -66,7 +50,7 @@ export async function createPasskey(
         challengeB64,
       }),
     3,
-    matchAASAError
+    matchAASABugError
   );
 
   console.log("[PASSKEY] Got creation result from expo module", result);
@@ -134,7 +118,7 @@ export async function requestPasskeySignature(
         challengeB64,
       }),
     3,
-    matchAASAError
+    matchAASABugError
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
 
