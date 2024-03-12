@@ -85,7 +85,6 @@ export function Bubble({
   fontSize: number;
   image?: string;
   children: React.ReactNode;
-  logPrefix?: string;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
 
