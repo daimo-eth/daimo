@@ -12,7 +12,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@farcaster/hub-nodejs": "^0.11.6"
+    "@daimo/api": "*",
+    "@daimo/common": "*",
+    "@farcaster/hub-nodejs": "^0.11.6",
+    "@trpc/client": "^10.43.2",
+    "@trpc/server": "^10.43.2",
+    "api": "^6.1.1",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "viem": "^2.8.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
