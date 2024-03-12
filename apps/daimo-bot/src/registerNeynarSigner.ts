@@ -112,4 +112,18 @@ type SignedKeyData = {
   // ! TODO: Run this file, open the signer approval url from output, and approve.
   // Record the signer_uuid
   // Afterwards, daimobot is now registered with Neynar API and is able to cast programmatically
+
+  // (Optional) Step 7: Send a test cast
+  // SAMPLE:
+
+  //   curl --request POST \
+  //      --url https://api.neynar.com/v2/farcaster/cast \
+  //      --header 'accept: application/json' \
+  //!      --header 'api_key: <ENTER_API_KEY_HERE>' \
+  //      --header 'content-type: application/json' \
+  //      --data '
+  // {
+  //!   "signer_uuid": "<ENTER_SIGNER_UUID_HERE>",
+  //   "text": "*Ahem* \n\n gm from daimobot 🪐"
+  // }
 })();
