@@ -19,7 +19,9 @@
     "@trpc/client": "^10.43.2",
     "@trpc/server": "^10.43.2",
     "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
+    "express": "^4.18.3",
     "viem": "^2.8.2"
   },
   "devDependencies": {

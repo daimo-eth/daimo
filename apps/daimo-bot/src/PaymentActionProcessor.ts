@@ -1,4 +1,3 @@
-import { MergeMessageHubEvent } from "@farcaster/hub-nodejs";
 import { trpcClient } from "./trpcClient";
 import {
   dollarsToAmount,
@@ -6,7 +5,7 @@ import {
   formatDaimoLink,
   generateRequestId,
 } from "@daimo/common";
-import { TRPCClient } from "./types";
+import { TRPCClient, WebhookEvent } from "./types";
 
 // 6 cases of Payment request:
 
@@ -26,15 +25,19 @@ import { TRPCClient } from "./types";
 
 export class PaymentActionProcessor {
   private text: string | null;
+  private castId: string | null;
   private parentCastId: string | null;
   private parentAuthorFid: number | null;
   private senderFid: number;
   private client: TRPCClient;
-  constructor(event: MergeMessageHubEvent) {
-    this.text = event.mergeMessageBody.message.data?.castAddBody?.text || null;
-    this.parentCastId = ""; // TODO
-    this.parentAuthorFid = -1; // TODO
-    this.senderFid = -1; // TODO
+
+  constructor(event: WebhookEvent) {
+    const { data } = event;
+    this.text = data.text;
+    this.castId = data.hash;
+    this.parentCastId = data.parent_url; // TODO verify
+    this.parentAuthorFid = data.parent_author.fid;
+    this.senderFid = data.author.fid;
     this.client = trpcClient;
   }
 
@@ -43,11 +46,11 @@ export class PaymentActionProcessor {
 
     const daimobotCommand = this.tryExtractCommand();
     if (!daimobotCommand) {
-      console.log("Did not follow either example above.");
+      console.log("Cast follows neither request nor pay format.");
+      // todo handle
       return;
     }
 
-    // Handle request or payment
     const { action, amount } = daimobotCommand;
     switch (action) {
       case "request": {
@@ -141,5 +144,3 @@ export class PaymentActionProcessor {
     return daimoShareUrl;
   }
 }
-// Farcaster Idiosyncrasy to remember: Timestamps are calculated from Farcaster epoch, not Unix epoch
-// https://github.com/farcasterxyz/hub-monorepo/blob/main/packages/hub-nodejs/docs/Utils.md#time
