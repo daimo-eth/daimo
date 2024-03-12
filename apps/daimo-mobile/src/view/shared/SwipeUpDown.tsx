@@ -7,7 +7,15 @@ import {
   NativeStackNavigationOptions,
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
-import { ReactNode, forwardRef, useCallback, useMemo, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -112,18 +120,6 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       };
     });
 
-    const TransactionList = () => (
-      <>
-        <Animated.View
-          style={[styles.itemMiniWrapper, itemMiniStyle]}
-          pointerEvents={isMini ? "auto" : "none"}
-        >
-          {itemMini}
-        </Animated.View>
-        {itemFull}
-      </>
-    );
-
     return (
       <BottomSheet
         index={0}
@@ -141,26 +137,64 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         animationConfigs={ANIMATION_CONFIG}
       >
         <SetBottomSheetSnapPointCount.Provider value={setSnapPointCount}>
-          <BottomSheetStackNavigator.Navigator
-            initialRouteName="BottomSheetList"
-            screenOptions={noHeaders}
+          <SwipeContext.Provider
+            value={{ isMini, itemMiniStyle, itemMini, itemFull }}
           >
-            <BottomSheetStackNavigator.Group>
-              <BottomSheetStackNavigator.Screen
-                name="BottomSheetList"
-                component={TransactionList}
-              />
-              <BottomSheetStackNavigator.Screen
-                name="BottomSheetHistoryOp"
-                component={HistoryOpScreen}
-              />
-            </BottomSheetStackNavigator.Group>
-          </BottomSheetStackNavigator.Navigator>
+            <BottomSheetStackNavigator.Navigator
+              initialRouteName="BottomSheetList"
+              screenOptions={noHeaders}
+            >
+              <BottomSheetStackNavigator.Group>
+                <BottomSheetStackNavigator.Screen
+                  name="BottomSheetList"
+                  component={TransactionList}
+                />
+                <BottomSheetStackNavigator.Screen
+                  name="BottomSheetHistoryOp"
+                  component={HistoryOpScreen}
+                />
+              </BottomSheetStackNavigator.Group>
+            </BottomSheetStackNavigator.Navigator>
+          </SwipeContext.Provider>
         </SetBottomSheetSnapPointCount.Provider>
       </BottomSheet>
     );
   }
 );
+
+type SwipeContextValue = {
+  itemMini: ReactNode;
+  itemFull: ReactNode;
+  isMini: boolean;
+  itemMiniStyle: { opacity: number };
+};
+
+const SwipeContext = createContext<SwipeContextValue | null>(null);
+
+function useSwipeContext() {
+  const ctx = useContext(SwipeContext);
+
+  if (!ctx) throw new Error("Must be used inside a SwipeContext");
+
+  return ctx;
+}
+
+// Fade animation between minified and full lists
+function TransactionList() {
+  const { itemMini, itemFull, isMini, itemMiniStyle } = useSwipeContext();
+
+  return (
+    <>
+      <Animated.View
+        style={[styles.itemMiniWrapper, itemMiniStyle]}
+        pointerEvents={isMini ? "auto" : "none"}
+      >
+        {itemMini}
+      </Animated.View>
+      {itemFull}
+    </>
+  );
+}
 
 const ANIMATION_CONFIG = {
   stiffness: 160,

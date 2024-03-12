@@ -115,7 +115,6 @@ export function Bubble({
 
   const imageStyle: ImageStyle = useMemo(
     () => ({
-      position: "absolute",
       // Match size of bordered default bubble
       height: size - 1,
       width: size - 1,
