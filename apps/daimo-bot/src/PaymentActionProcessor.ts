@@ -7,7 +7,7 @@ import {
 } from "@daimo/common";
 import { TRPCClient, WebhookEvent } from "./types";
 
-// 6 cases of Payment request:
+// 4 cases of Payment request:
 
 // Requesting:
 // Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
@@ -140,7 +140,7 @@ export class PaymentActionProcessor {
       recipient,
       dollars: `${amount}`,
     });
-    console.log(`[DAIMOBOT REQUEST] daimoShareUrl ${daimoShareUrl}`);
+    console.log(`[DAIMOBOT REQUEST] url ${daimoShareUrl}`);
     return daimoShareUrl;
   }
 }

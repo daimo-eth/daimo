@@ -21,6 +21,12 @@ assert(!!process.env.FARCASTER_ID, "FARCASTER_ID is not defined");
 const FARCASTER_ID = process.env.FARCASTER_ID;
 const NEYNAR_BASE_URL = "https://api.neynar.com/v2/farcaster";
 
+const AUTH_HEADERS = {
+  headers: {
+    api_key: process.env.NEYNAR_API_KEY,
+  },
+} as const;
+
 const generateSignature = async (publicKey: string) => {
   // DO NOT CHANGE ANY VALUES IN THIS CONSTANT
   const SIGNED_KEY_REQUEST_VALIDATOR_EIP_712_DOMAIN = {
@@ -70,11 +76,7 @@ type SignedKeyData = {
   const createSignerResponse = await axios.post(
     `${NEYNAR_BASE_URL}/signer`,
     {},
-    {
-      headers: {
-        api_key: process.env.NEYNAR_API_KEY,
-      },
-    }
+    AUTH_HEADERS
   );
 
   //   Step 2: Generate a signature
@@ -91,11 +93,7 @@ type SignedKeyData = {
       deadline,
       signature,
     },
-    {
-      headers: {
-        api_key: process.env.NEYNAR_API_KEY,
-      },
-    }
+    AUTH_HEADERS
   );
   const data: SignedKeyData = signedKeyResponse.data;
   console.log(data);

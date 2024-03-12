@@ -31,7 +31,7 @@ const getApiUrl = () => {
 };
 
 console.log(`[TRPC] connecting to ${getApiUrl()}`);
-// @ts-expect-error non-blocking AppRouter TypeError
+// @ts-expect-error: non-blocking AppRouter TypeError. types still populate
 export const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({

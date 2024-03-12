@@ -25,10 +25,12 @@ app.post("/daimobot-hook", async (req, res) => {
     if (event.data.object !== "cast") {
       throw new Error(`Unexpected event type: ${event.data.object}`);
     }
-    new PaymentActionProcessor(event).process(); // todo do something with it
+    new PaymentActionProcessor(event).process();
     res.status(200).send("OK");
   } catch (err) {
     console.error("Error processing webhook event:", err);
+    // TODO give error cast response to user
+    // TODO log to o11y provider
     res.status(500).send("Error processing event");
   }
 });
