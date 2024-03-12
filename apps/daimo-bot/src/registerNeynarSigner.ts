@@ -109,7 +109,8 @@ type SignedKeyData = {
   //   }
 
   //   Steps 4, 5, 6:
-  // ! TODO: Run this file, open the signer approval url from output, and approve.
+  // ! TODO: Run this file via `npm i; npx ts-node src/registerNeynarSigner.ts`
+  // ! open the signer approval url from output, and approve.
   // Record the signer_uuid
   // Afterwards, daimobot is now registered with Neynar API and is able to cast programmatically
 
