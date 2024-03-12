@@ -3,6 +3,7 @@ import { DaimoChain, daimoAccountABI } from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
 import { base64 } from "@scure/base";
+import { Platform } from "react-native";
 import {
   Hex,
   bytesToHex,
@@ -14,6 +15,26 @@ import {
 import { env } from "./env";
 import { Log } from "./log";
 import { parseCreateResponse, parseSignResponse } from "./passkeyParsers";
+
+// Workaround for iOS bug with passkeys: prefetch AASA
+export async function prefetchAASA() {
+  if (Platform.OS !== "ios" && Platform.OS !== "macos") return;
+
+  const result = await fetch(
+    "https://app-site-association.cdn-apple.com/a/v1/daimo.com" // Apple CDN URL
+  );
+
+  if (!result.ok) {
+    console.log("[PASSKEY] Failed to prefetch AASA", result);
+  }
+}
+
+function matchAASAError(e: any) {
+  return (
+    e.message.includes("JV8PYC9QV4.com.daimo") &&
+    e.message.includes("daimo.com")
+  );
+}
 
 // Wrapper for Expo module native passkey creation
 export async function createPasskey(
@@ -35,14 +56,17 @@ export async function createPasskey(
 
   const challengeB64 = btoa(`create key ${accountName} ${keySlot}`);
 
-  const result = await Log.promise(
+  const result = await Log.retryBackoff(
     "ExpoPasskeysCreate",
-    ExpoPasskeys.createPasskey({
-      domain: env(daimoChain).passkeyDomain,
-      passkeyName,
-      passkeyDisplayTitle,
-      challengeB64,
-    })
+    () =>
+      ExpoPasskeys.createPasskey({
+        domain: env(daimoChain).passkeyDomain,
+        passkeyName,
+        passkeyDisplayTitle,
+        challengeB64,
+      }),
+    3,
+    matchAASAError
   );
 
   console.log("[PASSKEY] Got creation result from expo module", result);
@@ -102,12 +126,15 @@ export async function requestPasskeySignature(
   challengeB64: string,
   domain: string
 ) {
-  const result = await Log.promise(
+  const result = await Log.retryBackoff(
     "ExpoPasskeysSign",
-    ExpoPasskeys.signWithPasskey({
-      domain,
-      challengeB64,
-    })
+    () =>
+      ExpoPasskeys.signWithPasskey({
+        domain,
+        challengeB64,
+      }),
+    3,
+    matchAASAError
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
 

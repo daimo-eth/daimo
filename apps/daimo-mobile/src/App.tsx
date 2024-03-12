@@ -14,6 +14,7 @@ import RNShake from "react-native-shake";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
 import { useInitNotifications } from "./logic/notify";
+import { prefetchAASA } from "./logic/passkey";
 import { RpcProvider } from "./logic/trpc";
 import { useAccount } from "./model/account";
 import { TabNav } from "./view/TabNav";
@@ -44,6 +45,10 @@ export default function App() {
     if (account == null || nowS - account.lastBlockTimestamp < 60 * 10) {
       SplashScreen.hideAsync();
     }
+
+    // Workaround for iOS bug with passkeys: prefetch AASA in background
+    // on loading app
+    prefetchAASA();
   }, []);
 
   return (
