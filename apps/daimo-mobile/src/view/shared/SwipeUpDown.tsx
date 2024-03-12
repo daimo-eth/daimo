@@ -179,6 +179,7 @@ function useSwipeContext() {
   return ctx;
 }
 
+// Fade animation between minified and full lists
 function TransactionList() {
   const { itemMini, itemFull, isMini, itemMiniStyle } = useSwipeContext();
 
