@@ -101,11 +101,12 @@ export class ProfileCache {
     console.log(`[PROFILE] linking: ${linkedAccJSON} to addr: ${addr}`);
 
     // Save to DB
-    await linkAccount(addr, linkedAccount, this.db);
+    await _linkAccount(addr, linkedAccount, this.db);
 
     // Index in memory
     const link: ProfileLink = { addr, linkedAccount };
     this.indexLinkedAccount(link);
+    this.fidToAddress.set(linkedAccount.fid, addr);
 
     // Return all accounts for this address
     return this.getLinkedAccounts(addr);
@@ -171,7 +172,7 @@ export class ProfileCache {
   }
 }
 
-async function linkAccount(
+async function _linkAccount(
   addr: Address,
   linkedAcc: LinkedAccount,
   db: DB

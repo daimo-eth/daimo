@@ -170,8 +170,9 @@ export function createRouter(
       }),
     lookupEthereumAccountByFid: publicProcedure
       .input(z.object({ fid: z.number() }))
-      .query(async () => {
-        throw new Error("TODO not implemented");
+      .query(async (opts) => {
+        const addr = profileCache.getAddress(opts.input.fid);
+        return addr ? await nameReg.getEAccount(addr) : null;
       }),
 
     lookupAddressKeys: publicProcedure
