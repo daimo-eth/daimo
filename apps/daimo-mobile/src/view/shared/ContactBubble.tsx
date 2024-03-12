@@ -85,6 +85,7 @@ export function Bubble({
   fontSize: number;
   image?: string;
   children: React.ReactNode;
+  logPrefix?: string;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;
 
@@ -115,7 +116,6 @@ export function Bubble({
 
   const imageStyle: ImageStyle = useMemo(
     () => ({
-      position: "absolute",
       // Match size of bordered default bubble
       height: size - 1,
       width: size - 1,
