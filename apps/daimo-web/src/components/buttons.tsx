@@ -36,7 +36,7 @@ export function PrimaryOpenInAppButton({
     >
       {justCopied
         ? "COPIED, REDIRECTING..."
-        : (inviteDeepLink ? "COPY INVITE AND " : "") + "INSTALL DAIMO"}
+        : (inviteDeepLink ? "COPY INVITE & " : "") + "INSTALL DAIMO"}
     </PrimaryButton>
   );
 }

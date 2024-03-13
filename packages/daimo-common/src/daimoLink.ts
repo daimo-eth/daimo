@@ -25,6 +25,14 @@ export type DaimoLink =
   | DaimoLinkInviteCode
   | DaimoLinkTag;
 
+export function stripSeedFromNoteLink<V extends DaimoLink>(link: V): V {
+  if (link.type === "notev2") {
+    return { ...link, seed: undefined };
+  } else if (link.type === "note") {
+    return { ...link, ephemeralPrivateKey: undefined };
+  } else return link;
+}
+
 /** Represents any Ethereum address */
 export type DaimoLinkAccount = {
   type: "account";

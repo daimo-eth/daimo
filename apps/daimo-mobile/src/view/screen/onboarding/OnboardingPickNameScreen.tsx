@@ -1,60 +1,51 @@
 import { validateName } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
   Keyboard,
+  StyleSheet,
   TouchableWithoutFeedback,
   View,
-  StyleSheet,
 } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
-import { ActStatus } from "../../../action/actStatus";
+import {
+  ParamListOnboarding,
+  useExitBack,
+  useOnboardingNav,
+} from "../../../common/nav";
+import {
+  getAccountManager,
+  useDaimoChain,
+} from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
 import { ButtonBig } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
-import {
-  EmojiToOcticon,
-  TextCenter,
-  TextError,
-  TextLight,
-} from "../../shared/text";
+import { TextCenter, TextLight } from "../../shared/text";
 
-export function CreateAccountPage({
-  onNext,
-  onPrev,
-  name,
-  setName,
-  daimoChain,
-  exec,
-  status,
-  message,
-}: {
-  onNext: () => void;
-  onPrev?: () => void;
-  name: string;
-  setName: (name: string) => void;
-  daimoChain: DaimoChain;
-  exec: () => void;
-  status: ActStatus;
-  message: string;
-}) {
-  const createAccount = useCallback(() => {
-    if (status === "idle") {
-      exec();
-      console.log(`[ONBOARDING] create account ${name} ${status} ${message}`);
-      onNext();
-    }
-  }, [exec]);
+type Props = NativeStackScreenProps<ParamListOnboarding, "CreatePickName">;
+export function OnboardingPickNameScreen({ route }: Props) {
+  const daimoChain = useDaimoChain();
+  const [name, setName] = useState("");
+
+  const nav = useOnboardingNav();
+  const createAccount = useCallback(async () => {
+    const { inviteLink } = route.params;
+    // Kick off account creation in background
+    getAccountManager().createAccount(name, inviteLink);
+    // Request notifications permission, hiding latency
+    nav.navigate("AllowNotifs");
+  }, [route.params, name]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View>
-        <OnboardingHeader title="Create Account" onPrev={onPrev} />
+        <OnboardingHeader title="Create Account" onPrev={useExitBack()} />
         <View style={styles.createAccountPage}>
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Octicons name="person" size={40} color={color.midnight} />
@@ -68,24 +59,13 @@ export function CreateAccountPage({
           </TextCenter>
           <Spacer h={32} />
           <View style={styles.namePickerWrap}>
-            {status === "idle" && (
-              <NamePicker
-                name={name}
-                daimoChain={daimoChain}
-                onChange={setName}
-                onChoose={createAccount}
-              />
-            )}
+            <NamePicker
+              name={name}
+              daimoChain={daimoChain}
+              onChange={setName}
+              onChoose={createAccount}
+            />
           </View>
-          <Spacer h={16} />
-          <TextCenter>
-            {status === "error" && <TextError>{message}</TextError>}
-            {status !== "error" && (
-              <TextLight>
-                <EmojiToOcticon size={16} text={message} />
-              </TextLight>
-            )}
-          </TextCenter>
         </View>
       </View>
     </TouchableWithoutFeedback>

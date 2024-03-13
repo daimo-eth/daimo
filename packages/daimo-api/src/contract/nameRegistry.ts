@@ -84,6 +84,10 @@ export class NameRegistry {
     private nameBlacklist: Set<string>
   ) {}
 
+  public status() {
+    return { numAccounts: this.accounts.length, numLogs: this.logs.length };
+  }
+
   async load(pg: Pool, from: bigint, to: bigint) {
     const startTime = Date.now();
     const result = await retryBackoff(

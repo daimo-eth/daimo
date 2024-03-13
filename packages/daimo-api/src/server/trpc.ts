@@ -40,7 +40,11 @@ export function onTrpcError({
   if (ctx) {
     ctx.span?.setAttribute("rpc.error", err);
   }
-  console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
+  if (error.code === "PRECONDITION_FAILED") {
+    console.log(`[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`);
+  } else {
+    console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
+  }
 }
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {

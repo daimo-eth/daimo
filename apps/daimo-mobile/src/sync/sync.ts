@@ -6,6 +6,7 @@ import {
   PendingOpEvent,
   amountToDollars,
   assert,
+  assertNotNull,
   now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
@@ -13,8 +14,9 @@ import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
 import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
+import { getAccountManager } from "../logic/accountManager";
 import { env } from "../logic/env";
-import { Account, getAccountManager } from "../model/account";
+import { Account } from "../model/account";
 
 // Sync strategy:
 // - On app load, load account from storage
@@ -61,8 +63,8 @@ type SyncStatus = "success" | "failed" | "skipped" | "skipped";
 
 async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
   const manager = getAccountManager();
-  if (manager.currentAccount == null) return "skipped";
-  const account = manager.currentAccount;
+  const account = manager.getAccount();
+  if (account == null) return "skipped";
 
   // Synced recently? Wait first.
   const nowS = now();
@@ -98,7 +100,7 @@ export async function resync(
   fromScratch?: boolean
 ): Promise<SyncStatus> {
   const manager = getAccountManager();
-  const accOld = manager.currentAccount;
+  const accOld = manager.getAccount();
   assert(!!accOld, `no account, skipping sync: ${reason}`);
 
   console.log(`[SYNC] RESYNC ${accOld.name}, ${reason}`);
@@ -106,10 +108,9 @@ export async function resync(
 
   try {
     const res = await fetchSync(accOld, fromScratch);
-    assert(!!manager.currentAccount, `account deleted during sync`);
-    const accNew = applySync(manager.currentAccount, res);
-    console.log(`[SYNC] SUCCEEDED ${accNew.name}`);
-    manager.setCurrentAccount(accNew);
+    assertNotNull(manager.getAccount(), "deleted during sync");
+    manager.transform((a) => applySync(a, res));
+    console.log(`[SYNC] SUCCEEDED ${accOld.name}`);
     // We are automatically marked online when any RPC req succeeds
     return "success";
   } catch (e) {

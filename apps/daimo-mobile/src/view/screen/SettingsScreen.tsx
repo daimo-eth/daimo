@@ -15,11 +15,13 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
+import { useExitToHome, useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
+import { useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
-import { Account, toEAccount, useAccount } from "../../model/account";
+import { Account, toEAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { BadgeButton, ButtonMed, TextButton } from "../shared/Button";
@@ -29,7 +31,6 @@ import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
@@ -104,7 +105,13 @@ function AccountSection({ account }: { account: Account }) {
   );
 }
 
-function AccountHeader({ account }: { account: Account }) {
+export function AccountHeader({
+  account,
+  noLinkedAccounts,
+}: {
+  account: Account;
+  noLinkedAccounts?: boolean;
+}) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
@@ -129,7 +136,9 @@ function AccountHeader({ account }: { account: Account }) {
             )}
           </TextBodyMedium>
         </View>
-        <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
+        {!noLinkedAccounts && (
+          <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
+        )}
       </View>
     </View>
   );

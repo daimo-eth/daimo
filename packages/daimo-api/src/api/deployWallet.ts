@@ -98,7 +98,8 @@ export async function deployWallet(
   let sendFaucet = false;
   if (inviteLinkStatus.link.type === "invite") {
     const { requestInfo } = ctx;
-    sendFaucet = await queryFaucetAntiSpamApi(requestInfo);
+    const isTestnet = chainConfig.chainL2.testnet;
+    sendFaucet = isTestnet || (await queryFaucetAntiSpamApi(requestInfo));
 
     inviteCodeTracker.useInviteCode(
       address,

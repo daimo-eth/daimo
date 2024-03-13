@@ -12,14 +12,12 @@ import {
   TrackedRequest,
   TransferOpEvent,
   assert,
+  now,
 } from "@daimo/common";
 import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
-import { useEffect, useState } from "react";
-import { MMKV } from "react-native-mmkv";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
-import { cacheEAccounts } from "../logic/addr";
 import { EAccountContact } from "../logic/daimoContacts";
 import { env } from "../logic/env";
 
@@ -96,6 +94,9 @@ export type Account = {
   inviteLinkStatus: DaimoInviteCodeStatus | null;
   /** Invitees of user */
   invitees: EAccount[];
+
+  /** True once we've completed onboarding. */
+  isOnboarded: boolean;
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -290,81 +291,8 @@ interface AccountV13 extends StoredModel {
   linkedAccounts: LinkedAccount[];
   inviteLinkStatus: DaimoInviteCodeStatus | null;
   invitees: EAccount[];
-}
 
-/** Loads and saves Daimo account data from storage. Notifies listeners. */
-export function getAccountManager(): AccountManager {
-  if (_accountManager == null) {
-    _accountManager = new AccountManager();
-  }
-  return _accountManager;
-}
-
-let _accountManager: AccountManager | null = null;
-
-/** Loads and saves Daimo account data from storage. Notifies listeners. */
-class AccountManager {
-  currentAccount: Account | null;
-  private mmkv = new MMKV();
-  private listeners = new Set<(a: Account | null) => void>();
-
-  constructor() {
-    // On first load, load+save to ensure latest serialization version.
-    const accountJSON = this.mmkv.getString("account");
-    console.log(`[ACCOUNT] read account JSON: ${accountJSON}`);
-    this.currentAccount = parseAccount(accountJSON);
-    this.setCurrentAccount(this.currentAccount);
-  }
-
-  addListener(listener: (a: Account | null) => void) {
-    this.listeners.add(listener);
-  }
-
-  removeListener(listener: (a: Account | null) => void) {
-    this.listeners.delete(listener);
-  }
-
-  transform(f: (a: Account) => Account) {
-    if (this.currentAccount == null) {
-      console.log("[ACCOUNT] SKIPPING transform: no current account");
-      return;
-    }
-    console.log("[ACCOUNT] transform");
-    this.setCurrentAccount(f(this.currentAccount));
-  }
-
-  setCurrentAccount = (account: Account | null) => {
-    console.log("[ACCOUNT] " + (account ? `save ${account.name}` : "clear"));
-
-    // Cache accounts so that addresses show up with correct display names.
-    // Would be cleaner use a listener, but must run first.
-    if (account) cacheEAccounts(account.namedAccounts);
-
-    this.currentAccount = account;
-    this.mmkv.set("account", serializeAccount(account));
-    for (const listener of this.listeners) {
-      listener(account);
-    }
-  };
-}
-
-/** Loads Daimo user data from storage, provides callback to write. */
-export function useAccount(): [
-  Account | null,
-  (account: Account | null) => void
-] {
-  const manager = getAccountManager();
-
-  // State + listeners pattern
-  const [accState, setAccState] = useState<Account | null>(
-    manager.currentAccount
-  );
-  useEffect(() => {
-    manager.addListener(setAccState);
-    return () => manager.removeListener(setAccState);
-  }, []);
-
-  return [accState, manager.setCurrentAccount];
+  isOnboarded?: boolean;
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -411,6 +339,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       linkedAccounts: [],
       inviteLinkStatus: null,
       invitees: [],
+
+      isOnboarded: true,
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -445,6 +375,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       linkedAccounts: [],
       inviteLinkStatus: null,
       invitees: [],
+
+      isOnboarded: true,
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -479,6 +411,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       linkedAccounts: [],
       inviteLinkStatus: null,
       invitees: [],
+
+      isOnboarded: true,
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -514,6 +448,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       linkedAccounts: [],
       inviteLinkStatus: null,
       invitees: [],
+
+      isOnboarded: true,
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -548,6 +484,8 @@ export function parseAccount(accountJSON?: string): Account | null {
       linkedAccounts: [],
       inviteLinkStatus: null,
       invitees: [],
+
+      isOnboarded: true,
     };
   }
   assert(model.storageVersion === 13, "Unknown account storage version");
@@ -583,6 +521,8 @@ export function parseAccount(accountJSON?: string): Account | null {
     linkedAccounts: a.linkedAccounts || [],
     inviteLinkStatus: a.inviteLinkStatus,
     invitees: a.invitees,
+
+    isOnboarded: a.isOnboarded ?? true,
   };
 }
 
@@ -621,6 +561,8 @@ export function serializeAccount(account: Account | null): string {
     linkedAccounts: account.linkedAccounts,
     inviteLinkStatus: account.inviteLinkStatus,
     invitees: account.invitees,
+
+    isOnboarded: account.isOnboarded,
   };
 
   return JSON.stringify(model);
@@ -649,7 +591,13 @@ export function createEmptyAccount(
     namedAccounts: [],
     recentTransfers: [],
     trackedRequests: [],
-    accountKeys: [],
+    accountKeys: [
+      {
+        slot: 0,
+        addedAt: now(),
+        pubKey: inputAccount.enclavePubKey,
+      },
+    ],
     pendingKeyRotation: [],
     recommendedExchanges: [],
     suggestedActions: [],
@@ -668,5 +616,7 @@ export function createEmptyAccount(
     linkedAccounts: [],
     inviteLinkStatus: null,
     invitees: [],
+
+    isOnboarded: false,
   };
 }

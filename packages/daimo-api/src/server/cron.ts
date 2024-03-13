@@ -5,9 +5,9 @@ import {
 } from "@daimo/common";
 import {
   daimoChainFromId,
+  daimoPaymasterV2ABI,
   daimoPaymasterV2Address,
   entryPointABI,
-  daimoPaymasterV2ABI,
   erc20ABI,
 } from "@daimo/contract";
 import { CronJob } from "cron";
@@ -34,12 +34,22 @@ export class Crontab {
   async init() {
     this.coinIndexer.pipeAllTransfers(this.pipeTransfers);
     this.cronJobs = [
-      new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()), // Every 5 minutes
-      new CronJob("*/5 * * * *", () => this.checkFaucetBalance()), // Every 5 minutes
-      new CronJob("*/5 * * * *", () => this.postRecentTransfers()), // Every 5 minutes
+      new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()),
+      new CronJob("*/5 * * * *", () => this.checkFaucetBalance()),
+      new CronJob("*/5 * * * *", () => this.postRecentTransfers()),
+      new CronJob("*/1 * * * *", () => this.printStatus()),
     ];
 
     this.cronJobs.forEach((job) => job.start());
+  }
+
+  private printStatus() {
+    const mem = process.memoryUsage();
+    const cpu = process.cpuUsage();
+    const coinIndexer = this.coinIndexer.status();
+    const nameRegistry = this.nameRegistry.status();
+    const status = { mem, cpu, coinIndexer, nameRegistry };
+    console.log(`[CRON] status: ${JSON.stringify(status)}`);
   }
 
   private pruneTransfers = () => {

@@ -19,6 +19,19 @@ export function daimoChainFromId(chainId: number): DaimoChain {
   }
 }
 
+// Gets specified chain, or default if not specified. Throws if invalid.
+export function daimoChainFromStr(str?: string | null): DaimoChain {
+  if (str == null || str === "") return "base";
+  switch (str) {
+    case "base":
+      return "base";
+    case "baseSepolia":
+      return "baseSepolia";
+    default:
+      throw new Error(`unsupported chain name ${str}`);
+  }
+}
+
 export interface ChainConfig {
   daimoChain: DaimoChain;
   chainL1: Chain;

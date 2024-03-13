@@ -21,17 +21,28 @@ import { useCallback, useEffect } from "react";
 import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { getAccountManager, useAccount } from "../logic/accountManager";
 import { env } from "../logic/env";
 import { getWrappedRawSigner } from "../logic/key";
 import { NamedError } from "../logic/log";
 import { getWrappedPasskeySigner } from "../logic/passkey";
-import { Account, getAccountManager, useAccount } from "../model/account";
+import { Account } from "../model/account";
 
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<PendingOpEvent>;
 
 /** Default send deadline, in seconds. Determines validUntil for each op. */
 export const SEND_DEADLINE_SECS = 120;
+
+/** Progress & outcome of a userop. */
+interface UserOpHandle extends ActHandle {
+  /** Action costs, including fees and total. */
+  cost: { feeDollars: number; totalDollars: number };
+  /** Should be called only when status is 'idle' */
+  exec: () => void;
+  /** Should be called only when status is 'success' or 'error' */
+  reset?: () => void;
+}
 
 /** Send a user op, track status. */
 export function useSendAsync({
@@ -52,7 +63,7 @@ export function useSendAsync({
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
   passkeyAccount?: Account;
-}): ActHandle {
+}): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
 
   const [deviceAccount] = useAccount();
@@ -91,13 +102,10 @@ export function useSendAsync({
       pendingOp.timestamp = now();
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
-      if (accountTransform) {
-        getAccountManager().transform((a) => accountTransform(a, pendingOp));
-      }
-
-      getAccountManager().transform((a) =>
-        addInviteLinkStatus(a, pendingOpEventData)
-      );
+      getAccountManager().transform((a) => {
+        if (accountTransform) a = accountTransform(a, pendingOp);
+        return addInviteLinkStatus(a, pendingOpEventData);
+      });
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
     }

@@ -17,7 +17,18 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback } from "react";
 import { Hex } from "viem";
 
-import { EAccountContact, MsgContact } from "../../logic/daimoContacts";
+import { EAccountContact, MsgContact } from "../logic/daimoContacts";
+
+export type ParamListOnboarding = {
+  Intro: undefined;
+  CreateNew: undefined;
+  CreatePickName: { inviteLink: DaimoLink };
+  CreateSetupKey: { inviteLink: DaimoLink };
+  ExistingSetupKey: undefined;
+  UseExisting: undefined;
+  AllowNotifs: undefined;
+  Finish: undefined;
+};
 
 export type QRScreenOptions = "PAY ME" | "SCAN";
 
@@ -124,6 +135,14 @@ type AllRoutes = NavigatorParamList &
 
 export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
   return useNavigation<NativeStackNavigationProp<AllRoutes, RouteName>>();
+}
+
+export function useOnboardingNav<
+  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding
+>() {
+  return useNavigation<
+    NativeStackNavigationProp<ParamListOnboarding, RouteName>
+  >();
 }
 
 export type MainNav = ReturnType<typeof useNav>;

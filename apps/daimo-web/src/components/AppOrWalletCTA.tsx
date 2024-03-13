@@ -34,7 +34,7 @@ export function AppOrWalletCTA({
               window.open(directDeepLink, "_blank");
             }}
           >
-            OPEN IN APP
+            ALREADY HAVE IT? OPEN IN APP
           </SecondaryButton>
           <div className="h-4" />
         </>

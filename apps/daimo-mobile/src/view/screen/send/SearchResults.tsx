@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 
+import { navToAccountPage, useNav } from "../../../common/nav";
 import {
   DaimoContact,
   EAccountContact,
@@ -25,7 +26,6 @@ import { Bubble, ContactBubble } from "../../shared/ContactBubble";
 import { LinkedAccountBubble } from "../../shared/LinkedAccountBubble";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { navToAccountPage, useNav } from "../../shared/nav";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";

@@ -13,6 +13,7 @@ import {
 import "react-native-url-polyfill/auto";
 
 import { WithdrawScreen } from "./WithdrawScreen";
+import { useNav } from "../../../common/nav";
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { ButtonMed } from "../../shared/Button";
@@ -21,7 +22,6 @@ import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SegmentSlider } from "../../shared/SegmentSlider";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { DaimoText, TextBold, TextLight, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";

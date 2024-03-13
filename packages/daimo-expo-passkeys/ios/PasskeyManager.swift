@@ -17,7 +17,7 @@ public class PasskeyManager {
         }
 
         if authError.code == .canceled {
-            return "User canceled auth request"
+            return "User cancelled auth request"
         } else {
             // The userInfo dictionary sometimes contains useful information.
             return "Error: \((error as NSError).userInfo)"

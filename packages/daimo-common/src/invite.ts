@@ -1,4 +1,4 @@
-import { DaimoLink, parseDaimoLink } from "./daimoLink";
+import { DaimoLink, parseDaimoLink, stripSeedFromNoteLink } from "./daimoLink";
 import {
   DaimoInviteCodeStatus,
   DaimoLinkStatus,
@@ -9,12 +9,27 @@ import {
 } from "./daimoLinkStatus";
 import { EAccount } from "./eAccount";
 
-/* Interpret text as a potential invite link */
-export function getInvitePasteLink(text: string): DaimoLink {
-  // Check if its a valid Daimo link
-  const link = parseDaimoLink(text);
-  if (link) return link;
-  return { type: "invite", code: text };
+// Checks if something *looks* like an invite link. Does not check with the API.
+// Returns a normalized DaimoLink, or undefined if the input doesn't look valid.
+export function parseInviteCodeOrLink(str: string): DaimoLink | undefined {
+  if (str.length < 3) return undefined;
+
+  // Does it look like a code
+  const lower = str.toLowerCase();
+  const looksValid = /^[a-z][a-z0-9-]{2,24}$/.test(lower);
+  if (looksValid) return { type: "invite", code: lower };
+
+  // Is it a link?
+  const link = parseDaimoLink(str);
+  if (link != null && link.type === "invite") {
+    return link;
+  } else if (link != null && link.type === "requestv2") {
+    return link;
+  } else if (link != null && link.type === "notev2") {
+    return stripSeedFromNoteLink(link);
+  }
+
+  return undefined;
 }
 
 export interface LinkInviteStatus {
