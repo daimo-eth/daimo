@@ -2,10 +2,11 @@
   "private": true,
   "name": "@daimo/monorepo",
   "license": "GPL-3.0-or-later",
-"scripts": {
+  "scripts": {
     "dev": "turbo dev",
     "start": "turbo start",
     "build": "turbo build",
+    "build:exclude-web": "turbo build --filter=!@daimo/web",
     "build:api": "turbo run build --filter @daimo/api",
     "build:mobile": "turbo run build --filter @daimo/mobile",
     "test": "turbo test",
