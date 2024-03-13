@@ -244,10 +244,14 @@ export class PushNotifier {
     const messages = [];
 
     for (const log of logs) {
+      // Only proceed if log is relevant.
+      // TODO: Potentially ignore cancelled requests as well.
       if (log.status !== DaimoRequestState.Pending) {
         const { tokenSymbol } = chainConfig;
-        const { metadata } = log;
-        const { dollars } = log.link;
+        const {
+          link: { dollars },
+          metadata,
+        } = log;
 
         // On fulfillment:
         // Ensure recepient and fulfiller both have Daimo accounts
