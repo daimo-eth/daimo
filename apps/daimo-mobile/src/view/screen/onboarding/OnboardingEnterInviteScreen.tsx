@@ -11,7 +11,7 @@ import { getChainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { PureComponent } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import {
@@ -51,7 +51,7 @@ export function OnboardingEnterInviteScreen() {
             it from a link.{"\n"}Don't have one? Join the waitlist.
           </IntroTextParagraph>
         </TextCenter>
-        <Spacer h={64} />
+        <Spacer h={32} />
         <EnterCodeForm nav={nav} />
         <Spacer h={16} />
         <TextButton title="JOIN WAITLIST" onPress={linkToWaitlist} />
@@ -108,7 +108,10 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
     getAccountManager().setDaimoChain(daimoChain);
 
     // Move to next screen
-    this.props.nav.navigate("CreatePickName", { inviteLink });
+    const { nav } = this.props;
+    const isAndroid = Platform.OS === "android";
+    if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+    else nav.navigate("CreatePickName", { inviteLink });
   };
 
   render() {

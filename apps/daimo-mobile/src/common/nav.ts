@@ -23,6 +23,8 @@ export type ParamListOnboarding = {
   Intro: undefined;
   CreateNew: undefined;
   CreatePickName: { inviteLink: DaimoLink };
+  CreateSetupKey: { inviteLink: DaimoLink };
+  ExistingSetupKey: undefined;
   UseExisting: undefined;
   AllowNotifs: undefined;
   Finish: undefined;

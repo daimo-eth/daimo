@@ -36,6 +36,7 @@ import { OnboardingEnterInviteScreen as OnbEnterInviteScreen } from "./screen/on
 import { OnboardingFinishScreen } from "./screen/onboarding/OnboardingFinishScreen";
 import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/OnboardingIntroScreen";
 import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
+import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
 import { usePollForAccount } from "./screen/onboarding/usePollForAccount";
 import DepositScreen from "./screen/receive/DepositScreen";
@@ -73,7 +74,9 @@ function OnboardingNavigator() {
     >
       <OnStack.Screen name="Intro" component={OnbIntroScreen} />
       <OnStack.Screen name="CreateNew" component={OnbEnterInviteScreen} />
+      <OnStack.Screen name="CreateSetupKey" component={OnbSetupKeyPage} />
       <OnStack.Screen name="CreatePickName" component={OnbPickNameScreen} />
+      <OnStack.Screen name="ExistingSetupKey" component={OnbSetupKeyPage} />
       <OnStack.Screen name="UseExisting" component={OnbUseExistingScreen} />
       <OnStack.Screen
         name="AllowNotifs"

@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -18,6 +19,7 @@ import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextCenter, TextH1 } from "../../shared/text";
 
+const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
   const nav = useOnboardingNav();
   const pasteInviteLink = async () => {
@@ -25,13 +27,17 @@ export function OnboardingIntroScreen() {
     const inviteLink = parseInviteCodeOrLink(str);
     console.log(`[INTRO] paste invite link: '${str}'`);
     if (inviteLink && (await getInviteLinkStatus(inviteLink))?.isValid) {
-      nav.navigate("CreatePickName", { inviteLink });
+      if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+      else nav.navigate("CreatePickName", { inviteLink });
     } else {
       nav.navigate("CreateNew");
     }
   };
 
-  const goToUseExisting = () => nav.navigate("UseExisting");
+  const goToUseExisting = () => {
+    if (isAndroid) nav.navigate("ExistingSetupKey");
+    else nav.navigate("UseExisting");
+  };
 
   return (
     <View style={styles.onboardingPage}>
