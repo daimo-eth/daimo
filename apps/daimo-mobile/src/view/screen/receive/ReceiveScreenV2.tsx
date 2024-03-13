@@ -5,7 +5,7 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -75,6 +75,16 @@ function RequestScreenInnerV2({ account }: { account: Account }) {
   const goBack = useExitBack();
   const goHome = useExitToHome();
 
+  useEffect(() => {
+    const unsubscribe = nav.addListener("transitionEnd", () => {
+      // Set focus on transitionEnd to avoid stack navigator looking
+      // glitchy on iOS.
+      textInputRef.current?.focus();
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
@@ -95,7 +105,7 @@ function RequestScreenInnerV2({ account }: { account: Account }) {
           showAmountAvailable={false}
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
-          autoFocus
+          autoFocus={false}
         />
         <Spacer h={32} />
         <View style={ss.container.padH16}>
