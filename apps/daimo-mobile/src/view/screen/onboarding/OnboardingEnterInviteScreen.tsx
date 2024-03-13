@@ -1,16 +1,27 @@
-import { getEAccountStr } from "@daimo/common";
+import {
+  DaimoLink,
+  LinkInviteStatus,
+  formatDaimoLink,
+  getEAccountStr,
+  getInviteStatus,
+  parseInviteCodeOrLink,
+  stripSeedFromNoteLink,
+} from "@daimo/common";
 import { getChainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useState } from "react";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { PureComponent, useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
-import { useExitBack, useOnboardingNav } from "../../../common/nav";
-import { getAccountManager } from "../../../logic/accountManager";
 import {
-  useOnboardingInviteCode,
-  useOnboardingPasteInvite,
-} from "../../../logic/onboarding";
+  ParamListOnboarding,
+  useExitBack,
+  useOnboardingNav,
+} from "../../../common/nav";
+import { getAccountManager } from "../../../logic/accountManager";
+import { env } from "../../../logic/env";
+import { useOnboardingPasteInvite } from "../../../logic/onboarding";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -31,6 +42,8 @@ export function OnboardingEnterInviteScreen() {
     const url = `https://daimo.com/waitlist`;
     Linking.openURL(url);
   };
+
+  const nav = useOnboardingNav();
 
   return (
     <View>
@@ -64,7 +77,7 @@ export function OnboardingEnterInviteScreen() {
         )}
         {mode === "enter" && (
           <>
-            <EnterCodeForm />
+            <EnterCodeForm nav={nav} />
             <Spacer h={16} />
             <TextButton title="JOIN WAITLIST" onPress={linkToWaitlist} />
           </>
@@ -74,66 +87,113 @@ export function OnboardingEnterInviteScreen() {
   );
 }
 
-function EnterCodeForm() {
-  // User enters their invite code. Check validity.
-  const [text, setText] = useState("");
-  const { inviteLink, inviteStatus, daimoChain } =
-    useOnboardingInviteCode(text);
+interface EnterCodeProps {
+  nav: NativeStackNavigationProp<ParamListOnboarding>;
+}
 
-  // Show invite status (valid/invalid) once user starts typing
-  const oct = (name: OctName, color?: string) => (
-    <Octicons {...{ name, color }} size={14} />
-  );
-  const isTestnet = !!getChainConfig(daimoChain).chainL2.testnet;
-  const status = (function () {
-    if (inviteLink == null) {
-      return " ";
-    } else if (inviteStatus == null) {
-      return "...";
-    } else if (inviteStatus.isValid) {
-      const { sender } = inviteStatus;
-      return (
-        <>
-          {oct("check-circle", color.successDark)} valid
-          {isTestnet ? " testnet " : " "}invite
-          {sender && ` from ${getEAccountStr(sender)}`}
-        </>
-      );
-    } else {
-      return <>{oct("alert")} invalid invite</>;
+interface EnterCodeState {
+  text: string;
+  inviteLink?: DaimoLink;
+  inviteStatus?: LinkInviteStatus;
+}
+
+class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
+  constructor(props: EnterCodeProps) {
+    super(props);
+    this.state = { text: "" };
+  }
+
+  editText = async (text: string) => {
+    // Update textbox immediately
+    const inviteLink = parseInviteCodeOrLink(text);
+    this.setState({ text, inviteLink, inviteStatus: undefined });
+
+    // Special case for testnet
+    if (text === "testnet") {
+      this.setState({ inviteStatus: { isValid: true } });
+      return;
     }
-  })();
 
-  // Once done, create account.
-  const nav = useOnboardingNav();
-  const goToNextStep = useCallback(() => {
+    // Fetch link status
+    const daimoChain = getAccountManager().getDaimoChain();
+    const { rpcFunc } = env(daimoChain);
+    const url =
+      inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));
+    const linkStatus = !!url && (await rpcFunc.getLinkStatus.query({ url }));
+    const inviteStatus = linkStatus ? getInviteStatus(linkStatus) : undefined;
+
+    // See if text has changed in the meantime
+    if (this.state.text !== text) return;
+
+    // Otherwise, update state
+    this.setState({ inviteLink, inviteStatus });
+  };
+
+  goToNextStep = () => {
+    const { text, inviteLink } = this.state;
     if (inviteLink == null) return;
+
+    // Hack: the "testnet" invite code is a cheat code to connect to testnet API
+    let daimoChain = getAccountManager().getDaimoChain();
+    if (text === "testnet") daimoChain = "baseSepolia";
     console.log(`[ONBOARDING] proceeding, invite ${text}, chain ${daimoChain}`);
     getAccountManager().setDaimoChain(daimoChain);
-    nav.navigate("CreatePickName", { inviteLink });
-  }, [nav, inviteLink, daimoChain]);
 
-  return (
-    <View>
-      <InputBig
-        placeholder="enter invite code"
-        value={text}
-        onChange={setText}
-        center={text.length < 16} // Workaround for Android centering bug
-      />
-      <Spacer h={16} />
-      <TextCenter>
-        <TextLight>{status}</TextLight>
-      </TextCenter>
-      <Spacer h={16} />
-      <ButtonBig
-        type="primary"
-        title="Submit"
-        onPress={goToNextStep}
-        disabled={inviteStatus == null || !inviteStatus.isValid}
-      />
-    </View>
-  );
+    // Move to next screen
+    this.props.nav.navigate("CreatePickName", { inviteLink });
+  };
+
+  render() {
+    // User enters their invite code. Check validity.
+    const { text, inviteLink, inviteStatus } = this.state;
+    const daimoChain = getAccountManager().getDaimoChain();
+
+    // Show invite status (valid/invalid) once user starts typing
+    const oct = (name: OctName, color?: string) => (
+      <Octicons {...{ name, color }} size={14} />
+    );
+    const isTestnet = !!getChainConfig(daimoChain).chainL2.testnet;
+    const status = (function () {
+      if (inviteLink == null) {
+        return " ";
+      } else if (inviteStatus == null) {
+        return "...";
+      } else if (inviteStatus.isValid) {
+        const { sender } = inviteStatus;
+        return (
+          <>
+            {oct("check-circle", color.successDark)} valid
+            {isTestnet ? " testnet " : " "}invite
+            {sender && ` from ${getEAccountStr(sender)}`}
+          </>
+        );
+      } else {
+        return <>{oct("alert")} invalid invite</>;
+      }
+    })();
+
+    return (
+      <View>
+        <InputBig
+          placeholder="enter invite code"
+          value={text}
+          onChange={this.editText}
+          center={text.length < 16} // Workaround for Android centering bug
+        />
+        <Spacer h={16} />
+        <TextCenter>
+          <TextLight>{status}</TextLight>
+        </TextCenter>
+        <Spacer h={16} />
+        <ButtonBig
+          type="primary"
+          title="Submit"
+          onPress={this.goToNextStep}
+          disabled={inviteStatus == null || !inviteStatus.isValid}
+        />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

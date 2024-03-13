@@ -103,6 +103,7 @@ class AccountManager {
 
   private notifyListeners() {
     try {
+      console.log(`[ACCOUNT] notifying ${this.listeners.size} listeners`);
       this.listeners.forEach((l) => l(this.currentAccount));
     } catch (e) {
       console.log(`[ACCOUNT] error notifying listeners: ${e}`);

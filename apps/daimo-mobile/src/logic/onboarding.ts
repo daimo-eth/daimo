@@ -1,14 +1,7 @@
-import {
-  LinkInviteStatus,
-  getInviteStatus,
-  parseInviteCodeOrLink,
-} from "@daimo/common";
-import { DaimoChain } from "@daimo/contract";
+import { parseInviteCodeOrLink } from "@daimo/common";
 import * as Clipboard from "expo-clipboard";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
-import { useDaimoChain } from "./accountManager";
-import { useFetchLinkStatus } from "./linkStatus";
 import { useOnboardingNav } from "../common/nav";
 
 // Handles invite paste.
@@ -29,28 +22,4 @@ export function useOnboardingPasteInvite() {
   };
 
   return { pasteInviteLink, pasteLinkError };
-}
-
-// Handle invite code or link input, looks up the code, checks validity.
-export function useOnboardingInviteCode(str: string) {
-  const inviteLink = useMemo(() => parseInviteCodeOrLink(str), [str]);
-  const daimoChain = useDaimoChain();
-  const linkStatus = useFetchLinkStatus(inviteLink, daimoChain);
-
-  const [inviteStatus, setInviteStatus] = useState<LinkInviteStatus>();
-  useEffect(() => {
-    if (linkStatus.data != null) {
-      setInviteStatus(getInviteStatus(linkStatus.data));
-    }
-  }, [linkStatus]);
-
-  // HACK: connect to testnet with a special invite code
-  if (str === "testnet") {
-    return {
-      inviteLink,
-      inviteStatus: { isValid: true },
-      daimoChain: "baseSepolia" as DaimoChain,
-    };
-  }
-  return { inviteLink, inviteStatus, daimoChain };
 }
