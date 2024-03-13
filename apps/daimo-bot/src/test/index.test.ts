@@ -28,6 +28,49 @@ const mockEvent = {
 };
 const validAddress = "0x123";
 
+describe("tryExtractCommand()", () => {
+  it("extracts proper request command", () => {
+    const processor = new PaymentActionProcessor(mockEvent);
+    const result = processor._tryExtractCommand();
+
+    expect(result).toEqual({
+      action: "request",
+      cleanedAmount: 15,
+    });
+  });
+
+  it("extracts proper pay command", () => {
+    const mockEventPayCommand = {
+      data: {
+        ...mockEvent.data,
+        text: "@daimobot pay $30",
+      },
+    };
+
+    const processor = new PaymentActionProcessor(mockEventPayCommand);
+    const result = processor._tryExtractCommand();
+
+    expect(result).toEqual({
+      action: "pay",
+      cleanedAmount: 30,
+    });
+  });
+
+  it("returns null when invalid command is present", () => {
+    const mockEventInvalidCommand = {
+      data: {
+        ...mockEvent.data,
+        text: "@daimobot pay $-30",
+      },
+    };
+
+    const processor = new PaymentActionProcessor(mockEventInvalidCommand);
+    const result = processor._tryExtractCommand();
+
+    expect(result).toBeNull();
+  });
+});
+
 describe("PaymentActionProcessor", () => {
   let mockTrpcClient: TRPCClient;
   let mockNeynarClient: NeynarAPIClient;

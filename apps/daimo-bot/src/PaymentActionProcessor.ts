@@ -70,7 +70,7 @@ export class PaymentActionProcessor {
   async process() {
     if (!this.text?.includes("@daimobot")) return;
 
-    const daimobotCommand = this.tryExtractCommand();
+    const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
       this.publishCastReply(
@@ -159,7 +159,7 @@ export class PaymentActionProcessor {
     }
   }
 
-  private tryExtractCommand(): {
+  _tryExtractCommand(): {
     action: string;
     cleanedAmount: number;
   } | null {
