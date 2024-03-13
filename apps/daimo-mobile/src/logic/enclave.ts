@@ -13,15 +13,16 @@ export interface EnclaveKeyInfo {
 export async function loadOrCreateEnclaveKey(
   keyName: string
 ): Promise<EnclaveKeyInfo> {
-  const keyInfo = await loadEnclaveKey(keyName);
+  let keyInfo = await loadEnclaveKey(keyName);
 
   console.log(`[ACTION] loaded key info ${JSON.stringify(keyInfo)}`);
   if (keyInfo.pubKeyHex != null) return keyInfo;
 
   const newPublicKey = await createEnclaveKey(keyName);
-  console.log(`[ACTION] created public key ${newPublicKey}`);
   const { hwSecLevel, enclaveKeyName } = keyInfo;
-  return { hwSecLevel, enclaveKeyName, pubKeyHex: newPublicKey };
+  keyInfo = { hwSecLevel, enclaveKeyName, pubKeyHex: newPublicKey };
+  console.log(`[ACTION] created key info ${JSON.stringify(keyInfo)}`);
+  return keyInfo;
 }
 
 /** Create a new key in the secure enclave. */

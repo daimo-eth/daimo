@@ -355,6 +355,8 @@ class AccountManager {
 
     this.keyInfo = await loadOrCreateEnclaveKey(defaultEnclaveKeyName);
     console.log(`[ACCOUNT] created enclave key ${this.keyInfo.enclaveKeyName}`);
+
+    this.notifyListeners();
   }
 
   // Returns summary of account + device + onboarding state.

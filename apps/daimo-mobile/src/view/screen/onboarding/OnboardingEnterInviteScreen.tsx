@@ -88,12 +88,7 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
     }
 
     // Fetch link status
-    const daimoChain = getAccountManager().getDaimoChain();
-    const { rpcFunc } = env(daimoChain);
-    const url =
-      inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));
-    const linkStatus = !!url && (await rpcFunc.getLinkStatus.query({ url }));
-    const inviteStatus = linkStatus ? getInviteStatus(linkStatus) : undefined;
+    const inviteStatus = await getInviteLinkStatus(inviteLink);
 
     // See if text has changed in the meantime
     if (this.state.text !== text) return;
@@ -167,6 +162,15 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
       </View>
     );
   }
+}
+
+export async function getInviteLinkStatus(inviteLink: DaimoLink | undefined) {
+  const daimoChain = getAccountManager().getDaimoChain();
+  const { rpcFunc } = env(daimoChain);
+  const url = inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));
+  const linkStatus = !!url && (await rpcFunc.getLinkStatus.query({ url }));
+  const inviteStatus = linkStatus ? getInviteStatus(linkStatus) : undefined;
+  return inviteStatus;
 }
 
 const styles = StyleSheet.create({

@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { getInviteLinkStatus } from "./OnboardingEnterInviteScreen";
 import { useOnboardingNav } from "../../../common/nav";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
@@ -23,7 +24,7 @@ export function OnboardingIntroScreen() {
     const str = await Clipboard.getStringAsync();
     const inviteLink = parseInviteCodeOrLink(str);
     console.log(`[INTRO] paste invite link: '${str}'`);
-    if (inviteLink) {
+    if (inviteLink && (await getInviteLinkStatus(inviteLink))?.isValid) {
       nav.navigate("CreatePickName", { inviteLink });
     } else {
       nav.navigate("CreateNew");

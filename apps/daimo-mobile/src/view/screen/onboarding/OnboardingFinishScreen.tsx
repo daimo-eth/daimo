@@ -31,7 +31,9 @@ export function OnboardingFinishScreen() {
     <View style={ss.container.center}>
       {status !== "error" && <ActivityIndicator size="large" />}
       {status === "error" && retry && (
-        <ButtonBig title="Retry" onPress={retry} type="primary" />
+        <View style={{ paddingHorizontal: 32, alignSelf: "stretch" }}>
+          <ButtonBig title="Retry" onPress={retry} type="primary" />
+        </View>
       )}
       <Spacer h={32} />
       <TextCenter>

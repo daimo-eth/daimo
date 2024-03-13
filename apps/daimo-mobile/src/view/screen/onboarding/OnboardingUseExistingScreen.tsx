@@ -48,18 +48,18 @@ export function OnboardingUseExistingScreen() {
 
   // Wait for enclave key to be loaded. Create one if necessary
   const { account, keyInfo } = useAccountAndKeyInfo();
+  const pubKeyHex = keyInfo?.pubKeyHex;
   useEffect(() => {
-    if (keyInfo != null && keyInfo.pubKeyHex == null) {
-      console.log(`[ONBOARDING] create enclave key`);
-      getAccountManager().createNewEnclaveKey();
-    }
-  }, [keyInfo]);
+    if (account != null || pubKeyHex != null) return;
+    console.log(`[ONBOARDING] create enclave key`);
+    getAccountManager().createNewEnclaveKey();
+  }, [account, pubKeyHex]);
 
   const onPrev = useExitBack();
 
   if (account != null) return null; // Will nav to home screen shortly.
 
-  if (keyInfo?.pubKeyHex == null) {
+  if (pubKeyHex == null) {
     return (
       <View>
         <OnboardingHeader title="Existing Account" onPrev={onPrev} />
@@ -78,9 +78,7 @@ export function OnboardingUseExistingScreen() {
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
         <Spacer h={16} />
-        <QRCodeBox
-          value={createAddDeviceString(keyInfo?.pubKeyHex, slotType)}
-        />
+        <QRCodeBox value={createAddDeviceString(pubKeyHex, slotType)} />
         <Spacer h={16} />
         <TextCenter>
           <TextPara>
@@ -95,7 +93,7 @@ export function OnboardingUseExistingScreen() {
         </TextCenter>
         <Spacer h={24} />
         <RestoreFromBackupButton
-          pubKeyHex={keyInfo?.pubKeyHex}
+          pubKeyHex={pubKeyHex}
           slotType={slotType}
           daimoChain={daimoChain}
         />
