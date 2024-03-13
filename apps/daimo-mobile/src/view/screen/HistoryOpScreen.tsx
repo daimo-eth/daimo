@@ -84,18 +84,16 @@ function HistoryOpScreenInner({
 
   const nav = useNav();
 
+  const leaveScreen = () => {
+    if (nav.canGoBack()) {
+      setBottomSheetSnapPointCount(3);
+      nav.goBack();
+    }
+  };
+
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader
-        title="Transfer"
-        onExit={() => {
-          if (nav.canGoBack()) {
-            setBottomSheetSnapPointCount(3);
-            nav.goBack();
-          }
-        }}
-        hideOfflineHeader
-      />
+      <ScreenHeader title="Transfer" onExit={leaveScreen} hideOfflineHeader />
       <Spacer h={16} />
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
@@ -107,7 +105,7 @@ function HistoryOpScreenInner({
       <Spacer h={16} />
       {op.type === "createLink" &&
         [OpStatus.confirmed, OpStatus.finalized].includes(op.status) && (
-          <NoteView account={account} note={op} />
+          <NoteView account={account} note={op} leaveScreen={leaveScreen} />
         )}
     </View>
   );
@@ -116,9 +114,11 @@ function HistoryOpScreenInner({
 function NoteView({
   account,
   note,
+  leaveScreen,
 }: {
   account: Account;
   note: PaymentLinkOpEvent;
+  leaveScreen: () => void;
 }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   // Strip seed from link
@@ -137,7 +137,11 @@ function NoteView({
       {noteFetch.isFetching && <CenterSpinner />}
       {noteFetch.error && <TextError>{noteFetch.error.message}</TextError>}
       {noteStatus && noteStatus.status === DaimoNoteState.Confirmed && (
-        <NoteDisplay {...{ account, noteStatus }} hideAmount />
+        <NoteDisplay
+          {...{ account, noteStatus }}
+          hideAmount
+          leaveScreen={leaveScreen}
+        />
       )}
     </View>
   );
