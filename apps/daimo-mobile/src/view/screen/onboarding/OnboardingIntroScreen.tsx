@@ -1,3 +1,5 @@
+import { parseInviteCodeOrLink } from "@daimo/common";
+import * as Clipboard from "expo-clipboard";
 import { ReactNode, useState } from "react";
 import {
   NativeScrollEvent,
@@ -8,19 +10,26 @@ import {
 } from "react-native";
 
 import { useOnboardingNav } from "../../../common/nav";
-import { useOnboardingPasteInvite } from "../../../logic/onboarding";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
-import { TextCenter, TextError, TextH1 } from "../../shared/text";
+import { TextCenter, TextH1 } from "../../shared/text";
 
 export function OnboardingIntroScreen() {
   const nav = useOnboardingNav();
-  const { pasteInviteLink, pasteLinkError } = useOnboardingPasteInvite();
+  const pasteInviteLink = async () => {
+    const str = await Clipboard.getStringAsync();
+    const inviteLink = parseInviteCodeOrLink(str);
+    console.log(`[INTRO] paste invite link: '${str}'`);
+    if (inviteLink) {
+      nav.navigate("CreatePickName", { inviteLink });
+    } else {
+      nav.navigate("CreateNew");
+    }
+  };
 
-  const goToCreateNew = () => nav.navigate("CreateNew");
   const goToUseExisting = () => nav.navigate("UseExisting");
 
   return (
@@ -29,20 +38,11 @@ export function OnboardingIntroScreen() {
         <IntroPageSwiper />
         <View style={styles.introButtonsCenter}>
           <View style={styles.introButtonsWrap}>
-            <TextCenter>
-              <TextError>{pasteLinkError || <>&nbsp;</>}</TextError>
-            </TextCenter>
-            <Spacer h={8} />
+            <Spacer h={32} />
             <ButtonBig
               type="primary"
               title="ACCEPT INVITE"
               onPress={pasteInviteLink}
-            />
-            <Spacer h={16} />
-            <ButtonBig
-              type="subtle"
-              title="CREATE ACCOUNT"
-              onPress={goToCreateNew}
             />
             <Spacer h={16} />
             <TextButton

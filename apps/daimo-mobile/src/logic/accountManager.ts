@@ -348,6 +348,15 @@ class AccountManager {
     this.setCurrentAccount(null);
   }
 
+  // Used to join an existing account. Creates a new enclave key, but no account yet.
+  async createNewEnclaveKey() {
+    assert(this.currentAccount == null, "Can't create, have existing account");
+    assert(this.keyInfo?.pubKeyHex == null, "Already have a key");
+
+    this.keyInfo = await loadOrCreateEnclaveKey(defaultEnclaveKeyName);
+    console.log(`[ACCOUNT] created enclave key ${this.keyInfo.enclaveKeyName}`);
+  }
+
   // Returns summary of account + device + onboarding state.
   getAccountAndKeyInfo() {
     const { currentAccount, createAccountHandle, keyInfo } = this;

@@ -57,7 +57,7 @@ export function OnboardingPickNameScreen({ route }: Props) {
               you get a name, you can't change it.
             </IntroTextParagraph>
           </TextCenter>
-          <Spacer h={32} />
+          <Spacer h={64} />
           <View style={styles.namePickerWrap}>
             <NamePicker
               name={name}

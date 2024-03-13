@@ -7,7 +7,7 @@ import {
   DaimoOpSender,
 } from "@daimo/userop";
 import { base64 } from "@scure/base";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Hex, hexToBytes } from "viem";
 
@@ -16,6 +16,7 @@ import { ActStatus } from "../../../action/actStatus";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useExitBack } from "../../../common/nav";
 import {
+  getAccountManager,
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
@@ -45,8 +46,14 @@ export function OnboardingUseExistingScreen() {
   const slotType =
     env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
 
-  // Wait for enclave key to be loaded
+  // Wait for enclave key to be loaded. Create one if necessary
   const { account, keyInfo } = useAccountAndKeyInfo();
+  useEffect(() => {
+    if (keyInfo != null && keyInfo.pubKeyHex == null) {
+      console.log(`[ONBOARDING] create enclave key`);
+      getAccountManager().createNewEnclaveKey();
+    }
+  }, [keyInfo]);
 
   const onPrev = useExitBack();
 

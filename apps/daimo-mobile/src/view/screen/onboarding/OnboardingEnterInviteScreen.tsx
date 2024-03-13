@@ -10,7 +10,7 @@ import {
 import { getChainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { PureComponent, useState } from "react";
+import { PureComponent } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
@@ -21,23 +21,15 @@ import {
 } from "../../../common/nav";
 import { getAccountManager } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
-import { useOnboardingPasteInvite } from "../../../logic/onboarding";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
-import { TextCenter, TextError, TextLight } from "../../shared/text";
+import { TextCenter, TextLight } from "../../shared/text";
 
 export function OnboardingEnterInviteScreen() {
-  // 1. Paste invite from link
-  const { pasteInviteLink, pasteLinkError } = useOnboardingPasteInvite();
-
-  // 2. Enter invite code manually
-  const [mode, setMode] = useState("paste" as "paste" | "enter");
-  const enterManually = () => setMode("enter");
-
-  // 3. No invite code? Join waitlist
+  // No invite code? Join waitlist
   const linkToWaitlist = () => {
     const url = `https://daimo.com/waitlist`;
     Linking.openURL(url);
@@ -59,29 +51,10 @@ export function OnboardingEnterInviteScreen() {
             it from a link.{"\n"}Don't have one? Join the waitlist.
           </IntroTextParagraph>
         </TextCenter>
-        <Spacer h={32} />
-        {mode === "paste" && (
-          <>
-            <TextCenter>
-              <TextError>{pasteLinkError || <>&nbsp;</>}</TextError>
-            </TextCenter>
-            <Spacer h={8} />
-            <ButtonBig
-              type="primary"
-              title="PASTE INVITE FROM LINK"
-              onPress={pasteInviteLink}
-            />
-            <Spacer h={16} />
-            <TextButton title="Enter code manually" onPress={enterManually} />
-          </>
-        )}
-        {mode === "enter" && (
-          <>
-            <EnterCodeForm nav={nav} />
-            <Spacer h={16} />
-            <TextButton title="JOIN WAITLIST" onPress={linkToWaitlist} />
-          </>
-        )}
+        <Spacer h={64} />
+        <EnterCodeForm nav={nav} />
+        <Spacer h={16} />
+        <TextButton title="JOIN WAITLIST" onPress={linkToWaitlist} />
       </View>
     </View>
   );
