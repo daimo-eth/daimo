@@ -13,7 +13,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noEmit": false
+    "noEmit": false,
+    "outDir": "dist"
   },
   "exclude": ["node_modules"]
 }
