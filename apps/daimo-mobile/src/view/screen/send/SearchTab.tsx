@@ -1,8 +1,8 @@
 import { TextInput, View } from "react-native";
 
-import { SearchResults } from "./SearchResults";
 import { useContactsPermission } from "../../../logic/systemContacts";
 import { InputBig } from "../../shared/InputBig";
+import { SearchResults } from "../../shared/SearchResults";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 

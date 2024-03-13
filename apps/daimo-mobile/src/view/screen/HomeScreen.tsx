@@ -17,7 +17,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SearchResults } from "./send/SearchResults";
 import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
@@ -31,6 +30,7 @@ import { HistoryListSwipe } from "../shared/HistoryList";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
+import { SearchResults } from "../shared/SearchResults";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";

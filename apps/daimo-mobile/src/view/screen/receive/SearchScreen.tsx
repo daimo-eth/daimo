@@ -2,9 +2,9 @@ import { TextInput, View } from "react-native";
 
 import { useContactsPermission } from "../../../logic/systemContacts";
 import { InputBig } from "../../shared/InputBig";
+import { SearchResults } from "../../shared/SearchResults";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
-import { SearchResults } from "../send/SearchResults";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
  *  or a system contact with phone number or email. */

@@ -10,25 +10,25 @@ import {
   View,
 } from "react-native";
 
-import { navToAccountPage, useNav } from "../../../common/nav";
+import { ButtonMed } from "./Button";
+import { Bubble, ContactBubble } from "./ContactBubble";
+import { LinkedAccountBubble } from "./LinkedAccountBubble";
+import Spacer from "./Spacer";
+import { ErrorRowCentered } from "./error";
+import { color, touchHighlightUnderlay } from "./style";
+import { TextBody, TextCenter, TextLight } from "./text";
+import { useWithAccount } from "./withAccount";
+import { navToAccountPage, useNav } from "../../common/nav";
 import {
   DaimoContact,
   EAccountContact,
   getContactName,
   getDaimoContactKey,
   useRecipientSearch,
-} from "../../../logic/daimoContacts";
-import { ContactsAccess } from "../../../logic/systemContacts";
-import { Account } from "../../../model/account";
-import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
-import { ButtonMed } from "../../shared/Button";
-import { Bubble, ContactBubble } from "../../shared/ContactBubble";
-import { LinkedAccountBubble } from "../../shared/LinkedAccountBubble";
-import Spacer from "../../shared/Spacer";
-import { ErrorRowCentered } from "../../shared/error";
-import { color, touchHighlightUnderlay } from "../../shared/style";
-import { TextBody, TextCenter, TextLight } from "../../shared/text";
-import { useWithAccount } from "../../shared/withAccount";
+} from "../../logic/daimoContacts";
+import { ContactsAccess } from "../../logic/systemContacts";
+import { Account } from "../../model/account";
+import { useKeyboardHeight } from "../../vendor/useKeyboardHeight";
 
 export function SearchResults({
   contactsAccess,
@@ -62,7 +62,8 @@ function SearchResultsScroll({
   const res = useRecipientSearch(
     account,
     prefix,
-    contactsPermission?.granted || false
+    contactsPermission?.granted || false,
+    mode === "receive"
   );
 
   const recentsOnly = prefix === "";
@@ -79,6 +80,7 @@ function SearchResultsScroll({
         <ExtraRows
           contactsPermission={contactsPermission}
           requestContactsPermission={requestContactsPermission}
+          mode={mode}
         />
       )}
       {res.recipients.length > 0 && (
@@ -216,9 +218,11 @@ function ProfileLinks({ recipient }: { recipient: EAccountContact }) {
 function ExtraRows({
   contactsPermission,
   requestContactsPermission,
+  mode,
 }: {
   contactsPermission: Contacts.PermissionResponse;
   requestContactsPermission: () => void;
+  mode: "send" | "receive" | "account";
 }) {
   const nav = useNav();
 
@@ -232,14 +236,21 @@ function ExtraRows({
         />
       )}
       <ExtraRow
-        title="Send via link"
+        title={mode === "receive" ? "Receive via link" : "Send via link"}
         inside={<Octicons name="link" size={14} color={color.primary} />}
-        onPress={() =>
-          nav.navigate("SendTab", {
-            screen: "SendLink",
-            params: {},
-          })
-        }
+        onPress={() => {
+          if (mode === "receive") {
+            nav.navigate("HomeTab", {
+              screen: "Receive",
+              params: { autoFocus: true },
+            });
+          } else {
+            nav.navigate("SendTab", {
+              screen: "SendLink",
+              params: {},
+            });
+          }
+        }}
       />
       <ExtraRow
         title="Scan QR code"

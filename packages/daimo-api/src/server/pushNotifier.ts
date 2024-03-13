@@ -266,7 +266,7 @@ export class PushNotifier {
             messages.push({
               to: pushTokens,
               badge: 1,
-              title: "",
+              title: "Request fulfilled",
               body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
             });
           }
@@ -286,7 +286,7 @@ export class PushNotifier {
                 messages.push({
                   to: pushTokens,
                   badge: 1,
-                  title: "",
+                  title: "Request received",
                   body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
                 });
               }

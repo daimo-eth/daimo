@@ -89,7 +89,8 @@ export function getContactProfilePicture(r: DaimoContact) {
 export function useRecipientSearch(
   account: Account,
   prefix: string,
-  searchContacts: boolean
+  searchContacts: boolean,
+  onlyDaimoContacts?: boolean
 ) {
   prefix = prefix.toLowerCase();
 
@@ -109,6 +110,8 @@ export function useRecipientSearch(
     if (recentsByAddr.has(other)) continue;
 
     const acc = getCachedEAccount(other);
+
+    if (onlyDaimoContacts && !acc.name) continue;
 
     // HACK: ignore transfers to specially labelled addresses like "payment link"
     // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
