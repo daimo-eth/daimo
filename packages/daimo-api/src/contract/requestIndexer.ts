@@ -12,7 +12,7 @@ import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
 import { logCoordinateKey } from "../utils/indexing";
 
-export interface RequestCreatedLog {
+interface RequestCreatedLog {
   transactionHash: Hex;
   logIndex: number;
   id: bigint;
@@ -23,7 +23,7 @@ export interface RequestCreatedLog {
   logAddr: Address;
 }
 
-export interface RequestFulfilledLog {
+interface RequestFulfilledLog {
   transactionHash: Hex;
   logIndex: number;
   id: bigint;

@@ -2,23 +2,21 @@ import {
   AddrLabel,
   DaimoNoteState,
   DaimoNoteStatus,
+  DaimoRequestState,
+  DaimoRequestV2Status,
   assert,
   assertNotNull,
   getAccountName,
   getSlotLabel,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
-import { Address, Hex, formatUnits, getAddress } from "viem";
+import { Address, Hex, formatUnits, getAddress, hexToString } from "viem";
 
 import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
-import {
-  RequestCreatedLog,
-  RequestFulfilledLog,
-  RequestIndexer,
-} from "../contract/requestIndexer";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -48,6 +46,7 @@ export class PushNotifier {
     this.coinIndexer.addListener(this.handleTransfers);
     this.noteIndexer.addListener(this.handleNoteOps);
     this.keyReg.addListener(this.handleKeyRotations);
+    this.requestIndexer.addListener(this.handleRequests);
 
     // Load Expo push notification tokens
     const rows = await retryBackoff(`loadPushTokens`, () =>
@@ -79,14 +78,10 @@ export class PushNotifier {
     this.maybeSendNotifications(messages);
   };
 
-  private handleRequestCreations = async (logs: RequestCreatedLog[]) => {
-    console.log(`[PUSH] got ${logs.length} request creations`);
-    const messages = this.getPushMessagesFromRequestCreations(logs);
+  private handleRequests = async (logs: DaimoRequestV2Status[]) => {
+    console.log(`[PUSH] got ${logs.length} requests`);
+    const messages = this.getPushMessagesFromRequests(logs);
     this.maybeSendNotifications(messages);
-  };
-
-  private handleRequestFulfills = async (logs: RequestFulfilledLog[]) => {
-    console.log(`[PUSH] got ${logs.length} request creations`);
   };
 
   /** NOT MEANT TO BE CALLED DIRECTLY: Always use maybeSendNotifications */
@@ -243,39 +238,57 @@ export class PushNotifier {
     ];
   }
 
-  private getPushMessagesFromRequestCreations(
-    logs: RequestCreatedLog[]
+  private getPushMessagesFromRequests(
+    logs: DaimoRequestV2Status[]
   ): ExpoPushMessage[] {
     const messages = [];
-    const { tokenDecimals, tokenSymbol } = chainConfig;
 
     for (const log of logs) {
-      const pushTokens = this.pushTokens.get(`0x`); // TODO: Replace with
+      if (log.status !== DaimoRequestState.Pending) {
+        const { tokenSymbol } = chainConfig;
+        const { metadata } = log;
+        const { dollars } = log.link;
 
-      if (pushTokens) {
-        messages.push({
-          to: pushTokens,
-          badge: 1,
-          title: ` requested 5.00 ${tokenSymbol} USDC`,
-          body: "",
-          data: { txHash: log.transactionHash },
-        });
-      }
-    }
+        // On fulfillment:
+        // Ensure recepient and fulfiller both have Daimo accounts
+        if (
+          log.recipient.name &&
+          log.status === DaimoRequestState.Fulfilled &&
+          log.fulfilledBy?.name
+        ) {
+          const pushTokens = this.pushTokens.get(log.recipient.addr);
 
-    return messages;
-  }
+          if (pushTokens) {
+            messages.push({
+              to: pushTokens,
+              badge: 1,
+              title: "",
+              body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
+            });
+          }
+        }
 
-  private getPushMessagesFromRequestFulfillments(logs: RequestFulfilledLog[]) {
-    const messages = [];
+        // On creation, parse fulfiller name from metadata.
+        if (log.recipient.name && log.status === DaimoRequestState.Created) {
+          const parsedMetadata = hexToString(metadata);
+          if (parsedMetadata !== "") {
+            // TODO: find a way to validate and prevent errors if the value does not match.
+            const { fulfiller } = JSON.parse(parsedMetadata);
 
-    for (const log of logs) {
-      const pushTokens = this.pushTokens.get(`0x`);
+            if (fulfiller) {
+              const pushTokens = this.pushTokens.get(fulfiller);
 
-      if (pushTokens) {
-        messages.push({
-          from: pushTokens,
-        });
+              if (pushTokens) {
+                messages.push({
+                  to: pushTokens,
+                  badge: 1,
+                  title: "",
+                  body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
+                });
+              }
+            }
+          }
+        }
       }
     }
 
