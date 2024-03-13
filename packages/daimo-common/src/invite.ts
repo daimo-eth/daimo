@@ -23,6 +23,8 @@ export function parseInviteCodeOrLink(str: string): DaimoLink | undefined {
   const link = parseDaimoLink(str);
   if (link != null && link.type === "invite") {
     return link;
+  } else if (link != null && link.type === "requestv2") {
+    return link;
   } else if (link != null && link.type === "notev2") {
     return stripSeedFromNoteLink(link);
   }

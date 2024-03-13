@@ -69,9 +69,9 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const snapPoints = useMemo(() => {
       if (snapPointCount === 2) {
-        return [450, maxHeightOffset - tabBarHeight];
+        return [500, maxHeightOffset - tabBarHeight];
       } else {
-        return [swipeHeight, 450, maxHeightOffset - tabBarHeight];
+        return [swipeHeight, 500, maxHeightOffset - tabBarHeight];
       }
     }, [maxHeightOffset, snapPointCount]);
 
