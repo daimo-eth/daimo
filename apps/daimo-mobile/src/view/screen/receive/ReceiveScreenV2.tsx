@@ -104,7 +104,7 @@ function RequestScreenInnerV2({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Request" onBack={goBack || goHome} />
+        <ScreenHeader title="Request from" onBack={goBack || goHome} />
         <Spacer h={8} />
         {!recipient && (
           <InfoBox
@@ -124,7 +124,7 @@ function RequestScreenInnerV2({
           autoFocus={false}
         />
         <Spacer h={32} />
-        <View style={ss.container.padH16}>
+        <View style={ss.container.padH8}>
           {as.status === "loading" ? (
             <>
               <ActivityIndicator size="large" />

@@ -273,7 +273,7 @@ const buttonStyles = {
     button: {
       paddingHorizontal: 24,
       paddingVertical: 20,
-      borderRadius: 8,
+      borderRadius: 4,
       backgroundColor: color.primaryBgLight,
     },
     title: {

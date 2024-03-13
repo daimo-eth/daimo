@@ -14,7 +14,11 @@ import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
-import { RequestIndexer } from "../contract/requestIndexer";
+import {
+  RequestCreatedLog,
+  RequestFulfilledLog,
+  RequestIndexer,
+} from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -73,6 +77,16 @@ export class PushNotifier {
     console.log(`[PUSH] got ${logs.length} key rotations`);
     const messages = this.getPushMessagesFromKeyRotations(logs);
     this.maybeSendNotifications(messages);
+  };
+
+  private handleRequestCreations = async (logs: RequestCreatedLog[]) => {
+    console.log(`[PUSH] got ${logs.length} request creations`);
+    const messages = this.getPushMessagesFromRequestCreations(logs);
+    this.maybeSendNotifications(messages);
+  };
+
+  private handleRequestFulfills = async (logs: RequestFulfilledLog[]) => {
+    console.log(`[PUSH] got ${logs.length} request creations`);
   };
 
   /** NOT MEANT TO BE CALLED DIRECTLY: Always use maybeSendNotifications */
@@ -227,6 +241,45 @@ export class PushNotifier {
         data: { txHash },
       },
     ];
+  }
+
+  private getPushMessagesFromRequestCreations(
+    logs: RequestCreatedLog[]
+  ): ExpoPushMessage[] {
+    const messages = [];
+    const { tokenDecimals, tokenSymbol } = chainConfig;
+
+    for (const log of logs) {
+      const pushTokens = this.pushTokens.get(`0x`); // TODO: Replace with
+
+      if (pushTokens) {
+        messages.push({
+          to: pushTokens,
+          badge: 1,
+          title: ` requested 5.00 ${tokenSymbol} USDC`,
+          body: "",
+          data: { txHash: log.transactionHash },
+        });
+      }
+    }
+
+    return messages;
+  }
+
+  private getPushMessagesFromRequestFulfillments(logs: RequestFulfilledLog[]) {
+    const messages = [];
+
+    for (const log of logs) {
+      const pushTokens = this.pushTokens.get(`0x`);
+
+      if (pushTokens) {
+        messages.push({
+          from: pushTokens,
+        });
+      }
+    }
+
+    return messages;
   }
 
   getPushMessagesFromNoteOps(logs: DaimoNoteStatus[]) {
