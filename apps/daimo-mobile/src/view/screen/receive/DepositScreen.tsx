@@ -44,11 +44,13 @@ export default function DepositScreen() {
   const WithdrawInner = useWithAccount(WithdrawScreen);
 
   return (
-    <View style={ss.container.screen}>
-      <ScreenHeader title="Deposit" onExit={goHome} />
-      <Spacer h={8} />
-      <SegmentSlider {...{ tabs, tab, setTab }} />
-      <Spacer h={24} />
+    <View style={styles.container}>
+      <View style={ss.container.padH16}>
+        <ScreenHeader title="Deposit" onExit={goHome} />
+        <Spacer h={8} />
+        <SegmentSlider {...{ tabs, tab, setTab }} />
+        <Spacer h={24} />
+      </View>
       {tab === "DEPOSIT" && <DepositInner />}
       {tab === "WITHDRAW" && <WithdrawInner />}
     </View>
@@ -60,7 +62,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   const testnet = chainConfig.chainL2.testnet;
 
   return (
-    <ScrollView>
+    <ScrollView style={ss.container.padH16}>
       {!testnet && (
         <>
           <OnrampsSection account={account} />
@@ -189,6 +191,9 @@ function HeaderRow({ title }: { title: string }) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   address: {
     flexDirection: "column",
     gap: 16,
