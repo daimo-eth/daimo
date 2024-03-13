@@ -42,23 +42,26 @@ export function InviteScreen() {
 function InviteScreenInner({ account }: { account: Account }) {
   const inviteLinkStatus = account.inviteLinkStatus;
 
-  if (!inviteLinkStatus) {
-    return (
-      <View style={ss.container.padH16}>
-        <LockedHeader />
-        <LockedFooter />
-      </View>
+  const header =
+    account.invitees.length > 0 ? (
+      <Header
+        invitees={account.invitees}
+        inviteLinkStatus={inviteLinkStatus || undefined}
+      />
+    ) : (
+      <LockedHeader />
     );
-  }
+
+  const footer = inviteLinkStatus?.isValid ? (
+    <ReferralButtonsFooter inviteCodeStatus={inviteLinkStatus} />
+  ) : (
+    <LockedFooter />
+  );
 
   return (
     <View style={ss.container.padH16}>
-      <Header invitees={account.invitees} inviteCodeStatus={inviteLinkStatus} />
-      {inviteLinkStatus.isValid ? (
-        <ReferralButtonsFooter inviteCodeStatus={inviteLinkStatus} />
-      ) : (
-        <LockedFooter />
-      )}
+      {header}
+      {footer}
     </View>
   );
 }
@@ -195,10 +198,10 @@ function LockedFooter() {
 
 function Header({
   invitees,
-  inviteCodeStatus,
+  inviteLinkStatus,
 }: {
   invitees: EAccount[];
-  inviteCodeStatus: DaimoInviteCodeStatus;
+  inviteLinkStatus?: DaimoInviteCodeStatus;
 }) {
   const goHome = useExitToHome();
 
@@ -209,7 +212,7 @@ function Header({
       <Spacer h={8} />
       <HeaderCountText
         invitees={invitees}
-        usesLeft={inviteCodeStatus.usesLeft}
+        usesLeft={inviteLinkStatus?.usesLeft}
       />
       <Spacer h={32} />
       <TextCenter>
