@@ -25,7 +25,7 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
-import { ParamListHome, useExitToHome } from "../../../common/nav";
+import { ParamListHome, useExitBack } from "../../../common/nav";
 import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
@@ -75,7 +75,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title={title} onExit={useExitToHome()} />
+      <ScreenHeader title={title} onBack={useExitBack()} />
       <ScrollView bounces={false}>
         {noteFetch.isFetching && <CenterSpinner />}
         {noteFetch.error && (
@@ -101,7 +101,7 @@ interface NoteDisplayProps {
 
 /// Displays a note: amount, status, and button to claim.
 export function NoteDisplay(
-  props: NoteDisplayProps & { hideAmount?: boolean }
+  props: NoteDisplayProps & { hideAmount?: boolean; leaveScreen?: () => void }
 ) {
   const Inner = useWithAccount(NoteDisplayInner);
   return <Inner {...props} />;
@@ -111,7 +111,12 @@ function NoteDisplayInner({
   account,
   noteStatus,
   hideAmount,
-}: NoteDisplayProps & { account: Account; hideAmount?: boolean }) {
+  leaveScreen,
+}: NoteDisplayProps & {
+  account: Account;
+  hideAmount?: boolean;
+  leaveScreen?: () => void;
+}) {
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address
@@ -216,10 +221,11 @@ function NoteDisplayInner({
   const netDollarsReceivedStr = getAmountText({ dollars: netRecv });
 
   // On success, go home, show newly created transaction
-  const goHome = useExitToHome();
+  const backHome = useExitBack();
   useEffect(() => {
     if (status !== "success") return;
-    goHome();
+    if (leaveScreen) leaveScreen();
+    else backHome!();
   }, [status]);
 
   const statusMessage = (function (): ReactNode {
