@@ -1,18 +1,23 @@
-import { trpcClient } from "./trpcClient";
 import {
+  EAccount,
+  assert,
   dollarsToAmount,
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
 } from "@daimo/common";
-import { TRPCClient, WebhookEvent } from "./types";
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { trpcClient } from "./trpcClient";
+import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
 // 4 cases of Payment request:
 
 // Requesting:
 // Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
 //      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daibot responds with a link to request $
-// Case 2: Alice has FC linked ✅, requests $ from anyone (open-ended post)
+//  Case 1a: Alice doesn't have FC linked ❌ but has ENS linked on FC, requests $ from anyone
+//     Action 3a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
+// Case 2: Alice has FC linked ✅, requests $ from anyone
 //      Action 2: Daimobot responses with link that requests $ from anyone to Alice's Daimo address
 
 // Paying:
@@ -23,22 +28,36 @@ import { TRPCClient, WebhookEvent } from "./types";
 // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
 //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
 
+assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
+const _neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
+
+assert(
+  !!process.env.DAIMOBOT_SIGNER_UUID,
+  "DAIMOBOT_SIGNER_UUID is not defined"
+);
+const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
+
 export class PaymentActionProcessor {
-  private text: string | null;
-  private castId: string | null;
+  private text: string;
+  private castId: string;
+  private senderFid: number;
+  private authorUsername: string;
   private parentCastId: string | null;
   private parentAuthorFid: number | null;
-  private senderFid: number;
-  private client: TRPCClient;
+  private trpcClient: TRPCClient;
+  private neynarClient: NeynarAPIClient;
 
   constructor(event: WebhookEvent) {
     const { data } = event;
     this.text = data.text;
     this.castId = data.hash;
+    this.authorUsername = data.author.username;
     this.parentCastId = data.parent_url; // TODO verify
     this.parentAuthorFid = data.parent_author.fid;
     this.senderFid = data.author.fid;
-    this.client = trpcClient;
+
+    this.trpcClient = trpcClient;
+    this.neynarClient = _neynarClient;
   }
 
   async process() {
@@ -47,57 +66,85 @@ export class PaymentActionProcessor {
     const daimobotCommand = this.tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
-      // todo handle
+      this.publishCastReply(
+        "Hi! To use me, please use the format `@daimobot request $<amount>` or `@daimobot pay $<amount>`."
+      );
       return;
     }
 
-    const { action, amount } = daimobotCommand;
+    const { action, cleanedAmount } = daimobotCommand;
     switch (action) {
       case "request": {
         // See if sender has Farcaster linked
         const senderEthAccount =
-          await this.client.lookupEthereumAccountByFid.query({
+          await this.trpcClient.lookupEthereumAccountByFid.query({
             fid: this.senderFid,
           });
         if (!senderEthAccount) {
+          // TODO check ENS here
           console.log(
             "Sender not registered with Farcaster. Sending a response cast."
           );
-          // TODO send a response cast that sender's not registered, with link to register
+          this.publishCastReply(
+            "Connect your Farcaster on Daimo to continue!"
+            // TODO if there's a convenience url to connect Farcaster, add here
+          );
           return;
         }
 
         const daimoShareUrl = await this.handleRequest(
-          amount,
+          cleanedAmount,
           senderEthAccount
         );
-        // todo post response with daimoShareUrl
+        this.publishCastReply(
+          `Here's a request for $${cleanedAmount} to @${this.authorUsername}!`,
+          {
+            embeds: [{ url: daimoShareUrl }],
+          }
+        );
         break;
       }
       case "pay": {
         // See if prospective recipient has Farcaster linked
         if (!this.parentAuthorFid) {
-          //   TODO handle more gracefully
-          throw new Error(
+          console.warn(
             "No parent author FID found, thus no one to prospectively pay."
           );
+          this.publishCastReply(
+            "I can't find who you're trying to pay 🧐 \n\n To pay someone, make sure you're replying to one of their casts!"
+          );
+          return;
         }
         const recipientEthAccount =
-          await this.client.lookupEthereumAccountByFid.query({
+          await this.trpcClient.lookupEthereumAccountByFid.query({
             fid: this.parentAuthorFid,
           });
+        const recipientUsername = await this.getFcUsernameByFid(
+          this.parentAuthorFid
+        );
         if (!recipientEthAccount) {
+          // TODO check ENS here
+
           console.log(
             "Recipient not registered with Farcaster. Sending a response cast."
           );
-          // TODO send a response cast that recipient's not registered, with link to register
+          this.publishCastReply(
+            `@${recipientUsername} has to first connect their Farcaster on Daimo to receive payments!`
+            // TODO if there's a convenience url to connect Farcaster, add here
+          );
           return;
         }
         const daimoShareUrl = await this.handleRequest(
-          amount,
+          cleanedAmount,
           recipientEthAccount
         );
-        // todo post response with payment confirmation
+
+        this.publishCastReply(
+          `Here's a request for $${cleanedAmount} to @${recipientUsername}!`,
+          {
+            embeds: [{ url: daimoShareUrl }],
+          }
+        );
         break;
       }
       default:
@@ -105,34 +152,38 @@ export class PaymentActionProcessor {
     }
   }
 
-  private tryExtractCommand(): { action: string; amount: number } | null {
+  private tryExtractCommand(): {
+    action: string;
+    cleanedAmount: number;
+  } | null {
     const match = this.text?.match(
       /@daimobot (request|pay) \$([0-9]+(?:\.[0-9]{1,2})?)/
     );
     if (match && match[1] && match[2]) {
+      const cleanedAmount = parseFloat(parseFloat(match[2]).toFixed(2));
       return {
         action: match[1],
-        amount: parseFloat(match[2]),
+        cleanedAmount,
       };
     }
     return null;
   }
 
-  private async handleRequest(
-    amount: number,
-    requestRecipient: any // TODO type
-  ) {
-    console.log(`Requesting $${amount}`);
-    // handle request
-    console.log("Calling trpcClient.createRequestSponsored.mutate");
+  private async handleRequest(amount: number, requestRecipient: EAccount) {
     const idString = encodeRequestId(generateRequestId());
     const recipient = requestRecipient.addr;
 
-    const txHash = await this.client.createRequestSponsored.mutate({
+    const params = {
       recipient,
       idString,
       amount: dollarsToAmount(amount).toString(),
-    });
+    };
+    console.log(
+      `Calling trpcClient.createRequestSponsored.mutate with params: ${JSON.stringify(
+        params
+      )}`
+    );
+    const txHash = await this.trpcClient.createRequestSponsored.mutate(params);
     console.log(`[DAIMOBOT REQUEST] txHash ${txHash}`);
     const daimoShareUrl = formatDaimoLink({
       type: "requestv2",
@@ -142,5 +193,22 @@ export class PaymentActionProcessor {
     });
     console.log(`[DAIMOBOT REQUEST] url ${daimoShareUrl}`);
     return daimoShareUrl;
+  }
+
+  private async publishCastReply(text: string, opts: SendCastOptions = {}) {
+    await this.neynarClient
+      .publishCast(DAIMOBOT_SIGNER_UUID, text, {
+        ...opts,
+        replyTo: this.castId,
+      })
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+  }
+
+  private async getFcUsernameByFid(fid: number) {
+    const profile = await this.neynarClient.fetchBulkUsers([fid]);
+    const len = profile.users.length;
+    assert(len === 1, `Expected exactly 1 user to be returned, got ${len}`);
+    return profile.users[0].username;
   }
 }

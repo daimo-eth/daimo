@@ -79,12 +79,12 @@ type SignedKeyData = {
     AUTH_HEADERS
   );
 
-  //   Step 2: Generate a signature
+  // Step 2: Generate a signature
   const { deadline, signature } = await generateSignature(
     createSignerResponse.data.public_key
   );
 
-  //   Step 3: Register signed key
+  // Step 3: Register signed key
   const signedKeyResponse = await axios.post(
     `${NEYNAR_BASE_URL}/signer/signed_key`,
     {
@@ -98,15 +98,15 @@ type SignedKeyData = {
   const data: SignedKeyData = signedKeyResponse.data;
   console.log(data);
 
-  //   Result will look something like:
-  //   data: {
+  // Result will look something like:
+  // data: {
   //     signer_uuid: '<uuid>',
   //     public_key: '0x...',
   //     status: 'pending_approval',
   //     signer_approval_url: 'https://client.warpcast.com/deeplinks/signed-key-request?token=0x...'
-  //   }
+  // }
 
-  //   Steps 4, 5, 6:
+  // Steps 4, 5, 6:
   // ! TODO: Run this file via `npm i; npx ts-node src/registerNeynarSigner.ts`
   // ! open the signer approval url from output, and approve.
   // Record the signer_uuid

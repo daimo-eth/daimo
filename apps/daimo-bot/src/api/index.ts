@@ -1,15 +1,10 @@
-import { PaymentActionProcessor } from "../PaymentActionProcessor";
-import dotenv from "dotenv";
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { assert } from "@daimo/common";
-import express from "express";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import express from "express";
+import { PaymentActionProcessor } from "../PaymentActionProcessor";
 import { WebhookEvent } from "../types";
 
 dotenv.config();
-
-assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
-const neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
 
 const app = express();
 const port = 4000;

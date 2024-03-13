@@ -1,3 +1,6 @@
+import { EAccount } from "@daimo/common";
+import { EmbeddedCast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+
 export type TRPCClient = {
   createRequestSponsored: {
     mutate: (input: {
@@ -7,15 +10,21 @@ export type TRPCClient = {
     }) => Promise<string>;
   };
   lookupEthereumAccountByFid: {
-    query: (args: { fid: number }) => Promise<any>;
+    query: (args: { fid: number }) => Promise<EAccount | null>;
   };
+};
+
+export type SendCastOptions = {
+  embeds?: EmbeddedCast[];
+  replyTo?: string;
+  channelId?: string;
 };
 
 export type WebhookEvent = {
   created_at: number;
   type: string;
   data: CastData;
-}
+};
 
 export type CastData = {
   object: string;
@@ -39,7 +48,7 @@ export type CastData = {
     count: number;
   };
   mentioned_profiles: any[];
-}
+};
 
 export type Author = {
   object: string;
@@ -53,4 +62,4 @@ export type Author = {
   following_count: number;
   verifications: string[];
   active_status: string;
-}
+};
