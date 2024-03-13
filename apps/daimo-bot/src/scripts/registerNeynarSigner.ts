@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
-import axios from "axios";
-import { mnemonicToAccount } from "viem/accounts";
 import { assert, now } from "@daimo/common";
+import axios from "axios";
+import dotenv from "dotenv";
+import { mnemonicToAccount } from "viem/accounts";
 
 // Codified version of steps in this guide:
 // https://docs.neynar.com/docs/write-to-farcaster-with-neynar-managed-signers
@@ -107,7 +107,7 @@ type SignedKeyData = {
   // }
 
   // Steps 4, 5, 6:
-  // ! TODO: Run this file via `npm i; npx ts-node src/registerNeynarSigner.ts`
+  // ! TODO: Run this file via `npm i; npx ts-node src/scripts/registerNeynarSigner.ts`
   // ! open the signer approval url from output, and approve.
   // Record the signer_uuid
   // Afterwards, daimobot is now registered with Neynar API and is able to cast programmatically

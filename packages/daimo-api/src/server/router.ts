@@ -14,9 +14,6 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
-import { PushNotifier } from "./pushNotifier";
-import { Telemetry, zUserAction } from "./telemetry";
-import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
@@ -44,6 +41,9 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { Watcher } from "../shovel/watcher";
+import { PushNotifier } from "./pushNotifier";
+import { Telemetry, zUserAction } from "./telemetry";
+import { trpcT } from "./trpc";
 
 export function createRouter(
   watcher: Watcher,
@@ -172,7 +172,11 @@ export function createRouter(
       .input(z.object({ fid: z.number() }))
       .query(async (opts) => {
         const addr = profileCache.getAddress(opts.input.fid);
-        return addr ? await nameReg.getEAccount(addr) : null;
+        if (!addr) return null;
+
+        // registry may return info even without linked accounts, verify first
+        const eAccount = await nameReg.getEAccount(addr);
+        return eAccount?.linkedAccounts?.length ? eAccount : null;
       }),
 
     lookupAddressKeys: publicProcedure
