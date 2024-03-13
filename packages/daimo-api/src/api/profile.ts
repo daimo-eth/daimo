@@ -16,6 +16,7 @@ import { ViemClient } from "../network/viemClient";
 export class ProfileCache {
   private links: ProfileLink[] = [];
   private linkedAccounts: Map<Address, LinkedAccount[]> = new Map();
+  private fidToAddress: Map<number, Address> = new Map();
 
   constructor(private vc: ViemClient, private db: DB) {}
 
@@ -88,6 +89,7 @@ export class ProfileCache {
       const linked = this.linkedAccounts.get(link.addr) || [];
       linked.push(link.linkedAccount);
       this.linkedAccounts.set(link.addr, linked);
+      this.fidToAddress.set(link.linkedAccount.fid, link.addr);
     }
   }
 
@@ -99,11 +101,12 @@ export class ProfileCache {
     console.log(`[PROFILE] linking: ${linkedAccJSON} to addr: ${addr}`);
 
     // Save to DB
-    await linkAccount(addr, linkedAccount, this.db);
+    await _linkAccount(addr, linkedAccount, this.db);
 
     // Index in memory
     const link: ProfileLink = { addr, linkedAccount };
     this.indexLinkedAccount(link);
+    this.fidToAddress.set(linkedAccount.fid, addr);
 
     // Return all accounts for this address
     return this.getLinkedAccounts(addr);
@@ -133,6 +136,10 @@ export class ProfileCache {
 
   getLinkedAccounts(addr: Address): LinkedAccount[] {
     return this.linkedAccounts.get(addr) || [];
+  }
+
+  getAddress(fid: number): Address | undefined {
+    return this.fidToAddress.get(fid);
   }
 
   getProfilePicture(addr: Address) {
@@ -167,7 +174,7 @@ export class ProfileCache {
   }
 }
 
-async function linkAccount(
+async function _linkAccount(
   addr: Address,
   linkedAcc: LinkedAccount,
   db: DB
