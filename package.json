@@ -2,7 +2,7 @@
   "private": true,
   "name": "@daimo/monorepo",
   "license": "GPL-3.0-or-later",
-  "scripts": {
+"scripts": {
     "dev": "turbo dev",
     "start": "turbo start",
     "build": "turbo build",
