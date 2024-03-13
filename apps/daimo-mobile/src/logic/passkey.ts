@@ -15,6 +15,12 @@ import { env } from "./env";
 import { Log } from "./log";
 import { parseCreateResponse, parseSignResponse } from "./passkeyParsers";
 
+// Workaround iOS deeplinks bug: https://github.com/daimo-eth/daimo/issues/837
+function matchAASABugError(e: string) {
+  // Match without english text since iOS errors are localized to device language
+  return e.includes("JV8PYC9QV4.com.daimo") && e.includes("daimo.com");
+}
+
 // Wrapper for Expo module native passkey creation
 export async function createPasskey(
   daimoChain: DaimoChain,
@@ -35,14 +41,17 @@ export async function createPasskey(
 
   const challengeB64 = btoa(`create key ${accountName} ${keySlot}`);
 
-  const result = await Log.promise(
+  const result = await Log.retryBackoff(
     "ExpoPasskeysCreate",
-    ExpoPasskeys.createPasskey({
-      domain: env(daimoChain).passkeyDomain,
-      passkeyName,
-      passkeyDisplayTitle,
-      challengeB64,
-    })
+    () =>
+      ExpoPasskeys.createPasskey({
+        domain: env(daimoChain).passkeyDomain,
+        passkeyName,
+        passkeyDisplayTitle,
+        challengeB64,
+      }),
+    3,
+    matchAASABugError
   );
 
   console.log("[PASSKEY] Got creation result from expo module", result);
@@ -102,12 +111,15 @@ export async function requestPasskeySignature(
   challengeB64: string,
   domain: string
 ) {
-  const result = await Log.promise(
+  const result = await Log.retryBackoff(
     "ExpoPasskeysSign",
-    ExpoPasskeys.signWithPasskey({
-      domain,
-      challengeB64,
-    })
+    () =>
+      ExpoPasskeys.signWithPasskey({
+        domain,
+        challengeB64,
+      }),
+    3,
+    matchAASABugError
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
 
