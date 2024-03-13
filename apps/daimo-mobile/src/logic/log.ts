@@ -56,7 +56,7 @@ export class Log {
           await new Promise((r) => setTimeout(r, 200 * 2 ** i));
         } else {
           console.log(
-            `[LOG] ${type} skipping retry ${i} error ${getErrMessage(e)}`
+            `[LOG] ${type} trial ${i}, quitting: ${getErrMessage(e)}`
           );
           throw new NamedError(getErrMessage(e), type);
         }
