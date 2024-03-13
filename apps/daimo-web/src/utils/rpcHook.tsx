@@ -12,7 +12,9 @@ function createRpcHook() {
   const reactQueryContext = createContext<QueryClient | undefined>(undefined);
   return {
     trpc: createTRPCReact<AppRouter>({
+      //@ts-ignore
       context: createContext(null),
+      //@ts-ignore
       reactQueryContext,
     }),
     reactQueryContext,
@@ -38,6 +40,7 @@ export function RpcHookProvider({ children }: { children: ReactNode }) {
     <rpcHook.trpc.Provider queryClient={rpcHook.queryClient} client={rpcClient}>
       <QueryClientProvider
         client={rpcHook.queryClient}
+        //@ts-ignore
         context={rpcHook.reactQueryContext}
       >
         {children}
