@@ -14,13 +14,6 @@ import { Linking, Platform, Share, StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { getAddress, isAddress } from "viem";
 
-import { useAccount } from "../../model/account";
-import { ButtonCircle } from "../shared/ButtonCircle";
-import { Scanner } from "../shared/Scanner";
-import { ScreenHeader } from "../shared/ScreenHeader";
-import { SegmentSlider } from "../shared/SegmentSlider";
-import Spacer from "../shared/Spacer";
-import image from "../shared/image";
 import {
   ParamListHome,
   QRScreenOptions,
@@ -28,7 +21,14 @@ import {
   useExitBack,
   useExitToHome,
   useNav,
-} from "../shared/nav";
+} from "../../common/nav";
+import { useAccount } from "../../logic/accountManager";
+import { ButtonCircle } from "../shared/ButtonCircle";
+import { Scanner } from "../shared/Scanner";
+import { ScreenHeader } from "../shared/ScreenHeader";
+import { SegmentSlider } from "../shared/SegmentSlider";
+import Spacer from "../shared/Spacer";
+import image from "../shared/image";
 import { color, ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 

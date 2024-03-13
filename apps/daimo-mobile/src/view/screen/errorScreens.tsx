@@ -2,11 +2,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ParamListMain } from "../../common/nav";
 import { SendDebugLogButton } from "../../common/useSendDebugLog";
 import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { ErrorBanner } from "../shared/error";
-import { ParamListMain } from "../shared/nav";
 import { ss } from "../shared/style";
 
 type Props = NativeStackScreenProps<ParamListMain, "LinkErrorModal">;

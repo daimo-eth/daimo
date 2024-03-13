@@ -93,7 +93,6 @@ async function main() {
     await Promise.all([paymaster.init(), inviteGraph.init()]);
 
     console.log(`[API] initializing push notifications...`);
-
     await Promise.all([notifier.init(), crontab.init()]);
 
     console.log(`[API] initializing profile cache...`);

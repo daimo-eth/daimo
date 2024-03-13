@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { navToAccountPage, useNav } from "../../../common/nav";
 import { DaimoContact, getContactName } from "../../../logic/daimoContacts";
 import { ButtonCircle } from "../../shared/ButtonCircle";
 import { ContactBubble } from "../../shared/ContactBubble";
 import { FarcasterButton } from "../../shared/FarcasterBubble";
 import Spacer from "../../shared/Spacer";
-import { navToAccountPage, useNav } from "../../shared/nav";
 import { TextH3, TextLight } from "../../shared/text";
 
 export function RecipientDisplay({

@@ -108,7 +108,7 @@ export function getWrappedRawSigner(
   };
 }
 
-export async function requestEnclaveSignature(
+async function requestEnclaveSignature(
   enclaveKeyName: string,
   hexMessage: string,
   usageMessage: string

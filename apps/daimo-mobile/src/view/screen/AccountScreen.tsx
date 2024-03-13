@@ -15,6 +15,13 @@ import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
+import {
+  ParamListHome,
+  navToAccountPage,
+  useExitBack,
+  useExitToHome,
+  useNav,
+} from "../../common/nav";
 import { addLastSendRecvTime } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
@@ -28,13 +35,6 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
-import {
-  ParamListHome,
-  navToAccountPage,
-  useExitBack,
-  useExitToHome,
-  useNav,
-} from "../shared/nav";
 import { color, ss } from "../shared/style";
 import { TextBody } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
@@ -106,22 +106,24 @@ function AccountScreenLoader({
   assert(["account", "invite"].includes(link.type), "Bad link type");
 
   return (
-    <View style={ss.container.center}>
-      {status.isLoading && <ActivityIndicator size="large" />}
-      {status.error && link.type === "account" && (
-        <ErrorBanner
-          error={status.error}
-          displayTitle="Account not found"
-          displayMessage={`Couldn't load account ${link.account}`}
-        />
-      )}
-      {status.error && link.type === "invite" && (
-        <ErrorBanner
-          error={status.error}
-          displayTitle="Invite not found"
-          displayMessage={`Couldn't load invite ${link.code}`}
-        />
-      )}
+    <View style={ss.container.padH16}>
+      <View style={ss.container.center}>
+        {status.isLoading && <ActivityIndicator size="large" />}
+        {status.error && link.type === "account" && (
+          <ErrorBanner
+            error={status.error}
+            displayTitle="Account not found"
+            displayMessage={`Couldn't load account ${link.account}`}
+          />
+        )}
+        {status.error && link.type === "invite" && (
+          <ErrorBanner
+            error={status.error}
+            displayTitle="Invite not found"
+            displayMessage={`Couldn't load invite ${link.code}`}
+          />
+        )}
+      </View>
     </View>
   );
 }

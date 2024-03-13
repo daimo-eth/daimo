@@ -12,8 +12,9 @@ import { stringToBytes } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { signAsync } from "../../action/sign";
+import { getAccountManager } from "../../logic/accountManager";
 import { env } from "../../logic/env";
-import { Account, getAccountManager } from "../../model/account";
+import { Account } from "../../model/account";
 import { FarcasterClient } from "../../profile/farcaster";
 import { QRCodeBox } from "../screen/QRScreen";
 import { ButtonMed, TextButton } from "../shared/Button";

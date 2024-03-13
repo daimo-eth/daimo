@@ -18,6 +18,12 @@ import { FulfillRequestButton } from "./FulfillRequestButton";
 import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
+  ParamListSend,
+  SendNavProp,
+  useExitToHome,
+  useNav,
+} from "../../../common/nav";
+import {
   EAccountContact,
   addLastSendRecvTime,
   getContactName,
@@ -31,12 +37,6 @@ import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import {
-  ParamListSend,
-  SendNavProp,
-  useExitToHome,
-  useNav,
-} from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { useWithAccount } from "../../shared/withAccount";
 

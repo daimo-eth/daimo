@@ -19,6 +19,11 @@ import { Linking, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NoteDisplay } from "./link/NoteScreen";
+import {
+  ParamListBottomSheet,
+  navToAccountPage,
+  useNav,
+} from "../../common/nav";
 import { getCachedEAccount } from "../../logic/addr";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
@@ -31,7 +36,6 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { ParamListBottomSheet, navToAccountPage, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,

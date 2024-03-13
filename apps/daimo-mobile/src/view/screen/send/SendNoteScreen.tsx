@@ -10,15 +10,15 @@ import {
 
 import { ExternalAction, NoteActionButton } from "./NoteActionButton";
 import { RecipientDisplay } from "./RecipientDisplay";
+import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
+import { useAccount } from "../../../logic/accountManager";
 import { MsgContact } from "../../../logic/daimoContacts";
-import { useAccount } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { composeEmail, composeSMS } from "../../shared/composeSend";
-import { ParamListSend, useExitToHome, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";

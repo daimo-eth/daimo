@@ -1,4 +1,4 @@
-import { assertUnreachable } from "@daimo/common";
+import { assertEqual, assertUnreachable } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet";
 import {
@@ -11,26 +11,33 @@ import {
   createNativeStackNavigator,
 } from "@react-navigation/native-stack";
 import {
+  StackCardInterpolatedStyle,
   StackCardInterpolationProps,
-  StackCardStyleInterpolator,
   TransitionPresets,
   createStackNavigator,
 } from "@react-navigation/stack";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountScreen } from "./screen/AccountScreen";
-import { ErrorScreen } from "./screen/ErrorScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
+import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
-import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
+import { MissingKeyScreen } from "./screen/onboarding/MissingKeyScreen";
+import { OnboardingAllowNotifsScreen as OnbAllowNotifsScreen } from "./screen/onboarding/OnboardingAllowNotifsScreen";
+import { OnboardingEnterInviteScreen as OnbEnterInviteScreen } from "./screen/onboarding/OnboardingEnterInviteScreen";
+import { OnboardingFinishScreen } from "./screen/onboarding/OnboardingFinishScreen";
+import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/OnboardingIntroScreen";
+import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
+import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
+import { usePollForAccount } from "./screen/onboarding/usePollForAccount";
 import DepositScreen from "./screen/receive/DepositScreen";
 import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
@@ -38,25 +45,47 @@ import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
+import { color } from "./shared/style";
 import {
   ParamListHome,
   ParamListInvite,
   ParamListMain,
+  ParamListOnboarding,
   ParamListSend,
   ParamListSettings,
   ParamListTab,
   useNav,
-} from "./shared/nav";
-import { color } from "./shared/style";
+} from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
-import { useAccount } from "../model/account";
+import { useAccountAndKeyInfo } from "../logic/accountManager";
 
 const { add, multiply } = Animated;
+
+// Onboarding navigator.
+const OnStack = createStackNavigator<ParamListOnboarding>();
+function OnboardingNavigator() {
+  usePollForAccount();
+
+  return (
+    <OnStack.Navigator
+      initialRouteName="Intro"
+      screenOptions={{ headerShown: false }}
+    >
+      <OnStack.Screen name="Intro" component={OnbIntroScreen} />
+      <OnStack.Screen name="CreateNew" component={OnbEnterInviteScreen} />
+      <OnStack.Screen name="CreatePickName" component={OnbPickNameScreen} />
+      <OnStack.Screen name="UseExisting" component={OnbUseExistingScreen} />
+      <OnStack.Screen name="AllowNotifs" component={OnbAllowNotifsScreen} />
+      <OnStack.Screen name="Finish" component={OnboardingFinishScreen} />
+    </OnStack.Navigator>
+  );
+}
 
 const Tab = createBottomTabNavigator<ParamListTab>();
 const MainStack = createStackNavigator<ParamListMain>();
 
-function TabNavigator() {
+// Main, logged-in bottom tab navigator.
+function MainTabNavigator() {
   const opts: BottomTabNavigationOptions = {
     // On Android, the tab bar jumps above the keyboard. This prevents that.
     // But on iOS, enabling this option can cause the screen to resize when the
@@ -81,69 +110,33 @@ function TabNavigator() {
   );
 }
 
+// Outer navigator. Multiplexes between Onboarding and MainTabNavigator.
 export function TabNav() {
-  // Track whether we've onboarded. If not, show OnboardingScreen.
-  const [account] = useAccount();
-  const [isOnboarded, setIsOnboarded] = useState<boolean>(account != null);
-  useEffect(() => {
-    // This is a latch: if we clear the account, go back to onboarding.
-    if (isOnboarded && account == null) setIsOnboarded(false);
-  }, [isOnboarded, account]);
-  // Stay onboarding till it's complete.
-  const onOnboardingComplete = () => setIsOnboarded(true);
+  const { account, keyInfo } = useAccountAndKeyInfo();
 
-  if (!isOnboarded) return <OnboardingScreen {...{ onOnboardingComplete }} />;
+  // No account? Create an account + enclave key.
+  if (account == null || !account.isOnboarded) {
+    return <OnboardingNavigator />;
+  }
 
-  // Error modal slides up from the bottom, greying out the app below.
-  // This custom interpolator recreates the native background effect.
-  const forModalPresentationIOS: StackCardStyleInterpolator = ({
-    current,
-    next,
-    inverted,
-    layouts: { screen },
-  }: StackCardInterpolationProps) => {
-    const progress = add(
-      current.progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 1],
-        extrapolate: "clamp",
-      }),
-      next
-        ? next.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-            extrapolate: "clamp",
-          })
-        : 0
-    );
-
-    const translateY = multiply(
-      progress.interpolate({
-        inputRange: [0, 1, 2],
-        outputRange: [screen.height, 0, 0],
-      }),
-      inverted
-    );
-
-    const overlayOpacity = progress.interpolate({
-      inputRange: [0, 1, 1.0001, 2],
-      outputRange: [0, 0.3, 1, 1],
-    });
-
-    return {
-      cardStyle: {
-        transform: [{ translateY }],
-      },
-      overlayStyle: { opacity: overlayOpacity },
-    };
-  };
-
+  // Ensure enclave key is present onchain. Otherwise, show error.
+  if (account != null && keyInfo != null) {
+    assertEqual(keyInfo.enclaveKeyName, account.enclaveKeyName);
+    const { pubKeyHex } = keyInfo;
+    if (
+      account.enclavePubKey !== pubKeyHex ||
+      account.accountKeys.find((k) => k.pubKey === pubKeyHex) == null
+    ) {
+      return <MissingKeyScreen />;
+    }
+  }
+  // Logged-in app.
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">
       <MainStack.Group>
         <MainStack.Screen
           name="MainTabNav"
-          component={TabNavigator}
+          component={MainTabNavigator}
           options={{ headerShown: false }}
         />
       </MainStack.Group>
@@ -163,12 +156,56 @@ export function TabNav() {
             ...TransitionPresets.ModalPresentationIOS,
             detachPreviousScreen: false,
             gestureResponseDistance: WINDOW_HEIGHT,
-            cardStyleInterpolator: forModalPresentationIOS,
+            cardStyleInterpolator: errorBottomSheetInterpolator,
           }}
         />
       </MainStack.Group>
     </MainStack.Navigator>
   );
+}
+
+// Error modal slides up from the bottom, greying out the app below.
+// This custom interpolator recreates the native background effect.
+function errorBottomSheetInterpolator({
+  current,
+  next,
+  inverted,
+  layouts: { screen },
+}: StackCardInterpolationProps): StackCardInterpolatedStyle {
+  const progress = add(
+    current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
+    }),
+    next
+      ? next.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 1],
+          extrapolate: "clamp",
+        })
+      : 0
+  );
+
+  const translateY = multiply(
+    progress.interpolate({
+      inputRange: [0, 1, 2],
+      outputRange: [screen.height, 0, 0],
+    }),
+    inverted
+  );
+
+  const overlayOpacity = progress.interpolate({
+    inputRange: [0, 1, 1.0001, 2],
+    outputRange: [0, 0.3, 1, 1],
+  });
+
+  return {
+    cardStyle: {
+      transform: [{ translateY }],
+    },
+    overlayStyle: { opacity: overlayOpacity },
+  };
 }
 
 function getTabOptions(
