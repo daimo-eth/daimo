@@ -5,8 +5,8 @@
   "main": "src/api/index.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/api/index.js",
-    "dev": "nodemon src/api/index.ts",
+    "start": "node api/index.js",
+    "dev": "nodemon api/index.ts",
     "test": "tsc --noEmit && jest"
   },
   "author": "",
