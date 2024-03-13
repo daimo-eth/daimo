@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/api/index.ts",
   "scripts": {
-    "build": "npx tsc",
+    "build": "tsc",
     "start": "node dist/api/index.js",
     "dev": "nodemon src/api/index.ts",
     "test": "tsc --noEmit && jest"
