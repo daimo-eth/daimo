@@ -10,7 +10,7 @@ module.exports = {
       danger: "#f35369",
       yellow: "#FFDC62",
       success: "#0CA01B",
-      primary: "#007aff",
+      primary: "#13915F",
       primaryLight: "#144B44",
       white: "#ffffff",
       ivory: "#fafafa",

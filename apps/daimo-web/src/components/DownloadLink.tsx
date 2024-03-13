@@ -12,7 +12,7 @@ export function DownloadLink() {
     <Link
       href={"/download"}
       target="_blank"
-      className="px-9 py-5 bg-primaryLight rounded-lg"
+      className="px-9 py-5 bg-primary rounded-lg"
     >
       <TextBold>Download</TextBold>
     </Link>
@@ -24,7 +24,7 @@ export function DownloadLinkButton() {
     <Link
       href={"/download"}
       target="_blank"
-      className="flex items-center space-x-2 lg:space-x-4 rounded-lg py-[15px] px-[36px] bg-primaryLight text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[240px] "
+      className="flex items-center space-x-2 lg:space-x-4 rounded-lg py-[15px] px-[36px] bg-primary text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[240px] "
     >
       <div>Download</div>
       <Image
@@ -50,7 +50,7 @@ export function DownloadLinkButtonMobileNav() {
     <Link
       href={"/download"}
       target="_blank"
-      className="flex items-center justify-center space-x-4 rounded-lg py-4 px-9 bg-primaryLight text-white font-bold md:text-lg tracking-snug"
+      className="flex items-center justify-center space-x-4 rounded-lg py-4 px-9 bg-primary text-white font-bold md:text-lg tracking-snug"
     >
       <div>{title}</div>
     </Link>
