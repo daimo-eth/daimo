@@ -7,6 +7,11 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import {
+  CONNECT_FC_MESSAGE,
+  PAYMENT_CONNECT_FC_MESSAGE,
+  REQUEST_PAYMENT_MESSAGE,
+} from "./botResponses";
 import { trpcClient } from "./trpcClient";
 import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
@@ -14,15 +19,15 @@ import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
 // Requesting:
 // Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
-//      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daibot responds with a link to request $
+//      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daimobot responds with a link to request $
 //  Case 1a: Alice doesn't have FC linked ❌ but has ENS linked on FC, requests $ from anyone
-//     Action 3a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
+//     Action 1a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
 // Case 2: Alice has FC linked ✅, requests $ from anyone
 //      Action 2: Daimobot responses with link that requests $ from anyone to Alice's Daimo address
 
 // Paying:
 // Case 3: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌
-//     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daibot responds with a link to request $
+//     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
 //  Case 3a: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌ but has ENS linked on FC
 //     Action 3a:  Daimobot responds with link that requests $ from anyone to Bob's ENS
 // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
@@ -42,22 +47,24 @@ export class PaymentActionProcessor {
   private castId: string;
   private senderFid: number;
   private authorUsername: string;
-  private parentCastId: string | null;
   private parentAuthorFid: number | null;
   private trpcClient: TRPCClient;
   private neynarClient: NeynarAPIClient;
 
-  constructor(event: WebhookEvent) {
+  constructor(
+    event: WebhookEvent,
+    trpc: TRPCClient = trpcClient,
+    neynarClient: NeynarAPIClient = _neynarClient
+  ) {
     const { data } = event;
     this.text = data.text;
     this.castId = data.hash;
     this.authorUsername = data.author.username;
-    this.parentCastId = data.parent_url; // TODO verify
     this.parentAuthorFid = data.parent_author.fid;
     this.senderFid = data.author.fid;
 
-    this.trpcClient = trpcClient;
-    this.neynarClient = _neynarClient;
+    this.trpcClient = trpc;
+    this.neynarClient = neynarClient;
   }
 
   async process() {
@@ -86,7 +93,7 @@ export class PaymentActionProcessor {
             "Sender not registered with Farcaster. Sending a response cast."
           );
           this.publishCastReply(
-            "Connect your Farcaster on Daimo to continue!"
+            CONNECT_FC_MESSAGE
             // TODO if there's a convenience url to connect Farcaster, add here
           );
           return;
@@ -97,7 +104,7 @@ export class PaymentActionProcessor {
           senderEthAccount
         );
         this.publishCastReply(
-          `Here's a request for $${cleanedAmount} to @${this.authorUsername}!`,
+          REQUEST_PAYMENT_MESSAGE(cleanedAmount, this.authorUsername),
           {
             embeds: [{ url: daimoShareUrl }],
           }
@@ -129,7 +136,7 @@ export class PaymentActionProcessor {
             "Recipient not registered with Farcaster. Sending a response cast."
           );
           this.publishCastReply(
-            `@${recipientUsername} has to first connect their Farcaster on Daimo to receive payments!`
+            PAYMENT_CONNECT_FC_MESSAGE(recipientUsername)
             // TODO if there's a convenience url to connect Farcaster, add here
           );
           return;
@@ -140,7 +147,7 @@ export class PaymentActionProcessor {
         );
 
         this.publishCastReply(
-          `Here's a request for $${cleanedAmount} to @${recipientUsername}!`,
+          REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername),
           {
             embeds: [{ url: daimoShareUrl }],
           }
@@ -159,6 +166,7 @@ export class PaymentActionProcessor {
     const match = this.text?.match(
       /@daimobot (request|pay) \$([0-9]+(?:\.[0-9]{1,2})?)/
     );
+    console.log(`[DAIMOBOT REQUEST] match: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
       const cleanedAmount = parseFloat(parseFloat(match[2]).toFixed(2));
       return {

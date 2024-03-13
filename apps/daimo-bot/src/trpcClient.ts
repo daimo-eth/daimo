@@ -1,5 +1,5 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import type { AppRouter } from "@daimo/api";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
 const BASE_CHAIN_ID = "8453";
 const BASE_SEPOLIA_CHAIN_ID = "84532";
@@ -30,7 +30,6 @@ const getApiUrl = () => {
   return `${url}/chain/${chainId}`;
 };
 
-console.log(`[TRPC] connecting to ${getApiUrl()}`);
 // @ts-expect-error: non-blocking AppRouter TypeError. types still populate
 export const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
