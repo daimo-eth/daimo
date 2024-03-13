@@ -15,6 +15,7 @@ export function useOnboardingPasteInvite() {
     const inviteLink = parseInviteCodeOrLink(str);
     console.log(`[INTRO] paste invite link: '${str}'`);
     if (inviteLink) {
+      setPasteLinkError("");
       nav.navigate("CreatePickName", { inviteLink });
     } else {
       setPasteLinkError("Copy link & try again.");

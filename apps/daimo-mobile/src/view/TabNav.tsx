@@ -75,8 +75,16 @@ function OnboardingNavigator() {
       <OnStack.Screen name="CreateNew" component={OnbEnterInviteScreen} />
       <OnStack.Screen name="CreatePickName" component={OnbPickNameScreen} />
       <OnStack.Screen name="UseExisting" component={OnbUseExistingScreen} />
-      <OnStack.Screen name="AllowNotifs" component={OnbAllowNotifsScreen} />
-      <OnStack.Screen name="Finish" component={OnboardingFinishScreen} />
+      <OnStack.Screen
+        name="AllowNotifs"
+        component={OnbAllowNotifsScreen}
+        options={{ gestureEnabled: false }}
+      />
+      <OnStack.Screen
+        name="Finish"
+        component={OnboardingFinishScreen}
+        options={{ gestureEnabled: false }}
+      />
     </OnStack.Navigator>
   );
 }
