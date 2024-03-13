@@ -1,8 +1,8 @@
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import express from "express";
-import { PaymentActionProcessor } from "../PaymentActionProcessor";
-import { WebhookEvent } from "../types";
+import { PaymentActionProcessor } from "./PaymentActionProcessor";
+import { WebhookEvent } from "./types";
 
 dotenv.config();
 

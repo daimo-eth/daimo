@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/api/index.js",
-    "dev": "nodemon src/api/index.ts",
+    "dev": "nodemon api/index.ts",
     "test": "tsc --noEmit && jest"
   },
   "author": "",
