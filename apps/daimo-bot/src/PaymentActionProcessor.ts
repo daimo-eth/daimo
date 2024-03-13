@@ -7,6 +7,7 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import dotenv from "dotenv";
 import {
   CONNECT_FC_MESSAGE,
   PAYMENT_CONNECT_FC_MESSAGE,
@@ -32,6 +33,8 @@ import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 //     Action 3a:  Daimobot responds with link that requests $ from anyone to Bob's ENS
 // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
 //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
+
+dotenv.config();
 
 assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
 const _neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
@@ -82,6 +85,9 @@ export class PaymentActionProcessor {
     switch (action) {
       case "request": {
         // See if sender has Farcaster linked
+        console.log(
+          `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`
+        );
         const senderEthAccount =
           await this.trpcClient.lookupEthereumAccountByFid.query({
             fid: this.senderFid,
@@ -165,7 +171,7 @@ export class PaymentActionProcessor {
     const match = this.text?.match(
       /@daimobot (request|pay) \$([0-9]+(?:\.[0-9]{1,2})?)/
     );
-    console.log(`[DAIMOBOT REQUEST] match: ${JSON.stringify(match)}`);
+    console.log(`[DAIMOBOT] checking: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
       const cleanedAmount = parseFloat(parseFloat(match[2]).toFixed(2));
       return {
@@ -206,8 +212,10 @@ export class PaymentActionProcessor {
         ...opts,
         replyTo: this.castId,
       })
-      .then((data) => console.log(data))
-      .catch((err) => console.error(err));
+      .then((data) =>
+        console.log("Published Cast:", JSON.stringify(data, null, 2))
+      )
+      .catch((err: any) => console.error(err));
   }
 
   private async getFcUsernameByFid(fid: number) {
