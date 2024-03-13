@@ -221,11 +221,11 @@ function NoteDisplayInner({
   const netDollarsReceivedStr = getAmountText({ dollars: netRecv });
 
   // On success, go home, show newly created transaction
-  const backHome = useExitBack();
+  const goBack = useExitBack();
   useEffect(() => {
     if (status !== "success") return;
     if (leaveScreen) leaveScreen();
-    else backHome!();
+    else goBack!();
   }, [status]);
 
   const statusMessage = (function (): ReactNode {
