@@ -68,8 +68,7 @@ export class PaymentActionProcessor {
   }
 
   async process() {
-    if (!this.text?.includes("@daimobot")) return;
-
+    // TODO leave short summary
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
@@ -187,9 +186,7 @@ export class PaymentActionProcessor {
       amount: dollarsToAmount(amount).toString(),
     };
     console.log(
-      `Calling trpcClient.createRequestSponsored.mutate with params: ${JSON.stringify(
-        params
-      )}`
+      `[DAIMOBOT] createRequestSponsored with params: ${JSON.stringify(params)}`
     );
     const txHash = await this.trpcClient.createRequestSponsored.mutate(params);
     console.log(`[DAIMOBOT REQUEST] txHash ${txHash}`);

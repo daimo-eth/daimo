@@ -24,7 +24,6 @@ app.post("/daimobot-hook", async (req, res) => {
     res.status(200).send("OK");
   } catch (err) {
     console.error("Error processing webhook event:", err);
-    // TODO give error cast response to user
     // TODO log to o11y provider
     res.status(500).send("Error processing event");
   }

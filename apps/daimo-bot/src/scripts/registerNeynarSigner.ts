@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import axios from "axios";
 import { mnemonicToAccount } from "viem/accounts";
-import { assert } from "@daimo/common";
+import { assert, now } from "@daimo/common";
 
 // Codified version of steps in this guide:
 // https://docs.neynar.com/docs/write-to-farcaster-with-neynar-managed-signers
@@ -46,7 +46,7 @@ const generateSignature = async (publicKey: string) => {
 
   const account = mnemonicToAccount(FARCASTER_SEED_PHRASE);
 
-  const deadline = Math.floor(Date.now() / 1000) + 86400; // t + 1 day
+  const deadline = now() + 86400; // t + 1 day
 
   const signature = await account.signTypedData({
     domain: SIGNED_KEY_REQUEST_VALIDATOR_EIP_712_DOMAIN,
