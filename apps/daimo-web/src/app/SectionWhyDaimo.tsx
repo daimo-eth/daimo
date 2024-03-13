@@ -132,7 +132,7 @@ function FeaturesDesktop() {
               className={clsx(
                 "relative h-2 w-2 rounded-full",
                 featureIndex === selectedIndex
-                  ? "bg-primaryLight"
+                  ? "bg-primaryDark"
                   : "bg-grayLight"
               )}
               aria-label={`Go to slide ${featureIndex + 1}`}
@@ -232,7 +232,7 @@ function FeaturesMobile() {
             key={featureIndex}
             className={clsx(
               "relative h-2 w-2 rounded-full",
-              featureIndex === activeIndex ? "bg-primaryLight" : "bg-grayLight"
+              featureIndex === activeIndex ? "bg-primaryDark" : "bg-grayLight"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
             onClick={() => {
@@ -253,9 +253,7 @@ function FeaturesMobile() {
             key={featureIndex}
             className={clsx(
               "relative font-semibold",
-              featureIndex === activeIndex
-                ? "text-primaryLight"
-                : "text-grayMid"
+              featureIndex === activeIndex ? "text-primaryDark" : "text-grayMid"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
             onClick={() => {

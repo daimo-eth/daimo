@@ -11,7 +11,7 @@ module.exports = {
       yellow: "#FFDC62",
       success: "#0CA01B",
       primary: "#13915F",
-      primaryLight: "#144B44",
+      primaryDark: "#144B44",
       white: "#ffffff",
       ivory: "#fafafa",
       ivoryDark: "#f2f2f2",
