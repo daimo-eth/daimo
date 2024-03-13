@@ -78,9 +78,7 @@ export function AddKeySlotButton({
     },
   });
 
-  const didUserCancel =
-    message.includes("User cancelled") || // Android
-    message.includes("User canceled"); // iOS
+  const didUserCancel = message.includes("User cancelled");
 
   const statusMessage = (function (): ReactNode {
     switch (status) {

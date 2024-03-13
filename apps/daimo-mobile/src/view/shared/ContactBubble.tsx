@@ -98,7 +98,6 @@ export function Bubble({
       borderColor: col,
       alignItems: "center",
       justifyContent: "center",
-      overflow: "hidden",
     }),
     [size, col]
   );
@@ -116,23 +115,25 @@ export function Bubble({
 
   const imageStyle: ImageStyle = useMemo(
     () => ({
-      position: "absolute",
-      height: size,
-      width: size,
-      borderRadius: size / 2,
-      zIndex: 5,
+      // Match size of bordered default bubble
+      height: size - 1,
+      width: size - 1,
+      borderRadius: 99,
     }),
     [size]
   );
 
   return (
     <View style={{ width: size, height: size }}>
-      <Image source={image} style={imageStyle} />
-      <View style={style}>
-        <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
-          {children}
-        </Text>
-      </View>
+      {image ? (
+        <Image source={image} style={imageStyle} />
+      ) : (
+        <View style={style}>
+          <Text style={textStyle} numberOfLines={1} allowFontScaling={false}>
+            {children}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }

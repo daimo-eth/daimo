@@ -143,7 +143,9 @@ export class ProfileCache {
   }
 
   getProfilePicture(addr: Address) {
-    return `${daimoDomainAddress}/profile/${addr}/pfp`;
+    return this.getLinkedAccounts(addr)?.[0]?.pfpUrl
+      ? `${daimoDomainAddress}/profile/${addr}/pfp`
+      : undefined;
   }
 
   searchLinkedAccounts(prefix: string): ProfileLink[] {

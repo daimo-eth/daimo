@@ -5,7 +5,7 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { useActStatus } from "../../../action/actStatus";
+import { useExitBack, useExitToHome, useNav } from "../../../common/nav";
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -22,7 +23,6 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useExitBack, useExitToHome, useNav } from "../../shared/nav";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
@@ -75,6 +75,16 @@ function RequestScreenInnerV2({ account }: { account: Account }) {
   const goBack = useExitBack();
   const goHome = useExitToHome();
 
+  useEffect(() => {
+    const unsubscribe = nav.addListener("transitionEnd", () => {
+      // Set focus on transitionEnd to avoid stack navigator looking
+      // glitchy on iOS.
+      textInputRef.current?.focus();
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
@@ -95,7 +105,7 @@ function RequestScreenInnerV2({ account }: { account: Account }) {
           showAmountAvailable={false}
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
-          autoFocus
+          autoFocus={false}
         />
         <Spacer h={32} />
         <View style={ss.container.padH16}>

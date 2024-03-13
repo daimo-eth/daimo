@@ -11,18 +11,14 @@ export type SetActStatus = (
 export interface ActHandle {
   /** Action status */
   status: ActStatus;
-  /** Action costs, including fees and total. */
-  cost: { feeDollars: number; totalDollars: number };
   /** Empty when idle. Describes progress, success, or failure. */
   message: string;
-  /** Should be called only when status is 'idle' */
-  exec: () => void;
-  /** Should be called only when status is 'success' or 'error' */
-  reset?: () => void;
+  /** Retry, if possible */
+  retry?: () => void;
 }
 
 /** Tracks progress of a user action. */
-export function useActStatus(name: string) {
+export function useActStatus(name: string): [ActHandle, SetActStatus] {
   const [as, set] = useState({ status: "idle" as ActStatus, message: "" });
 
   const startTime = useRef(0);
@@ -54,5 +50,5 @@ export function useActStatus(name: string) {
     []
   );
 
-  return [as, setAS] as const;
+  return [as, setAS];
 }

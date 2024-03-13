@@ -41,6 +41,30 @@ export class Log {
     }
   }
 
+  static async retryBackoff<T>(
+    type: string,
+    fn: () => Promise<T>,
+    retries: number,
+    matchError?: (e: string) => boolean
+  ) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await this.promise(type, fn());
+      } catch (e: any) {
+        if (matchError && matchError(getErrMessage(e))) {
+          console.log(`[LOG] ${type} trial ${i} error ${getErrMessage(e)}`);
+          await new Promise((r) => setTimeout(r, 200 * 2 ** i));
+        } else {
+          console.log(
+            `[LOG] ${type} trial ${i}, quitting: ${getErrMessage(e)}`
+          );
+          throw new NamedError(getErrMessage(e), type);
+        }
+      }
+    }
+    throw new NamedError("Retry limit exceeded", type);
+  }
+
   private static log(action: LogAction) {
     if (action.error) console.error(`[LOG] ${JSON.stringify(action)}`);
     else console.log(`[LOG] ${JSON.stringify(action)}`);

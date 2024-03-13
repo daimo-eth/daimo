@@ -13,8 +13,13 @@ import { Hex, hexToBytes } from "viem";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { ActStatus } from "../../../action/actStatus";
-import { DeviceKeyStatus } from "../../../action/key";
 import { useSendAsync } from "../../../action/useSendAsync";
+import { useExitBack } from "../../../common/nav";
+import {
+  getAccountManager,
+  useAccountAndKeyInfo,
+  useDaimoChain,
+} from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
 import { createAddDeviceString } from "../../../logic/key";
 import { requestPasskeySignature } from "../../../logic/passkey";
@@ -27,7 +32,6 @@ import { hydrateAccount } from "../../../sync/sync";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import {
-  EmojiToOcticon,
   TextBody,
   TextCenter,
   TextError,
@@ -36,29 +40,26 @@ import {
 } from "../../shared/text";
 import { QRCodeBox } from "../QRScreen";
 
-export function UseExistingPage({
-  useExistingStatus,
-  useExistingMessage,
-  keyStatus,
-  onNext,
-  onPrev,
-  daimoChain,
-}: {
-  useExistingStatus: ActStatus;
-  useExistingMessage: string;
-  keyStatus: DeviceKeyStatus;
-  onNext: () => void;
-  onPrev?: () => void;
-  daimoChain: DaimoChain;
-}) {
-  useEffect(() => {
-    if (useExistingStatus === "success") onNext();
-  }, [useExistingStatus]);
-
+export function OnboardingUseExistingScreen() {
+  // On-chain signing key slot identifies key type (phone, computer, etc)
+  const daimoChain = useDaimoChain();
   const slotType =
     env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
 
-  if (keyStatus.pubKeyHex === undefined) {
+  // Wait for enclave key to be loaded. Create one if necessary
+  const { account, keyInfo } = useAccountAndKeyInfo();
+  const pubKeyHex = keyInfo?.pubKeyHex;
+  useEffect(() => {
+    if (account != null || pubKeyHex != null) return;
+    console.log(`[ONBOARDING] create enclave key`);
+    getAccountManager().createNewEnclaveKey();
+  }, [account, pubKeyHex]);
+
+  const onPrev = useExitBack();
+
+  if (account != null) return null; // Will nav to home screen shortly.
+
+  if (pubKeyHex == null) {
     return (
       <View>
         <OnboardingHeader title="Existing Account" onPrev={onPrev} />
@@ -77,22 +78,14 @@ export function UseExistingPage({
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
       <View style={styles.useExistingPage}>
         <Spacer h={16} />
-        <QRCodeBox
-          value={createAddDeviceString(keyStatus.pubKeyHex, slotType)}
-        />
+        <QRCodeBox value={createAddDeviceString(pubKeyHex, slotType)} />
         <Spacer h={16} />
         <TextCenter>
-          {useExistingStatus === "error" ? (
-            <TextLight>
-              <EmojiToOcticon size={16} text={useExistingMessage} />
-            </TextLight>
-          ) : (
-            <TextPara>
-              Add this {env(daimoChain).deviceType} to an existing account. Go
-              to Daimo {`>`} Settings {`>`} Add Device on your other device to
-              scan the QR code.
-            </TextPara>
-          )}
+          <TextPara>
+            Add this {env(daimoChain).deviceType} to an existing account. Go to
+            Daimo {`>`} Settings {`>`} Add Device on your other device to scan
+            the QR code.
+          </TextPara>
         </TextCenter>
         <Spacer h={24} />
         <TextCenter>
@@ -100,7 +93,7 @@ export function UseExistingPage({
         </TextCenter>
         <Spacer h={24} />
         <RestoreFromBackupButton
-          pubKeyHex={keyStatus.pubKeyHex}
+          pubKeyHex={pubKeyHex}
           slotType={slotType}
           daimoChain={daimoChain}
         />

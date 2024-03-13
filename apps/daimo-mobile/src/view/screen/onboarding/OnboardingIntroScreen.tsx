@@ -1,14 +1,17 @@
-import { ReactNode, useEffect, useState } from "react";
+import { parseInviteCodeOrLink } from "@daimo/common";
+import * as Clipboard from "expo-clipboard";
+import { ReactNode, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   ScrollView,
-  View,
   StyleSheet,
+  View,
 } from "react-native";
 
-import { ActStatus } from "../../../action/actStatus";
-import { DeviceKeyStatus } from "../../../action/key";
+import { getInviteLinkStatus } from "./OnboardingEnterInviteScreen";
+import { useOnboardingNav } from "../../../common/nav";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -16,17 +19,51 @@ import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextCenter, TextH1 } from "../../shared/text";
 
-export function IntroPages({
-  useExistingStatus,
-  keyStatus,
-  existingNext,
-  onNext,
-}: {
-  useExistingStatus: ActStatus;
-  keyStatus: DeviceKeyStatus;
-  existingNext: () => void;
-  onNext: ({ choice }: { choice: "create" | "existing" }) => void;
-}) {
+const isAndroid = Platform.OS === "android";
+export function OnboardingIntroScreen() {
+  const nav = useOnboardingNav();
+  const pasteInviteLink = async () => {
+    const str = await Clipboard.getStringAsync();
+    const inviteLink = parseInviteCodeOrLink(str);
+    console.log(`[INTRO] paste invite link: '${str}'`);
+    if (inviteLink && (await getInviteLinkStatus(inviteLink))?.isValid) {
+      if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+      else nav.navigate("CreatePickName", { inviteLink });
+    } else {
+      nav.navigate("CreateNew");
+    }
+  };
+
+  const goToUseExisting = () => {
+    if (isAndroid) nav.navigate("ExistingSetupKey");
+    else nav.navigate("UseExisting");
+  };
+
+  return (
+    <View style={styles.onboardingPage}>
+      <View style={styles.introPages}>
+        <IntroPageSwiper />
+        <View style={styles.introButtonsCenter}>
+          <View style={styles.introButtonsWrap}>
+            <Spacer h={32} />
+            <ButtonBig
+              type="primary"
+              title="ACCEPT INVITE"
+              onPress={pasteInviteLink}
+            />
+            <Spacer h={16} />
+            <TextButton
+              title="ALREADY HAVE AN ACCOUNT?"
+              onPress={goToUseExisting}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function IntroPageSwiper() {
   const [pageIndex, setPageIndex] = useState(0);
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
@@ -34,49 +71,24 @@ export function IntroPages({
     setPageIndex(page);
   };
 
-  useEffect(() => {
-    if (keyStatus.pubKeyHex && useExistingStatus === "success") existingNext();
-  }, [useExistingStatus]);
-
   return (
-    <View style={styles.onboardingPage}>
-      <View style={styles.introPages}>
-        <PageBubble count={4} index={pageIndex} />
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          style={styles.introPageScroll}
-          onScroll={updatePageBubble}
-          scrollEventThrottle={32}
-          contentContainerStyle={{ width: `${introPages.length * 100}%` }}
-        >
-          {introPages.map((page, i) => (
-            <View style={{ width: `${100 / introPages.length}%` }} key={i}>
-              {page}
-            </View>
-          ))}
-        </ScrollView>
-        <Spacer h={32} />
-        <View style={styles.introButtonsCenter}>
-          <View style={styles.introButtonsWrap}>
-            <ButtonBig
-              type="primary"
-              title="Create Account"
-              onPress={() => {
-                onNext({ choice: "create" });
-              }}
-            />
-            <Spacer h={16} />
-            <TextButton
-              title="Already have an account?"
-              onPress={() => {
-                onNext({ choice: "existing" });
-              }}
-            />
+    <View>
+      <PageBubble count={4} index={pageIndex} />
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        style={styles.introPageScroll}
+        onScroll={updatePageBubble}
+        scrollEventThrottle={32}
+        contentContainerStyle={{ width: `${introPages.length * 100}%` }}
+      >
+        {introPages.map((page, i) => (
+          <View style={{ width: `${100 / introPages.length}%` }} key={i}>
+            {page}
           </View>
-        </View>
-      </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }

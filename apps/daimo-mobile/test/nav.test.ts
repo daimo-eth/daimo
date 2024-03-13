@@ -1,6 +1,6 @@
 import { DaimoLink } from "@daimo/common";
 
-import { MainNav, handleDeepLink } from "../src/view/shared/nav";
+import { MainNav, handleDeepLink } from "../src/common/nav";
 
 describe("nav", () => {
   const history = [] as { tab: string; screen: string; params: any }[];

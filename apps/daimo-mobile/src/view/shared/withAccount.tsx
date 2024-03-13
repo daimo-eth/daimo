@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from "react";
 
-import { useNav } from "./nav";
-import { Account, useAccount } from "../../model/account";
+import { useNav } from "../../common/nav";
+import { useAccount } from "../../logic/accountManager";
+import { Account } from "../../model/account";
 
 /// Higher-order component that provides an account to the wrapped component.
 /// If no account is present, redirects to onboarding.

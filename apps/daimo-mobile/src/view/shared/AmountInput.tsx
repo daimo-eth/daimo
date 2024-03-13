@@ -18,7 +18,7 @@ import {
   TextCenter,
   TextLight,
 } from "./text";
-import { useAccount } from "../../model/account";
+import { useAccount } from "../../logic/accountManager";
 
 // Input components allows entry in range $0.01 to $99,999.99
 const MAX_DOLLAR_INPUT_EXCLUSIVE = 100_000;

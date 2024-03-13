@@ -5,12 +5,12 @@ import { View } from "react-native";
 import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./AddKeySlotButton";
+import { useNav } from "../../../common/nav";
 import { parseAddDeviceString } from "../../../logic/key";
 import { Account } from "../../../model/account";
 import { Scanner } from "../../shared/Scanner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 import { TextBold, TextCenter, TextH2, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";

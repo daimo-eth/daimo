@@ -116,6 +116,7 @@ Set the following variables to use the remote, hosted API.
 ```sh
 export DAIMO_APP_API_URL_TESTNET="https://daimo-api-testnet.onrender.com"
 export DAIMO_APP_API_URL_MAINNET="https://daimo-api-prod.onrender.com"
+export DAIMO_DOMAIN="daimo.com"
 ```
 
 Finally, run the app in the simulator.

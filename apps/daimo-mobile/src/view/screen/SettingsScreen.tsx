@@ -5,7 +5,6 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import * as Notifications from "expo-notifications";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -16,11 +15,13 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
+import { useExitToHome, useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
+import { useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
-import { getPushNotificationManager } from "../../logic/notify";
+import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
-import { Account, toEAccount, useAccount } from "../../model/account";
+import { Account, toEAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { BadgeButton, ButtonMed, TextButton } from "../shared/Button";
@@ -30,7 +31,6 @@ import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { useExitToHome, useNav } from "../shared/nav";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
@@ -105,7 +105,13 @@ function AccountSection({ account }: { account: Account }) {
   );
 }
 
-function AccountHeader({ account }: { account: Account }) {
+export function AccountHeader({
+  account,
+  noLinkedAccounts,
+}: {
+  account: Account;
+  noLinkedAccounts?: boolean;
+}) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
@@ -130,7 +136,9 @@ function AccountHeader({ account }: { account: Account }) {
             )}
           </TextBodyMedium>
         </View>
-        <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
+        {!noLinkedAccounts && (
+          <LinkedAccountsRow linkedAccounts={account.linkedAccounts} />
+        )}
       </View>
     </View>
   );
@@ -325,15 +333,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 }
 
 function DetailsSection({ account }: { account: Account }) {
-  const enableNotifications = async () => {
-    await Notifications.requestPermissionsAsync();
-    try {
-      getPushNotificationManager().savePushTokenForAccount();
-    } catch (e: any) {
-      console.error(e);
-      window.alert(e.message);
-    }
-  };
+  const { ask } = useNotificationsAccess();
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
 
@@ -350,11 +350,7 @@ function DetailsSection({ account }: { account: Account }) {
       </View>
       <Spacer h={24} />
       {!account.pushToken && (
-        <ButtonMed
-          type="subtle"
-          title="Enable notifications"
-          onPress={enableNotifications}
-        />
+        <ButtonMed type="subtle" title="Enable notifications" onPress={ask} />
       )}
       {!account.pushToken && <Spacer h={16} />}
       <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />

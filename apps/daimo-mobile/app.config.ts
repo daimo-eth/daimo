@@ -2,7 +2,7 @@ import type { ExpoConfig } from "@expo/config";
 
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.6.4";
+const VERSION = "1.7.1";
 
 const config: ExpoConfig = {
   owner: "daimo",
@@ -25,12 +25,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: IS_DEV ? "com.daimo.dev" : "com.daimo",
-    associatedDomains: [
-      "applinks:daimo.xyz",
-      "applinks:daimo.com",
-      "webcredentials:daimo.xyz",
-      "webcredentials:daimo.com",
-    ],
+    associatedDomains: ["applinks:daimo.com", "webcredentials:daimo.com"],
     config: {
       usesNonExemptEncryption: false,
     },

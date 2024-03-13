@@ -3,8 +3,30 @@ import { Hex } from "viem";
 
 import { Log } from "./log";
 
+export interface EnclaveKeyInfo {
+  hwSecLevel: ExpoEnclave.HardwareSecurityLevel;
+  enclaveKeyName: string;
+  pubKeyHex?: Hex;
+}
+
+// Returns a public key, plus the security level of the key.
+export async function loadOrCreateEnclaveKey(
+  keyName: string
+): Promise<EnclaveKeyInfo> {
+  let keyInfo = await loadEnclaveKey(keyName);
+
+  console.log(`[ACTION] loaded key info ${JSON.stringify(keyInfo)}`);
+  if (keyInfo.pubKeyHex != null) return keyInfo;
+
+  const newPublicKey = await createEnclaveKey(keyName);
+  const { hwSecLevel, enclaveKeyName } = keyInfo;
+  keyInfo = { hwSecLevel, enclaveKeyName, pubKeyHex: newPublicKey };
+  console.log(`[ACTION] created key info ${JSON.stringify(keyInfo)}`);
+  return keyInfo;
+}
+
 /** Create a new key in the secure enclave. */
-export async function createEnclaveKey(enclaveKeyName: string) {
+async function createEnclaveKey(enclaveKeyName: string) {
   const pubKey = await Log.promise(
     "createEnclaveKey",
     ExpoEnclave.createKeyPair(enclaveKeyName)
@@ -16,13 +38,10 @@ export async function createEnclaveKey(enclaveKeyName: string) {
   return pubKeyHex;
 }
 
-/**
- * Fetches public key from enclave, or from cache for speed.
- *
- * Fetching from the enclave takes ~1 second on iPhone 13 Mini & iOS simulator?
- * Nalin: Does it? Seems like few ms for me.
- */
-export async function loadEnclaveKey(enclaveKeyName: string) {
+/** Fetches device pubkey, plus security level, from the secure enclave. */
+export async function loadEnclaveKey(
+  enclaveKeyName: string
+): Promise<EnclaveKeyInfo> {
   const [ret, hwSecLevel] = await Log.promise(
     "loadEnclaveKey",
     Promise.all([

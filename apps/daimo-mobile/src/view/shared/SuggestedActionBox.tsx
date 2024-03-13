@@ -15,11 +15,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { OctName } from "./InputBig";
-import { handleDeepLink, useNav } from "./nav";
 import { color } from "./style";
 import { TextBody, TextMeta } from "./text";
+import { handleDeepLink, useNav } from "../../common/nav";
+import { getAccountManager, useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
-import { getAccountManager, useAccount } from "../../model/account";
 
 export function SuggestedActionBox({
   action,

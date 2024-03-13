@@ -4,9 +4,9 @@ import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { SearchTab } from "./SearchTab";
+import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ParamListSend, useExitToHome, useNav } from "../../shared/nav";
 import { ss } from "../../shared/style";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
