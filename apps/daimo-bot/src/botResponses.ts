@@ -9,4 +9,3 @@ export const REQUEST_PAYMENT_MESSAGE = (
 export const PAYMENT_CONNECT_FC_MESSAGE = (recipientUsername: string) => {
   return `@${recipientUsername} has to first connect their Farcaster on Daimo to receive payments!`;
 };
-//
