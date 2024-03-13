@@ -28,8 +28,9 @@ export type ParamListHome = {
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
   HistoryOp: { op: DisplayOpEvent };
-  Receive: { autoFocus: boolean };
+  Receive: { autoFocus: boolean; recipient?: EAccountContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
+  ReceiveSearch: { autoFocus: boolean };
 };
 
 type ParamListError = {

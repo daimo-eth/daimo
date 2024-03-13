@@ -37,7 +37,7 @@ export function SearchResults({
 }: {
   contactsAccess: ContactsAccess;
   prefix: string;
-  mode: "send" | "account";
+  mode: "send" | "account" | "receive";
 }) {
   const Inner = useWithAccount(SearchResultsScroll);
   return (
@@ -54,7 +54,7 @@ function SearchResultsScroll({
   contactsAccess: ContactsAccess;
   account: Account;
   prefix: string;
-  mode: "send" | "account";
+  mode: "send" | "account" | "receive";
 }) {
   const { permission: contactsPermission, ask: requestContactsPermission } =
     contactsAccess;
@@ -127,7 +127,7 @@ function RecipientRow({
   mode,
 }: {
   recipient: DaimoContact;
-  mode: "send" | "account";
+  mode: "send" | "account" | "receive";
 }) {
   const name = getContactName(recipient);
   const nav = useNav();
@@ -144,10 +144,16 @@ function RecipientRow({
       case "eAcc": {
         if (mode === "account") {
           navToAccountPage(recipient, nav);
-        } else {
+        } else if (mode === "send") {
           nav.navigate("SendTab", {
             screen: "SendTransfer",
             params: { recipient },
+          });
+        } else {
+          console.log("Receive");
+          nav.navigate("HomeTab", {
+            screen: "Receive",
+            params: { autoFocus: true, recipient },
           });
         }
       }

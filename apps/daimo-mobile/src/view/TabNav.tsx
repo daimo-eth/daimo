@@ -32,6 +32,7 @@ import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import OnboardingScreen from "./screen/onboarding/OnboardingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
+import { ReceiveNavScreen } from "./screen/receive/ReceiveNavScreen";
 import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
@@ -276,6 +277,7 @@ function HomeTab() {
         <HomeStack.Screen name="Account" component={AccountScreen} />
         <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
+        <HomeStack.Screen name="ReceiveSearch" component={ReceiveNavScreen} />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

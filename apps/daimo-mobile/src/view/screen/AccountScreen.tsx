@@ -228,8 +228,16 @@ function AccountScreenBody({
           )}
         </View>
         <Spacer h={24} />
-        <View style={ss.container.padH8}>
-          {canSend && <ButtonBig type="primary" title="SEND" onPress={send} />}
+        <View style={[ss.container.padH8, { flexDirection: "row" }]}>
+          <View style={{ flex: 1 }}>
+            {canSend && (
+              <ButtonBig type="primary" title="SEND" onPress={send} />
+            )}
+          </View>
+          <Spacer w={16} />
+          <View style={{ flex: 1 }}>
+            <ButtonBig type="subtle" title="REQUEST" onPress={() => {}} />
+          </View>
         </View>
         <Spacer h={16} />
         <View style={ss.container.padH8}>

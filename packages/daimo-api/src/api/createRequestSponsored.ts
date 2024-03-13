@@ -9,6 +9,8 @@ interface RequestV2Input {
   idString: string;
   recipient: Address;
   amount: `${bigint}`;
+  // TODO: Find a better name for this.
+  proposedSender?: string;
 }
 
 export async function createRequestSponsored(
@@ -16,7 +18,7 @@ export async function createRequestSponsored(
   requestIndexer: RequestIndexer,
   input: RequestV2Input
 ): Promise<Hex> {
-  const { idString, recipient, amount } = input;
+  const { idString, recipient, amount, proposedSender } = input;
 
   // Verify ID is unused
   const id = decodeRequestIdString(idString);
@@ -32,6 +34,11 @@ export async function createRequestSponsored(
     functionName: "createRequest",
     args: [id, recipient, BigInt(amount), metadata],
   });
+
+  if (proposedSender) {
+    // Send push notification.
+    // Create database record to keep track of requests.
+  }
 
   return requestTxHash;
 }
