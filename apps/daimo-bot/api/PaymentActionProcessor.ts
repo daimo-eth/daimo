@@ -61,16 +61,12 @@ export class PaymentActionProcessor {
     // "@daimobot request":
     // Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
     //      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daimobot responds with a link to request $
-    //  Case 1a: Alice doesn't have FC linked ❌ but has ENS linked on FC, requests $ from anyone
-    //     Action 1a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
     // Case 2: Alice has FC linked ✅, requests $ from anyone
     //      Action 2: Daimobot responses with link that requests $ from anyone to Alice's Daimo address
 
     // "@daimobot pay":
     // Case 3: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌
     //     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
-    //  Case 3a: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌ but has ENS linked on FC
-    //     Action 3a:  Daimobot responds with link that requests $ from anyone to Bob's ENS
     // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
     //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
 
@@ -95,7 +91,6 @@ export class PaymentActionProcessor {
             fid: this.senderFid,
           });
         if (!senderEthAccount) {
-          // TODO check ENS here
           console.log(
             "Sender not registered with Farcaster. Sending a response cast."
           );
@@ -137,8 +132,6 @@ export class PaymentActionProcessor {
           this.parentAuthorFid
         );
         if (!recipientEthAccount) {
-          // TODO check ENS here
-
           console.log(
             "Recipient not registered with Farcaster. Sending a response cast."
           );
