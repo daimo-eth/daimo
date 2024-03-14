@@ -160,6 +160,13 @@ function AccountScreenBody({
     });
   }, [nav, eAcc, account]);
 
+  const goToRequest = () => {
+    nav.navigate("HomeTab", {
+      screen: "Receive",
+      params: { autoFocus: true, recipient: { type: "eAcc", ...eAcc } },
+    });
+  };
+
   // Bottom sheet: show transactions between us and this account
   const translationY = useSharedValue(0);
   const histListMini = (
@@ -238,7 +245,7 @@ function AccountScreenBody({
           </View>
           <Spacer w={16} />
           <View style={{ flex: 1 }}>
-            <ButtonBig type="subtle" title="REQUEST" onPress={() => {}} />
+            <ButtonBig type="subtle" title="REQUEST" onPress={goToRequest} />
           </View>
         </View>
         <Spacer h={16} />
