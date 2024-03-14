@@ -55,7 +55,7 @@ function getButtonTextAndBorder(buttonType?: "danger" | "success") {
     case "success":
       return "text-success border-success";
     default:
-      return "text-primaryLight border-primaryLight";
+      return "text-primary border-primary";
   }
 }
 
@@ -65,8 +65,7 @@ export function PrimaryButton({
   buttonType,
   disabled,
 }: ButtonProps) {
-  const background =
-    buttonType === "success" ? "bg-success" : "bg-primaryLight";
+  const background = buttonType === "success" ? "bg-success" : "bg-primary";
 
   return (
     <button
@@ -123,7 +122,7 @@ export function TextButton({
       case "success":
         return "text-success";
       default:
-        return "text-primaryLight";
+        return "text-primary";
     }
   })();
 
