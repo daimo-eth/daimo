@@ -209,15 +209,28 @@ export class PaymentActionProcessor {
   }
 
   private async publishCastReply(text: string, opts: SendCastOptions = {}) {
-    await this.neynarClient
-      .publishCast(DAIMOBOT_SIGNER_UUID, text, {
-        ...opts,
-        replyTo: this.castId,
-      })
-      .then((data) =>
-        console.log("Published Cast:", JSON.stringify(data, null, 2))
-      )
-      .catch((err: any) => console.error(err));
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.NODE_ENV === "test"
+    ) {
+      await this.neynarClient
+        .publishCast(DAIMOBOT_SIGNER_UUID, text, {
+          ...opts,
+          replyTo: this.castId,
+        })
+        .then((data) =>
+          console.log("Published Cast:", JSON.stringify(data, null, 2))
+        )
+        .catch((err: any) => console.error(err));
+    } else {
+      console.log(
+        `[DAIMOBOT] MOCK published cast: ${JSON.stringify(
+          { text, opts },
+          null,
+          2
+        )}`
+      );
+    }
   }
 
   private async getFcUsernameByFid(fid: number) {
