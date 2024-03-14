@@ -23,6 +23,7 @@ import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountScreen } from "./screen/AccountScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
+import { NotificationsScreen } from "./screen/NotificationsScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { ErrorScreen } from "./screen/errorScreens";
@@ -326,6 +327,10 @@ function HomeTab() {
         <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
         <HomeStack.Screen name="ReceiveSearch" component={ReceiveNavScreen} />
+        <HomeStack.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+        />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );

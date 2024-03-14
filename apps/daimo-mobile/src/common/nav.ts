@@ -42,6 +42,7 @@ export type ParamListHome = {
   Receive: { autoFocus: boolean; recipient?: EAccountContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
   ReceiveSearch: { autoFocus: boolean };
+  Notifications: undefined;
 };
 
 type ParamListError = {

@@ -5,7 +5,7 @@ import { Account } from "../../model/account";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { useWithAccount } from "../shared/withAccount";
 
-export default function NotificationsScreen() {
+export function NotificationsScreen() {
   const Inner = useWithAccount(NotificationsScreenInner);
   return <Inner />;
 }
