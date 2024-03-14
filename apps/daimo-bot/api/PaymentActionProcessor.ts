@@ -16,24 +16,6 @@ import {
 import { trpcClient } from "./trpcClient";
 import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
-// 4 cases of Payment request:
-
-// Requesting:
-// Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
-//      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daimobot responds with a link to request $
-//  Case 1a: Alice doesn't have FC linked ❌ but has ENS linked on FC, requests $ from anyone
-//     Action 1a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
-// Case 2: Alice has FC linked ✅, requests $ from anyone
-//      Action 2: Daimobot responses with link that requests $ from anyone to Alice's Daimo address
-
-// Paying:
-// Case 3: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌
-//     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
-//  Case 3a: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌ but has ENS linked on FC
-//     Action 3a:  Daimobot responds with link that requests $ from anyone to Bob's ENS
-// Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
-//     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
-
 dotenv.config();
 
 assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
@@ -71,7 +53,27 @@ export class PaymentActionProcessor {
   }
 
   async process() {
-    // TODO leave short summary
+    // Processes the incoming webhook event from Farcaster, extracting either a "request" or "pay" command,
+    // and performs actions based on the command type.
+
+    // 4 cases of Payment request:
+
+    // "@daimobot request":
+    // Case 1: Alice doesn't have FC linked ❌, requests $ from anyone (open-ended post)
+    //      Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daimobot responds with a link to request $
+    //  Case 1a: Alice doesn't have FC linked ❌ but has ENS linked on FC, requests $ from anyone
+    //     Action 1a:  Daimobot responds with link that requests $ from anyone to Alice's ENS
+    // Case 2: Alice has FC linked ✅, requests $ from anyone
+    //      Action 2: Daimobot responses with link that requests $ from anyone to Alice's Daimo address
+
+    // "@daimobot pay":
+    // Case 3: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌
+    //     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
+    //  Case 3a: Alice responds to Bobs post to pay him, Bob doesn't have FC linked ❌ but has ENS linked on FC
+    //     Action 3a:  Daimobot responds with link that requests $ from anyone to Bob's ENS
+    // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
+    //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
+
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
