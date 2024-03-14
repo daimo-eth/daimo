@@ -9,7 +9,7 @@ interface RequestV2Input {
   idString: string;
   recipient: Address;
   amount: `${bigint}`;
-  fulfiller?: string;
+  fulfiller?: Address;
 }
 
 export async function createRequestSponsored(

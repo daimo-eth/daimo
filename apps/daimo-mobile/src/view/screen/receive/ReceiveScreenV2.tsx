@@ -70,20 +70,23 @@ function RequestScreenInnerV2({
       recipient: account.address,
       idString,
       amount: `${dollarsToAmount(dollars)}`,
+      fulfiller: recipient?.addr,
     });
 
     console.log(`[REQUEST] txHash ${txHash}`);
     setAS("loading", "Sharing...");
 
-    const url = formatDaimoLink({
-      type: "requestv2",
-      id: idString,
-      recipient: account.name,
-      dollars: `${dollars}`,
-    });
+    if (!recipient) {
+      const url = formatDaimoLink({
+        type: "requestv2",
+        id: idString,
+        recipient: account.name,
+        dollars: `${dollars}`,
+      });
 
-    const didShare = await shareURL(url);
-    console.log(`[REQUEST] action ${didShare}`);
+      const didShare = await shareURL(url);
+      console.log(`[REQUEST] action ${didShare}`);
+    }
     setAS("success");
     nav.navigate("HomeTab", { screen: "Home" });
   };

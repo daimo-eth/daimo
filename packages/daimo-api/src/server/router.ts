@@ -346,15 +346,17 @@ export function createRouter(
           idString: z.string(),
           recipient: zAddress,
           amount: zBigIntStr,
+          fulfiller: zAddress.optional(),
         })
       )
       .mutation(async (opts) => {
-        const { idString, recipient, amount } = opts.input;
+        const { idString, recipient, amount, fulfiller } = opts.input;
 
         return createRequestSponsored(vc, reqIndexer, {
           idString,
           recipient,
           amount,
+          fulfiller,
         });
       }),
 
@@ -423,6 +425,7 @@ export function createRouter(
           recipient,
           memo,
         };
+
         const url = formatDaimoLink(reqLink);
 
         await setTagRedirect(tag, url, updateToken, db);
