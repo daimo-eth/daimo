@@ -145,11 +145,11 @@ export function useRecipientSearch(
   if (recipients.length === 0) recipients.push(...looseMatchRecents);
 
   // If we have a valid phone number or email prefix, show it as a recipient
-  if (zEmailAddress.safeParse(prefix).success) {
+  if (zEmailAddress.safeParse(prefix).success && !onlyDaimoContacts) {
     recipients.push({ type: "email", email: prefix });
   }
 
-  if (zPhoneNumber.safeParse(prefix).success) {
+  if (zPhoneNumber.safeParse(prefix).success && !onlyDaimoContacts) {
     recipients.push({ type: "phoneNumber", phoneNumber: prefix });
   }
 
@@ -162,6 +162,7 @@ export function useRecipientSearch(
     for (const account of res.data) {
       if (recipients.find((r) => r.type === "eAcc" && r.addr === account.addr))
         continue;
+      if (onlyDaimoContacts && !account.name) continue;
 
       // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);
@@ -184,7 +185,10 @@ export function useRecipientSearch(
     prefix,
     searchContacts && enabled
   );
-  if (systemContacts.length > 0) recipients.push(...systemContacts);
+
+  if (systemContacts.length > 0 && !onlyDaimoContacts) {
+    recipients.push(...systemContacts);
+  }
 
   return {
     isSearching: enabled,
