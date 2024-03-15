@@ -23,7 +23,7 @@ export function ReceiveNavScreen({ route }: Props) {
   const goHome = useExitToHome();
   const goBack = useCallback(() => {
     setPrefix("");
-    goHome();
+    nav.goBack();
   }, [nav, goHome]);
 
   // Focus search box if autoFocus is true
