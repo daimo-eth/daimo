@@ -152,7 +152,6 @@ function RecipientRow({
             params: { recipient },
           });
         } else {
-          console.log("Receive");
           nav.navigate("HomeTab", {
             screen: "Receive",
             params: { autoFocus: true, recipient },
