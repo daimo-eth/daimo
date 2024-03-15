@@ -38,7 +38,6 @@ import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/Onb
 import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
 import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
-import { usePollForAccount } from "./screen/onboarding/usePollForAccount";
 import DepositScreen from "./screen/receive/DepositScreen";
 import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
@@ -59,16 +58,15 @@ import {
   useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
-import { useAccountAndKeyInfo } from "../logic/accountManager";
+import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
 
 const { add, multiply } = Animated;
 
 // Onboarding navigator.
 const OnStack = createStackNavigator<ParamListOnboarding>();
 function OnboardingNavigator() {
-  usePollForAccount();
-
-  useOnboardingDeepLinkHandler();
+  const daimoChain = useDaimoChain();
+  useOnboardingDeepLinkHandler(daimoChain);
 
   return (
     <OnStack.Navigator

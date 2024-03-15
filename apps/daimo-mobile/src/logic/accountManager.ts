@@ -1,4 +1,5 @@
 import {
+  AddrLabel,
   DaimoLink,
   DaimoLinkNoteV2,
   DaimoNoteStatus,
@@ -243,7 +244,7 @@ class AccountManager {
       });
       console.log(`[ACCOUNT] deployWallet returned: ${JSON.stringify(result)}`);
       assertEqual(result.status, "success");
-      const { address } = result;
+      const { address, faucetTransfer } = result;
 
       // Save the newly created account
       const newAcc = createEmptyAccount(
@@ -255,6 +256,15 @@ class AccountManager {
         },
         this.daimoChain
       );
+
+      // If we received a faucet tx, add it as a pending op
+      if (faucetTransfer != null) {
+        newAcc.recentTransfers.push(faucetTransfer);
+        newAcc.namedAccounts.push({
+          label: AddrLabel.Faucet,
+          addr: faucetTransfer.from,
+        });
+      }
 
       // If invite link is a payment link, claim it & add as pending transfer
       if (inviteLink.type === "notev2") {
@@ -292,7 +302,7 @@ class AccountManager {
       })) as DaimoNoteStatus;
 
       console.log(`[ACCOUNT] claiming invite payment link`, inviteLink);
-      const txHash = await this.claimInvitePaymentLink(
+      const txHash = await this.sendClaimPaymentLinkTx(
         address,
         inviteLink,
         noteStatus
@@ -313,8 +323,8 @@ class AccountManager {
     }
   }
 
-  // Claims an invite link
-  private async claimInvitePaymentLink(
+  // Claims a payment link
+  private async sendClaimPaymentLinkTx(
     address: Address,
     inviteLink: DaimoLinkNoteV2,
     noteStatus: DaimoNoteStatus

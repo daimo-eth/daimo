@@ -9,10 +9,12 @@ import {
   View,
 } from "react-native";
 
+import { usePollForAccount } from "./usePollForAccount";
 import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
+import { useDaimoChain } from "../../../logic/accountManager";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -22,12 +24,16 @@ import { TextCenter, TextH1 } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
+  const dc = useDaimoChain();
   const nav = useOnboardingNav();
+
+  // User uninstalled and reinstalled the app? Load from enclave key.
+  usePollForAccount();
 
   // User clicks ACCEPT INVITE > pastes invite link
   const pasteInviteLink = async () => {
     const str = await Clipboard.getStringAsync();
-    return handleOnboardingDeepLink(nav, str);
+    return handleOnboardingDeepLink(dc, nav, str);
   };
 
   const goToUseExisting = () => {

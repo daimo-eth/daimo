@@ -85,7 +85,8 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
     }
 
     // Fetch link status
-    const inviteStatus = await fetchInviteLinkStatus(inviteLink);
+    const dc = getAccountManager().getDaimoChain();
+    const inviteStatus = await fetchInviteLinkStatus(dc, inviteLink);
 
     // See if text has changed in the meantime
     if (this.state.text !== text) return;

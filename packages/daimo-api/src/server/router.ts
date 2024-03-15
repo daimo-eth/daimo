@@ -250,7 +250,7 @@ export function createRouter(
           inviteCodeTracker,
           db
         );
-        const address = await deployWallet(
+        const { address, faucetTransfer } = await deployWallet(
           opts.ctx,
           name,
           pubKeyHex,
@@ -264,7 +264,7 @@ export function createRouter(
           paymaster,
           inviteGraph
         );
-        return { status: "success", address };
+        return { status: "success", address, faucetTransfer };
       }),
 
     // DEPRECATED

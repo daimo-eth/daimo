@@ -13,6 +13,7 @@ import {
   parseDaimoLink,
   parseInviteCodeOrLink,
 } from "@daimo/common";
+import { DaimoChain } from "@daimo/contract";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { URLListener, addEventListener } from "expo-linking";
@@ -154,10 +155,10 @@ export function useOnboardingNav<
 
 export type MainNav = ReturnType<typeof useNav>;
 
-export type OnboardingNav = ReturnType<typeof useOnboardingNav>;
+type OnboardingNav = ReturnType<typeof useOnboardingNav>;
 
 // Handles deeplinks during onboarding, if any.
-export function useOnboardingDeepLinkHandler() {
+export function useOnboardingDeepLinkHandler(dc: DaimoChain) {
   const nav = useOnboardingNav();
 
   // If we opened the app by clicking an invite link, go straight into onboarding.
@@ -165,27 +166,28 @@ export function useOnboardingDeepLinkHandler() {
     const deeplink = await getInitialDeepLink();
     if (deeplink == null) return;
     // Use invite / payment link now > don't nav there after onboarding
-    await handleOnboardingDeepLink(nav, deeplink);
+    await handleOnboardingDeepLink(dc, nav, deeplink);
     markInitialDeepLinkHandled();
   };
 
   useEffect(() => {
     navToInitialInviteDeepLinkIfPresent();
     const listener: URLListener = ({ url }) =>
-      handleOnboardingDeepLink(nav, url);
+      handleOnboardingDeepLink(dc, nav, url);
     const sub = addEventListener("url", listener);
     return () => sub.remove();
   }, []);
 }
 
 export async function handleOnboardingDeepLink(
+  dc: DaimoChain,
   nav: OnboardingNav,
   str: string
 ) {
   const inviteLink = parseInviteCodeOrLink(str);
   console.log(`[INTRO] paste invite link: '${str}'`);
   const isAndroid = Platform.OS === "android";
-  if (inviteLink && (await fetchInviteLinkStatus(inviteLink))?.isValid) {
+  if (inviteLink && (await fetchInviteLinkStatus(dc, inviteLink))?.isValid) {
     if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
     else nav.navigate("CreatePickName", { inviteLink });
   } else {
