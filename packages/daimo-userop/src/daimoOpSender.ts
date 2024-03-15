@@ -320,4 +320,28 @@ export class DaimoOpSender {
 
     return this.sendUserOp(op);
   }
+
+  public async cancelRequest(
+    id: bigint,
+    status: number,
+    opMetadata: DaimoOpMetadata
+  ) {
+    console.log(`[OP] cancel request ${id}`);
+
+    const executions: DaimoAccountCall[] = [
+      {
+        dest: Contracts.daimoRequestAddress,
+        value: 0n,
+        data: encodeFunctionData({
+          abi: Contracts.daimoRequestConfig.abi,
+          functionName: "updateRequest",
+          args: [id, status],
+        }),
+      },
+    ];
+
+    const op = this.opBuilder.executeBatch(executions, opMetadata);
+
+    return this.sendUserOp(op);
+  }
 }
