@@ -538,7 +538,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       requests: [],
     };
   } else if (model.storageVersion === 13) {
-    assert(model.storageVersion === 13, "Unknown account storage version");
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
     const a = model as AccountV13;
 
     return {
