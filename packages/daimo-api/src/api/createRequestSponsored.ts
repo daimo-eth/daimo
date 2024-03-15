@@ -29,7 +29,7 @@ export async function createRequestSponsored(
   let metadata: Hex = "0x00";
 
   if (fulfiller) {
-    const rawMetadata = JSON.stringify({ v: "0", fulfiller });
+    const rawMetadata = JSON.stringify({ v: 0, fulfiller });
     metadata = stringToHex(rawMetadata);
   }
 

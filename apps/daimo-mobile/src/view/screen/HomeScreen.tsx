@@ -219,8 +219,8 @@ function AmountAndButtons({ account }: { account: Account }) {
   const goRequest = useCallback(
     () =>
       nav.navigate("HomeTab", {
-        screen: "ReceiveSearch",
-        params: { autoFocus: true },
+        screen: "Notifications",
+        // params: { autoFocus: true },
       }),
     [nav]
   );

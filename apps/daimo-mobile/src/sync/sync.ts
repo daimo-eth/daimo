@@ -165,6 +165,7 @@ async function fetchSync(
     profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus,
     invitees: result.invitees,
+    requests: result.requests,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -266,6 +267,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus || null,
     invitees: result.invitees || [],
+    requests: result.requests,
   };
 
   console.log(

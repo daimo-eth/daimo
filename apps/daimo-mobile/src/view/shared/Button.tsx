@@ -132,6 +132,16 @@ export function ButtonMed(props: ButtonProps) {
     />
   );
 }
+export function ButtonSmall(props: ButtonProps) {
+  return (
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.small, props)}
+      touchUnderlay={useTouchUnderlay(props.type)}
+      icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
+    />
+  );
+}
 
 export function TextButton(props: TextButtonProps) {
   return (
@@ -301,7 +311,7 @@ const buttonStyles = {
     button: {
       paddingHorizontal: 16,
       paddingVertical: 8,
-      borderRadius: 8,
+      borderRadius: 4,
     },
     title: {
       fontSize: 14,

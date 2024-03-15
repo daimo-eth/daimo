@@ -67,6 +67,13 @@ export type DaimoRequestV2Status = {
   isValidInvite?: boolean;
 };
 
+export type DaimoRequestV2Info = {
+  id: string;
+  request: DaimoRequestV2Status;
+  type: "recipient" | "fulfiller";
+  fulfiller: EAccount;
+};
+
 /**
  * Pending means the note hasn't yet been created onchain. Confirmed means
  * it's been created and is waiting to be claimed. Cancelled means claimed

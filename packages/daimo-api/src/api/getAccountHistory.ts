@@ -3,6 +3,7 @@ import {
   AddrLabel,
   ChainGasConstants,
   DaimoInviteCodeStatus,
+  DaimoRequestV2Info,
   DisplayOpEvent,
   EAccount,
   KeyData,
@@ -53,6 +54,7 @@ export interface AccountHistoryResult {
   suggestedActions: SuggestedAction[];
   inviteLinkStatus: DaimoInviteCodeStatus | null;
   invitees: EAccount[];
+  requests: DaimoRequestV2Info[];
 }
 
 export interface SuggestedAction {
@@ -165,6 +167,9 @@ export async function getAccountHistory(
   // Get pfps from linked accounts
   const profilePicture = profileCache.getProfilePicture(address);
 
+  // Get request data for this user
+  const requests = await requestIndexer.getUserRequests(address);
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -185,6 +190,7 @@ export async function getAccountHistory(
     profilePicture,
     inviteLinkStatus,
     invitees,
+    requests,
   };
 
   // Suggest an action to the user, like backing up their account

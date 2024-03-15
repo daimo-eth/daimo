@@ -4,6 +4,7 @@ import {
   amountToDollars,
   getEAccountStr,
   encodeRequestId,
+  parseRequestMetadata,
 } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
@@ -33,6 +34,7 @@ interface RequestFulfilledLog {
 /* Request contract. Tracks request creation and fulfillment. */
 export class RequestIndexer {
   private requests: Map<bigint, DaimoRequestV2Status> = new Map();
+  private requestsByAddress: Map<Address, Set<bigint>> = new Map();
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
@@ -125,6 +127,16 @@ export class RequestIndexer {
     };
     this.requests.set(log.id, requestStatus);
 
+    // Parse metadata for fulfiller and add address to map.
+    // For now, this is sufficient proof that the request was created on
+    // Daimo.
+    const { fulfiller } = parseRequestMetadata(log.metadata);
+
+    if (fulfiller) {
+      this.storeReqByAddress(fulfiller, log.id);
+      this.storeReqByAddress(recipient.addr, log.id);
+    }
+
     return requestStatus;
   }
 
@@ -201,6 +213,52 @@ export class RequestIndexer {
       .filter((n) => n != null);
     const statuses = (await Promise.all(promises)).filter((n) => n != null);
     return statuses as DaimoRequestV2Status[];
+  }
+
+  private storeReqByAddress(address: Address, id: bigint) {
+    const existingSet = this.requestsByAddress.get(address);
+
+    if (!existingSet) {
+      this.requestsByAddress.set(address, new Set([id]));
+    } else {
+      this.requestsByAddress.set(address, existingSet.add(id));
+    }
+  }
+
+  // Fetch requests made/received by a user
+  async getUserRequests(addr: Address) {
+    const reqs = [];
+    const idSet = this.requestsByAddress.get(addr);
+
+    if (idSet) {
+      const ids = Array.from(idSet);
+
+      for (const requestId of ids) {
+        const reqObj = this.requests.get(requestId);
+
+        if (reqObj && reqObj.status !== DaimoRequestState.Cancelled) {
+          const { fulfiller } = parseRequestMetadata(reqObj.metadata);
+
+          if (fulfiller) {
+            // Consider putting this directly on the request object.
+            // Handling here is to avoid confusion with `fulfilledBy`.
+            const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
+
+            reqs.push({
+              id: requestId.toString(),
+              type: reqObj.recipient.addr === addr ? "recipient" : "fulfiller",
+              request: reqObj,
+              fulfiller: fulfillerAccount,
+            } as const);
+          }
+        }
+        // TODO: Guess the timestamp (might need to store the blockNumber first).
+        // When this is done, we can sort by reverse timestamp and add
+        // notification "createdAt"
+      }
+    }
+
+    return reqs;
   }
 
   getRequestStatusById(id: bigint): DaimoRequestV2Status | null {
