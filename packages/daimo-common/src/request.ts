@@ -35,8 +35,6 @@ export function generateRequestId() {
  * potentially EIP-712 compliant ones.
  */
 
-const SUPPORTED_VERSIONS = [0] as const;
-
 export type DaimoRichRequestV2 = {
   v: number;
   fulfiller: Address | null;

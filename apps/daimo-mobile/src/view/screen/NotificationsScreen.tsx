@@ -92,25 +92,26 @@ function NotificationRow(props: DaimoRequestV2Info) {
   );
 }
 
-function NotificationActions(props: DaimoRequestV2Info) {
-  const { type, request, fulfiller } = props;
+function NotificationActions({ type, request }: DaimoRequestV2Info) {
+  const nav = useNav();
 
-  const handleCancel = () => {
-    // Create trpc route handler
-  };
+  const handleCancel = () => {};
 
   const handleDecline = () => {
     // Soft-delete request from requests list.
   };
 
-  const handleAccept = () => {
-    // Create trpc route handler
+  const handleSend = () => {
+    nav.navigate("SendTab", {
+      screen: "SendTransfer",
+      params: { link: request.link },
+    });
   };
 
   if (type === "recipient") {
     return (
       <View>
-        <ButtonSmall type="subtle" title="Cancel" />
+        <ButtonSmall onPress={handleCancel} type="subtle" title="Cancel" />
       </View>
     );
   }
@@ -118,11 +119,11 @@ function NotificationActions(props: DaimoRequestV2Info) {
   return (
     <View style={{ flexDirection: "row" }}>
       <View style={{ flex: 1 }}>
-        <ButtonSmall type="subtle" title="Decline" />
+        <ButtonSmall onPress={handleDecline} type="subtle" title="Decline" />
       </View>
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
-        <ButtonSmall type="primary" title="Send" />
+        <ButtonSmall onPress={handleSend} type="primary" title="Send" />
       </View>
     </View>
   );
