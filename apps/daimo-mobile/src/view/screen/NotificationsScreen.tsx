@@ -1,7 +1,9 @@
 import { DaimoRequestV2Info } from "@daimo/common";
+import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useMemo } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 
+import { useSendAsync } from "../../action/useSendAsync";
 import { useNav } from "../../common/nav";
 import { EAccountContact } from "../../logic/daimoContacts";
 import { Account } from "../../model/account";
@@ -48,7 +50,11 @@ function NotificationsScreenInner({ account }: { account: Account }) {
               ]}
             />
             {requestsList.map((request) => (
-              <NotificationRow key={request.id} {...request} />
+              <NotificationRow
+                key={request.id}
+                {...request}
+                account={account}
+              />
             ))}
           </>
         )}
@@ -57,7 +63,7 @@ function NotificationsScreenInner({ account }: { account: Account }) {
   );
 }
 
-function NotificationRow(props: DaimoRequestV2Info) {
+function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
   const { type, request, fulfiller } = props;
 
   const contact = useMemo(() => {
@@ -92,10 +98,46 @@ function NotificationRow(props: DaimoRequestV2Info) {
   );
 }
 
-function NotificationActions({ type, request }: DaimoRequestV2Info) {
+function NotificationActions({
+  type,
+  request,
+  account,
+}: DaimoRequestV2Info & { account: Account }) {
   const nav = useNav();
 
-  const handleCancel = () => {};
+  // Generate nonce
+  const nonce = useMemo(
+    () =>
+      new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.RequestResponse)),
+    []
+  );
+
+  const { exec } = useSendAsync({
+    dollarsToSend: 0,
+    sendFn: async (opSender) => {
+      console.log(`[ACTION] fulfilling request ${request.link.id.toString()}`);
+      return opSender.cancelRequest(
+        BigInt(request.link.id),
+        2, // RequestStatus.Cancelled
+        { nonce, chainGasConstants: account.chainGasConstants }
+      );
+    },
+  });
+
+  const handleCancel = () => {
+    Alert.alert(
+      "Confirm cancel",
+      "Proceed with cancelling request?",
+      [
+        {
+          text: "Yes",
+          onPress: exec,
+        },
+        { text: "No" },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleDecline = () => {
     // Soft-delete request from requests list.
