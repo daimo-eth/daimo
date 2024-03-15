@@ -26,21 +26,21 @@ import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
-import { TextCenter, TextLight } from "../../shared/text";
+import { TextBody, TextCenter } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreatePickName">;
 export function OnboardingPickNameScreen({ route }: Props) {
   const daimoChain = useDaimoChain();
   const [name, setName] = useState("");
+  const { inviteLink } = route.params;
 
   const nav = useOnboardingNav();
   const createAccount = useCallback(async () => {
-    const { inviteLink } = route.params;
     // Kick off account creation in background
     getAccountManager().createAccount(name, inviteLink);
     // Request notifications permission, hiding latency
     nav.navigate("AllowNotifs");
-  }, [route.params, name]);
+  }, [inviteLink, name]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -53,11 +53,18 @@ export function OnboardingPickNameScreen({ route }: Props) {
           <Spacer h={24} />
           <TextCenter>
             <IntroTextParagraph>
-              Your username is what you'll go by on Daimo. Choose wisely — once
-              you get a name, you can't change it.
+              Your username is public on Daimo.
             </IntroTextParagraph>
           </TextCenter>
-          <Spacer h={32} />
+          <Spacer h={24} />
+          <IconRow
+            icon="check-circle"
+            color={color.successDark}
+            title={`valid ${
+              inviteLink.type === "notev2" ? "payment link" : "invite"
+            }`}
+          />
+          <Spacer h={8} />
           <View style={styles.namePickerWrap}>
             <NamePicker
               name={name}
@@ -69,6 +76,17 @@ export function OnboardingPickNameScreen({ route }: Props) {
         </View>
       </View>
     </TouchableWithoutFeedback>
+  );
+}
+
+function IconRow(props: { icon: OctName; color?: string; title: string }) {
+  const { icon, title } = props;
+  const col = props.color || color.grayMid;
+  return (
+    <View style={styles.iconRow}>
+      <Octicons {...{ name: icon, size: 16, color: col }} />
+      <TextBody color={col}>{title}</TextBody>
+    </View>
   );
 }
 
@@ -100,33 +118,34 @@ function NamePicker({
   }, [name]);
 
   let isAvailable = false;
-  const oct = (name: OctName, color?: string) => (
-    <Octicons {...{ name, color }} size={14} />
-  );
   const status = (function () {
     if (name.length === 0 || debounce) {
-      return " "; // no error
+      return <IconRow icon="circle" color={color.grayMid} title="pick name" />;
     } else if (error) {
-      return (
-        <>
-          {oct("alert")} {error.toLowerCase()}
-        </>
-      ); // invalid name
+      return <IconRow icon="alert" title={error.toLowerCase()} />;
     } else if (result.isLoading) {
-      return "..."; // name valid, loading
+      return <IconRow icon="circle" color={color.grayMid} title="..." />;
     } else if (result.error) {
-      return <>{oct("alert")} offline?</>; // name valid, other error
+      return <IconRow icon="alert" title="offline?" />;
     } else if (result.isSuccess && result.data) {
-      return <>{oct("alert")} sorry, that username is taken</>; // name taken
+      return <IconRow icon="alert" title="sorry, that name is taken" />;
     } else if (result.isSuccess && result.data === null) {
-      isAvailable = true; // name valid & available
-      return <>{oct("check-circle", color.successDark)} available</>;
+      isAvailable = true;
+      return (
+        <IconRow
+          icon="check-circle"
+          color={color.successDark}
+          title="username available"
+        />
+      );
     }
     throw new Error("unreachable");
   })();
 
   return (
     <View>
+      {status}
+      <Spacer h={24} />
       <InputBig
         placeholder="choose a username"
         value={name}
@@ -134,11 +153,7 @@ function NamePicker({
         center
         autoFocus
       />
-      <Spacer h={16} />
-      <TextCenter>
-        <TextLight>{status}</TextLight>
-      </TextCenter>
-      <Spacer h={16} />
+      <Spacer h={24} />
       <ButtonBig
         type="primary"
         title="Create"
@@ -156,5 +171,14 @@ const styles = StyleSheet.create({
   createAccountPage: {
     paddingTop: 36,
     paddingHorizontal: 24,
+  },
+  iconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 99,
+    backgroundColor: color.ivoryLight,
   },
 });

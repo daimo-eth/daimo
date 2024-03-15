@@ -21,7 +21,7 @@ import { SearchResults } from "./send/SearchResults";
 import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
-import { getInitialURLOrTag } from "../../logic/deeplink";
+import { getInitialDeepLink } from "../../logic/deeplink";
 import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
@@ -303,12 +303,13 @@ function useInitNavLinks() {
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
     deepLinkInitialised = true;
-    getInitialURLOrTag(false).then((url) => {
+    getInitialDeepLink().then((url) => {
       if (url == null) return;
       handleDeepLink(nav, url);
     });
 
-    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    const sub = addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    return () => sub.remove();
   }, [accountMissing, nav]);
 }
 

@@ -1,4 +1,4 @@
-import { DaimoLink, parseDaimoLink, stripSeedFromNoteLink } from "./daimoLink";
+import { DaimoLink, parseDaimoLink } from "./daimoLink";
 import {
   DaimoInviteCodeStatus,
   DaimoLinkStatus,
@@ -21,12 +21,8 @@ export function parseInviteCodeOrLink(str: string): DaimoLink | undefined {
 
   // Is it a link?
   const link = parseDaimoLink(str);
-  if (link != null && link.type === "invite") {
+  if (link != null && ["invite", "requestv2", "notev2"].includes(link.type)) {
     return link;
-  } else if (link != null && link.type === "requestv2") {
-    return link;
-  } else if (link != null && link.type === "notev2") {
-    return stripSeedFromNoteLink(link);
   }
 
   return undefined;

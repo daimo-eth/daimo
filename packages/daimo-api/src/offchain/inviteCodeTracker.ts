@@ -114,6 +114,10 @@ export class InviteCodeTracker {
     const inviter = code?.inviter
       ? await this.nameReg.getEAccount(code.inviter)
       : undefined;
+
+    console.log(
+      `[INVITE] getInvCodeStatus ${JSON.stringify({ code, usesLeft, inviter })}`
+    );
     return {
       link: inviteLink,
       isValid: usesLeft > 0,

@@ -56,6 +56,7 @@ import {
   ParamListSettings,
   ParamListTab,
   useNav,
+  useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccountAndKeyInfo } from "../logic/accountManager";
@@ -66,6 +67,8 @@ const { add, multiply } = Animated;
 const OnStack = createStackNavigator<ParamListOnboarding>();
 function OnboardingNavigator() {
   usePollForAccount();
+
+  useOnboardingDeepLinkHandler();
 
   return (
     <OnStack.Navigator

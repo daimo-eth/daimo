@@ -26,8 +26,9 @@ import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  console.log("[APP] rendering");
   const [account] = useAccount();
+  const onb = account?.isOnboarded ? "onboarded" : "not onboarded";
+  console.log(`[APP] rendering ${account?.name || "no account"}, ${onb}`);
 
   // Display notifications, listen for push notifications
   useInitNotifications();

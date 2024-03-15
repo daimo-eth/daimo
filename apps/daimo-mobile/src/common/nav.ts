@@ -11,13 +11,21 @@ import {
   EAccount,
   getEAccountStr,
   parseDaimoLink,
+  parseInviteCodeOrLink,
 } from "@daimo/common";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useCallback } from "react";
+import { URLListener, addEventListener } from "expo-linking";
+import { useCallback, useEffect } from "react";
+import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { EAccountContact, MsgContact } from "../logic/daimoContacts";
+import {
+  getInitialDeepLink,
+  markInitialDeepLinkHandled,
+} from "../logic/deeplink";
+import { fetchInviteLinkStatus } from "../logic/linkStatus";
 
 export type ParamListOnboarding = {
   Intro: undefined;
@@ -145,6 +153,45 @@ export function useOnboardingNav<
 }
 
 export type MainNav = ReturnType<typeof useNav>;
+
+export type OnboardingNav = ReturnType<typeof useOnboardingNav>;
+
+// Handles deeplinks during onboarding, if any.
+export function useOnboardingDeepLinkHandler() {
+  const nav = useOnboardingNav();
+
+  // If we opened the app by clicking an invite link, go straight into onboarding.
+  const navToInitialInviteDeepLinkIfPresent = async () => {
+    const deeplink = await getInitialDeepLink();
+    if (deeplink == null) return;
+    // Use invite / payment link now > don't nav there after onboarding
+    await handleOnboardingDeepLink(nav, deeplink);
+    markInitialDeepLinkHandled();
+  };
+
+  useEffect(() => {
+    navToInitialInviteDeepLinkIfPresent();
+    const listener: URLListener = ({ url }) =>
+      handleOnboardingDeepLink(nav, url);
+    const sub = addEventListener("url", listener);
+    return () => sub.remove();
+  }, []);
+}
+
+export async function handleOnboardingDeepLink(
+  nav: OnboardingNav,
+  str: string
+) {
+  const inviteLink = parseInviteCodeOrLink(str);
+  console.log(`[INTRO] paste invite link: '${str}'`);
+  const isAndroid = Platform.OS === "android";
+  if (inviteLink && (await fetchInviteLinkStatus(inviteLink))?.isValid) {
+    if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+    else nav.navigate("CreatePickName", { inviteLink });
+  } else {
+    nav.navigate("CreateNew");
+  }
+}
 
 export function handleDeepLink(nav: MainNav, url: string) {
   const link = parseDaimoLink(url);
