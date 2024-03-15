@@ -246,7 +246,8 @@ export class RequestIndexer {
 
             reqs.push({
               id: requestId.toString(),
-              type: reqObj.recipient.addr === addr ? "recipient" : "fulfiller",
+              type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
+              // type: reqObj.recipient.addr === addr ? "recipient" : "fulfiller",
               request: reqObj,
               fulfiller: fulfillerAccount,
             } as const);

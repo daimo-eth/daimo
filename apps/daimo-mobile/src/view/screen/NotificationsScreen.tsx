@@ -5,7 +5,7 @@ import { ScrollView, View } from "react-native";
 import { useNav } from "../../common/nav";
 import { EAccountContact } from "../../logic/daimoContacts";
 import { Account } from "../../model/account";
-import { ButtonMed, ButtonSmall } from "../shared/Button";
+import { ButtonSmall } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -31,6 +31,13 @@ function NotificationsScreenInner({ account }: { account: Account }) {
     <View style={ss.container.screen}>
       <ScreenHeader title="Notifications" onBack={goBack} />
       <ScrollView>
+        <View
+          style={[
+            ss.container.marginHNeg16,
+            ss.container.padH16,
+            { height: 0.5, backgroundColor: "#D6D6D6" },
+          ]}
+        />
         {requestsList.map((request) => (
           <NotificationRow key={request.id} {...request} />
         ))}
@@ -56,6 +63,8 @@ function NotificationRow(props: DaimoRequestV2Info) {
           paddingTop: 16,
           paddingBottom: 28,
           flexDirection: "row",
+          borderBottomWidth: 0.5,
+          borderBottomColor: "#D6D6D6",
         },
       ]}
     >
@@ -63,6 +72,8 @@ function NotificationRow(props: DaimoRequestV2Info) {
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
         <NotificationMessage {...props} />
+        <Spacer h={2} />
+        <TextBody color="#777777">5d ago</TextBody>
         <Spacer h={8} />
         <NotificationActions {...props} />
       </View>
@@ -96,11 +107,11 @@ function NotificationActions(props: DaimoRequestV2Info) {
   return (
     <View style={{ flexDirection: "row" }}>
       <View style={{ flex: 1 }}>
-        <ButtonMed type="subtle" title="Decline" />
+        <ButtonSmall type="subtle" title="Decline" />
       </View>
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
-        <ButtonMed type="primary" title="Accept" />
+        <ButtonSmall type="primary" title="Accept" />
       </View>
     </View>
   );
@@ -109,17 +120,19 @@ function NotificationActions(props: DaimoRequestV2Info) {
 function NotificationMessage(info: DaimoRequestV2Info) {
   if (info.type === "recipient") {
     return (
-      <TextBody style={{ color: "#777777" }}>
-        You requested <TextBody>${info.request.link.dollars}</TextBody> from{" "}
-        <TextBody>{info.fulfiller.name}</TextBody>
+      <TextBody color="#777777">
+        You requested{" "}
+        <TextBody color="#000000">${info.request.link.dollars}</TextBody> from{" "}
+        <TextBody color="#000000">{info.fulfiller.name}</TextBody>
       </TextBody>
     );
   }
 
   return (
-    <TextBody style={{ color: "#777777" }}>
-      <TextBody>{info.request.recipient.name}</TextBody> requested{" "}
-      <TextBody>${info.request.link.dollars}</TextBody> USDC
+    <TextBody color="#777777">
+      <TextBody color="#000000">{info.request.recipient.name}</TextBody>{" "}
+      requested{" "}
+      <TextBody color="#000000">${info.request.link.dollars}</TextBody> USDC
     </TextBody>
   );
 }
