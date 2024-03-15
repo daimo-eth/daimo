@@ -10,7 +10,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { ss } from "../shared/style";
-import { TextBody } from "../shared/text";
+import { TextBody, TextCenter } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 export function NotificationsScreen() {
@@ -31,16 +31,27 @@ function NotificationsScreenInner({ account }: { account: Account }) {
     <View style={ss.container.screen}>
       <ScreenHeader title="Notifications" onBack={goBack} />
       <ScrollView>
-        <View
-          style={[
-            ss.container.marginHNeg16,
-            ss.container.padH16,
-            { height: 0.5, backgroundColor: "#D6D6D6" },
-          ]}
-        />
-        {requestsList.map((request) => (
-          <NotificationRow key={request.id} {...request} />
-        ))}
+        {requestsList.length === 0 ? (
+          <View>
+            <Spacer h={48} />
+            <TextCenter>
+              <TextBody color="#777777">No notifications to display</TextBody>
+            </TextCenter>
+          </View>
+        ) : (
+          <>
+            <View
+              style={[
+                ss.container.marginHNeg16,
+                ss.container.padH16,
+                { height: 0.5, backgroundColor: "#D6D6D6" },
+              ]}
+            />
+            {requestsList.map((request) => (
+              <NotificationRow key={request.id} {...request} />
+            ))}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -111,7 +122,7 @@ function NotificationActions(props: DaimoRequestV2Info) {
       </View>
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
-        <ButtonSmall type="primary" title="Accept" />
+        <ButtonSmall type="primary" title="Send" />
       </View>
     </View>
   );

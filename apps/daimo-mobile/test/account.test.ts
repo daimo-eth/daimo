@@ -48,6 +48,8 @@ const account: Account = {
   invitees: [],
 
   isOnboarded: true,
+
+  requests: [],
 };
 
 describe("Account", () => {
