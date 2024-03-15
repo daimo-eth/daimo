@@ -3,7 +3,6 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Dimensions,
   RefreshControl,
   StyleSheet,
   TouchableHighlight,
@@ -161,16 +160,14 @@ function HomeScreenInner({ account }: { account: Account }) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{
-          height: screenDimensions.height,
-        }}
+        contentContainerStyle={styles.animatedScrollContent}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
         scrollEventThrottle={8}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={preventOverscrollStyle}>
+        <Animated.View style={[preventOverscrollStyle, styles.scrollView]}>
           <Spacer h={Math.max(16, ins.top)} />
           {account.suggestedActions.length > 0 &&
             netState.status !== "offline" &&
@@ -312,8 +309,6 @@ function useInitNavLinks() {
   }, [accountMissing, nav]);
 }
 
-const screenDimensions = Dimensions.get("screen");
-
 const iconButton = {
   backgroundColor: color.primary,
   height: 64,
@@ -334,6 +329,12 @@ const styles = StyleSheet.create({
   amountAndButtons: {
     flexDirection: "column",
     alignItems: "center",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  animatedScrollContent: {
+    height: "100%",
   },
   buttonRow: {
     flexDirection: "row",
