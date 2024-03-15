@@ -5,7 +5,9 @@ import {
   getEAccountStr,
   encodeRequestId,
   parseRequestMetadata,
+  guessTimestampFromNum,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -22,6 +24,7 @@ interface RequestCreatedLog {
   amount: bigint;
   metadata: Hex;
   logAddr: Address;
+  blockNumber: bigint;
 }
 
 interface RequestFulfilledLog {
@@ -75,7 +78,8 @@ export class RequestIndexer {
             creator,
             amount,
             metadata,
-            log_addr
+            log_addr,
+            block_num
           from request_created
           where block_num >= $1
           and block_num <= $2
@@ -124,6 +128,10 @@ export class RequestIndexer {
       creator,
       status: DaimoRequestState.Created,
       metadata: log.metadata,
+      createdAt: guessTimestampFromNum(
+        log.blockNumber,
+        daimoChainFromId(chainConfig.chainL2.id)
+      ),
     };
     this.requests.set(log.id, requestStatus);
 
@@ -288,6 +296,7 @@ function rowToRequestCreatedLog(r: any): RequestCreatedLog {
     amount: BigInt(r.amount),
     metadata: bytesToHex(r.metadata),
     logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+    blockNumber: BigInt(r.block_num),
   };
 }
 

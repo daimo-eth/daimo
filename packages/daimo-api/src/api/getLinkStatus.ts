@@ -74,6 +74,7 @@ export async function getLinkStatus(
           creator: undefined,
           status: DaimoRequestState.Pending,
           metadata: `0x`,
+          createdAt: Date.now(),
         };
         return pending;
       } else {

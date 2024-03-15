@@ -1,4 +1,4 @@
-import { DaimoRequestV2Info } from "@daimo/common";
+import { DaimoRequestV2Info, now, timeAgo } from "@daimo/common";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useMemo } from "react";
 import { Alert, ScrollView, View } from "react-native";
@@ -90,7 +90,9 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
       <View style={{ flex: 1 }}>
         <NotificationMessage {...props} />
         <Spacer h={2} />
-        <TextBody color="#777777">5d ago</TextBody>
+        <TextBody color="#777777">
+          {timeAgo(props.request.createdAt, now(), true)}
+        </TextBody>
         <Spacer h={8} />
         <NotificationActions {...props} />
       </View>
@@ -128,13 +130,7 @@ function NotificationActions({
     Alert.alert(
       "Confirm cancel",
       "Proceed with cancelling request?",
-      [
-        {
-          text: "Yes",
-          onPress: exec,
-        },
-        { text: "No" },
-      ],
+      [{ text: "Yes", onPress: exec }, { text: "No" }],
       { cancelable: true }
     );
   };
