@@ -8,9 +8,10 @@ import {
   assertNotNull,
   getAccountName,
   getSlotLabel,
+  parseRequestMetadata,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
-import { Address, Hex, formatUnits, getAddress, hexToString } from "viem";
+import { Address, Hex, formatUnits, getAddress } from "viem";
 
 import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
@@ -276,22 +277,18 @@ export class PushNotifier {
 
         // On creation, parse fulfiller name from metadata.
         if (log.recipient.name && log.status === DaimoRequestState.Created) {
-          const parsedMetadata = hexToString(metadata);
-          if (parsedMetadata !== "") {
-            // TODO: find a way to validate and prevent errors if the value does not match.
-            const { fulfiller } = JSON.parse(parsedMetadata);
+          const { fulfiller } = parseRequestMetadata(metadata);
 
-            if (fulfiller) {
-              const pushTokens = this.pushTokens.get(fulfiller);
+          if (fulfiller) {
+            const pushTokens = this.pushTokens.get(fulfiller);
 
-              if (pushTokens) {
-                messages.push({
-                  to: pushTokens,
-                  badge: 1,
-                  title: "Request received",
-                  body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
-                });
-              }
+            if (pushTokens) {
+              messages.push({
+                to: pushTokens,
+                badge: 1,
+                title: "Request received",
+                body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
+              });
             }
           }
         }
