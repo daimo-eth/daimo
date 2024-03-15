@@ -50,7 +50,7 @@ export async function createPasskey(
         passkeyDisplayTitle,
         challengeB64,
       }),
-    3,
+    5,
     matchAASABugError
   );
 
@@ -118,7 +118,7 @@ export async function requestPasskeySignature(
         domain,
         challengeB64,
       }),
-    3,
+    5,
     matchAASABugError
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
