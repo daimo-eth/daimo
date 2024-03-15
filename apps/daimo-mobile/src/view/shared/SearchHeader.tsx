@@ -10,11 +10,8 @@ import Animated, {
 
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
-import { ContactBubble } from "./ContactBubble";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
-import { useAccount } from "../../logic/accountManager";
-import { toEAccountContact } from "../../model/account";
 
 const animationConfig = { duration: 150 };
 
@@ -35,16 +32,6 @@ export function SearchHeader({
     isFocused.value = prefix != null;
   }, [prefix]);
 
-  const qrButton = useAnimatedStyle(() => {
-    return {
-      position: "absolute",
-      opacity: isFocused.value ? withTiming(0) : withTiming(1),
-      zIndex: isFocused.value ? 0 : 10,
-      elevation: isFocused.value ? 0 : 10,
-      right: 0,
-    };
-  });
-
   const accountButton = useAnimatedStyle(() => {
     return {
       position: "absolute",
@@ -54,6 +41,18 @@ export function SearchHeader({
       zIndex: isFocused.value ? 0 : 10,
       elevation: isFocused.value ? 0 : 10,
       left: 0,
+    };
+  });
+
+  const notificationsButton = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      opacity: isFocused.value
+        ? withTiming(0, animationConfig)
+        : withTiming(1, animationConfig),
+      zIndex: isFocused.value ? 0 : 10,
+      elevation: isFocused.value ? 0 : 10,
+      right: 0,
     };
   });
 
@@ -69,22 +68,23 @@ export function SearchHeader({
     };
   });
 
-  // Left side: account bubble
-  const goToAccount = useCallback(
-    () => nav.navigate("SettingsTab", { screen: "Settings" }),
-    [nav]
-  );
+  // const goToAccount = useCallback(
+  //   () => nav.navigate("SettingsTab", { screen: "Settings" }),
+  //   [nav]
+  // );
 
-  // Right: QR code
+  // Left: QR code
   const goToQR = useCallback(
     () =>
       nav.navigate("HomeTab", { screen: "QR", params: { option: undefined } }),
     [nav]
   );
 
-  const [account] = useAccount();
-  if (account == null) return null;
-  const eAcc = toEAccountContact(account);
+  // Right: Notifications
+  const goToNotifications = useCallback(
+    () => nav.navigate("HomeTab", { screen: "Notifications" }),
+    []
+  );
 
   return (
     <View style={styles.header}>
@@ -94,8 +94,10 @@ export function SearchHeader({
         </TouchableOpacity>
       </Animated.View>
       <Animated.View key="icon" style={accountButton}>
-        <ButtonCircle size={50} onPress={goToAccount}>
-          <ContactBubble contact={eAcc} size={50} transparent />
+        <ButtonCircle size={50} onPress={goToQR}>
+          <View style={styles.qrCircle}>
+            <Octicons name="apps" size={24} color={color.midnight} />
+          </View>
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput
@@ -108,10 +110,10 @@ export function SearchHeader({
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
-      <Animated.View style={[{ marginLeft: 16 }, qrButton]}>
-        <ButtonCircle size={50} onPress={goToQR}>
+      <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
+        <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.qrCircle}>
-            <Octicons name="apps" size={24} color={color.midnight} />
+            <Octicons name="bell" size={24} color={color.midnight} />
           </View>
         </ButtonCircle>
       </Animated.View>
