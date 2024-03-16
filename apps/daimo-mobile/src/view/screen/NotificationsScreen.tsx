@@ -101,6 +101,7 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
 }
 
 function NotificationActions({
+  id,
   type,
   request,
   account,
@@ -123,6 +124,12 @@ function NotificationActions({
         2, // RequestStatus.Cancelled
         { nonce, chainGasConstants: account.chainGasConstants }
       );
+    },
+    accountTransform: (acc) => {
+      return {
+        ...acc,
+        requests: acc.requests.filter((a) => a.id !== id),
+      };
     },
   });
 
