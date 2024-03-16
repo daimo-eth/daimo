@@ -30,7 +30,7 @@
     "@daimo/api": "*",
     "@daimo/auth-client": "^0.1.0",
     "@daimo/common": "*",
-    "@daimo/contract": "*",
+    "@daimo/contract": "*", 
     "@daimo/expo-app-delegate": "*",
     "@daimo/expo-enclave": "*",
     "@daimo/expo-passkeys": "*",
