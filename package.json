@@ -6,6 +6,7 @@
     "dev": "turbo dev",
     "start": "turbo start",
     "build": "turbo build",
+    "build:exclude-bot": "turbo build --filter=!@daimo/bot",
     "build:exclude-web": "turbo build --filter=!@daimo/web",
     "build:api": "turbo run build --filter @daimo/api",
     "build:mobile": "turbo run build --filter @daimo/mobile",

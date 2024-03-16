@@ -14,7 +14,6 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
-import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
@@ -44,6 +43,7 @@ import { Watcher } from "../shovel/watcher";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
+import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 
 export function createRouter(
   watcher: Watcher,
