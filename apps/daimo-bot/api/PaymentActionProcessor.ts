@@ -102,8 +102,10 @@ export class DaimobotProcessor {
     console.log(
       `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`
     );
-    const senderEthAccount = (await this.lookupFid(this.senderFid))
-      .maybeEAccount;
+    const senderEthAccount =
+      await this.trpcClient.lookupEthereumAccountByFid.query({
+        fid: this.senderFid,
+      });
     if (!senderEthAccount) {
       console.log(
         "Sender not registered with Farcaster. Sending a response cast."
@@ -140,8 +142,9 @@ export class DaimobotProcessor {
       await this.trpcClient.lookupEthereumAccountByFid.query({
         fid: this.parentAuthorFid,
       });
-    const recipientUsername = (await this.lookupFid(this.parentAuthorFid))
-      .fcUsername;
+    const recipientUsername = await this.getFcUsernameByFid(
+      this.parentAuthorFid
+    );
     if (!recipientEthAccount) {
       console.log(
         "Recipient not registered with Farcaster. Sending a response cast."
@@ -232,24 +235,10 @@ export class DaimobotProcessor {
     }
   }
 
-  private async lookupFid(fid: number): Promise<{
-    fid: number;
-    fcUsername: string;
-    maybeEAccount: EAccount | null;
-  }> {
-    const [profiles, maybeEAccount] = await Promise.all([
-      this.neynarClient.fetchBulkUsers([this.senderFid]),
-      this.trpcClient.lookupEthereumAccountByFid.query({
-        fid: this.senderFid,
-      }),
-    ]);
-    const len = profiles.users.length;
+  private async getFcUsernameByFid(fid: number) {
+    const profile = await this.neynarClient.fetchBulkUsers([fid]);
+    const len = profile.users.length;
     assert(len === 1, `Expected exactly 1 user to be returned, got ${len}`);
-
-    return {
-      fid,
-      fcUsername: profiles.users[0].username,
-      maybeEAccount,
-    };
+    return profile.users[0].username;
   }
 }
