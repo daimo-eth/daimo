@@ -1,5 +1,5 @@
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { PaymentActionProcessor } from "../PaymentActionProcessor";
+import { DaimobotProcessor } from "../PaymentActionProcessor";
 import {
   CONNECT_FC_MESSAGE,
   PAYMENT_CONNECT_FC_MESSAGE,
@@ -30,7 +30,7 @@ const validAddress = "0x123";
 
 describe("tryExtractCommand()", () => {
   it("extracts proper request command", () => {
-    const processor = new PaymentActionProcessor(mockEvent);
+    const processor = new DaimobotProcessor(mockEvent);
     const result = processor._tryExtractCommand();
 
     expect(result).toEqual({
@@ -47,7 +47,7 @@ describe("tryExtractCommand()", () => {
       },
     };
 
-    const processor = new PaymentActionProcessor(mockEventPayCommand);
+    const processor = new DaimobotProcessor(mockEventPayCommand);
     const result = processor._tryExtractCommand();
 
     expect(result).toEqual({
@@ -64,7 +64,7 @@ describe("tryExtractCommand()", () => {
       },
     };
 
-    const processor = new PaymentActionProcessor(mockEventInvalidCommand);
+    const processor = new DaimobotProcessor(mockEventInvalidCommand);
     const result = processor._tryExtractCommand();
 
     expect(result).toBeNull();
@@ -97,7 +97,7 @@ describe("PaymentActionProcessor", () => {
   it("handles Case 1: Alice doesn't have FC linked ❌, requests $ from anyone", async () => {
     // Action 1: Daimobot responds with a link to register with Farcaster. Alice registers, then Daimobot responds with a link to request $
 
-    const processor = new PaymentActionProcessor(
+    const processor = new DaimobotProcessor(
       mockEvent,
       mockTrpcClient,
       mockNeynarClient
@@ -126,7 +126,7 @@ describe("PaymentActionProcessor", () => {
       .fn()
       .mockResolvedValue(validAddress);
 
-    const processor = new PaymentActionProcessor(
+    const processor = new DaimobotProcessor(
       mockEvent,
       mockTrpcClient,
       mockNeynarClient
@@ -158,7 +158,7 @@ describe("PaymentActionProcessor", () => {
       .fn()
       .mockResolvedValue({ users: [{ username: bob.username }] });
 
-    const processor = new PaymentActionProcessor(
+    const processor = new DaimobotProcessor(
       {
         data: {
           ...mockEvent.data,
@@ -203,7 +203,7 @@ describe("PaymentActionProcessor", () => {
       .fn()
       .mockResolvedValue(validAddress);
 
-    const processor = new PaymentActionProcessor(
+    const processor = new DaimobotProcessor(
       {
         data: {
           ...mockEvent.data,

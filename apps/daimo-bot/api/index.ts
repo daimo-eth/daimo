@@ -2,7 +2,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import express from "express";
 import { WebhookEvent } from "./types";
-import { PaymentActionProcessor } from "./PaymentActionProcessor";
+import { DaimobotProcessor } from "./PaymentActionProcessor";
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const app = express();
 const port = 4000;
 
 app.use(bodyParser.json());
-app.get("/", (req, res) => res.send("Up!"));
+app.get("/health", (req, res) => res.send("Up!"));
 
 app.post("/daimobot-hook", async (req, res) => {
   const event: WebhookEvent = req.body;
@@ -20,7 +20,7 @@ app.post("/daimobot-hook", async (req, res) => {
     if (event.data.object !== "cast") {
       throw new Error(`Unexpected event type: ${event.data.object}`);
     }
-    new PaymentActionProcessor(event).process();
+    new DaimobotProcessor(event).process();
     res.status(200).send("OK");
   } catch (err) {
     console.error("Error processing webhook event:", err);

@@ -3,38 +3,19 @@ import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
 const BASE_CHAIN_ID = "8453";
 const BASE_SEPOLIA_CHAIN_ID = "84532";
-const URL_CHAIN_MAPPING = {
-  mainnet: {
-    url: process.env.DAIMO_APP_API_URL_MAINNET,
-    chainId: BASE_CHAIN_ID,
-  },
-  testnet: {
-    url: process.env.DAIMO_APP_API_URL_TESTNET,
-    chainId: BASE_SEPOLIA_CHAIN_ID,
-  },
-  default: {
-    url: "http://localhost:3000",
-    chainId: BASE_SEPOLIA_CHAIN_ID,
-  },
-} as const;
 
-const getApiUrl = () => {
-  const key: keyof typeof URL_CHAIN_MAPPING = process.env
-    .DAIMO_APP_API_URL_MAINNET
-    ? "mainnet"
-    : process.env.DAIMO_APP_API_URL_TESTNET
-    ? "testnet"
-    : "default";
-
-  const { url, chainId } = URL_CHAIN_MAPPING[key];
-  return `${url}/chain/${chainId}`;
-};
+function getEthApiConfig() {
+  let url = process.env.DAIMO_APP_API_URL_MAINNET;
+  if (url) return { url, chainId: BASE_CHAIN_ID };
+  url = process.env.DAIMO_APP_API_URL_TESTNET || "http://localhost:3000";
+  return { url, chainId: BASE_SEPOLIA_CHAIN_ID };
+}
 
 // @ts-expect-error: non-blocking AppRouter TypeError. types still populate
 export const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: getApiUrl(),
+      url: getEthApiConfig().url,
     }),
   ],
 });

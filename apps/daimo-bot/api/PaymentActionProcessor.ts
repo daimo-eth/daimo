@@ -10,6 +10,8 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import dotenv from "dotenv";
 import {
   CONNECT_FC_MESSAGE,
+  DAIMOBOT_INPUT_COMMAND_NOT_VALID,
+  PARENT_CAST_AUTHOR_NOT_FOUND,
   PAYMENT_CONNECT_FC_MESSAGE,
   REQUEST_PAYMENT_MESSAGE,
 } from "./botResponses";
@@ -19,7 +21,7 @@ import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 dotenv.config();
 
 assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
-const _neynarClient = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
+const NEYNAR_CLIENT = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
 
 assert(
   !!process.env.DAIMOBOT_SIGNER_UUID,
@@ -27,7 +29,10 @@ assert(
 );
 const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
 
-export class PaymentActionProcessor {
+export class DaimobotProcessor {
+  //* Responds to Farcaster casts as @daimobot
+  //* Makes it easy for people on Farcaster to pay each other onchain
+
   private text: string;
   private castId: string;
   private senderFid: number;
@@ -39,7 +44,7 @@ export class PaymentActionProcessor {
   constructor(
     event: WebhookEvent,
     trpc: TRPCClient = trpcClient,
-    neynarClient: NeynarAPIClient = _neynarClient
+    neynarClient: NeynarAPIClient = NEYNAR_CLIENT
   ) {
     const { data } = event;
     this.text = data.text;
@@ -73,90 +78,91 @@ export class PaymentActionProcessor {
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
-      this.publishCastReply(
-        "Hi! To use me, please use the format `@daimobot request $<amount>` or `@daimobot pay $<amount>`."
-      );
+      this.publishCastReply(DAIMOBOT_INPUT_COMMAND_NOT_VALID);
       return;
     }
 
     const { action, cleanedAmount } = daimobotCommand;
     switch (action) {
       case "request": {
-        // See if sender has Farcaster linked
-        console.log(
-          `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`
-        );
-        const senderEthAccount =
-          await this.trpcClient.lookupEthereumAccountByFid.query({
-            fid: this.senderFid,
-          });
-        if (!senderEthAccount) {
-          console.log(
-            "Sender not registered with Farcaster. Sending a response cast."
-          );
-          this.publishCastReply(
-            CONNECT_FC_MESSAGE
-            // TODO if there's a convenience url to connect Farcaster, add here
-          );
-          return;
-        }
-
-        const daimoShareUrl = await this.handleRequest(
-          cleanedAmount,
-          senderEthAccount
-        );
-        this.publishCastReply(
-          REQUEST_PAYMENT_MESSAGE(cleanedAmount, this.authorUsername),
-          {
-            embeds: [{ url: daimoShareUrl }],
-          }
-        );
+        await this.handleRequestCommand(cleanedAmount);
         break;
       }
       case "pay": {
-        // See if prospective recipient has Farcaster linked
-        if (!this.parentAuthorFid) {
-          console.warn(
-            "No parent author FID found, thus no one to prospectively pay."
-          );
-          this.publishCastReply(
-            "I can't find who you're trying to pay 🧐 \n\n To pay someone, make sure you're replying to one of their casts!"
-          );
-          return;
-        }
-        const recipientEthAccount =
-          await this.trpcClient.lookupEthereumAccountByFid.query({
-            fid: this.parentAuthorFid,
-          });
-        const recipientUsername = await this.getFcUsernameByFid(
-          this.parentAuthorFid
-        );
-        if (!recipientEthAccount) {
-          console.log(
-            "Recipient not registered with Farcaster. Sending a response cast."
-          );
-          this.publishCastReply(
-            PAYMENT_CONNECT_FC_MESSAGE(recipientUsername)
-            // TODO if there's a convenience url to connect Farcaster, add here
-          );
-          return;
-        }
-        const daimoShareUrl = await this.handleRequest(
-          cleanedAmount,
-          recipientEthAccount
-        );
-
-        this.publishCastReply(
-          REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername),
-          {
-            embeds: [{ url: daimoShareUrl }],
-          }
-        );
+        await this.handlePayCommand(cleanedAmount);
         break;
       }
       default:
         console.log("Unknown command.");
     }
+  }
+
+  private async handleRequestCommand(cleanedAmount: number) {
+    // See if sender has Farcaster linked
+    console.log(
+      `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`
+    );
+    const senderEthAccount = (await this.lookupFid(this.senderFid))
+      .maybeEAccount;
+    if (!senderEthAccount) {
+      console.log(
+        "Sender not registered with Farcaster. Sending a response cast."
+      );
+      this.publishCastReply(
+        CONNECT_FC_MESSAGE
+        // TODO if there's a convenience url to connect Farcaster, add here
+      );
+      return;
+    }
+
+    const daimoShareUrl = await this.createRequestLink(
+      cleanedAmount,
+      senderEthAccount
+    );
+    this.publishCastReply(
+      REQUEST_PAYMENT_MESSAGE(cleanedAmount, this.authorUsername),
+      {
+        embeds: [{ url: daimoShareUrl }],
+      }
+    );
+  }
+
+  private async handlePayCommand(cleanedAmount: number) {
+    // See if prospective recipient has Farcaster linked
+    if (!this.parentAuthorFid) {
+      console.warn(
+        "No parent author FID found, thus no one to prospectively pay."
+      );
+      this.publishCastReply(PARENT_CAST_AUTHOR_NOT_FOUND);
+      return;
+    }
+    const recipientEthAccount =
+      await this.trpcClient.lookupEthereumAccountByFid.query({
+        fid: this.parentAuthorFid,
+      });
+    const recipientUsername = (await this.lookupFid(this.parentAuthorFid))
+      .fcUsername;
+    if (!recipientEthAccount) {
+      console.log(
+        "Recipient not registered with Farcaster. Sending a response cast."
+      );
+      this.publishCastReply(
+        PAYMENT_CONNECT_FC_MESSAGE(recipientUsername)
+        // TODO if there's a convenience url to connect Farcaster, add here
+      );
+      return;
+    }
+    const daimoShareUrl = await this.createRequestLink(
+      cleanedAmount,
+      recipientEthAccount
+    );
+
+    this.publishCastReply(
+      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername),
+      {
+        embeds: [{ url: daimoShareUrl }],
+      }
+    );
   }
 
   _tryExtractCommand(): {
@@ -177,7 +183,7 @@ export class PaymentActionProcessor {
     return null;
   }
 
-  private async handleRequest(amount: number, requestRecipient: EAccount) {
+  private async createRequestLink(amount: number, requestRecipient: EAccount) {
     const idString = encodeRequestId(generateRequestId());
     const recipient = requestRecipient.addr;
 
@@ -226,10 +232,24 @@ export class PaymentActionProcessor {
     }
   }
 
-  private async getFcUsernameByFid(fid: number) {
-    const profile = await this.neynarClient.fetchBulkUsers([fid]);
-    const len = profile.users.length;
+  private async lookupFid(fid: number): Promise<{
+    fid: number;
+    fcUsername: string;
+    maybeEAccount: EAccount | null;
+  }> {
+    const [profiles, maybeEAccount] = await Promise.all([
+      this.neynarClient.fetchBulkUsers([this.senderFid]),
+      this.trpcClient.lookupEthereumAccountByFid.query({
+        fid: this.senderFid,
+      }),
+    ]);
+    const len = profiles.users.length;
     assert(len === 1, `Expected exactly 1 user to be returned, got ${len}`);
-    return profile.users[0].username;
+
+    return {
+      fid,
+      fcUsername: profiles.users[0].username,
+      maybeEAccount,
+    };
   }
 }
