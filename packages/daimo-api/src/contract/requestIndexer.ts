@@ -253,7 +253,6 @@ export class RequestIndexer {
             const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
 
             reqs.push({
-              id: requestId.toString(),
               type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
               // type: reqObj.recipient.addr === addr ? "recipient" : "fulfiller",
               request: reqObj,

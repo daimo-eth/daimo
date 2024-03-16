@@ -1,6 +1,11 @@
-import { DaimoRequestV2Info, now, timeAgo } from "@daimo/common";
+import {
+  DaimoRequestV2Info,
+  decodeRequestIdString,
+  now,
+  timeAgo,
+} from "@daimo/common";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Alert, ScrollView, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
@@ -51,7 +56,7 @@ function NotificationsScreenInner({ account }: { account: Account }) {
             />
             {requestsList.map((request) => (
               <NotificationRow
-                key={request.id}
+                key={request.request.link.id}
                 {...request}
                 account={account}
               />
@@ -101,7 +106,6 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
 }
 
 function NotificationActions({
-  id,
   type,
   request,
   account,
@@ -115,12 +119,12 @@ function NotificationActions({
     []
   );
 
-  const { exec } = useSendAsync({
+  const { status, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
       console.log(`[ACTION] fulfilling request ${request.link.id.toString()}`);
       return opSender.cancelRequest(
-        BigInt(request.link.id),
+        decodeRequestIdString(request.link.id),
         2, // RequestStatus.Cancelled
         { nonce, chainGasConstants: account.chainGasConstants }
       );
@@ -128,10 +132,18 @@ function NotificationActions({
     accountTransform: (acc) => {
       return {
         ...acc,
-        requests: acc.requests.filter((a) => a.id !== id),
+        requests: acc.requests.filter(
+          (a) => a.request.link.id !== request.link.id
+        ),
       };
     },
   });
+
+  useEffect(() => {
+    if (status === "success") {
+      nav.navigate("Home");
+    }
+  }, [status]);
 
   const handleCancel = () => {
     Alert.alert(

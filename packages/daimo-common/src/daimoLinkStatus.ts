@@ -69,7 +69,6 @@ export type DaimoRequestV2Status = {
 };
 
 export type DaimoRequestV2Info = {
-  id: string;
   request: DaimoRequestV2Status;
   type: "recipient" | "fulfiller";
   fulfiller: EAccount;
