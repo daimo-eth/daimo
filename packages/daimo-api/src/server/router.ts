@@ -171,6 +171,16 @@ export function createRouter(
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
         return addr ? await nameReg.getEAccount(addr) : null;
       }),
+    lookupEthereumAccountByFid: publicProcedure
+      .input(z.object({ fid: z.number() }))
+      .query(async (opts) => {
+        const addr = profileCache.getAddress(opts.input.fid);
+        if (!addr) return null;
+
+        // registry may return info even without linked accounts, verify first
+        const eAccount = await nameReg.getEAccount(addr);
+        return eAccount?.linkedAccounts?.length ? eAccount : null;
+      }),
 
     lookupAddressKeys: publicProcedure
       .input(z.object({ addr: zAddress }))
