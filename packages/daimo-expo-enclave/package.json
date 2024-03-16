@@ -10,6 +10,7 @@
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "echo No tests yet",
+    "prepare": "expo-module build",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module"
   },

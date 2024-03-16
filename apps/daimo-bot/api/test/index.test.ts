@@ -5,7 +5,7 @@ import {
   PAYMENT_CONNECT_FC_MESSAGE,
   REQUEST_PAYMENT_MESSAGE,
 } from "../botResponses";
-import { DaimobotProcessor } from "../PaymentActionProcessor";
+import { DaimobotProcessor } from "../daimobotProcessor";
 import { trpcClient } from "../trpcClient";
 import { TRPCClient } from "../types";
 
@@ -72,7 +72,7 @@ describe("tryExtractCommand()", () => {
   });
 });
 
-describe("PaymentActionProcessor", () => {
+describe("daimobotProcessor", () => {
   let mockTrpcClient: TRPCClient;
   let mockNeynarClient: NeynarAPIClient;
   beforeEach(() => {

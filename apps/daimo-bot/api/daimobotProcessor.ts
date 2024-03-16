@@ -212,10 +212,7 @@ export class DaimobotProcessor {
   }
 
   private async publishCastReply(text: string, opts: SendCastOptions = {}) {
-    if (
-      process.env.NODE_ENV === "production" ||
-      process.env.NODE_ENV === "test"
-    ) {
+    if (["production", "test"].includes(process.env.BOT_ENV!)) {
       await this.neynarClient
         .publishCast(DAIMOBOT_SIGNER_UUID, text, {
           ...opts,

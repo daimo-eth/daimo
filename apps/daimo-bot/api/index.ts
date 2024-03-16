@@ -2,7 +2,7 @@ import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import express, { Request, Response } from "express";
 
-import { DaimobotProcessor } from "./PaymentActionProcessor";
+import { DaimobotProcessor } from "./daimobotProcessor";
 import { WebhookEvent } from "./types";
 
 dotenv.config();
