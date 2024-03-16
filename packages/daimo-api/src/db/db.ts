@@ -302,17 +302,6 @@ export class DB {
     };
   }
 
-  async saveInviteCode(code: InviteCodeRow) {
-    console.log(`[DB] inserting invite code`);
-    const client = await this.pool.connect();
-    await client.query(
-      `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
-       ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
-      [code.code, code.useCount, code.maxUses, code.zupassEmail] as any
-    );
-    client.release();
-  }
-
   async incrementInviteCodeUseCount(code: string) {
     console.log(`[DB] incrementing invite code use count`);
     const client = await this.pool.connect();
