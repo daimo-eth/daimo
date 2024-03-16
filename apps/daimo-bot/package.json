@@ -10,7 +10,7 @@
     "test": "tsc --noEmit && jest"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@daimo/api": "*",
     "@daimo/common": "*",
