@@ -18,6 +18,7 @@ import { createAccount, createAccountDesc } from "./createAccount";
 import { chainConfig } from "./env";
 import { getEacc, getEaccDesc } from "./getEacc";
 import { getFids, getFidsDesc } from "./getFids";
+import { importInvites, importInvitesDesc } from "./importInvites";
 import { pushNotify, pushNotifyDesc } from "./pushNotify";
 
 main()
@@ -34,6 +35,7 @@ async function main() {
     { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
     { name: "get-fids", desc: getFidsDesc(), fn: getFids },
     { name: "get-eaccount", desc: getEaccDesc(), fn: getEacc },
+    { name: "import-invites", desc: importInvitesDesc(), fn: importInvites },
   ];
 
   const cmdName = process.argv[2] || "default";
