@@ -1,5 +1,4 @@
-import { Address } from "abitype";
-import { Hex, getAddress } from "viem";
+import { Hex, getAddress, Address } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 

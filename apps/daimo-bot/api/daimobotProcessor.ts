@@ -7,7 +7,8 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
+
 import {
   CONNECT_FC_MESSAGE,
   DAIMOBOT_INPUT_COMMAND_NOT_VALID,
@@ -211,10 +212,7 @@ export class DaimobotProcessor {
   }
 
   private async publishCastReply(text: string, opts: SendCastOptions = {}) {
-    if (
-      process.env.NODE_ENV === "production" ||
-      process.env.NODE_ENV === "test"
-    ) {
+    if (["production", "test"].includes(process.env.BOT_ENV!)) {
       await this.neynarClient
         .publishCast(DAIMOBOT_SIGNER_UUID, text, {
           ...opts,
