@@ -9,6 +9,7 @@
     "build:exclude-bot": "turbo build --filter=!@daimo/bot",
     "build:exclude-web": "turbo build --filter=!@daimo/web",
     "build:api": "turbo run build --filter @daimo/api",
+    "build:bot": "turbo run build --filter @daimo/bot",
     "build:mobile": "turbo run build --filter @daimo/mobile",
     "test": "turbo test",
     "lint": "turbo lint && syncpack list-mismatches",
@@ -16,7 +17,6 @@
     "fix:deps": "syncpack fix-mismatches"
   },
   "dependencies": {
-    "@semaphore-protocol/identity": "^3.15.0",
     "eslint-config-universe": "^11.3.0",
     "metro-react-native-babel-preset": "^0.77.0",
     "prettier": "^2.8.8",

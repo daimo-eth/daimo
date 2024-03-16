@@ -7,7 +7,8 @@ import {
   generateRequestId,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
+
 import {
   CONNECT_FC_MESSAGE,
   DAIMOBOT_INPUT_COMMAND_NOT_VALID,

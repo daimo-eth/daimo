@@ -1,10 +1,11 @@
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { DaimobotProcessor } from "../PaymentActionProcessor";
+
 import {
   CONNECT_FC_MESSAGE,
   PAYMENT_CONNECT_FC_MESSAGE,
   REQUEST_PAYMENT_MESSAGE,
 } from "../botResponses";
+import { DaimobotProcessor } from "../PaymentActionProcessor";
 import { trpcClient } from "../trpcClient";
 import { TRPCClient } from "../types";
 

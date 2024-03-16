@@ -1,8 +1,9 @@
-import bodyParser from "body-parser";
-import dotenv from "dotenv";
-import express from "express";
-import { WebhookEvent } from "./types";
+import * as bodyParser from "body-parser";
+import * as dotenv from "dotenv";
+import express, { Request, Response } from "express";
+
 import { DaimobotProcessor } from "./PaymentActionProcessor";
+import { WebhookEvent } from "./types";
 
 dotenv.config();
 
@@ -10,9 +11,9 @@ const app = express();
 const port = 4000;
 
 app.use(bodyParser.json());
-app.get("/health", (req, res) => res.send("Up!"));
+app.get("/health", (req: Request, res: Response) => res.send("Up!"));
 
-app.post("/daimobot-hook", async (req, res) => {
+app.post("/daimobot-hook", async (req: Request, res: Response) => {
   const event: WebhookEvent = req.body;
   console.log(`Received event: ${JSON.stringify(event, null, 2)}`);
 

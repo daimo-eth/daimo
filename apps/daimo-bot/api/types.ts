@@ -1,4 +1,5 @@
 import { EmbeddedCast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+
 import { trpcClient } from "./trpcClient";
 
 export type TRPCClient = typeof trpcClient;

@@ -8,7 +8,6 @@
     "dev": "expo-module build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
-    "prepare": "expo-module prepare",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "open -a \"Xcode\" example/ios",
