@@ -131,7 +131,11 @@ export class DaimobotProcessor {
       senderEthAccount
     );
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(cleanedAmount, this.authorUsername),
+      REQUEST_PAYMENT_MESSAGE(
+        cleanedAmount,
+        this.authorUsername,
+        daimoShareUrl
+      ),
       {
         embeds: [{ url: daimoShareUrl }],
       }
@@ -170,7 +174,7 @@ export class DaimobotProcessor {
     );
 
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername),
+      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername, daimoShareUrl),
       {
         embeds: [{ url: daimoShareUrl }],
       }
