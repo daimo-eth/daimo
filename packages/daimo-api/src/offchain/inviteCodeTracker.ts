@@ -4,13 +4,14 @@ import {
   OpStatus,
   TransferOpEvent,
   dollarsToAmount,
+  formatDaimoLink,
   now,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { NameRegistry } from "../contract/nameRegistry";
-import { DB, InviteCodeRow } from "../db/db";
+import { DB, InsertInviteCodeArgs, InviteCodeRow } from "../db/db";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -150,5 +151,11 @@ export class InviteCodeTracker {
     return await retryBackoff(`getBestInviteCodeForSender`, () =>
       this.db.getBestInviteCodeForSender(sender)
     );
+  }
+
+  // Creates a new invite code, if it doesn't already exist. Returns the link.
+  async insertInviteCode(args: InsertInviteCodeArgs): Promise<string> {
+    await this.db.insertInviteCode(args);
+    return formatDaimoLink({ type: "invite", code: args.code });
   }
 }

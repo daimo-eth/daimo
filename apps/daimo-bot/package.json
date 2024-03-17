@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev api/index.ts",
     "start": "ts-node api/index.ts",
-    "test": "tsc --noEmit && jest",
+    "test": "tsc --noEmit && npx jest",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0"

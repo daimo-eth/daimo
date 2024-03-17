@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import "@rainbow-me/rainbowkit/styles.css";
 import { neueMontreal } from "../fonts/font";
 import "./globals.css";
+import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAbsoluteUrl("/")),
   title: "Daimo",
   description: "Stablecoin payments app",
   icons: {

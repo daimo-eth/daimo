@@ -91,7 +91,7 @@ export function SuggestedActionBox({
     });
   };
 
-  const onPressX = (e?: GestureResponderEvent) => {
+  const onPressX = (e: GestureResponderEvent) => {
     e?.stopPropagation();
     opacity.value = withTiming(0, {}, () => {
       runOnJS(onDismiss)();

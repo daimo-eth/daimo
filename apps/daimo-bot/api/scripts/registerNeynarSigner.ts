@@ -7,7 +7,7 @@ import { mnemonicToAccount } from "viem/accounts";
 // https://docs.neynar.com/docs/write-to-farcaster-with-neynar-managed-signers
 
 // Step 0: Initial setup
-// ! TODO: set up 1) FARCASTER_SEED_PHRASE, 2) FARCASTER_ID, 3) NEYNAR_API_KEY in .env
+// ! TODO: set up 1) FARCASTER_SEED_PHRASE, 2) FARCASTER_ID, 3) DAIMO_NEYNAR_KEY in .env
 // Get FARCASTER_SEED_PHRASE from Warpcast on mobile app: Settings -> Advanced -> Reveal recovery phrase
 // Get FARCASTER_ID from Warpcast on profile page -> About -> FID
 
@@ -23,7 +23,7 @@ const NEYNAR_BASE_URL = "https://api.neynar.com/v2/farcaster";
 
 const AUTH_HEADERS = {
   headers: {
-    api_key: process.env.NEYNAR_API_KEY,
+    api_key: process.env.DAIMO_NEYNAR_KEY,
   },
 } as const;
 

@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { Address } from "viem";
 
-import { Spacer } from "../../components/layout";
+import { Spacer } from "../../components/Spacer";
 import {
   TextBold,
   TextError,

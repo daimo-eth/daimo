@@ -22,8 +22,8 @@ import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
 dotenv.config();
 
-assert(!!process.env.NEYNAR_API_KEY, "NEYNAR_API_KEY is not defined");
-const NEYNAR_CLIENT = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
+assert(!!process.env.DAIMO_NEYNAR_KEY, "DAIMO_NEYNAR_KEY is not defined");
+const NEYNAR_CLIENT = new NeynarAPIClient(process.env.DAIMO_NEYNAR_KEY);
 
 assert(
   !!process.env.DAIMOBOT_SIGNER_UUID,
