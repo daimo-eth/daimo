@@ -5,6 +5,7 @@ import {
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
+  getEAccountStr,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import * as dotenv from "dotenv";
@@ -216,7 +217,7 @@ export class DaimobotProcessor {
     const daimoShareUrl = formatDaimoLink({
       type: "requestv2",
       id: idString,
-      recipient: requestRecipient.name ?? requestRecipient.ensName ?? recipient,
+      recipient: getEAccountStr(requestRecipient),
       dollars: `${amount}`,
     });
     console.log(`[DAIMOBOT REQUEST] url ${daimoShareUrl}`);
