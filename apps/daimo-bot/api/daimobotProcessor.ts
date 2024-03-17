@@ -30,6 +30,9 @@ assert(
 );
 const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
 
+assert(!!process.env.FARCASTER_ID, "FARCASTER_ID is not defined");
+const FARCASTER_ID = process.env.FARCASTER_ID;
+
 export class DaimobotProcessor {
   //* Responds to Farcaster casts as @daimobot
   //* Makes it easy for people on Farcaster to pay each other onchain
@@ -75,6 +78,11 @@ export class DaimobotProcessor {
     //     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
     // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
     //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
+
+    if (this.senderFid === Number(FARCASTER_ID)) {
+      console.log("Sender is self, skipping.");
+      return;
+    }
 
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
