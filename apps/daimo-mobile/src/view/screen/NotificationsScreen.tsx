@@ -28,15 +28,12 @@ export function NotificationsScreen() {
 function NotificationsScreenInner({ account }: { account: Account }) {
   const nav = useNav();
 
-  const goBack = () => {
-    nav.goBack();
-  };
-
+  // TODO: Filter out handled requests.
   const requestsList = account.requests.slice();
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Notifications" onBack={goBack} />
+      <ScreenHeader title="Notifications" onBack={nav.goBack} />
       <ScrollView>
         {requestsList.length === 0 ? (
           <View>
