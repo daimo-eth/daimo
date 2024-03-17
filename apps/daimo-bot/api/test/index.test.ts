@@ -40,6 +40,24 @@ describe("tryExtractCommand()", () => {
     });
   });
 
+  it("extracts proper request command for decimals", () => {
+    const amount = 0.5;
+    const eventWithDecimal = {
+      ...mockEvent,
+      data: {
+        ...mockEvent.data,
+        text: `@daimobot request $${amount}`,
+      },
+    };
+    const processor = new DaimobotProcessor(eventWithDecimal);
+    const result = processor._tryExtractCommand();
+
+    expect(result).toEqual({
+      action: "request",
+      cleanedAmount: amount,
+    });
+  });
+
   it("extracts proper pay command", () => {
     const mockEventPayCommand = {
       data: {

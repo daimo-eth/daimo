@@ -187,7 +187,7 @@ export class DaimobotProcessor {
     cleanedAmount: number;
   } | null {
     const match = this.text?.match(
-      /@daimobot (request|pay) \$([0-9]+(?:\.[0-9]{1,2})?)/
+      /@daimobot (request|pay) \$([0-9]*\.?[0-9]{1,2})/
     );
     console.log(`[DAIMOBOT] checking: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
