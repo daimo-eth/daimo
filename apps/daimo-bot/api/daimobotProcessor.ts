@@ -216,7 +216,7 @@ export class DaimobotProcessor {
     const daimoShareUrl = formatDaimoLink({
       type: "requestv2",
       id: idString,
-      recipient,
+      recipient: requestRecipient.name ?? requestRecipient.ensName ?? recipient,
       dollars: `${amount}`,
     });
     console.log(`[DAIMOBOT REQUEST] url ${daimoShareUrl}`);
