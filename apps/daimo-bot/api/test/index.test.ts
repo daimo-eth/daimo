@@ -137,7 +137,9 @@ describe("daimobotProcessor", () => {
 
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      REQUEST_PAYMENT_MESSAGE(amount, senderUsername, expect.any(String)),
+      expect.stringContaining(
+        REQUEST_PAYMENT_MESSAGE(amount, senderUsername, "")
+      ),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
