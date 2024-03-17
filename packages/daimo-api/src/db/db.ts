@@ -172,7 +172,7 @@ export class DB {
        ON CONFLICT (tag) DO UPDATE SET link = $2`,
       [tag, link]
     );
-    if (res.rowCount > 0) {
+    if (Number(res.rowCount) > 0) {
       await client.query(
         `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
         [tag, link]
