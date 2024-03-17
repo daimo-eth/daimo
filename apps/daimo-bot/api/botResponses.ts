@@ -5,7 +5,9 @@ export const REQUEST_PAYMENT_MESSAGE = (
   recipientUsername: string,
   requestUrl: string
 ) => {
-  return `Here's a request for $${cleanedAmount} to @${recipientUsername}! \n ${requestUrl}`;
+  return `Here's a request for $${cleanedAmount.toFixed(
+    2
+  )} to @${recipientUsername}! \n ${requestUrl}`;
 };
 
 export const PAYMENT_CONNECT_FC_MESSAGE = (recipientUsername: string) => {
