@@ -40,6 +40,24 @@ describe("tryExtractCommand()", () => {
     });
   });
 
+  it("extracts proper request command for decimals", () => {
+    const amount = 0.5;
+    const eventWithDecimal = {
+      ...mockEvent,
+      data: {
+        ...mockEvent.data,
+        text: `@daimobot request $${amount}`,
+      },
+    };
+    const processor = new DaimobotProcessor(eventWithDecimal);
+    const result = processor._tryExtractCommand();
+
+    expect(result).toEqual({
+      action: "request",
+      cleanedAmount: amount,
+    });
+  });
+
   it("extracts proper pay command", () => {
     const mockEventPayCommand = {
       data: {
@@ -137,7 +155,9 @@ describe("daimobotProcessor", () => {
 
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      REQUEST_PAYMENT_MESSAGE(amount, senderUsername),
+      expect.stringContaining(
+        REQUEST_PAYMENT_MESSAGE(amount, senderUsername, "")
+      ),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
@@ -220,7 +240,9 @@ describe("daimobotProcessor", () => {
 
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      REQUEST_PAYMENT_MESSAGE(amount, bob.username),
+      expect.stringContaining(
+        REQUEST_PAYMENT_MESSAGE(amount, bob.username, "")
+      ),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);

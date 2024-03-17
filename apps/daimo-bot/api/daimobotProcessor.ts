@@ -5,6 +5,7 @@ import {
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
+  getEAccountStr,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import * as dotenv from "dotenv";
@@ -29,6 +30,9 @@ assert(
   "DAIMOBOT_SIGNER_UUID is not defined"
 );
 const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
+
+assert(!!process.env.FARCASTER_ID, "FARCASTER_ID is not defined");
+const FARCASTER_ID = process.env.FARCASTER_ID;
 
 export class DaimobotProcessor {
   //* Responds to Farcaster casts as @daimobot
@@ -75,6 +79,11 @@ export class DaimobotProcessor {
     //     Action 3:  Daimobot responds with a link to register with Farcaster. Bob registers, then Daimobot responds with a link to request $
     // Case 4: Alice responds to Bobs post to pay him, Bob has FC linked ✅
     //     Action 4: Daimobot responds with link that requests $ from anyone to Bob's Daimo address
+
+    if (this.senderFid === Number(FARCASTER_ID)) {
+      console.log("Sender is self, skipping.");
+      return;
+    }
 
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
@@ -123,7 +132,11 @@ export class DaimobotProcessor {
       senderEthAccount
     );
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(cleanedAmount, this.authorUsername),
+      REQUEST_PAYMENT_MESSAGE(
+        cleanedAmount,
+        this.authorUsername,
+        daimoShareUrl
+      ),
       {
         embeds: [{ url: daimoShareUrl }],
       }
@@ -162,7 +175,7 @@ export class DaimobotProcessor {
     );
 
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername),
+      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername, daimoShareUrl),
       {
         embeds: [{ url: daimoShareUrl }],
       }
@@ -174,7 +187,7 @@ export class DaimobotProcessor {
     cleanedAmount: number;
   } | null {
     const match = this.text?.match(
-      /@daimobot (request|pay) \$([0-9]+(?:\.[0-9]{1,2})?)/
+      /@daimobot (request|pay) \$([0-9]*\.?[0-9]{1,2})/
     );
     console.log(`[DAIMOBOT] checking: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
@@ -204,7 +217,7 @@ export class DaimobotProcessor {
     const daimoShareUrl = formatDaimoLink({
       type: "requestv2",
       id: idString,
-      recipient,
+      recipient: getEAccountStr(requestRecipient),
       dollars: `${amount}`,
     });
     console.log(`[DAIMOBOT REQUEST] url ${daimoShareUrl}`);

@@ -2,9 +2,12 @@ export const CONNECT_FC_MESSAGE =
   "Connect your Farcaster on Daimo to continue!";
 export const REQUEST_PAYMENT_MESSAGE = (
   cleanedAmount: number,
-  recipientUsername: string
+  recipientUsername: string,
+  requestUrl: string
 ) => {
-  return `Here's a request for $${cleanedAmount} to @${recipientUsername}!`;
+  return `Here's a request for $${cleanedAmount.toFixed(
+    2
+  )} to @${recipientUsername}! \n ${requestUrl}`;
 };
 
 export const PAYMENT_CONNECT_FC_MESSAGE = (recipientUsername: string) => {
