@@ -22,7 +22,7 @@
     "prettier": "^2.8.8",
     "syncpack": "^10.6.1",
     "turbo": "^1.10.15",
-    "typescript": "5.2.2"
+    "typescript": "^5.3.0"
   },
   "workspaces": [
     "packages/*",

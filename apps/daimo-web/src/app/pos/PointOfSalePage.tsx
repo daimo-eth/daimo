@@ -126,14 +126,14 @@ function NewOrderForm({
       <button
         className="bg-grayLight rounded-lg p-4 flex flex-col items-center disabled:opacity-25"
         onClick={placeOrder}
-        disabled={mut.isLoading || mut.isSuccess || order.length === 0}
+        disabled={mut.isPending || mut.isSuccess || order.length === 0}
       >
         <TextH1>Place Order</TextH1>
       </button>
       <Spacer h={8} />
       <center>
         {mut.isIdle && <TextBold>&nbsp;</TextBold>}
-        {mut.isLoading && <TextBold>...</TextBold>}
+        {mut.isPending && <TextBold>...</TextBold>}
         {mut.isSuccess && <TextBold>✅ ordered</TextBold>}
         {mut.isError && <TextBold>❌ {mut.error.message}</TextBold>}
       </center>

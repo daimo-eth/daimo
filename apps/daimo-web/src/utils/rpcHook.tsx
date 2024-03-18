@@ -11,12 +11,7 @@ import { apiUrlWithChain } from "./rpc";
 function createRpcHook() {
   const reactQueryContext = createContext<QueryClient | undefined>(undefined);
   return {
-    trpc: createTRPCReact<AppRouter>({
-      //@ts-ignore
-      context: createContext(null),
-      //@ts-ignore
-      reactQueryContext,
-    }),
+    trpc: createTRPCReact<AppRouter>({}),
     reactQueryContext,
     queryClient: new QueryClient({
       defaultOptions: {
@@ -38,11 +33,7 @@ const rpcClient = rpcHook.trpc.createClient({
 export function RpcHookProvider({ children }: { children: ReactNode }) {
   return (
     <rpcHook.trpc.Provider queryClient={rpcHook.queryClient} client={rpcClient}>
-      <QueryClientProvider
-        client={rpcHook.queryClient}
-        //@ts-ignore
-        context={rpcHook.reactQueryContext}
-      >
+      <QueryClientProvider client={rpcHook.queryClient}>
         {children}
       </QueryClientProvider>
     </rpcHook.trpc.Provider>
