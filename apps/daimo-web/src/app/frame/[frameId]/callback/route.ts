@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import { getFrameLinkServiceFromEnv } from "./frameLinkService";
+import { getFrameLinkServiceFromEnv } from "../../frameLinkService";
 
 export async function POST(
   req: NextRequest,

@@ -50,7 +50,8 @@ export default function Page({ params }: LinkProps) {
       </TextLight>
       <div className="h-4" />
       <pre className="font-mono text-grayMid">
-        {JSON.stringify(frame, null, 2)}
+        {frame == null && `Invite Frame ${frameId} not found`}
+        {frame && JSON.stringify(frame, null, 2)}
       </pre>
     </div>
   );

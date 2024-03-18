@@ -1,13 +1,18 @@
-import { assertNotNull } from "@daimo/common";
+import {
+  assertNotNull,
+  EAccount,
+  getAccountName,
+  parseDaimoLink,
+} from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
 
 import { assert, FarcasterCacheClient } from "./farcasterClient";
-import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
-import { rpc } from "../../../../utils/rpc";
-import { InviteFrameLink, inviteFrameLinks } from "../../frameLink";
-import { FrameRequest, getFrameHtmlResponse } from "../../frameUtils";
+import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
+import { FrameRequest, getFrameHtmlResponse } from "./frameUtils";
+import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
+import { rpc } from "../../utils/rpc";
 
 let envFrameLinkService: FrameLinkService | null = null;
 
@@ -44,34 +49,70 @@ export class FrameLinkService {
     if (!valid) throw new Error("Invalid frame request");
 
     // The frame being clicked on
-    // TODO: load from  URL
     const frame = inviteFrameLinks.find((l) => l.id === frameId);
-    if (frame == null)
+    if (frame == null) {
       throw new Error(`Unknown frame: ${req.nextUrl.pathname}`);
+    }
 
     // The user who clicked
     const { fid } = action.interactor;
     const user = await fcClient.getUser(fid);
 
     // Should we give them a Daimo invite?
-    const allowed = await this.auth(user, frame);
+    const [allowed, authMsg] = await this.auth(user, frame);
     const allowStr = allowed ? "ALLOWED" : "disallowed";
     console.log(
-      `[FRAME] frame click from ${fid} @${user.username} ${allowStr}`
+      `[FRAME] frame click from ${fid} @${user.username} ${allowStr} ${authMsg}`
     );
 
     // Create a single-use invite link specific to this user (fid)
     const inviteUrl = allowed && (await this.createInviteLink(fid, frame));
 
     // Success = user allowed, invite link found or created
-    if (inviteUrl) return this.successResponse(inviteUrl);
-    return this.cantMilkResponse(frameId);
+    if (inviteUrl) return this.successResponse(frame, inviteUrl, authMsg);
+    return this.failResponse(frame, authMsg);
   }
 
-  private async auth(user: User, frame: InviteFrameLink): Promise<boolean> {
-    if (frame.allowFidsBelow && user.fid < frame.allowFidsBelow) return true;
-    // TODO: check if frame owner follows user
-    return false;
+  // Check whether this Farcaster user gets a Daimo invite from this frame
+  private async auth(
+    user: User,
+    frame: InviteFrameLink
+  ): Promise<[boolean, string]> {
+    const { auth, owner } = frame;
+    if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
+      return [false, "Sorry, fid too high"];
+    } else if (
+      auth.ownerMustFollow &&
+      !(await this.isFollowedBy(user, owner))
+    ) {
+      return [false, `${getAccountName(owner)} doesn't follow you`];
+    }
+    for (const whitelist of auth.fidWhitelists || []) {
+      if (whitelist.fids.includes(user.fid)) {
+        return [true, whitelist.greeting];
+      }
+    }
+    if ((auth.fidWhitelists || []).length > 0) {
+      return [false, "Sorry, not on the list"];
+    }
+    return [true, frame.appearance.buttonSuccess];
+  }
+
+  // Check if the user is followed by the link owner
+  private async isFollowedBy(user: User, owner: EAccount): Promise<boolean> {
+    const { fid, username: ownerUsername } = assertNotNull(
+      owner.linkedAccounts?.[0],
+      `Invite Frame owner ${owner.name} doesn't have a linked FC`
+    );
+    console.log(
+      `[FRAME] checking if @${ownerUsername} follows @${user.username}`
+    );
+
+    const resp = await this.neynarClient.fetchRelevantFollowers(fid, user.fid);
+    const follower = resp.all_relevant_followers_dehydrated.find(
+      (f) => f.user?.fid === user.fid
+    );
+    return follower != null;
   }
 
   // Hits Daimo API to create an invite link for a given key
@@ -95,40 +136,40 @@ export class FrameLinkService {
     return link;
   }
 
-  private successResponse(payLink: string): NextResponse {
+  private successResponse(
+    frame: InviteFrameLink,
+    inviteLink: string,
+    authMsg: string
+  ) {
+    const link = parseDaimoLink(inviteLink);
+    assert(link != null && link.type === "invite");
+    const redirURL = getAbsoluteUrl(`/frame/${frame.id}/redirect/${link.code}`);
+    console.log(`[FRAME] success, sending invite code ${redirURL}`);
+
     return new NextResponse(
       getFrameHtmlResponse({
         buttons: [
           {
-            label: `✳️ Accept Invite + USDC`,
+            label: `✳️ ${authMsg}`,
             action: "post_redirect",
           },
         ],
-        image: getAbsoluteUrl(`/assets/frame/daimoo-success.png`),
-        post_url: payLink,
+        image: getAbsoluteUrl(frame.appearance.imgSuccess),
+        post_url: redirURL,
       })
     );
   }
 
-  private cantMilkResponse(frameId: number): NextResponse {
-    const msgs = [
-      "Moo-ve along, butter luck next time.",
-      "You must be udderly disappointed.",
-      "You're really milking my patience here.",
-      "Moo-ve along, human.",
-      "Another click, another empty pail.",
-    ];
-    const msg = msgs[Math.floor(Math.random() * msgs.length)];
-
+  private failResponse(frame: InviteFrameLink, authMsg: string): NextResponse {
     return new NextResponse(
       getFrameHtmlResponse({
         buttons: [
           {
-            label: `🐄 ` + msg,
+            label: `❌ ${authMsg}`,
           },
         ],
-        image: getAbsoluteUrl(`/assets/frame/daimoo-fail.png`),
-        post_url: getAbsoluteUrl(`/frame/${frameId}/callback`),
+        image: getAbsoluteUrl(frame.appearance.imgFail),
+        post_url: getAbsoluteUrl(`/frame/${frame.id}/callback`),
       })
     );
   }
