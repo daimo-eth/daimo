@@ -48,6 +48,7 @@ import { Watcher } from "../shovel/watcher";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
+console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(
   watcher: Watcher,
@@ -463,9 +464,9 @@ export function createRouter(
 }
 
 function authorize(apiKey: string) {
-  if (!apiKeys.has(apiKey)) return;
+  if (apiKeys.has(apiKey)) return;
   throw new TRPCError({
     code: "UNAUTHORIZED",
-    message: "Invalid API key: " + apiKey,
+    message: `Invalid API key '${apiKey}'`,
   });
 }

@@ -1,4 +1,6 @@
-import { appStoreLinks, daimoDomainAddress } from "@daimo/common";
+import { appStoreLinks } from "@daimo/common";
+
+import { getAbsoluteUrl } from "./getAbsoluteUrl";
 
 export type PlatformType = "ios" | "android" | "other";
 
@@ -30,6 +32,6 @@ export const downloadMetadata = {
   },
   other: {
     title: "Download on App Store or Google Play",
-    url: `${daimoDomainAddress}/download/other`,
+    url: getAbsoluteUrl(`/download/other`),
   },
 };
