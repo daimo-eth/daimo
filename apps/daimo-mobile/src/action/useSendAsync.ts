@@ -61,7 +61,7 @@ export function useSendAsync({
   customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
   pendingOp?: OpEvent;
   /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
+  accountTransform?: (account: Account, pendingOp?: OpEvent) => Account;
   passkeyAccount?: Account;
 }): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
@@ -108,6 +108,9 @@ export function useSendAsync({
       });
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
+    } else if (accountTransform) {
+      getAccountManager().transform(accountTransform);
+      console.log(`[SEND] updated account with provided transform`);
     }
   }, [account?.enclaveKeyName, keySlot, sendFn]);
 

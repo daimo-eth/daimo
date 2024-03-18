@@ -119,7 +119,7 @@ function NotificationActions({
   const { status, exec } = useSendAsync({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
-      console.log(`[ACTION] fulfilling request ${request.link.id.toString()}`);
+      console.log(`[ACTION] cancelling request ${request.link.id.toString()}`);
       return opSender.cancelRequest(
         decodeRequestIdString(request.link.id),
         2, // RequestStatus.Cancelled
