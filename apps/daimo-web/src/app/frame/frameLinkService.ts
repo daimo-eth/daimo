@@ -5,7 +5,10 @@ import {
   parseDaimoLink,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
-import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import {
+  User,
+  UserViewerContext,
+} from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
 
 import { assert, FarcasterCacheClient } from "./farcasterClient";
@@ -36,13 +39,20 @@ export class FrameLinkService {
     private fcClient: FarcasterCacheClient
   ) {}
 
+  // Load frame by ID
+  async loadFrame(frameId: number): Promise<InviteFrameLink | undefined> {
+    const frame = inviteFrameLinks.find((l) => l.id === frameId);
+    return frame;
+  }
+
   // Handle a frame button click
   async respond(req: NextRequest, frameId: number): Promise<NextResponse> {
     const { neynarClient, fcClient } = this;
 
     const body: FrameRequest = await req.json();
     const { valid, action } = await neynarClient.validateFrameAction(
-      body.trustedData.messageBytes
+      body.trustedData.messageBytes,
+      { followContext: true }
     );
     console.log("Frame request. valid? " + valid);
 
@@ -57,9 +67,10 @@ export class FrameLinkService {
     // The user who clicked
     const { fid } = action.interactor;
     const user = await fcClient.getUser(fid);
+    const viewerContext = assertNotNull(action.interactor.viewer_context);
 
     // Should we give them a Daimo invite?
-    const [allowed, authMsg] = await this.auth(user, frame);
+    const [allowed, authMsg] = await this.auth(user, frame, viewerContext);
     const allowStr = allowed ? "ALLOWED" : "disallowed";
     console.log(
       `[FRAME] frame click from ${fid} @${user.username} ${allowStr} ${authMsg}`
@@ -76,15 +87,15 @@ export class FrameLinkService {
   // Check whether this Farcaster user gets a Daimo invite from this frame
   private async auth(
     user: User,
-    frame: InviteFrameLink
+    frame: InviteFrameLink,
+    viewerContext: UserViewerContext
   ): Promise<[boolean, string]> {
     const { auth, owner } = frame;
     if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
       return [false, "Sorry, fid too high"];
-    } else if (
-      auth.ownerMustFollow &&
-      !(await this.isFollowedBy(user, owner))
-    ) {
+    } else if (auth.claimerMustFollowOwner && !viewerContext.following) {
+      return [false, `Gotta follow ${getAccountName(frame.owner)} first`];
+    } else if (auth.ownerMustFollow && !viewerContext.followed_by) {
       return [false, `${getAccountName(owner)} doesn't follow you`];
     }
     for (const whitelist of auth.fidWhitelists || []) {
@@ -120,7 +131,11 @@ export class FrameLinkService {
     fid: number,
     frame: InviteFrameLink
   ): Promise<string> {
-    const code = `fc-${fid}`;
+    const rand = Buffer.from(
+      crypto.getRandomValues(new Uint8Array(6))
+    ).toString("hex");
+
+    const code = `fc-${frame.id}-${fid}-${rand}`;
     const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
     console.log(`[FRAME] creating invite code ${code}`);

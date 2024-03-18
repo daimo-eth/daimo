@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { TextH1, TextLight } from "../../../components/typography";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { inviteFrameLinks } from "../frameLink";
+import { getFrameLinkServiceFromEnv } from "../frameLinkService";
 import { getFrameMetadata } from "../frameUtils";
 
 interface LinkProps {
@@ -10,23 +12,31 @@ interface LinkProps {
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
+  // Load the frame we're showing
+  const service = getFrameLinkServiceFromEnv();
+  const frame = await service.loadFrame(Number(props.params.frameId));
+  if (frame == null) {
+    throw notFound();
+  }
+
+  // Show image, button text customized to this invite frame
   const frameMetadata = getFrameMetadata({
     buttons: [
       {
-        label: "🍼 Milk",
+        label: frame.appearance.buttonInit,
       },
     ],
-    image: getAbsoluteUrl(`/assets/frame/daimoo-start.png`),
+    image: getAbsoluteUrl(frame.appearance.imgInit),
     post_url: getAbsoluteUrl(`/frame/${props.params.frameId}/callback`),
   });
 
   const metadata: Metadata = {
-    title: "Daimoo",
-    description: "Got USDC?",
+    title: "Daimo Invite Frame",
+    description: "Fast payments, self custody, open source, one-tap invites.",
     openGraph: {
-      title: "Daimoo",
-      description: "Got USDC?",
-      images: [getAbsoluteUrl(`/assets/frame/cow-emoji.png`)],
+      title: "Daimo Invite Frame",
+      description: "Fast payments, self custody, one-tap invites.",
+      images: [getAbsoluteUrl(frame.appearance.imgInit)],
     },
     other: {
       ...frameMetadata,
@@ -41,11 +51,11 @@ export default function Page({ params }: LinkProps) {
   const frame = inviteFrameLinks.find((l) => l.id === frameId);
   return (
     <div className="p-4 max-w-md">
-      <TextH1>🐮 Daimoo</TextH1>
+      <TextH1>✳️ Daimo Invite Frame</TextH1>
       <div className="h-4" />
       <TextLight>
         This is a Farcaster frame that invites people to Daimo. Want to post
-        your own? Email us at{" "}
+        your own, customized invite frame? Email us at{" "}
         <a href="mailto:founders@daimo.com">founders@daimo.com</a>.
       </TextLight>
       <div className="h-4" />
