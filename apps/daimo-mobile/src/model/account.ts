@@ -100,6 +100,7 @@ export type Account = {
 
   /** Request data for notifications */
   requests: DaimoRequestV2Info[];
+  declinedRequestIDs: string[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -328,6 +329,7 @@ interface AccountV14 extends StoredModel {
   isOnboarded?: boolean;
 
   requests: DaimoRequestV2Info[];
+  declinedRequestIDs: string[];
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -378,6 +380,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -416,6 +419,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -454,6 +458,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -493,6 +498,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -531,6 +537,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -570,6 +577,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       isOnboarded: a.isOnboarded ?? true,
 
       requests: [],
+      declinedRequestIDs: [],
     };
   }
 
@@ -610,6 +618,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     isOnboarded: a.isOnboarded ?? true,
 
     requests: a.requests,
+    declinedRequestIDs: a.declinedRequestIDs,
   };
 }
 
@@ -652,6 +661,7 @@ export function serializeAccount(account: Account | null): string {
     isOnboarded: account.isOnboarded,
 
     requests: account.requests,
+    declinedRequestIDs: account.declinedRequestIDs,
   };
 
   return JSON.stringify(model);
@@ -709,5 +719,6 @@ export function createEmptyAccount(
     isOnboarded: false,
 
     requests: [],
+    declinedRequestIDs: [],
   };
 }

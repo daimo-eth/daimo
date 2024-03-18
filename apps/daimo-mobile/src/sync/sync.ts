@@ -267,7 +267,9 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus || null,
     invitees: result.invitees || [],
-    requests: result.requests,
+    requests: result.requests.filter(
+      ({ request }) => !account.declinedRequestIDs.includes(request.link.id)
+    ),
   };
 
   console.log(

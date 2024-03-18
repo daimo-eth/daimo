@@ -4,13 +4,16 @@ import {
   now,
   timeAgo,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useEffect, useMemo } from "react";
 import { Alert, ScrollView, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { useNav } from "../../common/nav";
+import { getAccountManager } from "../../logic/accountManager";
 import { EAccountContact } from "../../logic/daimoContacts";
+import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { ButtonSmall } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
@@ -108,6 +111,7 @@ function NotificationActions({
   account,
 }: DaimoRequestV2Info & { account: Account }) {
   const nav = useNav();
+  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
 
   // Generate nonce
   const nonce = useMemo(
@@ -145,14 +149,37 @@ function NotificationActions({
   const handleCancel = () => {
     Alert.alert(
       "Confirm cancel",
-      "Proceed with cancelling request?",
+      "Proceed with request cancellation?",
       [{ text: "Yes", onPress: exec }, { text: "No" }],
       { cancelable: true }
     );
   };
 
+  const onDeclinePress = () => {
+    Alert.alert(
+      "Confirm decline",
+      "Proceed with declining request?",
+      [{ text: "Yes", onPress: handleDecline }, { text: "No" }],
+      { cancelable: true }
+    );
+  };
+
   const handleDecline = () => {
-    // Soft-delete request from requests list.
+    getAccountManager().transform((acc) => ({
+      ...acc,
+      declinedRequestIDs: [...acc.declinedRequestIDs, request.link.id],
+      requests: acc.requests.filter(
+        (a) => a.request.link.id !== request.link.id
+      ),
+    }));
+
+    rpcFunc.logAction.mutate({
+      action: {
+        accountName: account.name,
+        name: "request-decline",
+        keys: { "request.id": request.link.id },
+      },
+    });
   };
 
   const handleSend = () => {
@@ -173,7 +200,7 @@ function NotificationActions({
   return (
     <View style={{ flexDirection: "row" }}>
       <View style={{ flex: 1 }}>
-        <ButtonSmall onPress={handleDecline} type="subtle" title="Decline" />
+        <ButtonSmall onPress={onDeclinePress} type="subtle" title="Decline" />
       </View>
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
