@@ -12,6 +12,7 @@ import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
+import { useAccount } from "../../logic/accountManager";
 
 const animationConfig = { duration: 150 };
 
@@ -68,11 +69,6 @@ export function SearchHeader({
     };
   });
 
-  // const goToAccount = useCallback(
-  //   () => nav.navigate("SettingsTab", { screen: "Settings" }),
-  //   [nav]
-  // );
-
   // Left: QR code
   const goToQR = useCallback(
     () =>
@@ -85,6 +81,9 @@ export function SearchHeader({
     () => nav.navigate("HomeTab", { screen: "Notifications" }),
     []
   );
+
+  const [account] = useAccount();
+  if (account == null) return null;
 
   return (
     <View style={styles.header}>
@@ -114,9 +113,18 @@ export function SearchHeader({
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.qrCircle}>
             <Octicons name="bell" size={24} color={color.primary} />
+            {account.requests.length > 0 ? <NotificationBadge /> : null}
           </View>
         </ButtonCircle>
       </Animated.View>
+    </View>
+  );
+}
+
+function NotificationBadge() {
+  return (
+    <View style={styles.badgeBorder}>
+      <View style={styles.badge} />
     </View>
   );
 }
@@ -135,6 +143,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.grayLight,
     display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badge: {
+    backgroundColor: "red",
+    borderRadius: 4,
+    height: 6,
+    width: 6,
+  },
+  badgeBorder: {
+    backgroundColor: "white",
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    position: "absolute",
+    top: 10,
+    right: 14,
+    zIndex: 10,
     justifyContent: "center",
     alignItems: "center",
   },
