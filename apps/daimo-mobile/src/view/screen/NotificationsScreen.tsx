@@ -7,7 +7,7 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useEffect, useMemo } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
 import { useNav } from "../../common/nav";
@@ -50,7 +50,7 @@ function NotificationsScreenInner({ account }: { account: Account }) {
               style={[
                 ss.container.marginHNeg16,
                 ss.container.padH16,
-                { height: 0.5, backgroundColor: "#D6D6D6" },
+                styles.separator,
               ]}
             />
             {requestsList.map((request) => (
@@ -76,19 +76,7 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
   }, [type, request, fulfiller]);
 
   return (
-    <View
-      style={[
-        ss.container.marginHNeg16,
-        ss.container.padH16,
-        {
-          paddingTop: 16,
-          paddingBottom: 28,
-          flexDirection: "row",
-          borderBottomWidth: 0.5,
-          borderBottomColor: "#D6D6D6",
-        },
-      ]}
-    >
+    <View style={[ss.container.marginHNeg16, ss.container.padH16, styles.row]}>
       <ContactBubble contact={contact} size={36} />
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
@@ -123,11 +111,10 @@ function NotificationActions({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
       console.log(`[ACTION] cancelling request ${request.link.id.toString()}`);
-      return opSender.cancelRequest(
-        decodeRequestIdString(request.link.id),
-        2, // RequestStatus.Cancelled
-        { nonce, chainGasConstants: account.chainGasConstants }
-      );
+      return opSender.cancelRequest(decodeRequestIdString(request.link.id), {
+        nonce,
+        chainGasConstants: account.chainGasConstants,
+      });
     },
     accountTransform: (acc) => {
       return {
@@ -228,3 +215,17 @@ function NotificationMessage(info: DaimoRequestV2Info) {
     </TextBody>
   );
 }
+
+const styles = StyleSheet.create({
+  separator: {
+    height: 0.5,
+    backgroundColor: "#D6D6D6",
+  },
+  row: {
+    paddingTop: 16,
+    paddingBottom: 28,
+    flexDirection: "row",
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#D6D6D6",
+  },
+});

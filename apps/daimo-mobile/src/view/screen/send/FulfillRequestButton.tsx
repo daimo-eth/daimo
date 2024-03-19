@@ -33,7 +33,6 @@ export function FulfillRequestButton({
   account: Account;
   requestStatus: DaimoRequestV2Status;
 }) {
-  // const nav = useNav();
   const requestIdString = requestStatus.link.id;
   const dollars = Number(requestStatus.link.dollars);
 

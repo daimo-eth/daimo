@@ -13,6 +13,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  StyleSheet,
 } from "react-native";
 
 import { useActStatus } from "../../../action/actStatus";
@@ -137,16 +138,15 @@ function RequestScreenInnerV2({
               </TextCenter>
             </>
           ) : (
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
+            <View style={styles.buttonGroup}>
+              <View style={styles.buttonGrow}>
                 <ButtonBig
                   type="subtle"
                   title="Cancel"
                   onPress={goBack || goHome}
                 />
               </View>
-              <Spacer w={12} />
-              <View style={{ flex: 1 }}>
+              <View style={styles.buttonGrow}>
                 <ButtonBig
                   type={as.status === "success" ? "success" : "primary"}
                   disabled={dollars <= 0 || as.status !== "idle"}
@@ -161,3 +161,13 @@ function RequestScreenInnerV2({
     </TouchableWithoutFeedback>
   );
 }
+
+const styles = StyleSheet.create({
+  buttonGroup: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  buttonGrow: {
+    flex: 1,
+  },
+});

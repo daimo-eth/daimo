@@ -3,9 +3,9 @@ import { useCallback, useRef, useState } from "react";
 import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
-import { SearchTab } from "./SearchTab";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { ScreenHeader } from "../../shared/ScreenHeader";
+import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 
@@ -36,7 +36,10 @@ export function SendNavScreen({ route }: Props) {
         <ScreenHeader title="Send" onBack={goBack} />
         <Spacer h={8} />
         <View style={{ flex: 1, flexDirection: "column" }}>
-          <SearchTab {...{ prefix, setPrefix, textInputRef, autoFocus }} />
+          <SearchScreen
+            {...{ prefix, setPrefix, textInputRef, autoFocus }}
+            mode="send"
+          />
         </View>
       </View>
     </TouchableWithoutFeedback>
