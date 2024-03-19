@@ -236,22 +236,20 @@ export class RequestIndexer {
   // Fetch requests made/received by a user
   async getUserRequests(addr: Address) {
     const reqs = [];
-    const idSet = this.requestsByAddress.get(addr);
+    const ids = this.requestsByAddress.get(addr);
 
-    if (idSet) {
-      const ids = Array.from(idSet);
-
-      for (const requestId of ids) {
-        const reqObj = this.requests.get(requestId);
+    if (ids) {
+      for (const requestId of Array.from(ids)) {
+        const request = this.requests.get(requestId);
 
         // If the request is cancelled or fulfilled, ignore.
         if (
-          reqObj &&
+          request &&
           ![DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled].includes(
-            reqObj.status
+            request.status
           )
         ) {
-          const { fulfiller } = parseRequestMetadata(reqObj.metadata);
+          const { fulfiller } = parseRequestMetadata(request.metadata);
 
           if (fulfiller) {
             // Consider putting this directly on the request object.
@@ -260,14 +258,11 @@ export class RequestIndexer {
 
             reqs.push({
               type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
-              request: reqObj,
+              request,
               fulfiller: fulfillerAccount,
             } as const);
           }
         }
-        // TODO: Guess the timestamp (might need to store the blockNumber first).
-        // When this is done, we can sort by reverse timestamp and add
-        // notification "createdAt"
       }
     }
 
