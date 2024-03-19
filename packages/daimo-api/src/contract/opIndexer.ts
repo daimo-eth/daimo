@@ -47,6 +47,7 @@ export class OpIndexer {
         from erc4337_user_op
         where block_num >= $1 and block_num <= $2 and chain_id = $3
       `,
+          //@ts-ignore
           [from, to, chainConfig.chainL2.id]
         )
     );
@@ -54,7 +55,7 @@ export class OpIndexer {
       `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );
 
-    result.rows.forEach((row) => {
+    result.rows.forEach((row: any) => {
       const userOp: UserOp = {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         logIndex: row.log_idx,

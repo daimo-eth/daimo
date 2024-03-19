@@ -79,6 +79,7 @@ export class RequestIndexer {
           and block_num <= $2
           and chain_id = $3
       `,
+      //@ts-ignore
       [from, to, chainConfig.chainL2.id]
     );
     const logs = result.rows.map(rowToRequestCreatedLog);
@@ -142,9 +143,10 @@ export class RequestIndexer {
         and block_num <= $2
         and chain_id = $3
       `,
+      //@ts-ignore
       [from, to, chainConfig.chainL2.id]
     );
-    const cancelledIDs = result.rows.map((log) => BigInt(log.id));
+    const cancelledIDs = result.rows.map((log: any) => BigInt(log.id));
     const statuses = cancelledIDs
       .map((id) => {
         const request = this.requests.get(id);
@@ -178,6 +180,7 @@ export class RequestIndexer {
         and block_num <= $2
         and chain_id = $3
       `,
+      //@ts-ignore
       [from, to, chainConfig.chainL2.id]
     );
     const fulfilledRequests = result.rows.map(rowToRequestFulfilledLog);

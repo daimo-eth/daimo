@@ -99,6 +99,7 @@ export class NoteIndexer {
       ) as notelogs
       order by block_num asc, tx_idx asc, log_idx asc
     `,
+          //@ts-ignore
           [from, to, chainConfig.chainL2.id]
         )
     );

@@ -101,10 +101,11 @@ export class NameRegistry {
         and block_num <= $2
         and chain_id = $3
       `,
+          //@ts-ignore
           [from, to, chainConfig.chainL2.id]
         )
     );
-    const names = result.rows.map((r) => {
+    const names = result.rows.map((r: any) => {
       return {
         timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),
         name: bytesToString(r.name, { size: 32 }),
