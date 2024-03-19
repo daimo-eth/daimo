@@ -244,7 +244,13 @@ export class RequestIndexer {
       for (const requestId of ids) {
         const reqObj = this.requests.get(requestId);
 
-        if (reqObj && reqObj.status !== DaimoRequestState.Cancelled) {
+        // If the request is cancelled or fulfilled, ignore.
+        if (
+          reqObj &&
+          ![DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled].includes(
+            reqObj.status
+          )
+        ) {
           const { fulfiller } = parseRequestMetadata(reqObj.metadata);
 
           if (fulfiller) {
@@ -254,7 +260,6 @@ export class RequestIndexer {
 
             reqs.push({
               type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
-              // type: reqObj.recipient.addr === addr ? "recipient" : "fulfiller",
               request: reqObj,
               fulfiller: fulfillerAccount,
             } as const);

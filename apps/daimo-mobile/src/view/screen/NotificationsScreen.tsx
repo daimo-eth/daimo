@@ -31,7 +31,6 @@ export function NotificationsScreen() {
 function NotificationsScreenInner({ account }: { account: Account }) {
   const nav = useNav();
 
-  // TODO: Filter out handled requests.
   const requestsList = account.requests.slice();
 
   return (

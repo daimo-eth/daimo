@@ -119,8 +119,15 @@ export function useSendAsync({
 
 /** Regular transfer / payment link account transform. Adds pending
  *  transfer to history and merges any new named accounts. */
-export function transferAccountTransform(namedAccounts: EAccount[]) {
-  return (account: Account, pendingOp: OpEvent): Account => {
+export function transferAccountTransform(
+  namedAccounts: EAccount[],
+  requestId?: string
+) {
+  return (account: Account, pendingOp?: OpEvent): Account => {
+    if (!pendingOp) {
+      throw new Error("[SEND] pendingOp required");
+    }
+
     assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
@@ -135,6 +142,14 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
         pendingOp as DisplayOpEvent,
       ],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
+      // If sending based on request, remove request from requests list.
+      ...(requestId
+        ? {
+            requests: account.requests.filter(
+              (r) => r.request.link.id !== requestId
+            ),
+          }
+        : {}),
     };
   };
 }
