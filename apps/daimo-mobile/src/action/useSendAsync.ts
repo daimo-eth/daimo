@@ -138,11 +138,7 @@ export function transferAccountTransform(
   namedAccounts: EAccount[],
   requestId?: string
 ) {
-  return (account: Account, pendingOp?: OpEvent): Account => {
-    if (!pendingOp) {
-      throw new Error("[SEND] pendingOp required");
-    }
-
+  return (account: Account, pendingOp: OpEvent): Account => {
     assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
