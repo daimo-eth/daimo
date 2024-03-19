@@ -229,7 +229,7 @@ function ExtraRows({
 
   return (
     <>
-      {!contactsPermission.granted && (
+      {!contactsPermission.granted && mode !== "receive" && (
         <ExtraRow
           title="Send to contact"
           inside={<Octicons name="person" size={14} color={color.primary} />}
@@ -259,7 +259,7 @@ function ExtraRows({
         onPress={() =>
           nav.navigate("SendTab", {
             screen: "QR",
-            params: { option: "SCAN" },
+            params: { option: mode === "receive" ? "PAY ME" : "SCAN" },
           })
         }
       />
