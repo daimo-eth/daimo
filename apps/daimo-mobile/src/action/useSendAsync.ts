@@ -63,7 +63,7 @@ type UseSendWithPendingOpArgs = BaseUseSendArgs & {
 };
 
 type UseSendWithoutPendingOpArgs = BaseUseSendArgs & {
-  pendingOp: undefined;
+  pendingOp?: undefined;
   /** Runs on success, before the account is saved */
   accountTransform?: (account: Account) => Account;
 };
