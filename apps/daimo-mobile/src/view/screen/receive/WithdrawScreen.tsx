@@ -18,7 +18,7 @@ export function WithdrawScreen({ account }: { account: Account }) {
   const BB = Platform.OS === "android" ? TextBold : Badge;
 
   return (
-    <ScrollView>
+    <ScrollView style={ss.container.padH16}>
       <HeaderRow title="Withdraw to any wallet" />
       <View style={ss.container.padH16}>
         <TextPara>

@@ -1,4 +1,3 @@
-import { parseInviteCodeOrLink } from "@daimo/common";
 import * as Clipboard from "expo-clipboard";
 import { ReactNode, useState } from "react";
 import {
@@ -10,8 +9,12 @@ import {
   View,
 } from "react-native";
 
-import { getInviteLinkStatus } from "./OnboardingEnterInviteScreen";
-import { useOnboardingNav } from "../../../common/nav";
+import { usePollForAccount } from "./usePollForAccount";
+import {
+  handleOnboardingDeepLink,
+  useOnboardingNav,
+} from "../../../common/nav";
+import { useDaimoChain } from "../../../logic/accountManager";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -21,17 +24,16 @@ import { TextCenter, TextH1 } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
+  const dc = useDaimoChain();
   const nav = useOnboardingNav();
+
+  // User uninstalled and reinstalled the app? Load from enclave key.
+  usePollForAccount();
+
+  // User clicks ACCEPT INVITE > pastes invite link
   const pasteInviteLink = async () => {
     const str = await Clipboard.getStringAsync();
-    const inviteLink = parseInviteCodeOrLink(str);
-    console.log(`[INTRO] paste invite link: '${str}'`);
-    if (inviteLink && (await getInviteLinkStatus(inviteLink))?.isValid) {
-      if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
-      else nav.navigate("CreatePickName", { inviteLink });
-    } else {
-      nav.navigate("CreateNew");
-    }
+    return handleOnboardingDeepLink(dc, nav, str);
   };
 
   const goToUseExisting = () => {

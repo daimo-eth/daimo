@@ -1,11 +1,8 @@
 import {
   DaimoLink,
   LinkInviteStatus,
-  formatDaimoLink,
   getEAccountStr,
-  getInviteStatus,
   parseInviteCodeOrLink,
-  stripSeedFromNoteLink,
 } from "@daimo/common";
 import { getChainConfig } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -20,7 +17,7 @@ import {
   useOnboardingNav,
 } from "../../../common/nav";
 import { getAccountManager } from "../../../logic/accountManager";
-import { env } from "../../../logic/env";
+import { fetchInviteLinkStatus } from "../../../logic/linkStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { InputBig, OctName } from "../../shared/InputBig";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
@@ -88,7 +85,8 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
     }
 
     // Fetch link status
-    const inviteStatus = await getInviteLinkStatus(inviteLink);
+    const dc = getAccountManager().getDaimoChain();
+    const inviteStatus = await fetchInviteLinkStatus(dc, inviteLink);
 
     // See if text has changed in the meantime
     if (this.state.text !== text) return;
@@ -165,15 +163,6 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
       </View>
     );
   }
-}
-
-export async function getInviteLinkStatus(inviteLink: DaimoLink | undefined) {
-  const daimoChain = getAccountManager().getDaimoChain();
-  const { rpcFunc } = env(daimoChain);
-  const url = inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));
-  const linkStatus = !!url && (await rpcFunc.getLinkStatus.query({ url }));
-  const inviteStatus = linkStatus ? getInviteStatus(linkStatus) : undefined;
-  return inviteStatus;
 }
 
 const styles = StyleSheet.create({

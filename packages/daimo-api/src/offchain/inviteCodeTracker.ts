@@ -1,7 +1,10 @@
 import {
   DaimoInviteCodeStatus,
   DaimoLinkInviteCode,
+  OpStatus,
+  TransferOpEvent,
   dollarsToAmount,
+  now,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex } from "viem";
@@ -27,7 +30,7 @@ export class InviteCodeTracker {
     invitee: Address,
     code: InviteCodeRow,
     deviceAttestationString: Hex
-  ): Promise<boolean> {
+  ): Promise<TransferOpEvent | undefined> {
     const isFaucetAttestationUsed = await this.db.isFaucetAttestationUsed(
       deviceAttestationString
     );
@@ -40,15 +43,27 @@ export class InviteCodeTracker {
       );
 
       // Exit if mainnet double claim is attempted.
-      if (!chainConfig.chainL2.testnet) return false;
+      if (!chainConfig.chainL2.testnet) return undefined;
     }
 
     // Try sending bonus
+    let faucetTransfer: TransferOpEvent | undefined;
     if (code.bonusDollarsInvitee > 0) {
       console.log(
         `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
       );
-      await this.trySendUSDC(invitee, code.bonusDollarsInvitee);
+      const txHash = await this.trySendUSDC(invitee, code.bonusDollarsInvitee);
+      if (txHash != null) {
+        faucetTransfer = {
+          type: "transfer",
+          status: OpStatus.pending,
+          timestamp: now(),
+          amount: Number(dollarsToAmount(code.bonusDollarsInvitee)),
+          from: this.vc.walletClient.account.address,
+          to: invitee,
+          txHash,
+        };
+      }
     }
     if (code.inviter && code.bonusDollarsInviter > 0) {
       console.log(
@@ -59,13 +74,13 @@ export class InviteCodeTracker {
 
     await this.db.insertFaucetAttestation(deviceAttestationString);
 
-    return true;
+    return faucetTransfer;
   }
 
   // Try sending USDC to an address. Prints error if unsuccessful.
   async trySendUSDC(to: Address, dollars: number) {
     try {
-      await this.vc.writeContract({
+      return await this.vc.writeContract({
         abi: erc20ABI,
         address: chainConfig.tokenAddress,
         functionName: "transfer",
@@ -73,6 +88,7 @@ export class InviteCodeTracker {
       });
     } catch (e) {
       console.log(`[INVITE] failed to send USDC to ${to}: ${e}`);
+      return null;
     }
   }
 
@@ -83,7 +99,7 @@ export class InviteCodeTracker {
     deviceAttestationString: Hex,
     invCode: string,
     maybeSendFaucet: boolean
-  ): Promise<boolean> {
+  ): Promise<{ isValid: boolean; faucetTransfer?: TransferOpEvent }> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
       this.db.incrementInviteCodeUseCount(invCode)
     );
@@ -92,15 +108,15 @@ export class InviteCodeTracker {
     );
 
     if (code != null && code.useCount <= code.maxUses) {
-      const faucetStatus = maybeSendFaucet
+      const faucetTransfer = maybeSendFaucet
         ? await this.requestFaucet(invitee, code, deviceAttestationString)
-        : "SKIPPED";
+        : undefined;
 
-      console.log(`[INVITE] faucet status: ${faucetStatus}`);
+      console.log(`[INVITE] faucet status: ${faucetTransfer?.txHash}`);
 
       // Regardless of faucet status, we let the user in.
-      return true;
-    } else return false;
+      return { isValid: true, faucetTransfer };
+    } else return { isValid: false };
   }
 
   async getInviteCodeStatus(
@@ -114,6 +130,10 @@ export class InviteCodeTracker {
     const inviter = code?.inviter
       ? await this.nameReg.getEAccount(code.inviter)
       : undefined;
+
+    console.log(
+      `[INVITE] getInvCodeStatus ${JSON.stringify({ code, usesLeft, inviter })}`
+    );
     return {
       link: inviteLink,
       isValid: usesLeft > 0,

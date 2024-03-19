@@ -1,5 +1,4 @@
-import { Address } from "abitype";
-import { Hex, getAddress } from "viem";
+import { Hex, getAddress, Address } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
@@ -172,7 +171,7 @@ export function parseDaimoLink(link: string): DaimoLink | null {
     if (ret == null) console.warn(`[LINK] ignoring invalid Daimo link`, link);
     return ret;
   } catch (e: any) {
-    console.warn(`[LINK] ignoring invalid Daimo link`, link, e);
+    console.warn(`[LINK] error, ignoring Daimo link`, link, e);
     return null;
   }
 }

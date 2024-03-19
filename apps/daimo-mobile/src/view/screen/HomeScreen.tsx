@@ -3,7 +3,6 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Dimensions,
   RefreshControl,
   StyleSheet,
   TouchableHighlight,
@@ -20,7 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
-import { getInitialURLOrTag } from "../../logic/deeplink";
+import { getInitialDeepLink } from "../../logic/deeplink";
 import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
@@ -161,16 +160,14 @@ function HomeScreenInner({ account }: { account: Account }) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{
-          height: screenDimensions.height,
-        }}
+        contentContainerStyle={styles.animatedScrollContent}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
         scrollEventThrottle={8}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={preventOverscrollStyle}>
+        <Animated.View style={[preventOverscrollStyle, styles.scrollView]}>
           <Spacer h={Math.max(16, ins.top)} />
           {account.suggestedActions.length > 0 &&
             netState.status !== "offline" &&
@@ -303,16 +300,15 @@ function useInitNavLinks() {
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
     deepLinkInitialised = true;
-    getInitialURLOrTag(false).then((url) => {
+    getInitialDeepLink().then((url) => {
       if (url == null) return;
       handleDeepLink(nav, url);
     });
 
-    addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    const sub = addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    return () => sub.remove();
   }, [accountMissing, nav]);
 }
-
-const screenDimensions = Dimensions.get("screen");
 
 const iconButton = {
   backgroundColor: color.primary,
@@ -334,6 +330,12 @@ const styles = StyleSheet.create({
   amountAndButtons: {
     flexDirection: "column",
     alignItems: "center",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  animatedScrollContent: {
+    height: "100%",
   },
   buttonRow: {
     flexDirection: "row",

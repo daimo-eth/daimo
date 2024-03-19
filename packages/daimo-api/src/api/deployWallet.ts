@@ -1,6 +1,7 @@
 import {
   DaimoAccountCall,
   DaimoLinkStatus,
+  TransferOpEvent,
   formatDaimoLink,
   getInviteStatus,
 } from "@daimo/common";
@@ -31,11 +32,11 @@ export async function deployWallet(
   telemetry: Telemetry,
   paymaster: Paymaster,
   inviteGraph: InviteGraph
-): Promise<Address> {
+): Promise<{ address: Address; faucetTransfer?: TransferOpEvent }> {
   // For now, invite is required
-  const invSuccess = getInviteStatus(inviteLinkStatus).isValid;
+  const inviteStatus = getInviteStatus(inviteLinkStatus);
 
-  if (!invSuccess) {
+  if (!inviteStatus.isValid) {
     throw new Error("Invalid invite code");
   }
 
@@ -96,17 +97,22 @@ export async function deployWallet(
 
   // Send starter USDC only for invite links, and check for spam.
   let sendFaucet = false;
+  let faucetTransfer: TransferOpEvent | undefined;
   if (inviteLinkStatus.link.type === "invite") {
     const { requestInfo } = ctx;
     const isTestnet = chainConfig.chainL2.testnet;
     sendFaucet = isTestnet || (await queryFaucetAntiSpamApi(requestInfo));
 
-    inviteCodeTracker.useInviteCode(
+    const inviteResult = await inviteCodeTracker.useInviteCode(
       address,
       deviceAttestationString,
       inviteLinkStatus.link.code,
       sendFaucet
     );
+
+    if (inviteResult.faucetTransfer != null) {
+      faucetTransfer = inviteResult.faucetTransfer;
+    }
   }
 
   const explorer = chainConfig.chainL2.blockExplorers!.default.url;
@@ -117,7 +123,7 @@ export async function deployWallet(
     "celebrate"
   );
 
-  return address;
+  return { address, faucetTransfer };
 }
 
 async function queryFaucetAntiSpamApi(reqInfo: RequestInfo): Promise<boolean> {

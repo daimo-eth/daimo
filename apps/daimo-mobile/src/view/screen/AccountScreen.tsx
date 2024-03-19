@@ -96,7 +96,12 @@ function AccountScreenLoader({
     } else if ("inviter" in status.data) {
       eAcc = status.data.inviter || getTeamDaimoFaucetAcc();
     }
-    assert(eAcc != null, "No account or inviter");
+
+    if (eAcc == null) {
+      if (nav.canGoBack()) nav.goBack();
+      else nav.navigate("Home");
+      return;
+    }
 
     // Show account
     console.log(`[ACCOUNT] loaded account: ${JSON.stringify(status.data)}`);

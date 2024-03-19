@@ -1,0 +1,36 @@
+{
+  "name": "@daimo/bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "api/index.ts",
+  "scripts": {
+    "dev": "ts-node-dev api/index.ts",
+    "start": "ts-node api/index.ts",
+    "test": "tsc --noEmit && jest",
+    "lint": "npm run lint:deps && npm run lint:style",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
+    "lint:style": "eslint . --max-warnings=0"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@daimo/api": "*",
+    "@daimo/common": "*",
+    "@neynar/nodejs-sdk": "^1.12.0",
+    "@trpc/client": "^10.43.2",
+    "@trpc/server": "^10.43.2",
+    "@tsconfig/node20": "^20.1.0",
+    "axios": "^1.6.7",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "viem": "^1.19.15"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "5.2.2"
+  }
+}

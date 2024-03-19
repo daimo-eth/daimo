@@ -10,7 +10,7 @@ export default function DownloadPage() {
     <main className="max-w-2xl mx-auto px-4">
       <center>
         <div className="h-16" />
-        <Image src="/logo-web-dark.png" alt="Daimo" width="96" height="96" />
+        <Image src="/logo-web.png" alt="Daimo" width="96" height="96" />
         <div className="h-12" />
 
         <div className="text-2xl font-semibold">Download Daimo</div>

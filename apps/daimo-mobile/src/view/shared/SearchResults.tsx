@@ -1,5 +1,6 @@
 import { now, timeAgo } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import * as Contacts from "expo-contacts";
 import { useCallback } from "react";
 import {
@@ -68,12 +69,13 @@ function SearchResultsScroll({
 
   const recentsOnly = prefix === "";
 
-  const kbH = useKeyboardHeight();
+  const kbH = useKeyboardHeight() - useBottomTabBarHeight();
 
   return (
     <ScrollView
       contentContainerStyle={styles.resultsScroll}
       keyboardShouldPersistTaps="handled"
+      style={styles.scrollView}
     >
       {res.error && <ErrorRowCentered error={res.error} />}
       {recentsOnly && contactsPermission && (
@@ -333,5 +335,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  scrollView: {
+    height: "100%",
   },
 });
