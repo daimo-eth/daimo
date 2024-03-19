@@ -44,6 +44,32 @@ interface UserOpHandle extends ActHandle {
   reset?: () => void;
 }
 
+// Use discriminated unions to allow transforms without pendingOp.
+
+type BaseUseSendArgs = {
+  dollarsToSend: number;
+  sendFn: SendOpFn;
+  /** Custom handler that overrides sendAsync, used to claim
+   *  ephemeral notes without requesting a user signature / face ID.
+   */
+  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
+  passkeyAccount?: Account;
+};
+
+type UseSendWithPendingOpArgs = BaseUseSendArgs & {
+  pendingOp: OpEvent;
+  /** Runs on success, before the account is saved */
+  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
+};
+
+type UseSendWithoutPendingOpArgs = BaseUseSendArgs & {
+  pendingOp: undefined;
+  /** Runs on success, before the account is saved */
+  accountTransform?: (account: Account) => Account;
+};
+
+type UseSendArgs = UseSendWithPendingOpArgs | UseSendWithoutPendingOpArgs;
+
 /** Send a user op, track status. */
 export function useSendAsync({
   dollarsToSend,
@@ -52,18 +78,7 @@ export function useSendAsync({
   pendingOp,
   accountTransform,
   passkeyAccount,
-}: {
-  dollarsToSend: number;
-  sendFn: SendOpFn;
-  /** Custom handler that overrides sendAsync, used to claim
-   *  ephemeral notes without requesting a user signature / face ID.
-   */
-  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
-  pendingOp?: OpEvent;
-  /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account, pendingOp?: OpEvent) => Account;
-  passkeyAccount?: Account;
-}): UserOpHandle {
+}: UseSendArgs): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
 
   const [deviceAccount] = useAccount();
