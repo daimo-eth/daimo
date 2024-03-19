@@ -14,6 +14,7 @@ import csv from "csvtojson";
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
 import { chainConfig } from "./env";
+import { getEacc, getEaccDesc } from "./getEacc";
 import { getFids, getFidsDesc } from "./getFids";
 import { pushNotify, pushNotifyDesc } from "./pushNotify";
 
@@ -30,6 +31,7 @@ async function main() {
     { name: "mailing-list", desc: mailingListDesc(), fn: mailingList },
     { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
     { name: "get-fids", desc: getFidsDesc(), fn: getFids },
+    { name: "get-eaccount", desc: getEaccDesc(), fn: getEacc },
   ];
 
   const cmdName = process.argv[2] || "default";
