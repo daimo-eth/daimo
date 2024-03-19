@@ -96,7 +96,7 @@ export function SearchHeader({
       <Animated.View key="icon" style={accountButton}>
         <ButtonCircle size={50} onPress={goToQR}>
           <View style={styles.qrCircle}>
-            <Octicons name="apps" size={24} color={color.midnight} />
+            <Octicons name="apps" size={24} color={color.primary} />
           </View>
         </ButtonCircle>
       </Animated.View>
@@ -113,7 +113,7 @@ export function SearchHeader({
       <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.qrCircle}>
-            <Octicons name="bell" size={24} color={color.midnight} />
+            <Octicons name="bell" size={24} color={color.primary} />
           </View>
         </ButtonCircle>
       </Animated.View>

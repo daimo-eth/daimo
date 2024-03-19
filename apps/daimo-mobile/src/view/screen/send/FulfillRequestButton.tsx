@@ -19,7 +19,7 @@ import {
   transferAccountTransform,
   useSendAsync,
 } from "../../../action/useSendAsync";
-import { useExitToHome } from "../../../common/nav";
+import { useExitToHome, useNav } from "../../../common/nav";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
@@ -33,6 +33,7 @@ export function FulfillRequestButton({
   account: Account;
   requestStatus: DaimoRequestV2Status;
 }) {
+  // const nav = useNav();
   const requestIdString = requestStatus.link.id;
   const dollars = Number(requestStatus.link.dollars);
 
@@ -132,6 +133,7 @@ export function FulfillRequestButton({
   useEffect(() => {
     if (status !== "success") return;
     goHome();
+    // nav.goBack();
   }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;

@@ -4,7 +4,7 @@ import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { ReceiveSearch } from "./SearchScreen";
-import { ParamListHome, useExitToHome, useNav } from "../../../common/nav";
+import { ParamListHome, useNav } from "../../../common/nav";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
@@ -20,11 +20,10 @@ export function ReceiveNavScreen({ route }: Props) {
 
   // Navigation
   const nav = useNav();
-  const goHome = useExitToHome();
   const goBack = useCallback(() => {
     setPrefix("");
     nav.goBack();
-  }, [nav, goHome]);
+  }, [nav]);
 
   // Focus search box if autoFocus is true
   // Work around react-navigation autofocus bug
