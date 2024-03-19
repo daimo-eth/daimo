@@ -7,7 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { StyleSheet, View } from "react-native";
+import { Keyboard, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
@@ -89,7 +89,10 @@ function AppBody() {
 
   // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
-    const subscription = RNShake.addListener(() => setBottomSheet("debug"));
+    const subscription = RNShake.addListener(() => {
+      Keyboard.dismiss();
+      setBottomSheet("debug");
+    });
     return () => subscription.remove();
   }, []);
 
