@@ -8,7 +8,7 @@ import { useContactsPermission } from "../../logic/systemContacts";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
  *  or a system contact with phone number or email. */
-export type SearchScreenProps = {
+type SearchScreenProps = {
   prefix: string;
   setPrefix: (prefix: string) => void;
   autoFocus?: boolean;
