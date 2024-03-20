@@ -5,7 +5,7 @@ import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface indexer {
-  load(pg: Pool, from: bigint, to: bigint): void | Promise<void>;
+  load(pg: Pool, from: number, to: number): void | Promise<void>;
 }
 
 const dbConfig: ClientConfig = {
@@ -24,8 +24,8 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
-  private latest = 5700000n;
-  private batchSize = 20000n;
+  private latest = 5700000;
+  private batchSize = 20000;
 
   private indexers: indexer[] = [];
   private pg: Pool;
@@ -38,14 +38,14 @@ export class Watcher {
     this.indexers.push(...i);
   }
 
-  latestBlock(): { number: bigint; timestamp: number } {
+  latestBlock(): { number: number; timestamp: number } {
     return {
       number: this.latest,
       timestamp: guessTimestampFromNum(this.latest, chainConfig.daimoChain),
     };
   }
 
-  async waitFor(blockNumber: bigint, tries: number): Promise<boolean> {
+  async waitFor(blockNumber: number, tries: number): Promise<boolean> {
     const t0 = Date.now();
     for (let i = 0; i < tries; i++) {
       if (this.latest >= blockNumber) {
@@ -74,7 +74,7 @@ export class Watcher {
     setInterval(async () => {
       const shovelLatest = await this.getShovelLatest();
       const localLatest = await this.index(
-        this.latest + 1n,
+        this.latest + 1,
         shovelLatest,
         this.batchSize
       );
@@ -84,18 +84,18 @@ export class Watcher {
     }, 1000);
   }
 
-  async indexRange(start: bigint, stop: bigint) {
-    this.latest = start - 1n;
+  async indexRange(start: number, stop: number) {
+    this.latest = start - 1;
     while (this.latest < stop) {
-      this.latest = await this.index(this.latest + 1n, stop, this.batchSize);
+      this.latest = await this.index(this.latest + 1, stop, this.batchSize);
     }
     console.log(`[SHOVEL] initialized to ${this.latest}`);
   }
 
-  private async index(start: bigint, stop: bigint, n: bigint): Promise<bigint> {
+  private async index(start: number, stop: number, n: number): Promise<number> {
     const t0 = Date.now();
     const delta = stop - start;
-    if (delta <= 0n) return 0n;
+    if (delta <= 0n) return 0;
     const limit = delta > n ? n : delta;
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     await Promise.all(
@@ -107,10 +107,10 @@ export class Watcher {
     return start + limit;
   }
 
-  async getShovelLatest(): Promise<bigint> {
+  async getShovelLatest(): Promise<number> {
     const result = await retryBackoff(`shovel-latest-query`, () =>
       this.pg.query(`select num from shovel.latest`)
     );
-    return BigInt(result.rows[0].num);
+    return Number(result.rows[0].num);
   }
 }

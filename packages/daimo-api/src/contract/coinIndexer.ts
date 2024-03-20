@@ -46,7 +46,7 @@ export class CoinIndexer {
     return { numTransfers: this.allTransfers.length };
   }
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(

@@ -30,7 +30,7 @@ export class KeyRegistry {
     this.listeners.push(listener);
   }
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
@@ -95,8 +95,8 @@ export class KeyRegistry {
 
   private async loadKeyChange(
     pg: Pool,
-    from: bigint,
-    to: bigint,
+    from: number,
+    to: number,
     change: "added" | "removed"
   ): Promise<KeyChange[]> {
     let table: string = "";

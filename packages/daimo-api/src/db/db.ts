@@ -189,7 +189,13 @@ export class DB {
     await client.query(
       `INSERT INTO offchain_action (address, time, type, action_json, signature_hex)
        VALUES ($1, $2, $3, $4, $5)`,
-      [row.address, row.time, row.type, row.action_json, row.signature_hex]
+      [
+        row.address,
+        row.time,
+        row.type,
+        row.action_json,
+        row.signature_hex,
+      ] as any
     );
     client.release();
   }
@@ -302,7 +308,7 @@ export class DB {
     await client.query(
       `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
        ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
-      [code.code, code.useCount, code.maxUses, code.zupassEmail]
+      [code.code, code.useCount, code.maxUses, code.zupassEmail] as any
     );
     client.release();
   }

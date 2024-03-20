@@ -39,7 +39,7 @@ export class NoteIndexer {
 
   constructor(private nameReg: NameRegistry) {}
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     // Load notes contract event logs
     const startMs = Date.now();
     const logs = await this.loadNoteLogs(pg, from, to);
@@ -58,8 +58,8 @@ export class NoteIndexer {
 
   private async loadNoteLogs(
     pg: Pool,
-    from: bigint,
-    to: bigint
+    from: number,
+    to: number
   ): Promise<NoteLog[]> {
     const result = await retryBackoff(
       `noteIndexer-logs-query-${from}-${to}`,

@@ -80,7 +80,7 @@ export async function deployWallet(
     5
   );
 
-  const processed = await watcher.waitFor(deployReceipt.blockNumber, 8);
+  const processed = await watcher.waitFor(Number(deployReceipt.blockNumber), 8);
   if (!processed) {
     console.log(
       `[API] Deploy tx ${deployReceipt.transactionHash} not processed`

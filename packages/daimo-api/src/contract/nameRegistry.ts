@@ -88,7 +88,7 @@ export class NameRegistry {
     return { numAccounts: this.accounts.length, numLogs: this.logs.length };
   }
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
     const result = await retryBackoff(
       `nameRegistry-logs-query-${from}-${to}`,

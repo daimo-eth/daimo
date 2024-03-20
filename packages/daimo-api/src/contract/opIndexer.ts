@@ -36,7 +36,7 @@ export class OpIndexer {
     this.callbacks.delete(userOp.hash);
   }
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
     const result = await retryBackoff(
       `opIndexer-logs-query-${from}-${to}`,

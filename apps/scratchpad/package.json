@@ -3,8 +3,7 @@
   "name": "scratchpad",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "test": "tsc --noEmit"
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "@daimo/api": "*",
