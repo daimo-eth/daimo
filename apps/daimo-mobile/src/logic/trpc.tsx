@@ -2,7 +2,7 @@ import type { AppRouter } from "@daimo/api";
 import { assert } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
@@ -20,10 +20,7 @@ const apiUrlMainnetWithChain = `${apiUrlM}/chain/8453`;
 function createRpcHook() {
   const reactQueryContext = createContext<QueryClient | undefined>(undefined);
   return {
-    trpc: createTRPCReact<AppRouter>({
-      context: createContext(null),
-      reactQueryContext,
-    }),
+    trpc: createTRPCReact<AppRouter>({}),
     reactQueryContext,
     queryClient: new QueryClient({
       defaultOptions: {
@@ -126,8 +123,8 @@ const rpcHookTestnetClient = rpcHookTestnet.trpc.createClient(optsTestnet);
 
 type RpcClient = typeof rpcHookMainnetClient | typeof rpcHookTestnetClient;
 
-const rpcFuncMainnet = createTRPCProxyClient<AppRouter>(optsMainnet);
-const rpcFuncTestnet = createTRPCProxyClient<AppRouter>(optsTestnet);
+const rpcFuncMainnet = createTRPCClient<AppRouter>(optsMainnet);
+const rpcFuncTestnet = createTRPCClient<AppRouter>(optsTestnet);
 
 export function getRpcFunc(daimoChain: DaimoChain) {
   return chooseChain({
@@ -157,10 +154,7 @@ function ChainRpcProvider({
 }) {
   return (
     <rpcHook.trpc.Provider queryClient={rpcHook.queryClient} client={rpcClient}>
-      <QueryClientProvider
-        client={rpcHook.queryClient}
-        context={rpcHook.reactQueryContext}
-      >
+      <QueryClientProvider client={rpcHook.queryClient}>
         {children}
       </QueryClientProvider>
     </rpcHook.trpc.Provider>

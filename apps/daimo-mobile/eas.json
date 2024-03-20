@@ -4,23 +4,30 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "sim": {
-      "node": "20.3.0",
-      "ios": {
-        "buildConfiguration": "Debug",
-        "resourceClass": "large",
-        "simulator": true
+    "base": {
+      "resourceClass": "large",
+      "node": "21.2.0",
+      "android": {
+        "image": "ubuntu-22.04-jdk-17-ndk-r21e"
       },
       "env": {
         "DAIMO_DOMAIN": "daimo.com",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
+        "DAIMO_PASSKEY_DOMAIN": "daimo.com"
+      }
+    },
+    "sim": {
+      "extends": "base",
+      "ios": {
+        "buildConfiguration": "Debug",
+        "simulator": true
+      },
+      "env": {
         "DAIMO_APP_VARIANT": "sim"
       }
     },
     "dev": {
+      "extends": "base",
       "distribution": "internal",
-      "resourceClass": "large",
-      "node": "20.3.0",
       "android": {
         "gradleCommand": ":app:assembleDebug"
       },
@@ -28,20 +35,15 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "DAIMO_DOMAIN": "daimo.com",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
         "DAIMO_APP_VARIANT": "dev"
       }
     },
     "production": {
-      "resourceClass": "large",
-      "node": "20.3.0",
+      "extends": "base",
       "autoIncrement": true,
       "env": {
         "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
         "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
-        "DAIMO_DOMAIN": "daimo.com",
-        "DAIMO_PASSKEY_DOMAIN": "daimo.com",
         "DAIMO_APP_VARIANT": "prod"
       }
     }

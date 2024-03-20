@@ -11,18 +11,18 @@
   },
   "dependencies": {
     "@babel/core": "^7.20.0",
-    "@types/react": "^18.2.15",
+    "@daimo/contract": "*",
     "@daimo/expo-enclave": "*",
     "@daimo/userop": "*",
-    "@daimo/contract": "*",
     "@ethersproject/shims": "^5.7.0",
-    "expo": "^49.0.7",
-    "expo-build-properties": "~0.8.3",
-    "expo-splash-screen": "~0.20.5",
-    "expo-status-bar": "~1.6.0",
+    "@types/react": "~18.2.45",
+    "expo": "^50.0.11",
+    "expo-build-properties": "~0.11.1",
+    "expo-splash-screen": "~0.26.4",
+    "expo-status-bar": "~1.11.1",
     "fast-text-encoding": "^1.0.6",
     "react": "18.2.0",
-    "react-native": "0.72.4",
-    "typescript": "5.2.2"
+    "react-native": "0.73.4",
+    "typescript": "^5.3.0"
   }
 }
