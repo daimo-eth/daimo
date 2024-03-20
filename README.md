@@ -102,7 +102,7 @@ git clone git@github.com:daimo-eth/daimo --recurse-submodules
 Build the app.
 
 ```sh
-node --version # ensure you have node 20+
+node --version # ensure you have node 21+
 npm i
 npm run build
 ```
