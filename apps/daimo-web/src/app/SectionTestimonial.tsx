@@ -1,4 +1,4 @@
-import { Spacer } from "../components/layout";
+import { Spacer } from "../components/Spacer";
 import TestimonialAccent from "../components/TestimonialAccent";
 
 export function SectionTestimonial() {

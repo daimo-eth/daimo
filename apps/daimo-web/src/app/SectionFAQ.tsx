@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import readmeMD from "../../../../README.md";
-import { Spacer } from "../components/layout";
+import { Spacer } from "../components/Spacer";
 import { FAQ, parseFAQs } from "../utils/parseFAQ";
 
 const faqStyle = `

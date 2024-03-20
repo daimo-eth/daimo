@@ -10,7 +10,6 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import "react-native-url-polyfill/auto";
 
 import { WithdrawScreen } from "./WithdrawScreen";
 import { useNav } from "../../../common/nav";

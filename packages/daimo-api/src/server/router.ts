@@ -7,6 +7,7 @@ import {
   zAddress,
   zBigIntStr,
   zHex,
+  zInviteCodeStr,
   zUserOpHex,
 } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
@@ -44,6 +45,10 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { Watcher } from "../shovel/watcher";
+
+// Service authentication for, among other things, invite link creation
+const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
+console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(
   watcher: Watcher,
@@ -163,6 +168,22 @@ export function createRouter(
           inviteCodeTracker,
           db
         );
+      }),
+
+    createInviteLink: publicProcedure
+      .input(
+        z.object({
+          apiKey: z.string(),
+          code: zInviteCodeStr,
+          maxUses: z.number(),
+          inviter: zAddress,
+          bonusDollarsInvitee: z.number(),
+          bonusDollarsInviter: z.number(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        authorize(input.apiKey);
+        return await inviteCodeTracker.insertInviteCode(input);
       }),
 
     lookupEthereumAccountByKey: publicProcedure
@@ -442,5 +463,13 @@ export function createRouter(
 
         return url;
       }),
+  });
+}
+
+function authorize(apiKey: string) {
+  if (apiKeys.has(apiKey)) return;
+  throw new TRPCError({
+    code: "UNAUTHORIZED",
+    message: `Invalid API key '${apiKey}'`,
   });
 }

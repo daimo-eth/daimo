@@ -41,6 +41,8 @@ export const zDollarStr = z
 // TODO: use this in place of string / `${number}` everywhere applicable
 export type DollarStr = `${number}`;
 
+export const zInviteCodeStr = z.string().regex(/^[a-z][a-z0-9-]{2,24}$/i);
+
 export const zTrackedRequest = z.object({
   requestId: zBigIntStr,
   amount: zBigIntStr,

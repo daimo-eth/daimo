@@ -30,8 +30,8 @@ async function main() {
   shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
 
   const { startBlock, lastBlockNum } = {
-    startBlock: 5700000n,
-    lastBlockNum: 7000000n,
+    startBlock: 5700000,
+    lastBlockNum: 7000000,
   };
   await shovelWatcher.indexRange(startBlock, lastBlockNum);
 

@@ -43,7 +43,7 @@ export class RequestIndexer {
 
   constructor(private nameReg: NameRegistry) {}
 
-  async load(pg: Pool, from: bigint, to: bigint) {
+  async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
     const statuses: DaimoRequestV2Status[] = [];
     statuses.push(...(await this.loadCreated(pg, from, to)));
@@ -65,8 +65,8 @@ export class RequestIndexer {
 
   private async loadCreated(
     pg: Pool,
-    from: bigint,
-    to: bigint
+    from: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await pg.query(
       `
@@ -150,8 +150,8 @@ export class RequestIndexer {
 
   private async loadCancelled(
     pg: Pool,
-    from: bigint,
-    to: bigint
+    from: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await pg.query(
       `
@@ -164,7 +164,7 @@ export class RequestIndexer {
       `,
       [from, to, chainConfig.chainL2.id]
     );
-    const cancelledIDs = result.rows.map((log) => BigInt(log.id));
+    const cancelledIDs = result.rows.map((log: any) => BigInt(log.id));
     const statuses = cancelledIDs
       .map((id) => {
         const request = this.requests.get(id);
@@ -183,8 +183,8 @@ export class RequestIndexer {
 
   private async loadFulfilled(
     pg: Pool,
-    from: bigint,
-    to: bigint
+    from: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await pg.query(
       `

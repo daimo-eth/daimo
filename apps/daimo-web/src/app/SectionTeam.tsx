@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { Spacer } from "../components/layout";
+import { Spacer } from "../components/Spacer";
 import { TextH1 } from "../components/typography";
 
 export function SectionTeam() {

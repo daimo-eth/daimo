@@ -1,4 +1,4 @@
-import { ProfileLinkID, TagRedirectEvent } from "@daimo/common";
+import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, getAddress } from "viem";
 
@@ -172,7 +172,7 @@ export class DB {
        ON CONFLICT (tag) DO UPDATE SET link = $2`,
       [tag, link]
     );
-    if (Number(res.rowCount) > 0) {
+    if (res.rowCount && res.rowCount > 0) {
       await client.query(
         `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
         [tag, link]
@@ -189,7 +189,13 @@ export class DB {
     await client.query(
       `INSERT INTO offchain_action (address, time, type, action_json, signature_hex)
        VALUES ($1, $2, $3, $4, $5)`,
-      [row.address, row.time, row.type, row.action_json, row.signature_hex]
+      [
+        row.address,
+        row.time,
+        row.type,
+        row.action_json,
+        row.signature_hex,
+      ] as any
     );
     client.release();
   }
@@ -302,7 +308,7 @@ export class DB {
     await client.query(
       `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
        ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
-      [code.code, code.useCount, code.maxUses, code.zupassEmail]
+      [code.code, code.useCount, code.maxUses, code.zupassEmail] as any
     );
     client.release();
   }
@@ -354,6 +360,26 @@ export class DB {
     client.release();
   }
 
+  async insertInviteCode(row: InsertInviteCodeArgs) {
+    console.log(`[DB] inserting invite code: ${JSON.stringify(row)}`);
+    const client = await this.pool.connect();
+    const res = await client.query<[], any[]>(
+      `
+      INSERT INTO invitecode (code, use_count, max_uses, inviter, bonus_cents_invitee, bonus_cents_inviter)
+      VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (code) DO NOTHING`,
+      [
+        row.code,
+        0,
+        row.maxUses,
+        row.inviter,
+        Math.round(row.bonusDollarsInvitee * 100),
+        Math.round(row.bonusDollarsInviter * 100),
+      ]
+    );
+    client.release();
+    return assertNotNull(res.rowCount) > 0;
+  }
+
   async insertFaucetAttestation(attestation: string) {
     console.log(`[DB] inserting faucet attestation`);
     const client = await this.pool.connect();
@@ -388,6 +414,14 @@ export interface InviteCodeRow {
   useCount: number;
   maxUses: number;
   zupassEmail: string | null;
+  inviter: Address | null;
+  bonusDollarsInvitee: number;
+  bonusDollarsInviter: number;
+}
+
+export interface InsertInviteCodeArgs {
+  code: string;
+  maxUses: number;
   inviter: Address | null;
   bonusDollarsInvitee: number;
   bonusDollarsInviter: number;

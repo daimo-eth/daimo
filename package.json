@@ -22,12 +22,16 @@
     "prettier": "^2.8.8",
     "syncpack": "^10.6.1",
     "turbo": "^1.10.15",
-    "typescript": "5.2.2"
+    "typescript": "^5.3.0"
   },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
+  "overrides": {
+    "react-native": "0.73.4",
+    "@types/react-native": "0.73.0"
+  },
   "engines": {
     "node": ">=20.3.0",
     "npm": ">=9.6.7"

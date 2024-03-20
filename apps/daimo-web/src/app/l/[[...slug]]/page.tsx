@@ -6,7 +6,6 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
-  daimoDomainAddress,
   daimoLinkBaseV2,
   getAccountName,
   parseDaimoLink,
@@ -16,6 +15,7 @@ import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
 import { Providers, chainsDaimoL2 } from "../../../components/Providers";
+import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../utils/rpc";
 
 // Opt out of caching for all data requests in the route segment
@@ -38,7 +38,7 @@ type TitleDesc = {
 const defaultMeta = metadata(
   "Daimo",
   "Payments on Ethereum",
-  `${daimoDomainAddress}/logo-link-preview.png`
+  getAbsoluteUrl(`/logo-link-preview.png`)
 );
 
 function getUrl(props: LinkProps): string {
@@ -56,10 +56,10 @@ function getPreviewURL(
   action: string | undefined,
   dollars: `${number}` | undefined
 ) {
-  if (!name) return `${daimoDomainAddress}/logo-link-preview.png`;
+  if (!name) return getAbsoluteUrl(`/logo-link-preview.png`);
 
   const uriEncodedAction = action ? encodeURIComponent(action) : undefined;
-  let previewURL = `${daimoDomainAddress}/preview?name=${name}`;
+  let previewURL = getAbsoluteUrl(`/preview?name=${name}`);
   if (uriEncodedAction)
     previewURL = previewURL.concat(`&action=${uriEncodedAction}`);
   if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
