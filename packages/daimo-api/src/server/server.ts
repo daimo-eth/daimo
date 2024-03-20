@@ -1,5 +1,6 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
+import "dotenv/config";
 import http from "http";
 
 import { getAppVersionTracker } from "./appVersion";
