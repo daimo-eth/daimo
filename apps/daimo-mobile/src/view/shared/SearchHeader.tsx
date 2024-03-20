@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect, useRef } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
@@ -8,10 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import {
-  AnimatedSearchInput,
-  AnimatedSearchInputRef,
-} from "./AnimatedSearchInput";
+import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { ContactBubble } from "./ContactBubble";
 import { color } from "./style";
@@ -33,7 +30,6 @@ export function SearchHeader({
 }) {
   const isFocused = useSharedValue(prefix != null);
   const nav = useNav();
-  const ref = useRef<AnimatedSearchInputRef>(null);
 
   useEffect(() => {
     isFocused.value = prefix != null;
@@ -93,14 +89,7 @@ export function SearchHeader({
   return (
     <View style={styles.header}>
       <Animated.View key="back" style={backButton}>
-        <TouchableOpacity
-          onPress={() => {
-            setPrefix(undefined);
-            Keyboard.dismiss();
-            ref.current?.closeInput();
-          }}
-          hitSlop={16}
-        >
+        <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
           <Octicons name="arrow-left" size={30} color={color.midnight} />
         </TouchableOpacity>
       </Animated.View>
@@ -110,13 +99,12 @@ export function SearchHeader({
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput
-        ref={ref}
         icon="search"
         placeholder="Search for user..."
         value={prefix || ""}
         onChange={setPrefix}
-        onFocus={() => setPrefix(prefix || "")}
-        onClose={() => setPrefix(undefined)}
+        onFocus={() => setPrefix("")}
+        onBlur={() => setPrefix(undefined)}
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
