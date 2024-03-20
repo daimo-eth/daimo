@@ -124,7 +124,6 @@ export class KeyRegistry {
         and chain_id = $3
         group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
       `,
-        //@ts-ignore
         [from, to, chainConfig.chainL2.id]
       )
     );

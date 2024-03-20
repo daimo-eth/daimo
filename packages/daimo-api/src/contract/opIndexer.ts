@@ -47,7 +47,6 @@ export class OpIndexer {
         from erc4337_user_op
         where block_num >= $1 and block_num <= $2 and chain_id = $3
       `,
-          //@ts-ignore
           [from, to, chainConfig.chainL2.id]
         )
     );

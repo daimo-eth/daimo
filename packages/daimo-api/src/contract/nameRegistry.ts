@@ -101,7 +101,6 @@ export class NameRegistry {
         and block_num <= $2
         and chain_id = $3
       `,
-          //@ts-ignore
           [from, to, chainConfig.chainL2.id]
         )
     );
