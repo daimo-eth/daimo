@@ -257,14 +257,14 @@ function AccountScreenBody({
             </View>
           )}
         </View>
-      </View>
-      <Spacer h={16} />
-      <View style={ss.container.padH8}>
-        <ButtonBig
-          type="subtle"
-          title="VIEW ON BLOCK EXPLORER"
-          onPress={openExplorer}
-        />
+        <Spacer h={16} />
+        <View style={ss.container.padH8}>
+          <ButtonBig
+            type="subtle"
+            title="VIEW ON BLOCK EXPLORER"
+            onPress={openExplorer}
+          />
+        </View>
       </View>
       {bottomSheet}
     </>
