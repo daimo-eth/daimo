@@ -63,8 +63,6 @@ export type Account = {
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: DisplayOpEvent[];
-  /** Requests sent from this account. */
-  trackedRequests: TrackedRequest[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
@@ -311,7 +309,6 @@ interface AccountV14 extends StoredModel {
   lastBalance: string;
   lastFinalizedBlock: number;
   recentTransfers: DisplayOpEvent[];
-  trackedRequests: TrackedRequest[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   pendingKeyRotation: KeyRotationOpEvent[];
@@ -361,7 +358,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: [],
@@ -400,7 +396,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -439,7 +434,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -479,7 +473,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -519,7 +512,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -558,7 +550,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -599,7 +590,6 @@ export function parseAccount(accountJSON?: string): Account | null {
     lastFinalizedBlock: a.lastFinalizedBlock,
 
     recentTransfers: a.recentTransfers,
-    trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
     pendingKeyRotation: a.pendingKeyRotation,
@@ -642,7 +632,6 @@ export function serializeAccount(account: Account | null): string {
     lastFinalizedBlock: account.lastFinalizedBlock,
 
     recentTransfers: account.recentTransfers,
-    trackedRequests: account.trackedRequests,
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
     pendingKeyRotation: account.pendingKeyRotation,
@@ -689,7 +678,6 @@ export function createEmptyAccount(
 
     namedAccounts: [],
     recentTransfers: [],
-    trackedRequests: [],
     accountKeys: [
       {
         slot: 0,
