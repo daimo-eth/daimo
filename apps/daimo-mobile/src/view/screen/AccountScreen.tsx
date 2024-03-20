@@ -4,6 +4,7 @@ import {
   DaimoLinkInviteCode,
   EAccount,
   assert,
+  canRequestFrom,
   canSendTo,
   getAccountName,
   getAddressContraction,
@@ -22,7 +23,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { addLastSendRecvTime } from "../../logic/daimoContacts";
+import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
@@ -157,8 +158,10 @@ function AccountScreenBody({
   }, [account, eAcc]);
 
   const canSend = canSendTo(eAcc);
-  const send = useCallback(() => {
-    const recipient = addLastSendRecvTime(account, eAcc);
+  const canRequest = canRequestFrom(eAcc);
+  const recipient = addLastTransferTimes(account, eAcc);
+
+  const goToSend = useCallback(() => {
     nav.navigate("SendTab", {
       screen: "SendTransfer",
       params: { recipient },
@@ -168,7 +171,7 @@ function AccountScreenBody({
   const goToRequest = () => {
     nav.navigate("HomeTab", {
       screen: "Receive",
-      params: { autoFocus: true, recipient: { type: "eAcc", ...eAcc } },
+      params: { autoFocus: true, recipient },
     });
   };
 
@@ -242,25 +245,26 @@ function AccountScreenBody({
           )}
         </View>
         <Spacer h={24} />
-        <View style={[ss.container.padH8, { flexDirection: "row" }]}>
-          <View style={{ flex: 1 }}>
-            <ButtonBig type="subtle" title="REQUEST" onPress={goToRequest} />
-          </View>
-          <Spacer w={16} />
-          <View style={{ flex: 1 }}>
-            {canSend && (
-              <ButtonBig type="primary" title="SEND" onPress={send} />
-            )}
-          </View>
+        <View style={[ss.container.padH8, styles.buttonGroup]}>
+          {canRequest && (
+            <View style={{ flex: 1 }}>
+              <ButtonBig type="subtle" title="REQUEST" onPress={goToRequest} />
+            </View>
+          )}
+          {canSend && (
+            <View style={{ flex: 1 }}>
+              <ButtonBig type="primary" title="SEND" onPress={goToSend} />
+            </View>
+          )}
         </View>
-        <Spacer h={16} />
-        <View style={ss.container.padH8}>
-          <ButtonBig
-            type="subtle"
-            title="VIEW ON BLOCK EXPLORER"
-            onPress={openExplorer}
-          />
-        </View>
+      </View>
+      <Spacer h={16} />
+      <View style={ss.container.padH8}>
+        <ButtonBig
+          type="subtle"
+          title="VIEW ON BLOCK EXPLORER"
+          onPress={openExplorer}
+        />
       </View>
       {bottomSheet}
     </>
@@ -277,5 +281,9 @@ const styles = StyleSheet.create({
   },
   screenPadding: {
     paddingHorizontal: 16,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    gap: 16,
   },
 });

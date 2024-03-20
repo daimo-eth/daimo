@@ -237,7 +237,7 @@ function ExtraRows({
         />
       )}
       <ExtraRow
-        title={mode === "receive" ? "Receive via link" : "Send via link"}
+        title={mode === "receive" ? "Request via link" : "Send via link"}
         inside={<Octicons name="link" size={14} color={color.primary} />}
         onPress={() => {
           if (mode === "receive") {

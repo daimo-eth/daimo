@@ -37,7 +37,7 @@ export function SearchHeader({
     isFocused.value = prefix != null;
   }, [prefix]);
 
-  const accountButton = useAnimatedStyle(() => {
+  const qrButton = useAnimatedStyle(() => {
     return {
       position: "absolute",
       opacity: isFocused.value
@@ -103,9 +103,9 @@ export function SearchHeader({
           <Octicons name="arrow-left" size={30} color={color.midnight} />
         </TouchableOpacity>
       </Animated.View>
-      <Animated.View key="icon" style={accountButton}>
+      <Animated.View key="icon" style={qrButton}>
         <ButtonCircle size={50} onPress={goToQR}>
-          <View style={styles.qrCircle}>
+          <View style={styles.circleButton}>
             <Octicons name="apps" size={24} color={color.primary} />
           </View>
         </ButtonCircle>
@@ -123,7 +123,7 @@ export function SearchHeader({
       />
       <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
         <ButtonCircle size={50} onPress={goToNotifications}>
-          <View style={styles.qrCircle}>
+          <View style={styles.circleButton}>
             <Octicons name="bell" size={24} color={color.primary} />
             {account.requests.length > 0 ? <NotificationBadge /> : null}
           </View>
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 16,
   },
-  qrCircle: {
+  circleButton: {
     width: 50,
     height: 50,
     borderRadius: 50,

@@ -246,50 +246,47 @@ export class PushNotifier {
 
     for (const log of logs) {
       // Only proceed if log is relevant.
-      if (
-        [DaimoRequestState.Pending, DaimoRequestState.Cancelled].includes(
-          log.status
-        )
-      ) {
-        const { tokenSymbol } = chainConfig;
-        const {
-          link: { dollars },
-          metadata,
-        } = log;
+      const done = [DaimoRequestState.Pending, DaimoRequestState.Cancelled];
+      if (done.includes(log.status)) continue;
 
-        // On fulfillment, ensure both parties have Daimo accounts
-        if (
-          log.recipient.name &&
-          log.status === DaimoRequestState.Fulfilled &&
-          log.fulfilledBy?.name
-        ) {
-          const pushTokens = this.pushTokens.get(log.recipient.addr);
+      const { tokenSymbol } = chainConfig;
+      const {
+        link: { dollars },
+        metadata,
+      } = log;
+
+      // On fulfillment, ensure both parties have Daimo accounts
+      if (
+        log.recipient.name &&
+        log.status === DaimoRequestState.Fulfilled &&
+        log.fulfilledBy?.name
+      ) {
+        const pushTokens = this.pushTokens.get(log.recipient.addr);
+
+        if (pushTokens) {
+          messages.push({
+            to: pushTokens,
+            badge: 1,
+            title: "Request fulfilled",
+            body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
+          });
+        }
+      }
+
+      // On creation, parse fulfiller name from metadata.
+      if (log.recipient.name && log.status === DaimoRequestState.Created) {
+        const { fulfiller } = parseRequestMetadata(metadata);
+
+        if (fulfiller) {
+          const pushTokens = this.pushTokens.get(fulfiller);
 
           if (pushTokens) {
             messages.push({
               to: pushTokens,
               badge: 1,
-              title: "Request fulfilled",
-              body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
+              title: "Request received",
+              body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
             });
-          }
-        }
-
-        // On creation, parse fulfiller name from metadata.
-        if (log.recipient.name && log.status === DaimoRequestState.Created) {
-          const { fulfiller } = parseRequestMetadata(metadata);
-
-          if (fulfiller) {
-            const pushTokens = this.pushTokens.get(fulfiller);
-
-            if (pushTokens) {
-              messages.push({
-                to: pushTokens,
-                badge: 1,
-                title: "Request received",
-                body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
-              });
-            }
           }
         }
       }

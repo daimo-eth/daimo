@@ -229,7 +229,7 @@ export class RequestIndexer {
     if (!existingSet) {
       this.requestsByAddress.set(address, new Set([id]));
     } else {
-      this.requestsByAddress.set(address, existingSet.add(id));
+      existingSet.add(id);
     }
   }
 
@@ -238,32 +238,26 @@ export class RequestIndexer {
     const reqs = [];
     const ids = this.requestsByAddress.get(addr);
 
-    if (ids) {
-      for (const requestId of Array.from(ids)) {
-        const request = this.requests.get(requestId);
+    for (const requestId of Array.from(ids || [])) {
+      const request = this.requests.get(requestId);
 
-        // If the request is cancelled or fulfilled, ignore.
-        if (
-          request &&
-          ![DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled].includes(
-            request.status
-          )
-        ) {
-          const { fulfiller } = parseRequestMetadata(request.metadata);
+      if (request == null) continue;
+      // If the request is cancelled or fulfilled, ignore.
+      const done = [DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled];
+      if (done.includes(request.status)) continue;
 
-          if (fulfiller) {
-            // Consider putting this directly on the request object.
-            // Handling here is to avoid confusion with `fulfilledBy`.
-            const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
+      const { fulfiller } = parseRequestMetadata(request.metadata);
+      if (!fulfiller) continue;
 
-            reqs.push({
-              type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
-              request,
-              fulfiller: fulfillerAccount,
-            } as const);
-          }
-        }
-      }
+      // Consider putting this directly on the request object.
+      // Handling here is to avoid confusion with `fulfilledBy`.
+      const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
+
+      reqs.push({
+        type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
+        request,
+        fulfiller: fulfillerAccount,
+      } as const);
     }
 
     return reqs;

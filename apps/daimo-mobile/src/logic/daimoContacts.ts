@@ -61,7 +61,7 @@ export function getDaimoContactKey(contact: DaimoContact): string {
 }
 
 /** Convert EAccount to EAccountContact */
-export function addLastSendRecvTime(
+export function addLastTransferTimes(
   account: Account,
   otherEAcc: EAccount | EAccountSearchResult
 ): EAccountContact {

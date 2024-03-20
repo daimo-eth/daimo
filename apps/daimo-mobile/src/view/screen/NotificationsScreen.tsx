@@ -19,7 +19,7 @@ import { ButtonSmall } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { ss } from "../shared/style";
+import { color, ss } from "../shared/style";
 import { TextBody, TextCenter } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -41,7 +41,9 @@ function NotificationsScreenInner({ account }: { account: Account }) {
           <View>
             <Spacer h={48} />
             <TextCenter>
-              <TextBody color="#777777">No notifications to display</TextBody>
+              <TextBody color={color.grayMid}>
+                No notifications to display
+              </TextBody>
             </TextCenter>
           </View>
         ) : (
@@ -82,7 +84,7 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
       <View style={{ flex: 1 }}>
         <NotificationMessage {...props} />
         <Spacer h={2} />
-        <TextBody color="#777777">
+        <TextBody color={color.grayMid}>
           {timeAgo(props.request.createdAt, now(), true)}
         </TextBody>
         <Spacer h={8} />
@@ -199,19 +201,20 @@ function NotificationActions({
 function NotificationMessage(info: DaimoRequestV2Info) {
   if (info.type === "recipient") {
     return (
-      <TextBody color="#777777">
+      <TextBody color={color.grayMid}>
         You requested{" "}
-        <TextBody color="#000000">${info.request.link.dollars}</TextBody> from{" "}
-        <TextBody color="#000000">{info.fulfiller.name}</TextBody>
+        <TextBody color={color.midnight}>${info.request.link.dollars}</TextBody>{" "}
+        from <TextBody color={color.midnight}>{info.fulfiller.name}</TextBody>
       </TextBody>
     );
   }
 
   return (
-    <TextBody color="#777777">
-      <TextBody color="#000000">{info.request.recipient.name}</TextBody>{" "}
+    <TextBody color={color.grayMid}>
+      <TextBody color={color.midnight}>{info.request.recipient.name}</TextBody>{" "}
       requested{" "}
-      <TextBody color="#000000">${info.request.link.dollars}</TextBody> USDC
+      <TextBody color={color.midnight}>${info.request.link.dollars}</TextBody>{" "}
+      USDC
     </TextBody>
   );
 }
