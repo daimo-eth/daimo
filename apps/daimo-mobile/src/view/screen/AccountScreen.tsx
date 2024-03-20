@@ -157,10 +157,9 @@ function AccountScreenBody({
     Linking.openURL(url);
   }, [account, eAcc]);
 
-  const canSend = canSendTo(eAcc);
-  const canRequest = canRequestFrom(eAcc);
   const recipient = addLastTransferTimes(account, eAcc);
 
+  const canSend = canSendTo(eAcc);
   const goToSend = useCallback(() => {
     nav.navigate("SendTab", {
       screen: "SendTransfer",
@@ -168,6 +167,7 @@ function AccountScreenBody({
     });
   }, [nav, eAcc, account]);
 
+  const canRequest = canRequestFrom(eAcc);
   const goToRequest = () => {
     nav.navigate("HomeTab", {
       screen: "Receive",
