@@ -20,7 +20,7 @@ const apiUrlMainnetWithChain = `${apiUrlM}/chain/8453`;
 function createRpcHook() {
   const reactQueryContext = createContext<QueryClient | undefined>(undefined);
   return {
-    trpc: createTRPCReact<AppRouter>({}),
+    trpc: createTRPCReact<AppRouter>({ context: reactQueryContext }),
     reactQueryContext,
     queryClient: new QueryClient({
       defaultOptions: {
