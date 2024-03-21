@@ -1,5 +1,6 @@
+import Octicons from "@expo/vector-icons/Octicons";
 import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
   StyleSheet,
@@ -8,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
@@ -17,7 +19,9 @@ import {
   MAX_FONT_SIZE_MULTIPLIER,
   TextCenter,
   TextLight,
+  TextLink,
 } from "./text";
+import { DispatcherContext } from "../../action/dispatch";
 import { useAccount } from "../../logic/accountManager";
 
 // Input components allows entry in range $0.01 to $99,999.99
@@ -42,8 +46,35 @@ export function AmountChooser({
 }) {
   // Show how much we have available
   const [account] = useAccount();
+  const dispatcher = useContext(DispatcherContext);
+
   if (account == null) return null;
   const dollarStr = getAmountText({ amount: account.lastBalance });
+  const showHelpModal = () =>
+    dispatcher.dispatch({
+      name: "helpModal",
+      title: "Why are there no fees?",
+      content: (
+        <>
+          <TextLight>Daimo uses Base, an Ethereum rollup.</TextLight>
+          <Spacer h={24} />
+          <TextLight>
+            Rollups support near-instant transactions that cost a few cents each
+            by bundling many transactions into a single L1 transaction. They
+            inherit the strong guarantees of Ethereum: like L1, Base is reliable
+            and secure, and works worldwide.
+          </TextLight>
+          <Spacer h={24} />
+          <TouchableOpacity
+            onPress={() => {
+              // TODO add link
+            }}
+          >
+            <TextLink>Learn more on L2Beat.</TextLink>
+          </TouchableOpacity>
+        </>
+      ),
+    });
 
   return (
     <View style={ss.container.padH16}>
@@ -56,11 +87,22 @@ export function AmountChooser({
         onFocus={onFocus}
       />
       <Spacer h={4} />
-      <TextCenter>
-        <TextLight>
-          {showAmountAvailable ? `${dollarStr} available` : " "}
-        </TextLight>
-      </TextCenter>
+      <View style={styles.availableText}>
+        <Spacer w={24} />
+        <TextCenter>
+          <TextLight>
+            {showAmountAvailable ? `${dollarStr} available` : " "}
+          </TextLight>
+        </TextCenter>
+        <TouchableOpacity onPress={showHelpModal}>
+          <Octicons
+            size={16}
+            name="info"
+            color={color.grayDark}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -192,6 +234,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
     color: color.midnight,
+  },
+  availableText: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  icon: {
+    paddingLeft: 8,
+    height: 16,
+    width: 24,
+  },
+  iconButton: {
+    height: 16,
+    width: 32,
+    position: "absolute",
   },
 });
 

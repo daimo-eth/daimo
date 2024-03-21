@@ -80,7 +80,7 @@ const bottomSheetSettings = {
     enableSwipeClose: false,
   },
   helpModal: {
-    snapPoints: [300],
+    snapPoints: [450],
     enableSwipeClose: true,
   },
 } as const;

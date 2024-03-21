@@ -17,6 +17,7 @@ export const color = {
   grayMid: "#717171", // TODO gray4
   grayDark: "#444", // TODO gray5
   midnight: "#262626", // TODO "black" = 111111
+  link: "#027AFE",
 };
 
 const textBase: TextStyle = {
@@ -140,6 +141,12 @@ export const ss = {
     },
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+    },
+    link: {
+      textDecorationLine: "underline",
+      color: color.link,
+      fontSize: 16,
+      fontWeight: "600",
     },
   }),
 };
