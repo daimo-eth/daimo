@@ -55,7 +55,7 @@ function generateSMS(sendParams: ComposeParams, mode: "send" | "receive") {
   return body;
 }
 
-export async function composeEmail(
+async function composeEmail(
   email: EmailAddress,
   mode: "send" | "receive"
 ): Promise<ComposeSend | undefined> {
@@ -84,7 +84,7 @@ export async function composeEmail(
   };
 }
 
-export async function composeSMS(
+async function composeSMS(
   phoneNumber: PhoneNumber,
   mode: "send" | "receive"
 ): Promise<ComposeSend | undefined> {
