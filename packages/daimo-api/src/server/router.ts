@@ -4,6 +4,7 @@ import {
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
+  now,
   zAddress,
   zBigIntStr,
   zHex,
@@ -104,10 +105,12 @@ export function createRouter(
     .use(tracerMiddleware)
     .use(readyMiddleware);
 
+  const startTimeS = now();
+
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
       // See readyMiddleware
-      return "healthy";
+      return { status: "healthy", uptimeS: now() - startTimeS };
     }),
 
     search: publicProcedure
