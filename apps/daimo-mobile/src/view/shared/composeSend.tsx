@@ -132,7 +132,6 @@ export async function getSendRecvLinkAction(
       : await composeSMS(recipient.phoneNumber, mode);
 
   if (!composer) {
-    Alert.alert("Wrong!");
     return {
       type: "share",
       exec: shareURL,
