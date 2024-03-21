@@ -18,38 +18,46 @@ export async function GET(_: Request, { params }: Context) {
   const addr = params.addr[0];
 
   try {
-    let resultBlob: Blob | undefined = undefined;
-    let contentType: string | undefined = undefined;
-    const cachedBlob = pfpCache.get(addr);
-
-    if (pfpCache.get(addr)) {
-      resultBlob = cachedBlob;
+    let result: Blob | undefined = undefined;
+    if (pfpCache.has(addr)) {
+      result = pfpCache.get(addr);
     } else {
-      const res = await rpc.getEthereumAccount.query({ addr: params.addr[0] });
-      const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
-
-      if (profilePicture) {
-        const data = await fetch(profilePicture);
-        contentType = data.headers.get("Content-Type") ?? undefined;
-        const blob = await data.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        const result = await sharp(buffer).resize(64, 64).toBuffer();
-        resultBlob = new Blob([result], { type: contentType });
-      }
+      result = await loadPFP(addr);
+      pfpCache.set(addr, result);
     }
 
-    if (resultBlob) {
-      const response = new NextResponse(resultBlob);
-      if (contentType) {
-        response.headers.set("Content-Type", contentType);
-      }
-      return response;
+    if (result == null) {
+      return NextResponse.json({ error: "No image found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "No image found" }, { status: 404 });
+    console.log(`[PROFILE] returning ${result.size}b PFP for ${addr}`);
+    const response = new NextResponse(result);
+    response.headers.set("Content-Type", result.type);
+    return response;
   } catch (error) {
+    console.error(`[PROFILE] error fetching PFP for ${addr}`, error);
     return NextResponse.json({ error }, { status: 500 });
   }
+}
+
+async function loadPFP(addr: string): Promise<Blob | undefined> {
+  console.log(`[PROFILE] cache miss, looking up PFP for ${addr}`);
+  const res = await rpc.getEthereumAccount.query({ addr });
+  const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
+
+  if (profilePicture == null) {
+    console.warn(`[PROFILE] no PFP for ${addr}: ${JSON.stringify(res)}`);
+    return undefined;
+  }
+
+  console.log(`[PROFILE] fetching PFP for ${addr}: ${profilePicture}`);
+  const data = await fetch(profilePicture);
+  const origBlob = await data.blob();
+  const buffer = Buffer.from(await origBlob.arrayBuffer());
+
+  // Resize to specified size & format
+  const result = await sharp(buffer).resize(128, 128).webp().toBuffer();
+  const blob = new Blob([result], { type: "image/webp" });
+
+  return blob;
 }
