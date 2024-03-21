@@ -180,18 +180,18 @@ function AppBody() {
               enablePanDownToClose={enableSwipeClose}
               enableDynamicSizing={bottomSheet === "helpModal"}
             >
-              <BottomSheetView>
-                {bottomSheet === "debug" && <DebugBottomSheet />}
-                {(bottomSheet === "connectFarcaster" ||
-                  bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
-                {bottomSheet === "helpModal" && bottomSheetAction && (
+              {bottomSheet === "debug" && <DebugBottomSheet />}
+              {(bottomSheet === "connectFarcaster" ||
+                bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+              {bottomSheet === "helpModal" && bottomSheetAction && (
+                <BottomSheetView>
                   <HelpBottomSheet
                     content={bottomSheetAction.content}
                     title={bottomSheetAction.title}
                     onPress={() => bottomSheetRef.current?.close()}
                   />
-                )}
-              </BottomSheetView>
+                </BottomSheetView>
+              )}
             </BottomSheet>
           </View>
         </SafeAreaProvider>
