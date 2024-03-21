@@ -5,6 +5,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import Octicons from "@expo/vector-icons/Octicons";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -13,6 +14,7 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useExitToHome, useNav } from "../../common/nav";
@@ -195,6 +197,7 @@ function DevicesSection({ account }: { account: Account }) {
       .filter((k) => k.rotationType === "add")
       .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
   }, [account.pendingKeyRotation])();
+  const dispatcher = useContext(DispatcherContext);
 
   return (
     <View style={styles.sectionWrap}>
@@ -211,6 +214,21 @@ function DevicesSection({ account }: { account: Account }) {
         title="Create a Passkey Backup"
         message="Secured by your password manager"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
+        onPressInfo={() =>
+          dispatcher.dispatch({
+            name: "helpModal",
+            title: "What is a passkey backup?",
+            content: (
+              <>
+                <TextLight>
+                  Passkeys are a safer and easier alternative to passwords. With
+                  passkeys, users can sign in to apps and websites with a
+                  biometric sensor.
+                </TextLight>
+              </>
+            ),
+          })
+        }
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
@@ -229,16 +247,30 @@ function ButtonInfo({
   icon,
   title,
   message,
+  onPressInfo,
 }: {
   icon: ReactNode;
   title: string;
   message: string;
+  onPressInfo?(): void;
 }) {
   return (
     <View style={styles.buttonInfoContainer}>
       {icon}
       <View style={styles.messageContainer}>
-        <TextBody color={color.midnight}>{title}</TextBody>
+        <View style={styles.textRow}>
+          <TextBody color={color.midnight}>{title}</TextBody>
+          {onPressInfo && (
+            <TouchableOpacity onPress={onPressInfo}>
+              <Octicons
+                size={16}
+                name="info"
+                color={color.grayDark}
+                style={styles.icon}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
         <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
       </View>
     </View>
@@ -446,5 +478,11 @@ const styles = StyleSheet.create({
   buttonInfoContainer: {
     flexDirection: "row",
     marginBottom: 20,
+  },
+  icon: {
+    marginLeft: 8,
+  },
+  textRow: {
+    flexDirection: "row",
   },
 });

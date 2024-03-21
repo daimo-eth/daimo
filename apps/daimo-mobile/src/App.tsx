@@ -5,14 +5,21 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Keyboard, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
 
-import { Dispatcher, DispatcherContext } from "./action/dispatch";
+import { Action, Dispatcher, DispatcherContext } from "./action/dispatch";
 import { useAccount } from "./logic/accountManager";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -22,6 +29,7 @@ import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
 import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
+import { HelpBottomSheet } from "./view/sheet/HelpBottomSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,6 +79,10 @@ const bottomSheetSettings = {
     snapPoints: ["66%"],
     enableSwipeClose: false,
   },
+  helpModal: {
+    snapPoints: [300],
+    enableSwipeClose: true,
+  },
 } as const;
 const defaultSnapPoints = ["10%"];
 
@@ -83,6 +95,9 @@ function AppBody() {
   // Global bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheet, setBottomSheet] = useState<GlobalBottomSheet>(null);
+  const [bottomSheetAction, setBottomSheetAction] = useState<
+    { title: string; content: ReactElement } | undefined
+  >();
   const settings = bottomSheet && bottomSheetSettings[bottomSheet];
   const snapPoints = settings?.snapPoints || defaultSnapPoints;
   const enableSwipeClose = settings?.enableSwipeClose || false;
@@ -133,6 +148,14 @@ function AppBody() {
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
+  const openHelp = (helpAction: Action) => {
+    setBottomSheet("helpModal");
+    if (helpAction.name === "helpModal") {
+      setBottomSheetAction(helpAction);
+    }
+  };
+  useEffect(() => dispatcher.register("helpModal", openHelp), []);
+
   return (
     <DispatcherContext.Provider value={dispatcher}>
       <ErrorBoundary fallbackRender={renderErrorFallback}>
@@ -156,6 +179,13 @@ function AppBody() {
               {bottomSheet === "debug" && <DebugBottomSheet />}
               {(bottomSheet === "connectFarcaster" ||
                 bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+              {bottomSheet === "helpModal" && bottomSheetAction && (
+                <HelpBottomSheet
+                  content={bottomSheetAction.content}
+                  title={bottomSheetAction.title}
+                  onPress={() => bottomSheetRef.current?.close()}
+                />
+              )}
             </BottomSheet>
           </View>
         </SafeAreaProvider>
