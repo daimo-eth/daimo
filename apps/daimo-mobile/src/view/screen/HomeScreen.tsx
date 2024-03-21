@@ -161,13 +161,14 @@ function HomeScreenInner({ account }: { account: Account }) {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         contentContainerStyle={styles.animatedScrollContent}
+        style={styles.scrollView}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
         scrollEventThrottle={8}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={[preventOverscrollStyle, styles.scrollView]}>
+        <Animated.View style={preventOverscrollStyle}>
           <Spacer h={Math.max(16, ins.top)} />
           {account.suggestedActions.length > 0 &&
             netState.status !== "offline" &&
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollView: {
-    flex: 1,
+    height: "100%",
   },
   animatedScrollContent: {
     height: "100%",
