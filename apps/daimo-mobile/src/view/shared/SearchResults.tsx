@@ -137,10 +137,17 @@ function RecipientRow({
     switch (recipient.type) {
       case "email":
       case "phoneNumber": {
-        nav.navigate("SendTab", {
-          screen: "SendLink",
-          params: { recipient },
-        });
+        if (mode === "receive") {
+          nav.navigate("HomeTab", {
+            screen: "Receive",
+            params: { recipient, autoFocus: true },
+          });
+        } else {
+          nav.navigate("SendTab", {
+            screen: "SendLink",
+            params: { recipient },
+          });
+        }
         return;
       }
       case "eAcc": {

@@ -23,7 +23,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
-import { EAccountContact } from "../../../logic/daimoContacts";
+import { EAccountContact, MsgContact } from "../../../logic/daimoContacts";
 import { env } from "../../../logic/env";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -31,6 +31,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
+import { getSendRecvLinkAction } from "../../shared/composeSend";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
@@ -49,7 +50,7 @@ function RequestScreenInnerV2({
   recipient,
 }: {
   account: Account;
-  recipient?: EAccountContact;
+  recipient?: EAccountContact | MsgContact;
 }) {
   const [dollars, setDollars] = useState(0);
 
@@ -60,6 +61,7 @@ function RequestScreenInnerV2({
   const textInputRef = useRef<TextInput>(null);
 
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
+
   const sendRequest = async () => {
     textInputRef.current?.blur();
     setAS("loading", "Requesting...");
@@ -67,27 +69,42 @@ function RequestScreenInnerV2({
     const id = generateRequestId();
     const idString = encodeRequestId(id);
 
-    const txHash = await rpcFunc.createRequestSponsored.mutate({
-      recipient: account.address,
-      idString,
-      amount: `${dollarsToAmount(dollars)}`,
-      fulfiller: recipient?.addr,
-    });
-
-    console.log(`[REQUEST] txHash ${txHash}`);
     setAS("loading", "Sharing...");
 
-    if (!recipient) {
-      const url = formatDaimoLink({
-        type: "requestv2",
-        id: idString,
-        recipient: account.name,
-        dollars: `${dollars}`,
-      });
+    const url = formatDaimoLink({
+      type: "requestv2",
+      id: idString,
+      recipient: account.name,
+      dollars: `${dollars}`,
+    });
 
+    if (!recipient) {
       const didShare = await shareURL(url);
       console.log(`[REQUEST] action ${didShare}`);
+    } else if (
+      recipient?.type === "email" ||
+      recipient?.type === "phoneNumber"
+    ) {
+      const { exec } = await getSendRecvLinkAction(
+        recipient,
+        account.name,
+        "receive"
+      );
+
+      const didShare = await exec(url, dollars);
+
+      console.log(`[REQUEST] action ${didShare}`);
+    } else {
+      const txHash = await rpcFunc.createRequestSponsored.mutate({
+        recipient: account.address,
+        idString,
+        amount: `${dollarsToAmount(dollars)}`,
+        fulfiller: recipient?.addr,
+      });
+
+      console.log(`[REQUEST] txHash ${txHash}`);
     }
+
     setAS("success");
     nav.navigate("HomeTab", { screen: "Home" });
   };

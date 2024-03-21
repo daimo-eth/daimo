@@ -38,6 +38,7 @@ export function generateRequestId() {
 export type DaimoRichRequestV2 = {
   /** Version number of rich request metadata format */
   v: number;
+  /** Proposed fulfiller - user to whom request is sent */
   fulfiller: Address | null;
 };
 

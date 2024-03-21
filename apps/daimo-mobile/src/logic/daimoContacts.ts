@@ -145,11 +145,11 @@ export function useRecipientSearch(
   if (recipients.length === 0) recipients.push(...looseMatchRecents);
 
   // If we have a valid phone number or email prefix, show it as a recipient
-  if (zEmailAddress.safeParse(prefix).success && !onlyDaimoContacts) {
+  if (zEmailAddress.safeParse(prefix).success) {
     recipients.push({ type: "email", email: prefix });
   }
 
-  if (zPhoneNumber.safeParse(prefix).success && !onlyDaimoContacts) {
+  if (zPhoneNumber.safeParse(prefix).success) {
     recipients.push({ type: "phoneNumber", phoneNumber: prefix });
   }
 
@@ -186,7 +186,7 @@ export function useRecipientSearch(
     searchContacts && enabled
   );
 
-  if (systemContacts.length > 0 && !onlyDaimoContacts) {
+  if (systemContacts.length > 0) {
     recipients.push(...systemContacts);
   }
 
