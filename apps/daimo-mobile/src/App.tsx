@@ -1,5 +1,8 @@
 import { now } from "@daimo/common";
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -80,7 +83,7 @@ const bottomSheetSettings = {
     enableSwipeClose: false,
   },
   helpModal: {
-    snapPoints: [450],
+    snapPoints: [],
     enableSwipeClose: true,
   },
 } as const;
@@ -175,17 +178,20 @@ function AppBody() {
               onChange={onChangeIndex}
               onClose={onClose}
               enablePanDownToClose={enableSwipeClose}
+              enableDynamicSizing={bottomSheet === "helpModal"}
             >
-              {bottomSheet === "debug" && <DebugBottomSheet />}
-              {(bottomSheet === "connectFarcaster" ||
-                bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
-              {bottomSheet === "helpModal" && bottomSheetAction && (
-                <HelpBottomSheet
-                  content={bottomSheetAction.content}
-                  title={bottomSheetAction.title}
-                  onPress={() => bottomSheetRef.current?.close()}
-                />
-              )}
+              <BottomSheetView>
+                {bottomSheet === "debug" && <DebugBottomSheet />}
+                {(bottomSheet === "connectFarcaster" ||
+                  bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+                {bottomSheet === "helpModal" && bottomSheetAction && (
+                  <HelpBottomSheet
+                    content={bottomSheetAction.content}
+                    title={bottomSheetAction.title}
+                    onPress={() => bottomSheetRef.current?.close()}
+                  />
+                )}
+              </BottomSheetView>
             </BottomSheet>
           </View>
         </SafeAreaProvider>

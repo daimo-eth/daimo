@@ -26,6 +26,7 @@ export function HelpBottomSheet({
       {content}
       <Spacer h={32} />
       <ButtonMed title="GOT IT" onPress={onPress} type="subtle" />
+      <Spacer h={24} />
     </View>
   );
 }
