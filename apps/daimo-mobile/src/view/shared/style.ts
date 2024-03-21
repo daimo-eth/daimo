@@ -143,7 +143,6 @@ export const ss = {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
     },
     link: {
-      textDecorationLine: "underline",
       color: color.link,
       fontSize: 16,
       fontWeight: "600",
