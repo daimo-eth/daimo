@@ -1,14 +1,14 @@
-<img alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/637cd1be-b4b9-4bad-a4e0-df2ebf9216a8">
+<img alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/3207b2bf-f93d-4c26-b56f-1545e4e7c182">
 
-### Daimo is a stablecoin wallet
+### Daimo is a stablecoin personal bank
 
-Single stablecoin, single rollup, payments only. Cross-chain transfers coming soon.
+Today, we run on USDC on Base. Cross-chain transfers and more coming soon.
 
 No seed phrases. Keys are generated in your phone's secure enclave and never
 leave. You can add multiple devices and create Passkey backups to secure your
 account. Under the hood, it's a ERC-4337 contract wallet.
 
-The mission is to make an excellent experience. Payments should be fast, secure, and permissionless.
+The mission is to make an excellent experience. Sound assets, secure cryptography, your coins in your control.
 
 <!-- THE FAQ BELOW APPEARS AUTOMATICALLY ON THE WEBSITE. EDIT WITH CARE. -->
 
