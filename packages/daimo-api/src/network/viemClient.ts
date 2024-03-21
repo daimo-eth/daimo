@@ -113,6 +113,7 @@ export class ViemClient {
 
       // Execute, increment our nonce (saves us if we get a stale tx count)
       args.nonce = this.nextNonce;
+      args.gas = 2_000_000n;
       const ret = await this.walletClient.writeContract(args);
       this.nextNonce += 1;
       return ret;
