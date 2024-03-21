@@ -132,6 +132,16 @@ export function ButtonMed(props: ButtonProps) {
     />
   );
 }
+export function ButtonSmall(props: ButtonProps) {
+  return (
+    <Button
+      {...props}
+      style={useStyle(buttonStyles.small, props)}
+      touchUnderlay={useTouchUnderlay(props.type)}
+      icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
+    />
+  );
+}
 
 export function TextButton(props: TextButtonProps) {
   return (
@@ -273,8 +283,9 @@ const buttonStyles = {
     button: {
       paddingHorizontal: 24,
       paddingVertical: 20,
-      borderRadius: 8,
+      borderRadius: 4,
       backgroundColor: color.primaryBgLight,
+      height: 60,
     },
     title: {
       fontSize: 14,
@@ -299,9 +310,12 @@ const buttonStyles = {
   }),
   small: StyleSheet.create({
     button: {
+      justifyContent: "center",
+      alignItems: "center",
       paddingHorizontal: 16,
       paddingVertical: 8,
-      borderRadius: 8,
+      borderRadius: 4,
+      height: 40,
     },
     title: {
       fontSize: 14,

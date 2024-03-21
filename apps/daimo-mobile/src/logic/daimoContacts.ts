@@ -61,7 +61,7 @@ export function getDaimoContactKey(contact: DaimoContact): string {
 }
 
 /** Convert EAccount to EAccountContact */
-export function addLastSendRecvTime(
+export function addLastTransferTimes(
   account: Account,
   otherEAcc: EAccount | EAccountSearchResult
 ): EAccountContact {
@@ -89,7 +89,8 @@ export function getContactProfilePicture(r: DaimoContact) {
 export function useRecipientSearch(
   account: Account,
   prefix: string,
-  searchContacts: boolean
+  searchContacts: boolean,
+  onlyDaimoContacts?: boolean
 ) {
   prefix = prefix.toLowerCase();
 
@@ -109,6 +110,8 @@ export function useRecipientSearch(
     if (recentsByAddr.has(other)) continue;
 
     const acc = getCachedEAccount(other);
+
+    if (onlyDaimoContacts && !acc.name) continue;
 
     // HACK: ignore transfers to specially labelled addresses like "payment link"
     // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
@@ -159,6 +162,7 @@ export function useRecipientSearch(
     for (const account of res.data) {
       if (recipients.find((r) => r.type === "eAcc" && r.addr === account.addr))
         continue;
+      if (onlyDaimoContacts && !account.name) continue;
 
       // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);
@@ -181,7 +185,10 @@ export function useRecipientSearch(
     prefix,
     searchContacts && enabled
   );
-  if (systemContacts.length > 0) recipients.push(...systemContacts);
+
+  if (systemContacts.length > 0) {
+    recipients.push(...systemContacts);
+  }
 
   return {
     isSearching: enabled,

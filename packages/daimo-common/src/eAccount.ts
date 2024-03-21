@@ -57,6 +57,10 @@ export function canSendTo(acc: EAccount): boolean {
   return ![AddrLabel.PaymentLink, AddrLabel.Paymaster].includes(acc.label);
 }
 
+export function canRequestFrom(acc: EAccount): boolean {
+  return !!acc.name;
+}
+
 /** True if account has a display name, false if bare address. */
 export function hasAccountName(acc: EAccount): boolean {
   return !!(acc.name || acc.label || acc.ensName);

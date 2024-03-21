@@ -3,6 +3,7 @@ import {
   ChainGasConstants,
   DaimoInviteCodeStatus,
   DaimoLinkNote,
+  DaimoRequestV2Info,
   DisplayOpEvent,
   EAccount,
   KeyData,
@@ -18,7 +19,6 @@ import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
-import { EAccountContact } from "../logic/daimoContacts";
 import { env } from "../logic/env";
 
 /**
@@ -63,8 +63,6 @@ export type Account = {
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
   recentTransfers: DisplayOpEvent[];
-  /** Requests sent from this account. */
-  trackedRequests: TrackedRequest[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
@@ -97,6 +95,10 @@ export type Account = {
 
   /** True once we've completed onboarding. */
   isOnboarded: boolean;
+
+  /** Request data for notifications */
+  requests: DaimoRequestV2Info[];
+  declinedRequestIDs: string[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -105,10 +107,6 @@ export function toEAccount(account: Account): EAccount {
     name: account.name,
     profilePicture: account.profilePicture,
   };
-}
-
-export function toEAccountContact(account: Account): EAccountContact {
-  return { type: "eAcc", ...toEAccount(account) };
 }
 
 // Pre-v9 chain gas constants
@@ -295,6 +293,42 @@ interface AccountV13 extends StoredModel {
   isOnboarded?: boolean;
 }
 
+interface AccountV14 extends StoredModel {
+  storageVersion: 14;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: DisplayOpEvent[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
+  recommendedExchanges: RecommendedExchange[];
+  suggestedActions: SuggestedAction[];
+  dismissedActionIDs: string[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+  linkedAccounts: LinkedAccount[];
+  inviteLinkStatus: DaimoInviteCodeStatus | null;
+  invitees: EAccount[];
+
+  isOnboarded?: boolean;
+
+  requests: DaimoRequestV2Info[];
+  declinedRequestIDs: string[];
+}
+
 export function parseAccount(accountJSON?: string): Account | null {
   if (!accountJSON) return null;
   const model = JSON.parse(accountJSON) as StoredModel;
@@ -324,7 +358,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: [],
@@ -341,6 +374,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       invitees: [],
 
       isOnboarded: true,
+
+      requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -360,7 +396,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -377,6 +412,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       invitees: [],
 
       isOnboarded: true,
+
+      requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -396,7 +434,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -413,6 +450,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       invitees: [],
 
       isOnboarded: true,
+
+      requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -433,7 +473,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -450,6 +489,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       invitees: [],
 
       isOnboarded: true,
+
+      requests: [],
+      declinedRequestIDs: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -470,7 +512,6 @@ export function parseAccount(accountJSON?: string): Account | null {
       lastFinalizedBlock: a.lastFinalizedBlock,
 
       recentTransfers: a.recentTransfers,
-      trackedRequests: a.trackedRequests,
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -486,10 +527,53 @@ export function parseAccount(accountJSON?: string): Account | null {
       invitees: [],
 
       isOnboarded: true,
+
+      requests: [],
+      declinedRequestIDs: [],
+    };
+  } else if (model.storageVersion === 13) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
+    const a = model as AccountV13;
+
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: a.recommendedExchanges,
+      suggestedActions: a.suggestedActions,
+      dismissedActionIDs: a.dismissedActionIDs,
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+
+      linkedAccounts: a.linkedAccounts || [],
+      inviteLinkStatus: a.inviteLinkStatus,
+      invitees: a.invitees,
+
+      isOnboarded: a.isOnboarded ?? true,
+
+      requests: [],
+      declinedRequestIDs: [],
     };
   }
-  assert(model.storageVersion === 13, "Unknown account storage version");
-  const a = model as AccountV13;
+
+  assert(model.storageVersion === 14, "Unknown account storage version");
+  const a = model as AccountV14;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -506,7 +590,6 @@ export function parseAccount(accountJSON?: string): Account | null {
     lastFinalizedBlock: a.lastFinalizedBlock,
 
     recentTransfers: a.recentTransfers,
-    trackedRequests: a.trackedRequests,
     namedAccounts: a.namedAccounts,
     accountKeys: a.accountKeys,
     pendingKeyRotation: a.pendingKeyRotation,
@@ -523,14 +606,17 @@ export function parseAccount(accountJSON?: string): Account | null {
     invitees: a.invitees,
 
     isOnboarded: a.isOnboarded ?? true,
+
+    requests: a.requests,
+    declinedRequestIDs: a.declinedRequestIDs,
   };
 }
 
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV13 = {
-    storageVersion: 13,
+  const model: AccountV14 = {
+    storageVersion: 14,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -546,7 +632,6 @@ export function serializeAccount(account: Account | null): string {
     lastFinalizedBlock: account.lastFinalizedBlock,
 
     recentTransfers: account.recentTransfers,
-    trackedRequests: account.trackedRequests,
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
     pendingKeyRotation: account.pendingKeyRotation,
@@ -563,6 +648,9 @@ export function serializeAccount(account: Account | null): string {
     invitees: account.invitees,
 
     isOnboarded: account.isOnboarded,
+
+    requests: account.requests,
+    declinedRequestIDs: account.declinedRequestIDs,
   };
 
   return JSON.stringify(model);
@@ -590,7 +678,6 @@ export function createEmptyAccount(
 
     namedAccounts: [],
     recentTransfers: [],
-    trackedRequests: [],
     accountKeys: [
       {
         slot: 0,
@@ -618,5 +705,8 @@ export function createEmptyAccount(
     invitees: [],
 
     isOnboarded: false,
+
+    requests: [],
+    declinedRequestIDs: [],
   };
 }

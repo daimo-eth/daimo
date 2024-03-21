@@ -2,10 +2,13 @@ import {
   AddrLabel,
   DaimoNoteState,
   DaimoNoteStatus,
+  DaimoRequestState,
+  DaimoRequestV2Status,
   assert,
   assertNotNull,
   getAccountName,
   getSlotLabel,
+  parseRequestMetadata,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, formatUnits, getAddress } from "viem";
@@ -44,6 +47,7 @@ export class PushNotifier {
     this.coinIndexer.addListener(this.handleTransfers);
     this.noteIndexer.addListener(this.handleNoteOps);
     this.keyReg.addListener(this.handleKeyRotations);
+    this.requestIndexer.addListener(this.handleRequests);
 
     // Load Expo push notification tokens
     const rows = await retryBackoff(`loadPushTokens`, () =>
@@ -72,6 +76,12 @@ export class PushNotifier {
   private handleKeyRotations = async (logs: KeyChange[]) => {
     console.log(`[PUSH] got ${logs.length} key rotations`);
     const messages = this.getPushMessagesFromKeyRotations(logs);
+    this.maybeSendNotifications(messages);
+  };
+
+  private handleRequests = async (logs: DaimoRequestV2Status[]) => {
+    console.log(`[PUSH] got ${logs.length} requests`);
+    const messages = this.getPushMessagesFromRequests(logs);
     this.maybeSendNotifications(messages);
   };
 
@@ -227,6 +237,62 @@ export class PushNotifier {
         data: { txHash },
       },
     ];
+  }
+
+  private getPushMessagesFromRequests(
+    logs: DaimoRequestV2Status[]
+  ): ExpoPushMessage[] {
+    const messages = [];
+
+    for (const log of logs) {
+      // Only proceed if log is relevant.
+      const done = [DaimoRequestState.Pending, DaimoRequestState.Cancelled];
+      if (done.includes(log.status)) continue;
+
+      const { tokenSymbol } = chainConfig;
+      const {
+        link: { dollars },
+        metadata,
+      } = log;
+
+      // On fulfillment, ensure both parties have Daimo accounts
+      if (
+        log.recipient.name &&
+        log.status === DaimoRequestState.Fulfilled &&
+        log.fulfilledBy?.name
+      ) {
+        const pushTokens = this.pushTokens.get(log.recipient.addr);
+
+        if (pushTokens) {
+          messages.push({
+            to: pushTokens,
+            badge: 1,
+            title: "Request fulfilled",
+            body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
+          });
+        }
+      }
+
+      // On creation, parse fulfiller name from metadata.
+      if (log.recipient.name && log.status === DaimoRequestState.Created) {
+        const { fulfiller } = parseRequestMetadata(metadata);
+
+        if (fulfiller) {
+          const pushTokens = this.pushTokens.get(fulfiller);
+
+          if (pushTokens) {
+            messages.push({
+              to: pushTokens,
+              badge: 1,
+              title: "Request received",
+              body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
+            });
+          }
+        }
+      }
+    }
+
+    return messages;
   }
 
   getPushMessagesFromNoteOps(logs: DaimoNoteStatus[]) {

@@ -1,24 +1,28 @@
 import { TextInput, View } from "react-native";
 
+import { InputBig } from "./InputBig";
 import { SearchResults } from "./SearchResults";
-import { useContactsPermission } from "../../../logic/systemContacts";
-import { InputBig } from "../../shared/InputBig";
-import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import Spacer from "./Spacer";
+import { ss } from "./style";
+import { useContactsPermission } from "../../logic/systemContacts";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
  *  or a system contact with phone number or email. */
-export function SearchTab({
-  prefix,
-  setPrefix,
-  autoFocus,
-  textInputRef,
-}: {
+type SearchScreenProps = {
   prefix: string;
   setPrefix: (prefix: string) => void;
   autoFocus?: boolean;
   textInputRef: React.RefObject<TextInput>;
-}) {
+  mode: "send" | "receive";
+};
+
+export function SearchScreen({
+  prefix,
+  setPrefix,
+  autoFocus,
+  textInputRef,
+  mode,
+}: SearchScreenProps) {
   const contactsAccess = useContactsPermission();
 
   const placeHolderText = contactsAccess.permission?.granted
@@ -42,7 +46,7 @@ export function SearchTab({
         <SearchResults
           contactsAccess={contactsAccess}
           prefix={prefix}
-          mode="send"
+          mode={mode}
         />
       </View>
     </>

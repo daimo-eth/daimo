@@ -25,7 +25,7 @@ import {
 } from "../../../common/nav";
 import {
   EAccountContact,
-  addLastSendRecvTime,
+  addLastTransferTimes,
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
@@ -79,7 +79,10 @@ function SendScreenInner({
       else if (requestFetch.error)
         return <ErrorRowCentered error={requestFetch.error} />;
       else if (requestStatus) {
-        const recipient = addLastSendRecvTime(account, requestStatus.recipient);
+        const recipient = addLastTransferTimes(
+          account,
+          requestStatus.recipient
+        );
         if (requestStatus.link.type === "requestv2") {
           return (
             <SendConfirm

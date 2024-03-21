@@ -4,7 +4,10 @@ import {
   amountToDollars,
   getEAccountStr,
   encodeRequestId,
+  parseRequestMetadata,
+  guessTimestampFromNum,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -21,6 +24,7 @@ interface RequestCreatedLog {
   amount: bigint;
   metadata: Hex;
   logAddr: Address;
+  blockNumber: bigint;
 }
 
 interface RequestFulfilledLog {
@@ -33,6 +37,7 @@ interface RequestFulfilledLog {
 /* Request contract. Tracks request creation and fulfillment. */
 export class RequestIndexer {
   private requests: Map<bigint, DaimoRequestV2Status> = new Map();
+  private requestsByAddress: Map<Address, Set<bigint>> = new Map();
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
@@ -73,7 +78,8 @@ export class RequestIndexer {
             creator,
             amount,
             metadata,
-            log_addr
+            log_addr,
+            block_num
           from request_created
           where block_num >= $1
           and block_num <= $2
@@ -122,8 +128,22 @@ export class RequestIndexer {
       creator,
       status: DaimoRequestState.Created,
       metadata: log.metadata,
+      createdAt: guessTimestampFromNum(
+        log.blockNumber,
+        daimoChainFromId(chainConfig.chainL2.id)
+      ),
     };
     this.requests.set(log.id, requestStatus);
+
+    // Parse metadata for fulfiller and add address to map.
+    // For now, this is sufficient proof that the request was created on
+    // Daimo.
+    const { fulfiller } = parseRequestMetadata(log.metadata);
+
+    if (fulfiller) {
+      this.storeReqByAddress(fulfiller, log.id);
+      this.storeReqByAddress(recipient.addr, log.id);
+    }
 
     return requestStatus;
   }
@@ -203,6 +223,46 @@ export class RequestIndexer {
     return statuses as DaimoRequestV2Status[];
   }
 
+  private storeReqByAddress(address: Address, id: bigint) {
+    const existingSet = this.requestsByAddress.get(address);
+
+    if (!existingSet) {
+      this.requestsByAddress.set(address, new Set([id]));
+    } else {
+      existingSet.add(id);
+    }
+  }
+
+  // Fetch requests made/received by a user
+  async getUserRequests(addr: Address) {
+    const reqs = [];
+    const ids = this.requestsByAddress.get(addr);
+
+    for (const requestId of Array.from(ids || [])) {
+      const request = this.requests.get(requestId);
+
+      if (request == null) continue;
+      // If the request is cancelled or fulfilled, ignore.
+      const done = [DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled];
+      if (done.includes(request.status)) continue;
+
+      const { fulfiller } = parseRequestMetadata(request.metadata);
+      if (!fulfiller) continue;
+
+      // Consider putting this directly on the request object.
+      // Handling here is to avoid confusion with `fulfilledBy`.
+      const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
+
+      reqs.push({
+        type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
+        request,
+        fulfiller: fulfillerAccount,
+      } as const);
+    }
+
+    return reqs;
+  }
+
   getRequestStatusById(id: bigint): DaimoRequestV2Status | null {
     return this.requests.get(id) || null;
   }
@@ -229,6 +289,7 @@ function rowToRequestCreatedLog(r: any): RequestCreatedLog {
     amount: BigInt(r.amount),
     metadata: bytesToHex(r.metadata),
     logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+    blockNumber: BigInt(r.block_num),
   };
 }
 

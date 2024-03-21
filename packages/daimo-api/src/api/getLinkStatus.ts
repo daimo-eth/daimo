@@ -9,6 +9,7 @@ import {
   EAccount,
   assert,
   decodeRequestIdString,
+  now,
   parseDaimoLink,
 } from "@daimo/common";
 
@@ -74,6 +75,7 @@ export async function getLinkStatus(
           creator: undefined,
           status: DaimoRequestState.Pending,
           metadata: `0x`,
+          createdAt: now(),
         };
         return pending;
       } else {
