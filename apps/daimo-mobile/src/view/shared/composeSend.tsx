@@ -1,5 +1,5 @@
 import { EmailAddress, PhoneNumber } from "@daimo/common";
-import { Alert, Linking, Platform } from "react-native";
+import { Linking, Platform } from "react-native";
 import { getEmailClients, openComposer } from "react-native-email-link";
 
 import { shareURL } from "./shareURL";
