@@ -11,7 +11,7 @@ type FrameInputMetadata = {
   text: string;
 };
 
-type FrameMetadataType = {
+export type FrameMetadataType = {
   buttons?: [FrameButtonMetadata, ...FrameButtonMetadata[]];
   image: string;
   input?: FrameInputMetadata;
