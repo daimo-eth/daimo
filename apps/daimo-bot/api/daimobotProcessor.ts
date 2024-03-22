@@ -34,10 +34,9 @@ const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
 assert(!!process.env.FARCASTER_ID, "FARCASTER_ID is not defined");
 const FARCASTER_ID = process.env.FARCASTER_ID;
 
+// Responds to Farcaster casts as @daimobot
+// Makes it easy for people on Farcaster to pay each other onchain.
 export class DaimobotProcessor {
-  //* Responds to Farcaster casts as @daimobot
-  //* Makes it easy for people on Farcaster to pay each other onchain
-
   private text: string;
   private castId: string;
   private senderFid: number;
@@ -187,7 +186,7 @@ export class DaimobotProcessor {
     cleanedAmount: number;
   } | null {
     const match = this.text?.match(
-      /@daimobot (request|pay) \$([0-9]*\.?[0-9]{1,2})/
+      /@daimobot (request|pay) \$?([0-9]*\.?[0-9]{1,2})/
     );
     console.log(`[DAIMOBOT] checking: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
