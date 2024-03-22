@@ -26,6 +26,7 @@ export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest = 5700000;
   private batchSize = 20000;
+  private isIndexing = false;
 
   private indexers: indexer[] = [];
   private pg: Pool;
@@ -70,17 +71,29 @@ export class Watcher {
     await this.indexRange(this.latest, await this.getShovelLatest());
   }
 
+  // Watches shovel for new blocks, and indexes them.
+  // Skip indexing if it's already indexing.
   async watch() {
     setInterval(async () => {
-      const shovelLatest = await this.getShovelLatest();
-      const localLatest = await this.index(
-        this.latest + 1,
-        shovelLatest,
-        this.batchSize
-      );
-      // localLatest <= 0 when there are no new blocks in shovel
-      // or, for whatever reason, we are ahead of shovel.
-      if (localLatest > this.latest) this.latest = localLatest;
+      try {
+        if (this.isIndexing) {
+          console.log(`[SHOVEL] skipping tick, already indexing`);
+          return;
+        }
+        this.isIndexing = true;
+
+        const shovelLatest = await this.getShovelLatest();
+        const localLatest = await this.index(
+          this.latest + 1,
+          shovelLatest,
+          this.batchSize
+        );
+        // localLatest <= 0 when there are no new blocks in shovel
+        // or, for whatever reason, we are ahead of shovel.
+        if (localLatest > this.latest) this.latest = localLatest;
+      } finally {
+        this.isIndexing = false;
+      }
     }, 1000);
   }
 
