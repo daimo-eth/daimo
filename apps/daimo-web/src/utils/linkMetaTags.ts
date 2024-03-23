@@ -19,6 +19,9 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
 
   // If it's a request, make it frame with button to check status.
   const frameMeta = getFrameForLinkStatus(desc, "✳️ Check status");
+  console.log(
+    `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`
+  );
   if (frameMeta) meta.other = getFrameMetadata(frameMeta);
 
   return meta;
@@ -29,10 +32,10 @@ export function getFrameForLinkStatus(
   recheckLabel: string
 ): FrameMetadataType | undefined {
   const { name, action, dollars, linkStatus } = desc;
-  const previewURL = getPreviewURL(name, action, dollars);
 
   // If it's a request, make it frame with button to check status.
   if (linkStatus && linkStatus.link.type === "requestv2") {
+    const previewURL = getPreviewURL(name, action, dollars);
     const { status } = linkStatus as DaimoRequestV2Status;
     const isFinalized = [
       DaimoRequestState.Fulfilled,

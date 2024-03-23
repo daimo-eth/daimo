@@ -10,13 +10,7 @@ import {
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import * as dotenv from "dotenv";
 
-import {
-  CONNECT_FC_MESSAGE,
-  DAIMOBOT_INPUT_COMMAND_NOT_VALID,
-  PARENT_CAST_AUTHOR_NOT_FOUND,
-  PAYMENT_CONNECT_FC_MESSAGE,
-  REQUEST_PAYMENT_MESSAGE,
-} from "./botResponses";
+import { BotResp } from "./botResponses";
 import { trpcClient } from "./trpcClient";
 import { SendCastOptions, TRPCClient, WebhookEvent } from "./types";
 
@@ -87,7 +81,7 @@ export class DaimobotProcessor {
     const daimobotCommand = this._tryExtractCommand();
     if (!daimobotCommand) {
       console.log("Cast follows neither request nor pay format.");
-      this.publishCastReply(DAIMOBOT_INPUT_COMMAND_NOT_VALID);
+      this.publishCastReply(BotResp.commandNotValid());
       return;
     }
 
@@ -119,10 +113,8 @@ export class DaimobotProcessor {
       console.log(
         "Sender not registered with Farcaster. Sending a response cast."
       );
-      this.publishCastReply(
-        CONNECT_FC_MESSAGE
-        // TODO if there's a convenience url to connect Farcaster, add here
-      );
+      // TODO: deeplink into the connect farcaster flow
+      this.publishCastReply(BotResp.connectFarcasterToContinue());
       return;
     }
 
@@ -131,14 +123,8 @@ export class DaimobotProcessor {
       senderEthAccount
     );
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(
-        cleanedAmount,
-        this.authorUsername,
-        daimoShareUrl
-      ),
-      {
-        embeds: [{ url: daimoShareUrl }],
-      }
+      BotResp.request(cleanedAmount, this.authorUsername, daimoShareUrl),
+      { embeds: [{ url: daimoShareUrl }] }
     );
   }
 
@@ -148,7 +134,7 @@ export class DaimobotProcessor {
       console.warn(
         "No parent author FID found, thus no one to prospectively pay."
       );
-      this.publishCastReply(PARENT_CAST_AUTHOR_NOT_FOUND);
+      this.publishCastReply(BotResp.mustReplyToPayOrRequest());
       return;
     }
     const recipientEthAccount =
@@ -163,8 +149,7 @@ export class DaimobotProcessor {
         "Recipient not registered with Farcaster. Sending a response cast."
       );
       this.publishCastReply(
-        PAYMENT_CONNECT_FC_MESSAGE(recipientUsername)
-        // TODO if there's a convenience url to connect Farcaster, add here
+        BotResp.noDaimoOrEthAccountFound(recipientUsername)
       );
       return;
     }
@@ -174,7 +159,7 @@ export class DaimobotProcessor {
     );
 
     this.publishCastReply(
-      REQUEST_PAYMENT_MESSAGE(cleanedAmount, recipientUsername, daimoShareUrl),
+      BotResp.request(cleanedAmount, recipientUsername, daimoShareUrl),
       {
         embeds: [{ url: daimoShareUrl }],
       }
