@@ -26,56 +26,66 @@ export interface LinkStatusDesc {
 export async function loadLinkStatusDesc(
   url: string
 ): Promise<LinkStatusDesc | null> {
-  let res: DaimoLinkStatus;
+  let linkStatus: DaimoLinkStatus;
   try {
-    res = await rpc.getLinkStatus.query({ url });
+    linkStatus = await rpc.getLinkStatus.query({ url });
   } catch (err) {
     console.warn(`Error loading link status for ${url}`, err);
-    const link = parseDaimoLink(url);
-    if (link == null) {
-      return {
-        name: "Daimo",
-        description: "Unrecognized link",
-      };
-    }
-
-    switch (link.type) {
-      case "account":
-        return {
-          name: `${link.account}`,
-          description: "Couldn't load account",
-        };
-      case "request":
-      case "requestv2":
-        return {
-          name: `${link.recipient}`,
-          action: `is requesting`,
-          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load request status",
-          memo: link.type === "requestv2" ? link.memo : undefined,
-        };
-      case "notev2":
-        return {
-          name: `${link.sender}`,
-          action: `sent you`,
-          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load payment link",
-        };
-      case "note":
-        return {
-          name: `${link.previewSender}`,
-          action: `sent you`,
-          dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load payment link",
-        };
-      default:
-        return {
-          name: "Daimo",
-          description: "Unhandled link type: " + link.type,
-        };
-    }
+    return getLinkDescCantLoadStatus(url);
   }
 
+  console.log(`[LINK] got status for ${url}: ${JSON.stringify(linkStatus)}`);
+  const ret = getLinkDescFromStatus(linkStatus);
+  return { ...ret, linkStatus };
+}
+
+function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
+  const link = parseDaimoLink(url);
+  if (link == null) {
+    return {
+      name: "Daimo",
+      description: "Unrecognized link",
+    };
+  }
+
+  switch (link.type) {
+    case "account":
+      return {
+        name: `${link.account}`,
+        description: "Couldn't load account",
+      };
+    case "request":
+    case "requestv2":
+      return {
+        name: `${link.recipient}`,
+        action: `is requesting`,
+        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+        description: "Couldn't load request status",
+        memo: link.type === "requestv2" ? link.memo : undefined,
+      };
+    case "notev2":
+      return {
+        name: `${link.sender}`,
+        action: `sent you`,
+        dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
+        description: "Couldn't load payment link",
+      };
+    case "note":
+      return {
+        name: `${link.previewSender}`,
+        action: `sent you`,
+        dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
+        description: "Couldn't load payment link",
+      };
+    default:
+      return {
+        name: "Daimo",
+        description: "Unhandled link type: " + link.type,
+      };
+  }
+}
+
+function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
   // Handle link status
   const resLinkType = res.link.type;
   switch (resLinkType) {
@@ -95,7 +105,6 @@ export async function loadLinkStatusDesc(
           action: `is requesting`,
           dollars: `${res.link.dollars}`,
           description: "Pay with Daimo",
-          linkStatus: res,
         };
       } else {
         return {
@@ -118,7 +127,6 @@ export async function loadLinkStatusDesc(
             action: `is requesting`,
             dollars: `${res.link.dollars}`,
             description: "Pay with Daimo",
-            linkStatus: res,
             memo: res.link.memo,
           };
         }
@@ -156,7 +164,6 @@ export async function loadLinkStatusDesc(
             action: `sent you`,
             dollars: `${dollars}`,
             description: "Accept with Daimo",
-            linkStatus: res,
           };
         }
         case "claimed": {
@@ -203,7 +210,6 @@ export async function loadLinkStatusDesc(
         name: `${inviter ? getAccountName(inviter) : "daimo"}`,
         action: `invited you to Daimo`,
         description,
-        linkStatus: res,
       };
     }
     default: {

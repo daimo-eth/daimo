@@ -5,7 +5,15 @@ import { getFrameForLinkStatus } from "../../../../utils/linkMetaTags";
 import { loadLinkStatusDesc } from "../../../../utils/linkStatus";
 import { getFrameHtmlResponse } from "../../frameUtils";
 
+export async function GET(req: NextRequest) {
+  return handle(req);
+}
+
 export async function POST(req: NextRequest) {
+  return handle(req);
+}
+
+async function handle(req: NextRequest) {
   const reqURL = new URL(req.url);
   const rawLink = reqURL.searchParams.get("link");
   console.log(`[FRAME] got link status request: ${rawLink}`);
@@ -16,7 +24,6 @@ export async function POST(req: NextRequest) {
   }
 
   const desc = await loadLinkStatusDesc(rawLink);
-  console.log(`[FRAME] got status for ${rawLink}: ${JSON.stringify(desc)}`);
   if (desc == null) {
     return new NextResponse("Not found: " + rawLink, { status: 404 });
   }
