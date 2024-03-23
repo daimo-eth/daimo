@@ -2,23 +2,35 @@ import {
   DaimoRequestState,
   DaimoRequestV2Status,
   formatDaimoLink,
+  getAccountName,
 } from "@daimo/common";
 import { Metadata } from "next";
 
 import { getAbsoluteUrl } from "./getAbsoluteUrl";
 import { LinkStatusDesc } from "./linkStatus";
-import { FrameMetadataType, getFrameMetadata } from "../app/frame/frameUtils";
+import {
+  FrameButtonMetadata,
+  FrameMetadataType,
+  getFrameMetadata,
+} from "../app/frame/frameUtils";
 
 export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const { name, action, dollars } = desc;
+
+  // Create title
   const prefixedDollars = dollars && `$${dollars}`;
   const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
-  const previewURL = getPreviewURL(name, action, dollars);
+
+  // Create image preview
+  const { fulfilledBy, status } = desc.linkStatus as DaimoRequestV2Status;
+  const paidBy = fulfilledBy && getAccountName(fulfilledBy);
+  const cancelled = status === "cancelled";
+  const previewURL = getPreviewURL(name, action, dollars, paidBy, cancelled);
 
   const meta = createMetadata(title, desc.description, previewURL);
 
   // If it's a request, make it frame with button to check status.
-  const frameMeta = getFrameForLinkStatus(desc, "✳️ Check status");
+  const frameMeta = getFrameForLinkStatus(desc, "Check Status");
   console.log(
     `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`
   );
@@ -35,17 +47,34 @@ export function getFrameForLinkStatus(
 
   // If it's a request, make it frame with button to check status.
   if (linkStatus && linkStatus.link.type === "requestv2") {
-    const previewURL = getPreviewURL(name, action, dollars);
-    const { status } = linkStatus as DaimoRequestV2Status;
+    // Create image preview
+    const { fulfilledBy, status } = linkStatus as DaimoRequestV2Status;
+    const paidBy = fulfilledBy && getAccountName(fulfilledBy);
+    const cancelled = status === "cancelled";
+    const previewURL = getPreviewURL(name, action, dollars, paidBy, cancelled);
+
+    // Create frame buttons
     const isFinalized = [
       DaimoRequestState.Fulfilled,
       DaimoRequestState.Cancelled,
     ].includes(status);
-    const linkArg = encodeURIComponent(formatDaimoLink(linkStatus.link));
+    const linkUrl = formatDaimoLink(linkStatus.link);
+    const linkParam = encodeURIComponent(linkUrl);
+
+    let buttons: [FrameButtonMetadata, ...FrameButtonMetadata[]];
+    if (isFinalized) {
+      buttons = [{ label: "Open in Daimo", action: "link", target: linkUrl }];
+    } else {
+      buttons = [
+        { label: recheckLabel },
+        { label: "Pay Request", action: "link", target: linkUrl },
+      ];
+    }
+
     return {
-      buttons: isFinalized ? undefined : [{ label: recheckLabel }],
+      buttons,
       image: previewURL,
-      post_url: getAbsoluteUrl(`/frame/link/status?link=${linkArg}`),
+      post_url: getAbsoluteUrl(`/frame/link/status?link=${linkParam}`),
     };
   }
 }
@@ -55,15 +84,27 @@ export function getFrameForLinkStatus(
 function getPreviewURL(
   name: string | undefined,
   action: string | undefined,
-  dollars: `${number}` | undefined
+  dollars: `${number}` | undefined,
+  paidBy?: string,
+  cancelled?: boolean
 ) {
-  if (!name) return getAbsoluteUrl(`/logo-link-preview.png`);
+  if (!name) {
+    return getAbsoluteUrl(`/logo-link-preview.png`);
+  }
 
-  const uriEncodedAction = action ? encodeURIComponent(action) : undefined;
   let previewURL = getAbsoluteUrl(`/preview?name=${name}`);
-  if (uriEncodedAction)
-    previewURL = previewURL.concat(`&action=${uriEncodedAction}`);
-  if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
+  if (action) {
+    previewURL = previewURL.concat(`&action=${encodeURIComponent(action)}`);
+  }
+  if (dollars) {
+    previewURL = previewURL.concat(`&dollars=${dollars}`);
+  }
+  if (paidBy) {
+    previewURL = previewURL.concat(`&paidBy=${paidBy}`);
+  }
+  if (cancelled) {
+    previewURL = previewURL.concat(`&cancelled=true`);
+  }
   return previewURL;
 }
 

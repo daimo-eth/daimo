@@ -28,7 +28,7 @@ async function handle(req: NextRequest) {
     return new NextResponse("Not found: " + rawLink, { status: 404 });
   }
 
-  const frameMeta = getFrameForLinkStatus(desc, "Unpaid ✳️ Check Again");
+  const frameMeta = getFrameForLinkStatus(desc, "Unpaid · Check Again");
   if (frameMeta == null) {
     return new NextResponse("No frame for link: " + rawLink, { status: 404 });
   }
