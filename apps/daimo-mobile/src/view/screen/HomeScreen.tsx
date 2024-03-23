@@ -1,9 +1,17 @@
 import { OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
+  Pressable,
   RefreshControl,
   StyleSheet,
   TouchableHighlight,
@@ -17,6 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DispatcherContext } from "../../action/dispatch";
 import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
@@ -35,7 +44,7 @@ import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { color, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextLight } from "../shared/text";
+import { DaimoText, TextBody, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -195,6 +204,7 @@ function HomeScreenInner({ account }: { account: Account }) {
                 netState.status !== "offline" &&
                 isActionVisible
               ) && <Spacer h={64} />}
+              <CompleteOnboarding />
               <Spacer h={12} />
               <AmountAndButtons account={account} />
             </>
@@ -282,6 +292,38 @@ function IconButton({
         <TextBody>{title}</TextBody>
       </View>
     </View>
+  );
+}
+
+function CompleteOnboarding() {
+  const dispatcher = useContext(DispatcherContext);
+
+  const openChecklist = useCallback(() => {
+    dispatcher.dispatch({ name: "onboardingChecklist" });
+  }, []);
+
+  return (
+    <Pressable
+      onPress={openChecklist}
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 24,
+        borderRadius: 8,
+        borderWidth: 0.5,
+        borderColor: "red",
+        marginHorizontal: 24,
+      }}
+    >
+      <View>
+        <DaimoText variant="body">Finish setting up your account</DaimoText>
+        <DaimoText variant="emphasizedSmallText" color={color.grayMid}>
+          Complete 2 more items
+        </DaimoText>
+      </View>
+      <Octicons size={24} color={color.primary} name="arrow-right" />
+    </Pressable>
   );
 }
 

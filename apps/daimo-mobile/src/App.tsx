@@ -22,6 +22,7 @@ import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
 import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
+import { OnboardingChecklistBottomSheet } from "./view/sheet/OnboardingChecklistBottomSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -70,6 +71,10 @@ const bottomSheetSettings = {
   linkFarcaster: {
     snapPoints: ["66%"],
     enableSwipeClose: false,
+  },
+  onboardingChecklist: {
+    snapPoints: ["66%"],
+    enableSwipeClose: true,
   },
 } as const;
 const defaultSnapPoints = ["10%"];
@@ -128,8 +133,13 @@ function AppBody() {
   // Handle dispatch > open bottom sheet
   const openFC = () => setBottomSheet("connectFarcaster");
   const linkFC = () => setBottomSheet("linkFarcaster");
+  const openChecklist = () => setBottomSheet("onboardingChecklist");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
+  useEffect(
+    () => dispatcher.register("onboardingChecklist", openChecklist),
+    []
+  );
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
@@ -156,6 +166,9 @@ function AppBody() {
               {bottomSheet === "debug" && <DebugBottomSheet />}
               {(bottomSheet === "connectFarcaster" ||
                 bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+              {bottomSheet === "onboardingChecklist" && (
+                <OnboardingChecklistBottomSheet />
+              )}
             </BottomSheet>
           </View>
         </SafeAreaProvider>

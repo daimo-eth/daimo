@@ -141,5 +141,10 @@ export const ss = {
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
     },
+    emphasizedSmallText: {
+      ...textBase,
+      fontWeight: "600",
+      fontSize: 12,
+    },
   }),
 };
