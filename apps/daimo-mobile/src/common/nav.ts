@@ -89,6 +89,7 @@ export type ParamListSend = {
 
 export type ParamListInvite = {
   Invite: undefined;
+  YourInvites: undefined;
   Account:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };

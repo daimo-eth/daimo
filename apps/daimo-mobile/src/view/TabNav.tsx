@@ -26,6 +26,7 @@ import { InviteScreen } from "./screen/InviteScreen";
 import { NotificationsScreen } from "./screen/NotificationsScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
+import { YourInvitesScreen } from "./screen/YourInvitesScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
@@ -344,6 +345,7 @@ function InviteTab() {
     <InviteStack.Navigator initialRouteName="Invite" screenOptions={noHeaders}>
       <InviteStack.Group>
         <InviteStack.Screen name="Invite" component={InviteScreen} />
+        <InviteStack.Screen name="YourInvites" component={YourInvitesScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
       </InviteStack.Group>
     </InviteStack.Navigator>
