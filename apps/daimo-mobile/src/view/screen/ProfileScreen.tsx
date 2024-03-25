@@ -6,14 +6,16 @@ import {
   assert,
   canRequestFrom,
   canSendTo,
+  formatDaimoLink,
   getAccountName,
   getAddressContraction,
+  getEAccountStr,
   timeMonth,
 } from "@daimo/common";
 import { daimoChainFromId, teamDaimoFaucetAddr } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useEffect, useRef } from "react";
-import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
 import {
@@ -24,47 +26,61 @@ import {
   useNav,
 } from "../../common/nav";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
-import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
-import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { ButtonBig } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
+import { ExplorerBadge } from "../shared/ExplorerBadge";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
+import { shareURL } from "../shared/shareURL";
 import { color, ss } from "../shared/style";
-import { TextBody } from "../shared/text";
+import { TextBody, TextH2 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
-type Props = NativeStackScreenProps<ParamListHome, "Account">;
+type Props = NativeStackScreenProps<ParamListHome, "Profile">;
 
-export function AccountScreen(props: Props) {
-  const Inner = useWithAccount(AccountScreenInner);
+export function ProfileScreen(props: Props) {
+  const Inner = useWithAccount(ProfileScreenInner);
   return <Inner {...props} />;
 }
 
-function AccountScreenInner(props: Props & { account: Account }) {
+function ProfileScreenInner(props: Props & { account: Account }) {
   const goBack = useExitBack();
   const goHome = useExitToHome();
 
   const { params } = props.route;
 
+  const onShare = useMemo(() => {
+    if (!("eAcc" in params && params.eAcc)) return;
+    const accountName = getEAccountStr(params.eAcc);
+
+    return () => {
+      shareURL(formatDaimoLink({ type: "account", account: accountName }));
+      console.log(`[PROFILE] triggered share`);
+    };
+  }, [params]);
+
   return (
     <View style={[ss.container.screen, styles.noPadding]}>
       <View style={styles.screenPadding}>
-        <ScreenHeader title="Account" onBack={goBack || goHome} />
+        <ScreenHeader
+          title="Profile"
+          onBack={goBack || goHome}
+          onShare={onShare}
+        />
       </View>
       <Spacer h={32} />
       {"link" in params && (
-        <AccountScreenLoader account={props.account} link={params.link} />
+        <ProfileScreenLoader account={props.account} link={params.link} />
       )}
       {"eAcc" in params && (
-        <AccountScreenBody
+        <ProfileScreenBody
           account={props.account}
           eAcc={params.eAcc}
           inviterEAcc={params.inviterEAcc}
@@ -74,7 +90,7 @@ function AccountScreenInner(props: Props & { account: Account }) {
   );
 }
 
-function AccountScreenLoader({
+function ProfileScreenLoader({
   account,
   link,
 }: {
@@ -106,7 +122,7 @@ function AccountScreenLoader({
 
     // Show account
     console.log(`[ACCOUNT] loaded account: ${JSON.stringify(status.data)}`);
-    nav.navigate("Account", { eAcc, inviterEAcc });
+    nav.navigate("Profile", { eAcc, inviterEAcc });
   }, [status.data]);
 
   assert(["account", "invite"].includes(link.type), "Bad link type");
@@ -138,7 +154,7 @@ function getTeamDaimoFaucetAcc(): EAccount {
   return { addr: teamDaimoFaucetAddr, label: AddrLabel.Faucet };
 }
 
-function AccountScreenBody({
+function ProfileScreenBody({
   account,
   eAcc,
   inviterEAcc,
@@ -149,13 +165,6 @@ function AccountScreenBody({
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-
-  const openExplorer = useCallback(() => {
-    const { chainConfig } = env(daimoChainFromId(account.homeChainId));
-    const explorer = chainConfig.chainL2.blockExplorers!.default;
-    const url = `${explorer.url}/address/${eAcc.addr}`;
-    Linking.openURL(url);
-  }, [account, eAcc]);
 
   const recipient = addLastTransferTimes(account, eAcc);
 
@@ -235,14 +244,18 @@ function AccountScreenBody({
         <View style={styles.mainContent}>
           <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
           <Spacer h={16} />
-          <AccountCopyLinkButton eAcc={eAcc} size="h2" center />
+          <TextH2>{getAccountName(eAcc)}</TextH2>
           <Spacer h={4} />
           {subtitle}
-          {fcAccount && (
-            <>
-              <FarcasterButton fcAccount={fcAccount} />
-            </>
-          )}
+          <Spacer h={4} />
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {fcAccount && <FarcasterButton fcAccount={fcAccount} />}
+            {fcAccount && <Spacer w={8} />}
+            <ExplorerBadge
+              daimoChain={daimoChainFromId(account.homeChainId)}
+              address={eAcc.addr}
+            />
+          </View>
         </View>
         <Spacer h={24} />
         <View style={[ss.container.padH8, styles.buttonGroup]}>
@@ -258,13 +271,6 @@ function AccountScreenBody({
           )}
         </View>
         <Spacer h={16} />
-        <View style={ss.container.padH8}>
-          <ButtonBig
-            type="subtle"
-            title="VIEW ON BLOCK EXPLORER"
-            onPress={openExplorer}
-          />
-        </View>
       </View>
       {bottomSheet}
     </>

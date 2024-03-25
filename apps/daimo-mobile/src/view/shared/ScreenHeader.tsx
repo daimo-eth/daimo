@@ -1,3 +1,4 @@
+import { assert } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useCallback } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
@@ -11,15 +12,20 @@ export function ScreenHeader({
   title,
   onBack,
   onExit,
+  onShare,
   hideOfflineHeader,
 }: {
   title: ReactNode;
   onBack?: () => void;
   onExit?: () => void;
+  onShare?: () => void;
   hideOfflineHeader?: boolean;
 }) {
+  assert(!onExit || !onShare, "Exit and share are mutually exclusive");
+
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
+  const share = useCallback(onShare || (() => {}), [onShare]);
 
   return (
     <>
@@ -27,7 +33,11 @@ export function ScreenHeader({
       <View style={styles.screenHead}>
         <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
         <TextH3>{title}</TextH3>
-        <ScreenHeadButton icon="x" show={!!onExit} onPress={exit} />
+        {onExit ? (
+          <ScreenHeadButton icon="x" show={!!onExit} onPress={exit} />
+        ) : (
+          <ScreenHeadButton icon="share" show={!!onShare} onPress={share} />
+        )}
       </View>
     </>
   );

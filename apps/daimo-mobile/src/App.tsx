@@ -87,12 +87,14 @@ function AppBody() {
   const snapPoints = settings?.snapPoints || defaultSnapPoints;
   const enableSwipeClose = settings?.enableSwipeClose || false;
 
+  const openBottomSheet = (sheet: GlobalBottomSheet) => {
+    Keyboard.dismiss();
+    setBottomSheet(sheet);
+  };
+
   // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
-    const subscription = RNShake.addListener(() => {
-      Keyboard.dismiss();
-      setBottomSheet("debug");
-    });
+    const subscription = RNShake.addListener(() => openBottomSheet("debug"));
     return () => subscription.remove();
   }, []);
 
@@ -125,11 +127,13 @@ function AppBody() {
     []
   );
 
-  // Handle dispatch > open bottom sheet
-  const openFC = () => setBottomSheet("connectFarcaster");
-  const linkFC = () => setBottomSheet("linkFarcaster");
+  // Farcaster: Handle dispatch > open bottom sheet
+  const openFC = () => openBottomSheet("connectFarcaster");
+  const linkFC = () => openBottomSheet("linkFarcaster");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
+
+  // Common: Handle dispatch > hide bottom sheet
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 

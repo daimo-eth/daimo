@@ -20,10 +20,10 @@ import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { AccountScreen } from "./screen/AccountScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import { NotificationsScreen } from "./screen/NotificationsScreen";
+import { ProfileScreen } from "./screen/ProfileScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { ErrorScreen } from "./screen/errorScreens";
@@ -300,7 +300,7 @@ function SendTab() {
         <SendStack.Screen name="SendTransfer" component={SendTransferScreen} />
         <SendStack.Screen name="QR" component={QRScreen} />
         <SendStack.Screen name="SendLink" component={SendNoteScreen} />
-        <SendStack.Screen name="Account" component={AccountScreen} />
+        <SendStack.Screen name="Profile" component={ProfileScreen} />
       </SendStack.Group>
     </SendStack.Navigator>
   );
@@ -324,7 +324,7 @@ function HomeTab() {
       <HomeStack.Group>
         <HomeStack.Screen name="Home" component={HomeScreen} />
         <HomeStack.Screen name="QR" component={QRScreen} />
-        <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="Profile" component={ProfileScreen} />
         <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
         <HomeStack.Screen name="ReceiveSearch" component={ReceiveNavScreen} />
@@ -344,7 +344,7 @@ function InviteTab() {
     <InviteStack.Navigator initialRouteName="Invite" screenOptions={noHeaders}>
       <InviteStack.Group>
         <InviteStack.Screen name="Invite" component={InviteScreen} />
-        <HomeStack.Screen name="Account" component={AccountScreen} />
+        <HomeStack.Screen name="Profile" component={ProfileScreen} />
       </InviteStack.Group>
     </InviteStack.Navigator>
   );

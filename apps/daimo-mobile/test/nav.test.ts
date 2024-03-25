@@ -24,7 +24,7 @@ describe("nav", () => {
   it("handles account links", () => {
     history.length = 0;
     handleDeepLink(nav, "daimo://account/alice");
-    assertNav("HomeTab", "Account", {
+    assertNav("HomeTab", "Profile", {
       link: { type: "account", account: "alice" },
     });
   });
