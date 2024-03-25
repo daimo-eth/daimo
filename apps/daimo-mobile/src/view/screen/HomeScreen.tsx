@@ -206,8 +206,7 @@ function HomeScreenInner({ account }: { account: Account }) {
                 account.suggestedActions.length > 0 &&
                 netState.status !== "offline" &&
                 isActionVisible
-              ) && <Spacer h={64} />}
-              {/* <Spacer h={28} /> */}
+              ) && <Spacer h={allComplete ? 64 : 28} />}
               {!allComplete && <CompleteOnboarding />}
               <Spacer h={20} />
               <Spacer h={12} />

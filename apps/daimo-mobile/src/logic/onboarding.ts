@@ -1,3 +1,4 @@
+import { SlotType, getSlotType } from "@daimo/common";
 import { useCallback, useContext, useMemo } from "react";
 
 import { DispatcherContext } from "../action/dispatch";
@@ -8,13 +9,13 @@ export function useOnboardingChecklist(account: Account) {
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 
-  const hasBackup = useMemo(() => {
-    return account.accountKeys.length > 1;
-  }, [account.accountKeys.length]);
+  const hasBackup = account.accountKeys.some(
+    (key) => getSlotType(key.slot) === SlotType.PasskeyBackup
+  );
 
-  const farcasterConnected = useMemo(() => {
-    return account.linkedAccounts.length > 0;
-  }, [account.linkedAccounts.length]);
+  const farcasterConnected = !!account.linkedAccounts.find(
+    (a) => a.type === "farcaster"
+  );
 
   const allComplete = useMemo(() => {
     return hasBackup && farcasterConnected;
