@@ -43,7 +43,7 @@ export async function sendUserOpV2(
   } catch (e: any) {
     const em = e.message || "no error message";
     span.setAttribute("op.send_err", em);
-    telemetry.recordClippy(`❌ sendUserOp ${senderName}: ${em}`, "error");
+    telemetry.recordClippy(`sendUserOp ${senderName}: ${em}`, "error");
     throw e;
   }
 }

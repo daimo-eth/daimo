@@ -31,7 +31,7 @@ async function main() {
   const monitor = new Telemetry();
 
   console.log(`[API] starting...`);
-  const vc = getViemClientFromEnv();
+  const vc = getViemClientFromEnv(monitor);
 
   console.log(`[API] initializing db...`);
   const db = new DB();

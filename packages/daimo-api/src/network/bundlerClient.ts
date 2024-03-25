@@ -88,7 +88,7 @@ export class BundlerClient {
     viemClient: ViemClient,
     nameReg?: NameRegistry
   ) {
-    console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
+    console.log(`[BUNDLER] submitting userOp: ${JSON.stringify(op)}`);
     try {
       assert(nameReg != null, "nameReg required");
       const compressed = this.compress(op, nameReg);

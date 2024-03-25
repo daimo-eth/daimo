@@ -19,13 +19,14 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 
 import { chainConfig } from "../env";
+import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
 
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
  * This account sponsors gas for account creation (and a faucet, on testnet).
  */
-export function getViemClientFromEnv() {
+export function getViemClientFromEnv(monitor: Telemetry) {
   // Connect to L1
   const l1Client = createPublicClient({
     chain: chainConfig.chainL1,
@@ -39,7 +40,7 @@ export function getViemClientFromEnv() {
   const publicClient = createPublicClient({ chain, transport });
   const walletClient = createWalletClient({ chain, transport, account });
 
-  return new ViemClient(l1Client, publicClient, walletClient);
+  return new ViemClient(l1Client, publicClient, walletClient, monitor);
 }
 
 export function getEOA(privateKey?: string) {
@@ -63,7 +64,8 @@ export class ViemClient {
   constructor(
     private l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
-    public walletClient: WalletClient<Transport, Chain, Account>
+    public walletClient: WalletClient<Transport, Chain, Account>,
+    private telemetry: Telemetry
   ) {}
 
   getEnsAddress = memoize(
@@ -82,6 +84,30 @@ export class ViemClient {
     (a: { address: Address }) => this.l1Client.getEnsName(a),
     ({ address }: { address: Address }) => address
   );
+
+  onReceiptError = (hash: Hex, e: unknown) => {
+    const explorerURL = this.publicClient.chain.blockExplorers?.default?.url;
+    const txURL = `${explorerURL}/tx/${hash}`;
+    this.telemetry.recordClippy(
+      `Receipt error ${hash} - ${txURL}: ${e}`,
+      "error"
+    );
+  };
+
+  async waitForReceipt(hash: Hex) {
+    try {
+      const receipt = await this.publicClient.waitForTransactionReceipt({
+        hash,
+      });
+      console.log(`[CHAIN] waitForReceipt ${hash}: ${JSON.stringify(receipt)}`);
+      if (receipt.status !== "success") {
+        this.onReceiptError(hash, JSON.stringify(receipt));
+      }
+    } catch (e) {
+      console.log(`[CHAIN] waitForReceipt error: ${e}`);
+      this.onReceiptError(hash, e);
+    }
+  }
 
   async writeContract<
     const TAbi extends Abi | readonly unknown[],
@@ -116,6 +142,7 @@ export class ViemClient {
       args.gas = 2_000_000n;
       const ret = await this.walletClient.writeContract(args);
       this.nextNonce += 1;
+      this.waitForReceipt(ret);
       return ret;
     } finally {
       this.lockNonce.release();
