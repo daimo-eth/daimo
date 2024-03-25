@@ -1,9 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useContext, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { DispatcherContext } from "../../action/dispatch";
-import { useNav } from "../../common/nav";
+import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -21,26 +19,13 @@ function OnboardingChecklistBottomSheetInner({
 }: {
   account: Account;
 }) {
-  const nav = useNav();
-  const dispatcher = useContext(DispatcherContext);
-
-  const farcasterConnected = useMemo(() => {
-    return account.linkedAccounts.length > 0;
-  }, [account.linkedAccounts.length]);
-
-  const handleSecureAccount = useCallback(() => {
-    nav.navigate("Settings");
-    dispatcher.dispatch({ name: "hideBottomSheet" });
-  }, [nav, dispatcher]);
-
-  const handleConnectFarcaster = useCallback(() => {
-    nav.navigate("Settings");
-    dispatcher.dispatch({ name: "connectFarcaster" });
-  }, [nav, dispatcher]);
-
-  const dismissSheet = useCallback(() => {
-    dispatcher.dispatch({ name: "hideBottomSheet" });
-  }, [dispatcher]);
+  const {
+    hasBackup,
+    farcasterConnected,
+    handleSecureAccount,
+    handleConnectFarcaster,
+    dismissSheet,
+  } = useOnboardingChecklist(account);
 
   return (
     <View style={{ paddingHorizontal: 24 }}>
@@ -56,7 +41,7 @@ function OnboardingChecklistBottomSheetInner({
         title="Secure your account"
         description="Add a passkey backup to your account"
         onPress={handleSecureAccount}
-        done={false}
+        done={hasBackup}
       />
       <ChecklistRow
         step={2}
@@ -105,13 +90,18 @@ function ChecklistRow({
         </View>
         <Spacer w={16} />
         <View>
-          <DaimoText>{title}</DaimoText>
-          <DaimoText variant="metadata" color={color.grayMid}>
+          <DaimoText color={done ? color.gray3 : color.midnight}>
+            {title}
+          </DaimoText>
+          <DaimoText
+            variant="metadata"
+            color={done ? color.gray3 : color.grayMid}
+          >
             {description}
           </DaimoText>
         </View>
       </View>
-      <Octicons name="arrow-right" color={color.primary} size={24} />
+      {!done && <Octicons name="arrow-right" color={color.primary} size={24} />}
     </Pressable>
   );
 }

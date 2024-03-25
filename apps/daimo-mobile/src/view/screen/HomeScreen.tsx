@@ -30,6 +30,7 @@ import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
+import { useOnboardingChecklist } from "../../logic/onboarding";
 import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
@@ -157,6 +158,8 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   const contactsAccess = useContactsPermission();
 
+  const { allComplete } = useOnboardingChecklist(account);
+
   return (
     <View>
       <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
@@ -205,7 +208,7 @@ function HomeScreenInner({ account }: { account: Account }) {
                 isActionVisible
               ) && <Spacer h={64} />}
               {/* <Spacer h={28} /> */}
-              <CompleteOnboarding />
+              {!allComplete && <CompleteOnboarding />}
               <Spacer h={20} />
               <Spacer h={12} />
               <AmountAndButtons account={account} />
@@ -306,11 +309,10 @@ function CompleteOnboarding() {
 
   return (
     <Pressable onPress={openChecklist} style={styles.checklistAction}>
-      <View>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Octicons name="list-unordered" size={24} color={color.gray3} />
+        <Spacer w={12} />
         <DaimoText variant="body">Finish setting up your account</DaimoText>
-        <DaimoText variant="emphasizedSmallText" color={color.grayMid}>
-          Complete 2 more items
-        </DaimoText>
       </View>
       <Octicons size={24} color={color.primary} name="arrow-right" />
     </Pressable>
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 24,
+    padding: 20,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#EEEEEE",

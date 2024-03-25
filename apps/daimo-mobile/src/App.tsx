@@ -73,7 +73,7 @@ const bottomSheetSettings = {
     enableSwipeClose: false,
   },
   onboardingChecklist: {
-    snapPoints: ["66%"],
+    snapPoints: ["50%"],
     enableSwipeClose: true,
   },
 } as const;
