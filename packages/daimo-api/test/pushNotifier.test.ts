@@ -4,14 +4,18 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
+  DisplayOpEvent,
   EAccount,
+  OpStatus,
+  guessTimestampFromNum,
   now,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import assert from "node:assert";
 import test from "node:test";
 import { Address, Hex, getAddress } from "viem";
 
-import { Transfer } from "../src/contract/coinIndexer";
+import { CoinIndexer, Transfer } from "../src/contract/coinIndexer";
 import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { RequestIndexer } from "../src/contract/requestIndexer";
@@ -35,11 +39,11 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 2);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $1.00");
+    assert.strictEqual(output[0].title, "Sent $1.00 to bob");
     assert.strictEqual(output[0].body, "You sent 1.00 USDC to bob");
 
     assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[1].title, "Received $1.00");
+    assert.strictEqual(output[1].title, "Received $1.00 from alice");
     assert.strictEqual(output[1].body, "You received 1.00 USDC from alice");
   });
 
@@ -51,7 +55,7 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $0.69");
+    assert.strictEqual(output[0].title, "Sent $0.69 to charlie.eth");
     assert.strictEqual(output[0].body, "You sent 0.69 USDC to charlie.eth");
   });
 
@@ -68,11 +72,8 @@ test("PushNotifier", async () => {
 
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Received $5.00");
-    assert.strictEqual(
-      output[0].body,
-      "charlie.eth fulfilled your 5.00 USDC request"
-    );
+    assert.strictEqual(output[0].title, "Received $5.00 from charlie.eth");
+    assert.strictEqual(output[0].body, "Your 5.00 USDC request was fulfilled");
   });
 
   const paymentLinkFromAlice: DaimoLinkNote = {
@@ -257,9 +258,36 @@ function createNotifierAliceBob() {
     },
   } as unknown as KeyRegistry;
 
+  const stubCoinIndexer = {
+    attachTransferOpProperties: (log: Transfer): DisplayOpEvent => {
+      const op: DisplayOpEvent = {
+        type: "transfer",
+        status: OpStatus.confirmed,
+        timestamp: guessTimestampFromNum(
+          Number(log.blockNumber),
+          daimoChainFromId(chainConfig.chainL2.id)
+        ),
+        from: log.from,
+        to: log.to,
+        amount: Number(log.value),
+        blockNumber: Number(log.blockNumber),
+
+        blockHash: log.blockHash,
+        txHash: log.transactionHash,
+        logIndex: log.logIndex,
+        requestStatus:
+          stubRequestIndexer.getRequestStatusByFulfillLogCoordinate(
+            log.transactionHash,
+            log.logIndex - 1
+          ) || undefined,
+      };
+      return op;
+    },
+  } as unknown as CoinIndexer;
+
   const nullAny = null as any;
   const pn = new PushNotifier(
-    nullAny,
+    stubCoinIndexer,
     stubNameReg,
     nullAny,
     stubRequestIndexer,

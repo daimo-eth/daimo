@@ -1,6 +1,6 @@
 import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
-import { Address, getAddress } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {
@@ -108,6 +108,11 @@ export class DB {
             tag VARCHAR(32) NOT NULL, -- new or existing tag
             link VARCHAR(256) NOT NULL, -- new link
             update_token VARCHAR(64) DEFAULT NULL -- token used for this update
+          );
+
+          CREATE TABLE IF NOT EXISTS payment_memo (
+            ophash_hex VARCHAR(66) PRIMARY KEY,
+            memo TEXT NOT NULL
           );
       `);
     await client.end();
@@ -366,6 +371,33 @@ export class DB {
 
     return result.rows.length > 0;
   }
+
+  async loadPaymentMemos(): Promise<PaymentMemoRow[]> {
+    console.log(`[DB] loading payment memos`);
+    const client = await this.pool.connect();
+    const result = await client.query<RawPaymentMemoRow>(
+      `SELECT ophash_hex, memo FROM payment_memo`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} payment memo rows`);
+    return result.rows.map((row) => ({
+      opHash: row.ophash_hex as Hex,
+      memo: row.memo,
+    }));
+  }
+
+  async insertPaymentMemo(row: PaymentMemoRow) {
+    console.log(`[DB] inserting payment memos`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO payment_memo (ophash_hex, memo) VALUES ($1, $2)`,
+      [row.opHash, row.memo]
+    );
+    client.release();
+
+    console.log(`[DB] inserted payment memos`);
+  }
 }
 
 interface PushTokenRow {
@@ -426,4 +458,14 @@ interface TagRedirectRow {
   tag: string;
   link: string;
   update_token: string | null;
+}
+
+interface RawPaymentMemoRow {
+  ophash_hex: string;
+  memo: string;
+}
+
+export interface PaymentMemoRow {
+  opHash: Hex;
+  memo: string;
 }

@@ -243,9 +243,9 @@ function loadOpSender({
     ? getWrappedPasskeySigner(daimoChain)
     : getWrappedRawSigner(enclaveKeyName, keySlot!);
 
-  const sender: OpSenderCallback = async (op: UserOpHex) => {
+  const sender: OpSenderCallback = async (op: UserOpHex, memo?: string) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
-    return rpcFunc.sendUserOpV2.mutate({ op });
+    return rpcFunc.sendUserOpV2.mutate({ op, memo });
   };
 
   promise = (async () => {

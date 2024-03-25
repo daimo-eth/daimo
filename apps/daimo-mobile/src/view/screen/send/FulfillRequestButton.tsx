@@ -114,7 +114,7 @@ export function FulfillRequestButton({
       case "idle":
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return null;
+        if (dollars === 0) return "All payment details are public";
         return `Total incl. fees ${getAmountText({
           dollars: cost.totalDollars,
         })}`;

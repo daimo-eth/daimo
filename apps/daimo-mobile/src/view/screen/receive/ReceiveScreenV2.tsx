@@ -133,7 +133,7 @@ function RequestScreenInnerV2({
             subtitle="Request USDC from someone using any messaging app"
           />
         )}
-        <Spacer h={64} />
+        <Spacer h={24} />
         {recipient && <RecipientDisplay recipient={recipient} />}
         <Spacer h={32} />
         <AmountChooser

@@ -353,9 +353,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderColor: color.grayLight,
     borderWidth: 1,
-    shadowOffset: { height: 2, width: -1 },
-    elevation: 2,
-    shadowOpacity: 0.1,
+    ...ss.container.shadow,
   },
   codeView: {
     flexDirection: "row",

@@ -5,6 +5,7 @@ import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { getViemClientFromEnv } from "../src/network/viemClient";
+import { PaymentMemoTracker } from "../src/offchain/paymentMemoTracker";
 import { Telemetry } from "../src/server/telemetry";
 import { Watcher } from "../src/shovel/watcher";
 
@@ -20,11 +21,13 @@ async function main() {
   );
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);
+  const paymentMemoTracker = new PaymentMemoTracker(null as any);
   const coinIndexer = new CoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
-    requestIndexer
+    requestIndexer,
+    paymentMemoTracker
   );
   const keyReg = new KeyRegistry();
 

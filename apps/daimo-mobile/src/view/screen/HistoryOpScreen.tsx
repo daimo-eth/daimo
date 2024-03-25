@@ -195,6 +195,10 @@ function TransferBody({
   const coinName = chainConfig.tokenSymbol.toUpperCase();
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
+  const subtitleElements = [feeText(op.feeAmount), coinName, chainName];
+  if (op.type === "transfer" && op.memo) subtitleElements.unshift(op.memo);
+  const subtitle = subtitleElements.join(" • ");
+
   return (
     <View>
       <TextCenter>
@@ -208,9 +212,7 @@ function TransferBody({
       />
       <Spacer h={8} />
       <TextCenter>
-        <TextBodyCaps color={color.grayMid}>
-          <FeeText amount={op.feeAmount} /> • {coinName} • {chainName}
-        </TextBodyCaps>
+        <TextBodyCaps color={color.grayMid}>{subtitle}</TextBodyCaps>
       </TextCenter>
       <Spacer h={32} />
       <OpRow op={op} otherAcc={other} />
@@ -257,7 +259,7 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
   );
 }
 
-function FeeText({ amount }: { amount?: number }) {
+function feeText(amount?: number) {
   if (amount == null) {
     return "PENDING";
   }
