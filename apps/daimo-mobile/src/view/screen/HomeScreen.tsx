@@ -204,7 +204,9 @@ function HomeScreenInner({ account }: { account: Account }) {
                 netState.status !== "offline" &&
                 isActionVisible
               ) && <Spacer h={64} />}
+              {/* <Spacer h={28} /> */}
               <CompleteOnboarding />
+              <Spacer h={20} />
               <Spacer h={12} />
               <AmountAndButtons account={account} />
             </>
@@ -300,22 +302,10 @@ function CompleteOnboarding() {
 
   const openChecklist = useCallback(() => {
     dispatcher.dispatch({ name: "onboardingChecklist" });
-  }, []);
+  }, [dispatcher]);
 
   return (
-    <Pressable
-      onPress={openChecklist}
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 24,
-        borderRadius: 8,
-        borderWidth: 0.5,
-        borderColor: "red",
-        marginHorizontal: 24,
-      }}
-    >
+    <Pressable onPress={openChecklist} style={styles.checklistAction}>
       <View>
         <DaimoText variant="body">Finish setting up your account</DaimoText>
         <DaimoText variant="emphasizedSmallText" color={color.grayMid}>
@@ -398,5 +388,21 @@ const styles = StyleSheet.create({
   iconLabelDisabled: {
     ...iconLabel,
     opacity: 0.5,
+  },
+  checklistAction: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    marginHorizontal: 24,
+    shadowColor: "#F3F3F3",
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 4,
+    shadowOpacity: 1,
+    elevation: 3,
+    backgroundColor: "#fff",
   },
 });

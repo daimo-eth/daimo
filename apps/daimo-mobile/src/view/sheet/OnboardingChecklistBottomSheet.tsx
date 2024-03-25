@@ -1,6 +1,9 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { useCallback, useContext, useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
+import { DispatcherContext } from "../../action/dispatch";
+import { useNav } from "../../common/nav";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -18,9 +21,26 @@ function OnboardingChecklistBottomSheetInner({
 }: {
   account: Account;
 }) {
-  const handleSecureAccount = () => {};
+  const nav = useNav();
+  const dispatcher = useContext(DispatcherContext);
 
-  const handleConnectFarcaster = () => {};
+  const farcasterConnected = useMemo(() => {
+    return account.linkedAccounts.length > 0;
+  }, [account.linkedAccounts.length]);
+
+  const handleSecureAccount = useCallback(() => {
+    nav.navigate("Settings");
+    dispatcher.dispatch({ name: "hideBottomSheet" });
+  }, [nav, dispatcher]);
+
+  const handleConnectFarcaster = useCallback(() => {
+    nav.navigate("Settings");
+    dispatcher.dispatch({ name: "connectFarcaster" });
+  }, [nav, dispatcher]);
+
+  const dismissSheet = useCallback(() => {
+    dispatcher.dispatch({ name: "hideBottomSheet" });
+  }, [dispatcher]);
 
   return (
     <View style={{ paddingHorizontal: 24 }}>
@@ -36,15 +56,21 @@ function OnboardingChecklistBottomSheetInner({
         title="Secure your account"
         description="Add a passkey backup to your account"
         onPress={handleSecureAccount}
+        done={false}
       />
       <ChecklistRow
         step={2}
         title="Connect Farcaster"
         description="Import your profile image and connections"
         onPress={handleConnectFarcaster}
+        done={farcasterConnected}
       />
       <Spacer h={24} />
-      <ButtonBig type="subtle" title={`I'll get to it later`} />
+      <ButtonBig
+        type="subtle"
+        title={`I'll get to it later`}
+        onPress={dismissSheet}
+      />
     </View>
   );
 }
@@ -54,17 +80,28 @@ function ChecklistRow({
   title,
   description,
   onPress,
+  done,
 }: {
   step: number;
   title: string;
   description: string;
   onPress(): void;
+  done: boolean;
 }) {
   return (
     <Pressable onPress={onPress} style={styles.row}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View style={styles.rowLeft}>
-          <TextBody color={color.white}>{step}</TextBody>
+        <View
+          style={[
+            styles.rowLeft,
+            { backgroundColor: done ? color.primary : color.gray3 },
+          ]}
+        >
+          {done ? (
+            <Octicons name="check" size={16} color={color.white} />
+          ) : (
+            <TextBody color={color.white}>{step}</TextBody>
+          )}
         </View>
         <Spacer w={16} />
         <View>
@@ -98,6 +135,5 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     height: 36,
     width: 36,
-    backgroundColor: color.gray3,
   },
 });
