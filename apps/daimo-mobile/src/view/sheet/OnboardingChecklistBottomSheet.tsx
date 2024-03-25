@@ -1,11 +1,12 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { Pressable, StyleSheet, View } from "react-native";
+import { TouchableHighlight } from "@gorhom/bottom-sheet";
+import { StyleSheet, View } from "react-native";
 
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
+import { color, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextH3 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -28,7 +29,7 @@ function OnboardingChecklistBottomSheetInner({
   } = useOnboardingChecklist(account);
 
   return (
-    <View style={{ paddingHorizontal: 24 }}>
+    <View>
       <TextH3 style={{ textAlign: "center" }}>Onboarding checklist</TextH3>
       <Spacer h={16} />
       <TextBody style={{ textAlign: "center", color: color.grayMid }}>
@@ -51,11 +52,13 @@ function OnboardingChecklistBottomSheetInner({
         done={farcasterConnected}
       />
       <Spacer h={24} />
-      <ButtonBig
-        type="subtle"
-        title={`I'll get to it later`}
-        onPress={dismissSheet}
-      />
+      <View style={{ paddingHorizontal: 24 }}>
+        <ButtonBig
+          type="subtle"
+          title={`I'll get to it later`}
+          onPress={dismissSheet}
+        />
+      </View>
     </View>
   );
 }
@@ -74,35 +77,42 @@ function ChecklistRow({
   done: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.row}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View
-          style={[
-            styles.rowLeft,
-            { backgroundColor: done ? color.primary : color.gray3 },
-          ]}
-        >
-          {done ? (
-            <Octicons name="check" size={16} color={color.white} />
-          ) : (
-            <TextBody color={color.white}>{step}</TextBody>
+    <TouchableHighlight onPress={onPress} {...touchHighlightUnderlay.subtle}>
+      <View>
+        <View style={styles.row}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.rowLeft,
+                { backgroundColor: done ? color.primary : color.gray3 },
+              ]}
+            >
+              {done ? (
+                <Octicons name="check" size={16} color={color.white} />
+              ) : (
+                <TextBody color={color.white}>{step}</TextBody>
+              )}
+            </View>
+            <Spacer w={16} />
+            <View>
+              <DaimoText color={done ? color.gray3 : color.midnight}>
+                {title}
+              </DaimoText>
+              <DaimoText
+                variant="metadata"
+                color={done ? color.gray3 : color.grayMid}
+              >
+                {description}
+              </DaimoText>
+            </View>
+          </View>
+          {!done && (
+            <Octicons name="arrow-right" color={color.primary} size={24} />
           )}
         </View>
-        <Spacer w={16} />
-        <View>
-          <DaimoText color={done ? color.gray3 : color.midnight}>
-            {title}
-          </DaimoText>
-          <DaimoText
-            variant="metadata"
-            color={done ? color.gray3 : color.grayMid}
-          >
-            {description}
-          </DaimoText>
-        </View>
+        <View style={styles.separator} />
       </View>
-      {!done && <Octicons name="arrow-right" color={color.primary} size={24} />}
-    </Pressable>
+    </TouchableHighlight>
   );
 }
 
@@ -110,14 +120,13 @@ const styles = StyleSheet.create({
   separator: {
     height: 0.5,
     backgroundColor: color.grayLight,
+    marginHorizontal: 24,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottomWidth: 0.5,
-    paddingVertical: 24,
-    borderBottomColor: color.grayLight,
+    padding: 24,
   },
   rowLeft: {
     justifyContent: "center",
