@@ -104,6 +104,7 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
           <Spacer w={8} />
           <Pressable
             onPress={() => nav.push("YourInvites")}
+            hitSlop={16}
             children={({ pressed }) => (
               <TextBody color={pressed ? color.gray3 : color.grayMid}>
                 +{moreInvitees} more
@@ -147,6 +148,7 @@ function HeaderCountText({
       {showInviteesCount && (
         <Pressable
           onPress={() => nav.push("YourInvites")}
+          hitSlop={16}
           children={({ pressed }) => (
             <TextCenter>
               <TextBody color={pressed ? color.primaryBgLight : color.primary}>

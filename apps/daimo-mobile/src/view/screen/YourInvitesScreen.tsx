@@ -1,11 +1,5 @@
 import { EAccount, timeAgo } from "@daimo/common";
-import {
-  ScrollView,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
 import { Account } from "../../model/account";
@@ -49,9 +43,7 @@ function InviteeRow({ invitee }: { invitee: EAccount }) {
       >
         <View style={styles.inviteeRow}>
           <View style={styles.inviteeRowLeft}>
-            <TouchableOpacity onPress={() => navToAccountPage(invitee, nav)}>
-              <ContactBubble contact={{ type: "eAcc", ...invitee }} size={36} />
-            </TouchableOpacity>
+            <ContactBubble contact={{ type: "eAcc", ...invitee }} size={36} />
             <TextBody color={color.midnight}>{invitee.name}</TextBody>
           </View>
           <View style={styles.inviteeRowRight}>
