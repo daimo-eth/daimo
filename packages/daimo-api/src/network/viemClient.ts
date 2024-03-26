@@ -114,6 +114,10 @@ export class ViemClient {
     }
   }
 
+  // We do this to avoid race conditions with nonces. We can't rely on
+  // Viem to do this for us, as it's not atomic. Other places that use
+  // similar logic include Pimlico's Alto bundler:
+  // https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/executor/executor.ts
   async updateNonce() {
     const txCount = await this.publicClient.getTransactionCount({
       address: this.walletClient.account.address,
@@ -129,19 +133,36 @@ export class ViemClient {
     Args extends { nonce?: number; gas?: bigint },
     Ret
   >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
-    console.log(`[CHAIN] ready to run with override, waiting for lock`);
+    const startMs = performance.now();
+    const localTxId = Math.floor(Math.random() * 1e6);
+    console.log(
+      `[CHAIN] ready to run $${localTxId} with override, waiting for lock`
+    );
     await this.lockNonce.acquireAsync();
 
     try {
+      console.log(
+        `[CHAIN] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
+      );
       await this.updateNonce();
+      console.log(
+        `[CHAIN] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
+          this.nextNonce
+        }`
+      );
 
-      // Override nonce and gas, execute
-      args.nonce = this.nextNonce;
-      args.gas = 2_000_000n;
+      args.nonce = this.nextNonce; // Override nonce
+      args.gas = 2_000_000n; // Saves estimateGas roundtrip
 
       const ret = await fn(args);
 
-      // Increment nonce
+      console.log(
+        `[CHAIN] tx ${localTxId} ${
+          performance.now() - startMs
+        }ms: submitted ${ret}`
+      );
+
+      // Increment nonce for later
       this.nextNonce += 1;
       return ret;
     } finally {
