@@ -90,16 +90,16 @@ export class ViemClient {
     ({ address }: { address: Address }) => address
   );
 
-  onReceiptError = (hash: Hex, e: unknown) => {
+  private onReceiptError(hash: Hex, e: unknown) {
     const explorerURL = this.publicClient.chain.blockExplorers?.default?.url;
     const txURL = `${explorerURL}/tx/${hash}`;
     this.telemetry.recordClippy(
       `Receipt error ${hash} - ${txURL}: ${e}`,
       "error"
     );
-  };
+  }
 
-  async waitForReceipt(hash: Hex) {
+  private async waitForReceipt(hash: Hex) {
     try {
       const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
@@ -118,7 +118,7 @@ export class ViemClient {
   // Viem to do this for us, as it's not atomic. Other places that use
   // similar logic include Pimlico's Alto bundler:
   // https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/executor/executor.ts
-  async updateNonce() {
+  private async updateNonce() {
     const txCount = await this.publicClient.getTransactionCount({
       address: this.walletClient.account.address,
       blockTag: "pending",
@@ -129,7 +129,7 @@ export class ViemClient {
     this.nextNonce = Math.max(this.nextNonce, txCount);
   }
 
-  async runWithOverrideParams<
+  private async runWithOverrideParams<
     Args extends { nonce?: number; gas?: bigint },
     Ret
   >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
@@ -184,8 +184,9 @@ export class ViemClient {
     >
   ): Promise<Hex> {
     console.log(`[CHAIN] exec ${args.functionName}`);
-    const ret = await this.runWithOverrideParams(args, (args) =>
-      this.walletClient.writeContract(args)
+    const ret = await this.runWithOverrideParams(
+      args,
+      this.walletClient.writeContract
     );
     this.waitForReceipt(ret);
     return ret;
@@ -195,8 +196,9 @@ export class ViemClient {
     args: SendTransactionParameters<Chain, Account, TChainOverride>
   ): Promise<SendTransactionReturnType> {
     console.log(`[CHAIN] send ${args.to}, waiting for lock`);
-    const ret = await this.runWithOverrideParams(args, (args) =>
-      this.walletClient.sendTransaction(args)
+    const ret = await this.runWithOverrideParams(
+      args,
+      this.walletClient.sendTransaction
     );
     this.waitForReceipt(ret);
     return ret;
