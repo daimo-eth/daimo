@@ -43,7 +43,12 @@ export function AddKeySlotButton({
   const sendFn = async (opSender: DaimoOpSender) => {
     const key = await (async () => {
       if (!knownPubkey) {
-        assert(getSlotType(slot) === SlotType.PasskeyBackup);
+        console.log(`[KEY-ROTATION] creating ke ${getSlotType(slot)} ${slot}`);
+        assert(
+          getSlotType(slot) === SlotType.PasskeyBackup ||
+            getSlotType(slot) === SlotType.SecurityKeyBackup
+        );
+
         return await createPasskey(
           daimoChainFromId(account.homeChainId),
           account.name,
@@ -76,6 +81,7 @@ export function AddKeySlotButton({
         pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
       };
     },
+    signerType: "deviceKey",
   });
 
   const didUserCancel = message.includes("User cancelled");
