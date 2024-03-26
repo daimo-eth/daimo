@@ -149,5 +149,5 @@ export class Paymaster {
 }
 
 function calcPreVerificationGas() {
-  return 10_000_000n; // TODO
+  return 1_000_000n; // TODO
 }
