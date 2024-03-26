@@ -69,8 +69,7 @@ export class CoinIndexer {
         and block_num <= $2;
       `,
           [from, to]
-        ),
-      5
+        )
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {
