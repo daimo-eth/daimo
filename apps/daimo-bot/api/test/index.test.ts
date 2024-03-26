@@ -1,10 +1,6 @@
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
-import {
-  CONNECT_FC_MESSAGE,
-  PAYMENT_CONNECT_FC_MESSAGE,
-  REQUEST_PAYMENT_MESSAGE,
-} from "../botResponses";
+import { BotResp } from "../botResponses";
 import { DaimobotProcessor } from "../daimobotProcessor";
 import { trpcClient } from "../trpcClient";
 import { TRPCClient } from "../types";
@@ -127,7 +123,7 @@ describe("daimobotProcessor", () => {
     // Without FC linked, Daimobot should request sender to connect their FC
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      CONNECT_FC_MESSAGE,
+      BotResp.connectFarcasterToContinue(),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
@@ -155,9 +151,7 @@ describe("daimobotProcessor", () => {
 
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining(
-        REQUEST_PAYMENT_MESSAGE(amount, senderUsername, "")
-      ),
+      expect.stringContaining(BotResp.request(amount, senderUsername, "")),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
@@ -196,7 +190,7 @@ describe("daimobotProcessor", () => {
     // Without FC linked, Daimobot should request parent-thread user to connect their FC
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      PAYMENT_CONNECT_FC_MESSAGE("bob"),
+      BotResp.noDaimoOrEthAccountFound("bob"),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
@@ -240,9 +234,7 @@ describe("daimobotProcessor", () => {
 
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
-      expect.stringContaining(
-        REQUEST_PAYMENT_MESSAGE(amount, bob.username, "")
-      ),
+      expect.stringContaining(BotResp.request(amount, bob.username, "")),
       expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);

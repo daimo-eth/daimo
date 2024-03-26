@@ -27,12 +27,12 @@ export async function createRequestSponsored(
   }
 
   let metadata: Hex = "0x00";
-
   if (fulfiller) {
     const rawMetadata = JSON.stringify({ v: 0, fulfiller });
     metadata = stringToHex(rawMetadata);
   }
 
+  console.log(`[API] creating req ${id} ${recipient} ${amount} ${fulfiller}`);
   const requestTxHash = await vc.writeContract({
     abi: daimoRequestABI,
     address: daimoRequestAddress,
