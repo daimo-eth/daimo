@@ -12,6 +12,7 @@ import {
   View,
   TouchableHighlight,
   ImageBackground,
+  Pressable,
 } from "react-native";
 
 import InviteBackground from "../../../assets/invite-background.png";
@@ -87,6 +88,8 @@ function InviteeBubble({ invitee }: { invitee: EAccount }) {
 }
 
 function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
+  const nav = useNav();
+
   const displayInvitees = invitees.slice(-3); // Most recent invitees
   const moreInvitees =
     invitees.length > 3 ? invitees.length - displayInvitees.length : 0;
@@ -99,7 +102,15 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
       {moreInvitees > 0 && (
         <>
           <Spacer w={8} />
-          <TextBody color={color.grayMid}>+{moreInvitees} more</TextBody>
+          <Pressable
+            onPress={() => nav.push("YourInvites")}
+            hitSlop={16}
+            children={({ pressed }) => (
+              <TextBody color={pressed ? color.gray3 : color.grayMid}>
+                +{moreInvitees} more
+              </TextBody>
+            )}
+          />
         </>
       )}
     </View>
@@ -127,18 +138,26 @@ function HeaderCountText({
   invitees?: EAccount[];
   usesLeft?: number;
 }) {
+  const nav = useNav();
+
   const showInviteesCount = invitees != null && invitees.length > 0;
   const showUsesLeft = usesLeft != null && (showInviteesCount || usesLeft > 0);
 
   return (
     <View>
       {showInviteesCount && (
-        <TextCenter>
-          <TextBody color={color.primary}>
-            You've invited {invitees?.length}{" "}
-            {invitees?.length === 1 ? "friend" : "friends"}
-          </TextBody>
-        </TextCenter>
+        <Pressable
+          onPress={() => nav.push("YourInvites")}
+          hitSlop={16}
+          children={({ pressed }) => (
+            <TextCenter>
+              <TextBody color={pressed ? color.primaryBgLight : color.primary}>
+                You've invited {invitees?.length}{" "}
+                {invitees?.length === 1 ? "friend" : "friends"}
+              </TextBody>
+            </TextCenter>
+          )}
+        />
       )}
       {showInviteesCount && showUsesLeft && <Spacer h={8} />}
       {showUsesLeft && (
