@@ -1,5 +1,5 @@
 import { SlotType, getSlotType } from "@daimo/common";
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext } from "react";
 
 import { DispatcherContext } from "../action/dispatch";
 import { useNav } from "../common/nav";
@@ -17,12 +17,10 @@ export function useOnboardingChecklist(account: Account) {
     (a) => a.type === "farcaster"
   );
 
-  const allComplete = useMemo(() => {
-    return hasBackup && farcasterConnected;
-  }, [hasBackup, farcasterConnected]);
+  const allComplete = hasBackup && farcasterConnected;
 
   const handleSecureAccount = useCallback(() => {
-    nav.navigate("Settings");
+    nav.navigate("SettingsTab", { screen: "AddPasskey" });
     dispatcher.dispatch({ name: "hideBottomSheet" });
   }, [nav, dispatcher]);
 
