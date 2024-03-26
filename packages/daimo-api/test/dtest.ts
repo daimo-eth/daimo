@@ -5,10 +5,12 @@ import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { getViemClientFromEnv } from "../src/network/viemClient";
+import { Telemetry } from "../src/server/telemetry";
 import { Watcher } from "../src/shovel/watcher";
 
 async function main() {
-  const vc = getViemClientFromEnv();
+  const monitor = new Telemetry();
+  const vc = getViemClientFromEnv(monitor);
   const opIndexer = new OpIndexer();
   const nameReg = new NameRegistry(
     vc,
