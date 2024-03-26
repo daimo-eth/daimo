@@ -79,6 +79,7 @@ export function SendTransferButton({
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),
+    signerType: "deviceKey",
   });
 
   const sendDisabledReason = (function () {

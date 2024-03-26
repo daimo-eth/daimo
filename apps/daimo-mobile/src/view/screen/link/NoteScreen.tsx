@@ -210,6 +210,7 @@ function NoteDisplayInner({
       } as EAccount,
       noteStatus.sender,
     ]),
+    signerType: "deviceKey",
   });
   console.log(
     `[NOTE] rendering NoteDisplay, status ${status} ${message} ${JSON.stringify(

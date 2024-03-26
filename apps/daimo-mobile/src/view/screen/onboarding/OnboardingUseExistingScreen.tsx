@@ -73,6 +73,8 @@ export function OnboardingUseExistingScreen() {
     );
   }
 
+  const useSecurityKey = true; // todo, fork in design
+
   return (
     <View>
       <OnboardingHeader title="Existing Account" onPrev={onPrev} />
@@ -96,6 +98,7 @@ export function OnboardingUseExistingScreen() {
           pubKeyHex={pubKeyHex}
           slotType={slotType}
           daimoChain={daimoChain}
+          useSecurityKey={useSecurityKey}
         />
       </View>
     </View>
@@ -106,10 +109,12 @@ function RestoreFromBackupButton({
   pubKeyHex,
   slotType,
   daimoChain,
+  useSecurityKey,
 }: {
   pubKeyHex: Hex;
   slotType: SlotType;
   daimoChain: DaimoChain;
+  useSecurityKey: boolean;
 }) {
   const [passkeyAccount, setPasskeyAccount] = useState<Account | undefined>(
     undefined
@@ -149,6 +154,7 @@ function RestoreFromBackupButton({
     dollarsToSend: 0,
     sendFn,
     passkeyAccount,
+    signerType: useSecurityKey ? "securityKey" : "passkey",
   });
 
   const [restoreStatus, setRestoreStatus] = useState<{
@@ -166,7 +172,8 @@ function RestoreFromBackupButton({
     try {
       const { accountName } = await requestPasskeySignature(
         challengeB64,
-        env(daimoChain).passkeyDomain
+        env(daimoChain).passkeyDomain,
+        useSecurityKey
       );
 
       const rpcFunc = env(daimoChain).rpcFunc;

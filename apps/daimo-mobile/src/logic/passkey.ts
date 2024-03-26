@@ -1,4 +1,9 @@
-import { getSlotLabel, parseAndNormalizeSig } from "@daimo/common";
+import {
+  SlotType,
+  getSlotLabel,
+  getSlotType,
+  parseAndNormalizeSig,
+} from "@daimo/common";
 import { DaimoChain, daimoAccountABI } from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
@@ -29,11 +34,13 @@ export async function createPasskey(
   accountName: string,
   keySlot: number
 ) {
+  const useSecurityKey = getSlotType(keySlot) === SlotType.SecurityKeyBackup;
   console.log(
     "[PASSKEY] Creating passkey",
     accountName,
     keySlot,
-    env(daimoChain).passkeyDomain
+    env(daimoChain).passkeyDomain,
+    useSecurityKey
   );
   const passkeyName = `${accountName}.${keySlot}`;
 
@@ -51,6 +58,7 @@ export async function createPasskey(
         passkeyName,
         passkeyDisplayTitle,
         challengeB64,
+        useSecurityKey,
       }),
     5,
     matchAASABugError,
@@ -64,7 +72,8 @@ export async function createPasskey(
 
 // @daimo/userop compatible Signer for Webauthn signatures
 export function getWrappedPasskeySigner(
-  daimoChain: DaimoChain
+  daimoChain: DaimoChain,
+  useSecurityKey: boolean
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -81,7 +90,8 @@ export function getWrappedPasskeySigner(
       responseTypeLocation,
     } = await requestPasskeySignature(
       challengeB64,
-      env(daimoChain).passkeyDomain
+      env(daimoChain).passkeyDomain,
+      useSecurityKey
     );
     console.log("[PASSKEY] Got signature", derSig, accountName, keySlot);
 
@@ -112,7 +122,8 @@ export function getWrappedPasskeySigner(
 
 export async function requestPasskeySignature(
   challengeB64: string,
-  domain: string
+  domain: string,
+  useSecurityKey: boolean
 ) {
   const result = await Log.retryBackoff(
     "ExpoPasskeysSign",
@@ -120,6 +131,7 @@ export async function requestPasskeySignature(
       ExpoPasskeys.signWithPasskey({
         domain,
         challengeB64,
+        useSecurityKey,
       }),
     5,
     matchAASABugError,

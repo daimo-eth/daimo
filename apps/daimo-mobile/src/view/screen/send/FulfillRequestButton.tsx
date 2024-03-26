@@ -73,6 +73,7 @@ export function FulfillRequestButton({
     accountTransform: transferAccountTransform(
       hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : []
     ),
+    signerType: "deviceKey",
   });
 
   const sendDisabledReason = (() => {

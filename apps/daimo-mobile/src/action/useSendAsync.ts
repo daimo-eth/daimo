@@ -54,6 +54,7 @@ type BaseUseSendArgs = {
    */
   customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
   passkeyAccount?: Account;
+  signerType: "passkey" | "securityKey" | "deviceKey";
 };
 
 type UseSendWithPendingOpArgs = BaseUseSendArgs & {
@@ -78,6 +79,7 @@ export function useSendAsync({
   pendingOp,
   accountTransform,
   passkeyAccount,
+  signerType,
 }: UseSendArgs): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
 
@@ -105,7 +107,7 @@ export function useSendAsync({
 
     const pendingOpEventData = customHandler
       ? await customHandler(setAS)
-      : await sendAsync(setAS, account, keySlot, !!passkeyAccount, sendFn);
+      : await sendAsync(setAS, account, keySlot, signerType, sendFn);
 
     // Vibrate on success
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -195,7 +197,7 @@ export function useWarmSenderCache(account: Account) {
       enclaveKeyName,
       address,
       keySlot,
-      usePasskey: false,
+      signerType: "deviceKey",
       chainId,
     });
   }, [enclaveKeyName, address, keySlot, chainId]);
@@ -210,18 +212,18 @@ function loadOpSender({
   enclaveKeyName,
   address,
   keySlot,
-  usePasskey,
+  signerType,
   chainId,
 }: {
   enclaveKeyName: string;
   address: Address;
   keySlot: number | undefined;
-  usePasskey: boolean;
+  signerType: "passkey" | "securityKey" | "deviceKey";
   chainId: number;
 }) {
   assert(
-    (keySlot == null) === usePasskey,
-    "Key slot and passkey are mutually exclusive"
+    (keySlot != null) === (signerType === "deviceKey"),
+    "Signer type = deviceKey and keySlot must be both set"
   );
 
   let promise = accountCache.get([address, keySlot]);
@@ -230,9 +232,10 @@ function loadOpSender({
   const daimoChain = daimoChainFromId(chainId);
   const rpcFunc = env(daimoChain).rpcFunc;
 
-  const signer = usePasskey
-    ? getWrappedPasskeySigner(daimoChain)
-    : getWrappedRawSigner(enclaveKeyName, keySlot!);
+  const signer =
+    signerType === "deviceKey"
+      ? getWrappedRawSigner(enclaveKeyName, keySlot!)
+      : getWrappedPasskeySigner(daimoChain, signerType === "securityKey");
 
   const sender: OpSenderCallback = async (op: UserOpHex, memo?: string) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
@@ -266,13 +269,10 @@ async function sendAsync(
   setAS: SetActStatus,
   account: Account,
   keySlot: number | undefined,
-  usePasskey: boolean,
+  signerType: "passkey" | "securityKey" | "deviceKey",
   sendFn: SendOpFn
 ): Promise<PendingOpEvent> {
   try {
-    if (keySlot === undefined && !usePasskey)
-      throw new Error("No key slot or passkey");
-
     const { enclaveKeyName, address, homeChainId } = account;
 
     setAS("loading", "Loading account...");
@@ -280,7 +280,7 @@ async function sendAsync(
       enclaveKeyName,
       address,
       keySlot,
-      usePasskey,
+      signerType,
       chainId: homeChainId,
     });
 
