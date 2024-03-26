@@ -399,12 +399,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.grayLight,
     marginHorizontal: 24,
-    // shadowColor: color.ivoryLight,
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowRadius: 4,
-    // shadowOpacity: 1,
-    // elevation: 3,
-    ...ss.container.shadow,
     backgroundColor: color.white,
+    ...ss.container.shadow,
   },
 });
