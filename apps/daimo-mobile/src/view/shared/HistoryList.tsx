@@ -24,7 +24,7 @@ import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
 import { color, ss, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
+import { DaimoText, TextBody, TextCenter, TextLight, TextMeta } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
@@ -233,6 +233,12 @@ function DisplayOpRow({
     opTitle = "cancelled link";
   }
 
+  const opMemo =
+    displayOp.type === "transfer" && displayOp.memo
+      ? displayOp.memo
+      : undefined;
+  const memoCol = isPending ? color.gray3 : color.grayDark;
+
   return (
     <View style={styles.transferBorder}>
       <TouchableHighlight
@@ -254,8 +260,15 @@ function DisplayOpRow({
                 {...{ isPending }}
               />
             </TouchableOpacity>
-
-            <TextBody color={textCol}>{opTitle}</TextBody>
+            <View style={{ flexDirection: "column" }}>
+              <TextBody color={textCol}>{opTitle}</TextBody>
+              {opMemo && (
+                <>
+                  <Spacer h={2} />
+                  <TextMeta color={memoCol}>{opMemo}</TextMeta>
+                </>
+              )}
+            </View>
             {isPending && <PendingDot />}
           </View>
           <TransferAmountDate

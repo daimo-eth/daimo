@@ -11,10 +11,12 @@ import { FarcasterClient } from "../../profile/farcaster";
 export function FarcasterButton({
   fcAccount,
   align,
+  hideUsername,
   onPress,
 }: {
   fcAccount: FarcasterLinkedAccount;
   align?: "center";
+  hideUsername?: boolean;
   onPress?: () => void;
 }) {
   const username = FarcasterClient.getDispUsername(fcAccount).toUpperCase();
@@ -38,7 +40,9 @@ export function FarcasterButton({
           source={{ uri: image.iconFarcaster }}
           style={{ width: 16, height: 16, zIndex: -1 }}
         />
-        <TextBtnCaps color={color.grayDark}>{username}</TextBtnCaps>
+        {!hideUsername && (
+          <TextBtnCaps color={color.grayDark}>{username}</TextBtnCaps>
+        )}
       </View>
     </BadgeButton>
   );

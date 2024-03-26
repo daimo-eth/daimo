@@ -132,11 +132,7 @@ export class PushNotifier {
         continue;
       }
 
-      const requestStatus =
-        this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
-          log.transactionHash,
-          log.logIndex - 1
-        );
+      const opEvent = this.coinIndexer.attachTransferOpProperties(log);
 
       const [a, b] = await Promise.all([
         this.getPushMessagesFromTransfer(
@@ -144,6 +140,7 @@ export class PushNotifier {
           from,
           to,
           -BigInt(amount),
+          opEvent.type === "transfer" ? opEvent.memo : undefined,
           false
         ),
         this.getPushMessagesFromTransfer(
@@ -151,7 +148,8 @@ export class PushNotifier {
           to,
           from,
           BigInt(amount),
-          requestStatus != null
+          opEvent.type === "transfer" ? opEvent.memo : undefined,
+          opEvent.type === "transfer" && opEvent.requestStatus != null
         ),
       ]);
       messages.push(...a, ...b);
@@ -198,6 +196,7 @@ export class PushNotifier {
     addr: Address,
     other: Address,
     value: bigint,
+    memo: string | undefined,
     receivingRequestedMoney: boolean
   ): Promise<ExpoPushMessage[]> {
     const pushTokens = this.pushTokens.get(addr);
@@ -218,12 +217,18 @@ export class PushNotifier {
     }
     const otherStr = getAccountName(otherAcc);
 
-    const title = value < 0 ? `Sent $${dollars}` : `Received $${dollars}`;
+    const title =
+      value < 0
+        ? `Sent $${dollars} to ${otherStr}`
+        : `Received $${dollars} from ${otherStr}`;
     let body;
-    if (value < 0) {
-      body = `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
+
+    if (memo) {
+      body = memo;
     } else if (receivingRequestedMoney) {
-      body = `${otherStr} fulfilled your ${dollars} ${tokenSymbol} request`;
+      body = `Your ${dollars} ${tokenSymbol} request was fulfilled`;
+    } else if (value < 0) {
+      body = `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
     } else {
       body = `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
     }

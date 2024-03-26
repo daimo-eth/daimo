@@ -37,8 +37,8 @@ export function getEAccountStr(eAccount: EAccount): string {
   return eAccount.addr;
 }
 
-export function getAddressContraction(address: Address): string {
-  return address.slice(0, 6) + "…" + address.slice(-4);
+export function getAddressContraction(address: Address, length = 4): string {
+  return address.slice(0, 2 + length) + "…" + address.slice(-length);
 }
 
 /** Gets a display name or 0x... address contraction. */

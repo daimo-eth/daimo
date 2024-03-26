@@ -7,7 +7,8 @@ import { ButtonCircle } from "../../shared/ButtonCircle";
 import { ContactBubble } from "../../shared/ContactBubble";
 import { FarcasterButton } from "../../shared/FarcasterBubble";
 import Spacer from "../../shared/Spacer";
-import { TextH3, TextLight } from "../../shared/text";
+import { color } from "../../shared/style";
+import { TextBtnCaps, TextH2, TextLight } from "../../shared/text";
 
 export function RecipientDisplay({
   recipient,
@@ -27,11 +28,9 @@ export function RecipientDisplay({
       case "eAcc":
         if (requestMemo) {
           return requestMemo;
-        } else if (recipient.linkedAccounts?.length) {
-          return <FarcasterButton fcAccount={recipient.linkedAccounts[0]} />;
-        } else {
+        } else if (recipient.originalMatch) {
           return recipient.originalMatch;
-        }
+        } else return undefined;
       case "phoneNumber":
         return recipient.phoneNumber;
       case "email":
@@ -40,6 +39,9 @@ export function RecipientDisplay({
   })();
 
   const showSubtitle = subtitle != null && subtitle !== disp;
+
+  const showFarcaster =
+    recipient.type === "eAcc" && (recipient.linkedAccounts?.length || 0) > 0;
 
   const nav = useNav();
   const goToAccount = useCallback(() => {
@@ -56,16 +58,45 @@ export function RecipientDisplay({
       <Spacer h={8} />
       {isRequest && <TextLight>Requested by</TextLight>}
       {isRequest && <Spacer h={4} />}
-      <TextH3>{disp}</TextH3>
-      {showSubtitle && <Spacer h={4} />}
-      {showSubtitle && <TextLight>{subtitle}</TextLight>}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <TextH2>{disp}</TextH2>
+        {showFarcaster && <Spacer w={8} />}
+        {showFarcaster && (
+          <FarcasterButton
+            fcAccount={recipient.linkedAccounts![0]}
+            hideUsername
+          />
+        )}
+      </View>
+      {showSubtitle && <Spacer w={4} />}
+      {showSubtitle && <SubtitleBubble subtitle={subtitle} />}
     </View>
   );
 }
+
+const SubtitleBubble = ({ subtitle }: { subtitle: string }) => {
+  return (
+    <View style={styles.subtitleBubble}>
+      <TextBtnCaps color={color.grayDark}>{subtitle}</TextBtnCaps>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   recipientDisp: {
     flexDirection: "column",
     alignItems: "center",
+  },
+  subtitleBubble: {
+    backgroundColor: color.ivoryDark,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
 });

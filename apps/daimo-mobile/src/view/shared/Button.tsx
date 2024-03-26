@@ -172,7 +172,7 @@ export function BadgeButton({
           paddingVertical: 6,
           borderRadius: 8,
         }}
-        hitSlop={24}
+        hitSlop={12}
         {...touchHighlightUnderlay.subtle}
       >
         {children || <TextBtnCaps color={color.grayDark}>{title}</TextBtnCaps>}
