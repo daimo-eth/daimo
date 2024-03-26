@@ -37,7 +37,7 @@ async function main() {
   const db = new DB();
   await db.createTables();
 
-  console.log(`[API] using wallet ${vc.walletClient.account.address}`);
+  console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
   const profileCache = new ProfileCache(vc, db);
 

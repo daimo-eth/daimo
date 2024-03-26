@@ -60,7 +60,7 @@ export class InviteCodeTracker {
           status: OpStatus.pending,
           timestamp: now(),
           amount: Number(dollarsToAmount(code.bonusDollarsInvitee)),
-          from: this.vc.walletClient.account.address,
+          from: this.vc.account.address,
           to: invitee,
           txHash,
         };

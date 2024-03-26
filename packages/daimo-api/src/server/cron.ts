@@ -117,7 +117,7 @@ export class Crontab {
   }
 
   async checkFaucetBalance() {
-    const faucetAddr = this.vc.walletClient.account.address;
+    const faucetAddr = this.vc.account.address;
     const balance = await this.vc.publicClient.getBalance({
       address: faucetAddr,
     });

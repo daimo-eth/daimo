@@ -144,7 +144,7 @@ export class BundlerClient {
 
   /// Send compressed userop. This is about 4x cheaper than sending uncompressed
   async sendCompressedBundle(compressed: Hex, viemClient: ViemClient) {
-    const txHash = await viemClient.walletClient.sendTransaction({
+    const txHash = await viemClient.sendTransaction({
       to: bundleBulkerAddress,
       data: compressed,
     });
@@ -153,7 +153,7 @@ export class BundlerClient {
 
   /// Send uncompressed. Used for ops for which we don't yet have an inflator.
   async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
-    const beneficiary = viemClient.walletClient.account.address;
+    const beneficiary = viemClient.account.address;
     const txHash = await viemClient.writeContract({
       abi: entryPointABI,
       address: Constants.ERC4337.EntryPoint as Address,
