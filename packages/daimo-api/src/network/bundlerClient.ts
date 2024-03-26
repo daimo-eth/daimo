@@ -164,15 +164,6 @@ export class BundlerClient {
     return txHash;
   }
 
-  async estimatePreVerificationGas(op: UserOpHex) {
-    // const args = [op, Constants.ERC4337.EntryPoint];
-
-    // TODO: compute preVerificationGas from the op
-    // Use Pimlico forumla: https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/utils/validation.ts#L305-L368
-    // x Optimism formula: https://optimistic.etherscan.io/address/0xc0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3000f#code
-    return 1_000_000;
-  }
-
   async getUserOperationGasPriceParams() {
     console.log(`[BUNDLER] fetching gas price params`);
     const gasPrice = (await this.provider.send(
