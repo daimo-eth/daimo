@@ -61,20 +61,24 @@ function ProgressBlobs({
       {Array(steps)
         .fill(0)
         .map((_, index) => (
-          <ProgressBlob key={index} active={activeStep === index} />
+          <ProgressBlob
+            key={index}
+            active={activeStep === index}
+            done={index < activeStep}
+          />
         ))}
     </Animated.View>
   );
 }
 
-function ProgressBlob({ active }: { active: boolean }) {
+function ProgressBlob({ active, done }: { active: boolean; done: boolean }) {
   const offset = useSharedValue(20);
   const bg = useSharedValue(color.primary);
 
   useEffect(() => {
     offset.value = withTiming(active ? 60 : 20);
-    bg.value = withTiming(active ? color.primary : color.grayLight);
-  }, [active]);
+    bg.value = withTiming(done || active ? color.primary : color.grayLight);
+  }, [active, done]);
 
   const style = useAnimatedStyle(() => ({
     width: offset.value,
