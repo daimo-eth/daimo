@@ -47,6 +47,23 @@ function CreateBackupContent({ setStep }: { setStep: any }) {
         <TextBody>Set up a passkey backup</TextBody>
         <View style={{}} />
       </View>
+      <Spacer h={16} />
+      <View>
+        <View style={{ flexDirection: "row" }}>
+          <TextBody>-</TextBody>
+          <Spacer w={8} />
+          <TextBody color={color.grayMid} style={{ lineHeight: 1.5 }}>
+            Convenient, secure, and resistant to phishing
+          </TextBody>
+        </View>
+        <View style={{ flexDirection: "row" }}>
+          <TextBody>-</TextBody>
+          <Spacer w={8} />
+          <TextBody color={color.grayMid} style={{ lineHeight: 3 }}>
+            Stored by your password manager, like iCloud Keychain or 1Password
+          </TextBody>
+        </View>
+      </View>
       <Spacer h={24} />
       <ButtonBig type="primary" title="Backup with passkey" />
       <Spacer h={24} />
