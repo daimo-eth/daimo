@@ -2,6 +2,7 @@ import {
   assertNotNull,
   EAccount,
   getAccountName,
+  getEnv,
   parseDaimoLink,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
@@ -131,11 +132,9 @@ export class FrameLinkService {
     fid: number,
     frame: InviteFrameLink
   ): Promise<string> {
-    const rand = Buffer.from(
-      crypto.getRandomValues(new Uint8Array(6))
-    ).toString("hex");
-
-    const code = `fc-${frame.id}-${fid}-${rand}`;
+    const preimage = `${frame.id}-${fid}-${getEnv("DAIMO_API_KEY")}`;
+    const hash = await crypto.subtle.digest("SHA-256", Buffer.from(preimage));
+    const code = `fc-${frame.id}-${fid}-${Buffer.from(hash).toString("hex")}`;
     const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
     console.log(`[FRAME] creating invite code ${code}`);
