@@ -39,7 +39,6 @@ export function SeedPhraseScreen() {
         }
       />
       <Spacer h={24} />
-      {/* Test animation of progress blobs */}
       {activeStep === 0 ? (
         <CopySeedPhrase setActiveStep={setActiveStep} />
       ) : (
