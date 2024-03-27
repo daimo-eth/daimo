@@ -1,53 +1,79 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useMemo } from "react";
-import { Text, TextProps, TextStyle } from "react-native";
+import { Text, TextProps } from "react-native";
 
 import { color, ss } from "./style";
 
 export const MAX_FONT_SIZE_MULTIPLIER = 1.4;
 
-function useStyle(baseStyle: TextStyle, { color }: { color?: string }) {
-  return useMemo(() => [baseStyle, { color }], [baseStyle, color]);
-}
-
-export const DaimoText = (props: TextProps) => {
-  return <Text {...props} maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER} />;
+type TypographyProps = TextProps & {
+  variant?:
+    | "h1"
+    | "h2"
+    | "h3"
+    | "body"
+    | "bodyCaps"
+    | "bodyMedium"
+    | "metadata"
+    | "metadataLight"
+    | "para"
+    | "btnCaps"
+    | "error"
+    | "center"
+    | "emphasizedSmallText";
+  color?: string;
 };
 
-export function TextH1(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.h1, props)} />;
+// Temporary component for text management pending a full refactor
+export function DaimoText({
+  variant = "body",
+  color,
+  style,
+  ...props
+}: TypographyProps) {
+  return (
+    <Text
+      style={[ss.text[variant], { color }, style]}
+      maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+      {...props}
+    />
+  );
 }
 
-export function TextH2(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.h2, props)} />;
+export function TextH1(props: TypographyProps) {
+  return <DaimoText variant="h1" {...props} />;
 }
 
-export function TextH3(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.h3, props)} />;
+export function TextH2(props: TypographyProps) {
+  return <DaimoText variant="h2" {...props} />;
 }
 
-export function TextBody(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.body, props)} />;
+export function TextH3(props: TypographyProps) {
+  return <DaimoText variant="h3" {...props} />;
 }
 
-export function TextBodyCaps(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.bodyCaps, props)} />;
+export function TextBody(props: TypographyProps) {
+  return <DaimoText variant="body" {...props} />;
 }
 
-export function TextBodyMedium(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.bodyMedium, props)} />;
+export function TextBodyCaps(props: TypographyProps) {
+  return <DaimoText variant="bodyCaps" {...props} />;
 }
 
-export function TextMeta(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.metadata, props)} />;
+export function TextBodyMedium(props: TypographyProps) {
+  return <DaimoText variant="bodyMedium" {...props} />;
 }
 
-export function TextPara(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.para, props)} />;
+export function TextMeta(props: TypographyProps) {
+  return <DaimoText variant="metadata" {...props} />;
 }
 
-export function TextBtnCaps(props: TextProps & { color?: string }) {
-  return <DaimoText {...props} style={useStyle(ss.text.btnCaps, props)} />;
+export function TextPara(props: TypographyProps) {
+  return <DaimoText variant="para" {...props} />;
+}
+
+export function TextBtnCaps(props: TypographyProps) {
+  return <DaimoText variant="btnCaps" {...props} />;
 }
 
 export function TextLight(props: TextProps) {

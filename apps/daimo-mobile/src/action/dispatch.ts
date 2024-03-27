@@ -3,6 +3,7 @@ import { createContext } from "react";
 type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
+  | { name: "onboardingChecklist" }
   | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];
