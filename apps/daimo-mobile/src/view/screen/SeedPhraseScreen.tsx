@@ -21,7 +21,11 @@ export function SeedPhraseScreen() {
       <ProgressBlobs steps={2} activeStep={activeStep} />
       <Spacer h={24} />
       {/* Test animation of progress blobs */}
-      {activeStep === 0 ? <CopySeedPhrase /> : <VerifySeedPhrase />}
+      {activeStep === 0 ? (
+        <CopySeedPhrase setActiveStep={setActiveStep} />
+      ) : (
+        <VerifySeedPhrase setActiveStep={setActiveStep} />
+      )}
     </View>
   );
 }
@@ -68,7 +72,11 @@ function ProgressBlob({ active }: { active: boolean }) {
   );
 }
 
-function CopySeedPhrase() {
+function CopySeedPhrase({
+  setActiveStep,
+}: {
+  setActiveStep: (value: 0 | 1) => void;
+}) {
   return (
     <View>
       <TextBody color={color.grayDark}>
@@ -82,7 +90,11 @@ function CopySeedPhrase() {
   );
 }
 
-function VerifySeedPhrase() {
+function VerifySeedPhrase({
+  setActiveStep,
+}: {
+  setActiveStep: (value: 0 | 1) => void;
+}) {
   return (
     <View>
       <TextBody color={color.grayDark}>
