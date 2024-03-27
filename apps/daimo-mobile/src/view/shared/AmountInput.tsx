@@ -64,10 +64,8 @@ export function AmountChooser({
           <TextLight>Daimo uses Base, an Ethereum rollup.</TextLight>
           <Spacer h={24} />
           <TextLight>
-            Rollups support near-instant transactions that cost a few cents each
-            by bundling many transactions into a single L1 transaction. They
-            inherit the strong guarantees of Ethereum: like L1, Base is reliable
-            and secure, and works worldwide.
+            Daimo transactions are sponsored. This means that your transfers are
+            free.
           </TextLight>
           <Spacer h={24} />
           <TouchableOpacity onPress={openL2BeatLink}>
