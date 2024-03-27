@@ -10,7 +10,7 @@ import Animated, {
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
-import { ButtonBig, ButtonMed } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../shared/style";

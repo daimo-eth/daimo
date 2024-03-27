@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -6,6 +6,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -14,11 +15,29 @@ import { TextBody } from "../shared/text";
 
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
+  const nav = useNav();
+
+  const handleBack = useCallback(() => {
+    if (activeStep === 1) {
+      setActiveStep(0);
+    } else {
+      nav.goBack();
+    }
+  }, [activeStep, nav]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: color.white }}>
-      <ScreenHeader title="Seed phrase" />
-      <ProgressBlobs steps={2} activeStep={activeStep} />
+    <View
+      style={{ flex: 1, backgroundColor: color.white, paddingHorizontal: 24 }}
+    >
+      <ScreenHeader
+        title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
+        onBack={handleBack}
+        secondaryHeader={
+          <View style={{ marginVertical: 16, alignItems: "center" }}>
+            <ProgressBlobs steps={2} activeStep={activeStep} />
+          </View>
+        }
+      />
       <Spacer h={24} />
       {/* Test animation of progress blobs */}
       {activeStep === 0 ? (
@@ -79,13 +98,18 @@ function CopySeedPhrase({
 }) {
   return (
     <View>
-      <TextBody color={color.grayDark}>
+      <TextBody color={color.grayMid}>
         Your account will be backed up to the seed phrase, allowing you to
         recover it even if you lose your device.
       </TextBody>
+      <Spacer h={24} />
       <SeedPhraseBox mode="read" />
       <Spacer h={24} />
-      <ButtonBig type="primary" title="Continue" />
+      <ButtonBig
+        type="primary"
+        title="Continue"
+        onPress={() => setActiveStep(1)}
+      />
     </View>
   );
 }
@@ -100,6 +124,7 @@ function VerifySeedPhrase({
       <TextBody color={color.grayDark}>
         Type your seed phrase into the input box.
       </TextBody>
+      <Spacer h={24} />
       <SeedPhraseBox mode="edit" />
       <Spacer h={24} />
       <ButtonBig type="primary" title="Finish Setup" />
