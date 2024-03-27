@@ -131,7 +131,7 @@ export class ViemClient {
         this.onReceiptError(hash, JSON.stringify(receipt));
       }
     } catch (e) {
-      console.error(`[VIEM] waitForReceipt error: ${e}`);
+      console.error(`[VIEM] waitForReceipt ${hash} error: ${e}`);
       this.onReceiptError(hash, e);
     }
   }
