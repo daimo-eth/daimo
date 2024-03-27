@@ -1,22 +1,23 @@
 //
-//  PasskeyResponse.swift
+//  AuthResponder.swift
 //  Daimo
 //
 //  Created by Nalin Bhardwaj.
 //  Copyright © 2023 Daimo. All rights reserved.
 //
-//  PasskeyResponse is the delegate that recieves the result of a Passkey 
-//  creation/sign request and passes it back to the callback for processing.
+//  AuthResponder is the delegate that recieves the result of a Passkey or 
+//  SecurityKey creation/sign request and passes it back to the callback 
+//  for processing.
 
 import AuthenticationServices
 import ExpoModulesCore
 
 typealias AuthenticationRequestCallback = (ASAuthorization?, Error?) -> Void
 
-// A set used to retain pending requests until the callback is called
-var pendingRequests = Set<PasskeyResponse>()
+// A set used to retain pending requests until their callback is called
+var pendingRequests = Set<AuthResponder>()
 
-class PasskeyResponse: NSObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
+class AuthResponder: NSObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     private var callback: AuthenticationRequestCallback?
     
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {

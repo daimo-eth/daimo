@@ -74,6 +74,7 @@ export function FulfillRequestButton({
       hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : [],
       requestStatus.link.id
     ),
+    signerType: "deviceKey",
   });
 
   const sendDisabledReason = (() => {

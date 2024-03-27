@@ -9,6 +9,8 @@ const testCases: [number, string][] = [
   [26, "Phone 27"],
   [129, "Passkey Backup 2"],
   [65, "Computer 2"],
+  [160, "Security Key Backup"],
+  [193, "Seed Phrase Backup 2"],
 ];
 
 test("describes identifiers correctly", () => {
@@ -20,6 +22,7 @@ test("describes identifiers correctly", () => {
 test("finds unused slot", () => {
   assert.deepStrictEqual(findUnusedSlot([], SlotType.Phone), 0);
   assert.deepStrictEqual(findUnusedSlot([0], SlotType.Phone), 1);
+  assert.deepStrictEqual(findUnusedSlot([0], SlotType.SecurityKeyBackup), 160);
   assert.deepStrictEqual(findUnusedSlot([0, 1], SlotType.PasskeyBackup), 128);
   assert.deepStrictEqual(findUnusedSlot([0, 1], SlotType.Computer), 64);
   assert.deepStrictEqual(findUnusedSlot([0, 2], SlotType.Phone), 3);
@@ -34,5 +37,12 @@ test("finds unused slot", () => {
       SlotType.Phone
     ),
     5
+  );
+  assert.deepStrictEqual(
+    findUnusedSlot(
+      [...Array(256).keys()].filter((i) => i !== 199), // All slots except seed phrase backup 7 are taken
+      SlotType.SeedPhraseBackup
+    ),
+    199
   );
 });

@@ -126,6 +126,7 @@ function NotificationActions({
         ),
       };
     },
+    signerType: "deviceKey",
   });
 
   useEffect(() => {
