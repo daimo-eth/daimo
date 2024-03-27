@@ -134,7 +134,8 @@ export class FrameLinkService {
   ): Promise<string> {
     const preimage = `${frame.id}-${fid}-${getEnv("DAIMO_API_KEY")}`;
     const hash = await crypto.subtle.digest("SHA-256", Buffer.from(preimage));
-    const code = `fc-${frame.id}-${fid}-${Buffer.from(hash).toString("hex")}`;
+    const suffix = Buffer.from(hash).toString("hex").substring(0, 6);
+    const code = `fc-${frame.id}-${fid}-${suffix}`;
     const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
     console.log(`[FRAME] creating invite code ${code}`);
@@ -144,7 +145,7 @@ export class FrameLinkService {
       maxUses: 1,
       inviter: frame.owner.addr,
       bonusDollarsInvitee: frame.bonusDollarsInvitee,
-      bonusDollarsInviter: 0,
+      bonusDollarsInviter: frame.bonusDollarsInviter || 0,
     });
     console.log(`[FRAME] created invite: ${link}`);
     return link;

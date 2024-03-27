@@ -1,5 +1,6 @@
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
 import { ViemClient } from "@daimo/api/src/network/viemClient";
+import { Telemetry } from "@daimo/api/src/server/telemetry";
 import {
   PendingOpEvent,
   UserOpHex,
@@ -133,7 +134,12 @@ export async function createAccount() {
 
   const bundlerClient = getBundlerClientFromEnv();
   const sender: OpSenderCallback = async (op: UserOpHex) => {
-    const vc = new ViemClient(publicClient, publicClient, walletClient);
+    const vc = new ViemClient(
+      publicClient,
+      publicClient,
+      walletClient,
+      new Telemetry()
+    );
     const hash = await bundlerClient.getOpHash(op, vc.publicClient);
     console.log(`NOT sending userOp. Hash: ${hash}`);
     return { opHash: hash } as PendingOpEvent;

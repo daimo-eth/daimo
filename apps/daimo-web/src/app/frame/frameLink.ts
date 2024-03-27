@@ -7,6 +7,7 @@ export interface InviteFrameLink {
   owner: EAccount;
 
   bonusDollarsInvitee: number;
+  bonusDollarsInviter?: number;
 
   auth: {
     claimerMustFollowOwner?: boolean;
@@ -472,6 +473,39 @@ export const inviteFrameLinks: InviteFrameLink[] = [
       imgSuccess: "/assets/frame/InvFrameSuccess.png",
       imgFail: "/assets/frame/InvFrameFail.png",
       buttonInit: "Using Bountycaster? · Get Daimo ✳️",
+      buttonSuccess: "",
+    },
+  },
+  {
+    id: 7,
+    owner: {
+      addr: "0x689f16A76B14161B21dC3ae406D7e6C7C7978a9B",
+      name: "ted",
+      profilePicture: "",
+    },
+    bonusDollarsInvitee: 20,
+    bonusDollarsInviter: 10,
+    auth: {
+      fidWhitelists: [
+        {
+          greeting: "🌴 WELCOME 🌴",
+          fids: [
+            56, 28, 99, 114, 260, 291, 426, 451, 518, 576, 589, 680, 771, 897,
+            1180, 1214, 1236, 1285, 1298, 1401, 1733, 1918, 2201, 2420, 2745,
+            2802, 3621, 3635, 4253, 4256, 4373, 5745, 5774, 6804, 6862, 7085,
+            7795, 7960, 8971, 9135, 9230, 11279, 11510, 11528, 12256, 13465,
+            14611, 16085, 16405, 16871, 20270, 20286, 191351, 195929, 204173,
+            214447, 230238, 237845, 238307, 239328, 241408, 247238, 247238,
+            252769, 270504, 284982, 311845, 316167, 325710, 328928, 331688,
+          ],
+        },
+      ],
+    },
+    appearance: {
+      imgInit: "/assets/frame/InvInitClubTed.png",
+      imgSuccess: "/assets/frame/InvFrameSuccess.png",
+      imgFail: "/assets/frame/InvFrameFail.png",
+      buttonInit: "Club Ted member? · get Daimo ✳️",
       buttonSuccess: "",
     },
   },
