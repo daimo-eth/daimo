@@ -31,13 +31,9 @@ import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
+import { ExternalAction } from "../../shared/composeSend";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
-
-export type ExternalAction = {
-  type: "sms" | "mail" | "share";
-  exec: (url: string, dollars: number) => Promise<boolean>;
-};
 
 /** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
 export function NoteActionButton({

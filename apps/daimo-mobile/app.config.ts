@@ -40,7 +40,6 @@ const config: ExpoConfig = {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#13915F",
-      backgroundImage: "./assets/adaptive-icon-background.png",
     },
     softwareKeyboardLayoutMode: "pan",
     googleServicesFile: IS_DEV

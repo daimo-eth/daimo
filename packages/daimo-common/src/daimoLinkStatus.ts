@@ -63,8 +63,15 @@ export type DaimoRequestV2Status = {
   creator?: EAccount;
   status: DaimoRequestState;
   metadata: Hex;
+  createdAt: number;
   fulfilledBy?: EAccount;
   isValidInvite?: boolean;
+};
+
+export type DaimoRequestV2Info = {
+  request: DaimoRequestV2Status;
+  type: "recipient" | "fulfiller";
+  fulfiller: EAccount;
 };
 
 /**

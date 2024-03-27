@@ -88,7 +88,7 @@ export class BundlerClient {
     viemClient: ViemClient,
     nameReg?: NameRegistry
   ) {
-    console.log(`[BUNDLER] submtting userOp: ${JSON.stringify(op)}`);
+    console.log(`[BUNDLER] submitting userOp: ${JSON.stringify(op)}`);
     try {
       assert(nameReg != null, "nameReg required");
       const compressed = this.compress(op, nameReg);
@@ -144,7 +144,7 @@ export class BundlerClient {
 
   /// Send compressed userop. This is about 4x cheaper than sending uncompressed
   async sendCompressedBundle(compressed: Hex, viemClient: ViemClient) {
-    const txHash = await viemClient.walletClient.sendTransaction({
+    const txHash = await viemClient.sendTransaction({
       to: bundleBulkerAddress,
       data: compressed,
     });
@@ -153,7 +153,7 @@ export class BundlerClient {
 
   /// Send uncompressed. Used for ops for which we don't yet have an inflator.
   async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
-    const beneficiary = viemClient.walletClient.account.address;
+    const beneficiary = viemClient.account.address;
     const txHash = await viemClient.writeContract({
       abi: entryPointABI,
       address: Constants.ERC4337.EntryPoint as Address,
@@ -162,15 +162,6 @@ export class BundlerClient {
     });
     console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
     return txHash;
-  }
-
-  async estimatePreVerificationGas(op: UserOpHex) {
-    // const args = [op, Constants.ERC4337.EntryPoint];
-
-    // TODO: compute preVerificationGas from the op
-    // Use Pimlico forumla: https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/utils/validation.ts#L305-L368
-    // x Optimism formula: https://optimistic.etherscan.io/address/0xc0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3c0d3000f#code
-    return 1_000_000;
   }
 
   async getUserOperationGasPriceParams() {

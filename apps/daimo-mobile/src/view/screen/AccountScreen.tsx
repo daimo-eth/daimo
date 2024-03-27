@@ -4,6 +4,7 @@ import {
   DaimoLinkInviteCode,
   EAccount,
   assert,
+  canRequestFrom,
   canSendTo,
   getAccountName,
   getAddressContraction,
@@ -22,7 +23,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { addLastSendRecvTime } from "../../logic/daimoContacts";
+import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
@@ -156,14 +157,23 @@ function AccountScreenBody({
     Linking.openURL(url);
   }, [account, eAcc]);
 
+  const recipient = addLastTransferTimes(account, eAcc);
+
   const canSend = canSendTo(eAcc);
-  const send = useCallback(() => {
-    const recipient = addLastSendRecvTime(account, eAcc);
+  const goToSend = useCallback(() => {
     nav.navigate("SendTab", {
       screen: "SendTransfer",
       params: { recipient },
     });
   }, [nav, eAcc, account]);
+
+  const canRequest = canRequestFrom(eAcc);
+  const goToRequest = () => {
+    nav.navigate("HomeTab", {
+      screen: "Receive",
+      params: { autoFocus: true, recipient },
+    });
+  };
 
   // Bottom sheet: show transactions between us and this account
   const translationY = useSharedValue(0);
@@ -235,8 +245,17 @@ function AccountScreenBody({
           )}
         </View>
         <Spacer h={24} />
-        <View style={ss.container.padH8}>
-          {canSend && <ButtonBig type="primary" title="SEND" onPress={send} />}
+        <View style={[ss.container.padH8, styles.buttonGroup]}>
+          {canRequest && (
+            <View style={{ flex: 1 }}>
+              <ButtonBig type="subtle" title="REQUEST" onPress={goToRequest} />
+            </View>
+          )}
+          {canSend && (
+            <View style={{ flex: 1 }}>
+              <ButtonBig type="primary" title="SEND" onPress={goToSend} />
+            </View>
+          )}
         </View>
         <Spacer h={16} />
         <View style={ss.container.padH8}>
@@ -262,5 +281,9 @@ const styles = StyleSheet.create({
   },
   screenPadding: {
     paddingHorizontal: 16,
+  },
+  buttonGroup: {
+    flexDirection: "row",
+    gap: 16,
   },
 });

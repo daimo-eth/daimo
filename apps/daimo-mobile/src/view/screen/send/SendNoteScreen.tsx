@@ -8,17 +8,19 @@ import {
   View,
 } from "react-native";
 
-import { ExternalAction, NoteActionButton } from "./NoteActionButton";
+import { NoteActionButton } from "./NoteActionButton";
 import { RecipientDisplay } from "./RecipientDisplay";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { useAccount } from "../../../logic/accountManager";
-import { MsgContact } from "../../../logic/daimoContacts";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { composeEmail, composeSMS } from "../../shared/composeSend";
+import {
+  ExternalAction,
+  getSendRecvLinkAction,
+} from "../../shared/composeSend";
 import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
@@ -61,7 +63,9 @@ export function SendNoteScreen({ route }: Props) {
 
   useEffect(() => {
     if (!recipient) return;
-    getSendLinkAction(recipient, account.name).then(setExternalAction);
+    getSendRecvLinkAction(recipient, account.name, "send").then(
+      setExternalAction
+    );
   }, [recipient, noteDollars]);
 
   return (
@@ -123,33 +127,4 @@ export function SendNoteScreen({ route }: Props) {
       </View>
     </TouchableWithoutFeedback>
   );
-}
-
-async function getSendLinkAction(
-  recipient: MsgContact,
-  senderName: string
-): Promise<ExternalAction> {
-  const composer =
-    recipient.type === "email"
-      ? await composeEmail(recipient.email)
-      : await composeSMS(recipient.phoneNumber);
-
-  if (!composer) {
-    return {
-      type: "share",
-      exec: shareURL,
-    };
-  } else {
-    return {
-      type: recipient.type === "email" ? "mail" : "sms",
-      exec: async (url: string, dollars: number) => {
-        return composer({
-          type: "paymentLink",
-          url,
-          senderName,
-          dollars,
-        });
-      },
-    };
-  }
 }

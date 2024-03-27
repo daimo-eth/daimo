@@ -115,11 +115,9 @@ export class DB {
 
   async loadPushTokens(): Promise<PushTokenRow[]> {
     console.log(`[DB] loading push tokens`);
-    const client = await this.pool.connect();
-    const result = await client.query<PushTokenRow>(
+    const result = await this.pool.query<PushTokenRow>(
       `SELECT address, pushtoken FROM pushtoken`
     );
-    client.release();
 
     console.log(`[DB] ${result.rows.length} push tokens`);
     return result.rows;
@@ -127,36 +125,31 @@ export class DB {
 
   async savePushToken(token: PushTokenRow) {
     console.log(`[DB] inserting auth token`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO pushtoken (pushtoken, address) VALUES ($1, $2)
        ON CONFLICT (pushtoken) DO UPDATE SET address = $2`,
       [token.pushtoken, token.address]
     );
-    client.release();
   }
 
   async loadTagRedirect(tag: string): Promise<TagRedirectRow | null> {
     console.log(`[DB] loading tag redirect: ${tag}`);
-    const client = await this.pool.connect();
-    const result = await client.query<TagRedirectRow>(
+    const result = await this.pool.query<TagRedirectRow>(
       `SELECT tag, link, update_token FROM tag_redirect WHERE tag = $1`,
       [tag]
     );
-    client.release();
     return result.rows[0] || null;
   }
 
   async loadTagRedirectHist(tag: string): Promise<TagRedirectEvent[]> {
     console.log(`[DB] loading tag redirect history: ${tag}`);
-    const client = await this.pool.connect();
-    const result = await client.query(
+    const result = await this.pool.query(
       `SELECT tag, link, time
        FROM tag_redirect_history WHERE tag = $1
        ORDER BY time DESC LIMIT 10`,
       [tag]
     );
-    client.release();
+
     return result.rows.map((row) => ({
       time: Math.floor(new Date(row.time).getTime() / 1000),
       tag: row.tag,
@@ -166,27 +159,24 @@ export class DB {
 
   async saveTagRedirect(tag: string, link: string) {
     console.log(`[DB] inserting tag redirect: ${tag} -> ${link}`);
-    const client = await this.pool.connect();
-    const res = await client.query(
+    const res = await this.pool.query(
       `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
        ON CONFLICT (tag) DO UPDATE SET link = $2`,
       [tag, link]
     );
     if (res.rowCount && res.rowCount > 0) {
-      await client.query(
+      await this.pool.query(
         `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
         [tag, link]
       );
     }
-    client.release();
   }
 
   async saveOffchainAction(row: OffchainActionRow) {
     console.log(
       `[DB] inserting offchain action ${row.type} ${row.time} ${row.address}`
     );
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO offchain_action (address, time, type, action_json, signature_hex)
        VALUES ($1, $2, $3, $4, $5)`,
       [
@@ -197,7 +187,6 @@ export class DB {
         row.signature_hex,
       ] as any
     );
-    client.release();
   }
 
   async saveLinkedAccount(row: LinkedAccountRow) {
@@ -206,38 +195,37 @@ export class DB {
     );
     const client = await this.pool.connect();
 
-    await client.query(
-      `DELETE FROM linked_account
+    try {
+      await client.query(
+        `DELETE FROM linked_account
        WHERE (linked_type = $1 AND linked_id = $2)
        OR (linked_type = $1 AND address = $3)`,
-      [row.linked_type, row.linked_id, row.address]
-    );
+        [row.linked_type, row.linked_id, row.address]
+      );
 
-    await client.query(
-      `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
+      await client.query(
+        `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
        VALUES ($1, $2, $3, $4)`,
-      [row.linked_type, row.linked_id, row.address, row.account_json]
-    );
-    client.release();
+        [row.linked_type, row.linked_id, row.address, row.account_json]
+      );
+    } finally {
+      client.release();
+    }
   }
 
   async deleteLinkedAccount(linkID: ProfileLinkID) {
     console.log(`[DB] deleting linked_account: ${linkID.type} ${linkID.id}`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `DELETE FROM linked_account WHERE linked_type = $1 AND linked_id = $2 AND address = $3`,
       [linkID.type, linkID.id, linkID.addr]
     );
-    client.release();
   }
 
   async loadLinkedAccounts(): Promise<LinkedAccountRow[]> {
     console.log(`[DB] loading linked accounts`);
-    const client = await this.pool.connect();
-    const result = await client.query<LinkedAccountRow>(
+    const result = await this.pool.query<LinkedAccountRow>(
       `SELECT linked_type, linked_id, address, account_json FROM linked_account`
     );
-    client.release();
 
     console.log(`[DB] ${result.rows.length} linked accounts`);
     return result.rows;
@@ -245,11 +233,9 @@ export class DB {
 
   async loadNameBlacklist(): Promise<Set<string>> {
     console.log(`[DB] loading name blacklist`);
-    const client = await this.pool.connect();
-    const result = await client.query<{ name: string }>(
+    const result = await this.pool.query<{ name: string }>(
       `SELECT name FROM name_blacklist`
     );
-    client.release();
 
     console.log(`[DB] ${result.rows.length} blacklisted names`);
     return new Set(result.rows.map((row) => row.name));
@@ -257,12 +243,10 @@ export class DB {
 
   async checkPaymasterWhitelist(name: string): Promise<boolean> {
     console.log(`[DB] paymaster whitelist: checking ${name}...`);
-    const client = await this.pool.connect();
-    const result = await client.query<{ name: string }>(
+    const result = await this.pool.query<{ name: string }>(
       `SELECT name FROM paymaster_whitelist WHERE name = $1`,
       [name]
     );
-    client.release();
 
     const ret = result.rows.length > 0;
     console.log(`[DB] paymaster whitelist: ${ret ? "allow" : "DENY"} ${name}`);
@@ -271,23 +255,19 @@ export class DB {
 
   async insertPaymasterWhiteslist(name: string) {
     console.log(`[DB] inserting into paymaster whitelist: ${name}`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO paymaster_whitelist (name) VALUES ($1)
        ON CONFLICT (name) DO NOTHING`,
       [name]
     );
-    client.release();
   }
 
   async loadInviteCode(code: string): Promise<InviteCodeRow | null> {
     console.log(`[DB] loading invite code ${code}`);
-    const client = await this.pool.connect();
-    const result = await client.query<RawInviteCodeRow>(
+    const result = await this.pool.query<RawInviteCodeRow>(
       `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter FROM invitecode WHERE code = $1`,
       [code]
     );
-    client.release();
 
     if (result.rows.length === 0) return null;
     const row = result.rows[0];
@@ -304,23 +284,19 @@ export class DB {
 
   async saveInviteCode(code: InviteCodeRow) {
     console.log(`[DB] inserting invite code`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
        ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
       [code.code, code.useCount, code.maxUses, code.zupassEmail] as any
     );
-    client.release();
   }
 
   async incrementInviteCodeUseCount(code: string) {
     console.log(`[DB] incrementing invite code use count`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `UPDATE invitecode SET use_count = use_count + 1 WHERE code = $1`,
       [code]
     );
-    client.release();
   }
 
   // Returns the invite code for a sender with most available uses left.
@@ -328,23 +304,19 @@ export class DB {
     address: Address
   ): Promise<string | undefined> {
     console.log(`[DB] getting invite code for address`);
-    const client = await this.pool.connect();
-    const result = await client.query<{ code: string }>(
+    const result = await this.pool.query<{ code: string }>(
       `SELECT code FROM invitecode WHERE inviter = $1 ORDER BY max_uses - use_count DESC LIMIT 1`,
       [address]
     );
-    client.release();
 
     return result.rows.length > 0 ? result.rows[0].code : undefined;
   }
 
   async loadInviteGraph(): Promise<InviteGraphRow[]> {
     console.log(`[DB] loading invite graph`);
-    const client = await this.pool.connect();
-    const result = await client.query<InviteGraphRow>(
+    const result = await this.pool.query<InviteGraphRow>(
       `SELECT invitee, inviter FROM invite_graph ORDER BY created_at`
     );
-    client.release();
 
     console.log(`[DB] ${result.rows.length} invite graph rows`);
     return result.rows;
@@ -352,18 +324,15 @@ export class DB {
 
   async insertInviteGraph(rows: InviteGraphRow) {
     console.log(`[DB] inserting invite graph`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO invite_graph (invitee, inviter) VALUES ($1, $2)`,
       [rows.invitee, rows.inviter]
     );
-    client.release();
   }
 
   async insertInviteCode(row: InsertInviteCodeArgs) {
     console.log(`[DB] inserting invite code: ${JSON.stringify(row)}`);
-    const client = await this.pool.connect();
-    const res = await client.query<[], any[]>(
+    const res = await this.pool.query<[], any[]>(
       `
       INSERT INTO invitecode (code, use_count, max_uses, inviter, bonus_cents_invitee, bonus_cents_inviter)
       VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (code) DO NOTHING`,
@@ -376,29 +345,24 @@ export class DB {
         Math.round(row.bonusDollarsInviter * 100),
       ]
     );
-    client.release();
     return assertNotNull(res.rowCount) > 0;
   }
 
   async insertFaucetAttestation(attestation: string) {
     console.log(`[DB] inserting faucet attestation`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO used_faucet_attestations (attestation) VALUES ($1)
        ON CONFLICT (attestation) DO NOTHING`,
       [attestation]
     );
-    client.release();
   }
 
   async isFaucetAttestationUsed(attestation: string): Promise<boolean> {
     console.log(`[DB] checking faucet attestation`);
-    const client = await this.pool.connect();
-    const result = await client.query<{ attestation: string }>(
+    const result = await this.pool.query<{ attestation: string }>(
       `SELECT attestation FROM used_faucet_attestations WHERE attestation = $1`,
       [attestation]
     );
-    client.release();
 
     return result.rows.length > 0;
   }

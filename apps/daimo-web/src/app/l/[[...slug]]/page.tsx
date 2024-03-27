@@ -1,22 +1,15 @@
-import {
-  DaimoAccountStatus,
-  DaimoInviteCodeStatus,
-  DaimoLinkStatus,
-  DaimoNoteStatus,
-  DaimoRequestState,
-  DaimoRequestStatus,
-  DaimoRequestV2Status,
-  daimoLinkBaseV2,
-  getAccountName,
-  parseDaimoLink,
-} from "@daimo/common";
+import { daimoLinkBaseV2 } from "@daimo/common";
 import { Metadata } from "next";
 import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
 import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
-import { rpc } from "../../../utils/rpc";
+import {
+  createMetadata,
+  createMetadataForLinkStatus,
+} from "../../../utils/linkMetaTags";
+import { loadLinkStatusDesc } from "../../../utils/linkStatus";
 
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";
@@ -26,16 +19,7 @@ type LinkProps = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-type TitleDesc = {
-  name?: string;
-  action?: string;
-  dollars?: `${number}`;
-  description: string;
-  linkStatus?: DaimoLinkStatus;
-  memo?: string;
-};
-
-const defaultMeta = metadata(
+const defaultMeta = createMetadata(
   "Daimo",
   "Payments on Ethereum",
   getAbsoluteUrl(`/logo-link-preview.png`)
@@ -49,31 +33,11 @@ function getUrl(props: LinkProps): string {
   return `${daimoLinkBaseV2}/${path}?${queryString}`;
 }
 
-// Generates a OpenGraph link preview image URL
-// The image itself is also generated dynamically -- see preview/route.tsx
-function getPreviewURL(
-  name: string | undefined,
-  action: string | undefined,
-  dollars: `${number}` | undefined
-) {
-  if (!name) return getAbsoluteUrl(`/logo-link-preview.png`);
-
-  const uriEncodedAction = action ? encodeURIComponent(action) : undefined;
-  let previewURL = getAbsoluteUrl(`/preview?name=${name}`);
-  if (uriEncodedAction)
-    previewURL = previewURL.concat(`&action=${uriEncodedAction}`);
-  if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
-  return previewURL;
-}
-
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
-  const titleDesc = await loadTitleDesc(getUrl(props));
-  if (titleDesc == null) return defaultMeta;
-  const { name, action, dollars } = titleDesc;
-  const prefixedDollars = dollars && `$${dollars}`;
-  const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
-  const previewURL = getPreviewURL(name, action, dollars);
-  return metadata(title, titleDesc.description, previewURL);
+  const url = getUrl(props);
+  const desc = await loadLinkStatusDesc(url);
+  if (desc == null) return defaultMeta;
+  return createMetadataForLinkStatus(desc);
 }
 
 export default async function LinkPage(props: LinkProps) {
@@ -86,7 +50,7 @@ export default async function LinkPage(props: LinkProps) {
 
 async function LinkPageInner(props: LinkProps) {
   const { name, action, dollars, description, linkStatus, memo } =
-    (await loadTitleDesc(getUrl(props))) || {
+    (await loadLinkStatusDesc(getUrl(props))) || {
       title: "Daimo",
       description: "Payments on Ethereum",
     };
@@ -120,222 +84,4 @@ async function LinkPageInner(props: LinkProps) {
       </center>
     </main>
   );
-}
-
-function metadata(
-  title: string,
-  description: string,
-  previewURL: string
-): Metadata {
-  return {
-    title,
-    description,
-    icons: {
-      icon: "/logo-web-favicon.png",
-    },
-    openGraph: {
-      title,
-      description,
-      siteName: title,
-      images: [
-        {
-          url: previewURL,
-          alt: "Daimo",
-          width: 1200,
-          height: 630,
-        },
-      ],
-      type: "website",
-    },
-  };
-}
-
-async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
-  let res: DaimoLinkStatus;
-  try {
-    res = await rpc.getLinkStatus.query({ url });
-  } catch (err) {
-    console.warn(`Error loading link status for ${url}`, err);
-    const link = parseDaimoLink(url);
-    if (link == null) {
-      return {
-        name: "Daimo",
-        description: "Unrecognized link",
-      };
-    }
-
-    switch (link.type) {
-      case "account":
-        return {
-          name: `${link.account}`,
-          description: "Couldn't load account",
-        };
-      case "request":
-      case "requestv2":
-        return {
-          name: `${link.recipient}`,
-          action: `is requesting`,
-          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load request status",
-          memo: link.type === "requestv2" ? link.memo : undefined,
-        };
-      case "notev2":
-        return {
-          name: `${link.sender}`,
-          action: `sent you`,
-          dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load payment link",
-        };
-      case "note":
-        return {
-          name: `${link.previewSender}`,
-          action: `sent you`,
-          dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
-          description: "Couldn't load payment link",
-        };
-      default:
-        return {
-          name: "Daimo",
-          description: "Unhandled link type: " + link.type,
-        };
-    }
-  }
-
-  // Handle link status
-  const resLinkType = res.link.type;
-  switch (resLinkType) {
-    case "account": {
-      const { account } = res as DaimoAccountStatus;
-      return {
-        name: getAccountName(account),
-        description: "Get Daimo to send or receive payments",
-      };
-    }
-    case "request": {
-      const { recipient, fulfilledBy } = res as DaimoRequestStatus;
-      const name = getAccountName(recipient);
-      if (fulfilledBy === undefined) {
-        return {
-          name: `${name}`,
-          action: `is requesting`,
-          dollars: `${res.link.dollars}`,
-          description: "Pay with Daimo",
-          linkStatus: res,
-        };
-      } else {
-        return {
-          name: `${name}`,
-          action: `requested`,
-          dollars: `${res.link.dollars}`,
-          description: `Paid by ${getAccountName(fulfilledBy)}`,
-        };
-      }
-    }
-    case "requestv2": {
-      const { recipient, fulfilledBy, status } = res as DaimoRequestV2Status;
-      const name = getAccountName(recipient);
-
-      switch (status) {
-        case DaimoRequestState.Pending:
-        case DaimoRequestState.Created: {
-          return {
-            name: `${name}`,
-            action: `is requesting`,
-            dollars: `${res.link.dollars}`,
-            description: "Pay with Daimo",
-            linkStatus: res,
-            memo: res.link.memo,
-          };
-        }
-        case DaimoRequestState.Cancelled: {
-          return {
-            name: `${name}`,
-            action: `cancelled request`,
-            dollars: `${res.link.dollars}`,
-            description: `Cancelled by ${getAccountName(recipient)}`,
-            memo: res.link.memo,
-          };
-        }
-        case DaimoRequestState.Fulfilled: {
-          return {
-            name: `${name}`,
-            action: `requested`,
-            dollars: `${res.link.dollars}`,
-            description: `Paid by ${getAccountName(fulfilledBy!)}`,
-            memo: res.link.memo,
-          };
-        }
-        default: {
-          throw new Error(`unexpected DaimoRequestState ${status}`);
-        }
-      }
-    }
-    case "note":
-    case "notev2": {
-      const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
-      switch (status) {
-        case "pending":
-        case "confirmed": {
-          return {
-            name: `${getAccountName(sender)}`,
-            action: `sent you`,
-            dollars: `${dollars}`,
-            description: "Accept with Daimo",
-            linkStatus: res,
-          };
-        }
-        case "claimed": {
-          const claim = claimer
-            ? getAccountName(claimer)
-            : "(missing receiver)";
-          return {
-            name: `${getAccountName(sender)}`,
-            action: `sent`,
-            dollars: `${dollars}`,
-            description: `Accepted by ${claim}`,
-          };
-        }
-        case "cancelled": {
-          return {
-            name: `${getAccountName(sender)}`,
-            action: `cancelled send`,
-            dollars: `${dollars}`,
-            description: `Cancelled by ${getAccountName(sender)}`,
-          };
-        }
-        default: {
-          throw new Error(`unexpected DaimoNoteStatus ${status}`);
-        }
-      }
-    }
-    case "invite": {
-      const { inviter, bonusDollarsInvitee, bonusDollarsInviter, isValid } =
-        res as DaimoInviteCodeStatus;
-
-      const description = (() => {
-        if (!isValid) return "Invite expired";
-        if (
-          bonusDollarsInvitee &&
-          bonusDollarsInviter &&
-          bonusDollarsInvitee === bonusDollarsInviter
-        ) {
-          return `Accept their invite and we'll send you both $${bonusDollarsInvitee} USDC`;
-        } else if (bonusDollarsInvitee) {
-          return `Accept their invite and we'll send you $${bonusDollarsInvitee} USDC`;
-        } else return "Get Daimo to send or receive payments";
-      })();
-      return {
-        name: `${inviter ? getAccountName(inviter) : "daimo"}`,
-        action: `invited you to Daimo`,
-        description,
-        linkStatus: res,
-      };
-    }
-    default: {
-      return {
-        name: "Daimo",
-        description: "Unhandled link status for type: " + resLinkType,
-      };
-    }
-  }
 }

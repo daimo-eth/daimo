@@ -5,6 +5,7 @@ import {
   DaimoRequestState,
   DaimoRequestV2Status,
   EAccount,
+  now,
 } from "@daimo/common";
 import assert from "node:assert";
 import test from "node:test";
@@ -244,6 +245,7 @@ function createNotifierAliceBob() {
           recipient: { addr: addrBob, name: "bob" },
           status: DaimoRequestState.Fulfilled,
           metadata: "0x",
+          createdAt: now(),
         };
       } else return null;
     },

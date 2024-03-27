@@ -10,11 +10,9 @@ import Animated, {
 
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
-import { ContactBubble } from "./ContactBubble";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
-import { toEAccountContact } from "../../model/account";
 
 const animationConfig = { duration: 150 };
 
@@ -38,14 +36,16 @@ export function SearchHeader({
   const qrButton = useAnimatedStyle(() => {
     return {
       position: "absolute",
-      opacity: isFocused.value ? withTiming(0) : withTiming(1),
+      opacity: isFocused.value
+        ? withTiming(0, animationConfig)
+        : withTiming(1, animationConfig),
       zIndex: isFocused.value ? 0 : 10,
       elevation: isFocused.value ? 0 : 10,
-      right: 0,
+      left: 0,
     };
   });
 
-  const accountButton = useAnimatedStyle(() => {
+  const notificationsButton = useAnimatedStyle(() => {
     return {
       position: "absolute",
       opacity: isFocused.value
@@ -53,7 +53,7 @@ export function SearchHeader({
         : withTiming(1, animationConfig),
       zIndex: isFocused.value ? 0 : 10,
       elevation: isFocused.value ? 0 : 10,
-      left: 0,
+      right: 0,
     };
   });
 
@@ -69,22 +69,21 @@ export function SearchHeader({
     };
   });
 
-  // Left side: account bubble
-  const goToAccount = useCallback(
-    () => nav.navigate("SettingsTab", { screen: "Settings" }),
-    [nav]
-  );
-
-  // Right: QR code
+  // Left: QR code
   const goToQR = useCallback(
     () =>
       nav.navigate("HomeTab", { screen: "QR", params: { option: undefined } }),
     [nav]
   );
 
+  // Right: Notifications
+  const goToNotifications = useCallback(
+    () => nav.navigate("HomeTab", { screen: "Notifications" }),
+    []
+  );
+
   const [account] = useAccount();
   if (account == null) return null;
-  const eAcc = toEAccountContact(account);
 
   return (
     <View style={styles.header}>
@@ -93,9 +92,11 @@ export function SearchHeader({
           <Octicons name="arrow-left" size={30} color={color.midnight} />
         </TouchableOpacity>
       </Animated.View>
-      <Animated.View key="icon" style={accountButton}>
-        <ButtonCircle size={50} onPress={goToAccount}>
-          <ContactBubble contact={eAcc} size={50} transparent />
+      <Animated.View key="icon" style={qrButton}>
+        <ButtonCircle size={50} onPress={goToQR}>
+          <View style={styles.circleButton}>
+            <Octicons name="apps" size={24} color={color.primary} />
+          </View>
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput
@@ -108,13 +109,22 @@ export function SearchHeader({
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
-      <Animated.View style={[{ marginLeft: 16 }, qrButton]}>
-        <ButtonCircle size={50} onPress={goToQR}>
-          <View style={styles.qrCircle}>
-            <Octicons name="apps" size={24} color={color.midnight} />
+      <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
+        <ButtonCircle size={50} onPress={goToNotifications}>
+          <View style={styles.circleButton}>
+            <Octicons name="bell" size={24} color={color.primary} />
+            {account.requests.length > 0 ? <NotificationBadge /> : null}
           </View>
         </ButtonCircle>
       </Animated.View>
+    </View>
+  );
+}
+
+function NotificationBadge() {
+  return (
+    <View style={styles.badgeBorder}>
+      <View style={styles.badge} />
     </View>
   );
 }
@@ -126,13 +136,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 16,
   },
-  qrCircle: {
+  circleButton: {
     width: 50,
     height: 50,
     borderRadius: 50,
     borderWidth: 1,
     borderColor: color.grayLight,
     display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badge: {
+    backgroundColor: "red",
+    borderRadius: 4,
+    height: 6,
+    width: 6,
+  },
+  badgeBorder: {
+    backgroundColor: "white",
+    height: 10,
+    width: 10,
+    borderRadius: 5,
+    position: "absolute",
+    top: 10,
+    right: 14,
     justifyContent: "center",
     alignItems: "center",
   },

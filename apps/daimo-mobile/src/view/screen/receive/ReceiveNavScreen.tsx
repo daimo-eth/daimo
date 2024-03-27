@@ -3,15 +3,15 @@ import { useCallback, useRef, useState } from "react";
 import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
-import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
+import { ParamListHome, useNav } from "../../../common/nav";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 
-type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
+type Props = NativeStackScreenProps<ParamListHome, "ReceiveSearch">;
 
-export function SendNavScreen({ route }: Props) {
+export function ReceiveNavScreen({ route }: Props) {
   const { autoFocus } = route.params || {};
 
   // Search prefix
@@ -20,11 +20,10 @@ export function SendNavScreen({ route }: Props) {
 
   // Navigation
   const nav = useNav();
-  const goHome = useExitToHome();
   const goBack = useCallback(() => {
     setPrefix("");
-    goHome();
-  }, [nav, goHome]);
+    nav.goBack();
+  }, [nav]);
 
   // Focus search box if autoFocus is true
   // Work around react-navigation autofocus bug
@@ -33,12 +32,12 @@ export function SendNavScreen({ route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send" onBack={goBack} />
+        <ScreenHeader title="Request" onBack={goBack} />
         <Spacer h={8} />
         <View style={{ flex: 1, flexDirection: "column" }}>
           <SearchScreen
             {...{ prefix, setPrefix, textInputRef, autoFocus }}
-            mode="send"
+            mode="receive"
           />
         </View>
       </View>

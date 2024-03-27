@@ -110,7 +110,11 @@ export function createRouter(
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
       // See readyMiddleware
-      return { status: "healthy", uptimeS: now() - startTimeS };
+      return {
+        status: "healthy",
+        uptimeS: now() - startTimeS,
+        dbStatus: db.getStatus(),
+      };
     }),
 
     search: publicProcedure
@@ -380,15 +384,17 @@ export function createRouter(
           idString: z.string(),
           recipient: zAddress,
           amount: zBigIntStr,
+          fulfiller: zAddress.optional(),
         })
       )
       .mutation(async (opts) => {
-        const { idString, recipient, amount } = opts.input;
+        const { idString, recipient, amount, fulfiller } = opts.input;
 
         return createRequestSponsored(vc, reqIndexer, {
           idString,
           recipient,
           amount,
+          fulfiller,
         });
       }),
 
@@ -457,6 +463,7 @@ export function createRouter(
           recipient,
           memo,
         };
+
         const url = formatDaimoLink(reqLink);
 
         await setTagRedirect(tag, url, updateToken, db);

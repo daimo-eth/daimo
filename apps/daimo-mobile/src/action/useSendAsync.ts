@@ -44,6 +44,32 @@ interface UserOpHandle extends ActHandle {
   reset?: () => void;
 }
 
+// Use discriminated unions to allow transforms without pendingOp.
+
+type BaseUseSendArgs = {
+  dollarsToSend: number;
+  sendFn: SendOpFn;
+  /** Custom handler that overrides sendAsync, used to claim
+   *  ephemeral notes without requesting a user signature / face ID.
+   */
+  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
+  passkeyAccount?: Account;
+};
+
+type UseSendWithPendingOpArgs = BaseUseSendArgs & {
+  pendingOp: OpEvent;
+  /** Runs on success, before the account is saved */
+  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
+};
+
+type UseSendWithoutPendingOpArgs = BaseUseSendArgs & {
+  pendingOp?: undefined;
+  /** Runs on success, before the account is saved */
+  accountTransform?: (account: Account) => Account;
+};
+
+type UseSendArgs = UseSendWithPendingOpArgs | UseSendWithoutPendingOpArgs;
+
 /** Send a user op, track status. */
 export function useSendAsync({
   dollarsToSend,
@@ -52,18 +78,7 @@ export function useSendAsync({
   pendingOp,
   accountTransform,
   passkeyAccount,
-}: {
-  dollarsToSend: number;
-  sendFn: SendOpFn;
-  /** Custom handler that overrides sendAsync, used to claim
-   *  ephemeral notes without requesting a user signature / face ID.
-   */
-  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
-  pendingOp?: OpEvent;
-  /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
-  passkeyAccount?: Account;
-}): UserOpHandle {
+}: UseSendArgs): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
 
   const [deviceAccount] = useAccount();
@@ -108,6 +123,9 @@ export function useSendAsync({
       });
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
+    } else if (accountTransform) {
+      getAccountManager().transform(accountTransform);
+      console.log(`[SEND] updated account with provided transform`);
     }
   }, [account?.enclaveKeyName, keySlot, sendFn]);
 
@@ -116,7 +134,10 @@ export function useSendAsync({
 
 /** Regular transfer / payment link account transform. Adds pending
  *  transfer to history and merges any new named accounts. */
-export function transferAccountTransform(namedAccounts: EAccount[]) {
+export function transferAccountTransform(
+  namedAccounts: EAccount[],
+  requestId?: string
+) {
   return (account: Account, pendingOp: OpEvent): Account => {
     assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
     // Filter to new named accounts only
@@ -132,6 +153,14 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
         pendingOp as DisplayOpEvent,
       ],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
+      // If sending based on request, remove request from requests list.
+      ...(requestId
+        ? {
+            requests: account.requests.filter(
+              (r) => r.request.link.id !== requestId
+            ),
+          }
+        : {}),
     };
   };
 }

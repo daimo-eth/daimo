@@ -23,8 +23,10 @@ import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountScreen } from "./screen/AccountScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
+import { NotificationsScreen } from "./screen/NotificationsScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
+import { YourInvitesScreen } from "./screen/YourInvitesScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
@@ -39,6 +41,7 @@ import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboardi
 import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
 import DepositScreen from "./screen/receive/DepositScreen";
+import { ReceiveNavScreen } from "./screen/receive/ReceiveNavScreen";
 import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
@@ -325,6 +328,11 @@ function HomeTab() {
         <HomeStack.Screen name="Account" component={AccountScreen} />
         <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
+        <HomeStack.Screen name="ReceiveSearch" component={ReceiveNavScreen} />
+        <HomeStack.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+        />
       </HomeStack.Group>
     </HomeStack.Navigator>
   );
@@ -337,6 +345,7 @@ function InviteTab() {
     <InviteStack.Navigator initialRouteName="Invite" screenOptions={noHeaders}>
       <InviteStack.Group>
         <InviteStack.Screen name="Invite" component={InviteScreen} />
+        <InviteStack.Screen name="YourInvites" component={YourInvitesScreen} />
         <HomeStack.Screen name="Account" component={AccountScreen} />
       </InviteStack.Group>
     </InviteStack.Navigator>

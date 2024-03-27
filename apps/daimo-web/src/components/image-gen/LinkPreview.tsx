@@ -5,10 +5,14 @@ export function LinkPreviewImg({
   name,
   action,
   dollars,
+  paidBy,
+  cancelled,
 }: {
   name: string;
-  action: string | undefined;
-  dollars: string | undefined;
+  action?: string;
+  dollars?: string;
+  paidBy?: string;
+  cancelled?: boolean;
 }) {
   return (
     <div
@@ -34,7 +38,7 @@ export function LinkPreviewImg({
         }}
       >
         <Content name={name} action={action} dollars={dollars} />
-        <Footer />
+        <Footer paidBy={paidBy} cancelled={cancelled} />
       </div>
     </div>
   );
@@ -108,7 +112,14 @@ function Content({
   );
 }
 
-function Footer() {
+function Footer({
+  paidBy,
+  cancelled,
+}: {
+  paidBy?: string;
+  cancelled?: boolean;
+}) {
+  const hasStatus = paidBy || cancelled;
   return (
     <div
       style={{
@@ -121,20 +132,24 @@ function Footer() {
         marginBottom: "48px",
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        alt="Daimo"
-        src={getAbsoluteUrl(`/logo-link-preview-scalable.svg`)}
-        height="100%"
-        style={{ marginRight: "24px" }}
-      />
+      {!hasStatus && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            alt="Daimo"
+            src={getAbsoluteUrl(`/logo-link-preview-scalable.svg`)}
+            height="100%"
+            style={{ marginRight: "24px" }}
+          />
+        </>
+      )}
       <div
         style={{
           fontSize: 48,
           color: "#262626",
         }}
       >
-        Daimo
+        {cancelled ? `❌` : paidBy ? `✅ Paid by ${paidBy}` : "Daimo"}
       </div>
     </div>
   );

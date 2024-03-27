@@ -15,7 +15,7 @@ app.get("/health", (req: Request, res: Response) => res.send("Up!"));
 
 app.post("/daimobot-hook", async (req: Request, res: Response) => {
   const event: WebhookEvent = req.body;
-  console.log(`Received event: ${JSON.stringify(event, null, 2)}`);
+  console.log(`Received event: ${JSON.stringify(event)}`);
 
   try {
     if (event.data.object !== "cast") {
