@@ -41,7 +41,7 @@ function CreateBackupContent({ setStep }: { setStep: any }) {
       <Spacer h={16} />
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <View style={styles.keyCircle}>
-          <Octicons name="key" size={24} color={color.primary} />
+          <Octicons name="key" size={20} color={color.primary} />
         </View>
         <Spacer w={12} />
         <TextBody>Set up a passkey backup</TextBody>
