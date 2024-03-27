@@ -104,6 +104,7 @@ export type ParamListSettings = {
   AddDevice: undefined;
   AddPasskey: undefined;
   Device: { pubKey: Hex };
+  SeedPhrase: undefined;
 };
 
 export interface SendNavProp {

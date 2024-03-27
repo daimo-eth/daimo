@@ -9,7 +9,8 @@ export type Action =
   | { name: "withdrawInstructions" }
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
-  | { name: "hideBottomSheet" };
+  | { name: "hideBottomSheet" }
+  | { name: "createBackup" };
 
 type ActionName = Action["name"];
 

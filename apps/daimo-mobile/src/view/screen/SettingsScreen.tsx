@@ -169,9 +169,11 @@ function LinkedAccountsRow({
 
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
+  const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
-  const createBackup = () =>
-    nav.navigate("SettingsTab", { screen: "AddPasskey" });
+  const createBackup = () => {
+    dispatcher.dispatch({ name: "createBackup" });
+  };
 
   const sortKey: (k: KeyData) => number = (k) => {
     // Our own key always first
@@ -201,7 +203,6 @@ function DevicesSection({ account }: { account: Account }) {
       .filter((k) => k.rotationType === "add")
       .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
   }, [account.pendingKeyRotation])();
-  const dispatcher = useContext(DispatcherContext);
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",

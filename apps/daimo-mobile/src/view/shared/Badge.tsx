@@ -31,7 +31,9 @@ export function Badge({
 
   return (
     <View style={styleWrap}>
-      <TextBtnCaps color={color}>{children}</TextBtnCaps>
+      <TextBtnCaps color={color} numberOfLines={1}>
+        {children}
+      </TextBtnCaps>
     </View>
   );
 }

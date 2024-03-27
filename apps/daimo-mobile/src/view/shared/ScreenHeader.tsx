@@ -14,12 +14,14 @@ export function ScreenHeader({
   onExit,
   onShare,
   hideOfflineHeader,
+  secondaryHeader,
 }: {
   title: ReactNode;
   onBack?: () => void;
   onExit?: () => void;
   onShare?: () => void;
   hideOfflineHeader?: boolean;
+  secondaryHeader?: ReactNode;
 }) {
   assert(!onExit || !onShare, "Exit and share are mutually exclusive");
 
@@ -30,6 +32,7 @@ export function ScreenHeader({
   return (
     <>
       {!hideOfflineHeader && <OfflineHeader />}
+      {secondaryHeader}
       <View style={styles.screenHead}>
         <ScreenHeadButton icon="arrow-left" show={!!onBack} onPress={back} />
         <TextH3>{title}</TextH3>

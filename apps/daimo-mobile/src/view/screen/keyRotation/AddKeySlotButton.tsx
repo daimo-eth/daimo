@@ -13,7 +13,7 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { useMemo, ReactNode } from "react";
+import { useMemo, ReactNode, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
@@ -29,11 +29,15 @@ export function AddKeySlotButton({
   buttonTitle,
   knownPubkey,
   slot,
+  disabled,
+  onSuccess,
 }: {
   account: Account;
   buttonTitle: string;
   knownPubkey?: Hex; // In case of Add Device, we know the pubkey to add. If not, generate a passkey.
   slot: number;
+  disabled?: boolean;
+  onSuccess?: () => void;
 }) {
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
@@ -43,7 +47,7 @@ export function AddKeySlotButton({
   const sendFn = async (opSender: DaimoOpSender) => {
     const key = await (async () => {
       if (!knownPubkey) {
-        console.log(`[KEY-ROTATION] creating ke ${getSlotType(slot)} ${slot}`);
+        console.log(`[KEY-ROTATION] creating key ${getSlotType(slot)} ${slot}`);
         assert(
           getSlotType(slot) === SlotType.PasskeyBackup ||
             getSlotType(slot) === SlotType.SecurityKeyBackup
@@ -84,6 +88,12 @@ export function AddKeySlotButton({
     signerType: "deviceKey",
   });
 
+  useEffect(() => {
+    if (status === "success" && onSuccess) {
+      onSuccess();
+    }
+  }, [onSuccess, status]);
+
   const didUserCancel = message.includes("User cancelled");
 
   const statusMessage = (function (): ReactNode {
@@ -111,6 +121,7 @@ export function AddKeySlotButton({
             title={buttonTitle}
             onPress={exec}
             showBiometricIcon
+            disabled={disabled}
           />
         );
       case "loading":

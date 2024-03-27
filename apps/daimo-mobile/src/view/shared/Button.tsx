@@ -408,10 +408,7 @@ const buttonStyles = {
 
 const styles = StyleSheet.create({
   biometricIconContainer: {
-    width: 0,
-    left: 8,
-    height: 0,
-    justifyContent: "center",
+    marginLeft: 8,
   },
   biometricIcon: {
     height: 24,

@@ -15,6 +15,7 @@ import {
 import { Keyboard, StyleSheet, View } from "react-native";
 import RNShake from "react-native-shake";
 
+import { CreateBackupSheet } from "./CreateBackupSheet";
 import { DebugBottomSheet } from "./DebugBottomSheet";
 import { DepositAddressBottomSheet } from "./DepositAddressBottomSheet";
 import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
@@ -50,6 +51,9 @@ const bottomSheetSettings = {
   depositAddress: {
     dismissable: true,
   },
+  createBackup: {
+    enableSwipeClose: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -62,7 +66,8 @@ type DisplayedSheet =
         | "linkFarcaster"
         | "withdrawInstructions"
         | "depositAddress"
-        | "onboardingChecklist";
+        | "onboardingChecklist"
+        | "createBackup";
     }
   | {
       action: "helpModal";
@@ -134,6 +139,10 @@ export function GlobalBottomSheet() {
         openBottomSheet({ action: "depositAddress" });
         break;
       }
+      case "createBackup": {
+        openBottomSheet({ action: "createBackup" });
+        break;
+      }
       case "ownRequest": {
         const { reqStatus } = action;
         openBottomSheet({ action: "ownRequest", payload: { reqStatus } });
@@ -161,8 +170,10 @@ export function GlobalBottomSheet() {
     dispatcher.register("withdrawInstructions", handleDispatch);
     dispatcher.register("depositAddress", handleDispatch);
     dispatcher.register("ownRequest", handleDispatch);
+    dispatcher.register("createBackup", handleDispatch);
     dispatcher.register("helpModal", handleDispatch);
     dispatcher.register("hideBottomSheet", handleDispatch);
+    dispatcher.register("createBackup", handleDispatch);
   }, []);
 
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
@@ -201,9 +212,11 @@ export function GlobalBottomSheet() {
           {sheet?.action === "debug" && <DebugBottomSheet />}
           {(sheet?.action === "connectFarcaster" ||
             sheet?.action === "linkFarcaster") && <FarcasterBottomSheet />}
+          {sheet?.action === "createBackup" && <CreateBackupSheet />}
           {sheet?.action === "onboardingChecklist" && (
             <OnboardingChecklistBottomSheet />
           )}
+          {sheet?.action === "createBackup" && <CreateBackupSheet />}
           {sheet?.action === "helpModal" && (
             <HelpBottomSheet
               content={sheet.payload.content}

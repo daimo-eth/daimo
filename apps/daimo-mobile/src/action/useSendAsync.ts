@@ -15,7 +15,11 @@ import {
   notesV1AddressMap,
   notesV2AddressMap,
 } from "@daimo/contract";
-import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
+import {
+  DaimoOpSender,
+  OpSenderCallback,
+  SigningCallback,
+} from "@daimo/userop";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect } from "react";
 import { Address } from "viem";
@@ -23,7 +27,7 @@ import { Address } from "viem";
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
 import { getAccountManager, useAccount } from "../logic/accountManager";
 import { env } from "../logic/env";
-import { getWrappedRawSigner } from "../logic/key";
+import { getWrappedRawSigner, getWrappedSeedPhraseSigner } from "../logic/key";
 import { NamedError } from "../logic/log";
 import { getWrappedPasskeySigner } from "../logic/passkey";
 import { Account } from "../model/account";
@@ -54,6 +58,10 @@ type BaseUseSendArgs = {
    */
   customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
   passkeyAccount?: Account;
+  /** Used only in the special case where the seed phrase is required to
+   * sign
+   */
+  seedPhrase?: string;
   signerType: "passkey" | "securityKey" | "deviceKey";
 };
 
@@ -214,12 +222,14 @@ function loadOpSender({
   keySlot,
   signerType,
   chainId,
+  seedPhrase,
 }: {
   enclaveKeyName: string;
   address: Address;
   keySlot: number | undefined;
-  signerType: "passkey" | "securityKey" | "deviceKey";
+  signerType: "passkey" | "securityKey" | "deviceKey" | "seedPhraseKey";
   chainId: number;
+  seedPhrase?: string;
 }) {
   assert(
     (keySlot != null) === (signerType === "deviceKey"),
@@ -232,10 +242,19 @@ function loadOpSender({
   const daimoChain = daimoChainFromId(chainId);
   const rpcFunc = env(daimoChain).rpcFunc;
 
-  const signer =
-    signerType === "deviceKey"
-      ? getWrappedRawSigner(enclaveKeyName, keySlot!)
-      : getWrappedPasskeySigner(daimoChain, signerType === "securityKey");
+  let signer: SigningCallback;
+
+  if (signerType === "deviceKey") {
+    signer = getWrappedRawSigner(enclaveKeyName, keySlot!);
+  } else if (signerType === "passkey" || signerType === "securityKey") {
+    signer = getWrappedPasskeySigner(daimoChain, signerType === "securityKey");
+  } else {
+    if (!seedPhrase) {
+      throw new Error("Seed phrase required for this signer type");
+    }
+
+    signer = getWrappedSeedPhraseSigner(keySlot!, seedPhrase);
+  }
 
   const sender: OpSenderCallback = async (op: UserOpHex, memo?: string) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
@@ -269,7 +288,7 @@ async function sendAsync(
   setAS: SetActStatus,
   account: Account,
   keySlot: number | undefined,
-  signerType: "passkey" | "securityKey" | "deviceKey",
+  signerType: "passkey" | "securityKey" | "deviceKey" | "seedPhraseKey",
   sendFn: SendOpFn
 ): Promise<PendingOpEvent> {
   try {

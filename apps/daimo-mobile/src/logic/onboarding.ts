@@ -10,9 +10,17 @@ export function useOnboardingChecklist(account: Account) {
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 
-  const hasBackup = account.accountKeys.some(
-    (key) => getSlotType(key.slot) === SlotType.PasskeyBackup
-  );
+  const hasBackup = account.accountKeys.some((key) => {
+    const slotType = getSlotType(key.slot);
+    return (
+      slotType &&
+      [
+        SlotType.PasskeyBackup,
+        SlotType.SecurityKeyBackup,
+        SlotType.SeedPhraseBackup,
+      ].includes(slotType)
+    );
+  });
 
   const farcasterConnected =
     !!account.linkedAccounts.find((a) => a.type === "farcaster") ||
@@ -21,9 +29,8 @@ export function useOnboardingChecklist(account: Account) {
   const allComplete = hasBackup && farcasterConnected;
 
   const handleSecureAccount = useCallback(() => {
-    nav.navigate("SettingsTab", { screen: "AddPasskey" });
-    dispatcher.dispatch({ name: "hideBottomSheet" });
-  }, [nav, dispatcher]);
+    dispatcher.dispatch({ name: "createBackup" });
+  }, [dispatcher]);
 
   const handleConnectFarcaster = useCallback(() => {
     nav.navigate("Settings");

@@ -25,6 +25,7 @@ import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import { ProfileScreen } from "./screen/ProfileScreen";
 import { QRScreen } from "./screen/QRScreen";
+import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
 import { ErrorScreen } from "./screen/errorScreens";
@@ -368,6 +369,7 @@ function SettingsTab() {
       <SettingsStack.Screen name="AddDevice" component={AddDeviceScreen} />
       <SettingsStack.Screen name="AddPasskey" component={AddPasskeyScreen} />
       <SettingsStack.Screen name="Device" component={DeviceScreen} />
+      <SettingsStack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
     </SettingsStack.Navigator>
   );
 }
