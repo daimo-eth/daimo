@@ -9,7 +9,7 @@ export async function retryBackoff<T>(
     try {
       return await fn();
     } catch (e) {
-      if (i >= retryCount) {
+      if (i <= retryCount) {
         const sleepMs = Math.min(2000, 250 * 2 ** i);
         console.log(
           `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`

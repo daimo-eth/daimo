@@ -111,8 +111,8 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterV2Address} ETH`,
-      isMetaPaymasterEnabled ? 0.01 : 0.1,
-      isMetaPaymasterEnabled ? 0.005 : 0.2
+      isMetaPaymasterEnabled ? 0.01 : 0.15,
+      isMetaPaymasterEnabled ? 0.005 : 0.05
     );
   }
 
