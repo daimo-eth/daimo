@@ -3,6 +3,7 @@ export type CreateRequest = {
   challengeB64: string;
   passkeyName: string;
   passkeyDisplayTitle: string;
+  useSecurityKey: boolean;
 };
 
 export type CreateResult = {
@@ -13,6 +14,7 @@ export type CreateResult = {
 export type SignRequest = {
   domain: string;
   challengeB64: string;
+  useSecurityKey: boolean;
 };
 
 export type SignResult = {

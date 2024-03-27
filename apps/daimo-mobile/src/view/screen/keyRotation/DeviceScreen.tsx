@@ -81,6 +81,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
       };
     },
+    signerType: "deviceKey",
   });
 
   const removeDevice = useCallback(() => {

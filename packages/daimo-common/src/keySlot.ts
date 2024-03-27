@@ -4,32 +4,44 @@ export enum SlotType {
   Phone = "Phone",
   Computer = "Computer",
   PasskeyBackup = "Passkey Backup",
-}
-
-const slotTypeToFirstSlot = {
-  [SlotType.Phone]: 0,
-  [SlotType.Computer]: 0x40,
-  [SlotType.PasskeyBackup]: 0x80,
-};
-
-// Top two bits of slot denote the type.
-export function getSlotType(slot: number): SlotType | undefined {
-  if (slot > 255) return undefined;
-
-  const slotType = slot & 0xc0;
-
-  const isSlotType = (type: SlotType) =>
-    (slotType & slotTypeToFirstSlot[type]) === slotTypeToFirstSlot[type];
-
-  if (isSlotType(SlotType.PasskeyBackup)) return SlotType.PasskeyBackup;
-  else if (isSlotType(SlotType.Computer)) return SlotType.Computer;
-  else if (isSlotType(SlotType.Phone)) return SlotType.Phone;
-  else return undefined;
+  SecurityKeyBackup = "Security Key Backup",
+  SeedPhraseBackup = "Seed Phrase Backup",
 }
 
 // slots 0 - 63 are for mobile devices
 // slots 64 - 127 are for computer devices
-// slots 128 - 255 are for passkey backups
+// slots 128 - 160 are for passkey backups
+// slots 160 - 192 are for security key backups
+// slots 192 - 256 are for seed phrase backups
+const slotTypeToFirstSlot = {
+  [SlotType.Phone]: 0,
+  [SlotType.Computer]: 0x40,
+  [SlotType.PasskeyBackup]: 0x80,
+  [SlotType.SecurityKeyBackup]: 0xa0, // TODO: check max used slot in prod < 0xa0
+  [SlotType.SeedPhraseBackup]: 0xc0,
+};
+
+// Top three bits of slot denote the type.
+export function getSlotType(slot: number): SlotType | undefined {
+  if (slot > 255) return undefined;
+
+  const slotFirstThreeBits = slot & 0xe0;
+  const isSlotType = (type: SlotType) =>
+    (slotFirstThreeBits & slotTypeToFirstSlot[type]) ===
+    slotTypeToFirstSlot[type];
+
+  // slot types ordered by their first slot, descending
+  const descSlotTypes = Object.values(SlotType).sort((a, b) => {
+    return slotTypeToFirstSlot[b] - slotTypeToFirstSlot[a];
+  });
+
+  // Pick the largest slot type that fits
+  for (const slotType of descSlotTypes) {
+    if (isSlotType(slotType)) return slotType;
+  }
+  return undefined;
+}
+
 export function getSlotLabel(slot: number): string {
   const slotType = getSlotType(slot);
   assert(slotType !== undefined, "Invalid slot");

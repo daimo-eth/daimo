@@ -112,6 +112,7 @@ function NoteActionButtonInner({
         label: AddrLabel.PaymentLink,
       } as EAccount,
     ]),
+    signerType: "deviceKey",
   });
 
   const sendDisabledReason =

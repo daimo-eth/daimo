@@ -23,6 +23,15 @@ export function AddPasskeyScreen() {
     []
   );
 
+  const securityKeySlot = useMemo(
+    () =>
+      findUnusedSlot(
+        account.accountKeys.map((k) => k.slot),
+        SlotType.SecurityKeyBackup
+      ),
+    []
+  );
+
   const cloudName =
     Platform.OS === "ios" ? "iCloud Keychain" : "Google Password Manager";
 
@@ -48,6 +57,11 @@ export function AddPasskeyScreen() {
         buttonTitle="Create Passkey Backup"
         account={account}
         slot={passkeySlot}
+      />
+      <AddKeySlotButton
+        buttonTitle="Create Security Key Backup"
+        account={account}
+        slot={securityKeySlot}
       />
     </View>
   );

@@ -5,36 +5,34 @@
 //  Created by Nalin Bhardwaj.
 //  Copyright © 2023 Daimo. All rights reserved.
 //
-//  PasskeyManager is our interface to the Passkeys APIs.
+//  PasskeyManager is our interface to the Passkey and Security Key APIs.
 
 import AuthenticationServices
 import ExpoModulesCore
 
 public class PasskeyManager {
-    internal func interpretError(_ error: Error) -> String {
-        guard let authError = error as? ASAuthorizationError else {
-            return "Unexpected auth error: \(error.localizedDescription)"
-        }
-
-        if authError.code == .canceled {
-            return "User cancelled auth request"
-        } else {
-            // The userInfo dictionary sometimes contains useful information.
-            return "Error: \((error as NSError).userInfo)"
-        }
-    }
-
-    public func createPasskey(domain: String, accountName: String, userIdBase64: String, challengeBase64: String, promise: Promise) {
-        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+    public func createKey(domain: String, accountName: String, userIdBase64: String, challengeBase64: String, useSecurityKey: Bool, promise: Promise) {
         let challenge = Data(base64Encoded: challengeBase64)!
         let userId = Data(base64Encoded: userIdBase64)!
 
-        let registrationRequest = provider.createCredentialRegistrationRequest(challenge: challenge, name: accountName, userID: userId)
-        let controller = ASAuthorizationController(authorizationRequests: [registrationRequest])
+        let controller: ASAuthorizationController
 
-        PasskeyResponse().performAuth(controller: controller, callback: { (response, error) in
+        if useSecurityKey {
+            let provider = ASAuthorizationSecurityKeyPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+            let registrationRequest = provider.createCredentialRegistrationRequest(challenge: challenge, displayName: accountName, name: accountName, userID: userId)
+            registrationRequest.credentialParameters = [ ASAuthorizationPublicKeyCredentialParameters(algorithm: ASCOSEAlgorithmIdentifier.ES256) ]
+
+            controller = ASAuthorizationController(authorizationRequests: [registrationRequest])
+        } else {
+            let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+            let registrationRequest = provider.createCredentialRegistrationRequest(challenge: challenge, name: accountName, userID: userId)
+
+            controller = ASAuthorizationController(authorizationRequests: [registrationRequest])
+        }
+
+        AuthResponder().performAuth(controller: controller, callback: { (response, error) in
             if let error = error {
-                promise.reject("AuthError", self.interpretError(error))
+                promise.reject("AuthError", interpretAuthError(error))
                 return
             }
 
@@ -44,7 +42,7 @@ public class PasskeyManager {
             }
 
             switch response.credential {
-                case let credential as ASAuthorizationPlatformPublicKeyCredentialRegistration:
+                case let credential as ASAuthorizationPublicKeyCredentialRegistration:
                     let response: [AnyHashable: Any] = [
                         "rawClientDataJSON": credential.rawClientDataJSON.base64EncodedString(),
                         "rawAttestationObject": credential.rawAttestationObject?.base64EncodedString()
@@ -57,16 +55,24 @@ public class PasskeyManager {
         })
     }
 
-    public func signWithPasskey(domain: String, challengeBase64: String, promise: Promise) {
-        let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+    public func signWithKey(domain: String, challengeBase64: String, useSecurityKey: Bool, promise: Promise) {
         let challenge = Data(base64Encoded: challengeBase64)!
 
-        let assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
+        let assertionRequest: ASAuthorizationRequest
+
+        if useSecurityKey {
+            let provider = ASAuthorizationSecurityKeyPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+            assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
+        } else {
+            let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+            assertionRequest = provider.createCredentialAssertionRequest(challenge: challenge)
+        }
+
         let controller = ASAuthorizationController(authorizationRequests: [assertionRequest])
 
-        PasskeyResponse().performAuth(controller: controller, callback: { (response, error) in
+        AuthResponder().performAuth(controller: controller, callback: { (response, error) in
             if let error = error {
-                promise.reject("AuthError", self.interpretError(error))
+                promise.reject("AuthError", interpretAuthError(error))
                 return
             }
 
@@ -76,7 +82,7 @@ public class PasskeyManager {
             }
 
             switch response.credential {
-                case let credential as ASAuthorizationPlatformPublicKeyCredentialAssertion:
+                case let credential as ASAuthorizationPublicKeyCredentialAssertion:
                     let response: [AnyHashable: Any] = [
                         "userID": credential.userID.base64EncodedString(),
                         "signature": credential.signature.base64EncodedString(),
