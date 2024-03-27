@@ -1,4 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { useCallback, useContext, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, {
@@ -9,10 +10,11 @@ import Animated, {
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
-import { ButtonBig } from "../shared/Button";
+import { ButtonBig, ButtonMed } from "../shared/Button";
+import { OctName } from "../shared/InputBig";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
-import { TextBody, TextH3 } from "../shared/text";
+import { color, touchHighlightUnderlay } from "../shared/style";
+import { TextBody, TextCenter, TextH3 } from "../shared/text";
 
 export function CreateBackupSheet() {
   const [step, setStep] = useState<0 | 1>(0);
@@ -28,25 +30,20 @@ export function CreateBackupSheet() {
   );
 }
 
-function CreateBackupContent({ setStep }: { setStep: any }) {
+function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
   return (
     <Animated.View
       entering={FadeIn}
       exiting={FadeOut}
       style={{ paddingHorizontal: 24 }}
     >
-      <TextH3>Create a backup</TextH3>
+      <TextCenter>
+        <TextH3>Create a backup</TextH3>
+      </TextCenter>
       <Spacer h={16} />
       <View style={styles.separator} />
       <Spacer h={16} />
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View style={styles.keyCircle}>
-          <Octicons name="key" size={20} color={color.primary} />
-        </View>
-        <Spacer w={12} />
-        <TextBody>Set up a passkey backup</TextBody>
-        <View style={{}} />
-      </View>
+      <BackupOptionRow icon="key" title="Set up a passkey backup" />
       <Spacer h={16} />
       <View>
         <View style={{ flexDirection: "row" }}>
@@ -76,7 +73,11 @@ function CreateBackupContent({ setStep }: { setStep: any }) {
   );
 }
 
-function OfflineBackupContent({ setStep }: { setStep: any }) {
+function OfflineBackupContent({
+  setStep,
+}: {
+  setStep: (value: 0 | 1) => void;
+}) {
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 
@@ -91,15 +92,32 @@ function OfflineBackupContent({ setStep }: { setStep: any }) {
       exiting={FadeOut}
       style={{ paddingHorizontal: 24 }}
     >
-      <TextH3>Create an offline backup</TextH3>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ width: 40 }}>
+          <TouchableHighlight
+            onPress={() => setStep(0)}
+            style={styles.screenHeadButton}
+            hitSlop={16}
+            {...touchHighlightUnderlay.subtle}
+          >
+            <Octicons name="arrow-left" size={30} color={color.midnight} />
+          </TouchableHighlight>
+        </View>
+        <TextH3>Create an offline backup</TextH3>
+        <View style={{ width: 40 }} />
+      </View>
       <Spacer h={16} />
       <View style={styles.separator} />
       <Spacer h={20} />
       {Platform.OS !== "android" && (
         <>
-          <View style={{ flexDirection: "row" }}>
-            <TextBody>Set up a security key backup</TextBody>
-          </View>
+          <BackupOptionRow icon="key" title="Set up a security key backup" />
           <Spacer h={16} />
           <View>
             <TextBody color={color.grayMid}>
@@ -108,13 +126,12 @@ function OfflineBackupContent({ setStep }: { setStep: any }) {
           </View>
           <Spacer h={24} />
           <ButtonBig type="primary" title="Back up with security key" />
+          <Spacer h={20} />
           <View style={styles.separator} />
           <Spacer h={20} />
         </>
       )}
-      <View style={{ flexDirection: "row" }}>
-        <TextBody>Set up a seed phrase</TextBody>
-      </View>
+      <BackupOptionRow icon="comment" title="Set up a seed phrase" />
       <Spacer h={16} />
       <TextBody color={color.grayMid}>
         Your funds are connected to a phrase you can store securely.
@@ -126,6 +143,27 @@ function OfflineBackupContent({ setStep }: { setStep: any }) {
         onPress={goToSeedPhrase}
       />
     </Animated.View>
+  );
+}
+
+function BackupOptionRow({
+  icon,
+  title,
+  recommended,
+}: {
+  icon: OctName;
+  title: string;
+  recommended?: boolean;
+}) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={styles.keyCircle}>
+        <Octicons name={icon} size={20} color={color.primary} />
+      </View>
+      <Spacer w={12} />
+      <TextBody>{title}</TextBody>
+      {recommended && <View style={{}} />}
+    </View>
   );
 }
 
@@ -141,5 +179,13 @@ const styles = StyleSheet.create({
   separator: {
     borderBottomWidth: 0.5,
     borderBottomColor: color.grayLight,
+  },
+  screenHeadButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

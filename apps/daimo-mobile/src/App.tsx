@@ -73,7 +73,7 @@ const bottomSheetSettings = {
     enableSwipeClose: false,
   },
   createBackup: {
-    snapPoints: ["50%"],
+    snapPoints: ["60%"],
     enableSwipeClose: true,
   },
 } as const;
