@@ -1,8 +1,13 @@
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import { ButtonBig } from "../shared/Button";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBody } from "../shared/text";
@@ -11,7 +16,8 @@ export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
 
   return (
-    <View>
+    <View style={{ flex: 1, backgroundColor: color.white }}>
+      <ScreenHeader title="Seed phrase" />
       <ProgressBlobs steps={2} activeStep={activeStep} />
       <Spacer h={24} />
       {/* Test animation of progress blobs */}
@@ -43,8 +49,17 @@ export function ProgressBlobs({
 }
 
 function ProgressBlob({ active }: { active: boolean }) {
+  const offset = useSharedValue(20);
+  const bg = useSharedValue(color.primary);
+
+  useEffect(() => {
+    offset.value = withTiming(active ? 60 : 20);
+    bg.value = withTiming(active ? color.primary : color.grayLight);
+  }, [active]);
+
   const style = useAnimatedStyle(() => ({
-    width: active ? 20 : 60,
+    width: offset.value,
+    backgroundColor: bg.value,
   }));
 
   return (
