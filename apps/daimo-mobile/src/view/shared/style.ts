@@ -68,6 +68,13 @@ export const ss = {
       borderWidth: 1,
       borderColor: "#f00",
     },
+    shadow: {
+      // iOS
+      shadowOffset: { height: 2, width: -1 },
+      shadowOpacity: 0.05,
+      // Android
+      elevation: 1,
+    },
   }),
   text: StyleSheet.create({
     h1: {
