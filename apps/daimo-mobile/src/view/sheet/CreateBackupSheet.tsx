@@ -94,8 +94,29 @@ function OfflineBackupContent({ setStep }: { setStep: any }) {
       <TextH3>Create an offline backup</TextH3>
       <Spacer h={16} />
       <View style={styles.separator} />
-      {Platform.OS !== "android" && <View />}
-      <TextBody color={color.grayDark}>
+      <Spacer h={20} />
+      {Platform.OS !== "android" && (
+        <>
+          <View style={{ flexDirection: "row" }}>
+            <TextBody>Set up a security key backup</TextBody>
+          </View>
+          <Spacer h={16} />
+          <View>
+            <TextBody color={color.grayMid}>
+              Use a physical FIDO key, such as a YubiKey
+            </TextBody>
+          </View>
+          <Spacer h={24} />
+          <ButtonBig type="primary" title="Back up with security key" />
+          <View style={styles.separator} />
+          <Spacer h={20} />
+        </>
+      )}
+      <View style={{ flexDirection: "row" }}>
+        <TextBody>Set up a seed phrase</TextBody>
+      </View>
+      <Spacer h={16} />
+      <TextBody color={color.grayMid}>
         Your funds are connected to a phrase you can store securely.
       </TextBody>
       <Spacer h={24} />
