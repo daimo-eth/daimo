@@ -1,5 +1,6 @@
+import { useReducer, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -7,7 +8,20 @@ import { color, ss } from "../shared/style";
 import { TextBody } from "../shared/text";
 
 export function SeedPhraseScreen() {
-  return <View />;
+  const [activeStep, setActiveStep] = useState(0);
+
+  return (
+    <View>
+      <ProgressBlobs steps={2} activeStep={activeStep} />
+      <Spacer h={24} />
+      {/* Test animation of progress blobs */}
+      <ButtonBig
+        type="subtle"
+        title="Swap"
+        onPress={() => setActiveStep((c) => (c === 0 ? 1 : 0))}
+      />
+    </View>
+  );
 }
 
 export function ProgressBlobs({
@@ -17,7 +31,30 @@ export function ProgressBlobs({
   activeStep: number;
   steps: number;
 }) {
-  return <Animated.View />;
+  return (
+    <Animated.View style={{ flexDirection: "row", gap: 8 }}>
+      {Array(steps)
+        .fill(0)
+        .map((_, index) => (
+          <ProgressBlob key={index} active={activeStep === index} />
+        ))}
+    </Animated.View>
+  );
+}
+
+function ProgressBlob({ active }: { active: boolean }) {
+  const style = useAnimatedStyle(() => ({
+    width: active ? 20 : 60,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        { backgroundColor: color.primary, borderRadius: 8, height: 8 },
+        style,
+      ]}
+    />
+  );
 }
 
 export function CopySeedPhrase() {
@@ -34,12 +71,51 @@ export function CopySeedPhrase() {
   );
 }
 
+export function VerifySeedPhrase() {
+  return (
+    <View>
+      <TextBody color={color.grayDark}>
+        Type your seed phrase into the input box.
+      </TextBody>
+      <SeedPhraseBox mode="edit" />
+      <Spacer h={24} />
+      <ButtonBig type="primary" title="Finish Setup" />
+    </View>
+  );
+}
+
 function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
+  useSeedPhraseInput();
+
   return <View style={styles.box} />;
+}
+
+function useSeedPhraseInput() {
+  return useReducer(
+    (state: any, next: any) => {
+      return { ...state, [next.key]: next.value };
+    },
+    {
+      1: "",
+      2: "",
+      3: "",
+      4: "",
+      5: "",
+      6: "",
+      7: "",
+      8: "",
+      9: "",
+      10: "",
+      11: "",
+      12: "",
+    }
+  );
 }
 
 const styles = StyleSheet.create({
   box: {
+    paddingVertical: 20,
+    paddingHorizontal: 24,
     backgroundColor: color.white,
     ...ss.container.shadow,
   },

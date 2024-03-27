@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import { ButtonBig } from "../shared/Button";
 import Spacer from "../shared/Spacer";
@@ -23,6 +24,21 @@ export function CreateBackupSheet() {
       <ButtonBig type="primary" title="Backup with passkey" />
       <ButtonBig type="subtle" title="Backup to seed phrase instead" />
     </View>
+  );
+}
+
+function OfflineBackupContent() {
+  return (
+    <Animated.View entering={FadeIn}>
+      <TextH3>Create an offline backup</TextH3>
+      <Spacer h={16} />
+      <View style={styles.separator} />
+      {Platform.OS !== "android" && <View />}
+      <TextBody color={color.grayDark}>
+        Your funds are connected to a phrase you can store securely.
+      </TextBody>
+      <ButtonBig type="subtle" title="Backup with seed phrase" />
+    </Animated.View>
   );
 }
 

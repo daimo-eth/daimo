@@ -71,6 +71,10 @@ const bottomSheetSettings = {
     snapPoints: ["66%"],
     enableSwipeClose: false,
   },
+  createBackup: {
+    snapPoints: ["50%"],
+    enableSwipeClose: true,
+  },
 } as const;
 const defaultSnapPoints = ["10%"];
 
@@ -128,6 +132,7 @@ function AppBody() {
   // Handle dispatch > open bottom sheet
   const openFC = () => setBottomSheet("connectFarcaster");
   const linkFC = () => setBottomSheet("linkFarcaster");
+  const createBackup = () => setBottomSheet("createBackup");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
   const hideSheet = () => setBottomSheet(null);
@@ -152,6 +157,7 @@ function AppBody() {
               onChange={onChangeIndex}
               onClose={onClose}
               enablePanDownToClose={enableSwipeClose}
+              enableDynamicSizing
             >
               {bottomSheet === "debug" && <DebugBottomSheet />}
               {(bottomSheet === "connectFarcaster" ||
