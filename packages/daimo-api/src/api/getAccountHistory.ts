@@ -265,6 +265,10 @@ function getRampNetworkURL(account: EAccount) {
   return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}&finalUrl=${finalUrl}`;
 }
 
+function getBridgeURL(account: EAccount) {
+  return `https://www.relay.link/bridge/base/?currency=usdc&toAddress=${account.addr}&lockToChain=true&lockCurrency=true&header=daimo`;
+}
+
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   const cbUrl = generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
@@ -280,9 +284,9 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
 
   return [
     {
-      title: "Transfer from Ethereum",
-      cta: "Bridge from any wallet",
-      url: `https://daimo.com/bridge/${account.name}`,
+      title: "Transfer from another chain",
+      cta: "Bridge USDC from any wallet",
+      url: getBridgeURL(account),
     },
     {
       title: "Send from Coinbase & other options",
