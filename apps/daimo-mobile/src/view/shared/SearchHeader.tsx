@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect, useRef } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
@@ -8,10 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import {
-  AnimatedSearchInput,
-  AnimatedSearchInputRef,
-} from "./AnimatedSearchInput";
+import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
@@ -31,7 +28,6 @@ export function SearchHeader({
 }) {
   const isFocused = useSharedValue(prefix != null);
   const nav = useNav();
-  const ref = useRef<AnimatedSearchInputRef>(null);
 
   useEffect(() => {
     isFocused.value = prefix != null;
@@ -96,7 +92,6 @@ export function SearchHeader({
           onPress={() => {
             setPrefix(undefined);
             Keyboard.dismiss();
-            ref.current?.closeInput();
           }}
           hitSlop={16}
         >
@@ -111,10 +106,9 @@ export function SearchHeader({
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput
-        ref={ref}
         icon="search"
         placeholder="Search for user..."
-        value={prefix || ""}
+        value={prefix}
         onChange={setPrefix}
         onFocus={() => setPrefix(prefix || "")}
         onClose={() => setPrefix(undefined)}
