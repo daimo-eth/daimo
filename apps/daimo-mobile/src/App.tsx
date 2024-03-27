@@ -89,7 +89,10 @@ const bottomSheetSettings = {
 } as const;
 const defaultSnapPoints = ["10%"];
 
-type GlobalBottomSheet = null | keyof typeof bottomSheetSettings;
+type GlobalBottomSheet = null | {
+  action: keyof typeof bottomSheetSettings;
+  payload?: { title: string; content: ReactElement };
+};
 
 function AppBody() {
   // Global dispatcher
@@ -98,10 +101,8 @@ function AppBody() {
   // Global bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheet, setBottomSheet] = useState<GlobalBottomSheet>(null);
-  const [bottomSheetAction, setBottomSheetAction] = useState<
-    { title: string; content: ReactElement } | undefined
-  >();
-  const settings = bottomSheet && bottomSheetSettings[bottomSheet];
+
+  const settings = bottomSheet && bottomSheetSettings[bottomSheet?.action];
   const snapPoints = settings?.snapPoints || defaultSnapPoints;
   const enableSwipeClose = settings?.enableSwipeClose || false;
 
@@ -109,7 +110,7 @@ function AppBody() {
   useEffect(() => {
     const subscription = RNShake.addListener(() => {
       Keyboard.dismiss();
-      setBottomSheet("debug");
+      setBottomSheet({ action: "debug" });
     });
     return () => subscription.remove();
   }, []);
@@ -144,17 +145,16 @@ function AppBody() {
   );
 
   // Handle dispatch > open bottom sheet
-  const openFC = () => setBottomSheet("connectFarcaster");
-  const linkFC = () => setBottomSheet("linkFarcaster");
+  const openFC = () => setBottomSheet({ action: "connectFarcaster" });
+  const linkFC = () => setBottomSheet({ action: "linkFarcaster" });
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
-  const openHelp = (helpAction: Action) => {
-    setBottomSheet("helpModal");
-    if (helpAction.name === "helpModal") {
-      setBottomSheetAction(helpAction);
+  const openHelp = (actionPayload: Action) => {
+    if (actionPayload.name === "helpModal") {
+      setBottomSheet({ action: "helpModal", payload: actionPayload });
     }
   };
   useEffect(() => dispatcher.register("helpModal", openHelp), []);
@@ -178,16 +178,18 @@ function AppBody() {
               onChange={onChangeIndex}
               onClose={onClose}
               enablePanDownToClose={enableSwipeClose}
-              enableDynamicSizing={bottomSheet === "helpModal"}
+              enableDynamicSizing={bottomSheet?.action === "helpModal"}
             >
-              {bottomSheet === "debug" && <DebugBottomSheet />}
-              {(bottomSheet === "connectFarcaster" ||
-                bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
-              {bottomSheet === "helpModal" && bottomSheetAction && (
+              {bottomSheet?.action === "debug" && <DebugBottomSheet />}
+              {(bottomSheet?.action === "connectFarcaster" ||
+                bottomSheet?.action === "linkFarcaster") && (
+                <FarcasterBottomSheet />
+              )}
+              {bottomSheet?.action === "helpModal" && bottomSheet?.payload && (
                 <BottomSheetView>
                   <HelpBottomSheet
-                    content={bottomSheetAction.content}
-                    title={bottomSheetAction.title}
+                    content={bottomSheet.payload.content}
+                    title={bottomSheet.payload.title}
                     onPress={() => bottomSheetRef.current?.close()}
                   />
                 </BottomSheetView>

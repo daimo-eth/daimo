@@ -2,6 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as Haptics from "expo-haptics";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
+  Linking,
   NativeSyntheticEvent,
   StyleSheet,
   TextInput,
@@ -50,6 +51,10 @@ export function AmountChooser({
 
   if (account == null) return null;
   const dollarStr = getAmountText({ amount: account.lastBalance });
+  const openL2BeatLink = () => {
+    Linking.openURL("https://l2beat.com/scaling/projects/base");
+  };
+
   const showHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
@@ -65,11 +70,7 @@ export function AmountChooser({
             and secure, and works worldwide.
           </TextLight>
           <Spacer h={24} />
-          <TouchableOpacity
-            onPress={() => {
-              // TODO add link
-            }}
-          >
+          <TouchableOpacity onPress={openL2BeatLink}>
             <TextLink>Learn more on L2Beat.</TextLink>
           </TouchableOpacity>
         </>

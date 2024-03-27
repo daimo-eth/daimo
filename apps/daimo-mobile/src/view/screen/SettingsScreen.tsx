@@ -198,6 +198,20 @@ function DevicesSection({ account }: { account: Account }) {
       .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
   }, [account.pendingKeyRotation])();
   const dispatcher = useContext(DispatcherContext);
+  const openHelpModal = () =>
+    dispatcher.dispatch({
+      name: "helpModal",
+      title: "What is a passkey backup?",
+      content: (
+        <>
+          <TextLight>
+            Passkeys are a safer and easier alternative to passwords. With
+            passkeys, users can sign in to apps and websites with a biometric
+            sensor.
+          </TextLight>
+        </>
+      ),
+    });
 
   return (
     <View style={styles.sectionWrap}>
@@ -214,21 +228,7 @@ function DevicesSection({ account }: { account: Account }) {
         title="Create a Passkey Backup"
         message="Secured by your password manager"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
-        onPressInfo={() =>
-          dispatcher.dispatch({
-            name: "helpModal",
-            title: "What is a passkey backup?",
-            content: (
-              <>
-                <TextLight>
-                  Passkeys are a safer and easier alternative to passwords. With
-                  passkeys, users can sign in to apps and websites with a
-                  biometric sensor.
-                </TextLight>
-              </>
-            ),
-          })
-        }
+        onPressInfo={openHelpModal}
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
