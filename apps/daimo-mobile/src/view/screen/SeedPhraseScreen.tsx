@@ -9,6 +9,8 @@ import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBody } from "../shared/text";
 
+const ARRAY_SIX = Array(6).fill(0);
+
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
@@ -90,35 +92,27 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
     dispatch({ key: index, value: text });
   };
 
+  const renderCell = useCallback(
+    (index: number) => (
+      <SeedPhraseInput
+        key={`${mode}-${index}`}
+        mode={mode}
+        value={state[index]}
+        text=""
+        num={index}
+        onChangeText={(text) => handleInputChange(index, text)}
+      />
+    ),
+    [mode, state]
+  );
+
   return (
     <View style={styles.box}>
       <View style={styles.boxColumn}>
-        {Array(6)
-          .fill(0)
-          .map((_, index) => (
-            <SeedPhraseInput
-              key={`${mode}-index`}
-              mode={mode}
-              value={state[index + 1]}
-              text=""
-              num={index + 1}
-              onChangeText={(text) => handleInputChange(index + 1, text)}
-            />
-          ))}
+        {ARRAY_SIX.map((_, index) => renderCell(index + 1))}
       </View>
       <View style={styles.boxColumn}>
-        {Array(6)
-          .fill(0)
-          .map((_, index) => (
-            <SeedPhraseInput
-              key={`${mode}-index`}
-              mode={mode}
-              value={state[index + 7]}
-              text=""
-              num={index + 7}
-              onChangeText={(text) => handleInputChange(index + 7, text)}
-            />
-          ))}
+        {ARRAY_SIX.map((_, index) => renderCell(index + 7))}
       </View>
     </View>
   );
