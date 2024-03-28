@@ -22,9 +22,7 @@ export function SeedPhraseScreen() {
   }, [activeStep, nav]);
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: color.white, paddingHorizontal: 24 }}
-    >
+    <View style={styles.screen}>
       <ScreenHeader
         title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
         onBack={handleBack}
@@ -138,15 +136,7 @@ function BaseSeedPhraseInput({
   onChangeText(text: string): void;
 }) {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        borderBottomColor: color.grayLight,
-        borderBottomWidth: 2,
-        marginBottom: 8,
-        paddingVertical: 4,
-      }}
-    >
+    <View style={styles.boxInputWrapper}>
       <TextBody color={color.grayLight}>{num}</TextBody>
       <Spacer w={8} />
       {mode === "read" ? (
@@ -202,6 +192,11 @@ function useSeedPhraseInput() {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: color.white,
+    paddingHorizontal: 24,
+  },
   box: {
     borderWidth: 1,
     borderColor: color.grayLight,
@@ -215,6 +210,13 @@ const styles = StyleSheet.create({
   },
   boxColumn: {
     flex: 1,
+  },
+  boxInputWrapper: {
+    flexDirection: "row",
+    borderBottomColor: color.grayLight,
+    borderBottomWidth: 2,
+    marginBottom: 8,
+    paddingVertical: 4,
   },
   boxInput: {
     flex: 1,

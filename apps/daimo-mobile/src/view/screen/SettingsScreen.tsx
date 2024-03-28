@@ -168,7 +168,6 @@ function DevicesSection({ account }: { account: Account }) {
   const createBackup = () => {
     dispatcher.dispatch({ name: "createBackup" });
   };
-  // nav.navigate("SettingsTab", { screen: "AddPasskey" });
 
   const sortKey: (k: KeyData) => number = (k) => {
     // Our own key always first

@@ -1,5 +1,4 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { useCallback, useContext, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, {
@@ -12,8 +11,9 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, touchHighlightUnderlay } from "../shared/style";
+import { color } from "../shared/style";
 import { TextBody, TextCenter, TextH3 } from "../shared/text";
 
 export function CreateBackupSheet() {
@@ -46,20 +46,8 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <BackupOptionRow icon="key" title="Set up a passkey backup" />
       <Spacer h={16} />
       <View>
-        <View style={{ flexDirection: "row" }}>
-          <TextBody>-</TextBody>
-          <Spacer w={8} />
-          <TextBody color={color.grayMid} style={{ lineHeight: 1.5 }}>
-            Convenient, secure, and resistant to phishing
-          </TextBody>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <TextBody>-</TextBody>
-          <Spacer w={8} />
-          <TextBody color={color.grayMid} style={{ lineHeight: 3 }}>
-            Stored by your password manager, like iCloud Keychain or 1Password
-          </TextBody>
-        </View>
+        <BulletRow text="Convenient, secure, and resistant to phishing" />
+        <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
       </View>
       <Spacer h={24} />
       <ButtonBig type="primary" title="Backup with passkey" />
@@ -70,6 +58,16 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
         onPress={() => setStep(1)}
       />
     </Animated.View>
+  );
+}
+
+function BulletRow({ text }: { text: string }) {
+  return (
+    <View style={{ flexDirection: "row" }}>
+      <TextBody>•</TextBody>
+      <Spacer w={8} />
+      <TextBody color={color.grayMid}>{text}</TextBody>
+    </View>
   );
 }
 
@@ -86,46 +84,35 @@ function OfflineBackupContent({
     nav.navigate("SettingsTab", { screen: "SeedPhrase" });
   }, [nav, dispatcher]);
 
+  const goToSecurityKey = useCallback(() => {
+    dispatcher.dispatch({ name: "hideBottomSheet" });
+    nav.navigate("SettingsTab", { screen: "AddPasskey" });
+  }, [nav, dispatcher]);
+
   return (
     <Animated.View
       entering={FadeIn}
       exiting={FadeOut}
       style={{ paddingHorizontal: 24 }}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <View style={{ width: 40 }}>
-          <TouchableHighlight
-            onPress={() => setStep(0)}
-            style={styles.screenHeadButton}
-            hitSlop={16}
-            {...touchHighlightUnderlay.subtle}
-          >
-            <Octicons name="arrow-left" size={30} color={color.midnight} />
-          </TouchableHighlight>
-        </View>
-        <TextH3>Create an offline backup</TextH3>
-        <View style={{ width: 40 }} />
-      </View>
-      <Spacer h={16} />
+      <ScreenHeader
+        title="Create an offline backup"
+        onBack={() => setStep(0)}
+        hideOfflineHeader
+      />
       <View style={styles.separator} />
       <Spacer h={20} />
       {Platform.OS !== "android" && (
         <>
           <BackupOptionRow icon="key" title="Set up a security key backup" />
           <Spacer h={16} />
-          <View>
-            <TextBody color={color.grayMid}>
-              Use a physical FIDO key, such as a YubiKey
-            </TextBody>
-          </View>
+          <BulletRow text="Use a physical FIDO key, such as a YubiKey" />
           <Spacer h={24} />
-          <ButtonBig type="primary" title="Back up with security key" />
+          <ButtonBig
+            type="primary"
+            title="Back up with security key"
+            onPress={goToSecurityKey}
+          />
           <Spacer h={20} />
           <View style={styles.separator} />
           <Spacer h={20} />
@@ -133,9 +120,7 @@ function OfflineBackupContent({
       )}
       <BackupOptionRow icon="comment" title="Set up a seed phrase" />
       <Spacer h={16} />
-      <TextBody color={color.grayMid}>
-        Your funds are connected to a phrase you can store securely.
-      </TextBody>
+      <BulletRow text="Your funds are connected to a phrase you can store securely" />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
@@ -179,13 +164,5 @@ const styles = StyleSheet.create({
   separator: {
     borderBottomWidth: 0.5,
     borderBottomColor: color.grayLight,
-  },
-  screenHeadButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
