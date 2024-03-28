@@ -1,5 +1,5 @@
-import { useCallback, useReducer, useState } from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { memo, useCallback, useReducer, useState } from "react";
+import { View, StyleSheet, TextInput, TextInputProps } from "react-native";
 
 import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
@@ -103,6 +103,7 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
               value={state[index + 1]}
               text=""
               num={index + 1}
+              onChangeText={(text) => handleInputChange(index + 1, text)}
             />
           ))}
       </View>
@@ -112,9 +113,10 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
           .map((_, index) => (
             <SeedPhraseInput
               mode={mode}
-              value={state[index + 1]}
+              value={state[index + 7]}
               text=""
               num={index + 7}
+              onChangeText={(text) => handleInputChange(index + 7, text)}
             />
           ))}
       </View>
@@ -122,16 +124,18 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
   );
 }
 
-function SeedPhraseInput({
+function BaseSeedPhraseInput({
   mode,
   value,
   text,
   num,
+  onChangeText,
 }: {
   mode: "read" | "edit";
   value: string;
   text: string;
   num: number;
+  onChangeText(text: string): void;
 }) {
   return (
     <View
@@ -144,13 +148,27 @@ function SeedPhraseInput({
       }}
     >
       <TextBody color={color.grayLight}>{num}</TextBody>
-      <Spacer w={14} />
+      <Spacer w={8} />
       {mode === "read" ? (
         <TextBody>{text}</TextBody>
       ) : (
-        <TextInput value={value} />
+        <SeedPhraseTextInput value={value} onChangeText={onChangeText} />
       )}
     </View>
+  );
+}
+
+const SeedPhraseInput = memo(BaseSeedPhraseInput);
+
+function SeedPhraseTextInput({ value, onChangeText }: TextInputProps) {
+  return (
+    <TextInput
+      style={styles.boxInput}
+      value={value}
+      autoCapitalize="none"
+      autoCorrect={false}
+      onChangeText={onChangeText}
+    />
   );
 }
 
@@ -197,5 +215,9 @@ const styles = StyleSheet.create({
   },
   boxColumn: {
     flex: 1,
+  },
+  boxInput: {
+    flex: 1,
+    ...ss.text.body,
   },
 });
