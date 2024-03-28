@@ -62,7 +62,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
 function BulletRow({ text }: { text: string }) {
   return (
     <View style={{ flexDirection: "row" }}>
-      <TextBody>•</TextBody>
+      <TextBody color={color.grayMid}>•</TextBody>
       <Spacer w={8} />
       <TextBody color={color.grayMid}>{text}</TextBody>
     </View>

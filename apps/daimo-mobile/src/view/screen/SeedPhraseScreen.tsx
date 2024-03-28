@@ -1,13 +1,22 @@
-import { memo, useCallback, useReducer, useState } from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import Octicons from "@expo/vector-icons/Octicons";
+import * as Clipboard from "expo-clipboard";
+import { memo, useCallback, useMemo, useReducer, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableHighlight,
+  Pressable,
+  ViewStyle,
+} from "react-native";
 
 import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
-import { TextBody } from "../shared/text";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { TextBody, TextBtnCaps } from "../shared/text";
 
 const ARRAY_SIX = Array(6).fill(0);
 
@@ -49,6 +58,8 @@ function CopySeedPhrase({
 }: {
   setActiveStep: (value: 0 | 1) => void;
 }) {
+  const [saved, toggleSaved] = useReducer((s) => !s, false);
+
   return (
     <View>
       <TextBody color={color.grayMid}>
@@ -58,11 +69,86 @@ function CopySeedPhrase({
       <Spacer h={24} />
       <SeedPhraseBox mode="read" />
       <Spacer h={24} />
+      <CopyToClipboard />
+      <Spacer h={24} />
+      <ConfirmPhraseSave saved={saved} toggleSaved={toggleSaved} />
+      <Spacer h={24} />
       <ButtonBig
         type="primary"
         title="Continue"
+        disabled={!saved}
         onPress={() => setActiveStep(1)}
       />
+    </View>
+  );
+}
+
+function CopyToClipboard() {
+  const [justCopied, setJustCopied] = useState(false);
+
+  const copy = useCallback(async () => {
+    await Clipboard.setStringAsync("");
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 1000);
+  }, []);
+
+  return (
+    <View style={{ alignItems: "center" }}>
+      <TouchableHighlight
+        style={styles.copyButton}
+        hitSlop={16}
+        onPress={copy}
+        {...touchHighlightUnderlay.subtle}
+      >
+        <>
+          <Octicons
+            name={justCopied ? "check-circle" : "copy"}
+            size={16}
+            color={color.primary}
+          />
+          <Spacer w={8} />
+          <TextBtnCaps
+            style={[ss.text.btnCaps, { textTransform: "uppercase" }]}
+            color={color.primary}
+          >
+            COPY TO CLIPBOARD
+          </TextBtnCaps>
+        </>
+      </TouchableHighlight>
+    </View>
+  );
+}
+
+function Checkbox({ active, toggle }: { active: boolean; toggle(): void }) {
+  const boxStyle: ViewStyle = useMemo(
+    () => ({
+      width: 16,
+      height: 16,
+      borderRadius: 4,
+      borderWidth: active ? 0 : 2,
+      borderColor: color.primary,
+      backgroundColor: active ? color.primary : color.white,
+    }),
+    [active]
+  );
+
+  return <Pressable style={boxStyle} onPress={toggle} />;
+}
+
+function ConfirmPhraseSave({
+  saved,
+  toggleSaved,
+}: {
+  saved: boolean;
+  toggleSaved(): void;
+}) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Checkbox active={saved} toggle={toggleSaved} />
+      <Spacer w={4} />
+      <TextBody color={color.grayMid}>
+        I have saved my seed phrase in a secure location
+      </TextBody>
     </View>
   );
 }
@@ -70,7 +156,7 @@ function CopySeedPhrase({
 function VerifySeedPhrase() {
   return (
     <View>
-      <TextBody color={color.grayDark}>
+      <TextBody color={color.grayMid}>
         Type your seed phrase into the input box.
       </TextBody>
       <Spacer h={24} />
@@ -205,5 +291,11 @@ const styles = StyleSheet.create({
   boxInput: {
     flex: 1,
     ...ss.text.body,
+  },
+  copyButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    borderRadius: 4,
   },
 });
