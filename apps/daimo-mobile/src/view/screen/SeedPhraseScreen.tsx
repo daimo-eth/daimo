@@ -1,5 +1,5 @@
 import { memo, useCallback, useReducer, useState } from "react";
-import { View, StyleSheet, TextInput, TextInputProps } from "react-native";
+import { View, StyleSheet, TextInput } from "react-native";
 
 import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
@@ -134,25 +134,19 @@ function BaseSeedPhraseInput({
       {mode === "read" ? (
         <TextBody>{text}</TextBody>
       ) : (
-        <SeedPhraseTextInput value={value} onChangeText={onChangeText} />
+        <TextInput
+          style={styles.boxInput}
+          value={value}
+          autoCapitalize="none"
+          autoCorrect={false}
+          onChangeText={onChangeText}
+        />
       )}
     </View>
   );
 }
 
 const SeedPhraseInput = memo(BaseSeedPhraseInput);
-
-function SeedPhraseTextInput({ value, onChangeText }: TextInputProps) {
-  return (
-    <TextInput
-      style={styles.boxInput}
-      value={value}
-      autoCapitalize="none"
-      autoCorrect={false}
-      onChangeText={onChangeText}
-    />
-  );
-}
 
 type SeedPhraseInputState = Record<number, string>;
 type SeedPhraseInputAction = { key: number; value: string };
@@ -163,9 +157,7 @@ type SeedPhraseInputReducer = (
 
 function useSeedPhraseInput() {
   return useReducer<SeedPhraseInputReducer>(
-    (state, next) => {
-      return { ...state, [next.key]: next.value };
-    },
+    (state, next) => ({ ...state, [next.key]: next.value }),
     {
       1: "",
       2: "",
