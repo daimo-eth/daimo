@@ -97,6 +97,7 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
           .fill(0)
           .map((_, index) => (
             <SeedPhraseInput
+              key={`${mode}-index`}
               mode={mode}
               value={state[index + 1]}
               text=""
@@ -110,6 +111,7 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
           .fill(0)
           .map((_, index) => (
             <SeedPhraseInput
+              key={`${mode}-index`}
               mode={mode}
               value={state[index + 7]}
               text=""
