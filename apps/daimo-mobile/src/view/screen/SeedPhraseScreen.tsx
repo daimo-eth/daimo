@@ -38,7 +38,7 @@ export function SeedPhraseScreen() {
       {activeStep === 0 ? (
         <CopySeedPhrase setActiveStep={setActiveStep} />
       ) : (
-        <VerifySeedPhrase setActiveStep={setActiveStep} />
+        <VerifySeedPhrase />
       )}
     </View>
   );
@@ -67,11 +67,7 @@ function CopySeedPhrase({
   );
 }
 
-function VerifySeedPhrase({
-  setActiveStep,
-}: {
-  setActiveStep: (value: 0 | 1) => void;
-}) {
+function VerifySeedPhrase() {
   return (
     <View>
       <TextBody color={color.grayDark}>
