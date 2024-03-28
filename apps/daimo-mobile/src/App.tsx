@@ -20,6 +20,7 @@ import { TabNav } from "./view/TabNav";
 import { renderErrorFallback } from "./view/screen/errorScreens";
 import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
+import { CreateBackupSheet } from "./view/sheet/CreateBackupSheet";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
 import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
 
@@ -70,6 +71,10 @@ const bottomSheetSettings = {
   linkFarcaster: {
     snapPoints: ["66%"],
     enableSwipeClose: false,
+  },
+  createBackup: {
+    snapPoints: ["60%"],
+    enableSwipeClose: true,
   },
 } as const;
 const defaultSnapPoints = ["10%"];
@@ -128,8 +133,10 @@ function AppBody() {
   // Handle dispatch > open bottom sheet
   const openFC = () => setBottomSheet("connectFarcaster");
   const linkFC = () => setBottomSheet("linkFarcaster");
+  const createBackup = () => setBottomSheet("createBackup");
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
+  useEffect(() => dispatcher.register("createBackup", createBackup), []);
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
@@ -156,6 +163,7 @@ function AppBody() {
               {bottomSheet === "debug" && <DebugBottomSheet />}
               {(bottomSheet === "connectFarcaster" ||
                 bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+              {bottomSheet === "createBackup" && <CreateBackupSheet />}
             </BottomSheet>
           </View>
         </SafeAreaProvider>

@@ -163,9 +163,11 @@ function LinkedAccountsRow({
 
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
+  const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
-  const createBackup = () =>
-    nav.navigate("SettingsTab", { screen: "AddPasskey" });
+  const createBackup = () => {
+    dispatcher.dispatch({ name: "createBackup" });
+  };
 
   const sortKey: (k: KeyData) => number = (k) => {
     // Our own key always first

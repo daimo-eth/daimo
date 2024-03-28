@@ -3,7 +3,8 @@ import { createContext } from "react";
 type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
-  | { name: "hideBottomSheet" };
+  | { name: "hideBottomSheet" }
+  | { name: "createBackup" };
 
 type ActionName = Action["name"];
 
