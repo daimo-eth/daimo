@@ -1,5 +1,5 @@
 import { useCallback, useReducer, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TextInput } from "react-native";
 
 import { useNav } from "../../common/nav";
 import { ButtonBig } from "../shared/Button";
@@ -86,14 +86,84 @@ function VerifySeedPhrase({
 }
 
 function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
-  useSeedPhraseInput();
+  const [state, dispatch] = useSeedPhraseInput();
 
-  return <View style={styles.box} />;
+  const handleInputChange = (index: number, text: string) => {
+    dispatch({ key: index, value: text });
+  };
+
+  return (
+    <View style={styles.box}>
+      <View style={styles.boxColumn}>
+        {Array(6)
+          .fill(0)
+          .map((_, index) => (
+            <SeedPhraseInput
+              mode={mode}
+              value={state[index + 1]}
+              text=""
+              num={index + 1}
+            />
+          ))}
+      </View>
+      <View style={styles.boxColumn}>
+        {Array(6)
+          .fill(0)
+          .map((_, index) => (
+            <SeedPhraseInput
+              mode={mode}
+              value={state[index + 1]}
+              text=""
+              num={index + 7}
+            />
+          ))}
+      </View>
+    </View>
+  );
 }
 
+function SeedPhraseInput({
+  mode,
+  value,
+  text,
+  num,
+}: {
+  mode: "read" | "edit";
+  value: string;
+  text: string;
+  num: number;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        borderBottomColor: color.grayLight,
+        borderBottomWidth: 2,
+        marginBottom: 8,
+        paddingVertical: 4,
+      }}
+    >
+      <TextBody color={color.grayLight}>{num}</TextBody>
+      <Spacer w={14} />
+      {mode === "read" ? (
+        <TextBody>{text}</TextBody>
+      ) : (
+        <TextInput value={value} />
+      )}
+    </View>
+  );
+}
+
+type SeedPhraseInputState = Record<number, string>;
+type SeedPhraseInputAction = { key: number; value: string };
+type SeedPhraseInputReducer = (
+  state: SeedPhraseInputState,
+  action: SeedPhraseInputAction
+) => SeedPhraseInputState;
+
 function useSeedPhraseInput() {
-  return useReducer(
-    (state: any, next: any) => {
+  return useReducer<SeedPhraseInputReducer>(
+    (state, next) => {
       return { ...state, [next.key]: next.value };
     },
     {
@@ -115,9 +185,17 @@ function useSeedPhraseInput() {
 
 const styles = StyleSheet.create({
   box: {
+    borderWidth: 1,
+    borderColor: color.grayLight,
+    borderRadius: 8,
+    flexDirection: "row",
+    gap: 24,
     paddingVertical: 20,
     paddingHorizontal: 24,
     backgroundColor: color.white,
     ...ss.container.shadow,
+  },
+  boxColumn: {
+    flex: 1,
   },
 });
