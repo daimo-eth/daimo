@@ -2,6 +2,8 @@ import { Span } from "@opentelemetry/api";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
 
+import { Telemetry } from "./telemetry";
+
 export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
 
 /** Request context */
@@ -29,22 +31,30 @@ function getHeader(h: string | string[] | undefined) {
   else return h || "";
 }
 
-export function onTrpcError({
-  error,
-  ctx,
-}: {
-  error: TRPCError;
-  ctx?: TrpcRequestContext;
-}) {
-  const err = `${error.code} ${error.name} ${error.message}`;
-  if (ctx) {
-    ctx.span?.setAttribute("rpc.error", err);
-  }
-  if (error.code === "PRECONDITION_FAILED") {
-    console.log(`[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`);
-  } else {
-    console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
-  }
+export function onTrpcError(telemetry: Telemetry) {
+  return ({ error, ctx }: { error: TRPCError; ctx?: TrpcRequestContext }) => {
+    const err = `${error.code} ${error.name} ${error.message}`;
+    if (ctx) {
+      ctx.span?.setAttribute("rpc.error", err);
+    }
+    if (error.code === "PRECONDITION_FAILED") {
+      console.log(
+        `[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`
+      );
+    } else {
+      console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
+
+      // Log to slack if we can
+      try {
+        telemetry.recordClippy(
+          `TRPC Error ${ctx?.req.method} ${ctx?.req.url}: ${err}`,
+          "error"
+        );
+      } catch (e) {
+        console.error("Telemetry error", e);
+      }
+    }
+  };
 }
 
 function getXForwardedIP(opts: CreateHTTPContextOptions) {
