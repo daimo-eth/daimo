@@ -22,11 +22,11 @@ export function HelpBottomSheet({
       <TextCenter>
         <TextH3>{title}</TextH3>
       </TextCenter>
-      <Spacer h={12} />
+      <Spacer h={24} />
       {content}
       <Spacer h={32} />
       <ButtonMed title="GOT IT" onPress={onPress} type="subtle" />
-      <Spacer h={24} />
+      <Spacer h={48} />
     </View>
   );
 }
