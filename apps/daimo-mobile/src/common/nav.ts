@@ -130,6 +130,12 @@ export const defaultError = {
   showDownloadButton: true,
 };
 
+export enum ACTIVE_BOTTOM_SHEET_SCREEN {
+  HELP = "Help",
+  LIST = "List",
+  HISTORY = "History",
+}
+
 export type ParamListBottomSheet = {
   BottomSheetList: undefined;
   BottomSheetHistoryOp: {

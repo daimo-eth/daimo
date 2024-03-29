@@ -32,7 +32,11 @@ import ScrollPellet from "./ScrollPellet";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { TextCenter, TextH3, TextLight, TextLink } from "./text";
-import { ParamListBottomSheet, useNav } from "../../common/nav";
+import {
+  ACTIVE_BOTTOM_SHEET_SCREEN,
+  ParamListBottomSheet,
+  useNav,
+} from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,
@@ -63,12 +67,6 @@ export type SwipeUpDownRef = {
   expand: () => void;
 };
 
-export enum ACTIVE_SCREEN {
-  HELP = "Help",
-  LIST = "List",
-  HISTORY = "History",
-}
-
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   (
     { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, disabled },
@@ -79,14 +77,13 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const bsref = useRef<BottomSheet>(null);
 
     const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
-    const [activeScreen, setActiveScreen] = useState<ACTIVE_SCREEN>(
-      ACTIVE_SCREEN.LIST
-    );
+    const [activeScreen, setActiveScreen] =
+      useState<ACTIVE_BOTTOM_SHEET_SCREEN>(ACTIVE_BOTTOM_SHEET_SCREEN.LIST);
 
     const snapPoints = useMemo(() => {
-      if (activeScreen === ACTIVE_SCREEN.HELP) {
+      if (activeScreen === ACTIVE_BOTTOM_SHEET_SCREEN.HELP) {
         return [400, maxHeightOffset - tabBarHeight];
-      } else if (activeScreen === ACTIVE_SCREEN.HISTORY) {
+      } else if (activeScreen === ACTIVE_BOTTOM_SHEET_SCREEN.HISTORY) {
         return [500, maxHeightOffset - tabBarHeight];
       } else {
         return [swipeHeight, maxHeightOffset - tabBarHeight];
@@ -240,7 +237,7 @@ function HelpScreen() {
 
   const goBack = () => {
     if (nav.canGoBack()) {
-      setBottomSheetSnapPointCount(ACTIVE_SCREEN.HISTORY);
+      setBottomSheetSnapPointCount(ACTIVE_BOTTOM_SHEET_SCREEN.HISTORY);
       nav.goBack();
     }
   };

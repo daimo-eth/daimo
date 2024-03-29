@@ -23,10 +23,13 @@ import { getAmountText } from "./Amount";
 import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
-import { ACTIVE_SCREEN } from "./SwipeUpDown";
 import { color, ss, touchHighlightUnderlay } from "./style";
 import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
-import { navToAccountPage, useNav } from "../../common/nav";
+import {
+  ACTIVE_BOTTOM_SHEET_SCREEN,
+  navToAccountPage,
+  useNav,
+} from "../../common/nav";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
 import { SetBottomSheetSnapPointCount } from "../screen/HistoryOpScreen";
@@ -207,7 +210,7 @@ function DisplayOpRow({
   const viewOp = useCallback(
     (isLinkToOp: boolean) => {
       if (isLinkToOp || !canSendTo(otherAcc)) {
-        setBottomSheetSnapPointCount(ACTIVE_SCREEN.HISTORY);
+        setBottomSheetSnapPointCount(ACTIVE_BOTTOM_SHEET_SCREEN.HISTORY);
         (nav as any).navigate("BottomSheetHistoryOp", {
           op: displayOp,
           shouldAddInset: false,

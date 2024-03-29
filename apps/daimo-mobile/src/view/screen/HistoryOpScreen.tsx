@@ -22,6 +22,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import {
+  ACTIVE_BOTTOM_SHEET_SCREEN,
   ParamListBottomSheet,
   navToAccountPage,
   useNav,
@@ -38,7 +39,6 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { ACTIVE_SCREEN } from "../shared/SwipeUpDown";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
@@ -60,7 +60,7 @@ type Props = NativeStackScreenProps<
 // screen and only display the half screen snap point when the user is on the
 // detail screen.
 export const SetBottomSheetSnapPointCount = createContext(
-  (snaps: ACTIVE_SCREEN) => {}
+  (snaps: ACTIVE_BOTTOM_SHEET_SCREEN) => {}
 );
 
 export function HistoryOpScreen(props: Props) {
@@ -91,7 +91,7 @@ function HistoryOpScreenInner({
 
   const leaveScreen = () => {
     if (nav.canGoBack()) {
-      setBottomSheetSnapPointCount(ACTIVE_SCREEN.LIST);
+      setBottomSheetSnapPointCount(ACTIVE_BOTTOM_SHEET_SCREEN.LIST);
       nav.goBack();
     }
   };
@@ -203,7 +203,7 @@ function TransferBody({
   const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
 
   const openHelpModal = () => {
-    setBottomSheetSnapPointCount(ACTIVE_SCREEN.HELP);
+    setBottomSheetSnapPointCount(ACTIVE_BOTTOM_SHEET_SCREEN.HELP);
     (nav as any).navigate("BottomSheetHelp");
   };
 
