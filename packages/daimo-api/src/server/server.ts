@@ -126,7 +126,7 @@ async function main() {
     middleware: cors(),
     router,
     createContext,
-    onError: onTrpcError,
+    onError: onTrpcError(monitor),
   });
 
   const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;
