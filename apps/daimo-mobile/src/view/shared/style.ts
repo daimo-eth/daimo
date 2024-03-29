@@ -69,6 +69,13 @@ export const ss = {
       borderWidth: 1,
       borderColor: "#f00",
     },
+    shadow: {
+      // iOS
+      shadowOffset: { height: 2, width: -1 },
+      shadowOpacity: 0.05,
+      // Android
+      elevation: 1,
+    },
   }),
   text: StyleSheet.create({
     h1: {
@@ -141,6 +148,11 @@ export const ss = {
     },
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+    },
+    emphasizedSmallText: {
+      ...textBase,
+      fontWeight: "600",
+      fontSize: 12,
     },
     link: {
       color: color.link,

@@ -3,6 +3,7 @@ import { ReactElement, createContext } from "react";
 export type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
+  | { name: "onboardingChecklist" }
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "hideBottomSheet" };
 

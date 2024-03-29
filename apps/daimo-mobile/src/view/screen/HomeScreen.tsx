@@ -1,8 +1,16 @@
 import { OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Pressable,
   RefreshControl,
   StyleSheet,
   TouchableHighlight,
@@ -16,10 +24,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DispatcherContext } from "../../action/dispatch";
 import { useWarmCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
+import { useOnboardingChecklist } from "../../logic/onboarding";
 import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
@@ -33,8 +43,8 @@ import { SearchResults } from "../shared/SearchResults";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { color, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextLight } from "../shared/text";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { DaimoText, TextBody, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -147,6 +157,8 @@ function HomeScreenInner({ account }: { account: Account }) {
 
   const contactsAccess = useContactsPermission();
 
+  const { allComplete } = useOnboardingChecklist(account);
+
   return (
     <View>
       <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
@@ -172,7 +184,8 @@ function HomeScreenInner({ account }: { account: Account }) {
           <Spacer h={Math.max(16, ins.top)} />
           {account.suggestedActions.length > 0 &&
             netState.status !== "offline" &&
-            isActionVisible && (
+            isActionVisible &&
+            allComplete && (
               <SuggestedActionBox
                 action={account.suggestedActions[0]}
                 onHideAction={onHideSuggestedAction}
@@ -192,8 +205,9 @@ function HomeScreenInner({ account }: { account: Account }) {
                 account.suggestedActions.length > 0 &&
                 netState.status !== "offline" &&
                 isActionVisible
-              ) && <Spacer h={64} />}
-              <Spacer h={12} />
+              ) && <Spacer h={allComplete ? 64 : 28} />}
+              {!allComplete && <CompleteOnboarding />}
+              <Spacer h={32} />
               <AmountAndButtons account={account} />
             </>
           )}
@@ -283,6 +297,25 @@ function IconButton({
   );
 }
 
+function CompleteOnboarding() {
+  const dispatcher = useContext(DispatcherContext);
+
+  const openChecklist = useCallback(() => {
+    dispatcher.dispatch({ name: "onboardingChecklist" });
+  }, [dispatcher]);
+
+  return (
+    <Pressable onPress={openChecklist} style={styles.checklistAction}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Octicons name="list-unordered" size={24} color={color.gray3} />
+        <Spacer w={12} />
+        <DaimoText variant="body">Finish setting up your account</DaimoText>
+      </View>
+      <Octicons size={24} color={color.primary} name="arrow-right" />
+    </Pressable>
+  );
+}
+
 let deepLinkInitialised = false;
 
 /** Handle incoming app deep links. */
@@ -358,5 +391,17 @@ const styles = StyleSheet.create({
   iconLabelDisabled: {
     ...iconLabel,
     opacity: 0.5,
+  },
+  checklistAction: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: color.grayLight,
+    marginHorizontal: 24,
+    backgroundColor: color.white,
+    ...ss.container.shadow,
   },
 });
