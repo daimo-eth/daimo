@@ -43,7 +43,7 @@ export function AddKeySlotButton({
   const sendFn = async (opSender: DaimoOpSender) => {
     const key = await (async () => {
       if (!knownPubkey) {
-        console.log(`[KEY-ROTATION] creating ke ${getSlotType(slot)} ${slot}`);
+        console.log(`[KEY-ROTATION] creating key ${getSlotType(slot)} ${slot}`);
         assert(
           getSlotType(slot) === SlotType.PasskeyBackup ||
             getSlotType(slot) === SlotType.SecurityKeyBackup

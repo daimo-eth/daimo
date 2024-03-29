@@ -1,6 +1,14 @@
+import { SlotType, findUnusedSlot } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import { memo, useCallback, useMemo, useReducer, useState } from "react";
+import {
+  ReactNode,
+  memo,
+  useCallback,
+  useMemo,
+  useReducer,
+  useState,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -9,20 +17,34 @@ import {
   Pressable,
   ViewStyle,
 } from "react-native";
+import { english, generateMnemonic } from "viem/accounts";
 
+import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
+import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
+import { useWithAccount } from "../shared/withAccount";
 
 const ARRAY_SIX = Array(6).fill(0);
+
+function useSeedPhrase() {
+  // Generate mnemonic
+  const mnemonic = generateMnemonic(english);
+
+  const words = mnemonic.split(" ");
+
+  return { words };
+}
 
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
+  const { words } = useSeedPhrase();
 
   const handleBack = useCallback(() => {
     if (activeStep === 1) {
@@ -31,6 +53,13 @@ export function SeedPhraseScreen() {
       nav.goBack();
     }
   }, [activeStep, nav]);
+
+  const renderSeedPhraseBox = useCallback(
+    () => (
+      <SeedPhraseBox mode={activeStep === 0 ? "read" : "edit"} words={words} />
+    ),
+    [activeStep, words]
+  );
 
   return (
     <View style={styles.screen}>
@@ -45,9 +74,11 @@ export function SeedPhraseScreen() {
       />
       <Spacer h={24} />
       {activeStep === 0 ? (
-        <CopySeedPhrase setActiveStep={setActiveStep} />
+        <CopySeedPhrase setActiveStep={setActiveStep}>
+          {renderSeedPhraseBox()}
+        </CopySeedPhrase>
       ) : (
-        <VerifySeedPhrase />
+        <VerifySeedPhrase>{renderSeedPhraseBox()}</VerifySeedPhrase>
       )}
     </View>
   );
@@ -55,8 +86,10 @@ export function SeedPhraseScreen() {
 
 function CopySeedPhrase({
   setActiveStep,
+  children,
 }: {
   setActiveStep: (value: 0 | 1) => void;
+  children: ReactNode;
 }) {
   const [saved, toggleSaved] = useReducer((s) => !s, false);
 
@@ -67,7 +100,7 @@ function CopySeedPhrase({
         recover it even if you lose your device.
       </TextBody>
       <Spacer h={24} />
-      <SeedPhraseBox mode="read" />
+      {children}
       <Spacer h={24} />
       <CopyToClipboard />
       <Spacer h={24} />
@@ -153,21 +186,52 @@ function ConfirmPhraseSave({
   );
 }
 
-function VerifySeedPhrase() {
+function BaseVerifySeedPhrase({
+  account,
+  children,
+}: {
+  account: Account;
+  children: ReactNode;
+}) {
+  const seedPhraseSlot = useMemo(
+    () =>
+      findUnusedSlot(
+        account.accountKeys.map((k) => k.slot),
+        SlotType.SeedPhraseBackup
+      ),
+    []
+  );
+
   return (
     <View>
       <TextBody color={color.grayMid}>
         Type your seed phrase into the input box.
       </TextBody>
       <Spacer h={24} />
-      <SeedPhraseBox mode="edit" />
+      {children}
       <Spacer h={24} />
-      <ButtonBig type="primary" title="Finish Setup" />
+      <AddKeySlotButton
+        buttonTitle="Finish Setup"
+        account={account}
+        slot={seedPhraseSlot}
+      />
     </View>
   );
 }
 
-function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
+const VerifySeedPhrase = ({ children }: { children: ReactNode }) => {
+  const Inner = useWithAccount(BaseVerifySeedPhrase);
+
+  return <Inner>{children}</Inner>;
+};
+
+function SeedPhraseBox({
+  mode,
+  words,
+}: {
+  mode: "read" | "edit";
+  words: string[];
+}) {
   const [state, dispatch] = useSeedPhraseInput();
 
   const handleInputChange = (index: number, text: string) => {
@@ -180,12 +244,12 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
         key={`${mode}-${index}`}
         mode={mode}
         value={state[index]}
-        text=""
+        text={words[index - 1]}
         num={index}
         onChangeText={(text) => handleInputChange(index, text)}
       />
     ),
-    [mode, state]
+    [mode, state, words]
   );
 
   return (
