@@ -15,7 +15,6 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { Dimensions, Linking, StyleSheet, View } from "react-native";
@@ -74,7 +73,6 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   ) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useTabBarHeight();
-    const bsref = useRef<BottomSheet>(null);
 
     const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
     const [activeScreen, setActiveScreen] =
@@ -148,7 +146,6 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     return (
       <BottomSheet
-        ref={bsref}
         index={0}
         snapPoints={snapPoints}
         handleComponent={ScrollPellet}
