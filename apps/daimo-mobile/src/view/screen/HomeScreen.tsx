@@ -186,7 +186,8 @@ function HomeScreenInner({ account }: { account: Account }) {
           <Spacer h={Math.max(16, ins.top)} />
           {account.suggestedActions.length > 0 &&
             netState.status !== "offline" &&
-            isActionVisible && (
+            isActionVisible &&
+            allComplete && (
               <SuggestedActionBox
                 action={account.suggestedActions[0]}
                 onHideAction={onHideSuggestedAction}
@@ -208,8 +209,7 @@ function HomeScreenInner({ account }: { account: Account }) {
                 isActionVisible
               ) && <Spacer h={allComplete ? 64 : 28} />}
               {!allComplete && <CompleteOnboarding />}
-              <Spacer h={20} />
-              <Spacer h={12} />
+              <Spacer h={32} />
               <AmountAndButtons account={account} />
             </>
           )}

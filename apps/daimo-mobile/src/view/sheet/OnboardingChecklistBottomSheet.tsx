@@ -78,41 +78,44 @@ function ChecklistRow({
 }) {
   return (
     <TouchableHighlight onPress={onPress} {...touchHighlightUnderlay.subtle}>
-      <View>
-        <View style={styles.row}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View
-              style={[
-                styles.rowLeft,
-                { backgroundColor: done ? color.primary : color.gray3 },
-              ]}
+      <View style={styles.row}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <ChecklistRowBubble step={step} done={done} />
+          <Spacer w={16} />
+          <View>
+            <DaimoText color={done ? color.gray3 : color.midnight}>
+              {title}
+            </DaimoText>
+            <DaimoText
+              variant="metadata"
+              color={done ? color.gray3 : color.grayMid}
             >
-              {done ? (
-                <Octicons name="check" size={16} color={color.white} />
-              ) : (
-                <TextBody color={color.white}>{step}</TextBody>
-              )}
-            </View>
-            <Spacer w={16} />
-            <View>
-              <DaimoText color={done ? color.gray3 : color.midnight}>
-                {title}
-              </DaimoText>
-              <DaimoText
-                variant="metadata"
-                color={done ? color.gray3 : color.grayMid}
-              >
-                {description}
-              </DaimoText>
-            </View>
+              {description}
+            </DaimoText>
           </View>
-          {!done && (
-            <Octicons name="arrow-right" color={color.primary} size={24} />
-          )}
         </View>
-        <View style={styles.separator} />
+        {!done && (
+          <Octicons name="arrow-right" color={color.primary} size={24} />
+        )}
       </View>
     </TouchableHighlight>
+  );
+}
+
+function ChecklistRowBubble({ step, done }: { step: number; done: boolean }) {
+  return (
+    <View
+      style={[
+        styles.rowLeft,
+        { backgroundColor: done ? color.primary : color.gray3 },
+      ]}
+    >
+      {done ? (
+        <Octicons name="check" size={16} color={color.white} />
+      ) : (
+        <TextBody color={color.white}>{step}</TextBody>
+      )}
+    </View>
   );
 }
 
@@ -126,7 +129,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 24,
+    paddingVertical: 24,
+    marginHorizontal: 24,
+    borderBottomWidth: 0.5,
+    borderBottomColor: color.grayLight,
   },
   rowLeft: {
     justifyContent: "center",
