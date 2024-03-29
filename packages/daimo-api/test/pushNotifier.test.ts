@@ -76,6 +76,27 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].body, "Your 5.00 USDC request was fulfilled");
   });
 
+  await test("transfer with memo", async () => {
+    const input: Transfer[] = [
+      createTransfer({
+        from: addrBob,
+        to: addrAlice,
+        value: 1000000n,
+        memo: true,
+      }),
+    ];
+    const output = await pn.getPushMessagesFromTransfers(input);
+
+    assert.strictEqual(output.length, 2);
+    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(output[0].title, "Sent $1.00 to alice");
+    assert.strictEqual(output[0].body, "hello");
+
+    assert.deepStrictEqual(output[1].to, ["pushTokenAlice"]);
+    assert.strictEqual(output[1].title, "Received $1.00 from bob");
+    assert.strictEqual(output[1].body, "hello");
+  });
+
   const paymentLinkFromAlice: DaimoLinkNote = {
     type: "note",
     previewSender: "alice",
@@ -280,6 +301,7 @@ function createNotifierAliceBob() {
             log.transactionHash,
             log.logIndex - 1
           ) || undefined,
+        memo: log.transactionHash === "0x43" ? "hello" : undefined,
       };
       return op;
     },
@@ -304,13 +326,17 @@ function createTransfer(args: {
   from: Address;
   to: Address;
   value: bigint;
+  memo?: boolean;
   isRequestResponse?: boolean;
 }): Transfer {
+  // hardcoded txHash used in stub classes
+  const txHash = args.isRequestResponse ? "0x42" : args.memo ? "0x43" : "0x0";
+
   return {
     address: "0x0",
     blockHash: "0x0",
     blockNumber: 0n,
-    transactionHash: args.isRequestResponse ? "0x42" : "0x0",
+    transactionHash: txHash,
     transactionIndex: 0,
     logIndex: 0,
     from: args.from,

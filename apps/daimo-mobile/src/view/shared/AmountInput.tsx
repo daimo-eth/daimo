@@ -1,7 +1,6 @@
 import * as Haptics from "expo-haptics";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Linking,
   NativeSyntheticEvent,
   StyleSheet,
   TextInput,
@@ -19,7 +18,6 @@ import {
   TextCenter,
   TextLight,
 } from "./text";
-import { DispatcherContext } from "../../action/dispatch";
 import { useAccount } from "../../logic/accountManager";
 
 // Input components allows entry in range $0.01 to $99,999.99
