@@ -1,18 +1,28 @@
 import { now } from "@daimo/common";
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import { BottomSheetDefaultBackdropProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Keyboard, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import RNShake from "react-native-shake";
 
-import { Dispatcher, DispatcherContext } from "./action/dispatch";
+import { Action, Dispatcher, DispatcherContext } from "./action/dispatch";
 import { useAccount } from "./logic/accountManager";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -22,6 +32,7 @@ import ScrollPellet from "./view/shared/ScrollPellet";
 import { color } from "./view/shared/style";
 import { DebugBottomSheet } from "./view/sheet/DebugBottomSheet";
 import { FarcasterBottomSheet } from "./view/sheet/FarcasterBottomSheet";
+import { HelpBottomSheet } from "./view/sheet/HelpBottomSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -71,10 +82,17 @@ const bottomSheetSettings = {
     snapPoints: ["66%"],
     enableSwipeClose: false,
   },
+  helpModal: {
+    snapPoints: [],
+    enableSwipeClose: true,
+  },
 } as const;
 const defaultSnapPoints = ["10%"];
 
-type GlobalBottomSheet = null | keyof typeof bottomSheetSettings;
+type GlobalBottomSheet = null | {
+  action: keyof typeof bottomSheetSettings;
+  payload?: { title: string; content: ReactElement };
+};
 
 function AppBody() {
   // Global dispatcher
@@ -83,7 +101,8 @@ function AppBody() {
   // Global bottom sheet
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [bottomSheet, setBottomSheet] = useState<GlobalBottomSheet>(null);
-  const settings = bottomSheet && bottomSheetSettings[bottomSheet];
+
+  const settings = bottomSheet && bottomSheetSettings[bottomSheet?.action];
   const snapPoints = settings?.snapPoints || defaultSnapPoints;
   const enableSwipeClose = settings?.enableSwipeClose || false;
 
@@ -91,7 +110,7 @@ function AppBody() {
   useEffect(() => {
     const subscription = RNShake.addListener(() => {
       Keyboard.dismiss();
-      setBottomSheet("debug");
+      setBottomSheet({ action: "debug" });
     });
     return () => subscription.remove();
   }, []);
@@ -126,12 +145,19 @@ function AppBody() {
   );
 
   // Handle dispatch > open bottom sheet
-  const openFC = () => setBottomSheet("connectFarcaster");
-  const linkFC = () => setBottomSheet("linkFarcaster");
+  const openFC = () => setBottomSheet({ action: "connectFarcaster" });
+  const linkFC = () => setBottomSheet({ action: "linkFarcaster" });
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
+
+  const openHelp = (actionPayload: Action) => {
+    if (actionPayload.name === "helpModal") {
+      setBottomSheet({ action: "helpModal", payload: actionPayload });
+    }
+  };
+  useEffect(() => dispatcher.register("helpModal", openHelp), []);
 
   return (
     <DispatcherContext.Provider value={dispatcher}>
@@ -152,10 +178,22 @@ function AppBody() {
               onChange={onChangeIndex}
               onClose={onClose}
               enablePanDownToClose={enableSwipeClose}
+              enableDynamicSizing={bottomSheet?.action === "helpModal"}
             >
-              {bottomSheet === "debug" && <DebugBottomSheet />}
-              {(bottomSheet === "connectFarcaster" ||
-                bottomSheet === "linkFarcaster") && <FarcasterBottomSheet />}
+              {bottomSheet?.action === "debug" && <DebugBottomSheet />}
+              {(bottomSheet?.action === "connectFarcaster" ||
+                bottomSheet?.action === "linkFarcaster") && (
+                <FarcasterBottomSheet />
+              )}
+              {bottomSheet?.action === "helpModal" && bottomSheet?.payload && (
+                <BottomSheetView>
+                  <HelpBottomSheet
+                    content={bottomSheet.payload.content}
+                    title={bottomSheet.payload.title}
+                    onPress={() => bottomSheetRef.current?.close()}
+                  />
+                </BottomSheetView>
+              )}
             </BottomSheet>
           </View>
         </SafeAreaProvider>

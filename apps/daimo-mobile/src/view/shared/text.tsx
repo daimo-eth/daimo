@@ -63,6 +63,10 @@ export function TextBold(props: TextProps) {
   return <DaimoText {...props} style={ss.text.bold} />;
 }
 
+export function TextLink(props: TextProps) {
+  return <DaimoText {...props} style={ss.text.link} />;
+}
+
 export function TextCenter(props: TextProps) {
   return <DaimoText {...props} style={ss.text.center} />;
 }
