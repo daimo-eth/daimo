@@ -8,6 +8,7 @@
     "github.vscode-github-actions",
     "bradlc.vscode-tailwindcss",
     "austenc.tailwind-docs",
-    "ryanluker.vscode-coverage-gutters"
+    "ryanluker.vscode-coverage-gutters",
+    "ms-azuretools.vscode-docker"
   ]
 }
