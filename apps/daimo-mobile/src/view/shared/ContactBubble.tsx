@@ -55,6 +55,14 @@ export function ContactBubble({
           return <Octicons name="link" size={fontSize} color={color.primary} />;
         case AddrLabel.Coinbase:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
+        case AddrLabel.Relay:
+          return (
+            <Octicons
+              name="arrow-switch"
+              size={fontSize}
+              color={color.primary}
+            />
+          );
         default:
           return "?";
       }

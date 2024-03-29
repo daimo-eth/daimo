@@ -88,7 +88,13 @@ export function SearchHeader({
   return (
     <View style={styles.header}>
       <Animated.View key="back" style={backButton}>
-        <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
+        <TouchableOpacity
+          onPress={() => {
+            setPrefix(undefined);
+            Keyboard.dismiss();
+          }}
+          hitSlop={16}
+        >
           <Octicons name="arrow-left" size={30} color={color.midnight} />
         </TouchableOpacity>
       </Animated.View>
@@ -102,10 +108,10 @@ export function SearchHeader({
       <AnimatedSearchInput
         icon="search"
         placeholder="Search for user..."
-        value={prefix || ""}
+        value={prefix}
         onChange={setPrefix}
-        onFocus={() => setPrefix("")}
-        onBlur={() => setPrefix(undefined)}
+        onFocus={() => setPrefix(prefix || "")}
+        onClose={() => setPrefix(undefined)}
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
