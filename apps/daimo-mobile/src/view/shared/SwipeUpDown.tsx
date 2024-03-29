@@ -1,3 +1,4 @@
+import Octicons from "@expo/vector-icons/Octicons";
 import BottomSheet, {
   BottomSheetBackdrop,
   SCREEN_WIDTH,
@@ -14,17 +15,23 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, Linking, StyleSheet, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ButtonMed } from "./Button";
 import ScrollPellet from "./ScrollPellet";
-import { color } from "./style";
+import Spacer from "./Spacer";
+import { color, ss } from "./style";
+import { TextCenter, TextH3, TextLight, TextLink } from "./text";
 import { ParamListBottomSheet, useNav } from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
@@ -56,6 +63,12 @@ export type SwipeUpDownRef = {
   expand: () => void;
 };
 
+export enum ACTIVE_SCREEN {
+  HELP = "Help",
+  LIST = "List",
+  HISTORY = "History",
+}
+
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   (
     { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, disabled },
@@ -63,17 +76,22 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   ) => {
     const ins = useSafeAreaInsets();
     const tabBarHeight = useTabBarHeight();
+    const bsref = useRef<BottomSheet>(null);
 
     const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
-    const [snapPointCount, setSnapPointCount] = useState<2 | 3>(3);
+    const [activeScreen, setActiveScreen] = useState<ACTIVE_SCREEN>(
+      ACTIVE_SCREEN.LIST
+    );
 
     const snapPoints = useMemo(() => {
-      if (snapPointCount === 2) {
+      if (activeScreen === ACTIVE_SCREEN.HELP) {
+        return [400, maxHeightOffset - tabBarHeight];
+      } else if (activeScreen === ACTIVE_SCREEN.HISTORY) {
         return [500, maxHeightOffset - tabBarHeight];
       } else {
-        return [swipeHeight, 500, maxHeightOffset - tabBarHeight];
+        return [swipeHeight, maxHeightOffset - tabBarHeight];
       }
-    }, [maxHeightOffset, snapPointCount]);
+    }, [maxHeightOffset, activeScreen]);
 
     const [isMini, setIsMini] = useState(true);
 
@@ -92,21 +110,32 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
       onShowMini?.();
     };
 
+    const animatedPosition = useSharedValue(0);
+    const myWackyIndex = useDerivedValue(() => {
+      const diff = 500 - swipeHeight;
+      const offset =
+        screenDimensions.height -
+        (tabBarHeight + swipeHeight) -
+        animatedPosition.value;
+      return Math.min(1, offset / (diff - 100));
+    });
+
     const renderBackdrop = useCallback(
       (props: BottomSheetDefaultBackdropProps) => (
         <BottomSheetBackdrop
           {...props}
-          disappearsOnIndex={snapPointCount - 3}
-          appearsOnIndex={snapPointCount - 2}
+          animatedIndex={myWackyIndex}
+          disappearsOnIndex={0}
+          appearsOnIndex={1}
           pressBehavior="none" // Disable fully closing to swipeIndex -1
         />
       ),
-      [snapPointCount]
+      []
     );
 
     const handleSheetChanges = (snapIndex: number) => {
       console.log(`[SWIPE] snapIndex ${snapIndex}`);
-      if (snapPointCount === 3 && snapIndex < 1) {
+      if (snapIndex < 1) {
         showMini();
       } else {
         showFull();
@@ -122,12 +151,14 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     return (
       <BottomSheet
+        ref={bsref}
         index={0}
         snapPoints={snapPoints}
         handleComponent={ScrollPellet}
         onChange={handleSheetChanges}
         backdropComponent={renderBackdrop}
         animatedIndex={animatedIndex}
+        animatedPosition={animatedPosition}
         animateOnMount={false}
         enablePanDownToClose={false}
         enableHandlePanningGesture={!disabled}
@@ -136,7 +167,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetY={[-10, 10]}
         animationConfigs={ANIMATION_CONFIG}
       >
-        <SetBottomSheetSnapPointCount.Provider value={setSnapPointCount}>
+        <SetBottomSheetSnapPointCount.Provider value={setActiveScreen}>
           <SwipeContext.Provider
             value={{ isMini, itemMiniStyle, itemMini, itemFull }}
           >
@@ -148,6 +179,10 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
                 <BottomSheetStackNavigator.Screen
                   name="BottomSheetList"
                   component={TransactionList}
+                />
+                <BottomSheetStackNavigator.Screen
+                  name="BottomSheetHelp"
+                  component={HelpScreen}
                 />
                 <BottomSheetStackNavigator.Screen
                   name="BottomSheetHistoryOp"
@@ -193,6 +228,50 @@ function TransactionList() {
       </Animated.View>
       {itemFull}
     </>
+  );
+}
+
+function HelpScreen() {
+  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
+  const nav = useNav();
+  const openL2BeatLink = () => {
+    Linking.openURL("https://l2beat.com/scaling/projects/base");
+  };
+
+  const goBack = () => {
+    if (nav.canGoBack()) {
+      setBottomSheetSnapPointCount(ACTIVE_SCREEN.HISTORY);
+      nav.goBack();
+    }
+  };
+
+  return (
+    <View style={ss.container.padH16}>
+      <Spacer h={16} />
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <TouchableOpacity onPress={goBack}>
+          <Octicons name="arrow-left" size={30} color={color.midnight} />
+        </TouchableOpacity>
+        <TextCenter>
+          <TextH3>Why was I charged zero fees?</TextH3>
+        </TextCenter>
+        <Spacer w={30} />
+      </View>
+      <Spacer h={12} />
+      <TextLight>Daimo uses Base, an Ethereum rollup.</TextLight>
+      <Spacer h={24} />
+      <TextLight>
+        Daimo transactions are sponsored. This means that your transfers are
+        free.
+      </TextLight>
+      <Spacer h={24} />
+      <TouchableOpacity onPress={openL2BeatLink}>
+        <TextLink>Learn more on L2Beat.</TextLink>
+      </TouchableOpacity>
+      <Spacer h={32} />
+      <ButtonMed title="GOT IT" onPress={goBack} type="subtle" />
+      <Spacer h={24} />
+    </View>
   );
 }
 
