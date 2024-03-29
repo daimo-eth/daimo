@@ -65,17 +65,31 @@ let _accountManager: AccountManager | null = null;
  **/
 class AccountManager {
   private mmkv = new MMKV();
-  /** Listeners are called when account changes (common) or enclave key, create
-   *  account progress, or chain (rare). */
+  /**
+   * Listeners are called when account changes (common) or enclave key, create
+   * account progress, or chain (rare).
+   */
   private listeners = new Set<(a: Account | null) => void>();
-  /** The current logged-in Daimo account */
+  /**
+   * The current logged-in Daimo account
+   */
   private currentAccount: Account | null;
-  /** The current enclave key. There are error states where this key missing
-   *  locally or missing from the onchain account. */
+  /**
+   * The current enclave key. Null = still loading, state unknown.
+   * Otherwise, pubKeyHex can be null = no key in enclave.
+   * Finally, pubKeyHex present = key available in enclave.
+   *
+   * There are error states where this key missing locally or missing from the
+   * onchain account.
+   */
   private keyInfo: EnclaveKeyInfo | null = null;
-  /** Always matches home chain of account, if logged in. */
+  /**
+   * Always matches home chain of account, if logged in.
+   */
   private daimoChain: DaimoChain = daimoChainFromStr(process.env.DAIMO_CHAIN);
-  /** Present only when currentAccount is null & in process of being created. */
+  /**
+   * Present only when currentAccount is null & in process of being created.
+   */
   private createAccountHandle: ActHandle | null = null;
 
   constructor() {
@@ -297,6 +311,7 @@ class AccountManager {
     try {
       console.log(`[ACCOUNT] looking up invite payment link`, inviteLink);
       // TODO: remove this redundant extra roundtrip
+      // We already loaded noteStatus earlier.
       const noteStatus = (await rpcFunc.getLinkStatus.query({
         url: sanitizedUrl,
       })) as DaimoNoteStatus;
@@ -354,7 +369,7 @@ class AccountManager {
     await deleteEnclaveKey(enclaveKeyName);
 
     this.createAccountHandle = null;
-    this.keyInfo = null;
+    this.keyInfo.pubKeyHex = undefined;
     this.setCurrentAccount(null);
   }
 
