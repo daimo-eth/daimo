@@ -136,6 +136,7 @@ export type ParamListBottomSheet = {
     op: DisplayOpEvent;
     shouldAddInset: boolean;
   };
+  BottomSheetHelp: undefined;
 };
 
 type AllRoutes = NavigatorParamList &

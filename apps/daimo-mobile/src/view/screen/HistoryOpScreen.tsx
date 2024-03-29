@@ -13,6 +13,8 @@ import {
   timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
+import Octicons from "@expo/vector-icons/Octicons";
+import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
 import { Linking, StyleSheet, View } from "react-native";
@@ -36,6 +38,7 @@ import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { ACTIVE_SCREEN } from "../shared/SwipeUpDown";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
@@ -56,7 +59,9 @@ type Props = NativeStackScreenProps<
 // This allows the bottom sheet to be dismissed when the user exits the detail
 // screen and only display the half screen snap point when the user is on the
 // detail screen.
-export const SetBottomSheetSnapPointCount = createContext((snaps: 2 | 3) => {});
+export const SetBottomSheetSnapPointCount = createContext(
+  (snaps: ACTIVE_SCREEN) => {}
+);
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -86,7 +91,7 @@ function HistoryOpScreenInner({
 
   const leaveScreen = () => {
     if (nav.canGoBack()) {
-      setBottomSheetSnapPointCount(3);
+      setBottomSheetSnapPointCount(ACTIVE_SCREEN.LIST);
       nav.goBack();
     }
   };
@@ -194,6 +199,13 @@ function TransferBody({
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
   const chainName = chainConfig.chainL2.name.toUpperCase();
+  const nav = useNav();
+  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
+
+  const openHelpModal = () => {
+    setBottomSheetSnapPointCount(ACTIVE_SCREEN.HELP);
+    (nav as any).navigate("BottomSheetHelp");
+  };
 
   return (
     <View>
@@ -211,6 +223,14 @@ function TransferBody({
         <TextBodyCaps color={color.grayMid}>
           <FeeText amount={op.feeAmount} /> • {coinName} • {chainName}
         </TextBodyCaps>
+        <TouchableOpacity onPress={openHelpModal}>
+          <Octicons
+            size={16}
+            name="info"
+            color={color.grayDark}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </TextCenter>
       <Spacer h={32} />
       <OpRow op={op} otherAcc={other} />
@@ -288,5 +308,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  icon: {
+    marginLeft: 8,
   },
 });

@@ -34,7 +34,7 @@ export function ScreenHeader({
 }
 
 /** Shows a nav button if `show`, blank placeholder otherwise. */
-function ScreenHeadButton({
+export function ScreenHeadButton({
   icon,
   show,
   onPress,
