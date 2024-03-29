@@ -82,7 +82,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const snapPoints = useMemo(() => {
       if (activeScreen === ACTIVE_BOTTOM_SHEET_SCREEN.HELP) {
-        return [400, maxHeightOffset - tabBarHeight];
+        return [350, maxHeightOffset - tabBarHeight];
       } else if (activeScreen === ACTIVE_BOTTOM_SHEET_SCREEN.HISTORY) {
         return [500, maxHeightOffset - tabBarHeight];
       } else {
