@@ -77,7 +77,10 @@ export class DaimoOpSender {
   }
 
   /** Submits a user op to bundler. Returns PendingOpEvent. */
-  public async sendUserOp(opBuilder: DaimoOpBuilder): Promise<PendingOpEvent> {
+  public async sendUserOp(
+    opBuilder: DaimoOpBuilder,
+    memo?: string
+  ): Promise<PendingOpEvent> {
     const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
@@ -90,7 +93,7 @@ export class DaimoOpSender {
     console.log("[OP] sending userOp:", hexOp);
     zUserOpHex.parse(hexOp);
 
-    return this.opConfig.opSender(hexOp);
+    return this.opConfig.opSender(hexOp, memo);
   }
 
   private getTokenApproveCall(
@@ -159,7 +162,8 @@ export class DaimoOpSender {
   public async erc20transfer(
     to: Address,
     amount: `${number}`, // in the native unit of the token
-    opMetadata: DaimoOpMetadata
+    opMetadata: DaimoOpMetadata,
+    memo?: string
   ) {
     const { tokenAddress, tokenDecimals } = this.opConfig;
 
@@ -181,7 +185,7 @@ export class DaimoOpSender {
       opMetadata
     );
 
-    return this.sendUserOp(op);
+    return this.sendUserOp(op, memo);
   }
 
   /** Creates an ephemeral note V2 with given value. Returns userOpHash. */

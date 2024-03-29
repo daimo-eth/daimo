@@ -12,7 +12,11 @@ export interface SigResponse {
 export type SigningCallback = (msgHex: Hex) => Promise<SigResponse>;
 
 /**
- * Submits a signed userop, returning the userOpHash once the bundler accepts.
- * Throws an error otherwise. Does NOT wait for the op to be confirmed onchain.
+ * Submits a signed userop with optional offchain memo, returning the userOpHash
+ * once the bundler accepts. Throws an error otherwise. Does NOT wait for the op
+ * to be confirmed onchain.
  */
-export type OpSenderCallback = (op: UserOpHex) => Promise<PendingOpEvent>;
+export type OpSenderCallback = (
+  op: UserOpHex,
+  memo?: string
+) => Promise<PendingOpEvent>;

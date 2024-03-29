@@ -31,10 +31,12 @@ export function SendTransferButton({
   account,
   recipient,
   dollars,
+  memo,
 }: {
   account: Account;
   recipient: EAccountContact;
   dollars: number;
+  memo?: string;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
@@ -55,16 +57,22 @@ export function SendTransferButton({
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
       console.log(`[ACTION] sending $${dollarsStr} to ${recipient.addr}`);
-      return opSender.erc20transfer(recipient.addr, dollarsStr, {
-        nonce,
-        chainGasConstants: account.chainGasConstants,
-      });
+      return opSender.erc20transfer(
+        recipient.addr,
+        dollarsStr,
+        {
+          nonce,
+          chainGasConstants: account.chainGasConstants,
+        },
+        memo
+      );
     },
     pendingOp: {
       type: "transfer",
       from: account.address,
       to: recipient.addr,
       amount: Number(dollarsToAmount(dollarsStr)),
+      memo,
       status: OpStatus.pending,
       timestamp: 0,
     },
@@ -123,7 +131,7 @@ export function SendTransferButton({
         } else if (hasFee) {
           return `Total with fees ${totalStr}`;
         } else {
-          return null;
+          return "Payments are public";
         }
       }
       case "loading": {

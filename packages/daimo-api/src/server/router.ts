@@ -33,6 +33,7 @@ import {
   setTagRedirect,
   verifyTagUpdateToken,
 } from "../api/tagRedirect";
+import { validateMemo } from "../api/validateMemo";
 import { AccountFactory } from "../contract/accountFactory";
 import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -45,6 +46,7 @@ import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
 
 // Service authentication for, among other things, invite link creation
@@ -64,6 +66,7 @@ export function createRouter(
   keyReg: KeyRegistry,
   paymaster: Paymaster,
   inviteCodeTracker: InviteCodeTracker,
+  paymentMemoTracker: PaymentMemoTracker,
   inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
@@ -335,14 +338,16 @@ export function createRouter(
       }),
 
     sendUserOpV2: publicProcedure
-      .input(z.object({ op: zUserOpHex }))
+      .input(z.object({ op: zUserOpHex, memo: z.string().optional() }))
       .mutation(async (opts) => {
-        const { op } = opts.input;
+        const { op, memo } = opts.input;
         return sendUserOpV2(
           op,
+          memo,
           nameReg,
           bundlerClient,
           inviteCodeTracker,
+          paymentMemoTracker,
           telemetry,
           vc,
           opts.ctx
@@ -469,6 +474,13 @@ export function createRouter(
         await setTagRedirect(tag, url, updateToken, db);
 
         return url;
+      }),
+
+    validateMemo: publicProcedure
+      .input(z.object({ memo: z.string().optional() }))
+      .query(async (opts) => {
+        const { memo } = opts.input;
+        return validateMemo(memo);
       }),
   });
 }

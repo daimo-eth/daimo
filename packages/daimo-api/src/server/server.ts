@@ -24,6 +24,7 @@ import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
 
 async function main() {
@@ -49,6 +50,7 @@ async function main() {
     await db.loadNameBlacklist()
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
+  const paymentMemoTracker = new PaymentMemoTracker(db);
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);
@@ -56,7 +58,8 @@ async function main() {
     vc,
     opIndexer,
     noteIndexer,
-    requestIndexer
+    requestIndexer,
+    paymentMemoTracker
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
@@ -91,7 +94,11 @@ async function main() {
     await shovelWatcher.init();
     shovelWatcher.watch();
 
-    await Promise.all([paymaster.init(), inviteGraph.init()]);
+    await Promise.all([
+      paymaster.init(),
+      inviteGraph.init(),
+      paymentMemoTracker.init(),
+    ]);
 
     console.log(`[API] initializing push notifications...`);
     await Promise.all([notifier.init(), crontab.init()]);
@@ -117,6 +124,7 @@ async function main() {
     keyReg,
     paymaster,
     inviteCodeTracker,
+    paymentMemoTracker,
     inviteGraph,
     notifier,
     accountFactory,

@@ -111,12 +111,16 @@ function AppBody() {
   const snapPoints = settings?.snapPoints || defaultSnapPoints;
   const enableSwipeClose = settings?.enableSwipeClose || false;
 
+  const openBottomSheet = (sheet: GlobalBottomSheet) => {
+    Keyboard.dismiss();
+    setBottomSheet(sheet);
+  };
+
   // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
-    const subscription = RNShake.addListener(() => {
-      Keyboard.dismiss();
-      setBottomSheet({ action: "debug" });
-    });
+    const subscription = RNShake.addListener(() =>
+      openBottomSheet({ action: "debug" })
+    );
     return () => subscription.remove();
   }, []);
 
@@ -149,16 +153,19 @@ function AppBody() {
     []
   );
 
-  // Handle dispatch > open bottom sheet
-  const openFC = () => setBottomSheet({ action: "connectFarcaster" });
-  const linkFC = () => setBottomSheet({ action: "linkFarcaster" });
-  const openChecklist = () => setBottomSheet({ action: "onboardingChecklist" });
+  // Farcaster: Handle dispatch > open bottom sheet
+  const openFC = () => openBottomSheet({ action: "connectFarcaster" });
+  const linkFC = () => openBottomSheet({ action: "linkFarcaster" });
+  const openChecklist = () =>
+    openBottomSheet({ action: "onboardingChecklist" });
   useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
   useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
   useEffect(
     () => dispatcher.register("onboardingChecklist", openChecklist),
     []
   );
+
+  // Common: Handle dispatch > hide bottom sheet
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 
