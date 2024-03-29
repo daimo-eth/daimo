@@ -213,7 +213,7 @@ function SendChooseAmount({
 function PublicWarning() {
   return (
     <TextCenter>
-      <TextLight>All payment details are public</TextLight>
+      <TextLight>Payments are public</TextLight>
     </TextCenter>
   );
 }

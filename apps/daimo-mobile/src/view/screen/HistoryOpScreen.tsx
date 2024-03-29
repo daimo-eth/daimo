@@ -195,7 +195,7 @@ function TransferBody({
   const coinName = chainConfig.tokenSymbol.toUpperCase();
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
-  const subtitleElements = [feeText(op.feeAmount), coinName, chainName];
+  const subtitleElements = [getFeeText(op.feeAmount), coinName, chainName];
   if (op.type === "transfer" && op.memo) subtitleElements.unshift(op.memo);
   const subtitle = subtitleElements.join(" • ");
 
@@ -259,7 +259,7 @@ function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
   );
 }
 
-function feeText(amount?: number) {
+function getFeeText(amount?: number) {
   if (amount == null) {
     return "PENDING";
   }

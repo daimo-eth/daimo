@@ -131,7 +131,7 @@ export function SendTransferButton({
         } else if (hasFee) {
           return `Total with fees ${totalStr}`;
         } else {
-          return "All payment details are public";
+          return "Payments are public";
         }
       }
       case "loading": {
