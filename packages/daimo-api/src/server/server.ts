@@ -31,13 +31,13 @@ async function main() {
   const monitor = new Telemetry();
 
   console.log(`[API] starting...`);
-  const vc = getViemClientFromEnv();
+  const vc = getViemClientFromEnv(monitor);
 
   console.log(`[API] initializing db...`);
   const db = new DB();
   await db.createTables();
 
-  console.log(`[API] using wallet ${vc.walletClient.account.address}`);
+  console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
   const profileCache = new ProfileCache(vc, db);
 
@@ -126,7 +126,7 @@ async function main() {
     middleware: cors(),
     router,
     createContext,
-    onError: onTrpcError,
+    onError: onTrpcError(monitor),
   });
 
   const trpcPrefix = `/chain/${chainConfig.chainL2.id}/`;

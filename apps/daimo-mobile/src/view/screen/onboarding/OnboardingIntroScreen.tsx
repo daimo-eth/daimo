@@ -1,6 +1,7 @@
 import * as Clipboard from "expo-clipboard";
-import { ReactNode, useState } from "react";
+import { ReactNode, useContext, useState } from "react";
 import {
+  Linking,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
@@ -10,6 +11,7 @@ import {
 } from "react-native";
 
 import { usePollForAccount } from "./usePollForAccount";
+import { DispatcherContext } from "../../../action/dispatch";
 import {
   handleOnboardingDeepLink,
   useOnboardingNav,
@@ -20,7 +22,7 @@ import { InfoLink } from "../../shared/InfoLink";
 import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
-import { TextCenter, TextH1 } from "../../shared/text";
+import { TextCenter, TextH1, TextLight, TextLink } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
@@ -67,6 +69,59 @@ export function OnboardingIntroScreen() {
 
 function IntroPageSwiper() {
   const [pageIndex, setPageIndex] = useState(0);
+
+  const dispatcher = useContext(DispatcherContext);
+  const showHelpModal = () =>
+    dispatcher.dispatch({
+      name: "helpModal",
+      title: "What is a passkey backup?",
+      content: (
+        <>
+          <TextLight>
+            USDC is a regulated, digital currency that can always be redeemed
+            1:1 for US dollars.
+          </TextLight>
+          <Spacer h={24} />
+          <TextLight>
+            Learn more about USDC at the
+            <TextLink
+              onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
+            >
+              {" link here."}
+            </TextLink>
+          </TextLight>
+        </>
+      ),
+    });
+
+  const introPages = [
+    <IntroPage title="Welcome to Daimo">
+      <IntroTextParagraph>
+        Daimo is a global payments app that runs on Ethereum.
+      </IntroTextParagraph>
+    </IntroPage>,
+    <IntroPage title={tokenSymbol}>
+      <IntroTextParagraph>
+        You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
+        {tokenSymbol} is $1.
+      </IntroTextParagraph>
+      <View style={ss.container.marginHNeg16}>
+        <InfoLink onPress={showHelpModal} title="Learn how it works here" />
+      </View>
+    </IntroPage>,
+    <IntroPage title="Yours alone">
+      <IntroTextParagraph>
+        Daimo stores money via cryptographic secrets. There's no bank.
+      </IntroTextParagraph>
+    </IntroPage>,
+    <IntroPage title="On Ethereum">
+      <IntroTextParagraph>
+        Daimo runs on Base, an Ethereum rollup. This lets you send money
+        securely, anywhere in the world.
+      </IntroTextParagraph>
+    </IntroPage>,
+  ];
+
   const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
     const page = Math.round(contentOffset.x / layoutMeasurement.width);
@@ -96,36 +151,6 @@ function IntroPageSwiper() {
 }
 
 const tokenSymbol = "USDC";
-const introPages = [
-  <IntroPage title="Welcome to Daimo">
-    <IntroTextParagraph>
-      Daimo is a global payments app that runs on Ethereum.
-    </IntroTextParagraph>
-  </IntroPage>,
-  <IntroPage title={tokenSymbol}>
-    <IntroTextParagraph>
-      You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
-      {tokenSymbol} is $1.
-    </IntroTextParagraph>
-    <View style={ss.container.marginHNeg16}>
-      <InfoLink
-        url="https://www.circle.com/en/usdc"
-        title="Learn how it works here"
-      />
-    </View>
-  </IntroPage>,
-  <IntroPage title="Yours alone">
-    <IntroTextParagraph>
-      Daimo stores money via cryptographic secrets. There's no bank.
-    </IntroTextParagraph>
-  </IntroPage>,
-  <IntroPage title="On Ethereum">
-    <IntroTextParagraph>
-      Daimo runs on Base, an Ethereum rollup. This lets you send money securely,
-      anywhere in the world.
-    </IntroTextParagraph>
-  </IntroPage>,
-];
 
 function IntroPage({
   title,

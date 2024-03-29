@@ -110,7 +110,11 @@ export function createRouter(
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
       // See readyMiddleware
-      return { status: "healthy", uptimeS: now() - startTimeS };
+      return {
+        status: "healthy",
+        uptimeS: now() - startTimeS,
+        dbStatus: db.getStatus(),
+      };
     }),
 
     search: publicProcedure

@@ -1,9 +1,10 @@
-import { createContext } from "react";
+import { ReactElement, createContext } from "react";
 
-type Action =
+export type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
   | { name: "onboardingChecklist" }
+  | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];

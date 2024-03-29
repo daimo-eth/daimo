@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import {
-  Dimensions,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -173,9 +172,8 @@ function HomeScreenInner({ account }: { account: Account }) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{
-          height: screenDimensions.height,
-        }}
+        contentContainerStyle={styles.animatedScrollContent}
+        style={styles.scrollView}
         onScrollBeginDrag={onScrollBeginDrag}
         onScrollEndDrag={onScrollEndDrag}
         onScroll={scrollHandler}
@@ -346,8 +344,6 @@ function useInitNavLinks() {
   }, [accountMissing, nav]);
 }
 
-const screenDimensions = Dimensions.get("screen");
-
 const iconButton = {
   backgroundColor: color.primary,
   height: 64,
@@ -368,6 +364,12 @@ const styles = StyleSheet.create({
   amountAndButtons: {
     flexDirection: "column",
     alignItems: "center",
+  },
+  scrollView: {
+    height: "100%",
+  },
+  animatedScrollContent: {
+    height: "100%",
   },
   buttonRow: {
     flexDirection: "row",

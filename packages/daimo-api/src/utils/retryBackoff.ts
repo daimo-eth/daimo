@@ -1,14 +1,24 @@
+// Retries a function up to a maximum number of times, with exponential backoff.
+// Current settings, max total wait time is ~10 seconds.
 export async function retryBackoff<T>(
   name: string,
-  fn: () => Promise<T>,
-  retryCount: number = 10
+  fn: () => Promise<T>
 ): Promise<T> {
-  for (let i = 1; i <= retryCount; i++) {
+  const retryCount = 5;
+  for (let i = 1; ; i++) {
     try {
       return await fn();
     } catch (e) {
-      console.log(`[RETRY] ${name} retry ${i} after error: ${e}`);
-      await new Promise((r) => setTimeout(r, 250 * 2 ** i));
+      if (i <= retryCount) {
+        const sleepMs = Math.min(2000, 250 * 2 ** i);
+        console.log(
+          `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`
+        );
+        await new Promise((r) => setTimeout(r));
+      } else {
+        console.warn(`[RETRY] ${name} QUITTING after try ${i}, error: ${e}`);
+        break;
+      }
     }
   }
   // TODO: add performance logging

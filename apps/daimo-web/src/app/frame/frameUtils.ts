@@ -2,16 +2,17 @@
 // MIT License
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
-type FrameButtonMetadata = {
+export type FrameButtonMetadata = {
   label: string;
-  action?: "post" | "post_redirect";
+  action?: "post" | "post_redirect" | "link";
+  target?: string;
 };
 
 type FrameInputMetadata = {
   text: string;
 };
 
-type FrameMetadataType = {
+export type FrameMetadataType = {
   buttons?: [FrameButtonMetadata, ...FrameButtonMetadata[]];
   image: string;
   input?: FrameInputMetadata;
@@ -49,6 +50,9 @@ export const getFrameMetadata = function ({
       metadata[`fc:frame:button:${index + 1}`] = button.label;
       if (button.action) {
         metadata[`fc:frame:button:${index + 1}:action`] = button.action;
+      }
+      if (button.target) {
+        metadata[`fc:frame:button:${index + 1}:target`] = button.target;
       }
     });
   }
@@ -142,6 +146,11 @@ export function getFrameHtmlResponse({
           buttonHtml += `<meta property="fc:frame:button:${
             index + 1
           }:action" content="${button.action}" />`;
+        }
+        if (button.target) {
+          buttonHtml += `<meta property="fc:frame:button:${
+            index + 1
+          }:target" content="${button.target}" />`;
         }
         return buttonHtml;
       })

@@ -23,7 +23,7 @@ export function SectionHero() {
           transition={{ duration: 0.5, delay: 0.3, ease: "easeInOut" }}
           className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12"
         >
-          <HeroH1>Pay or receive USDC anywhere.</HeroH1>
+          <HeroH1>Your own bank, on Ethereum.</HeroH1>
           <HeroH2>
             Store money using secure hardware on your phone. Yours alone, like
             cash.

@@ -111,13 +111,13 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterV2Address} ETH`,
-      isMetaPaymasterEnabled ? 0.01 : 0.03,
-      isMetaPaymasterEnabled ? 0.005 : 0.01
+      isMetaPaymasterEnabled ? 0.01 : 0.15,
+      isMetaPaymasterEnabled ? 0.005 : 0.05
     );
   }
 
   async checkFaucetBalance() {
-    const faucetAddr = this.vc.walletClient.account.address;
+    const faucetAddr = this.vc.account.address;
     const balance = await this.vc.publicClient.getBalance({
       address: faucetAddr,
     });

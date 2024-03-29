@@ -65,12 +65,17 @@ export class CoinIndexer {
           t as "to",
           v as "value"
         from transfers
-        where block_num >= $1
-        and block_num <= $2;
+        where (
+          block_num >= $1
+          and block_num <= $2
+        )
+        and (
+          f in (select addr from "names")
+          or t in (select addr from "names")
+        );
       `,
           [from, to]
-        ),
-      5
+        )
     );
     const logs: Transfer[] = result.rows.map((row) => {
       return {

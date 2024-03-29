@@ -49,6 +49,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A": AddrLabel.Coinbase,
   "0x6dcBCe46a8B494c885D0e7b6817d2b519dF64467": AddrLabel.Coinbase,
   "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
+  // Known relay.link address on Base
+  "0xf70da97812CB96acDF810712Aa562db8dfA3dbEF": AddrLabel.Relay,
 };
 
 // Validate that current addresses are correctly recorded.

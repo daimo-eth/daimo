@@ -17,6 +17,7 @@ export const color = {
   grayMid: "#717171", // TODO gray4
   grayDark: "#444", // TODO gray5
   midnight: "#262626", // TODO "black" = 111111
+  link: "#027AFE",
 };
 
 const textBase: TextStyle = {
@@ -152,6 +153,11 @@ export const ss = {
       ...textBase,
       fontWeight: "600",
       fontSize: 12,
+    },
+    link: {
+      color: color.link,
+      fontSize: 16,
+      fontWeight: "600",
     },
   }),
 };

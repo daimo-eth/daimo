@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   LayoutChangeEvent,
@@ -28,29 +28,33 @@ const BACK_ICON = 30 + 8;
 
 const animationConfig = { duration: 150 };
 
-export function AnimatedSearchInput({
-  value,
-  onChange,
-  onFocus,
-  onBlur,
-  placeholder,
-  icon,
-  center,
-  autoFocus,
-  innerRef,
-  style,
-}: {
-  value: string;
+interface AnimatedSearchInputProps {
+  value?: string;
   onChange: (value: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
+  onClose?: () => void;
   placeholder?: string;
   icon?: OctName;
   center?: boolean;
   autoFocus?: boolean;
   innerRef?: RefObject<TextInput>;
   style?: ViewStyle;
-}) {
+}
+
+export const AnimatedSearchInput = ({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  onClose,
+  placeholder,
+  icon,
+  center,
+  autoFocus,
+  innerRef,
+  style,
+}: AnimatedSearchInputProps) => {
   const closedWidth = useSharedValue(INITIAL_WIDTH - ICONS);
   const openWidth = useSharedValue(INITIAL_WIDTH - BACK_ICON);
   const animatedWidth = useSharedValue(closedWidth.value);
@@ -59,29 +63,44 @@ export function AnimatedSearchInput({
   const openLeft = BACK_ICON / 2;
   const animatedLeft = useSharedValue(closedLeft);
 
-  const [isFocused, setIsFocused] = useState(false);
-  const onInputFocus = useCallback(() => {
+  const animateOpenInput = () => {
     animatedWidth.value = withTiming(openWidth.value, animationConfig);
     animatedLeft.value = withTiming(openLeft, animationConfig);
+  };
+
+  const animateCloseInput = () => {
+    animatedWidth.value = withTiming(closedWidth.value, animationConfig);
+    animatedLeft.value = withTiming(closedLeft, animationConfig);
+  };
+
+  const [isFocused, setIsFocused] = useState(false);
+  const onInputFocus = useCallback(() => {
+    animateOpenInput();
     setIsFocused(true);
     onFocus?.();
   }, []);
   const onInputBlur = useCallback(() => {
-    animatedWidth.value = withTiming(closedWidth.value, animationConfig);
-    animatedLeft.value = withTiming(closedLeft, animationConfig);
+    if (value?.length === 0) {
+      animateCloseInput();
+      onClose?.();
+    }
     setIsFocused(false);
     onBlur?.();
-  }, []);
+  }, [value]);
+
+  useEffect(() => {
+    if (value === undefined) animateCloseInput();
+  }, [value]);
 
   // Android text input incorrectly autocapitalizes. Fix via password input.
   const needsAndroidWorkaround = Platform.OS === "android";
 
   const otherRef = useRef<TextInput>(null);
   const wrapperRef = useAnimatedRef<View>();
-  const ref = innerRef || otherRef;
+  const inputRef = innerRef || otherRef;
   const focus = useCallback(() => {
-    ref.current?.focus();
-  }, [ref]);
+    inputRef.current?.focus();
+  }, []);
 
   const wrapperStyle = useAnimatedStyle(() => {
     return {
@@ -117,7 +136,7 @@ export function AnimatedSearchInput({
           ]}
         >
           <TextInput
-            ref={ref}
+            ref={inputRef}
             placeholder={placeholder}
             placeholderTextColor={color.grayMid}
             value={value}
@@ -136,6 +155,7 @@ export function AnimatedSearchInput({
             }
             onFocus={onInputFocus}
             onBlur={onInputBlur}
+            selectTextOnFocus
           />
           {icon && (
             <Animated.View style={styles.inputIcon}>
@@ -146,7 +166,7 @@ export function AnimatedSearchInput({
       </TouchableWithoutFeedback>
     </View>
   );
-}
+};
 
 const inputRow = {
   height: 48,

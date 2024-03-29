@@ -19,9 +19,14 @@ export async function GET(request: Request) {
   const dollars = searchParams.has("dollars")
     ? Number(searchParams.get("dollars")).toFixed(2)
     : undefined;
+  const paidBy = searchParams.get("paidBy") || undefined;
+  const cancelled = !!searchParams.get("cancelled");
 
-  return new ImageResponse(<LinkPreviewImg {...{ name, action, dollars }} />, {
-    width: 1200,
-    height: 630,
-  });
+  return new ImageResponse(
+    <LinkPreviewImg {...{ name, action, dollars, paidBy, cancelled }} />,
+    {
+      width: 1200,
+      height: 630,
+    }
+  );
 }
