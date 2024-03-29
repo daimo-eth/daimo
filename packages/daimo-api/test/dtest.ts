@@ -34,11 +34,8 @@ async function main() {
   const shovelWatcher = new Watcher();
   shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
 
-  const { startBlock, lastBlockNum } = {
-    startBlock: 5700000,
-    lastBlockNum: 7000000,
-  };
-  await shovelWatcher.indexRange(startBlock, lastBlockNum);
+  const lastBlockNum = 7000000;
+  await shovelWatcher.catchUpTo(lastBlockNum);
 
   let numKeyData: number = 0;
   keyReg["addrToKeyData"].forEach((addr, kd) => (numKeyData += kd.length));
