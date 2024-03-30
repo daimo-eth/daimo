@@ -1,10 +1,14 @@
+import { assertNotNull } from "@daimo/common";
+import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useMemo } from "react";
 import {
   Image,
   ImageSourcePropType,
+  Linking,
   StyleSheet,
   TextStyle,
   TouchableHighlight,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
@@ -18,7 +22,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import { color, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBtnCaps } from "./text";
+import { DaimoText, TextBtnCaps, TextLink } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
 
@@ -150,6 +154,37 @@ export function TextButton(props: TextButtonProps) {
       style={useStyle(buttonStyles.small, props)}
       icon={FaceIdPrimaryIcon}
     />
+  );
+}
+
+// Shows the (?) icon. Should open the help modal.
+export function HelpButton({ onPress }: { onPress: () => void }) {
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <Octicons size={16} name="info" color={color.grayDark} />
+    </TouchableOpacity>
+  );
+}
+
+// Shows a blue link. Should open an external page.
+export function LinkButton({
+  url,
+  onPress,
+  children,
+}: {
+  url?: string;
+  onPress?: () => void;
+  children: ReactNode;
+}) {
+  if (onPress == null) {
+    const linkUrl = assertNotNull(url, "Must specify url or onPress");
+    onPress = () => Linking.openURL(linkUrl);
+  }
+
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <TextLink>{children}</TextLink>
+    </TouchableOpacity>
   );
 }
 

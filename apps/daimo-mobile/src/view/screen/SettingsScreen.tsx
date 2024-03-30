@@ -5,7 +5,6 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import Octicons from "@expo/vector-icons/Octicons";
 import React, { ReactNode, useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -14,7 +13,6 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useExitToHome, useNav } from "../../common/nav";
@@ -26,7 +24,12 @@ import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
-import { BadgeButton, ButtonMed, TextButton } from "../shared/Button";
+import {
+  BadgeButton,
+  ButtonMed,
+  HelpButton,
+  TextButton,
+} from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
@@ -224,15 +227,15 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={24} />
-      <ButtonInfo
+      <HelpRow
         title="Create a Passkey Backup"
         message="Secured by your password manager"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
-        onPressInfo={openHelpModal}
+        onPressHelp={openHelpModal}
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
-      <ButtonInfo
+      <HelpRow
         title="Add a Device"
         message="Use your account on another device"
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
@@ -243,16 +246,16 @@ function DevicesSection({ account }: { account: Account }) {
   );
 }
 
-function ButtonInfo({
+function HelpRow({
   icon,
   title,
   message,
-  onPressInfo,
+  onPressHelp,
 }: {
   icon: ReactNode;
   title: string;
   message: string;
-  onPressInfo?(): void;
+  onPressHelp?(): void;
 }) {
   return (
     <View style={styles.buttonInfoContainer}>
@@ -260,16 +263,8 @@ function ButtonInfo({
       <View style={styles.messageContainer}>
         <View style={styles.textRow}>
           <TextBody color={color.midnight}>{title}</TextBody>
-          {onPressInfo && (
-            <TouchableOpacity onPress={onPressInfo}>
-              <Octicons
-                size={16}
-                name="info"
-                color={color.grayDark}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          )}
+          <Spacer w={8} />
+          {onPressHelp && <HelpButton onPress={onPressHelp} />}
         </View>
         <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
       </View>
@@ -478,9 +473,6 @@ const styles = StyleSheet.create({
   buttonInfoContainer: {
     flexDirection: "row",
     marginBottom: 20,
-  },
-  icon: {
-    marginLeft: 8,
   },
   textRow: {
     flexDirection: "row",

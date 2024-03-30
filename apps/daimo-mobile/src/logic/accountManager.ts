@@ -174,8 +174,12 @@ class AccountManager {
   }
 
   setDaimoChain(daimoChain: DaimoChain) {
+    if (this.daimoChain === daimoChain) return;
+
     // Always ensure consistency between chain and account
-    if (this.currentAccount) throw new Error("Can't chain on existing account");
+    if (this.currentAccount != null) {
+      throw new Error("Can't set chain on existing account");
+    }
     this.daimoChain = daimoChain;
     this.notifyListeners();
   }

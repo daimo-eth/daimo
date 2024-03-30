@@ -13,12 +13,15 @@ import {
   timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
+import Octicons from "@expo/vector-icons/Octicons";
+import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NoteDisplay } from "./link/NoteScreen";
+import { Dispatcher, DispatcherContext } from "../../action/dispatch";
 import {
   ParamListBottomSheet,
   navToAccountPage,
@@ -30,7 +33,7 @@ import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
-import { ButtonBig } from "../shared/Button";
+import { ButtonBig, LinkButton } from "../shared/Button";
 import { CenterSpinner } from "../shared/CenterSpinner";
 import { ContactBubble } from "../shared/ContactBubble";
 import { PendingDot } from "../shared/PendingDot";
@@ -195,9 +198,35 @@ function TransferBody({
   const coinName = chainConfig.tokenSymbol.toUpperCase();
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
-  const subtitleElements = [getFeeText(op.feeAmount), coinName, chainName];
-  if (op.type === "transfer" && op.memo) subtitleElements.unshift(op.memo);
-  const subtitle = subtitleElements.join(" • ");
+  // Help button to explain fees, chain, etc
+  const dispatcher = useContext(DispatcherContext);
+  const onShowHelp = useCallback(() => showHelpWhyNoFees(dispatcher), []);
+
+  // Generate subtitle = fees, chain, other details
+  const col = color.grayMid;
+  const subtitleElems = [
+    <React.Fragment key="fees">
+      <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
+    </React.Fragment>,
+    <React.Fragment key="coin">
+      <TextBody color={col}>{coinName}</TextBody>
+    </React.Fragment>,
+    <React.Fragment key="chain">
+      {chainName}
+      <Spacer w={8} />
+      <Octicons size={16} name="info" color={col} />
+    </React.Fragment>,
+  ];
+  if (op.type === "transfer" && op.memo) {
+    subtitleElems.unshift(
+      <React.Fragment key="memo">{op.memo}</React.Fragment>
+    );
+  }
+  for (let i = subtitleElems.length - 1; i > 0; i--) {
+    const spacerText = " • ";
+    const space = <React.Fragment key={i}>{spacerText}</React.Fragment>;
+    subtitleElems.splice(i, 0, space);
+  }
 
   return (
     <View>
@@ -211,14 +240,37 @@ function TransferBody({
         style={sentByUs ? { color: "black" } : { color: color.success }}
       />
       <Spacer h={8} />
-      <TextCenter>
-        <TextBodyCaps color={color.grayMid}>{subtitle}</TextBodyCaps>
-      </TextCenter>
+      <TouchableOpacity onPress={onShowHelp} hitSlop={8}>
+        <TextCenter>
+          <TextBodyCaps color={color.grayMid}>{subtitleElems}</TextBodyCaps>
+        </TextCenter>
+      </TouchableOpacity>
       <Spacer h={32} />
       <OpRow op={op} otherAcc={other} />
       <View style={styles.transferBorder} />
     </View>
   );
+}
+
+function showHelpWhyNoFees(dispatcher: Dispatcher) {
+  dispatcher.dispatch({
+    name: "helpModal",
+    title: "How transfers work",
+    content: (
+      <View style={ss.container.padH8}>
+        <TextPara>Daimo uses Base, an Ethereum rollup.</TextPara>
+        <Spacer h={24} />
+        <TextPara>
+          Rollups inherit the strong security guarantees of Ethereum, at much
+          lower cost.
+        </TextPara>
+        <Spacer h={24} />
+        <LinkButton url="https://l2beat.com/scaling/projects/base">
+          Learn more on L2Beat.
+        </LinkButton>
+      </View>
+    ),
+  });
 }
 
 function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
@@ -290,5 +342,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  subtitle: {
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  subtitleElem: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 24,
+    ...ss.container.debug,
   },
 });
