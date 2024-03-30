@@ -7,6 +7,7 @@ import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { DB } from "@daimo/api/src/db/db";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
+import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
 import { Telemetry } from "@daimo/api/src/server/telemetry";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
@@ -71,11 +72,13 @@ async function metrics() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(nameReg);
+  const paymentMemoTracker = new PaymentMemoTracker(db);
   const coinIndexer = new CoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
-    requestIndexer
+    requestIndexer,
+    paymentMemoTracker
   );
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
