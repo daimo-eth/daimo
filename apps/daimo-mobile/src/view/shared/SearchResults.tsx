@@ -261,14 +261,21 @@ function ExtraRows({
         }}
       />
       <ExtraRow
-        title="Scan QR code"
+        title={mode === "receive" ? "Show QR code" : "Scan QR code"}
         inside={<Octicons name="apps" size={14} color={color.primary} />}
-        onPress={() =>
-          nav.navigate("SendTab", {
-            screen: "QR",
-            params: { option: mode === "receive" ? "PAY ME" : "SCAN" },
-          })
-        }
+        onPress={() => {
+          if (mode === "receive") {
+            nav.navigate("HomeTab", {
+              screen: "QR",
+              params: { option: "PAY ME" },
+            });
+          } else {
+            nav.navigate("SendTab", {
+              screen: "QR",
+              params: { option: "SCAN" },
+            });
+          }
+        }}
       />
     </>
   );

@@ -50,7 +50,7 @@ export type ParamListHome = {
   HistoryOp: { op: DisplayOpEvent };
   Receive: { autoFocus: boolean; recipient?: EAccountContact | MsgContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
-  ReceiveSearch: { autoFocus: boolean };
+  ReceiveNav: undefined;
   Notifications: undefined;
 };
 
