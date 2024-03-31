@@ -119,7 +119,7 @@ export function SearchHeader({
       <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.circleButton}>
-            <Octicons name="bell" size={24} color={color.primary} />
+            <Icon name="bell-01" size={24} color={color.primary} />
             {account.requests.length > 0 ? <NotificationBadge /> : null}
           </View>
         </ButtonCircle>
