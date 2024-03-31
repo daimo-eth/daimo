@@ -36,6 +36,7 @@ import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
 import { HistoryListSwipe } from "../shared/HistoryList";
+import { Icon } from "../shared/Icon";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
 import { SearchHeader } from "../shared/SearchHeader";
@@ -307,7 +308,7 @@ function CompleteOnboarding() {
   return (
     <Pressable onPress={openChecklist} style={styles.checklistAction}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Octicons name="list-unordered" size={24} color={color.gray3} />
+        <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />
         <DaimoText variant="body">Finish setting up your account</DaimoText>
       </View>
