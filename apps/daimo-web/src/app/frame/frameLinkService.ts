@@ -11,6 +11,7 @@ import {
   UserViewerContext,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
+import { getAddress } from "viem";
 
 import { assert, FarcasterCacheClient } from "./farcasterClient";
 import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
@@ -106,6 +107,18 @@ export class FrameLinkService {
     }
     if ((auth.fidWhitelists || []).length > 0) {
       return [false, "Sorry, not on the list"];
+    }
+    for (const whitelist of auth.addressWhitelists || []) {
+      if (
+        user.verified_addresses.eth_addresses.some((addr) =>
+          whitelist.addrs.includes(getAddress(addr))
+        )
+      ) {
+        return [true, whitelist.greeting];
+      }
+    }
+    if ((auth.addressWhitelists || []).length > 0) {
+      return [false, "Not on list. Connect the right address?"];
     }
     return [true, frame.appearance.buttonSuccess];
   }
