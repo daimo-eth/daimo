@@ -17,6 +17,9 @@ contract AccountVerify1271Test is Test {
     DaimoAccountFactory public factory;
     DaimoAccount public account;
 
+    uint8[] initSlots;
+    bytes32[2][] initKeys;
+
     function setUp() public {
         entryPoint = new EntryPoint();
         verifier = new DaimoVerifier();
@@ -28,7 +31,13 @@ contract AccountVerify1271Test is Test {
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
         bytes32[2] memory key = [bytes32(pubKey[0]), bytes32(pubKey[1])];
-        account = factory.createAccount(0, key, new DaimoAccount.Call[](0), 0);
+
+        initSlots = new uint8[](1);
+        initSlots[0] = 0;
+        initKeys = new bytes32[2][](1);
+        initKeys[0] = key;
+
+        account = factory.createAccount(initSlots, initKeys, 1, new DaimoAccount.Call[](0), 0);
 
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
@@ -37,19 +46,24 @@ contract AccountVerify1271Test is Test {
 
     function testVerifySig() public {
         // Non-malleable signature. s is <= n/2
+        bytes memory actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: abi.encodePacked(
+                    bytes32(
+                        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                    )
+                ),
+                r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                s: 0x2adcff2bd06fc3cdd03e21e5e4c197913e96e75cad0bc6e9c9c14607af4f3a37
+            })
+        );
+        uint16 sigLength = uint16(actualSignature.length);
+
         bytes memory sig = abi.encodePacked(
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: 0x2adcff2bd06fc3cdd03e21e5e4c197913e96e75cad0bc6e9c9c14607af4f3a37
-                })
-            )
+            sigLength,
+            actualSignature
         );
 
         // check a valid signature
@@ -66,19 +80,24 @@ contract AccountVerify1271Test is Test {
     function testSignatureMalleability() public {
         // Malleable signature. s is > n/2
         uint256 s = 0xd52300d32f903c332fc1de1a1b3e686e7e501350fa0bd79b29f884bb4d13eb1a;
+        bytes memory actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: abi.encodePacked(
+                    bytes32(
+                        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                    )
+                ),
+                r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                s: s
+            })
+        );
+        uint16 sigLength = uint16(actualSignature.length);
+
         bytes memory sig = abi.encodePacked(
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: s
-                })
-            )
+            sigLength,
+            actualSignature
         );
 
         // Malleable signature is NOT accepted
@@ -89,19 +108,24 @@ contract AccountVerify1271Test is Test {
         // Fix the signature by changing s
         uint256 n = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551;
         s = n - s;
+        actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: abi.encodePacked(
+                    bytes32(
+                        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                    )
+                ),
+                r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                s: s
+            })
+        );
+        sigLength = uint16(actualSignature.length);
+
         sig = abi.encodePacked(
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: s
-                })
-            )
+            sigLength,
+            actualSignature
         );
         console.log("fixed sig s:", s);
 

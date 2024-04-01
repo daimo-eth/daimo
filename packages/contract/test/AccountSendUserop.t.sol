@@ -17,12 +17,19 @@ contract AccountSendUseropTest is Test {
     DaimoVerifier public verifier;
     DaimoAccountFactory public factory;
 
+    uint8[] slots;
+    bytes32[2][] initKeys;
+
     function setUp() public {
         entryPoint = new EntryPoint();
         verifier = new DaimoVerifier();
         factory = new DaimoAccountFactory(entryPoint, verifier);
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
+
+        slots = new uint8[](1);
+        slots[0] = 0;
+        initKeys = new bytes32[2][](1);
     }
 
     /***
@@ -52,6 +59,7 @@ contract AccountSendUseropTest is Test {
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
+        initKeys[0] = key;
 
         uint8 version = 1;
         uint48 validUntil = 0;
@@ -62,21 +70,26 @@ contract AccountSendUseropTest is Test {
             expectedUserOpHash
         );
 
+        bytes memory actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: challengeToSign,
+                r: 0x2dec57c39ecd3a573bb35e4d1bc16d3db6d5ee8ab024605aa910631d38bee5fe,
+                s: 0x6036d125bc72d63a29ff6ab63e25a5273acb9824b818e919d83ed0f883d6e941
+            })
+        );
+        uint16 sigLength = uint16(actualSignature.length);
+
         bytes memory ownerSig = abi.encodePacked(
             version,
             validUntil,
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: challengeToSign,
-                    r: 0x2dec57c39ecd3a573bb35e4d1bc16d3db6d5ee8ab024605aa910631d38bee5fe,
-                    s: 0x6036d125bc72d63a29ff6ab63e25a5273acb9824b818e919d83ed0f883d6e941
-                })
-            )
+            sigLength,
+            actualSignature
         );
 
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key, calls, 42);
+        DaimoAccount acc = factory.createAccount(slots, initKeys, 1, calls, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
@@ -127,7 +140,7 @@ contract AccountSendUseropTest is Test {
         // call validateUserOp directly
         DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.verifier());
         vm.store(address(a2), 0, 0); // set _initialized = 0
-        a2.initialize(0, key, calls);
+        a2.initialize(slots, initKeys, 1, calls);
         vm.prank(address(entryPoint));
         uint256 validationData = a2.validateUserOp(op, hash, 0);
         assertEq(validationData, 0);
@@ -140,6 +153,7 @@ contract AccountSendUseropTest is Test {
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
+        initKeys[0] = key;
 
         uint8 version = 1;
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
@@ -150,21 +164,26 @@ contract AccountSendUseropTest is Test {
             expectedUserOpHash
         );
 
+        bytes memory actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: challengeToSign,
+                r: 0x07d134db93e31d80eed6d093fcd15ad0fbd337ea2e5394f355307378345e8197,
+                s: 0x05d84f80617a5077c431a936762826f1145c5834b8e23dff6f3d8b41321a5815
+            })
+        );
+        uint16 sigLength = uint16(actualSignature.length);
+
         bytes memory ownerSig = abi.encodePacked(
             version,
             validUntil,
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: challengeToSign,
-                    r: 0x07d134db93e31d80eed6d093fcd15ad0fbd337ea2e5394f355307378345e8197,
-                    s: 0x05d84f80617a5077c431a936762826f1145c5834b8e23dff6f3d8b41321a5815
-                })
-            )
+            sigLength,
+            actualSignature
         );
 
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key, calls, 42);
+        DaimoAccount acc = factory.createAccount(slots, initKeys, 1, calls, 42);
         vm.deal(address(acc), 1 ether);
 
         // valid (but reverting) dummy userop

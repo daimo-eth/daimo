@@ -73,15 +73,20 @@ contract VerifierTest is Test {
             validUntil,
             expectedUserOpHash
         );
+        bytes memory actualSignature = abi.encode( // signature
+            Utils.rawSignatureToSignature({
+                challenge: dummyMessage,
+                r: 0x6f255bb79144ca77967dcf09c97072c0c399943f54310ef47c252fa8c4499ede,
+                s: 0x5ac0ae8ba13eee89509ab1c4151af3d9a8f58c24d3cd3c68579eb64549e7ef47
+            })
+        );
+        uint16 sigLength = uint16(actualSignature.length);
+
         dummySignature = abi.encodePacked(
+            uint8(1), // numSignatures
             uint8(0), // keySlot
-            abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: dummyMessage,
-                    r: 0x6f255bb79144ca77967dcf09c97072c0c399943f54310ef47c252fa8c4499ede,
-                    s: 0x5ac0ae8ba13eee89509ab1c4151af3d9a8f58c24d3cd3c68579eb64549e7ef47
-                })
-            )
+            sigLength,
+            actualSignature
         );
     }
 

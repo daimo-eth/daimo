@@ -15,10 +15,17 @@ contract AccountSigningKeysTest is Test {
     DaimoVerifier public verifier;
     DaimoAccountFactory public factory;
 
+    uint8[] initSlots;
+    bytes32[2][] initKeys;
+
     function setUp() public {
         entryPoint = new EntryPoint();
         verifier = new DaimoVerifier();
         factory = new DaimoAccountFactory(entryPoint, verifier);
+
+        initSlots = new uint8[](1);
+        initSlots[0] = 0;
+        initKeys = new bytes32[2][](1);
     }
 
     event SigningKeyAdded(
@@ -46,8 +53,10 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key1 = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
+        initKeys[0] = key1;
+
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
+        DaimoAccount acc = factory.createAccount(initSlots, initKeys, 1, calls, 42);
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
@@ -97,8 +106,10 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key1 = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
+        initKeys[0] = key1;
+
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
+        DaimoAccount acc = factory.createAccount(initSlots, initKeys, 1, calls, 42);
         assertTrue(acc.numActiveKeys() == uint8(1));
 
         // ensure initial key retrieves correctly
