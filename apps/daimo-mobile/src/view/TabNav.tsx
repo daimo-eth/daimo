@@ -328,7 +328,7 @@ function HomeTab() {
         <HomeStack.Screen name="Profile" component={ProfileScreen} />
         <HomeStack.Screen name="Note" component={NoteScreen} />
         <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
-        <HomeStack.Screen name="ReceiveSearch" component={ReceiveNavScreen} />
+        <HomeStack.Screen name="ReceiveNav" component={ReceiveNavScreen} />
         <HomeStack.Screen
           name="Notifications"
           component={NotificationsScreen}

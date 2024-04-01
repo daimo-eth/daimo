@@ -1,19 +1,14 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
-import { ParamListHome, useNav } from "../../../common/nav";
+import { useNav } from "../../../common/nav";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 
-type Props = NativeStackScreenProps<ParamListHome, "ReceiveSearch">;
-
-export function ReceiveNavScreen({ route }: Props) {
-  const { autoFocus } = route.params || {};
-
+export function ReceiveNavScreen() {
   // Search prefix
   // Clear prefix on back button
   const [prefix, setPrefix] = useState("");
@@ -25,9 +20,17 @@ export function ReceiveNavScreen({ route }: Props) {
     nav.goBack();
   }, [nav]);
 
-  // Focus search box if autoFocus is true
-  // Work around react-navigation autofocus bug
   const textInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    const unsubscribe = nav.addListener("transitionEnd", () => {
+      // Set focus on transitionEnd to avoid stack navigator looking
+      // glitchy on iOS.
+      textInputRef.current?.focus();
+    });
+
+    return unsubscribe;
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -36,7 +39,7 @@ export function ReceiveNavScreen({ route }: Props) {
         <Spacer h={8} />
         <View style={{ flex: 1, flexDirection: "column" }}>
           <SearchScreen
-            {...{ prefix, setPrefix, textInputRef, autoFocus }}
+            {...{ prefix, setPrefix, textInputRef }}
             mode="receive"
           />
         </View>

@@ -7,10 +7,16 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useEffect, useMemo } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { useSendAsync } from "../../action/useSendAsync";
-import { useNav } from "../../common/nav";
+import { navToAccountPage, useNav } from "../../common/nav";
 import { getAccountManager } from "../../logic/accountManager";
 import { EAccountContact } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
@@ -70,6 +76,8 @@ function NotificationsScreenInner({ account }: { account: Account }) {
 }
 
 function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
+  const nav = useNav();
+
   const { type, request, fulfiller } = props;
 
   const contact = useMemo(() => {
@@ -79,7 +87,9 @@ function NotificationRow(props: DaimoRequestV2Info & { account: Account }) {
 
   return (
     <View style={[ss.container.marginHNeg16, ss.container.padH16, styles.row]}>
-      <ContactBubble contact={contact} size={36} />
+      <TouchableOpacity onPress={() => navToAccountPage(contact, nav)}>
+        <ContactBubble contact={contact} size={36} />
+      </TouchableOpacity>
       <Spacer w={16} />
       <View style={{ flex: 1 }}>
         <NotificationMessage {...props} />
