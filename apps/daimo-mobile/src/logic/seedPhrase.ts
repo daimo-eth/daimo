@@ -10,8 +10,6 @@ export function encodeSeedPhrase() {
   const privateKey = p256.utils.randomPrivateKey();
   const publicKey = p256.getPublicKey(privateKey);
 
-  console.log("LENGTHO: ", privateKey.length);
-
   const privateKeyString = bytesToHex(privateKey);
   const mnemonic = privateKeyToMnemonic(privateKey);
 
@@ -41,9 +39,6 @@ function getChecksum(privateKey: Uint8Array) {
 }
 
 function privateKeyToMnemonic(privateKey: Uint8Array) {
-  console.log({ privateKey });
-  // We want this to be a multiple of 10
-
   // Pad with checksum
   const privateKeyWithChecksum = new Uint8Array([
     ...privateKey,
@@ -85,6 +80,8 @@ function mnemonicToPrivateKey(mnemonic: string) {
   }
 
   const retrieved = new Uint8Array();
+
+  assert(retrieved.length === 40, "Error retrieving privateKey + checksum");
 
   const privateKey = new Uint8Array(retrieved.slice(0, 32));
   const checksum = new Uint8Array(retrieved.slice(-8));
