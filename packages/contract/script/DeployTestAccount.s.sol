@@ -21,7 +21,13 @@ contract DeployScript is Script {
 
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
 
-        factory.createAccount(0, key, calls, 0);
+        uint8[] memory slots = new uint8[](1);
+        slots[0] = 0;
+
+        bytes32[2][] memory initKeys = new bytes32[2][](1);
+        initKeys[0] = key;
+
+        factory.createAccount(slots, initKeys, 1, calls, 0);
 
         vm.stopBroadcast();
     }
