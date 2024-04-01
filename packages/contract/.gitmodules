@@ -1,0 +1,19 @@
+[submodule "packages/contract/lib/forge-std"]
+	path = packages/contract/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+	branch = v1.4.0
+[submodule "packages/contract/lib/openzeppelin-contracts"]
+	path = packages/contract/lib/openzeppelin-contracts
+	url = https://github.com/Openzeppelin/openzeppelin-contracts
+	branch = v4.8.1
+[submodule "packages/contract/lib/account-abstraction"]
+	path = packages/contract/lib/account-abstraction
+	url = https://github.com/eth-infinitism/account-abstraction
+	branch = ver0.6.0
+[submodule "packages/contract/lib/openzeppelin-contracts-upgradeable"]
+	path = packages/contract/lib/openzeppelin-contracts-upgradeable
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+[submodule "packages/contract/lib/p256-verifier"]
+	path = packages/contract/lib/p256-verifier
+	url = https://github.com/daimo-eth/p256-verifier
+  
