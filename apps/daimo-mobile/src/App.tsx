@@ -153,7 +153,7 @@ function AppBody() {
     []
   );
 
-  // Farcaster: Handle dispatch > open bottom sheet
+  // Handle dispatch > open bottom sheet
   const openFC = () => openBottomSheet({ action: "connectFarcaster" });
   const linkFC = () => openBottomSheet({ action: "linkFarcaster" });
   const openChecklist = () =>
@@ -165,7 +165,7 @@ function AppBody() {
     []
   );
 
-  // Common: Handle dispatch > hide bottom sheet
+  //  Handle dispatch > hide bottom sheet
   const hideSheet = () => setBottomSheet(null);
   useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
 

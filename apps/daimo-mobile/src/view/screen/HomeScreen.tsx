@@ -331,7 +331,7 @@ function CompleteOnboarding() {
   );
 }
 
-let deepLinkInitialised = false;
+let handledInitialDeepLink = false;
 
 /** Handle incoming app deep links. */
 function useInitNavLinks() {
@@ -341,16 +341,17 @@ function useInitNavLinks() {
 
   // Handle deeplinks
   useEffect(() => {
-    if (accountMissing || deepLinkInitialised) return;
+    if (accountMissing) return;
 
     const currentTab = nav.getState().routes[0]?.name || "";
     console.log(`[NAV] ready to init? current tab: ${currentTab}`);
     if (!currentTab.startsWith("Home")) return;
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
-    deepLinkInitialised = true;
     getInitialDeepLink().then((url) => {
       if (url == null) return;
+      if (handledInitialDeepLink) return;
+      handledInitialDeepLink = true;
       handleDeepLink(nav, url);
     });
 
