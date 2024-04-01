@@ -192,12 +192,13 @@ function addInviteLinkStatus(
 }
 
 /** Warm the DaimoOpSender cache. */
-export function useWarmCache(
-  enclaveKeyName?: string,
-  address?: Address,
-  keySlot?: number,
-  chainId?: number
-) {
+export function useWarmSenderCache(account: Account) {
+  const { enclaveKeyName, address } = account;
+  const chainId = account.homeChainId;
+  const keySlot = account.accountKeys.find(
+    (keyData) => keyData.pubKey === account.enclavePubKey
+  )?.slot;
+
   useEffect(() => {
     if (!enclaveKeyName || !address || !keySlot || !chainId) return;
     loadOpSender({
