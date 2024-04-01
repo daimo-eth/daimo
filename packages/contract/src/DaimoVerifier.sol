@@ -57,7 +57,7 @@ contract DaimoVerifier is OwnableUpgradeable, UUPSUpgradeable {
         uint256 x,
         uint256 y
     ) public view returns (bool) {
-        Signature memory sig = abi.decode(signature[1:], (Signature));
+        Signature memory sig = abi.decode(signature, (Signature));
 
         return
             WebAuthn.verifySignature({

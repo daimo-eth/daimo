@@ -14,7 +14,7 @@ import "./DaimoVerifier.sol";
 /**
  * Daimo ERC-4337 contract account.
  *
- * Implements a 1-of-n multisig with P256 keys. Supports key rotation.
+ * Implements a m-of-n multisig with P256 keys. Supports key rotation.
  */
 contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     struct Call {
@@ -36,6 +36,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     /// Maximum number of signing keys
     uint8 public immutable maxKeys = 20;
 
+    /// Required number of keys for valid signature
+    uint8 public signatureThreshold;
+
     // Return value in case of signature failure, with no time-range.
     // Equivalent to _packValidationData(true,0,0)
     uint256 private constant _SIG_VALIDATION_FAILED = 1;
@@ -56,6 +59,9 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         uint8 keySlot,
         bytes32[2] key
     );
+
+    /// Emitted after setting a new threshold.
+    event ThresholdSet(uint8 threshold);
 
     modifier onlySelf() {
         require(msg.sender == address(this), "only self");
@@ -79,23 +85,37 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     }
 
     /// Initialize proxy contract storage.
-    /// @param slot the empty slot to use. Settable in case we need to use slot to signal key type.
-    /// @param key the initial signing key. All future calls and key rotations must be signed.
+    /// @param slots the empty slots to use. Settable in case we need to use slot to signal key type.
+    /// @param initKeys the initial signing keys. All future calls and key rotations must be signed.
+    /// @param threshold the signing threshold required for future requests
     /// @param initCalls contract calls to execute during initialization.
     function initialize(
-        uint8 slot,
-        bytes32[2] calldata key,
+        uint8[] calldata slots,
+        bytes32[2][] calldata initKeys,
+        uint8 threshold,
         Call[] calldata initCalls
     ) public virtual initializer {
-        keys[slot] = key;
-        numActiveKeys = 1;
+        uint256 slotsLength = slots.length;
+        require(slotsLength == initKeys.length, "slots length and init keys length must match");
+        require(threshold > 0, "threshold must be at least 1");
+        require(threshold <= slotsLength, "threshold cannot be greater than number of signing keys");
+
+        for (uint256 i = 0; i < slotsLength;) {
+            keys[slots[i]] = initKeys[i];
+            emit SigningKeyAdded(this, slots[i], initKeys[i]);
+            unchecked {
+                i++;
+            }
+        }
+
+        numActiveKeys = uint8(slotsLength);
+        signatureThreshold = threshold;
 
         for (uint256 i = 0; i < initCalls.length; i++) {
             _call(initCalls[i].dest, initCalls[i].value, initCalls[i].data);
         }
 
         emit AccountInitialized(entryPoint);
-        emit SigningKeyAdded(this, slot, key);
     }
 
     /// Execute multiple transactions atomically.
@@ -151,7 +171,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     // for client-side usage
     function signatureStruct(Signature memory sig) public {}
 
-    // Signature structure: [uint8 keySlot, uint8 signatureType, bytes signature]
+    // Signature structure: [uint8 numSignatures, uint8 keySlot, uint8 signatureType, bytes signature]
     // - keySlot: 0-255
     // - signature: abi.encode form of Signature struct
     /// Validate any Daimo account signature, whether for a userop or ERC1271 user sig.
@@ -161,14 +181,36 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     ) private view returns (bool) {
         if (signature.length < 1) return false;
 
-        // First bit identifies the keySlot
-        uint8 keySlot = uint8(signature[0]);
+        // First bit identifies the number of signatures
+        uint8 numSignatures = uint8(signature[0]);
+        if (numSignatures < signatureThreshold) return false;
 
-        // If the keySlot is empty, this is an invalid key
-        uint256 x = uint256(keys[keySlot][0]);
-        uint256 y = uint256(keys[keySlot][1]);
+        // TODO: this requires all signatures be valid. What
+        // if 2 sigs are required, 3 get passed in, and 1 is
+        // invalid. Should op succeed?
+        uint256 offset = 1;
+        for (uint256 i = 0; i < numSignatures;) {
+            uint8 keySlot = uint8(signature[offset]);
+            // TODO: is this even needed? can signatures vary in length?
+            // TODO: best way to do this?
+            uint16 signatureLength = (uint16(uint8(signature[offset + 1])) << 8) + uint16(uint8(signature[offset + 2]));
 
-        return verifier.verifySignature(message, signature, x, y);
+            // If the keySlot is empty, this is an invalid key
+            uint256 x = uint256(keys[keySlot][0]);
+            uint256 y = uint256(keys[keySlot][1]);
+
+            bool isValid = verifier.verifySignature(message, signature[offset + 3:offset + 3 + signatureLength], x, y);
+            if (!isValid) {
+                return false;
+            }
+
+            offset += 1 + 2 + signatureLength;
+            unchecked {
+                i++;
+            }
+        }
+
+        return true;
     }
 
     /// ERC1271: validate a user signature, verifying a valid Daimo account
@@ -196,10 +238,13 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         // UserOp signature structure:
         // - uint8 version
         //
-        // v1: 1+6+1+(unknown) bytes
+        // v1: 1+6+1+ (unknown) bytes
         // - uint48 validUntil
+        // - uint8 numSignatures
         // - uint8 keySlot
+        // - uint16 signatureLength
         // - bytes (type Signature) signature
+        // - ...
 
         // In all cases, we'll be checking a signature & returning a result.
         bytes memory messageToVerify;
@@ -214,7 +259,7 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
             if (sigLength < 7) return _SIG_VALIDATION_FAILED;
             uint48 validUntil = uint48(bytes6(userOp.signature[1:7]));
 
-            signature = userOp.signature[7:]; // keySlot, signature
+            signature = userOp.signature[7:]; // numSignatures, keySlot1, sigLength1, signature1, etc...
             messageToVerify = abi.encodePacked(version, validUntil, userOpHash);
             returnIfValid.validUntil = validUntil;
         } else {
@@ -295,9 +340,18 @@ contract DaimoAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     function removeSigningKey(uint8 slot) public onlySelf {
         require(keys[slot][0] != bytes32(0), "key does not exist");
         require(numActiveKeys > 1, "cannot remove only signing key");
+        require(signatureThreshold < numActiveKeys, "must decrease threshold before removing a signing key");
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];
         numActiveKeys--;
         emit SigningKeyRemoved(this, slot, currentKey);
+    }
+
+    /// Set the signing threshold
+    function setThreshold(uint8 threshold) public onlySelf {
+        require(threshold > 0, "threshold must be at least 1");
+        require(threshold <= numActiveKeys, "threshold cannot be greater than max keys");
+        signatureThreshold = threshold;
+        emit ThresholdSet(threshold);
     }
 }
