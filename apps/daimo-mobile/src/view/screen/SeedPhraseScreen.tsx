@@ -17,10 +17,10 @@ import {
   Pressable,
   ViewStyle,
 } from "react-native";
-import { english, generateMnemonic } from "viem/accounts";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
+import { encodeSeedPhrase } from "../../logic/seedPhrase";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -34,11 +34,12 @@ const ARRAY_SIX = Array(6).fill(0);
 
 function useSeedPhrase() {
   // Generate mnemonic
-  const mnemonic = generateMnemonic(english);
+
+  const { mnemonic, publicKey } = encodeSeedPhrase();
 
   const words = mnemonic.split(" ");
 
-  return { words };
+  return { words, publicKey };
 }
 
 export function SeedPhraseScreen() {
@@ -54,7 +55,7 @@ export function SeedPhraseScreen() {
     }
   }, [activeStep, nav]);
 
-  const renderSeedPhraseBox = useCallback(
+  const seedPhraseBox = useMemo(
     () => (
       <SeedPhraseBox mode={activeStep === 0 ? "read" : "edit"} words={words} />
     ),
@@ -75,10 +76,10 @@ export function SeedPhraseScreen() {
       <Spacer h={24} />
       {activeStep === 0 ? (
         <CopySeedPhrase setActiveStep={setActiveStep}>
-          {renderSeedPhraseBox()}
+          {seedPhraseBox}
         </CopySeedPhrase>
       ) : (
-        <VerifySeedPhrase>{renderSeedPhraseBox()}</VerifySeedPhrase>
+        <VerifySeedPhrase>{seedPhraseBox}</VerifySeedPhrase>
       )}
     </View>
   );
@@ -240,7 +241,7 @@ function SeedPhraseBox({
 
   const renderCell = useCallback(
     (index: number) => (
-      <SeedPhraseInput
+      <SeedPhraseCell
         key={`${mode}-${index}`}
         mode={mode}
         value={state[index]}
@@ -264,7 +265,7 @@ function SeedPhraseBox({
   );
 }
 
-function BaseSeedPhraseInput({
+function BaseSeedPhraseCell({
   mode,
   value,
   text,
@@ -279,7 +280,9 @@ function BaseSeedPhraseInput({
 }) {
   return (
     <View style={styles.boxInputWrapper}>
-      <TextBody color={color.grayLight}>{num}</TextBody>
+      <View style={{ width: 24 }}>
+        <TextBody color={color.gray3}>{num}</TextBody>
+      </View>
       <Spacer w={8} />
       {mode === "read" ? (
         <TextBody>{text}</TextBody>
@@ -296,7 +299,7 @@ function BaseSeedPhraseInput({
   );
 }
 
-const SeedPhraseInput = memo(BaseSeedPhraseInput);
+const SeedPhraseCell = memo(BaseSeedPhraseCell);
 
 type SeedPhraseInputState = Record<number, string>;
 type SeedPhraseInputAction = { key: number; value: string };
@@ -347,6 +350,7 @@ const styles = StyleSheet.create({
   },
   boxInputWrapper: {
     flexDirection: "row",
+    alignItems: "center",
     borderBottomColor: color.grayLight,
     borderBottomWidth: 2,
     marginBottom: 8,
