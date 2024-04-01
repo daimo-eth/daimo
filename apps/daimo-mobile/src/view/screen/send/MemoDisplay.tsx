@@ -60,7 +60,7 @@ export function SendMemoButton({
               memo || isFocused ? color.grayMid : color.midnight
             }
             onChangeText={setMemo}
-            style={{ ...ss.text.btnCaps }}
+            style={{ ...ss.text.btnCaps, minWidth: 140 }}
             numberOfLines={1}
             onFocus={onFocus}
             onBlur={onBlur}
