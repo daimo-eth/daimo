@@ -152,7 +152,11 @@ export class ViemClient {
   }
 
   private async runWithOverrideParams<
-    Args extends { nonce?: number; gas?: bigint },
+    Args extends {
+      nonce?: number;
+      gas?: bigint;
+      chain?: Chain | null;
+    },
     Ret
   >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
     const startMs = performance.now();
@@ -175,6 +179,7 @@ export class ViemClient {
 
       args.nonce = this.nextNonce; // Override nonce
       args.gas = 2_000_000n; // Saves estimateGas roundtrip
+      args.chain = null; // Saves eth_chainId roundtrip, see https://github.com/wevm/viem/pull/474#discussion_r1190476819
 
       const ret = await fn(args);
 
