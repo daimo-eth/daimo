@@ -10,9 +10,9 @@ contract DeployVerifierScript is Script {
         vm.startBroadcast();
 
         // Use CREATE2
-        address verifier = address(new DaimoVerifier{salt: 0}());
+        address verifier = address(new DaimoVerifier{salt: keccak256("splits.damioverifier.v0")}());
         address initOwner = 0x8603fb56E2B6DeaF02F3e247110CEc6f4Cbb7C8F; // Daimo Ledger
-        new DaimoVerifierProxy{salt: 0}(
+        new DaimoVerifierProxy{salt: "splits.damioverifier.v0"}(
             address(verifier), // implementation
             abi.encodeWithSelector(DaimoVerifier.init.selector, initOwner)
         );

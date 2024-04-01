@@ -15,7 +15,7 @@ contract DeployScript is Script {
             0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
         );
 
-        DaimoAccountFactory factory = new DaimoAccountFactory{salt: 0}(
+        DaimoAccountFactory factory = new DaimoAccountFactory{salt: "splits.damioverifier.v0"}(
             entryPoint,
             verifierProxy
         );
