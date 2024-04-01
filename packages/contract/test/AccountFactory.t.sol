@@ -49,4 +49,26 @@ contract AccountFactoryTest is Test {
         address counterfactual = factory.getAddress(slots, initKeys, 1, calls, 42);
         assertEq(address(acc), counterfactual);
     }
+
+    function testMultisigDeploy() public {
+        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
+
+        uint8[] memory multisigSlots = new uint8[](3);
+        multisigSlots[0] = 0;
+        multisigSlots[1] = 1;
+        multisigSlots[2] = 2;
+
+        bytes32[2][] memory multisigKeys = new bytes32[2][](3);
+        bytes32[2] memory multisigKey0 = [bytes32(0), bytes32(0)];
+        bytes32[2] memory multisigKey1 = [bytes32(0), bytes32(0)];
+        bytes32[2] memory multisigKey2 = [bytes32(0), bytes32(0)];
+        multisigKeys[0] = multisigKey0;
+        multisigKeys[1] = multisigKey1;
+        multisigKeys[2] = multisigKey2;
+
+        DaimoAccount acc = factory.createAccount{value: 0}(multisigSlots, multisigKeys, 2, calls, 42);
+        console.log("new account address:", address(acc));
+        assertEq(acc.numActiveKeys(), uint8(3));
+        assertEq(acc.signatureThreshold(), uint8(2));
+    }
 }
