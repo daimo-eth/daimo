@@ -5,6 +5,8 @@ export type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
   | { name: "onboardingChecklist" }
+  | { name: "depositAddress" }
+  | { name: "withdrawInstructions" }
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
   | { name: "hideBottomSheet" };

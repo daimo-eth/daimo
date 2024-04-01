@@ -105,6 +105,7 @@ function FarcasterQRButton({ url }: { url: string }) {
         title="OPEN IN WARPCAST"
         onPress={openInWarpcast}
       />
+      <Spacer h={16} />
     </>
   );
 }

@@ -42,6 +42,12 @@ const bottomSheetSettings = {
   ownRequest: {
     enableSwipeClose: true,
   },
+  withdrawInstructions: {
+    enableSwipeClose: true,
+  },
+  depositAddress: {
+    enableSwipeClose: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -52,6 +58,8 @@ type DisplayedSheet =
         | "debug"
         | "connectFarcaster"
         | "linkFarcaster"
+        | "withdrawInstructions"
+        | "depositAddress"
         | "onboardingChecklist";
     }
   | {
@@ -129,6 +137,14 @@ export function GlobalBottomSheet() {
         openBottomSheet({ action: "onboardingChecklist" });
         break;
       }
+      case "withdrawInstructions": {
+        openBottomSheet({ action: "withdrawInstructions" });
+        break;
+      }
+      case "depositAddress": {
+        openBottomSheet({ action: "depositAddress" });
+        break;
+      }
       case "ownRequest": {
         const { reqStatus } = action;
         openBottomSheet({ action: "ownRequest", payload: { reqStatus } });
@@ -153,6 +169,8 @@ export function GlobalBottomSheet() {
     dispatcher.register("connectFarcaster", handleDispatch);
     dispatcher.register("linkFarcaster", handleDispatch);
     dispatcher.register("onboardingChecklist", handleDispatch);
+    dispatcher.register("withdrawInstructions", handleDispatch);
+    dispatcher.register("depositAddress", handleDispatch);
     dispatcher.register("ownRequest", handleDispatch);
     dispatcher.register("helpModal", handleDispatch);
     dispatcher.register("hideBottomSheet", handleDispatch);

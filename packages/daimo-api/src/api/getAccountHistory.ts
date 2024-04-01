@@ -11,6 +11,7 @@ import {
   RecommendedExchange,
   appStoreLinks,
   assert,
+  daimoDomainAddress,
   formatDaimoLink,
   hasAccountName,
 } from "@daimo/common";
@@ -285,16 +286,19 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
       title: "Transfer from another chain",
       cta: "Bridge USDC from any wallet",
       url: getBridgeURL(account),
+      logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
     },
     {
       title: "Send from Coinbase & other options",
       cta: "Deposit from Coinbase",
       url: cbUrl,
+      logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
     },
     {
       title: "Cards, banks, & international options",
       cta: "Buy USDC",
       url: getRampNetworkURL(account),
+      logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
     },
   ];
 }

@@ -1,0 +1,120 @@
+import { assert } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
+import Octicons from "@expo/vector-icons/Octicons";
+import * as Clipboard from "expo-clipboard";
+import React, { useCallback, useState } from "react";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
+
+import { env } from "../../logic/env";
+import { Account } from "../../model/account";
+import { CheckLabel } from "../shared/Check";
+import Spacer from "../shared/Spacer";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import {
+  DaimoText,
+  TextBold,
+  TextCenter,
+  TextH3,
+  TextLight,
+  TextPara,
+} from "../shared/text";
+import { useWithAccount } from "../shared/withAccount";
+
+export function DepositAddressBottomSheet() {
+  const Inner = useWithAccount(DepositAddressBottomSheetInner);
+  return <Inner />;
+}
+
+function DepositAddressBottomSheetInner({ account }: { account: Account }) {
+  const { tokenSymbol, chainL2 } = env(
+    daimoChainFromId(account.homeChainId)
+  ).chainConfig;
+
+  const [check1, setCheck1] = useState(false);
+  const [check2, setCheck2] = useState(false);
+
+  assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
+
+  return (
+    <View style={{ ...ss.container.padH16, height: 472 }}>
+      <TextCenter>
+        <TextH3>Deposit to address</TextH3>
+      </TextCenter>
+      <Spacer h={16} />
+      <TextPara color={color.grayDark}>
+        Send {tokenSymbol} to your address below. Confirm that you're sending:
+      </TextPara>
+      <Spacer h={12} />
+      <CheckLabel value={check1} setValue={setCheck1}>
+        <TextBold>{tokenSymbol}</TextBold>, not USDbC or other assets
+      </CheckLabel>
+      <Spacer h={16} />
+      <CheckLabel value={check2} setValue={setCheck2}>
+        On <TextBold>{chainL2.name}</TextBold>, not any other chain
+      </CheckLabel>
+      <Spacer h={16} />
+      <AddressCopier addr={account.address} disabled={!check1 || !check2} />
+    </View>
+  );
+}
+
+function AddressCopier({
+  addr,
+  disabled,
+}: {
+  addr: string;
+  disabled?: boolean;
+}) {
+  const [justCopied, setJustCopied] = useState(false);
+  const copy = useCallback(async () => {
+    await Clipboard.setStringAsync(addr);
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 1000);
+  }, [addr]);
+
+  const col = disabled ? color.gray3 : color.midnight;
+
+  return (
+    <View style={styles.address}>
+      <TouchableHighlight
+        style={styles.addressButton}
+        onPress={disabled ? undefined : copy}
+        {...touchHighlightUnderlay.subtle}
+      >
+        <View style={styles.addressView}>
+          <DaimoText
+            style={[styles.addressMono, { color: col }]}
+            numberOfLines={1}
+          >
+            {addr}
+          </DaimoText>
+          <Octicons name="copy" size={16} color={col} />
+        </View>
+      </TouchableHighlight>
+      <TextLight>{justCopied ? "Copied" : " "}</TextLight>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  address: {
+    flexDirection: "column",
+    gap: 16,
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  addressButton: {
+    borderRadius: 8,
+    backgroundColor: color.ivoryDark,
+    padding: 16,
+  },
+  addressView: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  addressMono: {
+    ...ss.text.mono,
+    flexShrink: 1,
+  },
+});
