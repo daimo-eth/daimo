@@ -7,7 +7,6 @@ import {
   memo,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useReducer,
   useState,
@@ -19,6 +18,7 @@ import {
   TouchableHighlight,
   Pressable,
   ViewStyle,
+  ScrollView,
 } from "react-native";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
@@ -33,7 +33,7 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
-const ARRAY_SIX = Array(6).fill(0);
+const ARRAY_TWELVE = Array(12).fill(0);
 
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
@@ -78,14 +78,13 @@ function CopySeedPhrase({
   const [saved, toggleSaved] = useReducer((s) => !s, false);
 
   return (
-    <View>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <TextBody color={color.grayMid}>
         Your account will be backed up to the seed phrase, allowing you to
         recover it even if you lose your device.
       </TextBody>
       <Spacer h={24} />
       <SeedPhraseBox mode="read" />
-      {/* {children} */}
       <Spacer h={24} />
       <CopyToClipboard />
       <Spacer h={24} />
@@ -97,18 +96,19 @@ function CopySeedPhrase({
         disabled={!saved}
         onPress={() => setActiveStep(1)}
       />
-    </View>
+    </ScrollView>
   );
 }
 
 function CopyToClipboard() {
+  const { mnemonic } = useSeedPhraseContext();
   const [justCopied, setJustCopied] = useState(false);
 
   const copy = useCallback(async () => {
-    await Clipboard.setStringAsync("");
+    await Clipboard.setStringAsync(mnemonic);
     setJustCopied(true);
     setTimeout(() => setJustCopied(false), 1000);
-  }, []);
+  }, [mnemonic]);
 
   return (
     <View style={{ alignItems: "center" }}>
@@ -184,7 +184,7 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
   );
 
   return (
-    <View>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <TextBody color={color.grayMid}>
         Type your seed phrase into the input box.
       </TextBody>
@@ -197,7 +197,7 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
         slot={seedPhraseSlot}
         disabled={!isValid}
       />
-    </View>
+    </ScrollView>
   );
 }
 
@@ -231,10 +231,10 @@ function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
   return (
     <View style={styles.box}>
       <View style={styles.boxColumn}>
-        {ARRAY_SIX.map((_, index) => renderCell(index + 1))}
+        {ARRAY_TWELVE.map((_, index) => renderCell(index + 1))}
       </View>
       <View style={styles.boxColumn}>
-        {ARRAY_SIX.map((_, index) => renderCell(index + 7))}
+        {ARRAY_TWELVE.map((_, index) => renderCell(index + 13))}
       </View>
     </View>
   );
@@ -283,29 +283,25 @@ type SeedPhraseInputReducer = (
   action: SeedPhraseInputAction
 ) => SeedPhraseInputState;
 
+function getInitialState() {
+  const map: Record<number, string> = {};
+
+  for (let i = 0; i < 24; i++) map[i + 1] = "";
+
+  return map;
+}
+
 function useSeedPhraseInput() {
   return useReducer<SeedPhraseInputReducer>(
     (state, next) => ({ ...state, [next.key]: next.value }),
-    {
-      1: "",
-      2: "",
-      3: "",
-      4: "",
-      5: "",
-      6: "",
-      7: "",
-      8: "",
-      9: "",
-      10: "",
-      11: "",
-      12: "",
-    }
+    getInitialState()
   );
 }
 
 type SeedPhraseContextValue = {
   state: SeedPhraseInputState;
   dispatch: React.Dispatch<SeedPhraseInputAction>;
+  mnemonic: string;
   words: string[];
   publicKey: string;
   isValid: boolean;
@@ -323,16 +319,11 @@ function SeedPhraseProvider({ children }: { children: ReactNode }) {
     return Object.values(state).join(" ");
   }, [state]);
 
-  useEffect(() => {
-    console.log("mnemonic: ", mnemonic);
-    console.log("enteredPhrase: ", enteredPhrase);
-  }, [mnemonic, enteredPhrase]);
-
   const isValid = enteredPhrase === mnemonic;
 
   return (
     <SeedPhraseContext.Provider
-      value={{ state, dispatch, words, publicKey, isValid }}
+      value={{ state, dispatch, mnemonic, words, publicKey, isValid }}
     >
       {children}
     </SeedPhraseContext.Provider>
