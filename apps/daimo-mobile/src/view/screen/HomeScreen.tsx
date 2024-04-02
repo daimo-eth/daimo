@@ -1,3 +1,4 @@
+import { SuggestedAction } from "@daimo/api";
 import { OpStatus } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
@@ -25,7 +26,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { useWarmCache } from "../../action/useSendAsync";
+import { useWarmSenderCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
@@ -49,15 +50,16 @@ import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
 export default function HomeScreen() {
-  const Inner = useWithAccount(HomeScreenInner);
+  const Inner = useWithAccount(HomeScreenPullToRefreshWrap);
   return <Inner />;
 }
 
-function HomeScreenInner({ account }: { account: Account }) {
+// The whole screen (HomeScreenInner) can be pulled down to refresh.
+function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
+  // Pull-to-refresh state
   const scrollRef = useRef<Animated.ScrollView>(null);
   const isScrollDragged = useRef<boolean>(false);
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-  const ins = useSafeAreaInsets();
   const translationY = useSharedValue(0);
 
   // Hack to prevent pull-to-refresh from moving up instead of down.
@@ -67,24 +69,8 @@ function HomeScreenInner({ account }: { account: Account }) {
     `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
 
-  // Show suggested action when available.
-  const [isActionVisible, setIsActionVisible] = useState(false);
-  useEffect(() => {
-    const showActionTimeout = setTimeout(() => setIsActionVisible(true), 1500);
-    return () => clearTimeout(showActionTimeout);
-  }, []);
-  const onHideSuggestedAction = () => setIsActionVisible(false);
-
-  // Initialize DaimoOpSender immediately for speed.
-  const keySlot = account.accountKeys.find(
-    (keyData) => keyData.pubKey === account.enclavePubKey
-  )?.slot;
-  useWarmCache(
-    account.enclaveKeyName,
-    account.address,
-    keySlot,
-    account.homeChainId
-  );
+  // For speed, preload DaimoOpSender
+  useWarmSenderCache(account);
 
   // Show search results when search is focused.
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();
@@ -152,13 +138,6 @@ function HomeScreenInner({ account }: { account: Account }) {
   // Handle incoming applinks
   useInitNavLinks();
 
-  // No suggested actions when offline.
-  const netState = useNetworkState();
-
-  const contactsAccess = useContactsPermission();
-
-  const { allComplete } = useOnboardingChecklist(account);
-
   return (
     <View>
       <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
@@ -181,42 +160,78 @@ function HomeScreenInner({ account }: { account: Account }) {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View style={preventOverscrollStyle}>
-          <Spacer h={Math.max(16, ins.top)} />
-          {account.suggestedActions.length > 0 &&
-            netState.status !== "offline" &&
-            isActionVisible &&
-            allComplete && (
-              <SuggestedActionBox
-                action={account.suggestedActions[0]}
-                onHideAction={onHideSuggestedAction}
-              />
-            )}
-          <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
-          {searchPrefix != null && (
-            <SearchResults
-              contactsAccess={contactsAccess}
-              prefix={searchPrefix}
-              mode="account"
-            />
-          )}
-          {searchPrefix == null && account != null && (
-            <>
-              {!(
-                account.suggestedActions.length > 0 &&
-                netState.status !== "offline" &&
-                isActionVisible &&
-                allComplete
-              ) && <Spacer h={allComplete ? 64 : 28} />}
-              {!allComplete && <CompleteOnboarding />}
-              <Spacer h={32} />
-              <AmountAndButtons account={account} />
-            </>
-          )}
+          <HomeScreenInner {...{ account, searchPrefix, setSearchPrefix }} />
         </Animated.View>
       </Animated.ScrollView>
       {searchPrefix == null && bottomSheet}
     </View>
   );
+}
+
+function HomeScreenInner({
+  account,
+  searchPrefix,
+  setSearchPrefix,
+}: {
+  account: Account;
+  searchPrefix?: string;
+  setSearchPrefix: (prefix?: string) => void;
+}) {
+  const ins = useSafeAreaInsets();
+
+  const contactsAccess = useContactsPermission();
+
+  const cta = useHomeCTA(account);
+
+  return (
+    <View>
+      <Spacer h={Math.max(16, ins.top)} />
+      <SearchHeader prefix={searchPrefix} setPrefix={setSearchPrefix} />
+      {searchPrefix != null && (
+        <SearchResults
+          contactsAccess={contactsAccess}
+          prefix={searchPrefix}
+          mode="account"
+        />
+      )}
+      {searchPrefix == null && account != null && (
+        <>
+          <Spacer h={cta == null ? 64 : 24} />
+          {cta && cta.type === "onboardingChecklist" && <CompleteOnboarding />}
+          {cta && cta.type === "suggestedAction" && (
+            <SuggestedActionBox action={cta.action} onHideAction={cta.onHide} />
+          )}
+          <Spacer h={32} />
+          <AmountAndButtons account={account} />
+        </>
+      )}
+    </View>
+  );
+}
+
+type HomeCTA =
+  | { type: "onboardingChecklist" }
+  | { type: "suggestedAction"; action: SuggestedAction; onHide: () => void };
+
+// Get the home screen call-to-action, if any.
+function useHomeCTA(account: Account): HomeCTA | null {
+  // No suggested actions when offline.
+  const netState = useNetworkState();
+
+  // Suggested action: either from account, or the onboarding checklist.
+  const { allComplete } = useOnboardingChecklist(account);
+
+  // Show suggested action when available, shortly after loading.
+  const [isActionVisible, setIsActionVisible] = useState(true);
+  const onHide = () => setIsActionVisible(false);
+
+  if (netState.status === "offline") return null;
+  if (!allComplete) return { type: "onboardingChecklist" };
+
+  const { suggestedActions } = account;
+  if (!isActionVisible) return null;
+  if (suggestedActions.length === 0) return null;
+  return { type: "suggestedAction", action: suggestedActions[0], onHide };
 }
 
 function AmountAndButtons({ account }: { account: Account }) {
@@ -316,7 +331,7 @@ function CompleteOnboarding() {
   );
 }
 
-let deepLinkInitialised = false;
+let handledInitialDeepLink = false;
 
 /** Handle incoming app deep links. */
 function useInitNavLinks() {
@@ -326,16 +341,17 @@ function useInitNavLinks() {
 
   // Handle deeplinks
   useEffect(() => {
-    if (accountMissing || deepLinkInitialised) return;
+    if (accountMissing) return;
 
     const currentTab = nav.getState().routes[0]?.name || "";
     console.log(`[NAV] ready to init? current tab: ${currentTab}`);
     if (!currentTab.startsWith("Home")) return;
 
     console.log(`[NAV] listening for deep links, account ${account.name}`);
-    deepLinkInitialised = true;
     getInitialDeepLink().then((url) => {
       if (url == null) return;
+      if (handledInitialDeepLink) return;
+      handledInitialDeepLink = true;
       handleDeepLink(nav, url);
     });
 
