@@ -47,7 +47,7 @@ function NotificationsScreenInner({ account }: { account: Account }) {
           <View>
             <Spacer h={48} />
             <TextCenter>
-              <TextBody color={color.grayMid}>
+              <TextBody color={color.gray3}>
                 No notifications to display
               </TextBody>
             </TextCenter>

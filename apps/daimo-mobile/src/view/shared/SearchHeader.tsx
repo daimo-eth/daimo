@@ -10,6 +10,7 @@ import Animated, {
 
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
+import { Icon } from "./Icon";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
@@ -101,7 +102,7 @@ export function SearchHeader({
       <Animated.View key="icon" style={qrButton}>
         <ButtonCircle size={50} onPress={goToQR}>
           <View style={styles.circleButton}>
-            <Octicons name="apps" size={24} color={color.primary} />
+            <Icon name="qr-code-01" size={24} color={color.primary} />
           </View>
         </ButtonCircle>
       </Animated.View>
@@ -118,7 +119,7 @@ export function SearchHeader({
       <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.circleButton}>
-            <Octicons name="bell" size={24} color={color.primary} />
+            <Icon name="bell-01" size={24} color={color.primary} />
             {account.requests.length > 0 ? <NotificationBadge /> : null}
           </View>
         </ButtonCircle>
