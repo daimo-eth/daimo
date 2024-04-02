@@ -3,8 +3,11 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import {
   ReactNode,
+  createContext,
   memo,
   useCallback,
+  useContext,
+  useEffect,
   useMemo,
   useReducer,
   useState,
@@ -20,7 +23,7 @@ import {
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
-import { encodeSeedPhrase } from "../../logic/seedPhrase";
+import { generateSeedPhrase } from "../../logic/seedPhrase";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -32,20 +35,9 @@ import { useWithAccount } from "../shared/withAccount";
 
 const ARRAY_SIX = Array(6).fill(0);
 
-function useSeedPhrase() {
-  // Generate mnemonic
-
-  const { mnemonic, publicKey } = encodeSeedPhrase();
-
-  const words = mnemonic.split(" ");
-
-  return { words, publicKey };
-}
-
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
-  const { words } = useSeedPhrase();
 
   const handleBack = useCallback(() => {
     if (activeStep === 1) {
@@ -55,42 +47,33 @@ export function SeedPhraseScreen() {
     }
   }, [activeStep, nav]);
 
-  const seedPhraseBox = useMemo(
-    () => (
-      <SeedPhraseBox mode={activeStep === 0 ? "read" : "edit"} words={words} />
-    ),
-    [activeStep, words]
-  );
-
   return (
-    <View style={styles.screen}>
-      <ScreenHeader
-        title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
-        onBack={handleBack}
-        secondaryHeader={
-          <View style={{ marginVertical: 16, alignItems: "center" }}>
-            <ProgressBlobs steps={2} activeStep={activeStep} />
-          </View>
-        }
-      />
-      <Spacer h={24} />
-      {activeStep === 0 ? (
-        <CopySeedPhrase setActiveStep={setActiveStep}>
-          {seedPhraseBox}
-        </CopySeedPhrase>
-      ) : (
-        <VerifySeedPhrase>{seedPhraseBox}</VerifySeedPhrase>
-      )}
-    </View>
+    <SeedPhraseProvider>
+      <View style={styles.screen}>
+        <ScreenHeader
+          title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
+          onBack={handleBack}
+          secondaryHeader={
+            <View style={{ marginVertical: 16, alignItems: "center" }}>
+              <ProgressBlobs steps={2} activeStep={activeStep} />
+            </View>
+          }
+        />
+        <Spacer h={24} />
+        {activeStep === 0 ? (
+          <CopySeedPhrase setActiveStep={setActiveStep} />
+        ) : (
+          <VerifySeedPhrase />
+        )}
+      </View>
+    </SeedPhraseProvider>
   );
 }
 
 function CopySeedPhrase({
   setActiveStep,
-  children,
 }: {
   setActiveStep: (value: 0 | 1) => void;
-  children: ReactNode;
 }) {
   const [saved, toggleSaved] = useReducer((s) => !s, false);
 
@@ -101,7 +84,8 @@ function CopySeedPhrase({
         recover it even if you lose your device.
       </TextBody>
       <Spacer h={24} />
-      {children}
+      <SeedPhraseBox mode="read" />
+      {/* {children} */}
       <Spacer h={24} />
       <CopyToClipboard />
       <Spacer h={24} />
@@ -187,13 +171,9 @@ function ConfirmPhraseSave({
   );
 }
 
-function BaseVerifySeedPhrase({
-  account,
-  children,
-}: {
-  account: Account;
-  children: ReactNode;
-}) {
+function BaseVerifySeedPhrase({ account }: { account: Account }) {
+  const { isValid } = useSeedPhraseContext();
+
   const seedPhraseSlot = useMemo(
     () =>
       findUnusedSlot(
@@ -209,31 +189,26 @@ function BaseVerifySeedPhrase({
         Type your seed phrase into the input box.
       </TextBody>
       <Spacer h={24} />
-      {children}
+      <SeedPhraseBox mode="edit" />
       <Spacer h={24} />
       <AddKeySlotButton
         buttonTitle="Finish Setup"
         account={account}
         slot={seedPhraseSlot}
+        disabled={!isValid}
       />
     </View>
   );
 }
 
-const VerifySeedPhrase = ({ children }: { children: ReactNode }) => {
+const VerifySeedPhrase = () => {
   const Inner = useWithAccount(BaseVerifySeedPhrase);
 
-  return <Inner>{children}</Inner>;
+  return <Inner />;
 };
 
-function SeedPhraseBox({
-  mode,
-  words,
-}: {
-  mode: "read" | "edit";
-  words: string[];
-}) {
-  const [state, dispatch] = useSeedPhraseInput();
+function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
+  const { state, dispatch, words } = useSeedPhraseContext();
 
   const handleInputChange = (index: number, text: string) => {
     dispatch({ key: index, value: text });
@@ -326,6 +301,52 @@ function useSeedPhraseInput() {
       12: "",
     }
   );
+}
+
+type SeedPhraseContextValue = {
+  state: SeedPhraseInputState;
+  dispatch: React.Dispatch<SeedPhraseInputAction>;
+  words: string[];
+  publicKey: string;
+  isValid: boolean;
+};
+
+const SeedPhraseContext = createContext<SeedPhraseContextValue | null>(null);
+
+function SeedPhraseProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useSeedPhraseInput();
+  const { mnemonic, publicKey } = useMemo(() => generateSeedPhrase(), []);
+
+  const words = useMemo(() => mnemonic.split(" "), [mnemonic]);
+
+  const enteredPhrase = useMemo(() => {
+    return Object.values(state).join(" ");
+  }, [state]);
+
+  useEffect(() => {
+    console.log("mnemonic: ", mnemonic);
+    console.log("enteredPhrase: ", enteredPhrase);
+  }, [mnemonic, enteredPhrase]);
+
+  const isValid = enteredPhrase === mnemonic;
+
+  return (
+    <SeedPhraseContext.Provider
+      value={{ state, dispatch, words, publicKey, isValid }}
+    >
+      {children}
+    </SeedPhraseContext.Provider>
+  );
+}
+
+function useSeedPhraseContext() {
+  const seedPhraseContext = useContext(SeedPhraseContext);
+
+  if (!seedPhraseContext) {
+    throw new Error("Must be used inside a SeedPhraseProvider");
+  }
+
+  return seedPhraseContext;
 }
 
 const styles = StyleSheet.create({

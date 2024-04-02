@@ -29,11 +29,13 @@ export function AddKeySlotButton({
   buttonTitle,
   knownPubkey,
   slot,
+  disabled,
 }: {
   account: Account;
   buttonTitle: string;
   knownPubkey?: Hex; // In case of Add Device, we know the pubkey to add. If not, generate a passkey.
   slot: number;
+  disabled?: boolean;
 }) {
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
@@ -111,6 +113,7 @@ export function AddKeySlotButton({
             title={buttonTitle}
             onPress={exec}
             showBiometricIcon
+            disabled={disabled}
           />
         );
       case "loading":
