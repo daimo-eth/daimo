@@ -1,11 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useContext, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
@@ -21,13 +17,13 @@ export function CreateBackupSheet() {
   const [step, setStep] = useState<0 | 1>(0);
 
   return (
-    <Animated.View layout={LinearTransition}>
+    <View style={{ paddingBottom: 36 }}>
       {step === 0 ? (
         <CreateBackupContent setStep={setStep} />
       ) : (
         <OfflineBackupContent setStep={setStep} />
       )}
-    </Animated.View>
+    </View>
   );
 }
 

@@ -15,6 +15,7 @@ import {
 import { Keyboard, StyleSheet, View } from "react-native";
 import RNShake from "react-native-shake";
 
+import { CreateBackupSheet } from "./CreateBackupSheet";
 import { DebugBottomSheet } from "./DebugBottomSheet";
 import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
 import { HelpBottomSheet } from "./HelpBottomSheet";
@@ -164,6 +165,7 @@ export function GlobalBottomSheet() {
     dispatcher.register("ownRequest", handleDispatch);
     dispatcher.register("helpModal", handleDispatch);
     dispatcher.register("hideBottomSheet", handleDispatch);
+    dispatcher.register("createBackup", handleDispatch);
   }, []);
 
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
@@ -192,6 +194,7 @@ export function GlobalBottomSheet() {
           {sheet?.action === "onboardingChecklist" && (
             <OnboardingChecklistBottomSheet />
           )}
+          {sheet?.action === "createBackup" && <CreateBackupSheet />}
           {sheet?.action === "helpModal" && (
             <HelpBottomSheet
               content={sheet.payload.content}

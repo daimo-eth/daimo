@@ -202,7 +202,6 @@ function DevicesSection({ account }: { account: Account }) {
       .filter((k) => k.rotationType === "add")
       .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
   }, [account.pendingKeyRotation])();
-  const dispatcher = useContext(DispatcherContext);
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
