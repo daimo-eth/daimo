@@ -20,6 +20,7 @@ import {
   ViewStyle,
   ScrollView,
 } from "react-native";
+import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
@@ -172,7 +173,7 @@ function ConfirmPhraseSave({
 }
 
 function BaseVerifySeedPhrase({ account }: { account: Account }) {
-  const { isValid } = useSeedPhraseContext();
+  const { isValid, publicKey } = useSeedPhraseContext();
 
   const seedPhraseSlot = useMemo(
     () =>
@@ -195,6 +196,7 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
         buttonTitle="Finish Setup"
         account={account}
         slot={seedPhraseSlot}
+        knownPubkey={publicKey}
         disabled={!isValid}
       />
     </ScrollView>
@@ -303,7 +305,7 @@ type SeedPhraseContextValue = {
   dispatch: React.Dispatch<SeedPhraseInputAction>;
   mnemonic: string;
   words: string[];
-  publicKey: string;
+  publicKey: Hex;
   isValid: boolean;
 };
 
