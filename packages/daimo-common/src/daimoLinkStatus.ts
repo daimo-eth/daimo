@@ -107,6 +107,7 @@ export type DaimoNoteStatus = {
  */
 export type DaimoInviteCodeStatus = {
   link: DaimoLinkInviteCode;
+  createdAt: number;
   isValid: boolean;
   usesLeft?: number;
   bonusDollarsInvitee?: number;

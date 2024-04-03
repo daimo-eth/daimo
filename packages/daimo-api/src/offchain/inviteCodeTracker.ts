@@ -137,6 +137,7 @@ export class InviteCodeTracker {
     );
     return {
       link: inviteLink,
+      createdAt: code?.createdAt || 0,
       isValid: usesLeft > 0,
       usesLeft,
       bonusDollarsInvitee: code?.bonusDollarsInvitee || 0,

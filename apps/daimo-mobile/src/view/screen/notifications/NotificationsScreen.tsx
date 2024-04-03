@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 
 import { InvitesNotificationRow } from "./InvitesNotificationRow";
+import { NotificationRow } from "./NotificationRow";
 import { RequestNotificationRow } from "./RequestNotificationRow";
 import { useNav } from "../../../common/nav";
 import { useInAppNotifications } from "../../../logic/inAppNotifications";
@@ -52,9 +53,10 @@ function NotificationsScreenInner({ account }: { account: Account }) {
                 />
               );
             case "invite":
-              return <InvitesNotificationRow notif={notif} account={account} />;
+              return <InvitesNotificationRow key="invite" notif={notif} />;
           }
         })}
+        {notifications.length > 0 && <NotificationRow children={null} />}
       </ScrollView>
     </View>
   );

@@ -9,13 +9,13 @@ import {
 import Octicons from "@expo/vector-icons/Octicons";
 import { useContext } from "react";
 import {
-  StyleSheet,
   TouchableHighlight,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
 
+import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { RequestNotification } from "../../../logic/inAppNotifications";
@@ -46,65 +46,46 @@ export function RequestNotificationRow({
   const ts = timeAgo(notif.timestamp, now(), true);
   const dispatcher = useContext(DispatcherContext);
 
-  const onPress = (() => {
-    if (notif.request.status !== DaimoRequestState.Created) return undefined;
-
-    if (type === "expectedFulfiller") {
-      return () => {
-        nav.navigate("SendTab", {
-          screen: "SendTransfer",
-          params: { link: notif.request.link },
-        });
-      };
+  const onPress = function () {
+    if (notif.request.status !== DaimoRequestState.Created) {
+    } else if (type === "expectedFulfiller") {
+      const { link } = notif.request;
+      nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
     } else {
-      return () => {
-        dispatcher.dispatch({ name: "ownRequest", reqStatus: notif.request });
-      };
+      dispatcher.dispatch({ name: "ownRequest", reqStatus: notif.request });
     }
-  })();
+  };
 
   const width = useWindowDimensions().width;
   const messageWidth = width - 96;
 
   return (
-    <View style={{ marginHorizontal: 16 }}>
-      <TouchableHighlight
-        onPress={onPress}
-        {...touchHighlightUnderlay.subtle}
-        style={{ marginHorizontal: -16 }}
-      >
-        <View style={styles.row}>
-          <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity onPress={() => navToAccountPage(otherAcc, nav)}>
-              <ContactBubble
-                contact={{ type: "eAcc", ...otherAcc }}
-                size={36}
+    <TouchableHighlight onPress={onPress} {...touchHighlightUnderlay.subtle}>
+      <NotificationRow>
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity onPress={() => navToAccountPage(otherAcc, nav)}>
+            <ContactBubble contact={{ type: "eAcc", ...otherAcc }} size={36} />
+          </TouchableOpacity>
+          <Spacer w={16} />
+          <View>
+            <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
+              <RequestNotificationMessage
+                type={type}
+                otherAcc={otherAcc}
+                reqStatus={notif.request}
               />
-            </TouchableOpacity>
-            <Spacer w={16} />
-            <View>
-              <TextBody
-                color={color.grayMid}
-                style={{ maxWidth: messageWidth }}
-              >
-                <RequestNotificationMessage
-                  type={type}
-                  otherAcc={otherAcc}
-                  reqStatus={notif.request}
-                />
-              </TextBody>
-              <Spacer h={2} />
-              <TextMeta color={color.gray3}>{ts}</TextMeta>
-            </View>
+            </TextBody>
+            <Spacer h={2} />
+            <TextMeta color={color.gray3}>{ts}</TextMeta>
           </View>
-          {!!onPress && (
-            <View>
-              <Octicons name="chevron-right" color={color.grayDark} size={32} />
-            </View>
-          )}
         </View>
-      </TouchableHighlight>
-    </View>
+        {!!onPress && (
+          <View>
+            <Octicons name="chevron-right" color={color.grayDark} size={32} />
+          </View>
+        )}
+      </NotificationRow>
+    </TouchableHighlight>
   );
 }
 
@@ -169,17 +150,3 @@ function RequestNotificationMessage({
       );
   }
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
-    marginHorizontal: 16,
-    paddingVertical: 16,
-  },
-});

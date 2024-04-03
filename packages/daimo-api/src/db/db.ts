@@ -120,6 +120,17 @@ export class DB {
             decliner CHAR(42) NOT NULL,
             created_at TIMESTAMP DEFAULT NOW()
           );
+
+          --
+          -- Ensure every table tracks creation time.
+          --
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE invite_graph ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE payment_memo ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE offchain_action ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+
       `);
     await client.end();
   }
@@ -276,7 +287,8 @@ export class DB {
   async loadInviteCode(code: string): Promise<InviteCodeRow | null> {
     console.log(`[DB] loading invite code ${code}`);
     const result = await this.pool.query<RawInviteCodeRow>(
-      `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter FROM invitecode WHERE code = $1`,
+      `SELECT code, created_at, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter 
+      FROM invitecode WHERE code = $1`,
       [code]
     );
 
@@ -284,6 +296,7 @@ export class DB {
     const row = result.rows[0];
     return {
       code: row.code,
+      createdAt: dateToUnix(row.created_at),
       useCount: row.use_count,
       maxUses: row.max_uses,
       zupassEmail: row.zupass_email,
@@ -417,7 +430,7 @@ export class DB {
     return result.rows.map((row) => ({
       requestId: BigInt(row.request_id),
       decliner: row.decliner,
-      createdAt: Math.floor(row.created_at.getTime() / 1000),
+      createdAt: dateToUnix(row.created_at),
     }));
   }
 
@@ -434,6 +447,10 @@ export class DB {
   }
 }
 
+function dateToUnix(d: Date): number {
+  return Math.floor(d.getTime() / 1000);
+}
+
 interface PushTokenRow {
   pushtoken: string;
   address: string;
@@ -441,6 +458,7 @@ interface PushTokenRow {
 
 export interface InviteCodeRow {
   code: string;
+  createdAt: number;
   useCount: number;
   maxUses: number;
   zupassEmail: string | null;
@@ -459,6 +477,7 @@ export interface InsertInviteCodeArgs {
 
 interface RawInviteCodeRow {
   code: string;
+  created_at: Date;
   use_count: number;
   max_uses: number;
   zupass_email: string | null;

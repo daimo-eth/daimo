@@ -113,33 +113,52 @@ export function GlobalBottomSheet() {
     []
   );
 
-  // Handle dispatch > open bottom sheet
+  // Handle dispatch > open or close bottom sheet
   const dispatcher = useContext(DispatcherContext);
-  const openFC = () => openBottomSheet({ action: "connectFarcaster" });
-  const linkFC = () => openBottomSheet({ action: "linkFarcaster" });
-  const openChecklist = () =>
-    openBottomSheet({ action: "onboardingChecklist" });
-  useEffect(() => dispatcher.register("connectFarcaster", openFC), []);
-  useEffect(() => dispatcher.register("linkFarcaster", linkFC), []);
-  useEffect(
-    () => dispatcher.register("onboardingChecklist", openChecklist),
-    []
-  );
-
-  //  Handle dispatch > hide bottom sheet
-  const hideSheet = () => setSheet(null);
-  useEffect(() => dispatcher.register("hideBottomSheet", hideSheet), []);
-
-  const openHelp = (actionPayload: Action) => {
-    if (actionPayload.name === "helpModal") {
-      setSheet({ action: "helpModal", payload: actionPayload });
+  const handleDispatch = (action: Action) => {
+    switch (action.name) {
+      case "connectFarcaster": {
+        openBottomSheet({ action: "connectFarcaster" });
+        break;
+      }
+      case "linkFarcaster": {
+        openBottomSheet({ action: "linkFarcaster" });
+        break;
+      }
+      case "onboardingChecklist": {
+        openBottomSheet({ action: "onboardingChecklist" });
+        break;
+      }
+      case "ownRequest": {
+        const { reqStatus } = action;
+        openBottomSheet({ action: "ownRequest", payload: { reqStatus } });
+        break;
+      }
+      case "helpModal": {
+        const { title, content } = action;
+        openBottomSheet({ action: "helpModal", payload: { title, content } });
+        break;
+      }
+      case "hideBottomSheet": {
+        setSheet(null);
+        break;
+      }
+      default: {
+        throw new Error(`Unknown action: ${JSON.stringify(action)}`);
+      }
     }
   };
-  useEffect(() => dispatcher.register("helpModal", openHelp), []);
 
-  // Hide if there's no sheet
+  useEffect(() => {
+    dispatcher.register("connectFarcaster", handleDispatch);
+    dispatcher.register("linkFarcaster", handleDispatch);
+    dispatcher.register("onboardingChecklist", handleDispatch);
+    dispatcher.register("ownRequest", handleDispatch);
+    dispatcher.register("helpModal", handleDispatch);
+    dispatcher.register("hideBottomSheet", handleDispatch);
+  }, []);
+
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
-
   const settings = sheet && bottomSheetSettings[sheet.action];
 
   return (

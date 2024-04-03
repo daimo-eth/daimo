@@ -39,10 +39,6 @@ export function useInAppNotifications(): InAppNotificationInfo {
     markRead: () => {},
   });
 
-  const [inviteAddedTime, setInviteAddedTime] = useState<number | undefined>(
-    undefined
-  );
-
   const [account] = useAccount();
 
   useEffect(() => {
@@ -73,13 +69,11 @@ export function useInAppNotifications(): InAppNotificationInfo {
     }
 
     // Invites notif, ordered to the top of the list when added or app first loaded.
-    if (inviteLinkStatus?.isValid) {
-      const ts = inviteAddedTime ?? now();
-      if (!inviteAddedTime) setInviteAddedTime(ts);
+    if (inviteLinkStatus?.isValid && inviteLinkStatus.createdAt) {
       notifications.push({
         type: "invite",
         marksUnread: true,
-        timestamp: ts,
+        timestamp: inviteLinkStatus.createdAt,
         inviteLinkStatus,
       });
     }
