@@ -9,7 +9,7 @@ const obscenityConfig = new RegExpMatcher({
   ...englishRecommendedTransformers,
 });
 
-enum MemoStatus {
+export enum MemoStatus {
   OK = "ok",
   TOO_LONG = "too long",
   VIOLATES_GUIDELINES = "violates guidelines",
