@@ -15,6 +15,7 @@ import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
 import { Linking, View } from "react-native";
+import { Address } from "viem";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { Dispatcher, DispatcherContext } from "../../action/dispatch";
@@ -40,7 +41,6 @@ import {
   TextBodyCaps,
   TextCenter,
   TextError,
-  TextH3,
   TextPara,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
@@ -91,8 +91,11 @@ function HistoryOpScreenInner({
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Transfer" onExit={leaveScreen} hideOfflineHeader />
-      <Spacer h={16} />
+      <ScreenHeader
+        title={getOpVerb(op, account.address)}
+        onExit={leaveScreen}
+        hideOfflineHeader
+      />
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
@@ -178,18 +181,6 @@ function TransferBody({
   } else {
     other = getCachedEAccount(op.from);
   }
-  const isPayLink = other.label === "payment link";
-  const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
-
-  const verb = (() => {
-    if (isPayLink) {
-      return sentByUs ? "Created link" : "Accepted link";
-    } else if (isRequestResponse) {
-      return sentByUs ? "Fulfilled request" : "Received request";
-    } else {
-      return sentByUs ? "Sent" : "Received";
-    }
-  })();
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
@@ -214,11 +205,7 @@ function TransferBody({
       <Octicons size={16} name="info" color={col} />
     </React.Fragment>,
   ];
-  if (op.type === "transfer" && op.memo) {
-    subtitleElems.unshift(
-      <React.Fragment key="memo">{op.memo}</React.Fragment>
-    );
-  }
+
   for (let i = subtitleElems.length - 1; i > 0; i--) {
     const spacerText = " • ";
     const space = <React.Fragment key={i}>{spacerText}</React.Fragment>;
@@ -227,16 +214,20 @@ function TransferBody({
 
   return (
     <View>
-      <TextCenter>
-        <TextH3 color={color.grayDark}>{verb}</TextH3>
-      </TextCenter>
-      <Spacer h={4} />
       <TitleAmount
         amount={BigInt(op.amount)}
         preSymbol={sentByUs ? "-" : "+"}
         style={sentByUs ? { color: "black" } : { color: color.success }}
       />
-      <Spacer h={8} />
+      {op.type === "transfer" && op.memo && (
+        <>
+          <Spacer h={4} />
+          <TextCenter>
+            <TextBodyCaps color={color.grayMid}>{op.memo}</TextBodyCaps>
+          </TextCenter>
+        </>
+      )}
+      <Spacer h={16} />
       <TouchableOpacity onPress={onShowHelp} hitSlop={8}>
         <TextCenter>
           <TextBodyCaps color={color.grayMid}>{subtitleElems}</TextBodyCaps>
@@ -251,6 +242,20 @@ function TransferBody({
       />
     </View>
   );
+}
+
+function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
+  const isPayLink = op.type === "createLink" || op.type === "claimLink";
+  const sentByUs = op.from === accountAddress;
+  const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
+
+  if (isPayLink) {
+    return sentByUs ? "Created link" : "Accepted link";
+  } else if (isRequestResponse) {
+    return sentByUs ? "Fulfilled request" : "Received request";
+  } else {
+    return sentByUs ? "Sent" : "Received";
+  }
 }
 
 function showHelpWhyNoFees(dispatcher: Dispatcher) {

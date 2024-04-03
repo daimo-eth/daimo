@@ -91,8 +91,7 @@ export function HistoryListSwipe({
 
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
-    const title =
-      otherAcc == null ? "Transaction history" : `Transactions between you`;
+    const title = otherAcc == null ? "Recent activity" : `Between you`;
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />

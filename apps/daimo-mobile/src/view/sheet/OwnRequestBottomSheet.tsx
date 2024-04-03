@@ -16,9 +16,10 @@ import { useAccount } from "../../logic/accountManager";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonMed } from "../shared/Button";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
-import { TextCenter, TextH3 } from "../shared/text";
+import { TextBodyCaps, TextCenter } from "../shared/text";
 
 // Bottom sheet for request made by the user
 export function OwnRequestBottomSheet({
@@ -74,16 +75,19 @@ export function OwnRequestBottomSheet({
 
   return (
     <View style={ss.container.padH16}>
-      <Spacer h={16} />
-      <TextCenter>
-        <TextH3>Requested</TextH3>
-      </TextCenter>
-      <Spacer h={24} />
-      <TitleAmount
-        amount={dollarsToAmount(reqStatus.link.dollars)}
-        style={{ color: color.success }}
+      <ScreenHeader
+        title="You requested"
+        onExit={() => {
+          dispatcher.dispatch({ name: "hideBottomSheet" });
+        }}
+        hideOfflineHeader
       />
-      <Spacer h={24} />
+      <TitleAmount amount={dollarsToAmount(reqStatus.link.dollars)} />
+      <Spacer h={8} />
+      <TextCenter>
+        <TextBodyCaps color={color.grayMid}>USDC • BASE</TextBodyCaps>
+      </TextCenter>
+      <Spacer h={32} />
       {reqStatus.expectedFulfiller && (
         <AccountRow
           acc={reqStatus.expectedFulfiller}
