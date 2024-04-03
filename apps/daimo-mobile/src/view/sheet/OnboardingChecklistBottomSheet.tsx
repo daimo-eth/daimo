@@ -4,9 +4,9 @@ import { StyleSheet, View } from "react-native";
 
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../model/account";
-import { ButtonBig } from "../shared/Button";
+import { TextButton } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { color, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextH3 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -25,7 +25,7 @@ function OnboardingChecklistBottomSheetInner({
     farcasterConnected,
     handleSecureAccount,
     handleConnectFarcaster,
-    dismissSheet,
+    dismissChecklist,
   } = useOnboardingChecklist(account);
 
   return (
@@ -51,14 +51,13 @@ function OnboardingChecklistBottomSheetInner({
         onPress={handleConnectFarcaster}
         done={farcasterConnected}
       />
-      <Spacer h={24} />
-      <View style={{ paddingHorizontal: 24 }}>
-        <ButtonBig
-          type="subtle"
-          title={`I'll get to it later`}
-          onPress={dismissSheet}
-        />
+      <Spacer h={16} />
+      <View style={ss.container.padH24}>
+        {dismissChecklist && (
+          <TextButton title="DISMISS" onPress={dismissChecklist} />
+        )}
       </View>
+      <Spacer h={48} />
     </View>
   );
 }

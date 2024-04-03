@@ -1,6 +1,7 @@
 import { SlotType, getSlotType } from "@daimo/common";
 import { useCallback, useContext } from "react";
 
+import { getAccountManager } from "./accountManager";
 import { DispatcherContext } from "../action/dispatch";
 import { useNav } from "../common/nav";
 import { Account } from "../model/account";
@@ -13,9 +14,9 @@ export function useOnboardingChecklist(account: Account) {
     (key) => getSlotType(key.slot) === SlotType.PasskeyBackup
   );
 
-  const farcasterConnected = !!account.linkedAccounts.find(
-    (a) => a.type === "farcaster"
-  );
+  const farcasterConnected =
+    !!account.linkedAccounts.find((a) => a.type === "farcaster") ||
+    account.dismissedActionIDs.includes("onboard-connectFarcaster");
 
   const allComplete = hasBackup && farcasterConnected;
 
@@ -29,7 +30,11 @@ export function useOnboardingChecklist(account: Account) {
     dispatcher.dispatch({ name: "connectFarcaster" });
   }, [nav, dispatcher]);
 
-  const dismissSheet = useCallback(() => {
+  const dismissConnectFarcaster = useCallback(() => {
+    getAccountManager().transform((a) => ({
+      ...a,
+      dismissedActionIDs: [...a.dismissedActionIDs, "onboard-connectFarcaster"],
+    }));
     dispatcher.dispatch({ name: "hideBottomSheet" });
   }, [dispatcher]);
 
@@ -39,6 +44,6 @@ export function useOnboardingChecklist(account: Account) {
     allComplete,
     handleSecureAccount,
     handleConnectFarcaster,
-    dismissSheet,
+    dismissChecklist: hasBackup ? dismissConnectFarcaster : undefined,
   };
 }

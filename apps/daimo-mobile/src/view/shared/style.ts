@@ -62,6 +62,9 @@ export const ss = {
     padH16: {
       paddingHorizontal: 16,
     },
+    padH24: {
+      paddingHorizontal: 24,
+    },
     marginHNeg16: {
       marginHorizontal: -16,
     },

@@ -160,7 +160,7 @@ export function TextButton(props: TextButtonProps) {
 // Shows the (?) icon. Should open the help modal.
 export function HelpButton({ onPress }: { onPress: () => void }) {
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} hitSlop={16}>
       <Octicons size={16} name="info" color={color.grayDark} />
     </TouchableOpacity>
   );
