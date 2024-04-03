@@ -2,6 +2,7 @@ import {
   assertNotNull,
   EAccount,
   getAccountName,
+  getEnv,
   parseDaimoLink,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
@@ -10,6 +11,7 @@ import {
   UserViewerContext,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
+import { getAddress } from "viem";
 
 import { assert, FarcasterCacheClient } from "./farcasterClient";
 import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
@@ -106,6 +108,18 @@ export class FrameLinkService {
     if ((auth.fidWhitelists || []).length > 0) {
       return [false, "Sorry, not on the list"];
     }
+    for (const whitelist of auth.addressWhitelists || []) {
+      if (
+        user.verified_addresses.eth_addresses.some((addr) =>
+          whitelist.addrs.includes(getAddress(addr))
+        )
+      ) {
+        return [true, whitelist.greeting];
+      }
+    }
+    if ((auth.addressWhitelists || []).length > 0) {
+      return [false, "Not on list. Connect the right address?"];
+    }
     return [true, frame.appearance.buttonSuccess];
   }
 
@@ -131,11 +145,10 @@ export class FrameLinkService {
     fid: number,
     frame: InviteFrameLink
   ): Promise<string> {
-    const rand = Buffer.from(
-      crypto.getRandomValues(new Uint8Array(6))
-    ).toString("hex");
-
-    const code = `fc-${frame.id}-${fid}-${rand}`;
+    const preimage = `${frame.id}-${fid}-${getEnv("DAIMO_API_KEY")}`;
+    const hash = await crypto.subtle.digest("SHA-256", Buffer.from(preimage));
+    const suffix = Buffer.from(hash).toString("hex").substring(0, 6);
+    const code = `fc-${frame.id}-${fid}-${suffix}`;
     const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
     console.log(`[FRAME] creating invite code ${code}`);
@@ -145,7 +158,7 @@ export class FrameLinkService {
       maxUses: 1,
       inviter: frame.owner.addr,
       bonusDollarsInvitee: frame.bonusDollarsInvitee,
-      bonusDollarsInviter: 0,
+      bonusDollarsInviter: frame.bonusDollarsInviter || 0,
     });
     console.log(`[FRAME] created invite: ${link}`);
     return link;

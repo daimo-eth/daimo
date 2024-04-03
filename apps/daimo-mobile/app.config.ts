@@ -2,7 +2,7 @@ import type { ExpoConfig } from "@expo/config";
 
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.7.2";
+const VERSION = "1.8.0";
 
 const config: ExpoConfig = {
   owner: "daimo",
@@ -40,7 +40,6 @@ const config: ExpoConfig = {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#13915F",
-      backgroundImage: "./assets/adaptive-icon-background.png",
     },
     softwareKeyboardLayoutMode: "pan",
     googleServicesFile: IS_DEV

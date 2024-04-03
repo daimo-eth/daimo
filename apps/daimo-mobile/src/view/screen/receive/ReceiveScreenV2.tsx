@@ -69,8 +69,6 @@ function RequestScreenInnerV2({
     const id = generateRequestId();
     const idString = encodeRequestId(id);
 
-    setAS("loading", "Sharing...");
-
     const url = formatDaimoLink({
       type: "requestv2",
       id: idString,
@@ -133,7 +131,7 @@ function RequestScreenInnerV2({
             subtitle="Request USDC from someone using any messaging app"
           />
         )}
-        <Spacer h={64} />
+        <Spacer h={24} />
         {recipient && <RecipientDisplay recipient={recipient} />}
         <Spacer h={32} />
         <AmountChooser

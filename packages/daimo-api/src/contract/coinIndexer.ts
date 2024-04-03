@@ -15,6 +15,7 @@ import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { retryBackoff } from "../utils/retryBackoff";
 
 export interface Transfer {
@@ -39,7 +40,8 @@ export class CoinIndexer {
     private client: ViemClient,
     private opIndexer: OpIndexer,
     private noteIndexer: NoteIndexer,
-    private requestIndexer: RequestIndexer
+    private requestIndexer: RequestIndexer,
+    private paymentMemoTracker: PaymentMemoTracker
   ) {}
 
   public status() {
@@ -65,8 +67,14 @@ export class CoinIndexer {
           t as "to",
           v as "value"
         from transfers
-        where block_num >= $1
-        and block_num <= $2;
+        where (
+          block_num >= $1
+          and block_num <= $2
+        )
+        and (
+          f in (select addr from "names")
+          or t in (select addr from "names")
+        );
       `,
           [from, to]
         )
@@ -160,7 +168,7 @@ export class CoinIndexer {
   /* Populates atomic properties of logs to convert it to an Op Event.
    * Does not account for fees since they involve multiple transfer logs.
    */
-  private attachTransferOpProperties(log: Transfer): DisplayOpEvent {
+  attachTransferOpProperties(log: Transfer): DisplayOpEvent {
     const {
       blockNumber,
       blockHash,
@@ -188,6 +196,8 @@ export class CoinIndexer {
         logIndex - 1
       );
 
+    const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
+
     const partialOp = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
@@ -212,6 +222,7 @@ export class CoinIndexer {
           type: "transfer",
           ...partialOp,
           requestStatus,
+          memo,
         } as TransferOpEvent;
       }
 

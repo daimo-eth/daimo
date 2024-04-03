@@ -44,13 +44,13 @@ export type QRScreenOptions = "PAY ME" | "SCAN";
 export type ParamListHome = {
   Home: undefined;
   QR: { option: QRScreenOptions | undefined };
-  Account:
+  Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
   HistoryOp: { op: DisplayOpEvent };
   Receive: { autoFocus: boolean; recipient?: EAccountContact | MsgContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
-  ReceiveSearch: { autoFocus: boolean };
+  ReceiveNav: undefined;
   Notifications: undefined;
 };
 
@@ -81,7 +81,7 @@ export type ParamListSend = {
   SendTransfer: SendNavProp;
   QR: { option: QRScreenOptions | undefined };
   SendLink: { recipient?: MsgContact };
-  Account:
+  Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
   HistoryOp: { op: DisplayOpEvent };
@@ -90,7 +90,7 @@ export type ParamListSend = {
 export type ParamListInvite = {
   Invite: undefined;
   YourInvites: undefined;
-  Account:
+  Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
 };
@@ -111,6 +111,7 @@ export interface SendNavProp {
     | DaimoLinkTag;
   recipient?: EAccountContact;
   dollars?: `${number}`;
+  memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;
 }
@@ -226,7 +227,7 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       break;
     }
     case "account": {
-      nav.navigate("HomeTab", { screen: "Account", params: { link } });
+      nav.navigate("HomeTab", { screen: "Profile", params: { link } });
       break;
     }
     case "request":
@@ -247,7 +248,7 @@ async function goTo(nav: MainNav, link: DaimoLink) {
       break;
     }
     case "invite": {
-      nav.navigate("HomeTab", { screen: "Account", params: { link } });
+      nav.navigate("HomeTab", { screen: "Profile", params: { link } });
       break;
     }
     default:
@@ -276,5 +277,5 @@ export function navToAccountPage(account: EAccount, nav: MainNav) {
     account: getEAccountStr(account),
   } as DaimoLinkAccount;
 
-  nav.push("Account", { link: accountLink });
+  nav.push("Profile", { link: accountLink });
 }

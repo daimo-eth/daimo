@@ -78,6 +78,9 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** Request metadata, if this transfer fulfilled a request */
   requestStatus?: DaimoRequestV2Status;
+
+  /** Memo, user-generated text for the transfer */
+  memo?: string;
 }
 
 export interface PaymentLinkOpEvent extends OpEventBase {

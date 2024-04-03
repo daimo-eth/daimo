@@ -69,9 +69,10 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
 
     const snapPoints = useMemo(() => {
       if (snapPointCount === 2) {
-        return [500, maxHeightOffset - tabBarHeight];
+        // TODO: use dynamic sizing on TransferOp screen
+        return [440, maxHeightOffset - tabBarHeight];
       } else {
-        return [swipeHeight, 500, maxHeightOffset - tabBarHeight];
+        return [swipeHeight, 440, maxHeightOffset - tabBarHeight];
       }
     }, [maxHeightOffset, snapPointCount]);
 

@@ -6,12 +6,15 @@ import {
   encodeRequestId,
   parseRequestMetadata,
   guessTimestampFromNum,
+  now,
+  AddrLabel,
+  decodeRequestIdString,
 } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
+import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { logCoordinateKey } from "../utils/indexing";
 
@@ -32,16 +35,22 @@ interface RequestFulfilledLog {
   logIndex: number;
   id: bigint;
   fulfiller: Address;
+  blockNumber: bigint;
+}
+
+interface RequestCancelledLog {
+  id: bigint;
+  blockNumber: bigint;
 }
 
 /* Request contract. Tracks request creation and fulfillment. */
 export class RequestIndexer {
   private requests: Map<bigint, DaimoRequestV2Status> = new Map();
-  private requestsByAddress: Map<Address, Set<bigint>> = new Map();
+  private requestsByAddress: Map<Address, bigint[]> = new Map();
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry) {}
+  constructor(private db: DB, private nameReg: NameRegistry) {}
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
@@ -57,6 +66,17 @@ export class RequestIndexer {
     // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;
     ls.forEach((l) => l(statuses));
+  }
+
+  // Note that init is run after loads.
+  async init() {
+    const declinedRequests = await this.db.loadDeclinedRequests();
+    for (const r of declinedRequests) {
+      const request = this.requests.get(r.requestId)!;
+      request.status = DaimoRequestState.Declined;
+      request.updatedAt = Math.max(request.updatedAt || 0, r.createdAt);
+      this.requests.set(r.requestId, request);
+    }
   }
 
   addListener(listener: (statuses: DaimoRequestV2Status[]) => void) {
@@ -117,6 +137,22 @@ export class RequestIndexer {
     // the creator field to filter whitelisted creators.
     const creator = await this.nameReg.getEAccount(log.creator);
 
+    if (creator.label !== AddrLabel.Faucet) {
+      console.warn(
+        `[REQUEST] ${log.id} creator ${JSON.stringify(creator)} is not API`
+      );
+    }
+
+    const { fulfiller } = parseRequestMetadata(log.metadata);
+    const expectedFulfiller = fulfiller
+      ? await this.nameReg.getEAccount(fulfiller)
+      : undefined;
+
+    const createdAt = guessTimestampFromNum(
+      log.blockNumber,
+      chainConfig.daimoChain
+    );
+
     const requestStatus: DaimoRequestV2Status = {
       link: {
         type: "requestv2",
@@ -128,21 +164,15 @@ export class RequestIndexer {
       creator,
       status: DaimoRequestState.Created,
       metadata: log.metadata,
-      createdAt: guessTimestampFromNum(
-        log.blockNumber,
-        daimoChainFromId(chainConfig.chainL2.id)
-      ),
+      createdAt,
+      updatedAt: createdAt,
+      expectedFulfiller,
     };
     this.requests.set(log.id, requestStatus);
 
-    // Parse metadata for fulfiller and add address to map.
-    // For now, this is sufficient proof that the request was created on
-    // Daimo.
-    const { fulfiller } = parseRequestMetadata(log.metadata);
-
-    if (fulfiller) {
-      this.storeReqByAddress(fulfiller, log.id);
-      this.storeReqByAddress(recipient.addr, log.id);
+    this.storeReqByAddress(recipient.addr, log.id);
+    if (expectedFulfiller) {
+      this.storeReqByAddress(expectedFulfiller.addr, log.id);
     }
 
     return requestStatus;
@@ -156,7 +186,8 @@ export class RequestIndexer {
     const result = await pg.query(
       `
           select
-            id
+            id,
+            block_num
         from request_cancelled
         where block_num >= $1
         and block_num <= $2
@@ -164,16 +195,20 @@ export class RequestIndexer {
       `,
       [from, to, chainConfig.chainL2.id]
     );
-    const cancelledIDs = result.rows.map((log: any) => BigInt(log.id));
-    const statuses = cancelledIDs
-      .map((id) => {
-        const request = this.requests.get(id);
+    const cancelledRequests = result.rows.map(rowToRequestCancelledLog);
+    const statuses = cancelledRequests
+      .map((req) => {
+        const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestCancelled: ${id}`);
+          console.error(`[REQUEST] Error handling RequestCancelled: ${req.id}`);
           return null;
         }
         request.status = DaimoRequestState.Cancelled;
-        this.requests.set(id, request);
+        request.updatedAt = guessTimestampFromNum(
+          req.blockNumber,
+          chainConfig.daimoChain
+        );
+        this.requests.set(req.id, request);
         return request;
       })
       .filter((n) => n != null);
@@ -192,7 +227,8 @@ export class RequestIndexer {
             tx_hash,
             log_idx,
             id,
-            fulfiller
+            fulfiller,
+            block_num
         from request_fulfilled
         where block_num >= $1
         and block_num <= $2
@@ -211,6 +247,10 @@ export class RequestIndexer {
         const fulfilledBy = await this.nameReg.getEAccount(req.fulfiller);
         request.fulfilledBy = fulfilledBy;
         request.status = DaimoRequestState.Fulfilled;
+        request.updatedAt = guessTimestampFromNum(
+          req.blockNumber,
+          chainConfig.daimoChain
+        );
         this.requests.set(req.id, request);
         this.logCoordinateToRequestFulfill.set(
           logCoordinateKey(req.transactionHash, req.logIndex),
@@ -224,43 +264,55 @@ export class RequestIndexer {
   }
 
   private storeReqByAddress(address: Address, id: bigint) {
-    const existingSet = this.requestsByAddress.get(address);
-
-    if (!existingSet) {
-      this.requestsByAddress.set(address, new Set([id]));
-    } else {
-      existingSet.add(id);
-    }
+    const existingReqs = this.requestsByAddress.get(address) || [];
+    this.requestsByAddress.set(address, [...existingReqs, id]);
   }
 
-  // Fetch requests made/received by a user
-  async getUserRequests(addr: Address) {
-    const reqs = [];
-    const ids = this.requestsByAddress.get(addr);
+  // Fetch requests made or received by an address
+  async getAddrRequests(addr: Address) {
+    const requests = (this.requestsByAddress.get(addr) || []).map(
+      (id) => this.requests.get(id)!
+    );
 
-    for (const requestId of Array.from(ids || [])) {
-      const request = this.requests.get(requestId);
+    return requests;
+  }
 
-      if (request == null) continue;
-      // If the request is cancelled or fulfilled, ignore.
-      const done = [DaimoRequestState.Cancelled, DaimoRequestState.Fulfilled];
-      if (done.includes(request.status)) continue;
+  // TODO: gate creates and declines by account API key
+  async declineRequest(idString: string, decliner: Address) {
+    const id = decodeRequestIdString(idString);
 
-      const { fulfiller } = parseRequestMetadata(request.metadata);
-      if (!fulfiller) continue;
+    const request = this.requests.get(id)!;
 
-      // Consider putting this directly on the request object.
-      // Handling here is to avoid confusion with `fulfilledBy`.
-      const fulfillerAccount = await this.nameReg.getEAccount(fulfiller);
+    const { fulfiller } = parseRequestMetadata(request.metadata);
 
-      reqs.push({
-        type: fulfillerAccount.addr === addr ? "fulfiller" : "recipient",
-        request,
-        fulfiller: fulfillerAccount,
-      } as const);
+    if (!fulfiller) {
+      console.log(`[REQUEST] no fulfiller for ${id}`);
+      return;
     }
 
-    return reqs;
+    const expectedFulfiller = await this.nameReg.getEAccount(fulfiller);
+
+    if (expectedFulfiller.addr !== decliner) {
+      console.log(`[REQUEST] invalid decliner for ${id}`);
+      return;
+    }
+
+    if (
+      request.status === DaimoRequestState.Created ||
+      request.status === DaimoRequestState.Pending
+    ) {
+      await this.db.insertDeclinedRequest(id, decliner);
+      this.requests.set(id, {
+        ...request,
+        status: DaimoRequestState.Declined,
+        updatedAt: now(),
+      });
+
+      const ls = this.listeners;
+      ls.forEach((l) => l([this.requests.get(id)!]));
+    } else {
+      console.log(`[REQUEST] skipping decline for ${id}: ${request.status}`);
+    }
   }
 
   getRequestStatusById(id: bigint): DaimoRequestV2Status | null {
@@ -299,5 +351,13 @@ function rowToRequestFulfilledLog(r: any): RequestFulfilledLog {
     logIndex: r.log_idx,
     id: BigInt(r.id),
     fulfiller: getAddress(bytesToHex(r.fulfiller, { size: 20 })),
+    blockNumber: BigInt(r.block_num),
+  };
+}
+
+function rowToRequestCancelledLog(r: any): RequestCancelledLog {
+  return {
+    id: BigInt(r.id),
+    blockNumber: BigInt(r.block_num),
   };
 }

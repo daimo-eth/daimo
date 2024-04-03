@@ -7,6 +7,8 @@ import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { DB } from "@daimo/api/src/db/db";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
+import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
+import { Telemetry } from "@daimo/api/src/server/telemetry";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
 import csv from "csvtojson";
@@ -60,21 +62,23 @@ function metricsDesc() {
 }
 
 async function metrics() {
-  const vc = getViemClientFromEnv();
+  const vc = getViemClientFromEnv(new Telemetry());
 
-  console.log(`[METRICS] using wallet ${vc.walletClient.account.address}`);
+  console.log(`[METRICS] using wallet ${vc.account.address}`);
   const db = new DB();
   const inviteGraph = new InviteGraph(db);
   const profileCache = new ProfileCache(vc, db);
   const nameReg = new NameRegistry(vc, inviteGraph, profileCache, new Set([]));
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(nameReg);
+  const requestIndexer = new RequestIndexer(db, nameReg);
+  const paymentMemoTracker = new PaymentMemoTracker(db);
   const coinIndexer = new CoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
-    requestIndexer
+    requestIndexer,
+    paymentMemoTracker
   );
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);

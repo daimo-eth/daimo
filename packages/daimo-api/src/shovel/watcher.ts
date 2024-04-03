@@ -24,8 +24,8 @@ const poolConfig: PoolConfig = {
 
 export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
-  private latest = 5700000;
-  private batchSize = 20000;
+  private latest = 5699999;
+  private batchSize = 100000;
   private isIndexing = false;
 
   private indexers: indexer[] = [];
@@ -68,7 +68,8 @@ export class Watcher {
   }
 
   async init() {
-    await this.indexRange(this.latest, await this.getShovelLatest());
+    const shovelLatest = await this.getShovelLatest();
+    await this.catchUpTo(shovelLatest);
   }
 
   // Watches shovel for new blocks, and indexes them.
@@ -97,19 +98,21 @@ export class Watcher {
     }, 1000);
   }
 
-  async indexRange(start: number, stop: number) {
-    this.latest = start - 1;
+  // Indexes batches till we get to the given block number, inclusive.
+  async catchUpTo(stop: number) {
     while (this.latest < stop) {
       this.latest = await this.index(this.latest + 1, stop, this.batchSize);
     }
     console.log(`[SHOVEL] initialized to ${this.latest}`);
   }
 
+  // Indexes a single batch of blocks.
+  // Returns new tip block number on success, 0 if stop<start (= no new blocks).
   private async index(start: number, stop: number, n: number): Promise<number> {
     const t0 = Date.now();
     const delta = stop - start;
-    if (delta <= 0n) return 0;
-    const limit = delta > n ? n : delta;
+    if (delta < 0) return 0;
+    const limit = delta >= n ? n - 1 : delta;
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     await Promise.all(
       this.indexers.map((i) => i.load(this.pg, start, start + limit))

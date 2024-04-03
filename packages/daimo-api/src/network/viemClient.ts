@@ -15,6 +15,8 @@ import {
   WriteContractParameters,
   createPublicClient,
   createWalletClient,
+  fallback,
+  http,
   isHex,
   webSocket,
 } from "viem";
@@ -24,23 +26,43 @@ import { chainConfig } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
 
+function getTransportFromEnv() {
+  const l1_RPCs = process.env.DAIMO_API_L1_RPC_WS!.split(",");
+  const l2_RPCs = process.env.DAIMO_API_L2_RPC_WS!.split(",");
+
+  console.log(`[VIEM] using transport RPCs L1: ${l1_RPCs}, L2: ${l2_RPCs}`);
+
+  const stringToTransport = (rpc: string) =>
+    rpc.startsWith("wss") ? webSocket(rpc) : http(rpc);
+
+  return {
+    l1: fallback(l1_RPCs.map(stringToTransport), { rank: true }),
+    l2: fallback(l2_RPCs.map(stringToTransport), { rank: true }),
+  };
+}
+
 /**
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
  * This account sponsors gas for account creation (and a faucet, on testnet).
  */
 export function getViemClientFromEnv(monitor: Telemetry) {
+  const transports = getTransportFromEnv();
+
   // Connect to L1
   const l1Client = createPublicClient({
     chain: chainConfig.chainL1,
-    transport: webSocket(process.env.DAIMO_API_L1_RPC_WS),
+    transport: transports.l1,
   });
 
   // Connect to L2
   const chain = chainConfig.chainL2;
   const account = getEOA(process.env.DAIMO_API_PRIVATE_KEY);
-  const transport = webSocket(process.env.DAIMO_API_L2_RPC_WS);
-  const publicClient = createPublicClient({ chain, transport });
-  const walletClient = createWalletClient({ chain, transport, account });
+  const publicClient = createPublicClient({ chain, transport: transports.l2 });
+  const walletClient = createWalletClient({
+    chain,
+    transport: transports.l2,
+    account,
+  });
 
   return new ViemClient(l1Client, publicClient, walletClient, monitor);
 }
@@ -78,7 +100,7 @@ export class ViemClient {
       try {
         return await this.l1Client.getEnsAddress(a);
       } catch (e: any) {
-        console.log(`[CHAIN] getEnsAddr ${a.name} error: ${e.message}`);
+        console.log(`[VIEM] getEnsAddr ${a.name} error: ${e.message}`);
         return null;
       }
     },
@@ -104,12 +126,12 @@ export class ViemClient {
       const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
       });
-      console.log(`[CHAIN] waitForReceipt ${hash}: ${JSON.stringify(receipt)}`);
+      console.log(`[VIEM] waitForReceipt ${hash}: ${JSON.stringify(receipt)}`);
       if (receipt.status !== "success") {
         this.onReceiptError(hash, JSON.stringify(receipt));
       }
     } catch (e) {
-      console.error(`[CHAIN] waitForReceipt error: ${e}`);
+      console.error(`[VIEM] waitForReceipt ${hash} error: ${e}`);
       this.onReceiptError(hash, e);
     }
   }
@@ -124,40 +146,45 @@ export class ViemClient {
       blockTag: "pending",
     });
     console.log(
-      `[CHAIN] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`
+      `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`
     );
     this.nextNonce = Math.max(this.nextNonce, txCount);
   }
 
   private async runWithOverrideParams<
-    Args extends { nonce?: number; gas?: bigint },
+    Args extends {
+      nonce?: number;
+      gas?: bigint;
+      chain?: Chain | null;
+    },
     Ret
   >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
     const startMs = performance.now();
     const localTxId = Math.floor(Math.random() * 1e6);
     console.log(
-      `[CHAIN] ready to run $${localTxId} with override, waiting for lock`
+      `[VIEM] ready to run ${localTxId} with override, waiting for lock`
     );
     await this.lockNonce.acquireAsync();
 
     try {
       console.log(
-        `[CHAIN] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
+        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
       );
       await this.updateNonce();
       console.log(
-        `[CHAIN] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
+        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
           this.nextNonce
         }`
       );
 
       args.nonce = this.nextNonce; // Override nonce
       args.gas = 2_000_000n; // Saves estimateGas roundtrip
+      args.chain = null; // Saves eth_chainId roundtrip, see https://github.com/wevm/viem/pull/474#discussion_r1190476819
 
       const ret = await fn(args);
 
       console.log(
-        `[CHAIN] tx ${localTxId} ${
+        `[VIEM] tx ${localTxId} ${
           performance.now() - startMs
         }ms: submitted ${ret}`
       );
@@ -195,7 +222,7 @@ export class ViemClient {
   async sendTransaction<TChainOverride extends Chain | undefined = undefined>(
     args: SendTransactionParameters<Chain, Account, TChainOverride>
   ): Promise<SendTransactionReturnType> {
-    console.log(`[CHAIN] send ${args.to}, waiting for lock`);
+    console.log(`[VIEM] send ${args.to}, waiting for lock`);
     const ret = await this.runWithOverrideParams(
       args,
       this.walletClient.sendTransaction

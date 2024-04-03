@@ -77,17 +77,16 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
     else if (fcAccount != null) return "Your account is linked";
     else return "Connect Farcaster";
   })();
+
   return (
-    <View style={ss.container.screen}>
-      <View style={ss.container.padH16}>
-        <Spacer h={16} />
-        <TextH3>{header}</TextH3>
-        <Spacer h={12} />
-        {isLoading && url == null && <TextLight>Loading...</TextLight>}
-        {isLoading && url != null && <FarcasterQRButton url={url} />}
-        {hasFcAccount && <LinkFarcasterSection {...{ account, data }} />}
-        {error && <ErrorRowCentered error={error} />}
-      </View>
+    <View style={{ ...ss.container.padH16, height: 472 }}>
+      <Spacer h={16} />
+      <TextH3>{header}</TextH3>
+      <Spacer h={12} />
+      {isLoading && url == null && <TextLight>Loading...</TextLight>}
+      {isLoading && url != null && <FarcasterQRButton url={url} />}
+      {hasFcAccount && <LinkFarcasterSection {...{ account, data }} />}
+      {error && <ErrorRowCentered error={error} />}
     </View>
   );
 }
