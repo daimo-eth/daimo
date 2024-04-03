@@ -17,6 +17,7 @@ export const color = {
   grayMid: "#717171", // TODO gray4
   grayDark: "#444", // TODO gray5
   midnight: "#262626", // TODO "black" = 111111
+  link: "#027AFE",
 };
 
 const textBase: TextStyle = {
@@ -50,6 +51,12 @@ export const ss = {
       backgroundColor: color.white,
       paddingHorizontal: 16,
     },
+    screenWithoutPadding: {
+      flex: 1,
+      flexDirection: "column",
+      alignItems: "stretch",
+      backgroundColor: color.white,
+    },
     center: {
       flex: 1,
       alignItems: "center",
@@ -61,12 +68,22 @@ export const ss = {
     padH16: {
       paddingHorizontal: 16,
     },
+    padH24: {
+      paddingHorizontal: 24,
+    },
     marginHNeg16: {
       marginHorizontal: -16,
     },
     debug: {
       borderWidth: 1,
       borderColor: "#f00",
+    },
+    shadow: {
+      // iOS
+      shadowOffset: { height: 2, width: -1 },
+      shadowOpacity: 0.05,
+      // Android
+      elevation: 1,
     },
   }),
   text: StyleSheet.create({
@@ -140,6 +157,16 @@ export const ss = {
     },
     mono: {
       fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+    },
+    emphasizedSmallText: {
+      ...textBase,
+      fontWeight: "600",
+      fontSize: 12,
+    },
+    link: {
+      color: color.link,
+      fontSize: 16,
+      fontWeight: "600",
     },
   }),
 };

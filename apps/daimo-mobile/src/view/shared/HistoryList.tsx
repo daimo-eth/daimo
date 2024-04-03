@@ -24,7 +24,7 @@ import { ContactBubble } from "./ContactBubble";
 import { PendingDot } from "./PendingDot";
 import Spacer from "./Spacer";
 import { color, ss, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBody, TextCenter, TextLight } from "./text";
+import { DaimoText, TextBody, TextCenter, TextLight, TextMeta } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { getCachedEAccount } from "../../logic/addr";
 import { Account } from "../../model/account";
@@ -91,8 +91,7 @@ export function HistoryListSwipe({
 
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
-    const title =
-      otherAcc == null ? "Transaction history" : `Transactions between you`;
+    const title = otherAcc == null ? "Recent activity" : `Between you`;
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />
@@ -233,6 +232,12 @@ function DisplayOpRow({
     opTitle = "cancelled link";
   }
 
+  const opMemo =
+    displayOp.type === "transfer" && displayOp.memo
+      ? displayOp.memo
+      : undefined;
+  const memoCol = isPending ? color.gray3 : color.grayDark;
+
   return (
     <View style={styles.transferBorder}>
       <TouchableHighlight
@@ -254,8 +259,15 @@ function DisplayOpRow({
                 {...{ isPending }}
               />
             </TouchableOpacity>
-
-            <TextBody color={textCol}>{opTitle}</TextBody>
+            <View style={{ flexDirection: "column" }}>
+              <TextBody color={textCol}>{opTitle}</TextBody>
+              {opMemo && (
+                <>
+                  <Spacer h={2} />
+                  <TextMeta color={memoCol}>{opMemo}</TextMeta>
+                </>
+              )}
+            </View>
             {isPending && <PendingDot />}
           </View>
           <TransferAmountDate

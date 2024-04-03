@@ -1,6 +1,6 @@
 import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
-import { Address, getAddress } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {
@@ -109,6 +109,28 @@ export class DB {
             link VARCHAR(256) NOT NULL, -- new link
             update_token VARCHAR(64) DEFAULT NULL -- token used for this update
           );
+
+          CREATE TABLE IF NOT EXISTS payment_memo (
+            ophash_hex VARCHAR(66) PRIMARY KEY,
+            memo TEXT NOT NULL
+          );
+
+          CREATE TABLE IF NOT EXISTS declined_requests (
+            request_id VARCHAR(128) PRIMARY KEY,
+            decliner CHAR(42) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW()
+          );
+
+          --
+          -- Ensure every table tracks creation time.
+          --
+          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE invite_graph ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE payment_memo ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE offchain_action ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+          ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+
       `);
     await client.end();
   }
@@ -265,7 +287,8 @@ export class DB {
   async loadInviteCode(code: string): Promise<InviteCodeRow | null> {
     console.log(`[DB] loading invite code ${code}`);
     const result = await this.pool.query<RawInviteCodeRow>(
-      `SELECT code, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter FROM invitecode WHERE code = $1`,
+      `SELECT code, created_at, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter 
+      FROM invitecode WHERE code = $1`,
       [code]
     );
 
@@ -273,6 +296,7 @@ export class DB {
     const row = result.rows[0];
     return {
       code: row.code,
+      createdAt: dateToUnix(row.created_at),
       useCount: row.use_count,
       maxUses: row.max_uses,
       zupassEmail: row.zupass_email,
@@ -366,6 +390,65 @@ export class DB {
 
     return result.rows.length > 0;
   }
+
+  async loadPaymentMemos(): Promise<PaymentMemoRow[]> {
+    console.log(`[DB] loading payment memos`);
+    const client = await this.pool.connect();
+    const result = await client.query<RawPaymentMemoRow>(
+      `SELECT ophash_hex, memo FROM payment_memo`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} payment memo rows`);
+    return result.rows.map((row) => ({
+      opHash: row.ophash_hex as Hex,
+      memo: row.memo,
+    }));
+  }
+
+  async insertPaymentMemo(row: PaymentMemoRow) {
+    console.log(`[DB] inserting payment memos`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO payment_memo (ophash_hex, memo) VALUES ($1, $2)`,
+      [row.opHash, row.memo]
+    );
+    client.release();
+
+    console.log(`[DB] inserted payment memos`);
+  }
+
+  async loadDeclinedRequests(): Promise<DeclinedRequestRow[]> {
+    console.log(`[DB] loading declined requests`);
+    const client = await this.pool.connect();
+    const result = await client.query<RawDeclinedRequestRow>(
+      `SELECT request_id, decliner, created_at FROM declined_requests`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} declined request rows`);
+    return result.rows.map((row) => ({
+      requestId: BigInt(row.request_id),
+      decliner: row.decliner,
+      createdAt: dateToUnix(row.created_at),
+    }));
+  }
+
+  async insertDeclinedRequest(requestId: bigint, decliner: string) {
+    console.log(`[DB] inserting declined request`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO declined_requests (request_id, decliner) VALUES ($1, $2)`,
+      [requestId.toString(), decliner]
+    );
+    client.release();
+
+    console.log(`[DB] inserted declined request`);
+  }
+}
+
+function dateToUnix(d: Date): number {
+  return Math.floor(d.getTime() / 1000);
 }
 
 interface PushTokenRow {
@@ -375,6 +458,7 @@ interface PushTokenRow {
 
 export interface InviteCodeRow {
   code: string;
+  createdAt: number;
   useCount: number;
   maxUses: number;
   zupassEmail: string | null;
@@ -393,6 +477,7 @@ export interface InsertInviteCodeArgs {
 
 interface RawInviteCodeRow {
   code: string;
+  created_at: Date;
   use_count: number;
   max_uses: number;
   zupass_email: string | null;
@@ -426,4 +511,26 @@ interface TagRedirectRow {
   tag: string;
   link: string;
   update_token: string | null;
+}
+
+interface RawPaymentMemoRow {
+  ophash_hex: string;
+  memo: string;
+}
+
+export interface PaymentMemoRow {
+  opHash: Hex;
+  memo: string;
+}
+
+interface RawDeclinedRequestRow {
+  request_id: string;
+  decliner: string;
+  created_at: Date;
+}
+
+interface DeclinedRequestRow {
+  requestId: bigint;
+  decliner: string;
+  createdAt: number;
 }

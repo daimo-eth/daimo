@@ -4,21 +4,21 @@ import {
   DaimoNoteStatus,
   DisplayOpEvent,
   EAccount,
-  OpEvent,
   OpStatus,
   PaymentLinkOpEvent,
   amountToDollars,
-  canSendTo,
   getAccountName,
-  timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
+import Octicons from "@expo/vector-icons/Octicons";
+import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
-import { Linking, StyleSheet, View } from "react-native";
-import { TouchableHighlight } from "react-native-gesture-handler";
+import { Linking, View } from "react-native";
+import { Address } from "viem";
 
 import { NoteDisplay } from "./link/NoteScreen";
+import { Dispatcher, DispatcherContext } from "../../action/dispatch";
 import {
   ParamListBottomSheet,
   navToAccountPage,
@@ -29,20 +29,18 @@ import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
+import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
-import { ButtonBig } from "../shared/Button";
+import { ButtonBig, LinkButton } from "../shared/Button";
 import { CenterSpinner } from "../shared/CenterSpinner";
-import { ContactBubble } from "../shared/ContactBubble";
-import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss } from "../shared/style";
 import {
   TextBody,
   TextBodyCaps,
   TextCenter,
   TextError,
-  TextH3,
   TextPara,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
@@ -93,8 +91,11 @@ function HistoryOpScreenInner({
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Transfer" onExit={leaveScreen} hideOfflineHeader />
-      <Spacer h={16} />
+      <ScreenHeader
+        title={getOpVerb(op, account.address)}
+        onExit={leaveScreen}
+        hideOfflineHeader
+      />
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
@@ -171,6 +172,8 @@ function TransferBody({
   account: Account;
   op: DisplayOpEvent;
 }) {
+  const nav = useNav();
+
   let other: EAccount;
   const sentByUs = op.from === account.address;
   if (sentByUs) {
@@ -178,86 +181,105 @@ function TransferBody({
   } else {
     other = getCachedEAccount(op.from);
   }
-  const isPayLink = other.label === "payment link";
-  const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
-
-  const verb = (() => {
-    if (isPayLink) {
-      return sentByUs ? "Created link" : "Accepted link";
-    } else if (isRequestResponse) {
-      return sentByUs ? "Fulfilled request" : "Received request";
-    } else {
-      return sentByUs ? "Sent" : "Received";
-    }
-  })();
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
+  // Help button to explain fees, chain, etc
+  const dispatcher = useContext(DispatcherContext);
+  const onShowHelp = useCallback(() => showHelpWhyNoFees(dispatcher), []);
+
+  // Generate subtitle = fees, chain, other details
+  const col = color.grayMid;
+  const subtitleElems = [
+    <React.Fragment key="fees">
+      <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
+    </React.Fragment>,
+    <React.Fragment key="coin">
+      <TextBody color={col}>{coinName}</TextBody>
+    </React.Fragment>,
+    <React.Fragment key="chain">
+      {chainName}
+      <Spacer w={8} />
+      <Octicons size={16} name="info" color={col} />
+    </React.Fragment>,
+  ];
+
+  for (let i = subtitleElems.length - 1; i > 0; i--) {
+    const spacerText = " • ";
+    const space = <React.Fragment key={i}>{spacerText}</React.Fragment>;
+    subtitleElems.splice(i, 0, space);
+  }
+
   return (
     <View>
-      <TextCenter>
-        <TextH3 color={color.grayDark}>{verb}</TextH3>
-      </TextCenter>
-      <Spacer h={4} />
       <TitleAmount
         amount={BigInt(op.amount)}
         preSymbol={sentByUs ? "-" : "+"}
         style={sentByUs ? { color: "black" } : { color: color.success }}
       />
-      <Spacer h={8} />
-      <TextCenter>
-        <TextBodyCaps color={color.grayMid}>
-          <FeeText amount={op.feeAmount} /> • {coinName} • {chainName}
-        </TextBodyCaps>
-      </TextCenter>
+      {op.type === "transfer" && op.memo && (
+        <>
+          <Spacer h={4} />
+          <TextCenter>
+            <TextBodyCaps color={color.grayMid}>{op.memo}</TextBodyCaps>
+          </TextCenter>
+        </>
+      )}
+      <Spacer h={16} />
+      <TouchableOpacity onPress={onShowHelp} hitSlop={8}>
+        <TextCenter>
+          <TextBodyCaps color={color.grayMid}>{subtitleElems}</TextBodyCaps>
+        </TextCenter>
+      </TouchableOpacity>
       <Spacer h={32} />
-      <OpRow op={op} otherAcc={other} />
-      <View style={styles.transferBorder} />
+      <AccountRow
+        acc={other}
+        timestamp={op.timestamp}
+        viewAccount={() => navToAccountPage(other, nav)}
+        pending={op.status === "pending"}
+      />
     </View>
   );
 }
 
-function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
-  const isPending = op.status === "pending";
-  const textDark = isPending ? color.gray3 : color.midnight;
-  const textLight = isPending ? color.gray3 : color.grayMid;
+function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
+  const isPayLink = op.type === "createLink" || op.type === "claimLink";
+  const sentByUs = op.from === accountAddress;
+  const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
 
-  const date = timeString(op.timestamp);
-
-  const nav = useNav();
-
-  const viewAccount = useCallback(() => {
-    navToAccountPage(otherAcc, nav);
-  }, [nav, otherAcc]);
-
-  return (
-    <View style={styles.transferBorder}>
-      <TouchableHighlight
-        onPress={viewAccount}
-        disabled={!canSendTo(otherAcc)}
-        {...touchHighlightUnderlay.subtle}
-        style={styles.transferRowWrap}
-      >
-        <View style={styles.transferRow}>
-          <View style={styles.transferOtherAccount}>
-            <ContactBubble
-              contact={{ type: "eAcc", ...otherAcc }}
-              size={36}
-              {...{ isPending }}
-            />
-            <TextBody color={textDark}>{getAccountName(otherAcc)}</TextBody>
-            {isPending && <PendingDot />}
-          </View>
-          <TextPara color={textLight}>{date}</TextPara>
-        </View>
-      </TouchableHighlight>
-    </View>
-  );
+  if (isPayLink) {
+    return sentByUs ? "Created link" : "Accepted link";
+  } else if (isRequestResponse) {
+    return sentByUs ? "Fulfilled request" : "Received request";
+  } else {
+    return sentByUs ? "Sent" : "Received";
+  }
 }
 
-function FeeText({ amount }: { amount?: number }) {
+function showHelpWhyNoFees(dispatcher: Dispatcher) {
+  dispatcher.dispatch({
+    name: "helpModal",
+    title: "How transfers work",
+    content: (
+      <View style={ss.container.padH8}>
+        <TextPara>Daimo uses Base, an Ethereum rollup.</TextPara>
+        <Spacer h={24} />
+        <TextPara>
+          Rollups inherit the strong security guarantees of Ethereum, at much
+          lower cost.
+        </TextPara>
+        <Spacer h={24} />
+        <LinkButton url="https://l2beat.com/scaling/projects/base">
+          Learn more on L2Beat.
+        </LinkButton>
+      </View>
+    ),
+  });
+}
+
+function getFeeText(amount?: number) {
   if (amount == null) {
     return "PENDING";
   }
@@ -268,25 +290,3 @@ function FeeText({ amount }: { amount?: number }) {
   }
   return feeStr === "$0.00" ? "NO FEE" : feeStr + " FEE";
 }
-
-const styles = StyleSheet.create({
-  transferBorder: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-  },
-  transferRowWrap: {
-    marginHorizontal: -24,
-  },
-  transferRow: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  transferOtherAccount: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-});

@@ -1,8 +1,12 @@
-import { createContext } from "react";
+import { DaimoRequestV2Status } from "@daimo/common";
+import { ReactElement, createContext } from "react";
 
-type Action =
+export type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
+  | { name: "onboardingChecklist" }
+  | { name: "helpModal"; title: string; content: ReactElement }
+  | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
   | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];

@@ -14,6 +14,9 @@ const pfpCache = new LRUCache<string, Blob>({
   max: 1000,
 });
 
+// Opt out of caching for all data requests in the route segment
+export const dynamic = "force-dynamic";
+
 export async function GET(_: Request, { params }: Context) {
   const addr = params.addr[0];
 

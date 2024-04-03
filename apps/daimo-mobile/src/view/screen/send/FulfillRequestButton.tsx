@@ -71,8 +71,7 @@ export function FulfillRequestButton({
       },
     },
     accountTransform: transferAccountTransform(
-      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : [],
-      requestStatus.link.id
+      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : []
     ),
     signerType: "deviceKey",
   });
@@ -115,7 +114,7 @@ export function FulfillRequestButton({
       case "idle":
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return null;
+        if (dollars === 0) return "Payments are public";
         return `Total incl. fees ${getAmountText({
           dollars: cost.totalDollars,
         })}`;

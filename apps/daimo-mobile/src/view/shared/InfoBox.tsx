@@ -11,7 +11,7 @@ export function InfoBox({
   icon,
 }: {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon?: OctName;
 }) {
   return (
@@ -22,7 +22,7 @@ export function InfoBox({
       </View>
       <View style={styles.bubbleText}>
         <TextBody>{title}</TextBody>
-        <TextBody color={color.grayDark}>{subtitle}</TextBody>
+        {subtitle && <TextBody color={color.grayDark}>{subtitle}</TextBody>}
       </View>
     </View>
   );
@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    width: 32,
-    height: 32,
-    borderRadius: 32,
+    width: 24,
+    height: 24,
+    borderRadius: 24,
   },
   bubbleText: {
     flex: 1,

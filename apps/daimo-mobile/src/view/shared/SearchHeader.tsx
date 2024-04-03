@@ -10,9 +10,11 @@ import Animated, {
 
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
+import { Icon } from "./Icon";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { useInAppNotifications } from "../../logic/inAppNotifications";
 
 const animationConfig = { duration: 150 };
 
@@ -83,37 +85,45 @@ export function SearchHeader({
   );
 
   const [account] = useAccount();
+  const notifInfo = useInAppNotifications();
+
   if (account == null) return null;
 
   return (
     <View style={styles.header}>
       <Animated.View key="back" style={backButton}>
-        <TouchableOpacity onPress={() => Keyboard.dismiss()} hitSlop={16}>
+        <TouchableOpacity
+          onPress={() => {
+            setPrefix(undefined);
+            Keyboard.dismiss();
+          }}
+          hitSlop={16}
+        >
           <Octicons name="arrow-left" size={30} color={color.midnight} />
         </TouchableOpacity>
       </Animated.View>
       <Animated.View key="icon" style={qrButton}>
         <ButtonCircle size={50} onPress={goToQR}>
           <View style={styles.circleButton}>
-            <Octicons name="apps" size={24} color={color.primary} />
+            <Icon name="qr-code-01" size={24} color={color.primary} />
           </View>
         </ButtonCircle>
       </Animated.View>
       <AnimatedSearchInput
         icon="search"
         placeholder="Search for user..."
-        value={prefix || ""}
+        value={prefix}
         onChange={setPrefix}
-        onFocus={() => setPrefix("")}
-        onBlur={() => setPrefix(undefined)}
+        onFocus={() => setPrefix(prefix || "")}
+        onClose={() => setPrefix(undefined)}
         innerRef={innerRef}
         style={{ zIndex: 10 }}
       />
       <Animated.View style={[{ marginLeft: 16 }, notificationsButton]}>
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.circleButton}>
-            <Octicons name="bell" size={24} color={color.primary} />
-            {account.requests.length > 0 ? <NotificationBadge /> : null}
+            <Icon name="bell-01" size={24} color={color.primary} />
+            {notifInfo.unread && <NotificationBadge />}
           </View>
         </ButtonCircle>
       </Animated.View>

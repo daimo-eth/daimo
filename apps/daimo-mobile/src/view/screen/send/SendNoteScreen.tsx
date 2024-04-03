@@ -75,9 +75,9 @@ export function SendNoteScreen({ route }: Props) {
         <Spacer h={8} />
         <InfoBox
           title="Pay by sending a link"
-          subtitle="Daimo invite included with money"
+          subtitle="Payment includes Daimo invite"
         />
-        <Spacer h={32} />
+        <Spacer h={24} />
         {recipient ? (
           <RecipientDisplay recipient={recipient} />
         ) : (
@@ -109,7 +109,7 @@ export function SendNoteScreen({ route }: Props) {
           />
         )}
 
-        <Spacer h={32} />
+        <Spacer h={24} />
         {!amountChosen && (
           <ButtonBig
             type="primary"

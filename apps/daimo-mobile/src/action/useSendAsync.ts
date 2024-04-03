@@ -136,10 +136,7 @@ export function useSendAsync({
 
 /** Regular transfer / payment link account transform. Adds pending
  *  transfer to history and merges any new named accounts. */
-export function transferAccountTransform(
-  namedAccounts: EAccount[],
-  requestId?: string
-) {
+export function transferAccountTransform(namedAccounts: EAccount[]) {
   return (account: Account, pendingOp: OpEvent): Account => {
     assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
     // Filter to new named accounts only
@@ -155,14 +152,6 @@ export function transferAccountTransform(
         pendingOp as DisplayOpEvent,
       ],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
-      // If sending based on request, remove request from requests list.
-      ...(requestId
-        ? {
-            requests: account.requests.filter(
-              (r) => r.request.link.id !== requestId
-            ),
-          }
-        : {}),
     };
   };
 }
@@ -184,6 +173,7 @@ function addInviteLinkStatus(
       ? {
           link: { type: "invite", code: pendingOpEventData.inviteCode },
           isValid: false, // initialize false, filled on sync
+          createdAt: now(),
         }
       : null;
 
@@ -194,12 +184,13 @@ function addInviteLinkStatus(
 }
 
 /** Warm the DaimoOpSender cache. */
-export function useWarmCache(
-  enclaveKeyName?: string,
-  address?: Address,
-  keySlot?: number,
-  chainId?: number
-) {
+export function useWarmSenderCache(account: Account) {
+  const { enclaveKeyName, address } = account;
+  const chainId = account.homeChainId;
+  const keySlot = account.accountKeys.find(
+    (keyData) => keyData.pubKey === account.enclavePubKey
+  )?.slot;
+
   useEffect(() => {
     if (!enclaveKeyName || !address || !keySlot || !chainId) return;
     loadOpSender({
@@ -246,9 +237,9 @@ function loadOpSender({
       ? getWrappedRawSigner(enclaveKeyName, keySlot!)
       : getWrappedPasskeySigner(daimoChain, signerType === "securityKey");
 
-  const sender: OpSenderCallback = async (op: UserOpHex) => {
+  const sender: OpSenderCallback = async (op: UserOpHex, memo?: string) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
-    return rpcFunc.sendUserOpV2.mutate({ op });
+    return rpcFunc.sendUserOpV2.mutate({ op, memo });
   };
 
   promise = (async () => {

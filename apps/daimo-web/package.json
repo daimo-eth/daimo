@@ -6,7 +6,6 @@
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "@headlessui/react": "^1.7.18",
-    "@lifi/widget": "^2.9.0",
     "@neynar/nodejs-sdk": "^1.12.0",
     "@rainbow-me/rainbowkit": "^1.1.1",
     "@tanstack/react-query": "^5.28.4",

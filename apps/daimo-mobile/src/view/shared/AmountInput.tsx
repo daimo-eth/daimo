@@ -42,6 +42,7 @@ export function AmountChooser({
 }) {
   // Show how much we have available
   const [account] = useAccount();
+
   if (account == null) return null;
   const dollarStr = getAmountText({ amount: account.lastBalance });
 

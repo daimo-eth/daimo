@@ -1,10 +1,10 @@
 import {
+  DisplayOpEvent,
   amountToDollars,
+  formatDaimoLink,
   getAccountName,
-  guessTimestampFromNum,
 } from "@daimo/common";
 import {
-  daimoChainFromId,
   daimoPaymasterV2ABI,
   daimoPaymasterV2Address,
   entryPointABI,
@@ -21,7 +21,6 @@ import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 
 export class Crontab {
-  private transfersQueue: Transfer[] = [];
   private cronJobs: CronJob[] = [];
 
   constructor(
@@ -32,13 +31,12 @@ export class Crontab {
   ) {}
 
   async init() {
-    this.coinIndexer.pipeAllTransfers(this.pipeTransfers);
     this.cronJobs = [
       new CronJob("*/5 * * * *", () => this.checkPaymasterDeposit()),
       new CronJob("*/5 * * * *", () => this.checkFaucetBalance()),
-      new CronJob("*/5 * * * *", () => this.postRecentTransfers()),
       new CronJob("*/1 * * * *", () => this.printStatus()),
     ];
+    this.coinIndexer.addListener(this.pipeTransfers);
 
     this.cronJobs.forEach((job) => job.start());
   }
@@ -48,26 +46,14 @@ export class Crontab {
     const cpu = process.cpuUsage();
     const coinIndexer = this.coinIndexer.status();
     const nameRegistry = this.nameRegistry.status();
-    const status = { mem, cpu, coinIndexer, nameRegistry };
+    const status = {
+      mem,
+      cpu,
+      coinIndexer,
+      nameRegistry,
+    };
     console.log(`[CRON] status: ${JSON.stringify(status)}`);
   }
-
-  private pruneTransfers = () => {
-    this.transfersQueue = this.transfersQueue.filter(
-      (log) =>
-        guessTimestampFromNum(
-          log.blockNumber,
-          daimoChainFromId(chainConfig.chainL2.id)
-        ) *
-          1000 >
-        Date.now() - 1000 * 60 * 5 // Only keep 5 minutes of logs
-    );
-  };
-
-  private pipeTransfers = (logs: Transfer[]) => {
-    this.transfersQueue = this.transfersQueue.concat(logs);
-    this.pruneTransfers();
-  };
 
   async sendLowBalanceMessage(
     balance: number,
@@ -111,8 +97,8 @@ export class Crontab {
     await this.sendLowBalanceMessage(
       depositEth,
       `Paymaster ${daimoPaymasterV2Address} ETH`,
-      isMetaPaymasterEnabled ? 0.01 : 0.1,
-      isMetaPaymasterEnabled ? 0.005 : 0.2
+      isMetaPaymasterEnabled ? 0.01 : 0.15,
+      isMetaPaymasterEnabled ? 0.005 : 0.05
     );
   }
 
@@ -148,26 +134,34 @@ export class Crontab {
     );
   }
 
-  async postRecentTransfers() {
-    this.pruneTransfers();
-    for (const transfer of this.transfersQueue) {
-      const fromName = this.nameRegistry.resolveDaimoNameForAddr(transfer.from);
-      const toName = this.nameRegistry.resolveDaimoNameForAddr(transfer.to);
-
-      if (fromName == null && toName == null) continue;
-
-      const fromDisplayName = getAccountName(
-        await this.nameRegistry.getEAccount(transfer.from)
-      );
-      const toDisplayName = getAccountName(
-        await this.nameRegistry.getEAccount(transfer.to)
-      );
-
-      this.telemetry.recordClippy(
-        `Transfer: ${fromDisplayName} -> ${toDisplayName} $${amountToDollars(
-          transfer.value
-        )}`
-      );
+  private pipeTransfers = (logs: Transfer[]) => {
+    for (const transfer of logs) {
+      const opEvent = this.coinIndexer.attachTransferOpProperties(transfer);
+      this.postRecentTransfer(opEvent);
     }
+  };
+
+  async postRecentTransfer(opEvent: DisplayOpEvent) {
+    const fromName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.from);
+    const toName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.to);
+
+    if (fromName == null && toName == null) return;
+
+    const fromDisplayName = getAccountName(
+      await this.nameRegistry.getEAccount(opEvent.from)
+    );
+    const toDisplayName = getAccountName(
+      await this.nameRegistry.getEAccount(opEvent.to)
+    );
+
+    this.telemetry.recordClippy(
+      `Transfer: ${fromDisplayName} -> ${toDisplayName} $${amountToDollars(
+        opEvent.amount
+      )} ${
+        opEvent.type === "transfer" && opEvent.requestStatus
+          ? " for " + formatDaimoLink(opEvent.requestStatus.link)
+          : ""
+      } ${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
+    );
   }
 }

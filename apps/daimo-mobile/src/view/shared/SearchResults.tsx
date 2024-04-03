@@ -1,5 +1,6 @@
 import { now, timeAgo } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import * as Contacts from "expo-contacts";
 import { useCallback } from "react";
 import {
@@ -68,12 +69,13 @@ function SearchResultsScroll({
 
   const recentsOnly = prefix === "";
 
-  const kbH = useKeyboardHeight();
+  const kbH = useKeyboardHeight() - useBottomTabBarHeight();
 
   return (
     <ScrollView
       contentContainerStyle={styles.resultsScroll}
       keyboardShouldPersistTaps="handled"
+      style={styles.scrollView}
     >
       {res.error && <ErrorRowCentered error={res.error} />}
       {recentsOnly && contactsPermission && (
@@ -259,14 +261,21 @@ function ExtraRows({
         }}
       />
       <ExtraRow
-        title="Scan QR code"
+        title={mode === "receive" ? "Show QR code" : "Scan QR code"}
         inside={<Octicons name="apps" size={14} color={color.primary} />}
-        onPress={() =>
-          nav.navigate("SendTab", {
-            screen: "QR",
-            params: { option: mode === "receive" ? "PAY ME" : "SCAN" },
-          })
-        }
+        onPress={() => {
+          if (mode === "receive") {
+            nav.navigate("HomeTab", {
+              screen: "QR",
+              params: { option: "PAY ME" },
+            });
+          } else {
+            nav.navigate("SendTab", {
+              screen: "QR",
+              params: { option: "SCAN" },
+            });
+          }
+        }}
       />
     </>
   );
@@ -340,5 +349,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+  },
+  scrollView: {
+    height: "100%",
   },
 });

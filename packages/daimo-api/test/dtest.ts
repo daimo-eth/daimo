@@ -5,6 +5,7 @@ import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { getViemClientFromEnv } from "../src/network/viemClient";
+import { PaymentMemoTracker } from "../src/offchain/paymentMemoTracker";
 import { Telemetry } from "../src/server/telemetry";
 import { Watcher } from "../src/shovel/watcher";
 
@@ -19,23 +20,22 @@ async function main() {
     new Set<string>()
   );
   const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(nameReg);
+  const requestIndexer = new RequestIndexer(null as any, nameReg);
+  const paymentMemoTracker = new PaymentMemoTracker(null as any);
   const coinIndexer = new CoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
-    requestIndexer
+    requestIndexer,
+    paymentMemoTracker
   );
   const keyReg = new KeyRegistry();
 
   const shovelWatcher = new Watcher();
   shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
 
-  const { startBlock, lastBlockNum } = {
-    startBlock: 5700000,
-    lastBlockNum: 7000000,
-  };
-  await shovelWatcher.indexRange(startBlock, lastBlockNum);
+  const lastBlockNum = 7000000;
+  await shovelWatcher.catchUpTo(lastBlockNum);
 
   let numKeyData: number = 0;
   keyReg["addrToKeyData"].forEach((addr, kd) => (numKeyData += kd.length));

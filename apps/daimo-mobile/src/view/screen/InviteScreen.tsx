@@ -7,17 +7,22 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import {
-  StyleSheet,
   Image,
-  View,
-  TouchableHighlight,
   ImageBackground,
   Pressable,
+  StyleSheet,
+  TouchableHighlight,
+  View,
 } from "react-native";
 
 import InviteBackground from "../../../assets/invite-background.png";
 import InviteCover from "../../../assets/invite-cover.png";
-import { navToAccountPage, useExitToHome, useNav } from "../../common/nav";
+import {
+  navToAccountPage,
+  useExitBack,
+  useExitToHome,
+  useNav,
+} from "../../common/nav";
 import { Account } from "../../model/account";
 import { ButtonBig, ButtonMed } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
@@ -174,11 +179,12 @@ function HeaderCountText({
 const headerTitle = "Invite your friends and earn USDC!";
 
 function LockedHeader() {
+  const goBack = useExitBack();
   const goHome = useExitToHome();
 
   return (
     <View>
-      <ScreenHeader title="Invite Friends" onExit={goHome} />
+      <ScreenHeader title="Invite Friends" onExit={goBack || goHome} />
       <HeaderGraphic />
       <Spacer h={32} />
       <TextCenter>
@@ -222,11 +228,12 @@ function Header({
   invitees: EAccount[];
   inviteLinkStatus?: DaimoInviteCodeStatus;
 }) {
+  const goBack = useExitBack();
   const goHome = useExitToHome();
 
   return (
     <View>
-      <ScreenHeader title="Invite Friends" onExit={goHome} />
+      <ScreenHeader title="Invite Friends" onExit={goBack || goHome} />
       <HeaderGraphic invitees={invitees} />
       <Spacer h={8} />
       <HeaderCountText
@@ -353,9 +360,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.white,
     borderColor: color.grayLight,
     borderWidth: 1,
-    shadowOffset: { height: 2, width: -1 },
-    elevation: 2,
-    shadowOpacity: 0.1,
+    ...ss.container.shadow,
   },
   codeView: {
     flexDirection: "row",

@@ -24,7 +24,12 @@ import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
-import { BadgeButton, ButtonMed, TextButton } from "../shared/Button";
+import {
+  BadgeButton,
+  ButtonMed,
+  HelpButton,
+  TextButton,
+} from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
@@ -195,6 +200,21 @@ function DevicesSection({ account }: { account: Account }) {
       .filter((k) => k.rotationType === "add")
       .map((k) => <PendingDeviceRow key={k.slot} slot={k.slot} />);
   }, [account.pendingKeyRotation])();
+  const dispatcher = useContext(DispatcherContext);
+  const openHelpModal = () =>
+    dispatcher.dispatch({
+      name: "helpModal",
+      title: "What is a passkey backup?",
+      content: (
+        <>
+          <TextLight>
+            Passkeys are a safer and easier alternative to passwords. With
+            passkeys, users can sign in to apps and websites with a biometric
+            sensor.
+          </TextLight>
+        </>
+      ),
+    });
 
   return (
     <View style={styles.sectionWrap}>
@@ -207,14 +227,15 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={24} />
-      <ButtonInfo
+      <HelpRow
         title="Create a Passkey Backup"
         message="Secured by your password manager"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
+        onPressHelp={openHelpModal}
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
-      <ButtonInfo
+      <HelpRow
         title="Add a Device"
         message="Use your account on another device"
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
@@ -225,20 +246,26 @@ function DevicesSection({ account }: { account: Account }) {
   );
 }
 
-function ButtonInfo({
+function HelpRow({
   icon,
   title,
   message,
+  onPressHelp,
 }: {
   icon: ReactNode;
   title: string;
   message: string;
+  onPressHelp?(): void;
 }) {
   return (
     <View style={styles.buttonInfoContainer}>
       {icon}
       <View style={styles.messageContainer}>
-        <TextBody color={color.midnight}>{title}</TextBody>
+        <View style={styles.textRow}>
+          <TextBody color={color.midnight}>{title}</TextBody>
+          <Spacer w={8} />
+          {onPressHelp && <HelpButton onPress={onPressHelp} />}
+        </View>
         <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
       </View>
     </View>
@@ -446,5 +473,8 @@ const styles = StyleSheet.create({
   buttonInfoContainer: {
     flexDirection: "row",
     marginBottom: 20,
+  },
+  textRow: {
+    flexDirection: "row",
   },
 });
