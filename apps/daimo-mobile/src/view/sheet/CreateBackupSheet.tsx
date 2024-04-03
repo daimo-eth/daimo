@@ -9,6 +9,7 @@ import Animated, {
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
+import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -43,7 +44,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <Spacer h={16} />
       <View style={styles.separator} />
       <Spacer h={16} />
-      <BackupOptionRow icon="key" title="Set up a passkey backup" />
+      <BackupOptionRow icon="key" title="Set up a passkey backup" recommended />
       <Spacer h={16} />
       <BulletRow text="Convenient, secure, and resistant to phishing" />
       <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
@@ -145,7 +146,12 @@ function BackupOptionRow({
       </View>
       <Spacer w={12} />
       <TextBody>{title}</TextBody>
-      {recommended && <View style={{}} />}
+      {recommended && (
+        <>
+          <Spacer w={12} />
+          <Badge color={color.primary}>RECOMMENDED</Badge>
+        </>
+      )}
     </View>
   );
 }
