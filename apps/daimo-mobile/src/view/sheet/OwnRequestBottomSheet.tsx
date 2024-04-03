@@ -1,3 +1,4 @@
+import { chainConfig } from "@daimo/api/src/env";
 import {
   DaimoRequestState,
   DaimoRequestV2Status,
@@ -73,6 +74,8 @@ export function OwnRequestBottomSheet({
 
   if (!account) return null;
 
+  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  const chainName = chainConfig.chainL2.name.toUpperCase();
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
@@ -85,7 +88,9 @@ export function OwnRequestBottomSheet({
       <TitleAmount amount={dollarsToAmount(reqStatus.link.dollars)} />
       <Spacer h={8} />
       <TextCenter>
-        <TextBodyCaps color={color.grayMid}>USDC • BASE</TextBodyCaps>
+        <TextBodyCaps color={color.grayMid}>
+          {coinName} • {chainName}
+        </TextBodyCaps>
       </TextCenter>
       <Spacer h={32} />
       {reqStatus.expectedFulfiller && (
