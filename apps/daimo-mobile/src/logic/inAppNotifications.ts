@@ -54,11 +54,12 @@ export function useInAppNotifications(): InAppNotificationInfo {
 
     // Requests
     for (const request of notificationRequestStatuses) {
-      // Skip requests we've declined or cancelled.
+      // Skip requests we've declined, cancelled or sent as link.
       if (
         request.status === DaimoRequestState.Cancelled ||
         (request.status === DaimoRequestState.Declined &&
-          request.recipient.addr !== account.address)
+          request.recipient.addr !== account.address) ||
+        !request.expectedFulfiller
       ) {
         continue;
       }
