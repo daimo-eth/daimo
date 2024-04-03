@@ -54,7 +54,17 @@ export function useInAppNotifications(): InAppNotificationInfo {
 
     // Requests
     for (const request of notificationRequestStatuses) {
-      const marksUnread = // Either created by someone else (to us) or declined by the expected fulfiller
+      // Skip requests we've declined or cancelled.
+      if (
+        request.status === DaimoRequestState.Cancelled ||
+        (request.status === DaimoRequestState.Declined &&
+          request.recipient.addr !== account.address)
+      ) {
+        continue;
+      }
+
+      // Show unread (red bubble) if someone sends us a request, or declines our request.
+      const marksUnread =
         (request.status === DaimoRequestState.Created &&
           request.recipient.addr !== account.address) ||
         (request.status === DaimoRequestState.Declined &&

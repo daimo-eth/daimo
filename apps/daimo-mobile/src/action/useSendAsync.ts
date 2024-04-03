@@ -171,6 +171,7 @@ function addInviteLinkStatus(
       ? {
           link: { type: "invite", code: pendingOpEventData.inviteCode },
           isValid: false, // initialize false, filled on sync
+          createdAt: now(),
         }
       : null;
 

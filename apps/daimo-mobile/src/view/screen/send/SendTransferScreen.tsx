@@ -198,12 +198,12 @@ function SendChooseAmount({
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>
-          <ButtonBig type="subtle" title="Cancel" onPress={onCancel} />
+          <ButtonBig type="subtle" title="CANCEL" onPress={onCancel} />
         </View>
         <View style={styles.buttonGrow}>
           <ButtonBig
             type="primary"
-            title="Send"
+            title="CONFIRM"
             onPress={setSendAmount}
             disabled={dollars === 0 || (memoStatus && memoStatus !== "ok")}
           />
@@ -318,8 +318,9 @@ function SendConfirm({
       {memo ? (
         <MemoPellet memo={memo} onClick={navToInput} />
       ) : (
-        <Spacer h={38} />
+        <Spacer h={40} />
       )}
+      <Spacer h={16} />
       {button}
       {isRequest && (
         <>
