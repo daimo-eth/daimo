@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "license": "GPL-3.0-or-later",
   "description": "Daimo API for account creation, search, etc",
-  "main": "src/index.ts",
+  "main": "dist/src/index.js",
   "scripts": {
+    "build": "tsc",
     "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/server/tracing.ts src/server/server.ts",
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
