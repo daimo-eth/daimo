@@ -6,7 +6,6 @@ import Spacer from "../shared/Spacer";
 import { ss } from "../shared/style";
 import { TextCenter, TextH3 } from "../shared/text";
 
-// Global shake gesture > "Send Debug Log" sheet
 export function HelpBottomSheet({
   content,
   title,

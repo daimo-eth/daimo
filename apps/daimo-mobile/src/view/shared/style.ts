@@ -51,6 +51,12 @@ export const ss = {
       backgroundColor: color.white,
       paddingHorizontal: 16,
     },
+    screenWithoutPadding: {
+      flex: 1,
+      flexDirection: "column",
+      alignItems: "stretch",
+      backgroundColor: color.white,
+    },
     center: {
       flex: 1,
       alignItems: "center",

@@ -3,7 +3,7 @@ import {
   ChainGasConstants,
   DaimoInviteCodeStatus,
   DaimoLinkNote,
-  DaimoRequestV2Info,
+  DaimoRequestV2Status,
   DisplayOpEvent,
   EAccount,
   KeyData,
@@ -97,8 +97,10 @@ export type Account = {
   isOnboarded: boolean;
 
   /** Request data for notifications */
-  requests: DaimoRequestV2Info[];
-  declinedRequestIDs: string[];
+  notificationRequestStatuses: DaimoRequestV2Status[];
+
+  /** Track read notifications, todo: sync with server in future */
+  lastReadNotifTimestamp: number;
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -325,8 +327,8 @@ interface AccountV14 extends StoredModel {
 
   isOnboarded?: boolean;
 
-  requests: DaimoRequestV2Info[];
-  declinedRequestIDs: string[];
+  notificationRequestStatuses: DaimoRequestV2Status[];
+  lastReadNotifTimestamp: number;
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -375,8 +377,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -413,8 +415,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -451,8 +453,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -490,8 +492,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -528,8 +530,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -567,8 +569,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       isOnboarded: a.isOnboarded ?? true,
 
-      requests: [],
-      declinedRequestIDs: [],
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
     };
   }
 
@@ -607,8 +609,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     isOnboarded: a.isOnboarded ?? true,
 
-    requests: a.requests,
-    declinedRequestIDs: a.declinedRequestIDs,
+    notificationRequestStatuses: a.notificationRequestStatuses || [],
+    lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
   };
 }
 
@@ -649,8 +651,8 @@ export function serializeAccount(account: Account | null): string {
 
     isOnboarded: account.isOnboarded,
 
-    requests: account.requests,
-    declinedRequestIDs: account.declinedRequestIDs,
+    notificationRequestStatuses: account.notificationRequestStatuses,
+    lastReadNotifTimestamp: account.lastReadNotifTimestamp,
   };
 
   return JSON.stringify(model);
@@ -706,7 +708,7 @@ export function createEmptyAccount(
 
     isOnboarded: false,
 
-    requests: [],
-    declinedRequestIDs: [],
+    notificationRequestStatuses: [],
+    lastReadNotifTimestamp: now(),
   };
 }

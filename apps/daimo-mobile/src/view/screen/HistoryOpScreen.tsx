@@ -4,21 +4,17 @@ import {
   DaimoNoteStatus,
   DisplayOpEvent,
   EAccount,
-  OpEvent,
   OpStatus,
   PaymentLinkOpEvent,
   amountToDollars,
-  canSendTo,
   getAccountName,
-  timeString,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { createContext, useCallback, useContext } from "react";
-import { Linking, StyleSheet, View } from "react-native";
-import { TouchableHighlight } from "react-native-gesture-handler";
+import { Linking, View } from "react-native";
 
 import { NoteDisplay } from "./link/NoteScreen";
 import { Dispatcher, DispatcherContext } from "../../action/dispatch";
@@ -32,14 +28,13 @@ import { env } from "../../logic/env";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { syncFindSameOp } from "../../sync/sync";
+import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonBig, LinkButton } from "../shared/Button";
 import { CenterSpinner } from "../shared/CenterSpinner";
-import { ContactBubble } from "../shared/ContactBubble";
-import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss } from "../shared/style";
 import {
   TextBody,
   TextBodyCaps,
@@ -174,6 +169,8 @@ function TransferBody({
   account: Account;
   op: DisplayOpEvent;
 }) {
+  const nav = useNav();
+
   let other: EAccount;
   const sentByUs = op.from === account.address;
   if (sentByUs) {
@@ -246,8 +243,12 @@ function TransferBody({
         </TextCenter>
       </TouchableOpacity>
       <Spacer h={32} />
-      <OpRow op={op} otherAcc={other} />
-      <View style={styles.transferBorder} />
+      <AccountRow
+        acc={other}
+        timestamp={op.timestamp}
+        viewAccount={() => navToAccountPage(other, nav)}
+        pending={op.status === "pending"}
+      />
     </View>
   );
 }
@@ -273,44 +274,6 @@ function showHelpWhyNoFees(dispatcher: Dispatcher) {
   });
 }
 
-function OpRow({ op, otherAcc }: { op: OpEvent; otherAcc: EAccount }) {
-  const isPending = op.status === "pending";
-  const textDark = isPending ? color.gray3 : color.midnight;
-  const textLight = isPending ? color.gray3 : color.grayMid;
-
-  const date = timeString(op.timestamp);
-
-  const nav = useNav();
-
-  const viewAccount = useCallback(() => {
-    navToAccountPage(otherAcc, nav);
-  }, [nav, otherAcc]);
-
-  return (
-    <View style={styles.transferBorder}>
-      <TouchableHighlight
-        onPress={viewAccount}
-        disabled={!canSendTo(otherAcc)}
-        {...touchHighlightUnderlay.subtle}
-        style={styles.transferRowWrap}
-      >
-        <View style={styles.transferRow}>
-          <View style={styles.transferOtherAccount}>
-            <ContactBubble
-              contact={{ type: "eAcc", ...otherAcc }}
-              size={36}
-              {...{ isPending }}
-            />
-            <TextBody color={textDark}>{getAccountName(otherAcc)}</TextBody>
-            {isPending && <PendingDot />}
-          </View>
-          <TextPara color={textLight}>{date}</TextPara>
-        </View>
-      </TouchableHighlight>
-    </View>
-  );
-}
-
 function getFeeText(amount?: number) {
   if (amount == null) {
     return "PENDING";
@@ -322,37 +285,3 @@ function getFeeText(amount?: number) {
   }
   return feeStr === "$0.00" ? "NO FEE" : feeStr + " FEE";
 }
-
-const styles = StyleSheet.create({
-  transferBorder: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-  },
-  transferRowWrap: {
-    marginHorizontal: -24,
-  },
-  transferRow: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  transferOtherAccount: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  subtitle: {
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  subtitleElem: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 24,
-    ...ss.container.debug,
-  },
-});

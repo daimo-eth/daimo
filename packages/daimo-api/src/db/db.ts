@@ -114,6 +114,12 @@ export class DB {
             ophash_hex VARCHAR(66) PRIMARY KEY,
             memo TEXT NOT NULL
           );
+
+          CREATE TABLE IF NOT EXISTS declined_requests (
+            request_id VARCHAR(128) PRIMARY KEY,
+            decliner CHAR(42) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW()
+          );
       `);
     await client.end();
   }
@@ -398,6 +404,34 @@ export class DB {
 
     console.log(`[DB] inserted payment memos`);
   }
+
+  async loadDeclinedRequests(): Promise<DeclinedRequestRow[]> {
+    console.log(`[DB] loading declined requests`);
+    const client = await this.pool.connect();
+    const result = await client.query<RawDeclinedRequestRow>(
+      `SELECT request_id, decliner, created_at FROM declined_requests`
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} declined request rows`);
+    return result.rows.map((row) => ({
+      requestId: BigInt(row.request_id),
+      decliner: row.decliner,
+      createdAt: Math.floor(row.created_at.getTime() / 1000),
+    }));
+  }
+
+  async insertDeclinedRequest(requestId: bigint, decliner: string) {
+    console.log(`[DB] inserting declined request`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO declined_requests (request_id, decliner) VALUES ($1, $2)`,
+      [requestId.toString(), decliner]
+    );
+    client.release();
+
+    console.log(`[DB] inserted declined request`);
+  }
 }
 
 interface PushTokenRow {
@@ -468,4 +502,16 @@ interface RawPaymentMemoRow {
 export interface PaymentMemoRow {
   opHash: Hex;
   memo: string;
+}
+
+interface RawDeclinedRequestRow {
+  request_id: string;
+  decliner: string;
+  created_at: Date;
+}
+
+interface DeclinedRequestRow {
+  requestId: bigint;
+  decliner: string;
+  createdAt: number;
 }

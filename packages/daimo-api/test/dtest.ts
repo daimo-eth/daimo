@@ -20,7 +20,7 @@ async function main() {
     new Set<string>()
   );
   const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(nameReg);
+  const requestIndexer = new RequestIndexer(null as any, nameReg);
   const paymentMemoTracker = new PaymentMemoTracker(null as any);
   const coinIndexer = new CoinIndexer(
     vc,

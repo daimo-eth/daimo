@@ -14,6 +14,7 @@ import { Icon } from "./Icon";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { useInAppNotifications } from "../../logic/inAppNotifications";
 
 const animationConfig = { duration: 150 };
 
@@ -84,6 +85,8 @@ export function SearchHeader({
   );
 
   const [account] = useAccount();
+  const notifInfo = useInAppNotifications();
+
   if (account == null) return null;
 
   return (
@@ -120,7 +123,7 @@ export function SearchHeader({
         <ButtonCircle size={50} onPress={goToNotifications}>
           <View style={styles.circleButton}>
             <Icon name="bell-01" size={24} color={color.primary} />
-            {account.requests.length > 0 ? <NotificationBadge /> : null}
+            {notifInfo.unread && <NotificationBadge />}
           </View>
         </ButtonCircle>
       </Animated.View>

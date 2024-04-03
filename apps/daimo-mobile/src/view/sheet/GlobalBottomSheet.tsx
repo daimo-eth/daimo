@@ -1,3 +1,4 @@
+import { DaimoRequestV2Status } from "@daimo/common";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -18,6 +19,7 @@ import { DebugBottomSheet } from "./DebugBottomSheet";
 import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
 import { HelpBottomSheet } from "./HelpBottomSheet";
 import { OnboardingChecklistBottomSheet } from "./OnboardingChecklistBottomSheet";
+import { OwnRequestBottomSheet } from "./OwnRequestBottomSheet";
 import { Action, DispatcherContext } from "../../action/dispatch";
 import ScrollPellet from "../shared/ScrollPellet";
 
@@ -37,12 +39,29 @@ const bottomSheetSettings = {
   helpModal: {
     enableSwipeClose: true,
   },
+  ownRequest: {
+    enableSwipeClose: true,
+  },
 } as const;
 
-type DisplayedSheet = null | {
-  action: keyof typeof bottomSheetSettings;
-  payload?: { title: string; content: ReactElement };
-};
+type DisplayedSheet =
+  | null
+  | {
+      // Any key above, except helpModal and ownRequest
+      action:
+        | "debug"
+        | "connectFarcaster"
+        | "linkFarcaster"
+        | "onboardingChecklist";
+    }
+  | {
+      action: "helpModal";
+      payload: { title: string; content: ReactElement };
+    }
+  | {
+      action: "ownRequest";
+      payload: { reqStatus: DaimoRequestV2Status };
+    };
 
 // Shows the main, global bottom sheet. This ensures that only a single of
 // these sheets is visible at a time. The global sheet appears above any screen
@@ -139,19 +158,22 @@ export function GlobalBottomSheet() {
         enablePanDownToClose={settings?.enableSwipeClose}
         enableDynamicSizing
       >
-        <BottomSheetView style={{ flex: 0, minHeight: 100 }}>
+        <BottomSheetView style={styles.bottomSheetView}>
           {sheet?.action === "debug" && <DebugBottomSheet />}
           {(sheet?.action === "connectFarcaster" ||
             sheet?.action === "linkFarcaster") && <FarcasterBottomSheet />}
           {sheet?.action === "onboardingChecklist" && (
             <OnboardingChecklistBottomSheet />
           )}
-          {sheet?.action === "helpModal" && sheet?.payload && (
+          {sheet?.action === "helpModal" && (
             <HelpBottomSheet
               content={sheet.payload.content}
               title={sheet.payload.title}
               onPress={() => sheetRef.current?.close()}
             />
+          )}
+          {sheet?.action === "ownRequest" && (
+            <OwnRequestBottomSheet reqStatus={sheet.payload.reqStatus} />
           )}
         </BottomSheetView>
       </BottomSheet>
@@ -165,5 +187,9 @@ const styles = StyleSheet.create({
     height: "100%",
     width: "100%",
     alignItems: "center",
+  },
+  bottomSheetView: {
+    flex: 0,
+    minHeight: 128,
   },
 });

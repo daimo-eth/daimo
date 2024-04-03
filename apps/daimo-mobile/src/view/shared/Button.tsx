@@ -136,16 +136,6 @@ export function ButtonMed(props: ButtonProps) {
     />
   );
 }
-export function ButtonSmall(props: ButtonProps) {
-  return (
-    <Button
-      {...props}
-      style={useStyle(buttonStyles.small, props)}
-      touchUnderlay={useTouchUnderlay(props.type)}
-      icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
-    />
-  );
-}
 
 export function TextButton(props: TextButtonProps) {
   return (

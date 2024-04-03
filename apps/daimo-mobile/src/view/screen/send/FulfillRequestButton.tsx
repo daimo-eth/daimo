@@ -71,8 +71,7 @@ export function FulfillRequestButton({
       },
     },
     accountTransform: transferAccountTransform(
-      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : [],
-      requestStatus.link.id
+      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : []
     ),
   });
 

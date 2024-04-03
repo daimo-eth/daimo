@@ -53,7 +53,7 @@ async function main() {
   const paymentMemoTracker = new PaymentMemoTracker(db);
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(nameReg);
+  const requestIndexer = new RequestIndexer(db, nameReg);
   const coinIndexer = new CoinIndexer(
     vc,
     opIndexer,
@@ -98,6 +98,7 @@ async function main() {
       paymaster.init(),
       inviteGraph.init(),
       paymentMemoTracker.init(),
+      requestIndexer.init(),
     ]);
 
     console.log(`[API] initializing push notifications...`);

@@ -482,6 +482,13 @@ export function createRouter(
         const { memo } = opts.input;
         return validateMemo(memo);
       }),
+
+    declineRequest: publicProcedure
+      .input(z.object({ requestId: z.string(), decliner: zAddress }))
+      .mutation(async (opts) => {
+        const { requestId, decliner } = opts.input;
+        await reqIndexer.declineRequest(requestId, decliner);
+      }),
   });
 }
 

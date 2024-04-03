@@ -1,13 +1,17 @@
 import {
+  DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
+  assert,
   assertNotNull,
   getAccountName,
+  now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
@@ -24,6 +28,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { getAccountManager } from "../../../logic/accountManager";
 import {
   EAccountContact,
   addLastTransferTimes,
@@ -33,7 +38,7 @@ import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
-import { ButtonBig } from "../../shared/Button";
+import { ButtonBig, TextButton } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
@@ -261,6 +266,36 @@ function SendConfirm({
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
+  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
+
+  const [isDecliningRequest, setIsDecliningRequest] = useState(false);
+
+  const onDecline = async () => {
+    assert(requestStatus != null);
+
+    await rpcFunc.declineRequest.mutate({
+      requestId: requestStatus.link.id,
+      decliner: account.address,
+    });
+
+    getAccountManager().transform((acc) => {
+      const updatedRequestStatus = {
+        ...requestStatus,
+        status: DaimoRequestState.Declined,
+        updatedAt: now(),
+      };
+      return {
+        ...acc,
+        // Replace old request with updated one
+        notificationRequestStatuses: acc.notificationRequestStatuses
+          .filter((r) => r.link.id !== requestStatus.link.id)
+          .concat([updatedRequestStatus]),
+      };
+    });
+
+    nav.navigate("Home");
+  };
+
   return (
     <View>
       {infoBubble}
@@ -285,8 +320,23 @@ function SendConfirm({
       ) : (
         <Spacer h={38} />
       )}
-      <Spacer h={16} />
       {button}
+      {isRequest && (
+        <>
+          <Spacer h={16} />
+          {isDecliningRequest ? (
+            <ActivityIndicator size="large" />
+          ) : (
+            <TextButton
+              title="DECLINE"
+              onPress={async () => {
+                setIsDecliningRequest(true);
+                await onDecline();
+              }}
+            />
+          )}
+        </>
+      )}
     </View>
   );
 }

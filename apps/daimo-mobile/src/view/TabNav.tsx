@@ -22,7 +22,6 @@ import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
-import { NotificationsScreen } from "./screen/NotificationsScreen";
 import { ProfileScreen } from "./screen/ProfileScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
@@ -32,6 +31,7 @@ import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
+import { NotificationsScreen } from "./screen/notifications/NotificationsScreen";
 import { MissingKeyScreen } from "./screen/onboarding/MissingKeyScreen";
 import { OnboardingAllowNotifsScreen as OnbAllowNotifsScreen } from "./screen/onboarding/OnboardingAllowNotifsScreen";
 import { OnboardingEnterInviteScreen as OnbEnterInviteScreen } from "./screen/onboarding/OnboardingEnterInviteScreen";

@@ -69,8 +69,6 @@ function RequestScreenInnerV2({
     const id = generateRequestId();
     const idString = encodeRequestId(id);
 
-    setAS("loading", "Sharing...");
-
     const url = formatDaimoLink({
       type: "requestv2",
       id: idString,

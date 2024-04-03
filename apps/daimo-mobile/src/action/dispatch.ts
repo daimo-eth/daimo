@@ -1,3 +1,4 @@
+import { DaimoRequestV2Status } from "@daimo/common";
 import { ReactElement, createContext } from "react";
 
 export type Action =
@@ -5,6 +6,7 @@ export type Action =
   | { name: "linkFarcaster" }
   | { name: "onboardingChecklist" }
   | { name: "helpModal"; title: string; content: ReactElement }
+  | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
   | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];

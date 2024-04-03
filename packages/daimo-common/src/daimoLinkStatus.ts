@@ -50,11 +50,12 @@ export enum DaimoRequestState {
   Created = "created",
   Fulfilled = "fulfilled",
   Cancelled = "cancelled",
+  Declined = "declined", // Offchain
 }
 
 /**
  * Tracks details about a request for payment.
- * All of this information can be looked up onchain given `link`.
+ * All of this information (except declines) can be looked up onchain given `link`.
  */
 export type DaimoRequestV2Status = {
   link: DaimoLinkRequestV2;
@@ -66,12 +67,8 @@ export type DaimoRequestV2Status = {
   createdAt: number;
   fulfilledBy?: EAccount;
   isValidInvite?: boolean;
-};
-
-export type DaimoRequestV2Info = {
-  request: DaimoRequestV2Status;
-  type: "recipient" | "fulfiller";
-  fulfiller: EAccount;
+  expectedFulfiller?: EAccount; // Set by recipient to request from specific address
+  updatedAt?: number;
 };
 
 /**
