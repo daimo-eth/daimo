@@ -47,7 +47,7 @@ function OnboardingChecklistBottomSheetInner({
       <ChecklistRow
         step={2}
         title="Connect Farcaster"
-        description="Import your profile image and connections"
+        description="Import profile picture and connections"
         onPress={handleConnectFarcaster}
         done={farcasterConnected}
       />
