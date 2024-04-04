@@ -28,15 +28,16 @@ export class Watcher {
   private batchSize = 100000;
   private isIndexing = false;
 
-  private indexers: indexer[] = [];
+  // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
+  private indexerLayers: indexer[][] = [];
   private pg: Pool;
 
   constructor() {
     this.pg = new Pool(poolConfig);
   }
 
-  add(...i: indexer[]) {
-    this.indexers.push(...i);
+  add(...i: indexer[][]) {
+    this.indexerLayers.push(...i);
   }
 
   latestBlock(): { number: number; timestamp: number } {
@@ -114,9 +115,12 @@ export class Watcher {
     if (delta < 0) return 0;
     const limit = delta >= n ? n - 1 : delta;
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
-    await Promise.all(
-      this.indexers.map((i) => i.load(this.pg, start, start + limit))
-    );
+    for (const [i, layer] of this.indexerLayers.entries()) {
+      console.log(`[SHOVEL] indexing ${start} to ${start + limit} layer ${i}`);
+      await Promise.all(
+        layer.map((i) => i.load(this.pg, start, start + limit))
+      );
+    }
     console.log(
       `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
