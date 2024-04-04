@@ -80,12 +80,10 @@ async function main() {
 
   const shovelWatcher = new Watcher();
   shovelWatcher.add(
-    nameReg,
-    keyReg,
-    coinIndexer,
-    noteIndexer,
-    requestIndexer,
-    opIndexer
+    // indexers in dependency order, within each list, indexers are indexed in parallel
+    [nameReg, keyReg, opIndexer],
+    [noteIndexer, requestIndexer],
+    [coinIndexer]
   );
 
   // Initialize in background
