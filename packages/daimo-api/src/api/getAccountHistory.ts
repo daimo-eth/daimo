@@ -212,9 +212,7 @@ function getSuggestedActions(
   const latestVersion = getAppVersionTracker().getLatestVersion();
   const { daimoPlatform, daimoVersion } = ctx;
   const appVersion = daimoVersion.split(" ")[0];
-  if (latestVersion == null) {
-    console.log(`[API] no latest app version available`);
-  } else if (semverLt(appVersion, latestVersion)) {
+  if (appVersion && latestVersion && semverLt(appVersion, latestVersion)) {
     ret.push({
       id: `2024-02-update-${appVersion}-to-${latestVersion}`,
       title: "Upgrade Available",
