@@ -43,12 +43,12 @@ import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "Receive">;
 
-export function ReceiveScreenV2({ route }: Props) {
-  const Inner = useWithAccount(RequestScreenInnerV2);
+export function ReceiveScreen({ route }: Props) {
+  const Inner = useWithAccount(RequestScreenInner);
   return <Inner {...route.params} />;
 }
 
-function RequestScreenInnerV2({
+function RequestScreenInner({
   account,
   fulfiller,
 }: {
@@ -58,7 +58,7 @@ function RequestScreenInnerV2({
   const [dollars, setDollars] = useState(0);
 
   // On successful send, go home
-  const [as, setAS] = useActStatus("requestv2");
+  const [as, setAS] = useActStatus("request");
 
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
