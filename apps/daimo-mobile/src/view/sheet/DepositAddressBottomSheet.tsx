@@ -15,6 +15,7 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBold, TextLight, TextPara } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
+// Explains how to deposit money directly to your Daimo address
 export function DepositAddressBottomSheet() {
   const Inner = useWithAccount(DepositAddressBottomSheetInner);
   return <Inner />;

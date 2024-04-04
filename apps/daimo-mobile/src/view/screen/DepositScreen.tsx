@@ -20,7 +20,7 @@ import { InfoBox } from "../shared/InfoBox";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { DaimoText, TextBody, TextMeta } from "../shared/text";
+import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 export default function DepositScreen() {
@@ -85,10 +85,8 @@ function DepositList({ account }: { account: Account }) {
   }
 
   return (
-    <View style={{ marginHorizontal: 16 }}>
-      <DaimoText style={{ ...ss.text.body, color: color.gray3 }}>
-        Deposit
-      </DaimoText>
+    <View style={styles.section}>
+      <TextBody color={color.gray3}>Deposit</TextBody>
       {started && (
         <>
           <Spacer h={16} />
@@ -117,10 +115,8 @@ function WithdrawList() {
   const defaultLogo = `${daimoDomainAddress}/assets/deposit/withdraw-wallet.png`;
 
   return (
-    <View style={{ marginHorizontal: 16 }}>
-      <DaimoText style={{ ...ss.text.body, color: color.gray3 }}>
-        Withdraw
-      </DaimoText>
+    <View style={styles.section}>
+      <TextBody color={color.gray3}>Withdraw</TextBody>
       <Spacer h={16} />
       <OptionRow
         cta="Withdraw"
@@ -208,5 +204,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 99,
+  },
+  section: {
+    marginHorizontal: 16,
+    borderBottomWidth: 1,
+    borderColor: color.grayLight,
   },
 });

@@ -8,6 +8,8 @@ import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBold, TextLight, TextPara } from "../shared/text";
 
+// Explains how to withdraw money from your Daimo account, using another wallet
+// or exchange.
 export function WithdrawInstructionsBottomSheet() {
   const dispatcher = useContext(DispatcherContext);
   const BB = Platform.OS === "android" ? TextBold : Badge;
