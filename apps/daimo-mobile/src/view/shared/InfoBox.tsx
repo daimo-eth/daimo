@@ -1,4 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
+import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { OctName } from "./InputBig";
@@ -10,10 +11,14 @@ export function InfoBox({
   subtitle,
   icon,
 }: {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   icon?: OctName;
 }) {
+  if (typeof title === "string") {
+    title = <TextBody>{title}</TextBody>;
+  }
+
   return (
     <View style={styles.bubble}>
       <View style={styles.bubbleIcon}>
@@ -21,7 +26,7 @@ export function InfoBox({
         {icon && <Octicons name={icon} size={16} color={color.white} />}
       </View>
       <View style={styles.bubbleText}>
-        <TextBody>{title}</TextBody>
+        {title}
         {subtitle && <TextBody color={color.grayDark}>{subtitle}</TextBody>}
       </View>
     </View>

@@ -1,10 +1,11 @@
 import { assertNotNull } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode, useMemo } from "react";
+import { ReactElement, ReactNode, useContext, useMemo } from "react";
 import {
   Image,
   ImageSourcePropType,
   Linking,
+  Pressable,
   StyleSheet,
   TextStyle,
   TouchableHighlight,
@@ -21,10 +22,12 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { AnimatedCircle } from "./AnimatedCircle";
+import Spacer from "./Spacer";
 import { color, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBtnCaps, TextLink } from "./text";
+import { DaimoText, TextBody, TextBtnCaps, TextLink } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
+import { DispatcherContext } from "../../action/dispatch";
 
 interface TextButtonProps {
   title?: string;
@@ -148,11 +151,37 @@ export function TextButton(props: TextButtonProps) {
 }
 
 // Shows the (?) icon. Should open the help modal.
-export function HelpButton({ onPress }: { onPress: () => void }) {
+export function HelpButton({
+  onPress,
+  helpTitle,
+  helpContent,
+  title,
+}: {
+  onPress?: () => void;
+  helpTitle?: string;
+  helpContent?: ReactElement;
+  title?: string;
+}) {
+  const dispatcher = useContext(DispatcherContext);
+
+  if (onPress == null) {
+    onPress = () => {
+      dispatcher.dispatch({
+        name: "helpModal",
+        title: assertNotNull(helpTitle, "Must provide helpTitle"),
+        content: assertNotNull(helpContent, "Must provide helpContent"),
+      });
+    };
+  }
+
   return (
-    <TouchableOpacity onPress={onPress} hitSlop={16}>
-      <Octicons size={16} name="info" color={color.grayDark} />
-    </TouchableOpacity>
+    <Pressable onPress={onPress} hitSlop={16} style={{ paddingHorizontal: 4 }}>
+      <TextBody color={color.primary}>
+        <Octicons size={16} name="info" color={color.primary} />
+        {title && <Spacer w={4} />}
+        {title}
+      </TextBody>
+    </Pressable>
   );
 }
 

@@ -28,7 +28,7 @@ export class Dispatcher {
   }
 
   dispatch(action: Action) {
-    console.log(`[DISPATCH] ${JSON.stringify(action)}`);
+    console.log(`[DISPATCH] ${action.name}`);
     const handler = this.handlers.get(action.name);
     if (!handler) {
       throw new Error(`No handler for action: ${action.name}`);

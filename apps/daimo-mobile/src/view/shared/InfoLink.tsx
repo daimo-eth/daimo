@@ -12,7 +12,7 @@ export function InfoLink({
 }: {
   url?: string;
   title: string;
-  onPress?(): void;
+  onPress?: () => void;
 }) {
   return (
     <TextButton
