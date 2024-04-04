@@ -70,7 +70,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     pendingOp: {
       type: "keyRotation",
       status: OpStatus.pending,
-      slot: device!.slot,
+      slot: device?.slot || 1024, // 1024 means "Deleted device", which is not a real slot
       rotationType: "remove",
       timestamp: now(),
     },
@@ -101,14 +101,19 @@ export function DeviceScreen({ route, navigation }: Props) {
 
     async function removeKey() {
       console.log(`[DEVICE] Removing device ${devicePubkey}`);
-      await exec();
+      exec();
     }
   }, []);
 
+  // If we removed the device key, go back to settings.
   // If we removed this device's key onchain, delete it locally and log out.
   useEffect(() => {
     if (status !== "success" || !account) return;
-    if (devicePubkey !== account.enclavePubKey) return;
+    if (devicePubkey !== account.enclavePubKey) {
+      nav.navigate("SettingsTab", { screen: "Settings" });
+      return;
+    }
+
     getAccountManager().deleteAccountAndKey();
   }, [status]);
 
