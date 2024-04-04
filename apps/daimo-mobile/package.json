@@ -41,7 +41,7 @@
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^14.0.0",
     "@gorhom/bottom-sheet": "^4.6.1",
-    "@noble/curves": "^1.4.0",
+    "@noble/curves": "^1.2.0",
     "@react-native-segmented-control/segmented-control": "2.4.1",
     "@react-navigation/bottom-tabs": "^6.5.14",
     "@react-navigation/native": "^6.1.6",
