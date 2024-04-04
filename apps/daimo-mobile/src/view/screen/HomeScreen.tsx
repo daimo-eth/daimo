@@ -430,5 +430,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     backgroundColor: color.white,
     ...ss.container.shadow,
+    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
   },
 });
