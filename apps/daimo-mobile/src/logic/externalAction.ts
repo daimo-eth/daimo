@@ -12,6 +12,8 @@ import {
 type ComposeSend = (link: DaimoLink) => Promise<boolean>;
 
 function generateEmailCopy(link: DaimoLink, to: EmailContact) {
+  const contactName = getContactName(to);
+
   switch (link.type) {
     case "notev2": {
       const { sender: senderName, dollars } = link;
@@ -19,9 +21,7 @@ function generateEmailCopy(link: DaimoLink, to: EmailContact) {
 
       return {
         subject: `${senderName} sent you $${dollars}`,
-        body: `Hi ${getContactName(
-          to
-        )},\r\n\r\n${senderName} sent you $${dollars} USDC and invited you to join Daimo.\r\n\r\nVisit here to accept: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`,
+        body: `Hi ${contactName},\r\n\r\n${senderName} sent you $${dollars} USDC and invited you to join Daimo.\r\n\r\nVisit here to accept: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`,
       };
     }
     case "requestv2": {
@@ -30,9 +30,7 @@ function generateEmailCopy(link: DaimoLink, to: EmailContact) {
 
       return {
         subject: `${recipient} is requesting $${dollars}`,
-        body: `Hi ${getContactName(
-          to
-        )},\r\n\r\n${recipient} requested $${dollars} USDC on Daimo.\r\n\r\nVisit here to send: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`,
+        body: `Hi ${contactName},\r\n\r\n${recipient} requested $${dollars} USDC on Daimo.\r\n\r\nVisit here to send: ${url}\r\n\r\nDaimo is a global payments app that lets you send and receive USDC on Ethereum.`,
       };
     }
     default: {
@@ -66,7 +64,7 @@ async function composeEmail(
 ): Promise<ComposeSend | undefined> {
   // Test if we can email first
   const emailClients = await getEmailClients();
-  console.log(`[COMPOSE] emailClients ${JSON.stringify(emailClients)}`);
+  console.log(`[EXTACTION] emailClients ${JSON.stringify(emailClients)}`);
   if (emailClients.length === 0) return undefined;
 
   return async (link: DaimoLink) => {
@@ -83,7 +81,7 @@ async function composeEmail(
       app: appId,
       removeText: true,
     });
-    console.log(`[COMPOSE] appUsed ${appUsed}`);
+    console.log(`[EXTACTION] appUsed ${appUsed}`);
 
     return appUsed != null;
   };
@@ -99,7 +97,7 @@ async function composeSMS(
       : encodeURI(`sms:${to.phoneNumber}&body=test`);
   const canOpen = await Linking.canOpenURL(testOpenString);
 
-  console.log(`[COMPOSE] testOpenString ${testOpenString}: ${canOpen}`);
+  console.log(`[EXTACTION] testOpenString ${testOpenString}: ${canOpen}`);
   if (!canOpen) return undefined;
 
   return async (link: DaimoLink) => {
@@ -132,12 +130,12 @@ export async function shareURL(link: DaimoLink): Promise<boolean> {
       result = await Share.share({ url }); // Default behavior for iOS
     }
 
-    console.log(`[SHARESHEET] action ${result.action}`);
+    console.log(`[EXTACTION] action ${result.action}`);
     if (result.action === Share.sharedAction) {
-      console.log(`[SHARESHEET] shared, activityType: ${result.activityType}`);
+      console.log(`[EXTACTION] shared, activityType: ${result.activityType}`);
       return true;
     } else if (result.action === Share.dismissedAction) {
-      console.log(`[SHARESHEET] share dismissed`); // Only on iOS
+      console.log(`[EXTACTION] share dismissed`); // Only on iOS
     }
   } catch (error: any) {
     Alert.alert(error.message);

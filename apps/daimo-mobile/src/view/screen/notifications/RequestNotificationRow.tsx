@@ -41,7 +41,7 @@ export function RequestNotificationRow({
       ? "recipient"
       : "expectedFulfiller";
 
-  // Hack: If the request is to a link, use a dummy EAccount to render display
+  // Hack: if request is via link, display a dummy fulfiller EAccount
   const requestLinkContact: DaimoContact = {
     type: "eAcc",
     label: AddrLabel.RequestLink,

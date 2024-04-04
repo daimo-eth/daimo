@@ -70,7 +70,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     pendingOp: {
       type: "keyRotation",
       status: OpStatus.pending,
-      slot: device?.slot || 1024, // 1024 means "Deleted device", which is not a real slot
+      slot: device?.slot || -1, // -1 is only used for "Deleted device", which is not a real slot
       rotationType: "remove",
       timestamp: now(),
     },
@@ -99,7 +99,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       ]
     );
 
-    async function removeKey() {
+    function removeKey() {
       console.log(`[DEVICE] Removing device ${devicePubkey}`);
       exec();
     }
