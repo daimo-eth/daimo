@@ -74,7 +74,7 @@ function IntroPageSwiper() {
   const showHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
-      title: "What is a passkey backup?",
+      title: "How does USDC work?",
       content: (
         <>
           <TextLight>
@@ -83,12 +83,13 @@ function IntroPageSwiper() {
           </TextLight>
           <Spacer h={24} />
           <TextLight>
-            Learn more about USDC at the
+            Learn more about USDC{" "}
             <TextLink
               onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
             >
-              {" link here."}
+              here
             </TextLink>
+            .
           </TextLight>
         </>
       ),

@@ -261,7 +261,7 @@ function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
 function showHelpWhyNoFees(dispatcher: Dispatcher) {
   dispatcher.dispatch({
     name: "helpModal",
-    title: "How transfers work",
+    title: "How do transfers work?",
     content: (
       <View style={ss.container.padH8}>
         <TextPara>Daimo uses Base, an Ethereum rollup.</TextPara>
