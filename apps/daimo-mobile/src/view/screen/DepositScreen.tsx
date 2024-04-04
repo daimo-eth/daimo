@@ -1,5 +1,5 @@
-import { chainConfig } from "@daimo/api/src/env";
 import { daimoDomainAddress } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
 import React, { useContext, useState } from "react";
@@ -14,6 +14,7 @@ import {
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useExitToHome } from "../../common/nav";
+import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -46,6 +47,7 @@ function DepositScreenInner({ account }: { account: Account }) {
 }
 
 function DepositList({ account }: { account: Account }) {
+  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
 
   const [started, setStarted] = useState(false);
