@@ -10,20 +10,20 @@ import {
 } from "react-native";
 
 import { NoteActionButton } from "./NoteActionButton";
-import { RecipientDisplay } from "./RecipientDisplay";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { useAccount } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
+import {
+  ExternalAction,
+  getComposeExternalAction,
+  shareURL,
+} from "../../../logic/externalAction";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, HelpButton } from "../../shared/Button";
+import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import {
-  ExternalAction,
-  getSendRecvLinkAction,
-} from "../../shared/composeSend";
-import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import {
   TextBody,
@@ -71,10 +71,8 @@ export function SendNoteScreen({ route }: Props) {
 
   useEffect(() => {
     if (!recipient) return;
-    getSendRecvLinkAction(recipient, account.name, "send").then(
-      setExternalAction
-    );
-  }, [recipient, noteDollars]);
+    getComposeExternalAction(recipient).then(setExternalAction);
+  }, [recipient]);
 
   // Coin info
   const daimoChain = daimoChainFromId(account.homeChainId);
@@ -101,7 +99,7 @@ export function SendNoteScreen({ route }: Props) {
         />
         <Spacer h={24} />
         {recipient ? (
-          <RecipientDisplay recipient={recipient} />
+          <ContactDisplay contact={recipient} />
         ) : (
           <>
             <TextCenter>

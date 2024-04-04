@@ -12,7 +12,7 @@ import { Scanner } from "../../shared/Scanner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
-import { TextBold, TextCenter, TextH2, TextPara } from "../../shared/text";
+import { TextCenter, TextH2, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 export function AddDeviceScreen() {
@@ -72,9 +72,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
       {barCodeStatus === "scanned" && newKeyAndSlot && (
         <>
           <TextCenter>
-            <TextH2>
-              Scanned <TextBold>{getSlotLabel(newKeyAndSlot.slot)}</TextBold>
-            </TextH2>
+            <TextH2>Scanned {getSlotLabel(newKeyAndSlot.slot)}</TextH2>
           </TextCenter>
           <Spacer h={32} />
           <AddKeySlotButton

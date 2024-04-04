@@ -23,13 +23,13 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { shareURL } from "../../logic/externalAction";
 import { Account } from "../../model/account";
 import { ButtonBig, ButtonMed } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { ContactBubble } from "../shared/ContactBubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { shareURL } from "../shared/shareURL";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
@@ -295,7 +295,7 @@ function ReferralButtonsFooter({
           <ButtonBig
             type="primary"
             title="Share Link"
-            onPress={() => shareURL(url)}
+            onPress={() => shareURL(link)}
           />
         </View>
       </View>

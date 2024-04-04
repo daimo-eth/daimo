@@ -321,7 +321,17 @@ function CompleteOnboarding() {
   }, [dispatcher]);
 
   return (
-    <Pressable onPress={openChecklist} style={styles.checklistAction}>
+    <Pressable
+      onPress={openChecklist}
+      style={({ pressed }) => [
+        {
+          ...styles.checklistAction,
+          backgroundColor: pressed
+            ? touchHighlightUnderlay.subtle.underlayColor
+            : undefined,
+        },
+      ]}
+    >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />

@@ -337,7 +337,7 @@ const buttonStyles = {
     button: {
       paddingHorizontal: 24,
       paddingVertical: 20,
-      borderRadius: 4,
+      borderRadius: 8,
       backgroundColor: color.primaryBgLight,
       height: 60,
     },

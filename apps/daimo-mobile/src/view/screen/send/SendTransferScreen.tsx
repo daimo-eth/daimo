@@ -20,7 +20,6 @@ import {
 
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { SendMemoButton, MemoPellet } from "./MemoDisplay";
-import { RecipientDisplay } from "./RecipientDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   ParamListSend,
@@ -40,6 +39,7 @@ import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";
+import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -180,7 +180,7 @@ function SendChooseAmount({
     <View>
       {infoBubble}
       <Spacer h={24} />
-      <RecipientDisplay recipient={recipient} />
+      <ContactDisplay contact={recipient} />
       <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
         dollars={dollars}
@@ -300,8 +300,8 @@ function SendConfirm({
     <View>
       {infoBubble}
       <Spacer h={24} />
-      <RecipientDisplay
-        recipient={recipient}
+      <ContactDisplay
+        contact={recipient}
         isRequest={isRequest}
         requestMemo={requestStatus?.link?.memo}
       />

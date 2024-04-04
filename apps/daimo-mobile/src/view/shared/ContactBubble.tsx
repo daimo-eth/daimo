@@ -52,6 +52,7 @@ export function ContactBubble({
             <Octicons name="download" size={fontSize} color={color.primary} />
           );
         case AddrLabel.PaymentLink:
+        case AddrLabel.RequestLink:
           return <Octicons name="link" size={fontSize} color={color.primary} />;
         case AddrLabel.Coinbase:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;

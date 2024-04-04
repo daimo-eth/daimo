@@ -1,59 +1,59 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 
-import { navToAccountPage, useNav } from "../../../common/nav";
-import { DaimoContact, getContactName } from "../../../logic/daimoContacts";
-import { ButtonCircle } from "../../shared/ButtonCircle";
-import { ContactBubble } from "../../shared/ContactBubble";
-import { FarcasterButton } from "../../shared/FarcasterBubble";
-import Spacer from "../../shared/Spacer";
-import { color } from "../../shared/style";
-import { TextBtnCaps, TextH2, TextLight } from "../../shared/text";
+import { ButtonCircle } from "./ButtonCircle";
+import { ContactBubble } from "./ContactBubble";
+import { FarcasterButton } from "./FarcasterBubble";
+import Spacer from "./Spacer";
+import { color } from "./style";
+import { TextBtnCaps, TextH2, TextLight } from "./text";
+import { navToAccountPage, useNav } from "../../common/nav";
+import { DaimoContact, getContactName } from "../../logic/daimoContacts";
 
-export function RecipientDisplay({
-  recipient,
+export function ContactDisplay({
+  contact,
   isRequest,
   requestMemo,
 }: {
-  recipient: DaimoContact;
+  contact: DaimoContact;
   isRequest?: boolean;
   requestMemo?: string;
 }) {
   // Show who we're sending to
-  const isAccount = recipient.type === "eAcc";
-  const disp = getContactName(recipient);
+  const isAccount = contact.type === "eAcc";
+  const disp = getContactName(contact);
 
   const subtitle = (function () {
-    switch (recipient.type) {
+    switch (contact.type) {
       case "eAcc":
         if (requestMemo) {
           return requestMemo;
-        } else if (recipient.originalMatch) {
-          return recipient.originalMatch;
+        } else if (contact.originalMatch) {
+          return contact.originalMatch;
         } else return undefined;
       case "phoneNumber":
-        return recipient.phoneNumber;
+        return contact.phoneNumber;
       case "email":
-        return recipient.email;
+        return contact.email;
     }
   })();
 
   const showSubtitle = subtitle != null && subtitle !== disp;
 
   const showFarcaster =
-    recipient.type === "eAcc" && (recipient.linkedAccounts?.length || 0) > 0;
+    contact.type === "eAcc" && (contact.linkedAccounts?.length || 0) > 0;
 
   const nav = useNav();
   const goToAccount = useCallback(() => {
     if (isAccount) {
-      navToAccountPage(recipient, nav);
+      navToAccountPage(contact, nav);
     }
-  }, [nav, recipient]);
+  }, [nav, contact]);
 
   return (
     <View style={styles.recipientDisp}>
       <ButtonCircle size={64} onPress={goToAccount}>
-        <ContactBubble contact={recipient} size={64} transparent />
+        <ContactBubble contact={contact} size={64} transparent />
       </ButtonCircle>
       <Spacer h={8} />
       {isRequest && <TextLight>Requested by</TextLight>}
@@ -69,7 +69,7 @@ export function RecipientDisplay({
         {showFarcaster && <Spacer w={8} />}
         {showFarcaster && (
           <FarcasterButton
-            fcAccount={recipient.linkedAccounts![0]}
+            fcAccount={contact.linkedAccounts![0]}
             hideUsername
           />
         )}

@@ -328,7 +328,8 @@ export function createRouter(
         span.setAttributes(reqInfo);
 
         try {
-          return await bundlerClient.sendUserOp(op, vc, nameReg);
+          const opHash = await bundlerClient.getOpHash(op, vc.publicClient);
+          return await bundlerClient.sendUserOp(opHash, op, vc, nameReg);
         } catch (e: any) {
           const em = e.message || "no error message";
           span.setAttribute("op.send_err", em);
