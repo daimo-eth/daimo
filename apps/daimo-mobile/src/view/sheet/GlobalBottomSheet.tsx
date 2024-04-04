@@ -16,10 +16,12 @@ import { Keyboard, StyleSheet, View } from "react-native";
 import RNShake from "react-native-shake";
 
 import { DebugBottomSheet } from "./DebugBottomSheet";
+import { DepositAddressBottomSheet } from "./DepositAddressBottomSheet";
 import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
 import { HelpBottomSheet } from "./HelpBottomSheet";
 import { OnboardingChecklistBottomSheet } from "./OnboardingChecklistBottomSheet";
 import { OwnRequestBottomSheet } from "./OwnRequestBottomSheet";
+import { WithdrawInstructionsBottomSheet } from "./WithdrawInstructionsBottomSheet";
 import { Action, DispatcherContext } from "../../action/dispatch";
 import ScrollPellet from "../shared/ScrollPellet";
 
@@ -212,6 +214,10 @@ export function GlobalBottomSheet() {
           {sheet?.action === "ownRequest" && (
             <OwnRequestBottomSheet reqStatus={sheet.payload.reqStatus} />
           )}
+          {sheet?.action === "withdrawInstructions" && (
+            <WithdrawInstructionsBottomSheet />
+          )}
+          {sheet?.action === "depositAddress" && <DepositAddressBottomSheet />}
         </BottomSheetView>
       </BottomSheet>
     </View>

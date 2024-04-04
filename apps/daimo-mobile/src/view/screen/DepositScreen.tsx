@@ -32,7 +32,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Deposit Or Withdraw" onExit={useExitToHome} />
+        <ScreenHeader title="Deposit or Withdraw" onExit={useExitToHome} />
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />

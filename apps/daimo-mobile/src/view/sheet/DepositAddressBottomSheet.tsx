@@ -2,22 +2,17 @@ import { assert } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
+import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { CheckLabel } from "../shared/Check";
+import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import {
-  DaimoText,
-  TextBold,
-  TextCenter,
-  TextH3,
-  TextLight,
-  TextPara,
-} from "../shared/text";
+import { DaimoText, TextBold, TextLight, TextPara } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 export function DepositAddressBottomSheet() {
@@ -26,6 +21,8 @@ export function DepositAddressBottomSheet() {
 }
 
 function DepositAddressBottomSheetInner({ account }: { account: Account }) {
+  const dispatcher = useContext(DispatcherContext);
+
   const { tokenSymbol, chainL2 } = env(
     daimoChainFromId(account.homeChainId)
   ).chainConfig;
@@ -36,10 +33,14 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
 
   return (
-    <View style={{ ...ss.container.padH16, height: 472 }}>
-      <TextCenter>
-        <TextH3>Deposit to address</TextH3>
-      </TextCenter>
+    <View style={ss.container.padH16}>
+      <ScreenHeader
+        title="Deposit"
+        onExit={() => {
+          dispatcher.dispatch({ name: "hideBottomSheet" });
+        }}
+        hideOfflineHeader
+      />
       <Spacer h={16} />
       <TextPara color={color.grayDark}>
         Send {tokenSymbol} to your address below. Confirm that you're sending:
@@ -54,6 +55,7 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
       </CheckLabel>
       <Spacer h={16} />
       <AddressCopier addr={account.address} disabled={!check1 || !check2} />
+      <Spacer h={64} />
     </View>
   );
 }
