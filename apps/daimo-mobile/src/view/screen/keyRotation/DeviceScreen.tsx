@@ -143,7 +143,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         return (
           <ButtonBig
             type="danger"
-            title="Remove Device"
+            title={`Remove ${deviceName}`}
             onPress={removeDevice}
             disabled={!canRemove}
             showBiometricIcon
