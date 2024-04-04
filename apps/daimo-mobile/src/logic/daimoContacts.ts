@@ -25,13 +25,13 @@ export interface EAccountContact extends EAccount, BaseDaimoContact {
   originalMatch?: string;
 }
 
-interface EmailContact extends BaseDaimoContact {
+export interface EmailContact extends BaseDaimoContact {
   type: "email";
   email: EmailAddress;
   name?: string;
 }
 
-interface PhoneNumberContact extends BaseDaimoContact {
+export interface PhoneNumberContact extends BaseDaimoContact {
   type: "phoneNumber";
   phoneNumber: PhoneNumber;
   name?: string;
@@ -86,11 +86,11 @@ export function getContactProfilePicture(r: DaimoContact) {
   return r.type === "eAcc" ? r.profilePicture : undefined;
 }
 
-export function useRecipientSearch(
+export function useContactSearch(
   account: Account,
   prefix: string,
   searchContacts: boolean,
-  onlyDaimoContacts?: boolean
+  onlyNamedEAccs: boolean
 ) {
   prefix = prefix.toLowerCase();
 
@@ -111,7 +111,7 @@ export function useRecipientSearch(
 
     const acc = getCachedEAccount(other);
 
-    if (onlyDaimoContacts && !acc.name) continue;
+    if (onlyNamedEAccs && !acc.name) continue;
 
     // HACK: ignore transfers to specially labelled addresses like "payment link"
     // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
@@ -162,7 +162,7 @@ export function useRecipientSearch(
     for (const account of res.data) {
       if (recipients.find((r) => r.type === "eAcc" && r.addr === account.addr))
         continue;
-      if (onlyDaimoContacts && !account.name) continue;
+      if (onlyNamedEAccs && !account.name) continue;
 
       // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);

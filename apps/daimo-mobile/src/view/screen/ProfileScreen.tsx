@@ -6,7 +6,6 @@ import {
   assert,
   canRequestFrom,
   canSendTo,
-  formatDaimoLink,
   getAccountName,
   getAddressContraction,
   getEAccountStr,
@@ -26,6 +25,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
+import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
@@ -37,7 +37,6 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
-import { shareURL } from "../shared/shareURL";
 import { color, ss } from "../shared/style";
 import { TextBody, TextH2 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
@@ -61,7 +60,7 @@ function ProfileScreenInner(props: Props & { account: Account }) {
     const accountName = getEAccountStr(params.eAcc);
 
     return () => {
-      shareURL(formatDaimoLink({ type: "account", account: accountName }));
+      shareURL({ type: "account", account: accountName });
       console.log(`[PROFILE] triggered share`);
     };
   }, [params]);
@@ -166,13 +165,13 @@ function ProfileScreenBody({
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
 
-  const recipient = addLastTransferTimes(account, eAcc);
+  const contact = addLastTransferTimes(account, eAcc);
 
   const canSend = canSendTo(eAcc);
   const goToSend = useCallback(() => {
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { recipient },
+      params: { recipient: contact },
     });
   }, [nav, eAcc, account]);
 
@@ -180,7 +179,7 @@ function ProfileScreenBody({
   const goToRequest = () => {
     nav.navigate("HomeTab", {
       screen: "Receive",
-      params: { autoFocus: true, recipient },
+      params: { autoFocus: true, fulfiller: contact },
     });
   };
 

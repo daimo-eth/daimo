@@ -168,9 +168,7 @@ export async function getAccountHistory(
   const profilePicture = profileCache.getProfilePicture(address);
 
   // Get request data for this user
-  const notificationRequestStatuses = await requestIndexer.getAddrRequests(
-    address
-  );
+  const notificationRequestStatuses = requestIndexer.getAddrRequests(address);
 
   const ret: AccountHistoryResult = {
     address,

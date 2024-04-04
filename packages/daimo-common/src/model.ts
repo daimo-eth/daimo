@@ -11,6 +11,7 @@ export const zAddress = z
 export enum AddrLabel {
   Faucet = "team daimo",
   PaymentLink = "payment link",
+  RequestLink = "request link",
   Paymaster = "fee",
   Coinbase = "coinbase",
   Relay = "relay.link",
