@@ -63,6 +63,7 @@ export function OwnRequestBottomSheet({
           .concat([updatedRequest]),
       };
     },
+    signerType: "deviceKey",
   });
 
   useEffect(() => {
