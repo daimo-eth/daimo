@@ -32,6 +32,13 @@ function getPublicKeyCoordinates(publicKey: Hex): [Hex, Hex] {
 
 export function reverseSeedPhrase(mnemonic: string) {
   const entropy = bip39.mnemonicToEntropy(mnemonic, wordlist);
+  const publicKey = bytesToHex(p256.getPublicKey(entropy));
 
-  return bytesToHex(entropy);
+  const [x, y] = getPublicKeyCoordinates(publicKey);
+  const publicKeyDER = contractFriendlyKeyToDER([x, y]);
+
+  // It's not necessary yet, but we could convert the der to the raw hex in
+  // the future.
+
+  return publicKeyDER;
 }

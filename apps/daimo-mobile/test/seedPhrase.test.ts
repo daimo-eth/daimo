@@ -1,6 +1,7 @@
 import { isDERPubKey } from "@daimo/common";
 
 import { generateSeedPhrase, reverseSeedPhrase } from "../src/logic/seedPhrase";
+import { wordlist } from "../src/logic/wordlist";
 
 describe("Seed Phrase", () => {
   const { mnemonic, publicKey } = generateSeedPhrase();
@@ -10,10 +11,16 @@ describe("Seed Phrase", () => {
     expect(isDERPubKey(publicKey)).toEqual(true);
   });
 
-  it("correctly reverses a mnemonic", () => {
-    const privateKey = reverseSeedPhrase(mnemonic);
+  it("conforms to the wordlist", () => {
+    const words = mnemonic.split(" ");
+    for (const word of words) {
+      expect(wordlist).toContain(word);
+    }
+  });
 
-    // TODO: Test that the retrieved *publicKey* matches the one above.
-    expect(privateKey).toBeDefined();
+  it("correctly reverses a mnemonic", () => {
+    const publicKeyDER = reverseSeedPhrase(mnemonic);
+
+    expect(publicKeyDER).toEqual(publicKey);
   });
 });

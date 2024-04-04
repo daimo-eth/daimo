@@ -173,6 +173,7 @@ function ConfirmPhraseSave({
 }
 
 function BaseVerifySeedPhrase({ account }: { account: Account }) {
+  const nav = useNav();
   const { isValid, publicKey } = useSeedPhraseContext();
 
   const seedPhraseSlot = useMemo(
@@ -198,6 +199,7 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
         slot={seedPhraseSlot}
         knownPubkey={publicKey}
         disabled={!isValid}
+        onSuccess={() => nav.goBack()}
       />
     </ScrollView>
   );
