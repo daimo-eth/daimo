@@ -105,7 +105,12 @@ export function OwnRequestBottomSheet({
       )}
       <Spacer h={32} />
       {status === "idle" && (
-        <ButtonMed title="CANCEL REQUEST" onPress={onCancel} type="subtle" />
+        <ButtonMed
+          title="CANCEL REQUEST"
+          onPress={onCancel}
+          type="subtle"
+          showBiometricIcon
+        />
       )}
       {status === "loading" && <ActivityIndicator size="large" />}
       <Spacer h={48} />
