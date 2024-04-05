@@ -9,6 +9,7 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import {
   User,
   UserViewerContext,
+  ValidatedFrameAction,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
 import { getAddress } from "viem";
@@ -47,9 +48,9 @@ export class FrameLinkService {
     return frame;
   }
 
-  // Handle a frame button click
-  async respond(req: NextRequest, frameId: number): Promise<NextResponse> {
-    const { neynarClient, fcClient } = this;
+  // Validate POST body info = Farcaster user who clicked the frame
+  async validateFrameAction(req: NextRequest): Promise<ValidatedFrameAction> {
+    const { neynarClient } = this;
 
     const body: FrameRequest = await req.json();
     const { valid, action } = await neynarClient.validateFrameAction(
@@ -59,12 +60,27 @@ export class FrameLinkService {
     console.log("Frame request. valid? " + valid);
 
     if (!valid) throw new Error("Invalid frame request");
+    return action;
+  }
+
+  // Handle a frame button click
+  async respond(req: NextRequest, frameId: number): Promise<NextResponse> {
+    const action = await this.validateFrameAction(req);
 
     // The frame being clicked on
     const frame = inviteFrameLinks.find((l) => l.id === frameId);
     if (frame == null) {
       throw new Error(`Unknown frame: ${req.nextUrl.pathname}`);
     }
+
+    return this.respondToFrameClick(action, frame);
+  }
+
+  async respondToFrameClick(
+    action: ValidatedFrameAction,
+    frame: InviteFrameLink
+  ): Promise<NextResponse> {
+    const { fcClient } = this;
 
     // The user who clicked
     const { fid } = action.interactor;
@@ -93,7 +109,11 @@ export class FrameLinkService {
     viewerContext: UserViewerContext
   ): Promise<[boolean, string]> {
     const { auth, owner } = frame;
-    if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
+    console.log(`[FRAME] authenticating ${JSON.stringify(user)}`);
+
+    if (auth.mustBePowerUser && !(user as any).power_badge) {
+      return [false, "Must be a power user"];
+    } else if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
       return [false, "Sorry, fid too high"];
     } else if (auth.claimerMustFollowOwner && !viewerContext.following) {
       return [false, `Gotta follow ${getAccountName(frame.owner)} first`];

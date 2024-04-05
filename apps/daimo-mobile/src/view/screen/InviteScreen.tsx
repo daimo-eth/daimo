@@ -5,9 +5,11 @@ import {
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
+import { Image } from "expo-image";
 import { useCallback, useState } from "react";
 import {
   ImageBackground,
+  Linking,
   Pressable,
   StyleSheet,
   TouchableHighlight,
@@ -23,16 +25,18 @@ import {
 } from "../../common/nav";
 import { shareURL } from "../../logic/externalAction";
 import { Account } from "../../model/account";
-import { ButtonBig, ButtonMed } from "../shared/Button";
+import { ButtonBig, ButtonMed, TextButton } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { ContactBubble } from "../shared/ContactBubble";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import image from "../shared/image";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
   TextBody,
+  TextBtnCaps,
   TextCenter,
   TextH2,
   TextLight,
@@ -47,6 +51,10 @@ export function InviteScreen() {
 function InviteScreenInner({ account }: { account: Account }) {
   const inviteLinkStatus = account.inviteLinkStatus;
 
+  console.log(
+    `[INVITE] render ${account.name}, ${JSON.stringify(inviteLinkStatus)}`
+  );
+
   const header =
     account.invitees.length > 0 ? (
       <Header
@@ -58,7 +66,10 @@ function InviteScreenInner({ account }: { account: Account }) {
     );
 
   const footer = inviteLinkStatus?.isValid ? (
-    <ReferralButtonsFooter inviteCodeStatus={inviteLinkStatus} />
+    <ReferralButtonsFooter
+      inviteCodeStatus={inviteLinkStatus}
+      account={account}
+    />
   ) : (
     <LockedFooter />
   );
@@ -247,8 +258,10 @@ function Header({
 
 function ReferralButtonsFooter({
   inviteCodeStatus,
+  account,
 }: {
   inviteCodeStatus: DaimoInviteCodeStatus;
+  account: Account;
 }) {
   const { link, bonusDollarsInvitee, bonusDollarsInviter } = inviteCodeStatus;
   const url = formatDaimoLink(link);
@@ -266,6 +279,14 @@ function ReferralButtonsFooter({
       return ` and we'll send you $${bonusDollarsInviter} USDC`;
     } else return "";
   })();
+
+  const shareFarcaster = () => {
+    console.log(`[INVITE] share on farcaster`);
+    const msg = encodeURIComponent(`Join me on Daimo`);
+    const frameUrl = `https://daimo.com/frame/invite/${account.address}`;
+    const url = `https://warpcast.com/~/compose?text=${msg}&embeds[]=${frameUrl}`;
+    Linking.openURL(url);
+  };
 
   return (
     <View>
@@ -295,6 +316,21 @@ function ReferralButtonsFooter({
             onPress={() => shareURL(link)}
           />
         </View>
+      </View>
+      <Spacer h={16} />
+      <View>
+        <TextButton onPress={shareFarcaster}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Image
+              source={{ uri: image.iconFarcaster }}
+              style={{ width: 16, height: 16, zIndex: -1 }}
+            />
+            <Spacer w={8} />
+            <TextBtnCaps color={color.grayDark}>
+              SHARE FRAME ON FARCASTER
+            </TextBtnCaps>
+          </View>
+        </TextButton>
       </View>
     </View>
   );
