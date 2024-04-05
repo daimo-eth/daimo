@@ -25,7 +25,9 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   }
 
   // Show image, button text customized to this invite frame
-  const frameImg = getAbsoluteUrl(`/frame/invite/${eAcc.addr}/preview`);
+  const frameImg = getAbsoluteUrl(
+    `/frame/invite/${eAcc.addr}/preview?name=${eAcc.name}`
+  );
   const frameMetadata = getFrameMetadata({
     buttons: [
       {
