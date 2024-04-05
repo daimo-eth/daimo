@@ -95,8 +95,8 @@ export function useContactSearch(
   prefix = prefix.toLowerCase();
 
   // Load recent recipients (addrs we've sent $ to) & senders (...received from)
-  const recents = [] as DaimoContact[];
-  const recentsByAddr = new Map<Address, DaimoContact>();
+  const recents = [] as EAccountContact[];
+  const recentsByAddr = new Map<Address, EAccountContact>();
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   for (const t of transfersNewToOld) {
     const other = (function () {
@@ -118,13 +118,7 @@ export function useContactSearch(
     // TODO: show note claimer as recipient.
     if (acc.label != null) continue;
 
-    const r: EAccountContact = {
-      type: "eAcc",
-      ...acc,
-    };
-    if (t.from === account.address) r.lastSendTime = t.timestamp;
-    else r.lastRecvTime = t.timestamp;
-
+    const r = addLastTransferTimes(account, acc);
     recents.push(r);
     recentsByAddr.set(other, r);
   }
@@ -167,16 +161,13 @@ export function useContactSearch(
       // Even if we didn't match a given recent above ^, may still be a result.
       const recent = recentsByAddr.get(account.addr);
       if (recent) {
-        recipients.push({
-          type: "eAcc",
-          ...account,
-          lastSendTime: recent.lastSendTime,
-        });
+        recipients.push({ ...recent, originalMatch: account.originalMatch });
       } else {
         recipients.push({ type: "eAcc", ...account });
       }
     }
-    const sortKey = (r: DaimoContact) => r.lastSendTime || 0;
+    const sortKey = (r: DaimoContact) =>
+      Math.max(r.lastSendTime || 0, r.lastRecvTime || 0);
     recipients.sort((a, b) => sortKey(b) - sortKey(a));
   }
 

@@ -179,10 +179,16 @@ function ContactRow({
       case "eAcc": {
         const nowS = now();
         const { lastSendTime, lastRecvTime } = contact;
-        if (lastSendTime) return `Sent ${timeAgo(lastSendTime, nowS, true)}`;
-        if (lastRecvTime)
-          return `Received ${timeAgo(lastRecvTime, nowS, true)}`;
-        return undefined;
+        const lastSendMessage = lastSendTime
+          ? `Sent ${timeAgo(lastSendTime, nowS, true)}`
+          : undefined;
+        const lastRecvMessage = lastRecvTime
+          ? `Received ${timeAgo(lastRecvTime, nowS, true)}`
+          : undefined;
+
+        if ((lastSendTime || 0) > (lastRecvTime || 0)) {
+          return lastSendMessage;
+        } else return lastRecvMessage;
       }
     }
   })();
