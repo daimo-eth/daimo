@@ -45,7 +45,8 @@ export class Log {
     type: string,
     fn: () => Promise<T>,
     retries: number,
-    matchError?: (e: string) => boolean
+    matchError?: (e: string) => boolean,
+    failureMessage?: string
   ) {
     for (let i = 0; i < retries; i++) {
       try {
@@ -62,7 +63,7 @@ export class Log {
         }
       }
     }
-    throw new NamedError("Retry limit exceeded", type);
+    throw new NamedError(failureMessage || "Retry limit exceeded", type);
   }
 
   private static log(action: LogAction) {
@@ -72,7 +73,7 @@ export class Log {
 }
 
 /** Always returns a nonempty string, "unknown error" if missing. */
-function getErrMessage(e: any): string {
+export function getErrMessage(e: any): string {
   return typeof e === "string" ? e : e?.message || "unknown error";
 }
 
