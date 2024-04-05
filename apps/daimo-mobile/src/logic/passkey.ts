@@ -21,7 +21,7 @@ function matchAASABugError(e: string) {
   return e.includes("JV8PYC9QV4.com.daimo") && e.includes("daimo.com");
 }
 
-const AASA_BUG_MESSAGE = "iOS system error, restart the app and try again.";
+const AASA_BUG_MESSAGE = "iOS system error. Restart the app, then try again.";
 
 // Wrapper for Expo module native passkey creation
 export async function createPasskey(
