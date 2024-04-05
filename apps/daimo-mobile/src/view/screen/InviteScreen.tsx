@@ -282,7 +282,7 @@ function ReferralButtonsFooter({
 
   const shareFarcaster = () => {
     console.log(`[INVITE] share on farcaster`);
-    const msg = encodeURIComponent(`Join me on Daimo`);
+    const msg = "Join+me+on+Daimo";
     const frameUrl = `https://daimo.com/frame/invite/${account.address}`;
     const url = `https://warpcast.com/~/compose?text=${msg}&embeds[]=${frameUrl}`;
     Linking.openURL(url);

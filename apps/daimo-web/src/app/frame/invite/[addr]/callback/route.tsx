@@ -15,8 +15,8 @@ export async function POST(
   const frame: InviteFrameLink = {
     id: 0,
     owner: { addr },
-    bonusDollarsInvitee: 1000,
-    bonusDollarsInviter: 500,
+    bonusDollarsInvitee: 10,
+    bonusDollarsInviter: 0,
     auth: {
       mustBePowerUser: true,
     },
