@@ -2,8 +2,8 @@
   "name": "@daimo/common",
   "version": "0.1.0",
   "description": "Shared between web and mobile",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",

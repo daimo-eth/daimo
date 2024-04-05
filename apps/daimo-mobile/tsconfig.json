@@ -3,5 +3,14 @@
   "compilerOptions": {
     "strict": true
   },
-  "include": ["./*.js", "./src/**/*", "./test/**/*", "app.config.ts"]
+  "include": ["./*.js", "./src/**/*", "./test/**/*", "app.config.ts"],
+  "references": [
+    { "path": "../../packages/daimo-api" },
+    { "path": "../../packages/daimo-common" },
+    { "path": "../../packages/daimo-userop" },
+    { "path": "../../packages/daimo-contract" },
+    { "path": "../../packages/daimo-expo-enclave" },
+    { "path": "../../packages/daimo-expo-passkeys" },
+    { "path": "../../packages/daimo-expo-app-delegate" }
+  ]
 }

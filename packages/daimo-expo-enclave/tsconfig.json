@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./build",
     "lib": ["es2015"],
-    "types": null
+    "types": null,
+    "composite": true
   },
   "include": ["./src"],
   "exclude": ["**/__mocks__/*", "**/__tests__/*", "**/__stories__/*"]
