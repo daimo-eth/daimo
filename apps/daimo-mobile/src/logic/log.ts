@@ -73,7 +73,7 @@ export class Log {
 }
 
 /** Always returns a nonempty string, "unknown error" if missing. */
-export function getErrMessage(e: any): string {
+function getErrMessage(e: any): string {
   return typeof e === "string" ? e : e?.message || "unknown error";
 }
 
