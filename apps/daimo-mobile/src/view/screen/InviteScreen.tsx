@@ -7,7 +7,6 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
 import {
-  Image,
   ImageBackground,
   Pressable,
   StyleSheet,
@@ -16,20 +15,20 @@ import {
 } from "react-native";
 
 import InviteBackground from "../../../assets/invite-background.png";
-import InviteCover from "../../../assets/invite-cover.png";
 import {
   navToAccountPage,
   useExitBack,
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { shareURL } from "../../logic/externalAction";
 import { Account } from "../../model/account";
 import { ButtonBig, ButtonMed } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { ContactBubble } from "../shared/ContactBubble";
+import { CoverGraphic } from "../shared/CoverGraphic";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { shareURL } from "../shared/shareURL";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
@@ -124,15 +123,13 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
 
 function HeaderGraphic({ invitees }: { invitees?: EAccount[] }) {
   return invitees && invitees.length > 0 ? (
-    <View style={styles.imgContainer}>
+    <View style={styles.imageContainer}>
       <ImageBackground source={InviteBackground} style={styles.image}>
         <InviteesBubbles invitees={invitees} />
       </ImageBackground>
     </View>
   ) : (
-    <View style={styles.imgContainer}>
-      <Image source={InviteCover} style={styles.image} />
-    </View>
+    <CoverGraphic type="invite" />
   );
 }
 
@@ -295,7 +292,7 @@ function ReferralButtonsFooter({
           <ButtonBig
             type="primary"
             title="Share Link"
-            onPress={() => shareURL(url)}
+            onPress={() => shareURL(link)}
           />
         </View>
       </View>
@@ -334,7 +331,7 @@ function InviteCodeCopier({ code, url }: { code: string; url: string }) {
 }
 
 const styles = StyleSheet.create({
-  imgContainer: {
+  imageContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",

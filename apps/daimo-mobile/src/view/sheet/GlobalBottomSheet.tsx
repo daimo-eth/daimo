@@ -17,10 +17,12 @@ import RNShake from "react-native-shake";
 
 import { CreateBackupSheet } from "./CreateBackupSheet";
 import { DebugBottomSheet } from "./DebugBottomSheet";
+import { DepositAddressBottomSheet } from "./DepositAddressBottomSheet";
 import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
 import { HelpBottomSheet } from "./HelpBottomSheet";
 import { OnboardingChecklistBottomSheet } from "./OnboardingChecklistBottomSheet";
 import { OwnRequestBottomSheet } from "./OwnRequestBottomSheet";
+import { WithdrawInstructionsBottomSheet } from "./WithdrawInstructionsBottomSheet";
 import { Action, DispatcherContext } from "../../action/dispatch";
 import ScrollPellet from "../shared/ScrollPellet";
 
@@ -46,6 +48,12 @@ const bottomSheetSettings = {
   createBackup: {
     enableSwipeClose: true,
   },
+  withdrawInstructions: {
+    enableSwipeClose: true,
+  },
+  depositAddress: {
+    enableSwipeClose: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -56,8 +64,10 @@ type DisplayedSheet =
         | "debug"
         | "connectFarcaster"
         | "linkFarcaster"
-        | "onboardingChecklist"
-        | "createBackup";
+        | "createBackup"
+        | "withdrawInstructions"
+        | "depositAddress"
+        | "onboardingChecklist";
     }
   | {
       action: "helpModal";
@@ -138,6 +148,14 @@ export function GlobalBottomSheet() {
         openBottomSheet({ action: "createBackup" });
         break;
       }
+      case "withdrawInstructions": {
+        openBottomSheet({ action: "withdrawInstructions" });
+        break;
+      }
+      case "depositAddress": {
+        openBottomSheet({ action: "depositAddress" });
+        break;
+      }
       case "ownRequest": {
         const { reqStatus } = action;
         openBottomSheet({ action: "ownRequest", payload: { reqStatus } });
@@ -162,6 +180,8 @@ export function GlobalBottomSheet() {
     dispatcher.register("connectFarcaster", handleDispatch);
     dispatcher.register("linkFarcaster", handleDispatch);
     dispatcher.register("onboardingChecklist", handleDispatch);
+    dispatcher.register("withdrawInstructions", handleDispatch);
+    dispatcher.register("depositAddress", handleDispatch);
     dispatcher.register("ownRequest", handleDispatch);
     dispatcher.register("helpModal", handleDispatch);
     dispatcher.register("hideBottomSheet", handleDispatch);
@@ -205,6 +225,10 @@ export function GlobalBottomSheet() {
           {sheet?.action === "ownRequest" && (
             <OwnRequestBottomSheet reqStatus={sheet.payload.reqStatus} />
           )}
+          {sheet?.action === "withdrawInstructions" && (
+            <WithdrawInstructionsBottomSheet />
+          )}
+          {sheet?.action === "depositAddress" && <DepositAddressBottomSheet />}
         </BottomSheetView>
       </BottomSheet>
     </View>

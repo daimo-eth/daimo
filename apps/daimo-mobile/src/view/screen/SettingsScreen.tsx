@@ -44,6 +44,7 @@ import {
   TextColor,
   TextLight,
   TextMeta,
+  TextPara,
 } from "../shared/text";
 
 export function SettingsScreen() {
@@ -205,14 +206,18 @@ function DevicesSection({ account }: { account: Account }) {
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
-      title: "What is a passkey backup?",
+      title: "What is a Passkey Backup?",
       content: (
         <>
-          <TextLight>
-            Passkeys are a safer and easier alternative to passwords. With
-            passkeys, users can sign in to apps and websites with a biometric
-            sensor.
-          </TextLight>
+          <TextPara>
+            Passkeys are a convenient and phishing-resistant alternative to seed
+            phrases.
+          </TextPara>
+          <Spacer h={16} />
+          <TextPara>
+            Passkeys are generated and stored in your password manager, and
+            allow you to recover your account even if you lose your device.
+          </TextPara>
         </>
       ),
     });

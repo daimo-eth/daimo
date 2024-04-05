@@ -84,19 +84,17 @@ export class BundlerClient {
   }
 
   async sendUserOp(
+    opHash: Hex,
     op: UserOpHex,
     viemClient: ViemClient,
     nameReg?: NameRegistry
   ) {
     console.log(`[BUNDLER] submitting userOp: ${JSON.stringify(op)}`);
+
     try {
       assert(nameReg != null, "nameReg required");
       const compressed = this.compress(op, nameReg);
-      // Simultanously get the opHash (view function) and submit the bundle
-      const [opHash] = await Promise.all([
-        this.getOpHash(op, viemClient.publicClient),
-        this.sendCompressedBundle(compressed, viemClient),
-      ]);
+      await this.sendCompressedBundle(compressed, viemClient);
 
       if (this.opIndexer) {
         const opStart = Date.now();
@@ -118,10 +116,7 @@ export class BundlerClient {
       return opHash;
     } catch (e) {
       console.log(`[BUNDLER] cant send compressed, falling back: ${e}`);
-      const [opHash] = await Promise.all([
-        this.getOpHash(op, viemClient.publicClient),
-        this.sendUncompressedBundle(op, viemClient),
-      ]);
+      await this.sendUncompressedBundle(op, viemClient);
       return opHash;
     }
   }

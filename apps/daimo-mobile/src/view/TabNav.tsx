@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
+import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import { ProfileScreen } from "./screen/ProfileScreen";
@@ -41,9 +42,8 @@ import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/Onb
 import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
 import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
-import DepositScreen from "./screen/receive/DepositScreen";
 import { ReceiveNavScreen } from "./screen/receive/ReceiveNavScreen";
-import { ReceiveScreenV2 } from "./screen/receive/ReceiveScreenV2";
+import { ReceiveScreen } from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
 import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
@@ -328,7 +328,7 @@ function HomeTab() {
         <HomeStack.Screen name="QR" component={QRScreen} />
         <HomeStack.Screen name="Profile" component={ProfileScreen} />
         <HomeStack.Screen name="Note" component={NoteScreen} />
-        <HomeStack.Screen name="Receive" component={ReceiveScreenV2} />
+        <HomeStack.Screen name="Receive" component={ReceiveScreen} />
         <HomeStack.Screen name="ReceiveNav" component={ReceiveNavScreen} />
         <HomeStack.Screen
           name="Notifications"

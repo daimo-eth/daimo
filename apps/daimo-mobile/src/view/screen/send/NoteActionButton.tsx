@@ -6,7 +6,6 @@ import {
   OpStatus,
   assertNotNull,
   dollarsToAmount,
-  formatDaimoLink,
   generateNoteSeedAddress,
   getNoteId,
   now,
@@ -26,12 +25,12 @@ import {
   useSendAsync,
 } from "../../../action/useSendAsync";
 import { useNav } from "../../../common/nav";
+import { ExternalAction } from "../../../logic/externalAction";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { ExternalAction } from "../../shared/composeSend";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
@@ -155,9 +154,8 @@ function NoteActionButtonInner({
       id: noteId,
       seed: noteSeed,
     };
-    const url = formatDaimoLink(link);
 
-    const didShare = await externalAction.exec(url, dollars);
+    const didShare = await externalAction.exec(link);
     console.log(`[SEND NOTE] external action executed: ${didShare}`);
 
     nav.reset({
@@ -173,9 +171,9 @@ function NoteActionButtonInner({
 
   const externalActionButtonTitle = (function () {
     switch (externalAction.type) {
-      case "sms":
+      case "phoneNumber":
         return "SEND SMS";
-      case "mail":
+      case "email":
         return "SEND MAIL";
       case "share":
         return "SEND PAYMENT LINK";

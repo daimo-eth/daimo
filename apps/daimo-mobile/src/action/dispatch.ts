@@ -5,6 +5,8 @@ export type Action =
   | { name: "connectFarcaster" }
   | { name: "linkFarcaster" }
   | { name: "onboardingChecklist" }
+  | { name: "depositAddress" }
+  | { name: "withdrawInstructions" }
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
   | { name: "createBackup" }
@@ -29,7 +31,7 @@ export class Dispatcher {
   }
 
   dispatch(action: Action) {
-    console.log(`[DISPATCH] ${JSON.stringify(action)}`);
+    console.log(`[DISPATCH] ${action.name}`);
     const handler = this.handlers.get(action.name);
     if (!handler) {
       throw new Error(`No handler for action: ${action.name}`);

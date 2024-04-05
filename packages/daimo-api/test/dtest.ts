@@ -32,7 +32,11 @@ async function main() {
   const keyReg = new KeyRegistry();
 
   const shovelWatcher = new Watcher();
-  shovelWatcher.add(keyReg, nameReg, opIndexer, coinIndexer, noteIndexer);
+  shovelWatcher.add(
+    [nameReg, keyReg, opIndexer],
+    [noteIndexer, requestIndexer],
+    [coinIndexer]
+  );
 
   const lastBlockNum = 7000000;
   await shovelWatcher.catchUpTo(lastBlockNum);

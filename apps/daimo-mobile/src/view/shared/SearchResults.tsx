@@ -25,7 +25,7 @@ import {
   EAccountContact,
   getContactName,
   getDaimoContactKey,
-  useRecipientSearch,
+  useContactSearch,
 } from "../../logic/daimoContacts";
 import { ContactsAccess } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
@@ -60,7 +60,7 @@ function SearchResultsScroll({
   const { permission: contactsPermission, ask: requestContactsPermission } =
     contactsAccess;
 
-  const res = useRecipientSearch(
+  const res = useContactSearch(
     account,
     prefix,
     contactsPermission?.granted || false,
@@ -91,7 +91,7 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <RecipientRow key={getDaimoContactKey(r)} recipient={r} mode={mode} />
+        <ContactRow key={getDaimoContactKey(r)} contact={r} mode={mode} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
@@ -126,44 +126,44 @@ function NoSearchResults() {
   );
 }
 
-function RecipientRow({
-  recipient,
+function ContactRow({
+  contact,
   mode,
 }: {
-  recipient: DaimoContact;
+  contact: DaimoContact;
   mode: "send" | "account" | "receive";
 }) {
-  const name = getContactName(recipient);
+  const name = getContactName(contact);
   const nav = useNav();
   const goToAccount = useCallback(() => {
-    switch (recipient.type) {
+    switch (contact.type) {
       case "email":
       case "phoneNumber": {
         if (mode === "receive") {
           nav.navigate("HomeTab", {
             screen: "Receive",
-            params: { recipient, autoFocus: true },
+            params: { fulfiller: contact, autoFocus: true },
           });
         } else {
           nav.navigate("SendTab", {
             screen: "SendLink",
-            params: { recipient },
+            params: { recipient: contact },
           });
         }
         return;
       }
       case "eAcc": {
         if (mode === "account") {
-          navToAccountPage(recipient, nav);
+          navToAccountPage(contact, nav);
         } else if (mode === "send") {
           nav.navigate("SendTab", {
             screen: "SendTransfer",
-            params: { recipient },
+            params: { recipient: contact },
           });
         } else {
           nav.navigate("HomeTab", {
             screen: "Receive",
-            params: { autoFocus: true, recipient },
+            params: { autoFocus: true, fulfiller: contact },
           });
         }
       }
@@ -171,14 +171,14 @@ function RecipientRow({
   }, [name, mode]);
 
   const lightText = (function () {
-    switch (recipient.type) {
+    switch (contact.type) {
       case "email":
-        return recipient.name ? recipient.email : undefined;
+        return contact.name ? contact.email : undefined;
       case "phoneNumber":
-        return recipient.name ? recipient.phoneNumber : undefined;
+        return contact.name ? contact.phoneNumber : undefined;
       case "eAcc": {
         const nowS = now();
-        const { lastSendTime, lastRecvTime } = recipient;
+        const { lastSendTime, lastRecvTime } = contact;
         if (lastSendTime) return `Sent ${timeAgo(lastSendTime, nowS, true)}`;
         if (lastRecvTime)
           return `Received ${timeAgo(lastRecvTime, nowS, true)}`;
@@ -195,13 +195,13 @@ function RecipientRow({
     <Row onPress={goToAccount}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
-          <ContactBubble contact={recipient} size={36} />
+          <ContactBubble contact={contact} size={36} />
           <View style={{ flexDirection: "column" }}>
             <TextBody>{name}</TextBody>
-            {recipient.type === "eAcc" && (
+            {contact.type === "eAcc" && (
               <>
                 <Spacer h={2} />
-                <ProfileLinks recipient={recipient} />
+                <ProfileLinks contact={contact} />
               </>
             )}
           </View>
@@ -212,8 +212,8 @@ function RecipientRow({
   );
 }
 
-function ProfileLinks({ recipient }: { recipient: EAccountContact }) {
-  const links = recipient.linkedAccounts || [];
+function ProfileLinks({ contact }: { contact: EAccountContact }) {
+  const links = contact.linkedAccounts || [];
   return (
     <View style={{ flexDirection: "row" }}>
       {links.map((link, index) => (

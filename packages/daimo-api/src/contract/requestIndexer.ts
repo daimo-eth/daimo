@@ -269,7 +269,7 @@ export class RequestIndexer {
   }
 
   // Fetch requests made or received by an address
-  async getAddrRequests(addr: Address) {
+  getAddrRequests(addr: Address) {
     const requests = (this.requestsByAddress.get(addr) || []).map(
       (id) => this.requests.get(id)!
     );

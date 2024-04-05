@@ -21,7 +21,11 @@ import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
-import { EAccountContact, MsgContact } from "../logic/daimoContacts";
+import {
+  DaimoContact,
+  EAccountContact,
+  MsgContact,
+} from "../logic/daimoContacts";
 import {
   getInitialDeepLink,
   markInitialDeepLinkHandled,
@@ -48,7 +52,7 @@ export type ParamListHome = {
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
   HistoryOp: { op: DisplayOpEvent };
-  Receive: { autoFocus: boolean; recipient?: EAccountContact | MsgContact };
+  Receive: { autoFocus: boolean; fulfiller?: DaimoContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
   ReceiveNav: undefined;
   Notifications: undefined;

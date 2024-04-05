@@ -157,11 +157,11 @@ export class Crontab {
     this.telemetry.recordClippy(
       `Transfer: ${fromDisplayName} -> ${toDisplayName} $${amountToDollars(
         opEvent.amount
-      )} ${
+      )}${
         opEvent.type === "transfer" && opEvent.requestStatus
           ? " for " + formatDaimoLink(opEvent.requestStatus.link)
           : ""
-      } ${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
+      }${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
     );
   }
 }

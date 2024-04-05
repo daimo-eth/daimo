@@ -11,6 +11,7 @@ export const zAddress = z
 export enum AddrLabel {
   Faucet = "team daimo",
   PaymentLink = "payment link",
+  RequestLink = "request link",
   Paymaster = "fee",
   Coinbase = "coinbase",
   Relay = "relay.link",
@@ -82,6 +83,7 @@ export type UserOpHex = z.infer<typeof zUserOpHex>;
 export const zRecommendedExchange = z.object({
   title: z.string().optional(),
   cta: z.string(),
+  logo: z.string().optional(),
   url: z.string(),
 });
 

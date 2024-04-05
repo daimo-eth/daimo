@@ -34,16 +34,24 @@ export async function sendUserOpV2(
   span.setAttribute("op.memo", memo || "undefined");
 
   try {
-    const opHash = await bundlerClient.sendUserOp(op, vc, nameReg);
-    if (memo && validateMemo(memo) === "ok") {
-      await paymentMemoTracker.addMemo(opHash, memo);
-    }
+    const opHash = await bundlerClient.getOpHash(op, vc.publicClient);
+
+    const saveMemo = async () => {
+      if (memo && validateMemo(memo) === "ok") {
+        await paymentMemoTracker.addMemo(opHash, memo);
+      }
+    };
 
     // Creating a valid userop authenticates the user, so we can attach
     // private data like user's unique inviteCode in the response.
-    const inviteCode = await inviteCodeTracker.getBestInviteCodeForSender(
-      op.sender
-    );
+    // Note that there's a possible race condition here if the userop is
+    // confirmed and indexed before the memo is saved -- but that's unlikely.
+    const [, , inviteCode] = await Promise.all([
+      saveMemo(),
+      bundlerClient.sendUserOp(opHash, op, vc, nameReg),
+      inviteCodeTracker.getBestInviteCodeForSender(op.sender),
+    ]);
+
     return {
       opHash,
       inviteCode,

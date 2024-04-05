@@ -321,7 +321,17 @@ function CompleteOnboarding() {
   }, [dispatcher]);
 
   return (
-    <Pressable onPress={openChecklist} style={styles.checklistAction}>
+    <Pressable
+      onPress={openChecklist}
+      style={({ pressed }) => [
+        {
+          ...styles.checklistAction,
+          backgroundColor: pressed
+            ? touchHighlightUnderlay.subtle.underlayColor
+            : undefined,
+        },
+      ]}
+    >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />
@@ -420,5 +430,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     backgroundColor: color.white,
     ...ss.container.shadow,
+    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
   },
 });

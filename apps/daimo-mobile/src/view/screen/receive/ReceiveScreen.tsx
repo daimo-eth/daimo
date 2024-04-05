@@ -1,7 +1,7 @@
 import {
+  DaimoLinkRequestV2,
   dollarsToAmount,
   encodeRequestId,
-  formatDaimoLink,
   generateRequestId,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
@@ -10,10 +10,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
+  StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
   View,
-  StyleSheet,
 } from "react-native";
 
 import { useActStatus } from "../../../action/actStatus";
@@ -23,44 +23,64 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
-import { EAccountContact, MsgContact } from "../../../logic/daimoContacts";
+import { DaimoContact } from "../../../logic/daimoContacts";
 import { env } from "../../../logic/env";
+import {
+  ExternalAction,
+  getComposeExternalAction,
+  shareURL,
+} from "../../../logic/externalAction";
 import { Account } from "../../../model/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
+import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { getSendRecvLinkAction } from "../../shared/composeSend";
-import { shareURL } from "../../shared/shareURL";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
-import { RecipientDisplay } from "../send/RecipientDisplay";
 
 type Props = NativeStackScreenProps<ParamListHome, "Receive">;
 
-export function ReceiveScreenV2({ route }: Props) {
-  const Inner = useWithAccount(RequestScreenInnerV2);
+export function ReceiveScreen({ route }: Props) {
+  const Inner = useWithAccount(RequestScreenInner);
   return <Inner {...route.params} />;
 }
 
-function RequestScreenInnerV2({
+function RequestScreenInner({
   account,
-  recipient,
+  fulfiller,
 }: {
   account: Account;
-  recipient?: EAccountContact | MsgContact;
+  fulfiller?: DaimoContact;
 }) {
   const [dollars, setDollars] = useState(0);
 
   // On successful send, go home
-  const [as, setAS] = useActStatus("requestv2");
+  const [as, setAS] = useActStatus("request");
 
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
 
   const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
+
+  const [externalAction, setExternalAction] = useState<
+    ExternalAction | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!fulfiller) {
+      // Share URL
+      setExternalAction({
+        type: "share",
+        exec: shareURL,
+      });
+    } else if (fulfiller.type === "email" || fulfiller.type === "phoneNumber") {
+      // Compose email or SMS, fallback to share sheet
+      getComposeExternalAction(fulfiller).then(setExternalAction);
+    }
+  }, [fulfiller]);
 
   const sendRequest = async () => {
     textInputRef.current?.blur();
@@ -69,38 +89,27 @@ function RequestScreenInnerV2({
     const id = generateRequestId();
     const idString = encodeRequestId(id);
 
-    const url = formatDaimoLink({
+    const txHash = await rpcFunc.createRequestSponsored.mutate({
+      recipient: account.address,
+      idString,
+      amount: `${dollarsToAmount(dollars)}`,
+      fulfiller: fulfiller?.type === "eAcc" ? fulfiller.addr : undefined,
+    });
+
+    const link: DaimoLinkRequestV2 = {
       type: "requestv2",
       id: idString,
       recipient: account.name,
       dollars: `${dollars}`,
-    });
+    };
 
-    if (!recipient) {
-      const didShare = await shareURL(url);
-      console.log(`[REQUEST] action ${didShare}`);
-    } else if (
-      recipient?.type === "email" ||
-      recipient?.type === "phoneNumber"
-    ) {
-      const { exec } = await getSendRecvLinkAction(
-        recipient,
-        account.name,
-        "receive"
-      );
+    console.log(`[REQUEST] txHash ${txHash}`);
 
-      const didShare = await exec(url, dollars);
+    if (externalAction) {
+      console.log(`[REQUEST] external action ${externalAction.type}`);
+      const didShare = await externalAction.exec(link);
 
       console.log(`[REQUEST] action ${didShare}`);
-    } else {
-      const txHash = await rpcFunc.createRequestSponsored.mutate({
-        recipient: account.address,
-        idString,
-        amount: `${dollarsToAmount(dollars)}`,
-        fulfiller: recipient?.addr,
-      });
-
-      console.log(`[REQUEST] txHash ${txHash}`);
     }
 
     setAS("success");
@@ -125,14 +134,14 @@ function RequestScreenInnerV2({
       <View style={ss.container.screen}>
         <ScreenHeader title="Request from" onBack={goBack || goHome} />
         <Spacer h={8} />
-        {!recipient && (
+        {!fulfiller && (
           <InfoBox
             title="Send a request link"
             subtitle="Request USDC from someone using any messaging app"
           />
         )}
         <Spacer h={24} />
-        {recipient && <RecipientDisplay recipient={recipient} />}
+        {fulfiller && <ContactDisplay contact={fulfiller} />}
         <Spacer h={32} />
         <AmountChooser
           dollars={dollars}
