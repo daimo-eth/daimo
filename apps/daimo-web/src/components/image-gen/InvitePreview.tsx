@@ -41,7 +41,7 @@ function Content({ name }: { name: string }) {
           display: "block",
           color: "#8b5af6",
           fontSize: 18,
-          marginBottom: 24,
+          marginBottom: 12,
           textAlign: "center",
         }}
       >

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const name = searchParams.get("name");
 
   return new ImageResponse(<InvitePreviewImg name={name!} />, {
-    width: 1200,
-    height: 630,
+    width: 1086,
+    height: 569,
   });
 }
