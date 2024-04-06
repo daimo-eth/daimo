@@ -15,11 +15,12 @@ export function InvitePreviewImg({ name }: { name: string }) {
       <div
         style={{
           backgroundImage: `url("${getAbsoluteUrl(
-            "/assets/frame/InvitePowerUserDynamic.png"
+            "/assets/frame/InvInitPowerUserDynamic.png"
           )}")`,
           height: "100%",
           width: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           paddingTop: 74,
         }}
@@ -32,9 +33,12 @@ export function InvitePreviewImg({ name }: { name: string }) {
 
 function Content({ name }: { name: string }) {
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       <div
         style={{
+          display: "block",
           color: "#8b5af6",
           fontSize: 18,
           marginBottom: 24,
@@ -43,7 +47,15 @@ function Content({ name }: { name: string }) {
       >
         +$10 BONUS FOR POWER USERS
       </div>
-      <div style={{ fontSize: 36, textAlign: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          fontSize: 36,
+          textAlign: "center",
+          gap: 8,
+        }}
+      >
         Join {name} on <span style={{ color: "#489e35" }}>Daimo.</span>
       </div>
     </div>
