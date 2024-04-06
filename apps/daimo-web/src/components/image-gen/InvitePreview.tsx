@@ -44,7 +44,7 @@ function Content({ name }: { name: string }) {
         +$10 BONUS FOR POWER USERS
       </div>
       <div style={{ fontSize: 36, textAlign: "center" }}>
-        Join {name} on <span>Daimo.</span>
+        Join {name} on <span style={{ color: "#489e35" }}>Daimo.</span>
       </div>
     </div>
   );
