@@ -30,25 +30,18 @@ export function ProgressBlobs({
 }
 
 function ProgressBlob({ active, done }: { active: boolean; done: boolean }) {
-  const offset = useSharedValue(20);
+  const width = useSharedValue(20);
   const bg = useSharedValue(color.primary);
 
   useEffect(() => {
-    offset.value = withTiming(active ? 60 : 20);
+    width.value = withTiming(active ? 60 : 20);
     bg.value = withTiming(done || active ? color.primary : color.grayLight);
   }, [active, done]);
 
   const style = useAnimatedStyle(() => ({
-    width: offset.value,
+    width: width.value,
     backgroundColor: bg.value,
   }));
 
-  return (
-    <Animated.View
-      style={[
-        { backgroundColor: color.primary, borderRadius: 8, height: 8 },
-        style,
-      ]}
-    />
-  );
+  return <Animated.View style={[{ borderRadius: 8, height: 8 }, style]} />;
 }

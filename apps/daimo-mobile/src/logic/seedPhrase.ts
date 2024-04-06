@@ -1,4 +1,4 @@
-import { contractFriendlyKeyToDER } from "@daimo/common";
+import { assert, contractFriendlyKeyToDER } from "@daimo/common";
 import { p256 } from "@noble/curves/p256";
 import * as bip39 from "@scure/bip39";
 import { ec } from "elliptic";
@@ -37,8 +37,19 @@ export function reverseSeedPhrase(mnemonic: string) {
   const [x, y] = getPublicKeyCoordinates(publicKey);
   const publicKeyDER = contractFriendlyKeyToDER([x, y]);
 
-  // It's not necessary yet, but we could convert the der to the raw hex in
-  // the future.
-
   return publicKeyDER;
+}
+
+export function requestSeedPhraseSignature(
+  challengeB64: string,
+  seedPhrase: string
+) {
+  const entropy = bip39.mnemonicToEntropy(seedPhrase, wordlist);
+
+  assert(
+    p256.utils.isValidPrivateKey(entropy),
+    "The entered phrase does not match a valid p256 private key"
+  );
+
+  return p256.sign(challengeB64, entropy).toDERHex();
 }
