@@ -40,6 +40,11 @@ export function reverseSeedPhrase(mnemonic: string) {
   return publicKeyDER;
 }
 
+// Unlike the `requestPasskeySignature` method,
+// this does not provide an easy way to get the account name, key slot,
+// or other related information.
+// It is completely context-free, as it is not stored on the device.
+
 export function requestSeedPhraseSignature(
   challengeB64: string,
   seedPhrase: string

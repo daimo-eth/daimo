@@ -109,11 +109,16 @@ export function getWrappedRawSigner(
   };
 }
 
+// We require passing the raw seed phrase here, as this method is
+// completely context-free i.e. no information related to the key is stored
+// on the device.
 export function getWrappedSeedPhraseSigner(
   keySlot: number,
   seedPhrase: string
 ): SigningCallback {
   return async (challengeHex: Hex) => {
+    // Besides the signature generation with `requestSeedPhraseSignature`,
+    // this method copies most of `getWrappedRawSigner`.
     const bChallenge = hexToBytes(challengeHex);
     const challengeB64URL = base64urlnopad.encode(bChallenge);
 
