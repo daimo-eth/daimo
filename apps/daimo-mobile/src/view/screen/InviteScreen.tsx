@@ -17,12 +17,7 @@ import {
 } from "react-native";
 
 import InviteBackground from "../../../assets/invite-background.png";
-import {
-  navToAccountPage,
-  useExitBack,
-  useExitToHome,
-  useNav,
-} from "../../common/nav";
+import { navToAccountPage, useNav } from "../../common/nav";
 import { shareURL } from "../../logic/externalAction";
 import { Account } from "../../model/account";
 import { ButtonBig, ButtonMed, TextButton } from "../shared/Button";
@@ -187,12 +182,9 @@ function HeaderCountText({
 const headerTitle = "Invite your friends and earn USDC!";
 
 function LockedHeader() {
-  const goBack = useExitBack();
-  const goHome = useExitToHome();
-
   return (
     <View>
-      <ScreenHeader title="Invite Friends" onExit={goBack || goHome} />
+      <ScreenHeader title="Invite Friends" />
       <HeaderGraphic />
       <Spacer h={32} />
       <TextCenter>
@@ -236,12 +228,9 @@ function Header({
   invitees: EAccount[];
   inviteLinkStatus?: DaimoInviteCodeStatus;
 }) {
-  const goBack = useExitBack();
-  const goHome = useExitToHome();
-
   return (
     <View>
-      <ScreenHeader title="Invite Friends" onExit={goBack || goHome} />
+      <ScreenHeader title="Invite Friends" />
       <HeaderGraphic invitees={invitees} />
       <Spacer h={8} />
       <HeaderCountText

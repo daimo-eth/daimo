@@ -13,7 +13,6 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { useExitToHome } from "../../common/nav";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
@@ -33,7 +32,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Deposit or Withdraw" onExit={useExitToHome} />
+        <ScreenHeader title="Deposit or Withdraw" />
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
