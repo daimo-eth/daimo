@@ -1,14 +1,12 @@
 import {
   assertNotNull,
-  EAccount,
-  getAccountName,
+  formatDaimoLink,
   getEnv,
   parseDaimoLink,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import {
   User,
-  UserViewerContext,
   ValidatedFrameAction,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { NextRequest, NextResponse } from "next/server";
@@ -85,40 +83,37 @@ export class FrameLinkService {
     // The user who clicked
     const { fid } = action.interactor;
     const user = await fcClient.getUser(fid);
-    const viewerContext = assertNotNull(action.interactor.viewer_context);
 
     // Should we give them a Daimo invite?
-    const [allowed, authMsg] = await this.auth(user, frame, viewerContext);
-    const allowStr = allowed ? "ALLOWED" : "disallowed";
+    const [bonus, authMsg] = await this.auth(user, frame);
+    const bonusStr = bonus ? "BONUS" : "NO BONUS";
     console.log(
-      `[FRAME] frame click from ${fid} @${user.username} ${allowStr} ${authMsg}`
+      `[FRAME] frame click from ${fid} @${user.username} ${bonusStr} ${authMsg}`
     );
 
     // Create a single-use invite link specific to this user (fid)
-    const inviteUrl = allowed && (await this.createInviteLink(fid, frame));
+    const frameWithBonus = bonus
+      ? frame
+      : { ...frame, bonusDollarsInviter: 0, bonusDollarsInvitee: 0 };
+    const inviteUrl = await this.createInviteLink(fid, frameWithBonus);
 
     // Success = user allowed, invite link found or created
-    if (inviteUrl) return this.successResponse(frame, inviteUrl, authMsg);
-    return this.failResponse(frame, authMsg);
+    const buttonText = bonus ? `✳️ ${authMsg}` : `✳️ Claim Invite · ${authMsg}`;
+    return this.successResponse(frame, inviteUrl, buttonText);
   }
 
   // Check whether this Farcaster user gets a Daimo invite from this frame
   private async auth(
     user: User,
-    frame: InviteFrameLink,
-    viewerContext: UserViewerContext
+    frame: InviteFrameLink
   ): Promise<[boolean, string]> {
-    const { auth, owner } = frame;
+    const { auth } = frame;
     console.log(`[FRAME] authenticating ${JSON.stringify(user)}`);
 
     if (auth.mustBePowerUser && !(user as any).power_badge) {
-      return [false, "Must be a power user"];
+      return [false, "Not a power user"];
     } else if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
-      return [false, "Sorry, fid too high"];
-    } else if (auth.claimerMustFollowOwner && !viewerContext.following) {
-      return [false, `Gotta follow ${getAccountName(frame.owner)} first`];
-    } else if (auth.ownerMustFollow && !viewerContext.followed_by) {
-      return [false, `${getAccountName(owner)} doesn't follow you`];
+      return [false, "FID too high"];
     }
     for (const whitelist of auth.fidWhitelists || []) {
       if (whitelist.fids.includes(user.fid)) {
@@ -126,7 +121,7 @@ export class FrameLinkService {
       }
     }
     if ((auth.fidWhitelists || []).length > 0) {
-      return [false, "Sorry, not on the list"];
+      return [false, "Not on list"];
     }
     for (const whitelist of auth.addressWhitelists || []) {
       if (
@@ -138,26 +133,9 @@ export class FrameLinkService {
       }
     }
     if ((auth.addressWhitelists || []).length > 0) {
-      return [false, "Not on list. Connect the right address?"];
+      return [false, "Not on list"];
     }
     return [true, frame.appearance.buttonSuccess];
-  }
-
-  // Check if the user is followed by the link owner
-  private async isFollowedBy(user: User, owner: EAccount): Promise<boolean> {
-    const { fid, username: ownerUsername } = assertNotNull(
-      owner.linkedAccounts?.[0],
-      `Invite Frame owner ${owner.name} doesn't have a linked FC`
-    );
-    console.log(
-      `[FRAME] checking if @${ownerUsername} follows @${user.username}`
-    );
-
-    const resp = await this.neynarClient.fetchRelevantFollowers(fid, user.fid);
-    const follower = resp.all_relevant_followers_dehydrated.find(
-      (f) => f.user?.fid === user.fid
-    );
-    return follower != null;
   }
 
   // Hits Daimo API to create an invite link for a given key
@@ -187,37 +165,17 @@ export class FrameLinkService {
   private successResponse(
     frame: InviteFrameLink,
     inviteLink: string,
-    authMsg: string
+    buttonText: string
   ) {
     const link = parseDaimoLink(inviteLink);
     assert(link != null && link.type === "invite");
-    const redirURL = getAbsoluteUrl(`/frame/${frame.id}/redirect/${link.code}`);
-    console.log(`[FRAME] success, sending invite code ${redirURL}`);
+    const url = formatDaimoLink({ type: "invite", code: link.code });
+    console.log(`[FRAME] success, sending invite code ${url}`);
 
     return new NextResponse(
       getFrameHtmlResponse({
-        buttons: [
-          {
-            label: `✳️ ${authMsg}`,
-            action: "post_redirect",
-          },
-        ],
+        buttons: [{ label: buttonText, action: "link", target: url }],
         image: getAbsoluteUrl(frame.appearance.imgSuccess),
-        post_url: redirURL,
-      })
-    );
-  }
-
-  private failResponse(frame: InviteFrameLink, authMsg: string): NextResponse {
-    return new NextResponse(
-      getFrameHtmlResponse({
-        buttons: [
-          {
-            label: `❌ ${authMsg}`,
-          },
-        ],
-        image: getAbsoluteUrl(frame.appearance.imgFail),
-        post_url: getAbsoluteUrl(`/frame/${frame.id}/callback`),
       })
     );
   }

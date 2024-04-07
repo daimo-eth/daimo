@@ -12,8 +12,6 @@ export interface InviteFrameLink {
 
   auth: {
     mustBePowerUser?: boolean;
-    claimerMustFollowOwner?: boolean;
-    ownerMustFollow?: boolean;
     fidMustBeBelow?: number;
     fidWhitelists?: {
       greeting: string;

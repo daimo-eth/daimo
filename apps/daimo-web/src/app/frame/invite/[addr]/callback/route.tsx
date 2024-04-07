@@ -25,7 +25,7 @@ export async function POST(
       imgSuccess: "/assets/frame/InvFrameSuccess.png",
       imgFail: "/assets/frame/InvFrameFail.png",
       buttonInit: "",
-      buttonSuccess: "⚡️ Welcome · Claim Invite ✳️",
+      buttonSuccess: "Welcome · Claim Invite + $10 ✳️",
     },
   };
 
