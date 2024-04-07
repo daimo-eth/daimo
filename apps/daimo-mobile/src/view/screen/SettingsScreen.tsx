@@ -15,7 +15,7 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { useExitToHome, useNav } from "../../common/nav";
+import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
@@ -49,7 +49,6 @@ import {
 
 export function SettingsScreen() {
   const [account] = useAccount();
-  const goHome = useExitToHome();
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -58,7 +57,7 @@ export function SettingsScreen() {
   return (
     <View style={styles.pageWrap}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Settings" onBack={goHome} />
+        <ScreenHeader title="Settings" />
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={16} />
