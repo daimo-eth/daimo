@@ -81,7 +81,7 @@ export function useSendAsync({
 }: UseSendArgs): UserOpHandle {
   const [as, setAS] = useActStatus("useSendAsync");
 
-  const [deviceAccount] = useAccount();
+  const deviceAccount = useAccount();
   const account = passkeyAccount || deviceAccount;
 
   const keySlot = account

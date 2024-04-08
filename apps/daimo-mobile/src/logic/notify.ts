@@ -11,7 +11,7 @@ import { syncAfterPushNotification } from "../sync/sync";
 
 /** Registers push notifications, if we have permission & haven't already. */
 export function useInitNotifications() {
-  const [account] = useAccount();
+  const account = useAccount();
   const address = account?.address;
 
   useEffect(() => {

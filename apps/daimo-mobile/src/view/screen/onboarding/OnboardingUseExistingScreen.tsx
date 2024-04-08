@@ -12,7 +12,6 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Hex, hexToBytes } from "viem";
 
 import { OnboardingHeader } from "./OnboardingHeader";
-import { usePollForAccount } from "./usePollForAccount";
 import { ActStatus } from "../../../action/actStatus";
 import { useSendAsync } from "../../../action/useSendAsync";
 import { useExitBack } from "../../../common/nav";
@@ -55,9 +54,6 @@ export function OnboardingUseExistingScreen() {
     console.log(`[ONBOARDING] create enclave key`);
     getAccountManager().createNewEnclaveKey();
   }, [account, pubKeyHex]);
-
-  // Wait for key to show up onchain (on some existing account)
-  usePollForAccount();
 
   const onPrev = useExitBack();
 

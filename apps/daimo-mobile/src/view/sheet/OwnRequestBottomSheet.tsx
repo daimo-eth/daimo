@@ -29,7 +29,7 @@ export function OwnRequestBottomSheet({
 }: {
   reqStatus: DaimoRequestV2Status;
 }) {
-  const [account] = useAccount();
+  const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 

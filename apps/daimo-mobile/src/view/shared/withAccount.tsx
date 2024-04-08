@@ -12,7 +12,7 @@ export function useWithAccount<P extends { account: Account }>(
   return useMemo(
     () =>
       function WithAccount(props: Omit<P, "account">) {
-        const [account] = useAccount();
+        const account = useAccount();
 
         const nav = useNav();
         useEffect(() => {

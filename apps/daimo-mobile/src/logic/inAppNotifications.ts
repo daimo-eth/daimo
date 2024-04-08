@@ -39,7 +39,7 @@ export function useInAppNotifications(): InAppNotificationInfo {
     markRead: () => {},
   });
 
-  const [account] = useAccount();
+  const account = useAccount();
 
   useEffect(() => {
     if (account == null) return;

@@ -29,7 +29,7 @@ export function SuggestedActionBox({
   onHideAction?(): void;
 }) {
   const nav = useNav();
-  const [account] = useAccount();
+  const account = useAccount();
 
   // Action to display
   const { icon, title, subtitle } = action;

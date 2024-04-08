@@ -56,7 +56,7 @@ export function QRScreen(props: Props) {
 }
 
 function QRDisplay() {
-  const [account] = useAccount();
+  const account = useAccount();
   if (account == null) return null;
 
   const url = formatDaimoLink({ type: "account", account: account.name });

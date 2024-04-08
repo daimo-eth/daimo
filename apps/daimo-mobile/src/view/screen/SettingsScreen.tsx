@@ -48,7 +48,7 @@ import {
 } from "../shared/text";
 
 export function SettingsScreen() {
-  const [account] = useAccount();
+  const account = useAccount();
 
   const [showDetails, setShowDetails] = useState(false);
 

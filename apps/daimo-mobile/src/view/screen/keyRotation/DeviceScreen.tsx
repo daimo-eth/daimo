@@ -38,7 +38,7 @@ import {
 type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 
 export function DeviceScreen({ route, navigation }: Props) {
-  const [account] = useAccount();
+  const account = useAccount();
   const nav = useNav();
 
   const { pubKey: devicePubkey } = route.params;

@@ -24,6 +24,8 @@ export function OnboardingFinishScreen() {
   useEffect(() => {
     console.log(`[ONBOARDING] loading status ${status}`);
     if (account == null && status !== "success") return;
+    // if (account == null) return;
+    // if (status !== "success") return;
     getAccountManager().transform((a) => ({ ...a, isOnboarded: true }));
   }, [status, account]);
 
