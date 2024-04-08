@@ -276,6 +276,7 @@ function NoteDisplayInner({
               title="Cancel"
               onPress={exec}
               disabled={!isClaimable || netRecv === 0}
+              showBiometricIcon
             />
           );
         } else {
