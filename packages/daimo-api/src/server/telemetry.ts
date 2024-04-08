@@ -65,7 +65,10 @@ export class Telemetry {
     } else {
       Sentry.init({
         dsn: sentryDSN,
-        integrations: [nodeProfilingIntegration()],
+        integrations: [
+          new Sentry.Integrations.Postgres(),
+          nodeProfilingIntegration(),
+        ],
         tracesSampleRate: 1.0,
         profilesSampleRate: 1.0,
       });
