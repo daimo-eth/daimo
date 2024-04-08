@@ -22,12 +22,10 @@ export function OnboardingFinishScreen() {
 
   // On success, mark account as onboarded, showing home screen.
   useEffect(() => {
-    console.log(`[ONBOARDING] loading status ${status}`);
-    if (account == null && status !== "success") return;
-    // if (account == null) return;
-    // if (status !== "success") return;
+    if (account == null) return;
+    console.log(`[ONBOARDING] onboarded done, going home: ${account.name}`);
     getAccountManager().transform((a) => ({ ...a, isOnboarded: true }));
-  }, [status, account]);
+  }, [account]);
 
   return (
     <View style={ss.container.center}>
