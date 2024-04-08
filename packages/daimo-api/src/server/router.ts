@@ -12,6 +12,7 @@ import {
   zUserOpHex,
 } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
@@ -103,7 +104,12 @@ export function createRouter(
     return opts.next();
   });
 
+  const sentryMiddleware = trpcT.middleware(
+    Sentry.Handlers.trpcMiddleware({ attachRpcInput: true }) as any
+  );
+
   const publicProcedure = trpcT.procedure
+    .use(sentryMiddleware)
     .use(corsMiddleware)
     .use(tracerMiddleware)
     .use(readyMiddleware);

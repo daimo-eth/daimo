@@ -10,7 +10,8 @@
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
-    "lint:style": "eslint . --max-warnings=0"
+    "lint:style": "eslint . --max-warnings=0",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daimo --project daimo-api ./dist && sentry-cli sourcemaps upload --org daimo --project daimo-api ./dist"
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
@@ -22,6 +23,9 @@
     "@honeycombio/opentelemetry-node": "^0.6.0",
     "@opentelemetry/api": "^1.4.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.3",
+    "@sentry/cli": "^2.31.0",
+    "@sentry/node": "^7.109.0",
+    "@sentry/profiling-node": "^7.109.0",
     "@trpc/server": "^11.0.0-next-beta.318",
     "@types/cors": "^2.8.16",
     "@types/geoip-lite": "^1.4.2",
