@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
 
 import { color, ss } from "./style";
 import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
@@ -59,7 +60,8 @@ export function InputBig({
 
   return (
     <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
-      <View
+      <Animated.View
+        layout={LinearTransition}
         style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}
       >
         <TextInput
@@ -82,11 +84,11 @@ export function InputBig({
           onBlur={onInputBlur}
         />
         {icon && (
-          <View style={styles.inputIcon}>
+          <Animated.View style={styles.inputIcon}>
             <Octicons name={icon} size={18} color={color.primary} />
-          </View>
+          </Animated.View>
         )}
-      </View>
+      </Animated.View>
     </TouchableWithoutFeedback>
   );
 }
