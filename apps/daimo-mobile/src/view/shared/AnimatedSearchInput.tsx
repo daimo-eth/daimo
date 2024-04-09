@@ -135,6 +135,11 @@ export const AnimatedSearchInput = ({
             wrapperStyle,
           ]}
         >
+          {icon && (
+            <Animated.View style={styles.inputIcon}>
+              <Octicons name={icon} size={18} color={color.primary} />
+            </Animated.View>
+          )}
           <TextInput
             ref={inputRef}
             placeholder={placeholder}
@@ -157,11 +162,6 @@ export const AnimatedSearchInput = ({
             onBlur={onInputBlur}
             selectTextOnFocus
           />
-          {icon && (
-            <Animated.View style={styles.inputIcon}>
-              <Octicons name={icon} size={18} color={color.primary} />
-            </Animated.View>
-          )}
         </Animated.View>
       </TouchableWithoutFeedback>
     </View>
@@ -183,8 +183,8 @@ const input = {
   position: "absolute",
   top: 0,
   bottom: 0,
-  left: 16,
-  right: 40,
+  left: 48,
+  right: 16,
   paddingTop: 0,
   paddingVertical: 0,
 } as const;
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   inputIcon: {
     position: "absolute",
     top: 13,
-    right: 20,
+    left: 20,
     width: 16,
     alignContent: "center",
     justifyContent: "center",

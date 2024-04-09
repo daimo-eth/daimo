@@ -52,10 +52,7 @@ export function SearchScreen({
   return (
     <>
       <View style={{ flexDirection: "row", alignItems: "center", flexGrow: 0 }}>
-        <Animated.View
-          layout={LinearTransition.duration(150)}
-          style={{ flex: 1 }}
-        >
+        <Animated.View layout={LinearTransition} style={{ flex: 1 }}>
           <InputBig
             innerRef={textInputRef}
             autoFocus={autoFocus}

@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
-  View,
   ViewStyle,
 } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
@@ -64,6 +63,14 @@ export function InputBig({
         layout={LinearTransition}
         style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}
       >
+        {icon && (
+          <Animated.View
+            layout={LinearTransition.delay(10000)}
+            style={styles.inputIcon}
+          >
+            <Octicons name={icon} size={18} color={color.primary} />
+          </Animated.View>
+        )}
         <TextInput
           ref={ref}
           placeholder={placeholder}
@@ -83,11 +90,6 @@ export function InputBig({
           onFocus={onInputFocus}
           onBlur={onInputBlur}
         />
-        {icon && (
-          <Animated.View style={styles.inputIcon}>
-            <Octicons name={icon} size={18} color={color.primary} />
-          </Animated.View>
-        )}
       </Animated.View>
     </TouchableWithoutFeedback>
   );
@@ -109,8 +111,8 @@ const input = {
   position: "absolute",
   top: 0,
   bottom: 0,
-  left: 16,
-  right: 40,
+  left: 48,
+  right: 16,
   paddingTop: 0,
   paddingVertical: 0,
 } as const;
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
   inputIcon: {
     position: "absolute",
     top: 13,
-    right: 20,
+    left: 20,
     width: 16,
     alignContent: "center",
     justifyContent: "center",
