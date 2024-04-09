@@ -40,7 +40,7 @@ function OnboardingChecklistBottomSheetInner({
       <ChecklistRow
         step={1}
         title="Secure your account"
-        description="Add a passkey backup to your account"
+        description="Add a backup to your account"
         onPress={handleSecureAccount}
         done={hasBackup}
       />
