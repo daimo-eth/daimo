@@ -9,7 +9,7 @@ import Animated, {
 import { InputBig } from "./InputBig";
 import { SearchResults } from "./SearchResults";
 import Spacer from "./Spacer";
-import { ss } from "./style";
+import { color, ss } from "./style";
 import { TextBody } from "./text";
 import { useContactsPermission } from "../../logic/systemContacts";
 
@@ -67,7 +67,11 @@ export function SearchScreen({
         {inputFocused && (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
             <Pressable style={{ marginLeft: 16 }} onPress={blurInput}>
-              <TextBody>Cancel</TextBody>
+              {({ pressed }) => (
+                <TextBody color={pressed ? color.gray3 : color.grayMid}>
+                  Cancel
+                </TextBody>
+              )}
             </Pressable>
           </Animated.View>
         )}
