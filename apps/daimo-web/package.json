@@ -2,9 +2,9 @@
   "name": "@daimo/web",
   "private": true,
   "dependencies": {
-    "@daimo/api": "*",
-    "@daimo/common": "*",
-    "@daimo/contract": "*",
+    "@daimo/api": "^1.0.0",
+    "@daimo/common": "^1.0.0",
+    "@daimo/contract": "^1.0.0",
     "@headlessui/react": "^1.7.18",
     "@neynar/nodejs-sdk": "^1.12.0",
     "@rainbow-me/rainbowkit": "^1.1.1",

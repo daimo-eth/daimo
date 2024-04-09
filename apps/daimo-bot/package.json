@@ -14,8 +14,8 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@daimo/api": "*",
-    "@daimo/common": "*",
+    "@daimo/api": "^1.0.0",
+    "@daimo/common": "^1.0.0",
     "@neynar/nodejs-sdk": "^1.12.0",
     "@trpc/client": "^11.0.0-next-beta.318",
     "@trpc/server": "^11.0.0-next-beta.318",

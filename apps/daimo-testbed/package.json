@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@babel/core": "^7.20.0",
-    "@daimo/contract": "*",
+    "@daimo/contract": "^1.0.0",
     "@daimo/expo-enclave": "*",
-    "@daimo/userop": "*",
+    "@daimo/userop": "^1.0.0",
     "@ethersproject/shims": "^5.7.0",
     "@types/react": "~18.2.45",
     "expo": "^50.0.11",

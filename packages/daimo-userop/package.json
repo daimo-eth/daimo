@@ -1,6 +1,6 @@
 {
   "name": "@daimo/userop",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "GPL-3.0-or-later",
   "description": "userop.js for daimo account contracts",
   "main": "dist/index.js",
@@ -11,8 +11,8 @@
     "lint": "eslint . --max-warnings=0"
   },
   "dependencies": {
-    "@daimo/common": "*",
-    "@daimo/contract": "*",
+    "@daimo/common": "^1.0.0",
+    "@daimo/contract": "^1.0.0",
     "userop": "^0.3.2",
     "viem": "^1.19.15"
   },

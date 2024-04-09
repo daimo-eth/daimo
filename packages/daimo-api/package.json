@@ -1,24 +1,29 @@
 {
   "name": "@daimo/api",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "license": "GPL-3.0-or-later",
   "description": "Daimo API for account creation, search, etc",
   "main": "src/index.ts",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/server/tracing.ts src/server/server.ts",
+    "build": "tsc",
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
     "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0"
   },
+  "files": [
+    "dist"
+  ],
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
     "@coinbase/cbpay-js": "^1.8.0",
     "@daimo/bulk": "^0.3.1",
-    "@daimo/common": "*",
-    "@daimo/contract": "*",
-    "@daimo/userop": "*",
+    "@daimo/common": "^1.0.0",
+    "@daimo/contract": "^1.0.0",
+    "@daimo/userop": "^1.0.0",
     "@honeycombio/opentelemetry-node": "^0.6.0",
     "@opentelemetry/api": "^1.4.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.3",
