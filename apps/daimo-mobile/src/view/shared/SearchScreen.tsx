@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -7,10 +7,10 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { InputBig } from "./InputBig";
+import { PressableText } from "./PressableText";
 import { SearchResults } from "./SearchResults";
 import Spacer from "./Spacer";
-import { color, ss } from "./style";
-import { TextBody } from "./text";
+import { ss } from "./style";
 import { useContactsPermission } from "../../logic/systemContacts";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
@@ -66,17 +66,11 @@ export function SearchScreen({
         </Animated.View>
         {inputFocused && (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <Pressable
-              style={{ marginLeft: 16 }}
+            <PressableText
+              text="Cancel"
               onPress={blurInput}
-              hitSlop={8}
-            >
-              {({ pressed }) => (
-                <TextBody color={pressed ? color.gray3 : color.grayMid}>
-                  Cancel
-                </TextBody>
-              )}
-            </Pressable>
+              style={{ marginLeft: 16 }}
+            />
           </Animated.View>
         )}
       </View>
