@@ -15,7 +15,7 @@ export type PasskeySigner = {
   account: Account;
 };
 
-export type SecuritykeySigner = {
+export type SecKeySigner = {
   type: "securitykey";
   wrappedSigner: SigningCallback;
   account: Account;
@@ -31,5 +31,5 @@ export type MnemonicSigner = {
 export type Signer =
   | DeviceKeySigner
   | PasskeySigner
-  | SecuritykeySigner
+  | SecKeySigner
   | MnemonicSigner;

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-export type ActStatus = "idle" | "loading" | "success" | "error";
+type ActStatus = "idle" | "loading" | "success" | "error";
 
 export type SetActStatus = (
   status: ActStatus | Error,

@@ -33,14 +33,17 @@ import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import { NotificationsScreen } from "./screen/notifications/NotificationsScreen";
+import { AllowNotifsScreen } from "./screen/onboarding/AllowNotifsScreen";
+import { ExistingChooseAccountScreen } from "./screen/onboarding/ExistingChooseAccountScreen";
+import { ExistingScreen } from "./screen/onboarding/ExistingScreen";
+import { ExistingSeedPhraseScreen } from "./screen/onboarding/ExistingSeedPhraseScreen";
+import { ExistingUseBackupScreen } from "./screen/onboarding/ExistingUseBackupScreen";
 import { MissingKeyScreen } from "./screen/onboarding/MissingKeyScreen";
-import { OnboardingAllowNotifsScreen as OnbAllowNotifsScreen } from "./screen/onboarding/OnboardingAllowNotifsScreen";
+import { OnboardingChooseNameScreen as OnbChooseNameScreen } from "./screen/onboarding/OnboardingChooseNameScreen";
 import { OnboardingEnterInviteScreen as OnbEnterInviteScreen } from "./screen/onboarding/OnboardingEnterInviteScreen";
 import { OnboardingFinishScreen } from "./screen/onboarding/OnboardingFinishScreen";
 import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/OnboardingIntroScreen";
-import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
-import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
-import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
+import { OnboardingSetupKeyScreen as OnbSetupKeyScreen } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { usePollForAccount } from "./screen/onboarding/usePollForAccount";
 import { ReceiveNavScreen } from "./screen/receive/ReceiveNavScreen";
 import { ReceiveScreen } from "./screen/receive/ReceiveScreen";
@@ -85,13 +88,25 @@ function OnboardingNavigator() {
     >
       <OnStack.Screen name="Intro" component={OnbIntroScreen} />
       <OnStack.Screen name="CreateNew" component={OnbEnterInviteScreen} />
-      <OnStack.Screen name="CreateSetupKey" component={OnbSetupKeyPage} />
-      <OnStack.Screen name="CreatePickName" component={OnbPickNameScreen} />
-      <OnStack.Screen name="ExistingSetupKey" component={OnbSetupKeyPage} />
-      <OnStack.Screen name="UseExisting" component={OnbUseExistingScreen} />
+      <OnStack.Screen name="CreateSetupKey" component={OnbSetupKeyScreen} />
+      <OnStack.Screen name="CreateChooseName" component={OnbChooseNameScreen} />
+      <OnStack.Screen name="ExistingSetupKey" component={OnbSetupKeyScreen} />
+      <OnStack.Screen name="Existing" component={ExistingScreen} />
+      <OnStack.Screen
+        name="ExistingChooseAccount"
+        component={ExistingChooseAccountScreen}
+      />
+      <OnStack.Screen
+        name="ExistingUseBackup"
+        component={ExistingUseBackupScreen}
+      />
+      <OnStack.Screen
+        name="ExistingSeedPhrase"
+        component={ExistingSeedPhraseScreen}
+      />
       <OnStack.Screen
         name="AllowNotifs"
-        component={OnbAllowNotifsScreen}
+        component={AllowNotifsScreen}
         options={{ gestureEnabled: false }}
       />
       <OnStack.Screen
@@ -152,6 +167,7 @@ export function TabNav() {
       return <MissingKeyScreen />;
     }
   }
+
   // Logged-in app.
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">

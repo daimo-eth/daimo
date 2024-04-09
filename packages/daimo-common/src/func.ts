@@ -1,10 +1,20 @@
+import { assertNotNull } from "./assert";
+
 // Functional programming utilities.
 
-import { assertNotNull } from "./assert";
+// Tries a function, returns the result or null on error.
+export function tryOrNull<T>(fn: () => T): T | null {
+  try {
+    return fn();
+  } catch {
+    return null;
+  }
+}
 
 // No-op, wrap any function call to return void.
 export function ignore(input: any): void {}
 
+// Look-up table
 export function lookup<T, V>(...items: [T, V][]): (item: T) => V {
   const map = new Map(items);
   return (item) => {

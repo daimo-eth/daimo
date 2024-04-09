@@ -14,13 +14,17 @@ export function usePollForAccount() {
   // If we find an account, jump directly to the end of onboarding.
   // This happens in the Use Existing flow, or on app reinstall.
   const nav = useOnboardingNav();
+  const navState = nav.getState();
   const account = useAccount();
   useEffect(() => {
     if (account == null) return;
+    if (navState == null) return;
+
     console.log(`[ONBOARDING] polling found account ${account.name}`);
-    const navState = nav.getState();
     const page = navState.routes[navState.index].name;
     console.log(`[ONBOARDING] onboarding page ${page}, maybe jumping forward`);
-    if (page !== "Finish") nav.navigate("AllowNotifs");
-  }, [account == null]);
+    if (page !== "Finish") {
+      nav.navigate("AllowNotifs", { showProgressBar: false });
+    }
+  }, [account == null, navState == null]);
 }

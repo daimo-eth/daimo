@@ -1,10 +1,14 @@
-import { SlotType, findUnusedSlot, generateMnemonicKey } from "@daimo/common";
+import {
+  SlotType,
+  assertNotNull,
+  findAccountUnusedSlot,
+  generateMnemonicKey,
+} from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import {
   ReactNode,
   createContext,
-  memo,
   useCallback,
   useContext,
   useMemo,
@@ -12,13 +16,12 @@ import {
   useState,
 } from "react";
 import {
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableHighlight,
   Pressable,
-  ViewStyle,
   ScrollView,
+  StyleSheet,
+  TouchableHighlight,
+  View,
+  ViewStyle,
 } from "react-native";
 import { Hex } from "viem";
 
@@ -28,12 +31,17 @@ import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
 import { ScreenHeader } from "../shared/ScreenHeader";
+import {
+  SeedPhraseDisplay,
+  SeedPhraseEntry,
+  SeedPhraseInputAction,
+  SeedPhraseInputState,
+  useSeedPhraseInput,
+} from "../shared/SeedPhraseDisplay";
 import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
-
-const ARRAY_TWELVE = Array(12).fill(0);
 
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
@@ -76,6 +84,7 @@ function CopySeedPhrase({
   setActiveStep: (value: 0 | 1) => void;
 }) {
   const [saved, toggleSaved] = useReducer((s) => !s, false);
+  const { words } = useSeedPhraseContext();
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -84,7 +93,7 @@ function CopySeedPhrase({
         recover it even if you lose your device.
       </TextBody>
       <Spacer h={24} />
-      <SeedPhraseBox mode="read" />
+      <SeedPhraseDisplay words={words} />
       <Spacer h={24} />
       <CopyToClipboard />
       <Spacer h={24} />
@@ -165,22 +174,18 @@ function ConfirmPhraseSave({
       <Checkbox active={saved} toggle={toggleSaved} />
       <Spacer w={4} />
       <TextBody color={color.grayMid}>
-        I have saved my seed phrase in a secure location
+        I've saved this seed phrase securely
       </TextBody>
     </View>
   );
 }
 
-function BaseVerifySeedPhrase({ account }: { account: Account }) {
+function VerifySeedPhraseInner({ account }: { account: Account }) {
   const nav = useNav();
-  const { isValid, publicKey } = useSeedPhraseContext();
+  const { isValid, publicKey, state, dispatch } = useSeedPhraseContext();
 
   const seedPhraseSlot = useMemo(
-    () =>
-      findUnusedSlot(
-        account.accountKeys.map((k) => k.slot),
-        SlotType.SeedPhraseBackup
-      ),
+    () => findAccountUnusedSlot(account, SlotType.SeedPhraseBackup),
     []
   );
 
@@ -190,7 +195,7 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
         Type your seed phrase into the input box.
       </TextBody>
       <Spacer h={24} />
-      <SeedPhraseBox mode="edit" />
+      <SeedPhraseEntry {...{ state, dispatch }} />
       <Spacer h={24} />
       <AddKeySlotButton
         buttonTitle="Finish Setup"
@@ -205,101 +210,9 @@ function BaseVerifySeedPhrase({ account }: { account: Account }) {
 }
 
 const VerifySeedPhrase = () => {
-  const Inner = useWithAccount(BaseVerifySeedPhrase);
-
+  const Inner = useWithAccount(VerifySeedPhraseInner);
   return <Inner />;
 };
-
-function SeedPhraseBox({ mode }: { mode: "read" | "edit" }) {
-  const { state, dispatch, words } = useSeedPhraseContext();
-
-  const handleInputChange = (index: number, text: string) => {
-    dispatch({ key: index, value: text });
-  };
-
-  const renderCell = useCallback(
-    (index: number) => (
-      <SeedPhraseCell
-        key={`${mode}-${index}`}
-        mode={mode}
-        value={state[index]}
-        text={words[index - 1]}
-        num={index}
-        onChangeText={(text) => handleInputChange(index, text)}
-      />
-    ),
-    [mode, state, words]
-  );
-
-  return (
-    <View style={styles.box}>
-      <View style={styles.boxColumn}>
-        {ARRAY_TWELVE.map((_, index) => renderCell(index + 1))}
-      </View>
-      <View style={styles.boxColumn}>
-        {ARRAY_TWELVE.map((_, index) => renderCell(index + 13))}
-      </View>
-    </View>
-  );
-}
-
-function BaseSeedPhraseCell({
-  mode,
-  value,
-  text,
-  num,
-  onChangeText,
-}: {
-  mode: "read" | "edit";
-  value: string;
-  text: string;
-  num: number;
-  onChangeText(text: string): void;
-}) {
-  return (
-    <View style={styles.boxInputWrapper}>
-      <View style={{ width: 24 }}>
-        <TextBody color={color.gray3}>{num}</TextBody>
-      </View>
-      <Spacer w={8} />
-      {mode === "read" ? (
-        <TextBody>{text}</TextBody>
-      ) : (
-        <TextInput
-          style={styles.boxInput}
-          value={value}
-          autoCapitalize="none"
-          autoCorrect={false}
-          onChangeText={onChangeText}
-        />
-      )}
-    </View>
-  );
-}
-
-const SeedPhraseCell = memo(BaseSeedPhraseCell);
-
-type SeedPhraseInputState = Record<number, string>;
-type SeedPhraseInputAction = { key: number; value: string };
-type SeedPhraseInputReducer = (
-  state: SeedPhraseInputState,
-  action: SeedPhraseInputAction
-) => SeedPhraseInputState;
-
-function getInitialState() {
-  const map: Record<number, string> = {};
-
-  for (let i = 0; i < 24; i++) map[i + 1] = "";
-
-  return map;
-}
-
-function useSeedPhraseInput() {
-  return useReducer<SeedPhraseInputReducer>(
-    (state, next) => ({ ...state, [next.key]: next.value }),
-    getInitialState()
-  );
-}
 
 type SeedPhraseContextValue = {
   state: SeedPhraseInputState;
@@ -313,20 +226,26 @@ type SeedPhraseContextValue = {
 const SeedPhraseContext = createContext<SeedPhraseContextValue | null>(null);
 
 function SeedPhraseProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useSeedPhraseInput();
-  const { mnemonic, publicKey } = generateMnemonicKey();
-
+  // Generate a seed phrase
+  const { mnemonic, publicKeyDER } = useMemo(generateMnemonicKey, []);
   const words = useMemo(() => mnemonic.split(" "), [mnemonic]);
 
-  const enteredPhrase = useMemo(() => {
-    return Object.values(state).join(" ");
-  }, [state]);
+  // Have the user enter a few words, to verify they recorded it correctly
+  const indices = [1, 2, 11, 12];
+  const [state, dispatch] = useSeedPhraseInput(indices);
 
-  const isValid = enteredPhrase === mnemonic;
+  const isValid = !state.some((v, i) => v !== words[i - 1]);
 
   return (
     <SeedPhraseContext.Provider
-      value={{ state, dispatch, mnemonic, words, publicKey, isValid }}
+      value={{
+        state,
+        dispatch,
+        mnemonic,
+        words,
+        publicKey: publicKeyDER,
+        isValid,
+      }}
     >
       {children}
     </SeedPhraseContext.Provider>
@@ -335,12 +254,7 @@ function SeedPhraseProvider({ children }: { children: ReactNode }) {
 
 function useSeedPhraseContext() {
   const seedPhraseContext = useContext(SeedPhraseContext);
-
-  if (!seedPhraseContext) {
-    throw new Error("Must be used inside a SeedPhraseProvider");
-  }
-
-  return seedPhraseContext;
+  return assertNotNull(seedPhraseContext, "Must be used in SeedPhraseProvider");
 }
 
 const styles = StyleSheet.create({
@@ -348,32 +262,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: color.white,
     paddingHorizontal: 24,
-  },
-  box: {
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 24,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    backgroundColor: color.white,
-    ...ss.container.shadow,
-  },
-  boxColumn: {
-    flex: 1,
-  },
-  boxInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomColor: color.grayLight,
-    borderBottomWidth: 2,
-    marginBottom: 8,
-    paddingVertical: 4,
-  },
-  boxInput: {
-    flex: 1,
-    ...ss.text.body,
   },
   copyButton: {
     paddingVertical: 4,

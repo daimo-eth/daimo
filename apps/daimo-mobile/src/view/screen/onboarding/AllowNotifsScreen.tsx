@@ -1,23 +1,27 @@
 import { daimoDomainAddress } from "@daimo/common";
-import Octicons from "@expo/vector-icons/Octicons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ResizeMode, Video } from "expo-av";
 import { useCallback, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
-import { OnboardingHeader } from "./OnboardingHeader";
-import { useOnboardingNav } from "../../../common/nav";
+import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
+import ImgNotifications from "../../../../assets/onboarding-notifications.png";
+import { ParamListOnboarding, useOnboardingNav } from "../../../common/nav";
 import { useDaimoChain } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
 import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
-import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
+import { Cover } from "../../shared/CoverGraphic";
 import Spacer from "../../shared/Spacer";
-import { color } from "../../shared/style";
-import { TextCenter } from "../../shared/text";
+import { color, ss } from "../../shared/style";
+import { TextBodyMedium, TextCenter } from "../../shared/text";
+
+type Props = NativeStackScreenProps<ParamListOnboarding, "AllowNotifs">;
 
 // This screen shows final steps for onboarding (eg allow notifications),
 // then a spinner while waiting for account creation, or error.
-export function OnboardingAllowNotifsScreen() {
+export function AllowNotifsScreen({ route }: Props) {
+  const { showProgressBar } = route.params;
   const notificationsAccess = useNotificationsAccess();
 
   const daimoChain = useDaimoChain();
@@ -34,9 +38,13 @@ export function OnboardingAllowNotifsScreen() {
     finish();
   };
 
+  // Show progress if needed
+  const steps = showProgressBar ? getNumOnboardingSteps() : undefined;
+  const activeStep = steps ? steps - 1 : undefined;
+
   return (
-    <View>
-      <OnboardingHeader title="Notifications" />
+    <View style={ss.container.flexGrow}>
+      <OnboardingHeader title="Notifications" {...{ steps, activeStep }} />
       <RequestNotificationsPage
         displayMacVideo={displayMacVideo}
         requestPermission={requestNotificationsPermission}
@@ -56,39 +64,48 @@ function RequestNotificationsPage({
   displayMacVideo: boolean;
 }) {
   return (
-    <View style={styles.paddedPage}>
-      {displayMacVideo ? (
-        <MacNotificationsVideo />
-      ) : (
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
-          <Octicons name="mail" size={40} color={color.midnight} />
-        </View>
-      )}
-      <Spacer h={32} />
-      <TextCenter>
-        <IntroTextParagraph>
-          You will only be notified about account activity. For example, when
-          you receive money.
-        </IntroTextParagraph>
-      </TextCenter>
-      {displayMacVideo ? (
-        <>
-          <Spacer h={32} />
-          <TextButton title="Skip" onPress={skip} />
-        </>
-      ) : (
-        <>
-          <Spacer h={124} />
-          <ButtonBig
-            type="primary"
-            title="Allow Notifications"
-            onPress={requestPermission}
-          />
-          <Spacer h={16} />
-          <TextButton title="Skip" onPress={skip} />
-        </>
-      )}
+    <View style={ss.container.topBottom}>
+      <View key="top" style={ss.container.padH24}>
+        {displayMacVideo ? (
+          <MacNotificationsVideo />
+        ) : (
+          <Cover source={ImgNotifications} width={188} height={156} />
+        )}
+        <Spacer h={32} />
+        <Instructions />
+      </View>
+      <View key="bottom" style={ss.container.padH24}>
+        {displayMacVideo ? (
+          <>
+            <Spacer h={16} />
+            <TextButton title="Skip" onPress={skip} />
+            <Spacer h={16} />
+          </>
+        ) : (
+          <>
+            <Spacer h={16} />
+            <ButtonBig
+              type="primary"
+              title="Allow Notifications"
+              onPress={requestPermission}
+            />
+            <Spacer h={16} />
+            <TextButton title="Skip" onPress={skip} />
+            <Spacer h={16} />
+          </>
+        )}
+      </View>
     </View>
+  );
+}
+
+function Instructions() {
+  return (
+    <TextCenter>
+      <TextBodyMedium color={color.grayMid}>
+        You will only be notified about activity on your account.
+      </TextBodyMedium>
+    </TextCenter>
   );
 }
 
@@ -122,10 +139,3 @@ function MacNotificationsVideo() {
     />
   );
 }
-
-const styles = StyleSheet.create({
-  paddedPage: {
-    paddingTop: 36,
-    paddingHorizontal: 24,
-  },
-});

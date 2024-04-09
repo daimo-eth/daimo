@@ -234,8 +234,8 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <Spacer h={24} />
       <DescriptiveClickableRow
-        title="Create a Passkey Backup"
-        message="Secured by your password manager"
+        title="Create a Backup"
+        message="Passkey, security key, or seed phrase"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
         onPressHelp={openHelpModal}
       />

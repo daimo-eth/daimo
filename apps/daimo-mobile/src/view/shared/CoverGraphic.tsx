@@ -1,9 +1,32 @@
-import { View, StyleSheet, Image } from "react-native";
+import { useMemo } from "react";
+import { View, StyleSheet, Image, ImageSourcePropType } from "react-native";
 
 import DepositCover from "../../../assets/deposit-cover.png";
 import InviteCover from "../../../assets/invite-cover.png";
+import OnboardingCover from "../../../assets/onboarding-cover.png";
 
-export function CoverGraphic({ type }: { type: "invite" | "deposit" }) {
+export function Cover({
+  source,
+  width,
+  height,
+}: {
+  source: ImageSourcePropType;
+  width?: number;
+  height?: number;
+}) {
+  const style = useMemo(() => ({ width, height }), [width, height]);
+  return (
+    <View style={styles.imgContainer}>
+      <Image source={source} style={style} />
+    </View>
+  );
+}
+
+export function CoverGraphic({
+  type,
+}: {
+  type: "invite" | "deposit" | "onboarding";
+}) {
   return (
     <View style={styles.imgContainer}>
       <Image
@@ -22,6 +45,10 @@ const graphics = {
   deposit: {
     image: DepositCover,
     aspectRatio: 1.925,
+  },
+  onboarding: {
+    image: OnboardingCover,
+    aspectRatio: 0.9437,
   },
 };
 

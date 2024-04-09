@@ -46,26 +46,26 @@ export function AddKeySlotButton({
 
   const sendFn = async (opSender: DaimoOpSender) => {
     const key = await (async () => {
-      if (!knownPubkey) {
-        console.log(`[KEY-ROTATION] creating key ${getSlotType(slot)} ${slot}`);
-        assert(
-          getSlotType(slot) === SlotType.PasskeyBackup ||
-            getSlotType(slot) === SlotType.SecurityKeyBackup
-        );
+      if (knownPubkey != null) {
+        return knownPubkey;
+      }
 
-        return await createPasskey(
-          daimoChainFromId(account.homeChainId),
-          account.name,
-          slot
-        );
-      } else return knownPubkey;
+      console.log(`[KEY-ROTATION] creating key ${getSlotType(slot)} ${slot}`);
+      assert(
+        getSlotType(slot) === SlotType.PasskeyBackup ||
+          getSlotType(slot) === SlotType.SecurityKeyBackup
+      );
+
+      return await createPasskey(
+        daimoChainFromId(account.homeChainId),
+        account.name,
+        slot
+      );
     })();
 
     console.log(`[ACTION] adding key ${key} ${slot}`);
-    return opSender.addSigningKey(slot, key, {
-      nonce,
-      chainGasConstants: account.chainGasConstants,
-    });
+    const { chainGasConstants } = account;
+    return opSender.addSigningKey(slot, key, { nonce, chainGasConstants });
   };
 
   const { status, message, cost, exec } = useSendWithDeviceKeyAsync({

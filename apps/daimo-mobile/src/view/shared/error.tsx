@@ -8,19 +8,25 @@ import { color } from "./style";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 import { useExitToHome } from "../../common/nav";
 
-export function ErrorRowCentered({ error }: { error: { message?: string } }) {
-  let message = error.message ?? "Unknown error";
-  console.log(`[ERROR] rendering ${message}`, error);
+export function ErrorRowCentered({
+  error,
+  message,
+}: {
+  error?: { message?: string };
+  message?: string;
+}) {
+  let msg = message ?? error?.message ?? "Unknown error";
+  console.log(`[ERROR] rendering ${msg}`, error);
 
-  if (message.toLowerCase() === "network request failed") {
-    message = "Request failed. Offline?";
-  } else if (message.length > 200) {
-    message = message.slice(0, 200) + "...";
+  if (msg.toLowerCase() === "network request failed") {
+    msg = "Request failed. Offline?";
+  } else if (msg.length > 200) {
+    msg = msg.slice(0, 200) + "...";
   }
 
   return (
     <TextCenter>
-      <TextError>{message}</TextError>
+      <TextError>{msg}</TextError>
     </TextCenter>
   );
 }

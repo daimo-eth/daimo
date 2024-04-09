@@ -216,7 +216,6 @@ export function GlobalBottomSheet() {
           {sheet?.action === "onboardingChecklist" && (
             <OnboardingChecklistBottomSheet />
           )}
-          {sheet?.action === "createBackup" && <CreateBackupSheet />}
           {sheet?.action === "helpModal" && (
             <HelpBottomSheet
               content={sheet.payload.content}

@@ -9,8 +9,8 @@ export type Action =
   | { name: "withdrawInstructions" }
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
-  | { name: "hideBottomSheet" }
-  | { name: "createBackup" };
+  | { name: "createBackup" }
+  | { name: "hideBottomSheet" };
 
 type ActionName = Action["name"];
 
@@ -22,7 +22,7 @@ export class Dispatcher {
 
   register(name: ActionName, handler: (action: Action) => void) {
     if (this.handlers.has(name)) {
-      throw new Error(`Handler for ${name} already registered`);
+      console.warn(`[DISPATCH] handler for ${name} already registered`);
     }
     this.handlers.set(name, handler);
     return () => {

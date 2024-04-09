@@ -75,9 +75,9 @@ function wrapRawSignerAsWebauthn(
     const message = concat([authenticatorData, clientDataHash]);
 
     // Get P256-SHA256 signature, using passed (raw) sign function.
-    const derSig = await sign(bytesToHex(message));
+    const hexDerSig = await sign(bytesToHex(message));
 
-    const { r, s } = parseAndNormalizeSig(`0x${derSig}`);
+    const { r, s } = parseAndNormalizeSig(hexDerSig);
 
     const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":'));
     const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
@@ -130,12 +130,13 @@ export async function requestEnclaveSignature(
     androidTitle: "Daimo",
   };
 
-  const signature = (await Log.promise(
+  // Signature is raw hex DER, no 0x prefix
+  const signature = await Log.promise(
     "ExpoEnclaveSign",
     ExpoEnclave.sign(enclaveKeyName, hexMessage, promptCopy)
-  )) as Hex;
+  );
 
-  return signature;
+  return `0x${signature}`;
 }
 
 export function getWrappedMnemonicSigner(

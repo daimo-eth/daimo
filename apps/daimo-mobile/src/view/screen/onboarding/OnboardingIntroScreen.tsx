@@ -1,27 +1,36 @@
+import { debugJson } from "@daimo/common";
 import * as Clipboard from "expo-clipboard";
-import { ReactNode, useContext, useState } from "react";
+import React, { ReactNode } from "react";
 import {
+  Image,
   Linking,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Platform,
-  ScrollView,
+  SafeAreaView,
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaFrame } from "react-native-safe-area-context";
 
-import { DispatcherContext } from "../../../action/dispatch";
+import IntroIconEverywhere from "../../../../assets/intro-icon-everywhere.png";
+import IntroIconOnEthereum from "../../../../assets/intro-icon-on-ethereum.png";
+import IntroIconYourKeys from "../../../../assets/intro-icon-your-keys.png";
+import OnboardingCoverMicro from "../../../../assets/onboarding-cover-micro.png";
+import OnboardingCover from "../../../../assets/onboarding-cover.png";
 import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
 import { useDaimoChain } from "../../../logic/accountManager";
-import { ButtonBig, TextButton } from "../../shared/Button";
-import { InfoLink } from "../../shared/InfoLink";
-import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
+import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
-import { TextCenter, TextH1, TextLight, TextLink } from "../../shared/text";
+import { color } from "../../shared/style";
+import {
+  TextBody,
+  TextH1,
+  TextH3,
+  TextLight,
+  TextLink,
+} from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
@@ -36,178 +45,140 @@ export function OnboardingIntroScreen() {
 
   const goToUseExisting = () => {
     if (isAndroid) nav.navigate("ExistingSetupKey");
-    else nav.navigate("UseExisting");
+    else nav.navigate("Existing");
   };
 
+  const dims = useSafeAreaFrame();
+  const isCompact = dims.height < 850;
+  const isMicro = dims.height < 800;
+  console.log(`[ONBOARDING] render intro, ${debugJson({ dims, isCompact })}`);
+
   return (
-    <View style={styles.onboardingPage}>
-      <View style={styles.introPages}>
-        <IntroPageSwiper />
-        <View style={styles.introButtonsCenter}>
-          <View style={styles.introButtonsWrap}>
-            <Spacer h={32} />
-            <ButtonBig
-              type="primary"
-              title="ACCEPT INVITE"
-              onPress={pasteInviteLink}
-            />
-            <Spacer h={16} />
-            <TextButton
-              title="ALREADY HAVE AN ACCOUNT?"
-              onPress={goToUseExisting}
-            />
-          </View>
+    <SafeAreaView style={styles.onboardingPage}>
+      <View style={styles.onboardingPageTop}>
+        <Spacer h={isCompact ? 24 : 32} />
+        <TextH1 color={color.midnight}>Welcome to Daimo</TextH1>
+        <Spacer h={4} />
+        <TextH3 color={color.gray3}>Pay or receive USDC anywhere</TextH3>
+        <Spacer h={16} />
+        <View style={{ display: "flex", alignItems: "center" }}>
+          <Image
+            source={isMicro ? OnboardingCoverMicro : OnboardingCover}
+            style={
+              isMicro
+                ? { width: 256, height: 170 }
+                : { width: 302, height: 266 }
+            }
+          />
+        </View>
+        <Spacer h={isCompact ? 24 : 32} />
+        <IntroRows />
+      </View>
+      <View style={styles.introButtonsCenter}>
+        <View style={styles.introButtonsWrap}>
+          <ButtonBig
+            type="primary"
+            title="ACCEPT INVITE"
+            onPress={pasteInviteLink}
+          />
+          <Spacer h={16} />
+          <TextButton
+            title="ALREADY HAVE AN ACCOUNT?"
+            onPress={goToUseExisting}
+          />
+          <Spacer h={16} />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const icons = {
+  "intro-your-keys": IntroIconYourKeys,
+  "intro-everywhere": IntroIconEverywhere,
+  "intro-on-ethereum": IntroIconOnEthereum,
+};
+
+function IntroRows() {
+  return (
+    <View style={styles.introRows}>
+      <IntroRow icon="intro-your-keys" title="Your keys, your coins">
+        <TextBody color={color.gray3}>USDC on Base.</TextBody>
+        <HelpButton
+          title="Learn more"
+          helpTitle="How does USDC work?"
+          helpContent={<HelpModalUSDC />}
+        />
+      </IntroRow>
+      <Spacer h={16} />
+      <IntroRow icon="intro-everywhere" title="Works everywhere">
+        <TextBody color={color.gray3}>
+          Instant, 24/7 transfers to any contact
+        </TextBody>
+      </IntroRow>
+      <Spacer h={16} />
+      <IntroRow icon="intro-on-ethereum" title="Runs on Ethereum">
+        <TextBody color={color.gray3}>Daimo runs on Base, a rollup</TextBody>
+      </IntroRow>
+    </View>
+  );
+}
+
+function IntroRow({
+  icon,
+  title,
+  children,
+}: {
+  icon: keyof typeof icons;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <View style={styles.introRow}>
+      <View style={styles.introRowIcon}>
+        <Image source={icons[icon]} style={styles.introRowIconImage} />
+      </View>
+      <View style={styles.introRowContent}>
+        <TextBody color={color.midnight}>{title}</TextBody>
+        <Spacer h={4} />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {children}
         </View>
       </View>
     </View>
   );
 }
 
-function IntroPageSwiper() {
-  const [pageIndex, setPageIndex] = useState(0);
-
-  const dispatcher = useContext(DispatcherContext);
-  const showHelpModal = () =>
-    dispatcher.dispatch({
-      name: "helpModal",
-      title: "How does USDC work?",
-      content: (
-        <>
-          <TextLight>
-            USDC is a regulated, digital currency that can always be redeemed
-            1:1 for US dollars.
-          </TextLight>
-          <Spacer h={24} />
-          <TextLight>
-            Learn more about USDC{" "}
-            <TextLink
-              onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
-            >
-              here
-            </TextLink>
-            .
-          </TextLight>
-        </>
-      ),
-    });
-
-  const introPages = [
-    <IntroPage title="Welcome to Daimo">
-      <IntroTextParagraph>
-        Daimo is a global payments app that runs on Ethereum.
-      </IntroTextParagraph>
-    </IntroPage>,
-    <IntroPage title={tokenSymbol}>
-      <IntroTextParagraph>
-        You can send and receive money using the {tokenSymbol} stablecoin. 1{" "}
-        {tokenSymbol} is $1.
-      </IntroTextParagraph>
-      <View style={ss.container.marginHNeg16}>
-        <InfoLink onPress={showHelpModal} title="Learn how it works here" />
-      </View>
-    </IntroPage>,
-    <IntroPage title="Yours alone">
-      <IntroTextParagraph>
-        Daimo stores money via cryptographic secrets. There's no bank.
-      </IntroTextParagraph>
-    </IntroPage>,
-    <IntroPage title="On Ethereum">
-      <IntroTextParagraph>
-        Daimo runs on Base, an Ethereum rollup. This lets you send money
-        securely, anywhere in the world.
-      </IntroTextParagraph>
-    </IntroPage>,
-  ];
-
-  const updatePageBubble = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, layoutMeasurement } = event.nativeEvent;
-    const page = Math.round(contentOffset.x / layoutMeasurement.width);
-    setPageIndex(page);
-  };
-
+function HelpModalUSDC() {
   return (
     <View>
-      <PageBubble count={4} index={pageIndex} />
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={styles.introPageScroll}
-        onScroll={updatePageBubble}
-        scrollEventThrottle={32}
-        contentContainerStyle={{ width: `${introPages.length * 100}%` }}
-      >
-        {introPages.map((page, i) => (
-          <View style={{ width: `${100 / introPages.length}%` }} key={i}>
-            {page}
-          </View>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
-
-const tokenSymbol = "USDC";
-
-function IntroPage({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <View style={styles.introPage}>
-      <TextCenter>
-        <TextH1>{title}</TextH1>
-      </TextCenter>
-      <Spacer h={32} />
-      {children}
-    </View>
-  );
-}
-
-function PageBubble({ count, index }: { count: number; index: number }) {
-  const bubbles = [];
-  for (let i = 0; i < count; i++) {
-    bubbles.push(
-      <View
-        key={i}
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: 4,
-          backgroundColor: i === index ? color.midnight : color.grayLight,
-          margin: 4,
-        }}
-      />
-    );
-  }
-  return (
-    <View style={{ flexDirection: "row", justifyContent: "center" }}>
-      {bubbles}
+      <TextLight>
+        USDC is a regulated, digital currency that can always be redeemed 1:1
+        for US dollars.
+      </TextLight>
+      <Spacer h={24} />
+      <TextLight>
+        Learn more about USDC{" "}
+        <TextLink
+          onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
+        >
+          here
+        </TextLink>
+        .
+      </TextLight>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   onboardingPage: {
-    flex: 1,
+    display: "flex",
     justifyContent: "space-between",
+    flexGrow: 1,
   },
-  introPages: {
-    flex: 1,
-    backgroundColor: color.white,
-    alignItems: "stretch",
-    justifyContent: "center",
-  },
-  introPageScroll: {
-    flexGrow: 0,
-  },
-  introPage: {
-    padding: 32,
-    maxWidth: 480,
-    alignSelf: "center",
+  onboardingPageTop: {
+    display: "flex",
+    alignItems: "center",
   },
   introButtonsCenter: {
     paddingHorizontal: 24,
@@ -218,5 +189,28 @@ const styles = StyleSheet.create({
   introButtonsWrap: {
     flexGrow: 1,
     maxWidth: 480,
+  },
+  introRows: {
+    shadowColor: color.white,
+    flexGrow: 1,
+    paddingHorizontal: 24,
+  },
+  introRow: {
+    flexDirection: "row",
+  },
+  introRowIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: color.grayLight,
+    marginRight: 16,
+  },
+  introRowIconImage: {
+    width: 32,
+    height: 32,
+  },
+  introRowContent: {
+    flexDirection: "column",
+    alignItems: "flex-start",
   },
 });

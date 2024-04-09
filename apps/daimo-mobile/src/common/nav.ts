@@ -32,15 +32,19 @@ import {
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
 import { fetchInviteLinkStatus } from "../logic/linkStatus";
+import { Account } from "../model/account";
 
 export type ParamListOnboarding = {
   Intro: undefined;
   CreateNew: undefined;
-  CreatePickName: { inviteLink: DaimoLink };
+  CreateChooseName: { inviteLink: DaimoLink };
   CreateSetupKey: { inviteLink: DaimoLink };
+  Existing: undefined;
   ExistingSetupKey: undefined;
-  UseExisting: undefined;
-  AllowNotifs: undefined;
+  ExistingChooseAccount: undefined;
+  ExistingUseBackup: { targetEAcc: EAccount };
+  ExistingSeedPhrase: { targetAccount: Account };
+  AllowNotifs: { showProgressBar: boolean };
   Finish: undefined;
 };
 
@@ -198,7 +202,7 @@ export async function handleOnboardingDeepLink(
   const isAndroid = Platform.OS === "android";
   if (inviteLink && (await fetchInviteLinkStatus(dc, inviteLink))?.isValid) {
     if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
-    else nav.navigate("CreatePickName", { inviteLink });
+    else nav.navigate("CreateChooseName", { inviteLink });
   } else {
     nav.navigate("CreateNew");
   }

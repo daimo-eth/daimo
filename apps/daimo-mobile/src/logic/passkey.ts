@@ -120,7 +120,7 @@ export function getWrappedPasskeySigner(
   };
 }
 
-export async function requestPasskeySignature(
+async function requestPasskeySignature(
   challengeB64: string,
   domain: string,
   useSecurityKey: boolean

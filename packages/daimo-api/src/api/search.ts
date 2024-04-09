@@ -35,6 +35,7 @@ export async function search(
     const dAccounts = await nameReg.search(prefix);
     ret = dAccounts.map((d) => ({ ...d, originalMatch: d.name }));
   }
+
   // Add Farcaster results
   if (prefix.length > 1) {
     const linkedAccs = profileCache.searchLinkedAccounts(prefix);

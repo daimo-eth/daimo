@@ -91,7 +91,7 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <ContactRow key={getDaimoContactKey(r)} contact={r} mode={mode} />
+        <ContactNav key={getDaimoContactKey(r)} contact={r} mode={mode} />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
@@ -126,7 +126,7 @@ function NoSearchResults() {
   );
 }
 
-function ContactRow({
+function ContactNav({
   contact,
   mode,
 }: {
@@ -170,6 +170,18 @@ function ContactRow({
     }
   }, [name, mode]);
 
+  return <SearchResultRow contact={contact} onPress={goToAccount} />;
+}
+
+export function SearchResultRow({
+  contact,
+  onPress,
+}: {
+  contact: DaimoContact;
+  onPress: () => void;
+}) {
+  const name = getContactName(contact);
+
   const lightText = (function () {
     switch (contact.type) {
       case "email":
@@ -198,7 +210,7 @@ function ContactRow({
       : lightText;
 
   return (
-    <Row onPress={goToAccount}>
+    <Row onPress={onPress}>
       <View style={styles.resultRow}>
         <View style={styles.resultAccount}>
           <ContactBubble contact={contact} size={36} />

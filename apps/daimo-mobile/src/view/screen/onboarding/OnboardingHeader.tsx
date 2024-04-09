@@ -1,15 +1,24 @@
 import { useEffect } from "react";
-import { BackHandler, View } from "react-native";
+import { BackHandler, View, StyleSheet, Platform } from "react-native";
 
+import { ProgressBlobs } from "../../shared/ProgressBlobs";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { ss } from "../../shared/style";
+
+export function getNumOnboardingSteps() {
+  return Platform.OS === "ios" ? 3 : 4;
+}
 
 export function OnboardingHeader({
   title,
   onPrev,
+  steps,
+  activeStep,
 }: {
   title: string;
   onPrev?: () => void;
+  steps?: number;
+  activeStep?: number;
 }) {
   /* On Android, listen for the native back button. */
   useEffect(() => {
@@ -22,9 +31,24 @@ export function OnboardingHeader({
     return () => BackHandler.removeEventListener("hardwareBackPress", onBack);
   }, [onPrev]);
 
+  const secondaryHeader = steps != null && activeStep != null && (
+    <View style={styles.progressWrap}>
+      <ProgressBlobs steps={steps} activeStep={activeStep} />
+    </View>
+  );
+
   return (
     <View style={ss.container.padH16}>
-      <ScreenHeader title={title} onBack={onPrev} />
+      <ScreenHeader {...{ title, secondaryHeader }} onBack={onPrev} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  progressWrap: {
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+});

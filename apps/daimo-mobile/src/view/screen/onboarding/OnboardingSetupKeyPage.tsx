@@ -22,21 +22,24 @@ type Props = NativeStackScreenProps<
   ParamListOnboarding,
   "CreateSetupKey" | "ExistingSetupKey"
 >;
-export function OnboardingSetupKeyPage(props: Props) {
+export function OnboardingSetupKeyScreen(props: Props) {
   const [loading, setLoading] = useState(false);
   const [askToSetPin, setAskToSetPin] = useState(false);
   const [error, setError] = useState("");
 
   const nav = useOnboardingNav();
   const route = useRoute();
+  const isCreatingAccount = route.name === "CreateSetupKey";
+
+  // Nav
   const onNext = () => {
     const currentRoute = route.name;
     console.log(`[ONBOARDING] leaving SetupKeyPage, route ${currentRoute}`);
     if (currentRoute === "CreateSetupKey") {
       const { inviteLink } = props.route.params!;
-      nav.navigate("CreatePickName", { inviteLink });
+      nav.navigate("CreateChooseName", { inviteLink });
     } else if (currentRoute === "ExistingSetupKey") {
-      nav.navigate("UseExisting");
+      nav.navigate("Existing");
     } else throw new Error("Unknown SetupKeyPage route " + currentRoute);
   };
   const onPrev = useExitBack();
@@ -67,9 +70,12 @@ export function OnboardingSetupKeyPage(props: Props) {
     setLoading(false);
   };
 
+  // If we're in the onboarding flow, show progress bar
+  const progress = isCreatingAccount ? { steps: 4, activeStep: 1 } : {};
+
   return (
     <View>
-      <OnboardingHeader title="Set up device" onPrev={onPrev} />
+      <OnboardingHeader title="Set up device" onPrev={onPrev} {...progress} />
       <View style={styles.paddedPage}>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Octicons

@@ -4,13 +4,15 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
+  Image,
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 
-import { OnboardingHeader } from "./OnboardingHeader";
+import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
+import ImgChooseName from "../../../../assets/onboarding-choose-name.png";
 import {
   ParamListOnboarding,
   useExitBack,
@@ -21,15 +23,22 @@ import {
   useDaimoChain,
 } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
-import { ButtonBig } from "../../shared/Button";
+import { generateRandomName } from "../../../logic/name";
+import { ButtonBig, TextButton } from "../../shared/Button";
+import { Cover } from "../../shared/CoverGraphic";
 import { InputBig, OctName } from "../../shared/InputBig";
-import { IntroTextParagraph } from "../../shared/IntroTextParagraph";
 import Spacer from "../../shared/Spacer";
-import { color } from "../../shared/style";
-import { TextBody, TextCenter } from "../../shared/text";
+import image from "../../shared/image";
+import { color, ss } from "../../shared/style";
+import {
+  TextBody,
+  TextBodyMedium,
+  TextBtnCaps,
+  TextCenter,
+} from "../../shared/text";
 
-type Props = NativeStackScreenProps<ParamListOnboarding, "CreatePickName">;
-export function OnboardingPickNameScreen({ route }: Props) {
+type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
+export function OnboardingChooseNameScreen({ route }: Props) {
   const daimoChain = useDaimoChain();
   const [name, setName] = useState("");
   const { inviteLink } = route.params;
@@ -39,32 +48,27 @@ export function OnboardingPickNameScreen({ route }: Props) {
     // Kick off account creation in background
     getAccountManager().createAccount(name, inviteLink);
     // Request notifications permission, hiding latency
-    nav.navigate("AllowNotifs");
+    nav.navigate("AllowNotifs", { showProgressBar: true });
   }, [inviteLink, name]);
+
+  // Show progress bar
+  const steps = getNumOnboardingSteps();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
-        <OnboardingHeader title="Create Account" onPrev={useExitBack()} />
-        <View style={styles.createAccountPage}>
-          <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Octicons name="person" size={40} color={color.midnight} />
-          </View>
+        <OnboardingHeader
+          title="Choose Username"
+          onPrev={useExitBack()}
+          steps={steps}
+          activeStep={steps - 2}
+        />
+        <Spacer h={24} />
+        <View style={ss.container.padH24}>
+          <Cover source={ImgChooseName} width={188} height={156} />
+          <Spacer h={12} />
+          <Instructions />
           <Spacer h={24} />
-          <TextCenter>
-            <IntroTextParagraph>
-              Your username is public on Daimo.
-            </IntroTextParagraph>
-          </TextCenter>
-          <Spacer h={24} />
-          <IconRow
-            icon="check-circle"
-            color={color.successDark}
-            title={`valid ${
-              inviteLink.type === "notev2" ? "payment link" : "invite"
-            }`}
-          />
-          <Spacer h={8} />
           <View style={styles.namePickerWrap}>
             <NamePicker
               name={name}
@@ -79,12 +83,22 @@ export function OnboardingPickNameScreen({ route }: Props) {
   );
 }
 
-function IconRow(props: { icon: OctName; color?: string; title: string }) {
+function Instructions() {
+  return (
+    <TextCenter>
+      <TextBodyMedium color={color.grayMid}>
+        Choose a username you'll go by on Daimo. Your username is public.
+      </TextBodyMedium>
+    </TextCenter>
+  );
+}
+
+function IconRow(props: { icon?: OctName; color?: string; title: string }) {
   const { icon, title } = props;
   const col = props.color || color.grayMid;
   return (
     <View style={styles.iconRow}>
-      <Octicons {...{ name: icon, size: 16, color: col }} />
+      {icon && <Octicons {...{ name: icon, size: 20, color: col }} />}
       <TextBody color={col}>{title}</TextBody>
     </View>
   );
@@ -101,6 +115,7 @@ function NamePicker({
   onChange: (name: string) => void;
   onChoose: () => void;
 }) {
+  // First, validate the name & check if it's available
   let error = "";
   try {
     validateName(name);
@@ -110,6 +125,10 @@ function NamePicker({
   const rpcHook = env(daimoChain).rpcHook;
   const result = rpcHook.resolveName.useQuery({ name }, { enabled: !error });
 
+  // Let user pick a random name
+  const generateRandom = () => onChange(generateRandomName());
+
+  // Don't flash status changes while typing
   const [debounce, setDebounce] = useState(false);
   useEffect(() => {
     setDebounce(true);
@@ -119,12 +138,25 @@ function NamePicker({
 
   let isAvailable = false;
   const status = (function () {
-    if (name.length === 0 || debounce) {
-      return <IconRow icon="circle" color={color.grayMid} title="pick name" />;
+    if (name.length === 0) {
+      return (
+        <TextButton onPress={generateRandom}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Image
+              source={{ uri: image.iconSwitcheroo }}
+              style={{ width: 16, height: 16, zIndex: -1 }}
+            />
+            <Spacer w={8} />
+            <TextBtnCaps color={color.primary}>GENERATE RANDOM</TextBtnCaps>
+          </View>
+        </TextButton>
+      );
+    } else if (debounce) {
+      return <Spacer h={40} />;
     } else if (error) {
       return <IconRow icon="alert" title={error.toLowerCase()} />;
     } else if (result.isLoading) {
-      return <IconRow icon="circle" color={color.grayMid} title="..." />;
+      return <IconRow color={color.grayMid} title="..." />;
     } else if (result.error) {
       return <IconRow icon="alert" title="offline?" />;
     } else if (result.isSuccess && result.data) {
@@ -135,7 +167,7 @@ function NamePicker({
         <IconRow
           icon="check-circle"
           color={color.successDark}
-          title="username available"
+          title="available"
         />
       );
     }
@@ -144,8 +176,6 @@ function NamePicker({
 
   return (
     <View>
-      {status}
-      <Spacer h={24} />
       <InputBig
         placeholder="choose a username"
         value={name}
@@ -153,10 +183,12 @@ function NamePicker({
         center
         autoFocus
       />
+      <Spacer h={8} />
+      {status}
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="Create"
+        title="CREATE ACCOUNT"
         onPress={onChoose}
         disabled={!isAvailable}
       />
@@ -168,17 +200,11 @@ const styles = StyleSheet.create({
   namePickerWrap: {
     height: 168,
   },
-  createAccountPage: {
-    paddingTop: 36,
-    paddingHorizontal: 24,
-  },
   iconRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 99,
-    backgroundColor: color.ivoryLight,
+    justifyContent: "center",
+    gap: 8,
+    height: 40,
   },
 });

@@ -62,6 +62,14 @@ export const ss = {
       alignItems: "center",
       justifyContent: "center",
     },
+    flexGrow: {
+      flexGrow: 1,
+    },
+    topBottom: {
+      flexGrow: 1,
+      flexDirection: "column",
+      justifyContent: "space-between",
+    },
     padH8: {
       paddingHorizontal: 8,
     },

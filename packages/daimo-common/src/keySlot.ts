@@ -1,4 +1,5 @@
 import { assert } from "./assert";
+import { KeyData } from "./model";
 
 export enum SlotType {
   Phone = "Phone",
@@ -17,7 +18,7 @@ const slotTypeToFirstSlot = {
   [SlotType.Phone]: 0,
   [SlotType.Computer]: 0x40,
   [SlotType.PasskeyBackup]: 0x80,
-  [SlotType.SecurityKeyBackup]: 0xa0, // TODO: check max used slot in prod < 0xa0
+  [SlotType.SecurityKeyBackup]: 0xa0,
   [SlotType.SeedPhraseBackup]: 0xc0,
 };
 
@@ -48,6 +49,14 @@ export function getSlotLabel(slot: number): string {
 
   const index = slot - slotTypeToFirstSlot[slotType] + 1;
   return index === 1 ? slotType : `${slotType} ${index}`;
+}
+
+export function findAccountUnusedSlot(
+  account: { accountKeys: KeyData[] },
+  type: SlotType
+): number {
+  const allUsedSlots = account.accountKeys.map((k) => k.slot);
+  return findUnusedSlot(allUsedSlots, type);
 }
 
 export function findUnusedSlot(allUsedSlots: number[], type: SlotType): number {

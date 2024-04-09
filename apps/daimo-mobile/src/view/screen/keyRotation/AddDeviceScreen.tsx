@@ -1,4 +1,4 @@
-import { findUnusedSlot, getSlotLabel } from "@daimo/common";
+import { findAccountUnusedSlot, getSlotLabel } from "@daimo/common";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import { useState } from "react";
 import { View } from "react-native";
@@ -36,10 +36,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
       setBarCodeStatus("scanned");
 
       console.log(`[SCAN] got key ${parsedKey} ${parsedSlotType}`);
-      const nextSlot = findUnusedSlot(
-        account.accountKeys.map((k) => k.slot),
-        parsedSlotType
-      );
+      const nextSlot = findAccountUnusedSlot(account, parsedSlotType);
       setNewKeyAndSlot({ key: parsedKey, slot: nextSlot });
     } catch (e) {
       console.error(`[SCAN] error parsing QR code: ${e}`);

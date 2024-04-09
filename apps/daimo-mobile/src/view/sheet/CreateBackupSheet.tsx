@@ -1,4 +1,4 @@
-import { SlotType, assert, findUnusedSlot } from "@daimo/common";
+import { SlotType, assert, findAccountUnusedSlot } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
@@ -31,46 +31,22 @@ export function CreateBackupSheet() {
   );
 }
 
-function AddPasskeyButton() {
+function AddKeyButton({ slotType }: { slotType: SlotType }) {
   const account = useAccount();
   assert(account != null);
 
-  const passkeySlot = useMemo(
-    () =>
-      findUnusedSlot(
-        account.accountKeys.map((k) => k.slot),
-        SlotType.PasskeyBackup
-      ),
-    []
-  );
+  const slot = useMemo(() => findAccountUnusedSlot(account, slotType), []);
+
+  const isPasskey = slotType === SlotType.PasskeyBackup;
+  const isSecurityKey = slotType === SlotType.SecurityKeyBackup;
+  assert(isPasskey || isSecurityKey, "Unknown slot type");
+  const slotTypeStr = isPasskey ? "PASSKEY" : "SECURITY KEY";
 
   return (
     <AddKeySlotButton
-      buttonTitle="Backup with Passkey"
+      buttonTitle={`BACK UP WITH ${slotTypeStr}`}
       account={account}
-      slot={passkeySlot}
-    />
-  );
-}
-
-function AddSecurityKeyButton() {
-  const account = useAccount();
-  assert(account != null);
-
-  const securityKeySlot = useMemo(
-    () =>
-      findUnusedSlot(
-        account.accountKeys.map((k) => k.slot),
-        SlotType.SecurityKeyBackup
-      ),
-    []
-  );
-
-  return (
-    <AddKeySlotButton
-      buttonTitle="Backup with Security Key"
-      account={account}
-      slot={securityKeySlot}
+      slot={slot}
     />
   );
 }
@@ -93,11 +69,11 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <BulletRow text="Convenient, secure, and resistant to phishing" />
       <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
       <Spacer h={24} />
-      <AddPasskeyButton />
+      <AddKeyButton slotType={SlotType.PasskeyBackup} />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title="Backup offline backup instead"
+        title="Backup offline instead"
         onPress={() => setStep(1)}
       />
     </Animated.View>
@@ -146,7 +122,7 @@ function OfflineBackupContent({
           <Spacer h={16} />
           <BulletRow text="Use a physical FIDO key, such as a YubiKey" />
           <Spacer h={24} />
-          <AddSecurityKeyButton />
+          <AddKeyButton slotType={SlotType.SecurityKeyBackup} />
           <Spacer h={20} />
           <View style={styles.separator} />
           <Spacer h={20} />

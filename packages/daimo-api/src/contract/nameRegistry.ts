@@ -127,6 +127,12 @@ export class NameRegistry {
       return;
     }
 
+    // Ignore if already present
+    if (this.accounts.find((a) => a.addr === reg.addr)) {
+      console.log(`[NAME-REG] skipping already-cached account ${reg.name}`);
+      return;
+    }
+
     console.log(`[NAME-REG] caching ${reg.name} -> ${reg.addr}`);
     this.nameToReg.set(reg.name, reg);
 
