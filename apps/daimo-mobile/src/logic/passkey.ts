@@ -20,11 +20,13 @@ import { env } from "./env";
 import { Log } from "./log";
 import { parseCreateResponse, parseSignResponse } from "./passkeyParsers";
 
-// Workaround iOS deeplinks bug: https://github.com/daimo-eth/daimo/issues/837
+// Workaround iOS Passkeys AASA bug: https://github.com/daimo-eth/daimo/issues/837
 function matchAASABugError(e: string) {
   // Match without english text since iOS errors are localized to device language
   return e.includes("JV8PYC9QV4.com.daimo") && e.includes("daimo.com");
 }
+
+const AASA_BUG_MESSAGE = "iOS system error. Restart the app, then try again.";
 
 // Wrapper for Expo module native passkey creation
 export async function createPasskey(
@@ -59,7 +61,8 @@ export async function createPasskey(
         useSecurityKey,
       }),
     5,
-    matchAASABugError
+    matchAASABugError,
+    AASA_BUG_MESSAGE
   );
 
   console.log("[PASSKEY] Got creation result from expo module", result);
@@ -131,7 +134,8 @@ export async function requestPasskeySignature(
         useSecurityKey,
       }),
     5,
-    matchAASABugError
+    matchAASABugError,
+    AASA_BUG_MESSAGE
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
 

@@ -42,6 +42,7 @@ import { OnboardingIntroScreen as OnbIntroScreen } from "./screen/onboarding/Onb
 import { OnboardingPickNameScreen as OnbPickNameScreen } from "./screen/onboarding/OnboardingPickNameScreen";
 import { OnboardingSetupKeyPage as OnbSetupKeyPage } from "./screen/onboarding/OnboardingSetupKeyPage";
 import { OnboardingUseExistingScreen as OnbUseExistingScreen } from "./screen/onboarding/OnboardingUseExistingScreen";
+import { usePollForAccount } from "./screen/onboarding/usePollForAccount";
 import { ReceiveNavScreen } from "./screen/receive/ReceiveNavScreen";
 import { ReceiveScreen } from "./screen/receive/ReceiveScreen";
 import { SendNavScreen } from "./screen/send/SendNavScreen";
@@ -70,7 +71,13 @@ const { add, multiply } = Animated;
 const OnStack = createStackNavigator<ParamListOnboarding>();
 function OnboardingNavigator() {
   const daimoChain = useDaimoChain();
+
+  // Two external events can cause us to jump to a different screen.
+  // 1. A deep link arrives (go straight to "choose name")
   useOnboardingDeepLinkHandler(daimoChain);
+
+  // 2. We find an account that we have an enclave key for. "Allow notifs"
+  usePollForAccount();
 
   return (
     <OnStack.Navigator

@@ -1,5 +1,6 @@
 import { FarcasterLinkedAccount } from "@daimo/common";
-import { Image, Linking, StyleSheet, View } from "react-native";
+import { Image } from "expo-image";
+import { Linking, StyleSheet, View } from "react-native";
 
 import { BadgeButton } from "./Button";
 import Spacer from "./Spacer";

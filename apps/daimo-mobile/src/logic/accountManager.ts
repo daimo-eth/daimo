@@ -22,7 +22,7 @@ import {
 } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
-import { Address } from "viem";
+import { Address, Hex } from "viem";
 
 import { ActHandle } from "../action/actStatus";
 import { cacheEAccounts } from "../logic/addr";
@@ -215,23 +215,24 @@ class AccountManager {
     }
 
     console.log(`[ACTION] pollForAccountByKey saving ${acc.name}, ${acc.addr}`);
-    this.setCurrentAccount(
-      createEmptyAccount(
-        {
-          enclaveKeyName,
-          enclavePubKey: pubKeyHex,
-          name: acc.name,
-          address: acc.addr,
-        },
-        this.daimoChain
-      )
-    );
+    if (this.currentAccount != null) {
+      console.log(
+        `[ACCOUNT] ignoring found account, already have ${this.currentAccount.name}`
+      );
+      return;
+    }
+
+    // Current account guaranteed null, set it to the found account:
+    this.setNewAccount(enclaveKeyName, pubKeyHex, acc.name, acc.addr);
   }
 
   // Create new account
   async createAccount(name: string, inviteLink: DaimoLink) {
-    console.log(`[ACCOUNT] createAccount ${name}, ${inviteLink}`);
-    assert(this.currentAccount == null, "Can't create, have existing account");
+    console.log(
+      `[ACCOUNT] createAccount ${name}, ${formatDaimoLink(inviteLink)}`
+    );
+    const existingAcc = this.currentAccount;
+    assert(existingAcc == null, "Can't create, have existing account");
     assert(this.createAccountHandle?.status !== "loading", "Already creating");
 
     // Get enclave key
@@ -264,44 +265,60 @@ class AccountManager {
       assertEqual(result.status, "success");
       const { address, faucetTransfer } = result;
 
-      // Save the newly created account
-      const newAcc = createEmptyAccount(
-        {
-          enclaveKeyName,
-          enclavePubKey: pubKeyHex,
-          name,
-          address,
-        },
-        this.daimoChain
-      );
+      // Save the newly created account.
+      // (Avoid a race where we find it via polling)
+      if (this.currentAccount == null) {
+        console.log(`[ACCOUNT] createAccount saving ${name}, ${address}`);
+        this.setNewAccount(enclaveKeyName, pubKeyHex, name, address);
+      } else {
+        console.log(
+          `[ACCOUNT] createAccount NOT saving, existing (polled) acct ${this.currentAccount.name}`
+        );
+      }
 
       // If we received a faucet tx, add it as a pending op
       if (faucetTransfer != null) {
-        newAcc.recentTransfers.push(faucetTransfer);
-        newAcc.namedAccounts.push({
-          label: AddrLabel.Faucet,
-          addr: faucetTransfer.from,
-        });
+        const faucet = { label: AddrLabel.Faucet, addr: faucetTransfer.from };
+        this.transform((a) => ({
+          ...a,
+          recentTransfers: [...a.recentTransfers, faucetTransfer],
+          namedAccounts: [...a.namedAccounts, faucet],
+        }));
       }
 
-      // If invite link is a payment link, claim it & add as pending transfer
-      if (inviteLink.type === "notev2") {
-        this.createAccountHandle.message = "Claiming payment link...";
-        this.notifyListeners();
-        const pendingOp = await this.tryClaimPaymentLink(address, inviteLink);
-        if (pendingOp != null) newAcc.recentTransfers.push(pendingOp);
-      }
-
-      console.log(`[ACCOUNT] createAccount saving ${newAcc.name}, ${address}`);
-      this.createAccountHandle = null;
+      // Invariant: if we get here, we have a new account. Save key info.
       this.keyInfo = keyInfo;
-      this.setCurrentAccount(newAcc); // Saves account, notifies listeners
+      this.createAccountHandle = null;
+
+      // Finally, if invite is a payment link, claim & add as pending transfer
+      if (inviteLink.type === "notev2") {
+        this.tryClaimPaymentLink(address, inviteLink);
+      }
     } catch (e: any) {
       console.error(`[ACCOUNT] createAccount error: ${e}`);
       const retry = () => getAccountManager().createAccount(name, inviteLink);
       this.createAccountHandle = { status: "error", message: e.message, retry };
       this.notifyListeners();
     }
+  }
+
+  private setNewAccount(
+    enclaveKeyName: string,
+    enclavePubKey: Hex,
+    name: string,
+    address: Address
+  ) {
+    assert(this.currentAccount == null, "Can't create, have existing account");
+    const newAcc = createEmptyAccount(
+      {
+        enclaveKeyName,
+        enclavePubKey,
+        name,
+        address,
+      },
+      this.daimoChain
+    );
+    this.setCurrentAccount(newAcc); // Saves account, notifies listeners
   }
 
   // Returns a pending claimLink op.
@@ -327,7 +344,7 @@ class AccountManager {
         noteStatus
       );
       cacheEAccounts([noteStatus.sender]);
-      return {
+      const pendingOp = {
         type: "claimLink",
         amount: Number(dollarsToAmount(inviteLink.dollars)),
         status: OpStatus.pending,
@@ -337,6 +354,11 @@ class AccountManager {
         to: address,
         txHash,
       } as DisplayOpEvent;
+
+      this.transform((a) => ({
+        ...a,
+        recentTransfers: [...a.recentTransfers, pendingOp],
+      }));
     } catch (e: any) {
       console.error(`[ACCOUNT] error claiming invite payment link: ${e}`);
     }
@@ -399,7 +421,7 @@ class AccountManager {
  * Returns current Daimo account, or null if not logged in.
  * Avoid setAccount after async. Instead, use transform() to avoid races.
  */
-export function useAccount(): [Account | null] {
+export function useAccount(): Account | null {
   const manager = getAccountManager();
 
   // State + listeners pattern
@@ -411,7 +433,7 @@ export function useAccount(): [Account | null] {
     return () => manager.removeListener(setAccState);
   }, []);
 
-  return [accState];
+  return accState;
 }
 
 export function useAccountAndKeyInfo() {

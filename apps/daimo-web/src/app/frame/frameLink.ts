@@ -11,8 +11,7 @@ export interface InviteFrameLink {
   bonusDollarsInviter?: number;
 
   auth: {
-    claimerMustFollowOwner?: boolean;
-    ownerMustFollow?: boolean;
+    mustBePowerUser?: boolean;
     fidMustBeBelow?: number;
     fidWhitelists?: {
       greeting: string;

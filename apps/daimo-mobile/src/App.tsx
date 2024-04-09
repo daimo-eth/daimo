@@ -20,7 +20,7 @@ import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [account] = useAccount();
+  const account = useAccount();
   const onb = account?.isOnboarded ? "onboarded" : "not onboarded";
   console.log(`[APP] rendering ${account?.name || "no account"}, ${onb}`);
 

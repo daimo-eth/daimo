@@ -347,7 +347,7 @@ let handledInitialDeepLink = false;
 /** Handle incoming app deep links. */
 function useInitNavLinks() {
   const nav = useNav();
-  const [account] = useAccount();
+  const account = useAccount();
   const accountMissing = account == null;
 
   // Handle deeplinks

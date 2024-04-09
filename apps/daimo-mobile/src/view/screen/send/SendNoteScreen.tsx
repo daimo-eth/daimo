@@ -61,7 +61,7 @@ export function SendNoteScreen({ route }: Props) {
     else goHome();
   }, [nav, amountChosen]);
 
-  const [account] = useAccount();
+  const account = useAccount();
   assert(account != null);
 
   const [externalAction, setExternalAction] = useState<ExternalAction>({

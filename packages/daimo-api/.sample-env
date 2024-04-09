@@ -1,5 +1,7 @@
 # You can generate your own EOA using Metamask/viem/ethers.
+
 # Then, get Base Sepolia ETH here: https://www.alchemy.com/faucets/base-sepolia
+
 # And Base Sepolia USDC here: https://faucet.circle.com/
 
 DAIMO_API_PRIVATE_KEY=
@@ -11,3 +13,4 @@ DAIMO_BUNDLER_RPC=
 DAIMO_APP_API_URL_TESTNET="https://daimo-api-testnet.onrender.com"
 DAIMO_APP_API_URL_MAINNET="https://daimo-api-prod.onrender.com"
 DAIMO_DOMAIN="daimo.com"
+SENTRY_DSN=""

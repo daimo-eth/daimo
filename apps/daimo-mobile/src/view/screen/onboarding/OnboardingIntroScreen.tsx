@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 
-import { usePollForAccount } from "./usePollForAccount";
 import { DispatcherContext } from "../../../action/dispatch";
 import {
   handleOnboardingDeepLink,
@@ -28,9 +27,6 @@ const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
-
-  // User uninstalled and reinstalled the app? Load from enclave key.
-  usePollForAccount();
 
   // User clicks ACCEPT INVITE > pastes invite link
   const pasteInviteLink = async () => {

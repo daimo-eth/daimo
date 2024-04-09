@@ -84,7 +84,7 @@ export function SearchHeader({
     []
   );
 
-  const [account] = useAccount();
+  const account = useAccount();
   const notifInfo = useInAppNotifications();
 
   if (account == null) return null;

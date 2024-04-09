@@ -11,7 +11,7 @@ import { ss } from "../../shared/style";
 import { TextPara } from "../../shared/text";
 
 export function AddPasskeyScreen() {
-  const [account] = useAccount();
+  const account = useAccount();
   assert(account != null);
 
   const passkeySlot = useMemo(
