@@ -1,4 +1,6 @@
 import { trace } from "@opentelemetry/api";
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
 import Libhoney from "libhoney";
@@ -46,6 +48,7 @@ export class Telemetry {
 
   constructor() {
     const apiKey = process.env.HONEYCOMB_API_KEY || "";
+    const sentryDSN = process.env.SENTRY_DSN || "";
     if (apiKey === "") {
       console.log(`[TELEM] no HONEYCOMB_API_KEY set, telemetry disabled`);
       this.honeyEvents = null;
@@ -54,6 +57,20 @@ export class Telemetry {
         writeKey: apiKey,
         dataset: "daimo-events",
         sampleRate: 1,
+      });
+    }
+
+    if (sentryDSN === "") {
+      console.log(`[TELEM] no SENTRY_DSN set, Sentry error reports disabled`);
+    } else {
+      Sentry.init({
+        dsn: sentryDSN,
+        integrations: [
+          new Sentry.Integrations.Postgres(),
+          nodeProfilingIntegration(),
+        ],
+        tracesSampleRate: 1.0,
+        profilesSampleRate: 1.0,
       });
     }
   }
