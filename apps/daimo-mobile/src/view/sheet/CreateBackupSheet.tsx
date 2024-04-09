@@ -2,6 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useCallback, useContext, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { useSafeAreaFrame } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
@@ -135,6 +136,9 @@ function BackupOptionRow({
   title: string;
   recommended?: boolean;
 }) {
+  const { width } = useSafeAreaFrame();
+  const isCompact = width < 400;
+
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <View style={styles.keyCircle}>
@@ -145,7 +149,9 @@ function BackupOptionRow({
       {recommended && (
         <>
           <Spacer w={12} />
-          <Badge color={color.primary}>RECOMMENDED</Badge>
+          <Badge color={color.primary}>
+            {isCompact ? "REC." : "RECOMMENDED"}
+          </Badge>
         </>
       )}
     </View>
