@@ -66,7 +66,11 @@ export function SearchScreen({
         </Animated.View>
         {inputFocused && (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <Pressable style={{ marginLeft: 16 }} onPress={blurInput}>
+            <Pressable
+              style={{ marginLeft: 16 }}
+              onPress={blurInput}
+              hitSlop={8}
+            >
               {({ pressed }) => (
                 <TextBody color={pressed ? color.gray3 : color.grayMid}>
                   Cancel
