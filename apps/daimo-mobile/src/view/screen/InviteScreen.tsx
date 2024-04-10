@@ -24,6 +24,7 @@ import { ButtonBig, ButtonMed, TextButton } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { ContactBubble } from "../shared/ContactBubble";
 import { CoverGraphic } from "../shared/CoverGraphic";
+import { PressableText } from "../shared/PressableText";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
@@ -112,14 +113,10 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
       {moreInvitees > 0 && (
         <>
           <Spacer w={8} />
-          <Pressable
+          <PressableText
+            text={`+${moreInvitees} more`}
             onPress={() => nav.push("YourInvites")}
             hitSlop={16}
-            children={({ pressed }) => (
-              <TextBody color={pressed ? color.gray3 : color.grayMid}>
-                +{moreInvitees} more
-              </TextBody>
-            )}
           />
         </>
       )}
