@@ -51,7 +51,31 @@ async function handleCommand(command: string, text: string): Promise<string> {
 
     return viewInviteStatus(strippedText[1]);
   } else if (command === "/set-max-uses") {
-    return setMaxUses();
+    const strippedText = text.trim();
+    const parts = strippedText.split(" ");
+
+    let url = "";
+    let maxUses: number | undefined = undefined;
+
+    for (const part of parts) {
+      const [key, value] = part.split("=").map((x) => x.trim());
+
+      if (key === "link") {
+        url = value;
+      } else if (key === "max_uses") {
+        maxUses = Number(value);
+      }
+    }
+
+    if (!url) {
+      throw new Error("[SLACK-BOT] /set-max-uses: No invite link specified");
+    }
+
+    if (!maxUses) {
+      throw new Error("[SLACK-BOT] /set-max-uses: No max uses specified");
+    }
+
+    return setMaxUses(url, maxUses);
   } else if (command === "/help") {
     return help();
   }
@@ -74,7 +98,7 @@ async function viewInviteStatus(url: string) {
   return `<pre>${JSON.stringify(inviteStatus)}</pre>`;
 }
 
-async function setMaxUses(url: string) {
+async function setMaxUses(url: string, maxUses: number) {
   // TODO
 
   return "";
@@ -84,20 +108,10 @@ function help() {
   return ``;
 }
 
-function verifyToken(token: string) {}
-
 function parseCommandText(command: string, text: string): CommandPayload {
   if (command === "/create-invite") {
     const parts = text.trim().split(" ");
     assert(parts.length === 5);
-
-    const createInvitePayload = {
-      code: "",
-      bonusDollarsInvitee: 0,
-      bonusDollarsInviter: 0,
-      maxUses: 0,
-      inviter: "",
-    };
 
     const keyMap = {
       code: "code",
@@ -126,18 +140,22 @@ function parseCommandText(command: string, text: string): CommandPayload {
         );
       }
 
+      const payload: Partial<
+        Record<(typeof keyMap)[keyof typeof keyMap], string | number>
+      > = {};
+
       const parsedKey = keyMap[trimmedKey as keyof typeof keyMap];
 
-      createInvitePayload[parsedKey] = [
+      payload[parsedKey] = [
         "bonus_dollars_invitee",
         "bonus_dollars_inviter",
         "max_uses",
       ].includes(trimmedKey)
         ? Number(trimmedValue)
         : trimmedValue;
-    }
 
-    return createInvitePayload;
+      return validateCreateInvite(payload);
+    }
   } /* else if (command === "/view-invite-status") {
     return "";
   } else if (command === "/set-max-uses") {
@@ -147,4 +165,20 @@ function parseCommandText(command: string, text: string): CommandPayload {
   } */
 
   throw new Error("");
+}
+
+const CreateInviteSchema = z.object({
+  code: z.string(),
+  bonusDollarsInvitee: z.number(),
+  bonusDollarsInviter: z.number(),
+  maxUses: z.number(),
+  inviter: z.string(),
+});
+
+function validateCreateInvite(payload: object) {
+  try {
+    return CreateInviteSchema.parse(payload);
+  } catch (error) {
+    throw error;
+  }
 }
