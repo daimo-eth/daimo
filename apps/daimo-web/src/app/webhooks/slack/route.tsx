@@ -6,16 +6,18 @@ import { rpc } from "../../../utils/rpc";
 
 // Handle all slash commands from Slack
 export async function POST(request: NextRequest) {
-  const data = await request.json();
-  const { token, command, text } = data;
-
-  if (token !== process.env.SLACK_COMMAND_TOKEN) {
-    throw new Error("[SLACK-BOT] Token not recognized");
-  }
-
-  const res = await handleCommand(command, text);
-
   try {
+    const data = await request.json();
+    console.log({ data });
+
+    const { token, command, text } = data;
+
+    if (token !== process.env.SLACK_COMMAND_TOKEN) {
+      throw new Error("[SLACK-BOT] Token not recognized");
+    }
+
+    const res = await handleCommand(command, text);
+
     return NextResponse.json(
       { blocks: [{ type: "section", text: { type: "mrkdwn", text: res } }] },
       { status: 200 }
