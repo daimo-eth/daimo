@@ -7,10 +7,15 @@ import { rpc } from "../../../utils/rpc";
 // Handle all slash commands from Slack
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
-    console.log({ data });
+    const formData = await request.formData();
 
-    const { token, command, text } = data;
+    const token = formData.get("token") as string;
+    const command = formData.get("command") as string;
+    const text = formData.get("text") as string;
+
+    if (!token || !command || !text) {
+      throw new Error("Invalid request");
+    }
 
     if (token !== process.env.SLACK_COMMAND_TOKEN) {
       throw new Error("[SLACK-BOT] Token not recognized");
@@ -41,6 +46,8 @@ type CreateInviteLinkPayload = {
 type CommandPayload = CreateInviteLinkPayload;
 
 async function handleCommand(command: string, text: string): Promise<string> {
+  console.log(`[SLACK-BOT] Handling command ${command} - ${text}`);
+
   if (command === "/create-invite") {
     return createInvite(parseCommandText(command, text));
   } else if (command === "/view-invite-status") {
@@ -116,55 +123,59 @@ function help() {
 function parseCommandText(command: string, text: string): CommandPayload {
   if (command === "/create-invite") {
     const parts = text.trim().split(" ");
-    assert(parts.length === 5);
 
-    const keyMap = {
-      code: "code",
-      bonus_dollars_invitee: "bonusDollarsInvitee",
-      bonus_dollars_inviter: "bonusDollarsInviter",
-      max_uses: "maxUses",
-      inviter: "inviter",
-    } as const;
+    // This can change when there are default values for some of the arguments.
+    assert(parts.length === 5, "Missing arguments for /create-invite");
 
     const keys = new Set(Object.keys(keyMap));
 
-    for (const part of parts) {
-      const [key, value] = part.trim().split("=");
-      const trimmedKey = key.trim();
-      const trimmedValue = value.trim();
+    const payload: Partial<
+      Record<(typeof keyMap)[keyof typeof keyMap], string | number>
+    > = {};
 
-      if (!keys.has(trimmedKey)) {
+    for (const part of parts) {
+      const [key, value] = part
+        .trim()
+        .split("=")
+        .map((x) => x.trim());
+
+      if (!keys.has(key)) {
         throw new Error(
           `[SLACK-BOT] Bad command: Unrecognized parameter ${key}`
         );
       }
 
-      if (!trimmedValue) {
+      if (!value) {
         throw new Error(
           `[SLACK-BOT] Bad command: No value provided for ${key} parameter`
         );
       }
 
-      const payload: Partial<
-        Record<(typeof keyMap)[keyof typeof keyMap], string | number>
-      > = {};
-
-      const parsedKey = keyMap[trimmedKey as keyof typeof keyMap];
-
-      payload[parsedKey] = [
-        "bonus_dollars_invitee",
-        "bonus_dollars_inviter",
-        "max_uses",
-      ].includes(trimmedKey)
-        ? Number(trimmedValue)
-        : trimmedValue;
-
-      return validateCreateInvite(payload);
+      const parsedKey = keyMap[key as keyof typeof keyMap];
+      payload[parsedKey] = NUMBER_KEYS.includes(key) ? Number(value) : value;
     }
+
+    return validateCreateInvite(payload);
   }
 
   throw new Error("");
 }
+
+// Create invite validation
+
+const NUMBER_KEYS = [
+  "bonus_dollars_invitee",
+  "bonus_dollars_inviter",
+  "max_uses",
+];
+
+const keyMap = {
+  code: "code",
+  bonus_dollars_invitee: "bonusDollarsInvitee",
+  bonus_dollars_inviter: "bonusDollarsInviter",
+  max_uses: "maxUses",
+  inviter: "inviter",
+} as const;
 
 const CreateInviteSchema = z.object({
   code: z.string(),
