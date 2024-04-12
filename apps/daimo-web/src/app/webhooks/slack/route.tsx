@@ -13,10 +13,13 @@ export async function POST(request: NextRequest) {
     throw new Error("[SLACK-BOT] Token not recognized");
   }
 
-  await handleCommand(command, text);
+  const res = await handleCommand(command, text);
 
   try {
-    return NextResponse.json({}, { status: 200 });
+    return NextResponse.json(
+      { blocks: [{ type: "section", text: { type: "mrkdwn", text: res } }] },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
       { message: (error as Error)?.message },
@@ -156,13 +159,7 @@ function parseCommandText(command: string, text: string): CommandPayload {
 
       return validateCreateInvite(payload);
     }
-  } /* else if (command === "/view-invite-status") {
-    return "";
-  } else if (command === "/set-max-uses") {
-    return "";
-  } else if (command === "/help") {
-    return "";
-  } */
+  }
 
   throw new Error("");
 }
