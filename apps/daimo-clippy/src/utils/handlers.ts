@@ -75,7 +75,7 @@ async function viewInviteStatus(url: string) {
 }
 
 async function setMaxUses(url: string, maxUses: number) {
-  const apiKey = assertNotNull(process.env.DAIMO_API_KEY || "test");
+  const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
   const link = parseDaimoLink(url);
 
@@ -91,7 +91,7 @@ async function setMaxUses(url: string, maxUses: number) {
 
   const details = await viewInviteStatus(res);
 
-  return `Successfully updated invite: ${res} \n \`${details}\``;
+  return `Successfully updated invite: ${res} \n ${details}`;
 }
 
 function help() {

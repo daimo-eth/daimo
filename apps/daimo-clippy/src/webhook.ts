@@ -19,7 +19,9 @@ webhookRouter.post("/slack", async (req, res) => {
     const responseText = await handleCommand(command, text);
 
     return res.status(200).json({
-      blocks: [{ type: "section", text: { type: "mrkdwn", responseText } }],
+      blocks: [
+        { type: "section", text: { type: "mrkdwn", text: responseText } },
+      ],
     });
   } catch (error) {
     return res.status(500).json({
