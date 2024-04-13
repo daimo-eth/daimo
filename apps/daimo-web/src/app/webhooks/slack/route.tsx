@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const command = formData.get("command") as string;
     const text = formData.get("text") as string;
 
-    if (!token || !command || !text) {
+    if (!token || !command) {
       throw new Error("Invalid request");
     }
 
@@ -106,6 +106,8 @@ async function handleCommand(command: string, text: string): Promise<string> {
 
   throw new Error(`[SLACK-BOT] Unrecognized slash command: ${command}`);
 }
+
+// Command handlers
 
 async function createInvite(payload: CreateInviteLinkPayload) {
   const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
