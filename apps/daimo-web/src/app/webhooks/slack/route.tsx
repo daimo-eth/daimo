@@ -1,4 +1,4 @@
-import { assert, assertNotNull } from "@daimo/common";
+import { assert, assertNotNull, parseDaimoLink } from "@daimo/common";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -7,7 +7,7 @@ import { rpc } from "../../../utils/rpc";
 // Handle all slash commands from Slack
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
 
     const token = formData.get("token") as string;
     const command = formData.get("command") as string;
@@ -29,7 +29,19 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     return NextResponse.json(
-      { message: (error as Error)?.message },
+      {
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text:
+                ":x:" + (error as Error)?.message ??
+                "An error occured while handling your request",
+            },
+          },
+        ],
+      },
       { status: 500 }
     );
   }
@@ -107,17 +119,30 @@ async function createInvite(payload: CreateInviteLinkPayload) {
 async function viewInviteStatus(url: string) {
   const inviteStatus = await rpc.getLinkStatus.query({ url });
 
-  return `<pre>${JSON.stringify(inviteStatus)}</pre>`;
+  return `\`${JSON.stringify(inviteStatus)}\``;
 }
 
 async function setMaxUses(url: string, maxUses: number) {
-  // TODO
+  const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
-  return "";
+  const link = parseDaimoLink(url);
+
+  if (link?.type !== "invite") {
+    throw new Error("[SLACK-BOT] /set-max-uses Incorrect link type");
+  }
+
+  const res = await rpc.updateInviteLink.mutate({ apiKey, code: "", maxUses });
+  const details = await viewInviteStatus(res);
+
+  return `Successfully updated invite: ${res} \n \`${details}\``;
 }
 
 function help() {
-  return ``;
+  return `There are three included commands that help you with handling Daimo invites: \n
+  \`/create-invite\` - Creates a Daimo invite. \n
+  \`/view-invite-status\` - Shows all invite properties in JSON format. \n
+  \`/set-max-uses\` - Updates the "max_uses" property of invites.
+  `;
 }
 
 function parseCommandText(command: string, text: string): CommandPayload {
@@ -155,7 +180,7 @@ function parseCommandText(command: string, text: string): CommandPayload {
       payload[parsedKey] = NUMBER_KEYS.includes(key) ? Number(value) : value;
     }
 
-    return validateCreateInvite(payload);
+    return CreateInviteSchema.parse(payload);
   }
 
   throw new Error("");
@@ -184,11 +209,3 @@ const CreateInviteSchema = z.object({
   maxUses: z.number(),
   inviter: z.string(),
 });
-
-function validateCreateInvite(payload: object) {
-  try {
-    return CreateInviteSchema.parse(payload);
-  } catch (error) {
-    throw error;
-  }
-}

@@ -372,6 +372,17 @@ export class DB {
     return assertNotNull(res.rowCount) > 0;
   }
 
+  async updateInviteCode(row: UpdateInviteCodeArgs) {
+    console.log(`[DB] updating invite code: ${JSON.stringify(row)}`);
+
+    const res = await this.pool.query<[], any[]>(
+      `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
+      [row.maxUses, row.code]
+    );
+
+    return assertNotNull(res.rowCount) > 0;
+  }
+
   async insertFaucetAttestation(attestation: string) {
     console.log(`[DB] inserting faucet attestation`);
     await this.pool.query(
@@ -473,6 +484,11 @@ export interface InsertInviteCodeArgs {
   inviter: Address | null;
   bonusDollarsInvitee: number;
   bonusDollarsInviter: number;
+}
+
+export interface UpdateInviteCodeArgs {
+  code: string;
+  maxUses: number;
 }
 
 interface RawInviteCodeRow {

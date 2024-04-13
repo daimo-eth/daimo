@@ -202,6 +202,19 @@ export function createRouter(
         return await inviteCodeTracker.insertInviteCode(input);
       }),
 
+    updateInviteLink: publicProcedure
+      .input(
+        z.object({
+          apiKey: z.string(),
+          code: z.string(),
+          maxUses: z.number(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        authorize(input.apiKey);
+        return await inviteCodeTracker.updateInviteCode(input);
+      }),
+
     lookupEthereumAccountByKey: publicProcedure
       .input(z.object({ pubKeyHex: zHex }))
       .query(async (opts) => {
