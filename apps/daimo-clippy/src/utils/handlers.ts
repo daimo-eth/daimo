@@ -100,6 +100,6 @@ function help() {
   \`/view-invite-status\` - Shows all invite properties in JSON format. [link] \n
   \`/set-max-uses\` - Updates the "max_uses" property of invites. [link, max_uses]\n
   **Note**: Args must be named, but the order does not matter\n
-  e.g. \`/create invite code=test bonus_dollars_invitee=0 bonus_dollars_inviter max_uses=5 inviter=0x...\`
+  e.g. \`/create-invite code=test bonus_dollars_invitee=0 bonus_dollars_inviter max_uses=5 inviter=0x...\`
   `;
 }
