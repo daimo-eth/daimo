@@ -1,0 +1,15 @@
+{
+  "name": "@daimo/clippy",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "ts-node-dev src/index.ts",
+    "start": "ts-node src/index.ts"
+  },
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@daimo/api": "*",
+    "@daimo/common": "*",
+    "dotenv": "^16.4.5"
+  }
+}

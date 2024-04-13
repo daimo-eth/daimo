@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
             text: {
               type: "mrkdwn",
               text:
-                ":x:" + (error as Error)?.message ??
+                ":x: " + (error as Error)?.message ??
                 "An error occured while handling your request",
             },
           },
@@ -47,21 +47,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-type CreateInviteLinkPayload = {
-  code: string;
-  bonusDollarsInvitee: number;
-  bonusDollarsInviter: number;
-  maxUses: number;
-  inviter: string;
-};
-
-type CommandPayload = CreateInviteLinkPayload;
-
 async function handleCommand(command: string, text: string): Promise<string> {
   console.log(`[SLACK-BOT] Handling command ${command} - ${text}`);
 
   if (command === "/create-invite") {
-    return createInvite(parseCommandText(command, text));
+    return createInvite(parseCreateInviteText(text));
   } else if (command === "/view-invite-status") {
     const strippedText = text.trim().split("=");
 
@@ -125,7 +115,7 @@ async function viewInviteStatus(url: string) {
 }
 
 async function setMaxUses(url: string, maxUses: number) {
-  const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
+  const apiKey = assertNotNull(process.env.DAIMO_API_KEY || "test");
 
   const link = parseDaimoLink(url);
 
@@ -133,7 +123,12 @@ async function setMaxUses(url: string, maxUses: number) {
     throw new Error("[SLACK-BOT] /set-max-uses Incorrect link type");
   }
 
-  const res = await rpc.updateInviteLink.mutate({ apiKey, code: "", maxUses });
+  const res = await rpc.updateInviteLink.mutate({
+    apiKey,
+    code: link.code,
+    maxUses,
+  });
+
   const details = await viewInviteStatus(res);
 
   return `Successfully updated invite: ${res} \n \`${details}\``;
@@ -147,45 +142,47 @@ function help() {
   `;
 }
 
-function parseCommandText(command: string, text: string): CommandPayload {
-  if (command === "/create-invite") {
-    const parts = text.trim().split(" ");
+type CreateInviteLinkPayload = {
+  code: string;
+  bonusDollarsInvitee: number;
+  bonusDollarsInviter: number;
+  maxUses: number;
+  inviter: string;
+};
 
-    // This can change when there are default values for some of the arguments.
-    assert(parts.length === 5, "Missing arguments for /create-invite");
+function parseCreateInviteText(text: string): CreateInviteLinkPayload {
+  const parts = text.trim().split(" ");
 
-    const keys = new Set(Object.keys(keyMap));
+  // This can change when there are default values for some of the arguments.
+  assert(parts.length === 5, "Missing arguments for /create-invite");
 
-    const payload: Partial<
-      Record<(typeof keyMap)[keyof typeof keyMap], string | number>
-    > = {};
+  const keys = new Set(Object.keys(keyMap));
 
-    for (const part of parts) {
-      const [key, value] = part
-        .trim()
-        .split("=")
-        .map((x) => x.trim());
+  const payload: Partial<
+    Record<(typeof keyMap)[keyof typeof keyMap], string | number>
+  > = {};
 
-      if (!keys.has(key)) {
-        throw new Error(
-          `[SLACK-BOT] Bad command: Unrecognized parameter ${key}`
-        );
-      }
+  for (const part of parts) {
+    const [key, value] = part
+      .trim()
+      .split("=")
+      .map((x) => x.trim());
 
-      if (!value) {
-        throw new Error(
-          `[SLACK-BOT] Bad command: No value provided for ${key} parameter`
-        );
-      }
-
-      const parsedKey = keyMap[key as keyof typeof keyMap];
-      payload[parsedKey] = NUMBER_KEYS.includes(key) ? Number(value) : value;
+    if (!keys.has(key)) {
+      throw new Error(`[SLACK-BOT] Bad command: Unrecognized parameter ${key}`);
     }
 
-    return CreateInviteSchema.parse(payload);
+    if (!value) {
+      throw new Error(
+        `[SLACK-BOT] Bad command: No value provided for ${key} parameter`
+      );
+    }
+
+    const parsedKey = keyMap[key as keyof typeof keyMap];
+    payload[parsedKey] = NUMBER_KEYS.includes(key) ? Number(value) : value;
   }
 
-  throw new Error("");
+  return CreateInviteSchema.parse(payload);
 }
 
 // Create invite validation
