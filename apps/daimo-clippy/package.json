@@ -4,7 +4,10 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "lint": "npm run lint:deps && npm run lint:style",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
+    "lint:style": "eslint . --max-warnings=0"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
