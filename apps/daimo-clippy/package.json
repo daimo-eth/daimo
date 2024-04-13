@@ -13,6 +13,11 @@
   "dependencies": {
     "@daimo/api": "*",
     "@daimo/common": "*",
-    "dotenv": "^16.4.5"
+    "@daimo/contract": "*",
+    "@trpc/client": "^10.45.2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "zod": "^3.22.4"
   }
 }
