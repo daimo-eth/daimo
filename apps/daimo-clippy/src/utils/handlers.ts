@@ -96,8 +96,10 @@ async function setMaxUses(url: string, maxUses: number) {
 
 function help() {
   return `There are three included commands that help you with handling Daimo invites: \n
-  \`/create-invite\` - Creates a Daimo invite. \n
-  \`/view-invite-status\` - Shows all invite properties in JSON format. \n
-  \`/set-max-uses\` - Updates the "max_uses" property of invites.
+  \`/create-invite\` - Creates a Daimo invite. [code, bonus_dollars_invitee, bonus_dollar_inviter, max_uses, inviter] \n
+  \`/view-invite-status\` - Shows all invite properties in JSON format. [link] \n
+  \`/set-max-uses\` - Updates the "max_uses" property of invites. [link, max_uses]\n
+  **Note**: Args must be named, but the order does not matter\n
+  e.g. \`/create invite code=test bonus_dollars_invitee=0 bonus_dollars_inviter max_uses=5 inviter=0x...\`
   `;
 }
