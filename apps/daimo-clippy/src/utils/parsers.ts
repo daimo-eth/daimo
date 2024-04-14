@@ -1,7 +1,8 @@
-import { assert } from "@daimo/common";
+import { assert, zCreateInviteLinkArgs } from "@daimo/common";
+import z from "zod";
 
 import { CreateInviteLinkPayload } from "./types";
-import { CreateInviteSchema, NUMBER_KEYS, keyMap } from "./validation";
+import { CREATE_INVITE_KEY_SET } from "./validation";
 
 export function parseCreateInviteText(text: string): CreateInviteLinkPayload {
   const parts = text.trim().split(" ");
@@ -9,11 +10,7 @@ export function parseCreateInviteText(text: string): CreateInviteLinkPayload {
   // This can change when there are default values for some of the arguments.
   assert(parts.length === 5, "Missing arguments for /create-invite");
 
-  const keys = new Set(Object.keys(keyMap));
-
-  const payload: Partial<
-    Record<(typeof keyMap)[keyof typeof keyMap], string | number>
-  > = {};
+  const payload: Record<string, string> = {};
 
   for (const part of parts) {
     const [key, value] = part
@@ -21,7 +18,8 @@ export function parseCreateInviteText(text: string): CreateInviteLinkPayload {
       .split("=")
       .map((x) => x.trim());
 
-    if (!keys.has(key)) {
+    // Key validation uses set to make the error message generation cleaner.
+    if (!CREATE_INVITE_KEY_SET.has(key)) {
       throw new Error(`[SLACK-BOT] Bad command: Unrecognized parameter ${key}`);
     }
 
@@ -31,11 +29,15 @@ export function parseCreateInviteText(text: string): CreateInviteLinkPayload {
       );
     }
 
-    const parsedKey = keyMap[key as keyof typeof keyMap];
-    payload[parsedKey] = NUMBER_KEYS.includes(key) ? Number(value) : value;
+    payload[key] = value;
   }
 
-  return CreateInviteSchema.parse(payload);
+  return zCreateInviteLinkArgs.parse({
+    ...payload,
+    bonusDollarsInvitee: z.number().int().parse(payload.bonus_dollars_invitee),
+    bonusDollarsInviter: z.number().int().parse(payload.bonus_dollars_inviter),
+    maxUses: z.number().int().parse(payload.max_uses),
+  });
 }
 
 export function parseViewInviteStatusText(text: string) {
