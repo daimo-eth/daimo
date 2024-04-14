@@ -1,6 +1,10 @@
 import { assertNotNull, parseDaimoLink } from "@daimo/common";
 
-import { parseCreateInviteText } from "./parsers";
+import {
+  parseCreateInviteText,
+  parseSetMaxUsesText,
+  parseViewInviteStatusText,
+} from "./parsers";
 import { rpc } from "./rpc";
 import { CreateInviteLinkPayload } from "./types";
 
@@ -10,51 +14,20 @@ export async function handleCommand(
 ): Promise<string> {
   console.log(`[SLACK-BOT] Handling command ${command} - ${text}`);
 
-  if (command === "/create-invite") {
-    return createInvite(parseCreateInviteText(text));
-  } else if (command === "/view-invite-status") {
-    const strippedText = text.trim().split("=");
-
-    if (strippedText[0] !== "link") {
-      throw new Error(`[SLACK-BOT] Unrecognized parameter ${strippedText[0]}`);
+  switch (command) {
+    case "/create-invite":
+      return createInvite(parseCreateInviteText(text));
+    case "/view-invite-status":
+      return viewInviteStatus(parseViewInviteStatusText(text));
+    case "/set-max-uses": {
+      const { url, maxUses } = parseSetMaxUsesText(text);
+      return setMaxUses(url, maxUses);
     }
-
-    if (!strippedText[1]) {
-      throw new Error(`[SLACK-BOT] view-invite-status No link provided`);
-    }
-
-    return viewInviteStatus(strippedText[1]);
-  } else if (command === "/set-max-uses") {
-    const strippedText = text.trim();
-    const parts = strippedText.split(" ");
-
-    let url = "";
-    let maxUses: number | undefined = undefined;
-
-    for (const part of parts) {
-      const [key, value] = part.split("=").map((x) => x.trim());
-
-      if (key === "link") {
-        url = value;
-      } else if (key === "max_uses") {
-        maxUses = Number(value);
-      }
-    }
-
-    if (!url) {
-      throw new Error("[SLACK-BOT] /set-max-uses: No invite link specified");
-    }
-
-    if (!maxUses) {
-      throw new Error("[SLACK-BOT] /set-max-uses: No max uses specified");
-    }
-
-    return setMaxUses(url, maxUses);
-  } else if (command === "/help") {
-    return help();
+    case "/help":
+      return help();
+    default:
+      throw new Error(`[SLACK-BOT] Unrecognized slash command: ${command}`);
   }
-
-  throw new Error(`[SLACK-BOT] Unrecognized slash command: ${command}`);
 }
 
 // Command handlers
