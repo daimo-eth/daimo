@@ -26,11 +26,11 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { useWarmSenderCache } from "../../action/useSendAsync";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
 import { useOnboardingChecklist } from "../../logic/onboarding";
+import { useWarmDeviceKeySenderCache } from "../../logic/opSender";
 import { useContactsPermission } from "../../logic/systemContacts";
 import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
@@ -71,7 +71,7 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   );
 
   // For speed, preload DaimoOpSender
-  useWarmSenderCache(account);
+  useWarmDeviceKeySenderCache(account);
 
   // Show search results when search is focused.
   const [searchPrefix, setSearchPrefix] = useState<string | undefined>();

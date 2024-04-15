@@ -59,15 +59,15 @@ export class DaimoOpSender {
     const { accountAddress, accountSigner } = opConfig;
     const builder = await DaimoOpBuilder.init(accountAddress, accountSigner);
 
-    const { tokenAddress, tokenDecimals } = opConfig;
-    console.log(
-      `[OP] init: ${JSON.stringify({
-        accountAddress,
-        tokenAddress,
-        tokenDecimals,
-        notesAddressV1: opConfig.notesAddressV1,
-      })})}`
-    );
+    // const { tokenAddress, tokenDecimals } = opConfig;
+    // console.log(
+    //   `[OP] init: ${JSON.stringify({
+    //     accountAddress,
+    //     tokenAddress,
+    //     tokenDecimals,
+    //     notesAddressV1: opConfig.notesAddressV1,
+    //   })})}`
+    // );
 
     return new DaimoOpSender(opConfig, builder);
   }

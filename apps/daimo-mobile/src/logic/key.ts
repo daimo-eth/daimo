@@ -3,6 +3,7 @@ import {
   assert,
   parseAndNormalizeSig,
   SlotType,
+  signWithMnemonic,
 } from "@daimo/common";
 import { daimoAccountABI } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
@@ -47,10 +48,10 @@ export function createAddDeviceString(pubKey: Hex, slot: SlotType): string {
   return `addkeyV2:${pubKey}:${slot}`;
 }
 
-// Creates minimal Webauthn signatures using a hardware enclave key.
-// Unlike passkeys, which are backed up, enclave keys never leave the device.
-export function getWrappedRawSigner(
-  enclaveKeyName: string,
+// Wrapped raw signers to sign messages in the same format as WebAuthn.
+// This makes verification easier on-chain.
+function wrapRawSignerAsWebauthn(
+  sign: (message: Hex) => Promise<Hex>,
   keySlot: number
 ): SigningCallback {
   return async (challengeHex: Hex) => {
@@ -73,12 +74,8 @@ export function getWrappedRawSigner(
     authenticatorData[32] = 5; // flags: user present (1) + user verified (4)
     const message = concat([authenticatorData, clientDataHash]);
 
-    // Get P256-SHA256 signature, typically from a hardware enclave
-    const derSig = await requestEnclaveSignature(
-      enclaveKeyName,
-      bytesToHex(message).slice(2),
-      "Authorize transaction"
-    );
+    // Get P256-SHA256 signature, using passed (raw) sign function.
+    const derSig = await sign(bytesToHex(message));
 
     const { r, s } = parseAndNormalizeSig(`0x${derSig}`);
 
@@ -108,63 +105,19 @@ export function getWrappedRawSigner(
   };
 }
 
-// We require passing the raw seed phrase here, as this method is
-// completely context-free i.e. no information related to the key is stored
-// on the device.
-export function getWrappedSeedPhraseSigner(
-  keySlot: number,
-  seedPhrase: string
+export function getWrappedDeviceKeySigner(
+  enclaveKeyName: string,
+  keySlot: number
 ): SigningCallback {
-  return async (challengeHex: Hex) => {
-    // Besides the signature generation with `requestSeedPhraseSignature`,
-    // this method copies most of `getWrappedRawSigner`.
-    const bChallenge = hexToBytes(challengeHex);
-    const challengeB64URL = base64urlnopad.encode(bChallenge);
-
-    const clientDataJSON = JSON.stringify({
-      type: "webauthn.get",
-      challenge: challengeB64URL,
-    });
-
-    const clientDataHash = new Uint8Array(
-      await Crypto.digest(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        new TextEncoder().encode(clientDataJSON)
-      )
-    );
-
-    const authenticatorData = new Uint8Array(37); // rpIdHash (32) + flags (1) + counter (4)
-    authenticatorData[32] = 5; // flags: user present (1) + user verified (4)
-    const message = concat([authenticatorData, clientDataHash]);
-
-    const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":'));
-    const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
-
-    const derSig = requestSeedPhraseSignature(
-      bytesToHex(message).slice(2),
-      seedPhrase
-    );
-
-    const { r, s } = parseAndNormalizeSig(`0x${derSig}`);
-
-    const signatureStruct = getAbiItem({
-      abi: daimoAccountABI,
-      name: "signatureStruct",
-    }).inputs;
-
-    const encodedSig = encodeAbiParameters(signatureStruct, [
-      {
-        authenticatorData: bytesToHex(authenticatorData),
-        clientDataJSON,
-        challengeLocation,
-        responseTypeLocation,
-        r,
-        s,
-      },
-    ]);
-
-    return { keySlot, encodedSig };
-  };
+  return wrapRawSignerAsWebauthn(
+    (message) =>
+      requestEnclaveSignature(
+        enclaveKeyName,
+        message.slice(2),
+        "Authorize transaction"
+      ),
+    keySlot
+  );
 }
 
 export async function requestEnclaveSignature(
@@ -183,4 +136,14 @@ export async function requestEnclaveSignature(
   )) as Hex;
 
   return signature;
+}
+
+export function getWrappedMnemonicSigner(
+  mnemonic: string,
+  keySlot: number
+): SigningCallback {
+  return wrapRawSignerAsWebauthn(
+    (message) => signWithMnemonic(mnemonic, message),
+    keySlot
+  );
 }

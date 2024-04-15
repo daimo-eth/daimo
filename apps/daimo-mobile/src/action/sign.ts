@@ -1,7 +1,7 @@
 import { assertNotNull } from "@daimo/common";
 import { Hex, bytesToString, concatHex, hashMessage, numberToHex } from "viem";
 
-import { getWrappedRawSigner } from "../logic/key";
+import { getWrappedDeviceKeySigner } from "../logic/key";
 import { Account } from "../model/account";
 
 /** Signs a message. Hashes via ERC-191, returns an ERC-1271 signature. */
@@ -20,7 +20,7 @@ export async function signAsync({
   const keySlot = assertNotNull(key, "Key removed from account.").slot;
 
   // Get a (hardware enclave) signer. No passkey support required, for now.
-  const signer = getWrappedRawSigner(enclaveKeyName, keySlot);
+  const signer = getWrappedDeviceKeySigner(enclaveKeyName, keySlot);
 
   // Create an EIP-191 message hash
   const hashHex = hashMessage({ raw: messageBytes });

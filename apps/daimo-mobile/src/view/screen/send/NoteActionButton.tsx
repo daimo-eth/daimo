@@ -22,7 +22,7 @@ import { ActivityIndicator } from "react-native";
 
 import {
   transferAccountTransform,
-  useSendAsync,
+  useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useNav } from "../../../common/nav";
 import { ExternalAction } from "../../../logic/externalAction";
@@ -68,7 +68,7 @@ function NoteActionButtonInner({
     (op) => op.type === "createLink" && op.to === notesV2Addr
   );
 
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       return opSender.createEphemeralNote(
@@ -111,7 +111,6 @@ function NoteActionButtonInner({
         label: AddrLabel.PaymentLink,
       } as EAccount,
     ]),
-    signerType: "deviceKey",
   });
 
   const sendDisabledReason =

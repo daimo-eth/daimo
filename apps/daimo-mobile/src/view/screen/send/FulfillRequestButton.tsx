@@ -17,7 +17,7 @@ import { ActivityIndicator } from "react-native";
 
 import {
   transferAccountTransform,
-  useSendAsync,
+  useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
 import { Account } from "../../../model/account";
@@ -44,7 +44,7 @@ export function FulfillRequestButton({
   );
 
   // On exec, request signature from device enclave, approve contract, fulfill request.
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       console.log(`[ACTION] fulfilling request ${requestIdString}`);
@@ -73,7 +73,6 @@ export function FulfillRequestButton({
     accountTransform: transferAccountTransform(
       hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : []
     ),
-    signerType: "deviceKey",
   });
 
   const sendDisabledReason = (() => {

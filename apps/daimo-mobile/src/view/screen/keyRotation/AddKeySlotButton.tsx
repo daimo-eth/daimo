@@ -1,10 +1,10 @@
 import {
   OpStatus,
-  now,
+  SlotType,
   assert,
   formatFeeAmountOrNull,
   getSlotType,
-  SlotType,
+  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import {
@@ -13,16 +13,16 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { useMemo, ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
-import { useSendAsync } from "../../../action/useSendAsync";
+import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
 import { createPasskey } from "../../../logic/passkey";
 import { Account } from "../../../model/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { TextError, TextCenter, TextLight } from "../../shared/text";
+import { TextCenter, TextError, TextLight } from "../../shared/text";
 
 export function AddKeySlotButton({
   account,
@@ -68,7 +68,7 @@ export function AddKeySlotButton({
     });
   };
 
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn,
     pendingOp: {
@@ -85,7 +85,6 @@ export function AddKeySlotButton({
         pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
       };
     },
-    signerType: "deviceKey",
   });
 
   useEffect(() => {

@@ -13,9 +13,9 @@ import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
-import { SEND_DEADLINE_SECS } from "../action/useSendAsync";
 import { getAccountManager } from "../logic/accountManager";
 import { env } from "../logic/env";
+import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { Account } from "../model/account";
 
 // Sync strategy:
