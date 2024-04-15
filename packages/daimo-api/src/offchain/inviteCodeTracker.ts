@@ -11,7 +11,12 @@ import { erc20ABI } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { NameRegistry } from "../contract/nameRegistry";
-import { DB, InsertInviteCodeArgs, InviteCodeRow } from "../db/db";
+import {
+  DB,
+  InsertInviteCodeArgs,
+  InviteCodeRow,
+  UpdateInviteCodeArgs,
+} from "../db/db";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -157,6 +162,11 @@ export class InviteCodeTracker {
   // Creates a new invite code, if it doesn't already exist. Returns the link.
   async insertInviteCode(args: InsertInviteCodeArgs): Promise<string> {
     await this.db.insertInviteCode(args);
+    return formatDaimoLink({ type: "invite", code: args.code });
+  }
+
+  async updateInviteCode(args: UpdateInviteCodeArgs) {
+    await this.db.updateInviteCode(args);
     return formatDaimoLink({ type: "invite", code: args.code });
   }
 }

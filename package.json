@@ -11,6 +11,7 @@
     "build:api": "turbo run build --filter @daimo/api",
     "build:bot": "turbo run build --filter @daimo/bot",
     "build:mobile": "turbo run build --filter @daimo/mobile",
+    "build:clippy": "turbo run build --filter @daimo/clippy",
     "test": "turbo test",
     "lint": "turbo lint && syncpack list-mismatches",
     "codegen": "turbo codegen",

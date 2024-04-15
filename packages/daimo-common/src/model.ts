@@ -107,3 +107,13 @@ export interface TagRedirectEvent {
   tag: string;
   link: string;
 }
+
+export const zCreateInviteLinkArgs = z.object({
+  code: z.string(),
+  bonusDollarsInvitee: z.number(),
+  bonusDollarsInviter: z.number(),
+  maxUses: z.number(),
+  inviter: z.string(),
+});
+
+export type CreateInviteLinkArgs = z.infer<typeof zCreateInviteLinkArgs>;
