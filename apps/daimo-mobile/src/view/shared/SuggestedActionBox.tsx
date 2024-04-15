@@ -2,7 +2,7 @@ import { SuggestedAction } from "@daimo/api";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GestureResponderEvent, Linking, StyleSheet, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -17,6 +17,7 @@ import Animated, {
 import { OctName } from "./InputBig";
 import { color } from "./style";
 import { TextBody, TextMeta } from "./text";
+import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
@@ -30,6 +31,7 @@ export function SuggestedActionBox({
 }) {
   const nav = useNav();
   const account = useAccount();
+  const dispatcher = useContext(DispatcherContext);
 
   // Action to display
   const { icon, title, subtitle } = action;
@@ -52,7 +54,7 @@ export function SuggestedActionBox({
     console.log(`[SUGGESTED] executing ${action.id}: ${action.title}`);
 
     if (action.url.startsWith("daimo")) {
-      handleDeepLink(nav, action.url); // daimo:// direct deeplinks
+      handleDeepLink(nav, dispatcher, action.url); // daimo:// direct deeplinks
     } else {
       Linking.openURL(action.url); // https://, mailto://, ...
     }

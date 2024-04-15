@@ -30,7 +30,6 @@ import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
-import { AddPasskeyScreen } from "./screen/keyRotation/AddPasskeyScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
 import NoteScreen from "./screen/link/NoteScreen";
 import { NotificationsScreen } from "./screen/notifications/NotificationsScreen";
@@ -367,7 +366,6 @@ function SettingsTab() {
     <SettingsStack.Navigator screenOptions={noHeaders}>
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
       <SettingsStack.Screen name="AddDevice" component={AddDeviceScreen} />
-      <SettingsStack.Screen name="AddPasskey" component={AddPasskeyScreen} />
       <SettingsStack.Screen name="Device" component={DeviceScreen} />
       <SettingsStack.Screen name="SeedPhrase" component={SeedPhraseScreen} />
     </SettingsStack.Navigator>

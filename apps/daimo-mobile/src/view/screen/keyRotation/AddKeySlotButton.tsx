@@ -13,7 +13,7 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { ReactNode, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
@@ -95,7 +95,7 @@ export function AddKeySlotButton({
 
   const didUserCancel = message.includes("User cancelled");
 
-  const statusMessage = (function (): ReactNode {
+  const statusMessage = (function () {
     switch (status) {
       case "idle":
         return formatFeeAmountOrNull(cost.totalDollars);
@@ -138,10 +138,14 @@ export function AddKeySlotButton({
   return (
     <>
       {button}
-      <Spacer h={32} />
-      <TextCenter>
-        <TextLight>{statusMessage}</TextLight>
-      </TextCenter>
+      {statusMessage && (
+        <>
+          <Spacer h={32} />
+          <TextCenter>
+            <TextLight>{statusMessage}</TextLight>
+          </TextCenter>
+        </>
+      )}
     </>
   );
 }

@@ -349,6 +349,7 @@ function useInitNavLinks() {
   const nav = useNav();
   const account = useAccount();
   const accountMissing = account == null;
+  const dispatcher = useContext(DispatcherContext);
 
   // Handle deeplinks
   useEffect(() => {
@@ -363,10 +364,12 @@ function useInitNavLinks() {
       if (url == null) return;
       if (handledInitialDeepLink) return;
       handledInitialDeepLink = true;
-      handleDeepLink(nav, url);
+      handleDeepLink(nav, dispatcher, url);
     });
 
-    const sub = addEventListener("url", ({ url }) => handleDeepLink(nav, url));
+    const sub = addEventListener("url", ({ url }) =>
+      handleDeepLink(nav, dispatcher, url)
+    );
     return () => sub.remove();
   }, [accountMissing, nav]);
 }
