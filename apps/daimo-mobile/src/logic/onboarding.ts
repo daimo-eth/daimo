@@ -29,8 +29,9 @@ export function useOnboardingChecklist(account: Account) {
   const allComplete = hasBackup && farcasterConnected;
 
   const handleSecureAccount = useCallback(() => {
+    nav.navigate("Settings");
     dispatcher.dispatch({ name: "createBackup" });
-  }, [dispatcher]);
+  }, [nav, dispatcher]);
 
   const handleConnectFarcaster = useCallback(() => {
     nav.navigate("Settings");

@@ -21,8 +21,8 @@ export type SecuritykeySigner = {
   account: Account;
 };
 
-export type SeedPhraseSigner = {
-  type: "seedPhrase";
+export type MnemonicSigner = {
+  type: "mnemonic";
   keySlot: number;
   wrappedSigner: SigningCallback;
   account: Account;
@@ -32,4 +32,4 @@ export type Signer =
   | DeviceKeySigner
   | PasskeySigner
   | SecuritykeySigner
-  | SeedPhraseSigner;
+  | MnemonicSigner;

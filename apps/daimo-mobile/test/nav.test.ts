@@ -1,9 +1,11 @@
 import { DaimoLink } from "@daimo/common";
 
+import { Dispatcher } from "../src/action/dispatch";
 import { MainNav, handleDeepLink } from "../src/common/nav";
 
 describe("nav", () => {
   const history = [] as { tab: string; screen: string; params: any }[];
+  const dispatcherHistory = [] as { name: string; params: any }[];
   const nav: MainNav = {
     navigate: (
       tab: string,
@@ -11,6 +13,11 @@ describe("nav", () => {
     ) => {
       history.push({ tab, screen, params });
     },
+  } as any;
+
+  const dispatcher: Dispatcher = {
+    dispatch: ({ name, params }: { name: string; params: any }) =>
+      dispatcherHistory.push({ name, params }),
   } as any;
 
   const assertNav = (
@@ -23,7 +30,7 @@ describe("nav", () => {
 
   it("handles account links", () => {
     history.length = 0;
-    handleDeepLink(nav, "daimo://account/alice");
+    handleDeepLink(nav, dispatcher, "daimo://account/alice");
     assertNav("HomeTab", "Profile", {
       link: { type: "account", account: "alice" },
     });
@@ -31,7 +38,7 @@ describe("nav", () => {
 
   it("handles request links", () => {
     history.length = 0;
-    handleDeepLink(nav, "daimo://request/alice/1.23/456");
+    handleDeepLink(nav, dispatcher, "daimo://request/alice/1.23/456");
     assertNav("SendTab", "SendTransfer", {
       link: {
         type: "request",
@@ -46,6 +53,7 @@ describe("nav", () => {
     history.length = 0;
     handleDeepLink(
       nav,
+      dispatcher,
       "daimo://note/alice/1.23/0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     );
     assertNav("HomeTab", "Note", {

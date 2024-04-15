@@ -21,6 +21,7 @@ import { useCallback, useEffect } from "react";
 import { Platform } from "react-native";
 import { Hex } from "viem";
 
+import { Dispatcher } from "../action/dispatch";
 import {
   DaimoContact,
   EAccountContact,
@@ -102,7 +103,6 @@ export type ParamListInvite = {
 export type ParamListSettings = {
   Settings: undefined;
   AddDevice: undefined;
-  AddPasskey: undefined;
   Device: { pubKey: Hex };
   SeedPhrase: undefined;
 };
@@ -204,7 +204,11 @@ export async function handleOnboardingDeepLink(
   }
 }
 
-export function handleDeepLink(nav: MainNav, url: string) {
+export function handleDeepLink(
+  nav: MainNav,
+  dispatcher: Dispatcher,
+  url: string
+) {
   const link = parseDaimoLink(url);
   if (link == null) {
     console.log(`[NAV] skipping unparseable link ${url}`);
@@ -213,21 +217,21 @@ export function handleDeepLink(nav: MainNav, url: string) {
   }
 
   console.log(`[NAV] going to ${url}`);
-  goTo(nav, link);
+  goTo(nav, dispatcher, link);
 }
 
-async function goTo(nav: MainNav, link: DaimoLink) {
+async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
   const { type } = link;
   switch (type) {
     case "settings": {
-      const screen = (() => {
-        if (link.screen === "add-passkey") return "AddPasskey";
-        else if (link.screen === "add-device") return "AddDevice";
-        else return "Settings";
-      })();
+      const screen = link.screen === "add-device" ? "AddDevice" : "Settings";
 
-      // HACK: make the back button from Add[Passkey,...] go directly to Home.
-      nav.reset({ routes: [{ name: "SettingsTab", params: { screen } }] });
+      nav.navigate("SettingsTab", { screen });
+      if (link.screen === "add-passkey") {
+        nav.navigate("Settings");
+        dispatcher.dispatch({ name: "createBackup" });
+      }
+
       break;
     }
     case "account": {

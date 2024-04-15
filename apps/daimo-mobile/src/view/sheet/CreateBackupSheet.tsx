@@ -1,11 +1,14 @@
+import { SlotType, assert, findUnusedSlot } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaFrame } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
+import { useAccount } from "../../logic/accountManager";
+import { AddKeySlotButton } from "../screen/keyRotation/AddKeySlotButton";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
@@ -28,6 +31,50 @@ export function CreateBackupSheet() {
   );
 }
 
+function AddPasskeyButton() {
+  const account = useAccount();
+  assert(account != null);
+
+  const passkeySlot = useMemo(
+    () =>
+      findUnusedSlot(
+        account.accountKeys.map((k) => k.slot),
+        SlotType.PasskeyBackup
+      ),
+    []
+  );
+
+  return (
+    <AddKeySlotButton
+      buttonTitle="Backup with Passkey"
+      account={account}
+      slot={passkeySlot}
+    />
+  );
+}
+
+function AddSecurityKeyButton() {
+  const account = useAccount();
+  assert(account != null);
+
+  const securityKeySlot = useMemo(
+    () =>
+      findUnusedSlot(
+        account.accountKeys.map((k) => k.slot),
+        SlotType.SecurityKeyBackup
+      ),
+    []
+  );
+
+  return (
+    <AddKeySlotButton
+      buttonTitle="Backup with Security Key"
+      account={account}
+      slot={securityKeySlot}
+    />
+  );
+}
+
 function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
   return (
     <Animated.View
@@ -46,8 +93,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <BulletRow text="Convenient, secure, and resistant to phishing" />
       <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
       <Spacer h={24} />
-      {/* TODO */}
-      <ButtonBig type="primary" title="Backup with passkey" />
+      <AddPasskeyButton />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
@@ -81,11 +127,6 @@ function OfflineBackupContent({
     nav.navigate("SettingsTab", { screen: "SeedPhrase" });
   }, [nav, dispatcher]);
 
-  const goToSecurityKey = useCallback(() => {
-    dispatcher.dispatch({ name: "hideBottomSheet" });
-    nav.navigate("SettingsTab", { screen: "AddPasskey" });
-  }, [nav, dispatcher]);
-
   return (
     <Animated.View
       entering={FadeIn}
@@ -105,11 +146,7 @@ function OfflineBackupContent({
           <Spacer h={16} />
           <BulletRow text="Use a physical FIDO key, such as a YubiKey" />
           <Spacer h={24} />
-          <ButtonBig
-            type="primary"
-            title="Back up with security key"
-            onPress={goToSecurityKey}
-          />
+          <AddSecurityKeyButton />
           <Spacer h={20} />
           <View style={styles.separator} />
           <Spacer h={20} />
