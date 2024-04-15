@@ -20,7 +20,6 @@ import {
 } from "viem";
 
 import { Log } from "./log";
-import { requestSeedPhraseSignature } from "./seedPhrase";
 
 // Parses the custom URI from the Add Device QR code.
 export function parseAddDeviceString(addString: string): [Hex, SlotType] {
