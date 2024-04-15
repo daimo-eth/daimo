@@ -1,4 +1,4 @@
-import { SlotType, findUnusedSlot } from "@daimo/common";
+import { SlotType, findUnusedSlot, generateMnemonicKey } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import {
@@ -24,7 +24,6 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
-import { generateSeedPhrase } from "../../logic/seedPhrase";
 import { Account } from "../../model/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -315,7 +314,7 @@ const SeedPhraseContext = createContext<SeedPhraseContextValue | null>(null);
 
 function SeedPhraseProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useSeedPhraseInput();
-  const { mnemonic, publicKey } = useMemo(() => generateSeedPhrase(), []);
+  const { mnemonic, publicKey } = generateMnemonicKey();
 
   const words = useMemo(() => mnemonic.split(" "), [mnemonic]);
 

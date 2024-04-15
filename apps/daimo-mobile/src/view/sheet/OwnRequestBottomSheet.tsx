@@ -11,7 +11,7 @@ import { useContext, useEffect, useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { useSendAsync } from "../../action/useSendAsync";
+import { useSendWithDeviceKeyAsync } from "../../action/useSendAsync";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
@@ -40,7 +40,7 @@ export function OwnRequestBottomSheet({
     []
   );
 
-  const { status, exec: onCancel } = useSendAsync({
+  const { status, exec: onCancel } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
       console.log(
@@ -64,7 +64,6 @@ export function OwnRequestBottomSheet({
           .concat([updatedRequest]),
       };
     },
-    signerType: "deviceKey",
   });
 
   useEffect(() => {

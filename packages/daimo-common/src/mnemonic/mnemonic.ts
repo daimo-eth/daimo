@@ -4,14 +4,14 @@ import {
   mnemonicToSeedSync,
   validateMnemonic as bip39ValidateMnemonic,
 } from "@scure/bip39";
-import { Hex } from "viem";
+import { Hex, toHex } from "viem";
 
 import { wordlist } from "./wordlist";
 import { assert } from "../assert";
 
 export type MnemonicKey = {
   mnemonic: string;
-  publicKey: string;
+  publicKey: Hex;
 };
 
 function mnemonicToPrivateKey(mnemonic: string) {
@@ -25,14 +25,17 @@ export function validateMnemonic(mnemonic: string) {
   return bip39ValidateMnemonic(mnemonic, wordlist);
 }
 
-export function generateMnemonicKey() {
+export function generateMnemonicKey(): MnemonicKey {
   const mn = generateMnemonic(wordlist);
   const privKey = mnemonicToPrivateKey(mn);
 
-  return { mnemonic: mn, publicKey: p256.getPublicKey(privKey) };
+  return { mnemonic: mn, publicKey: toHex(p256.getPublicKey(privKey)) };
 }
 
-export function signWithMnemonic(mnemonic: string, msg: Hex) {
+export async function signWithMnemonic(
+  mnemonic: string,
+  msg: Hex
+): Promise<Hex> {
   assert(validateMnemonic(mnemonic));
 
   const privKey = mnemonicToPrivateKey(mnemonic);

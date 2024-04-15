@@ -23,7 +23,7 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 import { SetActStatus } from "../../../action/actStatus";
 import {
   transferAccountTransform,
-  useSendAsync,
+  useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { ParamListHome, useExitBack } from "../../../common/nav";
 import { env } from "../../../logic/env";
@@ -183,7 +183,7 @@ function NoteDisplayInner({
 
   const isOwnSentNote = noteStatus.sender.addr === account.address;
 
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn,
     customHandler,
@@ -210,7 +210,6 @@ function NoteDisplayInner({
       } as EAccount,
       noteStatus.sender,
     ]),
-    signerType: "deviceKey",
   });
   console.log(
     `[NOTE] rendering NoteDisplay, status ${status} ${message} ${JSON.stringify(

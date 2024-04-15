@@ -17,7 +17,7 @@ import { ActivityIndicator } from "react-native";
 
 import {
   transferAccountTransform,
-  useSendAsync,
+  useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
 import { EAccountContact } from "../../../logic/daimoContacts";
@@ -52,7 +52,7 @@ export function SendTransferButton({
   );
 
   // On exec, request signature from device enclave, send transfer.
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
@@ -79,7 +79,6 @@ export function SendTransferButton({
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),
-    signerType: "deviceKey",
   });
 
   const sendDisabledReason = (function () {

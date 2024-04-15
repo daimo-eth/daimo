@@ -19,7 +19,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useEffect, useMemo } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 
-import { useSendAsync } from "../../../action/useSendAsync";
+import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
 import { ParamListSettings, useNav } from "../../../common/nav";
 import { getAccountManager, useAccount } from "../../../logic/accountManager";
 import { ButtonBig } from "../../shared/Button";
@@ -64,7 +64,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     });
   };
 
-  const { status, message, cost, exec } = useSendAsync({
+  const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn,
     pendingOp: {
@@ -81,7 +81,6 @@ export function DeviceScreen({ route, navigation }: Props) {
         pendingKeyRotation: [...acc.pendingKeyRotation, pendingOp],
       };
     },
-    signerType: "deviceKey",
   });
 
   const removeDevice = useCallback(() => {

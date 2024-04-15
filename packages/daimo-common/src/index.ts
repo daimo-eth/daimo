@@ -19,3 +19,4 @@ export * from "./invite";
 export * from "./profileLink";
 export * from "./offchainAction";
 export * from "./env";
+export * from "./mnemonic/mnemonic";

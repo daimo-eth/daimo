@@ -46,6 +46,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <BulletRow text="Convenient, secure, and resistant to phishing" />
       <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
       <Spacer h={24} />
+      {/* TODO */}
       <ButtonBig type="primary" title="Backup with passkey" />
       <Spacer h={24} />
       <ButtonBig

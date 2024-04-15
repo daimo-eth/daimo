@@ -22,7 +22,11 @@ import {
 } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
 import { createAddDeviceString } from "../../../logic/key";
-import { requestPasskeySignature } from "../../../logic/passkey";
+import {
+  getWrappedPasskeySigner,
+  requestPasskeySignature,
+} from "../../../logic/passkey";
+import { PasskeySigner, SecuritykeySigner } from "../../../logic/signer";
 import {
   Account,
   createEmptyAccount,
@@ -73,7 +77,7 @@ export function OnboardingUseExistingScreen() {
     );
   }
 
-  const useSecurityKey = true; // todo, fork in design
+  const useSecurityKey = false; // todo, fork in design
 
   return (
     <View>
@@ -146,6 +150,23 @@ function RestoreFromBackupButton({
     });
   };
 
+  const wrappedSigner = getWrappedPasskeySigner(daimoChain, useSecurityKey);
+
+  const signer = useMemo(() => {
+    if (!passkeyAccount) return undefined;
+    return useSecurityKey
+      ? ({
+          type: "securitykey",
+          account: passkeyAccount,
+          wrappedSigner,
+        } as SecuritykeySigner)
+      : ({
+          type: "passkey",
+          account: passkeyAccount,
+          wrappedSigner,
+        } as PasskeySigner);
+  }, [passkeyAccount, useSecurityKey]);
+
   const {
     status: addDeviceStatus,
     message: addDeviceMessage,
@@ -153,8 +174,7 @@ function RestoreFromBackupButton({
   } = useSendAsync({
     dollarsToSend: 0,
     sendFn,
-    passkeyAccount,
-    signerType: useSecurityKey ? "securityKey" : "passkey",
+    signer,
   });
 
   const [restoreStatus, setRestoreStatus] = useState<{
