@@ -23,7 +23,7 @@ export function SendNavScreen({ route }: Props) {
   const textInputRef = useRef<TextInput>(null);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Send" />
         <Spacer h={8} />

@@ -1,0 +1,12 @@
+appId: com.daimo
+---
+- clearState
+- launchApp
+- runFlow: shared/createAccount.yaml
+- assertVisible: "$1.00"
+- runFlow:
+    file: shared/refundApi.yaml
+    env:
+      AMOUNT: "1.00"
+- assertVisible: "$0.00"
+- runFlow: shared/removeSelf.yaml

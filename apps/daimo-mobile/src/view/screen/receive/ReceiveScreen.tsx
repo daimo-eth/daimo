@@ -130,7 +130,7 @@ function RequestScreenInner({
   }, []);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Request from" onBack={goBack || goHome} />
         <Spacer h={8} />

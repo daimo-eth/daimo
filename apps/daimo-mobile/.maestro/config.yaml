@@ -1,0 +1,8 @@
+# Maestro Cloud configuration
+baselineBranch: master
+notifications:
+  email:
+    enabled: true
+    onSuccess: true
+    recipients:
+      - ${MAESTRO_SLACK_ALERT_EMAIL}

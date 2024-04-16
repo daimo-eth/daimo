@@ -16,7 +16,7 @@ export function CheckLabel({
   const toggle = useCallback(() => setValue(!value), [value, setValue]);
 
   return (
-    <TouchableWithoutFeedback onPress={toggle} hitSlop={12}>
+    <TouchableWithoutFeedback onPress={toggle} hitSlop={12} accessible={false}>
       <View style={styles.checkLabel}>
         <View style={value ? styles.checked : styles.unchecked} />
         <TextBody>{children}</TextBody>

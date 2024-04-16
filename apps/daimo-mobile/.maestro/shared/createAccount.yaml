@@ -1,0 +1,22 @@
+appId: com.daimo
+---
+- assertVisible: Welcome to Daimo
+- tapOn: Accept Invite
+- runFlow:
+    when:
+      visible: "Allow Paste"
+    commands:
+      - tapOn: Allow Paste
+- assertVisible: Join waitlist
+- tapOn: enter invite code
+- inputText: testnet
+- assertVisible:
+    text: "submit"
+    enabled: true
+- tapOn: submit
+- inputText: "maestro"
+- inputRandomNumber:
+    length: 8
+- tapOn: Create
+- tapOn: Allow Notifications
+- assertVisible: Your balance.*

@@ -1,0 +1,9 @@
+appId: com.daimo
+---
+- tapOn: "Home, tab, 3 of 5"
+- tapOn: " Send"
+- inputText: "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7"
+- tapOn: "team daimo"
+- inputText: ${AMOUNT}
+- tapOn: Confirm
+- longPressOn: Hold to send

@@ -257,7 +257,7 @@ function AmountAndButtons({ account }: { account: Account }) {
   const isEmpty = account.lastBalance === 0n;
 
   return (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback accessible={false}>
       <View style={styles.amountAndButtons}>
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />

@@ -1,0 +1,20 @@
+appId: com.daimo
+---
+# - clearState
+- launchApp
+- runFlow: shared/createAccount.yaml
+- assertVisible: "Your balance"
+- assertVisible: "$1.00"
+- tapOn: " Send"
+- inputText: "daimo"
+- tapOn: "D daimo"
+- inputText: "0.01"
+- tapOn: Confirm
+- longPressOn: Hold to send
+- assertVisible: "$0.99"
+- runFlow:
+    file: shared/refundApi.yaml
+    env:
+      AMOUNT: "0.99"
+- assertVisible: "$0.00"
+- runFlow: shared/removeSelf.yaml

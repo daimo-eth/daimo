@@ -1,0 +1,11 @@
+appId: com.daimo
+---
+- hideKeyboard
+- tapOn: "Settings, tab, 5 of 5"
+- tapOn: .*THIS DEVICE.*
+- tapOn: REMOVE PHONE
+- assertVisible: Are you sure.*
+- tapOn: # Remove Phone confirm
+    text: "0%"
+    index: 2
+- assertVisible: Welcome to Daimo

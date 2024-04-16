@@ -28,14 +28,21 @@
     "dev": {
       "extends": "base",
       "distribution": "internal",
-      "android": {
-        "gradleCommand": ":app:assembleDebug"
-      },
-      "ios": {
-        "buildConfiguration": "Debug"
-      },
+      "developmentClient": true,
       "env": {
         "DAIMO_APP_VARIANT": "dev"
+      }
+    },
+    "maestro": {
+      "extends": "base",
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
+        "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
+        "DAIMO_APP_VARIANT": "maestro"
       }
     },
     "production": {

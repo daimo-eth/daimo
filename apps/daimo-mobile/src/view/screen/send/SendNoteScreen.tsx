@@ -79,7 +79,7 @@ export function SendNoteScreen({ route }: Props) {
   const { tokenSymbol } = env(daimoChain).chainConfig;
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Send Link" onBack={goBack} onExit={goHome} />
         <Spacer h={8} />

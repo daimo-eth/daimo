@@ -148,7 +148,7 @@ function AmountInput({
   }, [ref, onFocus]);
 
   return (
-    <TouchableWithoutFeedback onPress={focus}>
+    <TouchableWithoutFeedback onPress={focus} accessible={false}>
       <View style={styles.amountInputWrap}>
         <DaimoText style={styles.amountDollar}>$</DaimoText>
         <TextInput

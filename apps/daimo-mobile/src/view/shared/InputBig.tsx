@@ -58,7 +58,7 @@ export function InputBig({
   }, [ref]);
 
   return (
-    <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
+    <TouchableWithoutFeedback onPress={focus} hitSlop={8} accessible={false}>
       <Animated.View
         layout={LinearTransition}
         style={[isFocused ? styles.inputRowFocused : styles.inputRow, style]}

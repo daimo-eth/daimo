@@ -33,7 +33,7 @@ export function ReceiveNavScreen() {
   }, []);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Request" onBack={goBack} />
         <Spacer h={8} />

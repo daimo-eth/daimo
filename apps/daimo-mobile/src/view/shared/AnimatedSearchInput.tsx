@@ -127,7 +127,7 @@ export const AnimatedSearchInput = ({
       pointerEvents="box-none"
       onLayout={onLayout}
     >
-      <TouchableWithoutFeedback onPress={focus} hitSlop={8}>
+      <TouchableWithoutFeedback onPress={focus} hitSlop={8} accessible={false}>
         <Animated.View
           style={[
             isFocused ? styles.inputRowFocused : styles.inputRow,

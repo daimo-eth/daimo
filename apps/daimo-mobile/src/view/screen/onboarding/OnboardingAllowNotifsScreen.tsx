@@ -24,14 +24,15 @@ export function OnboardingAllowNotifsScreen() {
   const [displayMacVideo, setDisplayMacVideo] = useState<boolean>(false);
 
   // Request notifications permission
+  const nav = useOnboardingNav();
+  const finish = useCallback(() => nav.navigate("Finish"), []);
+
   const requestNotificationsPermission = async () => {
     console.log(`[ONBOARDING] requesting notifications access`);
     setDisplayMacVideo(env(daimoChain).deviceType === "computer");
     await notificationsAccess.ask();
     finish();
   };
-  const nav = useOnboardingNav();
-  const finish = useCallback(() => nav.navigate("Finish"), []);
 
   return (
     <View>

@@ -128,7 +128,7 @@ function SendScreenInner({
   })();
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
         <Spacer h={8} />

@@ -43,7 +43,7 @@ export function OnboardingPickNameScreen({ route }: Props) {
   }, [inviteLink, name]);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
         <OnboardingHeader title="Create Account" onPrev={useExitBack()} />
         <View style={styles.createAccountPage}>
