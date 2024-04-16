@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -eox pipefail
+source .env.maestro
 
 if [ "$EAS_BUILD_PROFILE" = "maestro" ]; then
   echo "Uploading to Maestro"
@@ -18,11 +19,12 @@ if [ "$EAS_BUILD_PROFILE" = "maestro" ]; then
   maestro cloud \
     --async \
     --apiKey $MAESTRO_API_KEY \
-    --branch $EXPO_PUBLIC_GIT_BRANCH \
+    --branch $BRANCH_NAME \
     --repoOwner daimo-eth \
     --repoName daimo \
-    --pullRequestId $EXPO_PUBLIC_PR_ID \
     --commitSha $EAS_BUILD_GIT_COMMIT_HASH \
+    -e MAESTRO_SLACK_ALERT_EMAIL=$MAESTRO_SLACK_ALERT_EMAIL \
+    --ios-version 17 \
     $APP_EXECUTABLE_PATH .maestro/
 else
   echo "Skipping Maestro upload"

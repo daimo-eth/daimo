@@ -28,3 +28,32 @@ jobs:
       - name: Build and publish update
         run: npm run build:prod
         working-directory: ./apps/daimo-mobile
+
+  maestro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          packager: npm
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Run Maestro test suite
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+          MAESTRO_SLACK_ALERT_EMAIL: ${{ secrets.MAESTRO_SLACK_ALERT_EMAIL }}
+        run: |
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> .env.maestro
+          echo "MAESTRO_SLACK_ALERT_EMAIL=${MAESTRO_SLACK_ALERT_EMAIL}" >> .env.maestro
+          npm run build:maestro
+        working-directory: ./apps/daimo-mobile

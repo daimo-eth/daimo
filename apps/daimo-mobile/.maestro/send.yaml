@@ -1,6 +1,5 @@
 appId: com.daimo
 ---
-# - clearState
 - launchApp
 - runFlow: shared/createAccount.yaml
 - assertVisible: "Your balance"
