@@ -248,7 +248,7 @@ function DevicesSection({ account }: { account: Account }) {
       <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title="Is Anything Wrong?"
+        title="Questions? Feedback?"
         message="Contact us on Telegram"
         icon={
           <Icon

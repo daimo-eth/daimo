@@ -12,18 +12,21 @@ export function DebugBottomSheet() {
   return (
     <View style={ss.container.padH16}>
       <Spacer h={16} />
-      <TextH3>Is Anything Wrong?</TextH3>
+      <TextH3>Did something go wrong?</TextH3>
       <Spacer h={12} />
-      <TextLight>Contact us on Telegram</TextLight>
+      <TextLight>
+        Contact us on Telegram, then tap Send Debug Log to send us more
+        information. We'll get to the bottom of it.
+      </TextLight>
       <Spacer h={32} />
       <ButtonMed
         type="primary"
         title="CONTACT SUPPORT"
         onPress={openSupportTG}
       />
-      <Spacer h={32} />
+      <Spacer h={16} />
       <SendDebugLogButton />
-      <Spacer h={128} />
+      <Spacer h={96} />
     </View>
   );
 }
