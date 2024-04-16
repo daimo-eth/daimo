@@ -87,16 +87,15 @@ function wrapRawSignerAsWebauthn(
       name: "signatureStruct",
     }).inputs;
 
-    const encodedSig = encodeAbiParameters(signatureStruct, [
-      {
-        authenticatorData: bytesToHex(authenticatorData),
-        clientDataJSON,
-        challengeLocation,
-        responseTypeLocation,
-        r,
-        s,
-      },
-    ]);
+    const sigFields = {
+      authenticatorData: bytesToHex(authenticatorData),
+      clientDataJSON,
+      challengeLocation,
+      responseTypeLocation,
+      r,
+      s,
+    };
+    const encodedSig = encodeAbiParameters(signatureStruct, [sigFields]);
 
     return {
       keySlot,

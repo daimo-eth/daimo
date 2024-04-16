@@ -69,13 +69,14 @@ export function LogInFromSeedButton({
 }) {
   // Figure out which slot the mnmemonic (seed phrase) key is in
   const parsedKey = tryOrNull(() => mnemonicToPublicKey(mnemonic));
-  const keySlot = account.accountKeys.findIndex(
+  const keySlot = account.accountKeys.find(
     (k) => k.pubKey === parsedKey?.publicKeyDER
-  );
+  )?.slot;
+  console.log(`[ONBOARDING] mnemonic key slot: ${keySlot}`);
 
   // Create a signer--can sign signatures and userop for `account`
   const signer = useMemo(() => {
-    if (keySlot < 0) return null;
+    if (keySlot == null) return null;
 
     // Mnemonic key is present on the account
     const wrappedSigner = getWrappedMnemonicSigner(mnemonic, keySlot);
