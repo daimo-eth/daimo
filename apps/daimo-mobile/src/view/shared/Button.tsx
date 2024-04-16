@@ -332,6 +332,32 @@ function Button(
   );
 }
 
+export function DescriptiveClickableRow({
+  icon,
+  title,
+  message,
+  onPressHelp,
+}: {
+  icon: ReactNode;
+  title: string;
+  message: string;
+  onPressHelp?(): void;
+}) {
+  return (
+    <View style={styles.buttonInfoContainer}>
+      {icon}
+      <View style={styles.messageContainer}>
+        <View style={styles.textRow}>
+          <TextBody color={color.midnight}>{title}</TextBody>
+          <Spacer w={8} />
+          {onPressHelp && <HelpButton onPress={onPressHelp} />}
+        </View>
+        <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
+      </View>
+    </View>
+  );
+}
+
 const buttonStyles = {
   big: StyleSheet.create({
     button: {
@@ -394,6 +420,23 @@ const styles = StyleSheet.create({
   centerContent: {
     justifyContent: "center",
     alignItems: "center",
+    flexDirection: "row",
+  },
+  messageContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  infoMessageText: {
+    fontSize: 16,
+    lineHeight: 20,
+    color: color.gray3,
+    fontWeight: "500",
+  },
+  buttonInfoContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  textRow: {
     flexDirection: "row",
   },
 });

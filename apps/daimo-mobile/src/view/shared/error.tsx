@@ -74,9 +74,20 @@ export function ErrorBanner({
           title="Back to homepage"
           onPress={goHomeScreen}
         />
+        <Spacer h={16} />
+        <ButtonBig
+          type="subtle"
+          title="Contact Support"
+          onPress={openSupportTG}
+        />
       </View>
     </View>
   );
+}
+
+export function openSupportTG() {
+  console.log("[ERROR] Opening Telegram support");
+  Linking.openURL("https://t.me/m/M_VvTjeHZjlh");
 }
 
 const styles = StyleSheet.create({

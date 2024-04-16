@@ -5,7 +5,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import React, { ReactNode, useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   Linking,
   ScrollView,
@@ -27,18 +27,19 @@ import { Badge } from "../shared/Badge";
 import {
   BadgeButton,
   ButtonMed,
-  HelpButton,
+  DescriptiveClickableRow,
   TextButton,
 } from "../shared/Button";
 import { ContactBubble } from "../shared/ContactBubble";
 import { FarcasterButton } from "../shared/FarcasterBubble";
+import { Icon } from "../shared/Icon";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { openSupportTG } from "../shared/error";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
-  DaimoText,
   TextBody,
   TextBodyMedium,
   TextColor,
@@ -231,7 +232,7 @@ function DevicesSection({ account }: { account: Account }) {
         children={currentKeyRows.concat(pendingDeviceRows)}
       />
       <Spacer h={24} />
-      <HelpRow
+      <DescriptiveClickableRow
         title="Create a Passkey Backup"
         message="Secured by your password manager"
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
@@ -239,39 +240,31 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
       <View style={styles.separator} />
-      <HelpRow
+      <DescriptiveClickableRow
         title="Add a Device"
         message="Use your account on another device"
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
       />
       <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
       <View style={styles.separator} />
-    </View>
-  );
-}
-
-function HelpRow({
-  icon,
-  title,
-  message,
-  onPressHelp,
-}: {
-  icon: ReactNode;
-  title: string;
-  message: string;
-  onPressHelp?(): void;
-}) {
-  return (
-    <View style={styles.buttonInfoContainer}>
-      {icon}
-      <View style={styles.messageContainer}>
-        <View style={styles.textRow}>
-          <TextBody color={color.midnight}>{title}</TextBody>
-          <Spacer w={8} />
-          {onPressHelp && <HelpButton onPress={onPressHelp} />}
-        </View>
-        <DaimoText style={styles.infoMessageText}>{message}</DaimoText>
-      </View>
+      <DescriptiveClickableRow
+        title="Questions? Feedback?"
+        message="Contact us on Telegram"
+        icon={
+          <Icon
+            name="help-circle"
+            size={24}
+            color={color.gray3}
+            style={{ top: 7 }}
+          />
+        }
+      />
+      <ButtonMed
+        type="subtle"
+        title="CONTACT SUPPORT"
+        onPress={openSupportTG}
+      />
+      <View style={styles.separator} />
     </View>
   );
 }
@@ -463,22 +456,5 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 16,
     backgroundColor: color.yellow,
-  },
-  messageContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  infoMessageText: {
-    fontSize: 16,
-    lineHeight: 20,
-    color: color.gray3,
-    fontWeight: "500",
-  },
-  buttonInfoContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  textRow: {
-    flexDirection: "row",
   },
 });
