@@ -52,7 +52,7 @@ const bottomSheetSettings = {
     dismissable: true,
   },
   createBackup: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
 } as const;
 

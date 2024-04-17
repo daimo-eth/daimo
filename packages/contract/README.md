@@ -19,7 +19,7 @@ foundryup
 forge test --fork-url "https://base-sepolia.publicnode.com"
 ```
 
-Before making a PR, update detailed coverage:
+To view detailed coverage:
 
 ```
 forge coverage --report lcov --fork-url "https://base-sepolia.publicnode.com"

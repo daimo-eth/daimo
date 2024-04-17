@@ -11,11 +11,11 @@ import {
 } from "react-native";
 import { useSafeAreaFrame } from "react-native-safe-area-context";
 
-import IntroIconEverywhere from "../../../../assets/intro-icon-everywhere.png";
-import IntroIconOnEthereum from "../../../../assets/intro-icon-on-ethereum.png";
-import IntroIconYourKeys from "../../../../assets/intro-icon-your-keys.png";
-import OnboardingCoverMicro from "../../../../assets/onboarding-cover-micro.png";
-import OnboardingCover from "../../../../assets/onboarding-cover.png";
+import OnboardingCoverMicro from "../../../../assets/onboarding/intro-cover-micro.png";
+import OnboardingCover from "../../../../assets/onboarding/intro-cover.png";
+import IntroIconEverywhere from "../../../../assets/onboarding/intro-icon-everywhere.png";
+import IntroIconOnEthereum from "../../../../assets/onboarding/intro-icon-on-ethereum.png";
+import IntroIconYourKeys from "../../../../assets/onboarding/intro-icon-your-keys.png";
 import {
   handleOnboardingDeepLink,
   useOnboardingNav,

@@ -1,32 +1,33 @@
-import { useMemo } from "react";
-import { View, StyleSheet, Image, ImageSourcePropType } from "react-native";
+import { AVPlaybackSource, ResizeMode, Video } from "expo-av";
+import { Image, StyleSheet, View } from "react-native";
 
 import DepositCover from "../../../assets/deposit-cover.png";
 import InviteCover from "../../../assets/invite-cover.png";
-import OnboardingCover from "../../../assets/onboarding-cover.png";
 
-export function Cover({
-  source,
-  width,
-  height,
-}: {
-  source: ImageSourcePropType;
-  width?: number;
-  height?: number;
-}) {
-  const style = useMemo(() => ({ width, height }), [width, height]);
+export function CoverVideo({ video }: { video: AVPlaybackSource }) {
   return (
-    <View style={styles.imgContainer}>
-      <Image source={source} style={style} />
-    </View>
+    <Video
+      style={{
+        width: 224,
+        height: 165,
+        alignSelf: "center",
+      }}
+      source={video}
+      onError={(err: any) => {
+        console.error("[ONBOARDING] video loading error: ", err);
+      }}
+      onLoad={() => {
+        console.log("[ONBOARDING] video loaded");
+      }}
+      resizeMode={ResizeMode.COVER}
+      shouldPlay
+      useNativeControls={false}
+      volume={0}
+    />
   );
 }
 
-export function CoverGraphic({
-  type,
-}: {
-  type: "invite" | "deposit" | "onboarding";
-}) {
+export function CoverGraphic({ type }: { type: "invite" | "deposit" }) {
   return (
     <View style={styles.imgContainer}>
       <Image
@@ -45,10 +46,6 @@ const graphics = {
   deposit: {
     image: DepositCover,
     aspectRatio: 1.925,
-  },
-  onboarding: {
-    image: OnboardingCover,
-    aspectRatio: 0.9437,
   },
 };
 

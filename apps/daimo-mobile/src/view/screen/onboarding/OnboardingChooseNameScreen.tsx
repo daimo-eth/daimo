@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
-import ImgChooseName from "../../../../assets/onboarding-choose-name.png";
+import VidUsernameAnimation from "../../../../assets/onboarding/username-animation.mp4";
 import {
   ParamListOnboarding,
   useExitBack,
@@ -25,7 +25,7 @@ import {
 import { env } from "../../../logic/env";
 import { generateRandomName } from "../../../logic/name";
 import { ButtonBig, TextButton } from "../../shared/Button";
-import { Cover } from "../../shared/CoverGraphic";
+import { CoverVideo } from "../../shared/CoverGraphic";
 import { InputBig, OctName } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
@@ -65,7 +65,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
         />
         <Spacer h={24} />
         <View style={ss.container.padH24}>
-          <Cover source={ImgChooseName} width={188} height={156} />
+          <CoverVideo video={VidUsernameAnimation} />
           <Spacer h={12} />
           <Instructions />
           <Spacer h={24} />

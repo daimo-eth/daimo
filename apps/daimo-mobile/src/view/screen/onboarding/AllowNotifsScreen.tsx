@@ -5,13 +5,13 @@ import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
 
 import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
-import ImgNotifications from "../../../../assets/onboarding-notifications.png";
+import VidBellAnimation from "../../../../assets/onboarding/bell-animation.mp4";
 import { ParamListOnboarding, useOnboardingNav } from "../../../common/nav";
 import { useDaimoChain } from "../../../logic/accountManager";
 import { env } from "../../../logic/env";
 import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
-import { Cover } from "../../shared/CoverGraphic";
+import { CoverVideo } from "../../shared/CoverGraphic";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
@@ -69,7 +69,7 @@ function RequestNotificationsPage({
         {displayMacVideo ? (
           <MacNotificationsVideo />
         ) : (
-          <Cover source={ImgNotifications} width={188} height={156} />
+          <CoverVideo video={VidBellAnimation} />
         )}
         <Spacer h={32} />
         <Instructions />

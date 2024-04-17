@@ -8,7 +8,7 @@ import { PureComponent } from "react";
 import { Linking, Platform, View } from "react-native";
 
 import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
-import ImgInviteCode from "../../../../assets/onboarding-invite-code.png";
+import VidInviteAnimation from "../../../../assets/onboarding/invite-animation.mp4";
 import {
   ParamListOnboarding,
   useExitBack,
@@ -17,7 +17,7 @@ import {
 import { getAccountManager } from "../../../logic/accountManager";
 import { fetchInviteLinkStatus } from "../../../logic/linkStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
-import { Cover } from "../../shared/CoverGraphic";
+import { CoverVideo } from "../../shared/CoverGraphic";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
@@ -43,7 +43,7 @@ export function OnboardingEnterInviteScreen() {
       <View style={ss.container.topBottom}>
         <View key="top" style={ss.container.padH24}>
           <Spacer h={24} />
-          <Cover source={ImgInviteCode} width={188} height={156} />
+          <CoverVideo video={VidInviteAnimation} />
           <Spacer h={12} />
           <Instructions />
           <Spacer h={24} />
