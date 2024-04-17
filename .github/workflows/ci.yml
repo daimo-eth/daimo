@@ -78,9 +78,9 @@ jobs:
       - name: Run Maestro test suite
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-          PR_ID: ${{ github.event.number }}
+          RUN_ID: ${{ github.event.number || github.run_id }}
         run: |
           echo "BRANCH_NAME=${BRANCH_NAME}" >> .env.maestro
-          echo "PR_ID=${PR_ID}" >> .env.maestro
+          echo "RUN_ID=${RUN_ID}" >> .env.maestro
           npm run build:maestro
         working-directory: ./apps/daimo-mobile

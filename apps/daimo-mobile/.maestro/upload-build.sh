@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 set -eox pipefail
-source .env.maestro
 
 if [ "$EAS_BUILD_PROFILE" = "maestro" ]; then
+  source .env.maestro
   echo "Uploading to Maestro"
 
   curl -Ls "https://get.maestro.mobile.dev" | bash
@@ -22,7 +22,7 @@ if [ "$EAS_BUILD_PROFILE" = "maestro" ]; then
     --branch $BRANCH_NAME \
     --repoOwner daimo-eth \
     --repoName daimo \
-    --pullRequestId $PR_ID \
+    --pullRequestId $RUN_ID \
     --commitSha $EAS_BUILD_GIT_COMMIT_HASH \
     -e MAESTRO_SLACK_ALERT_EMAIL=$MAESTRO_SLACK_ALERT_EMAIL \
     --ios-version 17 \
