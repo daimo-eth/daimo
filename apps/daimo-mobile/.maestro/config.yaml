@@ -5,4 +5,4 @@ notifications:
     enabled: true
     onSuccess: true
     recipients:
-      - ${MAESTRO_SLACK_ALERT_EMAIL}
+      - alerts-aaaak7okwrieedyz372hhd57ue@daimo-workspace.slack.com
