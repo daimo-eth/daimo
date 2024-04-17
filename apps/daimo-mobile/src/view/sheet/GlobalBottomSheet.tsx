@@ -27,28 +27,28 @@ import ScrollPellet from "../shared/ScrollPellet";
 
 const bottomSheetSettings = {
   debug: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   connectFarcaster: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   linkFarcaster: {
-    enableSwipeClose: false,
+    dismissable: false,
   },
   onboardingChecklist: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   helpModal: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   ownRequest: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   withdrawInstructions: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
   depositAddress: {
-    enableSwipeClose: true,
+    dismissable: true,
   },
 } as const;
 
@@ -110,19 +110,6 @@ export function GlobalBottomSheet() {
     setSheet(null);
   }, []);
 
-  // Dark backdrop for bottom sheet
-  const renderBackdrop = useCallback(
-    (props: BottomSheetDefaultBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-0.9}
-        appearsOnIndex={0}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
   // Handle dispatch > open or close bottom sheet
   const dispatcher = useContext(DispatcherContext);
   const handleDispatch = (action: Action) => {
@@ -181,6 +168,19 @@ export function GlobalBottomSheet() {
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
   const settings = sheet && bottomSheetSettings[sheet.action];
 
+  // Dark backdrop for bottom sheet
+  const renderBackdrop = useCallback(
+    (props: BottomSheetDefaultBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-0.9}
+        appearsOnIndex={0}
+        pressBehavior={settings?.dismissable ? "close" : "none"}
+      />
+    ),
+    []
+  );
+
   return (
     <View
       style={styles.bottomSheetWrapper}
@@ -194,7 +194,7 @@ export function GlobalBottomSheet() {
         index={-1}
         onChange={onChangeIndex}
         onClose={onClose}
-        enablePanDownToClose={settings?.enableSwipeClose}
+        enablePanDownToClose={settings?.dismissable}
         enableDynamicSizing
       >
         <BottomSheetView style={styles.bottomSheetView}>
