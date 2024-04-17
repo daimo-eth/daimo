@@ -80,8 +80,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
           PR_ID: ${{ github.event.number }}
         run: |
-          echo "EXPO_PUBLIC_GIT_BRANCH=${BRANCH_NAME}" >> .env
-          echo "EXPO_PUBLIC_PR_ID=${PR_ID}" >> .env
-          cat .env
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> .env.maestro
+          echo "PR_ID=${PR_ID}" >> .env.maestro
           npm run build:maestro
         working-directory: ./apps/daimo-mobile

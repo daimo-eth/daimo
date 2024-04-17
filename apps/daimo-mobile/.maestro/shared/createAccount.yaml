@@ -17,6 +17,10 @@ appId: com.daimo
 - inputText: "maestro"
 - inputRandomNumber:
     length: 8
+- assertVisible:
+    text: Create
+    enabled: true
 - tapOn: Create
+- assertVisible: Notifications
 - tapOn: Allow Notifications
 - assertVisible: Your balance.*

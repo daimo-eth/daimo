@@ -5,7 +5,6 @@ appId: com.daimo
 - tapOn: .*THIS DEVICE.*
 - tapOn: REMOVE PHONE
 - assertVisible: Are you sure.*
-- tapOn: # Remove Phone confirm
-    text: "0%"
-    index: 2
+- tapOn: # Remove Phone confirm, alerts can't be indexed by text
+    point: "50%,55%"
 - assertVisible: Welcome to Daimo
