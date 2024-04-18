@@ -51,6 +51,7 @@ export class OpIndexer {
           [from, to, chainConfig.chainL2.id]
         )
     );
+    if (result.rows.length === 0) return;
     console.log(
       `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );

@@ -85,11 +85,13 @@ export class KeyRegistry {
         } key(s) for ${addr}`
       );
     }
+    if (changes.length === 0) return;
     console.log(
       `[KEY-REG] loaded ${changes.length} key changes in ${
         Date.now() - startTime
       }ms`
     );
+
     this.listeners.forEach((l) => l(changes));
   }
 

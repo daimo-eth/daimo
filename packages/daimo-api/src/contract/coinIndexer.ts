@@ -92,11 +92,13 @@ export class CoinIndexer {
         value: BigInt(row.value),
       };
     });
+    if (logs.length === 0) return;
     console.log(
       `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${
         Date.now() - startTime
       }ms`
     );
+
     this.allTransfers = this.allTransfers.concat(logs);
     this.listeners.forEach((l) => l(logs));
   }

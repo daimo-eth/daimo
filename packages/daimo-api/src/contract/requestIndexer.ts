@@ -58,11 +58,13 @@ export class RequestIndexer {
     statuses.push(...(await this.loadCreated(pg, from, to)));
     statuses.push(...(await this.loadCancelled(pg, from, to)));
     statuses.push(...(await this.loadFulfilled(pg, from, to)));
+    if (statuses.length === 0) return;
     console.log(
-      `[REQUEST] Loaded ${statuses.length} statuses in ${
+      `[REQUEST] loaded ${statuses.length} statuses in ${
         Date.now() - startTime
       }ms`
     );
+
     // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;
     ls.forEach((l) => l(statuses));

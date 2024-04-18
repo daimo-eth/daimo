@@ -115,8 +115,7 @@ export class Watcher {
     if (delta < 0) return 0;
     const limit = delta >= n ? n - 1 : delta;
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
-    for (const [i, layer] of this.indexerLayers.entries()) {
-      console.log(`[SHOVEL] indexing ${start} to ${start + limit} layer ${i}`);
+    for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
         layer.map((i) => i.load(this.pg, start, start + limit))
       );
