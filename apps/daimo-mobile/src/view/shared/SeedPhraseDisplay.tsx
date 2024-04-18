@@ -102,6 +102,7 @@ function SeedPhraseCellInner({
           autoCapitalize="none"
           autoCorrect={false}
           onChangeText={onChangeText}
+          hitSlop={{ top: 8, bottom: 4, left: 24, right: 4 }}
         />
       )}
     </View>

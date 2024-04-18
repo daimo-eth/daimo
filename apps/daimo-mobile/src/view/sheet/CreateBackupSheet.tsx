@@ -21,12 +21,13 @@ export function CreateBackupSheet() {
   const [step, setStep] = useState<0 | 1>(0);
 
   return (
-    <View style={{ paddingBottom: 36 }}>
+    <View>
       {step === 0 ? (
         <CreateBackupContent setStep={setStep} />
       ) : (
         <OfflineBackupContent setStep={setStep} />
       )}
+      <Spacer h={36} />
     </View>
   );
 }
@@ -73,7 +74,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title="Backup offline instead"
+        title="Back up offline instead"
         onPress={() => setStep(1)}
       />
     </Animated.View>
@@ -85,7 +86,9 @@ function BulletRow({ text }: { text: string }) {
     <View style={{ flexDirection: "row" }}>
       <TextBody color={color.grayMid}>•</TextBody>
       <Spacer w={8} />
-      <TextBody color={color.grayMid}>{text}</TextBody>
+      <TextBody color={color.grayMid} style={{ flexShrink: 1 }}>
+        {text}
+      </TextBody>
     </View>
   );
 }

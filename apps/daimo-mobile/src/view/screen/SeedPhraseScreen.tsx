@@ -89,8 +89,8 @@ function CopySeedPhrase({
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <TextBody color={color.grayMid}>
-        Your account will be backed up to the seed phrase, allowing you to
-        recover it even if you lose your device.
+        This seed phrase will be added to your account, allowing you to recover
+        it even if you lose your device.
       </TextBody>
       <Spacer h={24} />
       <SeedPhraseDisplay words={words} />

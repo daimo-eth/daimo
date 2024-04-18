@@ -93,7 +93,7 @@ export function ErrorBanner({
 
 export function openSupportTG() {
   console.log("[ERROR] Opening Telegram support");
-  Linking.openURL("https://t.me/m/M_VvTjeHZjlh");
+  Linking.openURL("https://t.me/daimo_support");
 }
 
 const styles = StyleSheet.create({
