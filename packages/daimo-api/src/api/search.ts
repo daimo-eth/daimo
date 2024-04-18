@@ -49,6 +49,14 @@ export async function search(
     }
   }
 
+  // Deduplicate
+  const addrs = new Set<Address>();
+  ret = ret.filter((r) => {
+    if (addrs.has(r.addr)) return false;
+    addrs.add(r.addr);
+    return true;
+  });
+
   console.log(`[API] search: ${ret.length} results for '${prefix}'`);
   return ret;
 }
