@@ -5,7 +5,7 @@ import { Hex, bytesToHex, numberToHex } from "viem";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
-interface UserOp {
+export interface UserOp {
   transactionHash: Hex;
   logIndex: number;
   nonce: bigint;
