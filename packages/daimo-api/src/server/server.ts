@@ -117,6 +117,7 @@ async function main() {
     bundlerClient,
     coinIndexer,
     noteIndexer,
+    opIndexer,
     requestIndexer,
     profileCache,
     nameReg,

@@ -25,6 +25,7 @@ import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
 import { getLinkStatus } from "../api/getLinkStatus";
+import { getMemo } from "../api/getMemo";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -40,6 +41,7 @@ import { CoinIndexer } from "../contract/coinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
+import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
@@ -61,6 +63,7 @@ export function createRouter(
   bundlerClient: BundlerClient,
   coinIndexer: CoinIndexer,
   noteIndexer: NoteIndexer,
+  opIndexer: OpIndexer,
   reqIndexer: RequestIndexer,
   profileCache: ProfileCache,
   nameReg: NameRegistry,
@@ -337,6 +340,14 @@ export function createRouter(
           inviteGraph
         );
         return { status: "success", address, faucetTransfer };
+      }),
+
+    // Get memo from a transaction hash and log index.
+    getMemo: publicProcedure
+      .input(z.object({ txHash: zHex, logIndex: z.number() }))
+      .query(async (opts) => {
+        const { txHash, logIndex } = opts.input;
+        return getMemo(txHash, logIndex, opIndexer, paymentMemoTracker);
       }),
 
     // DEPRECATED
