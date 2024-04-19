@@ -17,10 +17,7 @@ export async function getMemo(
   opIndexer: OpIndexer,
   paymentMemoTracker: PaymentMemoTracker
 ): Promise<TransactionMemo | undefined> {
-  const userOp: UserOp | undefined = opIndexer.fetchUserOpLog(
-    txHash as Hex,
-    logIndex
-  );
+  const userOp: UserOp | undefined = opIndexer.fetchUserOpLog(txHash, logIndex);
   const opHash = userOp?.hash;
   const memo = opHash ? paymentMemoTracker.getMemo(opHash) : undefined;
   const transactionMemo: TransactionMemo = {
