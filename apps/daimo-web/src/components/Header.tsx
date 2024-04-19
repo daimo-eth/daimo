@@ -78,8 +78,12 @@ function MobileNav() {
                       <Logo height={24} width={24} color={"#144B44"} />
                     </div>
                     <div className="space-y-4">
-                      <MobileNavLink href="/#features">Blog</MobileNavLink>
-                      <MobileNavLink href="/#reviews">Github</MobileNavLink>
+                      <MobileNavLink href="https://daimo.com/blog">
+                        Blog
+                      </MobileNavLink>
+                      <MobileNavLink href="https://github.com/daimo-eth/daimo">
+                        Github
+                      </MobileNavLink>
                       <MobileNavLink href="/#faqs">FAQ</MobileNavLink>
                     </div>
                     <div className="mt-8 flex flex-col gap-4">
