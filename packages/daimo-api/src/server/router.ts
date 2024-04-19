@@ -270,6 +270,18 @@ export function createRouter(
         );
       }),
 
+    getBestInviteCodeForSender: publicProcedure
+      .input(z.object({ apiKey: z.string(), sender: zAddress }))
+      .query(async (opts) => {
+        const { apiKey, sender } = opts.input;
+        authorize(apiKey);
+
+        const inviteCode = await inviteCodeTracker.getBestInviteCodeForSender(
+          sender
+        );
+        return inviteCode;
+      }),
+
     registerPushToken: publicProcedure
       .input(
         z.object({
