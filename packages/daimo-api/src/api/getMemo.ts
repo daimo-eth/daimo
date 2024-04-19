@@ -12,7 +12,7 @@ type TransactionMemo = {
 
 /** Retreives a payment memo given a transaction hash and log index. */
 export async function getMemo(
-  txHash: string,
+  txHash: Hex,
   logIndex: number,
   opIndexer: OpIndexer,
   paymentMemoTracker: PaymentMemoTracker
@@ -24,7 +24,7 @@ export async function getMemo(
   const opHash = userOp?.hash;
   const memo = opHash ? paymentMemoTracker.getMemo(opHash) : undefined;
   const transactionMemo: TransactionMemo = {
-    txHash: txHash as Hex,
+    txHash,
     logIndex,
     opHash,
     memo,

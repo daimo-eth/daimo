@@ -332,7 +332,7 @@ export function createRouter(
 
     // Get memo from a transaction hash and log index.
     getMemo: publicProcedure
-      .input(z.object({ txHash: z.string(), logIndex: z.number() }))
+      .input(z.object({ txHash: zHex, logIndex: z.number() }))
       .query(async (opts) => {
         const { txHash, logIndex } = opts.input;
         return getMemo(txHash, logIndex, opIndexer, paymentMemoTracker);
