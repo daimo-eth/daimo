@@ -1,21 +1,20 @@
-import * as bodyParser from "body-parser";
-import * as dotenv from "dotenv";
-import express from "express";
+import { App } from "@slack/bolt";
 
-dotenv.config();
+import { handleCommand } from "./handlers";
 
-// Import order matters here
-// eslint-disable-next-line
-import webhookRouter from "./webhook";
-
-const app = express();
-const port = process.env.PORT || 4100;
-
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-app.use("/webhooks", webhookRouter);
-
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+const app = new App({
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  token: process.env.SLACK_BOT_TOKEN,
 });
+
+app.event("app_mention", async ({ event, say }) => {
+  const { text } = event;
+  const response = await handleCommand(text);
+  await say(response);
+});
+
+(async () => {
+  await app.start(process.env.PORT || 4200);
+
+  console.log("⚡️ Slackbot is running!");
+})();
