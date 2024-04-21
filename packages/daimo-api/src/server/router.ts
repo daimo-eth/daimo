@@ -1,4 +1,5 @@
 import {
+  DaimoLinkInviteCode,
   DaimoLinkRequestV2,
   amountToDollars,
   encodeRequestId,
@@ -531,6 +532,17 @@ export function createRouter(
       .mutation(async (opts) => {
         const { requestId, decliner } = opts.input;
         await reqIndexer.declineRequest(requestId, decliner);
+      }),
+
+    // DEPRECATED
+    verifyInviteCode: publicProcedure
+      .input(z.object({ inviteCode: z.string() }))
+      .query(async (opts) => {
+        const { inviteCode } = opts.input;
+
+        const link: DaimoLinkInviteCode = { type: "invite", code: inviteCode };
+        const status = await inviteCodeTracker.getInviteCodeStatus(link);
+        return status.isValid;
       }),
   });
 }
