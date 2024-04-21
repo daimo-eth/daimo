@@ -124,11 +124,11 @@ export class FrameLinkService {
       return [false, "Not on list"];
     }
     for (const whitelist of auth.addressWhitelists || []) {
-      if (
-        user.verified_addresses.eth_addresses.some((addr) =>
-          whitelist.addrs.includes(getAddress(addr))
-        )
-      ) {
+      const whitelistAddrs = new Set(
+        whitelist.addrs.map((addr) => getAddress(addr))
+      );
+      const userAddrs = user.verified_addresses.eth_addresses;
+      if (userAddrs.some((addr) => whitelistAddrs.has(getAddress(addr)))) {
         return [true, whitelist.greeting];
       }
     }
