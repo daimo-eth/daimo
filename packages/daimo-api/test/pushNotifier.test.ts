@@ -7,6 +7,7 @@ import {
   DisplayOpEvent,
   EAccount,
   OpStatus,
+  ProposedSwap,
   guessTimestampFromNum,
   now,
 } from "@daimo/common";
@@ -15,11 +16,16 @@ import assert from "node:assert";
 import test from "node:test";
 import { Address, Hex, getAddress } from "viem";
 
-import { CoinIndexer, Transfer } from "../src/contract/coinIndexer";
+import {
+  ForeignCoinIndexer,
+  ForeignTokenTransfer,
+} from "../src/contract/foreignCoinIndexer";
+import { HomeCoinIndexer, Transfer } from "../src/contract/homeCoinIndexer";
 import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { chainConfig } from "../src/env";
+import { ForeignToken } from "../src/server/coinList";
 import { PushNotifier } from "../src/server/pushNotifier";
 
 const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
@@ -238,6 +244,40 @@ test("PushNotifier", async () => {
       "You cancelled your 4.20 USDC payment link"
     );
   });
+
+  await test("foreign token transfer", async () => {
+    const input: ForeignTokenTransfer = createForeignTokenTransfer({
+      from: addrCharlie,
+      to: addrBob,
+      value: 1000000n,
+    });
+    const output = await pn.getPushMessagesFromForeignCoinTransfer(input);
+
+    assert.strictEqual(output.length, 1);
+    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(output[0].title, "Received 10 FAKE from charlie.eth");
+    assert.strictEqual(output[0].body, "Accept 10 FAKE as $1.00 USDC");
+  });
+
+  await test("foreign token swap", async () => {
+    const input: Transfer[] = [
+      createTransfer({
+        from: addrCharlie,
+        to: addrBob,
+        value: 1000000n,
+        isSwapOutput: true,
+      }),
+    ];
+    const output = await pn.getPushMessagesFromTransfers(input);
+
+    assert.strictEqual(output.length, 1);
+    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(output[0].title, "Accepted $1.00 from charlie.eth");
+    assert.strictEqual(
+      output[0].body,
+      "You accepted 1.11111 FAKE as $1.00 USDC"
+    );
+  });
 });
 
 // Mock a world with two Daimo accounts, alice and bob
@@ -302,14 +342,51 @@ function createNotifierAliceBob() {
             log.logIndex - 1
           ) || undefined,
         memo: log.transactionHash === "0x43" ? "hello" : undefined,
+        preSwapTransfer:
+          log.transactionHash === "0x44"
+            ? {
+                coin: createFakeForeignToken(),
+                from: addrCharlie,
+                amount: "111111",
+              }
+            : undefined,
       };
       return op;
     },
-  } as unknown as CoinIndexer;
+  } as unknown as HomeCoinIndexer;
+
+  const stubForeignCoinIndexer = {
+    getProposedSwapForLog: (log: Transfer): ProposedSwap | undefined => {
+      if (log.transactionHash === "0x44") {
+        return {
+          fromCoin: createFakeForeignToken(),
+          fromAmount: "111111",
+          fromAcc: { addr: addrCharlie, ensName: "charlie.eth" },
+          receivedAt: now(),
+          toAmount: 1000000,
+          execRouterAddress: "0x0",
+          execCallData: "0x0",
+          execValue: "0x0",
+        };
+      }
+    },
+
+    getForeignTokenReceiveForSwap: (addr: Address, txHash: Hex) => {
+      if (txHash === "0x44") {
+        return createForeignTokenTransfer({
+          from: addrCharlie,
+          to: addrBob,
+          value: 1000000n,
+        });
+      }
+    },
+  } as unknown as ForeignCoinIndexer;
 
   const nullAny = null as any;
   const pn = new PushNotifier(
     stubCoinIndexer,
+    stubForeignCoinIndexer,
+    nullAny,
     stubNameReg,
     nullAny,
     stubRequestIndexer,
@@ -328,9 +405,16 @@ function createTransfer(args: {
   value: bigint;
   memo?: boolean;
   isRequestResponse?: boolean;
+  isSwapOutput?: boolean;
 }): Transfer {
   // hardcoded txHash used in stub classes
-  const txHash = args.isRequestResponse ? "0x42" : args.memo ? "0x43" : "0x0";
+  const txHash = args.isRequestResponse
+    ? "0x42"
+    : args.memo
+    ? "0x43"
+    : args.isSwapOutput
+    ? "0x44"
+    : "0x0";
 
   return {
     address: "0x0",
@@ -342,6 +426,34 @@ function createTransfer(args: {
     from: args.from,
     to: args.to,
     value: args.value,
+  };
+}
+
+function createForeignTokenTransfer(args: {
+  from: Address;
+  to: Address;
+  value: bigint;
+}): ForeignTokenTransfer {
+  return {
+    address: "0x0",
+    blockHash: "0x0",
+    blockNumber: 0n,
+    transactionHash: "0x44",
+    transactionIndex: 0,
+    logIndex: 0,
+    from: args.from,
+    to: args.to,
+    value: args.value,
+    foreignToken: createFakeForeignToken(),
+  };
+}
+
+function createFakeForeignToken(): ForeignToken {
+  return {
+    token: "0x0",
+    fullName: "fake token",
+    symbol: "FAKE",
+    decimals: 5,
   };
 }
 

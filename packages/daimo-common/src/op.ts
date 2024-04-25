@@ -1,6 +1,8 @@
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
+import { ForeignCoin } from "./foreignCoin";
+import { BigIntStr } from "./model";
 
 /**
  * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
@@ -33,6 +35,12 @@ export type PendingOpEvent = {
   opHash?: Hex;
   txHash?: Hex;
   inviteCode?: string;
+};
+
+export type PreSwapTransfer = {
+  coin: ForeignCoin;
+  amount: BigIntStr; // in native unit of the token
+  from: Address;
 };
 
 /**
@@ -81,6 +89,9 @@ export interface TransferOpEvent extends OpEventBase {
 
   /** Memo, user-generated text for the transfer */
   memo?: string;
+
+  /** If the transfer was caused by a user-initiated swap, the swap origin */
+  preSwapTransfer?: PreSwapTransfer;
 }
 
 export interface PaymentLinkOpEvent extends OpEventBase {
@@ -147,3 +158,23 @@ export type DaimoAccountCall = {
   value: bigint;
   data: Hex;
 };
+
+// Gets the logical from and to-addresses for a given op
+// If the op creates a payment link, to = payment link until claimed, then it's
+// the address of the claimer.
+// If the op is a swap, from = the pre-swap sender.
+export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
+  if (op.type === "transfer") {
+    if (op.preSwapTransfer) return [op.preSwapTransfer.from, op.to];
+    else return [op.from, op.to];
+  } else {
+    if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
+      // Self-transfer via payment link shows up as two payment link transfers
+      return [op.from, op.to];
+    }
+    return [
+      op.noteStatus.sender.addr,
+      op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
+    ];
+  }
+}

@@ -1,6 +1,7 @@
 import {
   DaimoAccountCall,
   PendingOpEvent,
+  ProposedSwap,
   UserOpHex,
   derKeytoContractFriendlyKey,
   now,
@@ -14,6 +15,7 @@ import {
   Hex,
   encodeFunctionData,
   getAddress,
+  hexToBigInt,
   maxUint256,
   parseUnits,
 } from "viem";
@@ -98,11 +100,12 @@ export class DaimoOpSender {
 
   private getTokenApproveCall(
     dest: Address,
-    amount: bigint = maxUint256 // defaults to infinite
+    amount: bigint = maxUint256, // defaults to infinite
+    tokenAddress: Address = this.opConfig.tokenAddress // defaults to home coin
   ): DaimoAccountCall {
     return {
       // Approve contract `amount` spending on behalf of the account
-      dest: this.opConfig.tokenAddress,
+      dest: tokenAddress,
       value: 0n,
       data: encodeFunctionData({
         abi: erc20ABI,
@@ -319,6 +322,35 @@ export class DaimoOpSender {
         }),
       },
     ];
+
+    const op = this.opBuilder.executeBatch(executions, opMetadata);
+
+    return this.sendUserOp(op);
+  }
+
+  public async executeProposedSwap(
+    swap: ProposedSwap,
+    opMetadata: DaimoOpMetadata
+  ) {
+    console.log(`[OP] execute swap ${swap.fromCoin.token}`);
+
+    const executions: DaimoAccountCall[] = [
+      {
+        dest: swap.execRouterAddress,
+        value: hexToBigInt(swap.execValue),
+        data: swap.execCallData,
+      },
+    ];
+
+    if (swap.fromCoin.token !== "ETH") {
+      executions.unshift(
+        this.getTokenApproveCall(
+          swap.execRouterAddress,
+          BigInt(swap.fromAmount),
+          swap.fromCoin.token
+        )
+      );
+    }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 

@@ -4,16 +4,26 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
+  PreSwapTransfer,
+  amountToDollars,
   assert,
   assertNotNull,
   getAccountName,
+  getDisplayFromTo,
+  getForeignCoinDisplayAmount,
   getSlotLabel,
+  nativeETH,
   parseRequestMetadata,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
-import { Address, Hex, formatUnits, getAddress } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
-import { CoinIndexer, Transfer } from "../contract/coinIndexer";
+import { ETHIndexer, ETHTransfer } from "../contract/ethIndexer";
+import {
+  ForeignCoinIndexer,
+  ForeignTokenTransfer,
+} from "../contract/foreignCoinIndexer";
+import { HomeCoinIndexer, Transfer } from "../contract/homeCoinIndexer";
 import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -35,7 +45,9 @@ export class PushNotifier {
   isInitialized = false;
 
   constructor(
-    private coinIndexer: CoinIndexer,
+    private coinIndexer: HomeCoinIndexer,
+    private foreignCoinIndexer: ForeignCoinIndexer,
+    private ethIndexer: ETHIndexer,
     private nameReg: NameRegistry,
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
@@ -45,6 +57,8 @@ export class PushNotifier {
 
   async init() {
     this.coinIndexer.addListener(this.handleTransfers);
+    this.foreignCoinIndexer.addListener(this.handleForeignCoinTransfers);
+    this.ethIndexer.addListener(this.handleEthTransfers);
     this.noteIndexer.addListener(this.handleNoteOps);
     this.keyReg.addListener(this.handleKeyRotations);
     this.requestIndexer.addListener(this.handleRequests);
@@ -70,6 +84,26 @@ export class PushNotifier {
   private handleTransfers = async (logs: Transfer[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
     const messages = await this.getPushMessagesFromTransfers(logs);
+    this.maybeSendNotifications(messages);
+  };
+
+  private handleForeignCoinTransfers = async (logs: ForeignTokenTransfer[]) => {
+    console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
+    const messages = (
+      await Promise.all(
+        logs.map((log) => this.getPushMessagesFromForeignCoinTransfer(log))
+      )
+    ).flat();
+    this.maybeSendNotifications(messages);
+  };
+
+  private handleEthTransfers = async (logs: ETHTransfer[]) => {
+    console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
+    const messages = (
+      await Promise.all(
+        logs.map((log) => this.getPushMessagesFromEthTransfer(log))
+      )
+    ).flat();
     this.maybeSendNotifications(messages);
   };
 
@@ -115,41 +149,33 @@ export class PushNotifier {
   async getPushMessagesFromTransfers(logs: Transfer[]) {
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
-      const { from, to, value } = log;
-      const amount = Number(value);
-
       const logId = `${log.transactionHash}:${log.logIndex}`;
-      if (from == null || to == null || amount == null) {
-        console.warn(`[PUSH] invalid transfer log: ${logId}`);
-        continue;
-      }
-      if (amount === 0) {
-        console.log(`[PUSH] skipping zero-value transfer: ${logId}`);
-        continue;
-      }
       if (log.transactionHash == null) {
         console.warn(`[PUSH] skipping unconfirmed tx: ${logId}`);
         continue;
       }
 
       const opEvent = this.coinIndexer.attachTransferOpProperties(log);
+      const [from, to] = getDisplayFromTo(opEvent);
 
       const [a, b] = await Promise.all([
         this.getPushMessagesFromTransfer(
           log.transactionHash,
           from,
           to,
-          -BigInt(amount),
+          -opEvent.amount,
           opEvent.type === "transfer" ? opEvent.memo : undefined,
-          false
+          false,
+          opEvent.type === "transfer" ? opEvent.preSwapTransfer : undefined
         ),
         this.getPushMessagesFromTransfer(
           log.transactionHash,
           to,
           from,
-          BigInt(amount),
+          opEvent.amount,
           opEvent.type === "transfer" ? opEvent.memo : undefined,
-          opEvent.type === "transfer" && opEvent.requestStatus != null
+          opEvent.type === "transfer" && opEvent.requestStatus != null,
+          opEvent.type === "transfer" ? opEvent.preSwapTransfer : undefined
         ),
       ]);
       messages.push(...a, ...b);
@@ -195,16 +221,16 @@ export class PushNotifier {
     txHash: Hex,
     addr: Address,
     other: Address,
-    value: bigint,
+    amount: number,
     memo: string | undefined,
-    receivingRequestedMoney: boolean
+    receivingRequestedMoney: boolean,
+    preSwapTransfer: PreSwapTransfer | undefined
   ): Promise<ExpoPushMessage[]> {
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens || pushTokens.length === 0) return [];
 
-    const { tokenDecimals, tokenSymbol } = chainConfig;
-    const rawAmount = formatUnits(value, tokenDecimals);
-    const dollars = Math.abs(Number(rawAmount)).toFixed(2);
+    const { tokenSymbol } = chainConfig;
+    const dollars = amountToDollars(Math.abs(amount));
 
     // Get the other side
     const otherAcc = await this.nameReg.getEAccount(other);
@@ -217,21 +243,30 @@ export class PushNotifier {
     }
     const otherStr = getAccountName(otherAcc);
 
-    const title =
-      value < 0
-        ? `Sent $${dollars} to ${otherStr}`
-        : `Received $${dollars} from ${otherStr}`;
-    let body;
+    const title = (() => {
+      if (preSwapTransfer) {
+        assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
+        return `Accepted $${dollars} from ${otherStr}`;
+      } else if (amount < 0) return `Sent $${dollars} to ${otherStr}`;
+      else return `Received $${dollars} from ${otherStr}`;
+    })();
 
-    if (memo) {
-      body = memo;
-    } else if (receivingRequestedMoney) {
-      body = `Your ${dollars} ${tokenSymbol} request was fulfilled`;
-    } else if (value < 0) {
-      body = `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
-    } else {
-      body = `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
-    }
+    const body = (() => {
+      if (memo) return memo;
+      if (receivingRequestedMoney)
+        return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
+      if (preSwapTransfer) {
+        assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
+        const readableAmount = getForeignCoinDisplayAmount(
+          preSwapTransfer.amount,
+          preSwapTransfer.coin
+        );
+        return `You accepted ${readableAmount} ${preSwapTransfer.coin.symbol} as $${dollars} ${tokenSymbol}`;
+      }
+      if (amount < 0)
+        return `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
+      return `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
+    })();
 
     return [
       {
@@ -240,6 +275,68 @@ export class PushNotifier {
         title,
         body,
         data: { txHash },
+      },
+    ];
+  }
+
+  async getPushMessagesFromForeignCoinTransfer(
+    log: ForeignTokenTransfer
+  ): Promise<ExpoPushMessage[]> {
+    const pushTokens = this.pushTokens.get(getAddress(log.to));
+    if (!pushTokens || pushTokens.length === 0) return [];
+
+    const readableAmount = getForeignCoinDisplayAmount(
+      log.value.toString() as `${bigint}`,
+      log.foreignToken
+    );
+    const swap = await this.foreignCoinIndexer.getProposedSwapForLog(log);
+    if (swap == null) return [];
+
+    const dollars = amountToDollars(swap.toAmount);
+
+    // Get the other side
+    const otherAcc = await this.nameReg.getEAccount(log.from);
+    const otherStr = getAccountName(otherAcc);
+
+    const title = `Received ${readableAmount} ${log.foreignToken.symbol} from ${otherStr}`;
+    const body = `Accept ${readableAmount} ${log.foreignToken.symbol} as $${dollars} USDC`;
+
+    return [
+      {
+        to: pushTokens,
+        badge: 1,
+        title,
+        body,
+        data: { txHash: log.transactionHash },
+      },
+    ];
+  }
+
+  private async getPushMessagesFromEthTransfer(
+    log: ETHTransfer
+  ): Promise<ExpoPushMessage[]> {
+    const pushTokens = this.pushTokens.get(getAddress(log.to));
+    if (!pushTokens || pushTokens.length === 0) return [];
+
+    const readableAmount = getForeignCoinDisplayAmount(
+      log.value.toString() as `${bigint}`,
+      nativeETH
+    );
+    const swap = await this.ethIndexer.getProposedSwapsForAddr(log.to);
+    if (swap.length === 0) return [];
+
+    const dollars = amountToDollars(swap[0].toAmount);
+
+    const title = `Received ${readableAmount} ${nativeETH.symbol}`;
+    const body = `Accept ${readableAmount} ${nativeETH.symbol} as $${dollars} USDC`;
+
+    return [
+      {
+        to: pushTokens,
+        badge: 1,
+        title,
+        body,
+        data: { blockNumber: log.blockNumber },
       },
     ];
   }

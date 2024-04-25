@@ -57,7 +57,10 @@ export function getViemClientFromEnv(monitor: Telemetry) {
   // Connect to L2
   const chain = chainConfig.chainL2;
   const account = getEOA(process.env.DAIMO_API_PRIVATE_KEY);
-  const publicClient = createPublicClient({ chain, transport: transports.l2 });
+  const publicClient = createPublicClient({
+    chain,
+    transport: transports.l2,
+  });
   const walletClient = createWalletClient({
     chain,
     transport: transports.l2,

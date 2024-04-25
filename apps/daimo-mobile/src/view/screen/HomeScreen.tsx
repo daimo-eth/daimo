@@ -1,5 +1,5 @@
 import { SuggestedAction } from "@daimo/api";
-import { OpStatus } from "@daimo/common";
+import { OpStatus, amountToDollars } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import {
@@ -25,6 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { HistoryListSwipe } from "./history/HistoryList";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
@@ -36,7 +37,6 @@ import { Account } from "../../model/account";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";
-import { HistoryListSwipe } from "../shared/HistoryList";
 import { Icon } from "../shared/Icon";
 import { OctName } from "../shared/InputBig";
 import { OfflineHeader } from "../shared/OfflineHeader";
@@ -46,7 +46,7 @@ import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { DaimoText, TextBody, TextLight } from "../shared/text";
+import { DaimoText, TextBody, TextBtnCaps, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
@@ -256,11 +256,22 @@ function AmountAndButtons({ account }: { account: Account }) {
 
   const isEmpty = account.lastBalance === 0n;
 
+  // sum over all proposed swaps toAmount
+  const pendingDollars = amountToDollars(
+    account.proposedSwaps.reduce((acc, swap) => acc + swap.toAmount, 0)
+  );
+
   return (
     <TouchableWithoutFeedback accessible={false}>
       <View style={styles.amountAndButtons}>
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />
+        {Number(pendingDollars) > 0.1 && (
+          <>
+            <Spacer h={8} />
+            <PendingTag pendingDollars={pendingDollars} />
+          </>
+        )}
         <Spacer h={16} />
         <View style={styles.buttonRow}>
           <IconButton title="Deposit" onPress={goDeposit} />
@@ -269,6 +280,31 @@ function AmountAndButtons({ account }: { account: Account }) {
         </View>
       </View>
     </TouchableWithoutFeedback>
+  );
+}
+
+function PendingTag({ pendingDollars }: { pendingDollars: string }) {
+  const nav = useNav();
+  const onPress = () => nav.navigate("Notifications");
+  return (
+    <Pressable onPress={onPress} hitSlop={8}>
+      {({ pressed }) => (
+        <View
+          style={{
+            borderRadius: 12,
+            backgroundColor: pressed
+              ? touchHighlightUnderlay.subtle.underlayColor
+              : color.ivoryDark,
+            paddingHorizontal: 16,
+            paddingVertical: 4,
+          }}
+        >
+          <TextBtnCaps color={color.grayDark}>
+            + ${pendingDollars} PENDING
+          </TextBtnCaps>
+        </View>
+      )}
+    </Pressable>
   );
 }
 

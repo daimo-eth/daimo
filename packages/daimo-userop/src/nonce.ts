@@ -44,6 +44,7 @@ export enum DaimoNonceType {
   RequestResponse = 3,
   AddKey = 4,
   RemoveKey = 5,
+  Swap = 6,
   MAX = 255, // At most one byte
 }
 

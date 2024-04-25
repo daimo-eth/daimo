@@ -1,9 +1,11 @@
+import { ProposedSwap } from "@daimo/common";
 import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 
 import { InvitesNotificationRow } from "./InvitesNotificationRow";
 import { NotificationRow } from "./NotificationRow";
 import { RequestNotificationRow } from "./RequestNotificationRow";
+import { SwapNotificationRow } from "./SwapNotificationRow";
 import { useNav } from "../../../common/nav";
 import { useInAppNotifications } from "../../../logic/inAppNotifications";
 import { Account } from "../../../model/account";
@@ -27,6 +29,10 @@ function NotificationsScreenInner({ account }: { account: Account }) {
   useEffect(() => {
     if (unread) markRead();
   }, [unread]);
+
+  const swapNotifKey = (swap: ProposedSwap) => {
+    return `${swap.fromCoin.token}-${swap.fromAmount}-${swap.toAmount}-${swap.receivedAt}`;
+  };
 
   return (
     <View style={ss.container.screenWithoutPadding}>
@@ -54,6 +60,14 @@ function NotificationsScreenInner({ account }: { account: Account }) {
               );
             case "invite":
               return <InvitesNotificationRow key="invite" notif={notif} />;
+            case "swap":
+              return (
+                <SwapNotificationRow
+                  key={swapNotifKey(notif.swap)}
+                  notif={notif}
+                  account={account}
+                />
+              );
           }
         })}
         {notifications.length > 0 && <NotificationRow children={null} />}

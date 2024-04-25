@@ -21,3 +21,4 @@ export * from "./offchainAction";
 export * from "./env";
 export * from "./mnemonic/mnemonic";
 export * from "./debug";
+export * from "./foreignCoin";

@@ -43,6 +43,9 @@ PAYMASTER_ADDR="0xa9E1CCB08053e4f5daBb506718352389C1547462"
 # Start paymaster by depositing and whitelisting
 forge script script/ManagePaymaster.s.sol --sig "start(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 
+# Deploy offchain utils contract
+forge script script/DeployOffchainUtils.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+
 # # Add paymaster deposit
 # forge script script/ManagePaymaster.s.sol --sig "addDeposit(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
 

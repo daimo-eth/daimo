@@ -51,6 +51,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
   // Known relay.link address on Base
   "0xf70da97812CB96acDF810712Aa562db8dfA3dbEF": AddrLabel.Relay,
+  // Known Uniswap ETH pools on Base
+  "0xd0b53D9277642d899DF5C87A3966A349A798F224": AddrLabel.UniswapETHPool,
 };
 
 // Validate that current addresses are correctly recorded.
@@ -251,5 +253,9 @@ export class NameRegistry {
         return await this.getEAccount(daimoAddress);
       }
     }
+  }
+
+  getAllDAccounts() {
+    return this.accounts;
   }
 }

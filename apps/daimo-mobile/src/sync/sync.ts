@@ -268,6 +268,7 @@ function applySync(account: Account, result: AccountHistoryResult): Account {
     inviteLinkStatus: result.inviteLinkStatus || null,
     invitees: result.invitees || [],
     notificationRequestStatuses: result.notificationRequestStatuses || [],
+    proposedSwaps: result.proposedSwaps || [],
   };
 
   console.log(

@@ -2,6 +2,8 @@ import { Address, Hex } from "viem";
 import { z } from "zod";
 
 import { DaimoLinkNote } from "./daimoLink";
+import { EAccount } from "./eAccount";
+import { ForeignCoin } from "./foreignCoin";
 
 export const zAddress = z
   .string()
@@ -15,6 +17,7 @@ export enum AddrLabel {
   Paymaster = "fee",
   Coinbase = "coinbase",
   Relay = "relay.link",
+  UniswapETHPool = "Swapped ETH",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */
@@ -117,3 +120,15 @@ export const zCreateInviteLinkArgs = z.object({
 });
 
 export type CreateInviteLinkArgs = z.infer<typeof zCreateInviteLinkArgs>;
+
+// TODO: fromAcc and receivedAt are unknown for native ETH
+export interface ProposedSwap {
+  fromCoin: ForeignCoin;
+  fromAmount: BigIntStr; // in native unit of the token
+  fromAcc: EAccount;
+  receivedAt?: number;
+  toAmount: number; // in native USDC units
+  execRouterAddress: Address;
+  execCallData: Hex;
+  execValue: Hex;
+}

@@ -2,16 +2,20 @@ import {
   DaimoInviteCodeStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
+  ProposedSwap,
   now,
 } from "@daimo/common";
 import { useEffect, useState } from "react";
 
 import { getAccountManager, useAccount } from "./accountManager";
 
-type InAppNotification = RequestNotification | InvitesNotification;
+type InAppNotification =
+  | RequestNotification
+  | InvitesNotification
+  | SwapNotification;
 
 type BaseNotification = {
-  type: "request" | "invite";
+  type: "request" | "invite" | "swap";
   timestamp: number;
   marksUnread: boolean;
 };
@@ -24,6 +28,11 @@ export type RequestNotification = BaseNotification & {
 export type InvitesNotification = BaseNotification & {
   type: "invite";
   inviteLinkStatus: DaimoInviteCodeStatus;
+};
+
+export type SwapNotification = BaseNotification & {
+  type: "swap";
+  swap: ProposedSwap;
 };
 
 type InAppNotificationInfo = {
@@ -78,7 +87,7 @@ export function useInAppNotifications(): InAppNotificationInfo {
       });
     }
 
-    // Invites notif, ordered to the top of the list when added or app first loaded.
+    // Available invites
     if (inviteLinkStatus?.isValid && inviteLinkStatus.createdAt) {
       notifications.push({
         type: "invite",
@@ -87,6 +96,17 @@ export function useInAppNotifications(): InAppNotificationInfo {
         inviteLinkStatus,
       });
     }
+
+    // Proposed swaps
+    account.proposedSwaps.map((swap) => {
+      console.log(`[IN-APP] pushing swap ${swap.fromCoin}`);
+      notifications.push({
+        type: "swap",
+        marksUnread: true,
+        timestamp: swap.receivedAt || now(),
+        swap,
+      });
+    });
 
     notifications.sort((a, b) => b.timestamp - a.timestamp);
 

@@ -5,6 +5,7 @@ import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface indexer {
+  preIndexingInit?(pg: Pool): void | Promise<void>;
   load(pg: Pool, from: number, to: number): void | Promise<void>;
 }
 
@@ -69,6 +70,9 @@ export class Watcher {
   }
 
   async init() {
+    for (const indexer of this.indexerLayers.flat()) {
+      if (indexer.preIndexingInit) await indexer.preIndexingInit(this.pg);
+    }
     const shovelLatest = await this.getShovelLatest();
     await this.catchUpTo(shovelLatest);
   }

@@ -42,6 +42,7 @@ export interface ChainConfig {
   pimlicoPaymasterAddress: Address; // Unused, only for backup
   notesV1Address: Address;
   notesV2Address: Address;
+  offChainUtilsDeployBlock: number;
 }
 
 // EphemeralNotes contract varies by chain due to different USDC addresses
@@ -74,6 +75,7 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         pimlicoPaymasterAddress: "0x939263eAFE57038a072cb4edD6B25dd81A8A6c56",
         notesV1Address: assertNotNull(notesV1AddressMap.get(base.id)),
         notesV2Address: assertNotNull(notesV2AddressMap.get(base.id)),
+        offChainUtilsDeployBlock: 13170550,
       };
     case "baseSepolia":
       return {
@@ -86,6 +88,7 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         pimlicoPaymasterAddress: "0x0000000000dd6Dd248Ab5487218e1C2D7fbB29c9",
         notesV1Address: assertNotNull(notesV1AddressMap.get(baseSepolia.id)),
         notesV2Address: assertNotNull(notesV2AddressMap.get(baseSepolia.id)),
+        offChainUtilsDeployBlock: 8681107,
       };
     default:
       throw new Error(`unknown chain '${daimoChain}'`);

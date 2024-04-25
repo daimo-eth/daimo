@@ -79,11 +79,6 @@ export class KeyRegistry {
           break;
         }
       }
-      console.log(
-        `[KEY-REG] cached ${
-          this.addrToKeyData.get(addr)?.length
-        } key(s) for ${addr}`
-      );
     }
     if (changes.length === 0) return;
     console.log(

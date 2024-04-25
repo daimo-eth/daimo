@@ -47,10 +47,12 @@ export function TitleAmount({
   amount,
   style,
   preSymbol,
+  postText,
 }: {
   amount: bigint;
   style?: TextStyle;
   preSymbol?: string;
+  postText?: string;
 }) {
   if (!(amount >= 0)) throw new Error("Invalid amount");
 
@@ -67,6 +69,8 @@ export function TitleAmount({
       {dollars}
       {amountSeparator}
       {cents}
+      <Spacer w={8} />
+      {postText}
     </DaimoText>
   );
 }

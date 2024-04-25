@@ -1,4 +1,4 @@
-import { DaimoRequestV2Status } from "@daimo/common";
+import { DaimoRequestV2Status, ProposedSwap } from "@daimo/common";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -22,6 +22,7 @@ import { FarcasterBottomSheet } from "./FarcasterBottomSheet";
 import { HelpBottomSheet } from "./HelpBottomSheet";
 import { OnboardingChecklistBottomSheet } from "./OnboardingChecklistBottomSheet";
 import { OwnRequestBottomSheet } from "./OwnRequestBottomSheet";
+import { SwapBottomSheet } from "./SwapBottomSheet";
 import { WithdrawInstructionsBottomSheet } from "./WithdrawInstructionsBottomSheet";
 import { Action, DispatcherContext } from "../../action/dispatch";
 import ScrollPellet from "../shared/ScrollPellet";
@@ -54,6 +55,9 @@ const bottomSheetSettings = {
   createBackup: {
     dismissable: true,
   },
+  swap: {
+    dismissable: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -76,7 +80,8 @@ type DisplayedSheet =
   | {
       action: "ownRequest";
       payload: { reqStatus: DaimoRequestV2Status };
-    };
+    }
+  | { action: "swap"; payload: { swap: ProposedSwap } };
 
 // Shows the main, global bottom sheet. This ensures that only a single of
 // these sheets is visible at a time. The global sheet appears above any screen
@@ -153,6 +158,11 @@ export function GlobalBottomSheet() {
         openBottomSheet({ action: "helpModal", payload: { title, content } });
         break;
       }
+      case "swap": {
+        const { swap } = action;
+        openBottomSheet({ action: "swap", payload: { swap } });
+        break;
+      }
       case "hideBottomSheet": {
         setSheet(null);
         break;
@@ -174,6 +184,7 @@ export function GlobalBottomSheet() {
     dispatcher.register("helpModal", handleDispatch);
     dispatcher.register("hideBottomSheet", handleDispatch);
     dispatcher.register("createBackup", handleDispatch);
+    dispatcher.register("swap", handleDispatch);
   }, []);
 
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
@@ -230,6 +241,9 @@ export function GlobalBottomSheet() {
             <WithdrawInstructionsBottomSheet />
           )}
           {sheet?.action === "depositAddress" && <DepositAddressBottomSheet />}
+          {sheet?.action === "swap" && (
+            <SwapBottomSheet swap={sheet.payload.swap} />
+          )}
         </BottomSheetView>
       </BottomSheet>
     </View>

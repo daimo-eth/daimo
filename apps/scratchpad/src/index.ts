@@ -1,10 +1,12 @@
 import { ProfileCache } from "@daimo/api/src/api/profile";
-import { CoinIndexer } from "@daimo/api/src/contract/coinIndexer";
+import { ForeignCoinIndexer } from "@daimo/api/src/contract/foreignCoinIndexer";
+import { HomeCoinIndexer } from "@daimo/api/src/contract/homeCoinIndexer";
 import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { DB } from "@daimo/api/src/db/db";
+import { UniswapClient } from "@daimo/api/src/network/uniswapClient";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
 import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
@@ -63,6 +65,7 @@ function metricsDesc() {
 
 async function metrics() {
   const vc = getViemClientFromEnv(new Telemetry());
+  const uc = new UniswapClient();
 
   console.log(`[METRICS] using wallet ${vc.account.address}`);
   const db = new DB();
@@ -73,11 +76,13 @@ async function metrics() {
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(db, nameReg);
   const paymentMemoTracker = new PaymentMemoTracker(db);
-  const coinIndexer = new CoinIndexer(
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, uc);
+  const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
     requestIndexer,
+    foreignCoinIndexer,
     paymentMemoTracker
   );
 

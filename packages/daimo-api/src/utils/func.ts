@@ -14,3 +14,12 @@ export function memoize<K, I, O>(
     return o;
   };
 }
+
+/**
+ * Returns chunks of size n.
+ * @param {Array<T>} array any array
+ * @param {number} n size of chunk
+ */
+export function* chunks<T>(array: T[], n: number) {
+  for (let i = 0; i < array.length; i += n) yield array.slice(i, i + n);
+}

@@ -30,7 +30,7 @@ import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,
   SetBottomSheetSnapPointCount,
-} from "../screen/HistoryOpScreen";
+} from "../screen/history/HistoryOpScreen";
 
 const BottomSheetStackNavigator =
   createNativeStackNavigator<ParamListBottomSheet>();

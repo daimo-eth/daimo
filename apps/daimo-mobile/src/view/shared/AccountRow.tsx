@@ -1,7 +1,7 @@
 import { EAccount, canSendTo, getAccountName, timeString } from "@daimo/common";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
-import { ContactBubble } from "./ContactBubble";
+import { ContactBubble } from "./Bubble";
 import { PendingDot } from "./PendingDot";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextPara } from "./text";

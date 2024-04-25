@@ -8,3 +8,15 @@ export function logCoordinateKey(transactionHash: Hex, logIndex: number) {
 export function senderIdKey(sender: Address, id: string) {
   return sender + ":" + id;
 }
+
+export function addrBlockNumKey(addr: Address, blockNum: number) {
+  return addr + ":" + blockNum;
+}
+
+export function addrTxHashKey(addr: Address, txHash: Hex) {
+  return addr + ":" + txHash;
+}
+
+export function addrTokenKey(addr: Address, token: Address) {
+  return addr + ":" + token;
+}
