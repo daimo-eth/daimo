@@ -43,6 +43,8 @@ export interface ChainConfig {
   notesV1Address: Address;
   notesV2Address: Address;
   offChainUtilsDeployBlock: number;
+  uniswapRouterAddress: Address;
+  uniswapETHPoolAddress: Address;
 }
 
 // EphemeralNotes contract varies by chain due to different USDC addresses
@@ -76,6 +78,8 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         notesV1Address: assertNotNull(notesV1AddressMap.get(base.id)),
         notesV2Address: assertNotNull(notesV2AddressMap.get(base.id)),
         offChainUtilsDeployBlock: 13170550,
+        uniswapRouterAddress: "0x2626664c2603336E57B271c5C0b26F421741e481",
+        uniswapETHPoolAddress: "0xd0b53D9277642d899DF5C87A3966A349A798F224",
       };
     case "baseSepolia":
       return {
@@ -89,6 +93,8 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         notesV1Address: assertNotNull(notesV1AddressMap.get(baseSepolia.id)),
         notesV2Address: assertNotNull(notesV2AddressMap.get(baseSepolia.id)),
         offChainUtilsDeployBlock: 8681107,
+        uniswapRouterAddress: "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4",
+        uniswapETHPoolAddress: "0xd0b53D9277642d899DF5C87A3966A349A798F224", // TODO: there's no ETH/USDC pool with actual liquidity on Sepolia
       };
     default:
       throw new Error(`unknown chain '${daimoChain}'`);

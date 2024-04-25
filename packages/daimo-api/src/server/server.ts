@@ -58,7 +58,7 @@ async function main() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(db, nameReg);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
@@ -101,13 +101,13 @@ async function main() {
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
+  shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
     await shovelWatcher.init();
     shovelWatcher.watch();
-    ethIndexer.watch(shovelWatcher);
 
     await Promise.all([
       paymaster.init(),

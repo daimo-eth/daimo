@@ -5,7 +5,6 @@ import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
 interface indexer {
-  preIndexingInit?(pg: Pool): void | Promise<void>;
   load(pg: Pool, from: number, to: number): void | Promise<void>;
 }
 
@@ -31,6 +30,10 @@ export class Watcher {
 
   // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
   private indexerLayers: indexer[][] = [];
+  // indexers that are ignored for synchronization, i.e. while they are indexing a old range other
+  // indexers may be ahead of them -- this is all for ETHIndexer which sucks.
+  private slowIndexers: indexer[] = [];
+
   private pg: Pool;
 
   constructor() {
@@ -39,6 +42,10 @@ export class Watcher {
 
   add(...i: indexer[][]) {
     this.indexerLayers.push(...i);
+  }
+
+  slowAdd(...i: indexer[]) {
+    this.slowIndexers.push(...i);
   }
 
   latestBlock(): { number: number; timestamp: number } {
@@ -69,10 +76,17 @@ export class Watcher {
     return false;
   }
 
+  async migrateDB() {
+    await this.pg.query(`
+      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (SELECT
+      et.*
+      FROM erc20_transfers et
+      JOIN names n ON n.addr = et.f
+        OR n.addr = et.t);`);
+  }
+
   async init() {
-    for (const indexer of this.indexerLayers.flat()) {
-      if (indexer.preIndexingInit) await indexer.preIndexingInit(this.pg);
-    }
+    await this.migrateDB();
     const shovelLatest = await this.getShovelLatest();
     await this.catchUpTo(shovelLatest);
   }
@@ -124,6 +138,7 @@ export class Watcher {
         layer.map((i) => i.load(this.pg, start, start + limit))
       );
     }
+    this.slowIndexers.forEach((i) => i.load(this.pg, start, start + limit)); // no await
     console.log(
       `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );

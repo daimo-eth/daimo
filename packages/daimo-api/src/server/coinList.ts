@@ -21,10 +21,10 @@ export type ForeignToken = ForeignCoin & { token: Address };
 const customOverrides: Record<Address, ForeignToken> = {
   "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA": {
     token: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
-    fullName: "Bridged USD Coin", // USDBC has a bad name on CoinGecko
-    symbol: "USDBC",
+    fullName: "Bridged USD Coin", // USDbC has a bad name on CoinGecko
+    symbol: "USDbC",
     decimals: 6,
-    logoURI: `${daimoDomainAddress}/assets/foreign-coin-logos/USDBC.png`, // CoinGecko logo is fugly
+    logoURI: `${daimoDomainAddress}/assets/foreign-coin-logos/USDbC.png`, // CoinGecko logo is fugly
   },
 };
 

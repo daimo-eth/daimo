@@ -126,7 +126,7 @@ export interface ProposedSwap {
   fromCoin: ForeignCoin;
   fromAmount: BigIntStr; // in native unit of the token
   fromAcc: EAccount;
-  receivedAt?: number;
+  receivedAt: number;
   toAmount: number; // in native USDC units
   execRouterAddress: Address;
   execCallData: Hex;

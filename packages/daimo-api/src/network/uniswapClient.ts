@@ -57,6 +57,7 @@ export class UniswapClient {
     chainConfig.tokenDecimals
   );
   private router: AlphaRouter | null;
+  private swapCache: Map<string, [ProposedSwap, number]> = new Map();
 
   constructor() {
     const l2_RPCs = process.env.DAIMO_API_L2_RPC_WS!.split(",");
@@ -76,6 +77,32 @@ export class UniswapClient {
     }
   }
 
+  cacheSwap(addr: Address, swap: ProposedSwap | null) {
+    if (swap == null) return;
+    const key = `${addr}-${swap.fromAmount}-${swap.fromCoin.token}-${swap.receivedAt}-${swap.fromAcc.addr}`;
+    this.swapCache.set(key, [swap, now()]);
+  }
+
+  getCachedSwap(
+    addr: Address,
+    fromAmount: BigIntStr,
+    token: "ETH" | Address,
+    receivedAt: number,
+    fromAddr: Address
+  ) {
+    const key = `${addr}-${fromAmount}-${token}-${receivedAt}-${fromAddr}`;
+    const ret = this.swapCache.get(key);
+    if (ret == null) return null;
+
+    const [swap, ts] = ret;
+    if (now() - ts > 60) {
+      // Cache expires after 1 min
+      this.swapCache.delete(key);
+      return null;
+    }
+    return swap;
+  }
+
   async getProposedSwap(
     addr: Address,
     fromAmount: BigIntStr,
@@ -85,10 +112,22 @@ export class UniswapClient {
   ): Promise<ProposedSwap | null> {
     if (!this.router) return null;
 
+    const cachedSwap = this.getCachedSwap(
+      addr,
+      fromAmount,
+      fromCoin.token,
+      receivedAt,
+      fromAcc.addr
+    );
+    if (cachedSwap) {
+      console.log(`[UNISWAP] using cached swap ${cachedSwap.fromCoin.token}`);
+      return cachedSwap;
+    }
+
     const options: SwapOptionsSwapRouter02 = {
       recipient: addr,
       slippageTolerance: new Percent(50, 10_000), // 50 bips
-      deadline: Math.floor(now() + 1800),
+      deadline: Math.floor(now() + 600),
       type: SwapType.SWAP_ROUTER_02,
     };
 
@@ -113,7 +152,9 @@ export class UniswapClient {
       return null;
     }
 
-    return {
+    console.log(`[UNISWAP] found route ${JSON.stringify(route.route)}`);
+
+    const swap: ProposedSwap = {
       fromCoin,
       fromAmount,
       fromAcc,
@@ -123,5 +164,9 @@ export class UniswapClient {
       execCallData: route.methodParameters.calldata as Hex,
       execValue: route.methodParameters.value as Hex,
     };
+
+    this.cacheSwap(addr, swap);
+
+    return swap;
   }
 }

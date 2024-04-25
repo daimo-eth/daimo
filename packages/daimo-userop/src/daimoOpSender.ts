@@ -332,7 +332,9 @@ export class DaimoOpSender {
     swap: ProposedSwap,
     opMetadata: DaimoOpMetadata
   ) {
-    console.log(`[OP] execute swap ${swap.fromCoin.token}`);
+    console.log(
+      `[OP] execute swap ${swap.fromCoin.token} to ${swap.toAmount} via ${swap.execRouterAddress}`
+    );
 
     const executions: DaimoAccountCall[] = [
       {

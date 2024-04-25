@@ -97,7 +97,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
           <Spacer h={32} />
           <AccountRow
             acc={swap.fromAcc}
-            timestamp={swap.receivedAt || now()}
+            timestamp={swap.receivedAt}
             viewAccount={() => navToAccountPage(swap.fromAcc!, nav)}
           />
         </>
@@ -125,7 +125,7 @@ function SwapInfoRow({ swap }: { swap: ProposedSwap }) {
     swap.fromCoin
   );
 
-  const humanReadableToAmount = amountToDollars(swap.toAmount);
+  const humanReadableToAmount = `$${amountToDollars(swap.toAmount)}`;
 
   return (
     <View style={{ flexDirection: "column", alignItems: "center" }}>
@@ -137,7 +137,7 @@ function SwapInfoRow({ swap }: { swap: ProposedSwap }) {
         <Image source={SwapLink} />
         <CurrencyDisplay
           coin={daimoUSDC}
-          amount={"$ " + humanReadableToAmount}
+          amount={humanReadableToAmount}
           amountColor={color.successDark}
         />
       </View>

@@ -3,6 +3,10 @@ import { DaimoChain } from "@daimo/contract";
 
 import { env } from "../../../logic/env";
 
+// Get memo text for an op
+// Either uses the memo field for standard transfers, e.g. "for ice cream"
+// Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
+// or "Accepted 5 USDT as USDC" if long
 export function getSynthesizedMemo(
   op: DisplayOpEvent,
   daimoChain: DaimoChain,

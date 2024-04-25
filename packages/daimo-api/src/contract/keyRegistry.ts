@@ -143,7 +143,7 @@ export class KeyRegistry {
   }
 
   /** Find all keys and metadata for a daimo account address */
-  async resolveAddressKeys(addr: Address): Promise<KeyData[] | null> {
+  resolveAddressKeys(addr: Address): KeyData[] | null {
     return this.addrToKeyData.get(addr) || null;
   }
 

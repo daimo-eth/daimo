@@ -6,7 +6,6 @@ import { Transfer } from "./homeCoinIndexer";
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
 import { UniswapClient } from "../network/uniswapClient";
-import { ViemClient } from "../network/viemClient";
 import { ForeignToken, fetchTokenList } from "../server/coinList";
 import { addrTxHashKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -37,26 +36,14 @@ export class ForeignCoinIndexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(
-    private nameReg: NameRegistry,
-    private vc: ViemClient,
-    private uc: UniswapClient
-  ) {}
-
-  async preIndexingInit(pg: Pool) {
-    this.foreignTokens = await fetchTokenList();
-    await retryBackoff(`createFilteredTransfersView`, async () => {
-      await pg.query(`CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers as (SELECT
-        et.*
-      FROM
-        erc20_transfers et
-        JOIN names n ON n.addr = et.f
-          OR n.addr = et.t);`);
-    });
-  }
+  constructor(private nameReg: NameRegistry, private uc: UniswapClient) {}
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
+
+    if (this.foreignTokens.size === 0) {
+      this.foreignTokens = await fetchTokenList();
+    }
 
     const result = await retryBackoff(
       `swapCoinIndexer-logs-query-${from}-${to}`,
@@ -190,6 +177,9 @@ export class ForeignCoinIndexer {
   }
 
   // Used to detect onchain swaps initiated by the user.
+  // Assumes that one transaction only contains one swap per address.
+  // This won't be true if for example a 4337 bundle contains multiple swaps
+  // from the same user, or the user swaps multiple assets in a single tx.
   getForeignTokenReceiveForSwap(
     addr: Address,
     txHash: Hex

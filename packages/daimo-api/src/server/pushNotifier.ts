@@ -73,6 +73,9 @@ export class PushNotifier {
     }
 
     this.isInitialized = true;
+    console.log(
+      `[PUSH] initialized, future indexing will be pushed notifications`
+    );
   }
 
   private handleNoteOps = async (logs: DaimoNoteStatus[]) => {
@@ -190,6 +193,7 @@ export class PushNotifier {
       return;
     }
 
+    console.log(`[PUSH] caching and registering ${pushToken} for ${addr}`);
     this.cachePushToken(addr, pushToken);
 
     await Promise.all([
@@ -213,7 +217,6 @@ export class PushNotifier {
       return;
     }
 
-    console.log(`[PUSH] registering ${pushToken} for ${addr}`);
     this.pushTokens.set(addr, [...tokens, pushToken]);
   }
 

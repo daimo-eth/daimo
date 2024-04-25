@@ -9,13 +9,13 @@ import {
   daimoOffchainUtilsABI,
   daimoOffchainUtilsAddress,
 } from "@daimo/contract";
+import { Pool } from "pg";
 import { Address } from "viem";
 
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
 import { UniswapClient } from "../network/uniswapClient";
 import { ViemClient } from "../network/viemClient";
-import { Watcher } from "../shovel/watcher";
 import { chunks } from "../utils/func";
 import { addrBlockNumKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -26,16 +26,11 @@ export type ETHTransfer = {
   blockNumber: number;
 };
 
-export const uniswapETHPoolAddr = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
-
 /* Tracks ETH transfers. */
 export class ETHIndexer {
-  private cachedBalances: Map<string, bigint> = new Map();
+  private cachedBalances = new Map<string, bigint>();
   private latestBalance: Map<Address, [bigint, number]> = new Map();
   private allETHTransfers: ETHTransfer[] = [];
-
-  private latest = 5699999;
-  private isIndexing = false;
 
   private listeners: ((ethTransfers: ETHTransfer[]) => void)[] = [];
 
@@ -45,82 +40,76 @@ export class ETHIndexer {
     private nameReg: NameRegistry
   ) {}
 
-  // Watches shovel for new blocks, and indexes ETH transfers from them.
-  // For now, ETH transfers are just batched balance changes since
-  // Shovel doesn't support them.
-  async watch(shovel: Watcher) {
-    setInterval(async () => {
-      try {
-        if (this.isIndexing) {
-          console.log(`[ETHINDEXER] skipping tick, already indexing`);
-          return;
-        }
-        this.isIndexing = true;
-
-        const shovelLatest = await shovel.getShovelLatest();
-
-        // localLatest <= 0 when there are no new blocks in shovel
-        // or, for whatever reason, we are ahead of shovel.
-        if (shovelLatest > this.latest) {
-          await this.load(this.latest + 1, shovelLatest);
-          this.latest = shovelLatest;
-        }
-      } finally {
-        this.isIndexing = false;
+  async batchFetchBalances(
+    allAddrs: Address[],
+    blockNum: number,
+    cache: boolean // whether to store query results in cache or not, clears existing cache entries as well if not
+  ): Promise<Map<Address, bigint>> {
+    const batchGetETHBalances = async (addrs: Address[]) => {
+      if (blockNum < chainConfig.offChainUtilsDeployBlock) {
+        return new Array(addrs.length).fill(0n) as bigint[];
+      } else {
+        return await this.vc.publicClient.readContract({
+          abi: daimoOffchainUtilsABI,
+          address: daimoOffchainUtilsAddress,
+          functionName: "batchGetETHBalances",
+          args: [addrs],
+          blockNumber: BigInt(blockNum),
+        });
       }
-    }, 1000);
-  }
+    };
 
-  async batchFetchAndCacheBalances(allAddrs: Address[], blockNum: number) {
-    const batchedAddrs = [...chunks(allAddrs, 1000)];
+    const ret = new Map<Address, bigint>();
 
-    for (const batch of batchedAddrs) {
-      console.log(`[ETH] fetching ${batch.length} balances at ${blockNum}`);
+    const queryAddrs = [] as Address[];
+    for (const addr of allAddrs) {
+      if (this.cachedBalances.has(addrBlockNumKey(addr, blockNum))) {
+        ret.set(
+          addr,
+          this.cachedBalances.get(addrBlockNumKey(addr, blockNum))!
+        );
+        if (!cache) {
+          this.cachedBalances.delete(addrBlockNumKey(addr, blockNum));
+        }
+      } else queryAddrs.push(addr);
+    }
 
-      const balances = await (async () => {
-        if (blockNum < chainConfig.offChainUtilsDeployBlock) {
-          return [...Array(batch.length).keys()].map((_) => 0n);
-        } else {
-          return await retryBackoff(`batchGetETHBalances`, () =>
-            this.vc.publicClient.readContract({
-              abi: daimoOffchainUtilsABI,
-              address: daimoOffchainUtilsAddress,
-              functionName: "batchGetETHBalances",
-              args: [batch],
-              blockNumber: BigInt(blockNum),
-            })
+    const batchedQueryAddrs = [...chunks(queryAddrs, 500)];
+
+    for (const batch of batchedQueryAddrs) {
+      if (batch.length === 0) continue;
+      const balances = await retryBackoff(`batchGetETHBalances`, () =>
+        batchGetETHBalances(batch)
+      );
+      for (let i = 0; i < batch.length; i++) {
+        ret.set(batch[i], balances[i]);
+        if (cache) {
+          this.cachedBalances.set(
+            addrBlockNumKey(batch[i], blockNum),
+            balances[i]
           );
         }
-      })();
-
-      for (const [i, balance] of balances.entries()) {
-        this.cachedBalances.set(addrBlockNumKey(batch[i], blockNum), balance);
       }
     }
+
+    return ret;
   }
 
-  async load(from: number, to: number) {
+  async load(_: Pool, from: number, to: number) {
     const startTime = Date.now();
-
     // TODO: For now, ETH transfers are just batched balance changes between
     // (from, to] since Shovel doesn't support indexing them.
 
     const allAddrs = this.nameReg.getAllDAccounts().map((a) => a.addr);
 
     // Query latest balances and starting balances for all accounts
-    await Promise.all([
-      this.batchFetchAndCacheBalances(allAddrs, to),
-      this.batchFetchAndCacheBalances(allAddrs, from - 1),
-    ]);
+    const before = await this.batchFetchBalances(allAddrs, from - 1, false); // clear cache during fetch
+    const after = await this.batchFetchBalances(allAddrs, to, true); // cache balances for next load
 
     const newTransfers = allAddrs
       .map((addr) => {
-        const balanceAfter = this.cachedBalances.get(
-          addrBlockNumKey(addr, to)
-        )!;
-        const balanceBefore = this.cachedBalances.get(
-          addrBlockNumKey(addr, from - 1)
-        )!;
+        const balanceAfter = after.get(addr)!;
+        const balanceBefore = before.get(addr)!;
 
         const currentLatestBalance = this.latestBalance.get(addr);
         if (!currentLatestBalance || currentLatestBalance[0] !== balanceAfter) {
@@ -168,18 +157,17 @@ export class ETHIndexer {
       0,
     ];
 
-    console.log(
-      `[ETH] getProposedSwap ${addr}: ${latestBalance} at ${latestBlock}`
-    );
-
-    if (!latestBalance) return []; // todo: ignore dust?
+    if (latestBalance === 0n) return []; // todo: ignore dust?
 
     const swap = await this.uc.getProposedSwap(
       addr,
       latestBalance.toString() as BigIntStr,
       nativeETH,
       guessTimestampFromNum(latestBlock, chainConfig.daimoChain),
-      { addr: uniswapETHPoolAddr, label: AddrLabel.UniswapETHPool }
+      {
+        addr: chainConfig.uniswapETHPoolAddress,
+        label: AddrLabel.UniswapETHPool,
+      }
     );
 
     console.log(`[ETH] getProposedSwap ${addr}: ${JSON.stringify(swap)}`);

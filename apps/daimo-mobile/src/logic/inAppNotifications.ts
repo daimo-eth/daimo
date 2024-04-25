@@ -103,7 +103,7 @@ export function useInAppNotifications(): InAppNotificationInfo {
       notifications.push({
         type: "swap",
         marksUnread: true,
-        timestamp: swap.receivedAt || now(),
+        timestamp: swap.receivedAt,
         swap,
       });
     });

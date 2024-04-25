@@ -109,13 +109,15 @@ export class HomeCoinIndexer {
   /** Get balance as of a block height. */
   async getBalanceAt(addr: Address, blockNum: number) {
     const blockNumber = BigInt(blockNum);
-    return this.client.publicClient.readContract({
-      abi: erc20ABI,
-      address: chainConfig.tokenAddress,
-      functionName: "balanceOf",
-      args: [addr],
-      blockNumber,
-    });
+    return await retryBackoff(`getBalanceAt-${addr}`, () =>
+      this.client.publicClient.readContract({
+        abi: erc20ABI,
+        address: chainConfig.tokenAddress,
+        functionName: "balanceOf",
+        args: [addr],
+        blockNumber,
+      })
+    );
   }
 
   /** Listener invoked for all past coin transfers, then for new ones. */

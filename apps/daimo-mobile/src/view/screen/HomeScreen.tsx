@@ -266,7 +266,7 @@ function AmountAndButtons({ account }: { account: Account }) {
       <View style={styles.amountAndButtons}>
         <TextLight>Your balance</TextLight>
         <TitleAmount amount={account.lastBalance} />
-        {Number(pendingDollars) > 0.1 && (
+        {Number(pendingDollars) > 0 && (
           <>
             <Spacer h={8} />
             <PendingTag pendingDollars={pendingDollars} />

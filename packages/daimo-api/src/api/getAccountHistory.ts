@@ -96,8 +96,8 @@ export async function getAccountHistory(
   db: DB
 ): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
-  const eAcc = await nameReg.getEAccount(address);
-  assert(eAcc.name != null, "Not a Daimo account");
+  const eAcc = nameReg.getDaimoAccount(address);
+  assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
 
   // Get latest finalized block. Next account sync, fetch since this block.
   const finBlock = await vc.publicClient.getBlock({
@@ -137,6 +137,8 @@ export async function getAccountHistory(
     if (log.type === "claimLink" || log.type === "createLink") {
       if (log.noteStatus.claimer) addrs.add(log.noteStatus.claimer.addr);
       addrs.add(log.noteStatus.sender.addr);
+    } else if (log.type === "transfer" && log.preSwapTransfer) {
+      addrs.add(log.preSwapTransfer.from);
     }
   });
   const namedAccounts = (
@@ -144,7 +146,7 @@ export async function getAccountHistory(
   ).filter((acc) => hasAccountName(acc));
 
   // Get account keys
-  const accountKeys = await keyReg.resolveAddressKeys(address);
+  const accountKeys = keyReg.resolveAddressKeys(address);
   assert(accountKeys != null);
 
   // Prefetch info required to send operations > fast at time of sending.
@@ -167,9 +169,7 @@ export async function getAccountHistory(
     : null;
 
   const inviteeAddrs = inviteGraph.getInvitees(address);
-  const invitees = await Promise.all(
-    inviteeAddrs.map((addr) => nameReg.getEAccount(addr))
-  );
+  const invitees = inviteeAddrs.map((addr) => nameReg.getDaimoAccount(addr)!);
 
   // Get pfps from linked accounts
   const profilePicture = profileCache.getProfilePicture(address);
@@ -178,13 +178,10 @@ export async function getAccountHistory(
   const notificationRequestStatuses = requestIndexer.getAddrRequests(address);
 
   // Get proposed swaps of non-home coin tokens for address
-  if (!foreignCoinIndexer) throw new Error("No foreign coin indexer");
-  const proposedSwaps = (
-    await Promise.all([
-      ethIndexer.getProposedSwapsForAddr(address),
-      foreignCoinIndexer.getProposedSwapsForAddr(address),
-    ])
-  ).flat();
+  const proposedSwaps = [
+    ...(await ethIndexer.getProposedSwapsForAddr(address)),
+    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address)),
+  ];
 
   const ret: AccountHistoryResult = {
     address,

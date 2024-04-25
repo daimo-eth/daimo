@@ -25,7 +25,7 @@ async function main() {
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(null as any, nameReg);
   const paymentMemoTracker = new PaymentMemoTracker(null as any);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
