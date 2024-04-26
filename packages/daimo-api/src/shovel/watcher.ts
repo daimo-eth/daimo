@@ -25,8 +25,10 @@ const poolConfig: PoolConfig = {
 export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest = 5699999;
+  private slowLatest = 5699999;
   private batchSize = 100000;
   private isIndexing = false;
+  private isSlowIndexing = false;
 
   // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
   private indexerLayers: indexer[][] = [];
@@ -110,6 +112,10 @@ export class Watcher {
           shovelLatest,
           this.batchSize
         );
+        if (localLatest - this.slowLatest > 3) {
+          // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
+          this.slowIndex(this.slowLatest + 1, localLatest);
+        }
         // localLatest <= 0 when there are no new blocks in shovel
         // or, for whatever reason, we are ahead of shovel.
         if (localLatest > this.latest) this.latest = localLatest;
@@ -124,6 +130,7 @@ export class Watcher {
     while (this.latest < stop) {
       this.latest = await this.index(this.latest + 1, stop, this.batchSize);
     }
+    await this.slowIndex(this.slowLatest + 1, stop); // jumps ethIndexer to the end in one go
     console.log(`[SHOVEL] initialized to ${this.latest}`);
   }
 
@@ -140,11 +147,20 @@ export class Watcher {
         layer.map((i) => i.load(this.pg, start, start + limit))
       );
     }
-    this.slowIndexers.forEach((i) => i.load(this.pg, start, start + limit)); // no await
     console.log(
       `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
     return start + limit;
+  }
+
+  private async slowIndex(start: number, stop: number) {
+    if (this.isSlowIndexing) return;
+    this.isSlowIndexing = true;
+    for (const i of this.slowIndexers) {
+      await i.load(this.pg, start, stop);
+    }
+    this.slowLatest = stop;
+    this.isSlowIndexing = false;
   }
 
   async getShovelLatest(): Promise<number> {

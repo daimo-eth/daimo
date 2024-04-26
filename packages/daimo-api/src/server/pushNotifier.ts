@@ -92,21 +92,25 @@ export class PushNotifier {
 
   private handleForeignCoinTransfers = async (logs: ForeignTokenTransfer[]) => {
     console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
-    const messages = (
-      await Promise.all(
-        logs.map((log) => this.getPushMessagesFromForeignCoinTransfer(log))
-      )
-    ).flat();
+    const messages: ExpoPushMessage[] = [];
+
+    for (const log of logs) {
+      messages.push(
+        ...(await this.getPushMessagesFromForeignCoinTransfer(log))
+      );
+    }
+
     this.maybeSendNotifications(messages);
   };
 
   private handleEthTransfers = async (logs: ETHTransfer[]) => {
     console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
-    const messages = (
-      await Promise.all(
-        logs.map((log) => this.getPushMessagesFromEthTransfer(log))
-      )
-    ).flat();
+    const messages: ExpoPushMessage[] = [];
+
+    for (const log of logs) {
+      messages.push(...(await this.getPushMessagesFromEthTransfer(log)));
+    }
+
     this.maybeSendNotifications(messages);
   };
 
@@ -321,12 +325,13 @@ export class PushNotifier {
     const pushTokens = this.pushTokens.get(getAddress(log.to));
     if (!pushTokens || pushTokens.length === 0) return [];
 
-    const readableAmount = getForeignCoinDisplayAmount(
-      log.value.toString() as `${bigint}`,
-      nativeETH
-    );
     const swap = await this.ethIndexer.getProposedSwapsForAddr(log.to);
     if (swap.length === 0) return [];
+
+    const readableAmount = getForeignCoinDisplayAmount(
+      swap[0].fromAmount,
+      nativeETH
+    );
 
     const dollars = amountToDollars(swap[0].toAmount);
 

@@ -74,7 +74,7 @@ export class ETHIndexer {
       } else queryAddrs.push(addr);
     }
 
-    const batchedQueryAddrs = [...chunks(queryAddrs, 500)];
+    const batchedQueryAddrs = [...chunks(queryAddrs, 100)];
 
     for (const batch of batchedQueryAddrs) {
       if (batch.length === 0) continue;

@@ -17,7 +17,7 @@ export enum AddrLabel {
   Paymaster = "fee",
   Coinbase = "coinbase",
   Relay = "relay.link",
-  UniswapETHPool = "Swapped ETH",
+  UniswapETHPool = "swapped ETH",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */
