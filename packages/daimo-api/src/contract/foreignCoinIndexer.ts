@@ -146,7 +146,8 @@ export class ForeignCoinIndexer {
   }
 
   async getProposedSwapForLog(
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
+    runInBackground?: boolean
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
@@ -155,7 +156,8 @@ export class ForeignCoinIndexer {
         log.value.toString() as `${bigint}`,
         log.foreignToken,
         guessTimestampFromNum(log.blockNumber, chainConfig.daimoChain),
-        fromAcc
+        fromAcc,
+        runInBackground
       );
     });
 
@@ -165,11 +167,16 @@ export class ForeignCoinIndexer {
     return swap;
   }
 
-  async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
+  async getProposedSwapsForAddr(
+    addr: Address,
+    runInBackground?: boolean
+  ): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
-        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
+        pendingSwaps.map((swap) =>
+          this.getProposedSwapForLog(swap, runInBackground)
+        )
       )
     ).filter((s): s is ProposedSwap => s != null);
 

@@ -128,6 +128,7 @@ export interface ProposedSwap {
   fromAcc: EAccount;
   receivedAt: number;
   toAmount: number; // in native USDC units
+  expiresAt: number;
   execRouterAddress: Address;
   execCallData: Hex;
   execValue: Hex;

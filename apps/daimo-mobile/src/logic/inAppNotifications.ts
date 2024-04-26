@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { getAccountManager, useAccount } from "./accountManager";
+import { resync } from "../sync/sync";
 
 type InAppNotification =
   | RequestNotification
@@ -99,6 +100,9 @@ export function useInAppNotifications(): InAppNotificationInfo {
 
     // Proposed swaps
     account.proposedSwaps.map((swap) => {
+      if (swap.expiresAt < now()) {
+        resync("Refetching swap data");
+      }
       console.log(`[IN-APP] pushing swap ${swap.fromCoin}`);
       notifications.push({
         type: "swap",

@@ -151,7 +151,10 @@ export class ETHIndexer {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
+  async getProposedSwapsForAddr(
+    addr: Address,
+    runInBackground?: boolean
+  ): Promise<ProposedSwap[]> {
     const [latestBalance, latestBlock] = this.latestBalance.get(addr) || [
       0n,
       0,
@@ -167,7 +170,8 @@ export class ETHIndexer {
       {
         addr: chainConfig.uniswapETHPoolAddress,
         label: AddrLabel.UniswapETHPool,
-      }
+      },
+      runInBackground
     );
 
     console.log(`[ETH] getProposedSwap ${addr}: ${JSON.stringify(swap)}`);
