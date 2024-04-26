@@ -1,4 +1,5 @@
 import {
+  DaimoRequestV2Status,
   DisplayOpEvent,
   amountToDollars,
   formatDaimoLink,
@@ -17,6 +18,7 @@ import { Hex, formatEther, getAddress } from "viem";
 import { Telemetry } from "./telemetry";
 import { CoinIndexer, Transfer } from "../contract/coinIndexer";
 import { NameRegistry } from "../contract/nameRegistry";
+import { RequestIndexer } from "../contract/requestIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 
@@ -26,6 +28,7 @@ export class Crontab {
   constructor(
     private vc: ViemClient,
     private coinIndexer: CoinIndexer,
+    private requestIndexer: RequestIndexer,
     private nameRegistry: NameRegistry,
     private telemetry: Telemetry
   ) {}
@@ -37,6 +40,7 @@ export class Crontab {
       new CronJob("*/1 * * * *", () => this.printStatus()),
     ];
     this.coinIndexer.addListener(this.pipeTransfers);
+    this.requestIndexer.addListener(this.pipeRequestLogs);
 
     this.cronJobs.forEach((job) => job.start());
   }
@@ -164,4 +168,22 @@ export class Crontab {
       }${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
     );
   }
+
+  private pipeRequestLogs = (statuses: DaimoRequestV2Status[]) => {
+    for (const status of statuses) {
+      const recipient = status.recipient;
+      const requestId = status.link.id;
+      const amount = status.link.dollars;
+      const expectedFulfiller = status.expectedFulfiller;
+      const fulfiller = status.fulfilledBy;
+
+      this.telemetry.recordClippy(
+        `Request ${requestId}: ${getAccountName(
+          recipient
+        )} requested $${amount} ${
+          expectedFulfiller ? `(from ${getAccountName(expectedFulfiller)})` : ""
+        } ${fulfiller ? `(fulfilled by ${getAccountName(fulfiller)})` : ""}`
+      );
+    }
+  };
 }

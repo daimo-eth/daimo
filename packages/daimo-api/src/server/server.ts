@@ -67,7 +67,13 @@ async function main() {
 
   const paymaster = new Paymaster(vc, bundlerClient, db);
   const accountFactory = new AccountFactory(vc);
-  const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
+  const crontab = new Crontab(
+    vc,
+    coinIndexer,
+    requestIndexer,
+    nameReg,
+    monitor
+  );
 
   const notifier = new PushNotifier(
     coinIndexer,
