@@ -174,7 +174,9 @@ export class Crontab {
         opEvent.type === "transfer" && opEvent.requestStatus
           ? " for " + formatDaimoLink(opEvent.requestStatus.link)
           : ""
-      }${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
+      }${
+        opEvent.type === "transfer" && opEvent.memo ? " : " + opEvent.memo : ""
+      }`
     );
   }
 
