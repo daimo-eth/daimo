@@ -110,9 +110,14 @@ export class RequestIndexer {
       [from, to, chainConfig.chainL2.id]
     );
     const logs = result.rows.map(rowToRequestCreatedLog);
-    // todo: ignore requests not made by the API
 
-    const promises = logs.map(async (l) => {
+    if (logs.length === 0) return [];
+
+    // Ignore requests made by blacklisted users
+    const blacklistedAddrs = await this.db.loadBlacklistedRequesters();
+    const logsFiltered = logs.filter((l) => !blacklistedAddrs.has(l.creator));
+
+    const promises = logsFiltered.map(async (l) => {
       try {
         return this.handleRequestCreated(l);
       } catch (e) {
@@ -198,6 +203,9 @@ export class RequestIndexer {
       [from, to, chainConfig.chainL2.id]
     );
     const cancelledRequests = result.rows.map(rowToRequestCancelledLog);
+
+    if (cancelledRequests.length === 0) return [];
+
     const statuses = cancelledRequests
       .map((req) => {
         const request = this.requests.get(req.id);
@@ -239,6 +247,9 @@ export class RequestIndexer {
       [from, to, chainConfig.chainL2.id]
     );
     const fulfilledRequests = result.rows.map(rowToRequestFulfilledLog);
+
+    if (fulfilledRequests.length === 0) return [];
+
     const promises = fulfilledRequests
       .map(async (req) => {
         const request = this.requests.get(req.id);

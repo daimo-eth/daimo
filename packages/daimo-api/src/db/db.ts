@@ -131,6 +131,10 @@ export class DB {
           ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
           ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 
+          CREATE TABLE IF NOT EXISTS blacklisted_requesters (
+            address CHAR(42) PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT NOW()
+          );
       `);
     await client.end();
   }
@@ -427,6 +431,16 @@ export class DB {
     client.release();
 
     console.log(`[DB] inserted payment memos`);
+  }
+
+  async loadBlacklistedRequesters(): Promise<Set<string>> {
+    console.log(`[DB] loading blacklisted requesters`);
+    const result = await this.pool.query<{ address: string }>(
+      `SELECT address FROM blacklisted_requesters`
+    );
+
+    console.log(`[DB] ${result.rows.length} blacklisted requesters`);
+    return new Set(result.rows.map((row) => row.address));
   }
 
   async loadDeclinedRequests(): Promise<DeclinedRequestRow[]> {
