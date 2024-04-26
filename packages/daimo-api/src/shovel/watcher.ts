@@ -82,7 +82,9 @@ export class Watcher {
       et.*
       FROM erc20_transfers et
       JOIN names n ON n.addr = et.f
-        OR n.addr = et.t);`);
+        OR n.addr = et.t);
+      
+      CREATE INDEX IF NOT EXISTS i_block_num ON filtered_erc20_transfers (block_num);`);
   }
 
   async init() {
