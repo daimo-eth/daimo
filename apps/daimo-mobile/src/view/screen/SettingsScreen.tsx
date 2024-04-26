@@ -24,13 +24,13 @@ import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../model/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
+import { ContactBubble } from "../shared/Bubble";
 import {
   BadgeButton,
   ButtonMed,
   DescriptiveClickableRow,
   TextButton,
 } from "../shared/Button";
-import { ContactBubble } from "../shared/ContactBubble";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { Icon } from "../shared/Icon";
 import { ClockIcon, PlusIcon } from "../shared/Icons";

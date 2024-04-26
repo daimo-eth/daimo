@@ -79,11 +79,6 @@ export class KeyRegistry {
           break;
         }
       }
-      console.log(
-        `[KEY-REG] cached ${
-          this.addrToKeyData.get(addr)?.length
-        } key(s) for ${addr}`
-      );
     }
     if (changes.length === 0) return;
     console.log(
@@ -148,7 +143,7 @@ export class KeyRegistry {
   }
 
   /** Find all keys and metadata for a daimo account address */
-  async resolveAddressKeys(addr: Address): Promise<KeyData[] | null> {
+  resolveAddressKeys(addr: Address): KeyData[] | null {
     return this.addrToKeyData.get(addr) || null;
   }
 

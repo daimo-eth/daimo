@@ -3,11 +3,11 @@ import {
   DaimoNoteState,
   DaimoNoteStatus,
   DisplayOpEvent,
-  EAccount,
   OpStatus,
   PaymentLinkOpEvent,
   amountToDollars,
   getAccountName,
+  getDisplayFromTo,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -17,33 +17,33 @@ import React, { createContext, useCallback, useContext } from "react";
 import { Linking, View } from "react-native";
 import { Address } from "viem";
 
-import { NoteDisplay } from "./link/NoteScreen";
-import { Dispatcher, DispatcherContext } from "../../action/dispatch";
+import { getSynthesizedMemo } from "./shared";
+import { Dispatcher, DispatcherContext } from "../../../action/dispatch";
 import {
   ParamListBottomSheet,
   navToAccountPage,
   useNav,
-} from "../../common/nav";
-import { getCachedEAccount } from "../../logic/addr";
-import { env } from "../../logic/env";
-import { useFetchLinkStatus } from "../../logic/linkStatus";
-import { Account } from "../../model/account";
-import { syncFindSameOp } from "../../sync/sync";
-import { AccountRow } from "../shared/AccountRow";
-import { TitleAmount } from "../shared/Amount";
-import { ButtonBig, LinkButton } from "../shared/Button";
-import { CenterSpinner } from "../shared/CenterSpinner";
-import { ScreenHeader } from "../shared/ScreenHeader";
-import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
+} from "../../../common/nav";
+import { getCachedEAccount } from "../../../logic/addr";
+import { env } from "../../../logic/env";
+import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { Account } from "../../../model/account";
+import { syncFindSameOp } from "../../../sync/sync";
+import { AccountRow } from "../../shared/AccountRow";
+import { TitleAmount } from "../../shared/Amount";
+import { ButtonBig, LinkButton } from "../../shared/Button";
+import { CenterSpinner } from "../../shared/CenterSpinner";
+import { ScreenHeader } from "../../shared/ScreenHeader";
+import Spacer from "../../shared/Spacer";
+import { color, ss } from "../../shared/style";
 import {
-  TextBody,
   TextBodyCaps,
   TextCenter,
   TextError,
   TextPara,
-} from "../shared/text";
-import { useWithAccount } from "../shared/withAccount";
+} from "../../shared/text";
+import { useWithAccount } from "../../shared/withAccount";
+import { NoteDisplay } from "../link/NoteScreen";
 
 type Props = NativeStackScreenProps<
   ParamListBottomSheet,
@@ -174,13 +174,9 @@ function TransferBody({
 }) {
   const nav = useNav();
 
-  let other: EAccount;
   const sentByUs = op.from === account.address;
-  if (sentByUs) {
-    other = getCachedEAccount(op.to);
-  } else {
-    other = getCachedEAccount(op.from);
-  }
+  const [displayFrom, displayTo] = getDisplayFromTo(op);
+  const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
@@ -193,14 +189,10 @@ function TransferBody({
   // Generate subtitle = fees, chain, other details
   const col = color.grayMid;
   const subtitleElems = [
+    <React.Fragment key="coin">{coinName}</React.Fragment>,
+    <React.Fragment key="chain">{chainName}</React.Fragment>,
     <React.Fragment key="fees">
       <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
-    </React.Fragment>,
-    <React.Fragment key="coin">
-      <TextBody color={col}>{coinName}</TextBody>
-    </React.Fragment>,
-    <React.Fragment key="chain">
-      {chainName}
       <Spacer w={8} />
       <Octicons size={16} name="info" color={col} />
     </React.Fragment>,
@@ -212,6 +204,11 @@ function TransferBody({
     subtitleElems.splice(i, 0, space);
   }
 
+  const memoText = getSynthesizedMemo(
+    op,
+    daimoChainFromId(account.homeChainId)
+  );
+
   return (
     <View>
       <TitleAmount
@@ -219,20 +216,20 @@ function TransferBody({
         preSymbol={sentByUs ? "-" : "+"}
         style={sentByUs ? { color: "black" } : { color: color.success }}
       />
-      {op.type === "transfer" && op.memo && (
-        <>
-          <Spacer h={4} />
-          <TextCenter>
-            <TextBodyCaps color={color.grayMid}>{op.memo}</TextBodyCaps>
-          </TextCenter>
-        </>
-      )}
-      <Spacer h={16} />
+      <Spacer h={4} />
       <TouchableOpacity onPress={onShowHelp} hitSlop={8}>
         <TextCenter>
           <TextBodyCaps color={color.grayMid}>{subtitleElems}</TextBodyCaps>
         </TextCenter>
       </TouchableOpacity>
+      {memoText && (
+        <>
+          <Spacer h={16} />
+          <TextCenter>
+            <TextBodyCaps color={color.grayMid}>{memoText}</TextBodyCaps>
+          </TextCenter>
+        </>
+      )}
       <Spacer h={32} />
       <AccountRow
         acc={other}

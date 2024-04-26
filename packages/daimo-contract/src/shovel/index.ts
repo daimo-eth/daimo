@@ -2,6 +2,7 @@ import { makeConfig, toJSON } from "@indexsupply/shovel-config";
 import type { Source } from "@indexsupply/shovel-config";
 import { writeFileSync } from "fs";
 
+import { erc20TransfersIntegration } from "./erc20transfers";
 import { keyAddedIntegration, keyRemovedIntegration } from "./keyRotation";
 import { namesIntegration } from "./names";
 import { noteCreatedIntegration, noteRedeemedIntegration } from "./notes";
@@ -26,6 +27,7 @@ const integrations = [
   keyAddedIntegration,
   keyRemovedIntegration,
   transfersIntegration,
+  erc20TransfersIntegration,
   noteCreatedIntegration,
   noteRedeemedIntegration,
   requestCreatedIntegration,

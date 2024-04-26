@@ -2,14 +2,16 @@ import {
   DisplayOpEvent,
   OpStatus,
   PaymentLinkOpEvent,
+  PreSwapTransfer,
   TransferOpEvent,
   guessTimestampFromNum,
 } from "@daimo/common";
-import { daimoChainFromId, erc20ABI } from "@daimo/contract";
+import { erc20ABI } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
+import { ForeignCoinIndexer } from "./foreignCoinIndexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
@@ -31,7 +33,7 @@ export interface Transfer {
 }
 
 /* USDC or testUSDC stablecoin contract. Tracks transfers. */
-export class CoinIndexer {
+export class HomeCoinIndexer {
   private allTransfers: Transfer[] = [];
 
   private listeners: ((transfers: Transfer[]) => void)[] = [];
@@ -41,6 +43,7 @@ export class CoinIndexer {
     private opIndexer: OpIndexer,
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
+    private foreignCoinIndexer: ForeignCoinIndexer,
     private paymentMemoTracker: PaymentMemoTracker
   ) {}
 
@@ -52,7 +55,7 @@ export class CoinIndexer {
     const startTime = Date.now();
 
     const result = await retryBackoff(
-      `coinIndexer-logs-query-${from}-${to}`,
+      `homeCoinIndexer-logs-query-${from}-${to}`,
       () =>
         pg.query(
           `
@@ -106,13 +109,15 @@ export class CoinIndexer {
   /** Get balance as of a block height. */
   async getBalanceAt(addr: Address, blockNum: number) {
     const blockNumber = BigInt(blockNum);
-    return this.client.publicClient.readContract({
-      abi: erc20ABI,
-      address: chainConfig.tokenAddress,
-      functionName: "balanceOf",
-      args: [addr],
-      blockNumber,
-    });
+    return await retryBackoff(`getBalanceAt-${addr}`, () =>
+      this.client.publicClient.readContract({
+        abi: erc20ABI,
+        address: chainConfig.tokenAddress,
+        functionName: "balanceOf",
+        args: [addr],
+        blockNumber,
+      })
+    );
   }
 
   /** Listener invoked for all past coin transfers, then for new ones. */
@@ -200,11 +205,26 @@ export class CoinIndexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
+    // If transfer occured as a result of a swap, attach logical origin info.
+    const correspondingForeignReceive =
+      this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
+        to,
+        transactionHash
+      );
+    const preSwapTransfer: PreSwapTransfer | undefined =
+      correspondingForeignReceive
+        ? {
+            coin: correspondingForeignReceive.foreignToken,
+            from: correspondingForeignReceive.from,
+            amount: `${correspondingForeignReceive.value}` as `${bigint}`,
+          }
+        : undefined;
+
     const partialOp = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
-        daimoChainFromId(chainConfig.chainL2.id)
+        chainConfig.daimoChain
       ),
       from,
       to,
@@ -225,6 +245,7 @@ export class CoinIndexer {
           ...partialOp,
           requestStatus,
           memo,
+          preSwapTransfer,
         } as TransferOpEvent;
       }
 

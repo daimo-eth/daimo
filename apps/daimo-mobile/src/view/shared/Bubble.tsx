@@ -1,4 +1,4 @@
-import { AddrLabel } from "@daimo/common";
+import { AddrLabel, ForeignCoin } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
@@ -56,6 +56,14 @@ export function ContactBubble({
           return <Octicons name="link" size={fontSize} color={color.primary} />;
         case AddrLabel.Coinbase:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
+        case AddrLabel.UniswapETHPool:
+          return (
+            <Octicons
+              name="arrow-switch"
+              size={fontSize}
+              color={color.primary}
+            />
+          );
         case AddrLabel.Relay:
           return (
             <Octicons
@@ -80,6 +88,18 @@ export function ContactBubble({
   );
 }
 
+export function TokenBubble({
+  coin,
+  size,
+}: {
+  coin: ForeignCoin;
+  size: number;
+}) {
+  const image = coin.logoURI;
+
+  return <Bubble {...{ size, image }}>{coin.symbol}</Bubble>;
+}
+
 export function Bubble({
   size,
   isPending,
@@ -91,7 +111,7 @@ export function Bubble({
   size: number;
   isPending?: boolean;
   transparent?: boolean;
-  fontSize: number;
+  fontSize?: number;
   image?: string;
   children: React.ReactNode;
 }) {

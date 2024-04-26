@@ -22,8 +22,8 @@ import {
   defaultEnclaveKeyName,
 } from "../../../model/account";
 import { hydrateAccount } from "../../../sync/sync";
+import { ContactBubble } from "../../shared/Bubble";
 import { ButtonBig } from "../../shared/Button";
-import { ContactBubble } from "../../shared/ContactBubble";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
 import { color, ss } from "../../shared/style";

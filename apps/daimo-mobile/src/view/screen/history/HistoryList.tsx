@@ -6,9 +6,11 @@ import {
   assert,
   canSendTo,
   getAccountName,
+  getDisplayFromTo,
   now,
   timeAgo,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { useCallback, useContext } from "react";
 import { Platform, StyleSheet, View } from "react-native";
@@ -17,18 +19,24 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Address } from "viem";
 
-import { getAmountText } from "./Amount";
-import { ContactBubble } from "./ContactBubble";
-import { PendingDot } from "./PendingDot";
-import Spacer from "./Spacer";
-import { color, ss, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBody, TextCenter, TextLight, TextMeta } from "./text";
-import { navToAccountPage, useNav } from "../../common/nav";
-import { getCachedEAccount } from "../../logic/addr";
-import { Account } from "../../model/account";
-import { SetBottomSheetSnapPointCount } from "../screen/HistoryOpScreen";
+import { SetBottomSheetSnapPointCount } from "./HistoryOpScreen";
+import { getSynthesizedMemo } from "./shared";
+import { navToAccountPage, useNav } from "../../../common/nav";
+import { getCachedEAccount } from "../../../logic/addr";
+import { Account } from "../../../model/account";
+import { getAmountText } from "../../shared/Amount";
+import { ContactBubble } from "../../shared/Bubble";
+import { PendingDot } from "../../shared/PendingDot";
+import Spacer from "../../shared/Spacer";
+import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import {
+  DaimoText,
+  TextBody,
+  TextCenter,
+  TextLight,
+  TextMeta,
+} from "../../shared/text";
 
 interface HeaderObject {
   isHeader: true;
@@ -59,7 +67,7 @@ export function HistoryListSwipe({
   if (otherAcc != null) {
     const otherAddr = otherAcc.addr;
     ops = ops.filter((op) => {
-      const [from, to] = getFromTo(op);
+      const [from, to] = getDisplayFromTo(op);
       return from === otherAddr || to === otherAddr;
     });
   }
@@ -84,7 +92,7 @@ export function HistoryListSwipe({
     <DisplayOpRow
       key={getDisplayOpId(t)}
       displayOp={t}
-      address={account.address}
+      account={account}
       {...{ linkTo, showDate }}
     />
   );
@@ -143,7 +151,7 @@ export function HistoryListSwipe({
         return (
           <DisplayOpRow
             displayOp={item.op}
-            address={account.address}
+            account={account}
             showDate
             {...{ linkTo }}
           />
@@ -163,37 +171,22 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
-// Gets the logical from and to-addresses for a given op
-// If the op creates a payment link, to = payment link until claimed, then it's
-// the address of the claimer.
-function getFromTo(op: DisplayOpEvent): [Address, Address] {
-  if (op.type === "transfer") {
-    return [op.from, op.to];
-  } else {
-    if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
-      // Self-transfer via payment link shows up as two payment link transfers
-      return [op.from, op.to];
-    }
-    return [
-      op.noteStatus.sender.addr,
-      op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
-    ];
-  }
-}
-
 function DisplayOpRow({
   displayOp,
-  address,
+  account,
+
   linkTo,
   showDate,
 }: {
   displayOp: DisplayOpEvent;
-  address: Address;
+  account: Account;
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
+  const address = account.address;
+
   assert(displayOp.amount > 0);
-  const [from, to] = getFromTo(displayOp);
+  const [from, to] = getDisplayFromTo(displayOp);
   assert([from, to].includes(address));
   const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
 
@@ -232,10 +225,11 @@ function DisplayOpRow({
     opTitle = "cancelled link";
   }
 
-  const opMemo =
-    displayOp.type === "transfer" && displayOp.memo
-      ? displayOp.memo
-      : undefined;
+  const opMemo = getSynthesizedMemo(
+    displayOp,
+    daimoChainFromId(account.homeChainId),
+    true
+  );
   const memoCol = isPending ? color.gray3 : color.grayDark;
 
   return (

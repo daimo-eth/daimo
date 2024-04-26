@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
 
+import { ContactBubble } from "./Bubble";
 import { ButtonCircle } from "./ButtonCircle";
-import { ContactBubble } from "./ContactBubble";
 import { FarcasterButton } from "./FarcasterBubble";
 import Spacer from "./Spacer";
 import { color } from "./style";

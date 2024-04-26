@@ -3,6 +3,7 @@ import {
   amountToDollars,
   formatDaimoLink,
   getAccountName,
+  getForeignCoinDisplayAmount,
 } from "@daimo/common";
 import {
   daimoPaymasterV2ABI,
@@ -15,7 +16,11 @@ import { Constants } from "userop";
 import { Hex, formatEther, getAddress } from "viem";
 
 import { Telemetry } from "./telemetry";
-import { CoinIndexer, Transfer } from "../contract/coinIndexer";
+import {
+  ForeignCoinIndexer,
+  ForeignTokenTransfer,
+} from "../contract/foreignCoinIndexer";
+import { HomeCoinIndexer, Transfer } from "../contract/homeCoinIndexer";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
@@ -25,7 +30,8 @@ export class Crontab {
 
   constructor(
     private vc: ViemClient,
-    private coinIndexer: CoinIndexer,
+    private homeCoinIndexer: HomeCoinIndexer,
+    private foreignCoinIndexer: ForeignCoinIndexer,
     private nameRegistry: NameRegistry,
     private telemetry: Telemetry
   ) {}
@@ -36,7 +42,8 @@ export class Crontab {
       new CronJob("*/5 * * * *", () => this.checkFaucetBalance()),
       new CronJob("*/1 * * * *", () => this.printStatus()),
     ];
-    this.coinIndexer.addListener(this.pipeTransfers);
+    this.homeCoinIndexer.addListener(this.pipeTransfers);
+    this.foreignCoinIndexer.addListener(this.pipeForeignCoinTransfers);
 
     this.cronJobs.forEach((job) => job.start());
   }
@@ -44,12 +51,12 @@ export class Crontab {
   private printStatus() {
     const mem = process.memoryUsage();
     const cpu = process.cpuUsage();
-    const coinIndexer = this.coinIndexer.status();
+    const homeCoinIndexer = this.homeCoinIndexer.status();
     const nameRegistry = this.nameRegistry.status();
     const status = {
       mem,
       cpu,
-      coinIndexer,
+      homeCoinIndexer,
       nameRegistry,
     };
     console.log(`[CRON] status: ${JSON.stringify(status)}`);
@@ -136,8 +143,14 @@ export class Crontab {
 
   private pipeTransfers = (logs: Transfer[]) => {
     for (const transfer of logs) {
-      const opEvent = this.coinIndexer.attachTransferOpProperties(transfer);
+      const opEvent = this.homeCoinIndexer.attachTransferOpProperties(transfer);
       this.postRecentTransfer(opEvent);
+    }
+  };
+
+  private pipeForeignCoinTransfers = (logs: ForeignTokenTransfer[]) => {
+    for (const transfer of logs) {
+      this.postRecentForeignCoinTransfer(transfer);
     }
   };
 
@@ -162,6 +175,28 @@ export class Crontab {
           ? " for " + formatDaimoLink(opEvent.requestStatus.link)
           : ""
       }${opEvent.type === "transfer" ? " : " + opEvent.memo : ""}`
+    );
+  }
+
+  async postRecentForeignCoinTransfer(transfer: ForeignTokenTransfer) {
+    const fromName = this.nameRegistry.resolveDaimoNameForAddr(transfer.from);
+    const toName = this.nameRegistry.resolveDaimoNameForAddr(transfer.to);
+
+    if (fromName == null && toName == null) return;
+
+    const fromDisplayName = getAccountName(
+      await this.nameRegistry.getEAccount(transfer.from)
+    );
+    const toDisplayName = getAccountName(
+      await this.nameRegistry.getEAccount(transfer.to)
+    );
+
+    const humanReadableValue = getForeignCoinDisplayAmount(
+      transfer.value.toString() as `${bigint}`,
+      transfer.foreignToken
+    );
+    this.telemetry.recordClippy(
+      `Forex Transfer: ${fromDisplayName} -> ${toDisplayName} ${humanReadableValue} ${transfer.foreignToken.symbol} `
     );
   }
 }

@@ -28,8 +28,7 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
     daimoChainFromId(account.homeChainId)
   ).chainConfig;
 
-  const [check1, setCheck1] = useState(false);
-  const [check2, setCheck2] = useState(false);
+  const [check, setCheck] = useState(false);
 
   assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
 
@@ -47,15 +46,11 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
         Send {tokenSymbol} to your address below. Confirm that you're sending:
       </TextPara>
       <Spacer h={12} />
-      <CheckLabel value={check1} setValue={setCheck1}>
-        <TextBold>{tokenSymbol}</TextBold>, not USDbC or other assets
-      </CheckLabel>
-      <Spacer h={16} />
-      <CheckLabel value={check2} setValue={setCheck2}>
+      <CheckLabel value={check} setValue={setCheck}>
         On <TextBold>{chainL2.name}</TextBold>, not any other chain
       </CheckLabel>
       <Spacer h={16} />
-      <AddressCopier addr={account.address} disabled={!check1 || !check2} />
+      <AddressCopier addr={account.address} disabled={!check} />
       <Spacer h={64} />
     </View>
   );

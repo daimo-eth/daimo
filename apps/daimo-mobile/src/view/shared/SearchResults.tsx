@@ -11,8 +11,8 @@ import {
   View,
 } from "react-native";
 
+import { Bubble, ContactBubble } from "./Bubble";
 import { ButtonMed } from "./Button";
-import { Bubble, ContactBubble } from "./ContactBubble";
 import { LinkedAccountBubble } from "./LinkedAccountBubble";
 import Spacer from "./Spacer";
 import { ErrorRowCentered } from "./error";

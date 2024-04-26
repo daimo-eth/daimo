@@ -38,7 +38,9 @@ import {
 } from "../api/tagRedirect";
 import { validateMemo } from "../api/validateMemo";
 import { AccountFactory } from "../contract/accountFactory";
-import { CoinIndexer } from "../contract/coinIndexer";
+import { ETHIndexer } from "../contract/ethIndexer";
+import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
+import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -62,7 +64,9 @@ export function createRouter(
   vc: ViemClient,
   db: DB,
   bundlerClient: BundlerClient,
-  coinIndexer: CoinIndexer,
+  homeCoinIndexer: HomeCoinIndexer,
+  ethIndexer: ETHIndexer,
+  foreignCoinIndexer: ForeignCoinIndexer,
   noteIndexer: NoteIndexer,
   opIndexer: OpIndexer,
   reqIndexer: RequestIndexer,
@@ -261,7 +265,9 @@ export function createRouter(
           sinceBlockNum,
           watcher,
           vc,
-          coinIndexer,
+          homeCoinIndexer,
+          ethIndexer,
+          foreignCoinIndexer,
           profileCache,
           noteIndexer,
           reqIndexer,

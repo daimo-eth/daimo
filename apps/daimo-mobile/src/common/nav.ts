@@ -289,5 +289,6 @@ export function navToAccountPage(account: EAccount, nav: MainNav) {
     account: getEAccountStr(account),
   } as DaimoLinkAccount;
 
-  nav.push("Profile", { link: accountLink });
+  if (nav.push) nav.push("Profile", { link: accountLink });
+  else nav.navigate("Profile", { link: accountLink });
 }

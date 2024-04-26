@@ -1,4 +1,4 @@
-import { DaimoRequestV2Status } from "@daimo/common";
+import { DaimoRequestV2Status, ProposedSwap } from "@daimo/common";
 import { ReactElement, createContext } from "react";
 
 export type Action =
@@ -10,7 +10,8 @@ export type Action =
   | { name: "helpModal"; title: string; content: ReactElement }
   | { name: "ownRequest"; reqStatus: DaimoRequestV2Status }
   | { name: "createBackup" }
-  | { name: "hideBottomSheet" };
+  | { name: "hideBottomSheet" }
+  | { name: "swap"; swap: ProposedSwap };
 
 type ActionName = Action["name"];
 

@@ -8,6 +8,7 @@ import {
   EAccount,
   KeyData,
   LinkedAccount,
+  ProposedSwap,
   RecommendedExchange,
   appStoreLinks,
   assert,
@@ -20,7 +21,9 @@ import { Address } from "viem";
 
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
-import { CoinIndexer } from "../contract/coinIndexer";
+import { ETHIndexer } from "../contract/ethIndexer";
+import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
+import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry, specialAddrLabels } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -56,6 +59,7 @@ export interface AccountHistoryResult {
   inviteLinkStatus: DaimoInviteCodeStatus | null;
   invitees: EAccount[];
   notificationRequestStatuses: DaimoRequestV2Status[];
+  proposedSwaps: ProposedSwap[];
 }
 
 export interface SuggestedAction {
@@ -78,7 +82,9 @@ export async function getAccountHistory(
   sinceBlockNum: number,
   watcher: Watcher,
   vc: ViemClient,
-  coinIndexer: CoinIndexer,
+  homeCoinIndexer: HomeCoinIndexer,
+  ethIndexer: ETHIndexer,
+  foreignCoinIndexer: ForeignCoinIndexer,
   profileCache: ProfileCache,
   noteIndexer: NoteIndexer,
   requestIndexer: RequestIndexer,
@@ -90,8 +96,8 @@ export async function getAccountHistory(
   db: DB
 ): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
-  const eAcc = await nameReg.getEAccount(address);
-  assert(eAcc.name != null, "Not a Daimo account");
+  const eAcc = nameReg.getDaimoAccount(address);
+  assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
 
   // Get latest finalized block. Next account sync, fetch since this block.
   const finBlock = await vc.publicClient.getBlock({
@@ -109,12 +115,12 @@ export async function getAccountHistory(
   if (lastBlk == null) throw new Error("No latest block");
   const lastBlock = Number(lastBlk.number);
   const lastBlockTimestamp = lastBlk.timestamp;
-  const lastBalance = await coinIndexer.getBalanceAt(address, lastBlock);
+  const lastBalance = await homeCoinIndexer.getBalanceAt(address, lastBlock);
 
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
-  const transferLogs = coinIndexer.filterTransfers({
+  const transferLogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
@@ -131,6 +137,8 @@ export async function getAccountHistory(
     if (log.type === "claimLink" || log.type === "createLink") {
       if (log.noteStatus.claimer) addrs.add(log.noteStatus.claimer.addr);
       addrs.add(log.noteStatus.sender.addr);
+    } else if (log.type === "transfer" && log.preSwapTransfer) {
+      addrs.add(log.preSwapTransfer.from);
     }
   });
   const namedAccounts = (
@@ -138,7 +146,7 @@ export async function getAccountHistory(
   ).filter((acc) => hasAccountName(acc));
 
   // Get account keys
-  const accountKeys = await keyReg.resolveAddressKeys(address);
+  const accountKeys = keyReg.resolveAddressKeys(address);
   assert(accountKeys != null);
 
   // Prefetch info required to send operations > fast at time of sending.
@@ -161,15 +169,19 @@ export async function getAccountHistory(
     : null;
 
   const inviteeAddrs = inviteGraph.getInvitees(address);
-  const invitees = await Promise.all(
-    inviteeAddrs.map((addr) => nameReg.getEAccount(addr))
-  );
+  const invitees = inviteeAddrs.map((addr) => nameReg.getDaimoAccount(addr)!);
 
   // Get pfps from linked accounts
   const profilePicture = profileCache.getProfilePicture(address);
 
   // Get request data for this user
   const notificationRequestStatuses = requestIndexer.getAddrRequests(address);
+
+  // Get proposed swaps of non-home coin tokens for address
+  const proposedSwaps = [
+    ...(await ethIndexer.getProposedSwapsForAddr(address)),
+    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address)),
+  ];
 
   const ret: AccountHistoryResult = {
     address,
@@ -192,6 +204,7 @@ export async function getAccountHistory(
     inviteLinkStatus,
     invitees,
     notificationRequestStatuses,
+    proposedSwaps,
   };
 
   // Suggest an action to the user, like backing up their account

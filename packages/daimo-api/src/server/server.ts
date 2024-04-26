@@ -11,7 +11,9 @@ import { Telemetry } from "./telemetry";
 import { createContext, onTrpcError } from "./trpc";
 import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
-import { CoinIndexer } from "../contract/coinIndexer";
+import { ETHIndexer } from "../contract/ethIndexer";
+import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
+import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
@@ -21,6 +23,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
+import { UniswapClient } from "../network/uniswapClient";
 import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -33,6 +36,7 @@ async function main() {
 
   console.log(`[API] starting...`);
   const vc = getViemClientFromEnv(monitor);
+  const uc = new UniswapClient();
 
   console.log(`[API] initializing db...`);
   const db = new DB();
@@ -54,23 +58,35 @@ async function main() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(db, nameReg);
-  const coinIndexer = new CoinIndexer(
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
+  const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
     requestIndexer,
+    foreignCoinIndexer,
     paymentMemoTracker
   );
+
+  const ethIndexer = new ETHIndexer(vc, uc, nameReg);
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
   bundlerClient.init(vc.publicClient);
 
   const paymaster = new Paymaster(vc, bundlerClient, db);
   const accountFactory = new AccountFactory(vc);
-  const crontab = new Crontab(vc, coinIndexer, nameReg, monitor);
+  const crontab = new Crontab(
+    vc,
+    homeCoinIndexer,
+    foreignCoinIndexer,
+    nameReg,
+    monitor
+  );
 
   const notifier = new PushNotifier(
-    coinIndexer,
+    homeCoinIndexer,
+    foreignCoinIndexer,
+    ethIndexer,
     nameReg,
     noteIndexer,
     requestIndexer,
@@ -82,9 +98,10 @@ async function main() {
   shovelWatcher.add(
     // indexers in dependency order, within each list, indexers are indexed in parallel
     [nameReg, keyReg, opIndexer],
-    [noteIndexer, requestIndexer],
-    [coinIndexer]
+    [noteIndexer, requestIndexer, foreignCoinIndexer],
+    [homeCoinIndexer]
   );
+  shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {
@@ -115,7 +132,9 @@ async function main() {
     vc,
     db,
     bundlerClient,
-    coinIndexer,
+    homeCoinIndexer,
+    ethIndexer,
+    foreignCoinIndexer,
     noteIndexer,
     opIndexer,
     requestIndexer,

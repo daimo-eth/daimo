@@ -51,6 +51,9 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
   // Known relay.link address on Base
   "0xf70da97812CB96acDF810712Aa562db8dfA3dbEF": AddrLabel.Relay,
+  // Known Uniswap ETH pools on Base
+  "0xd0b53D9277642d899DF5C87A3966A349A798F224": AddrLabel.UniswapETHPool,
+  "0x6c561B446416E1A00E8E93E221854d6eA4171372": AddrLabel.UniswapETHPool,
 };
 
 // Validate that current addresses are correctly recorded.
@@ -61,6 +64,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   assertEqual(s[chainConfig.pimlicoPaymasterAddress], AddrLabel.Paymaster);
   assertEqual(s[chainConfig.notesV1Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.notesV2Address], AddrLabel.PaymentLink);
+  assertEqual(s[chainConfig.uniswapETHPoolAddress], AddrLabel.UniswapETHPool);
 }
 
 // Represents a Daimo name registration.
@@ -251,5 +255,9 @@ export class NameRegistry {
         return await this.getEAccount(daimoAddress);
       }
     }
+  }
+
+  getAllDAccounts() {
+    return this.accounts;
   }
 }

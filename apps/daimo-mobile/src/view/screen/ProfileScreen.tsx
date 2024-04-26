@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
+import { HistoryListSwipe } from "./history/HistoryList";
 import {
   ParamListHome,
   navToAccountPage,
@@ -28,11 +29,10 @@ import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../model/account";
+import { ContactBubble } from "../shared/Bubble";
 import { ButtonBig } from "../shared/Button";
-import { ContactBubble } from "../shared/ContactBubble";
 import { ExplorerBadge } from "../shared/ExplorerBadge";
 import { FarcasterButton } from "../shared/FarcasterBubble";
-import { HistoryListSwipe } from "../shared/HistoryList";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";

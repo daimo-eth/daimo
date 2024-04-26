@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
 import { Account } from "../../model/account";
-import { ContactBubble } from "../shared/ContactBubble";
+import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody } from "../shared/text";

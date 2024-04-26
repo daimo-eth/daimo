@@ -9,6 +9,7 @@ import {
   KeyData,
   KeyRotationOpEvent,
   LinkedAccount,
+  ProposedSwap,
   RecommendedExchange,
   TrackedRequest,
   TransferOpEvent,
@@ -101,6 +102,9 @@ export type Account = {
 
   /** Track read notifications, todo: sync with server in future */
   lastReadNotifTimestamp: number;
+
+  /** Proposed swaps from non-home coin balances -> home coin balance */
+  proposedSwaps: ProposedSwap[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -329,6 +333,7 @@ interface AccountV14 extends StoredModel {
 
   notificationRequestStatuses: DaimoRequestV2Status[];
   lastReadNotifTimestamp: number;
+  proposedSwaps: ProposedSwap[];
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -379,6 +384,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -417,6 +423,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -455,6 +462,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -494,6 +502,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -532,6 +541,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -571,6 +581,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
     };
   }
 
@@ -611,6 +622,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     notificationRequestStatuses: a.notificationRequestStatuses || [],
     lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
+    proposedSwaps: a.proposedSwaps || [],
   };
 }
 
@@ -653,6 +665,7 @@ export function serializeAccount(account: Account | null): string {
 
     notificationRequestStatuses: account.notificationRequestStatuses,
     lastReadNotifTimestamp: account.lastReadNotifTimestamp,
+    proposedSwaps: account.proposedSwaps,
   };
 
   return JSON.stringify(model);
@@ -710,5 +723,6 @@ export function createEmptyAccount(
 
     notificationRequestStatuses: [],
     lastReadNotifTimestamp: now(),
+    proposedSwaps: [],
   };
 }

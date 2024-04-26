@@ -22,7 +22,7 @@ import { navToAccountPage, useNav } from "../../../common/nav";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../model/account";
-import { ContactBubble } from "../../shared/ContactBubble";
+import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
