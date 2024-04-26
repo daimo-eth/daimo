@@ -91,11 +91,10 @@ export class FrameLinkService {
       `[FRAME] frame click from ${fid} @${user.username} ${bonusStr} ${authMsg}`
     );
 
+    if (!bonus) return this.failResponse(frame, authMsg);
+
     // Create a single-use invite link specific to this user (fid)
-    const frameWithBonus = bonus
-      ? frame
-      : { ...frame, bonusDollarsInviter: 0, bonusDollarsInvitee: 0 };
-    const inviteUrl = await this.createInviteLink(fid, frameWithBonus);
+    const inviteUrl = await this.createInviteLink(fid, frame);
 
     // Success = user allowed, invite link found or created
     const buttonText = bonus ? `✳️ ${authMsg}` : `✳️ Claim Invite · ${authMsg}`;
@@ -176,6 +175,20 @@ export class FrameLinkService {
       getFrameHtmlResponse({
         buttons: [{ label: buttonText, action: "link", target: url }],
         image: getAbsoluteUrl(frame.appearance.imgSuccess),
+      })
+    );
+  }
+
+  private failResponse(frame: InviteFrameLink, authMsg: string): NextResponse {
+    return new NextResponse(
+      getFrameHtmlResponse({
+        buttons: [
+          {
+            label: `❌ ${authMsg}`,
+          },
+        ],
+        image: getAbsoluteUrl(frame.appearance.imgFail),
+        post_url: getAbsoluteUrl(`/frame/${frame.id}/callback`),
       })
     );
   }
