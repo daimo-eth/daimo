@@ -128,7 +128,9 @@ export interface ProposedSwap {
   fromAcc: EAccount;
   receivedAt: number;
   toAmount: number; // in native USDC units
+  cacheUntil: number; // Cache expiration time, prompts clients to refresh quote after this time
   execRouterAddress: Address;
   execCallData: Hex;
   execValue: Hex;
+  execDeadline: number; // Onchain execution deadline -- swap may fail after this time
 }

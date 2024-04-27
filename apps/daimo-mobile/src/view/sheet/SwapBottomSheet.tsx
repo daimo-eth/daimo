@@ -44,7 +44,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   const { status, exec: onCancel } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
-      console.log(`[ACTION] executing swap ${swap.fromCoin.fullName}`);
+      console.log(`[ACTION] executing swap ${JSON.stringify(swap)}`);
       return opSender.executeProposedSwap(swap, {
         nonce,
         chainGasConstants: account!.chainGasConstants,
