@@ -2,7 +2,7 @@ import type { ExpoConfig } from "@expo/config";
 
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.8.6";
+const VERSION = "1.8.7";
 
 const config: ExpoConfig = {
   owner: "daimo",

@@ -2,7 +2,7 @@
 <!-- release v1.2.3 build 101 -->
 <!-- Build number should be identical across both platforms. -->
 
-** Tweet-length summary of changes. **
+**Tweet-length summary of changes.**
 
 <!-- Optional screenshot, 4-6 panels joined as described in scratchpad README. -->
 
@@ -13,7 +13,6 @@
 - [ ] Branch from `master`
 - [ ] Testnet API deployed correctly
 - [ ] Testnet webapp deployed correctly
-- [ ] Logs look clean
 
 ### iOS
 
