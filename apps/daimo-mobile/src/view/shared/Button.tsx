@@ -4,12 +4,10 @@ import { ReactElement, ReactNode, useContext, useMemo } from "react";
 import {
   Image,
   ImageSourcePropType,
-  Linking,
   Pressable,
   StyleSheet,
   TextStyle,
   TouchableHighlight,
-  TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
@@ -24,7 +22,7 @@ import Animated, {
 import { AnimatedCircle } from "./AnimatedCircle";
 import Spacer from "./Spacer";
 import { color, touchHighlightUnderlay } from "./style";
-import { DaimoText, TextBody, TextBtnCaps, TextLink } from "./text";
+import { DaimoText, TextBody, TextBtnCaps } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
 import { DispatcherContext } from "../../action/dispatch";
@@ -182,28 +180,6 @@ export function HelpButton({
         {title}
       </TextBody>
     </Pressable>
-  );
-}
-
-// Shows a blue link. Should open an external page.
-export function LinkButton({
-  url,
-  onPress,
-  children,
-}: {
-  url?: string;
-  onPress?: () => void;
-  children: ReactNode;
-}) {
-  if (onPress == null) {
-    const linkUrl = assertNotNull(url, "Must specify url or onPress");
-    onPress = () => Linking.openURL(linkUrl);
-  }
-
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <TextLink>{children}</TextLink>
-    </TouchableOpacity>
   );
 }
 

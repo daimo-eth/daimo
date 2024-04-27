@@ -18,15 +18,18 @@ export function getSynthesizedMemo(
   if (op.type !== "transfer") return null;
   if (op.memo) return op.memo;
   if (op.preSwapTransfer) {
-    if (op.preSwapTransfer.coin.token === "ETH") return null;
+    if (op.preSwapTransfer.coin.token === "ETH") {
+      return `ETH → ${coinName}`;
+    }
 
     const readableAmount = getForeignCoinDisplayAmount(
       op.preSwapTransfer.amount,
       op.preSwapTransfer.coin
     );
-    if (short)
+    if (short) {
       return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;
-    else
+    } else {
       return `Accepted ${readableAmount} ${op.preSwapTransfer.coin.symbol} as ${coinName}`;
+    }
   }
 }

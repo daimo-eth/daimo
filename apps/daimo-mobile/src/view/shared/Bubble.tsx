@@ -57,14 +57,8 @@ export function ContactBubble({
         case AddrLabel.Coinbase:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
         case AddrLabel.UniswapETHPool:
-          return (
-            <Octicons
-              name="arrow-switch"
-              size={fontSize}
-              color={color.primary}
-            />
-          );
         case AddrLabel.Relay:
+        case AddrLabel.LiFi:
           return (
             <Octicons
               name="arrow-switch"
