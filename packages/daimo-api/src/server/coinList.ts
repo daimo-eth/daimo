@@ -1,4 +1,4 @@
-import { ForeignCoin, assert, daimoDomainAddress } from "@daimo/common";
+import { ForeignCoin, USDbC, assert } from "@daimo/common";
 import { Address, getAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -18,15 +18,7 @@ type TokenList = {
 // Exclude native ETH
 export type ForeignToken = ForeignCoin & { token: Address };
 
-const customOverrides: Record<Address, ForeignToken> = {
-  "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA": {
-    token: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
-    fullName: "Bridged USD Coin", // USDbC has a bad name on CoinGecko
-    symbol: "USDbC",
-    decimals: 6,
-    logoURI: `${daimoDomainAddress}/assets/foreign-coin-logos/USDbC.png`, // CoinGecko logo is fugly
-  },
-};
+const customOverrides = [USDbC] as ForeignToken[];
 
 export async function fetchTokenList(): Promise<Map<Address, ForeignToken>> {
   const tokenList = (await (
@@ -40,9 +32,9 @@ export async function fetchTokenList(): Promise<Map<Address, ForeignToken>> {
     const addr = getAddress(token.address);
     if (addr === chainConfig.tokenAddress) continue;
 
-    if (customOverrides[addr]) {
-      ret.set(addr, customOverrides[addr]);
-    } else {
+    const override = customOverrides.find((o) => o.token === addr);
+    if (override) ret.set(addr, override);
+    else {
       ret.set(addr, {
         token: addr,
         decimals: token.decimals,
