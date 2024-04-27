@@ -2,7 +2,8 @@ import { makeConfig, toJSON } from "@indexsupply/shovel-config";
 import type { Source } from "@indexsupply/shovel-config";
 import { writeFileSync } from "fs";
 
-import { erc20TransfersIntegration } from "./erc20transfers";
+import { erc20TransfersIntegration } from "./erc20Transfers";
+import { ethTransfersIntegration } from "./ethTransfers";
 import { keyAddedIntegration, keyRemovedIntegration } from "./keyRotation";
 import { namesIntegration } from "./names";
 import { noteCreatedIntegration, noteRedeemedIntegration } from "./notes";
@@ -22,12 +23,21 @@ const source: Source = {
   concurrency: 4,
 };
 
+const traceSource: Source = {
+  name: "$CHAIN_TRACE_NAME",
+  chain_id: "$CHAIN_ID",
+  url: "$CHAIN_TRACE_RPC_URL",
+  batch_size: 5,
+  concurrency: 2,
+};
+
 const integrations = [
   namesIntegration,
   keyAddedIntegration,
   keyRemovedIntegration,
   transfersIntegration,
   erc20TransfersIntegration,
+  ethTransfersIntegration,
   noteCreatedIntegration,
   noteRedeemedIntegration,
   requestCreatedIntegration,
@@ -38,7 +48,7 @@ const integrations = [
 
 const config = makeConfig({
   pg_url: "$DATABASE_URL",
-  sources: [source],
+  sources: [source, traceSource],
   integrations,
 });
 
