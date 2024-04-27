@@ -1,4 +1,8 @@
-import { ProposedSwap, guessTimestampFromNum } from "@daimo/common";
+import {
+  ProposedSwap,
+  guessTimestampFromNum,
+  isAmountDust,
+} from "@daimo/common";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -164,6 +168,8 @@ export class ForeignCoinIndexer {
     console.log(
       `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`
     );
+
+    if (swap && isAmountDust(swap.toAmount, log.foreignToken)) return null;
     return swap;
   }
 
