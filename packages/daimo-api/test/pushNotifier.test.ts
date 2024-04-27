@@ -364,6 +364,8 @@ function createNotifierAliceBob() {
           fromAcc: { addr: addrCharlie, ensName: "charlie.eth" },
           receivedAt: now(),
           toAmount: 1000000,
+          cacheUntil: now() + 5 * 60,
+          execDeadline: now() + 10 * 60,
           execRouterAddress: "0x0",
           execCallData: "0x0",
           execValue: "0x0",

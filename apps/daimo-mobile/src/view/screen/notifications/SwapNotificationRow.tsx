@@ -7,7 +7,7 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import React, { useContext } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, View, useWindowDimensions } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
@@ -27,6 +27,9 @@ export function SwapNotificationRow({
   notif: SwapNotification;
   account: Account;
 }) {
+  // should be very rare, but we write this defensively
+  const isSwapPastDeadline = notif.swap.execDeadline < now();
+
   const dispatcher = useContext(DispatcherContext);
 
   const ts = timeAgo(notif.timestamp, now(), true);
@@ -36,6 +39,7 @@ export function SwapNotificationRow({
   const messageWidth = width - 108;
 
   const onPress = () => {
+    if (isSwapPastDeadline) return;
     dispatcher.dispatch({
       name: "swap",
       swap: notif.swap,
@@ -81,7 +85,9 @@ export function SwapNotificationRow({
             <TextMeta color={color.gray3}>{ts}</TextMeta>
           </View>
         </View>
-        {!!onPress && (
+        {isSwapPastDeadline ? (
+          <ActivityIndicator />
+        ) : (
           <View>
             <Octicons name="chevron-right" color={color.grayDark} size={32} />
           </View>

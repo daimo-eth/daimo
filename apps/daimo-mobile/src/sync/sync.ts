@@ -59,6 +59,10 @@ function hasPendingOps(account: Account) {
   );
 }
 
+function hasCacheExpiredSwaps(account: Account) {
+  return account.proposedSwaps.some((s) => s.cacheUntil < now());
+}
+
 type SyncStatus = "success" | "failed" | "skipped" | "skipped";
 
 async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
@@ -70,8 +74,8 @@ async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
   const nowS = now();
   let intervalS = 10;
 
-  // Sync faster for 1. pending ops, and 2. recently-failed sync
-  if (hasPendingOps(account)) {
+  // Sync faster for 1. pending ops or expired swaps, and 2. recently-failed sync
+  if (hasPendingOps(account) || hasCacheExpiredSwaps(account)) {
     intervalS = 1;
   }
 

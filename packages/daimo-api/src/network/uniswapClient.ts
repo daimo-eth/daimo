@@ -127,11 +127,17 @@ export class UniswapClient {
   ) {
     assert(this.router != null, "Uniswap router not initialized");
 
-    const expiresAt = now() + 1800; // 30 min
+    const startMs = Date.now();
+    console.log(`[UNISWAP] fetching swap for ${addr} ${fromCoin.token}`);
+
+    const t = now();
+    const cacheUntil = t + 5 * 60; // 5 min
+    const execDeadline = t + 10 * 60; // 10 min
+
     const options: SwapOptionsSwapRouter02 = {
       recipient: addr,
       slippageTolerance: new Percent(50, 10_000), // 50 bips
-      deadline: expiresAt + 60, // 1 extra minute for buffer
+      deadline: execDeadline,
       type: SwapType.SWAP_ROUTER_02,
     };
 
@@ -167,7 +173,8 @@ export class UniswapClient {
       fromAmount,
       fromAcc,
       receivedAt,
-      expiresAt,
+      cacheUntil,
+      execDeadline,
       toAmount: Number(dollarsToAmount(route.quote.toExact())),
       execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
       execCallData: route.methodParameters.calldata as Hex,
@@ -175,6 +182,12 @@ export class UniswapClient {
     };
 
     this.cacheSwap(addr, swap);
+
+    console.log(
+      `[UNISWAP] fetched and cached swap for ${addr} ${fromCoin.token} in ${
+        Date.now() - startMs
+      }ms`
+    );
     return swap;
   }
 
@@ -200,20 +213,19 @@ export class UniswapClient {
       fromAcc.addr
     );
 
-    if (!cachedSwap || cachedSwap.expiresAt < now()) {
-      if (runsInBackground) {
-        // no await, kick off a background fetch
-        this.fetchAndCacheSwap(addr, fromAmount, fromCoin, receivedAt, fromAcc);
-      } else {
-        await this.fetchAndCacheSwap(
-          addr,
-          fromAmount,
-          fromCoin,
-          receivedAt,
-          fromAcc
-        );
-      }
+    if (cachedSwap && cachedSwap.cacheUntil > now()) {
+      return cachedSwap;
     }
+
+    const promise = this.fetchAndCacheSwap(
+      addr,
+      fromAmount,
+      fromCoin,
+      receivedAt,
+      fromAcc
+    );
+
+    if (!runsInBackground) await promise;
 
     return (
       this.getCachedSwap(
