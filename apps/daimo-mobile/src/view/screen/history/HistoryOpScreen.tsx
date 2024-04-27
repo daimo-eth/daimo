@@ -31,7 +31,7 @@ import { Account } from "../../../model/account";
 import { syncFindSameOp } from "../../../sync/sync";
 import { AccountRow } from "../../shared/AccountRow";
 import { TitleAmount } from "../../shared/Amount";
-import { ButtonBig, LinkButton } from "../../shared/Button";
+import { ButtonBig } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -99,9 +99,7 @@ function HistoryOpScreenInner({
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
-        {op.txHash && (
-          <LinkToExplorer {...{ chainConfig }} txHash={op.txHash} />
-        )}
+        {op.txHash && <LinkToExplorer {...{ chainConfig }} op={op} />}
       </View>
       <Spacer h={16} />
       {op.type === "createLink" &&
@@ -150,13 +148,19 @@ function NoteView({
 
 function LinkToExplorer({
   chainConfig,
-  txHash,
+  op,
 }: {
   chainConfig: ChainConfig;
-  txHash: string;
+  op: DisplayOpEvent;
 }) {
+  // Block explorer: `${explorer.url}/tx/${op.txHash}`
   const explorer = chainConfig.chainL2.blockExplorers!.default;
-  const url = `${explorer.url}/tx/${txHash}`;
+  const url = `${explorer.url}/tx/${op.txHash}`;
+
+  // EthReceipt
+  // const chainId = chainConfig.chainL2.id;
+  // const { blockNumber, logIndex } = op;
+  // const url = `https://ethreceipt.org/l/${chainId}/${blockNumber}/${logIndex}`;
 
   const openURL = useCallback(() => Linking.openURL(url), [url]);
 
@@ -179,12 +183,15 @@ function TransferBody({
   const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  const coinName = chainConfig.tokenSymbol;
   const chainName = chainConfig.chainL2.name.toUpperCase();
 
   // Help button to explain fees, chain, etc
   const dispatcher = useContext(DispatcherContext);
-  const onShowHelp = useCallback(() => showHelpWhyNoFees(dispatcher), []);
+  const onShowHelp = useCallback(
+    () => showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, coinName),
+    []
+  );
 
   // Generate subtitle = fees, chain, other details
   const col = color.grayMid;
@@ -255,22 +262,29 @@ function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
   }
 }
 
-function showHelpWhyNoFees(dispatcher: Dispatcher) {
+function showHelpWhyNoFees(
+  dispatcher: Dispatcher,
+  chainName: string,
+  coinName: string
+) {
   dispatcher.dispatch({
     name: "helpModal",
-    title: "How do transfers work?",
+    title: "About this transfer",
     content: (
       <View style={ss.container.padH8}>
-        <TextPara>Daimo uses Base, an Ethereum rollup.</TextPara>
-        <Spacer h={24} />
         <TextPara>
-          Rollups inherit the strong security guarantees of Ethereum, at much
-          lower cost.
+          This transaction settled on {chainName}, an Ethereum rollup.
         </TextPara>
         <Spacer h={24} />
-        <LinkButton url="https://l2beat.com/scaling/projects/base">
-          Learn more on L2Beat.
-        </LinkButton>
+        <TextPara>
+          Rollups inherit the strong security guarantees of Ethereum, at lower
+          cost.
+        </TextPara>
+        <Spacer h={24} />
+        <TextPara>
+          Transactions cost a few cents. Daimo sponsored this transfer, making
+          it free.
+        </TextPara>
       </View>
     ),
   });
@@ -285,5 +299,5 @@ function getFeeText(amount?: number) {
   if (amount > 0 && feeStr === "$0.00") {
     feeStr = "< $0.01";
   }
-  return feeStr === "$0.00" ? "NO FEE" : feeStr + " FEE";
+  return amount === 0 ? "FREE" : feeStr + " FEE";
 }

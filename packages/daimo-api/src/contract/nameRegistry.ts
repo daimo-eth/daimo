@@ -51,6 +51,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87": AddrLabel.Coinbase,
   // Known relay.link address on Base
   "0xf70da97812CB96acDF810712Aa562db8dfA3dbEF": AddrLabel.Relay,
+  // Known li.fi addresses on Base
+  "0x4DaC9d1769b9b304cb04741DCDEb2FC14aBdF110": AddrLabel.LiFi,
   // Known Uniswap ETH pools on Base
   "0xd0b53D9277642d899DF5C87A3966A349A798F224": AddrLabel.UniswapETHPool,
   "0x6c561B446416E1A00E8E93E221854d6eA4171372": AddrLabel.UniswapETHPool,

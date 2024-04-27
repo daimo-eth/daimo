@@ -17,6 +17,7 @@ export enum AddrLabel {
   Paymaster = "fee",
   Coinbase = "coinbase",
   Relay = "relay.link",
+  LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
 }
 
