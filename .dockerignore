@@ -1,0 +1,7 @@
+.git
+.github
+.turbo
+.next
+.vscode
+packages/contract
+apps/daimo-web

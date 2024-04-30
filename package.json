@@ -15,7 +15,9 @@
     "test": "turbo test",
     "lint": "turbo lint && syncpack list-mismatches",
     "codegen": "turbo codegen",
-    "fix:deps": "syncpack fix-mismatches"
+    "fix:deps": "syncpack fix-mismatches",
+    "docker:api": "docker build -t daimo-api -f packages/daimo-api/Dockerfile .",
+    "docker:shovel": "docker build -t daimo-shovel ./packages/daimo-contract/src/shovel"
   },
   "dependencies": {
     "eslint-config-universe": "^11.3.0",
