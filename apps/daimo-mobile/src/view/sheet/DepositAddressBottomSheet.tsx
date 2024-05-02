@@ -1,9 +1,10 @@
-import { assert } from "@daimo/common";
+import { assert, getAddressContraction } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import React, { useCallback, useContext, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
+import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../logic/env";
@@ -60,7 +61,7 @@ function AddressCopier({
   addr,
   disabled,
 }: {
-  addr: string;
+  addr: Address;
   disabled?: boolean;
 }) {
   const [justCopied, setJustCopied] = useState(false);
@@ -71,6 +72,8 @@ function AddressCopier({
   }, [addr]);
 
   const col = disabled ? color.gray3 : color.midnight;
+
+  const addrContracted = getAddressContraction(addr, 12);
 
   return (
     <View style={styles.address}>
@@ -84,7 +87,7 @@ function AddressCopier({
             style={[styles.addressMono, { color: col }]}
             numberOfLines={1}
           >
-            {addr}
+            {addrContracted}
           </DaimoText>
           <Octicons name="copy" size={16} color={col} />
         </View>

@@ -2,15 +2,23 @@ import {
   DaimoLinkAccount,
   formatDaimoLink,
   formatDaimoLinkDirect,
-  getAccountName,
+  getAddressContraction,
   parseDaimoLink,
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
+import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { useRef, useState } from "react";
-import { Linking, Platform, Share, StyleSheet, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  Pressable,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { getAddress, isAddress } from "viem";
 
@@ -56,10 +64,23 @@ export function QRScreen(props: Props) {
 }
 
 function QRDisplay() {
+  const [recentlyCopied, setRecentlyCopied] = useState(false);
   const account = useAccount();
   if (account == null) return null;
 
   const url = formatDaimoLink({ type: "account", account: account.name });
+
+  const subtitle = recentlyCopied
+    ? "Copied address"
+    : getAddressContraction(account.address);
+
+  const onLongPress = () => {
+    console.log(`[QR] copying address ${account.address}`);
+    Clipboard.setStringAsync(account.address);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRecentlyCopied(true);
+    setTimeout(() => setRecentlyCopied(false), 1000);
+  };
 
   return (
     <View>
@@ -67,15 +88,15 @@ function QRDisplay() {
       <Spacer h={16} />
       <View style={styles.accountShare}>
         <Spacer w={64} />
-        <View>
+        <Pressable onLongPress={onLongPress}>
           <TextCenter>
             <TextH3>{account.name}</TextH3>
           </TextCenter>
           <Spacer h={4} />
           <TextCenter>
-            <TextLight>{getAccountName({ addr: account.address })}</TextLight>
+            <TextLight>{subtitle}</TextLight>
           </TextCenter>
-        </View>
+        </Pressable>
         <ShareButton name={account.name} />
       </View>
     </View>
