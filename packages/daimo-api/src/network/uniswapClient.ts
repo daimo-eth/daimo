@@ -62,11 +62,15 @@ export class UniswapClient {
   private swapCache: Map<string, ProposedSwap> = new Map();
 
   constructor() {
-    const l2_RPCs = process.env.DAIMO_API_L2_RPC_WS!.split(",");
+    // Use an independent HTTP RPC to work around Websocket bugs in Ethers,
+    // and by extension the Uniswap SDK:
+    // https://github.com/Uniswap/smart-order-router/issues/461
+    // https://stackoverflow.com/q/77336570
+    const uniswap_RPC = process.env.DAIMO_API_UNISWAP_RPC!;
 
-    console.log(`[UNISWAP] using L2 RPCs: ${l2_RPCs}`);
+    console.log(`[UNISWAP] using L2 RPC: ${uniswap_RPC}`);
 
-    const provider = getDefaultProvider(l2_RPCs[0]) as any; // TODO: use fallbacks?
+    const provider = getDefaultProvider(uniswap_RPC) as any; // TODO: use fallbacks?
 
     if (chainConfig.chainL2.testnet) {
       // Base Sepolia is not supported by Uniswap yet -> we test in Prod.
