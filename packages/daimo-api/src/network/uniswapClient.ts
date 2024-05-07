@@ -1,12 +1,11 @@
 import {
   BigIntStr,
-  ProposedSwap,
-  now,
-  ForeignCoin,
-  nativeETH,
   EAccount,
+  ForeignCoin,
+  ProposedSwap,
   dollarsToAmount,
-  assert,
+  nativeETH,
+  now,
 } from "@daimo/common";
 import {
   Currency,
@@ -129,7 +128,10 @@ export class UniswapClient {
     receivedAt: number,
     fromAcc: EAccount
   ) {
-    assert(this.router != null, "Uniswap router not initialized");
+    if (this.router == null) {
+      console.log(`[UNISWAP] skipping fetch, no router`);
+      return null;
+    }
 
     const startMs = Date.now();
     console.log(`[UNISWAP] fetching swap for ${addr} ${fromCoin.token}`);
@@ -228,7 +230,6 @@ export class UniswapClient {
       receivedAt,
       fromAcc
     );
-
     if (!runsInBackground) await promise;
 
     return (

@@ -89,7 +89,7 @@ export async function getLinkStatus(
       if (ret == null) {
         const sender = await nameReg.getEAccountFromStr(link.previewSender);
         if (sender == null) {
-          throw new Error(`Note sender not found: ${link.previewSender}`);
+          throw new Error(`Sender ${link.previewSender} not found`);
         }
         const pending: DaimoNoteStatus = {
           status: DaimoNoteState.Pending,
@@ -107,7 +107,7 @@ export async function getLinkStatus(
     case "notev2": {
       const sender = await nameReg.getEAccountFromStr(link.sender);
       if (sender == null) {
-        throw new Error(`Note sender not found: ${link.sender}`);
+        throw new Error(`Sender ${link.sender} not found`);
       }
       const ret = noteIndexer.getNoteStatusById(sender.addr, link.id);
       if (ret == null) {

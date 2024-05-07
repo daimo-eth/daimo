@@ -81,8 +81,8 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
         {noteFetch.error && (
           <ErrorBanner
             error={noteFetch.error}
-            displayTitle="Payment link not found"
-            displayMessage="Fix errors in your link or download the latest version of the app"
+            displayTitle="Payment link invalid"
+            displayMessage={noteFetch.error.message}
           />
         )}
         {noteStatus && (
@@ -240,9 +240,15 @@ function NoteDisplayInner({
         } else {
           return <TextError>Cancelled by sender</TextError>;
         }
+      case DaimoNoteState.Pending: // Note is not yet onchain.
+        return <TextBody>Payment link not found. Pending?</TextBody>;
+      case DaimoNoteState.Confirmed: // Note is onchain, claimable, see below.
+        break;
       default:
-      // Pending note, available to claim
+        throw new Error(`Unknown note status: ${noteStatus.status}`);
     }
+
+    // Note is onchain, ready to claim.
     switch (status) {
       case "idle":
         if (netRecv === 0) {
