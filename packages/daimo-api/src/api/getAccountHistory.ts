@@ -115,7 +115,7 @@ export async function getAccountHistory(
   if (lastBlk == null) throw new Error("No latest block");
   const lastBlock = Number(lastBlk.number);
   const lastBlockTimestamp = lastBlk.timestamp;
-  const lastBalance = await homeCoinIndexer.getBalanceAt(address, lastBlock);
+  const lastBalance = homeCoinIndexer.getCurrentBalance(address);
 
   // TODO: get userops, including reverted ones. Show failed sends.
 
