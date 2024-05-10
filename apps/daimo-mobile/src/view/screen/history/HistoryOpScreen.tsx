@@ -153,20 +153,14 @@ function LinkToExplorer({
   chainConfig: ChainConfig;
   op: DisplayOpEvent;
 }) {
-  // Block explorer: `${explorer.url}/tx/${op.txHash}`
-  const explorer = chainConfig.chainL2.blockExplorers!.default;
-  const url = `${explorer.url}/tx/${op.txHash}`;
-
-  // EthReceipt
-  // const chainId = chainConfig.chainL2.id;
-  // const { blockNumber, logIndex } = op;
-  // const url = `https://ethreceipt.org/l/${chainId}/${blockNumber}/${logIndex}`;
+  // Ethreceipts
+  const chainId = chainConfig.chainL2.id;
+  const { blockNumber, logIndex } = op;
+  const url = `https://ethreceipts.org/l/${chainId}/${blockNumber}/${logIndex}`;
 
   const openURL = useCallback(() => Linking.openURL(url), [url]);
 
-  return (
-    <ButtonBig onPress={openURL} type="subtle" title="VIEW ON BLOCK EXPLORER" />
-  );
+  return <ButtonBig onPress={openURL} type="subtle" title="VIEW RECEIPT" />;
 }
 
 function TransferBody({
