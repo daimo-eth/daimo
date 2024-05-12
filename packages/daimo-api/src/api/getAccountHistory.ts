@@ -169,7 +169,9 @@ export async function getAccountHistory(
     : null;
 
   const inviteeAddrs = inviteGraph.getInvitees(address);
-  const invitees = inviteeAddrs.map((addr) => nameReg.getDaimoAccount(addr)!);
+  const invitees = inviteeAddrs
+    .map((addr) => nameReg.getDaimoAccount(addr))
+    .filter((acc) => acc != null) as EAccount[];
 
   // Get pfps from linked accounts
   const profilePicture = profileCache.getProfilePicture(address);
