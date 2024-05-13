@@ -113,7 +113,7 @@ export async function resync(
   try {
     const res = await fetchSync(accOld, fromScratch);
     assertNotNull(manager.getAccount(), "deleted during sync");
-    manager.transform((a) => applySync(a, res));
+    manager.transform((a) => applySync(a, res, !!fromScratch));
     console.log(`[SYNC] SUCCEEDED ${accOld.name}`);
     // We are automatically marked online when any RPC req succeeds
     return "success";
@@ -134,7 +134,7 @@ export async function resync(
 /** Hydrate a newly created account to fill in properties from server */
 export async function hydrateAccount(account: Account): Promise<Account> {
   const res = await fetchSync(account, true);
-  return applySync(account, res);
+  return applySync(account, res, false);
 }
 
 /** Loads all account history since the last finalized block as of the previous sync.
@@ -186,14 +186,22 @@ async function fetchSync(
   return result;
 }
 
-function applySync(account: Account, result: AccountHistoryResult): Account {
+function applySync(
+  account: Account,
+  result: AccountHistoryResult,
+  fromScratch: boolean
+): Account {
   assert(result.address === account.address);
   if (result.lastFinalizedBlock < account.lastFinalizedBlock) {
     console.log(
-      `[SYNC] skipping sync result for ${account.address}. Server has finalized ` +
-        `block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`
+      `[SYNC] Server has finalized block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`
     );
-    return account;
+    if (fromScratch) {
+      console.log(`[SYNC] NOT skipping sync from scratch`);
+    } else {
+      console.log(`[SYNC] skipping sync, keeping local account`);
+      return account;
+    }
   }
 
   // Sync in recent transfers
