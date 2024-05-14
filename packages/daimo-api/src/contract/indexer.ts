@@ -1,4 +1,6 @@
-export class Indexer {
+import { Pool } from "pg";
+
+export abstract class Indexer {
   public readonly name: string;
   protected lastProcessedBlock = 0;
 
@@ -6,6 +8,13 @@ export class Indexer {
     console.log(`[INDEXER] ${name} constructed`);
     this.name = name;
   }
+
+  // Loads a batch of blocks from the database.
+  public abstract load(
+    pg: Pool,
+    from: number,
+    to: number
+  ): void | Promise<void>;
 
   // Checks whether we just completed a stale query. True = don't process.
   // Otherwise, returns false (coninue processing) and updates lastProcessedBlock.

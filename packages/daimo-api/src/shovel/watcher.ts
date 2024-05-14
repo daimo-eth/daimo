@@ -1,12 +1,9 @@
 import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
+import { Indexer } from "../contract/indexer";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
-
-interface indexer {
-  load(pg: Pool, from: number, to: number): void | Promise<void>;
-}
 
 const dbConfig: ClientConfig = {
   connectionString: process.env.SHOVEL_DATABASE_URL,
@@ -31,10 +28,10 @@ export class Watcher {
   private isSlowIndexing = false;
 
   // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
-  private indexerLayers: indexer[][] = [];
+  private indexerLayers: Indexer[][] = [];
   // indexers that are ignored for synchronization, i.e. while they are indexing a old range other
   // indexers may be ahead of them -- this is all for ETHIndexer which sucks.
-  private slowIndexers: indexer[] = [];
+  private slowIndexers: Indexer[] = [];
 
   private pg: Pool;
 
@@ -42,11 +39,11 @@ export class Watcher {
     this.pg = new Pool(poolConfig);
   }
 
-  add(...i: indexer[][]) {
+  add(...i: Indexer[][]) {
     this.indexerLayers.push(...i);
   }
 
-  slowAdd(...i: indexer[]) {
+  slowAdd(...i: Indexer[]) {
     this.slowIndexers.push(...i);
   }
 
