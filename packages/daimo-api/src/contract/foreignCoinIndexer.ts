@@ -54,7 +54,9 @@ export class ForeignCoinIndexer {
       async () => {
         await pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`);
         return await pg.query(
-          `select * from filtered_erc20_transfers where block_num BETWEEN $1 AND $2;`,
+          `SELECT * from filtered_erc20_transfers 
+          WHERE block_num BETWEEN $1 AND $2
+          ORDER BY block_num ASC, log_idx ASC;`,
           [from, to]
         );
       }
@@ -111,7 +113,17 @@ export class ForeignCoinIndexer {
       const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
 
       // Delete the first matching pending swap that is now swapped
-      const matchingPendingSwap = pendingSwaps.find((t) => t.value === -delta)!;
+      const matchingPendingSwap = pendingSwaps.find(
+        (t) =>
+          t.foreignToken.token === log.foreignToken.token && t.value === -delta
+      );
+
+      if (matchingPendingSwap == null) {
+        console.log(
+          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+        );
+        return;
+      }
 
       this.correspondingReceiveOfSend.set(
         addrTxHashKey(addr, log.transactionHash),
@@ -125,8 +137,9 @@ export class ForeignCoinIndexer {
       this.pendingSwapsByAddr.set(addr, newPendingSwaps);
     } else {
       // inbound transfer, add as a pending swap
-      if (this.pendingSwapsByAddr.has(addr)) {
-        this.pendingSwapsByAddr.get(addr)!.push(log);
+      const pending = this.pendingSwapsByAddr.get(addr);
+      if (pending != null) {
+        pending.push(log);
       } else {
         this.pendingSwapsByAddr.set(addr, [log]);
       }
