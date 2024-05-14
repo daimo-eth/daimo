@@ -13,6 +13,7 @@ import {
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
+import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
@@ -44,13 +45,15 @@ interface RequestCancelledLog {
 }
 
 /* Request contract. Tracks request creation and fulfillment. */
-export class RequestIndexer {
+export class RequestIndexer extends Indexer {
   private requests: Map<bigint, DaimoRequestV2Status> = new Map();
   private requestsByAddress: Map<Address, bigint[]> = new Map();
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
-  constructor(private db: DB, private nameReg: NameRegistry) {}
+  constructor(private db: DB, private nameReg: NameRegistry) {
+    super("REQUEST");
+  }
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
@@ -64,6 +67,8 @@ export class RequestIndexer {
         Date.now() - startTime
       }ms`
     );
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
 
     // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;

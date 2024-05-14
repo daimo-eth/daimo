@@ -2,6 +2,7 @@ import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
+import { Indexer } from "./indexer";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -15,10 +16,13 @@ export interface UserOp {
 type OpCallback = (userOp: UserOp) => void;
 
 /* User operation indexer. Used to track fulfilled requests. */
-export class OpIndexer {
+export class OpIndexer extends Indexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
-
   private callbacks: Map<Hex, OpCallback[]> = new Map();
+
+  constructor() {
+    super("OP");
+  }
 
   addCallback(hash: Hex, cb: OpCallback) {
     const cbs = this.callbacks.get(hash);
@@ -55,6 +59,8 @@ export class OpIndexer {
     console.log(
       `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
 
     result.rows.forEach((row: any) => {
       const userOp: UserOp = {

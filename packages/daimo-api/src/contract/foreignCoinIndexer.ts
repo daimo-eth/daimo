@@ -7,6 +7,7 @@ import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Transfer } from "./homeCoinIndexer";
+import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
 import { UniswapClient } from "../network/uniswapClient";
@@ -29,7 +30,7 @@ export type ForeignTokenTransfer = Transfer & {
  * - Foreign Coin Indexer helps map the final inbound Home coin transfer to the
  *   original inbound foreign token transfer.
  */
-export class ForeignCoinIndexer {
+export class ForeignCoinIndexer extends Indexer {
   private foreignTokens: Map<Address, ForeignToken> = new Map();
   private allTransfers: ForeignTokenTransfer[] = [];
 
@@ -40,7 +41,9 @@ export class ForeignCoinIndexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, private uc: UniswapClient) {}
+  constructor(private nameReg: NameRegistry, private uc: UniswapClient) {
+    super("SWAPCOIN");
+  }
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
@@ -61,6 +64,9 @@ export class ForeignCoinIndexer {
         );
       }
     );
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
+
     const logs: ForeignTokenTransfer[] = result.rows
       .map((row) => {
         return {

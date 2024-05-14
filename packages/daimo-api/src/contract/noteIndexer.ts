@@ -9,6 +9,7 @@ import {
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
+import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
 import { senderIdKey, logCoordinateKey } from "../utils/indexing";
@@ -28,7 +29,7 @@ interface NoteLog {
 }
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
-export class NoteIndexer {
+export class NoteIndexer extends Indexer {
   // Map (sender, id) -> ephemeralOwner
   private senderIdToOwner: Map<string, Address> = new Map();
 
@@ -37,13 +38,17 @@ export class NoteIndexer {
   private logCoordinateToNoteEvent: Map<string, [Address, "create" | "claim"]> =
     new Map();
 
-  constructor(private nameReg: NameRegistry) {}
+  constructor(private nameReg: NameRegistry) {
+    super("NOTE");
+  }
 
   async load(pg: Pool, from: number, to: number) {
     // Load notes contract event logs
     const startMs = Date.now();
     const logs = await this.loadNoteLogs(pg, from, to);
+    if (logs.length === 0) return;
     console.log(`[NOTE] ${Date.now() - startMs}ms: loaded ${logs.length} logs`);
+    if (this.updateLastProcessedCheckStale(from, to)) return;
 
     // Update in-memory note statuses
     const notes: DaimoNoteStatus[] = await this.handleNoteLogs(logs);
