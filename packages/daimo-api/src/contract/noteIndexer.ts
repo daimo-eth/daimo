@@ -28,7 +28,7 @@ interface NoteLog {
 }
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
-export class NoteIndexer {
+export class NoteIndexer extends Indexer {
   // Map (sender, id) -> ephemeralOwner
   private senderIdToOwner: Map<string, Address> = new Map();
 

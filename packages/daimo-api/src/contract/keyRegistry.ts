@@ -2,6 +2,7 @@ import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
+import { Indexer } from "./indexer";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -17,7 +18,7 @@ export interface KeyChange {
   key: [Hex, Hex];
 }
 
-export class KeyRegistry {
+export class KeyRegistry extends Indexer {
   private addrToLogs = new Map<Address, KeyChange[]>();
 
   private keyToAddr = new Map<Hex, Address>();
@@ -25,6 +26,10 @@ export class KeyRegistry {
   private addrToDeploymentTxHash = new Map<Address, Hex>();
 
   private listeners: ((logs: KeyChange[]) => void)[] = [];
+
+  constructor() {
+    super("KEY-REG");
+  }
 
   addListener(listener: (logs: KeyChange[]) => void) {
     this.listeners.push(listener);
@@ -35,6 +40,9 @@ export class KeyRegistry {
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
     changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
+
     changes!.sort((a, b) => {
       const bdiff = a.blockNumber - b.blockNumber;
       if (bdiff !== 0n) return Number(bdiff);
@@ -124,6 +132,7 @@ export class KeyRegistry {
         [from, to, chainConfig.chainL2.id]
       )
     );
+
     return result.rows.map((row: any) => ({
       change,
       blockNumber: BigInt(row.block_num),

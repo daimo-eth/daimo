@@ -22,6 +22,7 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
+import { Indexer } from "./indexer";
 import { ProfileCache } from "../api/profile";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
@@ -77,7 +78,7 @@ interface Registration {
 }
 
 /* Interface to the NameRegistry contract. */
-export class NameRegistry {
+export class NameRegistry extends Indexer {
   /* In-memory indexer, for now. */
   private nameToReg = new Map<string, Registration>();
   private addrToReg = new Map<Address, Registration>();
@@ -90,7 +91,9 @@ export class NameRegistry {
     private inviteGraph: InviteGraph,
     private profileCache: ProfileCache,
     private nameBlacklist: Set<string>
-  ) {}
+  ) {
+    super("NAME-REG");
+  }
 
   public status() {
     return { numAccounts: this.accounts.length, numLogs: this.logs.length };
@@ -112,6 +115,9 @@ export class NameRegistry {
           [from, to, chainConfig.chainL2.id]
         )
     );
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
+
     const names = result.rows.map((r: any) => {
       return {
         timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),

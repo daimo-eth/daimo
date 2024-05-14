@@ -11,6 +11,7 @@ import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
 import { ForeignCoinIndexer } from "./foreignCoinIndexer";
+import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
@@ -32,7 +33,7 @@ export interface Transfer {
 }
 
 /* USDC or testUSDC stablecoin contract. Tracks transfers. */
-export class HomeCoinIndexer {
+export class HomeCoinIndexer extends Indexer {
   private allTransfers: Transfer[] = [];
   private currentBalances: Map<Address, bigint> = new Map();
 
@@ -45,7 +46,9 @@ export class HomeCoinIndexer {
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
     private paymentMemoTracker: PaymentMemoTracker
-  ) {}
+  ) {
+    super("COIN");
+  }
 
   public status() {
     return { numTransfers: this.allTransfers.length };
@@ -82,6 +85,9 @@ export class HomeCoinIndexer {
           [from, to]
         )
     );
+
+    if (this.updateLastProcessedCheckStale(from, to)) return;
+
     const logs: Transfer[] = result.rows.map((row) => {
       return {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
