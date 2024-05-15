@@ -16,3 +16,11 @@
 [submodule "packages/contract/lib/p256-verifier"]
 	path = packages/contract/lib/p256-verifier
 	url = https://github.com/daimo-eth/p256-verifier
+[submodule "packages/contract/lib/v3-core"]
+	path = packages/contract/lib/v3-core
+	url = https://github.com/uniswap/v3-core
+	branch = 0.8
+[submodule "packages/contract/lib/v3-periphery"]
+	path = packages/contract/lib/v3-periphery
+	url = https://github.com/uniswap/v3-periphery
+	branch = 0.8
