@@ -114,8 +114,8 @@ if you need access. Drag-drop the build into the simulator to install.
 Set the following variables to use the remote, hosted API.
 
 ```sh
-export DAIMO_APP_API_URL_TESTNET="https://daimo-api-testnet.onrender.com"
-export DAIMO_APP_API_URL_MAINNET="https://daimo-api-prod.onrender.com"
+export DAIMO_APP_API_URL_TESTNET="https://api-stage.daimo.xyz"
+export DAIMO_APP_API_URL_MAINNET="https://api.daimo.xyz"
 export DAIMO_DOMAIN="daimo.com"
 ```
 

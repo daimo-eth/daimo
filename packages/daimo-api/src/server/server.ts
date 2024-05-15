@@ -171,9 +171,10 @@ async function main() {
     req.url = "/" + req.url.slice(trpcPrefix.length);
     handler(req, res);
   });
-  server.listen(3000).address();
+  const port = 3000;
+  server.listen(port).address();
 
-  console.log(`[API] listening`);
+  console.log(`[API] listening on port ${port}`);
 }
 
 main().catch(console.error);

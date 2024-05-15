@@ -40,8 +40,8 @@
         "simulator": true
       },
       "env": {
-        "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
-        "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
+        "DAIMO_APP_API_URL_MAINNET": "https://api.daimo.xyz",
+        "DAIMO_APP_API_URL_TESTNET": "https://api-stage.daimo.xyz",
         "DAIMO_APP_VARIANT": "maestro"
       }
     },
@@ -49,8 +49,8 @@
       "extends": "base",
       "autoIncrement": true,
       "env": {
-        "DAIMO_APP_API_URL_MAINNET": "https://daimo-api-prod.onrender.com",
-        "DAIMO_APP_API_URL_TESTNET": "https://daimo-api-testnet.onrender.com",
+        "DAIMO_APP_API_URL_MAINNET": "https://api.daimo.xyz",
+        "DAIMO_APP_API_URL_TESTNET": "https://api-stage.daimo.xyz",
         "DAIMO_APP_VARIANT": "prod"
       }
     }
