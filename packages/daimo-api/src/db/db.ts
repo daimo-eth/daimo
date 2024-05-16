@@ -5,7 +5,7 @@ import { Address, Hex, getAddress } from "viem";
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {
   connectionString: process.env.PGURL,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
   query_timeout: 5000,
   statement_timeout: 5000,
   database: process.env.PGURL == null ? "daimo" : undefined,
