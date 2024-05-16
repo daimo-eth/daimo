@@ -55,7 +55,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"c09eff100c833882cd94bc6b5d2e0d45af6ec978eb7f4a2e5174696bfee87488";
+        bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -67,12 +67,12 @@ contract AccountSendUseropTest is Test {
             validUntil,
             uint8(0), // keySlot
             abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: challengeToSign,
-                    r: 0x2dec57c39ecd3a573bb35e4d1bc16d3db6d5ee8ab024605aa910631d38bee5fe,
-                    s: 0x6036d125bc72d63a29ff6ab63e25a5273acb9824b818e919d83ed0f883d6e941
-                })
-            )
+                    Utils.rawSignatureToSignature({
+                        challenge: challengeToSign,
+                        r: 0x95287be7cb8c72c4aeee050bb0448fed83b1330a1ba2edcb6835525c9c07b006,
+                        s: 0x656E96974C5170EFA7D65FFB4F61A793B0DA4AC9E346E5B28F9739FE3AF2B096
+                    })
+                )
         );
 
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
@@ -143,7 +143,7 @@ contract AccountSendUseropTest is Test {
 
         uint8 version = 1;
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"c09eff100c833882cd94bc6b5d2e0d45af6ec978eb7f4a2e5174696bfee87488";
+        bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
         bytes memory challengeToSign = abi.encodePacked(
             version,
             validUntil,
@@ -155,12 +155,12 @@ contract AccountSendUseropTest is Test {
             validUntil,
             uint8(0), // keySlot
             abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: challengeToSign,
-                    r: 0x07d134db93e31d80eed6d093fcd15ad0fbd337ea2e5394f355307378345e8197,
-                    s: 0x05d84f80617a5077c431a936762826f1145c5834b8e23dff6f3d8b41321a5815
-                })
-            )
+                    Utils.rawSignatureToSignature({
+                        challenge: challengeToSign,
+                        r: 0x2b17a942c427b4c0e691feb6efe6d65abdcdc5d56ca45bf1aa4822c3d8935f47,
+                        s: 0x37E6C05C93ABA7F7ED5A8921499F65BC7462959B92E8D371BA23367EBA564B9E
+                    })
+                )
         );
 
         DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
