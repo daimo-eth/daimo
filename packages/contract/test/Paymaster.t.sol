@@ -7,7 +7,7 @@ import "account-abstraction/interfaces/UserOperation.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
 import "../src/DaimoPaymasterV2.sol";
-import "../src/DaimoAccount.sol";
+import "../src/DaimoAccountV2.sol";
 
 contract PaymasterTest is Test {
     DaimoPaymasterV2 public paymaster;

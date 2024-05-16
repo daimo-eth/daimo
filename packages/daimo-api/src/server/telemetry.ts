@@ -1,6 +1,4 @@
 import { trace } from "@opentelemetry/api";
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import geoIP from "geoip-lite";
 // @ts-ignore - add once @types/libhoney PR ships
 import Libhoney from "libhoney";
@@ -62,19 +60,20 @@ export class Telemetry {
 
     if (sentryDSN === "") {
       console.log(`[TELEM] no SENTRY_DSN set, Sentry error reports disabled`);
-    } else {
-      Sentry.init({
-        dsn: sentryDSN,
-        // Don't send API server "not ready" errors to Sentry.
-        ignoreErrors: ["API not ready"],
-        integrations: [
-          new Sentry.Integrations.Postgres(),
-          nodeProfilingIntegration(),
-        ],
-        tracesSampleRate: 1.0,
-        profilesSampleRate: 1.0,
-      });
     }
+    // else {
+    //   Sentry.init({
+    //     dsn: sentryDSN,
+    //     // Don't send API server "not ready" errors to Sentry.
+    //     ignoreErrors: ["API not ready"],
+    //     integrations: [
+    //       new Sentry.Integrations.Postgres(),
+    //       nodeProfilingIntegration(),
+    //     ],
+    //     tracesSampleRate: 1.0,
+    //     profilesSampleRate: 1.0,
+    //   });
+    // }
   }
 
   startApiSpan(ctx: TrpcRequestContext, type: string, path: string) {

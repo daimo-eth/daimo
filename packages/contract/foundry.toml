@@ -2,6 +2,7 @@
 src = 'src'
 out = 'out'
 libs = ['lib']
+fs_permissions = [{ access = "read", path = "./"}]
 
 # Compiler settings
 solc = "0.8.21"

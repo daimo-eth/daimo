@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoAccountFactory.sol";
-import "../src/DaimoAccount.sol";
+import "../src/DaimoAccountFactoryV2.sol";
+import "../src/DaimoAccountV2.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
 
@@ -12,13 +12,11 @@ contract AccountSigningKeysTest is Test {
     using UserOperationLib for UserOperation;
 
     EntryPoint public entryPoint;
-    DaimoVerifier public verifier;
-    DaimoAccountFactory public factory;
+    DaimoAccountFactoryV2 public factory;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        verifier = new DaimoVerifier();
-        factory = new DaimoAccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactoryV2(entryPoint);
     }
 
     event SigningKeyAdded(

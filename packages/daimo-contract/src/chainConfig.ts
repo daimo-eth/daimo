@@ -45,6 +45,8 @@ export interface ChainConfig {
   offChainUtilsDeployBlock: number;
   uniswapRouterAddress: Address;
   uniswapETHPoolAddress: Address;
+  cctpMessageTransmitterAddress: Address;
+  circleAPIRoot: string;
 }
 
 // EphemeralNotes contract varies by chain due to different USDC addresses
@@ -80,6 +82,9 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         offChainUtilsDeployBlock: 13170550,
         uniswapRouterAddress: "0x2626664c2603336E57B271c5C0b26F421741e481",
         uniswapETHPoolAddress: "0xd0b53D9277642d899DF5C87A3966A349A798F224",
+        cctpMessageTransmitterAddress:
+          "0xAD09780d193884d503182aD4588450C416D6F9D4",
+        circleAPIRoot: "https://iris-api.circle.com/v1",
       };
     case "baseSepolia":
       return {
@@ -95,6 +100,9 @@ export function getChainConfig(daimoChain: DaimoChain): ChainConfig {
         offChainUtilsDeployBlock: 8681107,
         uniswapRouterAddress: "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4",
         uniswapETHPoolAddress: "0xd0b53D9277642d899DF5C87A3966A349A798F224", // TODO: there's no ETH/USDC pool with actual liquidity on Sepolia
+        cctpMessageTransmitterAddress:
+          "0x7865fAfC2db2093669d92c0F33AeEF291086BEFD",
+        circleAPIRoot: "https://iris-api-sandbox.circle.com/v1",
       };
     default:
       throw new Error(`unknown chain '${daimoChain}'`);
