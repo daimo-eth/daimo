@@ -3,8 +3,6 @@ pragma solidity ^0.8.12;
 
 import "account-abstraction/core/BasePaymaster.sol";
 
-import "./DaimoAccount.sol";
-
 /// Coinbase MetaPaymaster
 /// See https://github.com/base-org/paymaster/pull/22
 interface IMetaPaymaster {

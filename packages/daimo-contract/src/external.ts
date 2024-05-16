@@ -6,6 +6,10 @@ export const pimlicoPaymasterAbi = parseAbi([
   "function token() view returns (address)",
 ]);
 
+export const cctpMessageTransmitterABI = parseAbi([
+  "function receiveMessage(bytes calldata message, bytes calldata attestation)",
+]);
+
 export const swapRouter02Address = "0x2626664c2603336e57b271c5c0b26f421741e481";
 
 export const swapRouter02Abi = [

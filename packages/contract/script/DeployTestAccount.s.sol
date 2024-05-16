@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "../src/DaimoAccountFactory.sol";
-import "../src/DaimoAccount.sol";
+import "../src/DaimoAccountV2.sol";
 
 contract DeployScript is Script {
     function run(DaimoAccountFactory factory) public {
@@ -19,9 +19,7 @@ contract DeployScript is Script {
             )
         ];
 
-        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-
-        factory.createAccount(0, key, calls, 0);
+        factory.createAccount(0, key, 0);
 
         vm.stopBroadcast();
     }

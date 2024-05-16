@@ -20,3 +20,7 @@ export function addrTxHashKey(addr: Address, txHash: Hex) {
 export function addrTokenKey(addr: Address, token: Address) {
   return addr + ":" + token;
 }
+
+export function chainIdEventNonceKey(chainId: number, eventNonce: number) {
+  return chainId + ":" + eventNonce;
+}

@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoAccountFactory.sol";
-import "../src/DaimoAccount.sol";
+import "../src/DaimoAccountFactoryV2.sol";
+import "../src/DaimoAccountV2.sol";
 import "./Utils.sol";
 
 import "account-abstraction/core/EntryPoint.sol";
@@ -13,14 +13,12 @@ contract AccountVerify1271Test is Test {
     using UserOperationLib for UserOperation;
 
     EntryPoint public entryPoint;
-    DaimoVerifier public verifier;
-    DaimoAccountFactory public factory;
-    DaimoAccount public account;
+    DaimoAccountFactoryV2 public factory;
+    DaimoAccountV2 public account;
 
     function setUp() public {
         entryPoint = new EntryPoint();
-        verifier = new DaimoVerifier();
-        factory = new DaimoAccountFactory(entryPoint, verifier);
+        factory = new DaimoAccountFactoryV2(entryPoint);
 
         // Create test account with a single signing key
         uint256[2] memory pubKey = [
@@ -40,16 +38,16 @@ contract AccountVerify1271Test is Test {
         bytes memory sig = abi.encodePacked(
             uint8(0), // keySlot
             abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: 0x2adcff2bd06fc3cdd03e21e5e4c197913e96e75cad0bc6e9c9c14607af4f3a37
-                })
-            )
+                    Utils.rawSignatureToSignature({
+                        challenge: abi.encodePacked(
+                            bytes32(
+                                0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                            )
+                        ),
+                        r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                        s: 0x2adcff2bd06fc3cdd03e21e5e4c197913e96e75cad0bc6e9c9c14607af4f3a37
+                    })
+                )
         );
 
         // check a valid signature
@@ -69,16 +67,16 @@ contract AccountVerify1271Test is Test {
         bytes memory sig = abi.encodePacked(
             uint8(0), // keySlot
             abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: s
-                })
-            )
+                    Utils.rawSignatureToSignature({
+                        challenge: abi.encodePacked(
+                            bytes32(
+                                0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                            )
+                        ),
+                        r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                        s: s
+                    })
+                )
         );
 
         // Malleable signature is NOT accepted
@@ -92,16 +90,16 @@ contract AccountVerify1271Test is Test {
         sig = abi.encodePacked(
             uint8(0), // keySlot
             abi.encode( // signature
-                Utils.rawSignatureToSignature({
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                    s: s
-                })
-            )
+                    Utils.rawSignatureToSignature({
+                        challenge: abi.encodePacked(
+                            bytes32(
+                                0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
+                            )
+                        ),
+                        r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                        s: s
+                    })
+                )
         );
         console.log("fixed sig s:", s);
 

@@ -3,8 +3,6 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoAccount.sol";
-import "../src/DaimoVerifier.sol";
 import "p256-verifier/utils/Base64URL.sol";
 
 library Utils {
@@ -22,7 +20,7 @@ library Utils {
             )
         );
         console2.log("clientDataJSON:", clientDataJSON);
-        
+
         uint256 challengeLocation = 23;
         uint256 responseTypeLocation = 1;
 
