@@ -23,6 +23,10 @@ export function MissingKeyScreen() {
 
   const [title, desc] = getKeyErrorDesc(account, keyInfo);
 
+  console.log(
+    `[ONBOARDING] MISSING KEY ${account.name}, ${account.accountKeys.length} keys, ${account.pendingKeyRotation.length} pending rotations, pubKeyHex: ${keyInfo.pubKeyHex} title: ${title}, desc: ${desc}`
+  );
+
   return (
     <View>
       <OnboardingHeader title="Missing Key" />
