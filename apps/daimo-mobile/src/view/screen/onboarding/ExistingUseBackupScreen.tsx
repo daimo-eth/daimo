@@ -125,7 +125,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
             />
           </>
         )}
-        <Spacer h={24} />
+        <Spacer h={32} />
       </View>
     </View>
   );
