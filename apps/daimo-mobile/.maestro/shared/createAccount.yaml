@@ -10,6 +10,7 @@ appId: com.daimo
 - assertVisible: Join waitlist
 - tapOn: enter invite code
 - inputText: testnet
+- hideKeyboard
 - assertVisible:
     text: "submit"
     enabled: true
@@ -17,11 +18,10 @@ appId: com.daimo
 - inputText: "maestro"
 - inputRandomNumber:
     length: 8
-- wait: 2
 - assertVisible:
-    text: CREATE
+    text: CREATE ACCOUNT
     enabled: true
-- tapOn: CREATE
+- tapOn: CREATE ACCOUNT
 - assertVisible: Notifications
 - tapOn: Allow Notifications
 - assertVisible: Your balance.*

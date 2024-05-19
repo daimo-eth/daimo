@@ -201,4 +201,17 @@ cd apps/daimo-web && npm run dev
 ```
 
 </details>
+
+<details>
+<summary><strong>Dev quickstart: Maestro</strong></summary>
+
+`daimo-mobile` runs end to end tests with [Maestro](https://maestro.mobile.dev).
+
+To write or run a test locally, first obtain a Expo build labelled with profile `maestro` [here](https://expo.dev/accounts/daimo/projects/daimo/builds).
+
+Then, with Maestro installed, you can simply run `maestro test <test file name>` to run the test. Example: `maestro test .maestro/onboardAndRemove.yaml`.
+
+In the cloud, these tests are run on the master branch using the `maestro-ci` workflow in [Maestro cloud](https://console.mobile.dev).
+
+</details>
 </details>
