@@ -22,6 +22,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+import { chainLinkAggregatorABI } from "./chainLink";
 import { chainConfig } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
@@ -122,6 +123,17 @@ export class ViemClient {
       `Receipt error ${hash} - ${txURL}: ${e}`,
       "error"
     );
+  }
+
+  getChainLinkAnswers(oracles: Address[]) {
+    return this.l1Client.multicall({
+      contracts: oracles.map((oracle) => ({
+        address: oracle,
+        abi: chainLinkAggregatorABI,
+        functionName: "latestAnswer",
+        args: [],
+      })),
+    });
   }
 
   private async waitForReceipt(hash: Hex) {

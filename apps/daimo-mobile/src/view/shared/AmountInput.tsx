@@ -1,7 +1,10 @@
+import Octicons from "@expo/vector-icons/Octicons";
+import { Picker } from "@react-native-picker/picker";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   NativeSyntheticEvent,
+  Pressable,
   StyleSheet,
   TextInput,
   TextInputEndEditingEventData,
@@ -147,9 +150,22 @@ function AmountInput({
     if (onFocus) onFocus();
   }, [ref, onFocus]);
 
+  // Currency picker
+  const [currency, setCurrency] = useState<string>("USD");
+  const [picking, setPicking] = useState(false);
+  const pickCurrency = useCallback(() => {
+    setPicking(!picking);
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={focus} accessible={false}>
       <View style={styles.amountInputWrap}>
+        {picking && (
+          <CurrencyPicker currency={currency} onSetCurrency={setCurrency} />
+        )}
+        <Pressable onPress={pickCurrency} style={{ paddingBottom: 20 }}>
+          <Octicons name="chevron-down" size={24} color={color.grayMid} />
+        </Pressable>
         <DaimoText style={styles.amountDollar}>$</DaimoText>
         <TextInput
           ref={ref}
@@ -170,6 +186,44 @@ function AmountInput({
         />
       </View>
     </TouchableWithoutFeedback>
+  );
+}
+
+const currencies = [
+  { label: "$ USD", value: "USD" },
+  { label: "€ EUR", value: "EUR" },
+  { label: "£ GBP", value: "GBP" },
+  { label: "¥ JPY", value: "JPY" },
+  { label: "₩ KRW", value: "KRW" },
+  { label: "₪ TRY", value: "TRY" },
+  // CHF, AUD, CAD, MXN, ARS below
+  { label: "Fr. CHF", value: "CHF" },
+  { label: "$ AUD", value: "AUD" },
+  { label: "$ CAD", value: "CAD" },
+  { label: "$ MXN", value: "MXN" },
+  { label: "$ ARS", value: "ARS" },
+];
+
+function CurrencyPicker({
+  currency,
+  onSetCurrency,
+}: {
+  currency: string;
+  onSetCurrency: (currency: string) => void;
+}) {
+  const choose = (val: any) => {
+    if (val == null) return;
+    onSetCurrency(val);
+  };
+
+  return (
+    <View style={{ position: "absolute", top: 0, right: 0 }}>
+      <Picker selectedValue={currency} onValueChange={choose}>
+        {currencies.map((c) => (
+          <Picker.Item key={c.value} label={c.label} value={c.value} />
+        ))}
+      </Picker>
+    </View>
   );
 }
 
