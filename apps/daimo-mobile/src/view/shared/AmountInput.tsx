@@ -1,16 +1,17 @@
+import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { Picker } from "@react-native-picker/picker";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Dimensions,
   NativeSyntheticEvent,
-  Pressable,
   StyleSheet,
   TextInput,
   TextInputEndEditingEventData,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import SelectDropdown from "react-native-select-dropdown";
 
 import { amountSeparator, getAmountText } from "./Amount";
 import Spacer from "./Spacer";
@@ -151,102 +152,149 @@ function AmountInput({
   }, [ref, onFocus]);
 
   // Currency picker
-  const [currency, setCurrency] = useState<string>("USD");
-  const [picking, setPicking] = useState(false);
-  const pickCurrency = useCallback(() => {
-    setPicking(!picking);
-  }, []);
+  const [currency, onSetCurrency] =
+    useState<CurrencyExchangeRate>(currencyRateUSD);
+  const account = useAccount();
+  const allCurrencies = [currencyRateUSD, ...(account?.exchangeRates || [])];
 
   return (
     <TouchableWithoutFeedback onPress={focus} accessible={false}>
-      <View style={styles.amountInputWrap}>
-        {picking && (
-          <CurrencyPicker currency={currency} onSetCurrency={setCurrency} />
-        )}
-        <Pressable onPress={pickCurrency} style={{ paddingBottom: 20 }}>
-          <Octicons name="chevron-down" size={24} color={color.grayMid} />
-        </Pressable>
-        <DaimoText style={styles.amountDollar}>$</DaimoText>
-        <TextInput
-          ref={ref}
-          style={styles.amountInput}
-          keyboardType="numeric"
-          placeholder="0"
-          placeholderTextColor={color.grayMid}
-          numberOfLines={1}
-          maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
-          focusable={!disabled}
-          editable={!disabled}
-          selectTextOnFocus
-          autoFocus={autoFocus}
-          value={strVal}
-          onChangeText={change}
-          onEndEditing={onBlur} /* called on blur, works on Android */
-          onTouchEnd={focus}
-        />
+      <View style={styles.amountRow}>
+        <CurrencyPicker {...{ allCurrencies, currency, onSetCurrency }} />
+        <View style={styles.amountInputWrap}>
+          <DaimoText style={styles.amountDollar}>{currency.symbol}</DaimoText>
+          <TextInput
+            ref={ref}
+            style={styles.amountInput}
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor={color.grayMid}
+            numberOfLines={1}
+            maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
+            focusable={!disabled}
+            editable={!disabled}
+            selectTextOnFocus
+            autoFocus={autoFocus}
+            value={strVal}
+            onChangeText={change}
+            onEndEditing={onBlur} /* called on blur, works on Android */
+            onTouchEnd={focus}
+          />
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
 }
 
-const currencies = [
-  { label: "$ USD", value: "USD" },
-  { label: "€ EUR", value: "EUR" },
-  { label: "£ GBP", value: "GBP" },
-  { label: "¥ JPY", value: "JPY" },
-  { label: "₩ KRW", value: "KRW" },
-  { label: "₪ TRY", value: "TRY" },
-  // CHF, AUD, CAD, MXN, ARS below
-  { label: "Fr. CHF", value: "CHF" },
-  { label: "$ AUD", value: "AUD" },
-  { label: "$ CAD", value: "CAD" },
-  { label: "$ MXN", value: "MXN" },
-  { label: "$ ARS", value: "ARS" },
-];
-
 function CurrencyPicker({
+  allCurrencies,
   currency,
   onSetCurrency,
 }: {
-  currency: string;
-  onSetCurrency: (currency: string) => void;
+  allCurrencies: CurrencyExchangeRate[];
+  currency: CurrencyExchangeRate;
+  onSetCurrency: (currency: CurrencyExchangeRate) => void;
 }) {
-  const choose = (val: any) => {
+  const choose = (val: CurrencyExchangeRate) => {
     if (val == null) return;
     onSetCurrency(val);
   };
 
   return (
-    <View style={{ position: "absolute", top: 0, right: 0 }}>
-      <Picker selectedValue={currency} onValueChange={choose}>
-        {currencies.map((c) => (
-          <Picker.Item key={c.value} label={c.label} value={c.value} />
-        ))}
-      </Picker>
+    <View style={{ width: 24, height: 24 }}>
+      <SelectDropdown
+        data={allCurrencies}
+        defaultValue={currencyRateUSD}
+        onSelect={choose}
+        renderButton={(c) => (
+          <View>
+            <CurrencyPickButton currency={c} />
+          </View>
+        )}
+        renderItem={(c) => (
+          <View>
+            <CurrencyPickItem currency={c} />
+          </View>
+        )}
+        showsVerticalScrollIndicator
+        dropdownStyle={styles.curDropdownStyle}
+      />
     </View>
   );
 }
 
+function CurrencyPickButton({ currency }: { currency: CurrencyExchangeRate }) {
+  return (
+    <View
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 24,
+        backgroundColor: color.ivoryDark,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Octicons name="chevron-down" size={18} color={color.grayMid} />
+    </View>
+  );
+}
+
+function CurrencyPickItem({ currency }: { currency: CurrencyExchangeRate }) {
+  return (
+    <View
+      style={{
+        borderBottomWidth: 1,
+        borderBottomColor: color.grayLight,
+        paddingHorizontal: 24,
+        paddingVertical: 13,
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <DaimoText variant="dropdown">
+        {currency.name} ({currency.currency})
+      </DaimoText>
+      <DaimoText variant="dropdown">{currency.symbol}</DaimoText>
+    </View>
+  );
+}
+
+const dim = Dimensions.get("window");
+const isSmall = dim.width < 4007;
+
 const styles = StyleSheet.create({
+  amountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
   amountInputWrap: {
+    flexShrink: 1,
     flexDirection: "row",
     alignItems: "flex-end",
     gap: 4,
   },
   amountDollar: {
-    flexGrow: 1,
-    fontSize: 56,
+    fontSize: isSmall ? 50 : 56,
     fontWeight: "600",
     paddingBottom: 2,
     color: color.midnight,
     textAlign: "right",
   },
   amountInput: {
-    flexGrow: 1,
-    fontSize: 64,
+    fontSize: isSmall ? 56 : 64,
     fontWeight: "600",
     fontVariant: ["tabular-nums"],
     color: color.midnight,
+  },
+  curDropdownStyle: {
+    width: 220,
+    backgroundColor: color.white,
+    borderRadius: 13,
+    flexDirection: "column",
   },
 });
 

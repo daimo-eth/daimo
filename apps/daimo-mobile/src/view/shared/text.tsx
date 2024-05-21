@@ -20,7 +20,8 @@ type TypographyProps = TextProps & {
     | "btnCaps"
     | "error"
     | "center"
-    | "emphasizedSmallText";
+    | "emphasizedSmallText"
+    | "dropdown";
   color?: string;
 };
 

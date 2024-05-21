@@ -135,7 +135,6 @@ const styles = StyleSheet.create({
   sheetContainer: {
     // add horizontal space
     marginHorizontal: 24,
-    // ...ss.container.debug,
     ...ss.container.shadow,
   },
   contentContainer: {

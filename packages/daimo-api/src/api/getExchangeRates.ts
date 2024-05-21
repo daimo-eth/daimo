@@ -1,9 +1,9 @@
-import { CurrencyExchangeRate, daimoCurrencies, now } from "@daimo/common";
+import { CurrencyExchangeRate, nonUsdCurrencies, now } from "@daimo/common";
 
 import { ViemClient } from "../network/viemClient";
 
 export async function getExchangeRates(vc: ViemClient) {
-  const oracles = daimoCurrencies.map((c) => c.usdPairChainlinkAddress);
+  const oracles = nonUsdCurrencies.map((c) => c.usdPairChainlinkAddress);
   const answers = await vc.getChainLinkAnswers(oracles);
 
   const ret = [] as CurrencyExchangeRate[];
@@ -14,9 +14,9 @@ export async function getExchangeRates(vc: ViemClient) {
       console.warn(`[API] getExchangeRates: skipping error`, answer);
       continue;
     }
-    const { symbol, currency } = daimoCurrencies[i];
+    const { name, symbol, currency } = nonUsdCurrencies[i];
     const rateUSD = Number(answer.result) / 1e8;
-    ret.push({ symbol, currency, rateUSD });
+    ret.push({ name, symbol, currency, rateUSD });
   }
 
   return ret;

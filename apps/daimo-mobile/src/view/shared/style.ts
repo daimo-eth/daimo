@@ -149,6 +149,10 @@ export const ss = {
       fontWeight: "600",
       color: color.gray3,
     },
+    dropdown: {
+      ...textBase,
+      fontSize: 17,
+    },
     error: {
       ...textBase,
       fontSize: 16,
