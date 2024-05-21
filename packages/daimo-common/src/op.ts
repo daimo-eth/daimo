@@ -162,6 +162,7 @@ export type DaimoAccountCall = {
 // Gets the logical from and to-addresses for a given op
 // If the op creates a payment link, to = payment link until claimed, then it's
 // the address of the claimer.
+// If the op claims a payment link, from = sender, to = claimer.
 // If the op is a swap, from = the pre-swap sender.
 export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
   if (op.type === "transfer") {
@@ -171,10 +172,11 @@ export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
       // Self-transfer via payment link shows up as two payment link transfers
       return [op.from, op.to];
+    } else {
+      return [
+        op.noteStatus.sender.addr,
+        op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
+      ];
     }
-    return [
-      op.noteStatus.sender.addr,
-      op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
-    ];
   }
 }
