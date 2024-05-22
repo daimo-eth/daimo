@@ -261,7 +261,7 @@ function SendConfirm({
     button = <FulfillRequestButton {...{ account, requestStatus }} />;
   } else {
     const memoParts = [] as string[];
-    if (money.currency.name !== "USD") {
+    if (money.currency.currency !== "USD") {
       memoParts.push(`${money.currency.symbol}${money.localUnits}`);
     }
     if (memo != null) {

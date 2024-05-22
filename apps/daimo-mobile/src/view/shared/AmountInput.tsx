@@ -49,7 +49,8 @@ export function AmountChooser({
 
   const setEntry = (entry: LocalMoneyEntry) => {
     const { localUnits, currency } = entry;
-    onSetEntry({ ...entry, dollars: localUnits * currency.rateUSD });
+    const cents = Math.round(localUnits * currency.rateUSD * 100);
+    onSetEntry({ ...entry, dollars: cents / 100 });
   };
 
   const isNonUSD = moneyEntry.currency.currency !== "USD";
