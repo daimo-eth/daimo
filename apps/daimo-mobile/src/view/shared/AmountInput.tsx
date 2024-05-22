@@ -199,6 +199,7 @@ function AmountInput({
             onTouchEnd={focus}
           />
         </View>
+        <View style={styles.currencyPickerWrap} /* for centering */ />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -217,14 +218,14 @@ function CurrencyPicker({
   };
 
   return (
-    <View style={{ width: 24, height: 24 }}>
+    <View style={styles.currencyPickerWrap}>
       <SelectDropdown
         data={allCurrencies}
         defaultValue={currencyRateUSD}
         onSelect={choose}
-        renderButton={(c) => (
-          <View>
-            <CurrencyPickButton currency={c} />
+        renderButton={() => (
+          <View style={styles.currencyButton}>
+            <CurrencyPickButton />
           </View>
         )}
         renderItem={(c) => (
@@ -233,13 +234,13 @@ function CurrencyPicker({
           </View>
         )}
         showsVerticalScrollIndicator
-        dropdownStyle={styles.curDropdownStyle}
+        dropdownStyle={styles.currencyDropdown}
       />
     </View>
   );
 }
 
-function CurrencyPickButton({ currency }: { currency: CurrencyExchangeRate }) {
+function CurrencyPickButton() {
   return (
     <View
       style={{
@@ -285,7 +286,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
   },
   amountInputWrap: {
     flexShrink: 1,
@@ -306,8 +306,15 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     color: color.midnight,
   },
-  curDropdownStyle: {
-    width: 232,
+  currencyPickerWrap: {
+    width: 40,
+    height: 40,
+  },
+  currencyButton: {
+    padding: 8,
+  },
+  currencyDropdown: {
+    width: 256,
     backgroundColor: color.white,
     borderRadius: 13,
     flexDirection: "column",
