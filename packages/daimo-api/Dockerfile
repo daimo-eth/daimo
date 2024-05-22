@@ -7,8 +7,11 @@ FROM node:20
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy app code and dependencies
+# Copy app code, except node_modules
 COPY . .
+
+# Install dependencies
+RUN npm ci
 
 # Build your application
 RUN npm run build:api
