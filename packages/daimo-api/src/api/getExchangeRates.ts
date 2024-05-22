@@ -14,9 +14,9 @@ export async function getExchangeRates(vc: ViemClient) {
       console.warn(`[API] getExchangeRates: skipping error`, answer);
       continue;
     }
-    const { name, symbol, currency } = nonUsdCurrencies[i];
+    const { name, symbol, currency, decimals } = nonUsdCurrencies[i];
     const rateUSD = Number(answer.result) / 1e8;
-    ret.push({ name, symbol, currency, rateUSD });
+    ret.push({ name, symbol, currency, decimals, rateUSD });
   }
 
   return ret;

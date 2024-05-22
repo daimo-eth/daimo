@@ -33,6 +33,7 @@ import {
 } from "../logic/deeplink";
 import { fetchInviteLinkStatus } from "../logic/linkStatus";
 import { Account } from "../model/account";
+import { MoneyEntry } from "../model/moneyEntry";
 
 export type ParamListOnboarding = {
   Intro: undefined;
@@ -118,7 +119,7 @@ export interface SendNavProp {
     | DaimoLinkRequestV2
     | DaimoLinkTag;
   recipient?: EAccountContact;
-  dollars?: `${number}`;
+  money?: MoneyEntry;
   memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;
