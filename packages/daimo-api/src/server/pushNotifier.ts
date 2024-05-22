@@ -254,11 +254,20 @@ export class PushNotifier {
     })();
 
     const body = (() => {
+      // Transfer with memo
       if (opEvent.memo) return opEvent.memo;
 
-      if (opEvent.requestStatus)
-        return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
+      // Transfer fulilling request
+      if (opEvent.requestStatus) {
+        assert(opEvent.requestStatus.status === DaimoRequestState.Fulfilled);
+        if (amount > 0) {
+          return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
+        } else {
+          return `You fulfilled ${dollars} ${tokenSymbol} request`;
+        }
+      }
 
+      // Swap
       if (opEvent.preSwapTransfer) {
         assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
         const readableAmount = getForeignCoinDisplayAmount(
@@ -268,9 +277,12 @@ export class PushNotifier {
         return `You accepted ${readableAmount} ${opEvent.preSwapTransfer.coin.symbol} as $${dollars} ${tokenSymbol}`;
       }
 
-      if (amount < 0)
+      // Vanilla transfer
+      if (amount < 0) {
         return `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
-      return `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
+      } else {
+        return `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
+      }
     })();
 
     return [
@@ -354,32 +366,13 @@ export class PushNotifier {
 
     for (const log of logs) {
       // Only proceed if log is relevant.
-      const done = [DaimoRequestState.Pending, DaimoRequestState.Cancelled];
-      if (done.includes(log.status)) continue;
+      if (log.status !== DaimoRequestState.Created) continue;
 
       const { tokenSymbol } = chainConfig;
       const {
         link: { dollars },
         metadata,
       } = log;
-
-      // On fulfillment, ensure both parties have Daimo accounts
-      if (
-        log.recipient.name &&
-        log.status === DaimoRequestState.Fulfilled &&
-        log.fulfilledBy?.name
-      ) {
-        const pushTokens = this.pushTokens.get(log.recipient.addr);
-
-        if (pushTokens) {
-          messages.push({
-            to: pushTokens,
-            badge: 1,
-            title: "Request fulfilled",
-            body: `${log.fulfilledBy.name} sent you $${dollars} ${tokenSymbol}`,
-          });
-        }
-      }
 
       // On creation, parse fulfiller name from metadata.
       if (log.recipient.name && log.status === DaimoRequestState.Created) {
