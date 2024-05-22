@@ -18,6 +18,7 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, HelpButton } from "../../shared/Button";
 import { ContactDisplay } from "../../shared/ContactDisplay";
@@ -39,7 +40,7 @@ export function SendNoteScreen({ route }: Props) {
   const { recipient } = route.params || {};
 
   // Send Payment Link shows available secure messaging apps
-  const [noteDollars, setNoteDollars] = useState(0);
+  const [noteMoney, setNoteMoney] = useState(zeroUSDEntry);
 
   const textInputRef = useRef<TextInput>(null);
   const [amountChosen, setAmountChosen] = useState(false);
@@ -52,7 +53,7 @@ export function SendNoteScreen({ route }: Props) {
   const goHome = useExitToHome();
   const resetAmount = useCallback(() => {
     setAmountChosen(false);
-    setNoteDollars(0);
+    setNoteMoney(zeroUSDEntry);
     textInputRef.current?.focus();
   }, []);
   const goBack = useCallback(() => {
@@ -110,8 +111,8 @@ export function SendNoteScreen({ route }: Props) {
         <Spacer h={24} />
         {!amountChosen && (
           <AmountChooser
-            dollars={noteDollars}
-            onSetDollars={setNoteDollars}
+            moneyEntry={noteMoney}
+            onSetEntry={setNoteMoney}
             showAmountAvailable
             autoFocus
             disabled={amountChosen}
@@ -120,8 +121,8 @@ export function SendNoteScreen({ route }: Props) {
         )}
         {amountChosen && (
           <AmountChooser
-            dollars={noteDollars}
-            onSetDollars={setNoteDollars}
+            moneyEntry={noteMoney}
+            onSetEntry={setNoteMoney}
             disabled
             showAmountAvailable={false}
             autoFocus={false}
@@ -134,13 +135,13 @@ export function SendNoteScreen({ route }: Props) {
           <ButtonBig
             type="primary"
             title="Create Payment Link"
-            disabled={!(noteDollars > 0)}
+            disabled={!(noteMoney.dollars > 0)}
             onPress={onChooseAmount}
           />
         )}
         {amountChosen && (
           <NoteActionButton
-            dollars={noteDollars}
+            dollars={noteMoney.dollars}
             externalAction={externalAction}
           />
         )}

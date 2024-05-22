@@ -1,6 +1,7 @@
 import { SuggestedAction } from "@daimo/api";
 import {
   ChainGasConstants,
+  CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoLinkNote,
   DaimoRequestV2Status,
@@ -105,6 +106,9 @@ export type Account = {
 
   /** Proposed swaps from non-home coin balances -> home coin balance */
   proposedSwaps: ProposedSwap[];
+
+  /** Exchange rates for non-USD currencies, just for amount entry */
+  exchangeRates: CurrencyExchangeRate[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -334,6 +338,7 @@ interface AccountV14 extends StoredModel {
   notificationRequestStatuses: DaimoRequestV2Status[];
   lastReadNotifTimestamp: number;
   proposedSwaps: ProposedSwap[];
+  exchangeRates?: CurrencyExchangeRate[];
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -385,6 +390,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -424,6 +430,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -463,6 +470,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -503,6 +511,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -542,6 +551,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -582,6 +592,7 @@ export function parseAccount(accountJSON?: string): Account | null {
       notificationRequestStatuses: [],
       lastReadNotifTimestamp: 0,
       proposedSwaps: [],
+      exchangeRates: [],
     };
   }
 
@@ -623,6 +634,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     notificationRequestStatuses: a.notificationRequestStatuses || [],
     lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
     proposedSwaps: a.proposedSwaps || [],
+    exchangeRates: a.exchangeRates || [],
   };
 }
 
@@ -666,6 +678,7 @@ export function serializeAccount(account: Account | null): string {
     notificationRequestStatuses: account.notificationRequestStatuses,
     lastReadNotifTimestamp: account.lastReadNotifTimestamp,
     proposedSwaps: account.proposedSwaps,
+    exchangeRates: account.exchangeRates,
   };
 
   return JSON.stringify(model);
@@ -724,5 +737,6 @@ export function createEmptyAccount(
     notificationRequestStatuses: [],
     lastReadNotifTimestamp: now(),
     proposedSwaps: [],
+    exchangeRates: [],
   };
 }

@@ -170,6 +170,7 @@ async function fetchSync(
     inviteLinkStatus: result.inviteLinkStatus,
     invitees: result.invitees,
     notificationRequestStatuses: result.notificationRequestStatuses,
+    numExchangeRates: (result.exchangeRates || []).length,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -281,6 +282,7 @@ function applySync(
     invitees: result.invitees || [],
     notificationRequestStatuses: result.notificationRequestStatuses || [],
     proposedSwaps: result.proposedSwaps || [],
+    exchangeRates: result.exchangeRates || [],
   };
 
   console.log(

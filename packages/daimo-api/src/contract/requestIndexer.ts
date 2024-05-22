@@ -18,6 +18,7 @@ import { NameRegistry } from "./nameRegistry";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { logCoordinateKey } from "../utils/indexing";
+import { retryBackoff } from "../utils/retryBackoff";
 
 interface RequestCreatedLog {
   transactionHash: Hex;
@@ -95,9 +96,9 @@ export class RequestIndexer extends Indexer {
     from: number,
     to: number
   ): Promise<DaimoRequestV2Status[]> {
-    const result = await pg.query(
-      `
-          select
+    const result = await retryBackoff(`requestLoadCreated-${from}-${to}`, () =>
+      pg.query(
+        `select
             tx_hash,
             log_idx,
             id,
@@ -112,7 +113,8 @@ export class RequestIndexer extends Indexer {
           and block_num <= $2
           and chain_id = $3
       `,
-      [from, to, chainConfig.chainL2.id]
+        [from, to, chainConfig.chainL2.id]
+      )
     );
     const logs = result.rows.map(rowToRequestCreatedLog);
     // todo: ignore requests not made by the API
@@ -190,8 +192,11 @@ export class RequestIndexer extends Indexer {
     from: number,
     to: number
   ): Promise<DaimoRequestV2Status[]> {
-    const result = await pg.query(
-      `
+    const result = await retryBackoff(
+      `requestLoadCancelled-${from}-${to}`,
+      () =>
+        pg.query(
+          `
           select
             id,
             block_num
@@ -200,7 +205,8 @@ export class RequestIndexer extends Indexer {
         and block_num <= $2
         and chain_id = $3
       `,
-      [from, to, chainConfig.chainL2.id]
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     const cancelledRequests = result.rows.map(rowToRequestCancelledLog);
     const statuses = cancelledRequests
@@ -228,20 +234,22 @@ export class RequestIndexer extends Indexer {
     from: number,
     to: number
   ): Promise<DaimoRequestV2Status[]> {
-    const result = await pg.query(
-      `
-          select
-            tx_hash,
-            log_idx,
-            id,
-            fulfiller,
-            block_num
-        from request_fulfilled
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-      `,
-      [from, to, chainConfig.chainL2.id]
+    const result = await retryBackoff(
+      `requestLoadFulfilled-${from}-${to}`,
+      () =>
+        pg.query(
+          `select
+             tx_hash,
+             log_idx,
+             id,
+             fulfiller,
+             block_num
+          from request_fulfilled
+          where block_num >= $1
+          and block_num <= $2
+          and chain_id = $3`,
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     const fulfilledRequests = result.rows.map(rowToRequestFulfilledLog);
     const promises = fulfilledRequests

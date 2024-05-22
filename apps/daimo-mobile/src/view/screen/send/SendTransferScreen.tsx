@@ -9,7 +9,7 @@ import {
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 import { FulfillRequestButton } from "./FulfillRequestButton";
-import { SendMemoButton, MemoPellet } from "./MemoDisplay";
+import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   ParamListSend,
@@ -36,6 +36,7 @@ import {
 import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
+import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";
@@ -59,7 +60,7 @@ export default function SendScreen({ route }: Props) {
 function SendScreenInner({
   link,
   recipient,
-  dollars,
+  money,
   memo,
   account,
 }: SendNavProp & { account: Account }) {
@@ -77,17 +78,18 @@ function SendScreenInner({
   const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
       nav.navigate("SendTab", { screen: "SendTransfer", params });
-    if (dollars != null) goTo({ recipient });
+    if (money != null) goTo({ recipient });
     else if (nav.canGoBack()) nav.goBack();
     else goHome();
-  }, [nav, dollars, recipient]);
+  }, [nav, money, recipient]);
 
   const sendDisplay = (() => {
     if (link) {
-      if (requestFetch.isFetching) return <CenterSpinner />;
-      else if (requestFetch.error)
+      if (requestFetch.isFetching) {
+        return <CenterSpinner />;
+      } else if (requestFetch.error) {
         return <ErrorRowCentered error={requestFetch.error} />;
-      else if (requestStatus) {
+      } else if (requestStatus) {
         const recipient = addLastTransferTimes(
           account,
           requestStatus.recipient
@@ -98,7 +100,7 @@ function SendScreenInner({
               account={account}
               recipient={recipient}
               memo={memo}
-              dollars={requestStatus.link.dollars}
+              money={usdEntry(requestStatus.link.dollars)}
               requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
@@ -109,13 +111,13 @@ function SendScreenInner({
               account={account}
               recipient={recipient}
               memo={memo}
-              dollars={requestStatus.link.dollars}
+              money={usdEntry(requestStatus.link.dollars)}
             />
           );
         }
       } else return <CenterSpinner />;
     } else if (recipient) {
-      if (dollars == null)
+      if (money == null)
         return (
           <SendChooseAmount
             recipient={recipient}
@@ -123,7 +125,7 @@ function SendScreenInner({
             daimoChain={daimoChain}
           />
         );
-      else return <SendConfirm {...{ account, recipient, memo, dollars }} />;
+      else return <SendConfirm {...{ account, recipient, memo, money }} />;
     } else throw new Error("unreachable");
   })();
 
@@ -148,7 +150,7 @@ function SendChooseAmount({
   onCancel: () => void;
 }) {
   // Select how much
-  const [dollars, setDollars] = useState(0);
+  const [money, setMoney] = useState(zeroUSDEntry);
 
   // Select what for
   const [memo, setMemo] = useState<string | undefined>(undefined);
@@ -158,7 +160,7 @@ function SendChooseAmount({
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { dollars: `${dollars}`, memo, recipient },
+      params: { money, memo, recipient },
     });
 
   // Warn if paying new account
@@ -183,8 +185,8 @@ function SendChooseAmount({
       <ContactDisplay contact={recipient} />
       <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
-        dollars={dollars}
-        onSetDollars={setDollars}
+        moneyEntry={money}
+        onSetEntry={setMoney}
         showAmountAvailable
         autoFocus
       />
@@ -205,7 +207,9 @@ function SendChooseAmount({
             type="primary"
             title="CONFIRM"
             onPress={setSendAmount}
-            disabled={dollars === 0 || (memoStatus && memoStatus !== "ok")}
+            disabled={
+              money.dollars === 0 || (memoStatus && memoStatus !== "ok")
+            }
           />
         </View>
       </View>
@@ -226,17 +230,16 @@ function PublicWarning() {
 function SendConfirm({
   account,
   recipient,
-  dollars,
+  money,
   memo,
   requestStatus,
 }: {
   account: Account;
   recipient: EAccountContact;
-  dollars: `${number}`;
+  money: MoneyEntry;
   memo: string | undefined;
   requestStatus?: DaimoRequestV2Status;
 }) {
-  const nDollars = parseFloat(dollars);
   const isRequest = !!requestStatus;
 
   // Warn if paying new account
@@ -253,16 +256,27 @@ function SendConfirm({
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
 
-  const button = (() => {
-    if (isRequest)
-      return <FulfillRequestButton {...{ account, requestStatus }} />;
-    else
-      return (
-        <SendTransferButton
-          {...{ account, memo, recipient, dollars: nDollars }}
-        />
-      );
-  })();
+  let button: ReactNode;
+  if (isRequest) {
+    button = <FulfillRequestButton {...{ account, requestStatus }} />;
+  } else {
+    const memoParts = [] as string[];
+    if (money.currency.name !== "USD") {
+      memoParts.push(`${money.currency.symbol}${money.localUnits}`);
+    }
+    if (memo != null) {
+      memoParts.push(memo);
+    }
+    button = (
+      <SendTransferButton
+        account={account}
+        memo={memoParts.join(" · ")}
+        recipient={recipient}
+        dollars={money.dollars}
+      />
+    );
+  }
+
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
@@ -307,8 +321,8 @@ function SendConfirm({
       />
       <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
-        dollars={nDollars}
-        onSetDollars={useCallback(() => {}, [])}
+        moneyEntry={money}
+        onSetEntry={useCallback(() => {}, [])}
         disabled
         showAmountAvailable={false}
         autoFocus={false}

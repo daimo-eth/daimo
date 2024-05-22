@@ -31,6 +31,7 @@ import {
   shareURL,
 } from "../../../logic/externalAction";
 import { Account } from "../../../model/account";
+import { zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ContactDisplay } from "../../shared/ContactDisplay";
@@ -55,7 +56,7 @@ function RequestScreenInner({
   account: Account;
   fulfiller?: DaimoContact;
 }) {
-  const [dollars, setDollars] = useState(0);
+  const [money, setMoney] = useState(zeroUSDEntry);
 
   // On successful send, go home
   const [as, setAS] = useActStatus("request");
@@ -92,7 +93,7 @@ function RequestScreenInner({
     const txHash = await rpcFunc.createRequestSponsored.mutate({
       recipient: account.address,
       idString,
-      amount: `${dollarsToAmount(dollars)}`,
+      amount: `${dollarsToAmount(money.dollars)}`,
       fulfiller: fulfiller?.type === "eAcc" ? fulfiller.addr : undefined,
     });
 
@@ -100,7 +101,7 @@ function RequestScreenInner({
       type: "requestv2",
       id: idString,
       recipient: account.name,
-      dollars: `${dollars}`,
+      dollars: `${money.dollars}`,
     };
 
     console.log(`[REQUEST] txHash ${txHash}`);
@@ -144,8 +145,8 @@ function RequestScreenInner({
         {fulfiller && <ContactDisplay contact={fulfiller} />}
         <Spacer h={32} />
         <AmountChooser
-          dollars={dollars}
-          onSetDollars={setDollars}
+          moneyEntry={money}
+          onSetEntry={setMoney}
           showAmountAvailable={false}
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
@@ -173,7 +174,7 @@ function RequestScreenInner({
               <View style={styles.buttonGrow}>
                 <ButtonBig
                   type={as.status === "success" ? "success" : "primary"}
-                  disabled={dollars <= 0 || as.status !== "idle"}
+                  disabled={money.dollars <= 0 || as.status !== "idle"}
                   title={as.status === "success" ? "Sent" : "Request"}
                   onPress={sendRequest}
                 />
