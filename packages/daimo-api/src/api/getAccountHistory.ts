@@ -117,7 +117,10 @@ export async function getAccountHistory(
   // Get the latest block + current balance.
   const lastBlk = watcher.latestBlock();
   if (lastBlk == null) throw new Error("No latest block");
-  assert(lastBlk.number >= finBlock.number, "Latest block < finalized");
+  assert(
+    lastBlk.number >= finBlock.number,
+    `Latest block ${lastBlk.number} < finalized ${finBlock.number}`
+  );
   const lastBlock = Number(lastBlk.number);
   const lastBlockTimestamp = lastBlk.timestamp;
   const lastBalance = homeCoinIndexer.getCurrentBalance(address);
