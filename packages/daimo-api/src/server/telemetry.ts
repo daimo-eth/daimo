@@ -121,7 +121,6 @@ export class Telemetry {
     message: string,
     level: "info" | "warn" | "error" | "celebrate" = "info"
   ) {
-    const url = process.env.CLIPPY_WEBHOOK_URL || "";
     const levelEmoji = {
       info: "",
       warn: ":warning:",
@@ -130,15 +129,20 @@ export class Telemetry {
     }[level];
     const fullMessage = `[${chainConfig.chainL2.name}]${levelEmoji} ${message}`;
 
-    console.log(
-      `[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${fullMessage}`
-    );
+    this.recordClippyRichMessage(fullMessage, []);
+  }
+
+  /** Use blocks for rich text. Markdown, etc. */
+  recordClippyRichMessage(message: string, blocks: any[]) {
+    const url = process.env.CLIPPY_WEBHOOK_URL || "";
+
+    console.log(`[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${message}`);
     if (url === "") return;
 
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: fullMessage }),
+      body: JSON.stringify({ text: message, blocks }),
     });
   }
 }

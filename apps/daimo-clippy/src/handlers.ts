@@ -1,5 +1,5 @@
 import { assertNotNull, formatDaimoLink, parseDaimoLink } from "@daimo/common";
-import { getAddress } from "viem";
+import { Address, getAddress } from "viem";
 
 import { rpc } from "./rpc";
 import { getJSONblock, parseKwargs, unfurlLink } from "./utils";
@@ -40,6 +40,10 @@ type Command = {
 };
 
 const commands: Record<string, Command> = {
+  grant: {
+    help: "Grant an invite to a user. Args: [user, dollars (optional, default $10)]",
+    fn: grantInvite,
+  },
   "create-invite": {
     help: "Create a new invite link. Args: [code, bonus_dollars_invitee, bonus_dollar_inviter, max_uses, inviter]",
     fn: createInvite,
@@ -58,6 +62,30 @@ const commands: Record<string, Command> = {
   },
 };
 
+async function grantInvite(kwargs: Map<string, string>): Promise<string> {
+  const code = Array(8)
+    .fill(0)
+    .map(() => "abcdefghijklmnopqrstuvwxyz"[(Math.random() * 26) | 0])
+    .join("");
+
+  const name = assertNotNull(kwargs.get("user"));
+  if (name == null) return "Missing user";
+
+  const addr = await rpc.resolveName.query({ name });
+  if (addr == null) return `User '${name}' not found`;
+
+  const dollars = Number(kwargs.get("dollars") || 10);
+  const maxUses = 10;
+
+  console.log(
+    `[SLACK-BOT] granting invite to ${name}: ${code}, $${dollars}, max ${maxUses} uses`
+  );
+
+  await createInviteCode(code, dollars, dollars, maxUses, addr);
+
+  return `Granted ${name} an invite. Bonus: $${dollars}. Max uses: ${maxUses}`;
+}
+
 async function createInvite(kwargs: Map<string, string>): Promise<string> {
   const code = assertNotNull(kwargs.get("code"));
   const bonusDollarsInvitee = Number(
@@ -69,6 +97,22 @@ async function createInvite(kwargs: Map<string, string>): Promise<string> {
   const maxUses = Number(assertNotNull(kwargs.get("max_uses")));
   const inviter = getAddress(assertNotNull(kwargs.get("inviter")));
 
+  return createInviteCode(
+    code,
+    bonusDollarsInvitee,
+    bonusDollarsInviter,
+    maxUses,
+    inviter
+  );
+}
+
+export async function createInviteCode(
+  code: string,
+  bonusDollarsInvitee: number,
+  bonusDollarsInviter: number,
+  maxUses: number,
+  inviter: Address
+) {
   const res = await rpc.createInviteLink.mutate({
     apiKey,
     code,
