@@ -123,15 +123,26 @@ export const zCreateInviteLinkArgs = z.object({
 export type CreateInviteLinkArgs = z.infer<typeof zCreateInviteLinkArgs>;
 
 // TODO: fromAcc and receivedAt are unknown for native ETH
-export interface ProposedSwap {
+export interface SwapQuery {
   fromCoin: ForeignCoin;
   fromAmount: BigIntStr; // in native unit of the token
   fromAcc: EAccount;
   receivedAt: number;
-  toAmount: number; // in native USDC units
   cacheUntil: number; // Cache expiration time, prompts clients to refresh quote after this time
+  toCoin: Address; // for example, native USDC
+  execDeadline: number; // Onchain execution deadline -- swap may fail after this time
+}
+
+export type ProposedSwap = SwapQuery & {
+  routeFound: true;
+  toAmount: number; // for example, USDC units (*quoted*, not exec'd)
   execRouterAddress: Address;
   execCallData: Hex;
   execValue: Hex;
-  execDeadline: number; // Onchain execution deadline -- swap may fail after this time
-}
+};
+
+type SwapNoRoute = SwapQuery & {
+  routeFound: false;
+};
+
+export type SwapQueryResult = SwapNoRoute | ProposedSwap;

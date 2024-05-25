@@ -188,7 +188,9 @@ export class ForeignCoinIndexer extends Indexer {
       `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`
     );
 
-    if (swap && isAmountDust(swap.toAmount, log.foreignToken)) return null;
+    if (!swap) return null;
+    if (!swap.routeFound) return null;
+    if (isAmountDust(swap.toAmount, log.foreignToken)) return null;
     return swap;
   }
 

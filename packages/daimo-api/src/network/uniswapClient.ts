@@ -2,7 +2,8 @@ import {
   BigIntStr,
   EAccount,
   ForeignCoin,
-  ProposedSwap,
+  SwapQueryResult,
+  assertNotNull,
   dollarsToAmount,
   nativeETH,
   now,
@@ -19,6 +20,7 @@ import {
 import {
   AlphaRouter,
   SwapOptionsSwapRouter02,
+  SwapRoute,
   SwapType,
 } from "@uniswap/smart-order-router";
 import { getDefaultProvider } from "ethers";
@@ -27,6 +29,7 @@ import { Address, Hex, getAddress } from "viem";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
+// On Base
 // From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
 export const UNISWAP_V3_02_ROUTER_ADDRESS = getAddress(
   "0x2626664c2603336E57B271c5C0b26F421741e481"
@@ -58,7 +61,7 @@ export class UniswapClient {
     chainConfig.tokenDecimals
   );
   private router: AlphaRouter | null;
-  private swapCache: Map<string, ProposedSwap> = new Map();
+  private swapCache: Map<string, SwapQueryResult> = new Map();
 
   constructor() {
     // Use an independent HTTP RPC to work around Websocket bugs in Ethers,
@@ -92,8 +95,7 @@ export class UniswapClient {
     return `${addr}-${fromAmount}-${token}-${receivedAt}-${fromAddr}`;
   }
 
-  cacheSwap(addr: Address, swap: ProposedSwap | null) {
-    if (swap == null) return;
+  cacheSwap(addr: Address, swap: SwapQueryResult) {
     const key = this.swapCacheKey(
       addr,
       swap.fromAmount,
@@ -110,7 +112,7 @@ export class UniswapClient {
     token: "ETH" | Address,
     receivedAt: number,
     fromAddr: Address
-  ): ProposedSwap | undefined {
+  ): SwapQueryResult | undefined {
     const key = this.swapCacheKey(
       addr,
       fromAmount,
@@ -140,9 +142,59 @@ export class UniswapClient {
     const cacheUntil = t + 5 * 60; // 5 min
     const execDeadline = t + 10 * 60; // 10 min
 
+    const route = await this.fetchRoute(
+      fromCoin,
+      fromAmount,
+      addr,
+      execDeadline
+    );
+
+    const elapsedMs = Date.now() - startMs;
+    console.log(
+      `[UNISWAP] fetched swap for ${addr}: ${fromAmount} ${fromCoin.symbol} ${fromCoin.token} in ${elapsedMs}ms`
+    );
+
+    const routeQuery = {
+      fromCoin,
+      fromAmount,
+      fromAcc,
+      receivedAt,
+      cacheUntil,
+      execDeadline,
+      toCoin: this.uniHomeToken.address as Address,
+    };
+
+    const swap: SwapQueryResult =
+      route && route.methodParameters
+        ? {
+            ...routeQuery,
+            routeFound: true,
+            toAmount: Number(dollarsToAmount(route.quote.toExact())),
+            execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
+            execCallData: route.methodParameters.calldata as Hex,
+            execValue: route.methodParameters.value as Hex,
+          }
+        : {
+            ...routeQuery,
+            routeFound: false,
+          };
+
+    this.cacheSwap(addr, swap);
+    return swap;
+  }
+
+  // Fetches the best route for a given Uniswap swap.
+  private async fetchRoute(
+    fromCoin: ForeignCoin,
+    fromAmount: BigIntStr,
+    toAddr: Address,
+    execDeadline: number
+  ): Promise<SwapRoute | null> {
+    const router = assertNotNull(this.router, "fetchRoute: no router");
+
     const options: SwapOptionsSwapRouter02 = {
-      recipient: addr,
-      slippageTolerance: new Percent(50, 10_000), // 50 bips
+      recipient: toAddr,
+      slippageTolerance: new Percent(100, 10_000), // 100 bips = 1%
       deadline: execDeadline,
       type: SwapType.SWAP_ROUTER_02,
     };
@@ -151,50 +203,32 @@ export class UniswapClient {
       fromCoin.token === "ETH"
         ? new NativeETH()
         : new Token(chainConfig.chainL2.id, fromCoin.token, fromCoin.decimals);
+    const from = CurrencyAmount.fromRawAmount(uniFromToken, fromAmount);
+    const to = this.uniHomeToken;
+    const toSymbol = this.uniHomeToken.symbol;
 
-    const route = await retryBackoff(
-      `uniswap-router-${addr}-${fromCoin.token}`,
-      async () =>
-        await this.router!.route(
-          CurrencyAmount.fromRawAmount(uniFromToken, fromAmount),
-          this.uniHomeToken,
-          TradeType.EXACT_INPUT,
-          options
-        )
+    const results = await retryBackoff(
+      `uniswap-router-${toAddr}-${fromCoin.token}`,
+      () =>
+        Promise.all([
+          router.route(from, to, TradeType.EXACT_INPUT),
+          router.route(from, to, TradeType.EXACT_INPUT, options),
+        ])
     );
 
-    if (!route || !route.methodParameters) {
-      console.log(
-        `[UNISWAP] no route found for ${addr} ${JSON.stringify(
-          fromCoin
-        )}, amount ${fromAmount}`
-      );
-      return null;
-    }
-
-    console.log(`[UNISWAP] found route ${JSON.stringify(route.route)}`);
-
-    const swap: ProposedSwap = {
-      fromCoin,
-      fromAmount,
-      fromAcc,
-      receivedAt,
-      cacheUntil,
-      execDeadline,
-      toAmount: Number(dollarsToAmount(route.quote.toExact())),
-      execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
-      execCallData: route.methodParameters.calldata as Hex,
-      execValue: route.methodParameters.value as Hex,
-    };
-
-    this.cacheSwap(addr, swap);
-
+    // There is a strange bug where Uniswap sometimes returns terrible routes.
+    const quoteNoWroute = Number(results[0]?.quote.toExact()).toFixed(2);
+    const quoteWithWroute = Number(results[1]?.quote.toExact()).toFixed(2);
     console.log(
-      `[UNISWAP] fetched and cached swap for ${addr} ${fromCoin.token} in ${
-        Date.now() - startMs
-      }ms`
+      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoWroute ${quoteNoWroute} ${toSymbol} quoteWithWroute ${quoteWithWroute} ${toSymbol}`
     );
-    return swap;
+
+    const route = results[1];
+    const jsonRoute = JSON.stringify(route?.route);
+    console.log(
+      `[UNISWAP] best route to accept ${fromAmount} ${fromCoin.symbol}: ${jsonRoute}`
+    );
+    return route;
   }
 
   // Fetches swap data from Uniswap for foreign coins.
@@ -210,7 +244,7 @@ export class UniswapClient {
     receivedAt: number,
     fromAcc: EAccount,
     runsInBackground?: boolean
-  ): Promise<ProposedSwap | null> {
+  ): Promise<SwapQueryResult | null> {
     const cachedSwap = this.getCachedSwap(
       addr,
       fromAmount,
