@@ -363,6 +363,8 @@ function createNotifierAliceBob() {
           fromAmount: "111111",
           fromAcc: { addr: addrCharlie, ensName: "charlie.eth" },
           receivedAt: now(),
+          toCoin: chainConfig.tokenAddress,
+          routeFound: true,
           toAmount: 1000000,
           cacheUntil: now() + 5 * 60,
           execDeadline: now() + 10 * 60,

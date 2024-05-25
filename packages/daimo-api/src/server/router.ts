@@ -156,16 +156,14 @@ export function createRouter(
           fromToken: zAddress,
           fromAmount: zBigIntStr,
           toAddr: zAddress,
-          execDeadline: z.number(),
         })
       )
       .query(async (opts) => {
-        const { fromToken, fromAmount, toAddr, execDeadline } = opts.input;
-        return foreignCoinIndexer.fetchRoute(
-          fromToken,
+        const { fromToken, fromAmount, toAddr } = opts.input;
+        return foreignCoinIndexer.getProposedSwap(
           fromAmount,
-          toAddr,
-          execDeadline
+          fromToken,
+          toAddr
         );
       }),
 

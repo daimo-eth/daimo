@@ -4,7 +4,6 @@ import {
   guessTimestampFromNum,
   isAmountDust,
 } from "@daimo/common";
-import { SwapRoute } from "@uniswap/smart-order-router";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -43,7 +42,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, private uc: UniswapClient) {
+  constructor(private nameReg: NameRegistry, public uc: UniswapClient) {
     super("SWAPCOIN");
   }
 
@@ -97,18 +96,6 @@ export class ForeignCoinIndexer extends Indexer {
     if (logs.length === 0) return;
 
     await this.processSwapCoinLogs(logs);
-  }
-
-  // For debugging / introspection via getUniswapRoute
-  public async fetchRoute(
-    fromToken: Address,
-    fromAmount: BigIntStr,
-    toAddr: Address,
-    execDeadline: number
-  ): Promise<SwapRoute | null> {
-    const fromCoin = this.foreignTokens.get(fromToken);
-    if (fromCoin == null) return null;
-    return this.uc.fetchRoute(fromCoin, fromAmount, toAddr, execDeadline);
   }
 
   async processSwapCoinLogs(logs: ForeignTokenTransfer[]) {
@@ -243,5 +230,25 @@ export class ForeignCoinIndexer extends Indexer {
       ...correspondingReceive,
       foreignToken: this.foreignTokens.get(log.foreignToken.token)!,
     };
+  }
+
+  // For debugging / introspection of Uniswap routes
+  public async getProposedSwap(
+    fromAmount: BigIntStr,
+    fromToken: Address,
+    toAddr: Address
+  ) {
+    const coin = this.foreignTokens.get(fromToken);
+    if (coin == null) return null;
+    return this.uc.getProposedSwap(
+      toAddr,
+      fromAmount,
+      coin,
+      0,
+      {
+        addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+      },
+      true
+    );
   }
 }

@@ -68,11 +68,11 @@ export class UniswapClient {
     // and by extension the Uniswap SDK:
     // https://github.com/Uniswap/smart-order-router/issues/461
     // https://stackoverflow.com/q/77336570
-    const uniswap_RPC = process.env.DAIMO_API_UNISWAP_RPC!;
+    const uniswapRPC = process.env.DAIMO_API_UNISWAP_RPC!;
 
-    console.log(`[UNISWAP] using L2 RPC: ${uniswap_RPC}`);
+    console.log(`[UNISWAP] using L2 RPC: ${uniswapRPC}`);
 
-    const provider = getDefaultProvider(uniswap_RPC) as any; // TODO: use fallbacks?
+    const provider = getDefaultProvider(uniswapRPC) as any; // TODO: use fallbacks?
 
     if (chainConfig.chainL2.testnet) {
       // Base Sepolia is not supported by Uniswap yet -> we test in Prod.
