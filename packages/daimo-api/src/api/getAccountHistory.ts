@@ -297,6 +297,10 @@ function getBridgeURL(account: EAccount) {
   return `https://www.relay.link/bridge/base/?currency=usdc&toAddress=${account.addr}&lockToChain=true&lockCurrency=true&header=daimo`;
 }
 
+function getTronBridgeURL(account: EAccount) {
+  return `https://core.allbridge.io/?f=TRX&ft=USDT&t=BAS&tt=USDC&recipient=${account.addr}&send=100`;
+}
+
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   const cbUrl = generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
@@ -316,6 +320,12 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
       cta: "Bridge USDC from any wallet",
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
+    },
+    {
+      title: "Transfer from Tron",
+      cta: "Bridge USDT from Tron wallet",
+      url: getTronBridgeURL(account),
+      logo: `${daimoDomainAddress}/assets/deposit/tron.png`,
     },
     {
       title: "Send from Coinbase & other options",
