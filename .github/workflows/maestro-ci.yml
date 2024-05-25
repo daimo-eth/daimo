@@ -24,6 +24,9 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Wait for iOS and Android expo builds to start
+        run: sleep 120
+
       - name: Run Maestro test suite
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
