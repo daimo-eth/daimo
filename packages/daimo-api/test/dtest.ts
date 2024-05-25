@@ -47,7 +47,7 @@ async function main() {
   await shovelWatcher.catchUpTo(lastBlockNum);
 
   let numKeyData: number = 0;
-  keyReg["addrToKeyData"].forEach((addr, kd) => (numKeyData += kd.length));
+  keyReg["addrToKeyData"].forEach((_, kd) => (numKeyData += kd.length));
 
   console.log({
     allTransfers: coinIndexer["allTransfers"].length,

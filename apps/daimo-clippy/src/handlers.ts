@@ -1,5 +1,13 @@
-import { assertNotNull, formatDaimoLink, parseDaimoLink } from "@daimo/common";
-import { Address, getAddress } from "viem";
+import {
+  EAccount,
+  amountToDollars,
+  assertNotNull,
+  dollarsToAmount,
+  formatDaimoLink,
+  getSlotLabel,
+  parseDaimoLink,
+} from "@daimo/common";
+import { Address, getAddress, isAddress } from "viem";
 
 import { rpc } from "./rpc";
 import { getJSONblock, parseKwargs, unfurlLink } from "./utils";
@@ -22,13 +30,13 @@ export async function handleCommand(text: string): Promise<string> {
 
   // Check all remaining args are kwargs.
   if (args.slice(2).some((a) => !a.includes("=")))
-    return help(`Invalid args ${text}`);
+    return help(`Invalid args ${text}`, args[1]);
 
   try {
     return await command.fn(parseKwargs(args.slice(2)));
   } catch (e) {
     console.error(`[SLACK-BOT] Error handling command: ${e}`);
-    return help(`Error handling command ${text}: ${e}`);
+    return help(`Error handling command ${text}: ${e}`, args[1]);
   }
 }
 
@@ -56,11 +64,113 @@ const commands: Record<string, Command> = {
     help: "Set max uses. Args: [link, max_uses]",
     fn: setMaxUses,
   },
+  "get-user": {
+    help: "Gets name, address and balance of a user. Args: [user = name or addr]",
+    fn: getUser,
+  },
+  "get-uniswap": {
+    help: "Gets the best Uniswap route for a given token to USDC. Args: [num=1.23, token=DAI]",
+    fn: getUniswapRoute,
+  },
+  health: {
+    help: "Checks that the API is up",
+    fn: health,
+  },
   help: {
     help: "Show this help message",
     fn: (_) => help(),
   },
 };
+
+async function health(): Promise<string> {
+  const health = await rpc.health.query();
+  return JSON.stringify(health);
+}
+
+async function getUser(kwargs: Map<string, string>): Promise<string> {
+  const user = kwargs.get("user");
+  if (!user) throw new Error("Must specify user");
+
+  let address: Address;
+  let eAcc: EAccount;
+  if (isAddress(user)) {
+    address = getAddress(user);
+    eAcc = await rpc.getEthereumAccount.query({ addr: address });
+  } else {
+    const addr = await rpc.resolveName.query({ name: user });
+    if (addr == null) return `User '${user}' not found`;
+    eAcc = { addr, name: user };
+    address = addr;
+  }
+
+  if (eAcc.name == null) {
+    console.log(`Not a Daimo account: ${JSON.stringify(eAcc)}`);
+  }
+
+  const hist = await rpc.getAccountHistory.query({ address, sinceBlockNum: 0 });
+
+  return [
+    `Name        : ${eAcc.name}`,
+    `Address     : ${address}`,
+    `Balance     : ${amountToDollars(BigInt(hist.lastBalance))} USDC`,
+    `Keys        : ${hist.accountKeys
+      .map((k) => getSlotLabel(k.slot))
+      .join(", ")}`,
+    `Linked Accts: ${hist.linkedAccounts
+      .map((a) => `${a.type} ${a.username}`)
+      .join(", ")}`,
+    `# swaps     : ${hist.proposedSwaps.length}`,
+    `# transfers : ${hist.transferLogs.length}`,
+  ].join("\n");
+}
+
+type TokenList = {
+  tokens: {
+    chainId: number;
+    address: Address;
+    name: string;
+    symbol: string;
+    decimals: number;
+    logoURI?: string;
+  }[];
+  version: any;
+};
+let tokenListPromise: Promise<TokenList> | null = null;
+
+async function getTokenList(): Promise<TokenList> {
+  if (tokenListPromise == null) {
+    tokenListPromise = fetch("https://tokens.coingecko.com/base/all.json").then(
+      (a) => a.json()
+    );
+  }
+  return tokenListPromise;
+}
+
+async function getUniswapRoute(kwargs: Map<string, string>): Promise<string> {
+  const strN = kwargs.get("num");
+  const strToken = kwargs.get("token");
+  if (!strN || !strToken) return "Must specify num and token";
+
+  const { tokens } = await getTokenList();
+  const token = tokens.find(
+    (t) => t.symbol === strToken || t.address === strToken.toLowerCase()
+  );
+  if (token == null) return `Token '${strToken}' not found`;
+
+  const fromAmount = dollarsToAmount(Number(strN), token.decimals);
+
+  const route = await rpc.getUniswapRoute.query({
+    fromToken: getAddress(token.address),
+    fromAmount: "" + fromAmount,
+    toAddr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+  });
+
+  const fromStr = `${fromAmount} ${token.symbol}`; // eg 1.23 DAI
+  return [
+    `Token: ${token.symbol} (${token.address})`,
+    `Best route for ${fromStr} to USDC: ${JSON.stringify(route, null, 2)}`,
+  ].join("\n");
+}
 
 async function grantInvite(kwargs: Map<string, string>): Promise<string> {
   const code = Array(8)
@@ -172,12 +282,16 @@ async function setMaxUses(kwargs: Map<string, string>) {
   return `Successfully updated invite: ${res}\n\n${getJSONblock(inviteStatus)}`;
 }
 
-async function help(extraText?: string) {
+async function help(extraText?: string, cmdName?: string) {
   let res = "";
   if (extraText) res = `${extraText}\n\n`;
-  res += "Available commands:\n";
-  for (const [name, cmd] of Object.entries(commands)) {
-    res += `${name} ${cmd.help}\n`;
+  if (cmdName) {
+    res += `${cmdName}: ${commands[cmdName].help}\n`;
+  } else {
+    res += "Available commands:\n";
+    for (const [name, cmd] of Object.entries(commands)) {
+      res += `${name} ${cmd.help}\n`;
+    }
   }
   return res;
 }

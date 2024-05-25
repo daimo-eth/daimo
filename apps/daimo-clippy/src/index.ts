@@ -2,6 +2,8 @@ import { App } from "@slack/bolt";
 
 import { handleCommand } from "./handlers";
 
+const readline = require("readline/promises");
+
 //
 // Slack App, using Bolt. Subscribes to events (eg, someone used a slash
 // command), handles commands.
@@ -25,4 +27,19 @@ app.event("app_mention", async ({ event, say }) => {
   await app.start(port);
 
   console.log(`⚡️ Slackbot is running on port ${port}`);
+
+  // For faster development, test locally:
+  console.log(`To test @Clippy locally, enter commands below:`);
+  const { stdin: input, stdout: output } = process;
+  const rl = readline.createInterface({ input, output });
+  while (true) {
+    const input = (await rl.question("@Clippy ")).trim();
+    if (input === "") continue;
+    try {
+      const response = await handleCommand(`<@U0610TSAFAR> ${input}`);
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 })();

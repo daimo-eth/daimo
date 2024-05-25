@@ -1,4 +1,5 @@
 import {
+  BigIntStr,
   ProposedSwap,
   guessTimestampFromNum,
   isAmountDust,
@@ -41,7 +42,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, private uc: UniswapClient) {
+  constructor(private nameReg: NameRegistry, public uc: UniswapClient) {
     super("SWAPCOIN");
   }
 
@@ -188,7 +189,9 @@ export class ForeignCoinIndexer extends Indexer {
       `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`
     );
 
-    if (swap && isAmountDust(swap.toAmount, log.foreignToken)) return null;
+    if (!swap) return null;
+    if (!swap.routeFound) return null;
+    if (isAmountDust(swap.toAmount, log.foreignToken)) return null;
     return swap;
   }
 
@@ -227,5 +230,25 @@ export class ForeignCoinIndexer extends Indexer {
       ...correspondingReceive,
       foreignToken: this.foreignTokens.get(log.foreignToken.token)!,
     };
+  }
+
+  // For debugging / introspection of Uniswap routes
+  public async getProposedSwap(
+    fromAmount: BigIntStr,
+    fromToken: Address,
+    toAddr: Address
+  ) {
+    const coin = this.foreignTokens.get(fromToken);
+    if (coin == null) return null;
+    return this.uc.getProposedSwap(
+      toAddr,
+      fromAmount,
+      coin,
+      0,
+      {
+        addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+      },
+      true
+    );
   }
 }

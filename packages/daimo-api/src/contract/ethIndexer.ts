@@ -180,6 +180,6 @@ export class ETHIndexer extends Indexer {
 
     console.log(`[ETH] getProposedSwap ${addr}: ${JSON.stringify(swap)}`);
 
-    return swap ? [swap] : [];
+    return swap && swap.routeFound ? [swap] : [];
   }
 }
