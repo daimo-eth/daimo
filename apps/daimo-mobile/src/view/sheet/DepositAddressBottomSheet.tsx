@@ -44,7 +44,8 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
       />
       <Spacer h={16} />
       <TextPara color={color.grayDark}>
-        Send {tokenSymbol} to your address below. Confirm that you're sending:
+        Send {tokenSymbol} to your address below. You can also send any ERC-20
+        token, and it'll be converted to USDC. Confirm that you're sending:
       </TextPara>
       <Spacer h={12} />
       <CheckLabel value={check} setValue={setCheck}>

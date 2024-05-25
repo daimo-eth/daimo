@@ -67,7 +67,7 @@ function DepositList({ account }: { account: Account }) {
   const options: OptionRowProps[] = [
     {
       cta: "Deposit to address",
-      title: "Send USDC to your address",
+      title: "Send to your address",
       logo: defaultLogo,
       onClick: openAddressDeposit,
     },
