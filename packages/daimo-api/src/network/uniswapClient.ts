@@ -184,7 +184,7 @@ export class UniswapClient {
   }
 
   // Fetches the best route for a given Uniswap swap.
-  private async fetchRoute(
+  public async fetchRoute(
     fromCoin: ForeignCoin,
     fromAmount: BigIntStr,
     toAddr: Address,
@@ -217,11 +217,24 @@ export class UniswapClient {
     );
 
     // There is a strange bug where Uniswap sometimes returns terrible routes.
-    const quoteNoWroute = Number(results[0]?.quote.toExact()).toFixed(2);
-    const quoteWithWroute = Number(results[1]?.quote.toExact()).toFixed(2);
+    const quoteNoRoute = Number(results[0]?.quote.toExact());
+    const quoteWithRoute = Number(results[1]?.quote.toExact());
+    const quoteNoRouteStr = `${quoteNoRoute.toFixed(2)} ${toSymbol}`;
+    const quoteWithRouteStr = `${quoteWithRoute.toFixed(2)} ${toSymbol}`;
     console.log(
-      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoWroute ${quoteNoWroute} ${toSymbol} quoteWithWroute ${quoteWithWroute} ${toSymbol}`
+      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoWroute ${quoteNoRouteStr} quoteWithWroute ${quoteWithRouteStr}`
     );
+
+    const isLarge = quoteWithRoute > 100;
+    const isDiscrepancy =
+      Math.abs(quoteWithRoute - quoteNoRoute) / (quoteWithRoute + 1) > 0.05;
+    if (isLarge || isDiscrepancy) {
+      const desc = isDiscrepancy ? "BAD" : "LARGE";
+      const js = JSON.stringify({ noRoute: results[0], withRoute: results[1] });
+      console.warn(
+        `[UNISWAP] ${desc} quote ${quoteWithRouteStr} vs ${quoteNoRouteStr}: ${js}`
+      );
+    }
 
     const route = results[1];
     const jsonRoute = JSON.stringify(route?.route);

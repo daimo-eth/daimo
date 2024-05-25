@@ -1,8 +1,10 @@
 import {
+  BigIntStr,
   ProposedSwap,
   guessTimestampFromNum,
   isAmountDust,
 } from "@daimo/common";
+import { SwapRoute } from "@uniswap/smart-order-router";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -95,6 +97,18 @@ export class ForeignCoinIndexer extends Indexer {
     if (logs.length === 0) return;
 
     await this.processSwapCoinLogs(logs);
+  }
+
+  // For debugging / introspection via getUniswapRoute
+  public async fetchRoute(
+    fromToken: Address,
+    fromAmount: BigIntStr,
+    toAddr: Address,
+    execDeadline: number
+  ): Promise<SwapRoute | null> {
+    const fromCoin = this.foreignTokens.get(fromToken);
+    if (fromCoin == null) return null;
+    return this.uc.fetchRoute(fromCoin, fromAmount, toAddr, execDeadline);
   }
 
   async processSwapCoinLogs(logs: ForeignTokenTransfer[]) {

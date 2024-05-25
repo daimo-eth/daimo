@@ -150,6 +150,25 @@ export function createRouter(
         return nameReg.resolveName(name) || null;
       }),
 
+    getUniswapRoute: publicProcedure
+      .input(
+        z.object({
+          fromToken: zAddress,
+          fromAmount: zBigIntStr,
+          toAddr: zAddress,
+          execDeadline: z.number(),
+        })
+      )
+      .query(async (opts) => {
+        const { fromToken, fromAmount, toAddr, execDeadline } = opts.input;
+        return foreignCoinIndexer.fetchRoute(
+          fromToken,
+          fromAmount,
+          toAddr,
+          execDeadline
+        );
+      }),
+
     getEthereumAccount: publicProcedure
       .input(z.object({ addr: zAddress }))
       .query(async (opts) => {
