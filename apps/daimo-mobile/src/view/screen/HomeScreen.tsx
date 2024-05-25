@@ -322,7 +322,7 @@ function IconButton({
       case "Deposit":
         return "plus";
       case "Request":
-        return "download";
+        return "arrow-down";
       case "Send":
         return "paper-airplane";
       default:
