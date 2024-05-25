@@ -2,10 +2,62 @@ name: CD
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - prod
 
 jobs:
-  deploy:
+  api-deploy:
+    name: API Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          mask-aws-account-id: true
+
+      - id: login-ecr
+        name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set branch-level configuration
+        run: |
+          if [[ ${{ github.ref }} == "refs/heads/prod" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+            echo "CLUSTER_NAME=${{ vars.AWS_ECS_API_CLUSTER_PROD }}" >> $GITHUB_ENV
+            echo "SERVICE_NAME=${{ vars.AWS_ECS_API_SERVICE_PROD }}" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "CLUSTER_NAME=${{ vars.AWS_ECS_API_CLUSTER_STAGING }}" >> $GITHUB_ENV
+            echo "SERVICE_NAME=${{ vars.AWS_ECS_API_SERVICE_STAGING }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          GIT_SHA: ${{ github.sha }}
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_API_REPO }}
+        run: |
+          docker build --platform linux/arm64 -t $IMAGE_NAME:$GIT_SHA -t $IMAGE_NAME:$IMAGE_TAG -f packages/daimo-api/Dockerfile .
+          docker push $IMAGE_NAME:$GIT_SHA
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Deploy to ECS
+        run: |
+          pip install ecs-deploy
+          ecs deploy $CLUSTER_NAME $SERVICE_NAME --timeout 900
+
+  eas-deploy:
+    if: github.ref == 'refs/heads/master'
     name: EAS Deploy
     runs-on: ubuntu-latest
     steps:
