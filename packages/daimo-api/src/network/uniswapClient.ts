@@ -194,7 +194,7 @@ export class UniswapClient {
 
     const options: SwapOptionsSwapRouter02 = {
       recipient: toAddr,
-      slippageTolerance: new Percent(100, 10_000), // 100 bips = 1%
+      slippageTolerance: new Percent(500, 10_000), // 500 bips = 5%
       deadline: execDeadline,
       type: SwapType.SWAP_ROUTER_02,
     };
@@ -222,7 +222,7 @@ export class UniswapClient {
     const quoteNoRouteStr = `${quoteNoRoute.toFixed(2)} ${toSymbol}`;
     const quoteWithRouteStr = `${quoteWithRoute.toFixed(2)} ${toSymbol}`;
     console.log(
-      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoWroute ${quoteNoRouteStr} quoteWithWroute ${quoteWithRouteStr}`
+      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoRoute ${quoteNoRouteStr} quoteWithRoute ${quoteWithRouteStr}`
     );
 
     const isLarge = quoteWithRoute > 100;
