@@ -57,6 +57,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // Known Uniswap ETH pools on Base
   "0xd0b53D9277642d899DF5C87A3966A349A798F224": AddrLabel.UniswapETHPool,
   "0x6c561B446416E1A00E8E93E221854d6eA4171372": AddrLabel.UniswapETHPool,
+  // Known allbridge addresses on Base
+  "0xDA6bb1ec3BaBA68B26bEa0508d6f81c9ec5e96d5": AddrLabel.Allbridge,
 };
 
 // Validate that current addresses are correctly recorded.

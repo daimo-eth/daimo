@@ -19,6 +19,7 @@ export enum AddrLabel {
   Relay = "relay.link",
   LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
+  Allbridge = "allbridge",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */

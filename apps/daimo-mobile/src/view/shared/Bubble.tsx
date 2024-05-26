@@ -56,9 +56,7 @@ export function ContactBubble({
           return <Octicons name="link" size={fontSize} color={color.primary} />;
         case AddrLabel.Coinbase:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
-        case AddrLabel.UniswapETHPool:
-        case AddrLabel.Relay:
-        case AddrLabel.LiFi:
+        default:
           return (
             <Octicons
               name="arrow-switch"
@@ -66,8 +64,6 @@ export function ContactBubble({
               color={color.primary}
             />
           );
-        default:
-          return "?";
       }
     } else {
       const codePoint = name.codePointAt(0) || "?".charCodeAt(0);
