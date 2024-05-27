@@ -84,9 +84,7 @@ jobs:
           fi
 
       - name: Deploy to ECS
-        run: |
-          pip install ecs-deploy
-          ecs deploy $CLUSTER_NAME $SERVICE_NAME --timeout 900
+        run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
 
   eas-deploy:
     if: github.ref == 'refs/heads/master'
