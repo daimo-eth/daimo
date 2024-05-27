@@ -86,7 +86,7 @@ jobs:
           fi
 
       - name: Deploy to ECS
-        run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment
+        run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment > /dev/null
 
   eas-deploy:
     if: github.ref == 'refs/heads/master'
