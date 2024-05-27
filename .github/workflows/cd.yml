@@ -54,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha
           context: .
           file: ./packages/daimo-api/Dockerfile
           platforms: linux/arm64
