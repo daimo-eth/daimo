@@ -76,11 +76,13 @@ jobs:
           status=$?
           set -e
 
-          if [[ $status -ne 0 && ! "$output" =~ "ImageAlreadyExistsException" ]]; then
-            echo $output
-            exit $status
-          else
-            echo "Image already tagged with \"$IMAGE_TAG.\""
+          if [[ $status -ne 0 ]]; then
+            if [[ ! "$output" =~ "ImageAlreadyExistsException" ]]; then
+              echo $output
+              exit $status
+            else
+              echo "Image already tagged with \"$IMAGE_TAG.\""
+            fi
           fi
 
       - name: Deploy to ECS
