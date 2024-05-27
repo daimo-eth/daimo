@@ -22,10 +22,6 @@ export async function GET(request: Request) {
   // Proxy the request to super.so
   const res = await fetch(upstreamUrl, {
     method: request.method,
-    headers: {
-      ...request.headers,
-      Host: "daimo.super.site",
-    },
   });
 
   const resBody = await res.blob();

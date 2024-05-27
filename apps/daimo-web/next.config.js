@@ -30,7 +30,6 @@ const nextConfig = {
     });
     return config;
   },
-  transpilePackages: ["@lifi/widget", "@lifi/wallet-management"],
 };
 
 module.exports = nextConfig;
