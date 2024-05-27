@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - prod
+      - dehli/cd-wip
 
 jobs:
   api-deploy:
