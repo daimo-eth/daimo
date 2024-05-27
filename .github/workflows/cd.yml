@@ -42,33 +42,43 @@ jobs:
         with:
           platforms: arm64
 
-      - name: Build, tag, and push docker image to Amazon ECR
+      - name: Check for existing image with GIT_SHA
         env:
           GIT_SHA: ${{ github.sha }}
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPO: ${{ vars.AWS_ECR_API_REPO }}
         run: |
-          # Check if image exists in ECR with GIT_SHA tag
-          image_manifest=$(aws ecr batch-get-image --repository-name $REPO --image-ids imageTag=$GIT_SHA --query 'images[0].imageManifest' --output text)
+          image_manifest=$(aws ecr batch-get-image --repository-name $REPO --image-ids imageTag=$GIT_SHA --query 'images[0].imageManifest')
+          echo "IMAGE_MANIFEST=$image_manifest" >> $GITHUB_ENV
 
-          if [[ $image_manifest == "None" ]]; then
-            echo "Image does not exist with tag \"$GIT_SHA\", building and pushing new image."
-            docker build --platform linux/arm64 -t $REGISTRY/$REPO:$GIT_SHA -t $REGISTRY/$REPO:$IMAGE_TAG -f packages/daimo-api/Dockerfile .
-            docker push $REGISTRY/$REPO:$GIT_SHA
-            docker push $REGISTRY/$REPO:$IMAGE_TAG
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Build, tag, and push docker image to Amazon ECR
+        env:
+          GIT_SHA: ${{ github.sha }}
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_API_REPO }}
+        run: |
+          echo "Image does not exist with tag \"$GIT_SHA\", building and pushing new image."
+          docker build --platform linux/arm64 -t $IMAGE_NAME:$GIT_SHA -t $IMAGE_NAME:$IMAGE_TAG -f packages/daimo-api/Dockerfile .
+          docker push $IMAGE_NAME:$GIT_SHA
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - if: env.IMAGE_MANIFEST != 'null'
+        name: Add tag to existing image.
+        env:
+          REPO: ${{ vars.AWS_ECR_API_REPO }}
+        run: |
+          echo "Image exists with GIT_SHA tag, adding tag \"$IMAGE_TAG\" to it."
+          IMAGE_MANIFEST=$(echo $IMAGE_MANIFEST | jq -c -r)
+
+          set +e
+          output=$(aws ecr put-image --repository-name $REPO --image-tag $IMAGE_TAG --image-manifest "$IMAGE_MANIFEST" 2>&1)
+          status=$?
+          set -e
+
+          if [[ $status -ne 0 && ! "$output" =~ "ImageAlreadyExistsException" ]]; then
+            echo $output
+            exit $status
           else
-            echo "Image exists with tag \"$GIT_SHA\", adding tag \"$IMAGE_TAG\" to it."
-            set +e
-            output=$(aws ecr put-image --repository-name $REPO --image-tag $IMAGE_TAG --image-manifest "$image_manifest" 2>&1)
-            status=$?
-            set -e
-
-            if [[ $status -ne 0 && ! "$output" =~ "ImageAlreadyExistsException" ]]; then
-              echo $output
-              exit $status
-            else
-              echo "Image already tagged with \"$IMAGE_TAG.\""
-            fi
+            echo "Image already tagged with \"$IMAGE_TAG.\""
           fi
 
       - name: Deploy to ECS
