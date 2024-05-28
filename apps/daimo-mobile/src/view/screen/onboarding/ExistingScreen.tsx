@@ -1,11 +1,10 @@
 import { SlotType } from "@daimo/common";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { useExitBack, useOnboardingNav } from "../../../common/nav";
 import {
-  getAccountManager,
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
@@ -31,11 +30,6 @@ export function ExistingScreen() {
   // Wait for enclave key to be loaded. Create one if necessary
   const { account, keyInfo } = useAccountAndKeyInfo();
   const pubKeyHex = keyInfo?.pubKeyHex;
-  useEffect(() => {
-    if (account != null || keyInfo == null || pubKeyHex != null) return;
-    console.log(`[ONBOARDING] create enclave key`);
-    getAccountManager().createNewEnclaveKey();
-  }, [account, pubKeyHex]);
 
   const onPrev = useExitBack();
 
