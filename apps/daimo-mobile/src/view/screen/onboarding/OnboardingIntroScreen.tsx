@@ -1,6 +1,6 @@
 import { debugJson } from "@daimo/common";
 import * as Clipboard from "expo-clipboard";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import {
   Image,
   Linking,
@@ -20,7 +20,11 @@ import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
-import { useDaimoChain } from "../../../logic/accountManager";
+import {
+  getAccountManager,
+  useAccountAndKeyInfo,
+  useDaimoChain,
+} from "../../../logic/accountManager";
 import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
@@ -33,9 +37,19 @@ import {
 } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
+
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
+
+  // Create new enclave key in background if we don't have one.
+  const { keyInfo } = useAccountAndKeyInfo();
+  const pubKeyHex = keyInfo?.pubKeyHex;
+  useEffect(() => {
+    if (keyInfo == null || pubKeyHex != null) return;
+    console.log(`[ONBOARDING] create enclave key`);
+    getAccountManager().createNewEnclaveKey();
+  }, [pubKeyHex]);
 
   // User clicks ACCEPT INVITE > pastes invite link
   const pasteInviteLink = async () => {
