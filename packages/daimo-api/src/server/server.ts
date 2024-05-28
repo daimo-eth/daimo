@@ -101,7 +101,9 @@ async function main() {
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
-  shovelWatcher.slowAdd(ethIndexer);
+
+  // Disable ethIndexer for now
+  // shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {
