@@ -1,9 +1,7 @@
 import {
   DaimoLinkAccount,
   formatDaimoLink,
-  formatDaimoLinkDirect,
   getAddressContraction,
-  parseDaimoLink,
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -20,7 +18,6 @@ import {
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { getAddress, isAddress } from "viem";
 
 import {
   ParamListHome,
@@ -31,6 +28,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { decodeQR } from "../../logic/decodeQR";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { Scanner } from "../shared/Scanner";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -152,31 +150,6 @@ export function QRCodeBox({
   );
 }
 
-// Parse QR codes from Daimo or other wallets
-// Works around potential deep linking / AASA bugs by using direct links only
-function parseQRData(data: string) {
-  console.log(`[SCAN] parsing QR data '${data}'`);
-  if (data.startsWith("ethereum:")) {
-    data = data.slice("ethereum:".length).split("@")[0];
-  } else if (data.startsWith("eth:")) {
-    data = data.slice("eth:".length);
-  } else if (data.startsWith("base:")) {
-    data = data.slice("base:".length);
-  }
-  if (isAddress(data)) {
-    const addr = getAddress(data); // Convert to checksummed address
-    console.log(`[SCAN] opening address ${addr}`);
-    return formatDaimoLinkDirect({
-      type: "account",
-      account: addr,
-    });
-  } else {
-    const universalURL = parseDaimoLink(data);
-    // Workaround potential deep linking / AASA bugs by using direct links only
-    return universalURL ? formatDaimoLinkDirect(universalURL) : null;
-  }
-}
-
 function QRScan() {
   const [handled, setHandled] = useState(false);
   const nav = useNav();
@@ -184,7 +157,7 @@ function QRScan() {
   const handleBarCodeScanned: BarCodeScannedCallback = async ({ data }) => {
     if (handled) return;
 
-    const link = parseQRData(data);
+    const link = decodeQR(data);
     if (link == null) return nav.navigate("LinkErrorModal", defaultError);
     setHandled(true);
     console.log(`[SCAN] opening URL ${link}`);
