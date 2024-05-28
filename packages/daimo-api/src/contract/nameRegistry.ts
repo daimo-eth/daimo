@@ -84,6 +84,8 @@ export class NameRegistry extends Indexer {
   private addrToReg = new Map<Address, Registration>();
   private accounts: DAccount[] = [];
 
+  private ensReverseLookups = new Map<Address, Promise<string | undefined>>();
+
   logs: Registration[] = [];
 
   constructor(
@@ -225,25 +227,36 @@ export class NameRegistry extends Indexer {
     if (label) return { addr: address, label };
 
     // Finally, ENS reverse lookup
-    let ensName: string | undefined = undefined;
-    try {
-      console.log(`[NAME-REG] looking up ENS name for ${address}`);
-      ensName = (await this.vc.getEnsName({ address })) || undefined;
-      // Verify the forward lookup
-      if (ensName != null) {
-        const addr = await this.vc.getEnsAddress({ name: ensName });
-        if (addr !== address) {
-          console.warn(`[NAME-REG] bad ENS ${address} > ${ensName} > ${addr}`);
-          ensName = undefined;
-        }
-      }
-      console.log(`[NAME-REG] ENS name for ${address}: ${ensName}`);
-    } catch (e) {
-      console.log(`[NAME-REG] ENS lookup failed for ${address}: ${e}`);
+    let promise = this.ensReverseLookups.get(address);
+    if (promise == null) {
+      promise = this.getENSReverseLookup(address);
     }
+    const ensName = await promise;
 
     // Bare addresses are fine too, ensName can be undefined
     return { addr: address, ensName };
+  }
+
+  async getENSReverseLookup(address: Address): Promise<string | undefined> {
+    try {
+      console.log(`[NAME-REG] looking up ENS name for ${address}`);
+      const ensName = (await this.vc.getEnsName({ address })) || undefined;
+      if (ensName == null) {
+        return undefined;
+      }
+
+      // Verify the forward lookup
+      const addr = await this.vc.getEnsAddress({ name: ensName });
+      if (addr !== address) {
+        console.warn(`[NAME-REG] bad ENS ${address} > ${ensName} > ${addr}`);
+        return undefined;
+      }
+      console.log(`[NAME-REG] ENS name for ${address}: ${ensName}`);
+      return ensName;
+    } catch (e) {
+      console.log(`[NAME-REG] ENS lookup failed for ${address}: ${e}`);
+      return undefined;
+    }
   }
 
   /** Gets an Ethereum account given "alice", "bob.eth", or "0x..." */
