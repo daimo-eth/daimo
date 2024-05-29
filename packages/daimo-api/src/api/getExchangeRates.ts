@@ -1,23 +1,37 @@
-import { CurrencyExchangeRate, nonUsdCurrencies, now } from "@daimo/common";
+import {
+  CurrencyExchangeRate,
+  assert,
+  getEnv,
+  nonUsdCurrencies,
+  now,
+} from "@daimo/common";
 
 import { ViemClient } from "../network/viemClient";
+import { retryBackoff } from "../utils/retryBackoff";
+
+const exchangeRatesUrl = getEnv("EXCHANGE_RATES_URL");
 
 export async function getExchangeRates(vc: ViemClient) {
-  const oracles = nonUsdCurrencies.map((c) => c.usdPairChainlinkAddress);
-  const answers = await vc.getChainLinkAnswers(oracles);
-
-  const ret = [] as CurrencyExchangeRate[];
-
-  for (const i in answers) {
-    const answer = answers[i];
-    if (answer.status !== "success" || answer.result == null) {
-      console.warn(`[API] getExchangeRates: skipping error`, answer);
-      continue;
+  const data = await retryBackoff("fetchExchangeRates", async () => {
+    // Fetch JSON from EXCHANGE_RATES_URL using fetch()
+    console.log(`[API] fetching exchange rates from ${exchangeRatesUrl}`);
+    const res = await fetch(new URL(exchangeRatesUrl));
+    if (!res.ok) {
+      throw new Error(`Failed to fetch exchange rates: ${res.statusText}`);
     }
-    const { name, symbol, currency, decimals } = nonUsdCurrencies[i];
-    const rateUSD = Number(answer.result) / 1e8;
-    ret.push({ name, symbol, currency, decimals, rateUSD });
-  }
+    return await res.json();
+  });
+  console.log(`[API] got currency exchange rates: ${JSON.stringify(data)}`);
+
+  assert(data != null, "No exchange rates found");
+  assert(data.base === "USD", "Exchange rates must be in USD");
+
+  const ret = nonUsdCurrencies.map((c) => {
+    const { name, symbol, currency, decimals } = c;
+    const rateUSD = Number(data.rates[c.currency]);
+    assert(rateUSD > 0, `Exchange rate invalid: ${c.currency} ${rateUSD}`);
+    return { name, symbol, currency, decimals, rateUSD };
+  });
 
   return ret;
 }
