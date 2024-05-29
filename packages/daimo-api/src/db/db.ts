@@ -131,6 +131,11 @@ export class DB {
           ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
           ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 
+          CREATE TABLE IF NOT EXISTS session_key (
+            secret VARCHAR(184) PRIMARY KEY,
+            pubkey VARCHAR(184) NOT NULL, -- DER-encoded Hex P256-SHA256 public key
+            created_at TIMESTAMP DEFAULT NOW()
+          );
       `);
     await client.end();
   }
@@ -456,6 +461,38 @@ export class DB {
 
     console.log(`[DB] inserted declined request`);
   }
+
+  async insertSessionKey(deviceSecret: string, devicePubkey: Hex) {
+    console.log(`[DB] inserting session key`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO session_key (secret, pubkey) VALUES ($1, $2)`,
+      [deviceSecret, devicePubkey]
+    );
+    client.release();
+
+    console.log(`[DB] inserted session key`);
+  }
+
+  async fetchSessionKey(deviceSecret: string): Promise<SessionKeyRow | null> {
+    console.log(`[DB] fetching session key`);
+    const client = await this.pool.connect();
+    const result = await client.query<RawSessionKeyRow>(
+      `SELECT secret, pubkey, created_at FROM session_key WHERE secret = $1`,
+      [deviceSecret]
+    );
+    client.release();
+
+    console.log(`[DB] ${result.rows.length} session key rows`);
+    if (result.rows.length === 0) return null;
+    const res = {
+      deviceSecret,
+      devicePubkey: result.rows[0].pubkey as Hex,
+      createdAt: dateToUnix(result.rows[0].created_at),
+    };
+
+    return res;
+  }
 }
 
 function dateToUnix(d: Date): number {
@@ -548,5 +585,17 @@ interface RawDeclinedRequestRow {
 interface DeclinedRequestRow {
   requestId: bigint;
   decliner: string;
+  createdAt: number;
+}
+
+interface RawSessionKeyRow {
+  secret: string;
+  pubkey: string;
+  created_at: Date;
+}
+
+interface SessionKeyRow {
+  deviceSecret: string;
+  devicePubkey: Hex;
   createdAt: number;
 }

@@ -35,6 +35,7 @@ import NoteScreen from "./screen/link/NoteScreen";
 import { NotificationsScreen } from "./screen/notifications/NotificationsScreen";
 import { AllowNotifsScreen } from "./screen/onboarding/AllowNotifsScreen";
 import { ExistingChooseAccountScreen } from "./screen/onboarding/ExistingChooseAccountScreen";
+import { ExistingReinstallScreen } from "./screen/onboarding/ExistingReinstallScreen";
 import { ExistingScreen } from "./screen/onboarding/ExistingScreen";
 import { ExistingSeedPhraseScreen } from "./screen/onboarding/ExistingSeedPhraseScreen";
 import { ExistingUseBackupScreen } from "./screen/onboarding/ExistingUseBackupScreen";
@@ -92,6 +93,10 @@ function OnboardingNavigator() {
       <OnStack.Screen name="CreateChooseName" component={OnbChooseNameScreen} />
       <OnStack.Screen name="ExistingSetupKey" component={OnbSetupKeyScreen} />
       <OnStack.Screen name="Existing" component={ExistingScreen} />
+      <OnStack.Screen
+        name="ExistingReinstall"
+        component={ExistingReinstallScreen}
+      />
       <OnStack.Screen
         name="ExistingChooseAccount"
         component={ExistingChooseAccountScreen}

@@ -151,8 +151,10 @@ export class HomeCoinIndexer extends Indexer {
     addr,
     sinceBlockNum,
     txHashes,
+    isAuthenticated,
   }: {
     addr: Address;
+    isAuthenticated: boolean;
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
   }): DisplayOpEvent[] {
@@ -171,7 +173,7 @@ export class HomeCoinIndexer extends Indexer {
     }
 
     const transferOpsIncludingPaymaster = relevantTransfers.map((log) =>
-      this.attachTransferOpProperties(log)
+      this.attachTransferOpProperties(log, !!isAuthenticated)
     );
 
     const transferOps = this.attachFeeAmounts(transferOpsIncludingPaymaster);
@@ -182,7 +184,10 @@ export class HomeCoinIndexer extends Indexer {
   /* Populates atomic properties of logs to convert it to an Op Event.
    * Does not account for fees since they involve multiple transfer logs.
    */
-  attachTransferOpProperties(log: Transfer): DisplayOpEvent {
+  attachTransferOpProperties(
+    log: Transfer,
+    isAuthenticated: boolean
+  ): DisplayOpEvent {
     const {
       blockNumber,
       blockHash,
@@ -210,7 +215,10 @@ export class HomeCoinIndexer extends Indexer {
         logIndex - 1
       );
 
-    const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
+    const memo =
+      opHash && isAuthenticated // Memos are only available to authenticated requests
+        ? this.paymentMemoTracker.getMemo(opHash)
+        : undefined;
 
     // If transfer occured as a result of a swap, attach logical origin info.
     const correspondingForeignReceive =

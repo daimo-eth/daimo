@@ -35,6 +35,7 @@ import { DB } from "../db/db";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
+import { SessionKeyManager } from "../offchain/sessionKeyManager";
 import { getAppVersionTracker } from "../server/appVersion";
 import { TrpcRequestContext } from "../server/trpc";
 import { Watcher } from "../shovel/watcher";
@@ -83,6 +84,7 @@ export async function getAccountHistory(
   ctx: TrpcRequestContext,
   address: Address,
   inviteCode: string | undefined,
+  sessionSecret: string | undefined,
   sinceBlockNum: number,
   watcher: Watcher,
   vc: ViemClient,
@@ -94,12 +96,19 @@ export async function getAccountHistory(
   requestIndexer: RequestIndexer,
   inviteCodeTracker: InviteCodeTracker,
   inviteGraph: InviteGraph,
+  sessionKeyManager: SessionKeyManager,
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
   db: DB
 ): Promise<AccountHistoryResult> {
-  console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
+  const isAuthenticated =
+    sessionSecret != null &&
+    (await sessionKeyManager.isValidSessionKey(sessionSecret, address));
+
+  console.log(
+    `[API] getAccountHist: ${address} since ${sinceBlockNum}, auth ${isAuthenticated}`
+  );
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
   const startMs = Date.now();
@@ -131,6 +140,7 @@ export async function getAccountHistory(
   const transferLogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
+    isAuthenticated,
   });
   let elapsedMs = Date.now() - startMs;
   console.log(`${log}: ${elapsedMs}ms ${transferLogs.length} logs`);

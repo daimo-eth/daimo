@@ -143,7 +143,10 @@ export class Crontab {
 
   private pipeTransfers = (logs: Transfer[]) => {
     for (const transfer of logs) {
-      const opEvent = this.homeCoinIndexer.attachTransferOpProperties(transfer);
+      const opEvent = this.homeCoinIndexer.attachTransferOpProperties(
+        transfer,
+        true
+      );
       this.postRecentTransfer(opEvent);
     }
   };

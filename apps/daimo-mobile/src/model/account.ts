@@ -109,6 +109,9 @@ export type Account = {
 
   /** Exchange rates for non-USD currencies, just for amount entry */
   exchangeRates: CurrencyExchangeRate[];
+
+  /** Session secret, used for fetching authenticated data from the API */
+  sessionSecret?: string | null;
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -339,6 +342,7 @@ interface AccountV14 extends StoredModel {
   lastReadNotifTimestamp: number;
   proposedSwaps: ProposedSwap[];
   exchangeRates?: CurrencyExchangeRate[];
+  sessionSecret?: string | null;
 }
 
 export function parseAccount(accountJSON?: string): Account | null {
@@ -635,6 +639,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
     proposedSwaps: a.proposedSwaps || [],
     exchangeRates: a.exchangeRates || [],
+    sessionSecret: a.sessionSecret || null,
   };
 }
 
@@ -679,6 +684,7 @@ export function serializeAccount(account: Account | null): string {
     lastReadNotifTimestamp: account.lastReadNotifTimestamp,
     proposedSwaps: account.proposedSwaps,
     exchangeRates: account.exchangeRates,
+    sessionSecret: account.sessionSecret,
   };
 
   return JSON.stringify(model);
@@ -688,6 +694,7 @@ export function createEmptyAccount(
   inputAccount: {
     enclaveKeyName: string;
     enclavePubKey: Hex;
+    deviceSessionSecret: string;
     name: string;
     address: Address;
   },
@@ -738,5 +745,6 @@ export function createEmptyAccount(
     lastReadNotifTimestamp: now(),
     proposedSwaps: [],
     exchangeRates: [],
+    sessionSecret: inputAccount.deviceSessionSecret,
   };
 }
