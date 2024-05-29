@@ -20,7 +20,11 @@ export async function loadOrCreateEnclaveKey(
 
   const newPublicKey = await createEnclaveKey(keyName);
   const { hwSecLevel, enclaveKeyName } = keyInfo;
-  keyInfo = { hwSecLevel, enclaveKeyName, pubKeyHex: newPublicKey };
+  keyInfo = {
+    hwSecLevel,
+    enclaveKeyName,
+    pubKeyHex: newPublicKey,
+  };
   console.log(`[ACTION] created key info ${JSON.stringify(keyInfo)}`);
   return keyInfo;
 }

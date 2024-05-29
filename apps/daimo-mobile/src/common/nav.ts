@@ -41,6 +41,7 @@ export type ParamListOnboarding = {
   CreateChooseName: { inviteLink: DaimoLink };
   CreateSetupKey: { inviteLink: DaimoLink };
   Existing: undefined;
+  ExistingReinstall: undefined;
   ExistingSetupKey: undefined;
   ExistingChooseAccount: undefined;
   ExistingUseBackup: { targetEAcc: EAccount };

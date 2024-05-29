@@ -28,6 +28,7 @@ import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
+import { SessionKeyManager } from "../offchain/sessionKeyManager";
 import { Watcher } from "../shovel/watcher";
 
 async function main() {
@@ -47,6 +48,7 @@ async function main() {
   const profileCache = new ProfileCache(vc, db);
 
   const keyReg = new KeyRegistry();
+  const sessionKeyManager = new SessionKeyManager(vc, db, keyReg);
   const nameReg = new NameRegistry(
     vc,
     inviteGraph,
@@ -97,7 +99,7 @@ async function main() {
   const shovelWatcher = new Watcher();
   shovelWatcher.add(
     // indexers in dependency order, within each list, indexers are indexed in parallel
-    [nameReg, keyReg, opIndexer],
+    [nameReg, keyReg], // TODO: add opIndexer
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
@@ -147,6 +149,7 @@ async function main() {
     inviteCodeTracker,
     paymentMemoTracker,
     inviteGraph,
+    sessionKeyManager,
     notifier,
     accountFactory,
     monitor

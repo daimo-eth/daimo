@@ -11,6 +11,7 @@ import {
   assertNotNull,
   dollarsToAmount,
   formatDaimoLink,
+  generateSessionSecret,
   getNoteClaimSignatureFromSeed,
   now,
   stripSeedFromNoteLink,
@@ -92,6 +93,9 @@ class AccountManager {
    */
   private createAccountHandle: ActHandle | null = null;
 
+  private isReinstalledApp = false;
+  private sessionSecret: string | null = null;
+
   constructor() {
     // On first load, load+save to ensure latest serialization version.
     const accountJSON = this.mmkv.getString("account");
@@ -99,17 +103,32 @@ class AccountManager {
     this.currentAccount = parseAccount(accountJSON);
     this.setCurrentAccount(this.currentAccount);
 
-    // Load enclave key
-    this.loadEnclaveKey();
+    // Initialize key info
+    this.initKey();
   }
 
-  async loadEnclaveKey() {
+  async initKey() {
     try {
-      this.keyInfo =
+      // Load local key
+      const keyInfo =
         this.currentAccount == null
           ? await loadOrCreateEnclaveKey(defaultEnclaveKeyName)
           : await loadEnclaveKey(this.currentAccount.enclaveKeyName);
       console.log(`[ACCOUNT] loaded key: ${JSON.stringify(this.keyInfo)}`);
+      assert(keyInfo.pubKeyHex != null, "No key");
+
+      // Initialize and submit session key.
+      this.sessionSecret = generateSessionSecret();
+      const rpcFunc = env(this.daimoChain).rpcFunc;
+
+      const { isNewDevice } = await rpcFunc.tryRegisterNewDeviceSession.mutate({
+        deviceSecret: this.sessionSecret,
+        devicePubkey: keyInfo.pubKeyHex,
+      });
+      // TODO: if not isNewDevice, redirect to reinstall flow.
+      this.isReinstalledApp = !isNewDevice;
+      this.keyInfo = keyInfo;
+
       this.notifyListeners();
     } catch (e: any) {
       console.error(`[ACCOUNT] error loading enclave key: ${e}`);
@@ -192,8 +211,10 @@ class AccountManager {
       return;
     } else if (this.keyInfo?.pubKeyHex == null) {
       console.log(`[ACCOUNT] skip pollForAccountByKey, no signing key loaded`);
+      this.initKey();
       return;
     }
+    assert(this.sessionSecret != null, "No session secret");
     const { pubKeyHex, enclaveKeyName } = this.keyInfo;
 
     console.log(`[ACCOUNT] pollForAccountByKey, key ${pubKeyHex}`);
@@ -223,7 +244,13 @@ class AccountManager {
     }
 
     // Current account guaranteed null, set it to the found account:
-    this.setNewAccount(enclaveKeyName, pubKeyHex, acc.name, acc.addr);
+    this.setNewAccount(
+      enclaveKeyName,
+      pubKeyHex,
+      this.sessionSecret,
+      acc.name,
+      acc.addr
+    );
   }
 
   // Create new account
@@ -235,8 +262,13 @@ class AccountManager {
     assert(existingAcc == null, "Can't create, have existing account");
     assert(this.createAccountHandle?.status !== "loading", "Already creating");
 
-    // Get enclave key
-    const keyInfo = await loadOrCreateEnclaveKey(defaultEnclaveKeyName);
+    // Get enclave key or init it if we don't have one.
+    if (this.keyInfo == null) {
+      await this.initKey();
+    }
+    assert(this.keyInfo != null && this.sessionSecret != null, "No key");
+
+    const keyInfo = this.keyInfo;
     assert(keyInfo.pubKeyHex != null, "Can't create, no signing key");
     const { pubKeyHex, enclaveKeyName } = keyInfo;
 
@@ -269,7 +301,13 @@ class AccountManager {
       // (Avoid a race where we find it via polling)
       if (this.currentAccount == null) {
         console.log(`[ACCOUNT] createAccount saving ${name}, ${address}`);
-        this.setNewAccount(enclaveKeyName, pubKeyHex, name, address);
+        this.setNewAccount(
+          enclaveKeyName,
+          pubKeyHex,
+          this.sessionSecret,
+          name,
+          address
+        );
       } else {
         console.log(
           `[ACCOUNT] createAccount NOT saving, existing (polled) acct ${this.currentAccount.name}`
@@ -305,6 +343,7 @@ class AccountManager {
   private setNewAccount(
     enclaveKeyName: string,
     enclavePubKey: Hex,
+    deviceSessionSecret: string,
     name: string,
     address: Address
   ) {
@@ -313,6 +352,7 @@ class AccountManager {
       {
         enclaveKeyName,
         enclavePubKey,
+        deviceSessionSecret,
         name,
         address,
       },
@@ -397,23 +437,19 @@ class AccountManager {
     this.createAccountHandle = null;
     this.keyInfo.pubKeyHex = undefined;
     this.setCurrentAccount(null);
-  }
-
-  // Create a new enclave key, but no account yet.
-  async createNewEnclaveKey() {
-    assert(this.currentAccount == null, "Can't create, have existing account");
-    assert(this.keyInfo?.pubKeyHex == null, "Already have a key");
-
-    this.keyInfo = await loadOrCreateEnclaveKey(defaultEnclaveKeyName);
-    console.log(`[ACCOUNT] created enclave key ${this.keyInfo.enclaveKeyName}`);
-
-    this.notifyListeners();
+    this.initKey();
   }
 
   // Returns summary of account + device + onboarding state.
   getAccountAndKeyInfo() {
-    const { currentAccount, createAccountHandle, keyInfo } = this;
-    return { account: currentAccount, createAccountHandle, keyInfo };
+    const { currentAccount, createAccountHandle, keyInfo, isReinstalledApp } =
+      this;
+    return {
+      account: currentAccount,
+      createAccountHandle,
+      keyInfo,
+      isReinstalledApp,
+    };
   }
 }
 

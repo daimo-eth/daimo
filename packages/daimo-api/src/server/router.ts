@@ -54,6 +54,7 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
+import { SessionKeyManager } from "../offchain/sessionKeyManager";
 import { Watcher } from "../shovel/watcher";
 
 // Service authentication for, among other things, invite link creation
@@ -78,6 +79,7 @@ export function createRouter(
   inviteCodeTracker: InviteCodeTracker,
   paymentMemoTracker: PaymentMemoTracker,
   inviteGraph: InviteGraph,
+  sessionKeyManager: SessionKeyManager,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
   telemetry: Telemetry
@@ -270,16 +272,18 @@ export function createRouter(
         z.object({
           address: zAddress,
           inviteCode: z.string().optional(),
+          sessionSecret: z.string().optional(),
           sinceBlockNum: z.number(),
         })
       )
       .query(async (opts) => {
-        const { inviteCode, sinceBlockNum } = opts.input;
+        const { inviteCode, sessionSecret, sinceBlockNum } = opts.input;
         const address = getAddress(opts.input.address);
         return getAccountHistory(
           opts.ctx,
           address,
           inviteCode,
+          sessionSecret,
           sinceBlockNum,
           watcher,
           vc,
@@ -291,6 +295,7 @@ export function createRouter(
           reqIndexer,
           inviteCodeTracker,
           inviteGraph,
+          sessionKeyManager,
           nameReg,
           keyReg,
           paymaster,
@@ -342,11 +347,13 @@ export function createRouter(
       .mutation(async (opts) => {
         const { name, pubKeyHex, inviteLink, deviceAttestationString } =
           opts.input;
+
         telemetry.recordUserAction(opts.ctx, {
           name: "deployWallet",
           accountName: name,
           keys: {},
         });
+
         const inviteLinkStatus = await getLinkStatus(
           inviteLink,
           nameReg,
@@ -370,6 +377,51 @@ export function createRouter(
           inviteGraph
         );
         return { status: "success", address, faucetTransfer };
+      }),
+
+    // Register a session key for API authentication BEFORE the public key
+    // is added to the account.
+    tryRegisterNewDeviceSession: publicProcedure
+      .input(
+        z.object({
+          deviceSecret: z.string(),
+          devicePubkey: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const { deviceSecret, devicePubkey } = opts.input;
+        const address = await keyReg.resolveKey(devicePubkey);
+
+        if (address != null) {
+          return { isNewDevice: false };
+        }
+
+        await sessionKeyManager.insertNewDeviceSessionKey(
+          deviceSecret,
+          devicePubkey
+        );
+
+        return { isNewDevice: true };
+      }),
+
+    registerExistingDeviceSession: publicProcedure
+      .input(
+        z.object({
+          deviceSecret: z.string(),
+          devicePubkey: zHex,
+          signature: zHex,
+          addr: zAddress,
+        })
+      )
+      .mutation(async (opts) => {
+        const { deviceSecret, devicePubkey, signature, addr } = opts.input;
+
+        await sessionKeyManager.insertExistingDeviceSessionKey(
+          deviceSecret,
+          devicePubkey,
+          signature,
+          addr
+        );
       }),
 
     // Get memo from a transaction hash and log index.

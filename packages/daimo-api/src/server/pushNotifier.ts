@@ -162,7 +162,7 @@ export class PushNotifier {
         continue;
       }
 
-      const opEvent = this.coinIndexer.attachTransferOpProperties(log);
+      const opEvent = this.coinIndexer.attachTransferOpProperties(log, true);
       const [from, to] = getDisplayFromTo(opEvent);
 
       const [a, b] = await Promise.all([
