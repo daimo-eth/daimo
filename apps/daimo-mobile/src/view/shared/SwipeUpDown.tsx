@@ -29,7 +29,7 @@ import { ParamListBottomSheet, useNav } from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpScreen,
-  SetBottomSheetSnapPointCount,
+  SetBottomSheetDetailHeight,
 } from "../screen/history/HistoryOpScreen";
 
 const BottomSheetStackNavigator =
@@ -65,12 +65,12 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     const tabBarHeight = useTabBarHeight();
 
     const maxHeightOffset = screenDimensions.height - ins.top - ins.bottom;
-    const [snapPointCount, setSnapPointCount] = useState<2 | 3>(3);
+    const [detailHeight, setDetailHeight] = useState(0);
+    const snapPointCount = detailHeight > 0 ? 2 : 3;
 
     const snapPoints = useMemo(() => {
       if (snapPointCount === 2) {
-        // TODO: use dynamic sizing on TransferOp screen
-        return [440, maxHeightOffset - tabBarHeight];
+        return [detailHeight, maxHeightOffset - tabBarHeight];
       } else {
         return [swipeHeight, 440, maxHeightOffset - tabBarHeight];
       }
@@ -137,7 +137,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetY={[-10, 10]}
         animationConfigs={ANIMATION_CONFIG}
       >
-        <SetBottomSheetSnapPointCount.Provider value={setSnapPointCount}>
+        <SetBottomSheetDetailHeight.Provider value={setDetailHeight}>
           <SwipeContext.Provider
             value={{ isMini, itemMiniStyle, itemMini, itemFull }}
           >
@@ -157,7 +157,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
               </BottomSheetStackNavigator.Group>
             </BottomSheetStackNavigator.Navigator>
           </SwipeContext.Provider>
-        </SetBottomSheetSnapPointCount.Provider>
+        </SetBottomSheetDetailHeight.Provider>
       </BottomSheet>
     );
   }

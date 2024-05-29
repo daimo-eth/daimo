@@ -12,7 +12,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { useCallback, useContext } from "react";
+import { useContext } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import {
   TouchableHighlight,
@@ -20,7 +20,7 @@ import {
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { SetBottomSheetSnapPointCount } from "./HistoryOpScreen";
+import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { getSynthesizedMemo } from "./shared";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { getCachedEAccount } from "../../../logic/addr";
@@ -188,27 +188,25 @@ function DisplayOpRow({
   assert(displayOp.amount > 0);
   const [from, to] = getDisplayFromTo(displayOp);
   assert([from, to].includes(address));
-  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
+  const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
   const amountDelta = from === address ? -displayOp.amount : displayOp.amount;
 
   const nav = useNav();
-  const viewOp = useCallback(
-    (isLinkToOp: boolean) => {
-      if (isLinkToOp || !canSendTo(otherAcc)) {
-        setBottomSheetSnapPointCount(2);
-        (nav as any).navigate("BottomSheetHistoryOp", {
-          op: displayOp,
-          shouldAddInset: false,
-        });
-      } else {
-        navToAccountPage(otherAcc, nav);
-      }
-    },
-    [nav, displayOp, linkTo, otherAcc]
-  );
+  const viewOp = () => {
+    const height = displayOp.type === "createLink" ? 490 : 440;
+    setBottomSheetDetailHeight(height);
+    (nav as any).navigate("BottomSheetHistoryOp", {
+      op: displayOp,
+      shouldAddInset: false,
+    });
+  };
+  const viewAccount = () => {
+    if (canSendTo(otherAcc)) navToAccountPage(otherAcc, nav);
+    else viewOp();
+  };
 
   const isPending = displayOp.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
@@ -235,14 +233,14 @@ function DisplayOpRow({
   return (
     <View style={styles.transferBorder}>
       <TouchableHighlight
-        onPress={() => viewOp(true)}
+        onPress={viewOp}
         {...touchHighlightUnderlay.subtle}
         style={styles.displayOpRowWrap}
       >
         <View style={styles.displayOpRow}>
           <View style={styles.transferOtherAccount}>
             <TouchableOpacity
-              onPress={() => viewOp(false)}
+              onPress={viewAccount}
               disabled={
                 linkTo === "op" || otherAcc.label === AddrLabel.PaymentLink
               }

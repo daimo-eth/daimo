@@ -2,7 +2,7 @@ import {
   AddrLabel,
   DaimoLink,
   DaimoNoteState,
-  EAccount,
+  OpEvent,
   OpStatus,
   assertNotNull,
   dollarsToAmount,
@@ -17,7 +17,7 @@ import {
   DaimoNonceType,
   DaimoOpSender,
 } from "@daimo/userop";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 
 import {
@@ -68,6 +68,14 @@ function NoteActionButtonInner({
     (op) => op.type === "createLink" && op.to === notesV2Addr
   );
 
+  const link: DaimoLink = {
+    type: "notev2",
+    sender: account.name,
+    dollars: `${dollars}`,
+    id: noteId,
+    seed: noteSeed,
+  };
+
   const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
@@ -90,13 +98,7 @@ function NoteActionButtonInner({
       timestamp: now(),
       nonceMetadata: nonce.metadata.toHex(),
       noteStatus: {
-        link: {
-          type: "notev2",
-          sender: account.name,
-          dollars: `${dollars}`,
-          id: noteId,
-          seed: noteSeed,
-        },
+        link,
         status: DaimoNoteState.Pending,
         sender: { addr: account.address, name: account.name },
         dollars: `${dollars}`,
@@ -105,12 +107,13 @@ function NoteActionButtonInner({
         id: noteId,
       },
     },
-    accountTransform: transferAccountTransform([
-      {
-        addr: notesV2Addr,
-        label: AddrLabel.PaymentLink,
-      } as EAccount,
-    ]),
+    accountTransform: (account: Account, pendingOp: OpEvent) => {
+      const notesAcc = { addr: notesV2Addr, label: AddrLabel.PaymentLink };
+      return {
+        ...transferAccountTransform([notesAcc])(account, pendingOp),
+        sentPaymentLinks: [...account.sentPaymentLinks, link],
+      };
+    },
   });
 
   const sendDisabledReason =
@@ -143,16 +146,8 @@ function NoteActionButtonInner({
 
   const nav = useNav();
 
-  const sendNote = useCallback(async () => {
+  const sendNote = async () => {
     if (status !== "success") return;
-
-    const link: DaimoLink = {
-      type: "notev2",
-      sender: account.name,
-      dollars: `${dollars}`,
-      id: noteId,
-      seed: noteSeed,
-    };
 
     const didShare = await externalAction.exec(link);
     console.log(`[SEND NOTE] external action executed: ${didShare}`);
@@ -166,7 +161,7 @@ function NoteActionButtonInner({
       ],
     });
     nav.navigate("HomeTab", { screen: "Home" });
-  }, [status]);
+  };
 
   const externalActionButtonTitle = (function () {
     switch (externalAction.type) {

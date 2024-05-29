@@ -26,6 +26,7 @@ import {
 } from "../../../common/nav";
 import { getCachedEAccount } from "../../../logic/addr";
 import { env } from "../../../logic/env";
+import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";
 import { syncFindSameOp } from "../../../sync/sync";
@@ -54,7 +55,7 @@ type Props = NativeStackScreenProps<
 // This allows the bottom sheet to be dismissed when the user exits the detail
 // screen and only display the half screen snap point when the user is on the
 // detail screen.
-export const SetBottomSheetSnapPointCount = createContext((snaps: 2 | 3) => {});
+export const SetBottomSheetDetailHeight = createContext((height: number) => {});
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -65,18 +66,15 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
-  const setBottomSheetSnapPointCount = useContext(SetBottomSheetSnapPointCount);
+  const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   // Load the latest version of this op. If the user opens the detail screen
   // while the op is pending, and it confirms, the screen should update.
   // A pending op always has an opHash (since its initiated by the user's
   // account).
-  let { op } = route.params;
-  op =
-    syncFindSameOp(
-      { opHash: op.opHash, txHash: op.txHash },
-      account.recentTransfers
-    ) || op;
+  const { opHash, txHash } = route.params.op;
+  const foundOp = syncFindSameOp({ opHash, txHash }, account.recentTransfers);
+  const op = foundOp || route.params.op;
 
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
 
@@ -84,13 +82,19 @@ function HistoryOpScreenInner({
 
   const leaveScreen = () => {
     if (nav.canGoBack()) {
-      setBottomSheetSnapPointCount(3);
+      setBottomSheetDetailHeight(0);
       nav.goBack();
     }
   };
 
+  const sentPaymentLink =
+    op.type === "createLink" &&
+    op.noteStatus.claimer == null &&
+    account.sentPaymentLinks.find((p) => p.id === op.noteStatus.id);
+  const shareLinkAgain = sentPaymentLink && (() => shareURL(sentPaymentLink));
+
   return (
-    <View style={ss.container.screen}>
+    <View style={ss.container.padH16}>
       <ScreenHeader
         title={getOpVerb(op, account.address)}
         onExit={leaveScreen}
@@ -99,13 +103,23 @@ function HistoryOpScreenInner({
       <TransferBody account={account} op={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
-        {op.txHash && <LinkToExplorer {...{ chainConfig }} op={op} />}
+        {op.txHash && !shareLinkAgain && (
+          <LinkToExplorer {...{ chainConfig }} op={op} />
+        )}
+        {shareLinkAgain && (
+          <ButtonBig
+            type="subtle"
+            title="SHARE LINK AGAIN"
+            onPress={shareLinkAgain}
+          />
+        )}
       </View>
       <Spacer h={16} />
       {op.type === "createLink" &&
         [OpStatus.confirmed, OpStatus.finalized].includes(op.status) && (
           <NoteView account={account} note={op} leaveScreen={leaveScreen} />
         )}
+      {op.type === "createLink" && <Spacer h={16} />}
     </View>
   );
 }
@@ -248,7 +262,9 @@ function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
   const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
 
   if (isPayLink) {
-    return sentByUs ? "Created link" : "Accepted link";
+    if (sentByUs) return "Created link";
+    const fromUs = op.noteStatus.sender.addr === accountAddress;
+    return fromUs ? "Cancelled link" : "Accepted link";
   } else if (isRequestResponse) {
     return sentByUs ? "Fulfilled request" : "Received request";
   } else {
