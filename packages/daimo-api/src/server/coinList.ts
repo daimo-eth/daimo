@@ -1,5 +1,5 @@
 import { ForeignCoin, USDbC, assert } from "@daimo/common";
-import { Address, getAddress } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
 
@@ -29,6 +29,7 @@ export async function fetchTokenList(): Promise<Map<Address, ForeignToken>> {
   for (const token of tokenList.tokens) {
     assert(token.chainId === 8453, "Only Base supported");
     const largeLogo = token.logoURI?.split("?")[0].replace("thumb", "large");
+    if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
     const addr = getAddress(token.address);
     if (addr === chainConfig.tokenAddress) continue;
 
