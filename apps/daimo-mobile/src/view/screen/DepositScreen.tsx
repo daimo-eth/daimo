@@ -12,6 +12,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { Address } from "viem";
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
@@ -19,7 +20,6 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
-import { EAccountContact } from "../../logic/daimoContacts";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -67,11 +67,11 @@ function LandlineConnect() {
   const account = useAccount();
   if (account == null) return null;
 
-  // TODO: Use landline logo
+  // TODO(andrew): Use landline logo
   const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   const openLandline = () => {
-    // TODO: add session key
+    // TODO(andrew): add session key
     Linking.openURL(getLandlineURL(account.address, ""));
   };
 
@@ -85,34 +85,67 @@ function LandlineConnect() {
   );
 }
 
+// TODO(andrew): move this type to a shared location
+export type LandlineAccount = {
+  daimoAddress: Address;
+  bankName: string;
+  accountName: string;
+  lastFour: string;
+  liquidationAddress: Address;
+  chain: string;
+  destinationCurrency: string;
+};
+
 function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
-  // TODO: Use bank logo
+  // TODO(andrew): Use bank logo
   const logo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   if (account == null) return null;
 
-  const recipient: EAccountContact = {
-    type: "eAcc",
-    addr: account.address,
-  };
+  const landlineAccounts: LandlineAccount[] = [
+    {
+      daimoAddress: account.address,
+      bankName: "Chase",
+      accountName: "TOTAL CHECKING",
+      lastFour: "1234",
+      liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
+      chain: "base",
+      destinationCurrency: "usd",
+    },
+    {
+      daimoAddress: account.address,
+      bankName: "Chase",
+      accountName: "TOTAL CHECKING",
+      lastFour: "1234",
+      liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
+      chain: "base",
+      destinationCurrency: "usd",
+    },
+  ];
 
-  const goToSendTransfer = () => {
+  const goToSendTransfer = (landlineAccount: LandlineAccount) => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { recipient },
+      params: { landlineAccount },
     });
   };
 
   return (
-    <LandlineOptionRow
-      cta="Chase ****1234"
-      title="Connected 2d ago"
-      logo={logo}
-      isAccount
-      onClick={goToSendTransfer}
-    />
+    <>
+      {landlineAccounts.map((acc, idx) => (
+        <LandlineOptionRow
+          key={`landline-account-${idx}`}
+          cta={`${acc.bankName} ****${acc.lastFour}`}
+          // TODO(andrew): use createdAt date to calculate this
+          title="Connected 2d ago"
+          logo={logo}
+          isAccount
+          onClick={() => goToSendTransfer(acc)}
+        />
+      ))}
+    </>
   );
 }
 
