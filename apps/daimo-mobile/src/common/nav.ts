@@ -79,7 +79,7 @@ export type ParamListMain = {
 
 type NavigatorParamList = {
   LinkErrorModal: ParamListError;
-  DepositTab: undefined;
+  DepositTab: NavigatorScreenParams<ParamListDeposit>;
   InviteTab: NavigatorScreenParams<ParamListInvite>;
   HomeTab: NavigatorScreenParams<ParamListHome>;
   SendTab: NavigatorScreenParams<ParamListSend>;
@@ -95,6 +95,11 @@ export type ParamListSend = {
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
   HistoryOp: { op: DisplayOpEvent };
+};
+
+export type ParamListDeposit = {
+  Deposit: undefined;
+  LandlineTransfer: LandlineTransferNavProp;
 };
 
 export type ParamListInvite = {
@@ -125,8 +130,14 @@ export interface SendNavProp {
   autoFocus?: boolean;
 }
 
+export interface LandlineTransferNavProp {
+  recipient: EAccountContact;
+  money?: MoneyEntry;
+  memo?: string;
+}
+
 export type ParamListTab = {
-  DepositTab: undefined;
+  DepositTab: NavigatorScreenParams<ParamListDeposit>;
   InviteTab: NavigatorScreenParams<ParamListInvite>;
   HomeTab: NavigatorScreenParams<ParamListHome>;
   SendTab: NavigatorScreenParams<ParamListSend>;
