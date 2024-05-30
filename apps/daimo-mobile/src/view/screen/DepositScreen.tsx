@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import React, { useContext, useState } from "react";
 import {
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
@@ -13,6 +14,7 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
+import { useAccount } from "../../logic/accountManager";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
@@ -36,12 +38,64 @@ function DepositScreenInner({ account }: { account: Account }) {
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
-        <Spacer h={8} />
+        <Spacer h={16} />
+        <LandlineList />
+        <Spacer h={24} />
         <DepositList account={account} />
         <Spacer h={16} />
         <WithdrawList />
       </ScrollView>
     </View>
+  );
+}
+
+const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
+  return `http://localhost:4001?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+};
+
+function LandlineList() {
+  const isConnected = false;
+
+  return isConnected ? <LandlineAccountList /> : <LandlineConnect />;
+}
+
+function LandlineConnect() {
+  const account = useAccount();
+  if (account == null) return null;
+
+  // TODO: Use landline logo
+  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+
+  const openLandline = () => {
+    // TODO: add session key
+    Linking.openURL(getLandlineURL(account.address, ""));
+  };
+
+  return (
+    <LandlineOptionRow
+      cta="Connect with Landline"
+      title="Deposit or withdraw directly from a US bank account"
+      logo={defaultLogo}
+      onClick={openLandline}
+    />
+  );
+}
+
+function LandlineAccountList() {
+  const account = useAccount();
+  if (account == null) return null;
+
+  // TODO: Use bank logo
+  const logo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+
+  return (
+    <LandlineOptionRow
+      cta="Chase ****1234"
+      title="Connected 2d ago"
+      logo={logo}
+      isAccount
+      onClick={() => {}}
+    />
   );
 }
 
@@ -129,6 +183,57 @@ function WithdrawList() {
   );
 }
 
+type LandlineOptionRowProps = {
+  title: string;
+  cta: string;
+  logo: string;
+  isAccount?: boolean;
+  onClick: () => void;
+};
+
+function LandlineOptionRow({
+  title,
+  cta,
+  logo,
+  isAccount,
+  onClick,
+}: LandlineOptionRowProps) {
+  const width = useWindowDimensions().width;
+
+  return (
+    <Pressable
+      onPress={onClick}
+      style={({ pressed }) => [
+        {
+          ...styles.checklistAction,
+          backgroundColor: pressed
+            ? touchHighlightUnderlay.subtle.underlayColor
+            : undefined,
+        },
+      ]}
+    >
+      <View style={{ ...styles.optionRowLeft, maxWidth: width - 200 }}>
+        <LogoBubble logo={logo} />
+        <View style={{ flexDirection: "column" }}>
+          <TextBody color={color.midnight}>{cta}</TextBody>
+          <Spacer h={2} />
+          <TextMeta color={color.gray3}>{title}</TextMeta>
+        </View>
+      </View>
+      <View style={styles.optionRowRight}>
+        {isAccount ? (
+          <TextBody color={color.primary}>Start transfer</TextBody>
+        ) : (
+          <TextBody color={color.primary}>
+            Go{"  "}
+            <Octicons name="link-external" />
+          </TextBody>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
 type OptionRowProps = {
   title?: string;
   cta: string;
@@ -210,5 +315,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderBottomWidth: 1,
     borderColor: color.grayLight,
+  },
+  checklistAction: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: color.grayLight,
+    marginHorizontal: 24,
+    backgroundColor: color.white,
+    ...ss.container.shadow,
+    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
   },
 });
