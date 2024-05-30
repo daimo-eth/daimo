@@ -331,3 +331,5 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     },
   ];
 }
+
+// TODO(andrew): fetch connected landline accounts from landline app

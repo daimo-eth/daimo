@@ -1,37 +1,28 @@
-import {
-  DaimoRequestState,
-  DaimoRequestV2Status,
-  assert,
-  assertNotNull,
-  now,
-} from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Keyboard,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
 
+import { LandlineAccount } from "./DepositScreen";
 import {
   LandlineTransferNavProp,
   ParamListDeposit,
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { getAccountManager } from "../../logic/accountManager";
 import { EAccountContact } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { MoneyEntry, zeroUSDEntry } from "../../model/moneyEntry";
-import { FulfillRequestButton } from "../screen/send/FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "../screen/send/MemoDisplay";
 import { SendTransferButton } from "../screen/send/SendTransferButton";
 import { AmountChooser } from "../shared/AmountInput";
-import { ButtonBig, TextButton } from "../shared/Button";
+import { ButtonBig } from "../shared/Button";
 import { ContactDisplay } from "../shared/ContactDisplay";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
@@ -50,13 +41,12 @@ export default function LandlineTransferScreen({ route }: Props) {
 }
 
 function LandlineTransferScreenInner({
-  recipient,
+  landlineAccount,
   money,
   memo,
   account,
 }: LandlineTransferNavProp & { account: Account }) {
-  assertNotNull(recipient, "LandlineTransferScreenInner: need recipient");
-
+  // TODO(andrew): add check that landlineAccount chain is the same as daimoChain
   const daimoChain = daimoChainFromId(account.homeChainId);
 
   const nav = useNav();
@@ -67,29 +57,31 @@ function LandlineTransferScreenInner({
         screen: "LandlineTransfer",
         params,
       });
-    if (money != null) goTo({ recipient });
+    if (money != null) goTo({ landlineAccount });
     else if (nav.canGoBack()) nav.goBack();
     else goHome();
-  }, [nav, money, recipient]);
+  }, [nav, money, landlineAccount]);
 
   const sendDisplay = (() => {
-    if (recipient) {
-      if (money == null)
-        return (
-          <SendChooseAmount
-            recipient={recipient}
-            onCancel={goBack}
-            daimoChain={daimoChain}
-          />
-        );
-      else return <SendConfirm {...{ account, recipient, memo, money }} />;
-    } else throw new Error("unreachable");
+    if (money == null)
+      return (
+        <SendChooseAmount
+          landlineAccount={landlineAccount}
+          onCancel={goBack}
+          daimoChain={daimoChain}
+        />
+      );
+    else return <SendConfirm {...{ account, landlineAccount, memo, money }} />;
   })();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Chase" onBack={goBack} onExit={goHome} />
+        <ScreenHeader
+          title={landlineAccount.bankName}
+          onBack={goBack}
+          onExit={goHome}
+        />
         <Spacer h={8} />
         {sendDisplay}
       </View>
@@ -98,14 +90,19 @@ function LandlineTransferScreenInner({
 }
 
 function SendChooseAmount({
-  recipient,
+  landlineAccount,
   daimoChain,
   onCancel,
 }: {
-  recipient: EAccountContact;
+  landlineAccount: LandlineAccount;
   daimoChain: DaimoChain;
   onCancel: () => void;
 }) {
+  const recipient: EAccountContact = {
+    type: "eAcc",
+    addr: landlineAccount.liquidationAddress,
+  };
+
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
 
@@ -117,7 +114,7 @@ function SendChooseAmount({
   const setSendAmount = () =>
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { money, memo, recipient },
+      params: { money, memo, landlineAccount },
     });
 
   const hasLinkedAccounts =
@@ -178,90 +175,52 @@ function PublicWarning() {
 
 function SendConfirm({
   account,
-  recipient,
+  landlineAccount,
   money,
   memo,
-  requestStatus,
 }: {
   account: Account;
-  recipient: EAccountContact;
+  landlineAccount: LandlineAccount;
   money: MoneyEntry;
   memo: string | undefined;
-  requestStatus?: DaimoRequestV2Status;
 }) {
-  const isRequest = !!requestStatus;
+  const recipient: EAccountContact = {
+    type: "eAcc",
+    addr: landlineAccount.liquidationAddress,
+  };
 
   const nav = useNav();
 
   const navToInput = () => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { recipient },
+      params: { landlineAccount },
     });
   };
 
-  let button: ReactNode;
-  if (isRequest) {
-    button = <FulfillRequestButton {...{ account, requestStatus }} />;
-  } else {
-    const memoParts = [] as string[];
-    if (money.currency.currency !== "USD") {
-      memoParts.push(`${money.currency.symbol}${money.localUnits}`);
-    }
-    if (memo != null) {
-      memoParts.push(memo);
-    }
-    button = (
-      <SendTransferButton
-        account={account}
-        memo={memoParts.join(" · ")}
-        recipient={recipient}
-        dollars={money.dollars}
-      />
-    );
+  const memoParts = [] as string[];
+  if (money.currency.currency !== "USD") {
+    memoParts.push(`${money.currency.symbol}${money.localUnits}`);
   }
+  if (memo != null) {
+    memoParts.push(memo);
+  }
+  const button: ReactNode = (
+    <SendTransferButton
+      account={account}
+      memo={memoParts.join(" · ")}
+      recipient={recipient}
+      dollars={money.dollars}
+    />
+  );
 
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
-  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
-
-  const [isDecliningRequest, setIsDecliningRequest] = useState(false);
-
-  const onDecline = async () => {
-    assert(requestStatus != null);
-
-    await rpcFunc.declineRequest.mutate({
-      requestId: requestStatus.link.id,
-      decliner: account.address,
-    });
-
-    getAccountManager().transform((acc) => {
-      const updatedRequestStatus = {
-        ...requestStatus,
-        status: DaimoRequestState.Declined,
-        updatedAt: now(),
-      };
-      return {
-        ...acc,
-        // Replace old request with updated one
-        notificationRequestStatuses: acc.notificationRequestStatuses
-          .filter((r) => r.link.id !== requestStatus.link.id)
-          .concat([updatedRequestStatus]),
-      };
-    });
-
-    nav.navigate("Home");
-  };
-
   return (
     <View>
       <Spacer h={24} />
-      <ContactDisplay
-        contact={recipient}
-        isRequest={isRequest}
-        requestMemo={requestStatus?.link?.memo}
-      />
+      <ContactDisplay contact={recipient} />
       <Spacer h={hasLinkedAccounts ? 8 : 24} />
       <AmountChooser
         moneyEntry={money}
@@ -279,22 +238,6 @@ function SendConfirm({
       )}
       <Spacer h={16} />
       {button}
-      {isRequest && (
-        <>
-          <Spacer h={16} />
-          {isDecliningRequest ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <TextButton
-              title="DECLINE"
-              onPress={async () => {
-                setIsDecliningRequest(true);
-                await onDecline();
-              }}
-            />
-          )}
-        </>
-      )}
     </View>
   );
 }

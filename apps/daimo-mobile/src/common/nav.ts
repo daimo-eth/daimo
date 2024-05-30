@@ -34,6 +34,7 @@ import {
 import { fetchInviteLinkStatus } from "../logic/linkStatus";
 import { Account } from "../model/account";
 import { MoneyEntry } from "../model/moneyEntry";
+import { LandlineAccount } from "../view/screen/DepositScreen";
 
 export type ParamListOnboarding = {
   Intro: undefined;
@@ -131,7 +132,7 @@ export interface SendNavProp {
 }
 
 export interface LandlineTransferNavProp {
-  recipient: EAccountContact;
+  landlineAccount: LandlineAccount;
   money?: MoneyEntry;
   memo?: string;
 }
