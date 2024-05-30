@@ -14,7 +14,9 @@ import {
 } from "react-native";
 
 import { DispatcherContext } from "../../action/dispatch";
+import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { EAccountContact } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
@@ -54,7 +56,7 @@ const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
 };
 
 function LandlineList() {
-  const isConnected = false;
+  const isConnected = true;
 
   return isConnected ? <LandlineAccountList /> : <LandlineConnect />;
 }
@@ -83,10 +85,23 @@ function LandlineConnect() {
 
 function LandlineAccountList() {
   const account = useAccount();
-  if (account == null) return null;
-
+  const nav = useNav();
   // TODO: Use bank logo
   const logo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+
+  if (account == null) return null;
+
+  const recipient: EAccountContact = {
+    type: "eAcc",
+    addr: account.address,
+  };
+
+  const goToSendTransfer = () => {
+    nav.navigate("DepositTab", {
+      screen: "LandlineTransfer",
+      params: { recipient },
+    });
+  };
 
   return (
     <LandlineOptionRow
@@ -94,7 +109,7 @@ function LandlineAccountList() {
       title="Connected 2d ago"
       logo={logo}
       isAccount
-      onClick={() => {}}
+      onClick={goToSendTransfer}
     />
   );
 }

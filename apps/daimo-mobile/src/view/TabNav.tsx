@@ -23,6 +23,7 @@ import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
+import LandlineTransferScreen from "./screen/LandlineBankTransfer";
 import { ProfileScreen } from "./screen/ProfileScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";
@@ -54,6 +55,7 @@ import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
 import { color } from "./shared/style";
 import {
+  ParamListDeposit,
   ParamListHome,
   ParamListInvite,
   ParamListMain,
@@ -310,8 +312,21 @@ function getIcon(name: OctName, focusName?: OctName) {
 
 const noHeaders: NativeStackNavigationOptions = { headerShown: false };
 
+const DepositStack = createNativeStackNavigator<ParamListDeposit>();
+
 function DepositTab() {
-  return <DepositScreen />;
+  return (
+    <DepositStack.Navigator
+      initialRouteName="Deposit"
+      screenOptions={noHeaders}
+    >
+      <DepositStack.Screen name="Deposit" component={DepositScreen} />
+      <DepositStack.Screen
+        name="LandlineTransfer"
+        component={LandlineTransferScreen}
+      />
+    </DepositStack.Navigator>
+  );
 }
 
 const SendStack = createNativeStackNavigator<ParamListSend>();
