@@ -3,7 +3,7 @@ import { daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -61,24 +61,24 @@ const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
 function LandlineList() {
   const account = useAccount();
   if (account == null) return null;
-  // const isLandlineConnected = account.landlineAccounts.length > 0;
-  const isLandlineConnected = true;
+  const isLandlineConnected = account.landlineAccounts.length > 0;
 
   return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
 }
 
 function LandlineConnect() {
   const account = useAccount();
-  if (account == null) return null;
-
   // TODO(andrew): Use landline logo
   const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
-  // const sessionKey = account.landlineSessionKey;
-  const sessionKey = "c7a8c94c-da98-42f1-b60a-64ebe6f84f27";
 
-  const openLandline = () => {
-    Linking.openURL(getLandlineURL(account.address, sessionKey));
-  };
+  const openLandline = useCallback(() => {
+    if (!account) return;
+    Linking.openURL(
+      getLandlineURL(account.address, account.landlineSessionKey)
+    );
+  }, [account?.address, account?.landlineSessionKey]);
+
+  if (account == null) return null;
 
   return (
     <LandlineOptionRow
