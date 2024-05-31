@@ -171,6 +171,8 @@ async function fetchSync(
     invitees: result.invitees,
     notificationRequestStatuses: result.notificationRequestStatuses,
     numExchangeRates: (result.exchangeRates || []).length,
+    landlineSessionKey: result.landlineSessionKey,
+    landlineAccounts: result.landlineAccounts,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 

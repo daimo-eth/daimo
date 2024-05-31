@@ -10,12 +10,13 @@ export interface LandlineAccount {
   liquidationAddress: Address;
   chain: string;
   destinationCurrency: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export async function getLandlineSession(
   daimoAddress: Address
 ): Promise<string> {
+  // @ts-ignore
   const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate({
     daimoAddress,
   });
@@ -26,6 +27,7 @@ export async function getLandlineAccounts(
   daimoAddress: Address
 ): Promise<LandlineAccount[]> {
   const landlineAccounts =
+    // @ts-ignore
     await landlineTrpc.getExternalAccountsTransferInfo.mutate({
       daimoAddress,
     });
