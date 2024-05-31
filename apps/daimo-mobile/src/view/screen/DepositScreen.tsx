@@ -1,3 +1,4 @@
+import { daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
@@ -20,6 +21,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
+import { useTime } from "../../logic/time";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -58,9 +60,12 @@ const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
 };
 
 function LandlineList() {
-  const isConnected = true;
+  const account = useAccount();
+  if (account == null) return null;
+  const isLandlineConnected = account.landlineAccounts.length > 0;
+  // const isLandlineConnected = true;
 
-  return isConnected ? <LandlineAccountList /> : <LandlineConnect />;
+  return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
 }
 
 function LandlineConnect() {
@@ -69,10 +74,11 @@ function LandlineConnect() {
 
   // TODO(andrew): Use landline logo
   const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+  // const sessionKey = account.landlineSessionKey;
+  const sessionKey = "c7a8c94c-da98-42f1-b60a-64ebe6f84f27";
 
   const openLandline = () => {
-    // TODO(andrew): add session key
-    Linking.openURL(getLandlineURL(account.address, ""));
+    Linking.openURL(getLandlineURL(account.address, sessionKey));
   };
 
   return (
@@ -94,16 +100,19 @@ export type LandlineAccount = {
   liquidationAddress: Address;
   chain: string;
   destinationCurrency: string;
+  createdAt: Date;
 };
 
 function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
+  const nowS = useTime();
   // TODO(andrew): Use bank logo
   const logo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   if (account == null) return null;
 
+  // const landlineAccounts = account.landlineAccounts;
   const landlineAccounts: LandlineAccount[] = [
     {
       daimoAddress: account.address,
@@ -113,6 +122,7 @@ function LandlineAccountList() {
       liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
       chain: "base",
       destinationCurrency: "usd",
+      createdAt: new Date("2024-05-30 11:23:44.274001"),
     },
     {
       daimoAddress: account.address,
@@ -122,6 +132,7 @@ function LandlineAccountList() {
       liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
       chain: "base",
       destinationCurrency: "usd",
+      createdAt: new Date("2024-05-29 11:23:44.274001"),
     },
   ];
 
@@ -138,8 +149,10 @@ function LandlineAccountList() {
         <LandlineOptionRow
           key={`landline-account-${idx}`}
           cta={`${acc.bankName} ****${acc.lastFour}`}
-          // TODO(andrew): use createdAt date to calculate this
-          title="Connected 2d ago"
+          title={`Connected ${timeAgo(
+            acc.createdAt.getTime() / 1000,
+            nowS
+          )} ago`}
           logo={logo}
           isAccount
           onClick={() => goToSendTransfer(acc)}
