@@ -23,6 +23,7 @@ import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { env } from "../logic/env";
+import { LandlineAccount } from "../view/screen/DepositScreen";
 
 /**
  * Singleton account key.
@@ -113,6 +114,11 @@ export type Account = {
 
   /** Payment links sent, but not yet claimed */
   sentPaymentLinks: DaimoLinkNoteV2[];
+
+  /** Session key used to authenticate to the Landline onramp/offramp app **/
+  landlineSessionKey: string;
+  /** Bank accounts connected to the Landline onramp/offramp app **/
+  landlineAccounts: LandlineAccount[];
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -346,6 +352,48 @@ interface AccountV14 extends StoredModel {
   sentPaymentLinks?: DaimoLinkNoteV2[];
 }
 
+interface AccountV15 extends StoredModel {
+  storageVersion: 14;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: DisplayOpEvent[];
+  namedAccounts: EAccount[];
+  accountKeys: KeyData[];
+  pendingKeyRotation: KeyRotationOpEvent[];
+  recommendedExchanges: RecommendedExchange[];
+  suggestedActions: SuggestedAction[];
+  dismissedActionIDs: string[];
+
+  chainGasConstants: ChainGasConstants;
+
+  pushToken: string | null;
+  linkedAccounts: LinkedAccount[];
+  inviteLinkStatus: DaimoInviteCodeStatus | null;
+  invitees: EAccount[];
+
+  isOnboarded?: boolean;
+
+  notificationRequestStatuses: DaimoRequestV2Status[];
+  lastReadNotifTimestamp: number;
+  proposedSwaps: ProposedSwap[];
+  exchangeRates?: CurrencyExchangeRate[];
+  sentPaymentLinks?: DaimoLinkNoteV2[];
+
+  landlineSessionKey: string;
+  landlineAccounts: LandlineAccount[];
+}
+
 export function parseAccount(accountJSON?: string): Account | null {
   if (!accountJSON) return null;
   const model = JSON.parse(accountJSON) as StoredModel;
@@ -397,6 +445,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -438,6 +489,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -479,6 +533,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -521,6 +578,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -562,6 +622,9 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -604,11 +667,59 @@ export function parseAccount(accountJSON?: string): Account | null {
       proposedSwaps: [],
       exchangeRates: [],
       sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
+    };
+  } else if (model.storageVersion === 14) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
+    const a = model as AccountV14;
+
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers,
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: a.recommendedExchanges,
+      suggestedActions: a.suggestedActions,
+      dismissedActionIDs: a.dismissedActionIDs,
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+
+      linkedAccounts: a.linkedAccounts || [],
+      inviteLinkStatus: a.inviteLinkStatus,
+      invitees: a.invitees,
+
+      isOnboarded: a.isOnboarded ?? true,
+
+      notificationRequestStatuses: [],
+      lastReadNotifTimestamp: 0,
+      proposedSwaps: [],
+      exchangeRates: [],
+      sentPaymentLinks: [],
+
+      landlineSessionKey: "",
+      landlineAccounts: [],
     };
   }
 
-  assert(model.storageVersion === 14, "Unknown account storage version");
-  const a = model as AccountV14;
+  assert(model.storageVersion === 15, "Unknown account storage version");
+  const a = model as AccountV15;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -647,6 +758,9 @@ export function parseAccount(accountJSON?: string): Account | null {
     proposedSwaps: a.proposedSwaps || [],
     exchangeRates: a.exchangeRates || [],
     sentPaymentLinks: a.sentPaymentLinks || [],
+
+    landlineSessionKey: a.landlineSessionKey || "",
+    landlineAccounts: a.landlineAccounts || [],
   };
 }
 
@@ -752,5 +866,8 @@ export function createEmptyAccount(
     proposedSwaps: [],
     exchangeRates: [],
     sentPaymentLinks: [],
+
+    landlineSessionKey: "",
+    landlineAccounts: [],
   };
 }

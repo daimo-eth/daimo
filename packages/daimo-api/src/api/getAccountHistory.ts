@@ -32,6 +32,11 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import {
+  LandlineAccount,
+  getLandlineAccounts,
+  getLandlineSession,
+} from "../landline/connector";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -64,6 +69,9 @@ export interface AccountHistoryResult {
   proposedSwaps: ProposedSwap[];
 
   exchangeRates: CurrencyExchangeRate[];
+
+  landlineSessionKey: string;
+  landlineAccounts: LandlineAccount[];
 }
 
 export interface SuggestedAction {
@@ -198,6 +206,12 @@ export async function getAccountHistory(
   // Get exchange rates
   const exchangeRates = await getExchangeRatesCached(vc);
 
+  // Get landline session key
+  const landlineSessionKey = await getLandlineSession(address);
+
+  // Get landline accounts
+  const landlineAccounts = await getLandlineAccounts(address);
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -221,6 +235,9 @@ export async function getAccountHistory(
     notificationRequestStatuses,
     proposedSwaps,
     exchangeRates,
+
+    landlineSessionKey,
+    landlineAccounts,
   };
 
   // Suggest an action to the user, like backing up their account
