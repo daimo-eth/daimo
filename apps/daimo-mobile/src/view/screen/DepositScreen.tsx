@@ -1,3 +1,4 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import { daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -13,7 +14,6 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { Address } from "viem";
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
@@ -56,14 +56,16 @@ function DepositScreenInner({ account }: { account: Account }) {
 }
 
 const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
-  return `http://localhost:4001?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+  // TODO(andrew): move this to an env variable
+  const landlineDomain = "http://localhost:4001";
+  return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
 };
 
 function LandlineList() {
   const account = useAccount();
   if (account == null) return null;
-  const isLandlineConnected = account.landlineAccounts.length > 0;
-  // const isLandlineConnected = true;
+  // const isLandlineConnected = account.landlineAccounts.length > 0;
+  const isLandlineConnected = true;
 
   return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
 }
@@ -91,18 +93,6 @@ function LandlineConnect() {
   );
 }
 
-// TODO(andrew): move this type to a shared location
-export type LandlineAccount = {
-  daimoAddress: Address;
-  bankName: string;
-  accountName: string;
-  lastFour: string;
-  liquidationAddress: Address;
-  chain: string;
-  destinationCurrency: string;
-  createdAt: Date;
-};
-
 function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
@@ -122,7 +112,7 @@ function LandlineAccountList() {
       liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
       chain: "base",
       destinationCurrency: "usd",
-      createdAt: new Date("2024-05-30 11:23:44.274001"),
+      createdAt: "2024-05-30 11:23:44.274001",
     },
     {
       daimoAddress: account.address,
@@ -132,7 +122,7 @@ function LandlineAccountList() {
       liquidationAddress: "0xed2a48c6b6ea72f57252a61d5bf948b6ce8a3240",
       chain: "base",
       destinationCurrency: "usd",
-      createdAt: new Date("2024-05-29 11:23:44.274001"),
+      createdAt: "2024-05-29 11:23:44.274001",
     },
   ];
 
@@ -150,7 +140,7 @@ function LandlineAccountList() {
           key={`landline-account-${idx}`}
           cta={`${acc.bankName} ****${acc.lastFour}`}
           title={`Connected ${timeAgo(
-            acc.createdAt.getTime() / 1000,
+            new Date(acc.createdAt).getTime() / 1000,
             nowS
           )} ago`}
           logo={logo}

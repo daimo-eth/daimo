@@ -1,4 +1,5 @@
 import { SuggestedAction } from "@daimo/api";
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   ChainGasConstants,
   CurrencyExchangeRate,
@@ -23,7 +24,6 @@ import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
 import { env, getEnvMobile } from "../env";
-import { LandlineAccount } from "../view/screen/DepositScreen";
 
 const appVariant = getEnvMobile().DAIMO_APP_VARIANT;
 
@@ -355,7 +355,7 @@ interface AccountV14 extends StoredModel {
 }
 
 interface AccountV15 extends StoredModel {
-  storageVersion: 14;
+  storageVersion: 15;
 
   enclaveKeyName: string;
   enclavePubKey: Hex;
@@ -769,8 +769,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: AccountV14 = {
-    storageVersion: 14,
+  const model: AccountV15 = {
+    storageVersion: 15,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,
@@ -808,6 +808,9 @@ export function serializeAccount(account: Account | null): string {
     proposedSwaps: account.proposedSwaps,
     exchangeRates: account.exchangeRates,
     sentPaymentLinks: account.sentPaymentLinks,
+
+    landlineSessionKey: account.landlineSessionKey,
+    landlineAccounts: account.landlineAccounts,
   };
 
   return JSON.stringify(model);
