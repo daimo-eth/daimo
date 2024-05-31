@@ -172,7 +172,7 @@ async function fetchSync(
     notificationRequestStatuses: result.notificationRequestStatuses,
     numExchangeRates: (result.exchangeRates || []).length,
     landlineSessionKey: result.landlineSessionKey,
-    landlineAccounts: result.landlineAccounts,
+    numLandlineAccounts: (result.landlineAccounts || []).length,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -285,6 +285,8 @@ function applySync(
     notificationRequestStatuses: result.notificationRequestStatuses || [],
     proposedSwaps: result.proposedSwaps || [],
     exchangeRates: result.exchangeRates || [],
+    landlineSessionKey: result.landlineSessionKey,
+    landlineAccounts: result.landlineAccounts || [],
   };
 
   console.log(

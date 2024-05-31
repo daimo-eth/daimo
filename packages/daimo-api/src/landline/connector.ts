@@ -28,7 +28,7 @@ export async function getLandlineAccounts(
 ): Promise<LandlineAccount[]> {
   const landlineAccounts =
     // @ts-ignore
-    await landlineTrpc.getExternalAccountsTransferInfo.mutate({
+    await landlineTrpc.getExternalAccountsTransferInfo.query({
       daimoAddress,
     });
   return landlineAccounts;
