@@ -1,3 +1,4 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -8,7 +9,6 @@ import {
   View,
 } from "react-native";
 
-import { LandlineAccount } from "./DepositScreen";
 import {
   LandlineTransferNavProp,
   ParamListDeposit,

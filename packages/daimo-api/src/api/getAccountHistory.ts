@@ -206,11 +206,13 @@ export async function getAccountHistory(
   // Get exchange rates
   const exchangeRates = await getExchangeRatesCached(vc);
 
-  // Get landline session key
-  const landlineSessionKey = await getLandlineSession(address);
-
-  // Get landline accounts
-  const landlineAccounts = await getLandlineAccounts(address);
+  // Get landline session key and accounts
+  let landlineSessionKey = "";
+  let landlineAccounts: LandlineAccount[] = [];
+  if (!process.env.LANDLINE_API_KEY) {
+    landlineSessionKey = await getLandlineSession(address);
+    landlineAccounts = await getLandlineAccounts(address);
+  }
 
   const ret: AccountHistoryResult = {
     address,
