@@ -209,7 +209,7 @@ export async function getAccountHistory(
   // Get landline session key and accounts
   let landlineSessionKey = "";
   let landlineAccounts: LandlineAccount[] = [];
-  if (!process.env.LANDLINE_API_KEY) {
+  if (process.env.LANDLINE_API_KEY) {
     landlineSessionKey = await getLandlineSession(address);
     landlineAccounts = await getLandlineAccounts(address);
   }

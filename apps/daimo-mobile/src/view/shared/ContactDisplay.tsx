@@ -36,6 +36,8 @@ export function ContactDisplay({
         return contact.phoneNumber;
       case "email":
         return contact.email;
+      default:
+        return undefined;
     }
   })();
 
