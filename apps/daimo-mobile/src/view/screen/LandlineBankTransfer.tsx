@@ -15,7 +15,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { EAccountContact } from "../../logic/daimoContacts";
+import { BridgeBankAccountContact } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
 import { MoneyEntry, zeroUSDEntry } from "../../model/moneyEntry";
@@ -89,6 +89,17 @@ function LandlineTransferScreenInner({
   );
 }
 
+function landlineAccountToContact(
+  landlineAccount: LandlineAccount
+): BridgeBankAccountContact {
+  return {
+    type: "bridgeBankAccount",
+    addr: landlineAccount.liquidationAddress,
+    bankName: landlineAccount.bankName,
+    lastFour: landlineAccount.lastFour,
+  };
+}
+
 function SendChooseAmount({
   landlineAccount,
   daimoChain,
@@ -98,10 +109,7 @@ function SendChooseAmount({
   daimoChain: DaimoChain;
   onCancel: () => void;
 }) {
-  const recipient: EAccountContact = {
-    type: "eAcc",
-    addr: landlineAccount.liquidationAddress,
-  };
+  const recipient = landlineAccountToContact(landlineAccount);
 
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -117,9 +125,6 @@ function SendChooseAmount({
       params: { money, memo, landlineAccount },
     });
 
-  const hasLinkedAccounts =
-    recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
-
   // Validate memo
   const rpcHook = env(daimoChain).rpcHook;
   const result = rpcHook.validateMemo.useQuery({ memo });
@@ -129,7 +134,7 @@ function SendChooseAmount({
     <View>
       <Spacer h={24} />
       <ContactDisplay contact={recipient} />
-      <Spacer h={hasLinkedAccounts ? 8 : 24} />
+      <Spacer h={24} />
       <AmountChooser
         moneyEntry={money}
         onSetEntry={setMoney}
@@ -184,10 +189,7 @@ function SendConfirm({
   money: MoneyEntry;
   memo: string | undefined;
 }) {
-  const recipient: EAccountContact = {
-    type: "eAcc",
-    addr: landlineAccount.liquidationAddress,
-  };
+  const recipient = landlineAccountToContact(landlineAccount);
 
   const nav = useNav();
 
@@ -214,14 +216,11 @@ function SendConfirm({
     />
   );
 
-  const hasLinkedAccounts =
-    recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
-
   return (
     <View>
       <Spacer h={24} />
       <ContactDisplay contact={recipient} />
-      <Spacer h={hasLinkedAccounts ? 8 : 24} />
+      <Spacer h={24} />
       <AmountChooser
         moneyEntry={money}
         onSetEntry={useCallback(() => {}, [])}

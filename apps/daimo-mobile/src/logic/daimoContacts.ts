@@ -37,10 +37,20 @@ export interface PhoneNumberContact extends BaseDaimoContact {
   name?: string;
 }
 
+export interface BridgeBankAccountContact extends EAccount, BaseDaimoContact {
+  type: "bridgeBankAccount";
+  bankName: string;
+  lastFour: string;
+}
+
 // A DaimoContact is a "contact" of the user in the app.
 // Includes EAccounts and system contacts (email, phone number) with added
 // context about the contact based on user's own context. (lastSendTime, etc.)
-export type DaimoContact = EAccountContact | EmailContact | PhoneNumberContact;
+export type DaimoContact =
+  | EAccountContact
+  | EmailContact
+  | PhoneNumberContact
+  | BridgeBankAccountContact;
 
 // A MsgContact is a contact that is not a EAccount. (i.e. not an
 // on-chain account)
@@ -57,6 +67,8 @@ export function getDaimoContactKey(contact: DaimoContact): string {
       return contact.email;
     case "phoneNumber":
       return contact.phoneNumber;
+    case "bridgeBankAccount":
+      return contact.addr;
   }
 }
 
@@ -79,6 +91,8 @@ export function getContactName(r: DaimoContact) {
   if (r.type === "eAcc") return getAccountName(r);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
+  else if (r.type === "bridgeBankAccount")
+    return `${r.bankName} ****${r.lastFour}`;
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
