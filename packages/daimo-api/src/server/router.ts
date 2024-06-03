@@ -31,6 +31,7 @@ import { getMemo } from "../api/getMemo";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
+import { submitWaitlist } from "../api/submitWaitlist";
 import {
   getTagRedirect,
   getTagRedirectHist,
@@ -575,6 +576,23 @@ export function createRouter(
         const link: DaimoLinkInviteCode = { type: "invite", code: inviteCode };
         const status = await inviteCodeTracker.getInviteCodeStatus(link);
         return status.isValid;
+      }),
+
+    submitWaitlist: publicProcedure
+      .input(
+        z.object({ name: z.string(), email: z.string(), socials: z.string() }),
+      )
+      .mutation(async (opts) => {
+        const { name, email, socials } = opts.input;
+
+        await submitWaitlist(
+          name,
+          email,
+          socials,
+          db,
+          telemetry,
+          inviteCodeTracker,
+        );
       }),
   });
 }

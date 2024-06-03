@@ -131,6 +131,12 @@ export class DB {
           ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
           ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 
+          CREATE TABLE IF NOT EXISTS waitlist (
+            email VARCHAR(128) PRIMARY KEY,
+            name VARCHAR(128) NOT NULL,
+            socials VARCHAR(128) NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW()
+          );
       `);
     await client.end();
   }
@@ -455,6 +461,18 @@ export class DB {
     client.release();
 
     console.log(`[DB] inserted declined request`);
+  }
+
+  async insertWaitlist(name: string, email: string, socials: string) {
+    console.log(`[DB] inserting waitlist`);
+    const client = await this.pool.connect();
+    await client.query(
+      `INSERT INTO waitlist (name, email, socials) VALUES ($1, $2, $3)`,
+      [name, email, socials],
+    );
+    client.release();
+
+    console.log(`[DB] inserted waitlist`);
   }
 }
 
