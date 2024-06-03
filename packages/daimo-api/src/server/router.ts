@@ -55,6 +55,7 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
+import { observable } from "@trpc/server/observable";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -102,6 +103,8 @@ export function createRouter(
   });
 
   const readyMiddleware = trpcT.middleware(async (opts) => {
+    console.log(opts);
+
     // Don't serve requests until we're ready.
     // This avoids confusing UI state in local development.
     if (!notifier.isInitialized) {
@@ -573,6 +576,70 @@ export function createRouter(
         const status = await inviteCodeTracker.getInviteCodeStatus(link);
         return status.isValid;
       }),
+
+    onNewBlock: publicProcedure.subscription(async (opts) => {
+      return observable<{ number: number }>((emit) => {
+        const eventName = "newBlock";
+        const listener = (data: string) => {
+          const msg = JSON.parse(data);
+
+          emit.next({
+            number: msg.number,
+          });
+        };
+
+        db.notifications.on(eventName, listener);
+
+        return () => {
+          db.notifications.off(eventName, listener);
+        };
+      });
+    }),
+
+    // TODO: implementation missing user data
+    onNewTransaction: publicProcedure.subscription(async (opts) => {
+      return observable((emit) => {
+        const eventName = "newBlock";
+        const listener = (data: string) => {
+          const msg = JSON.parse(data);
+
+          const inviteCode = "";
+          const sinceBlockNum = msg.number - 1;
+
+          // TODO: Pass auth data on handshake to get user data?
+          const address = getAddress("");
+
+          const history = getAccountHistory(
+            opts.ctx,
+            address,
+            inviteCode,
+            sinceBlockNum,
+            watcher,
+            vc,
+            homeCoinIndexer,
+            ethIndexer,
+            foreignCoinIndexer,
+            profileCache,
+            noteIndexer,
+            reqIndexer,
+            inviteCodeTracker,
+            inviteGraph,
+            nameReg,
+            keyReg,
+            paymaster,
+            db
+          );
+
+          emit.next(history);
+        };
+
+        db.notifications.on(eventName, listener);
+
+        return () => {
+          db.notifications.off(eventName, listener);
+        };
+      });
+    }),
   });
 }
 

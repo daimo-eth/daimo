@@ -1,6 +1,7 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
 import "dotenv/config";
+import { WebSocketServer } from "ws";
 import http from "http";
 
 import { getAppVersionTracker } from "./appVersion";
@@ -29,6 +30,7 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
+import { applyWSSHandler } from "@trpc/server/adapters/ws";
 
 async function main() {
   console.log(`[API] initializing telemetry...`);
@@ -173,6 +175,15 @@ async function main() {
     req.url = "/" + req.url.slice(trpcPrefix.length);
     handler(req, res);
   });
+
+  // ws server
+  const wss = new WebSocketServer({ server });
+  applyWSSHandler<typeof router>({
+    wss,
+    router: router,
+    createContext,
+  });
+
   const port = 3000;
   server.listen(port).address();
 

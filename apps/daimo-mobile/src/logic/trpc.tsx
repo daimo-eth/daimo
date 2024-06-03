@@ -2,7 +2,15 @@ import type { AppRouter } from "@daimo/api";
 import { assert } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import {
+  CreateTRPCClientOptions,
+  createTRPCClient,
+  createWSClient,
+  httpBatchLink,
+  httpLink,
+  splitLink,
+  wsLink,
+} from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
@@ -55,69 +63,90 @@ function chooseChain<T>({
   else return testnet;
 }
 
-function getOpts(daimoChain: DaimoChain) {
+const customTRPCfetch = async (
+  input: RequestInfo | URL,
+  init?: RequestInit
+) => {
+  const url = (() => {
+    if (input instanceof URL) return input;
+    else if (input instanceof Request) return new URL(input.url);
+    else return new URL(input);
+  })();
+
+  init = init ?? {};
+  init.headers = (init.headers ?? {}) as Record<string, string>;
+
+  const platform = `${Platform.OS} ${Platform.Version}`;
+  const version = `${nativeApplicationVersion} #${nativeBuildVersion}`;
+  init.headers["x-daimo-platform"] = platform;
+  init.headers["x-daimo-version"] = version;
+
+  // Fetch timeout
+  const { pathname } = url;
+  const func = pathname.split("/").slice(-1)[0] as keyof AppRouter;
+  const timeout = (() => {
+    if (func === "deployWallet") return 60_000; // 1 minute
+    else return 10_000; // default: 10 seconds
+  })();
+  console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
+  const controller = new AbortController();
+  const timeoutID = setTimeout(() => {
+    console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);
+    controller.abort();
+  }, timeout);
+  init.signal = controller.signal;
+
+  // Fetch
+  const startMs = performance.now();
+  const ret = await fetch(input, init).then((res) => {
+    // When a request succeeds, mark us online immediately.
+    if (res.ok) updateNetworkStateOnline();
+    return res;
+  });
+  clearTimeout(timeoutID);
+
+  // Log
+  const ms = (performance.now() - startMs) | 0;
+  const method = init.method || "GET";
+  console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}ms`);
+
+  return ret;
+};
+
+function getTRPCOpts(
+  daimoChain: DaimoChain
+): CreateTRPCClientOptions<AppRouter> {
+  const url = `http://localhost:2022`;
+
   return {
     links: [
-      httpBatchLink({
-        url: chooseChain({
-          daimoChain,
-          mainnet: apiUrlMainnetWithChain,
-          testnet: apiUrlTestnetWithChain,
-        }),
-        fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-          const url = (() => {
-            if (input instanceof URL) return input;
-            else if (input instanceof Request) return new URL(input.url);
-            else return new URL(input);
-          })();
-
-          init = init ?? {};
-          init.headers = (init.headers ?? {}) as Record<string, string>;
-
-          const platform = `${Platform.OS} ${Platform.Version}`;
-          const version = `${nativeApplicationVersion} #${nativeBuildVersion}`;
-          init.headers["x-daimo-platform"] = platform;
-          init.headers["x-daimo-version"] = version;
-
-          // Fetch timeout
-          const { pathname } = url;
-          const func = pathname.split("/").slice(-1)[0] as keyof AppRouter;
-          const timeout = (() => {
-            if (func === "deployWallet") return 60_000; // 1 minute
-            else return 10_000; // default: 10 seconds
-          })();
-          console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
-          const controller = new AbortController();
-          const timeoutID = setTimeout(() => {
-            console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);
-            controller.abort();
-          }, timeout);
-          init.signal = controller.signal;
-
-          // Fetch
-          const startMs = performance.now();
-          const ret = await fetch(input, init).then((res) => {
-            // When a request succeeds, mark us online immediately.
-            if (res.ok) updateNetworkStateOnline();
-            return res;
-          });
-          clearTimeout(timeoutID);
-
-          // Log
-          const ms = (performance.now() - startMs) | 0;
-          const method = init.method || "GET";
-          console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}ms`);
-
-          return ret;
+      // call subscriptions through websockets and the rest over http
+      splitLink({
+        condition(op) {
+          return op.type === "subscription";
         },
+
+        true: wsLink({
+          client: createWSClient({
+            url,
+          }),
+        }),
+
+        false: httpBatchLink({
+          url: chooseChain({
+            daimoChain,
+            mainnet: apiUrlMainnetWithChain,
+            testnet: apiUrlTestnetWithChain,
+          }),
+          fetch: customTRPCfetch,
+        }),
       }),
     ],
-    transformer: undefined,
   };
 }
 
-const optsMainnet = getOpts("base");
-const optsTestnet = getOpts("baseSepolia");
+const optsMainnet = getTRPCOpts("base");
+const optsTestnet = getTRPCOpts("baseSepolia");
 const rpcHookMainnetClient = rpcHookMainnet.trpc.createClient(optsMainnet);
 const rpcHookTestnetClient = rpcHookTestnet.trpc.createClient(optsTestnet);
 

@@ -27,6 +27,7 @@ import { Account } from "../model/account";
 //   ...occasionally otherwise
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
+
   maybeSync(true)
     .then((status) => {
       if (status === "failed") {
@@ -42,6 +43,32 @@ export function startSync() {
         SplashScreen.hideAsync();
       }, 300);
     });
+
+  // TODO: is there a listener for retriving the account?
+  let listenInterval = setInterval(() => {
+    const manager = getAccountManager();
+    const account = manager.getAccount();
+
+    if (!account) {
+      return;
+    }
+
+    clearInterval(listenInterval);
+
+    const daimoChain = daimoChainFromId(account.homeChainId);
+
+    const rpcFunc = env(daimoChain).rpcFunc;
+
+    // TODO: pass input here instead of on handshake?
+    rpcFunc.onNewTransaction.subscribe(undefined, {
+      // TODO: possible race condition when initial sync request takes longer
+      // TODO: no typing in onData handler?
+      onData: (data) => {
+        applySync(account, data, false);
+      },
+    });
+  });
+
   setInterval(maybeSync, 1_000);
 }
 
