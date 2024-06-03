@@ -1,5 +1,6 @@
 import { Address, Hex } from "viem";
 
+import { assert, assertNotNull } from "./assert";
 import {
   DaimoLinkAccount,
   DaimoLinkInviteCode,
@@ -16,6 +17,21 @@ export type DaimoLinkStatus =
   | DaimoRequestV2Status
   | DaimoNoteStatus
   | DaimoInviteCodeStatus;
+
+// Asserts that status is a DaimoAccountStatus, returns DaimoAccountStatus
+export function assertDaimoAccountStatus(
+  status?: DaimoLinkStatus
+): DaimoAccountStatus {
+  assert(assertNotNull(status).link.type !== "account");
+  return status as DaimoAccountStatus;
+}
+
+export function assertDaimoRequestV2Status(
+  status?: DaimoLinkStatus
+): DaimoRequestV2Status {
+  assert(assertNotNull(status).link.type === "requestv2");
+  return status as DaimoRequestV2Status;
+}
 
 /**
  * Summarizes a link to any Ethereum account.
