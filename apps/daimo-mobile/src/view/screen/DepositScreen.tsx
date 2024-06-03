@@ -98,7 +98,7 @@ function LandlineAccountList() {
   const nav = useNav();
   const nowS = useTime();
   // TODO(andrew): Use bank logo
-  const logo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   if (account == null) return null;
 
@@ -113,6 +113,8 @@ function LandlineAccountList() {
       chain: "base",
       destinationCurrency: "usd",
       createdAt: "2024-05-30 11:23:44.274001",
+      bankLogo:
+        "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",
     },
     {
       daimoAddress: account.address,
@@ -143,7 +145,8 @@ function LandlineAccountList() {
             new Date(acc.createdAt).getTime() / 1000,
             nowS
           )} ago`}
-          logo={logo}
+          // Account logo is sent as base64 encoded string
+          logo={{ uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo}
           isAccount
           onClick={() => goToSendTransfer(acc)}
         />
@@ -239,7 +242,7 @@ function WithdrawList() {
 type LandlineOptionRowProps = {
   title: string;
   cta: string;
-  logo: string;
+  logo: { uri: string } | string;
   isAccount?: boolean;
   onClick: () => void;
 };
@@ -328,7 +331,7 @@ function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
   );
 }
 
-function LogoBubble({ logo }: { logo: string }) {
+function LogoBubble({ logo }: { logo: { uri: string } | string }) {
   return (
     <View style={styles.logoBubble}>
       <Image source={logo} style={styles.logoBubble} />

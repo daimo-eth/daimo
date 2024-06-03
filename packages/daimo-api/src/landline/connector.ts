@@ -10,6 +10,7 @@ export interface LandlineAccount {
   liquidationAddress: Address;
   chain: string;
   destinationCurrency: string;
+  bankLogo?: string;
   createdAt: string;
 }
 
