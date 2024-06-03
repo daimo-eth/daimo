@@ -25,10 +25,10 @@
     "lokijs": "^1.5.12",
     "lru-cache": "^10.2.0",
     "marked": "^9.0.3",
-    "next": "^13.5.4",
+    "next": "^14.2.3",
     "pino-pretty": "^10.2.3",
-    "react": "18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "sharp": "0.32.6",
     "tailwindcss": "^3.3.3",
     "ts-loader": "^9.5.0",
@@ -40,6 +40,7 @@
     "dev": "DAIMO_DOMAIN=localhost:3001 next dev -p 3001",
     "build": "next build",
     "start": "next start",
+    "test": "tsc --noEmit",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",
     "export": "next export"
   }

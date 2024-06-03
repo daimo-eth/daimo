@@ -30,7 +30,7 @@ function getUrl(props: LinkProps): string {
   const queryString = new URLSearchParams(
     props.searchParams as Record<string, string>
   ).toString();
-  return `${daimoLinkBaseV2}/${path}?${queryString}`;
+  return `${daimoLinkBaseV2}/${path}${queryString ? "?" : ""}${queryString}`;
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
