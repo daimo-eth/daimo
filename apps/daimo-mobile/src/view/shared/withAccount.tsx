@@ -7,7 +7,7 @@ import { Account } from "../../model/account";
 /// Higher-order component that provides an account to the wrapped component.
 /// If no account is present, redirects to onboarding.
 export function useWithAccount<P extends { account: Account }>(
-  Component: React.ComponentType<P>
+  Component: React.ComponentType<P>,
 ) {
   return useMemo(
     () =>
@@ -25,6 +25,6 @@ export function useWithAccount<P extends { account: Account }>(
           return <Component {...(props as P)} account={account} />;
         }
       },
-    []
+    [],
   );
 }

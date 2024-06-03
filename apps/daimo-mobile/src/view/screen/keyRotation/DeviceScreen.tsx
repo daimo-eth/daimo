@@ -52,7 +52,7 @@ export function DeviceScreen({ route, navigation }: Props) {
 
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.RemoveKey)),
-    [devicePubkey]
+    [devicePubkey],
   );
 
   const sendFn = async (opSender: DaimoOpSender) => {
@@ -96,7 +96,7 @@ export function DeviceScreen({ route, navigation }: Props) {
           text: "Cancel",
           style: "cancel",
         },
-      ]
+      ],
     );
 
     function removeKey() {
@@ -165,7 +165,7 @@ export function DeviceScreen({ route, navigation }: Props) {
 
   const addedAtS = guessTimestampFromNum(
     device.addedAt,
-    daimoChainFromId(account.homeChainId)
+    daimoChainFromId(account.homeChainId),
   );
 
   const goBack = () => nav.goBack();

@@ -10,7 +10,7 @@ import { env } from "../../../logic/env";
 export function getSynthesizedMemo(
   op: DisplayOpEvent,
   daimoChain: DaimoChain,
-  short?: boolean
+  short?: boolean,
 ) {
   const chainConfig = env(daimoChain).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
@@ -24,7 +24,7 @@ export function getSynthesizedMemo(
 
     const readableAmount = getForeignCoinDisplayAmount(
       op.preSwapTransfer.amount,
-      op.preSwapTransfer.coin
+      op.preSwapTransfer.coin,
     );
     if (short) {
       return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;

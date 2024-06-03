@@ -36,7 +36,7 @@ export function ExistingScreen() {
   const nav = useOnboardingNav();
   const onUseBackup = useCallback(
     () => nav.navigate("ExistingChooseAccount"),
-    [nav]
+    [nav],
   );
 
   if (account != null) return null; // Will nav to home screen shortly.

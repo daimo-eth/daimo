@@ -226,7 +226,7 @@ function DisplayOpRow({
   const opMemo = getSynthesizedMemo(
     displayOp,
     daimoChainFromId(account.homeChainId),
-    true
+    true,
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
 

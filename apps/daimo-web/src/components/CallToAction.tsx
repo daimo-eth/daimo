@@ -30,7 +30,9 @@ export function CallToAction({
     // for ephemeral notes.
     const { href } = window.location;
     setDirectDeepLink(
-      href.replace(daimoLinkBase, "daimo:/").replace(daimoLinkBaseV2, "daimo:/")
+      href
+        .replace(daimoLinkBase, "daimo:/")
+        .replace(daimoLinkBaseV2, "daimo:/"),
     );
   }, [directDeepLink]);
 

@@ -49,7 +49,7 @@ function chooseChain<T>({
 }): T {
   assert(
     ["base", "baseSepolia"].includes(daimoChain),
-    `Unsupported chain: ${daimoChain}`
+    `Unsupported chain: ${daimoChain}`,
   );
   if (daimoChain === "base") return mainnet;
   else return testnet;
@@ -83,7 +83,8 @@ function getOpts(daimoChain: DaimoChain) {
           const { pathname } = url;
           const func = pathname.split("/").slice(-1)[0] as keyof AppRouter;
           const timeout = (() => {
-            if (func === "deployWallet") return 60_000; // 1 minute
+            if (func === "deployWallet")
+              return 60_000; // 1 minute
             else return 10_000; // default: 10 seconds
           })();
           console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);

@@ -59,13 +59,13 @@ function NoteActionButtonInner({
   const noteId = getNoteId(noteAddress);
 
   const [nonce] = useState(
-    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote)),
   );
 
   const notesV2Addr = assertNotNull(notesV2AddressMap.get(account.homeChainId));
 
   const notesV2isApproved = account.recentTransfers.some(
-    (op) => op.type === "createLink" && op.to === notesV2Addr
+    (op) => op.type === "createLink" && op.to === notesV2Addr,
   );
 
   const link: DaimoLink = {
@@ -86,7 +86,7 @@ function NoteActionButtonInner({
         {
           nonce,
           chainGasConstants: account.chainGasConstants,
-        }
+        },
       );
     },
     pendingOp: {

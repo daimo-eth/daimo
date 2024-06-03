@@ -26,7 +26,7 @@ export class InviteCodeTracker {
   constructor(
     private vc: ViemClient,
     private nameReg: NameRegistry,
-    private db: DB
+    private db: DB,
   ) {}
 
   // Perform faucet request for invitee and inviter of a given invite code,
@@ -35,17 +35,17 @@ export class InviteCodeTracker {
   async requestFaucet(
     invitee: Address,
     code: InviteCodeRow,
-    deviceAttestationString: Hex
+    deviceAttestationString: Hex,
   ): Promise<TransferOpEvent | undefined> {
     const isFaucetAttestationUsed = await this.db.isFaucetAttestationUsed(
-      deviceAttestationString
+      deviceAttestationString,
     );
 
     if (isFaucetAttestationUsed) {
       console.log(
         `[INVITE] faucet attestation ${JSON.stringify(
-          code
-        )} ${deviceAttestationString} already used`
+          code,
+        )} ${deviceAttestationString} already used`,
       );
 
       // Exit if mainnet double claim is attempted.
@@ -56,7 +56,7 @@ export class InviteCodeTracker {
     let faucetTransfer: TransferOpEvent | undefined;
     if (code.bonusDollarsInvitee > 0) {
       console.log(
-        `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
+        `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`,
       );
       const txHash = await this.trySendUSDC(invitee, code.bonusDollarsInvitee);
       if (txHash != null) {
@@ -73,7 +73,7 @@ export class InviteCodeTracker {
     }
     if (code.inviter && code.bonusDollarsInviter > 0) {
       console.log(
-        `[INVITE] sending faucet to inviter ${code.inviter} ${code.bonusDollarsInviter}`
+        `[INVITE] sending faucet to inviter ${code.inviter} ${code.bonusDollarsInviter}`,
       );
       await this.trySendUSDC(code.inviter, code.bonusDollarsInviter);
     }
@@ -104,13 +104,13 @@ export class InviteCodeTracker {
     invitee: Address,
     deviceAttestationString: Hex,
     invCode: string,
-    maybeSendFaucet: boolean
+    maybeSendFaucet: boolean,
   ): Promise<{ isValid: boolean; faucetTransfer?: TransferOpEvent }> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
-      this.db.incrementInviteCodeUseCount(invCode)
+      this.db.incrementInviteCodeUseCount(invCode),
     );
     const code = await retryBackoff(`loadInviteCode`, () =>
-      this.db.loadInviteCode(invCode)
+      this.db.loadInviteCode(invCode),
     );
 
     if (code != null && code.useCount <= code.maxUses) {
@@ -126,10 +126,10 @@ export class InviteCodeTracker {
   }
 
   async getInviteCodeStatus(
-    inviteLink: DaimoLinkInviteCode
+    inviteLink: DaimoLinkInviteCode,
   ): Promise<DaimoInviteCodeStatus> {
     const code = await retryBackoff(`loadInviteCode`, () =>
-      this.db.loadInviteCode(inviteLink.code)
+      this.db.loadInviteCode(inviteLink.code),
     );
 
     const usesLeft = code ? code.maxUses - code.useCount : 0;
@@ -138,7 +138,7 @@ export class InviteCodeTracker {
       : undefined;
 
     console.log(
-      `[INVITE] getInvCodeStatus ${JSON.stringify({ code, usesLeft, inviter })}`
+      `[INVITE] getInvCodeStatus ${JSON.stringify({ code, usesLeft, inviter })}`,
     );
     return {
       link: inviteLink,
@@ -152,10 +152,10 @@ export class InviteCodeTracker {
   }
 
   async getBestInviteCodeForSender(
-    sender: Address
+    sender: Address,
   ): Promise<string | undefined> {
     return await retryBackoff(`getBestInviteCodeForSender`, () =>
-      this.db.getBestInviteCodeForSender(sender)
+      this.db.getBestInviteCodeForSender(sender),
     );
   }
 

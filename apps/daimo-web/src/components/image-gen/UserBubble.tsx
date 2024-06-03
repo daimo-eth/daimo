@@ -1,7 +1,7 @@
 // TODO: support rich profile custom images
 export function UserBubble({ name }: { name: string }) {
   const inBubbleText = String.fromCodePoint(
-    name.codePointAt(0) || "?".charCodeAt(0)
+    name.codePointAt(0) || "?".charCodeAt(0),
   ).toUpperCase();
 
   return (

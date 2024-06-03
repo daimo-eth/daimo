@@ -198,7 +198,7 @@ function TransferBody({
   const dispatcher = useContext(DispatcherContext);
   const onShowHelp = useCallback(
     () => showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, coinName),
-    []
+    [],
   );
 
   // Generate subtitle = fees, chain, other details
@@ -221,7 +221,7 @@ function TransferBody({
 
   const memoText = getSynthesizedMemo(
     op,
-    daimoChainFromId(account.homeChainId)
+    daimoChainFromId(account.homeChainId),
   );
 
   return (
@@ -275,7 +275,7 @@ function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
 function showHelpWhyNoFees(
   dispatcher: Dispatcher,
   chainName: string,
-  coinName: string
+  coinName: string,
 ) {
   dispatcher.dispatch({
     name: "helpModal",

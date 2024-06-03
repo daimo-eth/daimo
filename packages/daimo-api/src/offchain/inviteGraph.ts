@@ -16,7 +16,7 @@ export class InviteGraph {
 
     // Get edges sorted by creation time
     const rows = await retryBackoff(`loadInviteGraph`, () =>
-      this.db.loadInviteGraph()
+      this.db.loadInviteGraph(),
     );
 
     this.cacheInviteGraphRows(rows);
@@ -44,7 +44,7 @@ export class InviteGraph {
   // TODO: populate old graph data
   async addEdge(edge: InviteGraphRow) {
     await retryBackoff(`insertInviteGraph`, () =>
-      this.db.insertInviteGraph(edge)
+      this.db.insertInviteGraph(edge),
     );
     this.cacheInviteGraphRows([edge]);
   }

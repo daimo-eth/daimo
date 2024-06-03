@@ -39,7 +39,7 @@ type TitleDesc = {
 const defaultMeta = metadata(
   "Daimo",
   "Payments on Ethereum",
-  getAbsoluteUrl(`/logo-link-preview.png`)
+  getAbsoluteUrl(`/logo-link-preview.png`),
 );
 
 function getUrl(props: LinkProps): string {
@@ -52,7 +52,7 @@ function getUrl(props: LinkProps): string {
 function getPreviewURL(
   name: string | undefined,
   action: string | undefined,
-  dollars: `${number}` | undefined
+  dollars: `${number}` | undefined,
 ) {
   if (!name) return getAbsoluteUrl(`/logo-link-preview.png`);
 
@@ -118,7 +118,7 @@ async function LinkPageInner(props: LinkProps) {
 function metadata(
   title: string,
   description: string,
-  previewURL: string
+  previewURL: string,
 ): Metadata {
   return {
     title,

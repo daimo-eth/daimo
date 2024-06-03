@@ -22,13 +22,13 @@ type LinkProps = {
 const defaultMeta = createMetadata(
   "Daimo",
   "Payments on Ethereum",
-  getAbsoluteUrl(`/logo-link-preview.png`)
+  getAbsoluteUrl(`/logo-link-preview.png`),
 );
 
 function getUrl(props: LinkProps): string {
   const path = (props.params.slug || []).join("/");
   const queryString = new URLSearchParams(
-    props.searchParams as Record<string, string>
+    props.searchParams as Record<string, string>,
   ).toString();
   return `${daimoLinkBaseV2}/${path}${queryString ? "?" : ""}${queryString}`;
 }

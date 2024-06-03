@@ -12,7 +12,7 @@ export async function search(
   prefix: string,
   vc: ViemClient,
   nameReg: NameRegistry,
-  profileCache: ProfileCache
+  profileCache: ProfileCache,
 ): Promise<EAccountSearchResult[]> {
   prefix = prefix.trim();
   if (prefix.startsWith("@")) prefix = prefix.slice(1);
@@ -64,7 +64,7 @@ export async function search(
 async function getResultFromAddr(
   addr: Address,
   originalMatch: string,
-  nameReg: NameRegistry
+  nameReg: NameRegistry,
 ): Promise<EAccountSearchResult> {
   const eAcc = await nameReg.getEAccount(addr);
   return { ...eAcc, originalMatch };

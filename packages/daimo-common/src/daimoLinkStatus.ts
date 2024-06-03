@@ -20,14 +20,14 @@ export type DaimoLinkStatus =
 
 // Asserts that status is a DaimoAccountStatus, returns DaimoAccountStatus
 export function assertDaimoAccountStatus(
-  status?: DaimoLinkStatus
+  status?: DaimoLinkStatus,
 ): DaimoAccountStatus {
   assert(assertNotNull(status).link.type !== "account");
   return status as DaimoAccountStatus;
 }
 
 export function assertDaimoRequestV2Status(
-  status?: DaimoLinkStatus
+  status?: DaimoLinkStatus,
 ): DaimoRequestV2Status {
   assert(assertNotNull(status).link.type === "requestv2");
   return status as DaimoRequestV2Status;

@@ -21,7 +21,7 @@ export function ButtonCircle({
       borderRadius: size,
       margin,
     }),
-    [size]
+    [size],
   );
 
   return (

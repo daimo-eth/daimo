@@ -52,7 +52,7 @@ export class PushNotifier {
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
     private keyReg: KeyRegistry,
-    private db: DB
+    private db: DB,
   ) {}
 
   async init() {
@@ -65,7 +65,7 @@ export class PushNotifier {
 
     // Load Expo push notification tokens
     const rows = await retryBackoff(`loadPushTokens`, () =>
-      this.db.loadPushTokens()
+      this.db.loadPushTokens(),
     );
     console.log(`[PUSH] loaded ${rows.length} push tokens from DB`);
     for (const row of rows) {
@@ -74,7 +74,7 @@ export class PushNotifier {
 
     this.isInitialized = true;
     console.log(
-      `[PUSH] initialized, future indexing will be pushed notifications`
+      `[PUSH] initialized, future indexing will be pushed notifications`,
     );
   }
 
@@ -96,7 +96,7 @@ export class PushNotifier {
 
     for (const log of logs) {
       messages.push(
-        ...(await this.getPushMessagesFromForeignCoinTransfer(log))
+        ...(await this.getPushMessagesFromForeignCoinTransfer(log)),
       );
     }
 
@@ -171,14 +171,14 @@ export class PushNotifier {
           from,
           to,
           -opEvent.amount,
-          opEvent
+          opEvent,
         ),
         this.getPushMessagesFromTransfer(
           log.transactionHash,
           to,
           from,
           opEvent.amount,
-          opEvent
+          opEvent,
         ),
       ]);
       messages.push(...a, ...b);
@@ -198,7 +198,7 @@ export class PushNotifier {
 
     await Promise.all([
       retryBackoff(`savePushToken`, () =>
-        this.db.savePushToken({ address: addr, pushtoken: pushToken })
+        this.db.savePushToken({ address: addr, pushtoken: pushToken }),
       ),
       this.maybeSendNotifications([
         {
@@ -225,7 +225,7 @@ export class PushNotifier {
     addr: Address,
     other: Address,
     amount: number,
-    opEvent: DisplayOpEvent
+    opEvent: DisplayOpEvent,
   ): Promise<ExpoPushMessage[]> {
     if (opEvent.type !== "transfer") return []; // Only transfer opEvents handled here
 
@@ -272,7 +272,7 @@ export class PushNotifier {
         assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
         const readableAmount = getForeignCoinDisplayAmount(
           opEvent.preSwapTransfer.amount,
-          opEvent.preSwapTransfer.coin
+          opEvent.preSwapTransfer.coin,
         );
         return `You accepted ${readableAmount} ${opEvent.preSwapTransfer.coin.symbol} as $${dollars} ${tokenSymbol}`;
       }
@@ -297,14 +297,14 @@ export class PushNotifier {
   }
 
   async getPushMessagesFromForeignCoinTransfer(
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
   ): Promise<ExpoPushMessage[]> {
     const pushTokens = this.pushTokens.get(getAddress(log.to));
     if (!pushTokens || pushTokens.length === 0) return [];
 
     const readableAmount = getForeignCoinDisplayAmount(
       log.value.toString() as `${bigint}`,
-      log.foreignToken
+      log.foreignToken,
     );
     const swap = await this.foreignCoinIndexer.getProposedSwapForLog(log);
     if (swap == null) return [];
@@ -330,7 +330,7 @@ export class PushNotifier {
   }
 
   private async getPushMessagesFromEthTransfer(
-    log: ETHTransfer
+    log: ETHTransfer,
   ): Promise<ExpoPushMessage[]> {
     const pushTokens = this.pushTokens.get(getAddress(log.to));
     if (!pushTokens || pushTokens.length === 0) return [];
@@ -340,7 +340,7 @@ export class PushNotifier {
 
     const readableAmount = getForeignCoinDisplayAmount(
       swap[0].fromAmount,
-      nativeETH
+      nativeETH,
     );
 
     const dollars = amountToDollars(swap[0].toAmount);
@@ -360,7 +360,7 @@ export class PushNotifier {
   }
 
   private getPushMessagesFromRequests(
-    logs: DaimoRequestV2Status[]
+    logs: DaimoRequestV2Status[],
   ): ExpoPushMessage[] {
     const messages = [];
 
@@ -418,14 +418,14 @@ export class PushNotifier {
             sender.addr,
             `$${dollars} sent`,
             `${getAccountName(
-              claimer
-            )} accepted your ${dollars} ${symbol} payment link`
+              claimer,
+            )} accepted your ${dollars} ${symbol} payment link`,
           ),
           ...this.getPushMessages(
             claimer.addr,
             `Received $${dollars}`,
-            `You received ${dollars} ${symbol} from ${getAccountName(sender)}`
-          )
+            `You received ${dollars} ${symbol} from ${getAccountName(sender)}`,
+          ),
         );
       } else {
         // To Alice: "You cancelled your $1.00 payment link"
@@ -436,8 +436,8 @@ export class PushNotifier {
           ...this.getPushMessages(
             sender.addr,
             `Reclaimed $${dollars}`,
-            `You cancelled your ${dollars} ${symbol} payment link`
-          )
+            `You cancelled your ${dollars} ${symbol} payment link`,
+          ),
         );
       }
     }
@@ -472,7 +472,7 @@ export class PushNotifier {
   private getPushMessages(
     to: Address,
     title: string,
-    body: string
+    body: string,
   ): ExpoPushMessage[] {
     const pushTokens = this.pushTokens.get(to);
     if (pushTokens == null) return [];

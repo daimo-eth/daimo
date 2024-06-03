@@ -20,7 +20,7 @@ async function main() {
     vc,
     null as any,
     null as any,
-    new Set<string>()
+    new Set<string>(),
   );
   const noteIndexer = new NoteIndexer(nameReg);
   const requestIndexer = new RequestIndexer(null as any, nameReg);
@@ -32,7 +32,7 @@ async function main() {
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
   );
   const keyReg = new KeyRegistry();
 
@@ -40,7 +40,7 @@ async function main() {
   shovelWatcher.add(
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer],
-    [coinIndexer]
+    [coinIndexer],
   );
 
   const lastBlockNum = 7000000;

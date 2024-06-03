@@ -52,7 +52,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
   const touchUnderlay = useTouchUnderlay(props.type);
   const disabledStyle = useMemo(
     () => ({ ...style.button, opacity: 0.5 }),
-    [style.button]
+    [style.button],
   );
 
   const longPress = Gesture.LongPress()
@@ -248,7 +248,7 @@ function useStyle(base: ButtonStyle, props: TextButtonProps) {
       button: { ...base.button, ...btnOverride },
       title: { ...base.title, ...titleOverride },
     }),
-    [base, btnOverride]
+    [base, btnOverride],
   );
   return style;
 }
@@ -276,11 +276,11 @@ function Button(
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
     icon?: ImageSourcePropType;
-  }
+  },
 ) {
   const disabledStyle = useMemo(
     () => ({ ...props.style.button, opacity: 0.5 }),
-    [props.style.button]
+    [props.style.button],
   );
 
   const child = props.title ? (

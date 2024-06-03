@@ -51,7 +51,7 @@ async function main() {
     vc,
     inviteGraph,
     profileCache,
-    await db.loadNameBlacklist()
+    await db.loadNameBlacklist(),
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
@@ -65,7 +65,7 @@ async function main() {
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
   );
 
   const ethIndexer = new ETHIndexer(vc, uc, nameReg);
@@ -80,7 +80,7 @@ async function main() {
     homeCoinIndexer,
     foreignCoinIndexer,
     nameReg,
-    monitor
+    monitor,
   );
 
   const notifier = new PushNotifier(
@@ -91,7 +91,7 @@ async function main() {
     noteIndexer,
     requestIndexer,
     keyReg,
-    db
+    db,
   );
 
   const shovelWatcher = new Watcher();
@@ -99,7 +99,7 @@ async function main() {
     // indexers in dependency order, within each list, indexers are indexed in parallel
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
-    [homeCoinIndexer]
+    [homeCoinIndexer],
   );
 
   // Disable ethIndexer for now
@@ -149,7 +149,7 @@ async function main() {
     inviteGraph,
     notifier,
     accountFactory,
-    monitor
+    monitor,
   );
   const handler = createHTTPHandler({
     middleware: cors(),

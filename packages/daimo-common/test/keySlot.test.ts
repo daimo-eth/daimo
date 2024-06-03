@@ -29,20 +29,20 @@ test("finds unused slot", () => {
   assert.deepStrictEqual(findUnusedSlot([0, 255], SlotType.Phone), 1);
   assert.deepStrictEqual(
     findUnusedSlot([0, 1, 2, 4, 5, 6, 7, 8, 9], SlotType.Phone),
-    10
+    10,
   );
   assert.deepStrictEqual(
     findUnusedSlot(
       [...Array(64).keys()].filter((i) => i !== 5), // All mobile slots except 5 are taken
-      SlotType.Phone
+      SlotType.Phone,
     ),
-    5
+    5,
   );
   assert.deepStrictEqual(
     findUnusedSlot(
       [...Array(256).keys()].filter((i) => i !== 199), // All slots except seed phrase backup 7 are taken
-      SlotType.SeedPhraseBackup
+      SlotType.SeedPhraseBackup,
     ),
-    199
+    199,
   );
 });

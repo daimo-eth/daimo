@@ -152,7 +152,7 @@ function AddItemButton({
 }) {
   const add = useCallback(
     () => setOrder([...order, item]),
-    [setOrder, order, item]
+    [setOrder, order, item],
   );
   const sub = useCallback(() => {
     const i = order.findIndex((i) => i.name === item.name);
@@ -214,7 +214,7 @@ function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
   const urls = orders?.map((order) => order.link) || [];
   const query = rpcHook.trpc.getLinkStatusBatch.useQuery(
     { urls },
-    { refetchInterval: 1000, enabled: urls.length > 0 }
+    { refetchInterval: 1000, enabled: urls.length > 0 },
   );
   const { data, error, isError } = query;
 

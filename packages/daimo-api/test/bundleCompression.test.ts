@@ -17,15 +17,15 @@ test("compress example bundle", () => {
     null as any,
     null as any,
     null as any,
-    new Set([])
+    new Set([]),
   );
   nameReg.onSuccessfulRegister(
     "alice",
-    "0x8bFfa71A959AF0b15C6eaa10d244d80BF23cb6A2"
+    "0x8bFfa71A959AF0b15C6eaa10d244d80BF23cb6A2",
   );
   nameReg.onSuccessfulRegister(
     "bob",
-    "0xA1B349c566C44769888948aDC061ABCdB54497F7"
+    "0xA1B349c566C44769888948aDC061ABCdB54497F7",
   );
 
   // INPUT: UserOp, 700+ bytes ABI-encoded
@@ -69,7 +69,7 @@ test("compress example bundle", () => {
       "0x0500000000000000000000000000000000000000000000000000000000000000",
       "0x000000000000000000000000000000000000000000000000000000000000005a",
       stringToHex(
-        '{"type":"webauthn.get","challenge":"AQAAZVPHX0VzpTcrm5fZhFP_VciTT3XMWHH2bNzjd54e1wN5M2io"}'
+        '{"type":"webauthn.get","challenge":"AQAAZVPHX0VzpTcrm5fZhFP_VciTT3XMWHH2bNzjd54e1wN5M2io"}',
       ),
       "0x000000000000",
     ]),

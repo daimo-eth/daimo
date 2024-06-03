@@ -40,7 +40,7 @@ export function FulfillRequestButton({
   const nonce = useMemo(
     () =>
       new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.RequestResponse)),
-    []
+    [],
   );
 
   // On exec, request signature from device enclave, approve contract, fulfill request.
@@ -54,7 +54,7 @@ export function FulfillRequestButton({
         {
           nonce,
           chainGasConstants: account.chainGasConstants,
-        }
+        },
       );
     },
     pendingOp: {
@@ -71,7 +71,7 @@ export function FulfillRequestButton({
       },
     },
     accountTransform: transferAccountTransform(
-      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : []
+      hasAccountName(requestStatus.recipient) ? [requestStatus.recipient] : [],
     ),
   });
 

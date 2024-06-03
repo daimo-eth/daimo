@@ -15,7 +15,7 @@ interface RequestV2Input {
 export async function createRequestSponsored(
   vc: ViemClient,
   requestIndexer: RequestIndexer,
-  input: RequestV2Input
+  input: RequestV2Input,
 ): Promise<Hex> {
   const { idString, recipient, amount, fulfiller } = input;
 

@@ -146,7 +146,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].title, "$1.00 sent");
     assert.strictEqual(
       output[0].body,
-      "bob accepted your 1.00 USDC payment link"
+      "bob accepted your 1.00 USDC payment link",
     );
     assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
     assert.strictEqual(output[1].title, "Received $1.00");
@@ -217,7 +217,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].title, "Passkey Backup added");
     assert.strictEqual(
       output[0].body,
-      "You added Passkey Backup to your account"
+      "You added Passkey Backup to your account",
     );
     assert.strictEqual(output[1].title, "Phone removed");
     assert.strictEqual(output[2].title, "Phone 26 added");
@@ -241,7 +241,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].title, "Reclaimed $4.20");
     assert.strictEqual(
       output[0].body,
-      "You cancelled your 4.20 USDC payment link"
+      "You cancelled your 4.20 USDC payment link",
     );
   });
 
@@ -275,7 +275,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].title, "Accepted $1.00 from charlie.eth");
     assert.strictEqual(
       output[0].body,
-      "You accepted 1.11111 FAKE as $1.00 USDC"
+      "You accepted 1.11111 FAKE as $1.00 USDC",
     );
   });
 });
@@ -294,7 +294,7 @@ function createNotifierAliceBob() {
   const stubRequestIndexer = {
     getRequestStatusByFulfillLogCoordinate: (
       transactionHash: Hex,
-      logIndex: number
+      logIndex: number,
     ): DaimoRequestV2Status | null => {
       if (transactionHash === "0x42") {
         return {
@@ -326,7 +326,7 @@ function createNotifierAliceBob() {
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(
           Number(log.blockNumber),
-          daimoChainFromId(chainConfig.chainL2.id)
+          daimoChainFromId(chainConfig.chainL2.id),
         ),
         from: log.from,
         to: log.to,
@@ -339,7 +339,7 @@ function createNotifierAliceBob() {
         requestStatus:
           stubRequestIndexer.getRequestStatusByFulfillLogCoordinate(
             log.transactionHash,
-            log.logIndex - 1
+            log.logIndex - 1,
           ) || undefined,
         memo: log.transactionHash === "0x43" ? "hello" : undefined,
         preSwapTransfer:
@@ -395,7 +395,7 @@ function createNotifierAliceBob() {
     nullAny,
     stubRequestIndexer,
     stubKeyReg,
-    nullAny
+    nullAny,
   );
   pn.pushTokens.set(addrAlice, ["pushTokenAlice"]);
   pn.pushTokens.set(addrBob, ["pushTokenBob1", "pushTokenBob2"]);
@@ -415,10 +415,10 @@ function createTransfer(args: {
   const txHash = args.isRequestResponse
     ? "0x42"
     : args.memo
-    ? "0x43"
-    : args.isSwapOutput
-    ? "0x44"
-    : "0x0";
+      ? "0x43"
+      : args.isSwapOutput
+        ? "0x44"
+        : "0x0";
 
   return {
     address: "0x0",

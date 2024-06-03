@@ -40,12 +40,12 @@ export default function App() {
     };
     console.log(
       "P-256 Public Key, deploy corresponding account by calling createAccount on factory:",
-      derPublicKey
+      derPublicKey,
     );
     const account = await DaimoOpSender.initFromEnv(accAddress, signer);
     console.log(
       "account, give it some eth + usdc magically:",
-      account.getAddress()
+      account.getAddress(),
     );
 
     const nonce = new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send));
@@ -59,7 +59,7 @@ export default function App() {
           maxFeePerGas: "100000050",
           estimatedFee: 0.1,
         },
-      }
+      },
     );
     setOpHash(opHash ?? "failed");
   };
@@ -96,7 +96,7 @@ export default function App() {
         title="Verify signature"
         onPress={async () => {
           setVerification(
-            await ExpoEnclave.verify(account, signature, "deadbeef")
+            await ExpoEnclave.verify(account, signature, "deadbeef"),
           );
         }}
       />

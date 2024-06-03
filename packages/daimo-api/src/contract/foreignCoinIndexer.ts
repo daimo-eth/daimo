@@ -42,7 +42,10 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, public uc: UniswapClient) {
+  constructor(
+    private nameReg: NameRegistry,
+    public uc: UniswapClient,
+  ) {
     super("SWAPCOIN");
   }
 
@@ -61,9 +64,9 @@ export class ForeignCoinIndexer extends Indexer {
           `SELECT * from filtered_erc20_transfers 
           WHERE block_num BETWEEN $1 AND $2
           ORDER BY block_num ASC, log_idx ASC;`,
-          [from, to]
+          [from, to],
         );
-      }
+      },
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -90,7 +93,7 @@ export class ForeignCoinIndexer extends Indexer {
     console.log(
       `[SWAPCOIN] loaded ${logs.length} transfers ${from} ${to} in ${
         Date.now() - startTime
-      }ms`
+      }ms`,
     );
 
     if (logs.length === 0) return;
@@ -111,7 +114,7 @@ export class ForeignCoinIndexer extends Indexer {
   processSwapCoinDelta(
     addr: Address,
     delta: bigint,
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
   ) {
     if (delta < 0n) {
       // outbound transfer
@@ -122,23 +125,23 @@ export class ForeignCoinIndexer extends Indexer {
       // Delete the first matching pending swap that is now swapped
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
-          t.foreignToken.token === log.foreignToken.token && t.value === -delta
+          t.foreignToken.token === log.foreignToken.token && t.value === -delta,
       );
 
       if (matchingPendingSwap == null) {
         console.log(
-          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`,
         );
         return;
       }
 
       this.correspondingReceiveOfSend.set(
         addrTxHashKey(addr, log.transactionHash),
-        matchingPendingSwap
+        matchingPendingSwap,
       );
 
       const newPendingSwaps = pendingSwaps.filter(
-        (t) => t.transactionHash !== matchingPendingSwap.transactionHash
+        (t) => t.transactionHash !== matchingPendingSwap.transactionHash,
       );
 
       this.pendingSwapsByAddr.set(addr, newPendingSwaps);
@@ -171,7 +174,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapForLog(
     log: ForeignTokenTransfer,
-    runInBackground?: boolean
+    runInBackground?: boolean,
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
@@ -181,12 +184,12 @@ export class ForeignCoinIndexer extends Indexer {
         log.foreignToken,
         guessTimestampFromNum(log.blockNumber, chainConfig.daimoChain),
         fromAcc,
-        runInBackground
+        runInBackground,
       );
     });
 
     console.log(
-      `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`
+      `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`,
     );
 
     if (!swap) return null;
@@ -197,14 +200,14 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapsForAddr(
     addr: Address,
-    runInBackground?: boolean
+    runInBackground?: boolean,
   ): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
         pendingSwaps.map((swap) =>
-          this.getProposedSwapForLog(swap, runInBackground)
-        )
+          this.getProposedSwapForLog(swap, runInBackground),
+        ),
       )
     ).filter((s): s is ProposedSwap => s != null);
 
@@ -217,13 +220,13 @@ export class ForeignCoinIndexer extends Indexer {
   // from the same user, or the user swaps multiple assets in a single tx.
   getForeignTokenReceiveForSwap(
     addr: Address,
-    txHash: Hex
+    txHash: Hex,
   ): ForeignTokenTransfer | null {
     const log = this.sendsByAddrTxHash.get(addrTxHashKey(addr, txHash));
     if (log == null) return null;
 
     const correspondingReceive = this.correspondingReceiveOfSend.get(
-      addrTxHashKey(addr, txHash)
+      addrTxHashKey(addr, txHash),
     )!;
 
     return {
@@ -236,7 +239,7 @@ export class ForeignCoinIndexer extends Indexer {
   public async getProposedSwap(
     fromAmount: BigIntStr,
     fromToken: Address,
-    toAddr: Address
+    toAddr: Address,
   ) {
     const coin = this.foreignTokens.get(fromToken);
     if (coin == null) return null;
@@ -248,7 +251,7 @@ export class ForeignCoinIndexer extends Indexer {
       {
         addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
       },
-      true
+      true,
     );
   }
 }

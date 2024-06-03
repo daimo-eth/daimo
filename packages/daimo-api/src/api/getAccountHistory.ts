@@ -97,7 +97,7 @@ export async function getAccountHistory(
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
-  db: DB
+  db: DB,
 ): Promise<AccountHistoryResult> {
   console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
   const eAcc = nameReg.getDaimoAccount(address);
@@ -119,7 +119,7 @@ export async function getAccountHistory(
   if (lastBlk == null) throw new Error("No latest block");
   assert(
     lastBlk.number >= finBlock.number,
-    `Latest block ${lastBlk.number} < finalized ${finBlock.number}`
+    `Latest block ${lastBlk.number} < finalized ${finBlock.number}`,
   );
   const lastBlock = Number(lastBlk.number);
   const lastBlockTimestamp = lastBlk.timestamp;
@@ -170,7 +170,7 @@ export async function getAccountHistory(
         noteIndexer,
         requestIndexer,
         inviteCodeTracker,
-        db
+        db,
       )) as DaimoInviteCodeStatus)
     : null;
 
@@ -232,7 +232,7 @@ export async function getAccountHistory(
 function getSuggestedActions(
   eAcc: EAccount,
   hist: AccountHistoryResult,
-  ctx: TrpcRequestContext
+  ctx: TrpcRequestContext,
 ) {
   const ret: SuggestedAction[] = [];
 

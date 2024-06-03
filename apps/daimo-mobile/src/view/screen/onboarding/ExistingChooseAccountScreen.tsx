@@ -18,7 +18,7 @@ export function ExistingChooseAccountScreen() {
   const nav = useOnboardingNav();
   const setEAcc = useCallback(
     (targetEAcc: EAccount) => nav.navigate("ExistingUseBackup", { targetEAcc }),
-    [nav]
+    [nav],
   );
 
   return (

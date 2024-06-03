@@ -35,7 +35,10 @@ export class BundlerClient {
   // Compression settings
   private compressionInfo: CompressionInfo | undefined;
 
-  constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
+  constructor(
+    bundlerRpcUrl: string,
+    private opIndexer?: OpIndexer,
+  ) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
   }
 
@@ -44,7 +47,7 @@ export class BundlerClient {
 
     const opInflatorAddr = lookup(
       [84532, "0xf51Da0D79cB71B5b1f7990547838743065aA0c0d" as Address],
-      [8453, "0x8ABD51A785160481DB9E638eE71A3F4Ec4B996D8" as Address]
+      [8453, "0x8ABD51A785160481DB9E638eE71A3F4Ec4B996D8" as Address],
     )(chainConfig.chainL2.id);
 
     const [inflatorID, opInflatorID, opInflatorCoinAddr, opInflatorPaymaster] =
@@ -87,7 +90,7 @@ export class BundlerClient {
     opHash: Hex,
     op: UserOpHex,
     viemClient: ViemClient,
-    nameReg?: NameRegistry
+    nameReg?: NameRegistry,
   ) {
     console.log(`[BUNDLER] submitting userOp: ${JSON.stringify(op)}`);
 
@@ -107,7 +110,7 @@ export class BundlerClient {
           });
           span.end();
           console.log(
-            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`
+            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`,
           );
         });
       }
@@ -163,10 +166,10 @@ export class BundlerClient {
     console.log(`[BUNDLER] fetching gas price params`);
     const gasPrice = (await this.provider.send(
       "pimlico_getUserOperationGasPrice",
-      []
+      [],
     )) as GasPrice;
     console.log(
-      `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`
+      `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`,
     );
     return gasPrice.fast;
   }

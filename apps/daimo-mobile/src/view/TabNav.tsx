@@ -222,7 +222,7 @@ function errorBottomSheetInterpolator({
           outputRange: [0, 1],
           extrapolate: "clamp",
         })
-      : 0
+      : 0,
   );
 
   const translateY = multiply(
@@ -230,7 +230,7 @@ function errorBottomSheetInterpolator({
       inputRange: [0, 1, 2],
       outputRange: [screen.height, 0, 0],
     }),
-    inverted
+    inverted,
   );
 
   const overlayOpacity = progress.interpolate({
@@ -248,7 +248,7 @@ function errorBottomSheetInterpolator({
 
 function getTabOptions(
   safeInsets: EdgeInsets,
-  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
+  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> },
 ): BottomTabNavigationOptions {
   const opts: BottomTabNavigationOptions = {
     headerShown: false,

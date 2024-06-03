@@ -43,7 +43,7 @@ export function timeMonth(s: number) {
 
 export function guessTimestampFromNum(
   blockNum: number | bigint,
-  chain: DaimoChain
+  chain: DaimoChain,
 ) {
   if (typeof blockNum === "bigint") blockNum = Number(blockNum);
   switch (chain) {

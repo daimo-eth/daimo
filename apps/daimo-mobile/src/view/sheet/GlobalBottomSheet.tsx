@@ -99,7 +99,7 @@ export function GlobalBottomSheet() {
   // Global shake gesture > open Send Debug Log sheet
   useEffect(() => {
     const subscription = RNShake.addListener(() =>
-      openBottomSheet({ action: "debug" })
+      openBottomSheet({ action: "debug" }),
     );
     return () => subscription.remove();
   }, []);
@@ -200,7 +200,7 @@ export function GlobalBottomSheet() {
         pressBehavior={settings?.dismissable ? "close" : "none"}
       />
     ),
-    []
+    [],
   );
 
   return (

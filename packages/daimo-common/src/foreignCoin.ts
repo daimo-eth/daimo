@@ -42,7 +42,7 @@ function toFixedIfNecessary(value: string, dp: number) {
 
 export function getForeignCoinDisplayAmount(
   amount: `${bigint}`,
-  coin: ForeignCoin
+  coin: ForeignCoin,
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
   return toFixedIfNecessary(amountStr, 6).toString() as `${number}`;
@@ -59,7 +59,7 @@ const NON_DUST_TOKEN_WHITELIST = new Set([
 // It's dust if the amount is less than $1 and the token is not on the whitelist.
 export function isAmountDust(
   usdcAmount: number | bigint,
-  fromCoin: ForeignCoin
+  fromCoin: ForeignCoin,
 ) {
   if (NON_DUST_TOKEN_WHITELIST.has(fromCoin.token)) return false;
 

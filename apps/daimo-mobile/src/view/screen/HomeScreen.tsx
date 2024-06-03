@@ -67,7 +67,7 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   const preventOverscrollOffset = useSharedValue(0);
 
   console.log(
-    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`,
   );
 
   // For speed, preload DaimoOpSender
@@ -116,15 +116,15 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
     Object.keys(OpStatus).map((key) => [
       key,
       account.recentTransfers.filter(({ status }) => status === key).length,
-    ])
+    ]),
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
-    [statusCountsStr]
+    [statusCountsStr],
   );
   const histListFull = useMemo(
     () => <HistoryListSwipe account={account} showDate />,
-    [statusCountsStr]
+    [statusCountsStr],
   );
 
   // Show history
@@ -243,14 +243,14 @@ function AmountAndButtons({ account }: { account: Account }) {
         screen: "SendNav",
         params: { autoFocus: true },
       }),
-    [nav]
+    [nav],
   );
   const goRequest = useCallback(
     () =>
       nav.navigate("HomeTab", {
         screen: "ReceiveNav",
       }),
-    [nav]
+    [nav],
   );
   const goDeposit = useCallback(() => nav.navigate("DepositTab"), [nav]);
 
@@ -258,7 +258,7 @@ function AmountAndButtons({ account }: { account: Account }) {
 
   // sum over all proposed swaps toAmount
   const pendingDollars = amountToDollars(
-    account.proposedSwaps.reduce((acc, swap) => acc + swap.toAmount, 0)
+    account.proposedSwaps.reduce((acc, swap) => acc + swap.toAmount, 0),
   );
 
   return (
@@ -404,7 +404,7 @@ function useInitNavLinks() {
     });
 
     const sub = addEventListener("url", ({ url }) =>
-      handleDeepLink(nav, dispatcher, url)
+      handleDeepLink(nav, dispatcher, url),
     );
     return () => sub.remove();
   }, [accountMissing, nav]);

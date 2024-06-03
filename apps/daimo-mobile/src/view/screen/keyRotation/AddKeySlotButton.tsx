@@ -41,7 +41,7 @@ export function AddKeySlotButton({
 }) {
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
-    [knownPubkey, slot]
+    [knownPubkey, slot],
   );
 
   const sendFn = async (opSender: DaimoOpSender) => {
@@ -53,13 +53,13 @@ export function AddKeySlotButton({
       console.log(`[KEY-ROTATION] creating key ${getSlotType(slot)} ${slot}`);
       assert(
         getSlotType(slot) === SlotType.PasskeyBackup ||
-          getSlotType(slot) === SlotType.SecurityKeyBackup
+          getSlotType(slot) === SlotType.SecurityKeyBackup,
       );
 
       return await createPasskey(
         daimoChainFromId(account.homeChainId),
         account.name,
-        slot
+        slot,
       );
     })();
 

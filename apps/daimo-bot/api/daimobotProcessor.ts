@@ -21,7 +21,7 @@ const NEYNAR_CLIENT = new NeynarAPIClient(process.env.DAIMO_NEYNAR_KEY);
 
 assert(
   !!process.env.DAIMOBOT_SIGNER_UUID,
-  "DAIMOBOT_SIGNER_UUID is not defined"
+  "DAIMOBOT_SIGNER_UUID is not defined",
 );
 const DAIMOBOT_SIGNER_UUID = process.env.DAIMOBOT_SIGNER_UUID;
 
@@ -42,7 +42,7 @@ export class DaimobotProcessor {
   constructor(
     event: WebhookEvent,
     trpc: TRPCClient = trpcClient,
-    neynarClient: NeynarAPIClient = NEYNAR_CLIENT
+    neynarClient: NeynarAPIClient = NEYNAR_CLIENT,
   ) {
     const { data } = event;
     this.text = data.text;
@@ -103,7 +103,7 @@ export class DaimobotProcessor {
   private async handleRequestCommand(cleanedAmount: number) {
     // See if sender has Farcaster linked
     console.log(
-      `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`
+      `[DAIMOBOT REQUEST] lookupEthereumAccountByFid for FID: ${this.senderFid}`,
     );
     const senderEthAccount =
       await this.trpcClient.lookupEthereumAccountByFid.query({
@@ -111,7 +111,7 @@ export class DaimobotProcessor {
       });
     if (!senderEthAccount) {
       console.log(
-        "Sender not registered with Farcaster. Sending a response cast."
+        "Sender not registered with Farcaster. Sending a response cast.",
       );
       // TODO: deeplink into the connect farcaster flow
       this.publishCastReply(BotResp.connectFarcasterToContinue());
@@ -120,11 +120,11 @@ export class DaimobotProcessor {
 
     const daimoShareUrl = await this.createRequestLink(
       cleanedAmount,
-      senderEthAccount
+      senderEthAccount,
     );
     this.publishCastReply(
       BotResp.request(cleanedAmount, this.authorUsername, daimoShareUrl),
-      { embeds: [{ url: daimoShareUrl }] }
+      { embeds: [{ url: daimoShareUrl }] },
     );
   }
 
@@ -132,7 +132,7 @@ export class DaimobotProcessor {
     // See if prospective recipient has Farcaster linked
     if (!this.parentAuthorFid) {
       console.warn(
-        "No parent author FID found, thus no one to prospectively pay."
+        "No parent author FID found, thus no one to prospectively pay.",
       );
       this.publishCastReply(BotResp.mustReplyToPayOrRequest());
       return;
@@ -142,27 +142,27 @@ export class DaimobotProcessor {
         fid: this.parentAuthorFid,
       });
     const recipientUsername = await this.getFcUsernameByFid(
-      this.parentAuthorFid
+      this.parentAuthorFid,
     );
     if (!recipientEthAccount) {
       console.log(
-        "Recipient not registered with Farcaster. Sending a response cast."
+        "Recipient not registered with Farcaster. Sending a response cast.",
       );
       this.publishCastReply(
-        BotResp.noDaimoOrEthAccountFound(recipientUsername)
+        BotResp.noDaimoOrEthAccountFound(recipientUsername),
       );
       return;
     }
     const daimoShareUrl = await this.createRequestLink(
       cleanedAmount,
-      recipientEthAccount
+      recipientEthAccount,
     );
 
     this.publishCastReply(
       BotResp.request(cleanedAmount, recipientUsername, daimoShareUrl),
       {
         embeds: [{ url: daimoShareUrl }],
-      }
+      },
     );
   }
 
@@ -171,7 +171,7 @@ export class DaimobotProcessor {
     cleanedAmount: number;
   } | null {
     const match = this.text?.match(
-      /@daimobot (request|pay) \$?([0-9]*\.?[0-9]{1,2})/
+      /@daimobot (request|pay) \$?([0-9]*\.?[0-9]{1,2})/,
     );
     console.log(`[DAIMOBOT] checking: ${JSON.stringify(match)}`);
     if (match && match[1] && match[2]) {
@@ -194,7 +194,7 @@ export class DaimobotProcessor {
       amount: dollarsToAmount(amount).toString(),
     };
     console.log(
-      `[DAIMOBOT] createRequestSponsored with params: ${JSON.stringify(params)}`
+      `[DAIMOBOT] createRequestSponsored with params: ${JSON.stringify(params)}`,
     );
     const txHash = await this.trpcClient.createRequestSponsored.mutate(params);
     console.log(`[DAIMOBOT REQUEST] txHash ${txHash}`);
@@ -216,7 +216,7 @@ export class DaimobotProcessor {
           replyTo: this.castId,
         })
         .then((data) =>
-          console.log("Published Cast:", JSON.stringify(data, null, 2))
+          console.log("Published Cast:", JSON.stringify(data, null, 2)),
         )
         .catch((err: any) => console.error(err));
     } else {
@@ -224,8 +224,8 @@ export class DaimobotProcessor {
         `[DAIMOBOT] MOCK published cast: ${JSON.stringify(
           { text, opts },
           null,
-          2
-        )}`
+          2,
+        )}`,
       );
     }
   }

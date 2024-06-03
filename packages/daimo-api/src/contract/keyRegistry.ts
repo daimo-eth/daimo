@@ -81,7 +81,7 @@ export class KeyRegistry extends Indexer {
           if (!keyData) throw new Error("[KEY-REG] Invalid event, no key data");
           this.addrToKeyData.set(
             addr,
-            keyData.filter((k) => k.pubKey !== derKey)
+            keyData.filter((k) => k.pubKey !== derKey),
           );
           this.keyToAddr.delete(derKey);
           break;
@@ -92,7 +92,7 @@ export class KeyRegistry extends Indexer {
     console.log(
       `[KEY-REG] loaded ${changes.length} key changes in ${
         Date.now() - startTime
-      }ms`
+      }ms`,
     );
 
     this.listeners.forEach((l) => l(changes));
@@ -102,7 +102,7 @@ export class KeyRegistry extends Indexer {
     pg: Pool,
     from: number,
     to: number,
-    change: "added" | "removed"
+    change: "added" | "removed",
   ): Promise<KeyChange[]> {
     let table: string = "";
     if (change === "added") {
@@ -129,8 +129,8 @@ export class KeyRegistry extends Indexer {
         and chain_id = $3
         group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
       `,
-        [from, to, chainConfig.chainL2.id]
-      )
+        [from, to, chainConfig.chainL2.id],
+      ),
     );
 
     return result.rows.map((row: any) => ({

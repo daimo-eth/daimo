@@ -19,7 +19,7 @@ export async function sendUserOpV2(
   paymentMemoTracker: PaymentMemoTracker,
   telemetry: Telemetry,
   vc: ViemClient,
-  context: TrpcRequestContext
+  context: TrpcRequestContext,
 ) {
   const span = context.span!;
   span.setAttribute("op.sender", op.sender);

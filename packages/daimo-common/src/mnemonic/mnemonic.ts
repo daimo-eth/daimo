@@ -54,7 +54,7 @@ function privKeyToPubKeyDER(privKey: Uint8Array): Hex {
 
 export async function signWithMnemonic(
   mnemonic: string,
-  msg: Hex
+  msg: Hex,
 ): Promise<Hex> {
   assert(validateMnemonic(mnemonic));
 
