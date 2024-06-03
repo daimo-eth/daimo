@@ -16,6 +16,7 @@ import {
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
+import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -27,7 +28,10 @@ import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
-import { getAccountHistory } from "../api/getAccountHistory";
+import {
+  AccountHistoryResult,
+  getAccountHistory,
+} from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
@@ -53,6 +57,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -113,7 +118,11 @@ export function createRouter(
 
   // CORS for the web app
   const corsMiddleware = trpcT.middleware(async (opts) => {
-    opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    // cannot set headers when connecting via websockets
+    if (opts.ctx.res.setHeader) {
+      opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+
     return opts.next();
   });
 
@@ -697,6 +706,90 @@ export function createRouter(
           telemetry,
           inviteCodeTracker
         );
+      }),
+
+    onAccountUpdate: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          inviteCode: z.string().optional(),
+          sinceBlockNum: z.number(),
+        })
+      )
+      .subscription(async (opts) => {
+        const { address, inviteCode } = opts.input;
+        // how often to send updates regardless of new transfers
+        // useful to update exchange rates and others.
+        const refreshInterval = 10_000;
+
+        return observable<AccountHistoryResult>((emit) => {
+          let lastEmittedBlock = opts.input.sinceBlockNum;
+          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
+            null;
+
+          const pushHistory = (onlyOnNewTransfers: boolean) => {
+            getAccountHistoryPromise = getAccountHistory(
+              opts.ctx,
+              address,
+              inviteCode,
+              lastEmittedBlock,
+              watcher,
+              vc,
+              homeCoinIndexer,
+              ethIndexer,
+              foreignCoinIndexer,
+              profileCache,
+              noteIndexer,
+              reqIndexer,
+              inviteCodeTracker,
+              inviteGraph,
+              nameReg,
+              keyReg,
+              paymaster,
+              db
+            );
+
+            getAccountHistoryPromise
+              .then((history) => {
+                // we can have concurrent requests. discard those that arrived too late
+                if (history.lastBlock < lastEmittedBlock) {
+                  return;
+                }
+
+                if (onlyOnNewTransfers && history.transferLogs.length === 0) {
+                  return;
+                }
+
+                emit.next(history);
+
+                lastEmittedBlock = history.lastBlock;
+              })
+              .finally(() => {
+                getAccountHistoryPromise = null;
+              });
+          };
+
+          const eventListener = () => {
+            pushHistory(true);
+          };
+
+          const intervalTimer = setInterval(() => {
+            // interval concided with new block. let's skip this one.
+            if (getAccountHistoryPromise) {
+              return;
+            }
+
+            pushHistory(false);
+          }, refreshInterval);
+
+          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, eventListener);
+
+          return () => {
+            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, eventListener);
+
+            clearInterval(intervalTimer);
+          };
+        });
       }),
   });
 }

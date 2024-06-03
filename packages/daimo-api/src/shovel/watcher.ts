@@ -3,10 +3,11 @@ import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
 
 import { Indexer } from "../contract/indexer";
+import { DBNotifications, DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
-function getShovelPoolConfig(dbUrl?: string): PoolConfig {
+function getShovelDBConfig(dbUrl?: string) {
   const dbConfig: ClientConfig = {
     connectionString: dbUrl,
     connectionTimeoutMillis: 20000,
@@ -22,10 +23,12 @@ function getShovelPoolConfig(dbUrl?: string): PoolConfig {
     idleTimeoutMillis: 60000,
   };
 
-  return poolConfig;
+  return { poolConfig, dbConfig };
 }
 
 export class Watcher {
+  readonly notifications: DBNotifications;
+
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest = 5699999;
   private slowLatest = 5699999;
@@ -49,8 +52,9 @@ export class Watcher {
   private pg: Pool;
 
   constructor(private rpcClient: PublicClient, dbUrl?: string) {
-    const poolConfig = getShovelPoolConfig(dbUrl);
+    const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
+    this.notifications = new DBNotifications(dbConfig);
   }
 
   add(...i: Indexer[][]) {
@@ -109,7 +113,7 @@ export class Watcher {
   // Watches shovel for new blocks, and indexes them.
   // Skip indexing if it's already indexing.
   async watch() {
-    setInterval(async () => {
+    this.notifications.on(DB_EVENT_DAIMO_TRANSFERS, async () => {
       try {
         if (this.isIndexing) {
           console.log(`[SHOVEL] skipping tick, already indexing`);
@@ -139,7 +143,7 @@ export class Watcher {
       } finally {
         this.isIndexing = false;
       }
-    }, 1000);
+    });
   }
 
   // Indexes batches till we get to the given block number, inclusive.
