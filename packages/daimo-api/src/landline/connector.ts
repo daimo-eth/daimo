@@ -15,7 +15,7 @@ export interface LandlineAccount {
 }
 
 export async function getLandlineSession(
-  daimoAddress: Address
+  daimoAddress: Address,
 ): Promise<string> {
   // @ts-ignore
   const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate({
@@ -25,7 +25,7 @@ export async function getLandlineSession(
 }
 
 export async function getLandlineAccounts(
-  daimoAddress: Address
+  daimoAddress: Address,
 ): Promise<LandlineAccount[]> {
   const landlineAccounts =
     // @ts-ignore

@@ -27,6 +27,7 @@ import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 
 export default function DepositScreen() {
   const Inner = useWithAccount(DepositScreenInner);
@@ -71,13 +72,11 @@ function LandlineList() {
 
 function LandlineConnect() {
   const account = useAccount();
-  // TODO(andrew): Use landline logo
-  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   const openLandline = useCallback(() => {
     if (!account) return;
     Linking.openURL(
-      getLandlineURL(account.address, account.landlineSessionKey)
+      getLandlineURL(account.address, account.landlineSessionKey),
     );
   }, [account?.address, account?.landlineSessionKey]);
 
@@ -87,7 +86,8 @@ function LandlineConnect() {
     <LandlineOptionRow
       cta="Connect with Landline"
       title="Deposit or withdraw directly from a US bank account"
-      logo={defaultLogo}
+      // TODO(andrew): Update with real landline logo
+      logo={IntroIconEverywhere}
       onClick={openLandline}
     />
   );
@@ -113,20 +113,22 @@ function LandlineAccountList() {
 
   return (
     <>
-      {landlineAccounts.map((acc, idx) => (
-        <LandlineOptionRow
-          key={`landline-account-${idx}`}
-          cta={`${acc.bankName} ****${acc.lastFour}`}
-          title={`Connected ${timeAgo(
-            new Date(acc.createdAt).getTime() / 1000,
-            nowS
-          )} ago`}
-          // The bank logo is fetched as a base64 string for a png
-          logo={{ uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo}
-          isAccount
-          onClick={() => goToSendTransfer(acc)}
-        />
-      ))}
+      {landlineAccounts.map((acc, idx) => {
+        const accCreatedAtS = new Date(acc.createdAt).getTime() / 1000;
+        return (
+          <LandlineOptionRow
+            key={`landline-account-${idx}`}
+            cta={`${acc.bankName} ****${acc.lastFour}`}
+            title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
+            // The bank logo is fetched as a base64 string for a png
+            logo={
+              { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
+            }
+            isAccount
+            onClick={() => goToSendTransfer(acc)}
+          />
+        );
+      })}
     </>
   );
 }
@@ -167,7 +169,7 @@ function DepositList({ account }: { account: Account }) {
         logo: rec.logo || defaultLogo,
         isExternal: true,
         onClick: () => openExchange(rec.url),
-      }))
+      })),
     );
   }
 

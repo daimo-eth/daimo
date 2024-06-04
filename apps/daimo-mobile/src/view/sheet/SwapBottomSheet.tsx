@@ -38,7 +38,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   // Generate nonce
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Swap)),
-    []
+    [],
   );
 
   const { status, exec: onCancel } = useSendWithDeviceKeyAsync({
@@ -64,7 +64,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       timestamp: now(),
     },
     accountTransform: transferAccountTransform(
-      swap.fromAcc && hasAccountName(swap.fromAcc) ? [swap.fromAcc] : []
+      swap.fromAcc && hasAccountName(swap.fromAcc) ? [swap.fromAcc] : [],
     ),
   });
 
@@ -122,7 +122,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
 function SwapInfoRow({ swap }: { swap: ProposedSwap }) {
   const humanReadableFromAmount = getForeignCoinDisplayAmount(
     swap.fromAmount,
-    swap.fromCoin
+    swap.fromCoin,
   );
 
   const humanReadableToAmount = `$${amountToDollars(swap.toAmount)}`;

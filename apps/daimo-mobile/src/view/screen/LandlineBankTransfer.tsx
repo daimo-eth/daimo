@@ -34,7 +34,7 @@ type Props = NativeStackScreenProps<ParamListDeposit, "LandlineTransfer">;
 
 export default function LandlineTransferScreen({ route }: Props) {
   console.log(
-    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`
+    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`,
   );
   const Inner = useWithAccount(LandlineTransferScreenInner);
   return <Inner {...route.params} />;
@@ -90,7 +90,7 @@ function LandlineTransferScreenInner({
 }
 
 function landlineAccountToContact(
-  landlineAccount: LandlineAccount
+  landlineAccount: LandlineAccount,
 ): BridgeBankAccountContact {
   return {
     type: "bridgeBankAccount",

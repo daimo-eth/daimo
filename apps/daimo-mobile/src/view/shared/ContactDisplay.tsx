@@ -23,7 +23,6 @@ export function ContactDisplay({
   const isAccount = contact.type === "eAcc";
   const disp = getContactName(contact);
 
-  // TODO: add bank account contact type and display bank name
   const subtitle = (function () {
     switch (contact.type) {
       case "eAcc":
