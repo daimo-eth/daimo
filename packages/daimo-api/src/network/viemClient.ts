@@ -94,7 +94,7 @@ export class ViemClient {
     private l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
     private walletClient: WalletClient<Transport, Chain, Account>,
-    private telemetry: Telemetry,
+    private telemetry: Telemetry
   ) {
     this.account = this.walletClient.account;
   }
@@ -108,12 +108,12 @@ export class ViemClient {
         return null;
       }
     },
-    ({ name }: { name: string }) => name,
+    ({ name }: { name: string }) => name
   );
 
   getEnsName = memoize(
     (a: { address: Address }) => this.l1Client.getEnsName(a),
-    ({ address }: { address: Address }) => address,
+    ({ address }: { address: Address }) => address
   );
 
   private onReceiptError(hash: Hex, e: unknown) {
@@ -121,7 +121,7 @@ export class ViemClient {
     const txURL = `${explorerURL}/tx/${hash}`;
     this.telemetry.recordClippy(
       `Receipt error ${hash} - ${txURL}: ${e}`,
-      "error",
+      "error"
     );
   }
 
@@ -161,7 +161,7 @@ export class ViemClient {
       blockTag: "pending",
     });
     console.log(
-      `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`,
+      `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`
     );
     this.nextNonce = Math.max(this.nextNonce, txCount);
   }
@@ -172,24 +172,24 @@ export class ViemClient {
       gas?: bigint;
       chain?: Chain | null;
     },
-    Ret,
+    Ret
   >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
     const startMs = performance.now();
     const localTxId = Math.floor(Math.random() * 1e6);
     console.log(
-      `[VIEM] ready to run ${localTxId} with override, waiting for lock`,
+      `[VIEM] ready to run ${localTxId} with override, waiting for lock`
     );
     await this.lockNonce.acquireAsync();
 
     try {
       console.log(
-        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got lock`,
+        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
       );
       await this.updateNonce();
       console.log(
         `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
           this.nextNonce
-        }`,
+        }`
       );
 
       args.nonce = this.nextNonce; // Override nonce
@@ -201,7 +201,7 @@ export class ViemClient {
       console.log(
         `[VIEM] tx ${localTxId} ${
           performance.now() - startMs
-        }ms: submitted ${ret}`,
+        }ms: submitted ${ret}`
       );
 
       // Increment nonce for later
@@ -215,7 +215,7 @@ export class ViemClient {
   async writeContract<
     const TAbi extends Abi | readonly unknown[],
     TFunctionName extends string,
-    TChainOverride extends Chain | undefined = undefined,
+    TChainOverride extends Chain | undefined = undefined
   >(
     args: WriteContractParameters<
       TAbi,
@@ -223,24 +223,24 @@ export class ViemClient {
       Chain,
       Account,
       TChainOverride
-    >,
+    >
   ): Promise<Hex> {
     console.log(`[CHAIN] exec ${args.functionName}`);
     const ret = await this.runWithOverrideParams(
       args,
-      this.walletClient.writeContract,
+      this.walletClient.writeContract
     );
     this.waitForReceipt(ret);
     return ret;
   }
 
   async sendTransaction<TChainOverride extends Chain | undefined = undefined>(
-    args: SendTransactionParameters<Chain, Account, TChainOverride>,
+    args: SendTransactionParameters<Chain, Account, TChainOverride>
   ): Promise<SendTransactionReturnType> {
     console.log(`[VIEM] send ${args.to}, waiting for lock`);
     const ret = await this.runWithOverrideParams(
       args,
-      this.walletClient.sendTransaction,
+      this.walletClient.sendTransaction
     );
     this.waitForReceipt(ret);
     return ret;

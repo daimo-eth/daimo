@@ -65,7 +65,7 @@ export function useSendWithDeviceKeyAsync(args: UseSendArgs) {
 
   const keySlot = deviceAccount
     ? deviceAccount.accountKeys.find(
-        (k) => k.pubKey === deviceAccount.enclavePubKey,
+        (k) => k.pubKey === deviceAccount.enclavePubKey
       )?.slot
     : undefined;
 
@@ -76,7 +76,7 @@ export function useSendWithDeviceKeyAsync(args: UseSendArgs) {
           keySlot,
           wrappedSigner: getWrappedDeviceKeySigner(
             deviceAccount.enclaveKeyName,
-            keySlot,
+            keySlot
           ),
           account: deviceAccount,
         } as DeviceKeySigner)
@@ -103,7 +103,7 @@ export function useSendAsync({
 
   const exec = useCallback(async () => {
     console.log(
-      `[SEND] sending userOp. account: ${account?.name}, signer: ${signer?.type}, total cost: $${cost.totalDollars}`,
+      `[SEND] sending userOp. account: ${account?.name}, signer: ${signer?.type}, total cost: $${cost.totalDollars}`
     );
     assert(account != null, "No account");
 
@@ -163,12 +163,12 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 // userop successfully authenticates the user to the API.
 function addInviteLinkStatus(
   account: Account,
-  pendingOpEventData: PendingOpEvent,
+  pendingOpEventData: PendingOpEvent
 ): Account {
   console.log(
     `[SEND] attaching authenticate invite link status: ${JSON.stringify(
-      pendingOpEventData,
-    )}`,
+      pendingOpEventData
+    )}`
   );
   const inviteLinkStatus: DaimoInviteCodeStatus | null =
     pendingOpEventData.inviteCode
@@ -189,7 +189,7 @@ async function sendAsync(
   setAS: SetActStatus,
   account: Account,
   signer: Signer | undefined,
-  sendFn: SendOpFn,
+  sendFn: SendOpFn
 ): Promise<PendingOpEvent> {
   try {
     const { address, homeChainId } = account;
@@ -215,7 +215,7 @@ async function sendAsync(
     if (
       e instanceof NamedError &&
       ["ExpoEnclaveSign", "ExpoPasskeysCreate", "ExpoPasskeysSign"].includes(
-        e.name,
+        e.name
       )
     ) {
       setAS("error", e.message);

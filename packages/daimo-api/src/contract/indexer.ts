@@ -13,7 +13,7 @@ export abstract class Indexer {
   public abstract load(
     pg: Pool,
     from: number,
-    to: number,
+    to: number
   ): void | Promise<void>;
 
   // Checks whether we just completed a stale query. True = don't process.
@@ -21,12 +21,12 @@ export abstract class Indexer {
   protected updateLastProcessedCheckStale(from: number, to: number) {
     if (this.lastProcessedBlock >= from) {
       console.warn(
-        `[${this.name}] SKIPPING ${from}-${to}, already processed thru ${this.lastProcessedBlock}`,
+        `[${this.name}] SKIPPING ${from}-${to}, already processed thru ${this.lastProcessedBlock}`
       );
       return true;
     }
     console.log(
-      `[${this.name}] lastProcessedBlock=${this.lastProcessedBlock} > loaded ${from}-${to}`,
+      `[${this.name}] lastProcessedBlock=${this.lastProcessedBlock} > loaded ${from}-${to}`
     );
     this.lastProcessedBlock = to;
     return false;

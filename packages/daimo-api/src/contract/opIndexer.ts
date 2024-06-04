@@ -52,12 +52,12 @@ export class OpIndexer extends Indexer {
         where block_num >= $1 and block_num <= $2 and chain_id = $3
         and op_sender in (select addr from "names")
       `,
-          [from, to, chainConfig.chainL2.id],
-        ),
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     if (result.rows.length === 0) return;
     console.log(
-      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`,
+      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -73,18 +73,18 @@ export class OpIndexer extends Indexer {
       const newLogs = curLogs ? [...curLogs, row] : [userOp];
       this.txHashToSortedUserOps.set(
         userOp.transactionHash,
-        newLogs.sort((a, b) => a.logIndex - b.logIndex),
+        newLogs.sort((a, b) => a.logIndex - b.logIndex)
       );
 
       const nonceMetadata = DaimoNonce.fromHex(
-        numberToHex(userOp.nonce, { size: 32 }),
+        numberToHex(userOp.nonce, { size: 32 })
       )?.metadata.toHex();
       if (!nonceMetadata) return;
 
       this.callback(userOp);
     });
     console.log(
-      `[OP] processed ${result.rows.length} ops in ${Date.now() - startTime}ms`,
+      `[OP] processed ${result.rows.length} ops in ${Date.now() - startTime}ms`
     );
   }
 

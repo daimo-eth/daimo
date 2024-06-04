@@ -61,7 +61,7 @@ function requestContactsAccess(canAskAgain: boolean) {
             resolve();
           },
         },
-      ],
+      ]
     );
   });
 }
@@ -79,7 +79,7 @@ function askSystem(resolve: (value: void) => void) {
 // numbers or emails across two different contact names.
 export function useSystemContactsSearch(
   prefix: string,
-  enabled: boolean,
+  enabled: boolean
 ): MsgContact[] {
   const [recipients, setRecipients] = useState<MsgContact[]>([]);
 
@@ -101,7 +101,7 @@ export function useSystemContactsSearch(
           if (
             phone.number &&
             !matches.some(
-              (c) => c.type === "phoneNumber" && c.phoneNumber === phone.number,
+              (c) => c.type === "phoneNumber" && c.phoneNumber === phone.number
             )
           ) {
             matches.push({

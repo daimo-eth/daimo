@@ -155,7 +155,7 @@ function WagmiButton({
               if (isSuccess && data?.hash)
                 window.open(
                   chain?.blockExplorers!.default.url + "/tx/" + data?.hash,
-                  "_blank",
+                  "_blank"
                 );
               else write?.();
             }}
@@ -164,8 +164,8 @@ function WagmiButton({
             {isLoading
               ? "SENDING"
               : isSuccess && !incrementStep
-                ? "VIEW ON BLOCK EXPLORER"
-                : title}
+              ? "VIEW ON BLOCK EXPLORER"
+              : title}
           </SecondaryButton>
           <div className="h-4" />
         </>
@@ -252,7 +252,7 @@ async function getNoteSignature(
   linkType: "note" | "notev2",
   sender: Address,
   recipient: Address,
-  urlHash: string,
+  urlHash: string
 ) {
   if (linkType === "note") {
     // Deprecated notes link
@@ -265,7 +265,7 @@ async function getNoteSignature(
 async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
-  urlHash: string,
+  urlHash: string
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
 
@@ -274,7 +274,7 @@ async function linkStatusToAction(
       const { recipient } = linkStatus as DaimoRequestStatus;
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
-        chainConfig.tokenDecimals,
+        chainConfig.tokenDecimals
       );
       return [
         {
@@ -287,11 +287,11 @@ async function linkStatusToAction(
     }
     case "requestv2": {
       const id = decodeRequestIdString(
-        (linkStatus as DaimoRequestV2Status).link.id,
+        (linkStatus as DaimoRequestV2Status).link.id
       );
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
-        chainConfig.tokenDecimals,
+        chainConfig.tokenDecimals
       );
       return [
         {
@@ -316,13 +316,13 @@ async function linkStatusToAction(
         linkStatus.link.type,
         sender.addr,
         selfAddress,
-        urlHash,
+        urlHash
       );
 
       if (linkStatus.link.type === "notev2") {
         assert(
           selfAddress !== sender.addr,
-          "sender shouldn't be claiming their own note on web",
+          "sender shouldn't be claiming their own note on web"
         );
         return [
           {
@@ -345,7 +345,7 @@ async function linkStatusToAction(
     }
     default: {
       throw new Error(
-        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`,
+        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`
       );
     }
   }

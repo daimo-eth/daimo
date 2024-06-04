@@ -48,7 +48,7 @@ export function SendTransferButton({
   // Generate nonce
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send)),
-    [],
+    []
   );
 
   // On exec, request signature from device enclave, send transfer.
@@ -64,7 +64,7 @@ export function SendTransferButton({
           nonce,
           chainGasConstants: account.chainGasConstants,
         },
-        memo,
+        memo
       );
     },
     pendingOp: {
@@ -77,7 +77,7 @@ export function SendTransferButton({
       timestamp: 0,
     },
     accountTransform: transferAccountTransform(
-      hasAccountName(recipient) ? [recipient as EAccount] : [],
+      hasAccountName(recipient) ? [recipient as EAccount] : []
     ),
   });
 

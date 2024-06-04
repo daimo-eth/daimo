@@ -1,5 +1,5 @@
 export function LogoMark(
-  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string },
+  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string }
 ) {
   const color = props.color || "black";
   return (
@@ -39,7 +39,7 @@ export function LogoMark(
 }
 
 export function WordMark(
-  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string },
+  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string }
 ) {
   const color = props.color || "black";
   return (

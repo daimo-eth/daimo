@@ -75,13 +75,13 @@ export function SearchHeader({
   const goToQR = useCallback(
     () =>
       nav.navigate("HomeTab", { screen: "QR", params: { option: undefined } }),
-    [nav],
+    [nav]
   );
 
   // Right: Notifications
   const goToNotifications = useCallback(
     () => nav.navigate("HomeTab", { screen: "Notifications" }),
-    [],
+    []
   );
 
   const account = useAccount();

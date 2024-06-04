@@ -80,7 +80,7 @@ export function SuggestedActionBox({
       dismissedActionIDs: [...account.dismissedActionIDs, action.id],
       suggestedActions:
         account?.suggestedActions?.filter(
-          (a: SuggestedAction) => a.id !== action.id,
+          (a: SuggestedAction) => a.id !== action.id
         ) || [],
     }));
 

@@ -2,7 +2,7 @@
 // Current settings, max total wait time is ~10 seconds.
 export async function retryBackoff<T>(
   name: string,
-  fn: () => Promise<T>,
+  fn: () => Promise<T>
 ): Promise<T> {
   const retryCount = 5;
   for (let i = 1; ; i++) {
@@ -12,7 +12,7 @@ export async function retryBackoff<T>(
       if (i <= retryCount) {
         const sleepMs = Math.min(2000, 250 * 2 ** i);
         console.log(
-          `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`,
+          `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`
         );
         await new Promise((r) => setTimeout(r));
       } else {

@@ -72,7 +72,7 @@ export function parseSignResponse(result: SignResult) {
   const keySlot = parseInt(keySlotStr, 10);
 
   const clientDataJSON = Buffer.from(
-    base64.decode(result.rawClientDataJSONB64),
+    base64.decode(result.rawClientDataJSONB64)
   ).toString("utf-8");
 
   const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":"'));

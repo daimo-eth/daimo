@@ -115,7 +115,7 @@ describe("daimobotProcessor", () => {
     const processor = new DaimobotProcessor(
       mockEvent,
       mockTrpcClient,
-      mockNeynarClient,
+      mockNeynarClient
     );
 
     await processor.process();
@@ -124,7 +124,7 @@ describe("daimobotProcessor", () => {
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
       BotResp.connectFarcasterToContinue(),
-      expect.anything(),
+      expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
   });
@@ -144,7 +144,7 @@ describe("daimobotProcessor", () => {
     const processor = new DaimobotProcessor(
       mockEvent,
       mockTrpcClient,
-      mockNeynarClient,
+      mockNeynarClient
     );
 
     await processor.process();
@@ -152,12 +152,12 @@ describe("daimobotProcessor", () => {
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining(BotResp.request(amount, senderUsername, "")),
-      expect.anything(),
+      expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
 
     expect(mockTrpcClient.createRequestSponsored.mutate).toHaveBeenCalledTimes(
-      1,
+      1
     );
     expect(mockTrpcClient.createRequestSponsored.mutate).not.toThrow();
   });
@@ -182,7 +182,7 @@ describe("daimobotProcessor", () => {
         },
       },
       mockTrpcClient,
-      mockNeynarClient,
+      mockNeynarClient
     );
 
     await processor.process();
@@ -191,7 +191,7 @@ describe("daimobotProcessor", () => {
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
       BotResp.noDaimoOrEthAccountFound("bob"),
-      expect.anything(),
+      expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
 
@@ -227,7 +227,7 @@ describe("daimobotProcessor", () => {
         },
       },
       mockTrpcClient,
-      mockNeynarClient,
+      mockNeynarClient
     );
 
     await processor.process();
@@ -235,12 +235,12 @@ describe("daimobotProcessor", () => {
     expect(mockNeynarClient.publishCast).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining(BotResp.request(amount, bob.username, "")),
-      expect.anything(),
+      expect.anything()
     );
     expect(mockNeynarClient.publishCast).toHaveBeenCalledTimes(1);
 
     expect(mockTrpcClient.createRequestSponsored.mutate).toHaveBeenCalledTimes(
-      1,
+      1
     );
     expect(mockTrpcClient.createRequestSponsored.mutate).not.toThrow();
   });

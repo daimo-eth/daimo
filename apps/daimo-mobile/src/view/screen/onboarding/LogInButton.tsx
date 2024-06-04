@@ -70,7 +70,7 @@ export function LogInFromSeedButton({
   // Figure out which slot the mnmemonic (seed phrase) key is in
   const parsedKey = tryOrNull(() => mnemonicToPublicKey(mnemonic));
   const keySlot = account.accountKeys.find(
-    (k) => k.pubKey === parsedKey?.publicKeyDER,
+    (k) => k.pubKey === parsedKey?.publicKeyDER
   )?.slot;
   console.log(`[ONBOARDING] mnemonic key slot: ${keySlot}`);
 
@@ -123,13 +123,13 @@ function LogInButton({
     env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
   const nextSlot = useMemo(
     () => findAccountUnusedSlot(account, slotType),
-    [account],
+    [account]
   );
 
   // Send a userop to add our device key = log in.
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
-    [pubKeyHex],
+    [pubKeyHex]
   );
 
   const sendFn = async (opSender: DaimoOpSender) => {

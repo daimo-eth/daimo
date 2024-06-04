@@ -28,7 +28,7 @@ export function LinkPreviewImg({
       <div
         style={{
           backgroundImage: `url("${getAbsoluteUrl(
-            "/assets/preview-pixel-bg.svg",
+            "/assets/preview-pixel-bg.svg"
           )}")`,
           height: "100%",
           width: "100%",

@@ -81,7 +81,7 @@ function DepositList({ account }: { account: Account }) {
         logo: rec.logo || defaultLogo,
         isExternal: true,
         onClick: () => openExchange(rec.url),
-      })),
+      }))
     );
   }
 

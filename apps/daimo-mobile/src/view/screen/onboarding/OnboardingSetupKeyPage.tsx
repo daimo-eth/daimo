@@ -50,7 +50,7 @@ export function OnboardingSetupKeyScreen(props: Props) {
       await requestEnclaveSignature(
         defaultEnclaveKeyName,
         "dead",
-        "Create account",
+        "Create account"
       );
 
       console.log(`[ONBOARDING] enclave signature trial success`);

@@ -15,7 +15,7 @@ export function parseFAQs(markdown: string): FAQ[] {
   // Parse the FAQ from README
   const md = marked.lexer(markdown);
   const faqIx = md.findIndex(
-    (token) => token.type === "heading" && token.text === "FAQ",
+    (token) => token.type === "heading" && token.text === "FAQ"
   );
   assert(faqIx >= 0, "missing");
 
@@ -32,7 +32,7 @@ export function parseFAQs(markdown: string): FAQ[] {
     assert(headerText.endsWith("</summary>\n\n"), headerText);
     const question = headerText.slice(
       "<details><summary>".length,
-      -"</summary>\n\n".length,
+      -"</summary>\n\n".length
     );
 
     assert(tokens.slice(-1)[0].type === "html", tokens.slice(-1)[0].raw);

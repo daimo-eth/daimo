@@ -24,7 +24,7 @@ export interface LinkStatusDesc {
 }
 
 export async function loadLinkStatusDesc(
-  url: string,
+  url: string
 ): Promise<LinkStatusDesc | null> {
   let linkStatus: DaimoLinkStatus;
   try {

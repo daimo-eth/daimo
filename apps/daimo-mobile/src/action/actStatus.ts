@@ -4,7 +4,7 @@ type ActStatus = "idle" | "loading" | "success" | "error";
 
 export type SetActStatus = (
   status: ActStatus | Error,
-  message?: string,
+  message?: string
 ) => void;
 
 /** Progress & outcome of a long-running user action. */
@@ -39,7 +39,7 @@ export function useActStatus(name: string): [ActHandle, SetActStatus] {
       }
       const elapsedMs = Date.now() - startTime.current;
       console.log(
-        `[ACTION] ${name} - ${elapsedMs}ms: ${as.status} > ${status} ${message}`,
+        `[ACTION] ${name} - ${elapsedMs}ms: ${as.status} > ${status} ${message}`
       );
       if (status !== "loading") {
         console.log(`[ACTION] ${name} - ${status}, total time ${elapsedMs}ms`);
@@ -47,7 +47,7 @@ export function useActStatus(name: string): [ActHandle, SetActStatus] {
 
       set({ status, message });
     },
-    [],
+    []
   );
 
   return [as, setAS];

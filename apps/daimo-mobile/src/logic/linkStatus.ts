@@ -10,7 +10,7 @@ import { env } from "./env";
 
 export function useFetchLinkStatus(
   link: DaimoLink | undefined,
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ) {
   const sanitizedLink = link && stripSeedFromNoteLink(link);
   const url = sanitizedLink && formatDaimoLink(sanitizedLink);
@@ -20,7 +20,7 @@ export function useFetchLinkStatus(
 
 export async function fetchInviteLinkStatus(
   daimoChain: DaimoChain,
-  inviteLink: DaimoLink | undefined,
+  inviteLink: DaimoLink | undefined
 ) {
   const { rpcFunc } = env(daimoChain);
   const url = inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));

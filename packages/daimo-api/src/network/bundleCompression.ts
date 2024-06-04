@@ -25,7 +25,7 @@ export interface CompressionInfo {
 export function compressBundle(
   op: UserOpHex,
   info: CompressionInfo,
-  nameReg: NameRegistry,
+  nameReg: NameRegistry
 ) {
   if (info.inflatorID === 0) {
     throw new Error(`can't compress. register inflator ${info.inflatorAddr}`);
@@ -47,7 +47,7 @@ export function compressBundle(
 function compressOp(
   op: UserOpHex,
   info: CompressionInfo,
-  nameReg: NameRegistry,
+  nameReg: NameRegistry
 ) {
   const ret: Hex[] = [];
 
@@ -72,7 +72,7 @@ function compressOp(
       "00000000000000000000000000000000000000000000000000000000",
       "$",
     ].join(""),
-    "i",
+    "i"
   );
   let m = calldataRegex.exec(op.callData);
   if (!m) throw new Error("can't compress, bad callData: " + op.callData);
@@ -115,7 +115,7 @@ function compressOp(
       "000000000000",
       "$",
     ].join(""),
-    "i",
+    "i"
   );
   m = sigRegex.exec(op.signature);
   if (!m) throw new Error("can't compress, bad signature: " + op.signature);

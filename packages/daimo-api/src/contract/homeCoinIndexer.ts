@@ -45,7 +45,7 @@ export class HomeCoinIndexer extends Indexer {
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
-    private paymentMemoTracker: PaymentMemoTracker,
+    private paymentMemoTracker: PaymentMemoTracker
   ) {
     super("COIN");
   }
@@ -82,8 +82,8 @@ export class HomeCoinIndexer extends Indexer {
           or t in (select addr from "names")
         );
       `,
-          [from, to],
-        ),
+          [from, to]
+        )
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -105,7 +105,7 @@ export class HomeCoinIndexer extends Indexer {
     console.log(
       `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${
         Date.now() - startTime
-      }ms`,
+      }ms`
     );
 
     this.allTransfers = this.allTransfers.concat(logs);
@@ -157,21 +157,21 @@ export class HomeCoinIndexer extends Indexer {
     txHashes?: Hex[];
   }): DisplayOpEvent[] {
     let relevantTransfers = this.allTransfers.filter(
-      (log) => log.from === addr || log.to === addr,
+      (log) => log.from === addr || log.to === addr
     );
     if (sinceBlockNum) {
       relevantTransfers = relevantTransfers.filter(
-        (log) => (log.blockNumber || 0n) >= sinceBlockNum,
+        (log) => (log.blockNumber || 0n) >= sinceBlockNum
       );
     }
     if (txHashes !== undefined) {
       relevantTransfers = relevantTransfers.filter((log) =>
-        txHashes.includes(log.transactionHash || "0x"),
+        txHashes.includes(log.transactionHash || "0x")
       );
     }
 
     const transferOpsIncludingPaymaster = relevantTransfers.map((log) =>
-      this.attachTransferOpProperties(log),
+      this.attachTransferOpProperties(log)
     );
 
     const transferOps = this.attachFeeAmounts(transferOpsIncludingPaymaster);
@@ -196,18 +196,18 @@ export class HomeCoinIndexer extends Indexer {
     const opHash = userOp?.hash;
     const nonceMetadata = userOp
       ? DaimoNonce.fromHex(
-          numberToHex(userOp.nonce, { size: 32 }),
+          numberToHex(userOp.nonce, { size: 32 })
         )?.metadata.toHex()
       : undefined;
     const noteInfo = this.noteIndexer.getNoteStatusbyLogCoordinate(
       transactionHash,
-      logIndex - 1,
+      logIndex - 1
     );
 
     const requestStatus =
       this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
         transactionHash,
-        logIndex - 1,
+        logIndex - 1
       );
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
@@ -216,7 +216,7 @@ export class HomeCoinIndexer extends Indexer {
     const correspondingForeignReceive =
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
-        transactionHash,
+        transactionHash
       );
     const preSwapTransfer: PreSwapTransfer | undefined =
       correspondingForeignReceive
@@ -231,7 +231,7 @@ export class HomeCoinIndexer extends Indexer {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
-        chainConfig.daimoChain,
+        chainConfig.daimoChain
       ),
       from,
       to,
@@ -282,7 +282,7 @@ export class HomeCoinIndexer extends Indexer {
    * TODO: unit test this function
    */
   private attachFeeAmounts(
-    transferOpsIncludingPaymaster: DisplayOpEvent[],
+    transferOpsIncludingPaymaster: DisplayOpEvent[]
   ): DisplayOpEvent[] {
     // Map of opHash to fee amount paid to paymaster address
     const opHashToFee = new Map<Hex, number>();
@@ -304,7 +304,7 @@ export class HomeCoinIndexer extends Indexer {
         // Remove paymaster logs
         (op) =>
           op.from !== chainConfig.pimlicoPaymasterAddress &&
-          op.to !== chainConfig.pimlicoPaymasterAddress,
+          op.to !== chainConfig.pimlicoPaymasterAddress
       )
       .map((op) => {
         // Attach fee amounts to other transfers

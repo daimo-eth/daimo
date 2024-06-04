@@ -11,7 +11,7 @@ export async function claimEphemeralNoteSponsored(
   noteIndexer: NoteIndexer,
   ephemeralOwner: Address,
   recipient: Address,
-  signature: Hex,
+  signature: Hex
 ): Promise<Hex> {
   // Verify note is available to claim and signature is valid
   const noteStatus = noteIndexer.getNoteStatusByOwner(ephemeralOwner);

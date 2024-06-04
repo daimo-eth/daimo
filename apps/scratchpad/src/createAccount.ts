@@ -91,7 +91,7 @@ export async function createAccount() {
     // );
     const clientDataHash = await crypto.subtle.digest(
       "SHA-256",
-      Buffer.from(clientDataJSON),
+      Buffer.from(clientDataJSON)
     );
 
     const authenticatorData = new Uint8Array(37); // rpIdHash (32) + flags (1) + counter (4)
@@ -138,7 +138,7 @@ export async function createAccount() {
       publicClient,
       publicClient,
       walletClient,
-      new Telemetry(),
+      new Telemetry()
     );
     const hash = await bundlerClient.getOpHash(op, vc.publicClient);
     console.log(`NOT sending userOp. Hash: ${hash}`);

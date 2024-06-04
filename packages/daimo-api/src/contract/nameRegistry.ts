@@ -92,7 +92,7 @@ export class NameRegistry extends Indexer {
     private vc: ViemClient,
     private inviteGraph: InviteGraph,
     private profileCache: ProfileCache,
-    private nameBlacklist: Set<string>,
+    private nameBlacklist: Set<string>
   ) {
     super("NAME-REG");
   }
@@ -114,8 +114,8 @@ export class NameRegistry extends Indexer {
         and block_num <= $2
         and chain_id = $3
       `,
-          [from, to, chainConfig.chainL2.id],
-        ),
+          [from, to, chainConfig.chainL2.id]
+        )
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -130,7 +130,7 @@ export class NameRegistry extends Indexer {
     this.logs.push(...names);
     names.forEach(this.cacheAccount);
     console.log(
-      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`,
+      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`
     );
   }
 
@@ -166,7 +166,7 @@ export class NameRegistry extends Indexer {
       .filter(
         (a) =>
           a.name.startsWith(prefix) ||
-          (prefix.length > 3 && a.name.includes(prefix)),
+          (prefix.length > 3 && a.name.includes(prefix))
       )
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 10);

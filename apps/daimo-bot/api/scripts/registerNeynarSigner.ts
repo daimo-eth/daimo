@@ -14,7 +14,7 @@ import { mnemonicToAccount } from "viem/accounts";
 dotenv.config();
 assert(
   !!process.env.FARCASTER_SEED_PHRASE,
-  "FARCASTER_SEED_PHRASE is not defined",
+  "FARCASTER_SEED_PHRASE is not defined"
 );
 const FARCASTER_SEED_PHRASE = process.env.FARCASTER_SEED_PHRASE;
 assert(!!process.env.FARCASTER_ID, "FARCASTER_ID is not defined");
@@ -76,12 +76,12 @@ type SignedKeyData = {
   const createSignerResponse = await axios.post(
     `${NEYNAR_BASE_URL}/signer`,
     {},
-    AUTH_HEADERS,
+    AUTH_HEADERS
   );
 
   // Step 2: Generate a signature
   const { deadline, signature } = await generateSignature(
-    createSignerResponse.data.public_key,
+    createSignerResponse.data.public_key
   );
 
   // Step 3: Register signed key
@@ -93,7 +93,7 @@ type SignedKeyData = {
       deadline,
       signature,
     },
-    AUTH_HEADERS,
+    AUTH_HEADERS
   );
   const data: SignedKeyData = signedKeyResponse.data;
   console.log(data);

@@ -3,7 +3,7 @@ import { DaimoChain, getChainConfig } from "@daimo/contract";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
 export const chainConfig = getChainConfig(
-  (process.env.DAIMO_CHAIN || "baseSepolia") as DaimoChain,
+  (process.env.DAIMO_CHAIN || "baseSepolia") as DaimoChain
 );
 
 const apiUrl = process.env.DAIMO_API_URL || "http://localhost:3000";

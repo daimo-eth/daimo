@@ -31,7 +31,7 @@ export class AccountFactory {
    */
   async deploy(
     pubKeyHex: Hex,
-    initCalls: DaimoAccountCall[],
+    initCalls: DaimoAccountCall[]
   ): Promise<TransactionReceipt> {
     const hash = await this.vc.writeContract({
       ...daimoAccountFactoryConfig,

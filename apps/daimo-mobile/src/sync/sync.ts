@@ -88,7 +88,7 @@ async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
     return await resync(`initial sync from scratch`, true);
   } else if (lastPushNotificationS + 10 > nowS) {
     return await resync(
-      `push notification ${nowS - lastPushNotificationS}s ago`,
+      `push notification ${nowS - lastPushNotificationS}s ago`
     );
   } else if (lastSyncS + intervalS > nowS) {
     console.log(`[SYNC] skipping sync, attempted sync recently`);
@@ -101,7 +101,7 @@ async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
 /** Gets latest balance & history for this account, in the background. */
 export async function resync(
   reason: string,
-  fromScratch?: boolean,
+  fromScratch?: boolean
 ): Promise<SyncStatus> {
   const manager = getAccountManager();
   const accOld = manager.getAccount();
@@ -141,7 +141,7 @@ export async function hydrateAccount(account: Account): Promise<Account> {
  * This means we're guaranteed to see all events even if there were reorgs. */
 async function fetchSync(
   account: Account,
-  fromScratch?: boolean,
+  fromScratch?: boolean
 ): Promise<AccountHistoryResult> {
   const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
 
@@ -181,7 +181,7 @@ async function fetchSync(
   assert(result.lastBlockTimestamp > 0, "invalid lastBlockTimestamp");
   assert(
     result.chainGasConstants.paymasterAddress.length % 2 === 0,
-    `invalid paymasterAndData ${result.chainGasConstants.paymasterAddress}`,
+    `invalid paymasterAndData ${result.chainGasConstants.paymasterAddress}`
   );
 
   return result;
@@ -190,12 +190,12 @@ async function fetchSync(
 function applySync(
   account: Account,
   result: AccountHistoryResult,
-  fromScratch: boolean,
+  fromScratch: boolean
 ): Account {
   assert(result.address === account.address);
   if (result.lastFinalizedBlock < account.lastFinalizedBlock) {
     console.log(
-      `[SYNC] Server has finalized block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`,
+      `[SYNC] Server has finalized block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`
     );
     if (fromScratch) {
       console.log(`[SYNC] NOT skipping sync from scratch`);
@@ -208,13 +208,13 @@ function applySync(
   // Sync in recent transfers
   // Start with finalized transfers only
   const oldFinalizedTransfers = account.recentTransfers.filter(
-    (t) => t.blockNumber && t.blockNumber < result.sinceBlockNum,
+    (t) => t.blockNumber && t.blockNumber < result.sinceBlockNum
   );
 
   // Add newly onchain transfers
   const recentTransfers = addTransfers(
     oldFinalizedTransfers,
-    result.transferLogs,
+    result.transferLogs
   );
 
   // Mark finalized
@@ -226,7 +226,7 @@ function applySync(
 
   // Match pending transfers
   const oldPending = account.recentTransfers.filter(
-    (t) => t.status === OpStatus.pending,
+    (t) => t.status === OpStatus.pending
   );
 
   // Match pending transfers
@@ -234,7 +234,7 @@ function applySync(
   const stillPending = oldPending.filter(
     (t) =>
       syncFindSameOp({ opHash: t.opHash, txHash: t.txHash }, recentTransfers) ==
-        null && t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp,
+        null && t.timestamp + SEND_DEADLINE_SECS > result.lastBlockTimestamp
   );
   recentTransfers.push(...stillPending);
 
@@ -245,7 +245,7 @@ function applySync(
   } else {
     namedAccounts = addNamedAccounts(
       account.namedAccounts,
-      result.namedAccounts,
+      result.namedAccounts
     );
   }
 
@@ -269,7 +269,7 @@ function applySync(
     chainGasConstants: result.chainGasConstants,
     recommendedExchanges: result.recommendedExchanges || [],
     suggestedActions: result.suggestedActions?.filter(
-      (a) => !account.dismissedActionIDs.includes(a.id),
+      (a) => !account.dismissedActionIDs.includes(a.id)
     ),
 
     recentTransfers,
@@ -296,20 +296,20 @@ function applySync(
         newTransfers: recentTransfers.length,
         nPending: recentTransfers.filter((t) => t.status === OpStatus.pending)
           .length,
-      }),
+      })
   );
   return ret;
 }
 
 export function syncFindSameOp(
   id: PendingOpEvent,
-  ops: DisplayOpEvent[],
+  ops: DisplayOpEvent[]
 ): DisplayOpEvent | null {
   return (
     ops.find(
       (r) =>
         (id.opHash && id.opHash === r.opHash) ||
-        (id.txHash && id.txHash === r.txHash),
+        (id.txHash && id.txHash === r.txHash)
     ) || null
   );
 }
@@ -335,7 +335,7 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
   old: DisplayOpEvent[],
-  logs: DisplayOpEvent[],
+  logs: DisplayOpEvent[]
 ): DisplayOpEvent[] {
   // Sort new logs
   logs.sort((a, b) => {

@@ -125,8 +125,8 @@ function RequestNotificationMessage({
     otherAcc.label === AddrLabel.RequestLink
       ? "via"
       : type === "recipient"
-        ? "from"
-        : "for";
+      ? "from"
+      : "for";
 
   const otherAccText = (
     <TextBody color={color.midnight}>{getAccountName(otherAcc)}</TextBody>

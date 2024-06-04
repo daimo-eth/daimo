@@ -61,7 +61,7 @@ export class Watcher {
         console.log(
           `[SHOVEL] waiting for block ${blockNumber}, found after ${
             Date.now() - t0
-          }ms`,
+          }ms`
         );
         return true;
       }
@@ -70,7 +70,7 @@ export class Watcher {
     console.log(
       `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${
         this.latest
-      } after ${Date.now() - t0}ms`,
+      } after ${Date.now() - t0}ms`
     );
     return false;
   }
@@ -107,7 +107,7 @@ export class Watcher {
         const localLatest = await this.index(
           this.latest + 1,
           shovelLatest,
-          this.batchSize,
+          this.batchSize
         );
         if (localLatest - this.slowLatest > 3) {
           // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
@@ -141,11 +141,11 @@ export class Watcher {
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
-        layer.map((i) => i.load(this.pg, start, start + limit)),
+        layer.map((i) => i.load(this.pg, start, start + limit))
       );
     }
     console.log(
-      `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`,
+      `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
     return start + limit;
   }
@@ -162,7 +162,7 @@ export class Watcher {
 
   async getShovelLatest(): Promise<number> {
     const result = await retryBackoff(`shovel-latest-query`, () =>
-      this.pg.query(`select num from shovel.latest`),
+      this.pg.query(`select num from shovel.latest`)
     );
     return Number(result.rows[0].num);
   }

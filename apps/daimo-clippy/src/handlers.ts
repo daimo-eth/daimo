@@ -140,7 +140,7 @@ let tokenListPromise: Promise<TokenList> | null = null;
 async function getTokenList(): Promise<TokenList> {
   if (tokenListPromise == null) {
     tokenListPromise = fetch("https://tokens.coingecko.com/base/all.json").then(
-      (a) => a.json(),
+      (a) => a.json()
     );
   }
   return tokenListPromise;
@@ -153,7 +153,7 @@ async function getUniswapRoute(kwargs: Map<string, string>): Promise<string> {
 
   const { tokens } = await getTokenList();
   const token = tokens.find(
-    (t) => t.symbol === strToken || t.address === strToken.toLowerCase(),
+    (t) => t.symbol === strToken || t.address === strToken.toLowerCase()
   );
   if (token == null) return `Token '${strToken}' not found`;
 
@@ -188,7 +188,7 @@ async function grantInvite(kwargs: Map<string, string>): Promise<string> {
   const maxUses = 10;
 
   console.log(
-    `[SLACK-BOT] granting invite to ${name}: ${code}, $${dollars}, max ${maxUses} uses`,
+    `[SLACK-BOT] granting invite to ${name}: ${code}, $${dollars}, max ${maxUses} uses`
   );
 
   await createInviteCode(code, dollars, dollars, maxUses, addr);
@@ -199,10 +199,10 @@ async function grantInvite(kwargs: Map<string, string>): Promise<string> {
 async function createInvite(kwargs: Map<string, string>): Promise<string> {
   const code = assertNotNull(kwargs.get("code"));
   const bonusDollarsInvitee = Number(
-    assertNotNull(kwargs.get("bonus_dollars_invitee")),
+    assertNotNull(kwargs.get("bonus_dollars_invitee"))
   );
   const bonusDollarsInviter = Number(
-    assertNotNull(kwargs.get("bonus_dollars_inviter")),
+    assertNotNull(kwargs.get("bonus_dollars_inviter"))
   );
   const maxUses = Number(assertNotNull(kwargs.get("max_uses")));
   const inviter = getAddress(assertNotNull(kwargs.get("inviter")));
@@ -212,7 +212,7 @@ async function createInvite(kwargs: Map<string, string>): Promise<string> {
     bonusDollarsInvitee,
     bonusDollarsInviter,
     maxUses,
-    inviter,
+    inviter
   );
 }
 
@@ -221,7 +221,7 @@ export async function createInviteCode(
   bonusDollarsInvitee: number,
   bonusDollarsInviter: number,
   maxUses: number,
-  inviter: Address,
+  inviter: Address
 ) {
   const res = await rpc.createInviteLink.mutate({
     apiKey,
@@ -234,7 +234,7 @@ export async function createInviteCode(
   const inviteStatus = await rpc.getLinkStatus.query({ url: res });
 
   return `Successfully created invite: ${res}\n\n ${getJSONblock(
-    inviteStatus,
+    inviteStatus
   )}`;
 }
 

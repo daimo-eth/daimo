@@ -101,7 +101,7 @@ interface NoteDisplayProps {
 
 /// Displays a note: amount, status, and button to claim.
 export function NoteDisplay(
-  props: NoteDisplayProps & { hideAmount?: boolean; leaveScreen?: () => void },
+  props: NoteDisplayProps & { hideAmount?: boolean; leaveScreen?: () => void }
 ) {
   const Inner = useWithAccount(NoteDisplayInner);
   return <Inner {...props} />;
@@ -131,7 +131,7 @@ function NoteDisplayInner({
     noteStatus.link.type === "note"
       ? noteStatus.link.ephemeralPrivateKey
       : undefined,
-    noteStatus.link.type === "notev2" ? noteStatus.link.seed : undefined,
+    noteStatus.link.type === "notev2" ? noteStatus.link.seed : undefined
   );
 
   const nonceMetadata = new DaimoNonceMetadata(DaimoNonceType.ClaimNote);
@@ -164,7 +164,7 @@ function NoteDisplayInner({
       return opSender.claimEphemeralNoteV1(
         ephemeralOwner,
         ephemeralSignature,
-        opMetadata,
+        opMetadata
       );
     } else {
       if (noteStatus.sender.addr === account.address) {
@@ -175,7 +175,7 @@ function NoteDisplayInner({
         return opSender.claimEphemeralNoteRecipient(
           ephemeralOwner,
           ephemeralSignature,
-          opMetadata,
+          opMetadata
         );
       }
     }
@@ -213,8 +213,8 @@ function NoteDisplayInner({
   });
   console.log(
     `[NOTE] rendering NoteDisplay, status ${status} ${message} ${JSON.stringify(
-      noteStatus,
-    )} ${ephemeralSignature}`,
+      noteStatus
+    )} ${ephemeralSignature}`
   );
 
   const netRecv = Math.max(0, Number(noteStatus.dollars) - cost.totalDollars);

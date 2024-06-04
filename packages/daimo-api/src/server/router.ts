@@ -81,7 +81,7 @@ export function createRouter(
   inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
-  telemetry: Telemetry,
+  telemetry: Telemetry
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
@@ -115,7 +115,7 @@ export function createRouter(
   });
 
   const sentryMiddleware = trpcT.middleware(
-    Sentry.Handlers.trpcMiddleware({ attachRpcInput: true }) as any,
+    Sentry.Handlers.trpcMiddleware({ attachRpcInput: true }) as any
   );
 
   const publicProcedure = trpcT.procedure
@@ -157,14 +157,14 @@ export function createRouter(
           fromToken: zAddress,
           fromAmount: zBigIntStr,
           toAddr: zAddress,
-        }),
+        })
       )
       .query(async (opts) => {
         const { fromToken, fromAmount, toAddr } = opts.input;
         return foreignCoinIndexer.getProposedSwap(
           fromAmount,
           fromToken,
-          toAddr,
+          toAddr
         );
       }),
 
@@ -180,7 +180,7 @@ export function createRouter(
       .input(
         z.object({
           urls: z.array(z.string()),
-        }),
+        })
       )
       .query(async (opts) => {
         const { urls } = opts.input;
@@ -191,8 +191,8 @@ export function createRouter(
             noteIndexer,
             reqIndexer,
             inviteCodeTracker,
-            db,
-          ),
+            db
+          )
         );
         const ret = await Promise.all(promises);
         return ret;
@@ -209,7 +209,7 @@ export function createRouter(
           noteIndexer,
           reqIndexer,
           inviteCodeTracker,
-          db,
+          db
         );
       }),
 
@@ -222,7 +222,7 @@ export function createRouter(
           inviter: zAddress,
           bonusDollarsInvitee: z.number(),
           bonusDollarsInviter: z.number(),
-        }),
+        })
       )
       .mutation(async ({ input }) => {
         authorize(input.apiKey);
@@ -235,7 +235,7 @@ export function createRouter(
           apiKey: z.string(),
           code: z.string(),
           maxUses: z.number(),
-        }),
+        })
       )
       .mutation(async ({ input }) => {
         authorize(input.apiKey);
@@ -272,7 +272,7 @@ export function createRouter(
           address: zAddress,
           inviteCode: z.string().optional(),
           sinceBlockNum: z.number(),
-        }),
+        })
       )
       .query(async (opts) => {
         const { inviteCode, sinceBlockNum } = opts.input;
@@ -295,7 +295,7 @@ export function createRouter(
           nameReg,
           keyReg,
           paymaster,
-          db,
+          db
         );
       }),
 
@@ -310,8 +310,9 @@ export function createRouter(
         const { apiKey, sender } = opts.input;
         authorize(apiKey);
 
-        const inviteCode =
-          await inviteCodeTracker.getBestInviteCodeForSender(sender);
+        const inviteCode = await inviteCodeTracker.getBestInviteCodeForSender(
+          sender
+        );
         return inviteCode;
       }),
 
@@ -320,7 +321,7 @@ export function createRouter(
         z.object({
           address: zAddress,
           token: z.string(),
-        }),
+        })
       )
       .mutation(async (opts) => {
         // TODO: device attestation or similar to avoid griefing.
@@ -337,7 +338,7 @@ export function createRouter(
           pubKeyHex: zHex,
           inviteLink: z.string(),
           deviceAttestationString: zHex,
-        }),
+        })
       )
       .mutation(async (opts) => {
         const { name, pubKeyHex, inviteLink, deviceAttestationString } =
@@ -353,7 +354,7 @@ export function createRouter(
           noteIndexer,
           reqIndexer,
           inviteCodeTracker,
-          db,
+          db
         );
         const { address, faucetTransfer } = await deployWallet(
           opts.ctx,
@@ -367,7 +368,7 @@ export function createRouter(
           inviteCodeTracker,
           telemetry,
           paymaster,
-          inviteGraph,
+          inviteGraph
         );
         return { status: "success", address, faucetTransfer };
       }),
@@ -423,7 +424,7 @@ export function createRouter(
           paymentMemoTracker,
           telemetry,
           vc,
-          opts.ctx,
+          opts.ctx
         );
       }),
 
@@ -440,7 +441,7 @@ export function createRouter(
           ephemeralOwner: zAddress,
           recipient: zAddress,
           signature: zHex,
-        }),
+        })
       )
       .mutation(async (opts) => {
         const ephemeralOwner = getAddress(opts.input.ephemeralOwner);
@@ -452,7 +453,7 @@ export function createRouter(
           noteIndexer,
           ephemeralOwner,
           recipient,
-          signature,
+          signature
         );
       }),
 
@@ -463,7 +464,7 @@ export function createRouter(
           recipient: zAddress,
           amount: zBigIntStr,
           fulfiller: zAddress.optional(),
-        }),
+        })
       )
       .mutation(async (opts) => {
         const { idString, recipient, amount, fulfiller } = opts.input;
@@ -482,7 +483,7 @@ export function createRouter(
           addr: zAddress,
           actionJSON: z.string(),
           signature: zHex,
-        }),
+        })
       )
       .mutation(async (opts) => {
         const { addr, actionJSON, signature } = opts.input;
@@ -498,11 +499,7 @@ export function createRouter(
 
     updateTagRedirect: publicProcedure
       .input(
-        z.object({
-          tag: z.string(),
-          link: z.string(),
-          updateToken: z.string(),
-        }),
+        z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
       )
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
@@ -524,7 +521,7 @@ export function createRouter(
           recipient: zAddress,
           amount: zBigIntStr,
           memo: z.string().optional(),
-        }),
+        })
       )
       .mutation(async (opts) => {
         const { tag, updateToken, recipient, amount, memo } = opts.input;

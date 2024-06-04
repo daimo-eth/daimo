@@ -26,7 +26,7 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   const dispatcher = useContext(DispatcherContext);
 
   const { tokenSymbol, chainL2 } = env(
-    daimoChainFromId(account.homeChainId),
+    daimoChainFromId(account.homeChainId)
   ).chainConfig;
 
   const [check, setCheck] = useState(false);

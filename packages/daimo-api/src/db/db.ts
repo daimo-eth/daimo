@@ -144,7 +144,7 @@ export class DB {
   async loadPushTokens(): Promise<PushTokenRow[]> {
     console.log(`[DB] loading push tokens`);
     const result = await this.pool.query<PushTokenRow>(
-      `SELECT address, pushtoken FROM pushtoken`,
+      `SELECT address, pushtoken FROM pushtoken`
     );
 
     console.log(`[DB] ${result.rows.length} push tokens`);
@@ -156,7 +156,7 @@ export class DB {
     await this.pool.query(
       `INSERT INTO pushtoken (pushtoken, address) VALUES ($1, $2)
        ON CONFLICT (pushtoken) DO UPDATE SET address = $2`,
-      [token.pushtoken, token.address],
+      [token.pushtoken, token.address]
     );
   }
 
@@ -164,7 +164,7 @@ export class DB {
     console.log(`[DB] loading tag redirect: ${tag}`);
     const result = await this.pool.query<TagRedirectRow>(
       `SELECT tag, link, update_token FROM tag_redirect WHERE tag = $1`,
-      [tag],
+      [tag]
     );
     return result.rows[0] || null;
   }
@@ -175,7 +175,7 @@ export class DB {
       `SELECT tag, link, time
        FROM tag_redirect_history WHERE tag = $1
        ORDER BY time DESC LIMIT 10`,
-      [tag],
+      [tag]
     );
 
     return result.rows.map((row) => ({
@@ -190,19 +190,19 @@ export class DB {
     const res = await this.pool.query(
       `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
        ON CONFLICT (tag) DO UPDATE SET link = $2`,
-      [tag, link],
+      [tag, link]
     );
     if (res.rowCount && res.rowCount > 0) {
       await this.pool.query(
         `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
-        [tag, link],
+        [tag, link]
       );
     }
   }
 
   async saveOffchainAction(row: OffchainActionRow) {
     console.log(
-      `[DB] inserting offchain action ${row.type} ${row.time} ${row.address}`,
+      `[DB] inserting offchain action ${row.type} ${row.time} ${row.address}`
     );
     await this.pool.query(
       `INSERT INTO offchain_action (address, time, type, action_json, signature_hex)
@@ -213,13 +213,13 @@ export class DB {
         row.type,
         row.action_json,
         row.signature_hex,
-      ] as any,
+      ] as any
     );
   }
 
   async saveLinkedAccount(row: LinkedAccountRow) {
     console.log(
-      `[DB] inserting linked_account: ${row.linked_type} ${row.linked_id} ${row.address}`,
+      `[DB] inserting linked_account: ${row.linked_type} ${row.linked_id} ${row.address}`
     );
     const client = await this.pool.connect();
 
@@ -228,13 +228,13 @@ export class DB {
         `DELETE FROM linked_account
        WHERE (linked_type = $1 AND linked_id = $2)
        OR (linked_type = $1 AND address = $3)`,
-        [row.linked_type, row.linked_id, row.address],
+        [row.linked_type, row.linked_id, row.address]
       );
 
       await client.query(
         `INSERT INTO linked_account (linked_type, linked_id, address, account_json)
        VALUES ($1, $2, $3, $4)`,
-        [row.linked_type, row.linked_id, row.address, row.account_json],
+        [row.linked_type, row.linked_id, row.address, row.account_json]
       );
     } finally {
       client.release();
@@ -245,14 +245,14 @@ export class DB {
     console.log(`[DB] deleting linked_account: ${linkID.type} ${linkID.id}`);
     await this.pool.query(
       `DELETE FROM linked_account WHERE linked_type = $1 AND linked_id = $2 AND address = $3`,
-      [linkID.type, linkID.id, linkID.addr],
+      [linkID.type, linkID.id, linkID.addr]
     );
   }
 
   async loadLinkedAccounts(): Promise<LinkedAccountRow[]> {
     console.log(`[DB] loading linked accounts`);
     const result = await this.pool.query<LinkedAccountRow>(
-      `SELECT linked_type, linked_id, address, account_json FROM linked_account`,
+      `SELECT linked_type, linked_id, address, account_json FROM linked_account`
     );
 
     console.log(`[DB] ${result.rows.length} linked accounts`);
@@ -262,7 +262,7 @@ export class DB {
   async loadNameBlacklist(): Promise<Set<string>> {
     console.log(`[DB] loading name blacklist`);
     const result = await this.pool.query<{ name: string }>(
-      `SELECT name FROM name_blacklist`,
+      `SELECT name FROM name_blacklist`
     );
 
     console.log(`[DB] ${result.rows.length} blacklisted names`);
@@ -273,7 +273,7 @@ export class DB {
     console.log(`[DB] paymaster whitelist: checking ${name}...`);
     const result = await this.pool.query<{ name: string }>(
       `SELECT name FROM paymaster_whitelist WHERE name = $1`,
-      [name],
+      [name]
     );
 
     const ret = result.rows.length > 0;
@@ -286,7 +286,7 @@ export class DB {
     await this.pool.query(
       `INSERT INTO paymaster_whitelist (name) VALUES ($1)
        ON CONFLICT (name) DO NOTHING`,
-      [name],
+      [name]
     );
   }
 
@@ -295,7 +295,7 @@ export class DB {
     const result = await this.pool.query<RawInviteCodeRow>(
       `SELECT code, created_at, use_count, max_uses, zupass_email, inviter, bonus_cents_invitee, bonus_cents_inviter 
       FROM invitecode WHERE code = $1`,
-      [code],
+      [code]
     );
 
     if (result.rows.length === 0) return null;
@@ -317,7 +317,7 @@ export class DB {
     await this.pool.query(
       `INSERT INTO invitecode (code, use_count, max_uses, zupass_email) VALUES ($1, $2, $3, $4)
        ON CONFLICT (code) DO UPDATE SET use_count = $2, max_uses = $3, zupass_email = $4`,
-      [code.code, code.useCount, code.maxUses, code.zupassEmail] as any,
+      [code.code, code.useCount, code.maxUses, code.zupassEmail] as any
     );
   }
 
@@ -325,18 +325,18 @@ export class DB {
     console.log(`[DB] incrementing invite code use count`);
     await this.pool.query(
       `UPDATE invitecode SET use_count = use_count + 1 WHERE code = $1`,
-      [code],
+      [code]
     );
   }
 
   // Returns the invite code for a sender with most available uses left.
   async getBestInviteCodeForSender(
-    address: Address,
+    address: Address
   ): Promise<string | undefined> {
     console.log(`[DB] getting invite code for address`);
     const result = await this.pool.query<{ code: string }>(
       `SELECT code FROM invitecode WHERE inviter = $1 ORDER BY max_uses - use_count DESC LIMIT 1`,
-      [address],
+      [address]
     );
 
     return result.rows.length > 0 ? result.rows[0].code : undefined;
@@ -345,7 +345,7 @@ export class DB {
   async loadInviteGraph(): Promise<InviteGraphRow[]> {
     console.log(`[DB] loading invite graph`);
     const result = await this.pool.query<InviteGraphRow>(
-      `SELECT invitee, inviter FROM invite_graph ORDER BY created_at`,
+      `SELECT invitee, inviter FROM invite_graph ORDER BY created_at`
     );
 
     console.log(`[DB] ${result.rows.length} invite graph rows`);
@@ -356,7 +356,7 @@ export class DB {
     console.log(`[DB] inserting invite graph`);
     await this.pool.query(
       `INSERT INTO invite_graph (invitee, inviter) VALUES ($1, $2)`,
-      [rows.invitee, rows.inviter],
+      [rows.invitee, rows.inviter]
     );
   }
 
@@ -373,7 +373,7 @@ export class DB {
         row.inviter,
         Math.round(row.bonusDollarsInvitee * 100),
         Math.round(row.bonusDollarsInviter * 100),
-      ],
+      ]
     );
     return assertNotNull(res.rowCount) > 0;
   }
@@ -383,7 +383,7 @@ export class DB {
 
     const res = await this.pool.query<[], any[]>(
       `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
-      [row.maxUses, row.code],
+      [row.maxUses, row.code]
     );
 
     return assertNotNull(res.rowCount) > 0;
@@ -394,7 +394,7 @@ export class DB {
     await this.pool.query(
       `INSERT INTO used_faucet_attestations (attestation) VALUES ($1)
        ON CONFLICT (attestation) DO NOTHING`,
-      [attestation],
+      [attestation]
     );
   }
 
@@ -402,7 +402,7 @@ export class DB {
     console.log(`[DB] checking faucet attestation`);
     const result = await this.pool.query<{ attestation: string }>(
       `SELECT attestation FROM used_faucet_attestations WHERE attestation = $1`,
-      [attestation],
+      [attestation]
     );
 
     return result.rows.length > 0;
@@ -412,7 +412,7 @@ export class DB {
     console.log(`[DB] loading payment memos`);
     const client = await this.pool.connect();
     const result = await client.query<RawPaymentMemoRow>(
-      `SELECT ophash_hex, memo FROM payment_memo`,
+      `SELECT ophash_hex, memo FROM payment_memo`
     );
     client.release();
 
@@ -428,7 +428,7 @@ export class DB {
     const client = await this.pool.connect();
     await client.query(
       `INSERT INTO payment_memo (ophash_hex, memo) VALUES ($1, $2)`,
-      [row.opHash, row.memo],
+      [row.opHash, row.memo]
     );
     client.release();
 
@@ -439,7 +439,7 @@ export class DB {
     console.log(`[DB] loading declined requests`);
     const client = await this.pool.connect();
     const result = await client.query<RawDeclinedRequestRow>(
-      `SELECT request_id, decliner, created_at FROM declined_requests`,
+      `SELECT request_id, decliner, created_at FROM declined_requests`
     );
     client.release();
 
@@ -456,7 +456,7 @@ export class DB {
     const client = await this.pool.connect();
     await client.query(
       `INSERT INTO declined_requests (request_id, decliner) VALUES ($1, $2)`,
-      [requestId.toString(), decliner],
+      [requestId.toString(), decliner]
     );
     client.release();
 

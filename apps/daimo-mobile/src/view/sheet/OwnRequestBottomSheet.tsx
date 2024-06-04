@@ -37,14 +37,14 @@ export function OwnRequestBottomSheet({
   const nonce = useMemo(
     () =>
       new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.RequestResponse)),
-    [],
+    []
   );
 
   const { status, exec: onCancel } = useSendWithDeviceKeyAsync({
     dollarsToSend: 0,
     sendFn: async (opSender) => {
       console.log(
-        `[ACTION] cancelling request ${reqStatus.link.id.toString()}`,
+        `[ACTION] cancelling request ${reqStatus.link.id.toString()}`
       );
       return opSender.cancelRequest(decodeRequestIdString(reqStatus.link.id), {
         nonce,

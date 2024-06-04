@@ -24,10 +24,10 @@ import {
  * @return result.rawAttestationObjectB64 The raw attestation object.
  */
 export async function createPasskey(
-  request: CreateRequest,
+  request: CreateRequest
 ): Promise<CreateResult> {
   const userIDB64 = base64.encode(
-    new TextEncoder().encode(request.passkeyName),
+    new TextEncoder().encode(request.passkeyName)
   );
 
   switch (Platform.OS) {
@@ -37,7 +37,7 @@ export async function createPasskey(
         request.passkeyDisplayTitle,
         userIDB64,
         request.challengeB64,
-        request.useSecurityKey,
+        request.useSecurityKey
       );
       return {
         rawClientDataJSONB64: ret.rawClientDataJSON,
@@ -50,7 +50,7 @@ export async function createPasskey(
 
       const requestJSON = toAndroidCreateRequest(request, userIDB64);
       const ret = JSON.parse(
-        await ExpoPasskeysModule.createPasskey(requestJSON),
+        await ExpoPasskeysModule.createPasskey(requestJSON)
       );
       return {
         rawClientDataJSONB64: toBase64(ret.response.clientDataJSON),
@@ -76,17 +76,17 @@ export async function createPasskey(
  * @return result.signatureB64 The signature.
  */
 export async function signWithPasskey(
-  request: SignRequest,
+  request: SignRequest
 ): Promise<SignResult> {
   switch (Platform.OS) {
     case "ios": {
       const ret = await ExpoPasskeysModule.signWithPasskey(
         request.domain,
         request.challengeB64,
-        request.useSecurityKey,
+        request.useSecurityKey
       );
       const userIDstr = new TextDecoder("utf-8").decode(
-        base64.decode(ret.userID),
+        base64.decode(ret.userID)
       );
       return {
         passkeyName: userIDstr,
@@ -101,10 +101,10 @@ export async function signWithPasskey(
 
       const requestJSON = toAndroidSignRequest(request);
       const ret = JSON.parse(
-        await ExpoPasskeysModule.signWithPasskey(requestJSON),
+        await ExpoPasskeysModule.signWithPasskey(requestJSON)
       );
       const userIDstr = new TextDecoder("utf-8").decode(
-        base64.decode(toBase64(ret.response.userHandle)),
+        base64.decode(toBase64(ret.response.userHandle))
       );
       return {
         passkeyName: userIDstr,

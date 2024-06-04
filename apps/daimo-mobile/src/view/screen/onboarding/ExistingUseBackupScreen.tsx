@@ -134,7 +134,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
 async function loadAccount(
   eAcc: EAccount,
   pubKeyHex: Hex,
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ) {
   const newAccount = createEmptyAccount(
     {
@@ -143,7 +143,7 @@ async function loadAccount(
       enclaveKeyName: defaultEnclaveKeyName,
       enclavePubKey: pubKeyHex,
     },
-    daimoChain,
+    daimoChain
   );
 
   return await hydrateAccount(newAccount);

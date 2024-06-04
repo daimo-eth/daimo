@@ -64,7 +64,7 @@ export class NoteIndexer extends Indexer {
   private async loadNoteLogs(
     pg: Pool,
     from: number,
-    to: number,
+    to: number
   ): Promise<NoteLog[]> {
     const result = await retryBackoff(
       `noteIndexer-logs-query-${from}-${to}`,
@@ -104,8 +104,8 @@ export class NoteIndexer extends Indexer {
       ) as notelogs
       order by block_num asc, tx_idx asc, log_idx asc
     `,
-          [from, to, chainConfig.chainL2.id],
-        ),
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     return result.rows.map(rowToNoteLog);
   }
@@ -150,7 +150,7 @@ export class NoteIndexer extends Indexer {
     this.senderIdToOwner.set(senderIdKey(log.from, id), log.ephemeralOwner);
     this.logCoordinateToNoteEvent.set(
       logCoordinateKey(log.transactionHash, log.logIndex),
-      [log.ephemeralOwner, "create"],
+      [log.ephemeralOwner, "create"]
     );
     return newNote;
   }
@@ -172,7 +172,7 @@ export class NoteIndexer extends Indexer {
     // Mark as redeemed
     this.logCoordinateToNoteEvent.set(
       logCoordinateKey(log.transactionHash, log.logIndex),
-      [log.ephemeralOwner, "claim"],
+      [log.ephemeralOwner, "claim"]
     );
     assertNotNull(log.redeemer, "redeemer is null");
     assertNotNull(log.from, "from is null");
@@ -205,7 +205,7 @@ export class NoteIndexer extends Indexer {
 
   getNoteStatusbyLogCoordinate(transactionHash: Hex, logIndex: number) {
     const eve = this.logCoordinateToNoteEvent.get(
-      logCoordinateKey(transactionHash, logIndex),
+      logCoordinateKey(transactionHash, logIndex)
     );
     return eve ? [this.getNoteStatusByOwner(eve[0]), eve[1]] : null;
   }

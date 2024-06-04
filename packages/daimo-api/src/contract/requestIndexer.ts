@@ -52,10 +52,7 @@ export class RequestIndexer extends Indexer {
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
-  constructor(
-    private db: DB,
-    private nameReg: NameRegistry,
-  ) {
+  constructor(private db: DB, private nameReg: NameRegistry) {
     super("REQUEST");
   }
 
@@ -69,7 +66,7 @@ export class RequestIndexer extends Indexer {
     console.log(
       `[REQUEST] loaded ${statuses.length} statuses in ${
         Date.now() - startTime
-      }ms`,
+      }ms`
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -97,7 +94,7 @@ export class RequestIndexer extends Indexer {
   private async loadCreated(
     pg: Pool,
     from: number,
-    to: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await retryBackoff(`requestLoadCreated-${from}-${to}`, () =>
       pg.query(
@@ -116,8 +113,8 @@ export class RequestIndexer extends Indexer {
           and block_num <= $2
           and chain_id = $3
       `,
-        [from, to, chainConfig.chainL2.id],
-      ),
+        [from, to, chainConfig.chainL2.id]
+      )
     );
     const logs = result.rows.map(rowToRequestCreatedLog);
     // todo: ignore requests not made by the API
@@ -135,7 +132,7 @@ export class RequestIndexer extends Indexer {
   }
 
   private async handleRequestCreated(
-    log: RequestCreatedLog,
+    log: RequestCreatedLog
   ): Promise<DaimoRequestV2Status> {
     console.log(`[REQUEST] RequestCreated ${log.id}`);
     if (this.requests.get(log.id) != null) {
@@ -151,7 +148,7 @@ export class RequestIndexer extends Indexer {
 
     if (creator.label !== AddrLabel.Faucet) {
       console.warn(
-        `[REQUEST] ${log.id} creator ${JSON.stringify(creator)} is not API`,
+        `[REQUEST] ${log.id} creator ${JSON.stringify(creator)} is not API`
       );
     }
 
@@ -162,7 +159,7 @@ export class RequestIndexer extends Indexer {
 
     const createdAt = guessTimestampFromNum(
       log.blockNumber,
-      chainConfig.daimoChain,
+      chainConfig.daimoChain
     );
 
     const requestStatus: DaimoRequestV2Status = {
@@ -193,7 +190,7 @@ export class RequestIndexer extends Indexer {
   private async loadCancelled(
     pg: Pool,
     from: number,
-    to: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await retryBackoff(
       `requestLoadCancelled-${from}-${to}`,
@@ -208,8 +205,8 @@ export class RequestIndexer extends Indexer {
         and block_num <= $2
         and chain_id = $3
       `,
-          [from, to, chainConfig.chainL2.id],
-        ),
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     const cancelledRequests = result.rows.map(rowToRequestCancelledLog);
     const statuses = cancelledRequests
@@ -222,7 +219,7 @@ export class RequestIndexer extends Indexer {
         request.status = DaimoRequestState.Cancelled;
         request.updatedAt = guessTimestampFromNum(
           req.blockNumber,
-          chainConfig.daimoChain,
+          chainConfig.daimoChain
         );
         this.requests.set(req.id, request);
         return request;
@@ -235,7 +232,7 @@ export class RequestIndexer extends Indexer {
   private async loadFulfilled(
     pg: Pool,
     from: number,
-    to: number,
+    to: number
   ): Promise<DaimoRequestV2Status[]> {
     const result = await retryBackoff(
       `requestLoadFulfilled-${from}-${to}`,
@@ -251,8 +248,8 @@ export class RequestIndexer extends Indexer {
           where block_num >= $1
           and block_num <= $2
           and chain_id = $3`,
-          [from, to, chainConfig.chainL2.id],
-        ),
+          [from, to, chainConfig.chainL2.id]
+        )
     );
     const fulfilledRequests = result.rows.map(rowToRequestFulfilledLog);
     const promises = fulfilledRequests
@@ -267,12 +264,12 @@ export class RequestIndexer extends Indexer {
         request.status = DaimoRequestState.Fulfilled;
         request.updatedAt = guessTimestampFromNum(
           req.blockNumber,
-          chainConfig.daimoChain,
+          chainConfig.daimoChain
         );
         this.requests.set(req.id, request);
         this.logCoordinateToRequestFulfill.set(
           logCoordinateKey(req.transactionHash, req.logIndex),
-          req.id,
+          req.id
         );
         return request;
       })
@@ -289,7 +286,7 @@ export class RequestIndexer extends Indexer {
   // Fetch requests made or received by an address
   getAddrRequests(addr: Address) {
     const requests = (this.requestsByAddress.get(addr) || []).map(
-      (id) => this.requests.get(id)!,
+      (id) => this.requests.get(id)!
     );
 
     return requests;
@@ -339,10 +336,10 @@ export class RequestIndexer extends Indexer {
 
   getRequestStatusByFulfillLogCoordinate(
     transactionHash: Hex,
-    logIndex: number,
+    logIndex: number
   ) {
     const id = this.logCoordinateToRequestFulfill.get(
-      logCoordinateKey(transactionHash, logIndex),
+      logCoordinateKey(transactionHash, logIndex)
     );
     if (id == null) return null;
     return this.getRequestStatusById(id);

@@ -33,7 +33,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
 
   private constructor(
     private accountAddress: Address,
-    private signer: SigningCallback,
+    private signer: SigningCallback
   ) {
     super();
   }
@@ -41,7 +41,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   /** Client is used for simulation. Paymaster pays for userops. */
   public static async init(
     accountAddress: Address,
-    accountSigner: SigningCallback,
+    accountSigner: SigningCallback
   ): Promise<DaimoOpBuilder> {
     const instance = new DaimoOpBuilder(accountAddress, accountSigner);
 
@@ -84,7 +84,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
     return this.setNonce(opMetadata.nonce.toHex())
       .setMaxFeePerGas(opMetadata.chainGasConstants.maxFeePerGas)
       .setMaxPriorityFeePerGas(
-        opMetadata.chainGasConstants.maxPriorityFeePerGas,
+        opMetadata.chainGasConstants.maxPriorityFeePerGas
       )
       .setPreVerificationGas(opMetadata.chainGasConstants.preVerificationGas)
       .setPaymasterAndData(opMetadata.chainGasConstants.paymasterAddress);
@@ -102,7 +102,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
         abi: daimoAccountABI,
         functionName: "executeBatch",
         args: [calls],
-      }),
+      })
     );
   }
 }

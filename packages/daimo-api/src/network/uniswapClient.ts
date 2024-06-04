@@ -32,7 +32,7 @@ import { retryBackoff } from "../utils/retryBackoff";
 // On Base
 // From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
 export const UNISWAP_V3_02_ROUTER_ADDRESS = getAddress(
-  "0x2626664c2603336E57B271c5C0b26F421741e481",
+  "0x2626664c2603336E57B271c5C0b26F421741e481"
 );
 
 class NativeETH extends NativeCurrency {
@@ -45,7 +45,7 @@ class NativeETH extends NativeCurrency {
       chainConfig.chainL2.id,
       nativeETH.decimals,
       nativeETH.symbol,
-      nativeETH.fullName,
+      nativeETH.fullName
     );
   }
 
@@ -58,7 +58,7 @@ export class UniswapClient {
   private uniHomeToken = new Token(
     chainConfig.chainL2.id,
     chainConfig.tokenAddress,
-    chainConfig.tokenDecimals,
+    chainConfig.tokenDecimals
   );
   private router: AlphaRouter | null;
   private swapCache: Map<string, SwapQueryResult> = new Map();
@@ -90,7 +90,7 @@ export class UniswapClient {
     fromAmount: BigIntStr,
     token: "ETH" | Address,
     receivedAt: number,
-    fromAddr: Address,
+    fromAddr: Address
   ) {
     return `${addr}-${fromAmount}-${token}-${receivedAt}-${fromAddr}`;
   }
@@ -101,7 +101,7 @@ export class UniswapClient {
       swap.fromAmount,
       swap.fromCoin.token,
       swap.receivedAt,
-      swap.fromAcc.addr,
+      swap.fromAcc.addr
     );
     this.swapCache.set(key, swap);
   }
@@ -111,14 +111,14 @@ export class UniswapClient {
     fromAmount: BigIntStr,
     token: "ETH" | Address,
     receivedAt: number,
-    fromAddr: Address,
+    fromAddr: Address
   ): SwapQueryResult | undefined {
     const key = this.swapCacheKey(
       addr,
       fromAmount,
       token,
       receivedAt,
-      fromAddr,
+      fromAddr
     );
     return this.swapCache.get(key);
   }
@@ -128,7 +128,7 @@ export class UniswapClient {
     fromAmount: BigIntStr,
     fromCoin: ForeignCoin,
     receivedAt: number,
-    fromAcc: EAccount,
+    fromAcc: EAccount
   ) {
     if (this.router == null) {
       console.log(`[UNISWAP] skipping fetch, no router`);
@@ -146,12 +146,12 @@ export class UniswapClient {
       fromCoin,
       fromAmount,
       addr,
-      execDeadline,
+      execDeadline
     );
 
     const elapsedMs = Date.now() - startMs;
     console.log(
-      `[UNISWAP] fetched swap for ${addr}: ${fromAmount} ${fromCoin.symbol} ${fromCoin.token} in ${elapsedMs}ms`,
+      `[UNISWAP] fetched swap for ${addr}: ${fromAmount} ${fromCoin.symbol} ${fromCoin.token} in ${elapsedMs}ms`
     );
 
     const routeQuery = {
@@ -188,7 +188,7 @@ export class UniswapClient {
     fromCoin: ForeignCoin,
     fromAmount: BigIntStr,
     toAddr: Address,
-    execDeadline: number,
+    execDeadline: number
   ): Promise<SwapRoute | null> {
     const router = assertNotNull(this.router, "fetchRoute: no router");
 
@@ -213,7 +213,7 @@ export class UniswapClient {
         Promise.all([
           router.route(from, to, TradeType.EXACT_INPUT),
           router.route(from, to, TradeType.EXACT_INPUT, options),
-        ]),
+        ])
     );
 
     // There is a strange bug where Uniswap sometimes returns terrible routes.
@@ -222,7 +222,7 @@ export class UniswapClient {
     const quoteNoRouteStr = `${quoteNoRoute.toFixed(2)} ${toSymbol}`;
     const quoteWithRouteStr = `${quoteWithRoute.toFixed(2)} ${toSymbol}`;
     console.log(
-      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoRoute ${quoteNoRouteStr} quoteWithRoute ${quoteWithRouteStr}`,
+      `[UNISWAP] ${fromAmount} ${fromCoin.symbol} quoteNoRoute ${quoteNoRouteStr} quoteWithRoute ${quoteWithRouteStr}`
     );
 
     const isLarge = quoteWithRoute > 100;
@@ -232,14 +232,14 @@ export class UniswapClient {
       const desc = isDiscrepancy ? "BAD" : "LARGE";
       const js = JSON.stringify({ noRoute: results[0], withRoute: results[1] });
       console.warn(
-        `[UNISWAP] ${desc} quote ${quoteWithRouteStr} vs ${quoteNoRouteStr}: ${js}`,
+        `[UNISWAP] ${desc} quote ${quoteWithRouteStr} vs ${quoteNoRouteStr}: ${js}`
       );
     }
 
     const route = results[1];
     const jsonRoute = JSON.stringify(route?.route);
     console.log(
-      `[UNISWAP] best route to accept ${fromAmount} ${fromCoin.symbol}: ${jsonRoute}`,
+      `[UNISWAP] best route to accept ${fromAmount} ${fromCoin.symbol}: ${jsonRoute}`
     );
     return route;
   }
@@ -256,14 +256,14 @@ export class UniswapClient {
     fromCoin: ForeignCoin,
     receivedAt: number,
     fromAcc: EAccount,
-    runsInBackground?: boolean,
+    runsInBackground?: boolean
   ): Promise<SwapQueryResult | null> {
     const cachedSwap = this.getCachedSwap(
       addr,
       fromAmount,
       fromCoin.token,
       receivedAt,
-      fromAcc.addr,
+      fromAcc.addr
     );
 
     if (cachedSwap && cachedSwap.cacheUntil > now()) {
@@ -275,7 +275,7 @@ export class UniswapClient {
       fromAmount,
       fromCoin,
       receivedAt,
-      fromAcc,
+      fromAcc
     );
     if (!runsInBackground) await promise;
 
@@ -285,7 +285,7 @@ export class UniswapClient {
         fromAmount,
         fromCoin.token,
         receivedAt,
-        fromAcc.addr,
+        fromAcc.addr
       ) || null
     );
   }

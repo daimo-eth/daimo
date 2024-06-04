@@ -18,5 +18,5 @@ export type SigningCallback = (msgHex: Hex) => Promise<SigResponse>;
  */
 export type OpSenderCallback = (
   op: UserOpHex,
-  memo?: string,
+  memo?: string
 ) => Promise<PendingOpEvent>;

@@ -40,13 +40,13 @@ describe("Passkey", () => {
     const { r, s } = parseAndNormalizeSig(parsedSignResponse.derSig);
     expect(r).toEqual(
       BigInt(
-        "0x3ec596dddac5e3318b566a3dc4557d607b3d3944afb0139220b359ee46d3cd30",
-      ),
+        "0x3ec596dddac5e3318b566a3dc4557d607b3d3944afb0139220b359ee46d3cd30"
+      )
     );
     expect(s).toEqual(
       BigInt(
-        "0x79ff1a3947f4ae1837636d437851ac3484d83877f7fce876e4ffdb151fe9fdad",
-      ),
+        "0x79ff1a3947f4ae1837636d437851ac3484d83877f7fce876e4ffdb151fe9fdad"
+      )
     );
     expect(JSON.parse(parsedSignResponse.clientDataJSON)).toEqual({
       type: "webauthn.get",

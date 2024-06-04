@@ -6,7 +6,7 @@ import { getFrameLinkServiceFromEnv } from "../../../frameLinkService";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { addr: string } },
+  { params }: { params: { addr: string } }
 ): Promise<Response> {
   const addr = getAddress(params.addr);
   const service = getFrameLinkServiceFromEnv();

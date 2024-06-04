@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import { neueMontreal } from "../fonts/font";
@@ -22,12 +22,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  minimumScale: 0.4,
+  viewport: "width=device-width, initial-scale=1, minimum-scale=0.4",
 };
 
 function RootLayout({ children }: { children: React.ReactNode }) {

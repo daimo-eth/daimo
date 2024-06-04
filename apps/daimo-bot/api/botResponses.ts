@@ -6,7 +6,7 @@ export class BotResp {
   static request(
     cleanedAmount: number,
     recipientUsername: string,
-    requestUrl: string,
+    requestUrl: string
   ) {
     const amountStr = cleanedAmount.toFixed(2);
     return [

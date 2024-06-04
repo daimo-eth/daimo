@@ -23,7 +23,7 @@ export class DaimoNonce {
     assert(hexMetadata.length === 2 + 16);
     const nonce = (hexMetadata + this.key.slice(2) + "0000000000000000") as Hex;
     console.log(
-      `[OP]: Nonce for metadata = ${hexMetadata}, key = ${this.key}: nonce = ${nonce}`,
+      `[OP]: Nonce for metadata = ${hexMetadata}, key = ${this.key}: nonce = ${nonce}`
     );
     return nonce;
   }

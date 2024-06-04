@@ -217,7 +217,7 @@ class AccountManager {
     console.log(`[ACTION] pollForAccountByKey saving ${acc.name}, ${acc.addr}`);
     if (this.currentAccount != null) {
       console.log(
-        `[ACCOUNT] ignoring found account, already have ${this.currentAccount.name}`,
+        `[ACCOUNT] ignoring found account, already have ${this.currentAccount.name}`
       );
       return;
     }
@@ -229,7 +229,7 @@ class AccountManager {
   // Create new account
   async createAccount(name: string, inviteLink: DaimoLink) {
     console.log(
-      `[ACCOUNT] createAccount ${name}, ${formatDaimoLink(inviteLink)}`,
+      `[ACCOUNT] createAccount ${name}, ${formatDaimoLink(inviteLink)}`
     );
     const existingAcc = this.currentAccount;
     assert(existingAcc == null, "Can't create, have existing account");
@@ -272,7 +272,7 @@ class AccountManager {
         this.setNewAccount(enclaveKeyName, pubKeyHex, name, address);
       } else {
         console.log(
-          `[ACCOUNT] createAccount NOT saving, existing (polled) acct ${this.currentAccount.name}`,
+          `[ACCOUNT] createAccount NOT saving, existing (polled) acct ${this.currentAccount.name}`
         );
       }
 
@@ -306,7 +306,7 @@ class AccountManager {
     enclaveKeyName: string,
     enclavePubKey: Hex,
     name: string,
-    address: Address,
+    address: Address
   ) {
     assert(this.currentAccount == null, "Can't create, have existing account");
     const newAcc = createEmptyAccount(
@@ -316,7 +316,7 @@ class AccountManager {
         name,
         address,
       },
-      this.daimoChain,
+      this.daimoChain
     );
     this.setCurrentAccount(newAcc); // Saves account, notifies listeners
   }
@@ -324,7 +324,7 @@ class AccountManager {
   // Returns a pending claimLink op.
   private async tryClaimPaymentLink(
     address: Address,
-    inviteLink: DaimoLinkNoteV2,
+    inviteLink: DaimoLinkNoteV2
   ) {
     const { rpcFunc } = env(this.daimoChain);
     const sanitizedUrl = formatDaimoLink(stripSeedFromNoteLink(inviteLink));
@@ -341,7 +341,7 @@ class AccountManager {
       const txHash = await this.sendClaimPaymentLinkTx(
         address,
         inviteLink,
-        noteStatus,
+        noteStatus
       );
       cacheEAccounts([noteStatus.sender]);
       const pendingOp = {
@@ -368,13 +368,13 @@ class AccountManager {
   private async sendClaimPaymentLinkTx(
     address: Address,
     inviteLink: DaimoLinkNoteV2,
-    noteStatus: DaimoNoteStatus,
+    noteStatus: DaimoNoteStatus
   ) {
     const { rpcFunc } = env(this.daimoChain);
     const ephemeralSignature = await getNoteClaimSignatureFromSeed(
       noteStatus.sender.addr,
       address,
-      inviteLink.seed,
+      inviteLink.seed
     );
     const claimTxHash = await rpcFunc.claimEphemeralNoteSponsored.mutate({
       ephemeralOwner: noteStatus.ephemeralOwner!,
@@ -426,7 +426,7 @@ export function useAccount(): Account | null {
 
   // State + listeners pattern
   const [accState, setAccState] = useState<Account | null>(
-    manager.getAccount(),
+    manager.getAccount()
   );
   useEffect(() => {
     manager.addListener(setAccState);

@@ -38,7 +38,7 @@ export class ETHIndexer extends Indexer {
   constructor(
     private vc: ViemClient,
     private uc: UniswapClient,
-    private nameReg: NameRegistry,
+    private nameReg: NameRegistry
   ) {
     super("ETH");
   }
@@ -46,7 +46,7 @@ export class ETHIndexer extends Indexer {
   async batchFetchBalances(
     allAddrs: Address[],
     blockNum: number,
-    cache: boolean, // whether to store query results in cache or not, clears existing cache entries as well if not
+    cache: boolean // whether to store query results in cache or not, clears existing cache entries as well if not
   ): Promise<Map<Address, bigint>> {
     const batchGetETHBalances = async (addrs: Address[]) => {
       if (blockNum < chainConfig.offChainUtilsDeployBlock) {
@@ -69,7 +69,7 @@ export class ETHIndexer extends Indexer {
       if (this.cachedBalances.has(addrBlockNumKey(addr, blockNum))) {
         ret.set(
           addr,
-          this.cachedBalances.get(addrBlockNumKey(addr, blockNum))!,
+          this.cachedBalances.get(addrBlockNumKey(addr, blockNum))!
         );
         if (!cache) {
           this.cachedBalances.delete(addrBlockNumKey(addr, blockNum));
@@ -82,14 +82,14 @@ export class ETHIndexer extends Indexer {
     for (const batch of batchedQueryAddrs) {
       if (batch.length === 0) continue;
       const balances = await retryBackoff(`batchGetETHBalances`, () =>
-        batchGetETHBalances(batch),
+        batchGetETHBalances(batch)
       );
       for (let i = 0; i < batch.length; i++) {
         ret.set(batch[i], balances[i]);
         if (cache) {
           this.cachedBalances.set(
             addrBlockNumKey(batch[i], blockNum),
-            balances[i],
+            balances[i]
           );
         }
       }
@@ -111,7 +111,7 @@ export class ETHIndexer extends Indexer {
 
     const ms = Date.now() - startTime;
     console.log(
-      `[ETH] loaded ${before.size} before, ${after.size} after ETH transfers ${from} ${to} in ${ms}ms`,
+      `[ETH] loaded ${before.size} before, ${after.size} after ETH transfers ${from} ${to} in ${ms}ms`
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -157,7 +157,7 @@ export class ETHIndexer extends Indexer {
 
   async getProposedSwapsForAddr(
     addr: Address,
-    runInBackground?: boolean,
+    runInBackground?: boolean
   ): Promise<ProposedSwap[]> {
     const [latestBalance, latestBlock] = this.latestBalance.get(addr) || [
       0n,
@@ -175,7 +175,7 @@ export class ETHIndexer extends Indexer {
         addr: chainConfig.uniswapETHPoolAddress,
         label: AddrLabel.UniswapETHPool,
       },
-      runInBackground,
+      runInBackground
     );
 
     console.log(`[ETH] getProposedSwap ${addr}: ${JSON.stringify(swap)}`);

@@ -20,12 +20,12 @@
     "docker:shovel": "docker build -t daimo-shovel ./packages/daimo-contract/src/shovel"
   },
   "dependencies": {
-    "eslint-config-universe": "^13.0.0",
+    "eslint-config-universe": "^11.3.0",
     "metro-react-native-babel-preset": "^0.77.0",
-    "prettier": "^3.3.0",
-    "syncpack": "^12.3.2",
-    "turbo": "^1.13.3",
-    "typescript": "^5.4.5"
+    "prettier": "^2.8.8",
+    "syncpack": "^10.6.1",
+    "turbo": "^1.10.15",
+    "typescript": "^5.3.0"
   },
   "workspaces": [
     "packages/*",

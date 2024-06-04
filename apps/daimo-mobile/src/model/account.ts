@@ -704,7 +704,7 @@ export function createEmptyAccount(
     name: string;
     address: Address;
   },
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ): Account {
   return {
     ...inputAccount,

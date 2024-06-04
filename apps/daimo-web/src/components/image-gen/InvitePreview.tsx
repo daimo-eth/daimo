@@ -15,7 +15,7 @@ export function InvitePreviewImg({ name }: { name: string }) {
       <div
         style={{
           backgroundImage: `url("${getAbsoluteUrl(
-            "/assets/frame/InvInitPowerUserDynamic.png",
+            "/assets/frame/InvInitPowerUserDynamic.png"
           )}")`,
           height: "100%",
           width: "100%",
