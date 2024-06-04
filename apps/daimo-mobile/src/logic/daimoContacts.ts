@@ -1,3 +1,4 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   EAccount,
   EAccountSearchResult,
@@ -210,5 +211,17 @@ export function useContactSearch(
     recipients: recipients.slice(0, 16),
     status: res.status,
     error: res.error,
+  };
+}
+
+export function landlineAccountToContact(
+  landlineAccount: LandlineAccount,
+): BridgeBankAccountContact {
+  return {
+    type: "bridgeBankAccount",
+    addr: landlineAccount.liquidationAddress,
+    bankName: landlineAccount.bankName,
+    lastFour: landlineAccount.lastFour,
+    bankLogo: landlineAccount.bankLogo,
   };
 }

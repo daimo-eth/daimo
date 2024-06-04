@@ -48,7 +48,7 @@ function InviteScreenInner({ account }: { account: Account }) {
   const inviteLinkStatus = account.inviteLinkStatus;
 
   console.log(
-    `[INVITE] render ${account.name}, ${JSON.stringify(inviteLinkStatus)}`
+    `[INVITE] render ${account.name}, ${JSON.stringify(inviteLinkStatus)}`,
   );
 
   const header =

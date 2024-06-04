@@ -14,9 +14,11 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { env } from "../../logic/env";
 import { useTime } from "../../logic/time";
 import { Account } from "../../model/account";
@@ -27,7 +29,6 @@ import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
-import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 
 export default function DepositScreen() {
   const Inner = useWithAccount(DepositScreenInner);
@@ -105,9 +106,10 @@ function LandlineAccountList() {
   const landlineAccounts = account.landlineAccounts;
 
   const goToSendTransfer = (landlineAccount: LandlineAccount) => {
+    const recipient = landlineAccountToContact(landlineAccount);
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { landlineAccount },
+      params: { recipient },
     });
   };
 
