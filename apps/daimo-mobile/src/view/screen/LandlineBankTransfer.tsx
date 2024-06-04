@@ -97,6 +97,7 @@ function landlineAccountToContact(
     addr: landlineAccount.liquidationAddress,
     bankName: landlineAccount.bankName,
     lastFour: landlineAccount.lastFour,
+    bankLogo: landlineAccount.bankLogo,
   };
 }
 

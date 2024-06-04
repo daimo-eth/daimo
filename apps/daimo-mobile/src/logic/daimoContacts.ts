@@ -41,6 +41,7 @@ export interface BridgeBankAccountContact extends EAccount, BaseDaimoContact {
   type: "bridgeBankAccount";
   bankName: string;
   lastFour: string;
+  bankLogo: string | undefined;
 }
 
 // A DaimoContact is a "contact" of the user in the app.
@@ -96,8 +97,16 @@ export function getContactName(r: DaimoContact) {
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
-export function getContactProfilePicture(r: DaimoContact) {
-  return r.type === "eAcc" ? r.profilePicture : undefined;
+export function getContactProfilePicture(
+  r: DaimoContact
+): string | { uri: string } | undefined {
+  if (r.type === "eAcc") {
+    return r.profilePicture;
+  } else if (r.type === "bridgeBankAccount") {
+    return { uri: `data:image/png;base64,${r.bankLogo}` };
+  } else {
+    return undefined;
+  }
 }
 
 export function useContactSearch(
