@@ -183,11 +183,9 @@ By default:
 
 You'll need to either use the hosted Daimo API or run one locally.
 
-To run the API locally, fill in the `DAIMO_API_...` and `NEXT_PUBLIC_...`
-environment variables. Message us if you need help.
+To run the API locally, fill in `.env`. Message us if you need help.
 
-You can run Postgres in the background locally using
-`initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+You can run Postgres in the background locally using the Mac Postgres app.
 
 Once you're running the API locally, you can run the full stack self-contained.
 
