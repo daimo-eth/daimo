@@ -18,13 +18,6 @@ import { env } from "../logic/env";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { Account } from "../model/account";
 
-// Sync strategy:
-// - On app load, load account from storage
-// - Then, sync from API
-// - After, sync from API:
-//   ...immediately on push notification
-//   ...frequently while there's a pending transaction
-//   ...occasionally otherwise
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
 
@@ -44,32 +37,44 @@ export function startSync() {
       }, 300);
     });
 
-  // TODO: is there a listener for retriving the account?
-  let listenInterval = setInterval(() => {
-    const manager = getAccountManager();
-    const account = manager.getAccount();
+  const manager = getAccountManager();
+
+  // Called everytime when account changes.
+  // Assign a function here that clears any subscriptions from
+  // the previous account.
+  let onAccountChange = () => {};
+
+  const listener = (account: Account | null) => {
+    console.log("account change", account);
+
+    onAccountChange();
 
     if (!account) {
       return;
     }
 
-    clearInterval(listenInterval);
-
     const daimoChain = daimoChainFromId(account.homeChainId);
-
     const rpcFunc = env(daimoChain).rpcFunc;
 
-    // TODO: pass input here instead of on handshake?
-    rpcFunc.onNewTransaction.subscribe(undefined, {
-      // TODO: possible race condition when initial sync request takes longer
-      // TODO: no typing in onData handler?
-      onData: (data) => {
-        applySync(account, data, false);
+    const sub = rpcFunc.onAccountUpdate.subscribe(
+      {
+        address: account.address,
+        sinceBlockNum: account.lastFinalizedBlock,
       },
-    });
-  });
+      {
+        onData: (data) => {
+          console.log("received account update", data);
+          applySync(account, data, false);
+        },
+      }
+    );
 
-  setInterval(maybeSync, 1_000);
+    onAccountChange = () => {
+      sub.unsubscribe();
+    };
+  };
+
+  manager.addListener(listener);
 }
 
 let lastSyncS = 0;
