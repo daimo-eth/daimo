@@ -2,9 +2,9 @@ import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { Indexer } from "../contract/indexer";
+import { DBNotifications } from "../db/notifications";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
-import { DBNotifications } from "../db/notifications";
 
 const dbConfig: ClientConfig = {
   connectionString: process.env.SHOVEL_DATABASE_URL,

@@ -1,9 +1,9 @@
 import { Span } from "@opentelemetry/api";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
+import { CreateWSSContextFnOptions } from "@trpc/server/adapters/ws";
 
 import { Telemetry } from "./telemetry";
-import { CreateWSSContextFnOptions } from "@trpc/server/adapters/ws";
 
 export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
 

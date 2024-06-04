@@ -1,5 +1,5 @@
-import { Client, ClientConfig } from "pg";
 import EventEmitter from "node:events";
+import { Client, ClientConfig } from "pg";
 
 const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
 

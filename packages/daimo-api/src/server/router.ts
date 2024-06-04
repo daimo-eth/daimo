@@ -15,6 +15,7 @@ import {
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
+import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -53,14 +54,13 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
-import { observable } from "@trpc/server/observable";
-import { chainConfig } from "../env";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -601,7 +601,7 @@ export function createRouter(
 
             const { block_number: newBlockNumber } = JSON.parse(data);
 
-            let thisNotificationTime = Date.now();
+            const thisNotificationTime = Date.now();
 
             getAccountHistory(
               opts.ctx,
