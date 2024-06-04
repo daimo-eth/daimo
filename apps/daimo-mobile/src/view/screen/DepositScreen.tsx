@@ -17,10 +17,12 @@ import {
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
+import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
+import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
@@ -30,7 +32,6 @@ import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
-import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 
 export default function DepositScreen() {
   const Inner = useWithAccount(DepositScreenInner);
@@ -79,7 +80,7 @@ function LandlineConnect() {
   const openLandline = useCallback(() => {
     if (!account) return;
     Linking.openURL(
-      getLandlineURL(account.address, account.landlineSessionKey),
+      getLandlineURL(account.address, account.landlineSessionKey)
     );
   }, [account?.address, account?.landlineSessionKey]);
 
@@ -108,9 +109,10 @@ function LandlineAccountList() {
   const landlineAccounts = account.landlineAccounts;
 
   const goToSendTransfer = (landlineAccount: LandlineAccount) => {
+    const recipient = landlineAccountToContact(landlineAccount);
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { landlineAccount },
+      params: { recipient },
     });
   };
 
@@ -172,7 +174,7 @@ function DepositList({ account }: { account: Account }) {
         logo: rec.logo || defaultLogo,
         isExternal: true,
         onClick: () => openExchange(rec.url),
-      })),
+      }))
     );
   }
 

@@ -41,7 +41,7 @@ export default function LandlineTransferScreen({ route }: Props) {
 }
 
 function LandlineTransferScreenInner({
-  landlineAccount,
+  recipient,
   money,
   memo,
   account,
@@ -57,28 +57,28 @@ function LandlineTransferScreenInner({
         screen: "LandlineTransfer",
         params,
       });
-    if (money != null) goTo({ landlineAccount });
+    if (money != null) goTo({ recipient });
     else if (nav.canGoBack()) nav.goBack();
     else goHome();
-  }, [nav, money, landlineAccount]);
+  }, [nav, money, recipient]);
 
   const sendDisplay = (() => {
     if (money == null)
       return (
         <SendChooseAmount
-          landlineAccount={landlineAccount}
+          recipient={recipient}
           onCancel={goBack}
           daimoChain={daimoChain}
         />
       );
-    else return <SendConfirm {...{ account, landlineAccount, memo, money }} />;
+    else return <SendConfirm {...{ account, recipient, memo, money }} />;
   })();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader
-          title={landlineAccount.bankName}
+          title={recipient.bankName}
           onBack={goBack}
           onExit={goHome}
         />
@@ -89,29 +89,15 @@ function LandlineTransferScreenInner({
   );
 }
 
-function landlineAccountToContact(
-  landlineAccount: LandlineAccount,
-): BridgeBankAccountContact {
-  return {
-    type: "bridgeBankAccount",
-    addr: landlineAccount.liquidationAddress,
-    bankName: landlineAccount.bankName,
-    lastFour: landlineAccount.lastFour,
-    bankLogo: landlineAccount.bankLogo,
-  };
-}
-
 function SendChooseAmount({
-  landlineAccount,
+  recipient,
   daimoChain,
   onCancel,
 }: {
-  landlineAccount: LandlineAccount;
+  recipient: BridgeBankAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
 }) {
-  const recipient = landlineAccountToContact(landlineAccount);
-
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
 
@@ -123,7 +109,7 @@ function SendChooseAmount({
   const setSendAmount = () =>
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { money, memo, landlineAccount },
+      params: { money, memo, recipient },
     });
 
   // Validate memo
@@ -187,23 +173,21 @@ function PublicWarning() {
 
 function SendConfirm({
   account,
-  landlineAccount,
+  recipient,
   money,
   memo,
 }: {
   account: Account;
-  landlineAccount: LandlineAccount;
+  recipient: BridgeBankAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
 }) {
-  const recipient = landlineAccountToContact(landlineAccount);
-
   const nav = useNav();
 
   const navToInput = () => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
-      params: { landlineAccount },
+      params: { recipient },
     });
   };
 
