@@ -1,8 +1,46 @@
-// TODO: support rich profile custom images
-export function UserBubble({ name }: { name: string }) {
+/* eslint-disable @next/next/no-img-element */
+export function UserBubble({
+  name,
+  pfpUrl,
+}: {
+  name: string;
+  pfpUrl?: string;
+}) {
   const inBubbleText = String.fromCodePoint(
     name.codePointAt(0) || "?".charCodeAt(0),
   ).toUpperCase();
+
+  // Show pfp if it exists
+  if (pfpUrl) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          width: "256px",
+          height: "256px",
+          borderRadius: "50%",
+        }}
+      >
+        {pfpUrl && (
+          <div
+            style={{
+              display: "flex",
+              width: "256px",
+              height: "256px",
+              borderRadius: "50%",
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src={`${pfpUrl}`}
+              alt={"Profile"}
+              style={{ width: "256px", height: "256px", objectFit: "cover" }}
+            ></img>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
