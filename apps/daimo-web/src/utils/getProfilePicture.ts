@@ -8,10 +8,12 @@ export async function loadPFPUrl(name: string): Promise<string | undefined> {
   const profilePicture = res.linkedAccounts?.[0]?.pfpUrl;
 
   if (profilePicture == null) {
-    console.log(`[PFP] no PFP found for ${addr}`);
+    console.log(`[PFP] no PFP found for ${name} (${addr})`);
     return undefined;
   }
 
-  console.log(`[PFP] ${addr} fetched profile picture URL ${profilePicture}`);
+  console.log(
+    `[PFP] ${name} (${addr}) fetched profile picture URL ${profilePicture}`
+  );
   return profilePicture;
 }
