@@ -1,3 +1,4 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   DaimoLink,
   DaimoLinkAccount,
@@ -34,7 +35,6 @@ import {
 import { fetchInviteLinkStatus } from "../logic/linkStatus";
 import { Account } from "../model/account";
 import { MoneyEntry } from "../model/moneyEntry";
-import { LandlineAccount } from "../view/screen/DepositScreen";
 
 export type ParamListOnboarding = {
   Intro: undefined;
