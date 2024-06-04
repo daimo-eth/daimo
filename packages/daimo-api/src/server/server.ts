@@ -1,7 +1,7 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import cors from "cors";
 import "dotenv/config";
-import { WebSocketServer } from "ws";
+import { Server as WebSocketServer } from "ws";
 import http from "http";
 
 import { getAppVersionTracker } from "./appVersion";
