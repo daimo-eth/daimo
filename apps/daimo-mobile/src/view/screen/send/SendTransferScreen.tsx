@@ -92,7 +92,7 @@ function SendScreenInner({
       } else if (requestStatus) {
         const recipient = addLastTransferTimes(
           account,
-          requestStatus.recipient
+          requestStatus.recipient,
         );
         if (requestStatus.link.type === "requestv2") {
           return (
