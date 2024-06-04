@@ -389,8 +389,8 @@ interface AccountV15 extends StoredModel {
   notificationRequestStatuses: DaimoRequestV2Status[];
   lastReadNotifTimestamp: number;
   proposedSwaps: ProposedSwap[];
-  exchangeRates?: CurrencyExchangeRate[];
-  sentPaymentLinks?: DaimoLinkNoteV2[];
+  exchangeRates: CurrencyExchangeRate[];
+  sentPaymentLinks: DaimoLinkNoteV2[];
 
   landlineSessionKey: string;
   landlineAccounts: LandlineAccount[];
