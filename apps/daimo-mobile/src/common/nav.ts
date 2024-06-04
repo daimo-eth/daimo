@@ -172,7 +172,7 @@ export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
 }
 
 export function useOnboardingNav<
-  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding
+  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding,
 >() {
   return useNavigation<
     NativeStackNavigationProp<ParamListOnboarding, RouteName>
@@ -208,7 +208,7 @@ export function useOnboardingDeepLinkHandler(dc: DaimoChain) {
 export async function handleOnboardingDeepLink(
   dc: DaimoChain,
   nav: OnboardingNav,
-  str: string
+  str: string,
 ) {
   const inviteLink = parseInviteCodeOrLink(str);
   console.log(`[INTRO] paste invite link: '${str}'`);
@@ -224,7 +224,7 @@ export async function handleOnboardingDeepLink(
 export function handleDeepLink(
   nav: MainNav,
   dispatcher: Dispatcher,
-  url: string
+  url: string,
 ) {
   const link = parseDaimoLink(url);
   if (link == null) {
