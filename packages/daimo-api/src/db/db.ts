@@ -468,7 +468,7 @@ export class DB {
     const client = await this.pool.connect();
     await client.query(
       `INSERT INTO waitlist (name, email, socials) VALUES ($1, $2, $3)`,
-      [name, email, socials],
+      [name, email, socials]
     );
     client.release();
 

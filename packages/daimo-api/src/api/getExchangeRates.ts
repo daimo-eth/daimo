@@ -28,7 +28,7 @@ export async function getExchangeRates(vc: ViemClient) {
 
   const ret = nonUsdCurrencies.map((c) => {
     const { name, symbol, currency, decimals } = c;
-    const rateUSD = Number(data.rates[c.currency]);
+    const rateUSD = 1 / Number(data.rates[c.currency]);
     assert(rateUSD > 0, `Exchange rate invalid: ${c.currency} ${rateUSD}`);
     return { name, symbol, currency, decimals, rateUSD };
   });

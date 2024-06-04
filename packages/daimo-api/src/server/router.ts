@@ -577,7 +577,7 @@ export function createRouter(
 
     submitWaitlist: publicProcedure
       .input(
-        z.object({ name: z.string(), email: z.string(), socials: z.string() }),
+        z.object({ name: z.string(), email: z.string(), socials: z.string() })
       )
       .mutation(async (opts) => {
         const { name, email, socials } = opts.input;
@@ -588,7 +588,7 @@ export function createRouter(
           socials,
           db,
           telemetry,
-          inviteCodeTracker,
+          inviteCodeTracker
         );
       }),
   });
