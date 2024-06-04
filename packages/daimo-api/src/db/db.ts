@@ -19,13 +19,10 @@ const poolConfig: PoolConfig = {
 };
 
 export class DB {
-  notifications: DBNotifications;
-
   private pool: Pool;
 
   constructor() {
     this.pool = new Pool(poolConfig);
-    this.notifications = new DBNotifications(dbConfig);
   }
 
   getStatus() {
