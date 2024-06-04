@@ -173,9 +173,15 @@ function SendChooseAmount({
 
 function PublicWarning() {
   return (
-    <TextCenter>
-      <TextLight>Withdrawals are public</TextLight>
-    </TextCenter>
+    <View style={{ flexDirection: "column" }}>
+      <TextCenter>
+        <TextLight>Withdrawals are public</TextLight>
+      </TextCenter>
+      <Spacer h={4} />
+      <TextCenter>
+        <TextLight>Minimum withdrawal of 1 USDC</TextLight>
+      </TextCenter>
+    </View>
   );
 }
 
@@ -214,6 +220,9 @@ function SendConfirm({
       memo={memoParts.join(" · ")}
       recipient={recipient}
       dollars={money.dollars}
+      // Minimum USDC withdrawal amount specified by bridgexyz
+      // https://apidocs.bridge.xyz/docs/liquidation-address
+      minTransferAmount={1.0}
     />
   );
 
