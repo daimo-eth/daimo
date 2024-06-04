@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { daimoLinkBaseV2 } from "@daimo/common";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -5,6 +6,7 @@ import Image from "next/image";
 import { CallToAction } from "../../../components/CallToAction";
 import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
+import { loadPFPUrl } from "../../../utils/getProfilePicture";
 import {
   createMetadata,
   createMetadataForLinkStatus,
@@ -54,6 +56,7 @@ async function LinkPageInner(props: LinkProps) {
       title: "Daimo",
       description: "Payments on Ethereum",
     };
+  const pfp = name ? await loadPFPUrl(name) : undefined;
 
   return (
     <main className="max-w-md mx-auto px-4">
@@ -63,9 +66,29 @@ async function LinkPageInner(props: LinkProps) {
 
         <div className="h-12" />
 
-        <div className="text-xl font-semibold">
-          {name && <span>{name}</span>}
-          {action && <span className="text-grayMid">{" " + action}</span>}
+        <div className="flex text-xl font-semibold justify-center items-center">
+          <div className="flex flex-row gap-x-2">
+            {pfp && (
+              <div
+                className="flex h-[32px] w-[32px]"
+                style={{ position: "relative" }}
+              >
+                <img
+                  src={pfp}
+                  alt={"Profile"}
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: "100px",
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="flex items-center gap-x-1">
+              {name && <span>{name}</span>}
+              {action && <span className="text-grayMid">{" " + action}</span>}
+            </div>
+          </div>
         </div>
         {dollars && (
           <>

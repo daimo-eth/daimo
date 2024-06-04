@@ -7,12 +7,14 @@ export function LinkPreviewImg({
   dollars,
   paidBy,
   cancelled,
+  pfpUrl,
 }: {
   name: string;
   action?: string;
   dollars?: string;
   paidBy?: string;
   cancelled?: boolean;
+  pfpUrl?: string;
 }) {
   return (
     <div
@@ -37,7 +39,12 @@ export function LinkPreviewImg({
           flexDirection: "column",
         }}
       >
-        <Content name={name} action={action} dollars={dollars} />
+        <Content
+          name={name}
+          action={action}
+          dollars={dollars}
+          pfpUrl={pfpUrl}
+        />
         <Footer paidBy={paidBy} cancelled={cancelled} />
       </div>
     </div>
@@ -48,10 +55,12 @@ function Content({
   name,
   action,
   dollars,
+  pfpUrl,
 }: {
   name: string;
   action: string | undefined;
   dollars: string | undefined;
+  pfpUrl?: string;
 }) {
   return (
     <div
@@ -73,7 +82,7 @@ function Content({
           paddingRight: "24px",
         }}
       >
-        <UserBubble name={name} />
+        <UserBubble name={name} pfpUrl={pfpUrl} />
       </div>
       <div
         style={{

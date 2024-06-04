@@ -98,7 +98,7 @@ async function LinkPageInner(props: LinkProps) {
 
         <div className="h-12" />
 
-        <div className="text-xl font-semibold">
+        <div className="flex text-xl font-semibold justify-center items-center">
           {name && <span>{name}</span>}
           {action && <span className="text-grayMid">{" " + action}</span>}
         </div>
@@ -188,6 +188,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
   switch (res.link.type) {
     case "account": {
       const { account } = res as DaimoAccountStatus;
+      console.log(`[LINK] got account ${JSON.stringify(account)}`);
       return {
         name: getAccountName(account),
         description: "Get Daimo to send or receive payments",
