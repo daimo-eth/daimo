@@ -1,6 +1,8 @@
 import { Client, ClientConfig } from "pg";
 import EventEmitter from "node:events";
 
+const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
+
 /**
  * Connects to Postgres and emits LISTEN/NOTIFY events.
  */
@@ -15,12 +17,20 @@ export class DBNotifications extends EventEmitter {
     this.channels = new Set();
 
     this.on("newListener", (event, listener) => {
+      if (IGNORED_EVENTS.has(event)) {
+        return;
+      }
+
       if (!this.channels.has(event)) {
         this.#addChannel(event);
       }
     });
 
     this.on("removeListener", (event, listener) => {
+      if (IGNORED_EVENTS.has(event)) {
+        return;
+      }
+
       if (this.listenerCount(event) === 0) {
         this.#removeChannel(event);
       }
@@ -36,23 +46,34 @@ export class DBNotifications extends EventEmitter {
   }
 
   async #setupListener() {
-    if (!this.isConnected) {
-      await this.client.connect();
+    if (this.isConnected) {
+      return;
     }
 
     this.client.on("notification", (msg) => {
       this.emit(msg.channel, msg.payload);
     });
+
+    await this.client.connect();
+
+    this.isConnected = true;
   }
 
   async #addChannel(channel: string) {
-    if (!this.client) {
+    if (!this.isConnected) {
       await this.#setupListener();
     }
 
     if (!this.channels.has(channel)) {
-      await this.client.query(`LISTEN ${channel}`);
       this.channels.add(channel);
+
+      try {
+        await this.client.query(`LISTEN "${channel}"`);
+      } catch (e) {
+        this.channels.delete(channel);
+
+        throw e;
+      }
     }
   }
 

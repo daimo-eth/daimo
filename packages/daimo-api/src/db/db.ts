@@ -1,7 +1,6 @@
 import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, Hex, getAddress } from "viem";
-import { DBNotifications } from "./notifications";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 const dbConfig: ClientConfig = {

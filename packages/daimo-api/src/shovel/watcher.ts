@@ -4,6 +4,7 @@ import { ClientConfig, Pool, PoolConfig } from "pg";
 import { Indexer } from "../contract/indexer";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
+import { DBNotifications } from "../db/notifications";
 
 const dbConfig: ClientConfig = {
   connectionString: process.env.SHOVEL_DATABASE_URL,
@@ -20,6 +21,8 @@ const poolConfig: PoolConfig = {
 };
 
 export class Watcher {
+  readonly notifications: DBNotifications;
+
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest = 5699999;
   private slowLatest = 5699999;
@@ -37,6 +40,7 @@ export class Watcher {
 
   constructor() {
     this.pg = new Pool(poolConfig);
+    this.notifications = new DBNotifications(dbConfig);
   }
 
   add(...i: Indexer[][]) {

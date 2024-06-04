@@ -24,7 +24,10 @@ import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
-import { getAccountHistory } from "../api/getAccountHistory";
+import {
+  AccountHistoryResult,
+  getAccountHistory,
+} from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
@@ -56,6 +59,7 @@ import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
 import { observable } from "@trpc/server/observable";
+import { chainConfig } from "../env";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -577,69 +581,67 @@ export function createRouter(
         return status.isValid;
       }),
 
-    onNewBlock: publicProcedure.subscription(async (opts) => {
-      return observable<{ number: number }>((emit) => {
-        const eventName = "newBlock";
-        const listener = (data: string) => {
-          const msg = JSON.parse(data);
+    onAccountUpdate: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          inviteCode: z.string().optional(),
+          sinceBlockNum: z.number(),
+        })
+      )
+      .subscription(async (opts) => {
+        return observable<AccountHistoryResult>((emit) => {
+          const eventName = chainConfig.daimoChain + "-daimo-transfers";
 
-          emit.next({
-            number: msg.number,
-          });
-        };
+          let lastEmitTime = 0;
 
-        db.notifications.on(eventName, listener);
+          const listener = (data: string) => {
+            const { address, inviteCode } = opts.input;
 
-        return () => {
-          db.notifications.off(eventName, listener);
-        };
-      });
-    }),
+            const { block_number: newBlockNumber } = JSON.parse(data);
 
-    // TODO: implementation missing user data
-    onNewTransaction: publicProcedure.subscription(async (opts) => {
-      return observable((emit) => {
-        const eventName = "newBlock";
-        const listener = (data: string) => {
-          const msg = JSON.parse(data);
+            let thisNotificationTime = Date.now();
 
-          const inviteCode = "";
-          const sinceBlockNum = msg.number - 1;
+            getAccountHistory(
+              opts.ctx,
+              address,
+              inviteCode,
+              newBlockNumber,
+              watcher,
+              vc,
+              homeCoinIndexer,
+              ethIndexer,
+              foreignCoinIndexer,
+              profileCache,
+              noteIndexer,
+              reqIndexer,
+              inviteCodeTracker,
+              inviteGraph,
+              nameReg,
+              keyReg,
+              paymaster,
+              db
+            ).then((history) => {
+              // Don't do anything if we received account history after
+              // the last emit. This protects us for variability
+              // of processing the account history.
+              if (thisNotificationTime < lastEmitTime) {
+                return;
+              }
 
-          // TODO: Pass auth data on handshake to get user data?
-          const address = getAddress("");
+              lastEmitTime = Date.now();
 
-          const history = getAccountHistory(
-            opts.ctx,
-            address,
-            inviteCode,
-            sinceBlockNum,
-            watcher,
-            vc,
-            homeCoinIndexer,
-            ethIndexer,
-            foreignCoinIndexer,
-            profileCache,
-            noteIndexer,
-            reqIndexer,
-            inviteCodeTracker,
-            inviteGraph,
-            nameReg,
-            keyReg,
-            paymaster,
-            db
-          );
+              emit.next(history);
+            });
+          };
 
-          emit.next(history);
-        };
+          watcher.notifications.on(eventName, listener);
 
-        db.notifications.on(eventName, listener);
-
-        return () => {
-          db.notifications.off(eventName, listener);
-        };
-      });
-    }),
+          return () => {
+            watcher.notifications.off(eventName, listener);
+          };
+        });
+      }),
   });
 }
 
