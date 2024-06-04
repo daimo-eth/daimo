@@ -2,6 +2,7 @@
 import { ImageResponse } from "@vercel/og";
 
 import { LinkPreviewImg } from "../../components/image-gen/LinkPreview";
+import { loadPFPUrl } from "../../utils/getProfilePicture";
 
 export const runtime = "edge";
 
@@ -21,9 +22,14 @@ export async function GET(request: Request) {
     : undefined;
   const paidBy = searchParams.get("paidBy") || undefined;
   const cancelled = !!searchParams.get("cancelled");
+  const pfpUrl = name ? await loadPFPUrl(name) : undefined;
 
   return new ImageResponse(
-    <LinkPreviewImg {...{ name, action, dollars, paidBy, cancelled }} />,
+    (
+      <LinkPreviewImg
+        {...{ name, action, dollars, pfpUrl, paidBy, cancelled }}
+      />
+    ),
     {
       width: 1200,
       height: 630,

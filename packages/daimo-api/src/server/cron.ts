@@ -160,24 +160,28 @@ export class Crontab {
 
     if (fromName == null && toName == null) return;
 
-    const fromDisplayName = getAccountName(
-      await this.nameRegistry.getEAccount(opEvent.from)
-    );
-    const toDisplayName = getAccountName(
-      await this.nameRegistry.getEAccount(opEvent.to)
-    );
+    const [fromAcc, toAcc] = await Promise.all([
+      this.nameRegistry.getEAccount(opEvent.from),
+      this.nameRegistry.getEAccount(opEvent.to),
+    ]);
 
-    this.telemetry.recordClippy(
-      `Transfer: ${fromDisplayName} -> ${toDisplayName} $${amountToDollars(
-        opEvent.amount
-      )}${
-        opEvent.type === "transfer" && opEvent.requestStatus
-          ? " for " + formatDaimoLink(opEvent.requestStatus.link)
-          : ""
-      }${
-        opEvent.type === "transfer" && opEvent.memo ? " : " + opEvent.memo : ""
-      }`
-    );
+    // Post to Clippy
+    const parts = [
+      "Transfer:",
+      getAccountName(fromAcc),
+      "->",
+      getAccountName(toAcc),
+      "$" + amountToDollars(opEvent.amount),
+      opEvent.type === "transfer" &&
+        opEvent.requestStatus &&
+        `for ${formatDaimoLink(opEvent.requestStatus.link)}`,
+      opEvent.type === "transfer" && opEvent.memo && `: ${opEvent.memo}`,
+      opEvent.blockNumber != null &&
+        opEvent.logIndex != null &&
+        `https//ethreceipts.org/l/${chainConfig.chainL2.id}/${opEvent.blockNumber}/${opEvent.logIndex}`,
+    ];
+    const clippyMessage = parts.filter(Boolean).join(" ");
+    this.telemetry.recordClippy(clippyMessage);
   }
 
   async postRecentForeignCoinTransfer(transfer: ForeignTokenTransfer) {

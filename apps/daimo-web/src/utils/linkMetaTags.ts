@@ -1,6 +1,7 @@
 import {
   DaimoRequestState,
   DaimoRequestV2Status,
+  assertDaimoRequestV2Status,
   formatDaimoLink,
   getAccountName,
 } from "@daimo/common";
@@ -22,9 +23,13 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
 
   // Create image preview
-  const { fulfilledBy, status } = desc.linkStatus as DaimoRequestV2Status;
-  const paidBy = fulfilledBy && getAccountName(fulfilledBy);
-  const cancelled = status === "cancelled";
+  let paidBy: string | undefined;
+  let cancelled = false;
+  if (desc.linkStatus != null && desc.linkStatus.link.type === "requestv2") {
+    const stat = assertDaimoRequestV2Status(desc.linkStatus);
+    paidBy = stat.fulfilledBy && getAccountName(stat.fulfilledBy);
+    cancelled = stat.status === "cancelled";
+  }
   const previewURL = getPreviewURL(name, action, dollars, paidBy, cancelled);
 
   const meta = createMetadata(title, desc.description, previewURL);
@@ -81,6 +86,7 @@ export function getFrameForLinkStatus(
 
 // Generates a OpenGraph link preview image URL
 // The image itself is also generated dynamically -- see preview/route.tsx
+// TODO: refactor to take an object, handle account & note links
 function getPreviewURL(
   name: string | undefined,
   action: string | undefined,

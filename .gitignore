@@ -2,3 +2,7 @@ node_modules/
 dist/
 .turbo/
 .DS_Store
+
+# Each app/ package should have .env.example checked in with all required vars.
+# .env files are ignored by git, used for local development
+.env

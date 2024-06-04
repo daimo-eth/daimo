@@ -3,12 +3,6 @@ const superSo = "https://daimo.super.site";
 export async function GET(request: Request) {
   const url = new URL(request.url);
 
-  // Special case: /waitlist
-  if (url.pathname === "/waitlist") {
-    // redirect to waitlist noteform for now
-    return Response.redirect("https://noteforms.com/forms/daimo-uk2fe4", 302);
-  }
-
   // Redirect daimo.xyz to daimo.com
   if (url.hostname === "daimo.xyz") {
     url.hostname = "daimo.com";
