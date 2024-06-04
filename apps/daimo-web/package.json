@@ -34,7 +34,8 @@
     "ts-loader": "^9.5.0",
     "use-debounce": "^10.0.0",
     "viem": "^1.19.15",
-    "wagmi": "^1.4.12"
+    "wagmi": "^1.4.12",
+    "zod": "^3.23.8"
   },
   "scripts": {
     "dev": "DAIMO_DOMAIN=localhost:3001 next dev -p 3001",

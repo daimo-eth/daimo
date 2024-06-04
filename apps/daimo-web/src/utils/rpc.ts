@@ -1,9 +1,9 @@
 import { AppRouter } from "@daimo/api";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 
-import { chainConfig } from "../env";
+import { chainConfig, envVarsWeb } from "../env";
 
-const apiUrl = process.env.NEXT_PUBLIC_DAIMO_API_URL || "http://localhost:3000";
+const apiUrl = envVarsWeb.NEXT_PUBLIC_DAIMO_API_URL || "http://localhost:3000";
 export const apiUrlWithChain = `${apiUrl}/chain/${chainConfig.chainL2.id}`;
 
 export const rpc = createTRPCClient<AppRouter>({

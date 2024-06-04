@@ -178,7 +178,7 @@ export class Crontab {
       opEvent.type === "transfer" && opEvent.memo && `: ${opEvent.memo}`,
       opEvent.blockNumber != null &&
         opEvent.logIndex != null &&
-        `https//ethreceipts.org/l/${chainConfig.chainL2.id}/${opEvent.blockNumber}/${opEvent.logIndex}`,
+        `https://ethreceipts.org/l/${chainConfig.chainL2.id}/${opEvent.blockNumber}/${opEvent.logIndex}`,
     ];
     const clippyMessage = parts.filter(Boolean).join(" ");
     this.telemetry.recordClippy(clippyMessage);
