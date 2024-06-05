@@ -2,15 +2,15 @@ import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { Indexer } from "../contract/indexer";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
 const dbConfig: ClientConfig = {
-  connectionString: process.env.SHOVEL_DATABASE_URL,
+  connectionString: getEnvApi().SHOVEL_DATABASE_URL,
   connectionTimeoutMillis: 20000,
   query_timeout: 20000,
   statement_timeout: 20000,
-  database: process.env.SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
+  database: getEnvApi().SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
 };
 
 const poolConfig: PoolConfig = {

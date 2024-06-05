@@ -1,4 +1,4 @@
-import { getEnv } from "@daimo/common";
+import { assertNotNull } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import csv from "csvtojson";
 import _ from "lodash";
@@ -26,7 +26,9 @@ export async function getFids() {
 }
 
 async function getFidsForAddrs(addrs: Address[]): Promise<number[]> {
-  const client = new NeynarAPIClient(getEnv("DAIMO_NEYNAR_KEY"));
+  const client = new NeynarAPIClient(
+    assertNotNull(process.env.DAIMO_NEYNAR_KEY)
+  );
   const fids = [] as number[];
   for (const chunk of _.chunk(addrs, 300)) {
     console.log(`Fetching FIDs for ${chunk.length} addrs`);

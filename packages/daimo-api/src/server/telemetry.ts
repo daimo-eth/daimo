@@ -7,7 +7,7 @@ import Libhoney from "libhoney";
 import z from "zod";
 
 import { TrpcRequestContext } from "./trpc";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 
 // More keys to come. This list ensures we don't duplicate columns.
 export type TelemKey =
@@ -47,8 +47,8 @@ export class Telemetry {
   private tracerApi = trace.getTracer("daimo-api");
 
   constructor() {
-    const apiKey = process.env.HONEYCOMB_API_KEY || "";
-    const sentryDSN = process.env.SENTRY_DSN || "";
+    const apiKey = getEnvApi().HONEYCOMB_API_KEY;
+    const sentryDSN = getEnvApi().SENTRY_DSN;
     if (apiKey === "") {
       console.log(`[TELEM] no HONEYCOMB_API_KEY set, telemetry disabled`);
       this.honeyEvents = null;
@@ -134,7 +134,7 @@ export class Telemetry {
 
   /** Use blocks for rich text. Markdown, etc. */
   recordClippyRichMessage(message: string, blocks: any[]) {
-    const url = process.env.CLIPPY_WEBHOOK_URL || "";
+    const url = getEnvApi().CLIPPY_WEBHOOK_URL;
 
     console.log(`[TELEM] ${url === "" ? "SKIPPING " : ""}clippy: ${message}`);
     if (url === "") return;

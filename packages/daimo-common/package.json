@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
+    "test": "tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0"
@@ -28,6 +28,6 @@
     "@scure/base": "^1.1.3",
     "@scure/bip39": "^1.3.0",
     "viem": "^1.19.15",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   }
 }

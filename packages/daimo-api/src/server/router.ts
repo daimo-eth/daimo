@@ -50,6 +50,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { getEnvApi } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -58,7 +59,7 @@ import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
 
 // Service authentication for, among other things, invite link creation
-const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
+const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
 console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(

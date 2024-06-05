@@ -1,9 +1,9 @@
-import { daimoDomainAddress } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
 import React, { useContext, useState } from "react";
 import {
+  ImageSourcePropType,
   Linking,
   ScrollView,
   StyleSheet,
@@ -12,6 +12,8 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
+import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../logic/env";
 import { Account } from "../../model/account";
@@ -62,7 +64,7 @@ function DepositList({ account }: { account: Account }) {
     dispatcher.dispatch({ name: "depositAddress" });
   };
 
-  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+  const defaultLogo = IconDepositWallet;
 
   const options: OptionRowProps[] = [
     {
@@ -113,7 +115,7 @@ function WithdrawList() {
     dispatcher.dispatch({ name: "withdrawInstructions" });
   };
 
-  const defaultLogo = `${daimoDomainAddress}/assets/deposit/withdraw-wallet.png`;
+  const defaultLogo = IconWithdrawWallet;
 
   return (
     <View style={styles.section}>
@@ -132,7 +134,7 @@ function WithdrawList() {
 type OptionRowProps = {
   title?: string;
   cta: string;
-  logo: string;
+  logo: ImageSourcePropType;
   isExternal?: boolean;
   onClick: () => void;
 };
@@ -170,7 +172,7 @@ function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
   );
 }
 
-function LogoBubble({ logo }: { logo: string }) {
+function LogoBubble({ logo }: { logo: ImageSourcePropType }) {
   return (
     <View style={styles.logoBubble}>
       <Image source={logo} style={styles.logoBubble} />

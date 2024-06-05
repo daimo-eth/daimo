@@ -11,7 +11,7 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { Telemetry } from "../server/telemetry";
@@ -126,16 +126,18 @@ export async function deployWallet(
 }
 
 async function queryFaucetAntiSpamApi(reqInfo: RequestInfo): Promise<boolean> {
-  const faucetApiUrl = process.env.DAIMO_FAUCET_API_URL || "";
+  const faucetApiUrl = getEnvApi().DAIMO_FAUCET_API_URL;
+  // Staging = no faucet API = always allow
   if (faucetApiUrl === "") return true;
 
+  // Prod = query API to avoid sending invite faucet to spammers / farmers
   let sendFaucet = false;
   try {
     const faucetRes = await fetch(faucetApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.DAIMO_FAUCET_API_KEY || "",
+        "x-api-key": getEnvApi().DAIMO_FAUCET_API_KEY,
       },
       body: JSON.stringify(reqInfo),
     });

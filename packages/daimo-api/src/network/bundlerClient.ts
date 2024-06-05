@@ -15,7 +15,7 @@ import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
 import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 
 interface GasPriceParams {
   maxFeePerGas: Hex;
@@ -174,9 +174,7 @@ export class BundlerClient {
 
 /** Requires DAIMO_BUNDLER_RPC_URL. */
 export function getBundlerClientFromEnv(opIndexer?: OpIndexer) {
-  const rpcUrl = process.env.DAIMO_BUNDLER_RPC || "";
-  assert(rpcUrl !== "", "DAIMO_BUNDLER_RPC env var missing");
-  return new BundlerClient(rpcUrl, opIndexer);
+  return new BundlerClient(getEnvApi().DAIMO_BUNDLER_RPC, opIndexer);
 }
 
 function userOpFromHex(op: UserOpHex) {

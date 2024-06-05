@@ -1,14 +1,13 @@
 import { Address, formatUnits } from "viem";
 
 import { amountToDollars } from "./coin";
-import { daimoDomainAddress } from "./daimoLink";
 
 export type ForeignCoin = {
   token: "ETH" | Address;
   decimals: number;
   fullName: string;
   symbol: string;
-  logoURI?: string;
+  logoURI?: string; // unused?
 };
 
 export const nativeETH: ForeignCoin = {
@@ -32,7 +31,7 @@ export const USDbC: ForeignCoin = {
   fullName: "Bridged USD Coin", // USDbC has a bad name on CoinGecko
   symbol: "USDbC",
   decimals: 6,
-  logoURI: `${daimoDomainAddress}/assets/foreign-coin-logos/USDbC.png`, // CoinGecko logo is fugly
+  logoURI: `https://daimo.com/assets/foreign-coin-logos/USDbC.png`, // CoinGecko logo is fugly
 };
 
 // From https://stackoverflow.com/questions/32229667/have-max-2-decimal-places

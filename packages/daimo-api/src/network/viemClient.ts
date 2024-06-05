@@ -23,13 +23,13 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 
 import { chainLinkAggregatorABI } from "./chainLink";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
 
 function getTransportFromEnv() {
-  const l1_RPCs = process.env.DAIMO_API_L1_RPC_WS!.split(",");
-  const l2_RPCs = process.env.DAIMO_API_L2_RPC_WS!.split(",");
+  const l1_RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
+  const l2_RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
 
   console.log(`[VIEM] using transport RPCs L1: ${l1_RPCs}, L2: ${l2_RPCs}`);
 
@@ -57,7 +57,7 @@ export function getViemClientFromEnv(monitor: Telemetry) {
 
   // Connect to L2
   const chain = chainConfig.chainL2;
-  const account = getEOA(process.env.DAIMO_API_PRIVATE_KEY);
+  const account = getEOA(getEnvApi().DAIMO_API_PRIVATE_KEY);
   const publicClient = createPublicClient({
     chain,
     transport: transports.l2,
@@ -71,9 +71,7 @@ export function getViemClientFromEnv(monitor: Telemetry) {
   return new ViemClient(l1Client, publicClient, walletClient, monitor);
 }
 
-export function getEOA(privateKey?: string) {
-  if (!privateKey) throw new Error("Missing private key");
-
+export function getEOA(privateKey: string) {
   if (!privateKey.startsWith("0x")) privateKey = `0x${privateKey}`;
   assert(isHex(privateKey) && privateKey.length === 66, "Invalid private key");
 

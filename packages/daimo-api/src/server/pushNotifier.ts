@@ -24,15 +24,15 @@ import {
   ForeignTokenTransfer,
 } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer, Transfer } from "../contract/homeCoinIndexer";
-import { KeyRegistry, KeyChange } from "../contract/keyRegistry";
+import { KeyChange, KeyRegistry } from "../contract/keyRegistry";
 import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
-const pushEnabled = process.env.DAIMO_PUSH_ENABLED === "true";
+const pushEnabled = getEnvApi().DAIMO_PUSH_ENABLED;
 
 /**
  * Subscribes to coin transfers onchain. Whenever a transfer affects a Daimo

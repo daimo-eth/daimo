@@ -150,7 +150,6 @@ export class ProfileCache {
 
   searchLinkedAccounts(prefix: string): ProfileLink[] {
     if (prefix.length < 2) return [];
-    console.log();
     return this.links.filter((l) => {
       const { username, displayName } = l.linkedAccount;
       const match = (s: string) =>
