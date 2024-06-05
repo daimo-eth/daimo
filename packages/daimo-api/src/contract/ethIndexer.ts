@@ -41,33 +41,50 @@ export class ETHIndexer extends Indexer {
     super("ETH");
   }
 
+  // Fetch balances for all addresses at block number.
+  batchGetETHBalances = async (addrs: Address[], blockNum: number) => {
+    if (blockNum < chainConfig.offChainUtilsDeployBlock) {
+      return new Array(addrs.length).fill(0n) as bigint[];
+    } else {
+      return await this.vc.publicClient.readContract({
+        abi: daimoOffchainUtilsABI,
+        address: daimoOffchainUtilsAddress,
+        functionName: "batchGetETHBalances",
+        args: [addrs],
+        blockNumber: BigInt(blockNum),
+      });
+    }
+  };
+
   async batchFetchBalances(
     allAddrs: Address[],
-    blockNum: number
+    fromBlockNum: number,
+    toBlockNum: number
   ): Promise<Map<Address, bigint>> {
     // Call contract to get ETH balances for all addresses at block number.
-    const batchGetETHBalances = async (addrs: Address[]) => {
-      if (blockNum < chainConfig.offChainUtilsDeployBlock) {
-        return new Array(addrs.length).fill(0n) as bigint[];
-      } else {
-        return await this.vc.publicClient.readContract({
-          abi: daimoOffchainUtilsABI,
-          address: daimoOffchainUtilsAddress,
-          functionName: "batchGetETHBalances",
-          args: [addrs],
-          blockNumber: BigInt(blockNum),
-        });
-      }
-    };
-
     const balanceDiffs = new Map<Address, bigint>();
+
+    // Ensure the cache is up to date.
+    const oldQueryAddrs: Address[] = [];
+    allAddrs.forEach((addr) => {
+      if (!this.latestBalances.has(addr)) {
+        oldQueryAddrs.push(addr);
+      }
+    });
+    const oldBalances = await this.batchGetETHBalances(
+      oldQueryAddrs,
+      fromBlockNum
+    );
+    for (let i = 0; i < oldQueryAddrs.length; i++) {
+      this.latestBalances.set(oldQueryAddrs[i], [oldBalances[i], fromBlockNum]);
+    }
 
     // Query all balances for all addresses at the current block number.
     const batchedQueryAddrs = [...chunks(allAddrs, 100)];
     for (const batch of batchedQueryAddrs) {
       if (batch.length === 0) continue;
       const newBalances = await retryBackoff(`batchGetETHBalances`, () =>
-        batchGetETHBalances(batch)
+        this.batchGetETHBalances(batch, toBlockNum)
       );
 
       // Calculate difference between fetched balance and latest cached balance.
@@ -82,7 +99,7 @@ export class ETHIndexer extends Indexer {
           }
         }
         // Update cache with new balance and currentblock number.
-        this.latestBalances.set(batch[i], [newBalances[i], blockNum]);
+        this.latestBalances.set(batch[i], [newBalances[i], toBlockNum]);
       }
     }
     return balanceDiffs;
@@ -96,7 +113,7 @@ export class ETHIndexer extends Indexer {
     const allAddrs = this.nameReg.getAllDAccounts().map((a) => a.addr);
 
     // Query differences in latest balances and starting balances for all accounts
-    const balanceDiffs = await this.batchFetchBalances(allAddrs, to);
+    const balanceDiffs = await this.batchFetchBalances(allAddrs, from, to);
 
     const ms = Date.now() - startTime;
     console.log(
