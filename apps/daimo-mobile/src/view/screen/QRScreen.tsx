@@ -29,6 +29,7 @@ import {
 } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { decodeQR } from "../../logic/decodeQR";
+import { TextButton } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { Scanner } from "../shared/Scanner";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -64,6 +65,7 @@ export function QRScreen(props: Props) {
 function QRDisplay() {
   const [recentlyCopied, setRecentlyCopied] = useState(false);
   const account = useAccount();
+  const nav = useNav();
   if (account == null) return null;
 
   const url = formatDaimoLink({ type: "account", account: account.name });
@@ -78,6 +80,10 @@ function QRDisplay() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRecentlyCopied(true);
     setTimeout(() => setRecentlyCopied(false), 1000);
+  };
+
+  const goToDeposit = () => {
+    nav.navigate("DepositTab");
   };
 
   return (
@@ -96,6 +102,9 @@ function QRDisplay() {
           </TextCenter>
         </Pressable>
         <ShareButton name={account.name} />
+      </View>
+      <View style={styles.accountShare}>
+        <TextButton title="DEPOSIT FROM EXCHANGE ›" onPress={goToDeposit} />
       </View>
     </View>
   );

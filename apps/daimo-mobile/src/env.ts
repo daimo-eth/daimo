@@ -4,8 +4,6 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { DeviceType, deviceType } from "expo-device";
 import { ZodObject, z } from "zod";
 
-import { getRpcHook } from "./logic/trpc";
-
 const zEnv = {
   DAIMO_APP_VARIANT: z.enum(["sim", "maestro", "dev", "prod"]).default("sim"),
   // Useful for local testing against an alternate passkey domain
