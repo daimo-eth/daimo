@@ -118,30 +118,47 @@ function getTRPCOpts(
 ): CreateTRPCClientOptions<AppRouter> {
   const url = `http://localhost:2022`;
 
-  return {
-    links: [
-      // call subscriptions through websockets and the rest over http
-      splitLink({
-        condition(op) {
-          return op.type === "subscription";
-        },
+  let daimoLink = splitLink({
+    condition(op) {
+      return op.type === "subscription";
+    },
 
-        true: wsLink({
-          client: createWSClient({
-            url,
-          }),
-        }),
-
-        false: httpBatchLink({
-          url: chooseChain({
-            daimoChain,
-            mainnet: apiUrlMainnetWithChain,
-            testnet: apiUrlTestnetWithChain,
-          }),
-          fetch: customTRPCfetch,
-        }),
+    true: wsLink({
+      client: createWSClient({
+        url,
       }),
-    ],
+    }),
+
+    false: httpBatchLink({
+      url: chooseChain({
+        daimoChain,
+        mainnet: apiUrlMainnetWithChain,
+        testnet: apiUrlTestnetWithChain,
+      }),
+      fetch: customTRPCfetch,
+    }),
+  });
+
+  // TRPC client tries to connect to WebSocket on creation which breaks
+  // test environment that expects any resources to be defined explicitly in unit body
+  // or mocked altogether.
+  // Since TRPC client is currently tangled together with top-level code,
+  // we avoid using WebSocket link when running in no-browser environment (like tests.)
+  if (typeof WebSocket === "undefined") {
+    console.error("WebSocket not available, skipping websocket link");
+
+    daimoLink = httpBatchLink({
+      url: chooseChain({
+        daimoChain,
+        mainnet: apiUrlMainnetWithChain,
+        testnet: apiUrlTestnetWithChain,
+      }),
+      fetch: customTRPCfetch,
+    });
+  }
+
+  return {
+    links: [daimoLink],
   };
 }
 
