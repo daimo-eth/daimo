@@ -18,7 +18,11 @@ jobs:
         with:
           node-version: "20.x"
 
-      - run: npm ci && npm test
+      - run: |
+          cp apps/daimo-web/.env.example apps/daimo-web/.env
+          cp packages/daimo-api/.env.example packages/daimo-api/.env
+          npm ci
+          npm test
 
   test-contract:
     runs-on: ubuntu-latest
