@@ -52,13 +52,19 @@ export class ETHIndexer extends Indexer {
       if (blockNum < chainConfig.offChainUtilsDeployBlock) {
         return new Array(addrs.length).fill(0n) as bigint[];
       } else {
-        return await this.vc.publicClient.readContract({
-          abi: daimoOffchainUtilsABI,
-          address: daimoOffchainUtilsAddress,
-          functionName: "batchGetETHBalances",
-          args: [addrs],
-          blockNumber: BigInt(blockNum),
-        });
+        try {
+          const ethBalances = await this.vc.publicClient.readContract({
+            abi: daimoOffchainUtilsABI,
+            address: daimoOffchainUtilsAddress,
+            functionName: "batchGetETHBalances",
+            args: [addrs],
+            blockNumber: BigInt(blockNum),
+          });
+          return ethBalances;
+        } catch (e) {
+          console.log(`[ETH INDEXER] batchGetETHBalances error: ${e}`);
+          return new Array(addrs.length).fill(0n) as bigint[]; // unsure if this is the appropriate response
+        }
       }
     };
 

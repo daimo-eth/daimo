@@ -102,8 +102,9 @@ async function main() {
     [homeCoinIndexer]
   );
 
-  // Disable ethIndexer for now
-  // shovelWatcher.slowAdd(ethIndexer);
+  // ethIndexer can be spotty depending on RPC errors.
+  // TODO: merge ethIndexer and foreignCoinIndexer into one as shovel now supports both.
+  shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {
