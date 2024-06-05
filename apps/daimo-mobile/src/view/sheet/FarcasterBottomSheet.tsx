@@ -13,7 +13,7 @@ import { stringToBytes } from "viem";
 import { DispatcherContext } from "../../action/dispatch";
 import { signAsync } from "../../action/sign";
 import { getAccountManager } from "../../logic/accountManager";
-import { env } from "../../logic/env";
+import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../model/account";
 import { FarcasterClient } from "../../profile/farcaster";
 import { QRCodeBox } from "../screen/QRScreen";
@@ -181,7 +181,7 @@ async function updateProfileLinks(account: Account, action: OffchainAction) {
   console.log(
     `[PROFILE] sending offchain action: ${actionJSON} sig: ${signature}`
   );
-  const { rpcFunc } = env(daimoChainFromId(account.homeChainId));
+  const rpcFunc  = getRpcFunc(daimoChainFromId(account.homeChainId));
   const addr = account.address;
   const linkedAccounts = await rpcFunc.updateProfileLinks.mutate({
     addr,

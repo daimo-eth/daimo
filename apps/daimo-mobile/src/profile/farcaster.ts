@@ -8,6 +8,8 @@ import {
 } from "@daimo/auth-client";
 import { FarcasterLinkedAccount, assertNotNull } from "@daimo/common";
 
+import { getEnvMobile } from "../env";
+
 // Utility to connect to Farcaster.
 // See https://docs.farcaster.xyz/auth-kit/client/introduction
 export class FarcasterClient {
@@ -21,8 +23,7 @@ export class FarcasterClient {
   private init(): AppClient {
     if (this.appClient != null) return this.appClient;
 
-    const optimismRpcUrl =
-      process.env.DAIMO_OPTIMISM_RPC_URL || "https://mainnet.optimism.io";
+    const optimismRpcUrl = getEnvMobile().DAIMO_OPTIMISM_RPC_URL;
     console.log(`[FARCASTER] initializing, optimism RPC: ${optimismRpcUrl}`);
     this.appClient = createAppClient({
       relay: "https://relay.farcaster.xyz",

@@ -6,7 +6,7 @@ import {
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 
-import { env } from "./env";
+import { getRpcFunc, getRpcHook } from "./trpc";
 
 export function useFetchLinkStatus(
   link: DaimoLink | undefined,
@@ -14,7 +14,7 @@ export function useFetchLinkStatus(
 ) {
   const sanitizedLink = link && stripSeedFromNoteLink(link);
   const url = sanitizedLink && formatDaimoLink(sanitizedLink);
-  const { rpcHook } = env(daimoChain);
+  const rpcHook = getRpcHook(daimoChain);
   return rpcHook.getLinkStatus.useQuery({ url: url! }, { enabled: !!url });
 }
 
@@ -22,7 +22,7 @@ export async function fetchInviteLinkStatus(
   daimoChain: DaimoChain,
   inviteLink: DaimoLink | undefined
 ) {
-  const { rpcFunc } = env(daimoChain);
+  const rpcFunc = getRpcFunc(daimoChain);
   const url = inviteLink && formatDaimoLink(stripSeedFromNoteLink(inviteLink));
   const linkStatus = !!url && (await rpcFunc.getLinkStatus.query({ url }));
   const inviteStatus = linkStatus ? getInviteStatus(linkStatus) : undefined;

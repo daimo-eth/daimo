@@ -14,8 +14,8 @@ import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
-import { env } from "../logic/env";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
+import { getRpcFunc } from "../logic/trpc";
 import { Account } from "../model/account";
 
 // Sync strategy:
@@ -146,7 +146,7 @@ async function fetchSync(
   const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
 
   const daimoChain = daimoChainFromId(account.homeChainId);
-  const rpcFunc = env(daimoChain).rpcFunc;
+  const rpcFunc = getRpcFunc(daimoChain);
   const result = await rpcFunc.getAccountHistory.query({
     address: account.address,
     inviteCode: account.inviteLinkStatus?.link.code,

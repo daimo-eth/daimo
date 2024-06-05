@@ -24,12 +24,12 @@ import {
   useNav,
 } from "../../../common/nav";
 import { DaimoContact } from "../../../logic/daimoContacts";
-import { env } from "../../../logic/env";
 import {
   ExternalAction,
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { getRpcFunc } from "../../../logic/trpc";
 import { Account } from "../../../model/account";
 import { zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -64,7 +64,7 @@ function RequestScreenInner({
   const nav = useNav();
   const textInputRef = useRef<TextInput>(null);
 
-  const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
 
   const [externalAction, setExternalAction] = useState<
     ExternalAction | undefined
@@ -73,10 +73,7 @@ function RequestScreenInner({
   useEffect(() => {
     if (!fulfiller) {
       // Share URL
-      setExternalAction({
-        type: "share",
-        exec: shareURL,
-      });
+      setExternalAction({ type: "share", exec: shareURL });
     } else if (fulfiller.type === "email" || fulfiller.type === "phoneNumber") {
       // Compose email or SMS, fallback to share sheet
       getComposeExternalAction(fulfiller).then(setExternalAction);

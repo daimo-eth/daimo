@@ -11,8 +11,8 @@ import {
 
 import { NoteActionButton } from "./NoteActionButton";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
+import { env } from "../../../env";
 import { useAccount } from "../../../logic/accountManager";
-import { env } from "../../../logic/env";
 import {
   ExternalAction,
   getComposeExternalAction,

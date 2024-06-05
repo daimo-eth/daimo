@@ -26,9 +26,9 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { ParamListHome, useExitBack } from "../../../common/nav";
-import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
+import { getRpcFunc } from "../../../logic/trpc";
 import { Account } from "../../../model/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
@@ -140,7 +140,7 @@ function NoteDisplayInner({
   const isV2RecipientClaim =
     noteStatus.link.type === "notev2" &&
     noteStatus.sender.addr !== account.address;
-  const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
   const customHandler = isV2RecipientClaim
     ? async (setAS: SetActStatus) => {
         setAS("loading", "Accepting link...");

@@ -1,7 +1,7 @@
 import { DisplayOpEvent, getForeignCoinDisplayAmount } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 
-import { env } from "../../../logic/env";
+import { env } from "../../../env";
 
 // Get memo text for an op
 // Either uses the memo field for standard transfers, e.g. "for ice cream"

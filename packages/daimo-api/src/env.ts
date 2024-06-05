@@ -24,7 +24,6 @@ const zEnv = {
   DAIMO_FAUCET_API_KEY: z.string().optional().default(""),
   // ERC-4337 userop bundler. Used only for gas price estimation:
   // we submit [compressed] bundles ourselves.
-
   DAIMO_BUNDLER_RPC: z.string().startsWith("https://"),
   // Uniswap RPC, for any-chain swaps. Required on mainnet.
   // Use an independent HTTP RPC to work around Websocket bugs in Ethers,

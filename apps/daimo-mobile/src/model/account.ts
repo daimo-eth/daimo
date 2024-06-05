@@ -22,14 +22,16 @@ import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredModel } from "./storedModel";
-import { env } from "../logic/env";
+import { env, getEnvMobile } from "../env";
+
+const appVariant = getEnvMobile().DAIMO_APP_VARIANT;
 
 /**
  * Singleton account key.
  * Will be a series if/when we support multiple accounts.
  */
 export const defaultEnclaveKeyName =
-  process.env.DAIMO_APP_VARIANT === "dev" ? "daimo-dev-12" : "daimo-12";
+  appVariant === "dev" ? "daimo-dev-12" : "daimo-12";
 
 /**
  * Device API key name: serves as poor man's device attestation.
@@ -37,7 +39,7 @@ export const defaultEnclaveKeyName =
  * device attestations.
  */
 export const deviceAPIKeyName =
-  process.env.DAIMO_APP_VARIANT === "dev" ? "daimo-apikey-dev" : "daimo-apikey";
+  appVariant === "dev" ? "daimo-apikey-dev" : "daimo-apikey";
 
 /** Account data stored on device. */
 export type Account = {

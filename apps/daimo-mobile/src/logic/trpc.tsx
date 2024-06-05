@@ -8,13 +8,14 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
+import { getEnvMobile } from "../env";
 import { updateNetworkStateOnline } from "../sync/networkState";
 
 const apiUrlT =
-  process.env.DAIMO_APP_API_URL_TESTNET || process.env.DAIMO_APP_API_URL;
+  getEnvMobile().DAIMO_APP_API_URL_TESTNET || getEnvMobile().DAIMO_APP_API_URL;
 const apiUrlTestnetWithChain = `${apiUrlT}/chain/84532`;
 const apiUrlM =
-  process.env.DAIMO_APP_API_URL_MAINNET || process.env.DAIMO_APP_API_URL;
+  getEnvMobile().DAIMO_APP_API_URL_MAINNET || getEnvMobile().DAIMO_APP_API_URL;
 const apiUrlMainnetWithChain = `${apiUrlM}/chain/8453`;
 
 function createRpcHook() {

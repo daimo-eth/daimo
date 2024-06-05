@@ -15,7 +15,7 @@ import {
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
 import { DispatcherContext } from "../../action/dispatch";
-import { env } from "../../logic/env";
+import { env } from "../../env";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";

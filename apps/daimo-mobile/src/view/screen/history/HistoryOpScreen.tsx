@@ -24,8 +24,8 @@ import {
   navToAccountPage,
   useNav,
 } from "../../../common/nav";
+import { env } from "../../../env";
 import { getCachedEAccount } from "../../../logic/addr";
-import { env } from "../../../logic/env";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../model/account";

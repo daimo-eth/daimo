@@ -33,8 +33,8 @@ import {
   addLastTransferTimes,
   getContactName,
 } from "../../../logic/daimoContacts";
-import { env } from "../../../logic/env";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../model/account";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -174,7 +174,7 @@ function SendChooseAmount({
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
   // Validate memo
-  const rpcHook = env(daimoChain).rpcHook;
+  const rpcHook = getRpcHook(daimoChain);
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
 
@@ -280,7 +280,7 @@ function SendConfirm({
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
 
-  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
+  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
 
   const [isDecliningRequest, setIsDecliningRequest] = useState(false);
 

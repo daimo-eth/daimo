@@ -11,8 +11,8 @@ import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
 import { getCachedEAccount } from "./addr";
-import { env } from "./env";
 import { useSystemContactsSearch } from "./systemContacts";
+import { getRpcHook } from "./trpc";
 import { Account } from "../model/account";
 
 interface BaseDaimoContact {
@@ -150,7 +150,7 @@ export function useContactSearch(
   // Search if we have a prefix. Anyone we've already sent to appears first.
   // Otherwise, just show recent recipients.
   const enabled = prefix.length >= 1;
-  const rpcHook = env(daimoChainFromId(account.homeChainId)).rpcHook;
+  const rpcHook = getRpcHook(daimoChainFromId(account.homeChainId));
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
   if (res.data) {
     for (const account of res.data) {

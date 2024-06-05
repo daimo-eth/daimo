@@ -16,9 +16,9 @@ import {
   hexToBytes,
 } from "viem";
 
-import { env } from "./env";
 import { Log } from "./log";
 import { parseCreateResponse, parseSignResponse } from "./passkeyParsers";
+import { env } from "../env";
 
 // Workaround iOS Passkeys AASA bug: https://github.com/daimo-eth/daimo/issues/837
 function matchAASABugError(e: string) {
