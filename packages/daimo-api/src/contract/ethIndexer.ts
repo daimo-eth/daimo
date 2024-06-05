@@ -47,7 +47,7 @@ export class ETHIndexer extends Indexer {
     allAddrs: Address[],
     blockNum: number,
     cache: boolean // whether to store query results in cache or not, clears existing cache entries as well if not
-  ): Promise<Map<Address, bigint>> {
+  ): Promise<Map<Address, bigint> | undefined> {
     const batchGetETHBalances = async (addrs: Address[]) => {
       if (blockNum < chainConfig.offChainUtilsDeployBlock) {
         return new Array(addrs.length).fill(0n) as bigint[];
@@ -63,7 +63,6 @@ export class ETHIndexer extends Indexer {
           return ethBalances;
         } catch (e) {
           console.log(`[ETH INDEXER] batchGetETHBalances error: ${e}`);
-          return new Array(addrs.length).fill(0n) as bigint[]; // unsure if this is the appropriate response
         }
       }
     };
@@ -90,6 +89,8 @@ export class ETHIndexer extends Indexer {
       const balances = await retryBackoff(`batchGetETHBalances`, () =>
         batchGetETHBalances(batch)
       );
+      if (!balances) return undefined;
+
       for (let i = 0; i < batch.length; i++) {
         ret.set(batch[i], balances[i]);
         if (cache) {
@@ -114,6 +115,9 @@ export class ETHIndexer extends Indexer {
     // Query latest balances and starting balances for all accounts
     const before = await this.batchFetchBalances(allAddrs, from - 1, false); // clear cache during fetch
     const after = await this.batchFetchBalances(allAddrs, to, true); // cache balances for next load
+
+    // If batchGetETHBalances failed (due to suspected RPC failure), don't do anything.
+    if (!before || !after) return;
 
     const ms = Date.now() - startTime;
     console.log(
