@@ -28,6 +28,7 @@ export type ETHTransfer = {
 
 /* Tracks ETH transfers. */
 export class ETHIndexer extends Indexer {
+  // Map of all addresses to their latest balance and block number for that balance.
   private latestBalances: Map<Address, [bigint, number]> = new Map();
   private allETHTransfers: ETHTransfer[] = [];
 
@@ -58,26 +59,10 @@ export class ETHIndexer extends Indexer {
 
   async batchFetchBalances(
     allAddrs: Address[],
-    fromBlockNum: number,
     toBlockNum: number
   ): Promise<Map<Address, bigint>> {
     // Call contract to get ETH balances for all addresses at block number.
     const balanceDiffs = new Map<Address, bigint>();
-
-    // Ensure the cache is up to date.
-    const oldQueryAddrs: Address[] = [];
-    allAddrs.forEach((addr) => {
-      if (!this.latestBalances.has(addr)) {
-        oldQueryAddrs.push(addr);
-      }
-    });
-    const oldBalances = await this.batchGetETHBalances(
-      oldQueryAddrs,
-      fromBlockNum
-    );
-    for (let i = 0; i < oldQueryAddrs.length; i++) {
-      this.latestBalances.set(oldQueryAddrs[i], [oldBalances[i], fromBlockNum]);
-    }
 
     // Query all balances for all addresses at the current block number.
     const batchedQueryAddrs = [...chunks(allAddrs, 100)];
@@ -97,6 +82,8 @@ export class ETHIndexer extends Indexer {
           if (balanceDiff > 0n) {
             balanceDiffs.set(batch[i], balanceDiff);
           }
+        } else {
+          balanceDiffs.set(batch[i], newBalances[i] - 0n);
         }
         // Update cache with new balance and currentblock number.
         this.latestBalances.set(batch[i], [newBalances[i], toBlockNum]);
@@ -113,7 +100,7 @@ export class ETHIndexer extends Indexer {
     const allAddrs = this.nameReg.getAllDAccounts().map((a) => a.addr);
 
     // Query differences in latest balances and starting balances for all accounts
-    const balanceDiffs = await this.batchFetchBalances(allAddrs, from, to);
+    const balanceDiffs = await this.batchFetchBalances(allAddrs, to);
 
     const ms = Date.now() - startTime;
     console.log(
