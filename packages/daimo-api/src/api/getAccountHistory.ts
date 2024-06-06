@@ -32,6 +32,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { getEnvApi } from "../env";
 import {
   LandlineAccount,
   getLandlineAccounts,
@@ -209,7 +210,11 @@ export async function getAccountHistory(
   // Get landline session key and accounts
   let landlineSessionKey = "";
   let landlineAccounts: LandlineAccount[] = [];
-  if (process.env.LANDLINE_API_KEY) {
+
+  const username = eAcc.name;
+  const isUserWhitelisted =
+    getEnvApi().LANDLINE_WHITELIST_USERNAMES.includes(username);
+  if (getEnvApi().LANDLINE_API_URL && isUserWhitelisted) {
     landlineSessionKey = await getLandlineSession(address);
     landlineAccounts = await getLandlineAccounts(address);
   }
