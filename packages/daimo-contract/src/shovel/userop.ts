@@ -1,6 +1,5 @@
 import { Integration, Table } from "@indexsupply/shovel-config";
-import { Constants } from "userop";
-import { Address } from "viem";
+import { ENTRYPOINT_ADDRESS_V06 } from "permissionless";
 
 const userOpTable: Table = {
   name: "erc4337_user_op",
@@ -37,7 +36,7 @@ export const userOpIntegration: Integration = {
       name: "log_addr",
       column: "log_addr",
       filter_op: "contains",
-      filter_arg: [Constants.ERC4337.EntryPoint as Address],
+      filter_arg: [ENTRYPOINT_ADDRESS_V06],
     },
   ],
   event: {

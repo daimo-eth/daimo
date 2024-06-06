@@ -6,7 +6,7 @@ import {
 } from "@daimo/contract";
 import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useEffect } from "react";
-import { Address } from "viem";
+import { Address, createPublicClient, http } from "viem";
 
 import { getWrappedDeviceKeySigner } from "./key";
 import { DeviceKeySigner, Signer } from "./signer";
@@ -73,7 +73,13 @@ export function loadOpSender({
     console.info(`[SEND] loading DaimoOpSender ${address} ${signer.type}`);
 
     const chainConfig = env(daimoChain).chainConfig;
-    return await DaimoOpSender.init({
+
+    const publicClient = createPublicClient({
+      chain: chainConfig.chainL2,
+      transport: http()
+    });
+
+    return await DaimoOpSender.init(publicClient, {
       chainId,
       tokenAddress: chainConfig.tokenAddress,
       tokenDecimals: chainConfig.tokenDecimals,

@@ -3,7 +3,6 @@ import {
   erc20ABI,
   nameRegistryProxyConfig,
 } from "@daimo/contract";
-import { Constants } from "userop";
 import {
   Address,
   createPublicClient,
@@ -15,6 +14,7 @@ import {
 } from "viem";
 
 import { chainConfig } from "./env";
+import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils";
 
 export function checkAccountDesc() {
   return `Check the balance, nonce, etc of a Daimo account.`;
@@ -69,7 +69,7 @@ export async function checkAccount() {
   // Get account info from the EntryPoint contract
   const prefundBal = await publicClient.readContract({
     abi: entryPointABI,
-    address: getAddress(Constants.ERC4337.EntryPoint),
+    address: getAddress(ENTRYPOINT_ADDRESS_V06),
     functionName: "balanceOf",
     args: [addr],
   });
@@ -79,6 +79,6 @@ export async function checkAccount() {
 
   console.log(`...NameReg ${nameRegistryProxyConfig.address}`);
   console.log(`...  ERC20 ${chainConfig.tokenAddress}`);
-  console.log(`EntryPoint ${Constants.ERC4337.EntryPoint}`);
+  console.log(`EntryPoint ${ENTRYPOINT_ADDRESS_V06}`);
   console.log();
 }

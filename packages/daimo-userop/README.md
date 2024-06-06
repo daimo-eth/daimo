@@ -8,8 +8,8 @@ Example usage:
 import { DaimoOpSender } from "@daimo/userop";
 
 // Create DaimoOpConfig, then send some of that account's home coin (eg USDC).
-const sender = DaimoOpSender.init(config);
+const sender = DaimoOpSender.init(publicClient, config);
 sender.erc20Transfer(toAddress, amount, nonceMetadata);
 ```
 
-See `apps/daimo-mobile` for more examples. Built with `userop.js`.
+See `apps/daimo-mobile` for more examples. Built with `permissionless`.

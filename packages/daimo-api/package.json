@@ -41,10 +41,10 @@
     "geoip-lite": "^1.4.7",
     "libhoney": "^4.1.0",
     "obscenity": "^0.2.1",
+    "permissionless": "^0.1.30",
     "pg": "^8.11.0",
     "semver": "^7.6.0",
-    "userop": "^0.3.2",
-    "viem": "^1.19.15",
+    "viem": "^2.13.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -1,18 +1,22 @@
 import {
-  DaimoAccountCall,
+  ChainGasConstants,
+  DEFAULT_USEROP_CALL_GAS_LIMIT,
+  DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
   PendingOpEvent,
   ProposedSwap,
   UserOpHex,
   derKeytoContractFriendlyKey,
-  now,
   zUserOpHex,
 } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
 import { erc20ABI } from "@daimo/contract";
-import { Constants, Utils } from "userop";
+import { UserOperation } from "permissionless/_types/types";
 import {
   Address,
+  Chain,
   Hex,
+  PublicClient,
+  Transport,
   encodeFunctionData,
   getAddress,
   hexToBigInt,
@@ -21,7 +25,14 @@ import {
 } from "viem";
 
 import { OpSenderCallback, SigningCallback } from "./callback";
-import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
+import { DaimoSmartAccount, signerToDaimoSmartAccount } from "./daimoAccount";
+import { DaimoNonce } from "./nonce";
+
+// Metadata for a userop: nonce and paymaster constant.
+export type DaimoOpMetadata = {
+  nonce: DaimoNonce;
+  chainGasConstants: ChainGasConstants;
+};
 
 interface DaimoOpConfig {
   /** Chain ID */
@@ -51,15 +62,26 @@ interface DaimoOpConfig {
 export class DaimoOpSender {
   private constructor(
     public opConfig: DaimoOpConfig,
-    private opBuilder: DaimoOpBuilder
+    private account: DaimoSmartAccount
   ) {}
 
   /**
    * Initializes with all configuration provided: no env vars required.
    */
-  public static async init(opConfig: DaimoOpConfig): Promise<DaimoOpSender> {
+  public static async init<
+    transport extends Transport,
+    chain extends Chain | undefined = undefined
+  >(
+    publicClient: PublicClient<transport, chain>,
+    opConfig: DaimoOpConfig
+  ): Promise<DaimoOpSender> {
     const { accountAddress, accountSigner } = opConfig;
-    const builder = await DaimoOpBuilder.init(accountAddress, accountSigner);
+
+    const account = await signerToDaimoSmartAccount(publicClient, {
+      signer: accountSigner,
+      address: accountAddress,
+      deadlineSecs: opConfig.deadlineSecs,
+    });
 
     const { tokenAddress, tokenDecimals } = opConfig;
     console.log(
@@ -71,27 +93,28 @@ export class DaimoOpSender {
       })})}`
     );
 
-    return new DaimoOpSender(opConfig, builder);
+    return new DaimoOpSender(opConfig, account);
   }
 
   public getAddress(): Address {
-    return getAddress(this.opBuilder.getSender());
+    return getAddress(this.account.address);
   }
 
   /** Submits a user op to bundler. Returns PendingOpEvent. */
   public async sendUserOp(
-    opBuilder: DaimoOpBuilder,
+    op: UserOperation<"v0.6">,
     memo?: string
   ): Promise<PendingOpEvent> {
-    const nowS = now();
-    const validUntil = nowS + this.opConfig.deadlineSecs;
-    const builtOp = await opBuilder
-      .setValidUntil(validUntil)
-      .buildOp(Constants.ERC4337.EntryPoint, this.opConfig.chainId);
+    const hexOp: UserOpHex = {
+      ...op,
+      nonce: `0x${op.nonce.toString(16)}`,
+      callGasLimit: `0x${op.callGasLimit.toString(16)}`,
+      verificationGasLimit: `0x${op.verificationGasLimit.toString(16)}`,
+      preVerificationGas: `0x${op.preVerificationGas.toString(16)}`,
+      maxFeePerGas: `0x${op.maxFeePerGas.toString(16)}`,
+      maxPriorityFeePerGas: `0x${op.maxPriorityFeePerGas.toString(16)}`,
+    };
 
-    // This method is incorrectly named. It does not return JSON, it returns
-    // a userop object with all the fields normalized to hex.
-    const hexOp = Utils.OpToJSON(builtOp) as UserOpHex;
     console.log("[OP] sending userOp:", hexOp);
     zUserOpHex.parse(hexOp);
 
@@ -102,10 +125,10 @@ export class DaimoOpSender {
     dest: Address,
     amount: bigint = maxUint256, // defaults to infinite
     tokenAddress: Address = this.opConfig.tokenAddress // defaults to home coin
-  ): DaimoAccountCall {
+  ) {
     return {
       // Approve contract `amount` spending on behalf of the account
-      dest: tokenAddress,
+      to: tokenAddress,
       value: 0n,
       data: encodeFunctionData({
         abi: erc20ABI,
@@ -123,42 +146,32 @@ export class DaimoOpSender {
   ) {
     const contractFriendlyKey = derKeytoContractFriendlyKey(derPublicKey);
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: this.getAddress(),
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoAccountABI,
-            functionName: "addSigningKey",
-            args: [slot, contractFriendlyKey],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: this.getAddress(),
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoAccountABI,
+        functionName: "addSigningKey",
+        args: [slot, contractFriendlyKey],
+      }),
+    });
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   /** Removes an account signing key. Returns userOpHash. */
   public async removeSigningKey(slot: number, opMetadata: DaimoOpMetadata) {
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: this.getAddress(),
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoAccountABI,
-            functionName: "removeSigningKey",
-            args: [slot],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: this.getAddress(),
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoAccountABI,
+        functionName: "removeSigningKey",
+        args: [slot],
+      }),
+    });
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   /** Sends an ERC20 transfer. Returns userOpHash. */
@@ -173,22 +186,17 @@ export class DaimoOpSender {
     const parsedAmount = parseUnits(amount, tokenDecimals);
     console.log(`[OP] transfer ${parsedAmount} ${tokenAddress} to ${to}`);
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: tokenAddress,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.erc20ABI,
-            functionName: "transfer",
-            args: [to, parsedAmount],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: tokenAddress,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.erc20ABI,
+        functionName: "transfer",
+        args: [to, parsedAmount],
+      }),
+    });
 
-    return this.sendUserOp(op, memo);
+    return this.call(callData, opMetadata, memo);
   }
 
   /** Creates an ephemeral note V2 with given value. Returns userOpHash. */
@@ -206,7 +214,7 @@ export class DaimoOpSender {
 
     const executions = [
       {
-        dest: notesAddressV2,
+        to: notesAddressV2,
         value: 0n,
         data: encodeFunctionData({
           abi: Contracts.daimoEphemeralNotesV2ABI,
@@ -220,9 +228,9 @@ export class DaimoOpSender {
       executions.unshift(this.getTokenApproveCall(notesAddressV2));
     }
 
-    const op = this.opBuilder.executeBatch(executions, opMetadata);
+    const callData = await this.account.encodeCallData(executions);
 
-    return this.sendUserOp(op, memo);
+    return this.call(callData, opMetadata);
   }
 
   /** Claims an ephemeral note. Returns userOpHash. */
@@ -233,46 +241,36 @@ export class DaimoOpSender {
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: this.opConfig.notesAddressV1,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesABI,
-            functionName: "claimNote",
-            args: [ephemeralOwner, signature],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: this.opConfig.notesAddressV1,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoEphemeralNotesABI,
+        functionName: "claimNote",
+        args: [ephemeralOwner, signature],
+      }),
+    });
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
-  public claimEphemeralNoteSelf(
+  public async claimEphemeralNoteSelf(
     ephemeralOwner: Hex,
     opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] cancel ephemeral note V2 ${ephemeralOwner}`);
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: this.opConfig.notesAddressV2,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesV2ABI,
-            functionName: "claimNoteSelf",
-            args: [ephemeralOwner],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: this.opConfig.notesAddressV2,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoEphemeralNotesV2ABI,
+        functionName: "claimNoteSelf",
+        args: [ephemeralOwner],
+      }),
+    });
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   public async claimEphemeralNoteRecipient(
@@ -284,22 +282,17 @@ export class DaimoOpSender {
 
     const { accountAddress, notesAddressV2 } = this.opConfig;
 
-    const op = this.opBuilder.executeBatch(
-      [
-        {
-          dest: notesAddressV2,
-          value: 0n,
-          data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesV2ABI,
-            functionName: "claimNoteRecipient",
-            args: [ephemeralOwner, accountAddress, signature],
-          }),
-        },
-      ],
-      opMetadata
-    );
+    const callData = await this.account.encodeCallData({
+      to: notesAddressV2,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoEphemeralNotesV2ABI,
+        functionName: "claimNoteRecipient",
+        args: [ephemeralOwner, accountAddress, signature],
+      }),
+    });
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   public async approveAndFulfillRequest(
@@ -311,10 +304,10 @@ export class DaimoOpSender {
 
     const parsedAmount = parseUnits(amount, this.opConfig.tokenDecimals);
 
-    const executions: DaimoAccountCall[] = [
+    const executions = [
       this.getTokenApproveCall(Contracts.daimoRequestAddress, parsedAmount),
       {
-        dest: Contracts.daimoRequestAddress,
+        to: Contracts.daimoRequestAddress,
         value: 0n,
         data: encodeFunctionData({
           abi: Contracts.daimoRequestConfig.abi,
@@ -324,9 +317,9 @@ export class DaimoOpSender {
       },
     ];
 
-    const op = this.opBuilder.executeBatch(executions, opMetadata);
+    const callData = await this.account.encodeCallData(executions);
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   public async executeProposedSwap(
@@ -337,9 +330,9 @@ export class DaimoOpSender {
       `[OP] execute swap ${swap.fromCoin.token} to ${swap.toAmount} via ${swap.execRouterAddress}`
     );
 
-    const executions: DaimoAccountCall[] = [
+    const executions = [
       {
-        dest: swap.execRouterAddress,
+        to: swap.execRouterAddress,
         value: hexToBigInt(swap.execValue),
         data: swap.execCallData,
       },
@@ -355,28 +348,53 @@ export class DaimoOpSender {
       );
     }
 
-    const op = this.opBuilder.executeBatch(executions, opMetadata);
+    const callData = await this.account.encodeCallData(executions);
 
-    return this.sendUserOp(op);
+    return this.call(callData, opMetadata);
   }
 
   public async cancelRequest(id: bigint, opMetadata: DaimoOpMetadata) {
     console.log(`[OP] cancel request ${id}`);
 
-    const executions: DaimoAccountCall[] = [
-      {
-        dest: Contracts.daimoRequestAddress,
-        value: 0n,
-        data: encodeFunctionData({
-          abi: Contracts.daimoRequestConfig.abi,
-          functionName: "updateRequest",
-          args: [id, 2],
-        }),
-      },
-    ];
+    const callData = await this.account.encodeCallData({
+      to: Contracts.daimoRequestAddress,
+      value: 0n,
+      data: encodeFunctionData({
+        abi: Contracts.daimoRequestConfig.abi,
+        functionName: "updateRequest",
+        args: [id, 2],
+      }),
+    });
 
-    const op = this.opBuilder.executeBatch(executions, opMetadata);
+    return this.call(callData, opMetadata);
+  }
 
-    return this.sendUserOp(op);
+  private async call(
+    callData: Hex,
+    opMetadata: DaimoOpMetadata,
+    memo?: string
+  ) {
+    const op: UserOperation<"v0.6"> = {
+      sender: this.account.address,
+      nonce: BigInt(opMetadata.nonce.toHex()),
+      initCode: "0x",
+      callData,
+      maxFeePerGas: BigInt(opMetadata.chainGasConstants.maxFeePerGas),
+      maxPriorityFeePerGas: BigInt(
+        opMetadata.chainGasConstants.maxPriorityFeePerGas
+      ),
+      preVerificationGas: BigInt(
+        opMetadata.chainGasConstants.preVerificationGas
+      ),
+      paymasterAndData: opMetadata.chainGasConstants.paymasterAddress,
+      verificationGasLimit: DEFAULT_USEROP_VERIFICATION_GAS_LIMIT,
+      callGasLimit: DEFAULT_USEROP_CALL_GAS_LIMIT,
+      signature: "0x",
+    };
+
+    const signature = await this.account.signUserOperation(op);
+    op.signature = signature;
+
+    return this.sendUserOp(op, memo);
   }
 }

@@ -8,14 +8,15 @@ import {
 import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
 import { trace } from "@opentelemetry/api";
-import { BundlerJsonRpcProvider, Constants } from "userop";
-import { Address, Hex, PublicClient, hexToBigInt } from "viem";
+import { Address, Hex, PublicClient, createClient, hexToBigInt, http } from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
 import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
 import { chainConfig, getEnvApi } from "../env";
+import { PimlicoBundlerActions, pimlicoBundlerActions } from "permissionless/actions/pimlico";
+import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils";
 
 interface GasPriceParams {
   maxFeePerGas: Hex;
@@ -30,13 +31,18 @@ interface GasPrice {
 
 /** Sends userops through an ERC-4337 bundler. */
 export class BundlerClient {
-  provider: BundlerJsonRpcProvider;
+  provider: PimlicoBundlerActions;
 
   // Compression settings
   private compressionInfo: CompressionInfo | undefined;
 
   constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
-    this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
+    // this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
+
+    this.provider = createClient({
+      chain: chainConfig.chainL2,
+      transport: http(bundlerRpcUrl),
+    }).extend(pimlicoBundlerActions(ENTRYPOINT_ADDRESS_V06));
   }
 
   async init(publicClient: PublicClient) {
@@ -124,7 +130,7 @@ export class BundlerClient {
   async getOpHash(op: UserOpHex, publicClient: PublicClient) {
     return publicClient.readContract({
       abi: entryPointABI,
-      address: Constants.ERC4337.EntryPoint as Address,
+      address: ENTRYPOINT_ADDRESS_V06,
       functionName: "getUserOpHash",
       args: [userOpFromHex(op)],
     });
@@ -151,7 +157,7 @@ export class BundlerClient {
     const beneficiary = viemClient.account.address;
     const txHash = await viemClient.writeContract({
       abi: entryPointABI,
-      address: Constants.ERC4337.EntryPoint as Address,
+      address: ENTRYPOINT_ADDRESS_V06,
       functionName: "handleOps",
       args: [[userOpFromHex(op)], beneficiary],
     });
@@ -161,10 +167,9 @@ export class BundlerClient {
 
   async getUserOperationGasPriceParams() {
     console.log(`[BUNDLER] fetching gas price params`);
-    const gasPrice = (await this.provider.send(
-      "pimlico_getUserOperationGasPrice",
-      []
-    )) as GasPrice;
+
+    const gasPrice = await this.provider.getUserOperationGasPrice();
+
     console.log(
       `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`
     );
