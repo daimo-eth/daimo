@@ -79,6 +79,7 @@ async function main() {
     vc,
     homeCoinIndexer,
     foreignCoinIndexer,
+    ethIndexer,
     nameReg,
     monitor
   );

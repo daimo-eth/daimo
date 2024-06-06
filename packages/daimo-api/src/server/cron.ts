@@ -16,6 +16,7 @@ import { Constants } from "userop";
 import { Hex, formatEther, getAddress } from "viem";
 
 import { Telemetry } from "./telemetry";
+import { ETHIndexer, ETHTransfer } from "../contract/ethIndexer";
 import {
   ForeignCoinIndexer,
   ForeignTokenTransfer,
@@ -32,6 +33,7 @@ export class Crontab {
     private vc: ViemClient,
     private homeCoinIndexer: HomeCoinIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
+    private ethIndexer: ETHIndexer,
     private nameRegistry: NameRegistry,
     private telemetry: Telemetry
   ) {}
@@ -44,6 +46,7 @@ export class Crontab {
     ];
     this.homeCoinIndexer.addListener(this.pipeTransfers);
     this.foreignCoinIndexer.addListener(this.pipeForeignCoinTransfers);
+    this.ethIndexer.addListener(this.pipeEthTransfers);
 
     this.cronJobs.forEach((job) => job.start());
   }
@@ -154,6 +157,12 @@ export class Crontab {
     }
   };
 
+  private pipeEthTransfers = (logs: ETHTransfer[]) => {
+    for (const transfer of logs) {
+      this.postRecentEthTransfer(transfer);
+    }
+  };
+
   async postRecentTransfer(opEvent: DisplayOpEvent) {
     const fromName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.from);
     const toName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.to);
@@ -203,6 +212,22 @@ export class Crontab {
     );
     this.telemetry.recordClippy(
       `Forex Transfer: ${fromDisplayName} -> ${toDisplayName} ${humanReadableValue} ${transfer.foreignToken.symbol} `
+    );
+  }
+
+  // Track ETH received by a user (no "from" address because currently batch receives balance difference).
+  async postRecentEthTransfer(transfer: ETHTransfer) {
+    const toName = this.nameRegistry.resolveDaimoNameForAddr(transfer.to);
+
+    if (toName == null) return;
+
+    const toDisplayName = getAccountName(
+      await this.nameRegistry.getEAccount(transfer.to)
+    );
+
+    const humanReadableValue = formatEther(transfer.value);
+    this.telemetry.recordClippy(
+      `ETH Transfer: ${toDisplayName} received ${humanReadableValue} ETH`
     );
   }
 }
