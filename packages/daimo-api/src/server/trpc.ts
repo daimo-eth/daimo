@@ -39,7 +39,7 @@ export function onTrpcError(telemetry: Telemetry) {
     }
     if (error.code === "PRECONDITION_FAILED") {
       console.log(
-        `[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`,
+        `[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`
       );
     } else {
       console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
@@ -48,7 +48,7 @@ export function onTrpcError(telemetry: Telemetry) {
       try {
         telemetry.recordClippy(
           `TRPC Error ${ctx?.req.method} ${ctx?.req.url}: ${err}`,
-          "error",
+          "error"
         );
       } catch (e) {
         console.error("Telemetry error", e);
