@@ -77,14 +77,14 @@ export function getDaimoContactKey(contact: DaimoContact): string {
 /** Convert EAccount to EAccountContact */
 export function addLastTransferTimes(
   account: Account,
-  otherEAcc: EAccount | EAccountSearchResult,
+  otherEAcc: EAccount | EAccountSearchResult
 ): EAccountContact {
   const transfersNewToOld = account.recentTransfers.slice().reverse();
   const lastSendTime = transfersNewToOld.find(
-    (t) => t.from === account.address && t.to === otherEAcc.addr,
+    (t) => t.from === account.address && t.to === otherEAcc.addr
   )?.timestamp;
   const lastRecvTime = transfersNewToOld.find(
-    (t) => t.to === account.address && t.from === otherEAcc.addr,
+    (t) => t.to === account.address && t.from === otherEAcc.addr
   )?.timestamp;
   return { type: "eAcc", ...otherEAcc, lastSendTime, lastRecvTime };
 }
@@ -99,7 +99,7 @@ export function getContactName(r: DaimoContact) {
 }
 
 export function getContactProfilePicture(
-  r: DaimoContact,
+  r: DaimoContact
 ): string | { uri: string } | undefined {
   if (r.type === "eAcc") {
     return r.profilePicture;
@@ -115,7 +115,7 @@ export function useContactSearch(
   account: Account,
   prefix: string,
   searchContacts: boolean,
-  onlyNamedEAccs: boolean,
+  onlyNamedEAccs: boolean
 ) {
   prefix = prefix.toLowerCase();
 
@@ -199,7 +199,7 @@ export function useContactSearch(
   // Search contacts by name
   const systemContacts = useSystemContactsSearch(
     prefix,
-    searchContacts && enabled,
+    searchContacts && enabled
   );
 
   if (systemContacts.length > 0) {
@@ -215,7 +215,7 @@ export function useContactSearch(
 }
 
 export function landlineAccountToContact(
-  landlineAccount: LandlineAccount,
+  landlineAccount: LandlineAccount
 ): BridgeBankAccountContact {
   return {
     type: "bridgeBankAccount",

@@ -18,10 +18,7 @@ export class ProfileCache {
   private linkedAccounts: Map<Address, LinkedAccount[]> = new Map();
   private fidToAddress: Map<number, Address> = new Map();
 
-  constructor(
-    private vc: ViemClient,
-    private db: DB,
-  ) {}
+  constructor(private vc: ViemClient, private db: DB) {}
 
   static getDispUsername(link: LinkedAccount): string {
     switch (link.type) {
@@ -46,7 +43,7 @@ export class ProfileCache {
     assertEqual(
       verifySigResult,
       "0x1626ba7e",
-      "ERC-1271 sig validation failed",
+      "ERC-1271 sig validation failed"
     );
 
     // Validate and save to DB
@@ -98,7 +95,7 @@ export class ProfileCache {
 
   async linkAccount(
     addr: Address,
-    linkedAccount: LinkedAccount,
+    linkedAccount: LinkedAccount
   ): Promise<LinkedAccount[]> {
     const linkedAccJSON = JSON.stringify(linkedAccount);
     console.log(`[PROFILE] linking: ${linkedAccJSON} to addr: ${addr}`);
@@ -117,7 +114,7 @@ export class ProfileCache {
 
   async unlinkAccount(
     addr: Address,
-    linkID: ProfileLinkID,
+    linkID: ProfileLinkID
   ): Promise<LinkedAccount[]> {
     console.log(`[PROFILE] unlinking ${linkID.type} ${linkID.id} from ${addr}`);
 
@@ -129,7 +126,7 @@ export class ProfileCache {
       (l) =>
         l.addr !== linkID.addr ||
         l.linkedAccount.type !== linkID.type ||
-        l.linkedAccount.id !== linkID.id,
+        l.linkedAccount.id !== linkID.id
     );
     this.reindex();
 
@@ -167,7 +164,7 @@ export class ProfileCache {
       (l) =>
         l.linkedAccount.type !== link.linkedAccount.type ||
         l.addr !== link.addr ||
-        l.linkedAccount.id !== link.linkedAccount.id,
+        l.linkedAccount.id !== link.linkedAccount.id
     );
 
     // Add new link
@@ -179,7 +176,7 @@ export class ProfileCache {
 async function _linkAccount(
   addr: Address,
   linkedAcc: LinkedAccount,
-  db: DB,
+  db: DB
 ): Promise<LinkedAccount> {
   switch (linkedAcc.type) {
     case "farcaster":
@@ -192,7 +189,7 @@ async function _linkAccount(
 async function linkFarcaster(
   addr: Address,
   linkedAcc: LinkedAccount,
-  db: DB,
+  db: DB
 ): Promise<LinkedAccount> {
   // Save to DB
   const fcAccount = zFarcasterLinkedAccount.parse(linkedAcc);
