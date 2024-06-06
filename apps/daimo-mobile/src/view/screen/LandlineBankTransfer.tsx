@@ -1,4 +1,3 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -16,7 +15,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { BridgeBankAccountContact } from "../../logic/daimoContacts";
-import { env } from "../../logic/env";
+import { getRpcHook } from "../../logic/trpc";
 import { Account } from "../../model/account";
 import { MoneyEntry, zeroUSDEntry } from "../../model/moneyEntry";
 import { MemoPellet, SendMemoButton } from "../screen/send/MemoDisplay";
@@ -34,7 +33,7 @@ type Props = NativeStackScreenProps<ParamListDeposit, "LandlineTransfer">;
 
 export default function LandlineTransferScreen({ route }: Props) {
   console.log(
-    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`,
+    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`
   );
   const Inner = useWithAccount(LandlineTransferScreenInner);
   return <Inner {...route.params} />;
@@ -113,7 +112,7 @@ function SendChooseAmount({
     });
 
   // Validate memo
-  const rpcHook = env(daimoChain).rpcHook;
+  const rpcHook = getRpcHook(daimoChain);
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
 
