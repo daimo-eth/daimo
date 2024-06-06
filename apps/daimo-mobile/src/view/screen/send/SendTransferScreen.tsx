@@ -2,8 +2,10 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
+  ForeignCoin,
   assert,
   assertNotNull,
+  daimoUSDC,
   getAccountName,
   now,
 } from "@daimo/common";
@@ -18,6 +20,7 @@ import {
   View,
 } from "react-native";
 
+import { CoinPellet, SendCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { SendTransferButton } from "./SendTransferButton";
@@ -62,6 +65,7 @@ function SendScreenInner({
   recipient,
   money,
   memo,
+  coin,
   account,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
@@ -83,6 +87,8 @@ function SendScreenInner({
     else goHome();
   }, [nav, money, recipient]);
 
+  coin = coin ?? daimoUSDC; // TODO: change to account.homeCoin in future
+
   const sendDisplay = (() => {
     if (link) {
       if (requestFetch.isFetching) {
@@ -102,7 +108,8 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
-              requestStatus={statusV2}
+              coin={coin}
+              requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
         } else {
@@ -113,6 +120,7 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo}
               money={usdEntry(requestStatus.link.dollars)}
+              coin={coin}
             />
           );
         }
@@ -126,7 +134,8 @@ function SendScreenInner({
             daimoChain={daimoChain}
           />
         );
-      else return <SendConfirm {...{ account, recipient, memo, money }} />;
+      else
+        return <SendConfirm {...{ account, recipient, memo, money, coin }} />;
     } else throw new Error("unreachable");
   })();
 
@@ -156,12 +165,15 @@ function SendChooseAmount({
   // Select what for
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
+  // Select what coin
+  const [coin, setCoin] = useState<ForeignCoin>(daimoUSDC); // TODO: change to account.homeCoin in future
+
   // Once done, update nav
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { money, memo, recipient },
+      params: { money, memo, recipient, coin },
     });
 
   // Warn if paying new account
@@ -188,11 +200,24 @@ function SendChooseAmount({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={setMoney}
+        coin={coin}
         showAmountAvailable
         autoFocus
       />
       <Spacer h={16} />
-      <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
+      <View style={styles.detailsRow}>
+        <SendMemoButton
+          memo={memo}
+          memoStatus={memoStatus}
+          setMemo={setMemo}
+          daimoChain={daimoChain}
+        />
+        <SendCoinButton
+          coin={coin}
+          setCoin={setCoin}
+          isFixed={recipient.name != null}
+        />
+      </View>
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>
@@ -228,12 +253,14 @@ function SendConfirm({
   recipient,
   money,
   memo,
+  coin,
   requestStatus,
 }: {
   account: Account;
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
+  coin: ForeignCoin;
   requestStatus?: DaimoRequestV2Status;
 }) {
   const isRequest = !!requestStatus;
@@ -269,6 +296,7 @@ function SendConfirm({
         memo={memoParts.join(" · ")}
         recipient={recipient}
         dollars={money.dollars}
+        coin={coin}
       />
     );
   }
@@ -319,17 +347,21 @@ function SendConfirm({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={useCallback(() => {}, [])}
+        coin={coin}
         disabled
         showAmountAvailable={false}
         autoFocus={false}
         onFocus={navToInput}
       />
       <Spacer h={16} />
-      {memo ? (
-        <MemoPellet memo={memo} onClick={navToInput} />
-      ) : (
-        <Spacer h={40} />
-      )}
+      <View style={styles.detailsRow}>
+        {memo ? (
+          <MemoPellet memo={memo} onClick={navToInput} />
+        ) : (
+          <Spacer h={40} />
+        )}
+        <CoinPellet coin={coin} onClick={navToInput} />
+      </View>
       <Spacer h={16} />
       {button}
       {isRequest && (
@@ -360,5 +392,11 @@ const styles = StyleSheet.create({
   },
   buttonGrow: {
     flex: 1,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    gap: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

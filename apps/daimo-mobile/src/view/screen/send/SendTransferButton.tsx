@@ -1,5 +1,6 @@
 import {
   EAccount,
+  ForeignCoin,
   OpStatus,
   assert,
   canSendTo,
@@ -34,12 +35,14 @@ export function SendTransferButton({
   account,
   recipient,
   dollars,
+  coin,
   memo,
   minTransferAmount = 0,
 }: {
   account: Account;
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
+  coin?: ForeignCoin;
   memo?: string;
   minTransferAmount?: number;
 }) {
@@ -61,7 +64,11 @@ export function SendTransferButton({
     dollarsToSend: dollars,
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
-      console.log(`[ACTION] sending $${dollarsStr} to ${recipient.addr}`);
+      console.log(
+        `[ACTION] sending $${dollarsStr} ${coin && `in${coin.symbol} `}to ${
+          recipient.addr
+        }`
+      );
       return opSender.erc20transfer(
         recipient.addr,
         dollarsStr,
