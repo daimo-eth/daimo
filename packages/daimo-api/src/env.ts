@@ -48,6 +48,13 @@ const zEnv = {
   HONEYCOMB_API_KEY: z.string().optional().default(""),
   // Monitoring: Sentry
   SENTRY_DSN: z.string().optional().default(""),
+  // Landline integration
+  LANDLINE_API_URL: z.string().optional().default(""),
+  LANDLINE_API_KEY: z.string().optional().default(""),
+  LANDLINE_WHITELIST_USERNAMES: z
+    .string()
+    .optional()
+    .transform((s) => (s ? s.split(",") : [])),
 };
 
 let envVarsApi: z.infer<ZodObject<typeof zEnv>> | undefined;

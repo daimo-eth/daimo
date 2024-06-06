@@ -1,3 +1,4 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   EAccount,
   EAccountSearchResult,
@@ -37,10 +38,21 @@ export interface PhoneNumberContact extends BaseDaimoContact {
   name?: string;
 }
 
+export interface BridgeBankAccountContact extends EAccount, BaseDaimoContact {
+  type: "bridgeBankAccount";
+  bankName: string;
+  lastFour: string;
+  bankLogo: string | undefined;
+}
+
 // A DaimoContact is a "contact" of the user in the app.
 // Includes EAccounts and system contacts (email, phone number) with added
 // context about the contact based on user's own context. (lastSendTime, etc.)
-export type DaimoContact = EAccountContact | EmailContact | PhoneNumberContact;
+export type DaimoContact =
+  | EAccountContact
+  | EmailContact
+  | PhoneNumberContact
+  | BridgeBankAccountContact;
 
 // A MsgContact is a contact that is not a EAccount. (i.e. not an
 // on-chain account)
@@ -57,6 +69,8 @@ export function getDaimoContactKey(contact: DaimoContact): string {
       return contact.email;
     case "phoneNumber":
       return contact.phoneNumber;
+    case "bridgeBankAccount":
+      return contact.addr;
   }
 }
 
@@ -79,11 +93,22 @@ export function getContactName(r: DaimoContact) {
   if (r.type === "eAcc") return getAccountName(r);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
+  else if (r.type === "bridgeBankAccount")
+    return `${r.bankName} ****${r.lastFour}`;
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
-export function getContactProfilePicture(r: DaimoContact) {
-  return r.type === "eAcc" ? r.profilePicture : undefined;
+export function getContactProfilePicture(
+  r: DaimoContact
+): string | { uri: string } | undefined {
+  if (r.type === "eAcc") {
+    return r.profilePicture;
+  } else if (r.type === "bridgeBankAccount") {
+    // The bank logo is fetched as a base64 string for a png
+    return { uri: `data:image/png;base64,${r.bankLogo}` };
+  } else {
+    return undefined;
+  }
 }
 
 export function useContactSearch(
@@ -186,5 +211,17 @@ export function useContactSearch(
     recipients: recipients.slice(0, 16),
     status: res.status,
     error: res.error,
+  };
+}
+
+export function landlineAccountToContact(
+  landlineAccount: LandlineAccount
+): BridgeBankAccountContact {
+  return {
+    type: "bridgeBankAccount",
+    addr: landlineAccount.liquidationAddress,
+    bankName: landlineAccount.bankName,
+    lastFour: landlineAccount.lastFour,
+    bankLogo: landlineAccount.bankLogo,
   };
 }

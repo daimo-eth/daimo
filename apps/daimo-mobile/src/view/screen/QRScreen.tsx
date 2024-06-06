@@ -83,7 +83,9 @@ function QRDisplay() {
   };
 
   const goToDeposit = () => {
-    nav.navigate("DepositTab");
+    nav.navigate("DepositTab", {
+      screen: "Deposit",
+    });
   };
 
   return (

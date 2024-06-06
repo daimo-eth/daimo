@@ -1,10 +1,13 @@
+import { LandlineAccount } from "@daimo/api/src/landline/connector";
+import { daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   ImageSourcePropType,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
@@ -14,8 +17,13 @@ import {
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
+import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
 import { DispatcherContext } from "../../action/dispatch";
+import { useNav } from "../../common/nav";
 import { env } from "../../env";
+import { useAccount } from "../../logic/accountManager";
+import { landlineAccountToContact } from "../../logic/daimoContacts";
+import { useTime } from "../../logic/time";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -38,12 +46,95 @@ function DepositScreenInner({ account }: { account: Account }) {
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
-        <Spacer h={8} />
+        <Spacer h={16} />
+        <LandlineList />
+        <Spacer h={24} />
         <DepositList account={account} />
         <Spacer h={16} />
         <WithdrawList />
       </ScrollView>
     </View>
+  );
+}
+
+const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
+  const landlineDomain = process.env.LANDLINE_DOMAIN;
+  return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+};
+
+function LandlineList() {
+  const account = useAccount();
+  if (account == null) return null;
+  const showLandline =
+    !!account.landlineSessionKey && !!process.env.LANDLINE_DOMAIN;
+  if (!showLandline) return null;
+
+  const isLandlineConnected = account.landlineAccounts.length > 0;
+
+  return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
+}
+
+function LandlineConnect() {
+  const account = useAccount();
+
+  const openLandline = useCallback(() => {
+    if (!account) return;
+    Linking.openURL(
+      getLandlineURL(account.address, account.landlineSessionKey)
+    );
+  }, [account?.address, account?.landlineSessionKey]);
+
+  if (account == null) return null;
+
+  return (
+    <LandlineOptionRow
+      cta="Connect with Landline"
+      title="Deposit or withdraw directly from a US bank account"
+      // TODO(andrew): Update with real landline logo
+      logo={IntroIconEverywhere}
+      onClick={openLandline}
+    />
+  );
+}
+
+function LandlineAccountList() {
+  const account = useAccount();
+  const nav = useNav();
+  const nowS = useTime();
+  // TODO(andrew): Use bank logo
+  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
+
+  if (account == null) return null;
+
+  const landlineAccounts = account.landlineAccounts;
+
+  const goToSendTransfer = (landlineAccount: LandlineAccount) => {
+    const recipient = landlineAccountToContact(landlineAccount);
+    nav.navigate("DepositTab", {
+      screen: "LandlineTransfer",
+      params: { recipient },
+    });
+  };
+
+  return (
+    <>
+      {landlineAccounts.map((acc, idx) => {
+        const accCreatedAtS = new Date(acc.createdAt).getTime() / 1000;
+        return (
+          <LandlineOptionRow
+            key={`landline-account-${idx}`}
+            cta={`${acc.bankName} ****${acc.lastFour}`}
+            title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
+            // The bank logo is fetched as a base64 string for a png
+            logo={
+              { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
+            }
+            isAccount
+            onClick={() => goToSendTransfer(acc)}
+          />
+        );
+      })}
+    </>
   );
 }
 
@@ -131,6 +222,57 @@ function WithdrawList() {
   );
 }
 
+type LandlineOptionRowProps = {
+  title: string;
+  cta: string;
+  logo: ImageSourcePropType;
+  isAccount?: boolean;
+  onClick: () => void;
+};
+
+function LandlineOptionRow({
+  title,
+  cta,
+  logo,
+  isAccount,
+  onClick,
+}: LandlineOptionRowProps) {
+  const width = useWindowDimensions().width;
+
+  return (
+    <Pressable
+      onPress={onClick}
+      style={({ pressed }) => [
+        {
+          ...styles.checklistAction,
+          backgroundColor: pressed
+            ? touchHighlightUnderlay.subtle.underlayColor
+            : undefined,
+        },
+      ]}
+    >
+      <View style={{ ...styles.optionRowLeft, maxWidth: width - 200 }}>
+        <LogoBubble logo={logo} />
+        <View style={{ flexDirection: "column" }}>
+          <TextBody color={color.midnight}>{cta}</TextBody>
+          <Spacer h={2} />
+          <TextMeta color={color.gray3}>{title}</TextMeta>
+        </View>
+      </View>
+      <View style={styles.optionRowRight}>
+        {isAccount ? (
+          <TextBody color={color.primary}>Start transfer</TextBody>
+        ) : (
+          <TextBody color={color.primary}>
+            Go{"  "}
+            <Octicons name="link-external" />
+          </TextBody>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
 type OptionRowProps = {
   title?: string;
   cta: string;
@@ -212,5 +354,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderBottomWidth: 1,
     borderColor: color.grayLight,
+  },
+  checklistAction: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: color.grayLight,
+    marginHorizontal: 24,
+    backgroundColor: color.white,
+    ...ss.container.shadow,
+    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
   },
 });

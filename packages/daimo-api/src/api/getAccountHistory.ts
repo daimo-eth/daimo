@@ -32,6 +32,12 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { getEnvApi } from "../env";
+import {
+  LandlineAccount,
+  getLandlineAccounts,
+  getLandlineSession,
+} from "../landline/connector";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -64,6 +70,9 @@ export interface AccountHistoryResult {
   proposedSwaps: ProposedSwap[];
 
   exchangeRates: CurrencyExchangeRate[];
+
+  landlineSessionKey: string;
+  landlineAccounts: LandlineAccount[];
 }
 
 export interface SuggestedAction {
@@ -198,6 +207,18 @@ export async function getAccountHistory(
   // Get exchange rates
   const exchangeRates = await getExchangeRatesCached(vc);
 
+  // Get landline session key and accounts
+  let landlineSessionKey = "";
+  let landlineAccounts: LandlineAccount[] = [];
+
+  const username = eAcc.name;
+  const isUserWhitelisted =
+    getEnvApi().LANDLINE_WHITELIST_USERNAMES.includes(username);
+  if (getEnvApi().LANDLINE_API_URL && isUserWhitelisted) {
+    landlineSessionKey = await getLandlineSession(address);
+    landlineAccounts = await getLandlineAccounts(address);
+  }
+
   const ret: AccountHistoryResult = {
     address,
     sinceBlockNum,
@@ -221,6 +242,9 @@ export async function getAccountHistory(
     notificationRequestStatuses,
     proposedSwaps,
     exchangeRates,
+
+    landlineSessionKey,
+    landlineAccounts,
   };
 
   // Suggest an action to the user, like backing up their account
