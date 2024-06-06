@@ -22,23 +22,40 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { chainLinkAggregatorABI } from "./chainLink";
 import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
 
 function getTransportFromEnv() {
-  const l1_RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
-  const l2_RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
+  const l1RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
+  const l2RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
 
-  console.log(`[VIEM] using transport RPCs L1: ${l1_RPCs}, L2: ${l2_RPCs}`);
+  console.log(`[VIEM] using transport RPCs L1: ${l1RPCs}, L2: ${l2RPCs}`);
 
   const stringToTransport = (rpc: string) =>
     rpc.startsWith("wss") ? webSocket(rpc) : http(rpc);
 
   return {
-    l1: fallback(l1_RPCs.map(stringToTransport), { rank: true }),
-    l2: fallback(l2_RPCs.map(stringToTransport), { rank: true }),
+    l1: fallback(l1RPCs.map(stringToTransport), { rank: true }),
+    l2: addLogging(fallback(l2RPCs.map(stringToTransport), { rank: true })),
+  };
+}
+
+function addLogging(transport: Transport) {
+  return (args: Parameters<Transport>[0]) => {
+    const chainId = args.chain?.id;
+    const ret = transport(args);
+    const { request } = ret;
+    ret.request = async (args) => {
+      const randomID = Math.floor(Math.random() * 1e6).toString(36);
+      console.log(`[VIEM] request ${chainId} ${args.method} ${randomID}`);
+      const resp = (await request(args)) as any;
+      console.log(
+        `[VIEM] got response for ${chainId} ${args.method} ${randomID}`
+      );
+      return resp;
+    };
+    return ret;
   };
 }
 
@@ -121,17 +138,6 @@ export class ViemClient {
       `Receipt error ${hash} - ${txURL}: ${e}`,
       "error"
     );
-  }
-
-  getChainLinkAnswers(oracles: Address[]) {
-    return this.l1Client.multicall({
-      contracts: oracles.map((oracle) => ({
-        address: oracle,
-        abi: chainLinkAggregatorABI,
-        functionName: "latestAnswer",
-        args: [],
-      })),
-    });
   }
 
   private async waitForReceipt(hash: Hex) {

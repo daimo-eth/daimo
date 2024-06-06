@@ -11,7 +11,9 @@ import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
+import { OpIndexer } from "./opIndexer";
 import { chainConfig } from "../env";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { senderIdKey, logCoordinateKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -30,15 +32,23 @@ interface NoteLog {
 
 /* Ephemeral notes contract. Tracks note creation and redemption. */
 export class NoteIndexer extends Indexer {
-  // Map (sender, id) -> ephemeralOwner
+  // Index notes by sender, senderId > ephemeralOwner
   private senderIdToOwner: Map<string, Address> = new Map();
 
+  // Index note state by ephemeralOwner
   private notes: Map<Address, DaimoNoteStatus> = new Map();
+  private noteLogs: Map<Address, { create: NoteLog; claim?: NoteLog }> =
+    new Map();
+
   private listeners: ((logs: DaimoNoteStatus[]) => void)[] = [];
   private logCoordinateToNoteEvent: Map<string, [Address, "create" | "claim"]> =
     new Map();
 
-  constructor(private nameReg: NameRegistry) {
+  constructor(
+    private nameReg: NameRegistry,
+    private opIndexer: OpIndexer,
+    private paymentMemoTracker: PaymentMemoTracker
+  ) {
     super("NOTE");
   }
 
@@ -128,6 +138,16 @@ export class NoteIndexer extends Indexer {
     if (this.notes.get(log.ephemeralOwner) != null) {
       throw new Error(`bad NoteCreated: ${log.ephemeralOwner} exists`);
     }
+
+    // Index note log
+    this.noteLogs.set(log.ephemeralOwner, { create: log });
+    const op = this.opIndexer.fetchUserOpFromEventLog(log);
+    if (op == null) {
+      console.warn(`[NOTE] no userop found for note: ${JSON.stringify(log)}`);
+    }
+    const memo = op && this.paymentMemoTracker.getMemo(op.hash);
+
+    // Index note status
     const id = getNoteId(log.ephemeralOwner);
     const sender = await this.nameReg.getEAccount(log.from);
     const dollars = amountToDollars(log.amount);
@@ -144,6 +164,7 @@ export class NoteIndexer extends Indexer {
         dollars,
       },
       sender,
+      memo,
     };
     this.notes.set(log.ephemeralOwner, newNote);
 
@@ -181,6 +202,12 @@ export class NoteIndexer extends Indexer {
         ? DaimoNoteState.Cancelled
         : DaimoNoteState.Claimed;
     note.claimer = await this.nameReg.getEAccount(assertNotNull(log.redeemer));
+
+    // Index note logs
+    const logs = this.noteLogs.get(log.ephemeralOwner);
+    if (logs == null) throw new Error(`bad NoteRedeemed, missing logs`);
+    logs.claim = log;
+
     return note;
   }
 
@@ -215,6 +242,14 @@ export class NoteIndexer extends Indexer {
     const ephemeralOwner = this.senderIdToOwner.get(senderIdKey(sender, id));
     const ret = ephemeralOwner && this.notes.get(ephemeralOwner);
     return ret || null;
+  }
+
+  getCreateLog(ephemeralOwner: Address) {
+    return this.noteLogs.get(ephemeralOwner)?.create;
+  }
+
+  getClaimLog(ephemeralOwner: Address) {
+    return this.noteLogs.get(ephemeralOwner)?.claim;
   }
 }
 

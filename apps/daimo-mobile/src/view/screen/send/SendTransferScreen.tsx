@@ -191,12 +191,7 @@ function SendChooseAmount({
         autoFocus
       />
       <Spacer h={16} />
-      <SendMemoButton
-        memo={memo}
-        memoStatus={memoStatus}
-        setMemo={setMemo}
-        daimoChain={daimoChain}
-      />
+      <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>

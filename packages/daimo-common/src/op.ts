@@ -107,6 +107,9 @@ export interface PaymentLinkOpEvent extends OpEventBase {
 
   /** Userop nonce, if this link occurred in a userop */
   nonceMetadata?: Hex;
+
+  /** Memo from the sender, if present */
+  memo?: string;
 }
 
 export interface KeyRotationOpEvent extends OpEventBase {

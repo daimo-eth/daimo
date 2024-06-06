@@ -55,8 +55,9 @@ async function main() {
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
+
   const opIndexer = new OpIndexer();
-  const noteIndexer = new NoteIndexer(nameReg);
+  const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const homeCoinIndexer = new HomeCoinIndexer(
@@ -104,7 +105,7 @@ async function main() {
   );
 
   // ethIndexer can be spotty depending on RPC errors.
-  shovelWatcher.slowAdd(ethIndexer);
+  // shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {

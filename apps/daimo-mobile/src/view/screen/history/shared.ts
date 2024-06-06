@@ -15,8 +15,11 @@ export function getSynthesizedMemo(
   const chainConfig = env(daimoChain).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
 
-  if (op.type !== "transfer") return null;
   if (op.memo) return op.memo;
+  if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
+  if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
+
+  if (op.type !== "transfer") return null;
   if (op.preSwapTransfer) {
     if (op.preSwapTransfer.coin.token === "ETH") {
       return `ETH → ${coinName}`;

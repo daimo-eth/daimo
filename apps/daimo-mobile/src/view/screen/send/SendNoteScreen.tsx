@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { NoteActionButton } from "./NoteActionButton";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { env } from "../../../env";
@@ -18,6 +19,7 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { getRpcHook } from "../../../logic/trpc";
 import { zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, HelpButton } from "../../shared/Button";
@@ -39,20 +41,38 @@ type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
 export function SendNoteScreen({ route }: Props) {
   const { recipient } = route.params || {};
 
-  // Send Payment Link shows available secure messaging apps
-  const [noteMoney, setNoteMoney] = useState(zeroUSDEntry);
+  // Account, home coin, home chain
+  const account = useAccount();
+  assert(account != null);
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const { tokenSymbol } = env(daimoChain).chainConfig;
 
+  // Enter optional memo
+  const [memoChosen, setMemoChosen] = useState(false);
+  const [memo, setMemo] = useState<string | undefined>(undefined);
+  const rpcHook = getRpcHook(daimoChain);
+  const result = rpcHook.validateMemo.useQuery({ memo });
+  const memoStatus = result.data;
+  const onEditMemo = useCallback(() => setMemoChosen(false), []);
+
+  // Enter amount
+  const [noteMoney, setNoteMoney] = useState(zeroUSDEntry);
   const textInputRef = useRef<TextInput>(null);
   const [amountChosen, setAmountChosen] = useState(false);
-  const onChooseAmount = useCallback(() => {
+
+  // Click create > confirm screen
+  const onTapCreate = useCallback(() => {
     textInputRef.current?.blur();
+    setMemo(memo?.trim() || undefined);
     setAmountChosen(true);
-  }, []);
+    setMemoChosen(true);
+  }, [memo]);
 
   const nav = useNav();
   const goHome = useExitToHome();
   const resetAmount = useCallback(() => {
     setAmountChosen(false);
+    setMemoChosen(false);
     setNoteMoney(zeroUSDEntry);
     textInputRef.current?.focus();
   }, []);
@@ -62,9 +82,7 @@ export function SendNoteScreen({ route }: Props) {
     else goHome();
   }, [nav, amountChosen]);
 
-  const account = useAccount();
-  assert(account != null);
-
+  // Finally, share link to external messaging app
   const [externalAction, setExternalAction] = useState<ExternalAction>({
     type: "share",
     exec: shareURL,
@@ -74,10 +92,6 @@ export function SendNoteScreen({ route }: Props) {
     if (!recipient) return;
     getComposeExternalAction(recipient).then(setExternalAction);
   }, [recipient]);
-
-  // Coin info
-  const daimoChain = daimoChainFromId(account.homeChainId);
-  const { tokenSymbol } = env(daimoChain).chainConfig;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -129,19 +143,31 @@ export function SendNoteScreen({ route }: Props) {
             onFocus={resetAmount}
           />
         )}
+        <Spacer h={16} />
+        {!memoChosen && (
+          <SendMemoButton
+            memo={memo}
+            memoStatus={memoStatus}
+            setMemo={setMemo}
+          />
+        )}
+        {memoChosen && memo != null && (
+          <MemoPellet memo={memo} onClick={onEditMemo} />
+        )}
 
         <Spacer h={24} />
-        {!amountChosen && (
+        {(!amountChosen || !memoChosen) && (
           <ButtonBig
             type="primary"
             title="Create Payment Link"
             disabled={!(noteMoney.dollars > 0)}
-            onPress={onChooseAmount}
+            onPress={onTapCreate}
           />
         )}
-        {amountChosen && (
+        {amountChosen && memoChosen && (
           <NoteActionButton
             dollars={noteMoney.dollars}
+            memo={memo}
             externalAction={externalAction}
           />
         )}

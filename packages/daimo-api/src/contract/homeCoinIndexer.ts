@@ -243,6 +243,8 @@ export class HomeCoinIndexer extends Indexer {
       logIndex,
       nonceMetadata,
       opHash,
+
+      memo,
     };
 
     const opEvent = (() => {
@@ -251,7 +253,6 @@ export class HomeCoinIndexer extends Indexer {
           type: "transfer",
           ...partialOp,
           requestStatus,
-          memo,
           preSwapTransfer,
         } as TransferOpEvent;
       }

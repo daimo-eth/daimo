@@ -89,6 +89,13 @@ export class OpIndexer extends Indexer {
   }
 
   /**
+   * Interpret an event log as having originated from a userop, find the userop.
+   */
+  fetchUserOpFromEventLog(log: { transactionHash: Hex; logIndex: number }) {
+    return this.fetchUserOpLog(log.transactionHash, log.logIndex);
+  }
+
+  /**
    * Interpret a (txHash, queryLogIndex) as having originated from a userop and fetch the userop log of it.
    */
   fetchUserOpLog(txHash: Hex, queryLogIndex: number): UserOp | undefined {

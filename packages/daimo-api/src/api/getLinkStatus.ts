@@ -98,6 +98,7 @@ export async function getLinkStatus(
           link,
           sender,
           dollars: link.previewDollars,
+          memo: undefined, // Note V1 doesn't have memos
         };
         return pending;
       }
@@ -119,6 +120,9 @@ export async function getLinkStatus(
           sender,
           id: link.id,
           dollars: link.dollars,
+          memo: undefined,
+          // Memo not indexed until note is indexed
+          // TODO: we could fix this by storing memos by noteId, vs just opHash
         };
         return pending;
       }

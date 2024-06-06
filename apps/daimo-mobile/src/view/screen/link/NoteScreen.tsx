@@ -314,6 +314,14 @@ function NoteDisplayInner({
           </TextCenter>
           <Spacer h={8} />
           <TitleAmount amount={dollarsToAmount(noteStatus.dollars)} />
+          {noteStatus.memo && (
+            <>
+              <Spacer h={8} />
+              <TextCenter>
+                <TextLight>{noteStatus.memo}</TextLight>
+              </TextCenter>
+            </>
+          )}
           <Spacer h={32} />
         </>
       )}

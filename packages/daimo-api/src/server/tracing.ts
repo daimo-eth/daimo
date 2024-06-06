@@ -5,13 +5,16 @@ import { getEnvApi } from "../env";
 
 const isEnabled = getEnvApi().HONEYCOMB_API_KEY !== "";
 console.log(`[TRACING] initializing Honeycomb. enabled: ${isEnabled}`);
-const sdk = new HoneycombSDK({
-  dataset: "daimo-api",
-  instrumentations: [
-    getNodeAutoInstrumentations({
-      "@opentelemetry/instrumentation-fs": { enabled: false },
-    }),
-  ],
-});
 
-sdk.start();
+if (isEnabled) {
+  const sdk = new HoneycombSDK({
+    dataset: "daimo-api",
+    instrumentations: [
+      getNodeAutoInstrumentations({
+        "@opentelemetry/instrumentation-fs": { enabled: false },
+      }),
+    ],
+  });
+
+  sdk.start();
+}
