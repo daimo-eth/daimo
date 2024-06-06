@@ -74,14 +74,15 @@ export class ETHIndexer extends Indexer {
 
       // Calculate difference between fetched balance and latest cached balance.
       for (let i = 0; i < batch.length; i++) {
-        if (this.latestBalances.has(batch[i])) {
-          const oldBalance = this.latestBalances.get(batch[i])![0];
-          const balanceDiff = newBalances[i] - oldBalance;
+        const balance = this.latestBalances.get(batch[i]);
+        if (balance == null) continue;
 
-          // If received more ETH, add to balance diffs.
-          if (balanceDiff > 0n) {
-            balanceDiffs.set(batch[i], balanceDiff);
-          }
+        const oldBalance = this.latestBalances.get(batch[i])![0];
+        const balanceDiff = newBalances[i] - oldBalance;
+
+        // If received more ETH, add to balance diffs.
+        if (balanceDiff > 0n) {
+          balanceDiffs.set(batch[i], balanceDiff);
         }
         // Update cache with new balance and currentblock number.
         this.latestBalances.set(batch[i], [newBalances[i], toBlockNum]);
@@ -94,7 +95,6 @@ export class ETHIndexer extends Indexer {
   // (from, to] since Shovel doesn't support indexing them.
   async load(_: Pool, from: number, to: number) {
     const startTime = Date.now();
-
     const allAddrs = this.nameReg.getAllDAccounts().map((a) => a.addr);
 
     // Query differences in latest balances and starting balances for all accounts
