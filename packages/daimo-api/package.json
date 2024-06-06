@@ -26,6 +26,7 @@
     "@sentry/cli": "^2.31.0",
     "@sentry/node": "^7.109.0",
     "@sentry/profiling-node": "^7.109.0",
+    "@trpc/client": "^11.0.0-next-beta.318",
     "@trpc/server": "^11.0.0-next-beta.318",
     "@types/cors": "^2.8.16",
     "@types/geoip-lite": "^1.4.2",
