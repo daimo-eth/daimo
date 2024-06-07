@@ -22,7 +22,7 @@ export class DBNotifications extends EventEmitter {
       }
 
       if (!this.channels.has(event)) {
-        this.#addChannel(event);
+        this.addChannel(event);
       }
     });
 
@@ -32,7 +32,7 @@ export class DBNotifications extends EventEmitter {
       }
 
       if (this.listenerCount(event) === 0) {
-        this.#removeChannel(event);
+        this.removeChannel(event);
       }
     });
   }
@@ -59,7 +59,7 @@ export class DBNotifications extends EventEmitter {
     this.isConnected = true;
   }
 
-  async #addChannel(channel: string) {
+  private async addChannel(channel: string) {
     if (!this.isConnected) {
       await this.#setupListener();
     }
@@ -77,7 +77,7 @@ export class DBNotifications extends EventEmitter {
     }
   }
 
-  async #removeChannel(channel: string) {
+  private async removeChannel(channel: string) {
     if (this.channels.has(channel)) {
       await this.client.query(`UNLISTEN ${channel}`);
       this.channels.delete(channel);
