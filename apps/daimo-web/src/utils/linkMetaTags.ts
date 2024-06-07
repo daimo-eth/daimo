@@ -111,7 +111,7 @@ function getPreviewURL(
   if (cancelled) {
     previewURL = previewURL.concat(`&cancelled=true`);
   }
-  previewURL = previewURL.concat(`&v=2`); // cache bust images with old logo
+  previewURL = previewURL.concat(`&v=3`); // cache bust images without profile pics
   return previewURL;
 }
 

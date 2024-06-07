@@ -61,7 +61,7 @@ function getPreviewURL(
   if (uriEncodedAction)
     previewURL = previewURL.concat(`&action=${uriEncodedAction}`);
   if (dollars) previewURL = previewURL.concat(`&dollars=${dollars}`);
-  previewURL = previewURL.concat(`&v=2`); // cache bust images with old logo
+  previewURL = previewURL.concat(`&v=3`); // cache bust images without profile pics
   return previewURL;
 }
 
