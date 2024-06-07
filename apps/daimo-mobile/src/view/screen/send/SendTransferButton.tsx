@@ -2,6 +2,7 @@ import {
   EAccount,
   ForeignCoin,
   OpStatus,
+  ProposedSwap,
   assert,
   canSendTo,
   dollarsToAmount,
@@ -35,16 +36,18 @@ export function SendTransferButton({
   account,
   recipient,
   dollars,
-  coin,
+  toCoin,
   memo,
   minTransferAmount = 0,
+  route,
 }: {
   account: Account;
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
-  coin?: ForeignCoin;
+  toCoin: ForeignCoin;
   memo?: string;
   minTransferAmount?: number;
+  route?: ProposedSwap | null;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
@@ -65,17 +68,23 @@ export function SendTransferButton({
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
       console.log(
-        `[ACTION] sending $${dollarsStr} ${coin && `in${coin.symbol} `}to ${
-          recipient.addr
-        }`
+        `[ACTION] sending $${dollarsStr} ${toCoin.symbol} to ${recipient.addr}`
       );
+      const opMetadata = {
+        nonce,
+        chainGasConstants: account.chainGasConstants,
+      };
+
+      // Swap and transfer if necessary
+      if (route && route.routeFound) {
+        console.log(`[ACTION] sending via swap with route ${route}`);
+        return opSender.executeProposedSwap(route, opMetadata);
+      }
+      // Otherwise, just send home coin directly
       return opSender.erc20transfer(
         recipient.addr,
         dollarsStr,
-        {
-          nonce,
-          chainGasConstants: account.chainGasConstants,
-        },
+        opMetadata,
         memo
       );
     },

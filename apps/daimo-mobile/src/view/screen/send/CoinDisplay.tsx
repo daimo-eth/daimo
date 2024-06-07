@@ -1,17 +1,15 @@
-import { daimoUSDC, ForeignCoin, stablecoinCoins } from "@daimo/common";
-import { useState } from "react";
 import {
-  View,
-  StyleSheet,
-  Text,
-  Pressable,
-  TouchableHighlight,
-} from "react-native";
+  ForeignCoin,
+  getHomeCoinByAddress,
+  stablecoinCoins,
+} from "@daimo/common";
+import { useState } from "react";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
 import { useAccount } from "../../../logic/accountManager";
 import { DropdownPickButton } from "../../shared/DropdownPickButton";
-import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { color, ss } from "../../shared/style";
 import { DaimoText } from "../../shared/text";
 
 export function SendCoinButton({
@@ -24,23 +22,22 @@ export function SendCoinButton({
   isFixed: boolean;
 }) {
   const account = useAccount();
-  const [unchangeableCoinAttempt, setUnchangeableCoinAttempt] =
-    useState<boolean>(false);
-
-  if (account == null) return null;
-
-  const onSetCoin = (entry: ForeignCoin) => {
-    setCoin(entry);
-  };
 
   // TODO: tell user that they can't change coin when sending to another Daimo account
+  const [unchangeableCoinAttempt, setUnchangeableCoinAttempt] =
+    useState<boolean>(false);
   const onPressCoinChange = () => {
     if (isFixed) {
       setUnchangeableCoinAttempt(true);
     }
   };
 
-  const homeCoin = daimoUSDC; // change to account.homeCoin in future
+  if (account == null) return null;
+
+  const onSetCoin = (entry: ForeignCoin) => {
+    setCoin(entry);
+  };
+  const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
 
   return (
     <View style={{ ...styles.coinButton }}>
@@ -49,7 +46,7 @@ export function SendCoinButton({
           {!isFixed && (
             <CoinPicker
               homeCoin={homeCoin}
-              allCoins={stablecoinCoins}
+              allCoins={[...stablecoinCoins.values()]}
               onSetCoin={onSetCoin}
             />
           )}
@@ -94,13 +91,13 @@ function CoinPicker({
   };
 
   return (
-    <View style={styles.coinPickerWrap}>
+    <View>
       <SelectDropdown
         data={allCoins}
         defaultValue={homeCoin}
         onSelect={choose}
         renderButton={() => (
-          <View>
+          <View style={{ display: "flex" }}>
             <DropdownPickButton size={16} iconSize={12} />
           </View>
         )}
@@ -115,13 +112,11 @@ function CoinPicker({
   );
 }
 
-function CoinPickerDisabledBanner() {
+function CoinPickerDisabledBanner({ onClose }: { onClose: () => void }) {
   return (
-    <View>
-      <Text style={{ ...ss.text.btnCaps }}>
-        Cannot change coin when sending to another Daimo account
-      </Text>
-    </View>
+    <Text style={{ ...ss.text.btnCaps }}>
+      Cannot change coin when sending to another Daimo account.
+    </Text>
   );
 }
 
@@ -134,7 +129,6 @@ function CoinPickItem({ coin }: { coin: ForeignCoin }) {
         paddingHorizontal: 24,
         paddingVertical: 13,
         flexDirection: "row",
-        justifyContent: "space-between",
       }}
     >
       <DaimoText variant="dropdown">{coin.symbol}</DaimoText>
@@ -145,16 +139,15 @@ function CoinPickItem({ coin }: { coin: ForeignCoin }) {
 // Styles for dropdown
 const styles = StyleSheet.create({
   coinPickerWrap: {
-    width: "fit-content",
     height: 40,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 10,
   },
   coinDropdown: {
-    width: "fit-content",
+    width: 105,
     backgroundColor: color.white,
     borderRadius: 13,
     flexDirection: "column",

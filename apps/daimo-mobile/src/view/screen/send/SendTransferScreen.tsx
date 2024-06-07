@@ -1,12 +1,15 @@
 import {
+  BigIntStr,
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
   ForeignCoin,
+  ProposedSwap,
   assert,
   assertNotNull,
-  daimoUSDC,
+  dollarsToAmount,
   getAccountName,
+  getHomeCoinByAddress,
   now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
@@ -19,6 +22,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { Address } from "viem";
 
 import { CoinPellet, SendCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
@@ -38,7 +42,7 @@ import {
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
-import { Account } from "../../../model/account";
+import { Account, toEAccount } from "../../../model/account";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -87,7 +91,8 @@ function SendScreenInner({
     else goHome();
   }, [nav, money, recipient]);
 
-  coin = coin ?? daimoUSDC; // TODO: change to account.homeCoin in future
+  const defaultHomeCoin = getHomeCoinByAddress(account.homeCoinAddress);
+  coin = coin ?? defaultHomeCoin;
 
   const sendDisplay = (() => {
     if (link) {
@@ -132,6 +137,7 @@ function SendScreenInner({
             recipient={recipient}
             onCancel={goBack}
             daimoChain={daimoChain}
+            defaultHomeCoin={defaultHomeCoin}
           />
         );
       else
@@ -154,10 +160,12 @@ function SendChooseAmount({
   recipient,
   daimoChain,
   onCancel,
+  defaultHomeCoin,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
+  defaultHomeCoin: ForeignCoin;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -165,8 +173,8 @@ function SendChooseAmount({
   // Select what for
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
-  // Select what coin
-  const [coin, setCoin] = useState<ForeignCoin>(daimoUSDC); // TODO: change to account.homeCoin in future
+  // Select what coin (defaults to native home coin, e.g. daimo USDC)
+  const [coin, setCoin] = useState<ForeignCoin>(defaultHomeCoin);
 
   // Once done, update nav
   const nav = useNav();
@@ -206,12 +214,7 @@ function SendChooseAmount({
       />
       <Spacer h={16} />
       <View style={styles.detailsRow}>
-        <SendMemoButton
-          memo={memo}
-          memoStatus={memoStatus}
-          setMemo={setMemo}
-          daimoChain={daimoChain}
-        />
+        <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
         <SendCoinButton
           coin={coin}
           setCoin={setCoin}
@@ -279,6 +282,28 @@ function SendConfirm({
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
 
+  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
+  const rpcHook = getRpcHook(daimoChainFromId(account!.homeChainId));
+
+  const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
+  const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
+  console.log(
+    `[TRANSFER ATTEMPT] from ${numTokens} ${homeCoin.symbol} to ${coin.symbol}`
+  );
+  // If account's home coin is not the same as the desired send coin, retrieve Uniswap swap route.
+  let route = null;
+  if (homeCoin !== coin) {
+    const result = rpcHook.getUniswapRoute.useQuery({
+      fromToken: homeCoin.token as Address,
+      fromAmount: `${numTokens}` as BigIntStr,
+      fromAccount: toEAccount(account),
+      toToken: coin.token as Address,
+      toAddr: recipient.addr,
+    });
+    route = result.data as ProposedSwap;
+    console.log(`[TRANSFER] got uniswap route ${JSON.stringify(route)}`);
+  }
+
   let button: ReactNode;
   if (isRequest) {
     button = <FulfillRequestButton {...{ account, requestStatus }} />;
@@ -296,15 +321,14 @@ function SendConfirm({
         memo={memoParts.join(" · ")}
         recipient={recipient}
         dollars={money.dollars}
-        coin={coin}
+        toCoin={coin}
+        route={route}
       />
     );
   }
 
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
-
-  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
 
   const [isDecliningRequest, setIsDecliningRequest] = useState(false);
 

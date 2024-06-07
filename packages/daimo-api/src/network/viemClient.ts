@@ -55,7 +55,7 @@ function addLogging(transport: Transport) {
       console.log(`[VIEM] request ${chainId} ${method} ${reqID}`);
       try {
         const resp = (await request(args)) as any;
-        console.log(`[VIEM] response ${chainId} ${method} ${reqID}`);
+        // console.log(`[VIEM] response ${chainId} ${method} ${reqID}`);
         return resp;
       } catch (e) {
         console.error(`[VIEM] ERROR ${chainId} ${method} ${reqID}`, e);
