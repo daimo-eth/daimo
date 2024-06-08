@@ -221,13 +221,9 @@ export class Crontab {
 
     if (toName == null) return;
 
-    const toDisplayName = getAccountName(
-      await this.nameRegistry.getEAccount(transfer.to)
-    );
-
     const humanReadableValue = formatEther(transfer.value);
     this.telemetry.recordClippy(
-      `ETH Transfer: ${toDisplayName} received ${humanReadableValue} ETH`
+      `ETH Transfer: ${toName} received ${humanReadableValue} ETH`
     );
   }
 }
