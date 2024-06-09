@@ -77,15 +77,15 @@ export class ETHIndexer extends Indexer {
         const oldBalance = this.latestBalances.has(batch[i])
           ? this.latestBalances.get(batch[i])![0]
           : 0n;
-        const balanceDiff = newBalances[i] - oldBalance;
+        const newBalance = newBalances[i];
 
         // If received more ETH, add to balance diffs.
-        if (balanceDiff > 0n) {
-          balanceDiffs.set(batch[i], balanceDiff);
+        if (newBalance > oldBalance) {
+          balanceDiffs.set(batch[i], newBalance - oldBalance);
         }
 
         // Update cache with new balance and currentblock number if diff is non-zero.
-        if (balanceDiff !== 0n) {
+        if (newBalance !== oldBalance) {
           this.latestBalances.set(batch[i], [newBalances[i], toBlockNum]);
         }
       }
