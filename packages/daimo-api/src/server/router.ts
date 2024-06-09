@@ -53,6 +53,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
+import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -84,7 +85,8 @@ export function createRouter(
   inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
-  telemetry: Telemetry
+  telemetry: Telemetry,
+  binanceClient: BinanceClient
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
@@ -597,6 +599,18 @@ export function createRouter(
         const link: DaimoLinkInviteCode = { type: "invite", code: inviteCode };
         const status = await inviteCodeTracker.getInviteCodeStatus(link);
         return status.isValid;
+      }),
+
+    getBinanceWithdrawalURL: publicProcedure
+      .input(
+        z.object({ addr: zAddress, os: z.enum(["ios", "android", "other"]) })
+      )
+      .query(async (opts) => {
+        const { addr, os } = opts.input;
+        const acc = nameReg.getDaimoAccount(addr);
+        if (!acc) throw new TRPCError({ code: "NOT_FOUND" });
+
+        return await binanceClient.createWithdrawalURL(addr, os);
       }),
 
     submitWaitlist: publicProcedure

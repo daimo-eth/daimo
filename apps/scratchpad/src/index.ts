@@ -21,6 +21,7 @@ import { chainConfig } from "./env";
 import { getEacc, getEaccDesc } from "./getEacc";
 import { getFids, getFidsDesc } from "./getFids";
 import { pushNotify, pushNotifyDesc } from "./pushNotify";
+import { testBinance, testBinanceDesc } from "./testBinance";
 
 main()
   .then(() => console.log("Done"))
@@ -36,6 +37,7 @@ async function main() {
     { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
     { name: "get-fids", desc: getFidsDesc(), fn: getFids },
     { name: "get-eaccount", desc: getEaccDesc(), fn: getEacc },
+    { name: "test-binance", desc: testBinanceDesc(), fn: testBinance },
   ];
 
   const cmdName = process.argv[2] || "default";

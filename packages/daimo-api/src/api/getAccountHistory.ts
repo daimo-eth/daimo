@@ -313,16 +313,20 @@ function getRampNetworkURL(account: EAccount) {
   const hostAppName = "Daimo";
   const hostLogoUrl = "https://daimo.com/assets/icon-ramp.png";
   const swapAsset = "BASE_USDC";
-  const finalUrl = "daimo://";
+  const finalUrl = "https://daimo.com/l/deposit";
   return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}&finalUrl=${finalUrl}`;
+}
+
+function getBinanceURL(account: EAccount) {
+  return `https://daimo.com/binance?addr=${account.addr}`;
 }
 
 function getBridgeURL(account: EAccount) {
   return `https://www.relay.link/bridge/base/?currency=usdc&toAddress=${account.addr}&lockToChain=true&lockCurrency=true&header=daimo`;
 }
 
-function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
-  const cbUrl = generateOnRampURL({
+function getCoinbaseURL(account: EAccount) {
+  return generateOnRampURL({
     appId: "2be3ccd9-6ee4-4dba-aba8-d4b458fe476d",
     destinationWallets: [
       {
@@ -333,7 +337,9 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     ],
     defaultExperience: "send",
   });
+}
 
+function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   return [
     {
       title: "Transfer from another chain",
@@ -344,8 +350,14 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     {
       title: "Send from Coinbase & other options",
       cta: "Deposit from Coinbase",
-      url: cbUrl,
+      url: getCoinbaseURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
+    },
+    {
+      title: "Send from Binance",
+      cta: "Deposit from Binance",
+      url: getBinanceURL(account),
+      logo: `${daimoDomainAddress}/assets/deposit/binance.png`,
     },
     {
       title: "Cards, banks, & international options",

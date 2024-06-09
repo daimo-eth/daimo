@@ -21,6 +21,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig, getEnvApi } from "../env";
+import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { UniswapClient } from "../network/uniswapClient";
 import { getViemClientFromEnv } from "../network/viemClient";
@@ -49,6 +50,8 @@ async function main() {
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
   const profileCache = new ProfileCache(vc, db);
+
+  const binanceClient = new BinanceClient();
 
   const keyReg = new KeyRegistry();
   const nameReg = new NameRegistry(
@@ -157,7 +160,8 @@ async function main() {
     inviteGraph,
     notifier,
     accountFactory,
-    monitor
+    monitor,
+    binanceClient
   );
   const handler = createHTTPHandler({
     router,
