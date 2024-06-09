@@ -98,6 +98,17 @@ export function RequestNotificationRow({
                 reqStatus={notif.request}
               />
             </TextBody>
+            {notif.request.memo && (
+              <>
+                <Spacer h={2} />
+                <TextBody
+                  color={color.grayMid}
+                  style={{ maxWidth: messageWidth }}
+                >
+                  {notif.request.memo}
+                </TextBody>
+              </>
+            )}
             <Spacer h={2} />
             <TextMeta color={color.gray3}>{ts}</TextMeta>
           </View>

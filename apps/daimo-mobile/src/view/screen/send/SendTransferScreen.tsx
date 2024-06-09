@@ -95,13 +95,14 @@ function SendScreenInner({
           requestStatus.recipient
         );
         if (requestStatus.link.type === "requestv2") {
+          const statusV2 = requestStatus as DaimoRequestV2Status;
           return (
             <SendConfirm
               account={account}
               recipient={recipient}
-              memo={memo}
+              memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
-              requestStatus={requestStatus as DaimoRequestV2Status}
+              requestStatus={statusV2}
             />
           );
         } else {

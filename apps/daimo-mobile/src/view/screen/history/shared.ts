@@ -20,7 +20,9 @@ export function getSynthesizedMemo(
   if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
 
   if (op.type !== "transfer") return null;
-  if (op.preSwapTransfer) {
+  if (op.requestStatus) {
+    return op.requestStatus.memo;
+  } else if (op.preSwapTransfer) {
     if (op.preSwapTransfer.coin.token === "ETH") {
       return `ETH → ${coinName}`;
     }
