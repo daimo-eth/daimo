@@ -86,7 +86,7 @@ export class ETHIndexer extends Indexer {
 
         // Update cache with new balance and currentblock number if diff is non-zero.
         if (newBalance !== oldBalance) {
-          this.latestBalances.set(batch[i], [newBalances[i], toBlockNum]);
+          this.latestBalances.set(batch[i], [newBalance, toBlockNum]);
         }
       }
     }
