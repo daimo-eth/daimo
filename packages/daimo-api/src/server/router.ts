@@ -465,17 +465,16 @@ export function createRouter(
           recipient: zAddress,
           amount: zBigIntStr,
           fulfiller: zAddress.optional(),
+          memo: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { idString, recipient, amount, fulfiller } = opts.input;
-
-        return createRequestSponsored(vc, reqIndexer, {
-          idString,
-          recipient,
-          amount,
-          fulfiller,
-        });
+        return createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          opts.input
+        );
       }),
 
     updateProfileLinks: publicProcedure
@@ -530,7 +529,7 @@ export function createRouter(
         await verifyTagUpdateToken(tag, updateToken, db);
 
         const idString = encodeRequestId(generateRequestId());
-        await createRequestSponsored(vc, reqIndexer, {
+        await createRequestSponsored(vc, reqIndexer, paymentMemoTracker, {
           idString,
           recipient,
           amount,

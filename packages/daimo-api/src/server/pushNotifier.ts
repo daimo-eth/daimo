@@ -256,6 +256,7 @@ export class PushNotifier {
     const body = (() => {
       // Transfer with memo
       if (opEvent.memo) return opEvent.memo;
+      if (opEvent.requestStatus?.memo) return opEvent.requestStatus.memo;
 
       // Transfer fulilling request
       if (opEvent.requestStatus) {

@@ -76,7 +76,7 @@ async function metrics() {
 
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
-  const requestIndexer = new RequestIndexer(db, nameReg);
+  const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const coinIndexer = new HomeCoinIndexer(
     vc,

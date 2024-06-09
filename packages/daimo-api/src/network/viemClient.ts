@@ -192,14 +192,11 @@ export class ViemClient {
     await this.lockNonce.acquireAsync();
 
     try {
-      console.log(
-        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
-      );
+      const elapsedMs = () => Math.round(performance.now() - startMs);
+      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: got lock`);
       await this.updateNonce();
       console.log(
-        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
-          this.nextNonce
-        }`
+        `[VIEM] tx ${localTxId} ${elapsedMs()}ms: got nonce ${this.nextNonce}`
       );
 
       args.nonce = this.nextNonce; // Override nonce
@@ -208,11 +205,7 @@ export class ViemClient {
 
       const ret = await fn(args);
 
-      console.log(
-        `[VIEM] tx ${localTxId} ${
-          performance.now() - startMs
-        }ms: submitted ${ret}`
-      );
+      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: submitted: ${ret}`);
 
       // Increment nonce for later
       this.nextNonce += 1;

@@ -79,7 +79,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
     assert.strictEqual(output[0].title, "Received $5.00 from charlie.eth");
-    assert.strictEqual(output[0].body, "Your 5.00 USDC request was fulfilled");
+    assert.strictEqual(output[0].body, "👀");
   });
 
   await test("transfer with memo", async () => {
@@ -328,6 +328,7 @@ function createNotifierAliceBob() {
           status: DaimoRequestState.Fulfilled,
           metadata: "0x",
           createdAt: now(),
+          memo: "👀",
         };
       } else return null;
     },

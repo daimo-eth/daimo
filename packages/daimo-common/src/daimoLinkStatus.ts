@@ -85,6 +85,7 @@ export type DaimoRequestV2Status = {
   isValidInvite?: boolean;
   expectedFulfiller?: EAccount; // Request from a specific Daimo address
   updatedAt?: number;
+  memo?: string;
 };
 
 /**
