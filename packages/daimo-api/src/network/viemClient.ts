@@ -36,24 +36,30 @@ function getTransportFromEnv() {
     rpc.startsWith("wss") ? webSocket(rpc) : http(rpc);
 
   return {
-    l1: fallback(l1RPCs.map(stringToTransport), { rank: true }),
+    l1: addLogging(fallback(l1RPCs.map(stringToTransport), { rank: true })),
     l2: addLogging(fallback(l2RPCs.map(stringToTransport), { rank: true })),
   };
 }
 
+// Log JSON RPC requests. This helps debug RPC errors.
 function addLogging(transport: Transport) {
   return (args: Parameters<Transport>[0]) => {
     const chainId = args.chain?.id;
     const ret = transport(args);
     const { request } = ret;
     ret.request = async (args) => {
-      const randomID = Math.floor(Math.random() * 1e6).toString(36);
-      console.log(`[VIEM] request ${chainId} ${args.method} ${randomID}`);
-      const resp = (await request(args)) as any;
-      console.log(
-        `[VIEM] got response for ${chainId} ${args.method} ${randomID}`
-      );
-      return resp;
+      const reqID = Math.floor(Math.random() * 1e6).toString(36);
+      const { method, params } = args;
+      const paramsStr = JSON.stringify(params).substring(0, 400);
+      console.log(`[VIEM] request ${chainId} ${method} ${paramsStr} ${reqID}`);
+      try {
+        const resp = (await request(args)) as any;
+        console.log(`[VIEM] response ${chainId} ${method} ${reqID}`);
+        return resp;
+      } catch (e) {
+        console.error(`[VIEM] ERROR ${chainId} ${method} ${reqID}`, e);
+        throw e;
+      }
     };
     return ret;
   };

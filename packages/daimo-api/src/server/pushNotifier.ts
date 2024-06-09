@@ -401,10 +401,12 @@ export class PushNotifier {
 
     const messages: ExpoPushMessage[] = [];
     for (const log of logs) {
+      const { memo } = log;
+
       if (log.status === DaimoNoteState.Confirmed) {
         // To Alice: "You sent $3.50 to a payment link"
         const { sender, dollars } = log;
-        const title = `Sent $${dollars}`;
+        const title = addMemo(`Sent $${dollars}`, memo);
         const body = `You sent ${dollars} ${symbol} to a payment link`;
         messages.push(...this.getPushMessages(sender.addr, title, body));
       } else if (log.status === DaimoNoteState.Claimed) {
@@ -416,14 +418,14 @@ export class PushNotifier {
         messages.push(
           ...this.getPushMessages(
             sender.addr,
-            `$${dollars} sent`,
+            addMemo(`$${dollars} sent`, memo),
             `${getAccountName(
               claimer
             )} accepted your ${dollars} ${symbol} payment link`
           ),
           ...this.getPushMessages(
             claimer.addr,
-            `Received $${dollars}`,
+            addMemo(`Received $${dollars}`, memo),
             `You received ${dollars} ${symbol} from ${getAccountName(sender)}`
           )
         );
@@ -435,7 +437,7 @@ export class PushNotifier {
         messages.push(
           ...this.getPushMessages(
             sender.addr,
-            `Reclaimed $${dollars}`,
+            addMemo(`Reclaimed $${dollars}`, memo),
             `You cancelled your ${dollars} ${symbol} payment link`
           )
         );
@@ -486,4 +488,9 @@ export class PushNotifier {
       },
     ];
   }
+}
+
+function addMemo(title: string, memo?: string): string {
+  if (memo == null) return title;
+  return `${title} · ${memo}`;
 }

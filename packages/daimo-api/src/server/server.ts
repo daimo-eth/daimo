@@ -105,7 +105,7 @@ async function main() {
   );
 
   // ethIndexer can be spotty depending on RPC errors.
-  // shovelWatcher.slowAdd(ethIndexer);
+  shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {

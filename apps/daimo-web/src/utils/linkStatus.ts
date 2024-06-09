@@ -155,7 +155,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
     }
     case "note":
     case "notev2": {
-      const { status, dollars, sender, claimer } = res as DaimoNoteStatus;
+      const { status, dollars, sender, claimer, memo } = res as DaimoNoteStatus;
       switch (status) {
         case "pending":
         case "confirmed": {
@@ -164,6 +164,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: `sent you`,
             dollars: `${dollars}`,
             description: "Accept with Daimo",
+            memo,
           };
         }
         case "claimed": {
@@ -175,6 +176,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: `sent`,
             dollars: `${dollars}`,
             description: `Accepted by ${claim}`,
+            memo,
           };
         }
         case "cancelled": {
@@ -183,6 +185,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: `cancelled send`,
             dollars: `${dollars}`,
             description: `Cancelled by ${getAccountName(sender)}`,
+            memo,
           };
         }
         default: {
