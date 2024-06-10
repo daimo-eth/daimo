@@ -65,6 +65,8 @@ export class Telemetry {
     } else {
       Sentry.init({
         dsn: sentryDSN,
+        // Don't send API server "not ready" errors to Sentry.
+        ignoreErrors: ["API not ready"],
         integrations: [
           new Sentry.Integrations.Postgres(),
           nodeProfilingIntegration(),
