@@ -116,7 +116,11 @@ const customTRPCfetch = async (
 function getTRPCOpts(
   daimoChain: DaimoChain
 ): CreateTRPCClientOptions<AppRouter> {
-  const url = `http://localhost:2022`;
+  const url = chooseChain({
+    daimoChain,
+    mainnet: apiUrlMainnetWithChain,
+    testnet: apiUrlTestnetWithChain,
+  });
 
   let daimoLink = splitLink({
     condition(op) {
@@ -130,11 +134,7 @@ function getTRPCOpts(
     }),
 
     false: httpBatchLink({
-      url: chooseChain({
-        daimoChain,
-        mainnet: apiUrlMainnetWithChain,
-        testnet: apiUrlTestnetWithChain,
-      }),
+      url,
       fetch: customTRPCfetch,
     }),
   });
