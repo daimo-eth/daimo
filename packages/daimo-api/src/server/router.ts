@@ -19,7 +19,7 @@ import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
-import { z } from "zod";
+import { z, ZodNumber } from "zod";
 
 import { AntiSpam } from "./antiSpam";
 import { PushNotifier } from "./pushNotifier";

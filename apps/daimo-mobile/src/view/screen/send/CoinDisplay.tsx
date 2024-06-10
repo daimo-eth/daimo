@@ -1,9 +1,8 @@
 import {
   ForeignCoin,
   getHomeCoinByAddress,
-  stablecoinCoins,
+  supportedSendCoins,
 } from "@daimo/common";
-import { useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
@@ -23,15 +22,6 @@ export function SendCoinButton({
 }) {
   const account = useAccount();
 
-  // TODO: tell user that they can't change coin when sending to another Daimo account
-  const [unchangeableCoinAttempt, setUnchangeableCoinAttempt] =
-    useState<boolean>(false);
-  const onPressCoinChange = () => {
-    if (isFixed) {
-      setUnchangeableCoinAttempt(true);
-    }
-  };
-
   if (account == null) return null;
 
   const onSetCoin = (entry: ForeignCoin) => {
@@ -40,37 +30,22 @@ export function SendCoinButton({
   const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
 
   return (
-    <View style={{ ...styles.coinButton }}>
-      <Pressable onPress={onPressCoinChange}>
-        <View style={styles.coinPickerWrap}>
-          {!isFixed && (
-            <CoinPicker
-              homeCoin={homeCoin}
-              allCoins={[...stablecoinCoins.values()]}
-              onSetCoin={onSetCoin}
-            />
-          )}
-          <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
-        </View>
-      </Pressable>
-    </View>
-  );
-}
-
-export function CoinPellet({
-  coin,
-  onClick,
-}: {
-  coin: ForeignCoin;
-  onClick: () => void;
-}) {
-  return (
-    <View style={{ ...styles.coinButton }}>
-      <Pressable onPress={onClick}>
-        <View style={styles.coinPickerWrap}>
-          <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
-        </View>
-      </Pressable>
+    <View
+      style={{
+        ...styles.coinButton,
+        backgroundColor: isFixed ? color.grayLight : color.white,
+      }}
+    >
+      <View style={styles.coinPickerWrap}>
+        {!isFixed && (
+          <CoinPicker
+            homeCoin={homeCoin}
+            allCoins={[...supportedSendCoins.values()]}
+            onSetCoin={onSetCoin}
+          />
+        )}
+        <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
+      </View>
     </View>
   );
 }
@@ -91,47 +66,47 @@ function CoinPicker({
   };
 
   return (
-    <View>
-      <SelectDropdown
-        data={allCoins}
-        defaultValue={homeCoin}
-        onSelect={choose}
-        renderButton={() => (
-          <View style={{ display: "flex" }}>
-            <DropdownPickButton size={16} iconSize={12} />
-          </View>
-        )}
-        renderItem={(c) => (
-          <View>
-            <CoinPickItem coin={c} />
-          </View>
-        )}
-        dropdownStyle={styles.coinDropdown}
-      />
-    </View>
-  );
-}
-
-function CoinPickerDisabledBanner({ onClose }: { onClose: () => void }) {
-  return (
-    <Text style={{ ...ss.text.btnCaps }}>
-      Cannot change coin when sending to another Daimo account.
-    </Text>
+    <SelectDropdown
+      data={allCoins}
+      defaultValue={homeCoin}
+      onSelect={choose}
+      renderButton={() => (
+        <View style={{ display: "flex" }}>
+          <DropdownPickButton size={16} iconSize={12} />
+        </View>
+      )}
+      renderItem={(c) => (
+        <View>
+          <CoinPickItem coin={c} />
+        </View>
+      )}
+      dropdownStyle={styles.coinDropdown}
+    />
   );
 }
 
 function CoinPickItem({ coin }: { coin: ForeignCoin }) {
   return (
-    <View
-      style={{
-        borderBottomWidth: 1,
-        borderBottomColor: color.grayLight,
-        paddingHorizontal: 24,
-        paddingVertical: 13,
-        flexDirection: "row",
-      }}
-    >
+    <View style={styles.coinPickItem}>
       <DaimoText variant="dropdown">{coin.symbol}</DaimoText>
+    </View>
+  );
+}
+
+export function CoinPellet({
+  coin,
+  onClick,
+}: {
+  coin: ForeignCoin;
+  onClick: () => void;
+}) {
+  return (
+    <View style={{ ...styles.coinButton, backgroundColor: color.grayLight }}>
+      <Pressable onPress={onClick}>
+        <View style={styles.coinPickerWrap}>
+          <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
+        </View>
+      </Pressable>
     </View>
   );
 }
@@ -153,7 +128,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   coinButton: {
-    backgroundColor: color.white,
     borderColor: color.grayLight,
     borderWidth: 1,
     borderRadius: 8,
@@ -164,6 +138,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
+  },
+  coinPickItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: color.grayLight,
+    paddingHorizontal: 24,
+    paddingVertical: 13,
+    flexDirection: "row",
   },
   sheetContainer: {
     // add horizontal space

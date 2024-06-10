@@ -271,7 +271,7 @@ function useTouchUnderlay(type: ButtonProps["type"]) {
 
 type ButtonStyle = { button: ViewStyle; title: TextStyle };
 
-export function Button(
+function Button(
   props: TextButtonProps & {
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;

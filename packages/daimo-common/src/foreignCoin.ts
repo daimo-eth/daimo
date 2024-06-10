@@ -52,14 +52,13 @@ export const USDT: ForeignCoin = {
     "https://assets.coingecko.com/coins/images/325/large/tether.png?1547034089",
 };
 
-export const stablecoinCoins = new Map<string, ForeignCoin>([
+export const supportedSendCoins = new Map<string, ForeignCoin>([
   [daimoUSDC.token, daimoUSDC],
-  [USDbC.token, USDbC],
   [DAI.token, DAI],
   [USDT.token, USDT],
 ]);
 export const allHomeCoins = new Map<string, ForeignCoin>([
-  [daimoUSDC.token, daimoUSDC],
+  [daimoUSDC.token.toLowerCase(), daimoUSDC],
 ]);
 
 // From https://stackoverflow.com/questions/32229667/have-max-2-decimal-places
@@ -96,17 +95,18 @@ export function isAmountDust(
   return true;
 }
 
-// Get home coin by address (defaults to daimoUSDC).
-export function getHomeCoinByAddress(
-  address: string,
-  chainId?: number
-): ForeignCoin {
-  return allHomeCoins.get(address) ?? daimoUSDC;
+// Get home coin by address.
+export function getHomeCoinByAddress(address: Address): ForeignCoin {
+  const homeCoin = allHomeCoins.get(address.toLowerCase());
+  if (!homeCoin) {
+    throw new Error(`getHomeCoinByAddress: ${address} is not a home coin`);
+  }
+  return homeCoin;
 }
 
 // Get stable coin by address.
-export function getStableCoinByAddress(
+export function getSupportedSendCoinByAddress(
   address: string
 ): ForeignCoin | undefined {
-  return stablecoinCoins.get(address);
+  return supportedSendCoins.get(address);
 }

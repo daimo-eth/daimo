@@ -1,6 +1,5 @@
 import {
   DaimoAccountCall,
-  ForeignCoin,
   PendingOpEvent,
   ProposedSwap,
   UserOpHex,

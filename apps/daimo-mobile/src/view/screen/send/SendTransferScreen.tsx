@@ -1,10 +1,8 @@
 import {
-  BigIntStr,
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
   ForeignCoin,
-  ProposedSwap,
   assert,
   assertNotNull,
   dollarsToAmount,
@@ -22,11 +20,11 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { Address } from "viem";
 
 import { CoinPellet, SendCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
+import { RouteLoading, RoutePellet } from "./RouteDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   ParamListSend,
@@ -41,8 +39,9 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { getSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
-import { Account, toEAccount } from "../../../model/account";
+import { Account } from "../../../model/account";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -218,7 +217,7 @@ function SendChooseAmount({
         <SendCoinButton
           coin={coin}
           setCoin={setCoin}
-          isFixed={recipient.name != null}
+          isFixed={recipient.name != null && daimoChain !== "baseSepolia"}
         />
       </View>
       <Spacer h={16} />
@@ -277,32 +276,24 @@ function SendConfirm({
   }
 
   const nav = useNav();
-
   const navToInput = () => {
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
 
   const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
-  const rpcHook = getRpcHook(daimoChainFromId(account!.homeChainId));
 
   const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
   const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
-  console.log(
-    `[TRANSFER ATTEMPT] from ${numTokens} ${homeCoin.symbol} to ${coin.symbol}`
-  );
-  // If account's home coin is not the same as the desired send coin, retrieve Uniswap swap route.
-  let route = null;
-  if (homeCoin !== coin) {
-    const result = rpcHook.getUniswapRoute.useQuery({
-      fromToken: homeCoin.token as Address,
-      fromAmount: `${numTokens}` as BigIntStr,
-      fromAccount: toEAccount(account),
-      toToken: coin.token as Address,
-      toAddr: recipient.addr,
-    });
-    route = result.data as ProposedSwap;
-    console.log(`[TRANSFER] got uniswap route ${JSON.stringify(route)}`);
-  }
+
+  // If account's home coin is not the same as the desired send coin, retrieve swap route.
+  const route = getSwapRoute({
+    fromToken: homeCoin,
+    toToken: coin,
+    amountIn: numTokens,
+    fromAccount: account,
+    toAddress: recipient.addr,
+    daimoChainId: account!.homeChainId,
+  });
 
   let button: ReactNode;
   if (isRequest) {
@@ -385,9 +376,14 @@ function SendConfirm({
           <Spacer h={40} />
         )}
         <CoinPellet coin={coin} onClick={navToInput} />
+        {route ? (
+          <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />
+        ) : (
+          <RouteLoading />
+        )}
       </View>
       <Spacer h={16} />
-      {button}
+      {route && button}
       {isRequest && (
         <>
           <Spacer h={16} />

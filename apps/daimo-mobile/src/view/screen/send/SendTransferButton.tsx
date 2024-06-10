@@ -75,12 +75,12 @@ export function SendTransferButton({
         chainGasConstants: account.chainGasConstants,
       };
 
-      // Swap and transfer if necessary
+      // Swap and transfer if outbound coin is different than home coin.
       if (route && route.routeFound) {
         console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);
       }
-      // Otherwise, just send home coin directly
+      // Otherwise, just send home coin directly.
       return opSender.erc20transfer(
         recipient.addr,
         dollarsStr,

@@ -1,3 +1,4 @@
+import { getHomeCoinByAddress } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -201,6 +202,7 @@ function SendConfirm({
       // Minimum USDC withdrawal amount specified by bridgexyz
       // https://apidocs.bridge.xyz/docs/liquidation-address
       minTransferAmount={1.0}
+      toCoin={getHomeCoinByAddress(account.homeCoinAddress)}
     />
   );
 

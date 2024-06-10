@@ -1,5 +1,6 @@
 import {
   EAccount,
+  ForeignCoin,
   amountToDollars,
   assertNotNull,
   dollarsToAmount,
@@ -72,6 +73,10 @@ const commands: Record<string, Command> = {
   "get-user": {
     help: "Gets name, address and balance of a user. Args: [user = name or addr]",
     fn: getUser,
+  },
+  "get-swap-quote": {
+    help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
+    fn: getSwapQuote,
   },
   "get-swap-quote": {
     help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
@@ -199,6 +204,45 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
       null,
       2
     )}`,
+  ].join("\n");
+}
+
+// Gets a swap quote from the onchain contract.
+async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
+  const strN = kwargs.get("fromAmount");
+  const strFromToken = kwargs.get("fromToken");
+  const strToToken = kwargs.get("toToken");
+  if (!strN || !strFromToken || !strToToken)
+    return "Must specify fromAmount, fromToken and toToken";
+
+  const { tokens } = await getTokenList();
+  const fromToken = tokens.find(
+    (t) => t.symbol === strFromToken || t.address === strFromToken.toLowerCase()
+  );
+  if (fromToken == null) return `Token '${strFromToken}' not found`;
+
+  const toToken = tokens.find(
+    (t) => t.symbol === strToToken || t.address === strToToken.toLowerCase()
+  );
+  if (toToken == null) return `Token '${strToToken}' not found`;
+
+  const amountIn = dollarsToAmount(Number(strN), fromToken.decimals);
+
+  const result = await rpc.getSwapQuote.query({
+    amountIn,
+    fromToken: fromToken.address as Address,
+    toToken: toToken.address as Address,
+  });
+  const { amountOut, swapPath } = result.data as {
+    amountOut: bigint;
+    swapPath: string[]; // TODO: unsure if this is correct atype
+  };
+  return [
+    `From ${fromToken.symbol} (${fromToken.address})`,
+    `To ${toToken.symbol} (${toToken.address})`,
+    `Fetched onchain quote for ${amountIn} ${fromToken.symbol} to ${
+      toToken.symbol
+    }: ${JSON.stringify({ amountOut, swapPath }, null, 2)}`,
   ].join("\n");
 }
 
