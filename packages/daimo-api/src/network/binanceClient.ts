@@ -1,6 +1,6 @@
 import { PlatformType } from "@daimo/common";
 import { p256 } from "@noble/curves/p256";
-import { base64, base64urlnopad } from "@scure/base";
+import { base64nopad, base64urlnopad } from "@scure/base";
 import { Address, getAddress } from "viem";
 
 import { chainConfig, getEnvApi } from "../env";
@@ -40,7 +40,7 @@ export class BinanceClient {
       prehash: true,
     });
     const sigBytes = signature.normalizeS().toDERRawBytes();
-    const ret = base64.encode(sigBytes);
+    const ret = base64urlnopad.encode(sigBytes);
     return ret;
   }
 
@@ -125,7 +125,7 @@ export class BinanceClient {
     }
   }
 
-  async createWithdrawalURL(addr: Address, os: PlatformType) {
+  async createWithdrawalURL(addr: Address, platform: PlatformType) {
     const path = "/v1/friendly/binance-pay/withdraw/pre-create";
     const redirectUrl = "https://daimo.com/l/deposit";
 
@@ -147,15 +147,17 @@ export class BinanceClient {
     const sig = await this.signDeeplink(nonce, timestamp, transactionId);
     if (!sig) return undefined;
 
-    if (os === "ios") {
+    if (platform === "ios") {
       const deeplinkUrl = `bnc://app.binance.com/payment/onchainpay?transactionId=${transactionId}&nonce=${nonce}&timeStamp=${timestamp}&sign=${sig}&redirectUrl=${redirectUrl}`;
+      console.log(`[BINANCE] created deeplink: ${deeplinkUrl}`);
       const encodedDeeplinkUrl = base64urlnopad.encode(
         Buffer.from(deeplinkUrl)
       );
       return `${universalLinkUrl}?_dp=${encodedDeeplinkUrl}`;
-    } else if (os === "android") {
+    } else if (platform === "android") {
       const deeplinkUrl = `bnc://app.binance.com/payment/secpay?extra_key_api_type=on-chain-transfer&transactionId=${transactionId}&nonce=${nonce}&sign=${sig}&timeStamp=${timestamp}&redirectUrl=${redirectUrl}`;
-      const encodedDeeplinkUrl = base64.encode(Buffer.from(deeplinkUrl));
+      console.log(`[BINANCE] created deeplink: ${deeplinkUrl}`);
+      const encodedDeeplinkUrl = base64nopad.encode(Buffer.from(deeplinkUrl));
       return `${universalLinkUrl}?_dp=${encodedDeeplinkUrl}`;
     } else return undefined;
   }

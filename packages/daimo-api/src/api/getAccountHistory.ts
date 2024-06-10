@@ -317,10 +317,6 @@ function getRampNetworkURL(account: EAccount) {
   return `https://app.ramp.network?hostApiKey=${hostApikey}&hostAppName=${hostAppName}&hostLogoUrl=${hostLogoUrl}&swapAsset=${swapAsset}&userAddress=${account.addr}&finalUrl=${finalUrl}`;
 }
 
-function getBinanceURL(account: EAccount) {
-  return `https://daimo.com/binance?addr=${account.addr}`;
-}
-
 function getBridgeURL(account: EAccount) {
   return `https://www.relay.link/bridge/base/?currency=usdc&toAddress=${account.addr}&lockToChain=true&lockCurrency=true&header=daimo`;
 }
@@ -352,12 +348,6 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
       cta: "Deposit from Coinbase",
       url: getCoinbaseURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
-    },
-    {
-      title: "Send from Binance",
-      cta: "Deposit from Binance",
-      url: getBinanceURL(account),
-      logo: `${daimoDomainAddress}/assets/deposit/binance.png`,
     },
     {
       title: "Cards, banks, & international options",

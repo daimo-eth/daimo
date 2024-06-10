@@ -1,12 +1,14 @@
 import { LandlineAccount } from "@daimo/api/src/landline/connector";
-import { daimoDomainAddress, timeAgo } from "@daimo/common";
+import { PlatformType, daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
 import React, { useCallback, useContext, useState } from "react";
 import {
+  ActivityIndicator,
   ImageSourcePropType,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,6 +26,7 @@ import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
+import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -138,15 +141,47 @@ function LandlineAccountList() {
   );
 }
 
+function getBinanceOpener(
+  account: Account,
+  setProgress: (progress: Progress) => void
+) {
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+
+  const platform = ["ios", "android"].includes(Platform.OS)
+    ? (Platform.OS as PlatformType)
+    : "other";
+
+  if (platform === "other") {
+    return null;
+  }
+
+  return async () => {
+    setProgress("loading");
+    const url = await rpcFunc.getBinanceWithdrawalURL.query({
+      addr: account.address,
+      platform,
+    });
+
+    if (url == null) {
+      console.log(`[DEPOSIT] no binance url for ${account.name}`);
+    } else {
+      Linking.openURL(url);
+      setProgress("started");
+    }
+  };
+}
+
+type Progress = "idle" | "loading" | "started";
+
 function DepositList({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
 
-  const [started, setStarted] = useState(false);
+  const [progress, setProgress] = useState<Progress>("idle");
 
   const openExchange = (url: string) => {
     Linking.openURL(url);
-    setStarted(true);
+    setProgress("started");
   };
 
   const dispatcher = useContext(DispatcherContext);
@@ -167,6 +202,20 @@ function DepositList({ account }: { account: Account }) {
   ];
 
   if (!isTestnet) {
+    // Binance requires active generation for the link, expires quickly and
+    // 301 redirects don't work for opening universal links in Binance app,
+    // so we can't include it in the recommendedExchanges API-side.
+    const binanceOption = getBinanceOpener(account, setProgress);
+    if (binanceOption) {
+      options.unshift({
+        cta: "Deposit from Binance",
+        title: "Send from Binance balance",
+        logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
+        onClick: binanceOption,
+        progress, // Progress options only apply to Binance currently
+      });
+    }
+
     options.unshift(
       ...account.recommendedExchanges.map((rec) => ({
         title: rec.title || "Loading...",
@@ -181,7 +230,7 @@ function DepositList({ account }: { account: Account }) {
   return (
     <View style={styles.section}>
       <TextBody color={color.gray3}>Deposit</TextBody>
-      {started && (
+      {progress === "started" && (
         <>
           <Spacer h={16} />
           <InfoBox
@@ -278,11 +327,33 @@ type OptionRowProps = {
   cta: string;
   logo: ImageSourcePropType;
   isExternal?: boolean;
-  onClick: () => void;
+  progress?: Progress;
+  onClick: () => void | Promise<void>;
 };
 
-function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
+function OptionRow({
+  title,
+  cta,
+  logo,
+  isExternal,
+  onClick,
+  progress,
+}: OptionRowProps) {
   const width = useWindowDimensions().width;
+
+  const rightContent = (() => {
+    if (progress === "loading") return <ActivityIndicator size="small" />;
+    if (isExternal) {
+      return (
+        <TextBody color={color.primary}>
+          Go{"  "}
+          <Octicons name="link-external" />
+        </TextBody>
+      );
+    } else {
+      return <TextBody color={color.primary}>Continue</TextBody>;
+    }
+  })();
 
   return (
     <TouchableHighlight
@@ -299,16 +370,7 @@ function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
             <TextMeta color={color.gray3}>{title}</TextMeta>
           </View>
         </View>
-        <View style={styles.optionRowRight}>
-          {isExternal ? (
-            <TextBody color={color.primary}>
-              Go{"  "}
-              <Octicons name="link-external" />
-            </TextBody>
-          ) : (
-            <TextBody color={color.primary}>Continue</TextBody>
-          )}
-        </View>
+        <View style={styles.optionRowRight}>{rightContent}</View>
       </View>
     </TouchableHighlight>
   );

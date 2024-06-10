@@ -603,14 +603,17 @@ export function createRouter(
 
     getBinanceWithdrawalURL: publicProcedure
       .input(
-        z.object({ addr: zAddress, os: z.enum(["ios", "android", "other"]) })
+        z.object({
+          addr: zAddress,
+          platform: z.enum(["ios", "android", "other"]),
+        })
       )
       .query(async (opts) => {
-        const { addr, os } = opts.input;
+        const { addr, platform } = opts.input;
         const acc = nameReg.getDaimoAccount(addr);
         if (!acc) throw new TRPCError({ code: "NOT_FOUND" });
 
-        return await binanceClient.createWithdrawalURL(addr, os);
+        return await binanceClient.createWithdrawalURL(addr, platform);
       }),
 
     submitWaitlist: publicProcedure
