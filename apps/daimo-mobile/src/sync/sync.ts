@@ -39,19 +39,32 @@ export function startSync() {
 
   const manager = getAccountManager();
 
-  // Called everytime when account changes.
+  // Called when app is notified of account change.
   // Assign a function here that clears any subscriptions from
   // the previous account.
-  let onAccountChange = () => {};
+  let unsubscribePreviousAccount: null | (() => void) = null;
+
+  // listener is called on state change, not when on actual account switch
+  // this means it will get called when state is loaded from local storage
+  // or on every sync.
+  // we store previousAddress to check if account actually changes
+  // to avoid starting a new subscription each time.
+  let previousAddress = "";
 
   const listener = (account: Account | null) => {
     console.log("account change", account);
 
-    onAccountChange();
-
     if (!account) {
+      unsubscribePreviousAccount?.();
+
       return;
     }
+
+    if (previousAddress === account.address) {
+      return;
+    }
+
+    unsubscribePreviousAccount?.();
 
     const daimoChain = daimoChainFromId(account.homeChainId);
     const rpcFunc = env(daimoChain).rpcFunc;
@@ -63,15 +76,16 @@ export function startSync() {
       },
       {
         onData: (data) => {
-          console.log("received account update", data);
-          applySync(account, data, false);
+          manager.transform((a) => applySync(a, data, false));
         },
       }
     );
 
-    onAccountChange = () => {
+    unsubscribePreviousAccount = () => {
       sub.unsubscribe();
     };
+
+    previousAddress = account.address;
   };
 
   manager.addListener(listener);
