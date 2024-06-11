@@ -10,23 +10,18 @@ import {
   getNoteClaimSignatureFromSeed,
 } from "@daimo/common";
 import {
-  daimoRequestAddress,
-  daimoRequestABI,
-  daimoEphemeralNotesV2ABI,
-  notesV2AddressMap,
   daimoEphemeralNotesABI,
+  daimoEphemeralNotesV2ABI,
+  daimoRequestABI,
+  daimoRequestAddress,
+  erc20ABI,
   notesV1AddressMap,
+  notesV2AddressMap,
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
-import {
-  useNetwork,
-  usePrepareContractWrite,
-  useContractWrite,
-  useAccount,
-  erc20ABI,
-} from "wagmi";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
@@ -118,9 +113,14 @@ function WagmiButton({
   incrementStep?: () => void;
   setSecondary: () => void;
 }) {
-  const { chain } = useNetwork();
-  const { config, error } = usePrepareContractWrite(wagmiPrep);
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const { chain } = useAccount();
+  const { data, error } = useSimulateContract(wagmiPrep);
+  const {
+    isPending,
+    isSuccess,
+    writeContract,
+    data: txHash,
+  } = useWriteContract();
 
   const humanReadableError = useMemo(() => {
     if (!error || !error.message) return undefined;
@@ -142,44 +142,49 @@ function WagmiButton({
   }, [isSuccess, incrementStep]);
 
   useEffect(() => {
-    if (isLoading || isSuccess) setSecondary();
-  }, [isLoading, isSuccess, setSecondary]);
+    if (isPending || isSuccess) setSecondary();
+  }, [isPending, isSuccess, setSecondary]);
 
-  return (
-    <>
-      {humanReadableError === undefined && (
-        <>
-          <SecondaryButton
-            disabled={!write || isLoading}
-            onClick={() => {
-              if (isSuccess && data?.hash)
-                window.open(
-                  chain?.blockExplorers!.default.url + "/tx/" + data?.hash,
-                  "_blank"
-                );
-              else write?.();
-            }}
-            buttonType={isSuccess ? "success" : undefined}
-          >
-            {isLoading
-              ? "SENDING"
-              : isSuccess && !incrementStep
-              ? "VIEW ON BLOCK EXPLORER"
-              : title}
-          </SecondaryButton>
-          <div className="h-4" />
-        </>
-      )}
-      {humanReadableError !== undefined && (
-        <>
-          <SecondaryButton disabled buttonType="danger">
-            {humanReadableError.toUpperCase()}
-          </SecondaryButton>
-          <div className="h-4" />
-        </>
-      )}
-    </>
-  );
+  if (chain == null) {
+    return null;
+  } else if (humanReadableError == null) {
+    // Request to send
+    const request = data?.request;
+    return (
+      <>
+        <SecondaryButton
+          disabled={request == null || isPending}
+          onClick={() => {
+            if (isSuccess && txHash) {
+              const explorer = assertNotNull(chain.blockExplorers!.default.url);
+              window.open(`${explorer}/tx/${txHash}`, "_blank");
+            } else if (request == null || isPending) {
+              console.log("[CONNECT-WALLET] skipping, request:", request);
+            } else {
+              writeContract(request);
+            }
+          }}
+          buttonType={isSuccess ? "success" : undefined}
+        >
+          {isPending
+            ? "SENDING"
+            : isSuccess && !incrementStep
+            ? "VIEW ON BLOCK EXPLORER"
+            : title}
+        </SecondaryButton>
+        <div className="h-4" />
+      </>
+    );
+  } else {
+    return (
+      <>
+        <SecondaryButton disabled buttonType="danger">
+          {humanReadableError.toUpperCase()}
+        </SecondaryButton>
+        <div className="h-4" />
+      </>
+    );
+  }
 }
 
 function CustomConnectButton({ title }: { title: string }): JSX.Element {

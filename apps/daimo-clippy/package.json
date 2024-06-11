@@ -16,6 +16,6 @@
     "@daimo/contract": "*",
     "@slack/bolt": "^3.17.1",
     "@trpc/client": "^11.0.0-next-beta.318",
-    "viem": "^1.19.15"
+    "viem": "^2.13.8"
   }
 }

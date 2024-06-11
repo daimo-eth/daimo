@@ -2,9 +2,12 @@ import { assert } from "@daimo/common";
 import AwaitLock from "await-lock";
 import {
   Abi,
+  AbiStateMutability,
   Account,
   Address,
   Chain,
+  ContractFunctionArgs,
+  ContractFunctionName,
   GetContractReturnType,
   Hex,
   PublicClient,
@@ -217,20 +220,23 @@ export class ViemClient {
 
   async writeContract<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends string,
+    TMut extends AbiStateMutability,
+    TFunctionName extends ContractFunctionName<TAbi, TMut>,
+    TArgs extends ContractFunctionArgs<TAbi, TMut, TFunctionName>,
     TChainOverride extends Chain | undefined = undefined
   >(
-    args: WriteContractParameters<
+    params: WriteContractParameters<
       TAbi,
       TFunctionName,
+      TArgs,
       Chain,
       Account,
       TChainOverride
     >
   ): Promise<Hex> {
-    console.log(`[CHAIN] exec ${args.functionName}`);
+    console.log(`[CHAIN] exec ${params.functionName}`);
     const ret = await this.runWithOverrideParams(
-      args,
+      params,
       this.walletClient.writeContract
     );
     this.waitForReceipt(ret);
@@ -252,8 +258,7 @@ export class ViemClient {
 
 export type ContractType<TAbi extends Abi> = GetContractReturnType<
   TAbi,
-  PublicClient<Transport, Chain>,
-  WalletClient<Transport, Chain, Account>
+  PublicClient<Transport, Chain>
 >;
 
 export type ReadOnlyContractType<TAbi extends Abi> = GetContractReturnType<

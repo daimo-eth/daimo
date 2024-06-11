@@ -32,7 +32,7 @@ export async function claimEphemeralNoteSponsored(
     abi: daimoEphemeralNotesV2ABI,
     address: chainConfig.notesV2Address,
     functionName: "claimNoteRecipient",
-    args: [ephemeralOwner, recipient, signature],
+    args: [ephemeralOwner, recipient, signature] as any,
   });
 
   return claimTxHash;

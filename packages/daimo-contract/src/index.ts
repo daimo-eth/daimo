@@ -1,13 +1,21 @@
-import { parseAbi } from "viem";
+import { erc20Abi, parseAbi } from "viem";
 
 import {
-  daimoNameRegistryABI,
+  daimoAccountAbi,
+  daimoAccountFactoryAbi,
+  daimoEphemeralNotesAbi,
+  daimoEphemeralNotesV2Abi,
+  daimoNameRegistryAbi,
   daimoNameRegistryProxyAddress,
+  daimoOffchainUtilsAbi,
+  daimoPaymasterV2Abi,
+  daimoRequestAbi,
+  entryPointAbi,
 } from "./generated";
 
 export const nameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
-  abi: daimoNameRegistryABI,
+  abi: daimoNameRegistryAbi,
 } as const;
 
 export const pimlicoPaymasterAbi = parseAbi([
@@ -18,22 +26,23 @@ export const pimlicoPaymasterAbi = parseAbi([
 
 export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
 
+export const daimoAccountABI = daimoAccountAbi;
+export const daimoRequestABI = daimoRequestAbi;
+export const daimoAccountFactoryABI = daimoAccountFactoryAbi;
+export const daimoEphemeralNotesABI = daimoEphemeralNotesAbi;
+export const daimoEphemeralNotesV2ABI = daimoEphemeralNotesV2Abi;
+export const daimoPaymasterV2ABI = daimoPaymasterV2Abi;
+export const daimoOffchainUtilsABI = daimoOffchainUtilsAbi;
+export const entryPointABI = entryPointAbi;
+export const erc20ABI = erc20Abi;
+
 export {
-  daimoAccountABI,
-  daimoRequestABI,
   daimoRequestAddress,
   daimoRequestConfig,
-  daimoAccountFactoryABI,
   daimoAccountFactoryAddress,
   daimoAccountFactoryConfig,
-  daimoEphemeralNotesABI,
-  daimoEphemeralNotesV2ABI,
   daimoPaymasterV2Address,
-  daimoPaymasterV2ABI,
   daimoOffchainUtilsAddress,
-  daimoOffchainUtilsABI,
-  entryPointABI,
-  erc20ABI,
 } from "./generated";
 
 export * from "./chainConfig";
