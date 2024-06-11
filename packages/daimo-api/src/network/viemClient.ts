@@ -49,9 +49,8 @@ function addLogging(transport: Transport) {
     const { request } = ret;
     ret.request = async (args) => {
       const reqID = Math.floor(Math.random() * 1e6).toString(36);
-      const { method, params } = args;
-      const paramsStr = JSON.stringify(params).substring(0, 400);
-      console.log(`[VIEM] request ${chainId} ${method} ${paramsStr} ${reqID}`);
+      const { method } = args;
+      console.log(`[VIEM] request ${chainId} ${method} ${reqID}`);
       try {
         const resp = (await request(args)) as any;
         console.log(`[VIEM] response ${chainId} ${method} ${reqID}`);

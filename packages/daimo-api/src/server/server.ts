@@ -30,6 +30,11 @@ import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
 
+// Workaround viem bug
+(Error.prototype as any).walk = function () {
+  return this;
+};
+
 async function main() {
   console.log(`[API] initializing telemetry...`);
   const monitor = new Telemetry();

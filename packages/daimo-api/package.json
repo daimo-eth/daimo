@@ -5,7 +5,7 @@
   "description": "Daimo API for account creation, search, etc",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/server/tracing.ts src/server/server.ts",
+    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev --inspect=4321 -r ./src/server/tracing.ts src/server/server.ts",
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
     "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
