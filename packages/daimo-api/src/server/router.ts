@@ -595,23 +595,27 @@ export function createRouter(
         })
       )
       .subscription(async (opts) => {
+        const { address, inviteCode } = opts.input;
+
         return observable<AccountHistoryResult>((emit) => {
           const eventName = chainConfig.daimoChain + "-daimo-transfers";
 
-          let lastEmitTime = 0;
+          let lastEmittedBlock = opts.input.sinceBlockNum;
+          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
+            null;
 
           const listener = (data: string) => {
-            const { address, inviteCode } = opts.input;
+            // there is already getAccountHistory request in progress.
+            // wait for it to finish
+            if (getAccountHistoryPromise) {
+              return;
+            }
 
-            const { block_number: newBlockNumber } = JSON.parse(data);
-
-            const thisNotificationTime = Date.now();
-
-            getAccountHistory(
+            getAccountHistoryPromise = getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
-              newBlockNumber,
+              lastEmittedBlock,
               watcher,
               vc,
               homeCoinIndexer,
@@ -626,18 +630,17 @@ export function createRouter(
               keyReg,
               paymaster,
               db
-            ).then((history) => {
-              // Don't do anything if we received account history after
-              // the last emit. This protects us for variability
-              // of processing the account history.
-              if (thisNotificationTime < lastEmitTime) {
-                return;
-              }
+            );
 
-              lastEmitTime = Date.now();
+            getAccountHistoryPromise
+              .then((history) => {
+                lastEmittedBlock = history.lastBlock;
 
-              emit.next(history);
-            });
+                emit.next(history);
+              })
+              .finally(() => {
+                getAccountHistoryPromise = null;
+              });
           };
 
           watcher.notifications.on(eventName, listener);
