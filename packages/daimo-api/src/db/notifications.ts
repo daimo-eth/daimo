@@ -79,7 +79,7 @@ export class DBNotifications extends EventEmitter {
 
   private async removeChannel(channel: string) {
     if (this.channels.has(channel)) {
-      await this.client.query(`UNLISTEN ${channel}`);
+      await this.client.query(`UNLISTEN "${channel}"`);
       this.channels.delete(channel);
     }
   }
