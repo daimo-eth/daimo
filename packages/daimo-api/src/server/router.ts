@@ -103,7 +103,11 @@ export function createRouter(
   });
 
   const corsMiddleware = trpcT.middleware(async (opts) => {
-    opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    // cannot set headers when connecting via websockets
+    if (opts.ctx.res.setHeader) {
+      opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+
     return opts.next();
   });
 
