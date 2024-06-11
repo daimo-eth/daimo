@@ -57,6 +57,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // Known Uniswap ETH pools on Base
   "0xd0b53D9277642d899DF5C87A3966A349A798F224": AddrLabel.UniswapETHPool,
   "0x6c561B446416E1A00E8E93E221854d6eA4171372": AddrLabel.UniswapETHPool,
+  "0xb4CB800910B228ED3d0834cF79D697127BBB00e5": AddrLabel.UniswapETHPool,
   // Known Binance addresses on Base
   "0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A": AddrLabel.Binance,
 };
