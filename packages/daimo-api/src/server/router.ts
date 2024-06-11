@@ -109,7 +109,7 @@ export function createRouter(
     if (!notifier.isInitialized) {
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
-        message: "not ready",
+        message: "API not ready",
       });
     }
     return opts.next();
