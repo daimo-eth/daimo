@@ -1,5 +1,4 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
-import cors from "cors";
 import "dotenv/config";
 import http from "http";
 
@@ -159,7 +158,7 @@ async function main() {
     monitor
   );
   const handler = createHTTPHandler({
-    middleware: cors(),
+    // middleware: cors(), see corsMiddleware in router
     router,
     createContext,
     onError: onTrpcError(monitor),

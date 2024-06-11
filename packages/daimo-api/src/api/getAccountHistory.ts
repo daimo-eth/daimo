@@ -108,11 +108,11 @@ export async function getAccountHistory(
   paymaster: Paymaster,
   db: DB
 ): Promise<AccountHistoryResult> {
-  console.log(`[API] getAccountHist: ${address} since ${sinceBlockNum}`);
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
   const startMs = Date.now();
-  const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
+  const log = `[API] start getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
+  console.log(log);
 
   // Get latest finalized block. Next account sync, fetch since this block.
   const finBlock = await vc.publicClient.getBlock({

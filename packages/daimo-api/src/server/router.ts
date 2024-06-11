@@ -51,6 +51,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { getEnvApi } from "../env";
+import { runWithLogContext } from "../logging";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -89,10 +90,16 @@ export function createRouter(
     const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
     opts.ctx.span = span;
 
-    const result = await opts.next();
+    // Logging request ID
+    const reqId = Math.floor(Math.random() * 36 ** 6).toString(36);
+    span.setAttribute("req_id", reqId);
+
+    const result = await runWithLogContext("req" + reqId, () => opts.next());
 
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
-    console.log(`[API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`);
+    console.log(
+      `[${reqId}] [API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`
+    );
     span.setStatus({ code }).end();
 
     return result;
