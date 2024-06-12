@@ -158,7 +158,6 @@ async function main() {
     monitor
   );
   const handler = createHTTPHandler({
-    // middleware: cors(), see corsMiddleware in router
     router,
     createContext,
     onError: onTrpcError(monitor),
