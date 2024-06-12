@@ -24,7 +24,6 @@ import { Account } from "../model/account";
 
 class SyncManager {
   retryInterval = 1_000;
-  syncAttemptsFailed = 0;
   manager = getAccountManager();
   currentAccount: Account | null = null;
   // for tracking retry timeout
@@ -55,32 +54,11 @@ class SyncManager {
       },
       {
         onStarted: (...args) => {
-          console.log("[SyncManager]", "onStarted", args);
           updateNetworkStateOnline();
-
-          this.syncAttemptsFailed = 0;
         },
 
         onData: (data) => {
           this.manager.transform((a) => applySync(a, data, false));
-        },
-
-        onStopped: (...args) => {
-          console.log("[SyncManager]", "onStopped", args);
-          // When connection drops, immedietly reconnect
-          this.unsubscribe();
-          this.subscribe(account);
-        },
-
-        onError: (...args) => {
-          console.log("[SyncManager]", "onError", args);
-          this.unsubscribe();
-
-          this.retryTimeout = setTimeout(() => {
-            this.syncAttemptsFailed += 1;
-
-            this.subscribe(account);
-          }, this.retryInterval);
         },
       }
     );
@@ -92,15 +70,11 @@ class SyncManager {
     this._trpcUnsubscribe?.();
 
     this.currentAccount = null;
-    this.syncAttemptsFailed = 0;
-
-    // ensure we're not using a stale value in the callback
-    const currentSyncAttemptFailed = this.syncAttemptsFailed;
 
     updateNetworkState(() => {
       return {
         status: "offline",
-        syncAttemptsFailed: currentSyncAttemptFailed,
+        syncAttemptsFailed: 0,
       };
     });
 

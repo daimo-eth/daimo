@@ -16,7 +16,11 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
-import { updateNetworkStateOnline } from "../sync/networkState";
+import {
+  updateNetworkState,
+  updateNetworkStateOnline,
+} from "../sync/networkState";
+import { retryBackoff } from "@daimo/api/src/utils/retryBackoff";
 
 const apiUrlT =
   process.env.DAIMO_APP_API_URL_TESTNET || process.env.DAIMO_APP_API_URL;
@@ -130,6 +134,17 @@ function getTRPCOpts(
     true: wsLink({
       client: createWSClient({
         url,
+        retryDelayMs: () => 1_000,
+        onClose: () => {
+          console.warn("[TRPC] WebSocket closed");
+
+          updateNetworkState(() => {
+            return {
+              status: "offline",
+              syncAttemptsFailed: 0,
+            };
+          });
+        },
       }),
     }),
 
