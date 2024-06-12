@@ -1,5 +1,9 @@
 import EventEmitter from "node:events";
 import { Client, ClientConfig } from "pg";
+import { chainConfig } from "../env";
+
+export const DB_EVENT_DAIMO_TRANSFERS =
+  chainConfig.daimoChain + "-daimo-transfers";
 
 const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
 

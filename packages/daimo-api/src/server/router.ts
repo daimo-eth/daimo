@@ -61,6 +61,7 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
+import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -598,8 +599,6 @@ export function createRouter(
         const { address, inviteCode } = opts.input;
 
         return observable<AccountHistoryResult>((emit) => {
-          const eventName = chainConfig.daimoChain + "-daimo-transfers";
-
           let lastEmittedBlock = opts.input.sinceBlockNum;
           let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
             null;
@@ -643,10 +642,10 @@ export function createRouter(
               });
           };
 
-          watcher.notifications.on(eventName, listener);
+          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, listener);
 
           return () => {
-            watcher.notifications.off(eventName, listener);
+            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, listener);
           };
         });
       }),

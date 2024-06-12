@@ -2,7 +2,7 @@ import { guessTimestampFromNum } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 
 import { Indexer } from "../contract/indexer";
-import { DBNotifications } from "../db/notifications";
+import { DBNotifications, DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -99,7 +99,7 @@ export class Watcher {
   // Watches shovel for new blocks, and indexes them.
   // Skip indexing if it's already indexing.
   async watch() {
-    setInterval(async () => {
+    this.notifications.on(DB_EVENT_DAIMO_TRANSFERS, async () => {
       try {
         if (this.isIndexing) {
           console.log(`[SHOVEL] skipping tick, already indexing`);
@@ -123,7 +123,7 @@ export class Watcher {
       } finally {
         this.isIndexing = false;
       }
-    }, 1000);
+    });
   }
 
   // Indexes batches till we get to the given block number, inclusive.
