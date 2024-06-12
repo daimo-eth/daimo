@@ -1,23 +1,29 @@
-import { guessTimestampFromNum } from "@daimo/common";
+import { guessTimestampFromNum, now } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
+import { PublicClient } from "viem";
 
 import { Indexer } from "../contract/indexer";
-import { chainConfig, getEnvApi } from "../env";
+import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
-const dbConfig: ClientConfig = {
-  connectionString: getEnvApi().SHOVEL_DATABASE_URL,
-  connectionTimeoutMillis: 20000,
-  query_timeout: 20000,
-  statement_timeout: 20000,
-  database: getEnvApi().SHOVEL_DATABASE_URL == null ? "shovel" : undefined,
-};
+function getShovelPoolConfig(dbUrl?: string): PoolConfig {
+  const dbConfig: ClientConfig = {
+    connectionString: dbUrl,
+    connectionTimeoutMillis: 20000,
+    query_timeout: 20000,
+    statement_timeout: 20000,
+    database: dbUrl == null ? "shovel" : undefined,
+  };
 
-const poolConfig: PoolConfig = {
-  ...dbConfig,
-  max: 8,
-  idleTimeoutMillis: 60000,
-};
+  const poolConfig: PoolConfig = {
+    ...dbConfig,
+    min: 1,
+    max: 8,
+    idleTimeoutMillis: 60000,
+  };
+
+  return poolConfig;
+}
 
 export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
@@ -27,6 +33,13 @@ export class Watcher {
   private isIndexing = false;
   private isSlowIndexing = false;
 
+  // The latest block present in shovel DB, as of the most recent tick.
+  private shovelLatest = 0;
+  // The latest block as reported directly by the RPC (not shovel)
+  private rpcLatest = 0;
+  // The latest successful tick.
+  private lastGoodTickS = 0;
+
   // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
   private indexerLayers: Indexer[][] = [];
   // indexers that are ignored for synchronization, i.e. while they are indexing a old range other
@@ -35,7 +48,8 @@ export class Watcher {
 
   private pg: Pool;
 
-  constructor() {
+  constructor(private rpcClient: PublicClient, dbUrl?: string) {
+    const poolConfig = getShovelPoolConfig(dbUrl);
     this.pg = new Pool(poolConfig);
   }
 
@@ -88,8 +102,8 @@ export class Watcher {
 
   async init() {
     await this.migrateDB();
-    const shovelLatest = await this.getShovelLatest();
-    await this.catchUpTo(shovelLatest);
+    this.shovelLatest = await this.getShovelLatest();
+    await this.catchUpTo(this.shovelLatest);
   }
 
   // Watches shovel for new blocks, and indexes them.
@@ -103,10 +117,10 @@ export class Watcher {
         }
         this.isIndexing = true;
 
-        const shovelLatest = await this.getShovelLatest();
+        this.shovelLatest = await this.getShovelLatest();
         const localLatest = await this.index(
           this.latest + 1,
-          shovelLatest,
+          this.shovelLatest,
           this.batchSize
         );
         if (localLatest - this.slowLatest > 3) {
@@ -116,6 +130,12 @@ export class Watcher {
         // localLatest <= 0 when there are no new blocks in shovel
         // or, for whatever reason, we are ahead of shovel.
         if (localLatest > this.latest) this.latest = localLatest;
+
+        // Finally, check RPC to ensure shovel is up to date
+        this.rpcLatest = Number(await this.rpcClient.getBlockNumber());
+        this.lastGoodTickS = now();
+      } catch (e) {
+        console.error(`[SHOVEL] tick error`, e);
       } finally {
         this.isIndexing = false;
       }
@@ -160,10 +180,25 @@ export class Watcher {
     this.isSlowIndexing = false;
   }
 
-  async getShovelLatest(): Promise<number> {
+  private async getShovelLatest(): Promise<number> {
     const result = await retryBackoff(`shovel-latest-query`, () =>
       this.pg.query(`select num from shovel.latest`)
     );
     return Number(result.rows[0].num);
+  }
+
+  getStatus() {
+    const { lastGoodTickS, shovelLatest, rpcLatest } = this;
+    const { idleCount, totalCount, waitingCount } = this.pg;
+    return {
+      lastGoodTickS,
+      rpcLatest,
+      shovelLatest,
+      shovelDB: {
+        idleCount,
+        totalCount,
+        waitingCount,
+      },
+    };
   }
 }

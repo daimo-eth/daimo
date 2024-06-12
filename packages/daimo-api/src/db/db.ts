@@ -15,6 +15,7 @@ const dbConfig: ClientConfig = {
 
 const poolConfig: PoolConfig = {
   ...dbConfig,
+  min: 1,
   max: 8,
   idleTimeoutMillis: 60000,
 };

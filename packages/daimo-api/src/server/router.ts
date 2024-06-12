@@ -18,6 +18,7 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
+import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -119,6 +120,7 @@ export function createRouter(
         message: "API not ready",
       });
     }
+
     return opts.next();
   });
 
@@ -136,11 +138,26 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
-      // See readyMiddleware
+      // See readyMiddleware for not-ready check.
+      // If we're here, API is ready. Check whether it's healthy:
+      const nowS = now();
+      const node = await getNodeMetrics();
+      const indexer = watcher.getStatus();
+      let status = "healthy";
+      if (indexer.lastGoodTickS < nowS - 10) {
+        status = "unhealthy-watcher-not-ticking";
+      } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
+        status = "unhealthy-watcher-behind-rpc";
+      } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
+        status = "unhealthy-node-mem-full";
+      }
       return {
-        status: "healthy",
-        uptimeS: now() - startTimeS,
-        dbStatus: db.getStatus(),
+        status,
+        nowS,
+        uptimeS: nowS - startTimeS,
+        node: await getNodeMetrics(),
+        apiDB: db.getStatus(),
+        indexer,
       };
     }),
 

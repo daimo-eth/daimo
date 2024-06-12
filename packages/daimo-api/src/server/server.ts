@@ -20,7 +20,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { UniswapClient } from "../network/uniswapClient";
 import { getViemClientFromEnv } from "../network/viemClient";
@@ -100,9 +100,11 @@ async function main() {
     db
   );
 
-  const shovelWatcher = new Watcher();
+  // Set up indexers
+  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
+  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
   shovelWatcher.add(
-    // indexers in dependency order, within each list, indexers are indexed in parallel
+    // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]

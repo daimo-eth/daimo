@@ -41,7 +41,7 @@ async function main() {
   );
   const keyReg = new KeyRegistry();
 
-  const shovelWatcher = new Watcher();
+  const shovelWatcher = new Watcher(vc.publicClient);
   shovelWatcher.add(
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer],
