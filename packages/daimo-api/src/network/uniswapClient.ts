@@ -26,7 +26,7 @@ import {
 import { getDefaultProvider } from "ethers";
 import { Address, Hex, getAddress } from "viem";
 
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
 // On Base
@@ -64,25 +64,20 @@ export class UniswapClient {
   private swapCache: Map<string, SwapQueryResult> = new Map();
 
   constructor() {
-    // Use an independent HTTP RPC to work around Websocket bugs in Ethers,
-    // and by extension the Uniswap SDK:
-    // https://github.com/Uniswap/smart-order-router/issues/461
-    // https://stackoverflow.com/q/77336570
-    const uniswapRPC = process.env.DAIMO_API_UNISWAP_RPC!;
-
-    console.log(`[UNISWAP] using L2 RPC: ${uniswapRPC}`);
-
-    const provider = getDefaultProvider(uniswapRPC) as any; // TODO: use fallbacks?
-
     if (chainConfig.chainL2.testnet) {
       // Base Sepolia is not supported by Uniswap yet -> we test in Prod.
       this.router = null;
-    } else {
-      this.router = new AlphaRouter({
-        chainId: chainConfig.chainL2.id,
-        provider,
-      });
+      return;
     }
+
+    const uniswapRPC = getEnvApi().DAIMO_API_UNISWAP_RPC;
+    console.log(`[UNISWAP] using L2 RPC: '${uniswapRPC}'`);
+    assertNotNull(uniswapRPC, "Set DAIMO_API_UNISWAP_RPC");
+    const provider = getDefaultProvider(uniswapRPC) as any; // TODO: fallbacks?
+    this.router = new AlphaRouter({
+      chainId: chainConfig.chainL2.id,
+      provider,
+    });
   }
 
   swapCacheKey(

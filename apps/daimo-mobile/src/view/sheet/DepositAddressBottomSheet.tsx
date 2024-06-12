@@ -7,7 +7,7 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
-import { env } from "../../logic/env";
+import { env } from "../../env";
 import { Account } from "../../model/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";

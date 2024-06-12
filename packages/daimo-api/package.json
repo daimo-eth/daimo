@@ -5,9 +5,9 @@
   "description": "Daimo API for account creation, search, etc",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev -r ./src/server/tracing.ts src/server/server.ts",
+    "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev --inspect=4321 -r ./src/server/tracing.ts src/server/server.ts",
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
-    "test": "tsc --noEmit && DAIMO_DOMAIN=example.com tape -r ts-node/register/transpile-only test/**/*.test.ts",
+    "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0",
@@ -26,13 +26,12 @@
     "@sentry/cli": "^2.31.0",
     "@sentry/node": "^7.109.0",
     "@sentry/profiling-node": "^7.109.0",
+    "@trpc/client": "^11.0.0-next-beta.318",
     "@trpc/server": "^11.0.0-next-beta.318",
-    "@types/cors": "^2.8.16",
     "@types/geoip-lite": "^1.4.2",
     "@uniswap/sdk-core": "^4.2.0",
     "@uniswap/smart-order-router": "^3.27.0",
     "await-lock": "^2.2.2",
-    "cors": "^2.8.5",
     "cron": "^3.1.4",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.2",
@@ -45,7 +44,7 @@
     "userop": "^0.3.2",
     "viem": "^1.19.15",
     "ws": "^8.17.0",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.0",

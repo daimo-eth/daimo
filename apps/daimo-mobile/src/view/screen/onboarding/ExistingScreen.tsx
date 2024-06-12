@@ -4,11 +4,11 @@ import { View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { useExitBack, useOnboardingNav } from "../../../common/nav";
+import { env } from "../../../env";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { env } from "../../../logic/env";
 import { createAddDeviceString } from "../../../logic/key";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";

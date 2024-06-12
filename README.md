@@ -111,18 +111,16 @@ Run the iPhone Simulator in XCode. (If you're not on a Mac, see the
 Android quick start below.) Get the latest simulator build from Expo; message us
 if you need access. Drag-drop the build into the simulator to install.
 
-Set the following variables to use the remote, hosted API.
+Copy the example `.env` file to use the remote, hosted API.
 
 ```sh
-export DAIMO_APP_API_URL_TESTNET="https://api-stage.daimo.xyz"
-export DAIMO_APP_API_URL_MAINNET="https://api.daimo.xyz"
-export DAIMO_DOMAIN="daimo.com"
+cd apps/daimo-mobile
+cp .env.example .env
 ```
 
 Finally, run the app in the simulator.
 
 ```sh
-cd apps/daimo-mobile
 npm run dev
 ```
 
@@ -183,11 +181,9 @@ By default:
 
 You'll need to either use the hosted Daimo API or run one locally.
 
-To run the API locally, fill in the `DAIMO_API_...` and `NEXT_PUBLIC_...`
-environment variables. Message us if you need help.
+To run the API locally, fill in `.env`. Message us if you need help.
 
-You can run Postgres in the background locally using
-`initdb daimo && pg_ctl -D daimo start`. To stop, use `pg_ctl -D daimo stop`.
+You can run Postgres in the background locally using the Mac Postgres app.
 
 Once you're running the API locally, you can run the full stack self-contained.
 

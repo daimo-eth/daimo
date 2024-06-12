@@ -178,7 +178,7 @@ function AmountInput({
   return (
     <TouchableWithoutFeedback onPress={focus} accessible={false}>
       <View style={styles.amountRow}>
-        <CurrencyPicker {...{ allCurrencies, onSetCurrency }} />
+        {!disabled && <CurrencyPicker {...{ allCurrencies, onSetCurrency }} />}
         <View style={styles.amountInputWrap}>
           <DaimoText style={styles.amountDollar}>{currency.symbol}</DaimoText>
           <TextInput
@@ -199,7 +199,7 @@ function AmountInput({
             onTouchEnd={focus}
           />
         </View>
-        <View style={styles.currencyPickerWrap} /* for centering */ />
+        {!disabled && <View style={styles.currencyPickerWrap} /* center */ />}
       </View>
     </TouchableWithoutFeedback>
   );

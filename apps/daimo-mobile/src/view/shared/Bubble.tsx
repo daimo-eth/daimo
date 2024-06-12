@@ -106,7 +106,7 @@ export function Bubble({
   isPending?: boolean;
   transparent?: boolean;
   fontSize?: number;
-  image?: string;
+  image?: string | { uri: string };
   children: React.ReactNode;
 }) {
   const col = isPending ? color.primaryBgLight : color.primary;

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import { getAccountManager, useAccount } from "./accountManager";
-import { env } from "./env";
 import { Log } from "./log";
 import { askOpenSettings } from "./settings";
+import { getRpcFunc } from "./trpc";
 import { syncAfterPushNotification } from "../sync/sync";
 
 /** Registers push notifications, if we have permission & haven't already. */
@@ -106,7 +106,7 @@ class PushNotificationManager {
     }
 
     const { address, name, homeChainId } = account;
-    const rpcFunc = env(daimoChainFromId(homeChainId)).rpcFunc;
+    const rpcFunc = getRpcFunc(daimoChainFromId(homeChainId));
     console.log(`[NOTIFY] saving push token ${token.data} for account ${name}`);
     await Log.promise(
       "registerPushToken",

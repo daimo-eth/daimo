@@ -20,7 +20,7 @@ import { TextBody, TextMeta } from "./text";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
-import { env } from "../../logic/env";
+import { getRpcFunc } from "../../logic/trpc";
 
 export function SuggestedActionBox({
   action,
@@ -46,7 +46,7 @@ export function SuggestedActionBox({
   const wasCancelled = useSharedValue(false);
 
   // Track when we do the action or dismiss it.
-  const { rpcFunc } = env(daimoChainFromId(account!.homeChainId));
+  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
 
   // Press = do the suggested action.
   const onPress = () => {

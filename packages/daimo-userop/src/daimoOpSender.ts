@@ -196,7 +196,8 @@ export class DaimoOpSender {
     ephemeralOwner: Hex,
     amount: `${number}`,
     approveFirst: boolean,
-    opMetadata: DaimoOpMetadata
+    opMetadata: DaimoOpMetadata,
+    memo?: string
   ) {
     const { tokenDecimals, notesAddressV2 } = this.opConfig;
 
@@ -221,7 +222,7 @@ export class DaimoOpSender {
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 
-    return this.sendUserOp(op);
+    return this.sendUserOp(op, memo);
   }
 
   /** Claims an ephemeral note. Returns userOpHash. */

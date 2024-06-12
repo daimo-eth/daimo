@@ -5,7 +5,7 @@ import { Platform, ScrollView, StyleSheet, View } from "react-native";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { useExitBack, useOnboardingNav } from "../../../common/nav";
 import { getAccountManager } from "../../../logic/accountManager";
-import { env } from "../../../logic/env";
+import { getRpcHook } from "../../../logic/trpc";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
 import { InputBig } from "../../shared/InputBig";
 import { SearchResultRow } from "../../shared/SearchResults";
@@ -64,7 +64,7 @@ function AccountSearchResults({
   const kbH = useKeyboardHeight();
 
   const enabled = prefix.length >= 1;
-  const { rpcHook } = env(getAccountManager().getDaimoChain());
+  const rpcHook = getRpcHook(getAccountManager().getDaimoChain());
   const res = rpcHook.search.useQuery({ prefix }, { enabled });
 
   const daimoAccounts = (res.data || []).filter((r) => r.name != null);

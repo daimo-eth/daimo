@@ -24,14 +24,14 @@ import {
   useNav,
 } from "../../../common/nav";
 import { DaimoContact } from "../../../logic/daimoContacts";
-import { env } from "../../../logic/env";
 import {
   ExternalAction,
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../model/account";
-import { zeroUSDEntry } from "../../../model/moneyEntry";
+import { MoneyEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ContactDisplay } from "../../shared/ContactDisplay";
@@ -41,6 +41,7 @@ import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { SendMemoButton } from "../send/MemoDisplay";
 
 type Props = NativeStackScreenProps<ParamListHome, "Receive">;
 
@@ -56,79 +57,65 @@ function RequestScreenInner({
   account: Account;
   fulfiller?: DaimoContact;
 }) {
-  const [money, setMoney] = useState(zeroUSDEntry);
-
-  // On successful send, go home
-  const [as, setAS] = useActStatus("request");
-
+  // Nav
   const nav = useNav();
+  const goBack = useExitBack();
+  const goHome = useExitToHome();
+
+  // Enter amount, autofocus
+  const [money, setMoney] = useState(zeroUSDEntry);
   const textInputRef = useRef<TextInput>(null);
+  useEffect(() => {
+    // Set focus on transitionEnd to avoid stack navigator iOS glitches.
+    const unsubscribe = nav.addListener("transitionEnd", () =>
+      textInputRef.current?.focus()
+    );
+    return unsubscribe;
+  }, []);
 
-  const rpcFunc = env(daimoChainFromId(account.homeChainId)).rpcFunc;
-
+  // Share request link to share sheet or to a specific phone contact
   const [externalAction, setExternalAction] = useState<
     ExternalAction | undefined
   >(undefined);
-
   useEffect(() => {
     if (!fulfiller) {
       // Share URL
-      setExternalAction({
-        type: "share",
-        exec: shareURL,
-      });
+      setExternalAction({ type: "share", exec: shareURL });
     } else if (fulfiller.type === "email" || fulfiller.type === "phoneNumber") {
       // Compose email or SMS, fallback to share sheet
       getComposeExternalAction(fulfiller).then(setExternalAction);
     }
   }, [fulfiller]);
 
+  // Enter optional memo
+  const [memo, setMemo] = useState<string | undefined>(undefined);
+  const rpcHook = getRpcHook(daimoChainFromId(account.homeChainId));
+  const result = rpcHook.validateMemo.useQuery({ memo });
+  const memoStatus = result.data;
+
+  // Send request
+  const [as, setAS] = useActStatus("request");
   const sendRequest = async () => {
     textInputRef.current?.blur();
     setAS("loading", "Requesting...");
 
-    const id = generateRequestId();
-    const idString = encodeRequestId(id);
-
-    const txHash = await rpcFunc.createRequestSponsored.mutate({
-      recipient: account.address,
-      idString,
-      amount: `${dollarsToAmount(money.dollars)}`,
-      fulfiller: fulfiller?.type === "eAcc" ? fulfiller.addr : undefined,
-    });
-
-    const link: DaimoLinkRequestV2 = {
-      type: "requestv2",
-      id: idString,
-      recipient: account.name,
-      dollars: `${money.dollars}`,
-    };
-
+    const { txHash, link } = await createRequestOnChain(
+      account,
+      money,
+      fulfiller,
+      memo
+    );
     console.log(`[REQUEST] txHash ${txHash}`);
 
     if (externalAction) {
       console.log(`[REQUEST] external action ${externalAction.type}`);
       const didShare = await externalAction.exec(link);
-
       console.log(`[REQUEST] action ${didShare}`);
     }
 
     setAS("success");
     nav.navigate("HomeTab", { screen: "Home" });
   };
-
-  const goBack = useExitBack();
-  const goHome = useExitToHome();
-
-  useEffect(() => {
-    const unsubscribe = nav.addListener("transitionEnd", () => {
-      // Set focus on transitionEnd to avoid stack navigator looking
-      // glitchy on iOS.
-      textInputRef.current?.focus();
-    });
-
-    return unsubscribe;
-  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -152,6 +139,8 @@ function RequestScreenInner({
           disabled={as.status !== "idle"}
           autoFocus={false}
         />
+        <Spacer h={16} />
+        <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
         <Spacer h={32} />
         <View style={ss.container.padH8}>
           {as.status === "loading" ? (
@@ -185,6 +174,34 @@ function RequestScreenInner({
       </View>
     </TouchableWithoutFeedback>
   );
+}
+
+async function createRequestOnChain(
+  account: Account,
+  money: MoneyEntry,
+  fulfiller?: DaimoContact,
+  memo?: string
+) {
+  const id = generateRequestId();
+  const idString = encodeRequestId(id);
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+
+  const txHash = await rpcFunc.createRequestSponsored.mutate({
+    recipient: account.address,
+    idString,
+    amount: `${dollarsToAmount(money.dollars)}`,
+    fulfiller: fulfiller?.type === "eAcc" ? fulfiller.addr : undefined,
+    memo,
+  });
+
+  const link: DaimoLinkRequestV2 = {
+    type: "requestv2",
+    id: idString,
+    recipient: account.name,
+    dollars: `${money.dollars}`,
+  };
+
+  return { txHash, link };
 }
 
 const styles = StyleSheet.create({

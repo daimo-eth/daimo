@@ -1,7 +1,7 @@
 import {
+  assert,
   assertNotNull,
   formatDaimoLink,
-  getEnv,
   parseDaimoLink,
 } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
@@ -12,9 +12,10 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { getAddress } from "viem";
 
-import { assert, FarcasterCacheClient } from "./farcasterClient";
+import { FarcasterCacheClient } from "./farcasterClient";
 import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
 import { FrameRequest, getFrameHtmlResponse } from "./frameUtils";
+import { envVarsWeb } from "../../env";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 import { rpc } from "../../utils/rpc";
 
@@ -23,7 +24,7 @@ let envFrameLinkService: FrameLinkService | null = null;
 export function getFrameLinkServiceFromEnv(): FrameLinkService {
   if (envFrameLinkService == null) {
     // Connect to Farcaster
-    const neynarApiKey = process.env.DAIMO_NEYNAR_KEY || null;
+    const neynarApiKey = envVarsWeb.DAIMO_NEYNAR_KEY;
     assert(neynarApiKey != null, "Missing DAIMO_NEYNAR_KEY");
     const neynarClient = new NeynarAPIClient(neynarApiKey);
     const fcClient = new FarcasterCacheClient(neynarClient);
@@ -143,11 +144,11 @@ export class FrameLinkService {
     fid: number,
     frame: InviteFrameLink
   ): Promise<string> {
-    const preimage = `${frame.id}-${fid}-${getEnv("DAIMO_API_KEY")}`;
+    const apiKey = assertNotNull(envVarsWeb.DAIMO_API_KEY, "Set DAIMO_API_KEY");
+    const preimage = `${frame.id}-${fid}-${apiKey}`;
     const hash = await crypto.subtle.digest("SHA-256", Buffer.from(preimage));
     const suffix = Buffer.from(hash).toString("hex").substring(0, 6);
     const code = `fc-${frame.id}-${fid}-${suffix}`;
-    const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
     console.log(`[FRAME] creating invite code ${code}`);
     const link = await rpc.createInviteLink.mutate({

@@ -17,8 +17,8 @@ import {
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
+import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
-import { env } from "../../logic/env";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../model/account";

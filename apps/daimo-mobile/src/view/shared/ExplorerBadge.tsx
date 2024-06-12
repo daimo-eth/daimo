@@ -8,7 +8,7 @@ import { Address } from "viem";
 import { BadgeButton } from "./Button";
 import { color } from "./style";
 import { TextBtnCaps } from "./text";
-import { env } from "../../logic/env";
+import { env } from "../../env";
 
 export function ExplorerBadge({
   daimoChain,

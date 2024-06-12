@@ -50,7 +50,7 @@ export async function submitWaitlist(
 
   const mailToURL = generateMailtoURL(email, name, inviteLink);
 
-  const message = `New waitlist signup: ${name}, ${email}, ${socials}\n\nPrefilled email link: ${mailToURL}`;
+  const message = `New waitlist signup: ${name}, ${email}, ${socials}\n\n<${mailToURL}|Click here to send an email>`;
 
   telemetry.recordClippy(message, "celebrate");
 }

@@ -37,22 +37,26 @@ import { useWithAccount } from "../../shared/withAccount";
 /** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
 export function NoteActionButton({
   dollars,
+  memo,
   externalAction,
 }: {
   dollars: number;
+  memo?: string;
   externalAction: ExternalAction;
 }) {
   const Inner = useWithAccount(NoteActionButtonInner);
-  return <Inner dollars={dollars} externalAction={externalAction} />;
+  return <Inner {...{ dollars, memo, externalAction }} />;
 }
 
 function NoteActionButtonInner({
   account,
   dollars,
+  memo,
   externalAction,
 }: {
   account: Account;
   dollars: number;
+  memo?: string;
   externalAction: ExternalAction;
 }) {
   const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
@@ -86,7 +90,8 @@ function NoteActionButtonInner({
         {
           nonce,
           chainGasConstants: account.chainGasConstants,
-        }
+        },
+        memo
       );
     },
     pendingOp: {
@@ -105,6 +110,7 @@ function NoteActionButtonInner({
         contractAddress: notesV2Addr,
         ephemeralOwner: noteAddress,
         id: noteId,
+        memo,
       },
     },
     accountTransform: (account: Account, pendingOp: OpEvent) => {

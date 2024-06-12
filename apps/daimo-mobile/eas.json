@@ -11,7 +11,6 @@
         "image": "ubuntu-22.04-jdk-17-ndk-r21e"
       },
       "env": {
-        "DAIMO_DOMAIN": "daimo.com",
         "DAIMO_PASSKEY_DOMAIN": "daimo.com"
       }
     },

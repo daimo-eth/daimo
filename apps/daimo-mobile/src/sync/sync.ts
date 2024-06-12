@@ -18,8 +18,8 @@ import {
   updateNetworkStateOnline,
 } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
-import { env } from "../logic/env";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
+import { getRpcFunc } from "../logic/trpc";
 import { Account } from "../model/account";
 
 class SyncManager {
@@ -168,7 +168,7 @@ async function fetchSync(
   const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
 
   const daimoChain = daimoChainFromId(account.homeChainId);
-  const rpcFunc = env(daimoChain).rpcFunc;
+  const rpcFunc = getRpcFunc(daimoChain);
   const result = await rpcFunc.getAccountHistory.query({
     address: account.address,
     inviteCode: account.inviteLinkStatus?.link.code,
@@ -193,6 +193,8 @@ async function fetchSync(
     invitees: result.invitees,
     notificationRequestStatuses: result.notificationRequestStatuses,
     numExchangeRates: (result.exchangeRates || []).length,
+    landlineSessionKey: result.landlineSessionKey,
+    numLandlineAccounts: (result.landlineAccounts || []).length,
   };
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
@@ -305,6 +307,8 @@ function applySync(
     notificationRequestStatuses: result.notificationRequestStatuses || [],
     proposedSwaps: result.proposedSwaps || [],
     exchangeRates: result.exchangeRates || [],
+    landlineSessionKey: result.landlineSessionKey || "",
+    landlineAccounts: result.landlineAccounts || [],
   };
 
   console.log(

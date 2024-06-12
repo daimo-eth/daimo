@@ -252,7 +252,13 @@ function AmountAndButtons({ account }: { account: Account }) {
       }),
     [nav]
   );
-  const goDeposit = useCallback(() => nav.navigate("DepositTab"), [nav]);
+  const goDeposit = useCallback(
+    () =>
+      nav.navigate("DepositTab", {
+        screen: "Deposit",
+      }),
+    [nav]
+  );
 
   const isEmpty = account.lastBalance === 0n;
 

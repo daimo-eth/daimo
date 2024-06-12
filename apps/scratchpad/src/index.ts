@@ -72,10 +72,11 @@ async function metrics() {
   const inviteGraph = new InviteGraph(db);
   const profileCache = new ProfileCache(vc, db);
   const nameReg = new NameRegistry(vc, inviteGraph, profileCache, new Set([]));
-  const opIndexer = new OpIndexer();
-  const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(db, nameReg);
   const paymentMemoTracker = new PaymentMemoTracker(db);
+
+  const opIndexer = new OpIndexer();
+  const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
+  const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const coinIndexer = new HomeCoinIndexer(
     vc,

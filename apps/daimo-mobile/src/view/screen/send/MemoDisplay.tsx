@@ -1,4 +1,3 @@
-import { DaimoChain } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableHighlight, View } from "react-native";
@@ -12,12 +11,10 @@ export function SendMemoButton({
   memo,
   memoStatus,
   setMemo,
-  daimoChain,
 }: {
   memo: string | undefined;
   memoStatus: "ok" | string | undefined;
   setMemo: (memo: string | undefined) => void;
-  daimoChain: DaimoChain;
 }) {
   const [isFocused, setIsFocused] = useState(false);
 

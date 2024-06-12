@@ -79,7 +79,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output.length, 1);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
     assert.strictEqual(output[0].title, "Received $5.00 from charlie.eth");
-    assert.strictEqual(output[0].body, "Your 5.00 USDC request was fulfilled");
+    assert.strictEqual(output[0].body, "👀");
   });
 
   await test("transfer with memo", async () => {
@@ -128,7 +128,26 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].body, "You sent 1.00 USDC to a payment link");
   });
 
-  await test("claim payment link", async () => {
+  await test("send payment link with memo", async () => {
+    const input: DaimoNoteStatus[] = [
+      {
+        status: DaimoNoteState.Confirmed,
+        sender: { addr: addrAlice, name: "alice" },
+        dollars: "1.00",
+        link: paymentLinkFromAlice,
+        contractAddress: notesV2Address,
+        memo: "international dollar",
+      },
+    ];
+    const output = pn.getPushMessagesFromNoteOps(input);
+
+    assert.strictEqual(output.length, 1);
+    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
+    assert.strictEqual(output[0].title, "Sent $1.00 · international dollar");
+    assert.strictEqual(output[0].body, "You sent 1.00 USDC to a payment link");
+  });
+
+  await test("claim payment link with memo", async () => {
     const input: DaimoNoteStatus[] = [
       {
         status: DaimoNoteState.Claimed,
@@ -137,19 +156,20 @@ test("PushNotifier", async () => {
         dollars: "1.00",
         link: paymentLinkFromAlice,
         contractAddress: notesV2Address,
+        memo: "testing 123",
       },
     ];
     const output = pn.getPushMessagesFromNoteOps(input);
 
     assert.strictEqual(output.length, 2);
     assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "$1.00 sent");
+    assert.strictEqual(output[0].title, "$1.00 sent · testing 123");
     assert.strictEqual(
       output[0].body,
       "bob accepted your 1.00 USDC payment link"
     );
     assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[1].title, "Received $1.00");
+    assert.strictEqual(output[1].title, "Received $1.00 · testing 123");
     assert.strictEqual(output[1].body, "You received 1.00 USDC from alice");
   });
 
@@ -308,6 +328,7 @@ function createNotifierAliceBob() {
           status: DaimoRequestState.Fulfilled,
           metadata: "0x",
           createdAt: now(),
+          memo: "👀",
         };
       } else return null;
     },

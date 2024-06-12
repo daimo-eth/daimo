@@ -17,6 +17,7 @@ import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -47,12 +48,19 @@ interface RequestCancelledLog {
 
 /* Request contract. Tracks request creation and fulfillment. */
 export class RequestIndexer extends Indexer {
+  // Index requests by request ID
   private requests: Map<bigint, DaimoRequestV2Status> = new Map();
+  // Index requests by creator or expectedFulfiller
   private requestsByAddress: Map<Address, bigint[]> = new Map();
+  // Index requests by the log coordinates of the RequestFulfilled event
   private logCoordinateToRequestFulfill: Map<string, bigint> = new Map();
   private listeners: ((logs: DaimoRequestV2Status[]) => void)[] = [];
 
-  constructor(private db: DB, private nameReg: NameRegistry) {
+  constructor(
+    private db: DB,
+    private nameReg: NameRegistry,
+    private paymentMemoTracker: PaymentMemoTracker
+  ) {
     super("REQUEST");
   }
 
@@ -162,6 +170,10 @@ export class RequestIndexer extends Indexer {
       chainConfig.daimoChain
     );
 
+    // Get optional memo, offchain
+    // TODO: index memos by {noteID, requestID, or transferLogCoord}, not hash
+    const memo = this.paymentMemoTracker.getMemo(log.transactionHash);
+
     const requestStatus: DaimoRequestV2Status = {
       link: {
         type: "requestv2",
@@ -176,9 +188,12 @@ export class RequestIndexer extends Indexer {
       createdAt,
       updatedAt: createdAt,
       expectedFulfiller,
+      memo,
     };
-    this.requests.set(log.id, requestStatus);
+    console.log(`[REQUEST] request created ${JSON.stringify(requestStatus)}`);
 
+    // Add to in-memory index
+    this.requests.set(log.id, requestStatus);
     this.storeReqByAddress(recipient.addr, log.id);
     if (expectedFulfiller) {
       this.storeReqByAddress(expectedFulfiller.addr, log.id);
@@ -283,7 +298,7 @@ export class RequestIndexer extends Indexer {
     this.requestsByAddress.set(address, [...existingReqs, id]);
   }
 
-  // Fetch requests made or received by an address
+  // Fetch requests sent from/to an address: addr = creator or expectedFulfiller
   getAddrRequests(addr: Address) {
     const requests = (this.requestsByAddress.get(addr) || []).map(
       (id) => this.requests.get(id)!

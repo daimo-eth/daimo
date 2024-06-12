@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { Platform, Share, ShareContent } from "react-native";
 
 import { getDebugLog } from "./debugLog";
+import { env } from "../env";
 import { getAccountManager } from "../logic/accountManager";
 import { getHardwareSec } from "../logic/enclave";
-import { env } from "../logic/env";
 import { Account, serializeAccount } from "../model/account";
 import { amountSeparator } from "../view/shared/Amount";
 import { ButtonMed } from "../view/shared/Button";

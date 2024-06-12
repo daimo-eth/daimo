@@ -2,14 +2,10 @@ import { Hex, getAddress, Address } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
-const daimoDomain = process.env.NEXT_PUBLIC_DOMAIN || process.env.DAIMO_DOMAIN;
-
-export const daimoDomainAddress = (() => {
-  if (!daimoDomain) return "http://localhost:3001";
-  else if (daimoDomain?.startsWith("localhost")) return `http://${daimoDomain}`;
-  else return `https://${daimoDomain}`;
-})();
-
+// TODO: today, we use https://daimo.com/l/... deeplinks in both staging and prod.
+// This is ambiguous, and means that staging links are broken in the prod app
+// and vice versa. See https://github.com/daimo-eth/daimo/issues/858
+export const daimoDomainAddress = "https://daimo.com";
 export const daimoLinkBaseV2 = `${daimoDomainAddress}/l`;
 export const daimoLinkBase = `${daimoDomainAddress}/link`;
 

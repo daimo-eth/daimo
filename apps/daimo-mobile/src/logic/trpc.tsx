@@ -21,12 +21,13 @@ import {
   updateNetworkStateOnline,
 } from "../sync/networkState";
 import { retryBackoff } from "@daimo/api/src/utils/retryBackoff";
+import { getEnvMobile } from "../env";
 
 const apiUrlT =
-  process.env.DAIMO_APP_API_URL_TESTNET || process.env.DAIMO_APP_API_URL;
+  getEnvMobile().DAIMO_APP_API_URL_TESTNET || getEnvMobile().DAIMO_APP_API_URL;
 const apiUrlTestnetWithChain = `${apiUrlT}/chain/84532`;
 const apiUrlM =
-  process.env.DAIMO_APP_API_URL_MAINNET || process.env.DAIMO_APP_API_URL;
+  getEnvMobile().DAIMO_APP_API_URL_MAINNET || getEnvMobile().DAIMO_APP_API_URL;
 const apiUrlMainnetWithChain = `${apiUrlM}/chain/8453`;
 
 function createRpcHook() {

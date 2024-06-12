@@ -22,8 +22,8 @@ import {
   getAccountManager,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { env } from "../../../logic/env";
 import { generateRandomName } from "../../../logic/name";
+import { getRpcHook } from "../../../logic/trpc";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
 import { InputBig, OctName } from "../../shared/InputBig";
@@ -122,7 +122,7 @@ function NamePicker({
   } catch (e: any) {
     error = e.message;
   }
-  const rpcHook = env(daimoChain).rpcHook;
+  const rpcHook = getRpcHook(daimoChain);
   const result = rpcHook.resolveName.useQuery({ name }, { enabled: !error });
 
   // Let user pick a random name

@@ -20,7 +20,10 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
-import { EAccountContact } from "../../../logic/daimoContacts";
+import {
+  BridgeBankAccountContact,
+  EAccountContact,
+} from "../../../logic/daimoContacts";
 import { Account } from "../../../model/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
@@ -32,11 +35,13 @@ export function SendTransferButton({
   recipient,
   dollars,
   memo,
+  minTransferAmount = 0,
 }: {
   account: Account;
-  recipient: EAccountContact;
+  recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
   memo?: string;
+  minTransferAmount?: number;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
@@ -90,6 +95,8 @@ export function SendTransferButton({
       return "Can't send to this account";
     } else if (Number(dollarsStr) === 0) {
       return "Enter an amount";
+    } else if (Number(dollarsStr) < minTransferAmount) {
+      return `Minimum transfer amount is ${minTransferAmount} USDC`;
     } else {
       return undefined;
     }

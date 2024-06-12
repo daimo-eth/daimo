@@ -1,21 +1,20 @@
 import {
   CurrencyExchangeRate,
   assert,
-  getEnv,
   nonUsdCurrencies,
   now,
 } from "@daimo/common";
 
+import { getEnvApi } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
-
-const exchangeRatesUrl = getEnv("EXCHANGE_RATES_URL");
 
 export async function getExchangeRates(vc: ViemClient) {
   const data = await retryBackoff("fetchExchangeRates", async () => {
     // Fetch JSON from EXCHANGE_RATES_URL using fetch()
-    console.log(`[API] fetching exchange rates from ${exchangeRatesUrl}`);
-    const res = await fetch(new URL(exchangeRatesUrl));
+    const ratesUrl = getEnvApi().EXCHANGE_RATES_URL;
+    console.log(`[API] fetching exchange rates from ${ratesUrl}`);
+    const res = await fetch(new URL(ratesUrl));
     if (!res.ok) {
       throw new Error(`Failed to fetch exchange rates: ${res.statusText}`);
     }

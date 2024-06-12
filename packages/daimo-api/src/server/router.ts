@@ -19,6 +19,7 @@ import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
+import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -55,6 +56,8 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
+import { getEnvApi } from "../env";
+import { runWithLogContext } from "../logging";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -64,7 +67,7 @@ import { Watcher } from "../shovel/watcher";
 import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 
 // Service authentication for, among other things, invite link creation
-const apiKeys = new Set(process.env.DAIMO_ALLOWED_API_KEYS?.split(",") || []);
+const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
 console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(
@@ -94,10 +97,16 @@ export function createRouter(
     const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
     opts.ctx.span = span;
 
-    const result = await opts.next();
+    // Logging request ID
+    const reqId = Math.floor(Math.random() * 36 ** 6).toString(36);
+    span.setAttribute("req_id", reqId);
+
+    const result = await runWithLogContext("req" + reqId, () => opts.next());
 
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
-    console.log(`[API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`);
+    console.log(
+      `[${reqId}] [API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`
+    );
     span.setStatus({ code }).end();
 
     return result;
@@ -120,9 +129,10 @@ export function createRouter(
     if (!notifier.isInitialized) {
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
-        message: "not ready",
+        message: "API not ready",
       });
     }
+
     return opts.next();
   });
 
@@ -140,11 +150,26 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async (_opts) => {
-      // See readyMiddleware
+      // See readyMiddleware for not-ready check.
+      // If we're here, API is ready. Check whether it's healthy:
+      const nowS = now();
+      const node = await getNodeMetrics();
+      const indexer = watcher.getStatus();
+      let status = "healthy";
+      if (indexer.lastGoodTickS < nowS - 10) {
+        status = "unhealthy-watcher-not-ticking";
+      } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
+        status = "unhealthy-watcher-behind-rpc";
+      } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
+        status = "unhealthy-node-mem-full";
+      }
       return {
-        status: "healthy",
-        uptimeS: now() - startTimeS,
-        dbStatus: db.getStatus(),
+        status,
+        nowS,
+        uptimeS: nowS - startTimeS,
+        node: await getNodeMetrics(),
+        apiDB: db.getStatus(),
+        indexer,
       };
     }),
 
@@ -476,17 +501,16 @@ export function createRouter(
           recipient: zAddress,
           amount: zBigIntStr,
           fulfiller: zAddress.optional(),
+          memo: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
-        const { idString, recipient, amount, fulfiller } = opts.input;
-
-        return createRequestSponsored(vc, reqIndexer, {
-          idString,
-          recipient,
-          amount,
-          fulfiller,
-        });
+        return createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          opts.input
+        );
       }),
 
     updateProfileLinks: publicProcedure
@@ -541,7 +565,7 @@ export function createRouter(
         await verifyTagUpdateToken(tag, updateToken, db);
 
         const idString = encodeRequestId(generateRequestId());
-        await createRequestSponsored(vc, reqIndexer, {
+        await createRequestSponsored(vc, reqIndexer, paymentMemoTracker, {
           idString,
           recipient,
           amount,

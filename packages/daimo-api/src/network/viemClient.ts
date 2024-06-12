@@ -22,23 +22,45 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import { chainLinkAggregatorABI } from "./chainLink";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
 
 function getTransportFromEnv() {
-  const l1_RPCs = process.env.DAIMO_API_L1_RPC_WS!.split(",");
-  const l2_RPCs = process.env.DAIMO_API_L2_RPC_WS!.split(",");
+  const l1RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
+  const l2RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
 
-  console.log(`[VIEM] using transport RPCs L1: ${l1_RPCs}, L2: ${l2_RPCs}`);
+  console.log(`[VIEM] using transport RPCs L1: ${l1RPCs}, L2: ${l2RPCs}`);
 
   const stringToTransport = (rpc: string) =>
     rpc.startsWith("wss") ? webSocket(rpc) : http(rpc);
 
   return {
-    l1: fallback(l1_RPCs.map(stringToTransport), { rank: true }),
-    l2: fallback(l2_RPCs.map(stringToTransport), { rank: true }),
+    l1: addLogging(fallback(l1RPCs.map(stringToTransport), { rank: true })),
+    l2: addLogging(fallback(l2RPCs.map(stringToTransport), { rank: true })),
+  };
+}
+
+// Log JSON RPC requests. This helps debug RPC errors.
+function addLogging(transport: Transport) {
+  return (args: Parameters<Transport>[0]) => {
+    const chainId = args.chain?.id;
+    const ret = transport(args);
+    const { request } = ret;
+    ret.request = async (args) => {
+      const reqID = Math.floor(Math.random() * 1e6).toString(36);
+      const { method } = args;
+      console.log(`[VIEM] request ${chainId} ${method} ${reqID}`);
+      try {
+        const resp = (await request(args)) as any;
+        console.log(`[VIEM] response ${chainId} ${method} ${reqID}`);
+        return resp;
+      } catch (e) {
+        console.error(`[VIEM] ERROR ${chainId} ${method} ${reqID}`, e);
+        throw e;
+      }
+    };
+    return ret;
   };
 }
 
@@ -57,7 +79,7 @@ export function getViemClientFromEnv(monitor: Telemetry) {
 
   // Connect to L2
   const chain = chainConfig.chainL2;
-  const account = getEOA(process.env.DAIMO_API_PRIVATE_KEY);
+  const account = getEOA(getEnvApi().DAIMO_API_PRIVATE_KEY);
   const publicClient = createPublicClient({
     chain,
     transport: transports.l2,
@@ -71,9 +93,7 @@ export function getViemClientFromEnv(monitor: Telemetry) {
   return new ViemClient(l1Client, publicClient, walletClient, monitor);
 }
 
-export function getEOA(privateKey?: string) {
-  if (!privateKey) throw new Error("Missing private key");
-
+export function getEOA(privateKey: string) {
   if (!privateKey.startsWith("0x")) privateKey = `0x${privateKey}`;
   assert(isHex(privateKey) && privateKey.length === 66, "Invalid private key");
 
@@ -125,17 +145,6 @@ export class ViemClient {
     );
   }
 
-  getChainLinkAnswers(oracles: Address[]) {
-    return this.l1Client.multicall({
-      contracts: oracles.map((oracle) => ({
-        address: oracle,
-        abi: chainLinkAggregatorABI,
-        functionName: "latestAnswer",
-        args: [],
-      })),
-    });
-  }
-
   private async waitForReceipt(hash: Hex) {
     try {
       const receipt = await this.publicClient.waitForTransactionReceipt({
@@ -182,14 +191,11 @@ export class ViemClient {
     await this.lockNonce.acquireAsync();
 
     try {
-      console.log(
-        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got lock`
-      );
+      const elapsedMs = () => Math.round(performance.now() - startMs);
+      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: got lock`);
       await this.updateNonce();
       console.log(
-        `[VIEM] tx ${localTxId} ${performance.now() - startMs}ms: got nonce ${
-          this.nextNonce
-        }`
+        `[VIEM] tx ${localTxId} ${elapsedMs()}ms: got nonce ${this.nextNonce}`
       );
 
       args.nonce = this.nextNonce; // Override nonce
@@ -198,11 +204,7 @@ export class ViemClient {
 
       const ret = await fn(args);
 
-      console.log(
-        `[VIEM] tx ${localTxId} ${
-          performance.now() - startMs
-        }ms: submitted ${ret}`
-      );
+      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: submitted: ${ret}`);
 
       // Increment nonce for later
       this.nextNonce += 1;

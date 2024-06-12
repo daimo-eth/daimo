@@ -16,7 +16,7 @@ import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
 import { useSendAsync } from "../../../action/useSendAsync";
-import { env } from "../../../logic/env";
+import { env } from "../../../env";
 import { getWrappedMnemonicSigner } from "../../../logic/key";
 import { getWrappedPasskeySigner } from "../../../logic/passkey";
 import {

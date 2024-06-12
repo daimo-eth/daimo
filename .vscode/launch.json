@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Attach by --inspect port",
+      "port": 4321,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    }
+  ]
+}

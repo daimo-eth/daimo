@@ -1,4 +1,3 @@
-import cors from "cors";
 import "dotenv/config";
 import http from "http";
 import { Server as WebSocketServer } from "ws";
@@ -21,7 +20,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { chainConfig } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
 import { UniswapClient } from "../network/uniswapClient";
 import { getViemClientFromEnv } from "../network/viemClient";
@@ -32,6 +31,11 @@ import { Watcher } from "../shovel/watcher";
 
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
+
+// Workaround viem bug
+(Error.prototype as any).walk = function () {
+  return this;
+};
 
 async function main() {
   console.log(`[API] initializing telemetry...`);
@@ -58,9 +62,10 @@ async function main() {
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
+
   const opIndexer = new OpIndexer();
-  const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(db, nameReg);
+  const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
+  const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
@@ -82,6 +87,7 @@ async function main() {
     vc,
     homeCoinIndexer,
     foreignCoinIndexer,
+    ethIndexer,
     nameReg,
     monitor
   );
@@ -97,16 +103,18 @@ async function main() {
     db
   );
 
-  const shovelWatcher = new Watcher();
+  // Set up indexers
+  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
+  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
   shovelWatcher.add(
-    // indexers in dependency order, within each list, indexers are indexed in parallel
+    // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
 
-  // Disable ethIndexer for now
-  // shovelWatcher.slowAdd(ethIndexer);
+  // ethIndexer can be spotty depending on RPC errors.
+  shovelWatcher.slowAdd(ethIndexer);
 
   // Initialize in background
   (async () => {
@@ -155,7 +163,6 @@ async function main() {
     monitor
   );
   const handler = createHTTPHandler({
-    middleware: cors(),
     router,
     createContext,
     onError: onTrpcError(monitor),

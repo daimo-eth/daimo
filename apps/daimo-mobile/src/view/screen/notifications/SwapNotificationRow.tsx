@@ -12,7 +12,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
-import { env } from "../../../logic/env";
+import { env } from "../../../env";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../model/account";
 import { TokenBubble } from "../../shared/Bubble";

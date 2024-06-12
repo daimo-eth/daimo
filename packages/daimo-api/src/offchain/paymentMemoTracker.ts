@@ -11,7 +11,7 @@ export class PaymentMemoTracker {
   constructor(private db: DB) {}
 
   async init() {
-    console.log(`[PAYMENT MEMO] init`);
+    console.log(`[MEMO] init`);
 
     // Get memos sorted by creation time
     const rows = await retryBackoff(`loadPaymentMemos`, () =>

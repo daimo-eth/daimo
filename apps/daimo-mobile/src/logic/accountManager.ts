@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
+import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
 import { cacheEAccounts } from "../logic/addr";
 import {
@@ -32,7 +33,6 @@ import {
   loadEnclaveKey,
   loadOrCreateEnclaveKey,
 } from "../logic/enclave";
-import { env } from "../logic/env";
 import {
   Account,
   createEmptyAccount,
@@ -85,8 +85,9 @@ class AccountManager {
   private keyInfo: EnclaveKeyInfo | null = null;
   /**
    * Always matches home chain of account, if logged in.
+   * Switchable during login by entering eg. a testnet invite code.
    */
-  private daimoChain: DaimoChain = daimoChainFromStr(process.env.DAIMO_CHAIN);
+  private daimoChain: DaimoChain = daimoChainFromStr("base");
   /**
    * Present only when currentAccount is null & in process of being created.
    */
@@ -197,7 +198,7 @@ class AccountManager {
     const { pubKeyHex, enclaveKeyName } = this.keyInfo;
 
     console.log(`[ACCOUNT] pollForAccountByKey, key ${pubKeyHex}`);
-    const rpcFunc = env(this.daimoChain).rpcFunc;
+    const rpcFunc = getRpcFunc(this.daimoChain);
     let acc: EAccount | null = null;
     try {
       acc = await rpcFunc.lookupEthereumAccountByKey.query({ pubKeyHex });
@@ -247,7 +248,7 @@ class AccountManager {
     // Strip private seed from notes links before lookup
     const sanitizedUrl = formatDaimoLink(stripSeedFromNoteLink(inviteLink));
 
-    const { rpcFunc } = env(this.daimoChain);
+    const rpcFunc = getRpcFunc(this.daimoChain);
     this.createAccountHandle = {
       status: "loading",
       message: "Creating account...",
@@ -326,7 +327,7 @@ class AccountManager {
     address: Address,
     inviteLink: DaimoLinkNoteV2
   ) {
-    const { rpcFunc } = env(this.daimoChain);
+    const rpcFunc = getRpcFunc(this.daimoChain);
     const sanitizedUrl = formatDaimoLink(stripSeedFromNoteLink(inviteLink));
 
     try {
@@ -370,7 +371,7 @@ class AccountManager {
     inviteLink: DaimoLinkNoteV2,
     noteStatus: DaimoNoteStatus
   ) {
-    const { rpcFunc } = env(this.daimoChain);
+    const rpcFunc = getRpcFunc(this.daimoChain);
     const ephemeralSignature = await getNoteClaimSignatureFromSeed(
       noteStatus.sender.addr,
       address,

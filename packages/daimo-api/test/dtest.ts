@@ -15,16 +15,21 @@ async function main() {
   const monitor = new Telemetry();
   const vc = getViemClientFromEnv(monitor);
   const uc = new UniswapClient();
-  const opIndexer = new OpIndexer();
   const nameReg = new NameRegistry(
     vc,
     null as any,
     null as any,
     new Set<string>()
   );
-  const noteIndexer = new NoteIndexer(nameReg);
-  const requestIndexer = new RequestIndexer(null as any, nameReg);
   const paymentMemoTracker = new PaymentMemoTracker(null as any);
+
+  const opIndexer = new OpIndexer();
+  const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
+  const requestIndexer = new RequestIndexer(
+    null as any,
+    nameReg,
+    paymentMemoTracker
+  );
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
   const coinIndexer = new HomeCoinIndexer(
     vc,
@@ -36,7 +41,7 @@ async function main() {
   );
   const keyReg = new KeyRegistry();
 
-  const shovelWatcher = new Watcher();
+  const shovelWatcher = new Watcher(vc.publicClient);
   shovelWatcher.add(
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer],

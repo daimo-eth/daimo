@@ -83,8 +83,9 @@ export type DaimoRequestV2Status = {
   createdAt: number;
   fulfilledBy?: EAccount;
   isValidInvite?: boolean;
-  expectedFulfiller?: EAccount; // Set by recipient to request from specific address
+  expectedFulfiller?: EAccount; // Request from a specific Daimo address
   updatedAt?: number;
+  memo?: string;
 };
 
 /**
@@ -105,16 +106,22 @@ export enum DaimoNoteState {
  */
 export type DaimoNoteStatus = {
   link: DaimoLinkNote | DaimoLinkNoteV2;
+  // Status. Pending = not yet onchain, Confirmed = onchain & claimable.
   status: DaimoNoteState;
+  // Note creator (Daimo account)
   sender: EAccount;
+  // NoteV2 ID, derived from the ephemeralOwner. (sender, ID) is likely unique.
   id?: string;
-  /* Ephemeral notes contract address, used to distinguish between likes from
-   * contract DaimoEphemeralNotes vs. DaimoEphemeralNotesV2
-   */
+  // DaimoEphemeralNotes vs. DaimoEphemeralNotesV2 contract address
   contractAddress: Address;
+  // Ephemeral note owner (burner EOA, just for this note)
   ephemeralOwner?: Address;
+  // Claimer, or undefined if the note is not yet claimed or cancelled.
   claimer?: EAccount;
+  // Dollar value = exact amount of stablecoin sent via this note.
   dollars: `${number}`;
+  // Optional memo.
+  memo?: string;
 };
 
 /**

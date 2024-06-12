@@ -8,9 +8,10 @@ import { DaimoOpSender, OpSenderCallback } from "@daimo/userop";
 import { useEffect } from "react";
 import { Address } from "viem";
 
-import { env } from "./env";
 import { getWrappedDeviceKeySigner } from "./key";
 import { DeviceKeySigner, Signer } from "./signer";
+import { getRpcFunc } from "./trpc";
+import { env } from "../env";
 import { Account } from "../model/account";
 
 /** Default send deadline, in seconds. Determines validUntil for each op. */
@@ -61,7 +62,7 @@ export function loadOpSender({
   if (promise) return promise;
 
   const daimoChain = daimoChainFromId(chainId);
-  const rpcFunc = env(daimoChain).rpcFunc;
+  const rpcFunc = getRpcFunc(daimoChain);
 
   const sender: OpSenderCallback = async (op: UserOpHex, memo?: string) => {
     console.info(`[SEND] sending op ${JSON.stringify(op)}`);
