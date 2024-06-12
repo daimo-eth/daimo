@@ -141,7 +141,13 @@ function LandlineAccountList() {
   );
 }
 
-function getBinanceOpener(
+// An on-demand exchange is one that requires fetching a URL at the time of
+// user's interaction, rather than have it pre-fetched. These exchanges are
+// first fetched with a loading spinner, then the URL is opened.
+// Binance is the only on-demand exchange for now becuase generated links
+// expire quickly and 301 redirects don't work for opening universal links
+// in Binance app, so we can't include it in the recommendedExchanges API-side.
+function getOnDemandExchanges(
   account: Account,
   setProgress: (progress: Progress) => void
 ) {
@@ -152,26 +158,43 @@ function getBinanceOpener(
     : "other";
 
   if (platform === "other") {
-    return null;
+    return [];
   }
 
-  return async () => {
-    setProgress("loading");
-    const url = await rpcFunc.getBinanceWithdrawalURL.query({
+  const progressId = "loading-binance-deposit";
+
+  const onClick = async () => {
+    setProgress(progressId);
+    const url = await rpcFunc.getExchangeURL.query({
       addr: account.address,
       platform,
+      exchange: "binance",
+      direction: "depositFromExchange",
     });
 
     if (url == null) {
-      console.log(`[DEPOSIT] no binance url for ${account.name}`);
+      console.error(`[DEPOSIT] no binance url for ${account.name}`);
+      setProgress("idle");
     } else {
       Linking.openURL(url);
       setProgress("started");
     }
   };
+
+  return [
+    {
+      cta: "Deposit from Binance",
+      title: "Send from Binance balance",
+      logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
+      loadingId: progressId,
+      isExternal: true,
+      sortId: 2,
+      onClick,
+    },
+  ];
 }
 
-type Progress = "idle" | "loading" | "started";
+type Progress = "idle" | "loading-binance-deposit" | "started";
 
 function DepositList({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
@@ -197,34 +220,24 @@ function DepositList({ account }: { account: Account }) {
       cta: "Deposit to address",
       title: "Send to your address",
       logo: defaultLogo,
+      sortId: 100, // Standin for infinite
       onClick: openAddressDeposit,
     },
   ];
 
   if (!isTestnet) {
-    // Binance requires active generation for the link, expires quickly and
-    // 301 redirects don't work for opening universal links in Binance app,
-    // so we can't include it in the recommendedExchanges API-side.
-    const binanceOption = getBinanceOpener(account, setProgress);
-    if (binanceOption) {
-      options.unshift({
-        cta: "Deposit from Binance",
-        title: "Send from Binance balance",
-        logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
-        onClick: binanceOption,
-        progress, // Progress options only apply to Binance currently
-      });
-    }
-
-    options.unshift(
+    options.push(
       ...account.recommendedExchanges.map((rec) => ({
         title: rec.title || "Loading...",
         cta: rec.cta,
         logo: rec.logo || defaultLogo,
         isExternal: true,
+        sortId: rec.sortId || 0,
         onClick: () => openExchange(rec.url),
-      }))
+      })),
+      ...getOnDemandExchanges(account, setProgress)
     );
+    options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }
 
   return (
@@ -242,7 +255,7 @@ function DepositList({ account }: { account: Account }) {
       )}
       <Spacer h={16} />
       {options.map((option) => (
-        <OptionRow key={option.cta} {...option} />
+        <OptionRow key={option.cta} progress={progress} {...option} />
       ))}
     </View>
   );
@@ -327,7 +340,9 @@ type OptionRowProps = {
   cta: string;
   logo: ImageSourcePropType;
   isExternal?: boolean;
+  loadingId?: string;
   progress?: Progress;
+  sortId?: number;
   onClick: () => void | Promise<void>;
 };
 
@@ -336,13 +351,15 @@ function OptionRow({
   cta,
   logo,
   isExternal,
+  loadingId,
   onClick,
   progress,
 }: OptionRowProps) {
   const width = useWindowDimensions().width;
 
   const rightContent = (() => {
-    if (progress === "loading") return <ActivityIndicator size="small" />;
+    if (progress && progress === loadingId)
+      return <ActivityIndicator size="small" />;
     if (isExternal) {
       return (
         <TextBody color={color.primary}>

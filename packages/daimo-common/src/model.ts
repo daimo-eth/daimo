@@ -90,6 +90,7 @@ export const zRecommendedExchange = z.object({
   cta: z.string(),
   logo: z.string().optional(),
   url: z.string(),
+  sortId: z.number().optional(),
 });
 
 export type RecommendedExchange = z.infer<typeof zRecommendedExchange>;

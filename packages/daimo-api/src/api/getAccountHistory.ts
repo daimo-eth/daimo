@@ -342,18 +342,22 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
       cta: "Bridge USDC from any wallet",
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
+      sortId: 0,
     },
     {
       title: "Send from Coinbase & other options",
       cta: "Deposit from Coinbase",
       url: getCoinbaseURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
+      sortId: 1,
     },
+    // 2 is Binance, loaded client-side on demand.
     {
       title: "Cards, banks, & international options",
       cta: "Buy USDC",
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
+      sortId: 3,
     },
   ];
 }

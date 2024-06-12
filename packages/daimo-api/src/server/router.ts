@@ -601,19 +601,26 @@ export function createRouter(
         return status.isValid;
       }),
 
-    getBinanceWithdrawalURL: publicProcedure
+    getExchangeURL: publicProcedure
       .input(
         z.object({
           addr: zAddress,
           platform: z.enum(["ios", "android", "other"]),
+          exchange: z.enum(["binance"]),
+          direction: z.enum(["depositFromExchange", "withdrawToExchange"]),
         })
       )
       .query(async (opts) => {
-        const { addr, platform } = opts.input;
+        const { addr, platform, exchange, direction } = opts.input;
         const acc = nameReg.getDaimoAccount(addr);
         if (!acc) throw new TRPCError({ code: "NOT_FOUND" });
 
-        return await binanceClient.createWithdrawalURL(addr, platform);
+        switch (`${exchange}-${direction}`) {
+          case "binance-depositFromExchange":
+            return await binanceClient.createWithdrawalURL(addr, platform);
+          default:
+            throw new TRPCError({ code: "NOT_FOUND" });
+        }
       }),
 
     submitWaitlist: publicProcedure

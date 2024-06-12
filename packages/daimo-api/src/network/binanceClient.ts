@@ -32,11 +32,10 @@ export class BinanceClient {
   }
 
   private async signPayload(payload: string) {
-    const privateKeyHex = getEnvApi().BINANCE_API_PRIVATE_KEY;
-    if (!privateKeyHex) return undefined;
+    if (!this.PRIVATE_KEY) return undefined;
 
     const payloadBytes = Buffer.from(payload);
-    const signature = p256.sign(payloadBytes, privateKeyHex.slice(2), {
+    const signature = p256.sign(payloadBytes, this.PRIVATE_KEY.slice(2), {
       prehash: true,
     });
     const sigBytes = signature.normalizeS().toDERRawBytes();
@@ -121,7 +120,9 @@ export class BinanceClient {
       throw new Error("Base USDC not withdrawable");
     }
     if (getAddress(base.contractAddress) !== chainConfig.tokenAddress) {
-      throw new Error(`Wrong contract: ${base.contractAddress}`);
+      throw new Error(
+        `Wrong contract: ${base.contractAddress}, not ${chainConfig.tokenAddress}`
+      );
     }
   }
 
