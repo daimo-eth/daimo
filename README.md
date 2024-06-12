@@ -111,18 +111,16 @@ Run the iPhone Simulator in XCode. (If you're not on a Mac, see the
 Android quick start below.) Get the latest simulator build from Expo; message us
 if you need access. Drag-drop the build into the simulator to install.
 
-Set the following variables to use the remote, hosted API.
+Copy the example `.env` file to use the remote, hosted API.
 
 ```sh
-export DAIMO_APP_API_URL_TESTNET="https://api-stage.daimo.xyz"
-export DAIMO_APP_API_URL_MAINNET="https://api.daimo.xyz"
-export DAIMO_DOMAIN="daimo.com"
+cd apps/daimo-mobile
+cp .env.example .env
 ```
 
 Finally, run the app in the simulator.
 
 ```sh
-cd apps/daimo-mobile
 npm run dev
 ```
 

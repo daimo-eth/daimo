@@ -38,7 +38,7 @@
     "zod": "^3.23.8"
   },
   "scripts": {
-    "dev": "DAIMO_DOMAIN=localhost:3001 next dev -p 3001",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",
