@@ -133,71 +133,23 @@ function hasCacheExpiredSwaps(account: Account) {
   return account.proposedSwaps.some((s) => s.cacheUntil < now());
 }
 
-type SyncStatus = "success" | "failed" | "skipped" | "skipped";
-
-async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
-  const manager = getAccountManager();
-  const account = manager.getAccount();
-  if (account == null) return "skipped";
-
-  // Synced recently? Wait first.
-  const nowS = now();
-  let intervalS = 10;
-
-  // Sync faster for 1. pending ops or expired swaps, and 2. recently-failed sync
-  if (hasPendingOps(account) || hasCacheExpiredSwaps(account)) {
-    intervalS = 1;
-  }
-
-  const netState = getNetworkState();
-  if (netState.status === "online" && netState.syncAttemptsFailed > 0) {
-    intervalS = 1;
-  }
-
-  if (fromScratch) {
-    return await resync(`initial sync from scratch`, true);
-  } else if (lastPushNotificationS + 10 > nowS) {
-    return await resync(
-      `push notification ${nowS - lastPushNotificationS}s ago`
-    );
-  } else if (lastSyncS + intervalS > nowS) {
-    console.log(`[SYNC] skipping sync, attempted sync recently`);
-    return "skipped";
-  } else {
-    return await resync(`interval ${intervalS}s`);
-  }
-}
-
 /** Gets latest balance & history for this account, in the background. */
-export async function resync(
-  reason: string,
-  fromScratch?: boolean
-): Promise<SyncStatus> {
+export async function resync(reason: string, fromScratch?: boolean) {
   const manager = getAccountManager();
   const accOld = manager.getAccount();
   assert(!!accOld, `no account, skipping sync: ${reason}`);
 
-  console.log(`[SYNC] RESYNC ${accOld.name}, ${reason}`);
+  console.log(`[RESYNC] New ${accOld.name}, ${reason}`);
   lastSyncS = now();
 
   try {
     const res = await fetchSync(accOld, fromScratch);
     assertNotNull(manager.getAccount(), "deleted during sync");
+
     manager.transform((a) => applySync(a, res, !!fromScratch));
-    console.log(`[SYNC] SUCCEEDED ${accOld.name}`);
-    // We are automatically marked online when any RPC req succeeds
-    return "success";
+    console.log(`[RESYNC] SUCCEEDED ${accOld.name}`);
   } catch (e) {
-    console.error(`[SYNC] FAILED ${accOld.name}`, e);
-    // Mark offline
-    updateNetworkState((state) => {
-      const syncAttemptsFailed = state.syncAttemptsFailed + 1;
-      return {
-        syncAttemptsFailed,
-        status: syncAttemptsFailed > 3 ? "offline" : "online",
-      };
-    });
-    return "failed";
+    console.error(`[RESYNC] FAILED ${accOld.name}`, e);
   }
 }
 
