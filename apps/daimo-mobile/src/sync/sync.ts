@@ -18,77 +18,112 @@ import { env } from "../logic/env";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { Account } from "../model/account";
 
-export function startSync() {
-  console.log("[SYNC] APP LOAD, starting sync");
+class SyncManager {
+  retryInterval = 1_000;
+  syncAttemptsFailed = 0;
+  manager = getAccountManager();
+  currentAccount: Account | null = null;
+  // for tracking retry timeout
+  retryTimeout: any = undefined;
 
-  maybeSync(true)
-    .then((status) => {
-      if (status === "failed") {
-        updateNetworkState(() => {
-          return { status: "offline", syncAttemptsFailed: 1 };
-        });
-      }
-    })
-    .finally(() => {
-      // create small delay to let interface render becuase this callback
-      // run right after getting data so the interface still got to adapt
-      setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 300);
-    });
+  _trpcUnsubscribe: (() => void) | null = null;
 
-  const manager = getAccountManager();
+  start() {
+    this.manager.addListener(this._onAccountChange);
+  }
 
-  // Called when app is notified of account change.
-  // Assign a function here that clears any subscriptions from
-  // the previous account.
-  let unsubscribePreviousAccount: null | (() => void) = null;
+  stop() {
+    this.manager.removeListener(this._onAccountChange);
 
-  // listener is called on state change, not when on actual account switch
-  // this means it will get called when state is loaded from local storage
-  // or on every sync.
-  // we store previousAddress to check if account actually changes
-  // to avoid starting a new subscription each time.
-  let previousAddress = "";
+    this.unsubscribe();
+  }
 
-  const listener = (account: Account | null) => {
-    console.log("account change", account);
-
-    if (!account) {
-      unsubscribePreviousAccount?.();
-
-      return;
-    }
-
-    if (previousAddress === account.address) {
-      return;
-    }
-
-    unsubscribePreviousAccount?.();
-
+  subscribe(account: Account) {
     const daimoChain = daimoChainFromId(account.homeChainId);
     const rpcFunc = env(daimoChain).rpcFunc;
+
+    this.currentAccount = account;
 
     const sub = rpcFunc.onAccountUpdate.subscribe(
       {
         address: account.address,
-        sinceBlockNum: account.lastFinalizedBlock,
+        sinceBlockNum: 0,
       },
       {
+        onStarted: () => {
+          this.syncAttemptsFailed = 0;
+        },
+
         onData: (data) => {
-          manager.transform((a) => applySync(a, data, false));
+          this.manager.transform((a) => applySync(a, data, false));
+        },
+
+        onError: () => {
+          this.syncAttemptsFailed += 1;
+
+          // ensure we're not using a stale value in the callback
+          const currentSyncAttemptFailed = this.syncAttemptsFailed;
+
+          this.unsubscribe();
+
+          updateNetworkState(() => {
+            return {
+              status: "offline",
+              syncAttemptsFailed: currentSyncAttemptFailed,
+            };
+          });
+
+          this.retryTimeout = setTimeout(() => {
+            this.subscribe(account);
+          }, this.retryInterval);
         },
       }
     );
 
-    unsubscribePreviousAccount = () => {
-      sub.unsubscribe();
-    };
+    this._trpcUnsubscribe = sub.unsubscribe;
+  }
 
-    previousAddress = account.address;
+  unsubscribe() {
+    this._trpcUnsubscribe?.();
+
+    this.currentAccount = null;
+    this.syncAttemptsFailed = 0;
+
+    clearTimeout(this.retryTimeout);
+  }
+
+  _onAccountChange = (newAccount: Account | null) => {
+    if (!newAccount) {
+      this.unsubscribe();
+
+      return;
+    }
+
+    // do nothing if we still use the same wallet
+    if (this.currentAccount?.address === newAccount.address) {
+      return;
+    }
+
+    this.unsubscribe();
+
+    this.subscribe(newAccount);
   };
+}
 
-  manager.addListener(listener);
+export function startSync() {
+  console.log("[SYNC] APP LOAD, starting sync");
+
+  // create small delay to let interface render becuase this callback
+  // run right after getting data so the interface still got to adapt
+  setTimeout(() => {
+    SplashScreen.hideAsync();
+  }, 300);
+
+  const manager = new SyncManager();
+
+  manager.start();
+
+  return manager;
 }
 
 let lastSyncS = 0;
