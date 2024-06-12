@@ -12,7 +12,11 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
-import { getNetworkState, updateNetworkState } from "./networkState";
+import {
+  getNetworkState,
+  updateNetworkState,
+  updateNetworkStateOnline,
+} from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
 import { env } from "../logic/env";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
@@ -50,7 +54,10 @@ class SyncManager {
         sinceBlockNum: 0,
       },
       {
-        onStarted: () => {
+        onStarted: (...args) => {
+          console.log("[SyncManager]", "onStarted", args);
+          updateNetworkStateOnline();
+
           this.syncAttemptsFailed = 0;
         },
 
@@ -58,22 +65,20 @@ class SyncManager {
           this.manager.transform((a) => applySync(a, data, false));
         },
 
-        onError: () => {
-          this.syncAttemptsFailed += 1;
+        onStopped: (...args) => {
+          console.log("[SyncManager]", "onStopped", args);
+          // When connection drops, immedietly reconnect
+          this.unsubscribe();
+          this.subscribe(account);
+        },
 
-          // ensure we're not using a stale value in the callback
-          const currentSyncAttemptFailed = this.syncAttemptsFailed;
-
+        onError: (...args) => {
+          console.log("[SyncManager]", "onError", args);
           this.unsubscribe();
 
-          updateNetworkState(() => {
-            return {
-              status: "offline",
-              syncAttemptsFailed: currentSyncAttemptFailed,
-            };
-          });
-
           this.retryTimeout = setTimeout(() => {
+            this.syncAttemptsFailed += 1;
+
             this.subscribe(account);
           }, this.retryInterval);
         },
@@ -88,6 +93,16 @@ class SyncManager {
 
     this.currentAccount = null;
     this.syncAttemptsFailed = 0;
+
+    // ensure we're not using a stale value in the callback
+    const currentSyncAttemptFailed = this.syncAttemptsFailed;
+
+    updateNetworkState(() => {
+      return {
+        status: "offline",
+        syncAttemptsFailed: currentSyncAttemptFailed,
+      };
+    });
 
     clearTimeout(this.retryTimeout);
   }
