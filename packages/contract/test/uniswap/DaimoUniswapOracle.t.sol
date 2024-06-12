@@ -50,15 +50,16 @@ contract DaimoUniswapOracleTest is Test {
             IERC20 token1 = IERC20(query.readAddress(".token1"));
             address expectedPool = address(query.readAddress(".bestPool"));
 
-            (address poolAddr, ) = swapper.getBestPoolTick(token0, token1);
+            (address poolAddr, , ) = swapper.getBestPoolTick(token0, token1);
             assertEq(poolAddr, expectedPool);
-            (address revPoolAddr, ) = swapper.getBestPoolTick(token1, token0);
+            (address revPoolAddr, , ) = swapper.getBestPoolTick(token1, token0);
             assertEq(revPoolAddr, expectedPool);
         }
     }
 
     function testQuotes() public {
         string memory file = "./test/uniswap/data/uniswapQuotes.jsonl";
+        IERC20 usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
 
         while (true) {
             string memory query = vm.readLine(file);
@@ -68,7 +69,7 @@ contract DaimoUniswapOracleTest is Test {
             uint128 amountIn = uint128(query.readUint(".amountIn"));
             uint expectedOut = query.readUint(".expectedOut");
 
-            uint amountOut = swapper.getUSDCQuote(amountIn, tokenIn);
+            (uint amountOut, ) = swapper.quote(amountIn, tokenIn, usdc);
             assertEq(amountOut / 10 ** 4, expectedOut / 10 ** 4); // matches in cents
         }
     }

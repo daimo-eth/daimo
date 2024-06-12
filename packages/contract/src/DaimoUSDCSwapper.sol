@@ -8,13 +8,13 @@ import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IDaimoSwapper.sol";
 
-// Fully on-chain swap executor that quotes an accurate USDC price for
-// any (amount, token) using Uniswap V3 TWAP/TWALs. See
-// https://uniswap.org/whitepaper-v3.pdf for more on TWAP/TWALs.
+// Fully on-chain swap executor that quotes stablecoin swaps using Uniswap V3
+// TWAP/TWALs. Seehttps://uniswap.org/whitepaper-v3.pdf for more on TWAP/TWALs.
 //
-// Considers two paths: 1) directly from tokenIn to USDC, or 2) from tokenIn
-// to a hopToken to USDC. hopTokens are other popular tokens that often appear
-// in Uniswap routes -- for example, WETH.
+// Considers two paths for inbound/outbound swaps.
+// 1) directly from tokenIn to tokenOut, or 2) from tokenIn to a hopToken to
+// tokenOut. hopTokens are other popular tokens that often appear in Uniswap
+// routes -- for example, WETH.
 //
 // This ensures that if tokenIn is a token with an active Uniswap pool with
 // either USDC or any of the hopTokens, the price is accurate.
@@ -60,6 +60,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         oraclePoolFactory = _oraclePoolFactory;
     }
 
+    // Gets TWAP and TWAL for a single pool.
     function consultOracle(
         address pool,
         uint32 secondsAgo
@@ -77,14 +78,14 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     // The best pool for a pair is the one with the highest liquidity over
     // different fee tiers.
     function getBestPoolTick(
-        IERC20 tokenIn,
-        IERC20 tokenOut
-    ) public returns (address bestPool, int24 tick) {
+        IERC20 tokenA,
+        IERC20 tokenB
+    ) public view returns (address bestPool, int24 tick, uint24 bestFee) {
         uint128 bestLiquidity = 0;
         for (uint256 i = 0; i < oracleFeeTiers.length; i++) {
             address pool = oraclePoolFactory.getPool({
-                tokenA: address(tokenIn),
-                tokenB: address(tokenOut),
+                tokenA: address(tokenA),
+                tokenB: address(tokenB),
                 fee: oracleFeeTiers[i]
             });
 
@@ -100,45 +101,53 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
                     bestLiquidity = harmonicMeanLiquidity;
                     bestPool = pool;
                     tick = arithmeticMeanTick;
+                    bestFee = oracleFeeTiers[i];
                 }
-            } catch Error(string memory reason) {
-                emit OracleError(pool, oraclePeriod, reason);
-            } catch (bytes memory lowLevelData) {
-                emit LowLevelOracleError(pool, oraclePeriod, lowLevelData);
+            } catch {
+                // Ignore errors. No event emits, to keep this a view function.
+                // Can trace to debug oracle issues if needed.
             }
         }
     }
 
-    // Direct pool quote: tokenIn -> USDC
-    function quoteUSDCPool(
+    // Direct 1-hop quote: [tokenIn -> tokenOut]
+    function quoteDirect(
         uint128 amountIn,
-        IERC20 tokenIn
-    ) public returns (uint256 amountOut) {
-        (address pool, int24 tick) = getBestPoolTick(tokenIn, usdc);
+        IERC20 tokenIn,
+        IERC20 tokenOut
+    ) public view returns (uint256 amountOut, uint24 fee) {
+        int24 tick;
+        address swapPool;
+        (swapPool, tick, fee) = getBestPoolTick(tokenIn, tokenOut);
 
-        if (pool == address(0)) return 0;
+        if (swapPool == address(0)) return (0, 0);
 
         amountOut = OracleLibrary.getQuoteAtTick({
             tick: tick,
             baseAmount: amountIn,
             baseToken: address(tokenIn),
-            quoteToken: address(usdc)
+            quoteToken: address(tokenOut)
         });
     }
 
-    // 2 pool path: tokenIn -> [...hopTokens] -> USDC
-    function quoteUSDCViaHop(
+    // 2-hop paths: [tokenIn -> hopToken -> tokenOut]
+    function quoteViaHop(
         uint128 amountIn,
-        IERC20 tokenIn
-    ) public returns (uint256 amountOut) {
+        IERC20 tokenIn,
+        IERC20 tokenOut
+    ) public view returns (uint256 amountOut, bytes memory swapPath) {
         for (uint256 i = 0; i < hopTokens.length; i++) {
             IERC20 hopToken = hopTokens[i];
 
-            if (hopToken == tokenIn) continue; // Covered by direct pool quote already
+            if (hopToken == tokenIn) continue; // Covered by direct quote
+            if (hopToken == tokenOut) continue; // Covered by direct quote
 
-            (address pool, int24 tick) = getBestPoolTick(tokenIn, hopToken);
+            (address poolOne, int24 tick, uint24 feeOne) = getBestPoolTick(
+                tokenIn,
+                hopToken
+            );
 
-            if (pool == address(0)) continue;
+            if (poolOne == address(0)) continue;
 
             uint256 hopAmountOut = OracleLibrary.getQuoteAtTick({
                 tick: tick,
@@ -149,28 +158,64 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
             if (hopAmountOut > _MAX_UINT128) continue;
 
-            uint256 pathAmountOut = quoteUSDCPool(
+            (uint256 pathAmountOut, uint24 feeTwo) = quoteDirect(
                 uint128(hopAmountOut),
-                hopToken
+                hopToken,
+                tokenOut
             );
 
-            if (pathAmountOut > amountOut) amountOut = pathAmountOut;
+            if (pathAmountOut > amountOut) {
+                amountOut = pathAmountOut;
+                swapPath = abi.encodePacked(
+                    address(tokenIn),
+                    feeOne,
+                    address(hopToken),
+                    feeTwo,
+                    address(tokenOut)
+                );
+            }
         }
     }
 
-    // Fetch an accurate USDC quote for a given (amount, token) pair.
+    // Fetch a best-effort quote for a given exact input token pair.
     // token = 0x0 refers to ETH.
-    function getUSDCQuote(
+    function quote(
         uint128 amountIn,
-        IERC20 tokenIn
-    ) public returns (uint256 amountOut) {
+        IERC20 tokenIn,
+        IERC20 tokenOut
+    ) public view returns (uint256 amountOut, bytes memory swapPath) {
         if (address(tokenIn) == address(0)) tokenIn = weth;
-        if (tokenIn == usdc) return amountIn;
+        if (address(tokenOut) == address(0)) tokenOut = weth;
 
-        uint256 directAmountOut = quoteUSDCPool(amountIn, tokenIn);
-        uint256 hopAmountOut = quoteUSDCViaHop(amountIn, tokenIn);
+        // Same token swap.
+        if (tokenIn == tokenOut) {
+            amountOut = amountIn;
+            swapPath = new bytes(0);
+        }
 
-        return directAmountOut > hopAmountOut ? directAmountOut : hopAmountOut;
+        (uint256 directAmountOut, uint24 directFee) = quoteDirect(
+            amountIn,
+            tokenIn,
+            tokenOut
+        );
+
+        (uint256 hopAmountOut, bytes memory swapPathHop) = quoteViaHop(
+            amountIn,
+            tokenIn,
+            tokenOut
+        );
+
+        if (directAmountOut > hopAmountOut) {
+            amountOut = directAmountOut;
+            swapPath = abi.encodePacked(
+                address(tokenIn),
+                directFee,
+                address(tokenOut)
+            );
+        } else {
+            amountOut = hopAmountOut;
+            swapPath = swapPathHop;
+        }
     }
 
     function getFinalOutputToken(
@@ -182,7 +227,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
             outputToken[i] = swapPath[swapPath.length - 20 + i];
         }
 
-        return IERC20(address(uint160(bytes20(outputToken))));
+        return IERC20(address(bytes20(outputToken)));
     }
 
     // Swap input coins to USDC at a fair price, given a path and possibly
@@ -215,7 +260,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         );
 
         // Compute a fair price for the input token swap.
-        uint256 oracleAmountOut = getUSDCQuote(amountIn, tokenIn);
+        (uint256 oracleAmountOut, ) = quote(amountIn, tokenIn, usdc);
         // 1% slippage tolerance, to incentivize quick swaps via MEV.
         uint256 expectedAmountOut = oracleAmountOut - (oracleAmountOut / 100);
         uint256 swapAmountOutMinimum = expectedAmountOut - altruisticAmountOut;
