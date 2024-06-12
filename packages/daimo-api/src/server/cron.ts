@@ -12,7 +12,6 @@ import {
   erc20ABI,
 } from "@daimo/contract";
 import { CronJob } from "cron";
-import { Constants } from "userop";
 import { Hex, formatEther, getAddress } from "viem";
 
 import { Telemetry } from "./telemetry";
@@ -25,6 +24,7 @@ import { HomeCoinIndexer, Transfer } from "../contract/homeCoinIndexer";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { ENTRYPOINT_ADDRESS_V06 } from "permissionless/utils";
 
 export class Crontab {
   private cronJobs: CronJob[] = [];
@@ -95,7 +95,7 @@ export class Crontab {
     console.log(`[CRON] checked meta paymaster ${isMetaPaymasterEnabled}`);
 
     const depositInfo = await this.vc.publicClient.readContract({
-      address: Constants.ERC4337.EntryPoint as Hex,
+      address: ENTRYPOINT_ADDRESS_V06,
       abi: entryPointABI,
       functionName: "getDepositInfo",
       args: [daimoPaymasterV2Address],

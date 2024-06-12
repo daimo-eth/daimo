@@ -102,8 +102,7 @@
     "text-encoding-polyfill": "^0.6.7",
     "ts-unused-exports": "^9.0.4",
     "typescript": "^5.3.0",
-    "viem": "^1.19.15",
-    "zod": "^3.23.8"
+    "viem": "^2.13.6"
   },
   "eslintConfig": {
     "extends": [

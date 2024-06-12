@@ -5,6 +5,8 @@ import {
   Account,
   Address,
   Chain,
+  ContractFunctionArgs,
+  ContractFunctionName,
   GetContractReturnType,
   Hex,
   PublicClient,
@@ -216,12 +218,21 @@ export class ViemClient {
 
   async writeContract<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends string,
+    TFunctionName extends ContractFunctionName<
+      TAbi,
+      "nonpayable" | "payable"
+    > = ContractFunctionName<TAbi, "nonpayable" | "payable">,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      "nonpayable" | "payable",
+      TFunctionName
+    > = ContractFunctionArgs<TAbi, "nonpayable" | "payable", TFunctionName>,
     TChainOverride extends Chain | undefined = undefined
   >(
     args: WriteContractParameters<
       TAbi,
       TFunctionName,
+      TArgs,
       Chain,
       Account,
       TChainOverride
@@ -251,8 +262,7 @@ export class ViemClient {
 
 export type ContractType<TAbi extends Abi> = GetContractReturnType<
   TAbi,
-  PublicClient<Transport, Chain>,
-  WalletClient<Transport, Chain, Account>
+  PublicClient<Transport, Chain>
 >;
 
 export type ReadOnlyContractType<TAbi extends Abi> = GetContractReturnType<

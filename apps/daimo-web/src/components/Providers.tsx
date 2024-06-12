@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  RainbowKitProvider,
-  connectorsForWallets,
-  getDefaultWallets,
-} from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
 import * as React from "react";
 import { useMemo } from "react";
 import { Chain } from "viem/chains";
-import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
+import { WagmiProvider } from "wagmi";
 
 import { chainConfig } from "../env";
 
@@ -31,33 +26,20 @@ export function Providers({
   React.useEffect(() => setMounted(true), []);
 
   const wagmiConfig = useMemo(() => {
-    const { publicClient, webSocketPublicClient } = configureChains(chains, [
-      publicProvider(),
-    ]);
-
-    const walletConnectProjectId = "06d134eadbbacc1f9dd4575541dda90c";
-
-    const { wallets } = getDefaultWallets({
+    const config = getDefaultConfig({
       appName: "Daimo",
-      projectId: walletConnectProjectId,
-      chains,
+      projectId: "06d134eadbbacc1f9dd4575541dda90c",
+      chains: [chains[0], ...chains],
     });
 
-    const connectors = connectorsForWallets([...wallets]);
-
-    return createConfig({
-      autoConnect: true,
-      connectors,
-      publicClient,
-      webSocketPublicClient,
-    });
+    return config;
   }, [chains]);
 
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains} appInfo={appInfo}>
+    <WagmiProvider config={wagmiConfig}>
+      <RainbowKitProvider appInfo={appInfo}>
         {mounted && children}
       </RainbowKitProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
 }

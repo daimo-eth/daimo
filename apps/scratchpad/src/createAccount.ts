@@ -175,7 +175,7 @@ export async function createAccount() {
   console.log(`deploy transaction status ${tx.status}`);
 
   const chainId = chainConfig.chainL2.id;
-  const account = await DaimoOpSender.init({
+  const account = await DaimoOpSender.init(publicClient, {
     chainId,
     tokenAddress: chainConfig.tokenAddress,
     tokenDecimals: chainConfig.tokenDecimals,

@@ -19,14 +19,14 @@ import {
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useMemo, useEffect, useState } from "react";
-import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
 import {
-  useNetwork,
-  usePrepareContractWrite,
-  useContractWrite,
-  useAccount,
-  erc20ABI,
-} from "wagmi";
+  Address,
+  Hex,
+  InsufficientFundsError,
+  parseUnits,
+  erc20Abi,
+} from "viem";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
@@ -118,9 +118,14 @@ function WagmiButton({
   incrementStep?: () => void;
   setSecondary: () => void;
 }) {
-  const { chain } = useNetwork();
-  const { config, error } = usePrepareContractWrite(wagmiPrep);
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const { chain } = useAccount();
+  const { error } = useSimulateContract(wagmiPrep);
+  const {
+    data,
+    isPending,
+    isSuccess,
+    writeContract: write,
+  } = useWriteContract();
 
   const humanReadableError = useMemo(() => {
     if (!error || !error.message) return undefined;
@@ -142,26 +147,26 @@ function WagmiButton({
   }, [isSuccess, incrementStep]);
 
   useEffect(() => {
-    if (isLoading || isSuccess) setSecondary();
-  }, [isLoading, isSuccess, setSecondary]);
+    if (isPending || isSuccess) setSecondary();
+  }, [isPending, isSuccess, setSecondary]);
 
   return (
     <>
       {humanReadableError === undefined && (
         <>
           <SecondaryButton
-            disabled={!write || isLoading}
+            disabled={!write || isPending}
             onClick={() => {
-              if (isSuccess && data?.hash)
+              if (isSuccess && data)
                 window.open(
-                  chain?.blockExplorers!.default.url + "/tx/" + data?.hash,
+                  chain?.blockExplorers!.default.url + "/tx/" + data,
                   "_blank"
                 );
-              else write?.();
+              else write(wagmiPrep);
             }}
             buttonType={isSuccess ? "success" : undefined}
           >
-            {isLoading
+            {isPending
               ? "SENDING"
               : isSuccess && !incrementStep
               ? "VIEW ON BLOCK EXPLORER"
@@ -279,7 +284,7 @@ async function linkStatusToAction(
       return [
         {
           address: chainConfig.tokenAddress,
-          abi: erc20ABI as readonly unknown[],
+          abi: erc20Abi as readonly unknown[],
           functionName: "transfer" as const,
           args: [recipient.addr, parsedAmount] as const,
         },
@@ -296,7 +301,7 @@ async function linkStatusToAction(
       return [
         {
           address: chainConfig.tokenAddress,
-          abi: erc20ABI as readonly unknown[],
+          abi: erc20Abi as readonly unknown[],
           functionName: "approve" as const,
           args: [daimoRequestAddress, parsedAmount] as const,
         },

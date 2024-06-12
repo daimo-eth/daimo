@@ -93,10 +93,11 @@ export class Paymaster {
       () => this.bundlerClient.getUserOperationGasPriceParams()
     );
 
-    const maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
-    const maxPriorityFeePerGas = hexToBigInt(
-      gasPriceParams.maxPriorityFeePerGas
-    );
+    const {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    } = gasPriceParams;
+
     const preVerificationGas = calcPreVerificationGas();
 
     // this.estimatedFee = this.estimatePimlicoFee();

@@ -13,8 +13,8 @@
   "dependencies": {
     "@daimo/common": "*",
     "@daimo/contract": "*",
-    "userop": "^0.3.2",
-    "viem": "^1.19.15"
+    "permissionless": "^0.1.30",
+    "viem": "^2.13.6"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.0",
