@@ -597,19 +597,16 @@ export function createRouter(
       )
       .subscription(async (opts) => {
         const { address, inviteCode } = opts.input;
+        // how often to send updates regardless of new transfers
+        // useful to update exchange rates and others.
+        const refreshInterval = 10_000;
 
         return observable<AccountHistoryResult>((emit) => {
           let lastEmittedBlock = opts.input.sinceBlockNum;
           let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
             null;
 
-          const listener = (data: string) => {
-            // there is already getAccountHistory request in progress.
-            // wait for it to finish
-            if (getAccountHistoryPromise) {
-              return;
-            }
-
+          const pushHistory = (onlyOnNewTransfers: boolean) => {
             getAccountHistoryPromise = getAccountHistory(
               opts.ctx,
               address,
@@ -633,19 +630,43 @@ export function createRouter(
 
             getAccountHistoryPromise
               .then((history) => {
-                lastEmittedBlock = history.lastBlock;
+                // we can have concurrent requests. discard those that arrived too late
+                if (history.lastBlock < lastEmittedBlock) {
+                  return;
+                }
+
+                if (onlyOnNewTransfers && history.transferLogs.length === 0) {
+                  return;
+                }
 
                 emit.next(history);
+
+                lastEmittedBlock = history.lastBlock;
               })
               .finally(() => {
                 getAccountHistoryPromise = null;
               });
           };
 
-          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, listener);
+          const eventListener = () => {
+            pushHistory(true);
+          };
+
+          const intervalTimer = setInterval(() => {
+            // interval concided with new block. let's skip this one.
+            if (getAccountHistoryPromise) {
+              return;
+            }
+
+            pushHistory(false);
+          }, refreshInterval);
+
+          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, eventListener);
 
           return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, listener);
+            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, eventListener);
+
+            clearInterval(intervalTimer);
           };
         });
       }),
