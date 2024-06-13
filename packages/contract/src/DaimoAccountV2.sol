@@ -300,6 +300,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// @param slot the slot of the key to remove
     function removeSigningKey(uint8 slot) public onlySelf onlyNotForwarding {
         require(keys[slot][0] != bytes32(0), "key does not exist");
+        require(numActiveKeys > 1, "cannot remove only signing key");
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];
         numActiveKeys--;

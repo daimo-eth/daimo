@@ -3,12 +3,13 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
-import "../src/DaimoAccountFactoryV2.sol";
-import "../src/DaimoAccountV2.sol";
-import "./Utils.sol";
-
 import "account-abstraction/core/EntryPoint.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
+
+import "../src/DaimoAccountFactoryV2.sol";
+import "../src/DaimoAccountV2.sol";
+import "../src/DaimoTestUSDC.sol";
+import "./Utils.sol";
 
 contract AccountSendUseropTest is Test {
     using UserOperationLib for UserOperation;
@@ -74,7 +75,17 @@ contract AccountSendUseropTest is Test {
                 )
         );
 
-        DaimoAccountV2 acc = factory.createAccount(0, key, 42);
+        // Create a new Daimo account
+        TestUSDC usdc = new TestUSDC();
+        DaimoAccountV2 acc = factory.createAccount(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key,
+            42 // salt
+        );
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
@@ -123,12 +134,16 @@ contract AccountSendUseropTest is Test {
 
         // code coverage can't handle indirect calls
         // call validateUserOp directly
-        DaimoAccountV2 a2 = new DaimoAccountV2(
-            acc.entryPoint(),
-            acc.verifier()
-        );
+        DaimoAccountV2 a2 = new DaimoAccountV2(acc.entryPoint());
         vm.store(address(a2), 0, 0); // set _initialized = 0
-        a2.initialize(0, key, calls);
+        a2.initialize(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key
+        );
         vm.prank(address(entryPoint));
         uint256 validationData = a2.validateUserOp(op, hash, 0);
         assertEq(validationData, 0);
@@ -165,8 +180,17 @@ contract AccountSendUseropTest is Test {
                 )
         );
 
-        DaimoAccountV2.Call[] memory calls = new DaimoAccountV2.Call[](0);
-        DaimoAccountV2 acc = factory.createAccount(0, key, calls, 42);
+        // Create a new Daimo account
+        TestUSDC usdc = new TestUSDC();
+        DaimoAccountV2 acc = factory.createAccount(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key,
+            42 // salt
+        );
         vm.deal(address(acc), 1 ether);
 
         // valid (but reverting) dummy userop
