@@ -1,5 +1,6 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import "dotenv/config";
+import cors from "cors";
 import http from "http";
 
 import { getAppVersionTracker } from "./appVersion";
@@ -164,6 +165,7 @@ async function main() {
     binanceClient
   );
   const handler = createHTTPHandler({
+    middleware: cors(), // handle OPTIONS requests
     router,
     createContext,
     onError: onTrpcError(monitor),
