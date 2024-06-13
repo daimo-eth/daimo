@@ -1,12 +1,14 @@
 import { LandlineAccount } from "@daimo/api/src/landline/connector";
-import { daimoDomainAddress, timeAgo } from "@daimo/common";
+import { PlatformType, daimoDomainAddress, timeAgo } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
 import React, { useCallback, useContext, useState } from "react";
 import {
+  ActivityIndicator,
   ImageSourcePropType,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,6 +26,7 @@ import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
+import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../model/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
@@ -138,15 +141,70 @@ function LandlineAccountList() {
   );
 }
 
+// An on-demand exchange is one that requires fetching a URL at the time of
+// user's interaction, rather than have it pre-fetched. These exchanges are
+// first fetched with a loading spinner, then the URL is opened.
+// Binance is the only on-demand exchange for now becuase generated links
+// expire quickly and 301 redirects don't work for opening universal links
+// in Binance app, so we can't include it in the recommendedExchanges API-side.
+function getOnDemandExchanges(
+  account: Account,
+  setProgress: (progress: Progress) => void
+) {
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+
+  const platform = ["ios", "android"].includes(Platform.OS)
+    ? (Platform.OS as PlatformType)
+    : "other";
+
+  if (platform === "other") {
+    return [];
+  }
+
+  const progressId = "loading-binance-deposit";
+
+  const onClick = async () => {
+    setProgress(progressId);
+    const url = await rpcFunc.getExchangeURL.query({
+      addr: account.address,
+      platform,
+      exchange: "binance",
+      direction: "depositFromExchange",
+    });
+
+    if (url == null) {
+      console.error(`[DEPOSIT] no binance url for ${account.name}`);
+      setProgress("idle");
+    } else {
+      Linking.openURL(url);
+      setProgress("started");
+    }
+  };
+
+  return [
+    {
+      cta: "Deposit from Binance",
+      title: "Send from Binance balance",
+      logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
+      loadingId: progressId,
+      isExternal: true,
+      sortId: 2,
+      onClick,
+    },
+  ];
+}
+
+type Progress = "idle" | "loading-binance-deposit" | "started";
+
 function DepositList({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
 
-  const [started, setStarted] = useState(false);
+  const [progress, setProgress] = useState<Progress>("idle");
 
   const openExchange = (url: string) => {
     Linking.openURL(url);
-    setStarted(true);
+    setProgress("started");
   };
 
   const dispatcher = useContext(DispatcherContext);
@@ -162,26 +220,30 @@ function DepositList({ account }: { account: Account }) {
       cta: "Deposit to address",
       title: "Send to your address",
       logo: defaultLogo,
+      sortId: 100, // Standin for infinite
       onClick: openAddressDeposit,
     },
   ];
 
   if (!isTestnet) {
-    options.unshift(
+    options.push(
       ...account.recommendedExchanges.map((rec) => ({
         title: rec.title || "Loading...",
         cta: rec.cta,
         logo: rec.logo || defaultLogo,
         isExternal: true,
+        sortId: rec.sortId || 0,
         onClick: () => openExchange(rec.url),
-      }))
+      })),
+      ...getOnDemandExchanges(account, setProgress)
     );
+    options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }
 
   return (
     <View style={styles.section}>
       <TextBody color={color.gray3}>Deposit</TextBody>
-      {started && (
+      {progress === "started" && (
         <>
           <Spacer h={16} />
           <InfoBox
@@ -193,7 +255,7 @@ function DepositList({ account }: { account: Account }) {
       )}
       <Spacer h={16} />
       {options.map((option) => (
-        <OptionRow key={option.cta} {...option} />
+        <OptionRow key={option.cta} progress={progress} {...option} />
       ))}
     </View>
   );
@@ -278,11 +340,37 @@ type OptionRowProps = {
   cta: string;
   logo: ImageSourcePropType;
   isExternal?: boolean;
-  onClick: () => void;
+  loadingId?: string;
+  progress?: Progress;
+  sortId?: number;
+  onClick: () => void | Promise<void>;
 };
 
-function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
+function OptionRow({
+  title,
+  cta,
+  logo,
+  isExternal,
+  loadingId,
+  onClick,
+  progress,
+}: OptionRowProps) {
   const width = useWindowDimensions().width;
+
+  const rightContent = (() => {
+    if (progress && progress === loadingId)
+      return <ActivityIndicator size="small" />;
+    if (isExternal) {
+      return (
+        <TextBody color={color.primary}>
+          Go{"  "}
+          <Octicons name="link-external" />
+        </TextBody>
+      );
+    } else {
+      return <TextBody color={color.primary}>Continue</TextBody>;
+    }
+  })();
 
   return (
     <TouchableHighlight
@@ -299,16 +387,7 @@ function OptionRow({ title, cta, logo, isExternal, onClick }: OptionRowProps) {
             <TextMeta color={color.gray3}>{title}</TextMeta>
           </View>
         </View>
-        <View style={styles.optionRowRight}>
-          {isExternal ? (
-            <TextBody color={color.primary}>
-              Go{"  "}
-              <Octicons name="link-external" />
-            </TextBody>
-          ) : (
-            <TextBody color={color.primary}>Continue</TextBody>
-          )}
-        </View>
+        <View style={styles.optionRowRight}>{rightContent}</View>
       </View>
     </TouchableHighlight>
   );

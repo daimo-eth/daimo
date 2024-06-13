@@ -19,6 +19,7 @@ export enum AddrLabel {
   Relay = "relay.link",
   LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
+  Binance = "binance",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */
@@ -89,6 +90,7 @@ export const zRecommendedExchange = z.object({
   cta: z.string(),
   logo: z.string().optional(),
   url: z.string(),
+  sortId: z.number().optional(),
 });
 
 export type RecommendedExchange = z.infer<typeof zRecommendedExchange>;
@@ -146,3 +148,5 @@ type SwapNoRoute = SwapQuery & {
 };
 
 export type SwapQueryResult = SwapNoRoute | ProposedSwap;
+
+export type PlatformType = "ios" | "android" | "other";

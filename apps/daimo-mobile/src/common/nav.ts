@@ -276,6 +276,10 @@ async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
       nav.navigate("HomeTab", { screen: "Profile", params: { link } });
       break;
     }
+    case "deposit": {
+      nav.navigate("DepositTab", { screen: "Deposit" });
+      break;
+    }
     default:
       throw new Error(`Unhandled link type ${type}`);
   }

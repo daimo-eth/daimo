@@ -53,6 +53,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
+import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -84,7 +85,8 @@ export function createRouter(
   inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
-  telemetry: Telemetry
+  telemetry: Telemetry,
+  binanceClient: BinanceClient
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
@@ -597,6 +599,28 @@ export function createRouter(
         const link: DaimoLinkInviteCode = { type: "invite", code: inviteCode };
         const status = await inviteCodeTracker.getInviteCodeStatus(link);
         return status.isValid;
+      }),
+
+    getExchangeURL: publicProcedure
+      .input(
+        z.object({
+          addr: zAddress,
+          platform: z.enum(["ios", "android", "other"]),
+          exchange: z.enum(["binance"]),
+          direction: z.enum(["depositFromExchange", "withdrawToExchange"]),
+        })
+      )
+      .query(async (opts) => {
+        const { addr, platform, exchange, direction } = opts.input;
+        const acc = nameReg.getDaimoAccount(addr);
+        if (!acc) throw new TRPCError({ code: "NOT_FOUND" });
+
+        switch (`${exchange}-${direction}`) {
+          case "binance-depositFromExchange":
+            return await binanceClient.createWithdrawalURL(addr, platform);
+          default:
+            throw new TRPCError({ code: "NOT_FOUND" });
+        }
       }),
 
     submitWaitlist: publicProcedure

@@ -1,4 +1,4 @@
-import { getEnvVars } from "@daimo/common";
+import { getEnvVars, zHex } from "@daimo/common";
 import { getChainConfig } from "@daimo/contract";
 import dotenv from "dotenv";
 import z, { ZodObject } from "zod";
@@ -55,6 +55,8 @@ const zEnv = {
     .string()
     .optional()
     .transform((s) => (s ? s.split(",") : [])),
+  // Binance Pay API integration secrets
+  BINANCE_API_PRIVATE_KEY: zHex.optional(),
 };
 
 let envVarsApi: z.infer<ZodObject<typeof zEnv>> | undefined;
