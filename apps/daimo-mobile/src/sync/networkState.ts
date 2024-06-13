@@ -21,10 +21,6 @@ export function useNetworkState() {
   return state;
 }
 
-export function getNetworkState() {
-  return currentState;
-}
-
 // Marks us as being back online
 export function updateNetworkStateOnline() {
   updateNetworkState((state) => ({ status: "online", syncAttemptsFailed: 0 }));

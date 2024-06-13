@@ -7,7 +7,6 @@ import {
   createTRPCClient,
   createWSClient,
   httpBatchLink,
-  httpLink,
   splitLink,
   wsLink,
 } from "@trpc/client";
@@ -16,12 +15,11 @@ import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
+import { getEnvMobile } from "../env";
 import {
   updateNetworkState,
   updateNetworkStateOnline,
 } from "../sync/networkState";
-import { retryBackoff } from "@daimo/api/src/utils/retryBackoff";
-import { getEnvMobile } from "../env";
 
 const apiUrlT =
   getEnvMobile().DAIMO_APP_API_URL_TESTNET || getEnvMobile().DAIMO_APP_API_URL;

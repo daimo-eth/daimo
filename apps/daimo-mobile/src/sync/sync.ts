@@ -7,16 +7,11 @@ import {
   amountToDollars,
   assert,
   assertNotNull,
-  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
-import {
-  getNetworkState,
-  updateNetworkState,
-  updateNetworkStateOnline,
-} from "./networkState";
+import { updateNetworkState, updateNetworkStateOnline } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { getRpcFunc } from "../logic/trpc";
@@ -52,7 +47,7 @@ class SyncManager {
         sinceBlockNum: 0,
       },
       {
-        onStarted: (...args) => {
+        onStarted: () => {
           updateNetworkStateOnline();
         },
 
@@ -114,24 +109,6 @@ export function startSync() {
   return manager;
 }
 
-let lastSyncS = 0;
-let lastPushNotificationS = 0;
-
-export function syncAfterPushNotification() {
-  lastPushNotificationS = now();
-}
-
-function hasPendingOps(account: Account) {
-  return (
-    account.recentTransfers.find((t) => t.status === "pending") != null ||
-    account.pendingKeyRotation.length > 0
-  );
-}
-
-function hasCacheExpiredSwaps(account: Account) {
-  return account.proposedSwaps.some((s) => s.cacheUntil < now());
-}
-
 /** Gets latest balance & history for this account, in the background. */
 export async function resync(reason: string, fromScratch?: boolean) {
   const manager = getAccountManager();
@@ -139,7 +116,6 @@ export async function resync(reason: string, fromScratch?: boolean) {
   assert(!!accOld, `no account, skipping sync: ${reason}`);
 
   console.log(`[RESYNC] New ${accOld.name}, ${reason}`);
-  lastSyncS = now();
 
   try {
     const res = await fetchSync(accOld, fromScratch);
