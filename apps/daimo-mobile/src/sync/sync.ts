@@ -23,7 +23,6 @@ import { getRpcFunc } from "../logic/trpc";
 import { Account } from "../model/account";
 
 class SyncManager {
-  retryInterval = 1_000;
   manager = getAccountManager();
   currentAccount: Account | null = null;
   // for tracking retry timeout
