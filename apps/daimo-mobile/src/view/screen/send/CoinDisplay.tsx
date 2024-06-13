@@ -101,7 +101,7 @@ export function CoinPellet({
   onClick: () => void;
 }) {
   return (
-    <View style={{ ...styles.coinButton, backgroundColor: color.grayLight }}>
+    <View style={{ ...styles.coinButton }}>
       <Pressable onPress={onClick}>
         <View style={styles.coinPickerWrap}>
           <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>

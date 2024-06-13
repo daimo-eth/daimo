@@ -1,5 +1,7 @@
 import { ForeignCoin, ProposedSwap, amountToDollars } from "@daimo/common";
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+
+import { TextLight } from "../../shared/text";
 
 export function RoutePellet({
   route,
@@ -10,26 +12,13 @@ export function RoutePellet({
   fromCoin: ForeignCoin;
   toCoin: ForeignCoin;
 }) {
-  const fromAmount = amountToDollars(
-    BigInt(route.fromAmount),
-    fromCoin.decimals
-  );
   const toAmount = amountToDollars(route.toAmount, toCoin.decimals);
 
   return (
     <View style={styles.route}>
-      <Text>
-        You send {fromAmount} {fromCoin.symbol}. They receive {toAmount}{" "}
-        {toCoin.symbol}.
-      </Text>
-    </View>
-  );
-}
-
-export function RouteLoading() {
-  return (
-    <View style={styles.route}>
-      <Text>Computing route...</Text>
+      <TextLight style={{ fontSize: 14 }}>
+        They will receive {toAmount} {toCoin.symbol}
+      </TextLight>
     </View>
   );
 }
@@ -37,8 +26,9 @@ export function RouteLoading() {
 const styles = StyleSheet.create({
   route: {
     display: "flex",
-    padding: 8,
-    backgroundColor: "#eee",
+    padding: 12,
     borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

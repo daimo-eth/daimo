@@ -1,6 +1,6 @@
 import {
+  BigIntStr,
   EAccount,
-  ForeignCoin,
   amountToDollars,
   assertNotNull,
   dollarsToAmount,
@@ -212,7 +212,8 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
   const strN = kwargs.get("fromAmount");
   const strFromToken = kwargs.get("fromToken");
   const strToToken = kwargs.get("toToken");
-  if (!strN || !strFromToken || !strToToken)
+  const strDaimoChainId = kwargs.get("daimoChainId");
+  if (!strN || !strFromToken || !strToToken || !strDaimoChainId)
     return "Must specify fromAmount, fromToken and toToken";
 
   const { tokens } = await getTokenList();
@@ -228,21 +229,32 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
 
   const amountIn = dollarsToAmount(Number(strN), fromToken.decimals);
 
-  const result = await rpc.getSwapQuote.query({
-    amountIn,
-    fromToken: fromToken.address as Address,
-    toToken: toToken.address as Address,
+  const route = await rpc.getSwapQuote.query({
+    amountIn: `${amountIn}` as BigIntStr,
+    fromToken: fromToken.address,
+    toToken: toToken.address,
+    fromAccount: {
+      addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+    },
+    toAddr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+    chainId: Number(strDaimoChainId),
   });
-  const { amountOut, swapPath } = result.data as {
-    amountOut: bigint;
-    swapPath: string[]; // TODO: unsure if this is correct atype
-  };
+
+  if (!route) {
+    return [
+      `No route found from ${fromToken.symbol} (${fromToken.address})`,
+      `to ${toToken.symbol} (${toToken.address})`,
+    ].join("\n");
+  }
+  const fromStr = `${amountIn} ${fromToken.symbol}`; // eg 1.23 DAI
   return [
     `From ${fromToken.symbol} (${fromToken.address})`,
     `To ${toToken.symbol} (${toToken.address})`,
-    `Fetched onchain quote for ${amountIn} ${fromToken.symbol} to ${
-      toToken.symbol
-    }: ${JSON.stringify({ amountOut, swapPath }, null, 2)}`,
+    `Fetched route for ${fromStr} to ${toToken.symbol}: ${JSON.stringify(
+      route,
+      null,
+      2
+    )}`,
   ].join("\n");
 }
 

@@ -1,4 +1,5 @@
-import { Address, formatUnits } from "viem";
+import { WETH9 } from "@uniswap/sdk-core";
+import { Address, formatUnits, getAddress } from "viem";
 
 import { amountToDollars } from "./coin";
 
@@ -56,6 +57,7 @@ export const supportedSendCoins = new Map<string, ForeignCoin>([
   [daimoUSDC.token, daimoUSDC],
   [DAI.token, DAI],
   [USDT.token, USDT],
+  ["0x4200000000000000000000000000000000000006", nativeETH], // WETH
 ]);
 export const allHomeCoins = new Map<string, ForeignCoin>([
   [daimoUSDC.token.toLowerCase(), daimoUSDC],
@@ -109,4 +111,9 @@ export function getSupportedSendCoinByAddress(
   address: string
 ): ForeignCoin | undefined {
   return supportedSendCoins.get(address);
+}
+
+// Get WETH token addressby chainId.
+export function getWETHAddressByChainId(chainId: number): Address {
+  return getAddress(WETH9[chainId].address, chainId);
 }

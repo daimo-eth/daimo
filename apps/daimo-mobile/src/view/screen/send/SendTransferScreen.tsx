@@ -8,6 +8,7 @@ import {
   dollarsToAmount,
   getAccountName,
   getHomeCoinByAddress,
+  getWETHAddressByChainId,
   now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
@@ -24,7 +25,7 @@ import {
 import { CoinPellet, SendCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
-import { RouteLoading, RoutePellet } from "./RouteDisplay";
+import { RoutePellet } from "./RouteDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   ParamListSend,
@@ -286,14 +287,19 @@ function SendConfirm({
   const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
-  const route = getSwapRoute({
+  const toToken =
+    coin.token === "ETH"
+      ? getWETHAddressByChainId(account.homeChainId)
+      : coin.token;
+  const swapRoute = getSwapRoute({
     fromToken: homeCoin,
-    toToken: coin,
+    toToken,
     amountIn: numTokens,
     fromAccount: account,
     toAddress: recipient.addr,
     daimoChainId: account!.homeChainId,
   });
+  const route = homeCoin !== coin ? swapRoute : null;
 
   let button: ReactNode;
   if (isRequest) {
@@ -376,14 +382,10 @@ function SendConfirm({
           <Spacer h={40} />
         )}
         <CoinPellet coin={coin} onClick={navToInput} />
-        {route ? (
-          <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />
-        ) : (
-          <RouteLoading />
-        )}
       </View>
+      {route && <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />}
       <Spacer h={16} />
-      {route && button}
+      {button}
       {isRequest && (
         <>
           <Spacer h={16} />
