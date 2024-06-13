@@ -3,10 +3,11 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
+import "account-abstraction/core/EntryPoint.sol";
+
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
-
-import "account-abstraction/core/EntryPoint.sol";
+import "../src/DaimoTestUSDC.sol";
 
 contract AccountSigningKeysTest is Test {
     using UserOperationLib for UserOperation;
@@ -44,8 +45,17 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key1 = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
-        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
+        // Create a new Daimo account
+        TestUSDC usdc = new TestUSDC();
+        DaimoAccountV2 acc = factory.createAccount(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key1,
+            42 // salt
+        );
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
@@ -95,8 +105,18 @@ contract AccountSigningKeysTest is Test {
         bytes32[2] memory key1 = [bytes32(key1u[0]), bytes32(key1u[1])];
         bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
 
-        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key1, calls, 42);
+        // Create a new Daimo account
+        TestUSDC usdc = new TestUSDC();
+        DaimoAccountV2 acc = factory.createAccount(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key1,
+            42 // salt
+        );
+        console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
         // ensure initial key retrieves correctly

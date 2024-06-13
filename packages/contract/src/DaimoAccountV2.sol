@@ -85,7 +85,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         uint128 amountIn,
         IERC20 tokenIn,
         uint128 amountOut,
-        IERC20 outputUSDC
+        IERC20 tokenOut
     );
 
     /// Emitted on bridger actions.
@@ -310,10 +310,12 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     function swap(
         uint128 amountIn,
         IERC20 tokenIn,
-        bytes calldata swapPath,
-        uint128 altruisticAmountOut,
-        address altruisticSender
+        bytes calldata extraData
     ) public {
+        // bytes calldata swapPath,
+        // uint128 altruisticAmountOut,
+        // address altruisticSender
+
         require(tokenIn != homeCoin, "cannot swap home coin");
 
         TransferHelper.safeApprove(
@@ -321,15 +323,15 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
             address(swapper),
             amountIn
         );
-        uint128 totalAmountOut = swapper.executeSwap(
+        (uint128 totalAmountOut, IERC20 tokenOut) = swapper.swapToBridgableCoin(
             amountIn,
             tokenIn,
-            swapPath,
-            altruisticAmountOut,
-            altruisticSender
+            extraData
         );
 
-        emit ForeignCoinSwap(amountIn, tokenIn, totalAmountOut, outputUSDC);
+        require(tokenOut == homeCoin, "must swap to home coin");
+
+        emit ForeignCoinSwap(amountIn, tokenIn, totalAmountOut, homeCoin);
     }
 
     /// Bridge

@@ -3,11 +3,12 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
+import "account-abstraction/core/EntryPoint.sol";
+
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
+import "../src/DaimoTestUSDC.sol";
 import "./Utils.sol";
-
-import "account-abstraction/core/EntryPoint.sol";
 
 contract AccountVerify1271Test is Test {
     using UserOperationLib for UserOperation;
@@ -26,7 +27,19 @@ contract AccountVerify1271Test is Test {
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
         ];
         bytes32[2] memory key = [bytes32(pubKey[0]), bytes32(pubKey[1])];
-        account = factory.createAccount(0, key, new DaimoAccount.Call[](0), 0);
+
+        // Create a new Daimo account
+        TestUSDC usdc = new TestUSDC();
+        DaimoAccountV2 acc = factory.createAccount(
+            84532, // home chain = Base Sepolia
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key,
+            0 // salt
+        );
+        console.log("new account address:", address(acc));
 
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));

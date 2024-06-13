@@ -74,7 +74,7 @@ contract AccountSendUseropTest is Test {
                 )
         );
 
-        DaimoAccount acc = factory.createAccount(0, key, 42);
+        DaimoAccountV2 acc = factory.createAccount(0, key, 42);
         console.log("new account address:", address(acc));
         vm.deal(address(acc), 1 ether);
 
@@ -123,7 +123,10 @@ contract AccountSendUseropTest is Test {
 
         // code coverage can't handle indirect calls
         // call validateUserOp directly
-        DaimoAccount a2 = new DaimoAccount(acc.entryPoint(), acc.verifier());
+        DaimoAccountV2 a2 = new DaimoAccountV2(
+            acc.entryPoint(),
+            acc.verifier()
+        );
         vm.store(address(a2), 0, 0); // set _initialized = 0
         a2.initialize(0, key, calls);
         vm.prank(address(entryPoint));
@@ -162,8 +165,8 @@ contract AccountSendUseropTest is Test {
                 )
         );
 
-        DaimoAccount.Call[] memory calls = new DaimoAccount.Call[](0);
-        DaimoAccount acc = factory.createAccount(0, key, calls, 42);
+        DaimoAccountV2.Call[] memory calls = new DaimoAccountV2.Call[](0);
+        DaimoAccountV2 acc = factory.createAccount(0, key, calls, 42);
         vm.deal(address(acc), 1 ether);
 
         // valid (but reverting) dummy userop
