@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/DaimoAccountFactory.sol";
+import "../src/DaimoUSDCSwapper.sol";
 
 import {CREATE3Factory} from "create3-factory/src/CREATE3Factory.sol";
 
 contract DeployDaimoUSDCSwapper is Script {
-    CREATE3Factory create3 =
+    CREATE3Factory _create3 =
         CREATE3Factory(0x9fBB3DF7C40Da2e5A0dE984fFE2CCB7C47cd0ABf);
 
     function runBase() public {
@@ -36,7 +36,7 @@ contract DeployDaimoUSDCSwapper is Script {
         vm.startBroadcast();
 
         DaimoUSDCSwapper swapper = DaimoUSDCSwapper(
-            create3.deploy(
+            _create3.deploy(
                 keccak256("DaimoUSDCSwapper-testing"),
                 bytes.concat(
                     type(DaimoUSDCSwapper).creationCode,
