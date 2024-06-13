@@ -125,32 +125,13 @@ function getTRPCOpts(
     testnet: apiUrlTestnetWithChain,
   });
 
-  let daimoLink = splitLink({
-    condition(op) {
-      return op.type === "subscription";
-    },
-
-    true: wsLink({
-      client: createWSClient({
-        url,
-        retryDelayMs: () => 1_000,
-        onClose: () => {
-          console.warn("[TRPC] WebSocket closed");
-
-          updateNetworkState(() => {
-            return {
-              status: "offline",
-              syncAttemptsFailed: 0,
-            };
-          });
-        },
-      }),
+  let daimoLink = httpBatchLink({
+    url: chooseChain({
+      daimoChain,
+      mainnet: apiUrlMainnetWithChain,
+      testnet: apiUrlTestnetWithChain,
     }),
-
-    false: httpBatchLink({
-      url,
-      fetch: customTRPCfetch,
-    }),
+    fetch: customTRPCfetch,
   });
 
   // TRPC client tries to connect to WebSocket on creation which breaks
@@ -158,17 +139,36 @@ function getTRPCOpts(
   // or mocked altogether.
   // Since TRPC client is currently tangled together with top-level code,
   // we avoid using WebSocket link when running in no-browser environment (like tests.)
-  if (typeof WebSocket === "undefined") {
-    console.error("WebSocket not available, skipping websocket link");
+  if (typeof WebSocket !== "undefined") {
+    daimoLink = splitLink({
+      condition(op) {
+        return op.type === "subscription";
+      },
 
-    daimoLink = httpBatchLink({
-      url: chooseChain({
-        daimoChain,
-        mainnet: apiUrlMainnetWithChain,
-        testnet: apiUrlTestnetWithChain,
+      true: wsLink({
+        client: createWSClient({
+          url,
+          retryDelayMs: () => 1_000,
+          onClose: () => {
+            console.warn("[TRPC] WebSocket closed");
+
+            updateNetworkState(() => {
+              return {
+                status: "offline",
+                syncAttemptsFailed: 0,
+              };
+            });
+          },
+        }),
       }),
-      fetch: customTRPCfetch,
+
+      false: httpBatchLink({
+        url,
+        fetch: customTRPCfetch,
+      }),
     });
+  } else {
+    console.error("WebSocket not available, skipping websocket link");
   }
 
   return {
