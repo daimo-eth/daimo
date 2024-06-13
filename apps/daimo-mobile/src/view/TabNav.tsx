@@ -1,5 +1,4 @@
 import { assertEqual, assertUnreachable } from "@daimo/common";
-import * as SplashScreen from "expo-splash-screen";
 import Octicons from "@expo/vector-icons/Octicons";
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet";
 import {
@@ -17,6 +16,7 @@ import {
   TransitionPresets,
   createStackNavigator,
 } from "@react-navigation/stack";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
