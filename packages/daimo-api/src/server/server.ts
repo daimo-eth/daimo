@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { createHTTPHandler } from "@trpc/server/adapters/standalone";
+import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import http from "http";
 import { Server as WebSocketServer } from "ws";
 
@@ -28,9 +30,6 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
-
-import { applyWSSHandler } from "@trpc/server/adapters/ws";
-import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 
 // Workaround viem bug
 (Error.prototype as any).walk = function () {

@@ -43,7 +43,7 @@ class SyncManager {
 
   subscribe(account: Account) {
     const daimoChain = daimoChainFromId(account.homeChainId);
-    const rpcFunc = env(daimoChain).rpcFunc;
+    const rpcFunc = getRpcFunc(daimoChain);
 
     this.currentAccount = account;
 

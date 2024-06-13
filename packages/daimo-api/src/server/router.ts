@@ -55,7 +55,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { chainConfig } from "../env";
+import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BundlerClient } from "../network/bundlerClient";
@@ -64,7 +64,6 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
-import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
