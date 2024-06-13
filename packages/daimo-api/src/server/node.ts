@@ -5,7 +5,7 @@ import v8 from "node:v8";
 //   mem: { heapMB: 123, maxMB: 1024 },
 //   cpu: { load1m: 0.5, load5m: 0.1, load15m: 0.05 }
 // }
-export async function getNodeMetrics() {
+export function getNodeMetrics() {
   const memoryData = v8.getHeapStatistics();
   const loadAvg = os.loadavg();
   return {

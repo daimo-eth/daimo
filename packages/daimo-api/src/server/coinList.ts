@@ -2,6 +2,7 @@ import { ForeignCoin, USDbC, assert } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
+import { fetchWithBackoff } from "../network/fetchWithBackoff";
 
 type TokenList = {
   tokens: {
@@ -22,7 +23,7 @@ const customOverrides = [USDbC] as ForeignToken[];
 
 export async function fetchTokenList(): Promise<Map<Address, ForeignToken>> {
   const tokenList = (await (
-    await fetch("https://tokens.coingecko.com/base/all.json")
+    await fetchWithBackoff("https://tokens.coingecko.com/base/all.json")
   ).json()) as TokenList;
 
   const ret: Map<Address, ForeignToken> = new Map();
