@@ -91,13 +91,13 @@ export function createRouter(
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
     // Request ID for logs + honeycomb
-    const reqId = Math.floor(Math.random() * 36 ** 6).toString(36);
+    const reqId = "req:" + Math.floor(Math.random() * 36 ** 6).toString(36);
     const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
     opts.ctx.span = span;
     span.setAttribute("req_id", reqId);
 
     // Process request
-    const result = await runWithLogContext("req" + reqId, () => opts.next());
+    const result = await runWithLogContext(reqId, () => opts.next());
 
     // Log request
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
@@ -163,24 +163,25 @@ export function createRouter(
       // See readyMiddleware for not-ready check.
       // If we're here, API is ready. Check whether it's healthy:
       const nowS = now();
-      const node = await getNodeMetrics();
+      const uptimeS = nowS - startTimeS;
+      const node = getNodeMetrics();
+      const apiDB = db.getStatus();
       const indexer = watcher.getStatus();
+
       let status = "healthy";
       if (indexer.lastGoodTickS < nowS - 10) {
-        status = "unhealthy-watcher-not-ticking";
+        status = "watcher-not-ticking";
       } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
-        status = "unhealthy-watcher-behind-rpc";
+        status = "watcher-behind-rpc";
       } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
-        status = "unhealthy-node-mem-full";
+        status = "node-mem-full";
+      } else if (apiDB.waitingCount > 10) {
+        status = "api-db-overloaded";
+      } else if (indexer.shovelDB.waitingCount > 10) {
+        status = "shovel-db-overloaded";
       }
-      return {
-        status,
-        nowS,
-        uptimeS: nowS - startTimeS,
-        node: await getNodeMetrics(),
-        apiDB: db.getStatus(),
-        indexer,
-      };
+
+      return { status, nowS, uptimeS, node, apiDB, indexer };
     }),
 
     search: publicProcedure
