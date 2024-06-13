@@ -2,6 +2,7 @@ import {
   DaimoLinkInviteCode,
   DaimoLinkRequestV2,
   amountToDollars,
+  assertNotNull,
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
@@ -19,6 +20,7 @@ import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
+import { AntiSpam } from "./antiSpam";
 import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
@@ -58,6 +60,7 @@ import { DB } from "../db/db";
 import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
+import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -89,19 +92,21 @@ export function createRouter(
   inviteGraph: InviteGraph,
   notifier: PushNotifier,
   accountFactory: AccountFactory,
-  telemetry: Telemetry
+  telemetry: Telemetry,
+  binanceClient: BinanceClient
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
+    // Request ID for logs + honeycomb
+    const reqId = "req:" + Math.floor(Math.random() * 36 ** 6).toString(36);
     const span = telemetry.startApiSpan(opts.ctx, opts.type, opts.path);
     opts.ctx.span = span;
-
-    // Logging request ID
-    const reqId = Math.floor(Math.random() * 36 ** 6).toString(36);
     span.setAttribute("req_id", reqId);
 
-    const result = await runWithLogContext("req" + reqId, () => opts.next());
+    // Process request
+    const result = await runWithLogContext(reqId, () => opts.next());
 
+    // Log request
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
     console.log(
       `[${reqId}] [API] ${opts.type} ${opts.path} ${result.ok ? "ok" : "ERR"}`
@@ -111,6 +116,7 @@ export function createRouter(
     return result;
   });
 
+  // CORS for the web app
   const corsMiddleware = trpcT.middleware(async (opts) => {
     // cannot set headers when connecting via websockets
     if (opts.ctx.res.setHeader) {
@@ -120,9 +126,9 @@ export function createRouter(
     return opts.next();
   });
 
+  // Don't serve requests until we're ready.
+  // This avoids confusing UI state in local development.
   const readyMiddleware = trpcT.middleware(async (opts) => {
-    console.log(opts);
-
     // Don't serve requests until we're ready.
     // This avoids confusing UI state in local development.
     if (!notifier.isInitialized) {
@@ -131,7 +137,24 @@ export function createRouter(
         message: "API not ready",
       });
     }
+    return opts.next();
+  });
 
+  // API spam protection
+  const ipMap = new Map<string, { tsS: number; allowed: boolean }>();
+  const antiSpamMiddleware = trpcT.middleware(async (opts) => {
+    const { requestInfo } = opts.ctx;
+    const ip = assertNotNull(requestInfo["rpc.ip_addr"] as string);
+    let ipResult = ipMap.get(ip);
+    if (ipResult == null || ipResult.tsS < now() - 60) {
+      const allowed = await AntiSpam.shouldServeAPI(requestInfo);
+      ipResult = { tsS: now(), allowed };
+      ipMap.set(ip, ipResult);
+    }
+
+    if (!ipResult.allowed) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Blocked" });
+    }
     return opts.next();
   });
 
@@ -143,7 +166,8 @@ export function createRouter(
     .use(sentryMiddleware)
     .use(corsMiddleware)
     .use(tracerMiddleware)
-    .use(readyMiddleware);
+    .use(readyMiddleware)
+    .use(antiSpamMiddleware);
 
   const startTimeS = now();
 
@@ -152,24 +176,25 @@ export function createRouter(
       // See readyMiddleware for not-ready check.
       // If we're here, API is ready. Check whether it's healthy:
       const nowS = now();
-      const node = await getNodeMetrics();
+      const uptimeS = nowS - startTimeS;
+      const node = getNodeMetrics();
+      const apiDB = db.getStatus();
       const indexer = watcher.getStatus();
+
       let status = "healthy";
       if (indexer.lastGoodTickS < nowS - 10) {
-        status = "unhealthy-watcher-not-ticking";
+        status = "watcher-not-ticking";
       } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
-        status = "unhealthy-watcher-behind-rpc";
+        status = "watcher-behind-rpc";
       } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
-        status = "unhealthy-node-mem-full";
+        status = "node-mem-full";
+      } else if (apiDB.waitingCount > 10) {
+        status = "api-db-overloaded";
+      } else if (indexer.shovelDB.waitingCount > 10) {
+        status = "shovel-db-overloaded";
       }
-      return {
-        status,
-        nowS,
-        uptimeS: nowS - startTimeS,
-        node: await getNodeMetrics(),
-        apiDB: db.getStatus(),
-        indexer,
-      };
+
+      return { status, nowS, uptimeS, node, apiDB, indexer };
     }),
 
     search: publicProcedure
@@ -692,6 +717,28 @@ export function createRouter(
             clearInterval(intervalTimer);
           };
         });
+      }),
+
+    getExchangeURL: publicProcedure
+      .input(
+        z.object({
+          addr: zAddress,
+          platform: z.enum(["ios", "android", "other"]),
+          exchange: z.enum(["binance"]),
+          direction: z.enum(["depositFromExchange", "withdrawToExchange"]),
+        })
+      )
+      .query(async (opts) => {
+        const { addr, platform, exchange, direction } = opts.input;
+        const acc = nameReg.getDaimoAccount(addr);
+        if (!acc) throw new TRPCError({ code: "NOT_FOUND" });
+
+        switch (`${exchange}-${direction}`) {
+          case "binance-depositFromExchange":
+            return await binanceClient.createWithdrawalURL(addr, platform);
+          default:
+            throw new TRPCError({ code: "NOT_FOUND" });
+        }
       }),
 
     submitWaitlist: publicProcedure

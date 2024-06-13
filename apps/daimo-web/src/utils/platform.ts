@@ -1,8 +1,6 @@
-import { appStoreLinks } from "@daimo/common";
+import { appStoreLinks, PlatformType } from "@daimo/common";
 
 import { getAbsoluteUrl } from "./getAbsoluteUrl";
-
-export type PlatformType = "ios" | "android" | "other";
 
 export function detectPlatform(ua: string): PlatformType {
   // From https://dev.to/konyu/using-javascript-to-determine-whether-the-client-is-ios-or-android-4i1j

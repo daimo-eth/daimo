@@ -1,5 +1,7 @@
 import { assertEqual } from "@daimo/common";
 
+import { fetchWithBackoff } from "../network/fetchWithBackoff";
+
 let appVersionTracker = null as AppVersionTracker | null;
 
 export function getAppVersionTracker() {
@@ -37,7 +39,7 @@ export class AppVersionTracker {
 
   async getLatestVersionIOS() {
     const url = "https://itunes.apple.com/lookup?bundleId=com.daimo";
-    const response = await fetch(url);
+    const response = await fetchWithBackoff(url);
     const json = await response.json();
     assertEqual(json.resultCount, 1, "Unexpected result count");
 
