@@ -158,7 +158,9 @@ export function TabNav() {
 
   // Remove splash screen
   useEffect(() => {
-    SplashScreen.hideAsync();
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 32); // just wait for ~2 ticks for states to update
   }, []);
 
   // No account? Create an account + enclave key.
