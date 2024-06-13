@@ -9,7 +9,6 @@ import {
   assertNotNull,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import * as SplashScreen from "expo-splash-screen";
 
 import { updateNetworkState, updateNetworkStateOnline } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
@@ -95,12 +94,6 @@ class SyncManager {
 
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
-
-  // create small delay to let interface render becuase this callback
-  // run right after getting data so the interface still got to adapt
-  setTimeout(() => {
-    SplashScreen.hideAsync();
-  }, 300);
 
   const manager = new SyncManager();
 

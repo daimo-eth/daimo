@@ -1,4 +1,5 @@
 import { assertEqual, assertUnreachable } from "@daimo/common";
+import * as SplashScreen from "expo-splash-screen";
 import Octicons from "@expo/vector-icons/Octicons";
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet";
 import {
@@ -68,6 +69,8 @@ import {
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
+
+SplashScreen.preventAutoHideAsync();
 
 const { add, multiply } = Animated;
 
@@ -153,6 +156,11 @@ function MainTabNavigator() {
 export function TabNav() {
   const { account, keyInfo } = useAccountAndKeyInfo();
 
+  // Remove splash screen
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
   // No account? Create an account + enclave key.
   if (account == null || !account.isOnboarded) {
     return <OnboardingNavigator />;
@@ -169,7 +177,6 @@ export function TabNav() {
       return <MissingKeyScreen />;
     }
   }
-
   // Logged-in app.
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">
