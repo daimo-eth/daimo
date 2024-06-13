@@ -6,6 +6,7 @@
       "name": "$CHAIN_NAME",
       "chain_id": "$CHAIN_ID",
       "url": "$CHAIN_RPC_URL",
+      "ws_url": "$CHAIN_RPC_WS_URL",
       "batch_size": 100,
       "concurrency": 4
     }
@@ -1210,3 +1211,4 @@
     }
   ]
 }
+
