@@ -139,6 +139,9 @@ export function createRouter(
       const allowed = await AntiSpam.shouldServeAPI(requestInfo);
       ipResult = { tsS: now(), allowed };
       ipMap.set(ip, ipResult);
+      if (!ipResult.allowed) {
+        console.log(`[API] request blocked: ${JSON.stringify(requestInfo)}`);
+      }
     }
 
     if (!ipResult.allowed) {
@@ -298,6 +301,7 @@ export function createRouter(
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
         return addr ? await nameReg.getEAccount(addr) : null;
       }),
+
     lookupEthereumAccountByFid: publicProcedure
       .input(z.object({ fid: z.number() }))
       .query(async (opts) => {
@@ -431,7 +435,7 @@ export function createRouter(
         return getMemo(txHash, logIndex, opIndexer, paymentMemoTracker);
       }),
 
-    // DEPRECATED
+    // @deprecated, remove by 2024 Q4
     sendUserOp: publicProcedure
       .input(z.object({ op: zUserOpHex }))
       .mutation(async (opts) => {
@@ -507,6 +511,7 @@ export function createRouter(
         );
       }),
 
+    // @deprecated, remove by 2024 Q4
     createRequestSponsored: publicProcedure
       .input(
         z.object({
@@ -518,12 +523,36 @@ export function createRouter(
         })
       )
       .mutation(async (opts) => {
-        return createRequestSponsored(
+        const { txHash } = await createRequestSponsored(
           vc,
           reqIndexer,
           paymentMemoTracker,
+          nameReg,
           opts.input
         );
+        return txHash;
+      }),
+
+    createRequestSponsoredV2: publicProcedure
+      .input(
+        z.object({
+          idString: z.string(),
+          recipient: zAddress,
+          amount: zBigIntStr,
+          fulfiller: zAddress.optional(),
+          memo: z.string().optional(),
+        })
+      )
+      .mutation(async (opts) => {
+        const { txHash, status } = await createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          nameReg,
+          opts.input
+        );
+        notifier.sendPushNotificationForRequestCreated(status);
+        return { txHash, status };
       }),
 
     updateProfileLinks: publicProcedure
@@ -539,6 +568,7 @@ export function createRouter(
         return profileCache.updateProfileLinks(addr, actionJSON, signature);
       }),
 
+    // @deprecated, remove by 2024 Q4
     getTagRedirect: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -546,6 +576,7 @@ export function createRouter(
         return getTagRedirect(tag, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     updateTagRedirect: publicProcedure
       .input(
         z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
@@ -555,6 +586,7 @@ export function createRouter(
         return setTagRedirect(tag, link, updateToken, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -562,6 +594,7 @@ export function createRouter(
         return getTagRedirectHist(tag, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     updateTagToNewRequest: publicProcedure
       .input(
         z.object({
@@ -578,11 +611,14 @@ export function createRouter(
         await verifyTagUpdateToken(tag, updateToken, db);
 
         const idString = encodeRequestId(generateRequestId());
-        await createRequestSponsored(vc, reqIndexer, paymentMemoTracker, {
-          idString,
-          recipient,
-          amount,
-        });
+        const reqInput = { idString, recipient, amount };
+        await createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          nameReg,
+          reqInput
+        );
 
         const reqLink: DaimoLinkRequestV2 = {
           type: "requestv2",
@@ -613,7 +649,7 @@ export function createRouter(
         await reqIndexer.declineRequest(requestId, decliner);
       }),
 
-    // DEPRECATED
+    // @deprecated, remove by 2024 Q4
     verifyInviteCode: publicProcedure
       .input(z.object({ inviteCode: z.string() }))
       .query(async (opts) => {
