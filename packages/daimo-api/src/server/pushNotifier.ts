@@ -380,7 +380,8 @@ export class PushNotifier {
         const { fulfiller } = parseRequestMetadata(metadata);
 
         // Notify recipient = the account sending the request
-        const recipientPushTokens = this.pushTokens.get(log.recipient.addr);
+        const recipientAddr = getAddress(log.recipient.addr);
+        const recipientPushTokens = this.pushTokens.get(recipientAddr);
         if (recipientPushTokens) {
           const fromName =
             fulfiller && this.nameReg.resolveDaimoNameForAddr(fulfiller);
@@ -395,7 +396,11 @@ export class PushNotifier {
 
         // Notify fulfiller = the account they're requesting from
         const fulfillerPushTokens = fulfiller && this.pushTokens.get(fulfiller);
+        console.log(
+          `[PUSH] request created, recipient push tokens: ${recipientPushTokens?.length}, fulfiller push tokens: ${fulfillerPushTokens?.length}`
+        );
         if (fulfillerPushTokens) {
+          console.log(`[PUSH] request created, notifying fulfiller`);
           messages.push({
             to: fulfillerPushTokens,
             badge: 1,
