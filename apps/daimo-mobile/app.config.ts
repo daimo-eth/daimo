@@ -30,7 +30,14 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     infoPlist: {
-      LSApplicationQueriesSchemes: ["whatsapp", "sgnl", "tg", "mailto", "sms"],
+      LSApplicationQueriesSchemes: [
+        "whatsapp",
+        "sgnl",
+        "tg",
+        "mailto",
+        "sms",
+        "bnc",
+      ],
       NFCReaderUsageDescription: "Daimo uses NFC for tap-to-pay checkout.",
     },
   },

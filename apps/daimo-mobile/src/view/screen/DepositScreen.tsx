@@ -6,6 +6,7 @@ import { Image } from "expo-image";
 import React, { useCallback, useContext, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ImageSourcePropType,
   Linking,
   Platform,
@@ -151,17 +152,17 @@ function getOnDemandExchanges(
   account: Account,
   setProgress: (progress: Progress) => void
 ) {
-  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+  const daimoChain = daimoChainFromId(account.homeChainId);
+  const rpcFunc = getRpcFunc(daimoChain);
+  const deviceType = env(daimoChain).deviceType;
 
-  const platform = ["ios", "android"].includes(Platform.OS)
-    ? (Platform.OS as PlatformType)
-    : "other";
+  const platform =
+    deviceType === "computer" ? "other" : (Platform.OS as PlatformType);
+  const progressId = "loading-binance-deposit";
 
   if (platform === "other") {
-    return [];
+    return []; // Binance doesn't support macOS.
   }
-
-  const progressId = "loading-binance-deposit";
 
   const onClick = async () => {
     setProgress(progressId);
@@ -176,15 +177,33 @@ function getOnDemandExchanges(
       console.error(`[DEPOSIT] no binance url for ${account.name}`);
       setProgress("idle");
     } else {
-      Linking.openURL(url);
-      setProgress("started");
+      const hasBnc = await Linking.canOpenURL(`bnc://`);
+      console.log(`[DEPOSIT] has bnc: ${hasBnc}`);
+      if (!hasBnc) {
+        Alert.alert(
+          "Binance not installed",
+          "Please install Binance to use this feature",
+          [
+            {
+              text: "Continue",
+              onPress: async () => {
+                await Linking.openURL(url);
+              },
+            },
+            { text: "Cancel" },
+          ]
+        );
+      } else {
+        Linking.openURL(url);
+        setProgress("started");
+      }
     }
   };
 
   return [
     {
       cta: "Deposit from Binance",
-      title: "Send from Binance balance",
+      title: "Send your Binance balance",
       logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
       loadingId: progressId,
       isExternal: true,

@@ -4,6 +4,7 @@ import { base64nopad, base64urlnopad } from "@scure/base";
 import { Address, getAddress } from "viem";
 
 import { chainConfig, getEnvApi } from "../env";
+import { retryBackoff } from "../utils/retryBackoff";
 
 export class BinanceClient {
   private readonly BIPAY_API_ROOT = "https://www.binance.com/bapi/pay";
@@ -82,11 +83,13 @@ export class BinanceClient {
       )}`
     );
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers,
-      body: bodyStr,
-    });
+    const res = await retryBackoff(`binance-api-${path}`, () =>
+      fetch(url, {
+        method: "POST",
+        headers,
+        body: bodyStr,
+      })
+    );
     const resBody = (await res.json()) as { data: T; success: boolean };
     if (res.status !== 200 || !resBody.success) {
       console.error(
