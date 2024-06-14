@@ -379,17 +379,29 @@ export class PushNotifier {
       if (log.recipient.name && log.status === DaimoRequestState.Created) {
         const { fulfiller } = parseRequestMetadata(metadata);
 
-        if (fulfiller) {
-          const pushTokens = this.pushTokens.get(fulfiller);
+        // Notify recipient = the account sending the request
+        const recipientPushTokens = this.pushTokens.get(log.recipient.addr);
+        if (recipientPushTokens) {
+          const fromName =
+            fulfiller && this.nameReg.resolveDaimoNameForAddr(fulfiller);
+          const fromStr = fromName ? ` from ${fromName}` : "";
+          messages.push({
+            to: recipientPushTokens,
+            badge: 1,
+            title: "Request created",
+            body: `Requesting $${dollars} ${tokenSymbol}${fromStr}`,
+          });
+        }
 
-          if (pushTokens) {
-            messages.push({
-              to: pushTokens,
-              badge: 1,
-              title: "Request received",
-              body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
-            });
-          }
+        // Notify fulfiller = the account they're requesting from
+        const fulfillerPushTokens = fulfiller && this.pushTokens.get(fulfiller);
+        if (fulfillerPushTokens) {
+          messages.push({
+            to: fulfillerPushTokens,
+            badge: 1,
+            title: "Request received",
+            body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
+          });
         }
       }
     }

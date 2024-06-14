@@ -1,8 +1,10 @@
 import {
   DaimoLinkRequestV2,
+  DaimoRequestState,
   dollarsToAmount,
   encodeRequestId,
   generateRequestId,
+  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -23,6 +25,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { getAccountManager } from "../../../logic/accountManager";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import {
   ExternalAction,
@@ -30,7 +33,7 @@ import {
   shareURL,
 } from "../../../logic/externalAction";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
-import { Account } from "../../../model/account";
+import { Account, toEAccount } from "../../../model/account";
 import { MoneyEntry, zeroUSDEntry } from "../../../model/moneyEntry";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
@@ -99,6 +102,7 @@ function RequestScreenInner({
     textInputRef.current?.blur();
     setAS("loading", "Requesting...");
 
+    // Create-request transaction
     const { txHash, link } = await createRequestOnChain(
       account,
       money,
@@ -107,6 +111,26 @@ function RequestScreenInner({
     );
     console.log(`[REQUEST] txHash ${txHash}`);
 
+    // Show pending outbound request optimistically, before tx confirms
+    getAccountManager().transform((a) => ({
+      ...a,
+      notificationRequestStatuses: [
+        ...a.notificationRequestStatuses,
+        {
+          link,
+          status: DaimoRequestState.Pending,
+          creator: toEAccount(account),
+          recipient: toEAccount(account),
+          createdAt: now(),
+          updatedAt: now(),
+          metadata: "0x",
+          expectedFulfiller: fulfiller?.type === "eAcc" ? fulfiller : undefined,
+          memo,
+        },
+      ],
+    }));
+
+    // Share action
     if (externalAction) {
       console.log(`[REQUEST] external action ${externalAction.type}`);
       const didShare = await externalAction.exec(link);
