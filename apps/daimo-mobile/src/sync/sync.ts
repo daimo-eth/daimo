@@ -300,6 +300,7 @@ function applySync(
         newTransfers: recentTransfers.length,
         nPending: recentTransfers.filter((t) => t.status === OpStatus.pending)
           .length,
+        nNotifReqStatuses: account.notificationRequestStatuses.length,
       })
   );
   return ret;

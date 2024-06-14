@@ -95,6 +95,14 @@ export function OwnRequestBottomSheet({
           {coinName} • {chainName}
         </TextBodyCaps>
       </TextCenter>
+      {reqStatus.memo && (
+        <>
+          <Spacer h={16} />
+          <TextCenter>
+            <TextBodyCaps color={color.grayMid}>{reqStatus.memo}</TextBodyCaps>
+          </TextCenter>
+        </>
+      )}
       <Spacer h={32} />
       {reqStatus.expectedFulfiller && (
         <AccountRow
