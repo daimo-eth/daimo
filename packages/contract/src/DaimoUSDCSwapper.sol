@@ -5,6 +5,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IDaimoSwapper.sol";
 
@@ -207,9 +208,10 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
         // Same token swap.
         if (tokenIn == tokenOut) {
-            return (amountIn, new bytes(0));
+            amountOut = amountIn;
+            swapPath = new bytes(0);
+            return (amountOut, swapPath);
         }
-
         (uint256 directAmountOut, uint24 directFee) = quoteDirect(
             amountIn,
             tokenIn,

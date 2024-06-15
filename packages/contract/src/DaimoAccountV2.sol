@@ -212,11 +212,14 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         bytes memory message,
         bytes calldata signatureBytes
     ) private view returns (bool) {
-        Signature memory sig = abi.decode(signatureBytes, (Signature));
+        // First bit identifies keySlot
+        uint8 keySlot = uint8(signatureBytes[0]);
 
         // If the keySlot is empty, this is an invalid key
-        uint256 x = uint256(keys[sig.keySlot][0]);
-        uint256 y = uint256(keys[sig.keySlot][1]);
+        uint256 x = uint256(keys[keySlot][0]);
+        uint256 y = uint256(keys[keySlot][1]);
+
+        Signature memory sig = abi.decode(signatureBytes[1:], (Signature));
 
         return
             WebAuthn.verifySignature({
@@ -224,8 +227,6 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
                 authenticatorData: sig.authenticatorData,
                 requireUserVerification: false,
                 clientDataJSON: sig.clientDataJSON,
-                challengeLocation: 0,
-                responseTypeLocation: 0,
                 r: sig.r,
                 s: sig.s,
                 x: x,

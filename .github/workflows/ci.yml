@@ -37,9 +37,10 @@ jobs:
           BASE_MAINNET_RPC: ${{ secrets.BASE_MAINNET_RPC }}
         run: |
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --no-match-path "test/uniswap/*"
-          forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 14513720 --match-path "test/uniswap/*"
+          forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
+          forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"
           git diff --exit-code
-        # forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 15950101 --match-path "test/uniswap/*" vivek swap
+        #  vivek swap
         working-directory: ./packages/contract
 
   lint:
