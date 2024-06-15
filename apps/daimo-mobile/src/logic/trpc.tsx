@@ -88,8 +88,10 @@ function getOpts(daimoChain: DaimoChain) {
             else return 10_000; // default: 10 seconds
           })();
           console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
+          let promise: Promise<Response> | undefined;
           const controller = new AbortController();
           const timeoutID = setTimeout(() => {
+            if (promise == null) return; // Completed
             console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);
             controller.abort();
           }, timeout);
@@ -97,11 +99,13 @@ function getOpts(daimoChain: DaimoChain) {
 
           // Fetch
           const startMs = performance.now();
-          const ret = await fetch(input, init).then((res) => {
+          promise = fetch(input, init).then((res) => {
             // When a request succeeds, mark us online immediately.
             if (res.ok) updateNetworkStateOnline();
             return res;
           });
+          const ret = await promise;
+          promise = undefined;
           clearTimeout(timeoutID);
 
           // Log
