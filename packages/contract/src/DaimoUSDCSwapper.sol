@@ -5,6 +5,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./IDaimoSwapper.sol";
 
@@ -191,8 +192,8 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         if (tokenIn == tokenOut) {
             amountOut = amountIn;
             swapPath = new bytes(0);
+            return (amountOut, swapPath);
         }
-
         (uint256 directAmountOut, uint24 directFee) = quoteDirect(
             amountIn,
             tokenIn,
@@ -259,8 +260,9 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
             amountIn
         );
 
-        // Compute a fair price for the input token swap.
+        // // Compute a fair price for the input token swap.
         (uint256 oracleAmountOut, ) = quote(amountIn, tokenIn, usdc);
+
         // 1% slippage tolerance, to incentivize quick swaps via MEV.
         uint256 expectedAmountOut = oracleAmountOut - (oracleAmountOut / 100);
         uint256 swapAmountOutMinimum = expectedAmountOut - altruisticAmountOut;

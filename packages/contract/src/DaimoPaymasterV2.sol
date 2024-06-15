@@ -30,7 +30,7 @@ contract DaimoPaymasterV2 is BasePaymaster {
     mapping(address => bool) public bundlerWhitelist;
     IMetaPaymaster public metaPaymaster;
 
-    uint256 private constant POST_OP_OVERHEAD = 34982;
+    uint256 private constant _POST_OP_OVERHEAD = 34982;
 
     event UserOperationSponsored(
         bytes32 indexed userOpHash,
@@ -89,17 +89,17 @@ contract DaimoPaymasterV2 is BasePaymaster {
             context,
             (uint256, uint256)
         );
-        uint256 gasPrice = min(
+        uint256 gasPrice = _min(
             maxFeePerGas,
             maxPriorityFeePerGas + block.basefee
         );
         metaPaymaster.fund(
             address(this),
-            actualGasCost + POST_OP_OVERHEAD * gasPrice
+            actualGasCost + _POST_OP_OVERHEAD * gasPrice
         );
     }
 
-    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+    function _min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
 }

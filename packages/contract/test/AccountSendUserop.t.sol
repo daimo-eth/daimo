@@ -135,6 +135,11 @@ contract AccountSendUseropTest is Test {
         // code coverage can't handle indirect calls
         // call validateUserOp directly
         DaimoAccountV2 a2 = new DaimoAccountV2(acc.entryPoint());
+        uint256[2] memory key2u = [
+            0x1bf24cd1fa3d0d0a0f96c63b63af690ca0c171172fa08ad9a976c4a2be7421da,
+            0xa54f11ccb62cb1909ffff628bac5f83ada775db4ab4d1326ff9fbdb6cd76ca43
+        ];
+        bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
         vm.store(address(a2), 0, 0); // set _initialized = 0
         a2.initialize(
             84532, // home chain = Base Sepolia
@@ -142,7 +147,7 @@ contract AccountSendUseropTest is Test {
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),
             0,
-            key
+            key2
         );
         vm.prank(address(entryPoint));
         uint256 validationData = a2.validateUserOp(op, hash, 0);

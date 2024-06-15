@@ -30,7 +30,7 @@ contract AccountVerify1271Test is Test {
 
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
-        DaimoAccountV2 acc = factory.createAccount(
+        account = factory.createAccount(
             84532, // home chain = Base Sepolia
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
@@ -39,7 +39,7 @@ contract AccountVerify1271Test is Test {
             key,
             0 // salt
         );
-        console.log("new account address:", address(acc));
+        console.log("new account address:", address(account));
 
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
@@ -64,13 +64,13 @@ contract AccountVerify1271Test is Test {
         );
 
         // check a valid signature
-        bytes32 hash = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
-        bytes4 ret = account.isValidSignature(hash, sig);
+        bytes32 hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
+        bytes4 ret = account.isValidSignature(hashed, sig);
         assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
 
         // check an invalid signature
-        hash = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec6;
-        ret = account.isValidSignature(hash, sig);
+        hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec6;
+        ret = account.isValidSignature(hashed, sig);
         assertEq(ret, bytes4(0xffffffff));
     }
 
@@ -93,8 +93,8 @@ contract AccountVerify1271Test is Test {
         );
 
         // Malleable signature is NOT accepted
-        bytes32 hash = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
-        bytes4 ret = account.isValidSignature(hash, sig);
+        bytes32 hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
+        bytes4 ret = account.isValidSignature(hashed, sig);
         assertEq(ret, bytes4(0xffffffff));
 
         // Fix the signature by changing s
@@ -117,7 +117,7 @@ contract AccountVerify1271Test is Test {
         console.log("fixed sig s:", s);
 
         // Now it's accepted
-        ret = account.isValidSignature(hash, sig);
+        ret = account.isValidSignature(hashed, sig);
         assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
     }
 }
