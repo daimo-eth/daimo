@@ -1,7 +1,9 @@
 import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
+import { Kysely, PostgresDialect } from "kysely";
 import { Client, ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, Hex, getAddress } from "viem";
 
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { getEnvApi } from "../env";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
@@ -22,9 +24,13 @@ const poolConfig: PoolConfig = {
 
 export class DB {
   private pool: Pool;
+  public readonly kdb: Kysely<ShovelDB>;
 
   constructor() {
     this.pool = new Pool(poolConfig);
+    this.kdb = new Kysely<ShovelDB>({
+      dialect: new PostgresDialect({ pool: this.pool }),
+    });
   }
 
   getStatus() {

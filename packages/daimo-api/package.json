@@ -11,7 +11,8 @@
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daimo --project daimo-api ./dist && sentry-cli sourcemaps upload --org daimo --project daimo-api ./dist"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daimo --project daimo-api ./dist && sentry-cli sourcemaps upload --org daimo --project daimo-api ./dist",
+    "codegen": "kysely-codegen --out-file src/codegen/dbShovel.ts --schema shovel"
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {
@@ -41,9 +42,12 @@
     "ethers": "^5.7.2",
     "expo-server-sdk": "^3.7.0",
     "geoip-lite": "^1.4.7",
+    "kysely": "^0.27.3",
+    "kysely-codegen": "^0.15.0",
     "libhoney": "^4.1.0",
     "obscenity": "^0.2.1",
     "pg": "^8.11.0",
+    "postgres-interval": "^4.0.2",
     "semver": "^7.6.0",
     "userop": "^0.3.2",
     "viem": "^1.19.15",
