@@ -140,13 +140,13 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_API_REPO }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_API_REPO }}:${{ env.IMAGE_TAG }}
+            ${{ steps.login-ecr.outputs.registry }}/daimo-shovel:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/daimo-shovel:${{ env.IMAGE_TAG }}
 
       - if: env.IMAGE_MANIFEST != 'null'
         name: Add tag to existing image.
         env:
-          REPO: ${{ vars.AWS_ECR_API_REPO }}
+          REPO: daimo-shovel
         run: |
           echo "Image exists with GIT_SHA tag, adding tag \"$IMAGE_TAG\" to it."
           IMAGE_MANIFEST=$(echo $IMAGE_MANIFEST | jq -c -r)
