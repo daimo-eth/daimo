@@ -9,6 +9,7 @@ import {
   now,
   zAddress,
   zBigIntStr,
+  zEAccount,
   zHex,
   zInviteCodeStr,
   zUserOpHex,
@@ -30,6 +31,7 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
+import { getSwapQuote } from "../api/getSwapRoute";
 import { healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
@@ -207,11 +209,38 @@ export function createRouter(
       )
       .query(async (opts) => {
         const { fromToken, fromAmount, toAddr } = opts.input;
-        return foreignCoinIndexer.getProposedSwap(
+        const route = await foreignCoinIndexer.getProposedSwapSlow(
           fromAmount,
           fromToken,
           toAddr
         );
+        return route;
+      }),
+
+    getSwapQuote: publicProcedure
+      .input(
+        z.object({
+          amountIn: zBigIntStr,
+          fromToken: zAddress,
+          fromAccount: zEAccount,
+          toToken: zAddress,
+          toAddr: zAddress,
+          chainId: z.number(),
+        })
+      )
+      .query(async (opts) => {
+        const { amountIn, fromToken, toToken, fromAccount, toAddr, chainId } =
+          opts.input;
+        const route = await getSwapQuote({
+          amountInStr: amountIn,
+          tokenIn: fromToken,
+          tokenOut: toToken,
+          fromAccount,
+          toAddr,
+          chainId,
+          vc,
+        });
+        return route;
       }),
 
     getEthereumAccount: publicProcedure
