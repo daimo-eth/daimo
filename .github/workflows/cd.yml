@@ -88,6 +88,86 @@ jobs:
       - name: Deploy to ECS
         run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment > /dev/null
 
+  shovel-deploy:
+    name: Shovel Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          mask-aws-account-id: true
+
+      - id: login-ecr
+        name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set branch-level configuration
+        run: |
+          if [[ ${{ github.ref }} == "refs/heads/prod" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+            echo "CLUSTER_NAME=${{ vars.AWS_ECS_API_CLUSTER_PROD }}" >> $GITHUB_ENV
+            echo "SERVICE_NAME=shovel-service-production" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "CLUSTER_NAME=${{ vars.AWS_ECS_API_CLUSTER_STAGING }}" >> $GITHUB_ENV
+            echo "SERVICE_NAME=shovel-service-stage" >> $GITHUB_ENV
+          fi
+
+      - name: Check for existing image with GIT_SHA
+        env:
+          GIT_SHA: ${{ github.sha }}
+          REPO: daimo-shovel
+        run: |
+          image_manifest=$(aws ecr batch-get-image --repository-name $REPO --image-ids imageTag=$GIT_SHA --query 'images[0].imageManifest')
+          echo "IMAGE_MANIFEST=$image_manifest" >> $GITHUB_ENV
+
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Build, tag, and push docker image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=gha
+          cache-to: type=gha
+          context: ./packages/daimo-contract/src/shovel
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/daimo-shovel:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/daimo-shovel:${{ env.IMAGE_TAG }}
+
+      - if: env.IMAGE_MANIFEST != 'null'
+        name: Add tag to existing image.
+        env:
+          REPO: daimo-shovel
+        run: |
+          echo "Image exists with GIT_SHA tag, adding tag \"$IMAGE_TAG\" to it."
+          IMAGE_MANIFEST=$(echo $IMAGE_MANIFEST | jq -c -r)
+
+          set +e
+          output=$(aws ecr put-image --repository-name $REPO --image-tag $IMAGE_TAG --image-manifest "$IMAGE_MANIFEST" 2>&1)
+          status=$?
+          set -e
+
+          if [[ $status -ne 0 ]]; then
+            if [[ ! "$output" =~ "ImageAlreadyExistsException" ]]; then
+              echo $output
+              exit $status
+            else
+              echo "Image already tagged with \"$IMAGE_TAG.\""
+            fi
+          fi
+
+      - name: Deploy to ECS
+        run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment > /dev/null
+
   bot-deploy:
     if: github.ref == 'refs/heads/master'
     name: Bot Deploy
@@ -157,6 +237,24 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_CLIPPY_REPO }}:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_CLIPPY_REPO }}:latest
+
+  update-bot-clippy-service:
+    name: "Update Bot & Clippy service"
+    needs:
+      - bot-deploy
+      - clippy-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          mask-aws-account-id: true
+
+      - name: Update ECS Bot/Clippy Service
+        run: aws ecs update-service --cluster ${{ vars.AWS_ECS_INTERNAL_CLUSTER_PROD }} --service ${{ vars.AWS_ECS_INTERNAL_SERVICE_PROD }} --force-new-deployment
 
   eas-deploy:
     if: github.ref == 'refs/heads/master'

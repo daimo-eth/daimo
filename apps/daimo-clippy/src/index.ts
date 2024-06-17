@@ -9,6 +9,16 @@ const readline = require("readline/promises");
 // command), handles commands.
 //
 const app = new App({
+  customRoutes: [
+    {
+      path: "/health",
+      method: ["GET"],
+      handler: (req, res) => {
+        res.writeHead(200);
+        res.end("Up!");
+      },
+    },
+  ],
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   token: process.env.SLACK_BOT_TOKEN,
 });

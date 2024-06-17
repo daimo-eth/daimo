@@ -7,7 +7,7 @@ import { DBNotifications, DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
-function getShovelPoolConfig(dbUrl?: string): PoolConfig {
+function getShovelDBConfig(dbUrl?: string) {
   const dbConfig: ClientConfig = {
     connectionString: dbUrl,
     connectionTimeoutMillis: 20000,
@@ -23,7 +23,7 @@ function getShovelPoolConfig(dbUrl?: string): PoolConfig {
     idleTimeoutMillis: 60000,
   };
 
-  return poolConfig;
+  return { poolConfig, dbConfig };
 }
 
 export class Watcher {
@@ -52,9 +52,9 @@ export class Watcher {
   private pg: Pool;
 
   constructor(private rpcClient: PublicClient, dbUrl?: string) {
-    const poolConfig = getShovelPoolConfig(dbUrl);
+    const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
-    this.notifications = new DBNotifications(poolConfig);
+    this.notifications = new DBNotifications(dbConfig);
   }
 
   add(...i: Indexer[][]) {

@@ -1,5 +1,4 @@
 import {
-  DaimoLinkRequestV2,
   dollarsToAmount,
   encodeRequestId,
   generateRequestId,
@@ -23,6 +22,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { getAccountManager } from "../../../logic/accountManager";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import {
   ExternalAction,
@@ -99,7 +99,8 @@ function RequestScreenInner({
     textInputRef.current?.blur();
     setAS("loading", "Requesting...");
 
-    const { txHash, link } = await createRequestOnChain(
+    // Create-request transaction
+    const { txHash, pendingRequestStatus } = await createRequestOnChain(
       account,
       money,
       fulfiller,
@@ -107,9 +108,19 @@ function RequestScreenInner({
     );
     console.log(`[REQUEST] txHash ${txHash}`);
 
+    // Show pending outbound request optimistically, before tx confirms
+    getAccountManager().transform((a) => ({
+      ...a,
+      notificationRequestStatuses: [
+        ...a.notificationRequestStatuses,
+        pendingRequestStatus,
+      ],
+    }));
+
+    // Share action
     if (externalAction) {
       console.log(`[REQUEST] external action ${externalAction.type}`);
-      const didShare = await externalAction.exec(link);
+      const didShare = await externalAction.exec(pendingRequestStatus.link);
       console.log(`[REQUEST] action ${didShare}`);
     }
 
@@ -186,7 +197,7 @@ async function createRequestOnChain(
   const idString = encodeRequestId(id);
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
 
-  const txHash = await rpcFunc.createRequestSponsored.mutate({
+  const { txHash, status } = await rpcFunc.createRequestSponsoredV2.mutate({
     recipient: account.address,
     idString,
     amount: `${dollarsToAmount(money.dollars)}`,
@@ -194,14 +205,7 @@ async function createRequestOnChain(
     memo,
   });
 
-  const link: DaimoLinkRequestV2 = {
-    type: "requestv2",
-    id: idString,
-    recipient: account.name,
-    dollars: `${money.dollars}`,
-  };
-
-  return { txHash, link };
+  return { txHash, pendingRequestStatus: status };
 }
 
 const styles = StyleSheet.create({

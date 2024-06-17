@@ -1,6 +1,7 @@
-import "dotenv/config";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
+import cors from "cors";
+import "dotenv/config";
 import http from "http";
 import { Server as WebSocketServer } from "ws";
 
@@ -166,6 +167,7 @@ async function main() {
     binanceClient
   );
   const handler = createHTTPHandler({
+    middleware: cors(), // handle OPTIONS requests
     router,
     createContext,
     onError: onTrpcError(monitor),

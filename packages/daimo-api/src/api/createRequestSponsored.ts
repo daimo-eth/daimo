@@ -1,7 +1,17 @@
-import { decodeRequestIdString } from "@daimo/common";
+import {
+  DaimoLinkRequestV2,
+  DaimoRequestState,
+  DaimoRequestV2Status,
+  amountToDollars,
+  createRequestMetadata,
+  decodeRequestIdString,
+  encodeRequestId,
+  now,
+} from "@daimo/common";
 import { daimoRequestABI, daimoRequestAddress } from "@daimo/contract";
-import { Address, Hex, stringToHex } from "viem";
+import { Address, Hex } from "viem";
 
+import { NameRegistry } from "../contract/nameRegistry";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -18,8 +28,9 @@ export async function createRequestSponsored(
   vc: ViemClient,
   requestIndexer: RequestIndexer,
   paymentMemoTracker: PaymentMemoTracker,
+  nameReg: NameRegistry,
   input: RequestV2Input
-): Promise<Hex> {
+): Promise<{ txHash: Hex; status: DaimoRequestV2Status }> {
   const { idString, recipient, amount, fulfiller, memo } = input;
 
   // Verify ID is unused
@@ -31,15 +42,11 @@ export async function createRequestSponsored(
 
   // Requesting from a specific person? Stored onchain. (Not enforced, no need,
   // anyone can still fulfill the request on that person's behalf.)
-  let metadata: Hex = "0x00";
-  if (fulfiller) {
-    const rawMetadata = JSON.stringify({ v: 0, fulfiller });
-    metadata = stringToHex(rawMetadata);
-  }
+  const metadata: Hex = createRequestMetadata(fulfiller && { v: 0, fulfiller });
 
   // Create onchain request
   console.log(`[API] creating req ${id} ${recipient} ${amount} ${fulfiller}`);
-  const requestTxHash = await vc.writeContract({
+  const txHash = await vc.writeContract({
     abi: daimoRequestABI,
     address: daimoRequestAddress,
     functionName: "createRequest",
@@ -48,8 +55,30 @@ export async function createRequestSponsored(
 
   // Store memo, if applicable
   if (memo != null) {
-    paymentMemoTracker.addMemo(requestTxHash, memo);
+    paymentMemoTracker.addMemo(txHash, memo);
   }
 
-  return requestTxHash;
+  // Generate pending request status
+  const link: DaimoLinkRequestV2 = {
+    type: "requestv2",
+    id: encodeRequestId(id),
+    recipient,
+    dollars: amountToDollars(BigInt(amount)),
+  };
+
+  const creator = await nameReg.getEAccount(recipient);
+  const nowS = now();
+  const status: DaimoRequestV2Status = {
+    link,
+    status: DaimoRequestState.Pending,
+    creator,
+    recipient: creator,
+    createdAt: nowS,
+    updatedAt: nowS,
+    metadata,
+    expectedFulfiller: fulfiller && (await nameReg.getEAccount(fulfiller)),
+    memo,
+  };
+
+  return { txHash, status };
 }

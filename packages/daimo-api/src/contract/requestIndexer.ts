@@ -369,7 +369,7 @@ function rowToRequestCreatedLog(r: any): RequestCreatedLog {
     recipient: getAddress(bytesToHex(r.recipient, { size: 20 })),
     creator: getAddress(bytesToHex(r.creator, { size: 20 })),
     amount: BigInt(r.amount),
-    metadata: bytesToHex(r.metadata),
+    metadata: bytesToHex(r.metadata || []),
     logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
     blockNumber: BigInt(r.block_num),
   };

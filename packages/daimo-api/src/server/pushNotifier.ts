@@ -141,6 +141,8 @@ export class PushNotifier {
   }
 
   async maybeSendNotifications(messages: ExpoPushMessage[]) {
+    if (messages.length === 0) return;
+
     // Log the notification. In local development, stop there.
     const verb = pushEnabled ? "notifying" : "NOT notifying";
     for (const msg of messages) {
@@ -220,7 +222,32 @@ export class PushNotifier {
     this.pushTokens.set(addr, [...tokens, pushToken]);
   }
 
-  private async getPushMessagesFromTransfer(
+  sendPushNotificationForRequestCreated(log: DaimoRequestV2Status) {
+    const notifs = this.getPushNotificationForRequestCreated(log);
+    this.maybeSendNotifications(notifs);
+  }
+
+  getPushNotificationForRequestCreated(
+    log: DaimoRequestV2Status
+  ): ExpoPushMessage[] {
+    // Parse log
+    const recipientAddr = getAddress(log.recipient.addr);
+    const { dollars } = log.link;
+    const { fulfiller } = parseRequestMetadata(log.metadata);
+    const fromName =
+      fulfiller && this.nameReg.resolveDaimoNameForAddr(fulfiller);
+
+    // Get push notification for the requester (= payment recipient)
+    const { tokenSymbol } = chainConfig;
+    const fromStr = fromName ? ` from ${fromName}` : "";
+    return this.getPushMessages(
+      recipientAddr,
+      "Request created",
+      `Requesting $${dollars} ${tokenSymbol}${fromStr}`
+    );
+  }
+
+  async getPushMessagesFromTransfer(
     txHash: Hex,
     addr: Address,
     other: Address,
@@ -364,33 +391,29 @@ export class PushNotifier {
     logs: DaimoRequestV2Status[]
   ): ExpoPushMessage[] {
     const messages = [];
+    const { tokenSymbol } = chainConfig;
 
     for (const log of logs) {
       // Only proceed if log is relevant.
       if (log.status !== DaimoRequestState.Created) continue;
 
-      const { tokenSymbol } = chainConfig;
-      const {
-        link: { dollars },
-        metadata,
-      } = log;
-
       // On creation, parse fulfiller name from metadata.
       if (log.recipient.name && log.status === DaimoRequestState.Created) {
-        const { fulfiller } = parseRequestMetadata(metadata);
+        const { fulfiller } = parseRequestMetadata(log.metadata);
+        const { dollars } = log.link;
+        if (fulfiller == null) continue;
 
-        if (fulfiller) {
-          const pushTokens = this.pushTokens.get(fulfiller);
-
-          if (pushTokens) {
-            messages.push({
-              to: pushTokens,
-              badge: 1,
-              title: "Request received",
-              body: `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
-            });
-          }
-        }
+        // Don't notify recipient = the account sending the request here
+        // This push notif is sent earlier, during createRequestSponsored()
+        // Notify fulfiller = the account they're requesting from
+        console.log(`[PUSH] request created, notifying fulfiller`);
+        messages.push(
+          ...this.getPushMessages(
+            fulfiller,
+            "Request received",
+            `${log.recipient.name} requested $${dollars} ${tokenSymbol}`
+          )
+        );
       }
     }
 
