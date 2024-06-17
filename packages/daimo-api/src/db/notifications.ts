@@ -13,6 +13,7 @@ const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
  */
 export class DBNotifications extends EventEmitter {
   client: Client;
+  // Postgres notification channels that we are listening to.
   channels: Set<string>;
   isConnected = false;
 
