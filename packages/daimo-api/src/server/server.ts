@@ -46,7 +46,7 @@ async function main() {
 
   console.log(`[API] initializing db...`);
   const db = new DB();
-  await db.createTables();
+  await db.migrateDB();
 
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
