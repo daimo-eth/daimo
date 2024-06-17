@@ -1,29 +1,30 @@
-import {
-  CurrencyExchangeRate,
-  assert,
-  nonUsdCurrencies,
-  now,
-} from "@daimo/common";
+import { CurrencyExchangeRate, assert, nonUsdCurrencies } from "@daimo/common";
 
+import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
-import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
 
-export async function getExchangeRates(vc: ViemClient) {
-  const data = await retryBackoff("fetchExchangeRates", async () => {
-    // Fetch JSON from EXCHANGE_RATES_URL using fetch()
-    const ratesUrl = getEnvApi().EXCHANGE_RATES_URL;
-    console.log(`[API] fetching exchange rates from ${ratesUrl}`);
-    const res = await fetchWithBackoff(new URL(ratesUrl));
-    if (!res.ok) {
-      throw new Error(`Failed to fetch exchange rates: ${res.statusText}`);
-    }
-    return await res.json();
-  });
-  console.log(`[API] got currency exchange rates: ${JSON.stringify(data)}`);
+let promise: Promise<CurrencyExchangeRate[]> | null = null;
 
-  assert(data != null, "No exchange rates found");
+export async function getExchangeRates(extApiCache: ExternalApiCache) {
+  // If concurrent users want exchange rates, only fetch once.
+  if (promise == null) {
+    promise = getExchangeRatesInner(extApiCache);
+  }
+  const ret = await promise;
+  promise = null;
+  return ret;
+}
+
+export async function getExchangeRatesInner(extApiCache: ExternalApiCache) {
+  const json = await retryBackoff("fetchExchangeRates", () =>
+    extApiCache.get("exchange-rates", "rates", fetchExchangeRates, 3600)
+  );
+  console.log(`[API] got currency exchange rates: ${json}`);
+
+  assert(!!json, "No exchange rates found");
+  const data = JSON.parse(json);
   assert(data.base === "USD", "Exchange rates must be in USD");
 
   const ret = nonUsdCurrencies.map((c) => {
@@ -36,17 +37,13 @@ export async function getExchangeRates(vc: ViemClient) {
   return ret;
 }
 
-const cache = {
-  timeS: 0,
-  ratesPromise: Promise.resolve([] as CurrencyExchangeRate[]),
-};
-
-export async function getExchangeRatesCached(vc: ViemClient) {
-  const elapsedS = now() - cache.timeS;
-  if (elapsedS > 300) {
-    console.log(`[API] getExchangeRates: cache stale, fetching currency rates`);
-    cache.ratesPromise = getExchangeRates(vc);
-    cache.timeS = now();
+async function fetchExchangeRates() {
+  // Fetch JSON from EXCHANGE_RATES_URL using fetch()
+  const ratesUrl = getEnvApi().EXCHANGE_RATES_URL;
+  console.log(`[API] fetching exchange rates from ${ratesUrl}`);
+  const res = await fetchWithBackoff(new URL(ratesUrl));
+  if (!res.ok) {
+    throw new Error(`Failed to fetch exchange rates: ${res.statusText}`);
   }
-  return cache.ratesPromise;
+  return await res.text();
 }

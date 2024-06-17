@@ -53,6 +53,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -88,7 +89,8 @@ export function createRouter(
   notifier: PushNotifier,
   accountFactory: AccountFactory,
   telemetry: Telemetry,
-  binanceClient: BinanceClient
+  binanceClient: BinanceClient,
+  extApiCache: ExternalApiCache
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const tracerMiddleware = trpcT.middleware(async (opts) => {
@@ -349,12 +351,13 @@ export function createRouter(
           nameReg,
           keyReg,
           paymaster,
-          db
+          db,
+          extApiCache
         );
       }),
 
     getExchangeRates: publicProcedure.query(async (opts) => {
-      const rates = await getExchangeRates(vc);
+      const rates = await getExchangeRates(extApiCache);
       return rates;
     }),
 

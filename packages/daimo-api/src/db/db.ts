@@ -3,7 +3,7 @@ import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, Hex, getAddress } from "viem";
 
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as ApiDB } from "../codegen/dbApi";
 import { getEnvApi } from "../env";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
@@ -26,12 +26,12 @@ function getApiDBPoolConfigFromEnv(): PoolConfig {
 
 export class DB {
   private pool: Pool;
-  public readonly kdb: Kysely<ShovelDB>;
+  public readonly kdb: Kysely<ApiDB>;
 
   constructor(poolConfig?: PoolConfig) {
     if (poolConfig == null) poolConfig = getApiDBPoolConfigFromEnv();
     this.pool = new Pool(poolConfig);
-    this.kdb = new Kysely<ShovelDB>({
+    this.kdb = new Kysely<ApiDB>({
       dialect: new PostgresDialect({ pool: this.pool }),
     });
   }
@@ -157,12 +157,14 @@ export class DB {
           api_type VARCHAR(32) NOT NULL,
           key VARCHAR(128) NOT NULL,
           value TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT NOW(),
-          expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '1 day',
+          created_at TIMESTAMP NOT NULL,
+          updated_at TIMESTAMP NOT NULL,
+          expires_at TIMESTAMP NOT NULL,
 
-          UNIQUE (api_type, key),
-          INDEX (expires_at)
+          UNIQUE (api_type, key)
         );
+
+        CREATE INDEX IF NOT EXISTS expires_at_idx ON external_api_cache (expires_at);
       `);
       success = true;
     } catch (e) {

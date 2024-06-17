@@ -20,7 +20,7 @@ import {
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
-import { getExchangeRatesCached } from "./getExchangeRates";
+import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
 import { ETHIndexer } from "../contract/ethIndexer";
@@ -32,6 +32,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import {
   LandlineAccount,
@@ -106,7 +107,8 @@ export async function getAccountHistory(
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
-  db: DB
+  db: DB,
+  extApiCache: ExternalApiCache
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
@@ -205,7 +207,7 @@ export async function getAccountHistory(
   console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
 
   // Get exchange rates
-  const exchangeRates = await getExchangeRatesCached(vc);
+  const exchangeRates = await getExchangeRates(extApiCache);
 
   // Get landline session key and accounts
   let landlineSessionKey = "";

@@ -21,6 +21,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
@@ -47,6 +48,8 @@ async function main() {
   console.log(`[API] initializing db...`);
   const db = new DB();
   await db.migrateDB();
+
+  const extApiCache = new ExternalApiCache(db.kdb);
 
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
@@ -162,7 +165,8 @@ async function main() {
     notifier,
     accountFactory,
     monitor,
-    binanceClient
+    binanceClient,
+    extApiCache
   );
   const handler = createHTTPHandler({
     middleware: cors(), // handle OPTIONS requests
