@@ -150,6 +150,9 @@ export function createRouter(
       const allowed = await AntiSpam.shouldServeAPI(requestInfo);
       ipResult = { tsS: now(), allowed };
       ipMap.set(ip, ipResult);
+      if (!ipResult.allowed) {
+        console.log(`[API] request blocked: ${JSON.stringify(requestInfo)}`);
+      }
     }
 
     if (!ipResult.allowed) {
@@ -309,6 +312,7 @@ export function createRouter(
         const addr = await keyReg.resolveKey(opts.input.pubKeyHex);
         return addr ? await nameReg.getEAccount(addr) : null;
       }),
+
     lookupEthereumAccountByFid: publicProcedure
       .input(z.object({ fid: z.number() }))
       .query(async (opts) => {
@@ -442,7 +446,7 @@ export function createRouter(
         return getMemo(txHash, logIndex, opIndexer, paymentMemoTracker);
       }),
 
-    // DEPRECATED
+    // @deprecated, remove by 2024 Q4
     sendUserOp: publicProcedure
       .input(z.object({ op: zUserOpHex }))
       .mutation(async (opts) => {
@@ -518,6 +522,7 @@ export function createRouter(
         );
       }),
 
+    // @deprecated, remove by 2024 Q4
     createRequestSponsored: publicProcedure
       .input(
         z.object({
@@ -529,12 +534,36 @@ export function createRouter(
         })
       )
       .mutation(async (opts) => {
-        return createRequestSponsored(
+        const { txHash } = await createRequestSponsored(
           vc,
           reqIndexer,
           paymentMemoTracker,
+          nameReg,
           opts.input
         );
+        return txHash;
+      }),
+
+    createRequestSponsoredV2: publicProcedure
+      .input(
+        z.object({
+          idString: z.string(),
+          recipient: zAddress,
+          amount: zBigIntStr,
+          fulfiller: zAddress.optional(),
+          memo: z.string().optional(),
+        })
+      )
+      .mutation(async (opts) => {
+        const { txHash, status } = await createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          nameReg,
+          opts.input
+        );
+        notifier.sendPushNotificationForRequestCreated(status);
+        return { txHash, status };
       }),
 
     updateProfileLinks: publicProcedure
@@ -550,6 +579,7 @@ export function createRouter(
         return profileCache.updateProfileLinks(addr, actionJSON, signature);
       }),
 
+    // @deprecated, remove by 2024 Q4
     getTagRedirect: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -557,6 +587,7 @@ export function createRouter(
         return getTagRedirect(tag, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     updateTagRedirect: publicProcedure
       .input(
         z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
@@ -566,6 +597,7 @@ export function createRouter(
         return setTagRedirect(tag, link, updateToken, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -573,6 +605,7 @@ export function createRouter(
         return getTagRedirectHist(tag, db);
       }),
 
+    // @deprecated, remove by 2024 Q4
     updateTagToNewRequest: publicProcedure
       .input(
         z.object({
@@ -589,11 +622,14 @@ export function createRouter(
         await verifyTagUpdateToken(tag, updateToken, db);
 
         const idString = encodeRequestId(generateRequestId());
-        await createRequestSponsored(vc, reqIndexer, paymentMemoTracker, {
-          idString,
-          recipient,
-          amount,
-        });
+        const reqInput = { idString, recipient, amount };
+        await createRequestSponsored(
+          vc,
+          reqIndexer,
+          paymentMemoTracker,
+          nameReg,
+          reqInput
+        );
 
         const reqLink: DaimoLinkRequestV2 = {
           type: "requestv2",
@@ -624,7 +660,7 @@ export function createRouter(
         await reqIndexer.declineRequest(requestId, decliner);
       }),
 
-    // DEPRECATED
+    // @deprecated, remove by 2024 Q4
     verifyInviteCode: publicProcedure
       .input(z.object({ inviteCode: z.string() }))
       .query(async (opts) => {
@@ -633,90 +669,6 @@ export function createRouter(
         const link: DaimoLinkInviteCode = { type: "invite", code: inviteCode };
         const status = await inviteCodeTracker.getInviteCodeStatus(link);
         return status.isValid;
-      }),
-
-    onAccountUpdate: publicProcedure
-      .input(
-        z.object({
-          address: zAddress,
-          inviteCode: z.string().optional(),
-          sinceBlockNum: z.number(),
-        })
-      )
-      .subscription(async (opts) => {
-        const { address, inviteCode } = opts.input;
-        // how often to send updates regardless of new transfers
-        // useful to update exchange rates and others.
-        const refreshInterval = 10_000;
-
-        return observable<AccountHistoryResult>((emit) => {
-          let lastEmittedBlock = opts.input.sinceBlockNum;
-          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
-            null;
-
-          const pushHistory = (onlyOnNewTransfers: boolean) => {
-            getAccountHistoryPromise = getAccountHistory(
-              opts.ctx,
-              address,
-              inviteCode,
-              lastEmittedBlock,
-              watcher,
-              vc,
-              homeCoinIndexer,
-              ethIndexer,
-              foreignCoinIndexer,
-              profileCache,
-              noteIndexer,
-              reqIndexer,
-              inviteCodeTracker,
-              inviteGraph,
-              nameReg,
-              keyReg,
-              paymaster,
-              db
-            );
-
-            getAccountHistoryPromise
-              .then((history) => {
-                // we can have concurrent requests. discard those that arrived too late
-                if (history.lastBlock < lastEmittedBlock) {
-                  return;
-                }
-
-                if (onlyOnNewTransfers && history.transferLogs.length === 0) {
-                  return;
-                }
-
-                emit.next(history);
-
-                lastEmittedBlock = history.lastBlock;
-              })
-              .finally(() => {
-                getAccountHistoryPromise = null;
-              });
-          };
-
-          const eventListener = () => {
-            pushHistory(true);
-          };
-
-          const intervalTimer = setInterval(() => {
-            // interval concided with new block. let's skip this one.
-            if (getAccountHistoryPromise) {
-              return;
-            }
-
-            pushHistory(false);
-          }, refreshInterval);
-
-          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, eventListener);
-
-          return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, eventListener);
-
-            clearInterval(intervalTimer);
-          };
-        });
       }),
 
     getExchangeURL: publicProcedure
@@ -756,6 +708,96 @@ export function createRouter(
           telemetry,
           inviteCodeTracker
         );
+      }),
+
+    onAccountUpdate: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          inviteCode: z.string().optional(),
+          sinceBlockNum: z.number(),
+        })
+      )
+      .subscription(async (opts) => {
+        const { address, inviteCode } = opts.input;
+        // how often to send updates regardless of new transfers
+        // useful to update exchange rates and others.
+        const refreshInterval = 10_000;
+
+        return observable<AccountHistoryResult>((emit) => {
+          let lastEmittedBlock = opts.input.sinceBlockNum;
+          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
+            null;
+
+          const pushHistory = () => {
+            // (onlyOnNewTransfers: boolean) => {
+            getAccountHistoryPromise = getAccountHistory(
+              opts.ctx,
+              address,
+              inviteCode,
+              lastEmittedBlock,
+              watcher,
+              vc,
+              homeCoinIndexer,
+              ethIndexer,
+              foreignCoinIndexer,
+              profileCache,
+              noteIndexer,
+              reqIndexer,
+              inviteCodeTracker,
+              inviteGraph,
+              nameReg,
+              keyReg,
+              paymaster,
+              db
+            );
+
+            getAccountHistoryPromise
+              .then((history) => {
+                // we can have concurrent requests. discard those that arrived too late
+                if (history.lastBlock <= lastEmittedBlock) {
+                  return;
+                }
+                // TODO: replace
+                // When a DB event happens, we need to:
+                // - Handle transfers, key rotations, etc
+                // - Figure out which accounts are affected
+                // - Send onAccountUpdate to those accounts, if connected
+                //
+                // if (onlyOnNewTransfers && history.transferLogs.length === 0) {
+                //   return;
+                // }
+
+                emit.next(history);
+
+                lastEmittedBlock = history.lastBlock;
+              })
+              .finally(() => {
+                getAccountHistoryPromise = null;
+              });
+          };
+
+          const onDBEvent = async () => {
+            // new block arrived while interval update was running. wait for it.
+            if (getAccountHistoryPromise) {
+              await getAccountHistoryPromise;
+            }
+            pushHistory();
+          };
+
+          const intervalTimer = setInterval(() => {
+            // interval coincided with new block. let's skip this one.
+            if (getAccountHistoryPromise) return;
+            pushHistory();
+          }, refreshInterval);
+
+          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+
+          return () => {
+            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+            clearInterval(intervalTimer);
+          };
+        });
       }),
   });
 }

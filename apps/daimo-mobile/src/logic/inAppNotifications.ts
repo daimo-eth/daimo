@@ -74,8 +74,8 @@ export function useInAppNotifications(): InAppNotificationInfo {
 
       // Show unread (red bubble) if someone sends us a request, or declines our request.
       const marksUnread =
-        (request.status === DaimoRequestState.Created &&
-          request.recipient.addr !== account.address) ||
+        request.status === DaimoRequestState.Pending ||
+        request.status === DaimoRequestState.Created ||
         (request.status === DaimoRequestState.Declined &&
           request.recipient.addr === account.address);
 

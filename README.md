@@ -211,3 +211,30 @@ In the cloud, these tests are run on the master branch using the `maestro-ci` wo
 
 </details>
 </details>
+
+<details>
+<summary><strong>DB diagnostics</strong></summary>
+
+Shovel caught up?
+
+```sql
+SELECT * FROM shovel.latest;
+```
+
+Largest Postgres DB tables, disk usage:
+
+```sql
+SELECT
+  table_schema,
+  table_name,
+  pg_size_pretty(pg_total_relation_size(c.oid)) AS total_size
+FROM
+  information_schema.tables t
+JOIN
+  pg_class c ON c.relname = t.table_name
+WHERE table_type = 'BASE TABLE'
+ORDER BY pg_total_relation_size(c.oid) DESC
+LIMIT 20;
+```
+
+</details>

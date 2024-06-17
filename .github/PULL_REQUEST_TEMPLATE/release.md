@@ -1,10 +1,4 @@
-<!-- PR TITLE -->
-<!-- release v1.2.3 build 101 -->
-<!-- Build number should be identical across both platforms. -->
-
 **Tweet-length summary of changes.**
-
-<!-- Optional screenshot, 4-6 panels joined as described in scratchpad README. -->
 
 ## Release checklist
 
@@ -23,14 +17,12 @@ just outright bugs.
 - [ ] Create testnet account
 - [ ] Faucet + notification should appear automatically.
 - [ ] Send payment
-- [ ] Create Payment Link, open in browser
-- [ ] Cancel Payment Link
-- [ ] Tap Payment Link, ensure it opens in-app
-- [ ] Create Request, open in browser
+- [ ] Create payment link with memo. Ensure memo appears.
+- [ ] Cancel payment link.
+- [ ] Create request link with memo. Ensure the memo appears.
 - [ ] Add device + Use existing onboarding (test transactions work on both devices)
 - [ ] Remove device
 - [ ] Open History
-- [ ] Tap transaction, view in block explorer
 - [ ] Account screen: Send Debug Log
 - [ ] Debug log looks clean
 
@@ -41,14 +33,8 @@ just outright bugs.
 - [ ] Create account
 - [ ] Faucet + notification should appear automatically
 - [ ] Send payment
-- [ ] Create Payment Link
-- [ ] Cancel Payment Link
-- [ ] Tap Payment Link, ensure it opens in-app
-- [ ] Add device + Use existing onboarding (test transactions work on both devices)
-- [ ] Remove device
-- [ ] Create Request
-- [ ] Open History
-- [ ] Tap transaction, view in block explorer
+- [ ] Create & cancel payment link
+- [ ] Create & cancel request to another account, with memo
 - [ ] Account screen: Send Debug Log
 - [ ] Debug log looks clean
 
@@ -67,7 +53,7 @@ Smoke test, particularly for visual regressions:
 - [ ] Prod API deploys correctly
 - [ ] Prod website deploys correctly
 - [ ] Logs clean
-- [ ] Honeycomb clean
+- [ ] Sentry clean
 
 ### Prod smoke test
 

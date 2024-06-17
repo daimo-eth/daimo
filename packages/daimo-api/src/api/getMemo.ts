@@ -10,7 +10,7 @@ type TransactionMemo = {
   memo?: string;
 };
 
-/** Retreives a payment memo given a transaction hash and log index. */
+/** Retreives a payment memo given a bundle transaction hash and log index. */
 export async function getMemo(
   txHash: Hex,
   logIndex: number,

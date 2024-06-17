@@ -6,6 +6,7 @@ import {
   hexToBigInt,
   hexToString,
   numberToBytes,
+  stringToHex,
 } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 
@@ -42,6 +43,11 @@ export type DaimoRichRequestV2 = {
   fulfiller: Address | null;
 };
 
+export function createRequestMetadata(reqMeta?: DaimoRichRequestV2): Hex {
+  if (reqMeta == null) return "0x";
+  return stringToHex(JSON.stringify(reqMeta));
+}
+
 export function parseRequestMetadata(metadata: Hex): DaimoRichRequestV2 {
   const parsedMetadata = hexToString(metadata);
 
@@ -51,11 +57,8 @@ export function parseRequestMetadata(metadata: Hex): DaimoRichRequestV2 {
 
   const res = JSON.parse(parsedMetadata);
 
-  // HACK: Accidentally created a transaction with v: "0" instead of 0.
-  if (typeof res.v === "string") {
-    res.v = Number(res.v);
-  }
-
+  // HACK: Accidentally created a transaction with v: "0" instead of 0
+  res.v = Number(res.v);
   assert(
     typeof res.v === "number" && !Number.isNaN(res.v),
     "Request version must be a number"
