@@ -129,14 +129,8 @@ function getTRPCOpts(
     testnet: apiUrlTestnetWithChain,
   });
 
-  let daimoLink = httpBatchLink({
-    url: chooseChain({
-      daimoChain,
-      mainnet: apiUrlMainnetWithChain,
-      testnet: apiUrlTestnetWithChain,
-    }),
-    fetch: customTRPCfetch,
-  });
+  const daimoHttpLink = httpBatchLink({ url, fetch: customTRPCfetch });
+  let daimoLink = daimoHttpLink;
 
   // TRPC client tries to connect to WebSocket on creation which breaks
   // test environment that expects any resources to be defined explicitly in unit body
@@ -144,40 +138,30 @@ function getTRPCOpts(
   // Since TRPC client is currently tangled together with top-level code,
   // we avoid using WebSocket link when running in no-browser environment (like tests.)
   if (typeof WebSocket !== "undefined") {
-    daimoLink = splitLink({
-      condition(op) {
-        return op.type === "subscription";
-      },
-
-      true: wsLink({
-        client: createWSClient({
-          url,
-          retryDelayMs: () => 1_000,
-          onClose: () => {
-            console.warn("[TRPC] WebSocket closed");
-
-            updateNetworkState(() => {
-              return {
-                status: "offline",
-                syncAttemptsFailed: 0,
-              };
-            });
-          },
-        }),
-      }),
-
-      false: httpBatchLink({
+    console.log("[TRPC] WebSocket available, using ws for subscriptions");
+    const daimoWebsocketLink = wsLink({
+      client: createWSClient({
         url,
-        fetch: customTRPCfetch,
+        retryDelayMs: () => 1_000,
+        onClose: () => {
+          console.warn("[TRPC] WebSocket closed");
+          updateNetworkState(() => {
+            return { status: "offline", syncAttemptsFailed: 0 };
+          });
+        },
       }),
     });
+
+    daimoLink = splitLink({
+      condition: (op) => op.type === "subscription",
+      true: daimoWebsocketLink,
+      false: daimoHttpLink,
+    });
   } else {
-    console.error("WebSocket not available, skipping websocket link");
+    console.log("[TRPC] WebSocket not available, using http for subscriptions");
   }
 
-  return {
-    links: [daimoLink],
-  };
+  return { links: [daimoLink] };
 }
 
 const optsMainnet = getTRPCOpts("base");

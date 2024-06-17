@@ -727,7 +727,8 @@ export function createRouter(
           let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
             null;
 
-          const pushHistory = (onlyOnNewTransfers: boolean) => {
+          const pushHistory = () => {
+            // (onlyOnNewTransfers: boolean) => {
             getAccountHistoryPromise = getAccountHistory(
               opts.ctx,
               address,
@@ -752,13 +753,18 @@ export function createRouter(
             getAccountHistoryPromise
               .then((history) => {
                 // we can have concurrent requests. discard those that arrived too late
-                if (history.lastBlock < lastEmittedBlock) {
+                if (history.lastBlock <= lastEmittedBlock) {
                   return;
                 }
-
-                if (onlyOnNewTransfers && history.transferLogs.length === 0) {
-                  return;
-                }
+                // TODO: replace
+                // When a DB event happens, we need to:
+                // - Handle transfers, key rotations, etc
+                // - Figure out which accounts are affected
+                // - Send onAccountUpdate to those accounts, if connected
+                //
+                // if (onlyOnNewTransfers && history.transferLogs.length === 0) {
+                //   return;
+                // }
 
                 emit.next(history);
 
@@ -769,24 +775,24 @@ export function createRouter(
               });
           };
 
-          const eventListener = () => {
-            pushHistory(true);
+          const onDBEvent = async () => {
+            // new block arrived while interval update was running. wait for it.
+            if (getAccountHistoryPromise) {
+              await getAccountHistoryPromise;
+            }
+            pushHistory();
           };
 
           const intervalTimer = setInterval(() => {
-            // interval concided with new block. let's skip this one.
-            if (getAccountHistoryPromise) {
-              return;
-            }
-
-            pushHistory(false);
+            // interval coincided with new block. let's skip this one.
+            if (getAccountHistoryPromise) return;
+            pushHistory();
           }, refreshInterval);
 
-          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, eventListener);
+          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
 
           return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, eventListener);
-
+            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
             clearInterval(intervalTimer);
           };
         });
