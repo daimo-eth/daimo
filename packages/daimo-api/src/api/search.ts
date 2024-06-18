@@ -70,7 +70,10 @@ async function getResultFromAddr(
   return { ...eAcc, originalMatch };
 }
 
-async function tryGetEnsAddr(prefix: string, vc: ViemClient) {
+async function tryGetEnsAddr(
+  prefix: string,
+  vc: ViemClient
+): Promise<Address | null> {
   if (prefix.length < 3) return null;
   if (!prefix.includes(".")) return null;
   try {

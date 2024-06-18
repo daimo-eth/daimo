@@ -41,15 +41,14 @@ async function main() {
   console.log(`[API] initializing telemetry...`);
   const monitor = new Telemetry();
 
-  console.log(`[API] starting...`);
-  const vc = getViemClientFromEnv(monitor);
-  const uc = new UniswapClient();
-
   console.log(`[API] initializing db...`);
   const db = new DB();
   await db.migrateDB();
 
+  console.log(`[API] starting...`);
   const extApiCache = new ExternalApiCache(db.kdb);
+  const vc = getViemClientFromEnv(monitor, extApiCache);
+  const uc = new UniswapClient();
 
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);

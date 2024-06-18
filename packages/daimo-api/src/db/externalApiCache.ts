@@ -2,6 +2,26 @@ import { Kysely } from "kysely";
 
 import { DB as ApiDB } from "../codegen/dbApi";
 
+export interface IExternalApiCache {
+  get(
+    apiType: string,
+    key: string,
+    execFn: () => Promise<string>,
+    expiryS?: number
+  ): Promise<string | undefined>;
+}
+
+export class StubExternalApiCache implements IExternalApiCache {
+  async get(
+    apiType: string,
+    key: string,
+    execFn: () => Promise<string>,
+    expiryS?: number
+  ): Promise<string | undefined> {
+    return await execFn();
+  }
+}
+
 // DB cache of external API calls.
 // Improves reliability and helps us avoid rate limiting.
 export class ExternalApiCache {
