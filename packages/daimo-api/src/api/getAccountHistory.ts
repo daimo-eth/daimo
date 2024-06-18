@@ -200,9 +200,9 @@ export async function getAccountHistory(
 
   // Get proposed swaps of non-home coin tokens for address
   const proposedSwaps = [
-    ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
-    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address, true)),
-  ];
+    // ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
+    // ...(await foreignCoinIndexer.getProposedSwapsForAddr(address, true)),
+  ] as ProposedSwap[];
   elapsedMs = Date.now() - startMs;
   console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
 

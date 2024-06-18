@@ -9,14 +9,13 @@ const inspector = require("node:inspector/promises");
 const session = new inspector.Session();
 session.connect();
 
-export async function healthCheck(
+export async function healthDebug(
   db: DB,
   watcher: Watcher,
   startTimeS: number,
   trpcReqsInFlight: string[]
 ) {
-  // Seasync e readyMiddleware for not-ready check.
-  // If we're here, API is ready. Check whether it's healthy:
+  // Additional debug diagnostics
   const nowS = now();
   const uptimeS = nowS - startTimeS;
   const node = getNodeMetrics();

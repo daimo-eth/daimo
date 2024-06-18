@@ -30,7 +30,7 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
-import { healthCheck } from "../api/healthCheck";
+import { healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -172,7 +172,12 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async () => {
-      const ret = await healthCheck(db, watcher, startTimeS, trpcReqsInFlight);
+      // See readyMiddleware for ready check
+      return { status: "healthy" };
+    }),
+
+    healthDebug: publicProcedure.query(async () => {
+      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
       console.log(`[API] health check: ${ret.status}`);
       return ret;
     }),
