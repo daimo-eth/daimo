@@ -14,7 +14,6 @@ import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { chainConfig } from "../env";
-import { UniswapClient } from "../network/uniswapClient";
 import { ViemClient } from "../network/viemClient";
 import { ForeignToken, fetchForeignTokenList } from "../server/coinList";
 import { addrTxHashKey } from "../utils/indexing";
@@ -46,7 +45,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, public uc: UniswapClient) {
+  constructor(private nameReg: NameRegistry, private vc: ViemClient) {
     super("SWAPCOIN");
   }
 
@@ -174,26 +173,17 @@ export class ForeignCoinIndexer extends Indexer {
   }
 
   async getProposedSwapForLog(
-    log: ForeignTokenTransfer,
-    vc?: ViemClient
+    log: ForeignTokenTransfer
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
-      if (vc) {
-        return this.getProposedSwap(
-          log.foreignToken.token,
-          log.value.toString() as `${bigint}`,
-          fromAcc,
-          daimoUSDC.token as Address, // USDC
-          log.to,
-          vc
-        );
-      }
-      return this.getProposedSwapSlow(
-        log.value.toString() as `${bigint}`,
+      return this.getProposedSwap(
         log.foreignToken.token,
-        fromAcc.addr
+        log.value.toString() as `${bigint}`,
+        fromAcc,
+        daimoUSDC.token as Address, // USDC
+        log.to
       );
     });
 
@@ -214,7 +204,7 @@ export class ForeignCoinIndexer extends Indexer {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
-        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap, vc))
+        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
       )
     ).filter((s): s is ProposedSwap => s != null);
 
@@ -248,8 +238,7 @@ export class ForeignCoinIndexer extends Indexer {
     fromAmount: BigIntStr,
     fromAcc: EAccount,
     toToken: Address,
-    toAddr: Address,
-    vc: ViemClient
+    toAddr: Address
   ): Promise<SwapQueryResult | null> {
     if (fromToken === toToken) return null;
     const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
@@ -262,29 +251,9 @@ export class ForeignCoinIndexer extends Indexer {
         fromAccount: fromAcc,
         toAddr,
         chainId,
-        vc,
+        vc: this.vc,
       });
     });
     return swap;
-  }
-
-  // For debugging / introspection of Uniswap routes
-  public async getProposedSwapSlow(
-    fromAmount: BigIntStr,
-    fromToken: Address,
-    toAddr: Address
-  ) {
-    const coin = this.foreignTokens.get(fromToken);
-    if (coin == null) return null;
-    return this.uc.getProposedSwap(
-      toAddr,
-      fromAmount,
-      coin,
-      0,
-      {
-        addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
-      },
-      true
-    );
   }
 }

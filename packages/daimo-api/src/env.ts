@@ -25,12 +25,6 @@ const zEnv = {
   // ERC-4337 userop bundler. Used only for gas price estimation:
   // we submit [compressed] bundles ourselves.
   DAIMO_BUNDLER_RPC: z.string().startsWith("https://"),
-  // Uniswap RPC, for any-chain swaps. Required on mainnet.
-  // Use an independent HTTP RPC to work around Websocket bugs in Ethers,
-  // and by extension the Uniswap SDK:
-  // https://github.com/Uniswap/smart-order-router/issues/461
-  // https://stackoverflow.com/q/77336570
-  DAIMO_API_UNISWAP_RPC: z.string().startsWith("https://").optional(),
   // Ethereum L1 RPC, with comma-delimited fallbacks.
   DAIMO_API_L1_RPC_WS: z.string(),
   // Ethereum L2 RPC, with comma-delimited fallbacks.

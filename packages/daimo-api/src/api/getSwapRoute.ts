@@ -3,11 +3,16 @@ import { daimoUsdcSwapperABI, daimoUsdcSwapperAddress } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { WETH9 } from "@uniswap/sdk-core";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
-import { Address, Hex } from "viem";
+import { Address, getAddress, Hex } from "viem";
 
-import { UNISWAP_V3_02_ROUTER_ADDRESS } from "../network/uniswapClient";
 import { ViemClient } from "../network/viemClient";
 import { fetchForeignTokenList } from "../server/coinList";
+
+// Uniswap router on Base
+// From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
+export const UNISWAP_V3_02_ROUTER_ADDRESS = getAddress(
+  "0x2626664c2603336E57B271c5C0b26F421741e481"
+);
 
 // Direct path length is: 0x (1) + Token (20) + Fee (3) + Token (20) = 44 * 2.
 const SINGLE_POOL_LENGTH_HEX = 88;

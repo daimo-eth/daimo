@@ -199,24 +199,6 @@ export function createRouter(
         return nameReg.resolveName(name) || null;
       }),
 
-    getUniswapRoute: publicProcedure
-      .input(
-        z.object({
-          fromToken: zAddress,
-          fromAmount: zBigIntStr,
-          toAddr: zAddress,
-        })
-      )
-      .query(async (opts) => {
-        const { fromToken, fromAmount, toAddr } = opts.input;
-        const route = await foreignCoinIndexer.getProposedSwapSlow(
-          fromAmount,
-          fromToken,
-          toAddr
-        );
-        return route;
-      }),
-
     getSwapQuote: publicProcedure
       .input(
         z.object({
