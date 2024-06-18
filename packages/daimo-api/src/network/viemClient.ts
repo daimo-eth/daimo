@@ -132,7 +132,7 @@ export class ViemClient {
   );
 
   getEnsName = memoize(
-    (a: { address: Address }) => this.l1Client.getEnsName(a),
+    (a: { address: Address }) => undefined, // TODO: reinstate this.l1Client.getEnsName(a),
     ({ address }: { address: Address }) => address
   );
 
