@@ -54,7 +54,6 @@ export async function getSwapQuote({
     ["address", "uint24", "address"],
     [tokenIn, fee, tokenOut]
   );
-  // const swapPath: Hex = swapQuote[1]; // abi-encoded Uniswap path
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.
@@ -98,10 +97,7 @@ export async function getSwapQuote({
   }
 
   if (!callData) return null;
-  // const execCallData = SwapRouter02.INTERFACE.encodeFunctionData(
-  //   "multicall(uint256,bytes[])",
-  //   [execDeadline, [callData]]
-  // );
+
   if (!foreignTokenList) {
     foreignTokenList = await fetchForeignTokenList();
   }

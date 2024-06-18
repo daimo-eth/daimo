@@ -35,7 +35,7 @@ export type ForeignTokenTransfer = Transfer & {
  *   original inbound foreign token transfer.
  */
 export class ForeignCoinIndexer extends Indexer {
-  private foreignTokens: Map<Address, ForeignToken> = new Map();
+  public foreignTokens: Map<Address, ForeignToken> = new Map();
   private allTransfers: ForeignTokenTransfer[] = [];
 
   private pendingSwapsByAddr: Map<Address, ForeignTokenTransfer[]> = new Map(); // inbound transfers without a corresponding outbound swap
@@ -251,6 +251,7 @@ export class ForeignCoinIndexer extends Indexer {
       toAddr,
       chainId,
       vc: this.vc,
+      foreignTokenList: this.foreignTokens,
     });
   }
 }

@@ -213,6 +213,7 @@ export function createRouter(
       .query(async (opts) => {
         const { amountIn, fromToken, toToken, fromAccount, toAddr, chainId } =
           opts.input;
+        const foreignTokenList = foreignCoinIndexer.foreignTokens;
         const route = await getSwapQuote({
           amountInStr: amountIn,
           tokenIn: fromToken,
@@ -221,6 +222,7 @@ export function createRouter(
           toAddr,
           chainId,
           vc,
+          foreignTokenList,
         });
         return route;
       }),
