@@ -3,7 +3,7 @@ import { daimoUsdcSwapperABI, daimoUsdcSwapperAddress } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { WETH9 } from "@uniswap/sdk-core";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
-import { Address, getAddress, Hex } from "viem";
+import { Address, encodePacked, getAddress, Hex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { fetchForeignTokenList } from "../server/coinList";
@@ -37,15 +37,22 @@ export async function getSwapQuote({
   chainId: number;
 }) {
   const amountIn: bigint = BigInt(amountInStr);
+
+  // TODO: update to a future quote() that takes liquidity into account.
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
     address: daimoUsdcSwapperAddress,
-    functionName: "quote",
+    functionName: "quoteDirect",
     args: [amountIn, tokenIn, tokenOut],
   });
 
   const amountOut: bigint = swapQuote[0];
-  const swapPath: Hex = swapQuote[1]; // abi-encoded Uniswap path
+  const fee = swapQuote[1];
+  const swapPath = encodePacked(
+    ["address", "uint24", "address"],
+    [tokenIn, fee, tokenOut]
+  );
+  // const swapPath: Hex = swapQuote[1]; // abi-encoded Uniswap path
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.
@@ -89,10 +96,10 @@ export async function getSwapQuote({
   }
 
   if (!callData) return null;
-  const execCallData = SwapRouter02.INTERFACE.encodeFunctionData(
-    "multicall(uint256,bytes[])",
-    [execDeadline, [callData]]
-  );
+  // const execCallData = SwapRouter02.INTERFACE.encodeFunctionData(
+  //   "multicall(uint256,bytes[])",
+  //   [execDeadline, [callData]]
+  // );
 
   const foreignTokens = await fetchForeignTokenList();
   const fromCoin = foreignTokens.get(tokenIn);
@@ -110,7 +117,7 @@ export async function getSwapQuote({
     routeFound: true,
     toAmount: Number(amountOut),
     execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
-    execCallData: execCallData as Hex,
+    execCallData: callData as Hex,
     execValue: "0x00" as Hex,
   };
 
