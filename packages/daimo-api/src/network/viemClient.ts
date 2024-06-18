@@ -134,10 +134,15 @@ export class ViemClient {
   getEnsAddress = memoize(
     async ({ name }: { name: string }): Promise<Address | null> => {
       try {
-        const result = await this.extApiCache.get("ens-get-addr", name, () => {
-          console.log(`[VIEM] getEnsAddress for '${name}'`);
-          return this.l1Client.getEnsAddress({ name }).then((a) => a || "");
-        });
+        const result = await this.extApiCache.get(
+          "ens-get-addr",
+          name,
+          () => {
+            console.log(`[VIEM] getEnsAddress for '${name}'`);
+            return this.l1Client.getEnsAddress({ name }).then((a) => a || "");
+          },
+          24 * 3600
+        );
         return !result ? null : getAddress(result);
       } catch (e: any) {
         console.log(`[VIEM] getEnsAddress for '${name}' error: ${e.message}`);
@@ -148,7 +153,18 @@ export class ViemClient {
   );
 
   getEnsName = memoize(
-    (a: { address: Address }) => undefined, // TODO: reinstate this.l1Client.getEnsName(a),
+    async ({ address }: { address: Address }) => {
+      const result = await this.extApiCache.get(
+        "ens-get-name",
+        address,
+        () => {
+          console.log(`[VIEM] getEnsName for '${address}'`);
+          return this.l1Client.getEnsName({ address }).then((a) => a || "");
+        },
+        24 * 3600
+      );
+      return result || null;
+    },
     ({ address }: { address: Address }) => address
   );
 
