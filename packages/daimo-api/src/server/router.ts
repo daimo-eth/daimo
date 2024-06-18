@@ -280,7 +280,9 @@ export function createRouter(
         z.object({
           apiKey: z.string(),
           code: z.string(),
-          maxUses: z.number(),
+          maxUses: z.number().optional(),
+          bonusDollarsInviter: z.number().optional(),
+          bonusDollarsInvitee: z.number().optional(),
         })
       )
       .mutation(async ({ input }) => {

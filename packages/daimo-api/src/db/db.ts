@@ -416,13 +416,27 @@ export class DB {
 
   async updateInviteCode(row: UpdateInviteCodeArgs) {
     console.log(`[DB] updating invite code: ${JSON.stringify(row)}`);
+    let res;
+    if (row.maxUses) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
+        [row.maxUses, row.code]
+      );
+    }
+    if (row.bonusDollarInviter) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET bonus_cents_inviter = $1 WHERE code = $2`,
+        [row.bonusDollarInviter * 100, row.code]
+      );
+    }
+    if (row.bonusDollarInvitee) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET bonus_cents_invitee = $1 WHERE code = $2`,
+        [row.bonusDollarInvitee * 100, row.code]
+      );
+    }
 
-    const res = await this.pool.query<[], any[]>(
-      `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
-      [row.maxUses, row.code]
-    );
-
-    return assertNotNull(res.rowCount) > 0;
+    return res && assertNotNull(res.rowCount) > 0;
   }
 
   async insertFaucetAttestation(attestation: string) {
@@ -542,7 +556,9 @@ export interface InsertInviteCodeArgs {
 
 export interface UpdateInviteCodeArgs {
   code: string;
-  maxUses: number;
+  maxUses?: number;
+  bonusDollarInviter?: number;
+  bonusDollarInvitee?: number;
 }
 
 interface RawInviteCodeRow {
