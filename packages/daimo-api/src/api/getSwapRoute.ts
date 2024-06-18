@@ -6,7 +6,7 @@ import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { Address, encodePacked, getAddress, Hex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
-import { fetchForeignTokenList } from "../server/coinList";
+import { fetchForeignTokenList, ForeignToken } from "../server/coinList";
 
 // Uniswap router on Base
 // From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
@@ -27,14 +27,16 @@ export async function getSwapQuote({
   toAddr,
   chainId,
   vc,
+  foreignTokenList,
 }: {
   amountInStr: BigIntStr;
   tokenIn: Address;
   tokenOut: Address;
   fromAccount: EAccount;
   toAddr: Address;
-  vc: ViemClient;
   chainId: number;
+  vc: ViemClient;
+  foreignTokenList?: Map<Address, ForeignToken>;
 }) {
   const amountIn: bigint = BigInt(amountInStr);
 
@@ -100,9 +102,10 @@ export async function getSwapQuote({
   //   "multicall(uint256,bytes[])",
   //   [execDeadline, [callData]]
   // );
-
-  const foreignTokens = await fetchForeignTokenList();
-  const fromCoin = foreignTokens.get(tokenIn);
+  if (!foreignTokenList) {
+    foreignTokenList = await fetchForeignTokenList();
+  }
+  const fromCoin = foreignTokenList.get(tokenIn);
 
   if (!fromCoin) return null;
 

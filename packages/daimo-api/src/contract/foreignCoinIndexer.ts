@@ -243,17 +243,14 @@ export class ForeignCoinIndexer extends Indexer {
     if (fromToken === toToken) return null;
     const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
 
-    const swap = await retryBackoff(`getProposedBackoff`, async () => {
-      return await getSwapQuote({
-        amountInStr: fromAmount,
-        tokenIn: fromToken,
-        tokenOut: toToken,
-        fromAccount: fromAcc,
-        toAddr,
-        chainId,
-        vc: this.vc,
-      });
+    return await getSwapQuote({
+      amountInStr: fromAmount,
+      tokenIn: fromToken,
+      tokenOut: toToken,
+      fromAccount: fromAcc,
+      toAddr,
+      chainId,
+      vc: this.vc,
     });
-    return swap;
   }
 }
