@@ -9,13 +9,6 @@
       "ws_url": "$CHAIN_RPC_WS_URL",
       "batch_size": 100,
       "concurrency": 4
-    },
-    {
-      "name": "$CHAIN_TRACE_NAME",
-      "chain_id": "$CHAIN_ID",
-      "url": "$CHAIN_TRACE_RPC_URL",
-      "batch_size": 128,
-      "concurrency": 8
     }
   ],
   "integrations": [
@@ -90,9 +83,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": [
-            "0x4430A644B215a187a3daa5b114fA3f3d9DeBc17D"
-          ]
+          "filter_arg": ["0x4430A644B215a187a3daa5b114fA3f3d9DeBc17D"]
         }
       ],
       "event": {
@@ -529,103 +520,6 @@
       }
     },
     {
-      "name": "eth_transfers",
-      "enabled": false,
-      "sources": [
-        {
-          "name": "$CHAIN_TRACE_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
-      "table": {
-        "name": "eth_transfers",
-        "columns": [
-          {
-            "name": "chain_id",
-            "type": "numeric"
-          },
-          {
-            "name": "block_num",
-            "type": "numeric"
-          },
-          {
-            "name": "block_hash",
-            "type": "bytea"
-          },
-          {
-            "name": "tx_idx",
-            "type": "numeric"
-          },
-          {
-            "name": "tx_hash",
-            "type": "bytea"
-          },
-          {
-            "name": "call_type",
-            "type": "text"
-          },
-          {
-            "name": "from",
-            "type": "bytea"
-          },
-          {
-            "name": "to",
-            "type": "bytea"
-          },
-          {
-            "name": "value",
-            "type": "numeric"
-          }
-        ]
-      },
-      "block": [
-        {
-          "name": "chain_id",
-          "column": "chain_id"
-        },
-        {
-          "name": "block_num",
-          "column": "block_num"
-        },
-        {
-          "name": "block_hash",
-          "column": "block_hash"
-        },
-        {
-          "name": "tx_idx",
-          "column": "tx_idx"
-        },
-        {
-          "name": "tx_hash",
-          "column": "tx_hash"
-        },
-        {
-          "name": "trace_action_call_type",
-          "column": "call_type",
-          "filter_op": "eq",
-          "filter_arg": [
-            "call"
-          ]
-        },
-        {
-          "name": "trace_action_from",
-          "column": "from"
-        },
-        {
-          "name": "trace_action_to",
-          "column": "to"
-        },
-        {
-          "name": "trace_action_value",
-          "column": "value",
-          "filter_op": "gt",
-          "filter_arg": [
-            "0"
-          ]
-        }
-      ]
-    },
-    {
       "name": "note_created",
       "enabled": true,
       "sources": [
@@ -941,9 +835,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": [
-            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
-          ]
+          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
         }
       ],
       "event": {
@@ -1050,9 +942,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": [
-            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
-          ]
+          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
         }
       ],
       "event": {
@@ -1144,9 +1034,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": [
-            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
-          ]
+          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
         }
       ],
       "event": {
@@ -1258,9 +1146,7 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": [
-            "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
-          ]
+          "filter_arg": ["0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"]
         }
       ],
       "event": {
@@ -1315,4 +1201,3 @@
     }
   ]
 }
-
