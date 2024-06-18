@@ -20,7 +20,6 @@ import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
-import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -31,6 +30,7 @@ import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
+import { healthCheck } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -166,29 +166,8 @@ export function createRouter(
   const startTimeS = now();
 
   return trpcT.router({
-    health: publicProcedure.query(async (_opts) => {
-      // See readyMiddleware for not-ready check.
-      // If we're here, API is ready. Check whether it's healthy:
-      const nowS = now();
-      const uptimeS = nowS - startTimeS;
-      const node = getNodeMetrics();
-      const apiDB = db.getStatus();
-      const indexer = watcher.getStatus();
-
-      let status = "healthy";
-      if (indexer.lastGoodTickS < nowS - 10) {
-        status = "watcher-not-ticking";
-      } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
-        status = "watcher-behind-rpc";
-      } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
-        status = "node-mem-full";
-      } else if (apiDB.waitingCount > 10) {
-        status = "api-db-overloaded";
-      } else if (indexer.shovelDB.waitingCount > 10) {
-        status = "shovel-db-overloaded";
-      }
-
-      return { status, nowS, uptimeS, node, apiDB, indexer };
+    health: publicProcedure.query(() => {
+      return healthCheck(db, watcher, startTimeS);
     }),
 
     search: publicProcedure
