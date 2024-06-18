@@ -9,6 +9,7 @@ import {
 } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
+import { chainConfig } from "./env";
 import { rpc } from "./rpc";
 import { getJSONblock, parseKwargs, unfurlLink } from "./utils";
 
@@ -68,9 +69,9 @@ const commands: Record<string, Command> = {
     help: "Gets name, address and balance of a user. Args: [user = name or addr]",
     fn: getUser,
   },
-  "get-uniswap": {
-    help: "Gets the best Uniswap route for a given token to USDC. Args: [num=1.23, token=DAI]",
-    fn: getUniswapRoute,
+  "get-swap-quote": {
+    help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
+    fn: getSwapQuote,
   },
   health: {
     help: "Checks that the API is up",
@@ -146,29 +147,54 @@ async function getTokenList(): Promise<TokenList> {
   return tokenListPromise;
 }
 
-async function getUniswapRoute(kwargs: Map<string, string>): Promise<string> {
-  const strN = kwargs.get("num");
-  const strToken = kwargs.get("token");
-  if (!strN || !strToken) return "Must specify num and token";
+// Gets a swap quote from the onchain contract.
+async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
+  const strN = kwargs.get("fromAmount");
+  const strFromToken = kwargs.get("fromToken");
+  const strToToken = kwargs.get("toToken");
+  if (!strN || !strFromToken || !strToToken)
+    return "Must specify fromAmount, fromToken and toToken";
 
   const { tokens } = await getTokenList();
-  const token = tokens.find(
-    (t) => t.symbol === strToken || t.address === strToken.toLowerCase()
+  const fromToken = tokens.find(
+    (t) => t.symbol === strFromToken || t.address === strFromToken.toLowerCase()
   );
-  if (token == null) return `Token '${strToken}' not found`;
+  if (fromToken == null) return `Token '${strFromToken}' not found`;
 
-  const fromAmount = dollarsToAmount(Number(strN), token.decimals);
+  const toToken = tokens.find(
+    (t) => t.symbol === strToToken || t.address === strToToken.toLowerCase()
+  );
+  if (toToken == null) return `Token '${strToToken}' not found`;
 
-  const route = await rpc.getUniswapRoute.query({
-    fromToken: getAddress(token.address),
-    fromAmount: "" + fromAmount,
+  const amountIn = dollarsToAmount(Number(strN), fromToken.decimals);
+  const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
+
+  const route = await rpc.getSwapQuote.query({
+    amountIn: `${amountIn}`,
+    fromToken: fromToken.address,
+    toToken: toToken.address,
+    fromAccount: {
+      addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+    },
     toAddr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
+    chainId,
   });
 
-  const fromStr = `${fromAmount} ${token.symbol}`; // eg 1.23 DAI
+  if (!route) {
+    return [
+      `No route found from ${fromToken.symbol} (${fromToken.address})`,
+      `to ${toToken.symbol} (${toToken.address})`,
+    ].join("\n");
+  }
+  const fromStr = `${amountIn} ${fromToken.symbol}`; // eg 1.23 DAI
   return [
-    `Token: ${token.symbol} (${token.address})`,
-    `Best route for ${fromStr} to USDC: ${JSON.stringify(route, null, 2)}`,
+    `From ${fromToken.symbol} (${fromToken.address})`,
+    `To ${toToken.symbol} (${toToken.address})`,
+    `Fetched route for ${fromStr} to ${toToken.symbol}: ${JSON.stringify(
+      route,
+      null,
+      2
+    )}`,
   ].join("\n");
 }
 
