@@ -12,7 +12,8 @@ session.connect();
 export async function healthCheck(
   db: DB,
   watcher: Watcher,
-  startTimeS: number
+  startTimeS: number,
+  trpcReqsInFlight: string[]
 ) {
   // Seasync e readyMiddleware for not-ready check.
   // If we're here, API is ready. Check whether it's healthy:
@@ -37,7 +38,16 @@ export async function healthCheck(
 
   const nPromises = await countPromises();
 
-  return { status, nowS, uptimeS, node, apiDB, indexer, nPromises };
+  return {
+    status,
+    nowS,
+    uptimeS,
+    node,
+    apiDB,
+    indexer,
+    nPromises,
+    trpcReqsInFlight,
+  };
 }
 
 async function countPromises() {

@@ -93,6 +93,8 @@ export function createRouter(
   extApiCache: ExternalApiCache
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
+  const trpcReqsInFlight = [] as string[];
+
   const tracerMiddleware = trpcT.middleware(async (opts) => {
     // Request ID for logs + honeycomb
     const reqId = "req:" + Math.floor(Math.random() * 36 ** 6).toString(36);
@@ -101,7 +103,10 @@ export function createRouter(
     span.setAttribute("req_id", reqId);
 
     // Process request
+    const slug = `${opts.type}:${opts.path}:${reqId}`;
+    trpcReqsInFlight.push(slug);
     const result = await runWithLogContext(reqId, () => opts.next());
+    trpcReqsInFlight.splice(trpcReqsInFlight.indexOf(slug), 1);
 
     // Log request
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
@@ -167,7 +172,7 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(() => {
-      return healthCheck(db, watcher, startTimeS);
+      return healthCheck(db, watcher, startTimeS, trpcReqsInFlight.slice());
     }),
 
     search: publicProcedure

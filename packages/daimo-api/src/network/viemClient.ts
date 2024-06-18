@@ -134,12 +134,13 @@ export class ViemClient {
   getEnsAddress = memoize(
     async ({ name }: { name: string }): Promise<Address | null> => {
       try {
-        const result = await this.extApiCache.get("ens-get-address", name, () =>
-          this.l1Client.getEnsAddress({ name }).then((a) => a || "")
-        );
+        const result = await this.extApiCache.get("ens-get-addr", name, () => {
+          console.log(`[VIEM] getEnsAddress for '${name}'`);
+          return this.l1Client.getEnsAddress({ name }).then((a) => a || "");
+        });
         return !result ? null : getAddress(result);
       } catch (e: any) {
-        console.log(`[VIEM] getEnsAddr ${name} error: ${e.message}`);
+        console.log(`[VIEM] getEnsAddress for '${name}' error: ${e.message}`);
         return null;
       }
     },
