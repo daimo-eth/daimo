@@ -18,10 +18,11 @@ import { userOpIntegration } from "./userop";
 const source: Source = {
   name: "$CHAIN_NAME",
   chain_id: "$CHAIN_ID",
+  ws_url: "$CHAIN_RPC_WS_URL",
   urls: ["$CHAIN_RPC_URL", "$CHAIN_RPC_URL_BACKUP"],
   batch_size: 100,
   concurrency: 4,
-};
+} as any; // TODO: remove once @indexsupply/shovel-config updates
 
 const traceSource: Source = {
   name: "$CHAIN_TRACE_NAME",
@@ -29,7 +30,7 @@ const traceSource: Source = {
   urls: ["$CHAIN_TRACE_RPC_URL", "$CHAIN_TRACE_RPC_URL_BACKUP"],
   batch_size: 128,
   concurrency: 8,
-};
+} as any;
 
 const integrations = [
   namesIntegration,

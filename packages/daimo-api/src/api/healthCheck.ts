@@ -46,7 +46,7 @@ export async function healthCheck(
     apiDB,
     indexer,
     nPromises,
-    trpcReqsInFlight,
+    trpcReqsInFlight: trpcReqsInFlight.slice(),
   };
 }
 

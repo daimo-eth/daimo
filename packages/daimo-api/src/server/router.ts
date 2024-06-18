@@ -171,8 +171,10 @@ export function createRouter(
   const startTimeS = now();
 
   return trpcT.router({
-    health: publicProcedure.query(() => {
-      return healthCheck(db, watcher, startTimeS, trpcReqsInFlight.slice());
+    health: publicProcedure.query(async () => {
+      const ret = await healthCheck(db, watcher, startTimeS, trpcReqsInFlight);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     search: publicProcedure
