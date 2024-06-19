@@ -40,21 +40,14 @@ export async function getSwapQuote({
 }) {
   const amountIn: bigint = BigInt(amountInStr);
 
-  const amountOut: bigint = await vc.publicClient.readContract({
+  const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
-    address: "0xa5404e387bebC4669cb04Ffa0368204B662Cc50c",
-    functionName: "quoteFromOracle",
+    address: "0x4f0ac4dC662514d8b5D3218C8FD072D7B1A911c2",
+    functionName: "quote",
     args: [amountIn, tokenIn, tokenOut],
   });
-
-  // Retrieves the swap path separately from the quoted amountOut to take
-  // liquidity into account when path finding.
-  const swapPath = await vc.publicClient.readContract({
-    abi: daimoUsdcSwapperABI,
-    address: "0xa5404e387bebC4669cb04Ffa0368204B662Cc50c",
-    functionName: "quoteBestPath",
-    args: [amountIn, tokenIn, tokenOut],
-  });
+  const amountOut: bigint = swapQuote[0];
+  const swapPath: Hex = swapQuote[1];
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.

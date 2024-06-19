@@ -1915,11 +1915,6 @@ export const daimoUsdcSwapperABI = [
         internalType: 'contract ISwapRouter',
         type: 'address',
       },
-      {
-        name: '_uniswapQuoter',
-        internalType: 'contract IQuoterV2',
-        type: 'address',
-      },
       { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
       { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
       {
@@ -1978,12 +1973,14 @@ export const daimoUsdcSwapperABI = [
     inputs: [
       { name: 'tokenA', internalType: 'contract IERC20', type: 'address' },
       { name: 'tokenB', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
     ],
     name: 'getBestPoolTick',
     outputs: [
       { name: 'bestPool', internalType: 'address', type: 'address' },
       { name: 'tick', internalType: 'int24', type: 'int24' },
       { name: 'bestFee', internalType: 'uint24', type: 'uint24' },
+      { name: 'bestAmountOut', internalType: 'uint128', type: 'uint128' },
     ],
   },
   {
@@ -2031,8 +2028,11 @@ export const daimoUsdcSwapperABI = [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
       { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
     ],
-    name: 'quoteBestPath',
-    outputs: [{ name: 'swapPath', internalType: 'bytes', type: 'bytes' }],
+    name: 'quote',
+    outputs: [
+      { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
+    ],
   },
   {
     stateMutability: 'view',
@@ -2047,17 +2047,6 @@ export const daimoUsdcSwapperABI = [
       { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
       { name: 'fee', internalType: 'uint24', type: 'uint24' },
     ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
-      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
-    ],
-    name: 'quoteFromOracle',
-    outputs: [{ name: 'amountOut', internalType: 'uint256', type: 'uint256' }],
   },
   {
     stateMutability: 'view',
@@ -2085,15 +2074,6 @@ export const daimoUsdcSwapperABI = [
     outputs: [
       { name: 'totalAmountOut', internalType: 'uint128', type: 'uint128' },
       { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'uniswapQuoter',
-    outputs: [
-      { name: '', internalType: 'contract IQuoterV2', type: 'address' },
     ],
   },
   {

@@ -121,8 +121,9 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
         if (estAmountOut256 >= _MAX_UINT128) continue; // swap too large
 
-        uint256 requiredXY = amountIn * estAmountOut256; // x * y of trade
-        uint256 availableXY = harmonicMeanLiquidity * harmonicMeanLiquidity;
+        uint256 requiredXY = uint256(amountIn) * estAmountOut256; // x * y of trade
+        uint256 availableXY = uint256(harmonicMeanLiquidity) *
+          uint256(harmonicMeanLiquidity);
 
         if (
           harmonicMeanLiquidity > bestLiquidity && availableXY >= requiredXY
@@ -236,41 +237,6 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
       amountOut = hopAmountOut;
       swapPath = swapPathHop;
     }
-  }
-
-  // Fetch the best route for a given exact input token pair.
-  // quoteExactInput/Single are not view functions, so we need to use staticcall
-  function quoteBestPath(
-    uint128 amountIn,
-    IERC20 tokenIn,
-    IERC20 tokenOut
-  ) public view returns (bytes memory swapPath) {
-    if (address(tokenIn) == address(0)) tokenIn = weth;
-    if (address(tokenOut) == address(0)) tokenOut = weth;
-
-    // Same token swap.
-    if (tokenIn == tokenOut) {
-      return new bytes(0);
-    }
-
-    // Quote real amountOut for direct swap path.
-    (uint256 amountOutDirect, uint24 directFee) = quoteDirect(
-      amountIn,
-      tokenIn,
-      tokenOut
-    );
-
-    // Quote real amountOut for via hop swap path.
-    (uint256 amountOutViaHop, bytes memory swapPathViaHop) = quoteViaHop(
-      amountIn,
-      tokenIn,
-      tokenOut
-    );
-
-    return
-      amountOutDirect > amountOutViaHop
-        ? abi.encodePacked(address(tokenIn), directFee, address(tokenOut))
-        : swapPathViaHop;
   }
 
   function getFinalOutputToken(
