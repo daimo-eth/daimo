@@ -721,7 +721,7 @@ export function createRouter(
       .subscription(async (opts) => {
         const { address, inviteCode } = opts.input;
         // how often to send updates regardless of new transfers
-        // useful to update exchange rates and others.
+        // useful to update keys, exchange rates and others.
         const refreshInterval = 10_000;
 
         return observable<AccountHistoryResult>((emit) => {
@@ -729,9 +729,8 @@ export function createRouter(
           let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
             null;
 
-          const pushHistory = () => {
-            // (onlyOnNewTransfers: boolean) => {
-            getAccountHistoryPromise = getAccountHistory(
+          const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
+            getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
@@ -750,23 +749,23 @@ export function createRouter(
               keyReg,
               paymaster,
               db
-            );
-
-            getAccountHistoryPromise
+            )
               .then((history) => {
-                // we can have concurrent requests. discard those that arrived too late
-                if (history.lastBlock <= lastEmittedBlock) {
+                // we can have concurrent requests. discard interval pushes
+                // that arrived too late
+                if (
+                  !emitOnlyOnNewTransfers &&
+                  history.lastBlock <= lastEmittedBlock
+                ) {
                   return;
                 }
-                // TODO: replace
-                // When a DB event happens, we need to:
-                // - Handle transfers, key rotations, etc
-                // - Figure out which accounts are affected
-                // - Send onAccountUpdate to those accounts, if connected
-                //
-                // if (onlyOnNewTransfers && history.transferLogs.length === 0) {
-                //   return;
-                // }
+
+                if (
+                  emitOnlyOnNewTransfers &&
+                  history.transferLogs.length === 0
+                ) {
+                  return;
+                }
 
                 emit.next(history);
 
@@ -777,24 +776,21 @@ export function createRouter(
               });
           };
 
-          const onDBEvent = async () => {
-            // new block arrived while interval update was running. wait for it.
-            if (getAccountHistoryPromise) {
-              await getAccountHistoryPromise;
-            }
-            pushHistory();
+          // when new block is produced,
+          // push history only if there are new transfers
+          const onNewBlock = async () => {
+            pushHistory(true);
           };
 
+          // for interval updates push full history
           const intervalTimer = setInterval(() => {
-            // interval coincided with new block. let's skip this one.
-            if (getAccountHistoryPromise) return;
-            pushHistory();
+            pushHistory(false);
           }, refreshInterval);
 
-          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onDBEvent);
+          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
 
           return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onDBEvent);
+            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
             clearInterval(intervalTimer);
           };
         });
