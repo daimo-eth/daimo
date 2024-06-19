@@ -1,6 +1,6 @@
 import {
   DaimoInviteCodeStatus,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpEvent,
   PendingOpEvent,
@@ -140,7 +140,9 @@ export function useSendAsync({
  *  transfer to history and merges any new named accounts. */
 export function transferAccountTransform(namedAccounts: EAccount[]) {
   return (account: Account, pendingOp: OpEvent): Account => {
-    assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
+    assert(
+      ["transfer", "createLink", "claimLink", "swap"].includes(pendingOp.type)
+    );
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
       account.namedAccounts.find((a) => a.addr === addr);
@@ -149,10 +151,7 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 
     return {
       ...account,
-      recentTransfers: [
-        ...account.recentTransfers,
-        pendingOp as DisplayOpEvent,
-      ],
+      recentTransfers: [...account.recentTransfers, pendingOp as TransferClog],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
     };
   };

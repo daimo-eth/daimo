@@ -1,5 +1,5 @@
 import {
-  DisplayOpEvent,
+  TransferClog,
   getForeignCoinDisplayAmount,
   isNativeETH,
 } from "@daimo/common";
@@ -12,7 +12,7 @@ import { env } from "../../../env";
 // Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
 // or "Accepted 5 USDT as USDC" if long
 export function getSynthesizedMemo(
-  op: DisplayOpEvent,
+  op: TransferClog,
   daimoChain: DaimoChain,
   short?: boolean
 ) {
@@ -23,22 +23,30 @@ export function getSynthesizedMemo(
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
   if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
 
-  if (op.type !== "transfer") return null;
-  if (op.requestStatus) {
+  if (op.type !== "transfer" && op.type !== "swap") return null;
+  if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
-  } else if (op.preSwapTransfer) {
-    if (isNativeETH(op.preSwapTransfer.coin, chainConfig)) {
+  } else if (
+    (op.type === "transfer" && op.preSwapTransfer) ||
+    op.type === "swap"
+  ) {
+    // TODO: do we need to explicitly handle preSwapTransfer && "transfer" for
+    // backwards compatibility?
+    const fromCoin =
+      op.type === "transfer" ? op.preSwapTransfer!.coin : op.coinOther;
+    const fromAmount =
+      op.type === "transfer" ? op.preSwapTransfer!.amount : op.amountOther;
+
+    if (isNativeETH(fromCoin.address, chainConfig)) {
       return `ETH → ${coinName}`;
     }
 
-    const readableAmount = getForeignCoinDisplayAmount(
-      op.preSwapTransfer.amount,
-      op.preSwapTransfer.coin
-    );
+    const readableAmount = getForeignCoinDisplayAmount(fromAmount, fromCoin);
+
     if (short) {
-      return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;
+      return `${readableAmount} ${fromCoin.symbol} → ${coinName}`;
     } else {
-      return `Accepted ${readableAmount} ${op.preSwapTransfer.coin.symbol} as ${coinName}`;
+      return `Accepted ${readableAmount} ${fromCoin.symbol} as ${coinName}`;
     }
   }
 }

@@ -5,7 +5,7 @@ import {
   CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoRequestV2Status,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   KeyData,
   LinkedAccount,
@@ -59,7 +59,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: DisplayOpEvent[];
+  transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -196,7 +196,7 @@ export async function getAccountHistory(
     // TODO: re-enable once eth_transfers is caught up
     // ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
     ...(await foreignCoinIndexer.getProposedSwapsForAddr(address)),
-  ];
+  ] as ProposedSwap[];
   elapsedMs = Date.now() - startMs;
   console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
 

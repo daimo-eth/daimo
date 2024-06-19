@@ -1,5 +1,5 @@
 import {
-  DisplayOpEvent,
+  TransferClog,
   amountToDollars,
   formatDaimoLink,
   getAccountName,
@@ -163,7 +163,7 @@ export class Crontab {
     }
   };
 
-  async postRecentTransfer(opEvent: DisplayOpEvent) {
+  async postRecentTransfer(opEvent: TransferClog) {
     const fromName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.from);
     const toName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.to);
 

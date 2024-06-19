@@ -20,9 +20,9 @@ import { BigIntStr } from "./model";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferOpEvent | PaymentLinkOpEvent | KeyRotationOpEvent;
+export type OpEvent = TransferClog | KeyRotationOpEvent;
 
-export type DisplayOpEvent = TransferOpEvent | PaymentLinkOpEvent;
+export type TransferClog = SimpleTransferClog | PaymentLinkClog | SwapClog;
 
 /**
  *  Fetched data for a pending OpEvent. For a pending op, we (usually)
@@ -37,6 +37,11 @@ export type PendingOpEvent = {
   inviteCode?: string;
 };
 
+/*
+ * Deprecated usage in TransferClog.
+ *
+ * Use SwapClog instead for transfers that involve a swap on the same chain.
+ */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
@@ -44,7 +49,8 @@ export type PreSwapTransfer = {
 };
 
 /**
- * Represents a transfer of tokens from one address to another.
+ * Represents a transfer of the same tokens from one address to another on the
+ * same chain (a.k.a. same coins, same chain).
  *
  * There's a surprising amount of complexity to the state of a transfer.
  *
@@ -72,7 +78,7 @@ export type PreSwapTransfer = {
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface TransferOpEvent extends OpEventBase {
+export interface SimpleTransferClog extends OpEventBase {
   type: "transfer";
 
   from: Address;
@@ -91,10 +97,10 @@ export interface TransferOpEvent extends OpEventBase {
   memo?: string;
 
   /** If the transfer was caused by a user-initiated swap, the swap origin */
-  preSwapTransfer?: PreSwapTransfer;
+  preSwapTransfer?: PreSwapTransfer; // Keep for backwards compatibility (?)
 }
 
-export interface PaymentLinkOpEvent extends OpEventBase {
+export interface PaymentLinkClog extends OpEventBase {
   type: "createLink" | "claimLink";
 
   from: Address;
@@ -109,6 +115,36 @@ export interface PaymentLinkOpEvent extends OpEventBase {
   nonceMetadata?: Hex;
 
   /** Memo from the sender, if present */
+  memo?: string;
+}
+
+/**
+ * Represents a token swap between two accounts on the same chain.
+ * Same chain, different coins.
+ *
+ * A token swap can be inbound swap (e.g. a Daimo account receives a foreign
+ * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
+ * foreign token transfer to Bob).
+ */
+export interface SwapClog extends OpEventBase {
+  type: "swap";
+
+  from: Address;
+  to: Address;
+
+  /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
+  amount: number; // amount that affects the user
+
+  /** "Other" coin involved in the swap (i.e. not homeCoin or bridgeCoin) */
+  coinOther: ForeignToken;
+
+  /** Amount of the coinOther in the swap (in native unit of coinOther) */
+  amountOther: BigIntStr;
+
+  /** Userop nonce, if this transfer occurred in a userop */
+  nonceMetadata?: Hex;
+
+  /** Memo, user-generated text for the transfer */
   memo?: string;
 }
 
@@ -167,10 +203,12 @@ export type DaimoAccountCall = {
 // the address of the claimer.
 // If the op claims a payment link, from = sender, to = claimer.
 // If the op is a swap, from = the pre-swap sender.
-export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
+export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   if (op.type === "transfer") {
     if (op.preSwapTransfer) return [op.preSwapTransfer.from, op.to];
     else return [op.from, op.to];
+  } else if (op.type === "swap") {
+    return [op.from, op.to];
   } else {
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
       // Self-transfer via payment link shows up as two payment link transfers
