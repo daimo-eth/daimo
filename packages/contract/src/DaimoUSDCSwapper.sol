@@ -119,7 +119,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
           quoteToken: address(tokenB)
         });
 
-        if (estAmountOut256 >= _MAX_UINT128) continue; // swap too large
+        if (estAmountOut256 > _MAX_UINT128) continue; // swap too large
 
         uint256 requiredXY = uint256(amountIn) * estAmountOut256; // x * y of trade
         uint256 availableXY = uint256(harmonicMeanLiquidity) *
@@ -178,10 +178,9 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
       ) = getBestPoolTick(tokenIn, hopToken, amountIn);
 
       if (poolOne == address(0)) continue;
-      if (hopAmountOut > _MAX_UINT128) continue;
 
       (uint256 pathAmountOut, uint24 feeTwo) = quoteDirect(
-        uint128(hopAmountOut),
+        hopAmountOut,
         hopToken,
         tokenOut
       );

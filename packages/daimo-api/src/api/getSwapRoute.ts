@@ -42,7 +42,7 @@ export async function getSwapQuote({
 
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
-    address: "0x4f0ac4dC662514d8b5D3218C8FD072D7B1A911c2",
+    address: "0x2F7e2Eee89A3c6937A22607c7e9B2231825a5418",
     functionName: "quote",
     args: [amountIn, tokenIn, tokenOut],
   });

@@ -40,7 +40,7 @@ contract DeployDaimoUSDCSwapper is Script {
 
     DaimoUSDCSwapper swapper = DaimoUSDCSwapper(
       _create3.deploy(
-        keccak256("DaimoUSDCSwapper-testing-8"),
+        keccak256("DaimoUSDCSwapper-testing-9"),
         bytes.concat(
           type(DaimoUSDCSwapper).creationCode,
           abi.encode(
