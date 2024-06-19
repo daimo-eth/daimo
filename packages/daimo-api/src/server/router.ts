@@ -57,8 +57,8 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { ExternalApiCache } from "../db/externalApiCache";
+import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -722,8 +722,6 @@ export function createRouter(
 
         return observable<AccountHistoryResult>((emit) => {
           let lastEmittedBlock = opts.input.sinceBlockNum;
-          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
-            null;
 
           const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
             getAccountHistory(
@@ -746,31 +744,24 @@ export function createRouter(
               paymaster,
               db,
               extApiCache
-            )
-              .then((history) => {
-                // we can have concurrent requests. discard interval pushes
-                // that arrived too late
-                if (
-                  !emitOnlyOnNewTransfers &&
-                  history.lastBlock <= lastEmittedBlock
-                ) {
-                  return;
-                }
+            ).then((history) => {
+              // we can have concurrent requests. discard interval pushes
+              // that arrived too late
+              if (
+                !emitOnlyOnNewTransfers &&
+                history.lastBlock <= lastEmittedBlock
+              ) {
+                return;
+              }
 
-                if (
-                  emitOnlyOnNewTransfers &&
-                  history.transferLogs.length === 0
-                ) {
-                  return;
-                }
+              if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
+                return;
+              }
 
-                emit.next(history);
+              emit.next(history);
 
-                lastEmittedBlock = history.lastBlock;
-              })
-              .finally(() => {
-                getAccountHistoryPromise = null;
-              });
+              lastEmittedBlock = history.lastBlock;
+            });
           };
 
           // when new block is produced,
