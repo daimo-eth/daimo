@@ -127,6 +127,10 @@ export class Watcher {
           this.shovelLatest,
           this.batchSize
         );
+        const { shovelLatest } = this;
+        const tickSummary = JSON.stringify({ shovelLatest, localLatest });
+        console.log(`[SHOVEL] starting tick ${tickSummary}`);
+
         if (localLatest - this.slowLatest > 3) {
           // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
           this.slowIndex(this.slowLatest + 1, localLatest);

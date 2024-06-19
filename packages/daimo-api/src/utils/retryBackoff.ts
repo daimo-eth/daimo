@@ -14,7 +14,7 @@ export async function retryBackoff<T>(
         console.log(
           `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`
         );
-        await new Promise((r) => setTimeout(r));
+        await new Promise((r) => setTimeout(r, sleepMs));
       } else {
         console.warn(`[RETRY] ${name} QUITTING after try ${i}, error: ${e}`);
         break;

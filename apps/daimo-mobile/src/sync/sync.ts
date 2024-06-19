@@ -23,7 +23,7 @@ class SyncManager {
   // for tracking retry timeout
   retryTimeout: any = undefined;
 
-  _trpcUnsubscribe: (() => void) | null = null;
+  private _trpcUnsubscribe: (() => void) | null = null;
 
   start() {
     this.manager.addListener(this._onAccountChange);

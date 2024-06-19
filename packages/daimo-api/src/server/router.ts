@@ -21,7 +21,6 @@ import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
-import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -35,6 +34,7 @@ import {
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
+import { healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -58,6 +58,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
+import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -93,9 +94,12 @@ export function createRouter(
   notifier: PushNotifier,
   accountFactory: AccountFactory,
   telemetry: Telemetry,
-  binanceClient: BinanceClient
+  binanceClient: BinanceClient,
+  extApiCache: ExternalApiCache
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
+  const trpcReqsInFlight = [] as string[];
+
   const tracerMiddleware = trpcT.middleware(async (opts) => {
     // Request ID for logs + honeycomb
     const reqId = "req:" + Math.floor(Math.random() * 36 ** 6).toString(36);
@@ -104,7 +108,10 @@ export function createRouter(
     span.setAttribute("req_id", reqId);
 
     // Process request
+    const slug = `${opts.type}:${opts.path}:${reqId}`;
+    trpcReqsInFlight.push(slug);
     const result = await runWithLogContext(reqId, () => opts.next());
+    trpcReqsInFlight.splice(trpcReqsInFlight.indexOf(slug), 1);
 
     // Log request
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
@@ -175,29 +182,15 @@ export function createRouter(
   const startTimeS = now();
 
   return trpcT.router({
-    health: publicProcedure.query(async (_opts) => {
-      // See readyMiddleware for not-ready check.
-      // If we're here, API is ready. Check whether it's healthy:
-      const nowS = now();
-      const uptimeS = nowS - startTimeS;
-      const node = getNodeMetrics();
-      const apiDB = db.getStatus();
-      const indexer = watcher.getStatus();
+    health: publicProcedure.query(async () => {
+      // See readyMiddleware for ready check
+      return { status: "healthy" };
+    }),
 
-      let status = "healthy";
-      if (indexer.lastGoodTickS < nowS - 10) {
-        status = "watcher-not-ticking";
-      } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
-        status = "watcher-behind-rpc";
-      } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
-        status = "node-mem-full";
-      } else if (apiDB.waitingCount > 10) {
-        status = "api-db-overloaded";
-      } else if (indexer.shovelDB.waitingCount > 10) {
-        status = "shovel-db-overloaded";
-      }
-
-      return { status, nowS, uptimeS, node, apiDB, indexer };
+    healthDebug: publicProcedure.query(async () => {
+      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     search: publicProcedure
@@ -298,7 +291,9 @@ export function createRouter(
         z.object({
           apiKey: z.string(),
           code: z.string(),
-          maxUses: z.number(),
+          maxUses: z.number().optional(),
+          bonusDollarsInviter: z.number().optional(),
+          bonusDollarsInvitee: z.number().optional(),
         })
       )
       .mutation(async ({ input }) => {
@@ -360,12 +355,13 @@ export function createRouter(
           nameReg,
           keyReg,
           paymaster,
-          db
+          db,
+          extApiCache
         );
       }),
 
     getExchangeRates: publicProcedure.query(async (opts) => {
-      const rates = await getExchangeRates(vc);
+      const rates = await getExchangeRates(extApiCache);
       return rates;
     }),
 
@@ -748,7 +744,8 @@ export function createRouter(
               nameReg,
               keyReg,
               paymaster,
-              db
+              db,
+              extApiCache
             )
               .then((history) => {
                 // we can have concurrent requests. discard interval pushes

@@ -1,3 +1,4 @@
+import { StubExternalApiCache } from "@daimo/api/src/db/externalApiCache";
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
 import { ViemClient } from "@daimo/api/src/network/viemClient";
 import { Telemetry } from "@daimo/api/src/server/telemetry";
@@ -138,7 +139,8 @@ export async function createAccount() {
       publicClient,
       publicClient,
       walletClient,
-      new Telemetry()
+      new Telemetry(),
+      new StubExternalApiCache()
     );
     const hash = await bundlerClient.getOpHash(op, vc.publicClient);
     console.log(`NOT sending userOp. Hash: ${hash}`);

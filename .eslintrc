@@ -1,7 +1,7 @@
 {
   "root": true,
   "extends": ["universe"],
-  "ignorePatterns": ["dist"],
+  "ignorePatterns": ["dist", "codegen"],
   "rules": {
     "import/order": [
       "error",

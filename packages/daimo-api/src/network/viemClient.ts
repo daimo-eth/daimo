@@ -16,12 +16,14 @@ import {
   createPublicClient,
   createWalletClient,
   fallback,
+  getAddress,
   http,
   isHex,
   webSocket,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
+import { IExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { memoize } from "../utils/func";
@@ -68,7 +70,10 @@ function addLogging(transport: Transport) {
  * Loads a wallet from the local DAIMO_API_PRIVATE_KEY env var.
  * This account sponsors gas for account creation (and a faucet, on testnet).
  */
-export function getViemClientFromEnv(monitor: Telemetry) {
+export function getViemClientFromEnv(
+  monitor: Telemetry,
+  extApiCache: IExternalApiCache
+) {
   const transports = getTransportFromEnv();
 
   // Connect to L1
@@ -90,7 +95,13 @@ export function getViemClientFromEnv(monitor: Telemetry) {
     account,
   });
 
-  return new ViemClient(l1Client, publicClient, walletClient, monitor);
+  return new ViemClient(
+    l1Client,
+    publicClient,
+    walletClient,
+    monitor,
+    extApiCache
+  );
 }
 
 export function getEOA(privateKey: string) {
@@ -114,17 +125,27 @@ export class ViemClient {
     private l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
     private walletClient: WalletClient<Transport, Chain, Account>,
-    private telemetry: Telemetry
+    private telemetry: Telemetry,
+    private extApiCache: IExternalApiCache
   ) {
     this.account = this.walletClient.account;
   }
 
   getEnsAddress = memoize(
-    async (a: { name: string }) => {
+    async ({ name }: { name: string }): Promise<Address | null> => {
       try {
-        return await this.l1Client.getEnsAddress(a);
+        const result = await this.extApiCache.get(
+          "ens-get-addr",
+          name,
+          () => {
+            console.log(`[VIEM] getEnsAddress for '${name}'`);
+            return this.l1Client.getEnsAddress({ name }).then((a) => a || "");
+          },
+          24 * 3600
+        );
+        return !result ? null : getAddress(result);
       } catch (e: any) {
-        console.log(`[VIEM] getEnsAddr ${a.name} error: ${e.message}`);
+        console.log(`[VIEM] getEnsAddress for '${name}' error: ${e.message}`);
         return null;
       }
     },
@@ -132,7 +153,18 @@ export class ViemClient {
   );
 
   getEnsName = memoize(
-    (a: { address: Address }) => this.l1Client.getEnsName(a),
+    async ({ address }: { address: Address }) => {
+      const result = await this.extApiCache.get(
+        "ens-get-name",
+        address,
+        () => {
+          console.log(`[VIEM] getEnsName for '${address}'`);
+          return this.l1Client.getEnsName({ address }).then((a) => a || "");
+        },
+        24 * 3600
+      );
+      return result || null;
+    },
     ({ address }: { address: Address }) => address
   );
 

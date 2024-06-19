@@ -20,7 +20,7 @@ import {
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
-import { getExchangeRatesCached } from "./getExchangeRates";
+import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
 import { ETHIndexer } from "../contract/ethIndexer";
@@ -32,6 +32,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
+import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import {
   LandlineAccount,
@@ -106,7 +107,8 @@ export async function getAccountHistory(
   nameReg: NameRegistry,
   keyReg: KeyRegistry,
   paymaster: Paymaster,
-  db: DB
+  db: DB,
+  extApiCache: ExternalApiCache
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
@@ -198,14 +200,14 @@ export async function getAccountHistory(
 
   // Get proposed swaps of non-home coin tokens for address
   const proposedSwaps = [
-    ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
-    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address, true)),
-  ];
+    // ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
+    // ...(await foreignCoinIndexer.getProposedSwapsForAddr(address, true)),
+  ] as ProposedSwap[];
   elapsedMs = Date.now() - startMs;
   console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
 
   // Get exchange rates
-  const exchangeRates = await getExchangeRatesCached(vc);
+  const exchangeRates = await getExchangeRates(extApiCache);
 
   // Get landline session key and accounts
   let landlineSessionKey = "";
@@ -318,7 +320,7 @@ function getRampNetworkURL(account: EAccount) {
 }
 
 function getBridgeURL(account: EAccount) {
-  return `https://www.relay.link/bridge/base/?currency=usdc&toAddress=${account.addr}&lockToChain=true&lockCurrency=true&header=daimo`;
+  return `https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
 }
 
 function getCoinbaseURL(account: EAccount) {

@@ -64,6 +64,10 @@ const commands: Record<string, Command> = {
     help: "Set max uses. Args: [link, max_uses]",
     fn: setMaxUses,
   },
+  "disable-invite-bonus": {
+    help: "Disable invite bonus. Args: [link]",
+    fn: disableInviteBonus,
+  },
   "get-user": {
     help: "Gets name, address and balance of a user. Args: [user = name or addr]",
     fn: getUser,
@@ -261,6 +265,26 @@ async function viewInviteStatus(kwargs: Map<string, string>): Promise<string> {
   const inviteStatus = await rpc.getLinkStatus.query({ url });
 
   return `${getJSONblock(inviteStatus)}`;
+}
+
+async function disableInviteBonus(kwargs: Map<string, string>) {
+  const link = parseDaimoLink(unfurlLink(assertNotNull(kwargs.get("link"))));
+
+  if (link?.type !== "invite") {
+    return help("disable-invite-bonus invalid link type");
+  }
+
+  const res = await rpc.updateInviteLink.mutate({
+    apiKey,
+    code: link.code,
+    bonusDollarsInvitee: 0,
+    bonusDollarsInviter: 0,
+  });
+  const inviteStatus = await rpc.getLinkStatus.query({ url: res });
+
+  return `Successfully disabled invite bonus: ${res}\n\n${getJSONblock(
+    inviteStatus
+  )}`;
 }
 
 async function setMaxUses(kwargs: Map<string, string>) {
