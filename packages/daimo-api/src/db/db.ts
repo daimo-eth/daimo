@@ -417,19 +417,19 @@ export class DB {
   async updateInviteCode(row: UpdateInviteCodeArgs) {
     console.log(`[DB] updating invite code: ${JSON.stringify(row)}`);
     let res;
-    if (row.maxUses) {
+    if (row.maxUses != null) {
       res = await this.pool.query<[], any[]>(
         `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
         [row.maxUses, row.code]
       );
     }
-    if (row.bonusDollarInviter) {
+    if (row.bonusDollarInviter != null) {
       res = await this.pool.query<[], any[]>(
         `UPDATE invitecode SET bonus_cents_inviter = $1 WHERE code = $2`,
         [row.bonusDollarInviter * 100, row.code]
       );
     }
-    if (row.bonusDollarInvitee) {
+    if (row.bonusDollarInvitee != null) {
       res = await this.pool.query<[], any[]>(
         `UPDATE invitecode SET bonus_cents_invitee = $1 WHERE code = $2`,
         [row.bonusDollarInvitee * 100, row.code]
