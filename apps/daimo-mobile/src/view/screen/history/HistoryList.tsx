@@ -1,6 +1,6 @@
 import {
   AddrLabel,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   assert,
@@ -47,7 +47,7 @@ interface HeaderObject {
 interface DisplayOpRenderObject {
   isHeader: false;
   id: string;
-  op: DisplayOpEvent;
+  op: TransferClog;
 }
 
 export function HistoryListSwipe({
@@ -89,7 +89,7 @@ export function HistoryListSwipe({
     );
   }
 
-  const renderRow = (t: DisplayOpEvent) => (
+  const renderRow = (t: TransferClog) => (
     <DisplayOpRow
       key={getDisplayOpId(t)}
       displayOp={t}
@@ -178,7 +178,7 @@ function DisplayOpRow({
   linkTo,
   showDate,
 }: {
-  displayOp: DisplayOpEvent;
+  displayOp: TransferClog;
   account: Account;
   linkTo: "op" | "account";
   showDate?: boolean;
@@ -317,7 +317,7 @@ function TransferAmountDate({
   );
 }
 
-function getDisplayOpId(t: DisplayOpEvent): string {
+function getDisplayOpId(t: TransferClog): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 

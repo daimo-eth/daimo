@@ -5,7 +5,7 @@ import {
   CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoRequestV2Status,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   KeyData,
   LinkedAccount,
@@ -58,7 +58,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: DisplayOpEvent[];
+  transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -232,7 +232,7 @@ export async function getAccountHistory(
 }
 
 async function getNamedAccountsFromClogs(
-  clogs: DisplayOpEvent[],
+  clogs: TransferClog[],
   nameReg: NameRegistry
 ): Promise<EAccount[]> {
   const addrs = new Set<Address>();

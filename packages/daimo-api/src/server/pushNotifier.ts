@@ -4,7 +4,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
-  DisplayOpEvent,
+  TransferClog,
   amountToDollars,
   assert,
   assertNotNull,
@@ -237,7 +237,7 @@ export class PushNotifier {
     addr: Address,
     other: Address,
     amount: number,
-    opEvent: DisplayOpEvent
+    opEvent: TransferClog
   ): Promise<ExpoPushMessage[]> {
     if (opEvent.type !== "transfer") return []; // Only transfer opEvents handled here
 

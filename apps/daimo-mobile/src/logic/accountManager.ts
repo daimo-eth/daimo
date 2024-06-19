@@ -3,7 +3,7 @@ import {
   DaimoLink,
   DaimoLinkNoteV2,
   DaimoNoteStatus,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   assert,
@@ -354,7 +354,7 @@ class AccountManager {
         noteStatus,
         to: address,
         txHash,
-      } as DisplayOpEvent;
+      } as TransferClog;
 
       this.transform((a) => ({
         ...a,

@@ -56,6 +56,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       to: account!.address,
       amount: swap.toAmount,
       preSwapTransfer: {
+        // TODO:
         coin: swap.fromCoin,
         from: swap.fromAcc.addr,
         amount: swap.fromAmount,

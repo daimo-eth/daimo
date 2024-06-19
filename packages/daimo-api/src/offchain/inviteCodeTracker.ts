@@ -2,7 +2,7 @@ import {
   DaimoInviteCodeStatus,
   DaimoLinkInviteCode,
   OpStatus,
-  TransferOpEvent,
+  SimpleTransferClog,
   dollarsToAmount,
   formatDaimoLink,
   now,
@@ -36,7 +36,7 @@ export class InviteCodeTracker {
     invitee: Address,
     code: InviteCodeRow,
     deviceAttestationString: Hex
-  ): Promise<TransferOpEvent | undefined> {
+  ): Promise<SimpleTransferClog | undefined> {
     const isFaucetAttestationUsed = await this.db.isFaucetAttestationUsed(
       deviceAttestationString
     );
@@ -53,7 +53,7 @@ export class InviteCodeTracker {
     }
 
     // Try sending bonus
-    let faucetTransfer: TransferOpEvent | undefined;
+    let faucetTransfer: SimpleTransferClog | undefined;
     if (code.bonusDollarsInvitee > 0) {
       console.log(
         `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
@@ -105,7 +105,7 @@ export class InviteCodeTracker {
     deviceAttestationString: Hex,
     invCode: string,
     maybeSendFaucet: boolean
-  ): Promise<{ isValid: boolean; faucetTransfer?: TransferOpEvent }> {
+  ): Promise<{ isValid: boolean; faucetTransfer?: SimpleTransferClog }> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
       this.db.incrementInviteCodeUseCount(invCode)
     );

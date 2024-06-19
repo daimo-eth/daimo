@@ -7,7 +7,7 @@ import {
   DaimoLinkRequest,
   DaimoLinkRequestV2,
   DaimoLinkTag,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   ForeignToken,
   getEAccountStr,
@@ -59,7 +59,7 @@ export type ParamListHome = {
   Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
-  HistoryOp: { op: DisplayOpEvent };
+  HistoryOp: { op: TransferClog };
   Receive: { autoFocus: boolean; fulfiller?: DaimoContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
   ReceiveNav: undefined;
@@ -96,7 +96,7 @@ export type ParamListSend = {
   Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
-  HistoryOp: { op: DisplayOpEvent };
+  HistoryOp: { op: TransferClog };
 };
 
 export type ParamListDeposit = {
@@ -158,7 +158,7 @@ export const defaultError = {
 export type ParamListBottomSheet = {
   BottomSheetList: undefined;
   BottomSheetHistoryOp: {
-    op: DisplayOpEvent;
+    op: TransferClog;
     shouldAddInset: boolean;
   };
 };

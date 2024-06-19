@@ -2,9 +2,9 @@ import {
   DaimoLinkNoteV2,
   DaimoNoteState,
   DaimoNoteStatus,
-  DisplayOpEvent,
+  TransferClog,
   OpStatus,
-  PaymentLinkOpEvent,
+  PaymentLinkClog,
   amountToDollars,
   getAccountName,
   getDisplayFromTo,
@@ -130,7 +130,7 @@ function NoteView({
   leaveScreen,
 }: {
   account: Account;
-  note: PaymentLinkOpEvent;
+  note: PaymentLinkClog;
   leaveScreen: () => void;
 }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
@@ -165,7 +165,7 @@ function LinkToExplorer({
   op,
 }: {
   chainConfig: ChainConfig;
-  op: DisplayOpEvent;
+  op: TransferClog;
 }) {
   // Ethreceipts
   const chainId = chainConfig.chainL2.id;
@@ -177,13 +177,7 @@ function LinkToExplorer({
   return <ButtonBig onPress={openURL} type="subtle" title="VIEW RECEIPT" />;
 }
 
-function TransferBody({
-  account,
-  op,
-}: {
-  account: Account;
-  op: DisplayOpEvent;
-}) {
+function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const nav = useNav();
 
   const sentByUs = op.from === account.address;
@@ -256,7 +250,7 @@ function TransferBody({
   );
 }
 
-function getOpVerb(op: DisplayOpEvent, accountAddress: Address) {
+function getOpVerb(op: TransferClog, accountAddress: Address) {
   const isPayLink = op.type === "createLink" || op.type === "claimLink";
   const sentByUs = op.from === accountAddress;
   const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
