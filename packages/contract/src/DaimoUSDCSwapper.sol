@@ -5,8 +5,10 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 import "./IDaimoSwapper.sol";
 
 // Fully on-chain swap executor that quotes stablecoin swaps using Uniswap V3
@@ -39,6 +41,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
   uint24[] public oracleFeeTiers;
   uint32 public oraclePeriod;
   IUniswapV3Factory public oraclePoolFactory;
+  IQuoterV2 public uniswapQuoter;
 
   event OracleError(address pool, uint32 secondsAgo, string reason);
   event LowLevelOracleError(address pool, uint32 secondsAgo, bytes reason);
@@ -50,7 +53,8 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     ISwapRouter _uniswapRouter,
     uint24[] memory _oracleFeeTiers,
     uint32 _oraclePeriod,
-    IUniswapV3Factory _oraclePoolFactory
+    IUniswapV3Factory _oraclePoolFactory,
+    IQuoterV2 _uniswapQuoter
   ) {
     usdc = _usdc;
     weth = _weth;
@@ -59,6 +63,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     oracleFeeTiers = _oracleFeeTiers;
     oraclePeriod = _oraclePeriod;
     oraclePoolFactory = _oraclePoolFactory;
+    uniswapQuoter = _uniswapQuoter;
   }
 
   // Gets TWAP and TWAL for a single pool.
@@ -178,45 +183,78 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     }
   }
 
-  // Fetch a best-effort quote for a given exact input token pair.
+  // Fetch a best-effort quote amountOut for a given exact input token pair.
   // token = 0x0 refers to ETH.
-  function quote(
+  function quoteFromOracle(
     uint128 amountIn,
     IERC20 tokenIn,
     IERC20 tokenOut
-  ) public view returns (uint256 amountOut, bytes memory swapPath) {
+  ) public view returns (uint256 amountOut) {
     if (address(tokenIn) == address(0)) tokenIn = weth;
     if (address(tokenOut) == address(0)) tokenOut = weth;
 
     // Same token swap.
     if (tokenIn == tokenOut) {
       amountOut = amountIn;
-      swapPath = new bytes(0);
-      return (amountOut, swapPath);
+      return amountOut;
     }
-    (uint256 directAmountOut, uint24 directFee) = quoteDirect(
-      amountIn,
-      tokenIn,
-      tokenOut
-    );
+    (uint256 directAmountOut, ) = quoteDirect(amountIn, tokenIn, tokenOut);
+    (uint256 hopAmountOut, ) = quoteViaHop(amountIn, tokenIn, tokenOut);
 
-    (uint256 hopAmountOut, bytes memory swapPathHop) = quoteViaHop(
-      amountIn,
-      tokenIn,
-      tokenOut
-    );
+    amountOut = (directAmountOut > hopAmountOut)
+      ? directAmountOut
+      : hopAmountOut;
+  }
 
-    if (directAmountOut > hopAmountOut) {
-      amountOut = directAmountOut;
-      swapPath = abi.encodePacked(
-        address(tokenIn),
-        directFee,
-        address(tokenOut)
-      );
-    } else {
-      amountOut = hopAmountOut;
-      swapPath = swapPathHop;
+  // Fetch the best route for a given exact input token pair.
+  // quoteExactInput/Single are not view functions, so we need to use staticcall
+  function quoteBestPath(
+    uint128 amountIn,
+    IERC20 tokenIn,
+    IERC20 tokenOut
+  ) public view returns (bytes memory swapPath) {
+    if (address(tokenIn) == address(0)) tokenIn = weth;
+    if (address(tokenOut) == address(0)) tokenOut = weth;
+
+    // Same token swap.
+    if (tokenIn == tokenOut) {
+      return new bytes(0);
     }
+
+    // Quote real amountOut for direct swap path.
+    (, uint24 directFee) = quoteDirect(amountIn, tokenIn, tokenOut);
+    IQuoterV2.QuoteExactInputSingleParams memory params = IQuoterV2
+      .QuoteExactInputSingleParams({
+        tokenIn: address(tokenIn),
+        tokenOut: address(tokenOut),
+        amountIn: 0,
+        fee: directFee,
+        sqrtPriceLimitX96: 0
+      });
+
+    (, bytes memory dataDirect) = address(uniswapQuoter).staticcall(
+      abi.encodeWithSignature(
+        "quoteExactInputSingle((address,address,uint24,uint256,uint160))",
+        params
+      )
+    );
+    uint256 amountOutDirect = abi.decode(dataDirect, (uint256));
+
+    // Quote real amountOut for via hop swap path.
+    (, bytes memory swapPathViaHop) = quoteViaHop(amountIn, tokenIn, tokenOut);
+    (, bytes memory dataViaHop) = address(uniswapQuoter).staticcall(
+      abi.encodeWithSignature(
+        "quoteExactInput(bytes,uint256)",
+        swapPathViaHop,
+        amountIn
+      )
+    );
+    uint256 amountOutViaHop = abi.decode(dataViaHop, (uint256));
+
+    return
+      amountOutDirect > amountOutViaHop
+        ? abi.encodePacked(address(tokenIn), directFee, address(tokenOut))
+        : swapPathViaHop;
   }
 
   function getFinalOutputToken(
@@ -261,7 +299,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     );
 
     // // Compute a fair price for the input token swap.
-    (uint256 oracleAmountOut, ) = quote(amountIn, tokenIn, usdc);
+    uint256 oracleAmountOut = quoteFromOracle(amountIn, tokenIn, usdc);
 
     // 1% slippage tolerance, to incentivize quick swaps via MEV.
     uint256 expectedAmountOut = oracleAmountOut - (oracleAmountOut / 100);
