@@ -33,7 +33,6 @@ export {
   daimoOffchainUtilsAddress,
   daimoOffchainUtilsABI,
   daimoUsdcSwapperABI,
-  daimoUsdcSwapperAddress,
   entryPointABI,
   erc20ABI,
 } from "./generated";

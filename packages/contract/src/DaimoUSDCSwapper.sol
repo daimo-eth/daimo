@@ -35,13 +35,13 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
   // Constants used by Uniswap.
   ISwapRouter public uniswapRouter;
+  IQuoterV2 public uniswapQuoter;
   IERC20 public usdc;
   IERC20 public weth;
   IERC20[] public hopTokens;
   uint24[] public oracleFeeTiers;
   uint32 public oraclePeriod;
   IUniswapV3Factory public oraclePoolFactory;
-  IQuoterV2 public uniswapQuoter;
 
   event OracleError(address pool, uint32 secondsAgo, string reason);
   event LowLevelOracleError(address pool, uint32 secondsAgo, bytes reason);
@@ -51,19 +51,19 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     IERC20 _weth,
     IERC20[] memory _hopTokens,
     ISwapRouter _uniswapRouter,
+    IQuoterV2 _uniswapQuoter,
     uint24[] memory _oracleFeeTiers,
     uint32 _oraclePeriod,
-    IUniswapV3Factory _oraclePoolFactory,
-    IQuoterV2 _uniswapQuoter
+    IUniswapV3Factory _oraclePoolFactory
   ) {
     usdc = _usdc;
     weth = _weth;
     hopTokens = _hopTokens;
     uniswapRouter = _uniswapRouter;
+    uniswapQuoter = _uniswapQuoter;
     oracleFeeTiers = _oracleFeeTiers;
     oraclePeriod = _oraclePeriod;
     oraclePoolFactory = _oraclePoolFactory;
-    uniswapQuoter = _uniswapQuoter;
   }
 
   // Gets TWAP and TWAL for a single pool.

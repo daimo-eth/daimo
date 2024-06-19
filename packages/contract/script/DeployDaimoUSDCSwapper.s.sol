@@ -6,6 +6,9 @@ import "../src/DaimoUSDCSwapper.sol";
 
 import {CREATE3Factory} from "create3-factory/src/CREATE3Factory.sol";
 
+// Uniswap Base Deployments Reference:
+// https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
+
 contract DeployDaimoUSDCSwapper is Script {
   CREATE3Factory _create3 =
     CREATE3Factory(0x9fBB3DF7C40Da2e5A0dE984fFE2CCB7C47cd0ABf);
@@ -33,11 +36,15 @@ contract DeployDaimoUSDCSwapper is Script {
       0x33128a8fC17869897dcE68Ed026d694621f6FDfD
     );
 
+    IQuoterV2 uniswapQuoter = IQuoterV2(
+      0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a
+    );
+
     vm.startBroadcast();
 
     DaimoUSDCSwapper swapper = DaimoUSDCSwapper(
       _create3.deploy(
-        keccak256("DaimoUSDCSwapper-testing-4"),
+        keccak256("DaimoUSDCSwapper-testing-5"),
         bytes.concat(
           type(DaimoUSDCSwapper).creationCode,
           abi.encode(
@@ -45,6 +52,7 @@ contract DeployDaimoUSDCSwapper is Script {
             weth,
             hopTokens,
             uniswapRouter,
+            uniswapQuoter,
             oracleFeeTiers,
             oraclePeriod,
             oraclePoolFactory

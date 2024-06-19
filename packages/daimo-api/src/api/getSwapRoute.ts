@@ -1,9 +1,9 @@
 import { BigIntStr, EAccount, now, ProposedSwap } from "@daimo/common";
-import { daimoUsdcSwapperABI, daimoUsdcSwapperAddress } from "@daimo/contract";
+import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { WETH9 } from "@uniswap/sdk-core";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
-import { Address, encodePacked, getAddress, Hex } from "viem";
+import { Address, getAddress, Hex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { fetchForeignTokenList, ForeignToken } from "../server/coinList";
@@ -40,20 +40,21 @@ export async function getSwapQuote({
 }) {
   const amountIn: bigint = BigInt(amountInStr);
 
-  // TODO: update to a future quote() that takes liquidity into account.
-  const swapQuote = await vc.publicClient.readContract({
+  const amountOut: bigint = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
-    address: daimoUsdcSwapperAddress,
-    functionName: "quoteDirect",
+    address: "0xa5404e387bebC4669cb04Ffa0368204B662Cc50c",
+    functionName: "quoteFromOracle",
     args: [amountIn, tokenIn, tokenOut],
   });
 
-  const amountOut: bigint = swapQuote[0];
-  const fee = swapQuote[1];
-  const swapPath = encodePacked(
-    ["address", "uint24", "address"],
-    [tokenIn, fee, tokenOut]
-  );
+  // Retrieves the swap path separately from the quoted amountOut to take
+  // liquidity into account when path finding.
+  const swapPath = await vc.publicClient.readContract({
+    abi: daimoUsdcSwapperABI,
+    address: "0xa5404e387bebC4669cb04Ffa0368204B662Cc50c",
+    functionName: "quoteBestPath",
+    args: [amountIn, tokenIn, tokenOut],
+  });
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.
