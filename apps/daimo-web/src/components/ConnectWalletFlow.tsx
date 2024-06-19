@@ -1,6 +1,7 @@
 import {
   DaimoLinkStatus,
   DaimoNoteStatus,
+  DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
   assert,
@@ -271,11 +272,14 @@ async function linkStatusToAction(
 
   switch (linkStatus.link.type) {
     case "request": {
-      const { recipient } = linkStatus as DaimoRequestStatus;
+      const { recipient, fulfilledBy } = linkStatus as DaimoRequestStatus;
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
         chainConfig.tokenDecimals
       );
+      if (fulfilledBy != null) {
+        return [];
+      }
       return [
         {
           address: chainConfig.tokenAddress,
@@ -286,9 +290,10 @@ async function linkStatusToAction(
       ];
     }
     case "requestv2": {
-      const id = decodeRequestIdString(
-        (linkStatus as DaimoRequestV2Status).link.id
-      );
+      const { link, status } = linkStatus as DaimoRequestV2Status;
+      if (status !== DaimoRequestState.Created) return [];
+
+      const id = decodeRequestIdString(link.id);
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
         chainConfig.tokenDecimals
@@ -310,7 +315,9 @@ async function linkStatusToAction(
     }
     case "note":
     case "notev2": {
-      const { sender, ephemeralOwner } = linkStatus as DaimoNoteStatus;
+      const { sender, ephemeralOwner, claimer } = linkStatus as DaimoNoteStatus;
+
+      if (claimer != null) return [];
 
       const signature = await getNoteSignature(
         linkStatus.link.type,

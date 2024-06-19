@@ -20,7 +20,7 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
 
   // Create title
   const prefixedDollars = dollars && `$${dollars}`;
-  const title = [name, action, prefixedDollars].filter((x) => x).join(" ");
+  const title = [name, action, prefixedDollars].filter((x) => !!x).join(" ");
 
   // Create image preview
   let paidBy: string | undefined;
@@ -32,7 +32,13 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   }
   const previewURL = getPreviewURL(name, action, dollars, paidBy, cancelled);
 
-  const meta = createMetadata(title, desc.description, previewURL);
+  // Add memo to description, if available
+  let { description } = desc;
+  if (desc.memo) {
+    description += `· ${desc.memo}`;
+  }
+
+  const meta = createMetadata(title, description, previewURL);
 
   // If it's a request, make it frame with button to check status.
   const frameMeta = getFrameForLinkStatus(desc, "Check Status");
