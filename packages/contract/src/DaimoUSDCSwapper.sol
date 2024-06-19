@@ -2,10 +2,11 @@
 pragma solidity ^0.8.12;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+import "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/IQuoterV2.sol";
 import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
@@ -35,7 +36,6 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
   // Constants used by Uniswap.
   ISwapRouter public uniswapRouter;
-  IQuoterV2 public uniswapQuoter;
   IERC20 public usdc;
   IERC20 public weth;
   IERC20[] public hopTokens;
@@ -51,7 +51,6 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     IERC20 _weth,
     IERC20[] memory _hopTokens,
     ISwapRouter _uniswapRouter,
-    IQuoterV2 _uniswapQuoter,
     uint24[] memory _oracleFeeTiers,
     uint32 _oraclePeriod,
     IUniswapV3Factory _oraclePoolFactory
@@ -60,7 +59,6 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     weth = _weth;
     hopTokens = _hopTokens;
     uniswapRouter = _uniswapRouter;
-    uniswapQuoter = _uniswapQuoter;
     oracleFeeTiers = _oracleFeeTiers;
     oraclePeriod = _oraclePeriod;
     oraclePoolFactory = _oraclePoolFactory;
@@ -82,11 +80,21 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
   }
 
   // The best pool for a pair is the one with the highest liquidity over
-  // different fee tiers.
+  // different fee tiers and minimum required liquidity to perform the swap.
   function getBestPoolTick(
     IERC20 tokenA,
-    IERC20 tokenB
-  ) public view returns (address bestPool, int24 tick, uint24 bestFee) {
+    IERC20 tokenB,
+    uint128 amountIn
+  )
+    public
+    view
+    returns (
+      address bestPool,
+      int24 tick,
+      uint24 bestFee,
+      uint128 bestAmountOut
+    )
+  {
     uint128 bestLiquidity = 0;
     for (uint256 i = 0; i < oracleFeeTiers.length; i++) {
       address pool = oraclePoolFactory.getPool({
@@ -103,17 +111,35 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         int24 arithmeticMeanTick,
         uint128 harmonicMeanLiquidity
       ) {
-        if (harmonicMeanLiquidity > bestLiquidity) {
+        // Check that the pool has enough liquidity.
+        uint256 estAmountOut256 = OracleLibrary.getQuoteAtTick({
+          tick: arithmeticMeanTick,
+          baseAmount: amountIn,
+          baseToken: address(tokenA),
+          quoteToken: address(tokenB)
+        });
+
+        if (estAmountOut256 >= _MAX_UINT128) continue; // swap too large
+
+        uint256 requiredXY = amountIn * estAmountOut256; // x * y of trade
+        uint256 availableXY = harmonicMeanLiquidity * harmonicMeanLiquidity;
+
+        if (
+          harmonicMeanLiquidity > bestLiquidity && availableXY >= requiredXY
+        ) {
           bestLiquidity = harmonicMeanLiquidity;
           bestPool = pool;
           tick = arithmeticMeanTick;
           bestFee = oracleFeeTiers[i];
+          bestAmountOut = uint128(estAmountOut256);
         }
       } catch {
         // Ignore errors. No event emits, to keep this a view function.
         // Can trace to debug oracle issues if needed.
       }
     }
+    // No pools with enough liquidity.
+    if (bestLiquidity == 0) return (address(0), 0, 0, 0);
   }
 
   // Direct 1-hop quote: [tokenIn -> tokenOut]
@@ -124,16 +150,11 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
   ) public view returns (uint256 amountOut, uint24 fee) {
     int24 tick;
     address swapPool;
-    (swapPool, tick, fee) = getBestPoolTick(tokenIn, tokenOut);
-
-    if (swapPool == address(0)) return (0, 0);
-
-    amountOut = OracleLibrary.getQuoteAtTick({
-      tick: tick,
-      baseAmount: amountIn,
-      baseToken: address(tokenIn),
-      quoteToken: address(tokenOut)
-    });
+    (swapPool, tick, fee, amountOut) = getBestPoolTick(
+      tokenIn,
+      tokenOut,
+      amountIn
+    );
   }
 
   // 2-hop paths: [tokenIn -> hopToken -> tokenOut]
@@ -148,20 +169,14 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
       if (hopToken == tokenIn) continue; // Covered by direct quote
       if (hopToken == tokenOut) continue; // Covered by direct quote
 
-      (address poolOne, int24 tick, uint24 feeOne) = getBestPoolTick(
-        tokenIn,
-        hopToken
-      );
+      (
+        address poolOne,
+        ,
+        uint24 feeOne,
+        uint128 hopAmountOut
+      ) = getBestPoolTick(tokenIn, hopToken, amountIn);
 
       if (poolOne == address(0)) continue;
-
-      uint256 hopAmountOut = OracleLibrary.getQuoteAtTick({
-        tick: tick,
-        baseAmount: amountIn,
-        baseToken: address(tokenIn),
-        quoteToken: address(hopToken)
-      });
-
       if (hopAmountOut > _MAX_UINT128) continue;
 
       (uint256 pathAmountOut, uint24 feeTwo) = quoteDirect(
@@ -183,27 +198,44 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     }
   }
 
-  // Fetch a best-effort quote amountOut for a given exact input token pair.
+  // Fetch a best-effort quote for a given exact input token pair.
   // token = 0x0 refers to ETH.
-  function quoteFromOracle(
+  function quote(
     uint128 amountIn,
     IERC20 tokenIn,
     IERC20 tokenOut
-  ) public view returns (uint256 amountOut) {
+  ) public view returns (uint256 amountOut, bytes memory swapPath) {
     if (address(tokenIn) == address(0)) tokenIn = weth;
     if (address(tokenOut) == address(0)) tokenOut = weth;
 
     // Same token swap.
     if (tokenIn == tokenOut) {
-      amountOut = amountIn;
-      return amountOut;
+      return (amountIn, new bytes(0));
     }
-    (uint256 directAmountOut, ) = quoteDirect(amountIn, tokenIn, tokenOut);
-    (uint256 hopAmountOut, ) = quoteViaHop(amountIn, tokenIn, tokenOut);
 
-    amountOut = (directAmountOut > hopAmountOut)
-      ? directAmountOut
-      : hopAmountOut;
+    (uint256 directAmountOut, uint24 directFee) = quoteDirect(
+      amountIn,
+      tokenIn,
+      tokenOut
+    );
+
+    (uint256 hopAmountOut, bytes memory swapPathHop) = quoteViaHop(
+      amountIn,
+      tokenIn,
+      tokenOut
+    );
+
+    if (directAmountOut > hopAmountOut) {
+      amountOut = directAmountOut;
+      swapPath = abi.encodePacked(
+        address(tokenIn),
+        directFee,
+        address(tokenOut)
+      );
+    } else {
+      amountOut = hopAmountOut;
+      swapPath = swapPathHop;
+    }
   }
 
   // Fetch the best route for a given exact input token pair.
@@ -222,34 +254,18 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     }
 
     // Quote real amountOut for direct swap path.
-    (, uint24 directFee) = quoteDirect(amountIn, tokenIn, tokenOut);
-    IQuoterV2.QuoteExactInputSingleParams memory params = IQuoterV2
-      .QuoteExactInputSingleParams({
-        tokenIn: address(tokenIn),
-        tokenOut: address(tokenOut),
-        amountIn: 0,
-        fee: directFee,
-        sqrtPriceLimitX96: 0
-      });
-
-    (, bytes memory dataDirect) = address(uniswapQuoter).staticcall(
-      abi.encodeWithSignature(
-        "quoteExactInputSingle((address,address,uint24,uint256,uint160))",
-        params
-      )
+    (uint256 amountOutDirect, uint24 directFee) = quoteDirect(
+      amountIn,
+      tokenIn,
+      tokenOut
     );
-    uint256 amountOutDirect = abi.decode(dataDirect, (uint256));
 
     // Quote real amountOut for via hop swap path.
-    (, bytes memory swapPathViaHop) = quoteViaHop(amountIn, tokenIn, tokenOut);
-    (, bytes memory dataViaHop) = address(uniswapQuoter).staticcall(
-      abi.encodeWithSignature(
-        "quoteExactInput(bytes,uint256)",
-        swapPathViaHop,
-        amountIn
-      )
+    (uint256 amountOutViaHop, bytes memory swapPathViaHop) = quoteViaHop(
+      amountIn,
+      tokenIn,
+      tokenOut
     );
-    uint256 amountOutViaHop = abi.decode(dataViaHop, (uint256));
 
     return
       amountOutDirect > amountOutViaHop
@@ -299,7 +315,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     );
 
     // // Compute a fair price for the input token swap.
-    uint256 oracleAmountOut = quoteFromOracle(amountIn, tokenIn, usdc);
+    (uint256 oracleAmountOut, ) = quote(amountIn, tokenIn, usdc);
 
     // 1% slippage tolerance, to incentivize quick swaps via MEV.
     uint256 expectedAmountOut = oracleAmountOut - (oracleAmountOut / 100);

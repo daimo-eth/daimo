@@ -36,15 +36,11 @@ contract DeployDaimoUSDCSwapper is Script {
       0x33128a8fC17869897dcE68Ed026d694621f6FDfD
     );
 
-    IQuoterV2 uniswapQuoter = IQuoterV2(
-      0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a
-    );
-
     vm.startBroadcast();
 
     DaimoUSDCSwapper swapper = DaimoUSDCSwapper(
       _create3.deploy(
-        keccak256("DaimoUSDCSwapper-testing-5"),
+        keccak256("DaimoUSDCSwapper-testing-7"),
         bytes.concat(
           type(DaimoUSDCSwapper).creationCode,
           abi.encode(
@@ -52,7 +48,6 @@ contract DeployDaimoUSDCSwapper is Script {
             weth,
             hopTokens,
             uniswapRouter,
-            uniswapQuoter,
             oracleFeeTiers,
             oraclePeriod,
             oraclePoolFactory
