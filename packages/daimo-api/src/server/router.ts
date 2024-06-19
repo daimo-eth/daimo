@@ -57,7 +57,7 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
+import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -791,10 +791,10 @@ export function createRouter(
             pushHistory();
           }, refreshInterval);
 
-          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onDBEvent);
 
           return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onDBEvent);
             clearInterval(intervalTimer);
           };
         });

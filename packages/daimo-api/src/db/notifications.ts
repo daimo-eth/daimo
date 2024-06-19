@@ -3,8 +3,8 @@ import { Client, ClientConfig } from "pg";
 
 import { chainConfig } from "../env";
 
-export const DB_EVENT_DAIMO_TRANSFERS =
-  chainConfig.daimoChain + "-daimo-transfers";
+export const DB_EVENT_DAIMO_NEW_BLOCK =
+  chainConfig.daimoChain + "-daimo-new-block";
 
 const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
 
