@@ -16,7 +16,8 @@ export const currencyRateUSD: CurrencyExchangeRate = {
 
 const data: [string, string, string, number][] = [
   ["Euro", "€", "EUR", 2],
-  ["Argentine Peso", "A$", "ARS", 0],
+  ["Argentine Peso", "ARS", "ARS", 0],
+  ["Ukrainian Hryvnia", "₴", "UAH", 0],
   ["Naira", "₦", "NGN", 0],
   ["Turkish Lira", "₺", "TRY", 0],
   ["Swiss Franc", "₣", "CHF", 2],
