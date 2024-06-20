@@ -32,6 +32,7 @@ export {
   daimoPaymasterV2ABI,
   daimoOffchainUtilsAddress,
   daimoOffchainUtilsABI,
+  daimoUsdcSwapperABI,
   entryPointABI,
   erc20ABI,
 } from "./generated";

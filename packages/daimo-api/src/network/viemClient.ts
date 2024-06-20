@@ -159,7 +159,17 @@ export class ViemClient {
         address,
         () => {
           console.log(`[VIEM] getEnsName for '${address}'`);
-          return this.l1Client.getEnsName({ address }).then((a) => a || "");
+          return this.l1Client
+            .getEnsName({ address })
+            .then((a) => a || "")
+            .catch((e) => {
+              // Workaround ENS bug: failed lookups revert with an ugly error
+              if (e.message.includes("out-of-bounds access")) {
+                return "";
+              } else {
+                throw e;
+              }
+            });
         },
         24 * 3600
       );

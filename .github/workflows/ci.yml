@@ -35,8 +35,10 @@ jobs:
 
       - env:
           BASE_SEPOLIA_RPC: ${{ secrets.BASE_SEPOLIA_RPC }}
+          BASE_MAINNET_RPC: ${{ secrets.BASE_MAINNET_RPC }}
         run: |
-          forge test -vvv --fork-url "$BASE_SEPOLIA_RPC"
+          forge test -vvv --fork-url "$BASE_SEPOLIA_RPC" --no-match-path "test/uniswap/*"
+          forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 15950101 --match-path "test/uniswap/*"
           git diff --exit-code
         working-directory: ./packages/contract
 

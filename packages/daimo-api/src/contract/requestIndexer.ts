@@ -88,7 +88,11 @@ export class RequestIndexer extends Indexer {
   async init() {
     const declinedRequests = await this.db.loadDeclinedRequests();
     for (const r of declinedRequests) {
-      const request = this.requests.get(r.requestId)!;
+      const request = this.requests.get(r.requestId);
+      if (request == null) {
+        console.error(`[REQUEST] init: declined req not found: ${r.requestId}`);
+        continue;
+      }
       request.status = DaimoRequestState.Declined;
       request.updatedAt = Math.max(request.updatedAt || 0, r.createdAt);
       this.requests.set(r.requestId, request);
