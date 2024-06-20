@@ -528,7 +528,7 @@
     },
     {
       "name": "eth_transfers",
-      "enabled": false,
+      "enabled": true,
       "sources": [
         {
           "name": "$CHAIN_TRACE_NAME",

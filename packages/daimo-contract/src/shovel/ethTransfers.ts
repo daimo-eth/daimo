@@ -17,7 +17,7 @@ const table: Table = {
 
 export const ethTransfersIntegration = {
   name: "eth_transfers",
-  enabled: false,
+  enabled: true,
   sources: [{ name: "$CHAIN_TRACE_NAME", start: "$CHAIN_START_BLOCK" }],
   table,
   block: [
