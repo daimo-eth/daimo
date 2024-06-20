@@ -24,6 +24,7 @@ import { z } from "zod";
 import { AntiSpam } from "./antiSpam";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
+import { TokenRegistry } from "./tokenRegistry";
 import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
@@ -97,7 +98,8 @@ export function createRouter(
   accountFactory: AccountFactory,
   telemetry: Telemetry,
   binanceClient: BinanceClient,
-  extApiCache: ExternalApiCache
+  extApiCache: ExternalApiCache,
+  tokenReg: TokenRegistry
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
   const trpcReqsInFlight = [] as string[];
@@ -224,8 +226,7 @@ export function createRouter(
       .query(async (opts) => {
         const { amountIn, fromToken, toToken, fromAccount, toAddr, chainId } =
           opts.input;
-        const foreignTokenList = foreignCoinIndexer.foreignTokens;
-        const route = await getSwapQuote({
+        return await getSwapQuote({
           amountInStr: amountIn,
           tokenIn: getAddress(fromToken),
           tokenOut: getAddress(toToken),
@@ -233,9 +234,8 @@ export function createRouter(
           toAddr,
           chainId,
           vc,
-          foreignTokenList,
+          tokenReg,
         });
-        return route;
       }),
 
     getEthereumAccount: publicProcedure

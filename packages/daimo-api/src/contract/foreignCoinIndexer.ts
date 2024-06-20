@@ -15,7 +15,7 @@ import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-import { ForeignToken, fetchForeignTokenList } from "../server/coinList";
+import { ForeignToken, TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -35,7 +35,6 @@ export type ForeignTokenTransfer = Transfer & {
  *   original inbound foreign token transfer.
  */
 export class ForeignCoinIndexer extends Indexer {
-  public foreignTokens: Map<Address, ForeignToken> = new Map();
   private allTransfers: ForeignTokenTransfer[] = [];
 
   private pendingSwapsByAddr: Map<Address, ForeignTokenTransfer[]> = new Map(); // inbound transfers without a corresponding outbound swap
@@ -45,16 +44,16 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, private vc: ViemClient) {
+  constructor(
+    private nameReg: NameRegistry,
+    private vc: ViemClient,
+    private tokenReg: TokenRegistry
+  ) {
     super("SWAPCOIN");
   }
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
-
-    if (this.foreignTokens.size === 0) {
-      this.foreignTokens = await fetchForeignTokenList();
-    }
 
     const result = await retryBackoff(
       `swapCoinIndexer-logs-query-${from}-${to}`,
@@ -85,10 +84,10 @@ export class ForeignCoinIndexer extends Indexer {
           value: BigInt(row.v),
         };
       })
-      .filter((t) => this.foreignTokens.has(t.address))
+      .filter((t) => this.tokenReg.hasToken(t.address))
       .map((t) => ({
         ...t,
-        foreignToken: this.foreignTokens.get(t.address)!,
+        foreignToken: this.tokenReg.getToken(t.address)!,
       }));
     console.log(
       `[SWAPCOIN] loaded ${logs.length} transfers ${from} ${to} in ${
@@ -228,7 +227,7 @@ export class ForeignCoinIndexer extends Indexer {
 
     return {
       ...correspondingReceive,
-      foreignToken: this.foreignTokens.get(log.foreignToken.token)!,
+      foreignToken: this.tokenReg.getToken(log.foreignToken.token)!,
     };
   }
 
@@ -251,7 +250,7 @@ export class ForeignCoinIndexer extends Indexer {
       toAddr,
       chainId,
       vc: this.vc,
-      foreignTokenList: this.foreignTokens,
+      tokenReg: this.tokenReg,
     });
   }
 }
