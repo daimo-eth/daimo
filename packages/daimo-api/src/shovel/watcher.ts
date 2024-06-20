@@ -3,7 +3,7 @@ import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
 
 import { Indexer } from "../contract/indexer";
-import { DBNotifications, DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
+import { DBNotifications, DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -113,7 +113,7 @@ export class Watcher {
   // Watches shovel for new blocks, and indexes them.
   // Skip indexing if it's already indexing.
   async watch() {
-    this.notifications.on(DB_EVENT_DAIMO_TRANSFERS, async () => {
+    this.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, async () => {
       try {
         if (this.isIndexing) {
           console.log(`[SHOVEL] skipping tick, already indexing`);
@@ -127,6 +127,10 @@ export class Watcher {
           this.shovelLatest,
           this.batchSize
         );
+        const { shovelLatest } = this;
+        const tickSummary = JSON.stringify({ shovelLatest, localLatest });
+        console.log(`[SHOVEL] starting tick ${tickSummary}`);
+
         if (localLatest - this.slowLatest > 3) {
           // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
           this.slowIndex(this.slowLatest + 1, localLatest);

@@ -9,6 +9,7 @@ import {
   now,
   zAddress,
   zBigIntStr,
+  zEAccount,
   zHex,
   zInviteCodeStr,
   zUserOpHex,
@@ -21,7 +22,6 @@ import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
-import { getNodeMetrics } from "./node";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { trpcT } from "./trpc";
@@ -35,6 +35,8 @@ import {
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
+import { getSwapQuote } from "../api/getSwapRoute";
+import { healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -57,7 +59,8 @@ import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
-import { DB_EVENT_DAIMO_TRANSFERS } from "../db/notifications";
+import { ExternalApiCache } from "../db/externalApiCache";
+import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -93,9 +96,12 @@ export function createRouter(
   notifier: PushNotifier,
   accountFactory: AccountFactory,
   telemetry: Telemetry,
-  binanceClient: BinanceClient
+  binanceClient: BinanceClient,
+  extApiCache: ExternalApiCache
 ) {
   // Log API calls to Honeycomb. Track performance, investigate errors.
+  const trpcReqsInFlight = [] as string[];
+
   const tracerMiddleware = trpcT.middleware(async (opts) => {
     // Request ID for logs + honeycomb
     const reqId = "req:" + Math.floor(Math.random() * 36 ** 6).toString(36);
@@ -104,7 +110,10 @@ export function createRouter(
     span.setAttribute("req_id", reqId);
 
     // Process request
+    const slug = `${opts.type}:${opts.path}:${reqId}`;
+    trpcReqsInFlight.push(slug);
     const result = await runWithLogContext(reqId, () => opts.next());
+    trpcReqsInFlight.splice(trpcReqsInFlight.indexOf(slug), 1);
 
     // Log request
     const code = result.ok ? SpanStatusCode.OK : SpanStatusCode.ERROR;
@@ -175,29 +184,15 @@ export function createRouter(
   const startTimeS = now();
 
   return trpcT.router({
-    health: publicProcedure.query(async (_opts) => {
-      // See readyMiddleware for not-ready check.
-      // If we're here, API is ready. Check whether it's healthy:
-      const nowS = now();
-      const uptimeS = nowS - startTimeS;
-      const node = getNodeMetrics();
-      const apiDB = db.getStatus();
-      const indexer = watcher.getStatus();
+    health: publicProcedure.query(async () => {
+      // See readyMiddleware for ready check
+      return { status: "healthy" };
+    }),
 
-      let status = "healthy";
-      if (indexer.lastGoodTickS < nowS - 10) {
-        status = "watcher-not-ticking";
-      } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
-        status = "watcher-behind-rpc";
-      } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
-        status = "node-mem-full";
-      } else if (apiDB.waitingCount > 10) {
-        status = "api-db-overloaded";
-      } else if (indexer.shovelDB.waitingCount > 10) {
-        status = "shovel-db-overloaded";
-      }
-
-      return { status, nowS, uptimeS, node, apiDB, indexer };
+    healthDebug: publicProcedure.query(async () => {
+      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     search: publicProcedure
@@ -215,21 +210,32 @@ export function createRouter(
         return nameReg.resolveName(name) || null;
       }),
 
-    getUniswapRoute: publicProcedure
+    getSwapQuote: publicProcedure
       .input(
         z.object({
+          amountIn: zBigIntStr,
           fromToken: zAddress,
-          fromAmount: zBigIntStr,
+          fromAccount: zEAccount,
+          toToken: zAddress,
           toAddr: zAddress,
+          chainId: z.number(),
         })
       )
       .query(async (opts) => {
-        const { fromToken, fromAmount, toAddr } = opts.input;
-        return foreignCoinIndexer.getProposedSwap(
-          fromAmount,
-          fromToken,
-          toAddr
-        );
+        const { amountIn, fromToken, toToken, fromAccount, toAddr, chainId } =
+          opts.input;
+        const foreignTokenList = foreignCoinIndexer.foreignTokens;
+        const route = await getSwapQuote({
+          amountInStr: amountIn,
+          tokenIn: fromToken,
+          tokenOut: toToken,
+          fromAccount,
+          toAddr,
+          chainId,
+          vc,
+          foreignTokenList,
+        });
+        return route;
       }),
 
     getEthereumAccount: publicProcedure
@@ -298,7 +304,9 @@ export function createRouter(
         z.object({
           apiKey: z.string(),
           code: z.string(),
-          maxUses: z.number(),
+          maxUses: z.number().optional(),
+          bonusDollarsInviter: z.number().optional(),
+          bonusDollarsInvitee: z.number().optional(),
         })
       )
       .mutation(async ({ input }) => {
@@ -360,12 +368,13 @@ export function createRouter(
           nameReg,
           keyReg,
           paymaster,
-          db
+          db,
+          extApiCache
         );
       }),
 
     getExchangeRates: publicProcedure.query(async (opts) => {
-      const rates = await getExchangeRates(vc);
+      const rates = await getExchangeRates(extApiCache);
       return rates;
     }),
 
@@ -721,17 +730,14 @@ export function createRouter(
       .subscription(async (opts) => {
         const { address, inviteCode } = opts.input;
         // how often to send updates regardless of new transfers
-        // useful to update exchange rates and others.
+        // useful to update keys, exchange rates and others.
         const refreshInterval = 10_000;
 
         return observable<AccountHistoryResult>((emit) => {
           let lastEmittedBlock = opts.input.sinceBlockNum;
-          let getAccountHistoryPromise: Promise<AccountHistoryResult> | null =
-            null;
 
-          const pushHistory = () => {
-            // (onlyOnNewTransfers: boolean) => {
-            getAccountHistoryPromise = getAccountHistory(
+          const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
+            getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
@@ -749,52 +755,43 @@ export function createRouter(
               nameReg,
               keyReg,
               paymaster,
-              db
-            );
+              db,
+              extApiCache
+            ).then((history) => {
+              // we can have concurrent requests. discard interval pushes
+              // that arrived too late
+              if (
+                !emitOnlyOnNewTransfers &&
+                history.lastBlock <= lastEmittedBlock
+              ) {
+                return;
+              }
 
-            getAccountHistoryPromise
-              .then((history) => {
-                // we can have concurrent requests. discard those that arrived too late
-                if (history.lastBlock <= lastEmittedBlock) {
-                  return;
-                }
-                // TODO: replace
-                // When a DB event happens, we need to:
-                // - Handle transfers, key rotations, etc
-                // - Figure out which accounts are affected
-                // - Send onAccountUpdate to those accounts, if connected
-                //
-                // if (onlyOnNewTransfers && history.transferLogs.length === 0) {
-                //   return;
-                // }
+              if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
+                return;
+              }
 
-                emit.next(history);
+              emit.next(history);
 
-                lastEmittedBlock = history.lastBlock;
-              })
-              .finally(() => {
-                getAccountHistoryPromise = null;
-              });
+              lastEmittedBlock = history.lastBlock;
+            });
           };
 
-          const onDBEvent = async () => {
-            // new block arrived while interval update was running. wait for it.
-            if (getAccountHistoryPromise) {
-              await getAccountHistoryPromise;
-            }
-            pushHistory();
+          // when new block is produced,
+          // push history only if there are new transfers
+          const onNewBlock = async () => {
+            pushHistory(true);
           };
 
+          // for interval updates push full history
           const intervalTimer = setInterval(() => {
-            // interval coincided with new block. let's skip this one.
-            if (getAccountHistoryPromise) return;
-            pushHistory();
+            pushHistory(false);
           }, refreshInterval);
 
-          watcher.notifications.on(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
 
           return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_TRANSFERS, onDBEvent);
+            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
             clearInterval(intervalTimer);
           };
         });

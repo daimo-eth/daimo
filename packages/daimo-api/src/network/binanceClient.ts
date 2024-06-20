@@ -76,10 +76,9 @@ export class BinanceClient {
     };
     const url = `${this.BIPAY_API_ROOT}${path}`;
 
+    const headersStr = JSON.stringify(headers);
     console.log(
-      `[BINANCE] POSTing ${url}:\nbody: ${body}\nheaders: ${JSON.stringify(
-        headers
-      )}`
+      `[BINANCE] POSTing ${url}:\nbody: ${bodyStr}\nheaders: ${headersStr}`
     );
 
     const res = await fetch(url, {

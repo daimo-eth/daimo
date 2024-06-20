@@ -6,7 +6,7 @@ import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { DB } from "@daimo/api/src/db/db";
-import { UniswapClient } from "@daimo/api/src/network/uniswapClient";
+import { StubExternalApiCache } from "@daimo/api/src/db/externalApiCache";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
 import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
@@ -14,6 +14,7 @@ import { Telemetry } from "@daimo/api/src/server/telemetry";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
 import csv from "csvtojson";
+import { dnsEncode } from "ethers/lib/utils";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { createAccount, createAccountDesc } from "./createAccount";
@@ -59,6 +60,15 @@ function defaultDesc() {
 
 async function defaultScript() {
   console.log("Hello, world");
+
+  let addr = "6152348912fb1e78c9037d83f9d4524d4a2988ed".toLowerCase();
+  console.log(`addr ${addr} dnsEncode ` + dnsEncode(`${addr}.addr.reverse`));
+
+  addr = "179A862703a4adfb29896552DF9e307980D19285".toLowerCase();
+  console.log(`addr ${addr} dnsEncode ` + dnsEncode(`${addr}.addr.reverse`));
+
+  addr = "179A862703a4adfb29896552DF9e307980D19286".toLowerCase();
+  console.log(`addr ${addr} dnsEncode ` + dnsEncode(`${addr}.addr.reverse`));
 }
 
 function metricsDesc() {
@@ -66,8 +76,7 @@ function metricsDesc() {
 }
 
 async function metrics() {
-  const vc = getViemClientFromEnv(new Telemetry());
-  const uc = new UniswapClient();
+  const vc = getViemClientFromEnv(new Telemetry(), new StubExternalApiCache());
 
   console.log(`[METRICS] using wallet ${vc.account.address}`);
   const db = new DB();
@@ -79,7 +88,7 @@ async function metrics() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,

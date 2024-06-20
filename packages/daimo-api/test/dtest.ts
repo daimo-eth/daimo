@@ -5,7 +5,7 @@ import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { RequestIndexer } from "../src/contract/requestIndexer";
-import { UniswapClient } from "../src/network/uniswapClient";
+import { StubExternalApiCache } from "../src/db/externalApiCache";
 import { getViemClientFromEnv } from "../src/network/viemClient";
 import { PaymentMemoTracker } from "../src/offchain/paymentMemoTracker";
 import { Telemetry } from "../src/server/telemetry";
@@ -13,8 +13,7 @@ import { Watcher } from "../src/shovel/watcher";
 
 async function main() {
   const monitor = new Telemetry();
-  const vc = getViemClientFromEnv(monitor);
-  const uc = new UniswapClient();
+  const vc = getViemClientFromEnv(monitor, new StubExternalApiCache());
   const nameReg = new NameRegistry(
     vc,
     null as any,
@@ -30,7 +29,7 @@ async function main() {
     nameReg,
     paymentMemoTracker
   );
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,

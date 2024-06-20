@@ -1,30 +1,39 @@
 import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
-import { Client, ClientConfig, Pool, PoolConfig } from "pg";
+import { Kysely, PostgresDialect } from "kysely";
+import { ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, Hex, getAddress } from "viem";
 
+import { DB as ApiDB } from "../codegen/dbApi";
 import { getEnvApi } from "../env";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
-const dbConfig: ClientConfig = {
-  connectionString: getEnvApi().PGURL,
-  connectionTimeoutMillis: 10000,
-  query_timeout: 5000,
-  statement_timeout: 5000,
-  database: getEnvApi().PGURL == null ? "daimo" : undefined,
-};
+function getApiDBPoolConfigFromEnv(): PoolConfig {
+  const dbConfig: ClientConfig = {
+    connectionString: getEnvApi().PGURL,
+    connectionTimeoutMillis: 10000,
+    query_timeout: 5000,
+    statement_timeout: 5000,
+    database: getEnvApi().PGURL == null ? "daimo" : undefined,
+  };
 
-const poolConfig: PoolConfig = {
-  ...dbConfig,
-  min: 1,
-  max: 8,
-  idleTimeoutMillis: 60000,
-};
+  return {
+    ...dbConfig,
+    min: 1,
+    max: 8,
+    idleTimeoutMillis: 60000,
+  };
+}
 
 export class DB {
   private pool: Pool;
+  public readonly kdb: Kysely<ApiDB>;
 
-  constructor() {
+  constructor(poolConfig?: PoolConfig) {
+    if (poolConfig == null) poolConfig = getApiDBPoolConfigFromEnv();
     this.pool = new Pool(poolConfig);
+    this.kdb = new Kysely<ApiDB>({
+      dialect: new PostgresDialect({ pool: this.pool }),
+    });
   }
 
   getStatus() {
@@ -36,112 +45,136 @@ export class DB {
     };
   }
 
-  async createTables() {
-    console.log(`[DB] connecting`);
-    const client = new Client(dbConfig);
-    await client.connect();
+  async migrateDB() {
+    console.log(`[DB] migrating API DB`);
+    const startMs = performance.now();
+    let success = false;
+    try {
+      await this.pool.query(`
+        CREATE TABLE IF NOT EXISTS pushtoken (
+          pushtoken VARCHAR(64) PRIMARY KEY,
+          address CHAR(42) NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS pushtoken_address ON pushtoken (address);
+        
+        CREATE TABLE IF NOT EXISTS invitecode (
+          code VARCHAR(64) PRIMARY KEY,
+          use_count INT NOT NULL,
+          max_uses INT NOT NULL DEFAULT 1
+        );
+        ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
+        ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS inviter CHAR(42) DEFAULT NULL;
+        ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_invitee INT DEFAULT 0 NOT NULL;
+        ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_inviter INT DEFAULT 0 NOT NULL;
 
-    console.log("[DB] connected, creating tables if necessary");
-    await client.query(`
-          CREATE TABLE IF NOT EXISTS pushtoken (
-            pushtoken VARCHAR(64) PRIMARY KEY,
-            address CHAR(42) NOT NULL
-          );
-          CREATE INDEX IF NOT EXISTS pushtoken_address ON pushtoken (address);
-          
-          CREATE TABLE IF NOT EXISTS invitecode (
-            code VARCHAR(64) PRIMARY KEY,
-            use_count INT NOT NULL,
-            max_uses INT NOT NULL DEFAULT 1
-          );
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS zupass_email VARCHAR DEFAULT NULL;
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS inviter CHAR(42) DEFAULT NULL;
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_invitee INT DEFAULT 0 NOT NULL;
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS bonus_cents_inviter INT DEFAULT 0 NOT NULL;
+        CREATE TABLE IF NOT EXISTS name_blacklist (
+          name VARCHAR(32) PRIMARY KEY
+        );
 
-          CREATE TABLE IF NOT EXISTS name_blacklist (
-            name VARCHAR(32) PRIMARY KEY
-          );
+        -- These accounts are allowed to use our sponsoring paymaster.
+        -- We only include accounts created via a valid invite code.
+        CREATE TABLE IF NOT EXISTS paymaster_whitelist (
+          name VARCHAR(32) PRIMARY KEY
+        );
 
-          -- These accounts are allowed to use our sponsoring paymaster.
-          -- We only include accounts created via a valid invite code.
-          CREATE TABLE IF NOT EXISTS paymaster_whitelist (
-            name VARCHAR(32) PRIMARY KEY
-          );
+        CREATE TABLE IF NOT EXISTS linked_account (
+          linked_type VARCHAR(32) NOT NULL, -- eg "farcaster"
+          linked_id VARCHAR(64), -- eg "0x123a..."
+          address CHAR(42), -- our Daimo account address
+          account_json TEXT, -- the linked social media account
+          PRIMARY KEY (address, linked_type),
+          UNIQUE (linked_type, linked_id)
+        );
 
-          CREATE TABLE IF NOT EXISTS linked_account (
-            linked_type VARCHAR(32) NOT NULL, -- eg "farcaster"
-            linked_id VARCHAR(64), -- eg "0x123a..."
-            address CHAR(42), -- our Daimo account address
-            account_json TEXT, -- the linked social media account
-            PRIMARY KEY (address, linked_type),
-            UNIQUE (linked_type, linked_id)
-          );
+        CREATE TABLE IF NOT EXISTS offchain_action (
+          id SERIAL PRIMARY KEY,
+          address CHAR(42), -- our Daimo account address
+          time BIGINT NOT NULL, -- action timestamp, extracted from action
+          type VARCHAR(32) NOT NULL, -- action type, extracted from action
+          action_json TEXT NOT NULL, -- action, ERC1271-signed by the account
+          signature_hex TEXT NOT NULL,
+          UNIQUE (address, time, type)
+        );
 
-          CREATE TABLE IF NOT EXISTS offchain_action (
-            id SERIAL PRIMARY KEY,
-            address CHAR(42), -- our Daimo account address
-            time BIGINT NOT NULL, -- action timestamp, extracted from action
-            type VARCHAR(32) NOT NULL, -- action type, extracted from action
-            action_json TEXT NOT NULL, -- action, ERC1271-signed by the account
-            signature_hex TEXT NOT NULL,
-            UNIQUE (address, time, type)
-          );
+        CREATE TABLE IF NOT EXISTS invite_graph (
+          invitee CHAR(42) PRIMARY KEY,
+          inviter CHAR(42) NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
 
-          CREATE TABLE IF NOT EXISTS invite_graph (
-            invitee CHAR(42) PRIMARY KEY,
-            inviter CHAR(42) NOT NULL,
-            created_at TIMESTAMP DEFAULT NOW()
-          );
+        -- Used to prevent double-claiming faucet bonuses
+        CREATE TABLE IF NOT EXISTS used_faucet_attestations (
+          attestation CHAR(184) PRIMARY KEY
+        );
+        
+        CREATE TABLE IF NOT EXISTS tag_redirect (
+          tag VARCHAR(32) PRIMARY KEY, -- tag, eg "foo" in daimo.com/l/t/foo
+          link VARCHAR(256) NOT NULL, -- redirect URL
+          update_token VARCHAR(64) DEFAULT NULL -- if set, the link can only be updated with this token
+        );
 
-          -- Used to prevent double-claiming faucet bonuses
-          CREATE TABLE IF NOT EXISTS used_faucet_attestations (
-            attestation CHAR(184) PRIMARY KEY
-          );
-          
-          CREATE TABLE IF NOT EXISTS tag_redirect (
-            tag VARCHAR(32) PRIMARY KEY, -- tag, eg "foo" in daimo.com/l/t/foo
-            link VARCHAR(256) NOT NULL, -- redirect URL
-            update_token VARCHAR(64) DEFAULT NULL -- if set, the link can only be updated with this token
-          );
+        CREATE TABLE IF NOT EXISTS tag_redirect_history (
+          id SERIAL PRIMARY KEY,
+          time TIMESTAMP NOT NULL DEFAULT NOW(),
+          tag VARCHAR(32) NOT NULL, -- new or existing tag
+          link VARCHAR(256) NOT NULL, -- new link
+          update_token VARCHAR(64) DEFAULT NULL -- token used for this update
+        );
 
-          CREATE TABLE IF NOT EXISTS tag_redirect_history (
-            id SERIAL PRIMARY KEY,
-            time TIMESTAMP NOT NULL DEFAULT NOW(),
-            tag VARCHAR(32) NOT NULL, -- new or existing tag
-            link VARCHAR(256) NOT NULL, -- new link
-            update_token VARCHAR(64) DEFAULT NULL -- token used for this update
-          );
+        CREATE TABLE IF NOT EXISTS payment_memo (
+          ophash_hex VARCHAR(66) PRIMARY KEY,
+          memo TEXT NOT NULL
+        );
 
-          CREATE TABLE IF NOT EXISTS payment_memo (
-            ophash_hex VARCHAR(66) PRIMARY KEY,
-            memo TEXT NOT NULL
-          );
+        CREATE TABLE IF NOT EXISTS declined_requests (
+          request_id VARCHAR(128) PRIMARY KEY,
+          decliner CHAR(42) NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
 
-          CREATE TABLE IF NOT EXISTS declined_requests (
-            request_id VARCHAR(128) PRIMARY KEY,
-            decliner CHAR(42) NOT NULL,
-            created_at TIMESTAMP DEFAULT NOW()
-          );
+        --
+        -- Ensure every table tracks creation time.
+        --
+        ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        ALTER TABLE invite_graph ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        ALTER TABLE payment_memo ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        ALTER TABLE offchain_action ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
 
-          --
-          -- Ensure every table tracks creation time.
-          --
-          ALTER TABLE invitecode ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-          ALTER TABLE invite_graph ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-          ALTER TABLE payment_memo ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-          ALTER TABLE offchain_action ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-          ALTER TABLE linked_account ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
-          ALTER TABLE used_faucet_attestations ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+        CREATE TABLE IF NOT EXISTS waitlist (
+          email VARCHAR(128) PRIMARY KEY,
+          name VARCHAR(128) NOT NULL,
+          socials VARCHAR(128) NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
 
-          CREATE TABLE IF NOT EXISTS waitlist (
-            email VARCHAR(128) PRIMARY KEY,
-            name VARCHAR(128) NOT NULL,
-            socials VARCHAR(128) NOT NULL,
-            created_at TIMESTAMP DEFAULT NOW()
-          );
+        --
+        -- External API cache for reverse ENS lookups, etc
+        --
+        CREATE TABLE IF NOT EXISTS external_api_cache (
+          id SERIAL PRIMARY KEY,
+          api_type VARCHAR(32) NOT NULL,
+          key VARCHAR(128) NOT NULL,
+          value TEXT NOT NULL,
+          created_at TIMESTAMP NOT NULL,
+          updated_at TIMESTAMP NOT NULL,
+          expires_at TIMESTAMP NOT NULL,
+
+          UNIQUE (api_type, key)
+        );
+
+        CREATE INDEX IF NOT EXISTS expires_at_idx ON external_api_cache (expires_at);
       `);
-    await client.end();
+      success = true;
+    } catch (e) {
+      console.error(`[DB] error migrating API DB: ${e}`);
+      throw e;
+    } finally {
+      const status = success ? "success" : "error";
+      const elapsedMs = performance.now() - startMs;
+      console.log(`[DB] migration ${status} in ${elapsedMs}ms`);
+    }
   }
 
   async loadPushTokens(): Promise<PushTokenRow[]> {
@@ -383,13 +416,27 @@ export class DB {
 
   async updateInviteCode(row: UpdateInviteCodeArgs) {
     console.log(`[DB] updating invite code: ${JSON.stringify(row)}`);
+    let res;
+    if (row.maxUses != null) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
+        [row.maxUses, row.code]
+      );
+    }
+    if (row.bonusDollarInviter != null) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET bonus_cents_inviter = $1 WHERE code = $2`,
+        [row.bonusDollarInviter * 100, row.code]
+      );
+    }
+    if (row.bonusDollarInvitee != null) {
+      res = await this.pool.query<[], any[]>(
+        `UPDATE invitecode SET bonus_cents_invitee = $1 WHERE code = $2`,
+        [row.bonusDollarInvitee * 100, row.code]
+      );
+    }
 
-    const res = await this.pool.query<[], any[]>(
-      `UPDATE invitecode SET max_uses = $1 WHERE code = $2`,
-      [row.maxUses, row.code]
-    );
-
-    return assertNotNull(res.rowCount) > 0;
+    return res && assertNotNull(res.rowCount) > 0;
   }
 
   async insertFaucetAttestation(attestation: string) {
@@ -509,7 +556,9 @@ export interface InsertInviteCodeArgs {
 
 export interface UpdateInviteCodeArgs {
   code: string;
-  maxUses: number;
+  maxUses?: number;
+  bonusDollarInviter?: number;
+  bonusDollarInvitee?: number;
 }
 
 interface RawInviteCodeRow {

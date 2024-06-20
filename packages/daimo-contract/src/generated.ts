@@ -453,6 +453,563 @@ export const daimoAccountFactoryConfig = {
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoAccountFactoryV2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoAccountFactoryV2ABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'accountImplementation',
+    outputs: [
+      { name: '', internalType: 'contract DaimoAccountV2', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: '_homeChain', internalType: 'uint256', type: 'uint256' },
+      { name: '_homeCoin', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: '_swapper',
+        internalType: 'contract IDaimoSwapper',
+        type: 'address',
+      },
+      {
+        name: '_bridger',
+        internalType: 'contract IDaimoBridger',
+        type: 'address',
+      },
+      { name: 'slot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'createAccount',
+    outputs: [
+      { name: 'ret', internalType: 'contract DaimoAccountV2', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'entryPoint',
+    outputs: [
+      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: '_homeChain', internalType: 'uint256', type: 'uint256' },
+      { name: '_homeCoin', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: '_swapper',
+        internalType: 'contract IDaimoSwapper',
+        type: 'address',
+      },
+      {
+        name: '_bridger',
+        internalType: 'contract IDaimoBridger',
+        type: 'address',
+      },
+      { name: 'slot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+      { name: 'salt', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getAddress',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoAccountV2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoAccountV2ABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+      },
+    ],
+  },
+  { stateMutability: 'payable', type: 'receive' },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'slot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+    ],
+    name: 'addSigningKey',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'bridge',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'bridger',
+    outputs: [
+      { name: '', internalType: 'contract IDaimoBridger', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'entryPoint',
+    outputs: [
+      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'calls',
+        internalType: 'struct DaimoAccountV2.Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'dest', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'executeBatch',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'forward',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'forwardingAddress',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'getActiveSigningKeys',
+    outputs: [
+      {
+        name: 'activeSigningKeys',
+        internalType: 'bytes32[2][]',
+        type: 'bytes32[2][]',
+      },
+      {
+        name: 'activeSigningKeySlots',
+        internalType: 'uint8[]',
+        type: 'uint8[]',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'homeChain',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'homeCoin',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_homeChain', internalType: 'uint256', type: 'uint256' },
+      { name: '_homeCoin', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: '_swapper',
+        internalType: 'contract IDaimoSwapper',
+        type: 'address',
+      },
+      {
+        name: '_bridger',
+        internalType: 'contract IDaimoBridger',
+        type: 'address',
+      },
+      { name: 'slot', internalType: 'uint8', type: 'uint8' },
+      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
+    ],
+    name: 'initialize',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'message', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'signature', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'isValidSignature',
+    outputs: [{ name: 'magicValue', internalType: 'bytes4', type: 'bytes4' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: '', internalType: 'uint8', type: 'uint8' },
+      { name: '', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'keys',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'maxKeys',
+    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'numActiveKeys',
+    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [{ name: 'slot', internalType: 'uint8', type: 'uint8' }],
+    name: 'removeSigningKey',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'newForwardingAddress',
+        internalType: 'address',
+        type: 'address',
+      },
+    ],
+    name: 'setForwardingAddress',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'sig',
+        internalType: 'struct DaimoAccountV2.Signature',
+        type: 'tuple',
+        components: [
+          { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
+          { name: 'authenticatorData', internalType: 'bytes', type: 'bytes' },
+          { name: 'clientDataJSON', internalType: 'string', type: 'string' },
+          { name: 'r', internalType: 'uint256', type: 'uint256' },
+          { name: 's', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'signatureStruct',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'swap',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'swapper',
+    outputs: [
+      { name: '', internalType: 'contract IDaimoSwapper', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'userOp',
+        internalType: 'struct UserOperation',
+        type: 'tuple',
+        components: [
+          { name: 'sender', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+          { name: 'initCode', internalType: 'bytes', type: 'bytes' },
+          { name: 'callData', internalType: 'bytes', type: 'bytes' },
+          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'verificationGasLimit',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          {
+            name: 'preVerificationGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'maxPriorityFeePerGas',
+            internalType: 'uint256',
+            type: 'uint256',
+          },
+          { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
+          { name: 'signature', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'userOpHash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'missingAccountFunds', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'validateUserOp',
+    outputs: [
+      { name: 'validationData', internalType: 'uint256', type: 'uint256' },
+    ],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'entryPoint',
+        internalType: 'contract IEntryPoint',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'homeChain',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'homeCoin',
+        internalType: 'contract IERC20',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AccountInitialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'amountIn',
+        internalType: 'uint128',
+        type: 'uint128',
+        indexed: false,
+      },
+      {
+        name: 'tokenIn',
+        internalType: 'contract IERC20',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'ForeignChainBridge',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'amountIn',
+        internalType: 'uint128',
+        type: 'uint128',
+        indexed: false,
+      },
+      {
+        name: 'tokenIn',
+        internalType: 'contract IERC20',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'amountOut',
+        internalType: 'uint128',
+        type: 'uint128',
+        indexed: false,
+      },
+      {
+        name: 'tokenOut',
+        internalType: 'contract IERC20',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'ForeignCoinSwap',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'forwardingAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'ForwardingAddressChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'contract IAccount',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'key',
+        internalType: 'bytes32[2]',
+        type: 'bytes32[2]',
+        indexed: false,
+      },
+    ],
+    name: 'SigningKeyAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'account',
+        internalType: 'contract IAccount',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'key',
+        internalType: 'bytes32[2]',
+        type: 'bytes32[2]',
+        indexed: false,
+      },
+    ],
+    name: 'SigningKeyRemoved',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoCCTPBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoCctpBridgerABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_cctpMessenger',
+        internalType: 'contract ITokenMessenger',
+        type: 'address',
+      },
+      {
+        name: '_cctpInputChainIds',
+        internalType: 'uint256[]',
+        type: 'uint256[]',
+      },
+      {
+        name: '_cctpOutputDomains',
+        internalType: 'uint32[]',
+        type: 'uint32[]',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'cctpDomainMapping',
+    outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'cctpMessenger',
+    outputs: [
+      { name: '', internalType: 'contract ITokenMessenger', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'homeChain', internalType: 'uint256', type: 'uint256' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+    ],
+    name: 'sendToHomeChain',
+    outputs: [],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoEphemeralNotes
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1336,6 +1893,259 @@ export const daimoRequestConfig = {
   address: daimoRequestAddress,
   abi: daimoRequestABI,
 } as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoUSDCSwapper
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoUsdcSwapperABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_usdc', internalType: 'contract IERC20', type: 'address' },
+      { name: '_weth', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: '_hopTokens',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
+      {
+        name: '_uniswapRouter',
+        internalType: 'contract ISwapRouter',
+        type: 'address',
+      },
+      { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
+      { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
+      {
+        name: '_oraclePoolFactory',
+        internalType: 'contract IUniswapV3Factory',
+        type: 'address',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'pool', internalType: 'address', type: 'address' },
+      { name: 'secondsAgo', internalType: 'uint32', type: 'uint32' },
+    ],
+    name: 'consultOracle',
+    outputs: [
+      { name: 'arithmeticMeanTick', internalType: 'int24', type: 'int24' },
+      {
+        name: 'harmonicMeanLiquidity',
+        internalType: 'uint128',
+        type: 'uint128',
+      },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'sig',
+        internalType: 'struct DaimoUSDCSwapper.DaimoUSDCSwapperExtraData',
+        type: 'tuple',
+        components: [
+          { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
+          {
+            name: 'altruisticAmountOut',
+            internalType: 'uint128',
+            type: 'uint128',
+          },
+          {
+            name: 'altruisticSender',
+            internalType: 'address',
+            type: 'address',
+          },
+        ],
+      },
+    ],
+    name: 'extraDataStruct',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'tokenA', internalType: 'contract IERC20', type: 'address' },
+      { name: 'tokenB', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+    ],
+    name: 'getBestPoolTick',
+    outputs: [
+      { name: 'bestPool', internalType: 'address', type: 'address' },
+      { name: 'tick', internalType: 'int24', type: 'int24' },
+      { name: 'bestFee', internalType: 'uint24', type: 'uint24' },
+      { name: 'bestAmountOut', internalType: 'uint128', type: 'uint128' },
+    ],
+  },
+  {
+    stateMutability: 'pure',
+    type: 'function',
+    inputs: [{ name: 'swapPath', internalType: 'bytes', type: 'bytes' }],
+    name: 'getFinalOutputToken',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'hopTokens',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'oracleFeeTiers',
+    outputs: [{ name: '', internalType: 'uint24', type: 'uint24' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'oraclePeriod',
+    outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'oraclePoolFactory',
+    outputs: [
+      { name: '', internalType: 'contract IUniswapV3Factory', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'quote',
+    outputs: [
+      { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'quoteDirect',
+    outputs: [
+      { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'fee', internalType: 'uint24', type: 'uint24' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'quoteViaHop',
+    outputs: [
+      { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'swapToBridgableCoin',
+    outputs: [
+      { name: 'totalAmountOut', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'uniswapRouter',
+    outputs: [
+      { name: '', internalType: 'contract ISwapRouter', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'usdc',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'weth',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'pool',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'secondsAgo',
+        internalType: 'uint32',
+        type: 'uint32',
+        indexed: false,
+      },
+      { name: 'reason', internalType: 'bytes', type: 'bytes', indexed: false },
+    ],
+    name: 'LowLevelOracleError',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'pool',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'secondsAgo',
+        internalType: 'uint32',
+        type: 'uint32',
+        indexed: false,
+      },
+      {
+        name: 'reason',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+    ],
+    name: 'OracleError',
+  },
+  { type: 'error', inputs: [], name: 'T' },
+] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoVerifier
@@ -2623,6 +3433,45 @@ export const entryPointABI = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IDaimoBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const iDaimoBridgerABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'homeChain', internalType: 'uint256', type: 'uint256' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+    ],
+    name: 'sendToHomeChain',
+    outputs: [],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IDaimoSwapper
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const iDaimoSwapperABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'swapToBridgableCoin',
+    outputs: [
+      { name: 'totalAmountOut', internalType: 'uint128', type: 'uint128' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IMetaPaymaster
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2636,6 +3485,25 @@ export const iMetaPaymasterABI = [
     ],
     name: 'fund',
     outputs: [],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ITokenMessenger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const iTokenMessengerABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'destinationDomain', internalType: 'uint32', type: 'uint32' },
+      { name: 'mintRecipient', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'burnToken', internalType: 'address', type: 'address' },
+    ],
+    name: 'depositForBurn',
+    outputs: [{ name: '_nonce', internalType: 'uint64', type: 'uint64' }],
   },
 ] as const
 

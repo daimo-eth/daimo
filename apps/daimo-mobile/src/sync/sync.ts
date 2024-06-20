@@ -19,10 +19,8 @@ import { Account } from "../model/account";
 class SyncManager {
   manager = getAccountManager();
   currentAccount: Account | null = null;
-  // for tracking retry timeout
-  retryTimeout: any = undefined;
 
-  _trpcUnsubscribe: (() => void) | null = null;
+  private _trpcUnsubscribe: (() => void) | null = null;
 
   start() {
     this.manager.addListener(this._onAccountChange);
@@ -70,8 +68,6 @@ class SyncManager {
         syncAttemptsFailed: 0,
       };
     });
-
-    clearTimeout(this.retryTimeout);
   }
 
   _onAccountChange = (newAccount: Account | null) => {
