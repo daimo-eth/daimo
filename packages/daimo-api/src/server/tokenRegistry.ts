@@ -1,4 +1,4 @@
-import { ForeignCoin, USDbC, assert, getHomeCoinToken } from "@daimo/common";
+import { ForeignCoin, USDbC, assert } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -7,7 +7,7 @@ import { fetchWithBackoff } from "../network/fetchWithBackoff";
 // Exclude native ETH
 export type ForeignToken = ForeignCoin & { token: Address };
 
-type TokenList = {
+interface TokenList {
   tokens: {
     chainId: number;
     address: Address;
@@ -17,9 +17,9 @@ type TokenList = {
     logoURI?: string;
   }[];
   version: any;
-};
+}
 
-// TODO: in the future, load a token registry for each chain.
+// TODO: keep track of which tokens are on which chain.
 export class TokenRegistry {
   foreignTokens: Map<Address, ForeignToken>;
   private chainName: string;
@@ -68,16 +68,9 @@ export class TokenRegistry {
 
   // Note: foreign tokens list doesn't include homecoin by default
   // for indexing purposes.
-  public getToken(
-    addr: Address,
-    includeHomeCoin?: boolean
-  ): ForeignToken | undefined {
+  public getToken(addr: Address): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
-    if (includeHomeCoin && tokenAddress === chainConfig.tokenAddress) {
-      return getHomeCoinToken(tokenAddress);
-    }
-
-    const token = this.foreignTokens.get(addr);
+    const token = this.foreignTokens.get(tokenAddress);
     console.log(
       `[TOKEN-REG] retrieved token ${token?.symbol} for addr ${addr}`
     );

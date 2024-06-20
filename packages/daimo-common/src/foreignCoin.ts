@@ -66,15 +66,3 @@ export function isAmountDust(
 
   return true;
 }
-
-// Get home coin token for a given token address.
-export function getHomeCoinToken(tokenAddress: Address) {
-  switch (tokenAddress) {
-    case daimoUSDC.token:
-    default:
-      return {
-        ...daimoUSDC,
-        token: tokenAddress,
-      };
-  }
-}

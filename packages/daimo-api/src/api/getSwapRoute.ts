@@ -1,4 +1,10 @@
-import { BigIntStr, EAccount, now, ProposedSwap } from "@daimo/common";
+import {
+  BigIntStr,
+  daimoUSDC,
+  EAccount,
+  now,
+  ProposedSwap,
+} from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { WETH9 } from "@uniswap/sdk-core";
@@ -92,7 +98,14 @@ export async function getSwapQuote({
 
   if (!callData) return null;
 
-  const fromCoin = tokenReg.getToken(tokenIn, true);
+  let fromCoin;
+  // TODO: in future, check home coin token (for now, daimoUSDC)
+  if (tokenIn === daimoUSDC.token) {
+    fromCoin = daimoUSDC;
+  } else {
+    fromCoin = tokenReg.getToken(tokenIn);
+  }
+
   if (!fromCoin) return null;
 
   const swap: ProposedSwap = {
