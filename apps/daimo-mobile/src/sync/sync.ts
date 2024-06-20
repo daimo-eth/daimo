@@ -20,8 +20,6 @@ import { Account } from "../model/account";
 class SyncManager {
   manager = getAccountManager();
   currentAccount: Account | null = null;
-  // for tracking retry timeout
-  retryTimeout: any = undefined;
 
   private _trpcUnsubscribe: (() => void) | null = null;
 
@@ -71,8 +69,6 @@ class SyncManager {
         syncAttemptsFailed: 0,
       };
     });
-
-    clearTimeout(this.retryTimeout);
   }
 
   _onAccountChange = (newAccount: Account | null) => {
