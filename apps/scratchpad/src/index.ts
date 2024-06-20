@@ -7,7 +7,6 @@ import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
 import { DB } from "@daimo/api/src/db/db";
 import { StubExternalApiCache } from "@daimo/api/src/db/externalApiCache";
-import { UniswapClient } from "@daimo/api/src/network/uniswapClient";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
 import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
@@ -78,7 +77,6 @@ function metricsDesc() {
 
 async function metrics() {
   const vc = getViemClientFromEnv(new Telemetry(), new StubExternalApiCache());
-  const uc = new UniswapClient();
 
   console.log(`[METRICS] using wallet ${vc.account.address}`);
   const db = new DB();
@@ -90,7 +88,7 @@ async function metrics() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,

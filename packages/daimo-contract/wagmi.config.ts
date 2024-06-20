@@ -2,6 +2,7 @@ import { defineConfig } from "@wagmi/cli";
 import { foundry } from "@wagmi/cli/plugins";
 
 import latestAccountFactory from "../contract/broadcast/DeployAccountFactory.s.sol/8453/run-latest.json";
+import latestUSDCSwapper from "../contract/broadcast/DeployDaimoUSDCSwapper.s.sol/8453/runBase-latest.json";
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
 import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/8453/run-latest.json";
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
@@ -22,6 +23,7 @@ const deployments = Object.fromEntries(
     ...latestRequest.transactions,
     ...latestPaymaster.transactions,
     ...latestOffchainUtils.transactions,
+    ...latestUSDCSwapper.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
     .map((r) => [r.contractName, r.contractAddress as `0x${string}`])

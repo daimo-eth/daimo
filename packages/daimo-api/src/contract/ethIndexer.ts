@@ -1,10 +1,4 @@
-import {
-  AddrLabel,
-  BigIntStr,
-  ProposedSwap,
-  guessTimestampFromNum,
-  nativeETH,
-} from "@daimo/common";
+import { ProposedSwap } from "@daimo/common";
 import {
   daimoOffchainUtilsABI,
   daimoOffchainUtilsAddress,
@@ -15,7 +9,6 @@ import { Address } from "viem";
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
-import { UniswapClient } from "../network/uniswapClient";
 import { ViemClient } from "../network/viemClient";
 import { chunks } from "../utils/func";
 import { retryBackoff } from "../utils/retryBackoff";
@@ -34,11 +27,7 @@ export class ETHIndexer extends Indexer {
 
   private listeners: ((ethTransfers: ETHTransfer[]) => void)[] = [];
 
-  constructor(
-    private vc: ViemClient,
-    private uc: UniswapClient,
-    private nameReg: NameRegistry
-  ) {
+  constructor(private vc: ViemClient, private nameReg: NameRegistry) {
     super("ETH");
   }
 
@@ -137,31 +126,8 @@ export class ETHIndexer extends Indexer {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
-  async getProposedSwapsForAddr(
-    addr: Address,
-    runInBackground?: boolean
-  ): Promise<ProposedSwap[]> {
-    const [latestBalance, latestBlock] = this.latestBalances.get(addr) || [
-      0n,
-      0,
-    ];
-
-    if (latestBalance === 0n) return []; // todo: ignore dust?
-
-    const swap = await this.uc.getProposedSwap(
-      addr,
-      latestBalance.toString() as BigIntStr,
-      nativeETH,
-      guessTimestampFromNum(latestBlock, chainConfig.daimoChain),
-      {
-        addr: chainConfig.uniswapETHPoolAddress,
-        label: AddrLabel.UniswapETHPool,
-      },
-      runInBackground
-    );
-
-    console.log(`[ETH] getProposedSwap ${addr}: ${JSON.stringify(swap)}`);
-
-    return swap && swap.routeFound ? [swap] : [];
+  async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
+    // TODO: implement once eth_transfers is indexed
+    return [];
   }
 }

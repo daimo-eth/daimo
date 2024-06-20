@@ -1,7 +1,9 @@
 import {
   BigIntStr,
+  EAccount,
   ProposedSwap,
-  guessTimestampFromNum,
+  SwapQueryResult,
+  daimoUSDC,
   isAmountDust,
 } from "@daimo/common";
 import { Pool } from "pg";
@@ -10,9 +12,10 @@ import { Address, Hex, bytesToHex, getAddress } from "viem";
 import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
+import { getSwapQuote } from "../api/getSwapRoute";
 import { chainConfig } from "../env";
-import { UniswapClient } from "../network/uniswapClient";
-import { ForeignToken, fetchTokenList } from "../server/coinList";
+import { ViemClient } from "../network/viemClient";
+import { ForeignToken, fetchForeignTokenList } from "../server/coinList";
 import { addrTxHashKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -32,7 +35,7 @@ export type ForeignTokenTransfer = Transfer & {
  *   original inbound foreign token transfer.
  */
 export class ForeignCoinIndexer extends Indexer {
-  private foreignTokens: Map<Address, ForeignToken> = new Map();
+  public foreignTokens: Map<Address, ForeignToken> = new Map();
   private allTransfers: ForeignTokenTransfer[] = [];
 
   private pendingSwapsByAddr: Map<Address, ForeignTokenTransfer[]> = new Map(); // inbound transfers without a corresponding outbound swap
@@ -42,7 +45,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, public uc: UniswapClient) {
+  constructor(private nameReg: NameRegistry, private vc: ViemClient) {
     super("SWAPCOIN");
   }
 
@@ -50,7 +53,7 @@ export class ForeignCoinIndexer extends Indexer {
     const startTime = Date.now();
 
     if (this.foreignTokens.size === 0) {
-      this.foreignTokens = await fetchTokenList();
+      this.foreignTokens = await fetchForeignTokenList();
     }
 
     const result = await retryBackoff(
@@ -170,18 +173,17 @@ export class ForeignCoinIndexer extends Indexer {
   }
 
   async getProposedSwapForLog(
-    log: ForeignTokenTransfer,
-    runInBackground?: boolean
+    log: ForeignTokenTransfer
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
-      return this.uc.getProposedSwap(
-        log.to,
+
+      return this.getProposedSwap(
+        log.foreignToken.token,
         log.value.toString() as `${bigint}`,
-        log.foreignToken,
-        guessTimestampFromNum(log.blockNumber, chainConfig.daimoChain),
         fromAcc,
-        runInBackground
+        daimoUSDC.token as Address, // USDC
+        log.to
       );
     });
 
@@ -197,14 +199,12 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapsForAddr(
     addr: Address,
-    runInBackground?: boolean
+    vc: ViemClient
   ): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
-        pendingSwaps.map((swap) =>
-          this.getProposedSwapForLog(swap, runInBackground)
-        )
+        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
       )
     ).filter((s): s is ProposedSwap => s != null);
 
@@ -232,23 +232,26 @@ export class ForeignCoinIndexer extends Indexer {
     };
   }
 
-  // For debugging / introspection of Uniswap routes
+  // Fetch a route using on-chain oracle.
   public async getProposedSwap(
-    fromAmount: BigIntStr,
     fromToken: Address,
+    fromAmount: BigIntStr,
+    fromAcc: EAccount,
+    toToken: Address,
     toAddr: Address
-  ) {
-    const coin = this.foreignTokens.get(fromToken);
-    if (coin == null) return null;
-    return this.uc.getProposedSwap(
+  ): Promise<SwapQueryResult | null> {
+    if (fromToken === toToken) return null;
+    const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
+
+    return await getSwapQuote({
+      amountInStr: fromAmount,
+      tokenIn: fromToken,
+      tokenOut: toToken,
+      fromAccount: fromAcc,
       toAddr,
-      fromAmount,
-      coin,
-      0,
-      {
-        addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
-      },
-      true
-    );
+      chainId,
+      vc: this.vc,
+      foreignTokenList: this.foreignTokens,
+    });
   }
 }

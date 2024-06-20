@@ -21,7 +21,9 @@ export type ForeignToken = ForeignCoin & { token: Address };
 
 const customOverrides = [USDbC] as ForeignToken[];
 
-export async function fetchTokenList(): Promise<Map<Address, ForeignToken>> {
+export async function fetchForeignTokenList(): Promise<
+  Map<Address, ForeignToken>
+> {
   const tokenList = (await (
     await fetchWithBackoff("https://tokens.coingecko.com/base/all.json")
   ).json()) as TokenList;

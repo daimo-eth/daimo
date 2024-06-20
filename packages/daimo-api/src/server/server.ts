@@ -1,7 +1,7 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
-import cors from "cors";
 import "dotenv/config";
+import cors from "cors";
 import http from "http";
 import { Server as WebSocketServer } from "ws";
 
@@ -27,7 +27,6 @@ import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
-import { UniswapClient } from "../network/uniswapClient";
 import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -50,7 +49,6 @@ async function main() {
   console.log(`[API] starting...`);
   const extApiCache = new ExternalApiCache(db.kdb);
   const vc = getViemClientFromEnv(monitor, extApiCache);
-  const uc = new UniswapClient();
 
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
@@ -71,7 +69,7 @@ async function main() {
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, uc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
@@ -81,7 +79,7 @@ async function main() {
     paymentMemoTracker
   );
 
-  const ethIndexer = new ETHIndexer(vc, uc, nameReg);
+  const ethIndexer = new ETHIndexer(vc, nameReg);
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
   bundlerClient.init(vc.publicClient);
