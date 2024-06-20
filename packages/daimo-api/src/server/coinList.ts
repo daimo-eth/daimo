@@ -21,6 +21,8 @@ export type ForeignToken = ForeignCoin & { token: Address };
 
 const customOverrides = [USDbC] as ForeignToken[];
 
+// Fetches a list of foreign tokens from Coingecko.
+// Note: stores addresses in lowercase.
 export async function fetchForeignTokenList(): Promise<
   Map<Address, ForeignToken>
 > {
@@ -33,7 +35,7 @@ export async function fetchForeignTokenList(): Promise<
     assert(token.chainId === 8453, "Only Base supported");
     const largeLogo = token.logoURI?.split("?")[0].replace("thumb", "large");
     if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
-    const addr = getAddress(token.address);
+    const addr = getAddress(token.address).toLowerCase() as Address;
     if (addr === chainConfig.tokenAddress) continue;
 
     const override = customOverrides.find((o) => o.token === addr);
