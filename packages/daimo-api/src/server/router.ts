@@ -17,6 +17,7 @@ import {
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
+import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -27,7 +28,10 @@ import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
-import { getAccountHistory } from "../api/getAccountHistory";
+import {
+  AccountHistoryResult,
+  getAccountHistory,
+} from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
@@ -56,6 +60,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
+import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -122,13 +127,19 @@ export function createRouter(
 
   // CORS for the web app
   const corsMiddleware = trpcT.middleware(async (opts) => {
-    opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    // cannot set headers when connecting via websockets
+    if (opts.ctx.res.setHeader) {
+      opts.ctx.res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+
     return opts.next();
   });
 
   // Don't serve requests until we're ready.
   // This avoids confusing UI state in local development.
   const readyMiddleware = trpcT.middleware(async (opts) => {
+    // Don't serve requests until we're ready.
+    // This avoids confusing UI state in local development.
     if (!notifier.isInitialized) {
       throw new TRPCError({
         code: "PRECONDITION_FAILED",
@@ -706,6 +717,84 @@ export function createRouter(
           telemetry,
           inviteCodeTracker
         );
+      }),
+
+    onAccountUpdate: publicProcedure
+      .input(
+        z.object({
+          address: zAddress,
+          inviteCode: z.string().optional(),
+          sinceBlockNum: z.number(),
+        })
+      )
+      .subscription(async (opts) => {
+        const { address, inviteCode } = opts.input;
+        // how often to send updates regardless of new transfers
+        // useful to update keys, exchange rates and others.
+        const refreshInterval = 10_000;
+
+        return observable<AccountHistoryResult>((emit) => {
+          let lastEmittedBlock = opts.input.sinceBlockNum;
+
+          const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
+            getAccountHistory(
+              opts.ctx,
+              address,
+              inviteCode,
+              lastEmittedBlock,
+              watcher,
+              vc,
+              homeCoinIndexer,
+              ethIndexer,
+              foreignCoinIndexer,
+              profileCache,
+              noteIndexer,
+              reqIndexer,
+              inviteCodeTracker,
+              inviteGraph,
+              nameReg,
+              keyReg,
+              paymaster,
+              db,
+              extApiCache
+            ).then((history) => {
+              // we can have concurrent requests. discard interval pushes
+              // that arrived too late
+              if (
+                !emitOnlyOnNewTransfers &&
+                history.lastBlock <= lastEmittedBlock
+              ) {
+                return;
+              }
+
+              if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
+                return;
+              }
+
+              emit.next(history);
+
+              lastEmittedBlock = history.lastBlock;
+            });
+          };
+
+          // when new block is produced,
+          // push history only if there are new transfers
+          const onNewBlock = async () => {
+            pushHistory(true);
+          };
+
+          // for interval updates push full history
+          const intervalTimer = setInterval(() => {
+            pushHistory(false);
+          }, refreshInterval);
+
+          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+
+          return () => {
+            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+            clearInterval(intervalTimer);
+          };
+        });
       }),
   });
 }

@@ -1,7 +1,9 @@
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
-import cors from "cors";
+import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import "dotenv/config";
+import cors from "cors";
 import http from "http";
+import { Server as WebSocketServer } from "ws";
 
 import { getAppVersionTracker } from "./appVersion";
 import { Crontab } from "./cron";
@@ -187,6 +189,15 @@ async function main() {
     req.url = "/" + req.url.slice(trpcPrefix.length);
     handler(req, res);
   });
+
+  // ws server
+  const wss = new WebSocketServer({ server });
+  applyWSSHandler<typeof router>({
+    wss,
+    router,
+    createContext,
+  });
+
   const port = 3000;
   server.listen(port).address();
 
