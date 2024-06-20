@@ -28,8 +28,8 @@ const traceSource: Source = {
   name: "$CHAIN_TRACE_NAME",
   chain_id: "$CHAIN_ID",
   urls: ["$CHAIN_TRACE_RPC_URL", "$CHAIN_TRACE_RPC_URL_BACKUP"],
-  batch_size: 128,
-  concurrency: 8,
+  batch_size: 32,
+  concurrency: 2,
 } as any;
 
 const integrations = [
