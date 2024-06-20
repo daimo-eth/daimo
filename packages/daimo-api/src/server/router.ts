@@ -227,8 +227,8 @@ export function createRouter(
         const foreignTokenList = foreignCoinIndexer.foreignTokens;
         const route = await getSwapQuote({
           amountInStr: amountIn,
-          tokenIn: fromToken,
-          tokenOut: toToken,
+          tokenIn: getAddress(fromToken),
+          tokenOut: getAddress(toToken),
           fromAccount,
           toAddr,
           chainId,

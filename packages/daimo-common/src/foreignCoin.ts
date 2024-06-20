@@ -66,3 +66,15 @@ export function isAmountDust(
 
   return true;
 }
+
+export function getForeignCoinFromAddress(addr: Address): ForeignCoin {
+  if (addr === nativeETH.token) return nativeETH;
+  if (addr === daimoUSDC.token) return daimoUSDC;
+  return {
+    token: addr,
+    decimals: 18,
+    fullName: "Unknown",
+    symbol: "?",
+    logoURI: "",
+  };
+}

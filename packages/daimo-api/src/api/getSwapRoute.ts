@@ -1,4 +1,11 @@
-import { BigIntStr, EAccount, now, ProposedSwap } from "@daimo/common";
+import {
+  BigIntStr,
+  daimoUSDC,
+  EAccount,
+  nativeETH,
+  now,
+  ProposedSwap,
+} from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { WETH9 } from "@uniswap/sdk-core";
@@ -95,8 +102,7 @@ export async function getSwapQuote({
   if (!foreignTokenList) {
     foreignTokenList = await fetchForeignTokenList();
   }
-  const fromCoin = foreignTokenList.get(tokenIn);
-
+  const fromCoin = getTokenFromAddress(tokenIn, foreignTokenList);
   if (!fromCoin) return null;
 
   const swap: ProposedSwap = {
@@ -137,4 +143,22 @@ function decodeDirectPool(swapPath: Hex): Pool {
     fee: parseInt(swapPath.slice(42, 48), 16),
     tokenOut: `0x${swapPath.slice(48, 88)}` as Address,
   };
+}
+
+function getTokenFromAddress(
+  addr: Address,
+  foreignTokenList: Map<Address, ForeignToken>
+): ForeignToken | undefined {
+  if (addr === nativeETH.token)
+    return {
+      ...nativeETH,
+      token: getAddress("0x4200000000000000000000000000000000000006"),
+    };
+
+  if (addr === daimoUSDC.token)
+    return {
+      ...daimoUSDC,
+      token: getAddress("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"),
+    };
+  return foreignTokenList.get(addr);
 }
