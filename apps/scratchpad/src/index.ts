@@ -11,6 +11,7 @@ import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
 import { InviteGraph } from "@daimo/api/src/offchain/inviteGraph";
 import { PaymentMemoTracker } from "@daimo/api/src/offchain/paymentMemoTracker";
 import { Telemetry } from "@daimo/api/src/server/telemetry";
+import { TokenRegistry } from "@daimo/api/src/server/tokenRegistry";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
 import csv from "csvtojson";
@@ -84,11 +85,12 @@ async function metrics() {
   const profileCache = new ProfileCache(vc, db);
   const nameReg = new NameRegistry(vc, inviteGraph, profileCache, new Set([]));
   const paymentMemoTracker = new PaymentMemoTracker(db);
+  const tokenReg = new TokenRegistry();
 
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,

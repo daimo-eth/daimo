@@ -9,6 +9,7 @@ import { StubExternalApiCache } from "../src/db/externalApiCache";
 import { getViemClientFromEnv } from "../src/network/viemClient";
 import { PaymentMemoTracker } from "../src/offchain/paymentMemoTracker";
 import { Telemetry } from "../src/server/telemetry";
+import { TokenRegistry } from "../src/server/tokenRegistry";
 import { Watcher } from "../src/shovel/watcher";
 
 async function main() {
@@ -29,7 +30,11 @@ async function main() {
     nameReg,
     paymentMemoTracker
   );
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(
+    nameReg,
+    vc,
+    new TokenRegistry()
+  );
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
