@@ -44,8 +44,6 @@ export async function getSwapQuote({
   vc: ViemClient;
   tokenReg: TokenRegistry;
 }) {
-  console.log("TOKEN REG: ", JSON.stringify(tokenReg.getTokenList()));
-
   const amountIn: bigint = BigInt(amountInStr);
 
   const swapQuote = await vc.publicClient.readContract({
