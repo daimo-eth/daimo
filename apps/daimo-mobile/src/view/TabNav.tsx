@@ -16,6 +16,7 @@ import {
   TransitionPresets,
   createStackNavigator,
 } from "@react-navigation/stack";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -68,6 +69,8 @@ import {
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
+
+SplashScreen.preventAutoHideAsync();
 
 const { add, multiply } = Animated;
 
@@ -153,6 +156,13 @@ function MainTabNavigator() {
 export function TabNav() {
   const { account, keyInfo } = useAccountAndKeyInfo();
 
+  // Remove splash screen
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      SplashScreen.hideAsync();
+    });
+  }, []);
+
   // No account? Create an account + enclave key.
   if (account == null || !account.isOnboarded) {
     return <OnboardingNavigator />;
@@ -169,7 +179,6 @@ export function TabNav() {
       return <MissingKeyScreen />;
     }
   }
-
   // Logged-in app.
   return (
     <MainStack.Navigator initialRouteName="MainTabNav">
