@@ -1,3 +1,4 @@
+import { fetchWithBackoff } from "@daimo/api/src/network/fetchWithBackoff";
 import {
   EAccount,
   amountToDollars,
@@ -140,15 +141,16 @@ type TokenList = {
   }[];
   version: any;
 };
-let tokenListPromise: Promise<TokenList> | null = null;
+
+let foreignTokenList: TokenList | null = null;
 
 async function getTokenList(): Promise<TokenList> {
-  if (tokenListPromise == null) {
-    tokenListPromise = fetch("https://tokens.coingecko.com/base/all.json").then(
-      (a) => a.json()
-    );
+  if (foreignTokenList == null) {
+    foreignTokenList = (await (
+      await fetchWithBackoff("https://tokens.coingecko.com/base/all.json")
+    ).json()) as TokenList;
   }
-  return tokenListPromise;
+  return foreignTokenList;
 }
 
 // Gets a swap quote from the onchain contract.
