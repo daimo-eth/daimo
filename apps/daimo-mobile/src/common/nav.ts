@@ -9,7 +9,7 @@ import {
   DaimoLinkTag,
   DisplayOpEvent,
   EAccount,
-  ForeignCoin,
+  ForeignToken,
   getEAccountStr,
   parseDaimoLink,
   parseInviteCodeOrLink,
@@ -127,7 +127,7 @@ export interface SendNavProp {
     | DaimoLinkTag;
   recipient?: EAccountContact;
   money?: MoneyEntry;
-  coin?: ForeignCoin;
+  coin?: ForeignToken;
   memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;

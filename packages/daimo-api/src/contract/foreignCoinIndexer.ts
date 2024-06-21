@@ -181,7 +181,6 @@ export class ForeignCoinIndexer extends Indexer {
   async getProposedSwapForLog(
     log: ForeignTokenTransfer
   ): Promise<ProposedSwap | null> {
-    console.log("[API] getting proposed swap for log: ", log);
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
@@ -189,7 +188,7 @@ export class ForeignCoinIndexer extends Indexer {
         log.foreignToken.address,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        baseUSDC.address as Address, // USDC
+        baseUSDC.address, // USDC
         log.to
       );
     });

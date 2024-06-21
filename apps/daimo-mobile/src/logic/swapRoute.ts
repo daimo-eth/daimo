@@ -1,4 +1,4 @@
-import { BigIntStr, ForeignCoin, ProposedSwap } from "@daimo/common";
+import { BigIntStr, ProposedSwap } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
@@ -14,7 +14,7 @@ export function getSwapRoute({
   toAddress,
   daimoChainId,
 }: {
-  fromToken: ForeignCoin;
+  fromToken: Address;
   toToken: Address;
   amountIn: bigint;
   fromAccount: Account;
@@ -25,7 +25,7 @@ export function getSwapRoute({
 
   const result = rpcHook.getSwapQuote.useQuery({
     amountIn: `${amountIn}` as BigIntStr,
-    fromToken: fromToken.token as Address,
+    fromToken,
     toToken,
     fromAccount: toEAccount(fromAccount),
     toAddr: toAddress,

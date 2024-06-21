@@ -1,8 +1,4 @@
-import {
-  ForeignCoin,
-  getHomeCoinByAddress,
-  supportedSendCoins,
-} from "@daimo/common";
+import { ForeignToken, baseUSDC, supportedSendCoins } from "@daimo/common";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
@@ -16,24 +12,24 @@ export function SendCoinButton({
   setCoin,
   isFixed,
 }: {
-  coin: ForeignCoin;
-  setCoin: (coin: ForeignCoin) => void;
+  coin: ForeignToken;
+  setCoin: (coin: ForeignToken) => void;
   isFixed: boolean;
 }) {
   const account = useAccount();
 
   if (account == null) return null;
 
-  const onSetCoin = (entry: ForeignCoin) => {
+  const onSetCoin = (entry: ForeignToken) => {
     setCoin(entry);
   };
-  const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
+  const homeCoin = baseUSDC; // TODO: add home coin to account
 
   return (
     <View
       style={{
         ...styles.coinButton,
-        backgroundColor: isFixed ? color.grayLight : color.white,
+        backgroundColor: color.white,
       }}
     >
       <View style={styles.coinPickerWrap}>
@@ -44,7 +40,14 @@ export function SendCoinButton({
             onSetCoin={onSetCoin}
           />
         )}
-        <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
+        <Text
+          style={{
+            ...ss.text.btnCaps,
+            color: isFixed ? color.grayMid : color.midnight,
+          }}
+        >
+          {coin.symbol}
+        </Text>
       </View>
     </View>
   );
@@ -56,11 +59,11 @@ function CoinPicker({
   allCoins,
   onSetCoin,
 }: {
-  homeCoin: ForeignCoin;
-  allCoins: ForeignCoin[];
-  onSetCoin: (coin: ForeignCoin) => void;
+  homeCoin: ForeignToken;
+  allCoins: ForeignToken[];
+  onSetCoin: (coin: ForeignToken) => void;
 }) {
-  const choose = (val: ForeignCoin) => {
+  const choose = (val: ForeignToken) => {
     if (val == null) return;
     onSetCoin(val);
   };
@@ -85,7 +88,7 @@ function CoinPicker({
   );
 }
 
-function CoinPickItem({ coin }: { coin: ForeignCoin }) {
+function CoinPickItem({ coin }: { coin: ForeignToken }) {
   return (
     <View style={styles.coinPickItem}>
       <DaimoText variant="dropdown">{coin.symbol}</DaimoText>
@@ -97,7 +100,7 @@ export function CoinPellet({
   coin,
   onClick,
 }: {
-  coin: ForeignCoin;
+  coin: ForeignToken;
   onClick: () => void;
 }) {
   return (

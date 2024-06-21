@@ -1,7 +1,7 @@
 import {
   CurrencyExchangeRate,
   currencyRateUSD,
-  ForeignCoin,
+  ForeignToken,
 } from "@daimo/common";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -41,7 +41,7 @@ export function AmountChooser({
   moneyEntry: MoneyEntry;
   onSetEntry: (entry: MoneyEntry) => void;
   showAmountAvailable: boolean;
-  coin?: ForeignCoin;
+  coin?: ForeignToken;
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;

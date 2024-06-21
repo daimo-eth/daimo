@@ -1,6 +1,6 @@
 import {
   EAccount,
-  ForeignCoin,
+  ForeignToken,
   OpStatus,
   ProposedSwap,
   assert,
@@ -44,7 +44,7 @@ export function SendTransferButton({
   account: Account;
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
-  toCoin: ForeignCoin;
+  toCoin: ForeignToken;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;

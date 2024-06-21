@@ -2,13 +2,12 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
-  ForeignCoin,
+  ForeignToken,
   assert,
   assertNotNull,
+  baseUSDC,
   dollarsToAmount,
   getAccountName,
-  getHomeCoinByAddress,
-  getWETHAddressByChainId,
   now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
@@ -91,7 +90,7 @@ function SendScreenInner({
     else goHome();
   }, [nav, money, recipient]);
 
-  const defaultHomeCoin = getHomeCoinByAddress(account.homeCoinAddress);
+  const defaultHomeCoin = baseUSDC; // TODO: add homecoin in Account
   coin = coin ?? defaultHomeCoin;
 
   const sendDisplay = (() => {
@@ -165,7 +164,7 @@ function SendChooseAmount({
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
-  defaultHomeCoin: ForeignCoin;
+  defaultHomeCoin: ForeignToken;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -174,7 +173,7 @@ function SendChooseAmount({
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
   // Select what coin (defaults to native home coin, e.g. daimo USDC)
-  const [coin, setCoin] = useState<ForeignCoin>(defaultHomeCoin);
+  const [coin, setCoin] = useState<ForeignToken>(defaultHomeCoin);
 
   // Once done, update nav
   const nav = useNav();
@@ -263,7 +262,7 @@ function SendConfirm({
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
-  coin: ForeignCoin;
+  coin: ForeignToken;
   requestStatus?: DaimoRequestV2Status;
 }) {
   const isRequest = !!requestStatus;
@@ -283,17 +282,14 @@ function SendConfirm({
 
   const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
 
-  const homeCoin = getHomeCoinByAddress(account.homeCoinAddress);
+  // TODO: store homeCoin (foreignToken type) in account in the future
+  const homeCoin = baseUSDC;
   const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
-  const toToken =
-    coin.token === "ETH"
-      ? getWETHAddressByChainId(account.homeChainId)
-      : coin.token;
   const swapRoute = getSwapRoute({
-    fromToken: homeCoin,
-    toToken,
+    fromToken: homeCoin.address,
+    toToken: coin.address,
     amountIn: numTokens,
     fromAccount: account,
     toAddress: recipient.addr,

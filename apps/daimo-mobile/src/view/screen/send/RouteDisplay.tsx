@@ -1,4 +1,4 @@
-import { ForeignCoin, ProposedSwap, amountToDollars } from "@daimo/common";
+import { ForeignToken, ProposedSwap, amountToDollars } from "@daimo/common";
 import { View, StyleSheet } from "react-native";
 
 import { TextLight } from "../../shared/text";
@@ -9,8 +9,8 @@ export function RoutePellet({
   toCoin,
 }: {
   route: ProposedSwap;
-  fromCoin: ForeignCoin;
-  toCoin: ForeignCoin;
+  fromCoin: ForeignToken;
+  toCoin: ForeignToken;
 }) {
   const toAmount = amountToDollars(route.toAmount, toCoin.decimals);
 
