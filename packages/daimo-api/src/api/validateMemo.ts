@@ -1,12 +1,12 @@
 import {
   RegExpMatcher,
   englishDataset,
-  englishRecommendedTransformers,
+  englishRecommendedWhitelistMatcherTransformers,
 } from "obscenity";
 
 const obscenityConfig = new RegExpMatcher({
   ...englishDataset.build(),
-  ...englishRecommendedTransformers,
+  ...englishRecommendedWhitelistMatcherTransformers,
 });
 
 enum MemoStatus {
