@@ -100,7 +100,7 @@ export async function getSwapQuote({
 
   let fromCoin;
   // TODO: in future, check home coin token (for now, daimoUSDC)
-  if (tokenIn === daimoUSDC.token) {
+  if (tokenIn === daimoUSDC.address) {
     fromCoin = daimoUSDC;
   } else {
     fromCoin = tokenReg.getToken(tokenIn);

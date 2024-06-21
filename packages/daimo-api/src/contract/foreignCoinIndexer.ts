@@ -1,6 +1,7 @@
 import {
   BigIntStr,
   EAccount,
+  ForeignToken,
   ProposedSwap,
   SwapQueryResult,
   daimoUSDC,
@@ -15,7 +16,7 @@ import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-import { ForeignToken, TokenRegistry } from "../server/tokenRegistry";
+import { TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -128,12 +129,13 @@ export class ForeignCoinIndexer extends Indexer {
       // Delete the first matching pending swap that is now swapped
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
-          t.foreignToken.token === log.foreignToken.token && t.value === -delta
+          t.foreignToken.address === log.foreignToken.address &&
+          t.value === -delta
       );
 
       if (matchingPendingSwap == null) {
         console.log(
-          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.address}`
         );
         return;
       }
@@ -182,10 +184,10 @@ export class ForeignCoinIndexer extends Indexer {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
       return this.getProposedSwap(
-        log.foreignToken.token,
+        log.foreignToken.address,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        daimoUSDC.token as Address, // USDC
+        daimoUSDC.address as Address, // USDC
         log.to
       );
     });
@@ -231,7 +233,7 @@ export class ForeignCoinIndexer extends Indexer {
 
     return {
       ...correspondingReceive,
-      foreignToken: this.tokenReg.getToken(log.foreignToken.token)!,
+      foreignToken: this.tokenReg.getToken(log.foreignToken.address)!,
     };
   }
 

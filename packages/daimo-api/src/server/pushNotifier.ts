@@ -12,7 +12,7 @@ import {
   getDisplayFromTo,
   getForeignCoinDisplayAmount,
   getSlotLabel,
-  nativeETH,
+  baseETH,
   parseRequestMetadata,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
@@ -368,13 +368,13 @@ export class PushNotifier {
 
     const readableAmount = getForeignCoinDisplayAmount(
       swap[0].fromAmount,
-      nativeETH
+      baseETH
     );
 
     const dollars = amountToDollars(swap[0].toAmount);
 
-    const title = `Received ${readableAmount} ${nativeETH.symbol}`;
-    const body = `Accept ${readableAmount} ${nativeETH.symbol} as $${dollars} USDC`;
+    const title = `Received ${readableAmount} ${baseETH.symbol}`;
+    const body = `Accept ${readableAmount} ${baseETH.symbol} as $${dollars} USDC`;
 
     return [
       {

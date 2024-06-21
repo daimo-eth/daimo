@@ -1,4 +1,4 @@
-import { AddrLabel, ForeignCoin } from "@daimo/common";
+import { AddrLabel, ForeignToken } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
@@ -87,7 +87,7 @@ export function TokenBubble({
   coin,
   size,
 }: {
-  coin: ForeignCoin;
+  coin: ForeignToken;
   size: number;
 }) {
   const image = coin.logoURI;

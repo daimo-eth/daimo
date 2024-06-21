@@ -1,11 +1,12 @@
 import {
-  ForeignCoin,
+  ForeignToken,
   OpStatus,
   ProposedSwap,
   amountToDollars,
   daimoUSDC,
   getForeignCoinDisplayAmount,
   hasAccountName,
+  isNativeETH,
   now,
 } from "@daimo/common";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
@@ -92,7 +93,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
         preSymbol="+"
         postText="USDC"
       />
-      {swap.fromCoin.token !== "ETH" && (
+      {!isNativeETH(swap.fromCoin.address, account.homeChainId) && (
         <>
           <Spacer h={32} />
           <AccountRow
@@ -150,7 +151,7 @@ function CurrencyDisplay({
   amount,
   amountColor,
 }: {
-  coin: ForeignCoin;
+  coin: ForeignToken;
   amount: string;
   amountColor?: string;
 }) {
@@ -165,7 +166,7 @@ function CurrencyDisplay({
       <TokenBubble coin={coin} size={48} />
       <Spacer w={8} />
       <View style={{ flexDirection: "column" }}>
-        <TextH3 color={color.midnight}>{coin.fullName}</TextH3>
+        <TextH3 color={color.midnight}>{coin.name}</TextH3>
         <Spacer h={2} />
         <TextBodyCaps color={amountColor || color.grayDark}>
           {amount} {coin.symbol}

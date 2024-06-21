@@ -1,4 +1,8 @@
-import { DisplayOpEvent, getForeignCoinDisplayAmount } from "@daimo/common";
+import {
+  DisplayOpEvent,
+  getForeignCoinDisplayAmount,
+  isNativeETH,
+} from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 
 import { env } from "../../../env";
@@ -23,7 +27,7 @@ export function getSynthesizedMemo(
   if (op.requestStatus) {
     return op.requestStatus.memo;
   } else if (op.preSwapTransfer) {
-    if (op.preSwapTransfer.coin.token === "ETH") {
+    if (isNativeETH(op.preSwapTransfer.coin.address, chainConfig)) {
       return `ETH → ${coinName}`;
     }
 

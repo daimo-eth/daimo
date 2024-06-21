@@ -1,21 +1,11 @@
-import { ForeignCoin, USDbC, assert } from "@daimo/common";
+import { ForeignToken, USDbC, assert } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
 
-// Exclude native ETH
-export type ForeignToken = ForeignCoin & { token: Address };
-
 interface TokenList {
-  tokens: {
-    chainId: number;
-    address: Address;
-    name: string;
-    symbol: string;
-    decimals: number;
-    logoURI?: string;
-  }[];
+  tokens: ForeignToken[];
   version: any;
 }
 
@@ -48,15 +38,16 @@ export class TokenRegistry {
       const addr = getAddress(token.address);
       if (addr === chainConfig.tokenAddress) continue;
 
-      const override = customOverrides.find((o) => o.token === addr);
+      const override = customOverrides.find((o) => o.address === addr);
       if (override) this.foreignTokens.set(addr, override);
       else {
         this.foreignTokens.set(addr, {
-          token: addr,
+          address: addr,
           decimals: token.decimals,
-          fullName: token.name,
+          name: token.name,
           symbol: token.symbol,
           logoURI: largeLogo,
+          chainId: token.chainId,
         });
       }
     }

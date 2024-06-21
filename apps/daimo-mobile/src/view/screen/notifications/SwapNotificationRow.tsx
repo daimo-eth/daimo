@@ -1,6 +1,7 @@
 import {
   getAccountName,
   getForeignCoinDisplayAmount,
+  isNativeETH,
   now,
   timeAgo,
 } from "@daimo/common";
@@ -56,17 +57,17 @@ export function SwapNotificationRow({
   );
 
   const copy = (() => {
-    if (notif.swap.fromCoin.token !== "ETH") {
+    if (!isNativeETH(notif.swap.fromCoin.address, chainConfig)) {
       return (
         <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-          Accept {readableAmount} {coin.fullName} from{" "}
+          Accept {readableAmount} {coin.name} from{" "}
           <TextBody color={color.midnight}>{accName}</TextBody>
         </TextBody>
       );
     } else {
       return (
         <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-          Accept {readableAmount} {coin.fullName} as{" "}
+          Accept {readableAmount} {coin.name} as{" "}
           <TextBody color={color.midnight}>{homeCoinName}</TextBody>
         </TextBody>
       );
