@@ -35,7 +35,6 @@
     "@types/cors": "^2.8.17",
     "@types/geoip-lite": "^1.4.2",
     "@uniswap/router-sdk": "^1.9.3",
-    "@uniswap/sdk-core": "^4.2.1",
     "@uniswap/v3-sdk": "^3.13.1",
     "await-lock": "^2.2.2",
     "cors": "^2.8.5",

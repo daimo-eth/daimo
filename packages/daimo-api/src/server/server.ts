@@ -10,6 +10,7 @@ import { Crontab } from "./cron";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
 import { Telemetry } from "./telemetry";
+import { TokenRegistry } from "./tokenRegistry";
 import { createContext, onTrpcError } from "./trpc";
 import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
@@ -66,10 +67,13 @@ async function main() {
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
 
+  const tokenReg = new TokenRegistry();
+  await tokenReg.load();
+
   const opIndexer = new OpIndexer();
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
-  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc);
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
@@ -165,7 +169,8 @@ async function main() {
     accountFactory,
     monitor,
     binanceClient,
-    extApiCache
+    extApiCache,
+    tokenReg
   );
   const handler = createHTTPHandler({
     middleware: cors(), // handle OPTIONS requests

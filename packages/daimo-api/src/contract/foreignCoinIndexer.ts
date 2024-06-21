@@ -1,9 +1,10 @@
 import {
   BigIntStr,
   EAccount,
+  ForeignToken,
   ProposedSwap,
   SwapQueryResult,
-  daimoUSDC,
+  baseUSDC,
   isAmountDust,
 } from "@daimo/common";
 import { Pool } from "pg";
@@ -15,7 +16,7 @@ import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-import { ForeignToken, fetchForeignTokenList } from "../server/coinList";
+import { TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -35,7 +36,6 @@ export type ForeignTokenTransfer = Transfer & {
  *   original inbound foreign token transfer.
  */
 export class ForeignCoinIndexer extends Indexer {
-  public foreignTokens: Map<Address, ForeignToken> = new Map();
   private allTransfers: ForeignTokenTransfer[] = [];
 
   private pendingSwapsByAddr: Map<Address, ForeignTokenTransfer[]> = new Map(); // inbound transfers without a corresponding outbound swap
@@ -45,15 +45,20 @@ export class ForeignCoinIndexer extends Indexer {
 
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
-  constructor(private nameReg: NameRegistry, private vc: ViemClient) {
+  constructor(
+    private nameReg: NameRegistry,
+    private vc: ViemClient,
+    private tokenReg: TokenRegistry
+  ) {
     super("SWAPCOIN");
   }
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
 
-    if (this.foreignTokens.size === 0) {
-      this.foreignTokens = await fetchForeignTokenList();
+    const chainId = this.vc.publicClient.chain.id;
+    if (this.tokenReg.foreignTokensByChain.get(chainId)?.size === 0) {
+      await this.tokenReg.load();
     }
 
     const result = await retryBackoff(
@@ -85,10 +90,10 @@ export class ForeignCoinIndexer extends Indexer {
           value: BigInt(row.v),
         };
       })
-      .filter((t) => this.foreignTokens.has(t.address))
+      .filter((t) => this.tokenReg.hasToken(t.address))
       .map((t) => ({
         ...t,
-        foreignToken: this.foreignTokens.get(t.address)!,
+        foreignToken: this.tokenReg.getToken(t.address)!,
       }));
     console.log(
       `[SWAPCOIN] loaded ${logs.length} transfers ${from} ${to} in ${
@@ -125,12 +130,13 @@ export class ForeignCoinIndexer extends Indexer {
       // Delete the first matching pending swap that is now swapped
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
-          t.foreignToken.token === log.foreignToken.token && t.value === -delta
+          t.foreignToken.address === log.foreignToken.address &&
+          t.value === -delta
       );
 
       if (matchingPendingSwap == null) {
         console.log(
-          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.address}`
         );
         return;
       }
@@ -156,18 +162,18 @@ export class ForeignCoinIndexer extends Indexer {
     }
   }
 
-  /** Listener invoked for all past ETH transfers, then for new ones. */
+  /** Listener invoked for all past foreignCoin transfers, then for new ones. */
   pipeAllTransfers(listener: (logs: ForeignTokenTransfer[]) => void) {
     listener(this.allTransfers);
     this.addListener(listener);
   }
 
-  /** Listener is invoked for all new ETH transfers. */
+  /** Listener is invoked for all new foreignCoin transfers. */
   addListener(listener: (logs: ForeignTokenTransfer[]) => void) {
     this.listeners.push(listener);
   }
 
-  /** Unsubscribe from new ETH transfers. */
+  /** Unsubscribe from new foreignCoin transfers. */
   removeListener(listener: (logs: ForeignTokenTransfer[]) => void) {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
@@ -175,14 +181,15 @@ export class ForeignCoinIndexer extends Indexer {
   async getProposedSwapForLog(
     log: ForeignTokenTransfer
   ): Promise<ProposedSwap | null> {
+    console.log("[API] getting proposed swap for log: ", log);
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
       return this.getProposedSwap(
-        log.foreignToken.token,
+        log.foreignToken.address,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        daimoUSDC.token as Address, // USDC
+        baseUSDC.address as Address, // USDC
         log.to
       );
     });
@@ -197,10 +204,7 @@ export class ForeignCoinIndexer extends Indexer {
     return swap;
   }
 
-  async getProposedSwapsForAddr(
-    addr: Address,
-    vc: ViemClient
-  ): Promise<ProposedSwap[]> {
+  async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
@@ -228,7 +232,7 @@ export class ForeignCoinIndexer extends Indexer {
 
     return {
       ...correspondingReceive,
-      foreignToken: this.foreignTokens.get(log.foreignToken.token)!,
+      foreignToken: this.tokenReg.getToken(log.foreignToken.address)!,
     };
   }
 
@@ -251,7 +255,7 @@ export class ForeignCoinIndexer extends Indexer {
       toAddr,
       chainId,
       vc: this.vc,
-      foreignTokenList: this.foreignTokens,
+      tokenReg: this.tokenReg,
     });
   }
 }

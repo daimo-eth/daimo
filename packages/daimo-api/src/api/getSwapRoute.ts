@@ -1,12 +1,18 @@
-import { BigIntStr, EAccount, now, ProposedSwap } from "@daimo/common";
+import {
+  BigIntStr,
+  baseUSDC,
+  EAccount,
+  now,
+  ProposedSwap,
+  getNativeETHByChain,
+} from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
-import { WETH9 } from "@uniswap/sdk-core";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { Address, getAddress, Hex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
-import { fetchForeignTokenList, ForeignToken } from "../server/coinList";
+import { TokenRegistry } from "../server/tokenRegistry";
 
 // Uniswap router on Base
 // From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
@@ -27,7 +33,7 @@ export async function getSwapQuote({
   toAddr,
   chainId,
   vc,
-  foreignTokenList,
+  tokenReg,
 }: {
   amountInStr: BigIntStr;
   tokenIn: Address;
@@ -36,7 +42,7 @@ export async function getSwapQuote({
   toAddr: Address;
   chainId: number;
   vc: ViemClient;
-  foreignTokenList?: Map<Address, ForeignToken>;
+  tokenReg: TokenRegistry;
 }) {
   const amountIn: bigint = BigInt(amountInStr);
 
@@ -53,7 +59,7 @@ export async function getSwapQuote({
   // sent to the recipient.
   // Special case: if outputToken is native, then routerMustCustody is true.
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
-  const routerMustCustody = tokenOut === WETH9[chainId].address;
+  const routerMustCustody = tokenOut === getNativeETHByChain(chainId)?.address;
   const recipient: Address = routerMustCustody ? ADDRESS_ZERO : toAddr;
 
   const t = now();
@@ -92,10 +98,13 @@ export async function getSwapQuote({
 
   if (!callData) return null;
 
-  if (!foreignTokenList) {
-    foreignTokenList = await fetchForeignTokenList();
+  let fromCoin;
+  // TODO: in future, check home coin token using account (for now, baseUSDC)
+  if (tokenIn === getAddress(baseUSDC.address)) {
+    fromCoin = baseUSDC;
+  } else {
+    fromCoin = tokenReg.getToken(tokenIn); // Foreign tokens
   }
-  const fromCoin = foreignTokenList.get(tokenIn);
 
   if (!fromCoin) return null;
 

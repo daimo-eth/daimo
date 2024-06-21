@@ -6,6 +6,7 @@ import {
   DaimoRequestV2Status,
   DisplayOpEvent,
   EAccount,
+  ForeignToken,
   OpStatus,
   ProposedSwap,
   guessTimestampFromNum,
@@ -25,7 +26,6 @@ import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { chainConfig } from "../src/env";
-import { ForeignToken } from "../src/server/coinList";
 import { PushNotifier } from "../src/server/pushNotifier";
 
 const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
@@ -475,10 +475,11 @@ function createForeignTokenTransfer(args: {
 
 function createFakeForeignToken(): ForeignToken {
   return {
-    token: "0x0",
-    fullName: "fake token",
+    address: "0x0",
+    name: "fake token",
     symbol: "FAKE",
     decimals: 5,
+    chainId: chainConfig.chainL2.id,
   };
 }
 

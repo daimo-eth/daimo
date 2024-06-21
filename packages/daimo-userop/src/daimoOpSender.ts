@@ -4,6 +4,7 @@ import {
   ProposedSwap,
   UserOpHex,
   derKeytoContractFriendlyKey,
+  isNativeETH,
   now,
   zUserOpHex,
 } from "@daimo/common";
@@ -334,7 +335,7 @@ export class DaimoOpSender {
     opMetadata: DaimoOpMetadata
   ) {
     console.log(
-      `[OP] execute swap ${swap.fromCoin.token} to ${swap.toAmount} via ${swap.execRouterAddress}`
+      `[OP] execute swap ${swap.fromCoin.address} to ${swap.toAmount} via ${swap.execRouterAddress}`
     );
 
     const executions: DaimoAccountCall[] = [
@@ -345,12 +346,12 @@ export class DaimoOpSender {
       },
     ];
 
-    if (swap.fromCoin.token !== "ETH") {
+    if (!isNativeETH(swap.fromCoin.address, this.opConfig.chainId)) {
       executions.unshift(
         this.getTokenApproveCall(
           swap.execRouterAddress,
           BigInt(swap.fromAmount),
-          swap.fromCoin.token
+          swap.fromCoin.address
         )
       );
     }

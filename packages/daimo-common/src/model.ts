@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { DaimoLinkNote } from "./daimoLink";
 import { EAccount } from "./eAccount";
-import { ForeignCoin } from "./foreignCoin";
+import { ForeignToken } from "./foreignToken";
 
 export const zAddress = z
   .string()
@@ -126,7 +126,7 @@ export type CreateInviteLinkArgs = z.infer<typeof zCreateInviteLinkArgs>;
 
 // TODO: fromAcc and receivedAt are unknown for native ETH
 export interface SwapQuery {
-  fromCoin: ForeignCoin;
+  fromCoin: ForeignToken;
   fromAmount: BigIntStr; // in native unit of the token
   fromAcc: EAccount;
   receivedAt: number;

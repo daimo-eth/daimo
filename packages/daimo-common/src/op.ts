@@ -1,7 +1,7 @@
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
-import { ForeignCoin } from "./foreignCoin";
+import { ForeignToken } from "./foreignToken";
 import { BigIntStr } from "./model";
 
 /**
@@ -38,7 +38,7 @@ export type PendingOpEvent = {
 };
 
 export type PreSwapTransfer = {
-  coin: ForeignCoin;
+  coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
 };

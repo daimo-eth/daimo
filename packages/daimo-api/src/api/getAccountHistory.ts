@@ -202,7 +202,7 @@ export async function getAccountHistory(
   const proposedSwaps = [
     // TODO: re-enable once eth_transfers is caught up
     // ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
-    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address, vc)),
+    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address)),
   ];
   elapsedMs = Date.now() - startMs;
   console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
