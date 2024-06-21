@@ -59,11 +59,31 @@ export class ForeignCoinIndexer extends Indexer {
     const result = await retryBackoff(
       `swapCoinIndexer-logs-query-${from}-${to}`,
       async () => {
-        await pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`);
+        await Promise.all([
+          pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`),
+          pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
+        ]);
         return await pg.query(
-          `SELECT * from filtered_erc20_transfers 
+          `
+          SELECT *
+          FROM filtered_erc20_transfers 
+            WHERE block_num BETWEEN $1 AND $2
+          UNION ALL
+          SELECT
+            chain_id,
+            block_num,
+            block_hash,
+            tx_idx,
+            tx_hash,
+            '\\00' AS log_addr,
+            from as f,
+            to as t,
+            value as v,
+            trace_action_idx as log_idx
+          FROM filtered_eth_transfers
           WHERE block_num BETWEEN $1 AND $2
-          ORDER BY block_num ASC, log_idx ASC;`,
+          ORDER BY block_num ASC, tx_idx ASC,log_idx ASC
+          ;`,
           [from, to]
         );
       }

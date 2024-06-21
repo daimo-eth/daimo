@@ -10,6 +10,7 @@ import {
   daimoPaymasterV2Address,
   entryPointABI,
   erc20ABI,
+  zeroAddr,
 } from "@daimo/contract";
 import { CronJob } from "cron";
 import { Constants } from "userop";
@@ -85,9 +86,7 @@ export class Crontab {
       functionName: "metaPaymaster",
     });
 
-    const isMetaPaymasterEnabled =
-      getAddress(metaPaymaster) !==
-      getAddress("0x0000000000000000000000000000000000000000");
+    const isMetaPaymasterEnabled = getAddress(metaPaymaster) !== zeroAddr;
 
     console.log(`[CRON] checked meta paymaster ${isMetaPaymasterEnabled}`);
 

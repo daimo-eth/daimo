@@ -105,10 +105,10 @@ export class Watcher {
         ON filtered_erc20_transfers (block_num);
 
       CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_eth_transfers AS (
-        SELECT *
-        FROM eth_transfers
-        JOIN names n ON n.addr = eth_transfers.to
-        OR n.addr = eth_transfers.from
+        SELECT et.*
+        FROM eth_transfers et
+        JOIN names n ON n.addr = et.to
+        OR n.addr = et.from
       );
 
       CREATE INDEX IF NOT EXISTS i_filtered_eth_transfers_block_num
