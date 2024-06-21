@@ -355,10 +355,8 @@ export function createRouter(
           address,
           inviteCode,
           sinceBlockNum,
-          watcher,
           vc,
           homeCoinIndexer,
-          ethIndexer,
           foreignCoinIndexer,
           profileCache,
           noteIndexer,
@@ -369,7 +367,8 @@ export function createRouter(
           keyReg,
           paymaster,
           db,
-          extApiCache
+          extApiCache,
+          await watcher.getShovelLatest()
         );
       }),
 
@@ -736,16 +735,21 @@ export function createRouter(
         return observable<AccountHistoryResult>((emit) => {
           let lastEmittedBlock = opts.input.sinceBlockNum;
 
-          const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
-            getAccountHistory(
+          const pushHistory = async (
+            emitOnlyOnNewTransfers: boolean,
+            blockNumber?: number
+          ) => {
+            if (!blockNumber) {
+              blockNumber = await watcher.getShovelLatest();
+            }
+
+            const history = await getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
               lastEmittedBlock,
-              watcher,
               vc,
               homeCoinIndexer,
-              ethIndexer,
               foreignCoinIndexer,
               profileCache,
               noteIndexer,
@@ -756,25 +760,26 @@ export function createRouter(
               keyReg,
               paymaster,
               db,
-              extApiCache
-            ).then((history) => {
-              // we can have concurrent requests. discard interval pushes
-              // that arrived too late
-              if (
-                !emitOnlyOnNewTransfers &&
-                history.lastBlock <= lastEmittedBlock
-              ) {
-                return;
-              }
+              extApiCache,
+              blockNumber
+            );
 
-              if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
-                return;
-              }
+            // we can have concurrent requests. discard interval pushes
+            // that arrived too late
+            if (
+              !emitOnlyOnNewTransfers &&
+              history.lastBlock <= lastEmittedBlock
+            ) {
+              return;
+            }
 
-              emit.next(history);
+            if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
+              return;
+            }
 
-              lastEmittedBlock = history.lastBlock;
-            });
+            emit.next(history);
+
+            lastEmittedBlock = history.lastBlock;
           };
 
           // when new block is produced,

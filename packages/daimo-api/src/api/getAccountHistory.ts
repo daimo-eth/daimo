@@ -15,6 +15,7 @@ import {
   assert,
   daimoDomainAddress,
   formatDaimoLink,
+  guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
 import semverLt from "semver/functions/lt";
@@ -33,7 +34,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
-import { getEnvApi } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import {
   LandlineAccount,
   getLandlineAccounts,
@@ -94,10 +95,8 @@ export async function getAccountHistory(
   address: Address,
   inviteCode: string | undefined,
   sinceBlockNum: number,
-  watcher: Watcher,
   vc: ViemClient,
   homeCoinIndexer: HomeCoinIndexer,
-  ethIndexer: ETHIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
   profileCache: ProfileCache,
   noteIndexer: NoteIndexer,
@@ -108,7 +107,8 @@ export async function getAccountHistory(
   keyReg: KeyRegistry,
   paymaster: Paymaster,
   db: DB,
-  extApiCache: ExternalApiCache
+  extApiCache: ExternalApiCache,
+  blockNumber: number
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
@@ -126,14 +126,15 @@ export async function getAccountHistory(
   }
 
   // Get the latest block + current balance.
-  const lastBlk = watcher.latestBlock();
-  if (lastBlk == null) throw new Error("No latest block");
   assert(
-    lastBlk.number >= finBlock.number,
-    `Latest block ${lastBlk.number} < finalized ${finBlock.number}`
+    blockNumber >= Number(finBlock.number),
+    `Latest block ${blockNumber} < finalized ${finBlock.number}`
   );
-  const lastBlock = Number(lastBlk.number);
-  const lastBlockTimestamp = lastBlk.timestamp;
+  const lastBlock = blockNumber;
+  const lastBlockTimestamp = guessTimestampFromNum(
+    lastBlock,
+    chainConfig.daimoChain
+  );
   const lastBalance = homeCoinIndexer.getCurrentBalance(address);
 
   // TODO: get userops, including reverted ones. Show failed sends.

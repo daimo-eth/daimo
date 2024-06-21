@@ -188,7 +188,7 @@ export class Watcher {
     this.isSlowIndexing = false;
   }
 
-  private async getShovelLatest(): Promise<number> {
+  async getShovelLatest(): Promise<number> {
     const result = await retryBackoff(`shovel-latest-query`, () =>
       this.pg.query(`select num from shovel.latest`)
     );
