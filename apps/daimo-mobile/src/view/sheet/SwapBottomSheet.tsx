@@ -3,7 +3,7 @@ import {
   OpStatus,
   ProposedSwap,
   amountToDollars,
-  daimoUSDC,
+  baseUSDC,
   getForeignCoinDisplayAmount,
   hasAccountName,
   isNativeETH,
@@ -137,7 +137,7 @@ function SwapInfoRow({ swap }: { swap: ProposedSwap }) {
         />
         <Image source={SwapLink} />
         <CurrencyDisplay
-          coin={daimoUSDC}
+          coin={baseUSDC}
           amount={humanReadableToAmount}
           amountColor={color.successDark}
         />

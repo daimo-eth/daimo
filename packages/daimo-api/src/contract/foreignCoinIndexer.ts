@@ -4,7 +4,7 @@ import {
   ForeignToken,
   ProposedSwap,
   SwapQueryResult,
-  daimoUSDC,
+  baseUSDC,
   isAmountDust,
 } from "@daimo/common";
 import { Pool } from "pg";
@@ -162,18 +162,18 @@ export class ForeignCoinIndexer extends Indexer {
     }
   }
 
-  /** Listener invoked for all past ETH transfers, then for new ones. */
+  /** Listener invoked for all past foreignCoin transfers, then for new ones. */
   pipeAllTransfers(listener: (logs: ForeignTokenTransfer[]) => void) {
     listener(this.allTransfers);
     this.addListener(listener);
   }
 
-  /** Listener is invoked for all new ETH transfers. */
+  /** Listener is invoked for all new foreignCoin transfers. */
   addListener(listener: (logs: ForeignTokenTransfer[]) => void) {
     this.listeners.push(listener);
   }
 
-  /** Unsubscribe from new ETH transfers. */
+  /** Unsubscribe from new foreignCoin transfers. */
   removeListener(listener: (logs: ForeignTokenTransfer[]) => void) {
     this.listeners = this.listeners.filter((l) => l !== listener);
   }
@@ -181,6 +181,7 @@ export class ForeignCoinIndexer extends Indexer {
   async getProposedSwapForLog(
     log: ForeignTokenTransfer
   ): Promise<ProposedSwap | null> {
+    console.log("[API] getting proposed swap for log: ", log);
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
@@ -188,7 +189,7 @@ export class ForeignCoinIndexer extends Indexer {
         log.foreignToken.address,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        daimoUSDC.address as Address, // USDC
+        baseUSDC.address as Address, // USDC
         log.to
       );
     });
@@ -203,10 +204,7 @@ export class ForeignCoinIndexer extends Indexer {
     return swap;
   }
 
-  async getProposedSwapsForAddr(
-    addr: Address,
-    vc: ViemClient
-  ): Promise<ProposedSwap[]> {
+  async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(

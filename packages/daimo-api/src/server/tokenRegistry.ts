@@ -1,5 +1,5 @@
 import { ForeignToken, USDbC, assert, getChainName } from "@daimo/common";
-import { Address, getAddress, isAddress, extractChain } from "viem";
+import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
@@ -43,7 +43,7 @@ export class TokenRegistry {
           .replace("thumb", "large");
         if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
         const addr = getAddress(token.address);
-        if (addr === chainConfig.tokenAddress) continue;
+        if (addr === chainConfig.tokenAddress) continue; // excude home coin
 
         const override = customOverrides.find((o) => o.address === addr);
         if (override) foreignTokens.set(addr, override);
@@ -65,8 +65,10 @@ export class TokenRegistry {
     }
   }
 
+  // Get a token from the foreign token list.
   public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
+
     const token = this.foreignTokensByChain
       .get(chainId ?? this.defaultChainId)
       ?.get(tokenAddress);
@@ -76,6 +78,7 @@ export class TokenRegistry {
     return token;
   }
 
+  // Check if a foreign token is tracked in the foreign token list.
   public hasToken(addr: Address, chainId?: number): boolean {
     return (
       this.foreignTokensByChain

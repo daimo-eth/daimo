@@ -1,7 +1,7 @@
 import { ChainConfig } from "@daimo/contract";
-import { WETH9 } from "@uniswap/sdk-core";
 import { Address, formatUnits, getAddress } from "viem";
 
+import { base, baseSepolia } from "./chain";
 import { amountToDollars } from "./coin";
 
 export type ForeignToken = {
@@ -22,7 +22,7 @@ export const baseETH: ForeignToken = {
   chainId: 8453,
 };
 
-export const daimoUSDC: ForeignToken = {
+export const baseUSDC: ForeignToken = {
   address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
   name: "USD Coin",
   symbol: "USDC",
@@ -40,7 +40,7 @@ export const USDbC: ForeignToken = {
   chainId: 8453,
 };
 
-export const DAI: ForeignToken = {
+export const baseDAI: ForeignToken = {
   address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
   name: "Dai Stablecoin",
   symbol: "DAI",
@@ -65,9 +65,9 @@ export function getForeignCoinDisplayAmount(
 
 const NON_DUST_TOKEN_WHITELIST = new Set([
   baseETH.address,
-  daimoUSDC.address,
+  baseUSDC.address,
   USDbC.address,
-  DAI.address,
+  baseDAI.address,
 ]);
 
 // It's dust if the amount is less than $1 and the token is not on the whitelist.
@@ -82,9 +82,14 @@ export function isAmountDust(
   return true;
 }
 
-// Get WETH token address using chainId.
-export function getWETHAddressByChainId(chainId: number): Address {
-  return getAddress(WETH9[chainId].address, chainId);
+// Get native WETH token address using chainId.
+export function getNativeETHByChain(chainId: number): ForeignToken | undefined {
+  switch (chainId) {
+    case base.chainId:
+      return base.nativeETH;
+    case baseSepolia.chainId:
+      return baseSepolia.nativeETH;
+  }
 }
 
 // Token is native ETH to the given chainConfig.
@@ -95,9 +100,9 @@ export function isNativeETH(
   const tokenAddr = getAddress(tokenAddress);
   let isNative = false;
   if (typeof chain === "number") {
-    isNative = getWETHAddressByChainId(chain) === tokenAddr;
+    isNative = getNativeETHByChain(chain)?.address === tokenAddr;
   } else {
-    isNative = getWETHAddressByChainId(chain.chainL2.id) === tokenAddr;
+    isNative = getNativeETHByChain(chain.chainL2.id)?.address === tokenAddr;
   }
   return isNative;
 }

@@ -1,13 +1,13 @@
 import {
   BigIntStr,
-  daimoUSDC,
+  baseUSDC,
   EAccount,
   now,
   ProposedSwap,
+  getNativeETHByChain,
 } from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
-import { WETH9 } from "@uniswap/sdk-core";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
 import { Address, getAddress, Hex } from "viem";
 
@@ -59,7 +59,7 @@ export async function getSwapQuote({
   // sent to the recipient.
   // Special case: if outputToken is native, then routerMustCustody is true.
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
-  const routerMustCustody = tokenOut === WETH9[chainId].address;
+  const routerMustCustody = tokenOut === getNativeETHByChain(chainId)?.address;
   const recipient: Address = routerMustCustody ? ADDRESS_ZERO : toAddr;
 
   const t = now();
@@ -99,11 +99,11 @@ export async function getSwapQuote({
   if (!callData) return null;
 
   let fromCoin;
-  // TODO: in future, check home coin token (for now, daimoUSDC)
-  if (tokenIn === daimoUSDC.address) {
-    fromCoin = daimoUSDC;
+  // TODO: in future, check home coin token using account (for now, baseUSDC)
+  if (tokenIn === getAddress(baseUSDC.address)) {
+    fromCoin = baseUSDC;
   } else {
-    fromCoin = tokenReg.getToken(tokenIn);
+    fromCoin = tokenReg.getToken(tokenIn); // Foreign tokens
   }
 
   if (!fromCoin) return null;
