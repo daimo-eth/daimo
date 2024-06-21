@@ -50,7 +50,6 @@ import {
 } from "../api/tagRedirect";
 import { validateMemo } from "../api/validateMemo";
 import { AccountFactory } from "../contract/accountFactory";
-import { ETHIndexer } from "../contract/ethIndexer";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -82,7 +81,6 @@ export function createRouter(
   db: DB,
   bundlerClient: BundlerClient,
   homeCoinIndexer: HomeCoinIndexer,
-  ethIndexer: ETHIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
   noteIndexer: NoteIndexer,
   opIndexer: OpIndexer,
@@ -358,7 +356,6 @@ export function createRouter(
           watcher,
           vc,
           homeCoinIndexer,
-          ethIndexer,
           foreignCoinIndexer,
           profileCache,
           noteIndexer,
@@ -745,7 +742,6 @@ export function createRouter(
               watcher,
               vc,
               homeCoinIndexer,
-              ethIndexer,
               foreignCoinIndexer,
               profileCache,
               noteIndexer,

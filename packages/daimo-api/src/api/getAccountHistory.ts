@@ -24,7 +24,6 @@ import { Address } from "viem";
 import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
-import { ETHIndexer } from "../contract/ethIndexer";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -90,7 +89,6 @@ export async function getAccountHistory(
   watcher: Watcher,
   vc: ViemClient,
   homeCoinIndexer: HomeCoinIndexer,
-  ethIndexer: ETHIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
   profileCache: ProfileCache,
   noteIndexer: NoteIndexer,
@@ -105,9 +103,9 @@ export async function getAccountHistory(
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
-  const startMs = Date.now();
-  const log = `[API] start getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
-  console.log(log);
+  const startMs = performance.now();
+  const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
+  console.log(`${log}: starting`);
 
   // Get latest finalized block. Next account sync, fetch since this block.
   const finBlock = await vc.publicClient.getBlock({
@@ -136,24 +134,11 @@ export async function getAccountHistory(
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
-  let elapsedMs = Date.now() - startMs;
+  let elapsedMs = performance.now() - startMs;
   console.log(`${log}: ${elapsedMs}ms ${transferLogs.length} logs`);
 
   // Get named accounts
-  const addrs = new Set<Address>();
-  transferLogs.forEach((log) => {
-    addrs.add(log.from);
-    addrs.add(log.to);
-    if (log.type === "claimLink" || log.type === "createLink") {
-      if (log.noteStatus.claimer) addrs.add(log.noteStatus.claimer.addr);
-      addrs.add(log.noteStatus.sender.addr);
-    } else if (log.type === "transfer" && log.preSwapTransfer) {
-      addrs.add(log.preSwapTransfer.from);
-    }
-  });
-  const namedAccounts = (
-    await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
-  ).filter((acc) => hasAccountName(acc));
+  const namedAccounts = await getNamedAccountsFromClogs(transferLogs, nameReg);
 
   // Get account keys
   const accountKeys = keyReg.resolveAddressKeys(address);
@@ -182,7 +167,7 @@ export async function getAccountHistory(
   const invitees = inviteeAddrs
     .map((addr) => nameReg.getDaimoAccount(addr))
     .filter((acc) => acc != null) as EAccount[];
-  elapsedMs = Date.now() - startMs;
+  elapsedMs = performance.now() - startMs;
   console.log(`${log}: ${elapsedMs}ms: ${invitees.length} invitees`);
 
   // Get pfps from linked accounts
@@ -192,13 +177,9 @@ export async function getAccountHistory(
   const notificationRequestStatuses = requestIndexer.getAddrRequests(address);
 
   // Get proposed swaps of non-home coin tokens for address
-  const proposedSwaps = [
-    // TODO: re-enable once eth_transfers is caught up
-    // ...(await ethIndexer.getProposedSwapsForAddr(address, true)),
-    ...(await foreignCoinIndexer.getProposedSwapsForAddr(address)),
-  ];
-  elapsedMs = Date.now() - startMs;
-  console.log(`${log}: ${elapsedMs}: ${proposedSwaps.length} swaps`);
+  const swaps = await foreignCoinIndexer.getProposedSwapsForAddr(address);
+  elapsedMs = performance.now() - startMs;
+  console.log(`${log}: ${elapsedMs}: ${swaps.length} swaps`);
 
   // Get exchange rates
   const exchangeRates = await getExchangeRates(extApiCache);
@@ -236,7 +217,7 @@ export async function getAccountHistory(
     inviteLinkStatus,
     invitees,
     notificationRequestStatuses,
-    proposedSwaps,
+    proposedSwaps: swaps,
     exchangeRates,
 
     landlineSessionKey,
@@ -246,7 +227,31 @@ export async function getAccountHistory(
   // Suggest an action to the user, like backing up their account
   const suggestedActions = getSuggestedActions(eAcc, ret, ctx);
 
+  elapsedMs = Date.now() - startMs;
+  console.log(`${log}: ${elapsedMs}: done, returning`);
   return { ...ret, suggestedActions };
+}
+
+async function getNamedAccountsFromClogs(
+  clogs: DisplayOpEvent[],
+  nameReg: NameRegistry
+): Promise<EAccount[]> {
+  const addrs = new Set<Address>();
+  clogs.forEach((clog) => {
+    addrs.add(clog.from);
+    addrs.add(clog.to);
+    if (clog.type === "claimLink" || clog.type === "createLink") {
+      if (clog.noteStatus.claimer) addrs.add(clog.noteStatus.claimer.addr);
+      addrs.add(clog.noteStatus.sender.addr);
+    } else if (clog.type === "transfer" && clog.preSwapTransfer) {
+      addrs.add(clog.preSwapTransfer.from);
+    }
+  });
+  const namedAccounts = (
+    await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
+  ).filter((acc) => hasAccountName(acc));
+
+  return namedAccounts;
 }
 
 function getSuggestedActions(

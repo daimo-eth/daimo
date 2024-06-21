@@ -14,7 +14,6 @@ import { TokenRegistry } from "./tokenRegistry";
 import { createContext, onTrpcError } from "./trpc";
 import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
-import { ETHIndexer } from "../contract/ethIndexer";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -83,8 +82,6 @@ async function main() {
     paymentMemoTracker
   );
 
-  const ethIndexer = new ETHIndexer(vc, nameReg);
-
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
   bundlerClient.init(vc.publicClient);
 
@@ -94,7 +91,6 @@ async function main() {
     vc,
     homeCoinIndexer,
     foreignCoinIndexer,
-    ethIndexer,
     nameReg,
     monitor
   );
@@ -102,7 +98,6 @@ async function main() {
   const notifier = new PushNotifier(
     homeCoinIndexer,
     foreignCoinIndexer,
-    ethIndexer,
     nameReg,
     noteIndexer,
     requestIndexer,
@@ -153,7 +148,6 @@ async function main() {
     db,
     bundlerClient,
     homeCoinIndexer,
-    ethIndexer,
     foreignCoinIndexer,
     noteIndexer,
     opIndexer,

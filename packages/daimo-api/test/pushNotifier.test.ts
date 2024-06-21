@@ -411,7 +411,6 @@ function createNotifierAliceBob() {
   const pn = new PushNotifier(
     stubCoinIndexer,
     stubForeignCoinIndexer,
-    nullAny,
     stubNameReg,
     nullAny,
     stubRequestIndexer,

@@ -12,13 +12,11 @@ import {
   getDisplayFromTo,
   getForeignCoinDisplayAmount,
   getSlotLabel,
-  baseWETH,
   parseRequestMetadata,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, getAddress } from "viem";
 
-import { ETHIndexer, ETHTransfer } from "../contract/ethIndexer";
 import {
   ForeignCoinIndexer,
   ForeignTokenTransfer,
@@ -47,7 +45,6 @@ export class PushNotifier {
   constructor(
     private coinIndexer: HomeCoinIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
-    private ethIndexer: ETHIndexer,
     private nameReg: NameRegistry,
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
@@ -58,7 +55,6 @@ export class PushNotifier {
   async init() {
     this.coinIndexer.addListener(this.handleTransfers);
     this.foreignCoinIndexer.addListener(this.handleForeignCoinTransfers);
-    this.ethIndexer.addListener(this.handleEthTransfers);
     this.noteIndexer.addListener(this.handleNoteOps);
     this.keyReg.addListener(this.handleKeyRotations);
     this.requestIndexer.addListener(this.handleRequests);
@@ -98,17 +94,6 @@ export class PushNotifier {
       messages.push(
         ...(await this.getPushMessagesFromForeignCoinTransfer(log))
       );
-    }
-
-    this.maybeSendNotifications(messages);
-  };
-
-  private handleEthTransfers = async (logs: ETHTransfer[]) => {
-    console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
-    const messages: ExpoPushMessage[] = [];
-
-    for (const log of logs) {
-      messages.push(...(await this.getPushMessagesFromEthTransfer(log)));
     }
 
     this.maybeSendNotifications(messages);
@@ -353,36 +338,6 @@ export class PushNotifier {
         title,
         body,
         data: { txHash: log.transactionHash },
-      },
-    ];
-  }
-
-  private async getPushMessagesFromEthTransfer(
-    log: ETHTransfer
-  ): Promise<ExpoPushMessage[]> {
-    const pushTokens = this.pushTokens.get(getAddress(log.to));
-    if (!pushTokens || pushTokens.length === 0) return [];
-
-    const swap = await this.ethIndexer.getProposedSwapsForAddr(log.to);
-    if (swap.length === 0) return [];
-
-    const readableAmount = getForeignCoinDisplayAmount(
-      swap[0].fromAmount,
-      baseWETH
-    );
-
-    const dollars = amountToDollars(swap[0].toAmount);
-
-    const title = `Received ${readableAmount} ETH`;
-    const body = `Accept ${readableAmount} ETH as $${dollars} USDC`;
-
-    return [
-      {
-        to: pushTokens,
-        badge: 1,
-        title,
-        body,
-        data: { blockNumber: log.blockNumber },
       },
     ];
   }

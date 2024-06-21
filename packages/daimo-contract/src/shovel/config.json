@@ -6,14 +6,20 @@
       "name": "$CHAIN_NAME",
       "chain_id": "$CHAIN_ID",
       "ws_url": "$CHAIN_RPC_WS_URL",
-      "urls": ["$CHAIN_RPC_URL", "$CHAIN_RPC_URL_BACKUP"],
+      "urls": [
+        "$CHAIN_RPC_URL",
+        "$CHAIN_RPC_URL_BACKUP"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "$CHAIN_TRACE_NAME",
       "chain_id": "$CHAIN_ID",
-      "urls": ["$CHAIN_TRACE_RPC_URL", "$CHAIN_TRACE_RPC_URL_BACKUP"],
+      "urls": [
+        "$CHAIN_TRACE_RPC_URL",
+        "$CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
       "batch_size": 32,
       "concurrency": 2
     }
@@ -90,7 +96,9 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["0x4430A644B215a187a3daa5b114fA3f3d9DeBc17D"]
+          "filter_arg": [
+            "0x4430A644B215a187a3daa5b114fA3f3d9DeBc17D"
+          ]
         }
       ],
       "event": {
@@ -601,7 +609,9 @@
           "name": "trace_action_call_type",
           "column": "call_type",
           "filter_op": "eq",
-          "filter_arg": ["call"]
+          "filter_arg": [
+            "call"
+          ]
         },
         {
           "name": "trace_action_from",
@@ -615,7 +625,9 @@
           "name": "trace_action_value",
           "column": "value",
           "filter_op": "gt",
-          "filter_arg": ["0"]
+          "filter_arg": [
+            "0"
+          ]
         }
       ]
     },
@@ -935,7 +947,9 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
+          "filter_arg": [
+            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
+          ]
         }
       ],
       "event": {
@@ -1042,7 +1056,9 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
+          "filter_arg": [
+            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
+          ]
         }
       ],
       "event": {
@@ -1134,7 +1150,9 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"]
+          "filter_arg": [
+            "0xA728b16CbA81772Fa881dC569Ad4c7F1dE360869"
+          ]
         }
       ],
       "event": {
@@ -1246,7 +1264,9 @@
           "name": "log_addr",
           "column": "log_addr",
           "filter_op": "contains",
-          "filter_arg": ["0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"]
+          "filter_arg": [
+            "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789"
+          ]
         }
       ],
       "event": {

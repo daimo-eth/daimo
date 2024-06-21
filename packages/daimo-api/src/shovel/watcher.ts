@@ -94,13 +94,26 @@ export class Watcher {
 
   async migrateDB() {
     await this.pg.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (SELECT
-      et.*
-      FROM erc20_transfers et
-      JOIN names n ON n.addr = et.f
-        OR n.addr = et.t);
+      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (
+        SELECT et.*
+        FROM erc20_transfers et
+        JOIN names n ON n.addr = et.f
+        OR n.addr = et.t
+      );
       
-      CREATE INDEX IF NOT EXISTS i_block_num ON filtered_erc20_transfers (block_num);`);
+      CREATE INDEX IF NOT EXISTS i_block_num
+        ON filtered_erc20_transfers (block_num);
+
+      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_eth_transfers AS (
+        SELECT *
+        FROM eth_transfers
+        JOIN names n ON n.addr = eth_transfers.to
+        OR n.addr = eth_transfers.from
+      );
+
+      CREATE INDEX IF NOT EXISTS i_filtered_eth_transfers_block_num
+        ON filtered_eth_transfers (block_num);
+    `);
   }
 
   async init() {
