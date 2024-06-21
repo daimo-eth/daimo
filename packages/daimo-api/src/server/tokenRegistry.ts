@@ -1,5 +1,5 @@
-import { ForeignToken, USDbC, assert } from "@daimo/common";
-import { Address, getAddress, isAddress } from "viem";
+import { ForeignToken, USDbC, assert, getChainName } from "@daimo/common";
+import { Address, getAddress, isAddress, extractChain } from "viem";
 
 import { chainConfig } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
@@ -9,70 +9,82 @@ interface TokenList {
   version: any;
 }
 
-// TODO: keep track of which tokens are on which chain.
+// Token Registry sorted by chain id.
 export class TokenRegistry {
-  foreignTokens: Map<Address, ForeignToken>;
-  private chainName: string;
+  foreignTokensByChain: Map<number, Map<Address, ForeignToken>>;
+  private chains: number[];
+  private defaultChainId: number = chainConfig.chainL2.id;
 
-  constructor() {
-    this.foreignTokens = new Map<Address, ForeignToken>();
-    this.chainName = chainConfig.chainL2.name.toLowerCase();
+  constructor(chains?: number[]) {
+    this.foreignTokensByChain = new Map<number, Map<Address, ForeignToken>>();
+    this.chains = chains ?? [this.defaultChainId]; // defaults to home chain
   }
 
   public async load() {
     const customOverrides = [USDbC] as ForeignToken[];
 
-    const tokenList = (await (
-      await fetchWithBackoff(
-        `https://tokens.coingecko.com/${this.chainName}/all.json`
-      )
-    ).json()) as TokenList;
+    for (const chainId of this.chains) {
+      const chainName = getChainName(chainId);
+      const foreignTokens = new Map<Address, ForeignToken>();
 
-    for (const token of tokenList.tokens) {
-      assert(
-        token.chainId === chainConfig.chainL2.id,
-        `Unsupported token on ${this.chainName}`
-      );
-      const largeLogo = token.logoURI?.split("?")[0].replace("thumb", "large");
-      if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
-      const addr = getAddress(token.address);
-      if (addr === chainConfig.tokenAddress) continue;
+      const tokenList = (await (
+        await fetchWithBackoff(
+          `https://tokens.coingecko.com/${chainName}/all.json`
+        )
+      ).json()) as TokenList;
 
-      const override = customOverrides.find((o) => o.address === addr);
-      if (override) this.foreignTokens.set(addr, override);
-      else {
-        this.foreignTokens.set(addr, {
-          address: addr,
-          decimals: token.decimals,
-          name: token.name,
-          symbol: token.symbol,
-          logoURI: largeLogo,
-          chainId: token.chainId,
-        });
+      for (const token of tokenList.tokens) {
+        assert(
+          token.chainId === chainConfig.chainL2.id,
+          `Unsupported token on ${chainName}`
+        );
+        const largeLogo = token.logoURI
+          ?.split("?")[0]
+          .replace("thumb", "large");
+        if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
+        const addr = getAddress(token.address);
+        if (addr === chainConfig.tokenAddress) continue;
+
+        const override = customOverrides.find((o) => o.address === addr);
+        if (override) foreignTokens.set(addr, override);
+        else {
+          foreignTokens.set(addr, {
+            address: addr,
+            decimals: token.decimals,
+            name: token.name,
+            symbol: token.symbol,
+            logoURI: largeLogo,
+            chainId: token.chainId,
+          });
+        }
       }
+      console.log(
+        `[TOKEN-REG] loaded ${foreignTokens.size} tokens on ${chainName}`
+      );
+      this.foreignTokensByChain.set(chainId, foreignTokens);
     }
-
-    console.log(
-      `[TOKEN-REG] loaded ${this.foreignTokens.size} tokens on ${this.chainName}`
-    );
   }
 
-  // Note: foreign tokens list doesn't include homecoin by default
-  // for indexing purposes.
-  public getToken(addr: Address): ForeignToken | undefined {
+  public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
-    const token = this.foreignTokens.get(tokenAddress);
+    const token = this.foreignTokensByChain
+      .get(chainId ?? this.defaultChainId)
+      ?.get(tokenAddress);
     console.log(
       `[TOKEN-REG] retrieved token ${token?.symbol} for addr ${addr}`
     );
     return token;
   }
 
-  public hasToken(addr: Address): boolean {
-    return this.foreignTokens.has(addr);
+  public hasToken(addr: Address, chainId?: number): boolean {
+    return (
+      this.foreignTokensByChain
+        .get(chainId ?? this.defaultChainId)
+        ?.has(getAddress(addr)) ?? false
+    );
   }
 
-  public getTokenList(): Map<Address, ForeignToken> {
-    return this.foreignTokens;
+  public getTokenList(chainId: number): Map<Address, ForeignToken> {
+    return this.foreignTokensByChain.get(chainId) ?? new Map();
   }
 }

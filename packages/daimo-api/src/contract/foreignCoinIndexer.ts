@@ -56,7 +56,8 @@ export class ForeignCoinIndexer extends Indexer {
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
 
-    if (this.tokenReg.foreignTokens.size === 0) {
+    const chainId = this.vc.publicClient.chain.id;
+    if (this.tokenReg.foreignTokensByChain.get(chainId)?.size === 0) {
       await this.tokenReg.load();
     }
 
