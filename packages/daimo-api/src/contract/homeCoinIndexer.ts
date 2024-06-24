@@ -226,7 +226,7 @@ export class HomeCoinIndexer extends Indexer {
         }
       : undefined;
 
-    const partialOp = {
+    const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
@@ -252,13 +252,13 @@ export class HomeCoinIndexer extends Indexer {
         if (swapClogInbound) {
           return {
             type: "swap",
-            ...partialOp,
+            ...partialClog,
             ...swapClogInbound,
           } as SwapClog;
         } else {
           return {
             type: "transfer",
-            ...partialOp,
+            ...partialClog,
             requestStatus,
           } as SimpleTransferClog;
         }
@@ -269,13 +269,13 @@ export class HomeCoinIndexer extends Indexer {
         return {
           type: "createLink",
           noteStatus,
-          ...partialOp,
+          ...partialClog,
         } as PaymentLinkClog;
       } else if (noteEventType === "claim") {
         return {
           type: "claimLink",
           noteStatus,
-          ...partialOp,
+          ...partialClog,
         } as PaymentLinkClog;
       } else {
         throw new Error(`Unexpected note event type: ${noteEventType}`);

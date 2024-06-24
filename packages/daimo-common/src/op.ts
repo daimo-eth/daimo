@@ -138,7 +138,8 @@ export interface SwapClog extends OpEventBase {
   /** "Other" coin involved in the swap (i.e. not homeCoin or bridgeCoin) */
   coinOther: ForeignToken;
 
-  /** Amount of the coinOther in the swap (in native unit of coinOther) */
+  /** Amount of the coinOther in the swap (in native unit of coinOther)
+   * Uses BigIntStr to avoid number type overflows */
   amountOther: BigIntStr;
 
   /** Userop nonce, if this transfer occurred in a userop */
