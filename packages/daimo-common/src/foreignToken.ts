@@ -81,7 +81,8 @@ export const baseUSDT: ForeignToken = {
 
 export function getForeignCoinDisplayAmount(
   amount: `${bigint}`,
-  coin: ForeignToken
+  coin: ForeignToken,
+  numDecimals?: number
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
   const maxDecimals = 6;

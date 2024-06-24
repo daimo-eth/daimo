@@ -11,11 +11,17 @@ import { env } from "../../../env";
 // Either uses the memo field for standard transfers, e.g. "for ice cream"
 // Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
 // or "Accepted 5 USDT as USDC" if long
-export function getSynthesizedMemo(
-  op: TransferClog,
-  daimoChain: DaimoChain,
-  short?: boolean
-) {
+export function getSynthesizedMemo({
+  op,
+  daimoChain,
+  short,
+  sentByUs,
+}: {
+  op: TransferClog;
+  daimoChain: DaimoChain;
+  short?: boolean;
+  sentByUs?: boolean;
+}) {
   const chainConfig = env(daimoChain).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
 
@@ -30,23 +36,33 @@ export function getSynthesizedMemo(
     (op.type === "transfer" && op.preSwapTransfer) ||
     op.type === "swap"
   ) {
+    const isOutboundSwap = !!(op.type === "swap" && sentByUs);
+
     // TODO: do we need to explicitly handle preSwapTransfer && "transfer" for
     // backwards compatibility?
-    const fromCoin =
+    const otherCoin =
       op.type === "transfer" ? op.preSwapTransfer!.coin : op.coinOther;
-    const fromAmount =
+    const otherAmount =
       op.type === "transfer" ? op.preSwapTransfer!.amount : op.amountOther;
 
-    if (isNativeETH(fromCoin.address, chainConfig)) {
-      return `ETH → ${coinName}`;
+    if (isNativeETH(otherCoin.address, chainConfig)) {
+      return isOutboundSwap ? `${coinName} → ETH` : `ETH → ${coinName}`;
     }
 
-    const readableAmount = getForeignCoinDisplayAmount(fromAmount, fromCoin);
+    const readableAmount = getForeignCoinDisplayAmount(
+      otherAmount,
+      otherCoin,
+      short ? 2 : 6
+    );
 
     if (short) {
-      return `${readableAmount} ${fromCoin.symbol} → ${coinName}`;
+      return isOutboundSwap
+        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+        : `${readableAmount} ${otherCoin.symbol} → ${coinName}`;
     } else {
-      return `Accepted ${readableAmount} ${fromCoin.symbol} as ${coinName}`;
+      return isOutboundSwap
+        ? `Sent ${readableAmount} ${otherCoin.symbol} as ${coinName}`
+        : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
     }
   }
 }

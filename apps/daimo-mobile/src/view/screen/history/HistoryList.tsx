@@ -222,11 +222,12 @@ function DisplayOpRow({
     opTitle = "cancelled link";
   }
 
-  const opMemo = getSynthesizedMemo(
-    displayOp,
-    daimoChainFromId(account.homeChainId),
-    true
-  );
+  const opMemo = getSynthesizedMemo({
+    op: displayOp,
+    daimoChain: daimoChainFromId(account.homeChainId),
+    short: true,
+    sentByUs: from === address,
+  });
   const memoCol = isPending ? color.gray3 : color.grayDark;
 
   return (

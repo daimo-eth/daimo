@@ -213,10 +213,11 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
     subtitleElems.splice(i, 0, space);
   }
 
-  const memoText = getSynthesizedMemo(
+  const memoText = getSynthesizedMemo({
     op,
-    daimoChainFromId(account.homeChainId)
-  );
+    daimoChain: daimoChainFromId(account.homeChainId),
+    sentByUs,
+  });
 
   return (
     <View>

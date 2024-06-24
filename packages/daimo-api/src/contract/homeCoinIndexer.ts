@@ -181,6 +181,9 @@ export class HomeCoinIndexer extends Indexer {
 
   /* Populates atomic properties of logs to convert it to an Op Event.
    * Does not account for fees since they involve multiple transfer logs.
+   *
+   * Coalesced logs can be attributed to a simple transfer (same coin, same
+   * chain), swap (different coins, same chain), or payment link.
    */
   attachTransferOpProperties(log: Transfer): TransferClog {
     const {
@@ -212,8 +215,7 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // SwapClog: if transfer occured as a result of an inbound swap, attach
-    // logical origin info.
+    // If inbound swap, attach logical origin info to create a swapClog.
     const correspondingForeignReceive =
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
@@ -226,6 +228,17 @@ export class HomeCoinIndexer extends Indexer {
         }
       : undefined;
 
+    // If outbound swap, attach logical outbound info to create a swapClog.
+    // const correspondingForeignSend =
+    //   this.foreignCoinIndexer.getForeignTokenSendForSwap(to, transactionHash);
+    // const swapClogOutbound = correspondingForeignSend
+    //   ? {
+    //       coinOther: correspondingForeignSend.foreignToken,
+    //       amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
+    //     }
+    //   : undefined;
+
+    // Base clog info (same for all TransferClog types).
     const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
@@ -249,13 +262,16 @@ export class HomeCoinIndexer extends Indexer {
 
     const opEvent = (() => {
       if (!noteInfo) {
+        // If inbound or outbound swap (mutually exclusive), create a swapClog.
         if (swapClogInbound) {
           return {
             type: "swap",
             ...partialClog,
             ...swapClogInbound,
+            // ...swapClogOutbound,
           } as SwapClog;
         } else {
+          // TODO: if this is an outbound swap, should create a swapClog instead...
           return {
             type: "transfer",
             ...partialClog,

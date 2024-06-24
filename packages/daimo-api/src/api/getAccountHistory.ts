@@ -59,7 +59,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: TransferClog[];
+  transferLogs: TransferClog[]; // TODO: rename to transferClogs
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -132,23 +132,23 @@ export async function getAccountHistory(
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
-  const transferLogs = homeCoinIndexer.filterTransfers({
+  const transferClogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
   let elapsedMs = Date.now() - startMs;
-  console.log(`${log}: ${elapsedMs}ms ${transferLogs.length} logs`);
+  console.log(`${log}: ${elapsedMs}ms ${transferClogs.length} logs`);
 
   // Get named accounts
   const addrs = new Set<Address>();
-  transferLogs.forEach((log) => {
-    addrs.add(log.from);
-    addrs.add(log.to);
-    if (log.type === "claimLink" || log.type === "createLink") {
-      if (log.noteStatus.claimer) addrs.add(log.noteStatus.claimer.addr);
-      addrs.add(log.noteStatus.sender.addr);
-    } else if (log.type === "transfer" && log.preSwapTransfer) {
-      addrs.add(log.preSwapTransfer.from);
+  transferClogs.forEach((clog) => {
+    addrs.add(clog.from);
+    addrs.add(clog.to);
+    if (clog.type === "claimLink" || clog.type === "createLink") {
+      if (clog.noteStatus.claimer) addrs.add(clog.noteStatus.claimer.addr);
+      addrs.add(clog.noteStatus.sender.addr);
+    } else if (clog.type === "transfer" && clog.preSwapTransfer) {
+      addrs.add(clog.preSwapTransfer.from);
     }
   });
   const namedAccounts = (
@@ -228,7 +228,7 @@ export async function getAccountHistory(
     recommendedExchanges,
     suggestedActions: [],
 
-    transferLogs,
+    transferLogs: transferClogs,
     namedAccounts,
     accountKeys,
     linkedAccounts,
