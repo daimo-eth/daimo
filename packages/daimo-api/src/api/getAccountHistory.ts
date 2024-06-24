@@ -24,7 +24,6 @@ import { Address } from "viem";
 import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
-import { ETHIndexer } from "../contract/ethIndexer";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -45,7 +44,6 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { getAppVersionTracker } from "../server/appVersion";
 import { TrpcRequestContext } from "../server/trpc";
-import { Watcher } from "../shovel/watcher";
 
 export interface AccountHistoryResult {
   address: Address;

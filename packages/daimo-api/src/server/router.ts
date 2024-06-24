@@ -736,18 +736,14 @@ export function createRouter(
           let lastEmittedBlock = opts.input.sinceBlockNum;
 
           const pushHistory = async (
-            emitOnlyOnNewTransfers: boolean,
-            blockNumber?: number
+            blockNumber: number,
+            requireNewTransfers = false
           ) => {
-            if (!blockNumber) {
-              blockNumber = await watcher.getShovelLatest();
-            }
-
             const history = await getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
-              lastEmittedBlock,
+              blockNumber,
               vc,
               homeCoinIndexer,
               foreignCoinIndexer,
@@ -764,16 +760,11 @@ export function createRouter(
               blockNumber
             );
 
-            // we can have concurrent requests. discard interval pushes
-            // that arrived too late
-            if (
-              !emitOnlyOnNewTransfers &&
-              history.lastBlock <= lastEmittedBlock
-            ) {
+            if (lastEmittedBlock > history.lastBlock) {
               return;
             }
 
-            if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
+            if (requireNewTransfers && history.transferLogs.length === 0) {
               return;
             }
 
@@ -782,21 +773,25 @@ export function createRouter(
             lastEmittedBlock = history.lastBlock;
           };
 
-          // when new block is produced,
-          // push history only if there are new transfers
-          const onNewBlock = async () => {
-            pushHistory(true);
+          // on new block, push state only when new transfers are available
+          const onNewBlock = async (payload: string) => {
+            const { block_number } = JSON.parse(payload);
+
+            pushHistory(block_number, true);
           };
 
           // for interval updates push full history
-          const intervalTimer = setInterval(() => {
-            pushHistory(false);
+          const intervalTimer = setInterval(async () => {
+            const blockNumber = await watcher.getShovelLatest();
+
+            pushHistory(blockNumber);
           }, refreshInterval);
 
           watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
 
           return () => {
             watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+
             clearInterval(intervalTimer);
           };
         });
