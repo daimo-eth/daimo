@@ -115,9 +115,7 @@ export async function getAccountHistory(
   console.log(log);
 
   // Get latest finalized block. Next account sync, fetch since this block.
-  const finBlock = await vc.publicClient.getBlock({
-    blockTag: "finalized",
-  });
+  const finBlock = await vc.getFinalizedBlock();
   if (finBlock.number == null) throw new Error("No finalized block");
   if (finBlock.number < sinceBlockNum) {
     console.log(`${log}: sinceBlockNum > finalized block ${finBlock.number}`);
