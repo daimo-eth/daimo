@@ -1,5 +1,8 @@
-import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
-import Octicons from "@expo/vector-icons/Octicons";
+import {
+  CurrencyExchangeRate,
+  currencyRateUSD,
+  ForeignToken,
+} from "@daimo/common";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -15,6 +18,7 @@ import SelectDropdown from "react-native-select-dropdown";
 
 import { amountSeparator, getAmountText } from "./Amount";
 import { Badge } from "./Badge";
+import { DropdownPickButton } from "./DropdownPickButton";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
@@ -28,6 +32,7 @@ export function AmountChooser({
   moneyEntry,
   onSetEntry,
   showAmountAvailable,
+  coin,
   autoFocus,
   disabled,
   innerRef,
@@ -36,6 +41,7 @@ export function AmountChooser({
   moneyEntry: MoneyEntry;
   onSetEntry: (entry: MoneyEntry) => void;
   showAmountAvailable: boolean;
+  coin?: ForeignToken;
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
@@ -69,7 +75,7 @@ export function AmountChooser({
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         {isNonUSD && (
           <Badge color={color.midnight}>
-            = ${moneyEntry.dollars.toFixed(2)} USDC
+            = ${moneyEntry.dollars.toFixed(2)} {coin?.symbol ?? "USDC"}
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
@@ -225,7 +231,7 @@ function CurrencyPicker({
         onSelect={choose}
         renderButton={() => (
           <View style={styles.currencyButton}>
-            <CurrencyPickButton />
+            <DropdownPickButton />
           </View>
         )}
         renderItem={(c) => (
@@ -236,24 +242,6 @@ function CurrencyPicker({
         showsVerticalScrollIndicator
         dropdownStyle={styles.currencyDropdown}
       />
-    </View>
-  );
-}
-
-function CurrencyPickButton() {
-  return (
-    <View
-      style={{
-        width: 24,
-        height: 24,
-        borderRadius: 24,
-        backgroundColor: color.ivoryDark,
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Octicons name="chevron-down" size={18} color={color.grayMid} />
     </View>
   );
 }

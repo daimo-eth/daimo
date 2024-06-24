@@ -224,7 +224,7 @@ export function createRouter(
         })
       )
       .query(async (opts) => {
-        const { amountIn, fromToken, toToken, fromAccount, toAddr, chainId } =
+        const { amountIn, fromToken, fromAccount, toToken, toAddr, chainId } =
           opts.input;
         return await getSwapQuote({
           amountInStr: amountIn,

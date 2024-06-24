@@ -174,7 +174,6 @@ function HeaderRow({ title }: { title: string }) {
 function DisplayOpRow({
   displayOp,
   account,
-
   linkTo,
   showDate,
 }: {

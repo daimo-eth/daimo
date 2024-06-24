@@ -50,6 +50,16 @@ export const baseDAI: ForeignToken = {
   chainId: 8453,
 };
 
+export const baseUSDT: ForeignToken = {
+  address: "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2",
+  name: "Tether USD",
+  symbol: "USDT",
+  decimals: 6,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/325/large/tether.png?1547034089",
+  chainId: 8453,
+};
+
 // From https://stackoverflow.com/questions/32229667/have-max-2-decimal-places
 function toFixedIfNecessary(value: string, dp: number) {
   return +parseFloat(value).toFixed(dp);
@@ -105,4 +115,19 @@ export function isNativeETH(
     isNative = getNativeETHByChain(chain.chainL2.id)?.address === tokenAddr;
   }
   return isNative;
+}
+
+// Any coin send (stablecoins + ETH).
+export const supportedSendCoins = new Map<string, ForeignToken>([
+  [baseUSDC.address, baseUSDC],
+  [baseDAI.address, baseDAI],
+  [baseUSDT.address, baseUSDT],
+  [baseETH.address, baseETH],
+]);
+
+// Get stable coin by address.
+export function getSupportedSendCoinByAddress(
+  address: string
+): ForeignToken | undefined {
+  return supportedSendCoins.get(address);
 }

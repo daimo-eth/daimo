@@ -2,8 +2,11 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
+  ForeignToken,
   assert,
   assertNotNull,
+  baseUSDC,
+  dollarsToAmount,
   getAccountName,
   now,
 } from "@daimo/common";
@@ -18,8 +21,10 @@ import {
   View,
 } from "react-native";
 
+import { CoinPellet, SendCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
+import { RoutePellet } from "./RouteDisplay";
 import { SendTransferButton } from "./SendTransferButton";
 import {
   ParamListSend,
@@ -34,6 +39,7 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { getSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../model/account";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
@@ -62,6 +68,7 @@ function SendScreenInner({
   recipient,
   money,
   memo,
+  coin,
   account,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
@@ -83,6 +90,9 @@ function SendScreenInner({
     else goHome();
   }, [nav, money, recipient]);
 
+  const defaultHomeCoin = baseUSDC; // TODO: add homecoin in Account
+  coin = coin ?? defaultHomeCoin;
+
   const sendDisplay = (() => {
     if (link) {
       if (requestFetch.isFetching) {
@@ -102,7 +112,8 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
-              requestStatus={statusV2}
+              coin={coin}
+              requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
         } else {
@@ -113,6 +124,7 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo}
               money={usdEntry(requestStatus.link.dollars)}
+              coin={coin}
             />
           );
         }
@@ -124,9 +136,11 @@ function SendScreenInner({
             recipient={recipient}
             onCancel={goBack}
             daimoChain={daimoChain}
+            defaultHomeCoin={defaultHomeCoin}
           />
         );
-      else return <SendConfirm {...{ account, recipient, memo, money }} />;
+      else
+        return <SendConfirm {...{ account, recipient, memo, money, coin }} />;
     } else throw new Error("unreachable");
   })();
 
@@ -145,10 +159,12 @@ function SendChooseAmount({
   recipient,
   daimoChain,
   onCancel,
+  defaultHomeCoin,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
+  defaultHomeCoin: ForeignToken;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -156,12 +172,15 @@ function SendChooseAmount({
   // Select what for
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
+  // Select what coin (defaults to native home coin, e.g. daimo USDC)
+  const [coin, setCoin] = useState<ForeignToken>(defaultHomeCoin);
+
   // Once done, update nav
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { money, memo, recipient },
+      params: { money, memo, recipient, coin },
     });
 
   // Warn if paying new account
@@ -188,11 +207,19 @@ function SendChooseAmount({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={setMoney}
+        coin={coin}
         showAmountAvailable
         autoFocus
       />
       <Spacer h={16} />
-      <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
+      <View style={styles.detailsRow}>
+        <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
+        <SendCoinButton
+          coin={coin}
+          setCoin={setCoin}
+          isFixed={recipient.name != null && daimoChain !== "baseSepolia"}
+        />
+      </View>
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>
@@ -228,12 +255,14 @@ function SendConfirm({
   recipient,
   money,
   memo,
+  coin,
   requestStatus,
 }: {
   account: Account;
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
+  coin: ForeignToken;
   requestStatus?: DaimoRequestV2Status;
 }) {
   const isRequest = !!requestStatus;
@@ -247,10 +276,26 @@ function SendConfirm({
   }
 
   const nav = useNav();
-
   const navToInput = () => {
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
+
+  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
+
+  // TODO: store homeCoin (foreignToken type) in account in the future
+  const homeCoin = baseUSDC;
+  const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
+
+  // If account's home coin is not the same as the desired send coin, retrieve swap route.
+  const swapRoute = getSwapRoute({
+    fromToken: homeCoin.address,
+    toToken: coin.address,
+    amountIn: numTokens,
+    fromAccount: account,
+    toAddress: recipient.addr,
+    daimoChainId: account!.homeChainId,
+  });
+  const route = homeCoin !== coin ? swapRoute : null;
 
   let button: ReactNode;
   if (isRequest) {
@@ -269,14 +314,14 @@ function SendConfirm({
         memo={memoParts.join(" · ")}
         recipient={recipient}
         dollars={money.dollars}
+        toCoin={coin}
+        route={route}
       />
     );
   }
 
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
-
-  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
 
   const [isDecliningRequest, setIsDecliningRequest] = useState(false);
 
@@ -319,17 +364,22 @@ function SendConfirm({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={useCallback(() => {}, [])}
+        coin={coin}
         disabled
         showAmountAvailable={false}
         autoFocus={false}
         onFocus={navToInput}
       />
       <Spacer h={16} />
-      {memo ? (
-        <MemoPellet memo={memo} onClick={navToInput} />
-      ) : (
-        <Spacer h={40} />
-      )}
+      <View style={styles.detailsRow}>
+        {memo ? (
+          <MemoPellet memo={memo} onClick={navToInput} />
+        ) : (
+          <Spacer h={40} />
+        )}
+        <CoinPellet coin={coin} onClick={navToInput} />
+      </View>
+      {route && <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />}
       <Spacer h={16} />
       {button}
       {isRequest && (
@@ -360,5 +410,11 @@ const styles = StyleSheet.create({
   },
   buttonGrow: {
     flex: 1,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    gap: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

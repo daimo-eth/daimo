@@ -9,7 +9,14 @@ import { UserOpHex, assert, lookup } from "@daimo/common";
 import { entryPointABI } from "@daimo/contract";
 import { trace } from "@opentelemetry/api";
 import { BundlerJsonRpcProvider, Constants } from "userop";
-import { Address, Hex, PublicClient, hexToBigInt } from "viem";
+import {
+  Address,
+  BaseError,
+  ContractFunctionRevertedError,
+  Hex,
+  PublicClient,
+  hexToBigInt,
+} from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
@@ -149,14 +156,30 @@ export class BundlerClient {
   /// Send uncompressed. Used for ops for which we don't yet have an inflator.
   async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
     const beneficiary = viemClient.account.address;
-    const txHash = await viemClient.writeContract({
-      abi: entryPointABI,
-      address: Constants.ERC4337.EntryPoint as Address,
-      functionName: "handleOps",
-      args: [[userOpFromHex(op)], beneficiary],
-    });
-    console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
-    return txHash;
+    try {
+      const { request } = await viemClient.publicClient.simulateContract({
+        abi: entryPointABI,
+        address: Constants.ERC4337.EntryPoint as Address,
+        functionName: "handleOps",
+        args: [[userOpFromHex(op)], beneficiary],
+      });
+      const txHash = await viemClient.writeContract(request);
+      console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
+      return txHash;
+    } catch (err) {
+      if (err instanceof BaseError) {
+        const revertError = err.walk(
+          (err) => err instanceof ContractFunctionRevertedError
+        );
+        if (revertError instanceof ContractFunctionRevertedError) {
+          const errorName = revertError.data?.errorName ?? "";
+          const reason = revertError.reason;
+          console.log(
+            `[BUNDLER] error submitting uncompressed bundle: ${errorName} ${reason}`
+          );
+        }
+      }
+    }
   }
 
   async getUserOperationGasPriceParams() {
