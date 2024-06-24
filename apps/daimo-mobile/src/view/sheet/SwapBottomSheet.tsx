@@ -93,7 +93,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
         preSymbol="+"
         postText="USDC"
       />
-      {!isNativeETH(swap.fromCoin.address, account.homeChainId) && (
+      {!isNativeETH(swap.fromCoin, account.homeChainId) && (
         <>
           <Spacer h={32} />
           <AccountRow

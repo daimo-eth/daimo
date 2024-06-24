@@ -27,7 +27,7 @@ export function getSynthesizedMemo(
   if (op.requestStatus) {
     return op.requestStatus.memo;
   } else if (op.preSwapTransfer) {
-    if (isNativeETH(op.preSwapTransfer.coin.address, chainConfig)) {
+    if (isNativeETH(op.preSwapTransfer.coin, chainConfig)) {
       return `ETH → ${coinName}`;
     }
 

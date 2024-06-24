@@ -1,23 +1,23 @@
 // TODO: add supported chain info. Add to chainConfig or account maybe?
 
-import { ForeignToken, baseETH } from "./foreignToken";
+import { ForeignToken, baseSepoliaWETH, baseWETH } from "./foreignToken";
 
 export type AccountChain = {
   chainId: number;
   name: string;
-  nativeETH: ForeignToken;
+  nativeWETH: ForeignToken;
 };
 
 export const base: AccountChain = {
   chainId: 8453,
   name: "base",
-  nativeETH: baseETH,
+  nativeWETH: baseWETH,
 };
 
 export const baseSepolia: AccountChain = {
   chainId: 84532,
   name: "baseSepolia",
-  nativeETH: baseETH,
+  nativeWETH: baseSepoliaWETH,
 };
 
 export function getChainName(chainId: number): string | undefined {

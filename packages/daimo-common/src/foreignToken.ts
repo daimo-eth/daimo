@@ -1,5 +1,5 @@
 import { ChainConfig } from "@daimo/contract";
-import { Address, formatUnits, getAddress } from "viem";
+import { Address, formatUnits } from "viem";
 
 import { base, baseSepolia } from "./chain";
 import { amountToDollars } from "./coin";
@@ -13,7 +13,26 @@ export type ForeignToken = {
   logoURI?: string;
 };
 
-export const baseETH: ForeignToken = {
+//
+// Base Sepolia
+//
+
+export const baseSepoliaWETH: ForeignToken = {
+  address: "0x4200000000000000000000000000000000000006",
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "ETH",
+  logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+  chainId: 84532,
+};
+
+//
+// Base Mainnet
+//
+
+// TODO: 0x0 sentinel value for actual native ETH vs rollup-native WETH?
+
+export const baseWETH: ForeignToken = {
   address: "0x4200000000000000000000000000000000000006",
   decimals: 18,
   name: "Ethereum",
@@ -23,7 +42,7 @@ export const baseETH: ForeignToken = {
 };
 
 export const baseUSDC: ForeignToken = {
-  address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   name: "USD Coin",
   symbol: "USDC",
   decimals: 6,
@@ -31,7 +50,7 @@ export const baseUSDC: ForeignToken = {
   chainId: 8453,
 };
 
-export const USDbC: ForeignToken = {
+export const baseUSDbC: ForeignToken = {
   address: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
   name: "Bridged USD Coin", // USDbC has a bad name on CoinGecko
   symbol: "USDbC",
@@ -60,23 +79,22 @@ export const baseUSDT: ForeignToken = {
   chainId: 8453,
 };
 
-// From https://stackoverflow.com/questions/32229667/have-max-2-decimal-places
-function toFixedIfNecessary(value: string, dp: number) {
-  return +parseFloat(value).toFixed(dp);
-}
-
 export function getForeignCoinDisplayAmount(
   amount: `${bigint}`,
   coin: ForeignToken
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
-  return toFixedIfNecessary(amountStr, 6).toString() as `${number}`;
+  const maxDecimals = 6;
+  if (coin.decimals > maxDecimals) {
+    return parseFloat(amountStr).toFixed(maxDecimals);
+  }
+  return amountStr;
 }
 
 const NON_DUST_TOKEN_WHITELIST = new Set([
-  baseETH.address,
+  baseWETH.address,
   baseUSDC.address,
-  USDbC.address,
+  baseUSDbC.address,
   baseDAI.address,
 ]);
 
@@ -93,28 +111,24 @@ export function isAmountDust(
 }
 
 // Get native WETH token address using chainId.
-export function getNativeETHByChain(chainId: number): ForeignToken | undefined {
+export function getNativeWETHByChain(
+  chainId: number
+): ForeignToken | undefined {
   switch (chainId) {
     case base.chainId:
-      return base.nativeETH;
+      return base.nativeWETH;
     case baseSepolia.chainId:
-      return baseSepolia.nativeETH;
+      return baseSepolia.nativeWETH;
   }
 }
 
-// Token is native ETH to the given chainConfig.
+// Checks if the token ETH or native WETH on the given chain.
 export function isNativeETH(
-  tokenAddress: Address,
+  token: ForeignToken,
   chain: ChainConfig | number
 ): boolean {
-  const tokenAddr = getAddress(tokenAddress);
-  let isNative = false;
-  if (typeof chain === "number") {
-    isNative = getNativeETHByChain(chain)?.address === tokenAddr;
-  } else {
-    isNative = getNativeETHByChain(chain.chainL2.id)?.address === tokenAddr;
-  }
-  return isNative;
+  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
+  return token.chainId === chainId && token.symbol === "ETH";
 }
 
 // Any coin send (stablecoins + ETH).

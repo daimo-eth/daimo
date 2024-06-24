@@ -19,8 +19,9 @@ import {
 } from "./storedTypes";
 
 // This file describes the current schema for locally-stored user accounts.
-// IMPORTANT: do not edit these models except by new OPTIONAL fields or enums.
+// IMPORTANT: do not edit these except to add new OPTIONAL fields or enums.
 // All other changes require a version bump + migration.
+// Stored accounts can only contain StoredV[...] types.
 
 export interface StoredV15Account extends StoredModel {
   storageVersion: 15;

@@ -346,7 +346,7 @@ export class DaimoOpSender {
       },
     ];
 
-    if (!isNativeETH(swap.fromCoin.address, this.opConfig.chainId)) {
+    if (!isNativeETH(swap.fromCoin, this.opConfig.chainId)) {
       executions.unshift(
         this.getTokenApproveCall(
           swap.execRouterAddress,

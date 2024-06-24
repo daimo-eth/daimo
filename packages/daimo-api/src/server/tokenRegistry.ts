@@ -1,4 +1,4 @@
-import { ForeignToken, USDbC, assert, getChainName } from "@daimo/common";
+import { ForeignToken, baseUSDbC, assert, getChainName } from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -8,6 +8,8 @@ interface TokenList {
   tokens: ForeignToken[];
   version: any;
 }
+
+const customOverrides = [baseUSDbC] as ForeignToken[];
 
 // Token Registry sorted by chain id.
 export class TokenRegistry {
@@ -21,8 +23,6 @@ export class TokenRegistry {
   }
 
   public async load() {
-    const customOverrides = [USDbC] as ForeignToken[];
-
     for (const chainId of this.chains) {
       const chainName = getChainName(chainId);
       const foreignTokens = new Map<Address, ForeignToken>();
@@ -45,7 +45,9 @@ export class TokenRegistry {
         const addr = getAddress(token.address);
         if (addr === chainConfig.tokenAddress) continue; // excude home coin
 
-        const override = customOverrides.find((o) => o.address === addr);
+        const override = customOverrides.find(
+          (o) => o.address === addr && o.chainId === chainId
+        );
         if (override) foreignTokens.set(addr, override);
         else {
           foreignTokens.set(addr, {

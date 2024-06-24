@@ -57,7 +57,7 @@ export function SwapNotificationRow({
   );
 
   const copy = (() => {
-    if (!isNativeETH(notif.swap.fromCoin.address, chainConfig)) {
+    if (!isNativeETH(notif.swap.fromCoin, chainConfig)) {
       return (
         <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
           Accept {readableAmount} {coin.name} from{" "}
