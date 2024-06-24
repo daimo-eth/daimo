@@ -16,7 +16,7 @@ export function RoutePellet({
 
   return (
     <View style={styles.route}>
-      <TextLight style={{ fontSize: 14 }}>
+      <TextLight>
         They will receive {toAmount} {toCoin.symbol}
       </TextLight>
     </View>
