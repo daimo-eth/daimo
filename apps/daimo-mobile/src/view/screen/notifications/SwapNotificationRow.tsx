@@ -15,7 +15,7 @@ import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { env } from "../../../env";
 import { SwapNotification } from "../../../logic/inAppNotifications";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";

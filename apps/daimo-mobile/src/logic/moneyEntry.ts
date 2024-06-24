@@ -1,20 +1,18 @@
 import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
 
+// Represents a user-entered amount in local currency, eg "¥100"
 export interface LocalMoneyEntry {
   currency: CurrencyExchangeRate;
   localUnits: number;
 }
 
+// Represents a user-entered mmount in local currency, plus the equivalent in
+// USD at current exchange rate. eg "¥100 = $1.07"
 export interface MoneyEntry extends LocalMoneyEntry {
   dollars: number;
 }
 
-export const zeroUSDEntry = {
-  currency: currencyRateUSD,
-  localUnits: 0,
-  dollars: 0,
-};
-
+// Special case: a user-entered amount in dollars, no conversion needed.
 export function usdEntry(dollars: number | `${number}`): MoneyEntry {
   const n = typeof dollars === "number" ? dollars : parseFloat(dollars);
   return {
@@ -23,3 +21,6 @@ export function usdEntry(dollars: number | `${number}`): MoneyEntry {
     dollars: n,
   };
 }
+
+// Special case: $0.00
+export const zeroUSDEntry = usdEntry(0);

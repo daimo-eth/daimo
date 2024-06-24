@@ -1,5 +1,4 @@
-import { SuggestedAction } from "@daimo/api";
-import { OpStatus, amountToDollars } from "@daimo/common";
+import { OpStatus, SuggestedAction, amountToDollars } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import {
@@ -33,7 +32,7 @@ import { getInitialDeepLink } from "../../logic/deeplink";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { useWarmDeviceKeySenderCache } from "../../logic/opSender";
 import { useContactsPermission } from "../../logic/systemContacts";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 import { TitleAmount } from "../shared/Amount";

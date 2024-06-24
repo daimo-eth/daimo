@@ -21,7 +21,7 @@ import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
-import { Account, toEAccount } from "../../model/account";
+import { Account, toEAccount } from "../../storage/account";
 import { AccountCopyLinkButton } from "../shared/AccountCopyLinkButton";
 import { Badge } from "../shared/Badge";
 import { ContactBubble } from "../shared/Bubble";

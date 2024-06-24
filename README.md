@@ -237,4 +237,17 @@ ORDER BY pg_total_relation_size(c.oid) DESC
 LIMIT 20;
 ```
 
+Largest tables, approximate row count:
+
+```sql
+SELECT
+  (SELECT nspname FROM pg_namespace WHERE oid=relnamespace) as r_schema,
+  relname as r_name,
+  reltuples as approx_num_rows,
+  (relpages * 8) / 1024 as approx_disk_mb
+FROM pg_class
+WHERE reltuples > 0
+ORDER BY reltuples DESC;
+```
+
 </details>

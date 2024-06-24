@@ -23,7 +23,7 @@ import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
 import { useAccount } from "../../logic/accountManager";
-import { LocalMoneyEntry, MoneyEntry } from "../../model/moneyEntry";
+import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
 
 // Input components allows entry in range $0.01 to $99,999.99
 const MAX_TOTAL_DIGITS = 7;

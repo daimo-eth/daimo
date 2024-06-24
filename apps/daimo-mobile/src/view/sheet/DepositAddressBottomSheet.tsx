@@ -8,7 +8,7 @@ import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../env";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";

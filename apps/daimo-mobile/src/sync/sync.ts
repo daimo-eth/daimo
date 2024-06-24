@@ -14,7 +14,7 @@ import { updateNetworkState, updateNetworkStateOnline } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { getRpcFunc } from "../logic/trpc";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 class SyncManager {
   manager = getAccountManager();

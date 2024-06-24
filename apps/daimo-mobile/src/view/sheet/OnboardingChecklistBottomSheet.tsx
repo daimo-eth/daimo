@@ -3,7 +3,7 @@ import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { StyleSheet, View } from "react-native";
 
 import { useOnboardingChecklist } from "../../logic/onboarding";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";

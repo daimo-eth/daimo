@@ -27,7 +27,7 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
 import { ScreenHeader } from "../shared/ScreenHeader";

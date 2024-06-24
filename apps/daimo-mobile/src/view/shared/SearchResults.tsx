@@ -28,7 +28,7 @@ import {
   useContactSearch,
 } from "../../logic/daimoContacts";
 import { ContactsAccess } from "../../logic/systemContacts";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { useKeyboardHeight } from "../../vendor/useKeyboardHeight";
 
 export function SearchResults({

@@ -4,7 +4,7 @@ import { useCallback, useContext } from "react";
 import { getAccountManager } from "./accountManager";
 import { DispatcherContext } from "../action/dispatch";
 import { useNav } from "../common/nav";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 export function useOnboardingChecklist(account: Account) {
   const nav = useNav();

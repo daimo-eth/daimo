@@ -19,7 +19,7 @@ import {
 import InviteBackground from "../../../assets/invite-background.png";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { shareURL } from "../../logic/externalAction";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ButtonBig, ButtonMed, TextButton } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";

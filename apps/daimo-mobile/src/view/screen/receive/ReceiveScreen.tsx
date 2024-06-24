@@ -29,9 +29,9 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { MoneyEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
-import { Account } from "../../../model/account";
-import { MoneyEntry, zeroUSDEntry } from "../../../model/moneyEntry";
+import { Account } from "../../../storage/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig } from "../../shared/Button";
 import { ContactDisplay } from "../../shared/ContactDisplay";

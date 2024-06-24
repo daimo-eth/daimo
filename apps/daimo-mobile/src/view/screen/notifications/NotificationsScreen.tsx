@@ -8,7 +8,7 @@ import { RequestNotificationRow } from "./RequestNotificationRow";
 import { SwapNotificationRow } from "./SwapNotificationRow";
 import { useNav } from "../../../common/nav";
 import { useInAppNotifications } from "../../../logic/inAppNotifications";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";

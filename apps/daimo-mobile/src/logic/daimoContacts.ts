@@ -14,7 +14,7 @@ import { Address } from "viem";
 import { getCachedEAccount } from "./addr";
 import { useSystemContactsSearch } from "./systemContacts";
 import { getRpcHook } from "./trpc";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 interface BaseDaimoContact {
   lastSendTime?: number;

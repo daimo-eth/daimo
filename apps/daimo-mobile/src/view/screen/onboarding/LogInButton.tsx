@@ -25,7 +25,7 @@ import {
   SecKeySigner,
   Signer,
 } from "../../../logic/signer";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import { ErrorRowCentered } from "../../shared/error";
 

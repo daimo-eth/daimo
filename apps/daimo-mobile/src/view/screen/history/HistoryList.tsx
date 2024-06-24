@@ -24,7 +24,7 @@ import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { getSynthesizedMemo } from "./shared";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { getCachedEAccount } from "../../../logic/addr";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
 import { PendingDot } from "../../shared/PendingDot";

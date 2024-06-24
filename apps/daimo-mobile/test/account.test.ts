@@ -1,4 +1,8 @@
-import { Account, parseAccount, serializeAccount } from "../src/model/account";
+import {
+  Account,
+  parseAccount,
+  serializeAccount,
+} from "../src/storage/account";
 
 const correctSerV7 = `{"storageVersion":7,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0},"pushToken":null}`;
 const correctSerV8 = `{"storageVersion":8,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"pendingNotes":[],"namedAccounts":[],"accountKeys":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456"},"pushToken":null}`;

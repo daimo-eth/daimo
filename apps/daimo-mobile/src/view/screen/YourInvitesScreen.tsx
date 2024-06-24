@@ -2,7 +2,7 @@ import { EAccount, timeAgo } from "@daimo/common";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";

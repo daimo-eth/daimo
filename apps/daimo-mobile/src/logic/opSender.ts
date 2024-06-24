@@ -12,7 +12,7 @@ import { getWrappedDeviceKeySigner } from "./key";
 import { DeviceKeySigner, Signer } from "./signer";
 import { getRpcFunc } from "./trpc";
 import { env } from "../env";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 /** Default send deadline, in seconds. Determines validUntil for each op. */
 export const SEND_DEADLINE_SECS = 120;

@@ -9,7 +9,7 @@ import { getDebugLog } from "./debugLog";
 import { env } from "../env";
 import { getAccountManager } from "../logic/accountManager";
 import { getHardwareSec } from "../logic/enclave";
-import { Account, serializeAccount } from "../model/account";
+import { Account, serializeAccount } from "../storage/account";
 import { amountSeparator } from "../view/shared/Amount";
 import { ButtonMed } from "../view/shared/Button";
 

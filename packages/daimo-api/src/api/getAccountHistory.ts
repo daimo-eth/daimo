@@ -11,6 +11,7 @@ import {
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
+  SuggestedAction,
   appStoreLinks,
   assert,
   daimoDomainAddress,
@@ -74,14 +75,6 @@ export interface AccountHistoryResult {
 
   landlineSessionKey: string;
   landlineAccounts: LandlineAccount[];
-}
-
-export interface SuggestedAction {
-  id: string;
-  icon?: string;
-  title: string;
-  subtitle: string;
-  url: string;
 }
 
 /**

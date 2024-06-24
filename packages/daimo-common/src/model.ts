@@ -150,3 +150,11 @@ type SwapNoRoute = SwapQuery & {
 export type SwapQueryResult = SwapNoRoute | ProposedSwap;
 
 export type PlatformType = "ios" | "android" | "other";
+
+export interface SuggestedAction {
+  id: string;
+  icon?: string;
+  title: string;
+  subtitle: string;
+  url: string;
+}

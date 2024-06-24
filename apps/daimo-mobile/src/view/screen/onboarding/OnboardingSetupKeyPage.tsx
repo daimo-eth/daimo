@@ -12,7 +12,7 @@ import {
 } from "../../../common/nav";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
-import { defaultEnclaveKeyName } from "../../../model/account";
+import { defaultEnclaveKeyName } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";

@@ -6,7 +6,7 @@ import {
   useAccountAndKeyInfo,
 } from "../../../logic/accountManager";
 import { EnclaveKeyInfo } from "../../../logic/enclave";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";

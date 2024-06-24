@@ -29,7 +29,7 @@ import { ParamListHome, useExitBack } from "../../../common/nav";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { getRpcFunc } from "../../../logic/trpc";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { TitleAmount, getAmountText } from "../../shared/Amount";
 import { ButtonBig } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";

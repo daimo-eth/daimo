@@ -16,9 +16,9 @@ import {
   useNav,
 } from "../../common/nav";
 import { BridgeBankAccountContact } from "../../logic/daimoContacts";
+import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
-import { Account } from "../../model/account";
-import { MoneyEntry, zeroUSDEntry } from "../../model/moneyEntry";
+import { Account } from "../../storage/account";
 import { MemoPellet, SendMemoButton } from "../screen/send/MemoDisplay";
 import { SendTransferButton } from "../screen/send/SendTransferButton";
 import { AmountChooser } from "../shared/AmountInput";

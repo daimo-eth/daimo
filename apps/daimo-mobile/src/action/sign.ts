@@ -2,7 +2,7 @@ import { assertNotNull } from "@daimo/common";
 import { Hex, bytesToString, concatHex, hashMessage, numberToHex } from "viem";
 
 import { getWrappedDeviceKeySigner } from "../logic/key";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 /** Signs a message. Hashes via ERC-191, returns an ERC-1271 signature. */
 export async function signAsync({

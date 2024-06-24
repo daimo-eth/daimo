@@ -1,4 +1,4 @@
-import { SuggestedAction } from "@daimo/api";
+import { SuggestedAction } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";

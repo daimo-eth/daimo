@@ -21,7 +21,7 @@ import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import { RequestNotification } from "../../../logic/inAppNotifications";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";

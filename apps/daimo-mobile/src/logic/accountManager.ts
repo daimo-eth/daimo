@@ -40,7 +40,7 @@ import {
   deviceAPIKeyName,
   parseAccount,
   serializeAccount,
-} from "../model/account";
+} from "../storage/account";
 
 /** Loads and saves Daimo account data from storage. Notifies listeners. */
 export function getAccountManager(): AccountManager {

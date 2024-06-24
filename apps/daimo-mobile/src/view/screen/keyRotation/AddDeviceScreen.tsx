@@ -7,7 +7,7 @@ import { Hex } from "viem";
 import { AddKeySlotButton } from "./AddKeySlotButton";
 import { useNav } from "../../../common/nav";
 import { parseAddDeviceString } from "../../../logic/key";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { Scanner } from "../../shared/Scanner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";

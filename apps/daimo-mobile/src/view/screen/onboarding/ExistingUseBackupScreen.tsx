@@ -20,7 +20,7 @@ import {
   Account,
   createEmptyAccount,
   defaultEnclaveKeyName,
-} from "../../../model/account";
+} from "../../../storage/account";
 import { hydrateAccount } from "../../../sync/sync";
 import { ContactBubble } from "../../shared/Bubble";
 import { ButtonBig } from "../../shared/Button";

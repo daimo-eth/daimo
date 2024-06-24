@@ -19,7 +19,7 @@ import { Hex } from "viem";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
 import { createPasskey } from "../../../logic/passkey";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { TextCenter, TextError, TextLight } from "../../shared/text";

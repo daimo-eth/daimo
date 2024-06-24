@@ -39,10 +39,10 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
-import { Account } from "../../../model/account";
-import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../model/moneyEntry";
+import { Account } from "../../../storage/account";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";

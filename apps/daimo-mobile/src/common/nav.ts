@@ -34,8 +34,8 @@ import {
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
 import { fetchInviteLinkStatus } from "../logic/linkStatus";
-import { Account } from "../model/account";
-import { MoneyEntry } from "../model/moneyEntry";
+import { MoneyEntry } from "../logic/moneyEntry";
+import { Account } from "../storage/account";
 
 export type ParamListOnboarding = {
   Intro: undefined;

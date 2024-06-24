@@ -27,7 +27,7 @@ import {
 import { useNav } from "../../../common/nav";
 import { ExternalAction } from "../../../logic/externalAction";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";

@@ -27,7 +27,7 @@ import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
 import { getRpcFunc } from "../../logic/trpc";
-import { Account } from "../../model/account";
+import { Account } from "../../storage/account";
 import { CoverGraphic } from "../shared/CoverGraphic";
 import { InfoBox } from "../shared/InfoBox";
 import { ScreenHeader } from "../shared/ScreenHeader";

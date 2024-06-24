@@ -1,6 +1,6 @@
 import { SigningCallback } from "@daimo/userop";
 
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 export type DeviceKeySigner = {
   type: "deviceKey";

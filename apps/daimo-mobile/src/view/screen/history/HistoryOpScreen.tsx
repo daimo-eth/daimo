@@ -28,7 +28,7 @@ import { env } from "../../../env";
 import { getCachedEAccount } from "../../../logic/addr";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
-import { Account } from "../../../model/account";
+import { Account } from "../../../storage/account";
 import { syncFindSameOp } from "../../../sync/sync";
 import { AccountRow } from "../../shared/AccountRow";
 import { TitleAmount } from "../../shared/Amount";

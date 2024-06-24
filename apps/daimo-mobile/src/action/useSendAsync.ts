@@ -19,7 +19,7 @@ import { getWrappedDeviceKeySigner } from "../logic/key";
 import { NamedError } from "../logic/log";
 import { loadOpSender } from "../logic/opSender";
 import { DeviceKeySigner, Signer } from "../logic/signer";
-import { Account } from "../model/account";
+import { Account } from "../storage/account";
 
 /** Send a user op, returning the userOpHash. */
 type SendOpFn = (opSender: DaimoOpSender) => Promise<PendingOpEvent>;
