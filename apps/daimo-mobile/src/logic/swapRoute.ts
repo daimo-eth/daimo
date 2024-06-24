@@ -3,7 +3,7 @@ import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
 import { getRpcHook } from "./trpc";
-import { Account, toEAccount } from "../model/account";
+import { Account, toEAccount } from "../storage/account";
 
 // Get a swap route from on-chain contract.
 export function getSwapRoute({

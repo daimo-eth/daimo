@@ -3,8 +3,13 @@ import { Address, Hex, getAddress } from "viem";
 import { Account } from "./account";
 import { StoredModel } from "./storedModel";
 import {
-  StoredV15ChainGasConstants,
   StoredV15Clog,
+  StoredV15ProposedSwap,
+  StoredV15TransferClog,
+  migrateV15Clog,
+} from "./storedTypeMigrations";
+import {
+  StoredV15ChainGasConstants,
   StoredV15CurrencyExchangeRate,
   StoredV15DaimoInviteCodeStatus,
   StoredV15DaimoLinkNote,
@@ -13,12 +18,16 @@ import {
   StoredV15EAccount,
   StoredV15KeyData,
   StoredV15KeyRotationClog,
+  StoredV15LandlineAccount,
   StoredV15LinkedAccount,
-  StoredV15ProposedSwap,
   StoredV15RecommendedExchange,
   StoredV15SuggestedAction,
-  StoredV15TransferClog,
 } from "./storedTypes";
+
+//
+// This file describes all old schema versions for locally-stored user accounts.
+// Do not edit. Each old version specifies a migration to current account.
+//
 
 // Pre-v9 chain gas constants
 type StoredV8ChainGasConstants = {
@@ -248,6 +257,48 @@ interface AccountV14 extends StoredModel {
   sentPaymentLinks?: StoredV15DaimoLinkNoteV2[];
 }
 
+interface StoredV15Account extends StoredModel {
+  storageVersion: 15;
+
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  name: string;
+  address: string;
+
+  homeChainId: number;
+  homeCoinAddress: Address;
+
+  lastBlock: number;
+  lastBlockTimestamp: number;
+  lastBalance: string;
+  lastFinalizedBlock: number;
+  recentTransfers: StoredV15Clog[];
+  namedAccounts: StoredV15EAccount[];
+  accountKeys: StoredV15KeyData[];
+  pendingKeyRotation: StoredV15KeyRotationClog[];
+  recommendedExchanges: StoredV15RecommendedExchange[];
+  suggestedActions: StoredV15SuggestedAction[];
+  dismissedActionIDs: string[];
+
+  chainGasConstants: StoredV15ChainGasConstants;
+
+  pushToken: string | null;
+  linkedAccounts: StoredV15LinkedAccount[];
+  inviteLinkStatus: StoredV15DaimoInviteCodeStatus | null;
+  invitees: StoredV15EAccount[];
+
+  isOnboarded: boolean;
+
+  notificationRequestStatuses: StoredV15DaimoRequestV2Status[];
+  lastReadNotifTimestamp: number;
+  proposedSwaps: StoredV15ProposedSwap[];
+  exchangeRates: StoredV15CurrencyExchangeRate[];
+  sentPaymentLinks: StoredV15DaimoLinkNoteV2[];
+
+  landlineSessionKey: string;
+  landlineAccounts: StoredV15LandlineAccount[];
+}
+
 // Migrate old accounts to latest schema.
 export function migrateOldAccount(model: StoredModel): Account {
   if (model.storageVersion === 8) {
@@ -267,7 +318,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: [],
@@ -311,7 +362,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -355,7 +406,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -400,7 +451,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -445,7 +496,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -489,7 +540,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -534,7 +585,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       lastBlockTimestamp: a.lastBlockTimestamp,
       lastFinalizedBlock: a.lastFinalizedBlock,
 
-      recentTransfers: a.recentTransfers,
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
       namedAccounts: a.namedAccounts,
       accountKeys: a.accountKeys,
       pendingKeyRotation: a.pendingKeyRotation,
@@ -560,6 +611,50 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionKey: "",
       landlineAccounts: [],
+    };
+  } else if (model.storageVersion === 15) {
+    console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
+    const a = model as StoredV15Account;
+    return {
+      enclaveKeyName: a.enclaveKeyName,
+      enclavePubKey: a.enclavePubKey,
+      name: a.name,
+      address: getAddress(a.address),
+
+      homeChainId: a.homeChainId,
+      homeCoinAddress: getAddress(a.homeCoinAddress),
+
+      lastBalance: BigInt(a.lastBalance),
+      lastBlock: a.lastBlock,
+      lastBlockTimestamp: a.lastBlockTimestamp,
+      lastFinalizedBlock: a.lastFinalizedBlock,
+
+      recentTransfers: a.recentTransfers.map(migrateV15Clog),
+      namedAccounts: a.namedAccounts,
+      accountKeys: a.accountKeys,
+      pendingKeyRotation: a.pendingKeyRotation,
+      recommendedExchanges: a.recommendedExchanges,
+      suggestedActions: a.suggestedActions,
+      dismissedActionIDs: a.dismissedActionIDs,
+
+      chainGasConstants: a.chainGasConstants,
+
+      pushToken: a.pushToken,
+
+      linkedAccounts: a.linkedAccounts || [],
+      inviteLinkStatus: a.inviteLinkStatus,
+      invitees: a.invitees,
+
+      isOnboarded: a.isOnboarded ?? true,
+
+      notificationRequestStatuses: a.notificationRequestStatuses || [],
+      lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
+      proposedSwaps: [], // Drop old proposedSwaps, will repopulate on sync
+      exchangeRates: a.exchangeRates || [],
+      sentPaymentLinks: a.sentPaymentLinks || [],
+
+      landlineSessionKey: a.landlineSessionKey || "",
+      landlineAccounts: a.landlineAccounts || [],
     };
   } else {
     throw new Error(`Unhandled old storageVersion: ${model.storageVersion}`);

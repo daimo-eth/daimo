@@ -19,7 +19,7 @@ import {
 import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
-import { StoredV15Account } from "./storedAccount";
+import { StoredV16Account } from "./storedAccount";
 import { migrateOldAccount } from "./storedAccountMigrations";
 import { StoredModel } from "./storedModel";
 import { env, getEnvMobile } from "../env";
@@ -142,12 +142,16 @@ export function parseAccount(accountJSON?: string): Account | null {
   }
 
   // Migrate old accounts to latest schema.
-  if (model.storageVersion < 15) {
+  const latestVersion = 16;
+  if (model.storageVersion < latestVersion) {
     return migrateOldAccount(model);
   }
 
-  assert(model.storageVersion === 15, "Unknown account storage version");
-  const a = model as StoredV15Account;
+  assert(
+    model.storageVersion === latestVersion,
+    `Unknown account storage version ${model.storageVersion}`
+  );
+  const a = model as StoredV16Account;
 
   return {
     enclaveKeyName: a.enclaveKeyName,
@@ -175,28 +179,28 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     pushToken: a.pushToken,
 
-    linkedAccounts: a.linkedAccounts || [],
+    linkedAccounts: a.linkedAccounts,
     inviteLinkStatus: a.inviteLinkStatus,
     invitees: a.invitees,
 
-    isOnboarded: a.isOnboarded ?? true,
+    isOnboarded: a.isOnboarded,
 
-    notificationRequestStatuses: a.notificationRequestStatuses || [],
-    lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
-    proposedSwaps: a.proposedSwaps || [],
-    exchangeRates: a.exchangeRates || [],
-    sentPaymentLinks: a.sentPaymentLinks || [],
+    notificationRequestStatuses: a.notificationRequestStatuses,
+    lastReadNotifTimestamp: a.lastReadNotifTimestamp,
+    proposedSwaps: a.proposedSwaps,
+    exchangeRates: a.exchangeRates,
+    sentPaymentLinks: a.sentPaymentLinks,
 
-    landlineSessionKey: a.landlineSessionKey || "",
-    landlineAccounts: a.landlineAccounts || [],
+    landlineSessionKey: a.landlineSessionKey,
+    landlineAccounts: a.landlineAccounts,
   };
 }
 
 export function serializeAccount(account: Account | null): string {
   if (!account) return "";
 
-  const model: StoredV15Account = {
-    storageVersion: 15,
+  const model: StoredV16Account = {
+    storageVersion: 16,
 
     enclaveKeyName: account.enclaveKeyName,
     enclavePubKey: account.enclavePubKey,

@@ -21,7 +21,7 @@ export const baseSepoliaWETH: ForeignToken = {
   address: "0x4200000000000000000000000000000000000006",
   decimals: 18,
   name: "Ethereum",
-  symbol: "ETH",
+  symbol: "WETH",
   logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
   chainId: 84532,
 };
@@ -36,7 +36,7 @@ export const baseWETH: ForeignToken = {
   address: "0x4200000000000000000000000000000000000006",
   decimals: 18,
   name: "Ethereum",
-  symbol: "ETH",
+  symbol: "WETH",
   logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
   chainId: 8453,
 };
@@ -136,7 +136,7 @@ export const supportedSendCoins = new Map<string, ForeignToken>([
   [baseUSDC.address, baseUSDC],
   [baseDAI.address, baseDAI],
   [baseUSDT.address, baseUSDT],
-  [baseETH.address, baseETH],
+  [baseWETH.address, baseWETH],
 ]);
 
 // Get stable coin by address.

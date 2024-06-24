@@ -1,15 +1,15 @@
 import {
   BigIntStr,
-  baseUSDC,
   EAccount,
-  now,
   ProposedSwap,
-  getNativeETHByChain,
+  baseUSDC,
+  getNativeWETHByChain,
+  now,
 } from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
 import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
-import { Address, getAddress, Hex } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
@@ -59,7 +59,7 @@ export async function getSwapQuote({
   // sent to the recipient.
   // Special case: if outputToken is native, then routerMustCustody is true.
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
-  const routerMustCustody = tokenOut === getNativeETHByChain(chainId)?.address;
+  const routerMustCustody = tokenOut === getNativeWETHByChain(chainId)?.address;
   const recipient: Address = routerMustCustody ? ADDRESS_ZERO : toAddr;
 
   const t = now();

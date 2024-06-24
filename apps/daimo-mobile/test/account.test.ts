@@ -14,6 +14,7 @@ const lowercaseAddrV13 = `{"storageVersion":13,"enclaveKeyName":"test","enclaveP
 const correctSerV13 = `{"storageVersion":13,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"accountKeys":[],"pendingKeyRotation":[],"recommendedExchanges":[],"suggestedActions":[],"dismissedActionIDs":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456","preVerificationGas":"0"},"pushToken":null,"linkedAccounts":[],"inviteLinkStatus":null,"invitees":[],"isOnboarded":true}`;
 const correctSerV14 = `{"storageVersion":14,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"accountKeys":[],"pendingKeyRotation":[],"recommendedExchanges":[],"suggestedActions":[],"dismissedActionIDs":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456","preVerificationGas":"0"},"pushToken":null,"linkedAccounts":[],"inviteLinkStatus":null,"invitees":[],"isOnboarded":true,"notificationRequestStatuses":[],"lastReadNotifTimestamp":0,"proposedSwaps":[],"exchangeRates":[],"sentPaymentLinks":[]}`;
 const correctSerV15 = `{"storageVersion":15,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"accountKeys":[],"pendingKeyRotation":[],"recommendedExchanges":[],"suggestedActions":[],"dismissedActionIDs":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456","preVerificationGas":"0"},"pushToken":null,"linkedAccounts":[],"inviteLinkStatus":null,"invitees":[],"isOnboarded":true,"notificationRequestStatuses":[],"lastReadNotifTimestamp":0,"proposedSwaps":[],"exchangeRates":[],"sentPaymentLinks":[],"landlineSessionKey":"","landlineAccounts":[]}`;
+const correctSerV16 = `{"storageVersion":16,"enclaveKeyName":"test","enclavePubKey":"0x3059301306072a8648ce3d020106082a8648ce3d0301070342000400000000000000000000000000000000000000000000000000000000000001230000000000000000000000000000000000000000000000000000000000000456","name":"test","address":"0x0000000000000000000000000000000000000123","homeChainId":84531,"homeCoinAddress":"0x1B85deDe8178E18CdE599B4C9d913534553C3dBf","lastBalance":"123","lastBlock":101,"lastBlockTimestamp":789,"lastFinalizedBlock":99,"recentTransfers":[],"namedAccounts":[],"accountKeys":[],"pendingKeyRotation":[],"recommendedExchanges":[],"suggestedActions":[],"dismissedActionIDs":[],"chainGasConstants":{"maxPriorityFeePerGas":"0","maxFeePerGas":"0","estimatedFee":0,"paymasterAddress":"0x0000000000000000000000000000000000000456","preVerificationGas":"0"},"pushToken":null,"linkedAccounts":[],"inviteLinkStatus":null,"invitees":[],"isOnboarded":true,"notificationRequestStatuses":[],"lastReadNotifTimestamp":0,"proposedSwaps":[],"exchangeRates":[],"sentPaymentLinks":[],"landlineSessionKey":"","landlineAccounts":[]}`;
 
 const account: Account = {
   enclaveKeyName: "test",
@@ -67,11 +68,11 @@ const account: Account = {
 describe("Account", () => {
   it("serializes", async () => {
     const ser = serializeAccount(account);
-    expect(ser).toEqual(correctSerV15);
+    expect(ser).toEqual(correctSerV16);
   });
 
   it("deserializes", () => {
-    const a = parseAccount(correctSerV13);
+    const a = parseAccount(correctSerV16);
     expect(a).toEqual(account);
   });
 
@@ -132,6 +133,12 @@ describe("Account", () => {
   it("migrates V15 correctly", () => {
     // Adds landlineSessionKey, landlineAccounts
     const a = parseAccount(correctSerV15);
+    expect(a).toEqual(account);
+  });
+
+  it("migrates V15 correctly", () => {
+    // Adds landlineSessionKey, landlineAccounts
+    const a = parseAccount(correctSerV16);
     expect(a).toEqual(account);
   });
 });

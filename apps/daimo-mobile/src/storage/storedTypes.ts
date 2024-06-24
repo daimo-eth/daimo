@@ -1,20 +1,24 @@
 import {
-  OpStatus,
+  AddrLabel,
   BigIntStr,
   DaimoNoteState,
-  AddrLabel,
   DaimoRequestState,
   DollarStr,
+  OpStatus,
 } from "@daimo/common";
-import { Hex, Address } from "viem";
+import { Address, Hex } from "viem";
 
+//
 // Stored types used inside of StoredModels.
+//
 // Do not edit these except to add new OPTIONAL fields or enums.
 // Anything else requires a new version and a migration.
+// This file contains current types. For old versions, see storedTypeMigrations.
+//
 
-export type StoredV15Clog = StoredV15TransferClog | StoredV15PaymentLinkClog;
+export type StoredV16Clog = StoredV16TransferClog | StoredV15PaymentLinkClog;
 
-export interface StoredV15TransferClog {
+interface StoredV16TransferClog {
   timestamp: number;
   status: OpStatus;
   opHash?: Hex;
@@ -31,13 +35,13 @@ export interface StoredV15TransferClog {
   requestStatus?: StoredV15DaimoRequestV2Status;
   memo?: string;
   preSwapTransfer?: {
-    coin: StoredV15ForeignCoin;
+    coin: StoredV16ForeignCoin;
     amount: BigIntStr;
     from: Address;
   };
 }
 
-interface StoredV15PaymentLinkClog {
+export interface StoredV15PaymentLinkClog {
   timestamp: number;
   status: OpStatus;
   opHash?: Hex;
@@ -204,8 +208,8 @@ export interface StoredV15CurrencyExchangeRate {
   rateUSD: number;
 }
 
-export interface StoredV15ProposedSwap {
-  fromCoin: StoredV15ForeignCoin;
+export interface StoredV16ProposedSwap {
+  fromCoin: StoredV16ForeignCoin;
   fromAmount: BigIntStr;
   fromAcc: StoredV15EAccount;
   receivedAt: number;
@@ -219,9 +223,9 @@ export interface StoredV15ProposedSwap {
   execValue: Hex;
 }
 
-interface StoredV15ForeignCoin {
+interface StoredV16ForeignCoin {
   chainId: number;
-  address?: Address;
+  address: Address;
   name: string;
   symbol: string;
   decimals: number;

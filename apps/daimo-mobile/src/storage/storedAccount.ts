@@ -3,7 +3,6 @@ import { Address, Hex } from "viem";
 import { StoredModel } from "./storedModel";
 import {
   StoredV15ChainGasConstants,
-  StoredV15Clog,
   StoredV15CurrencyExchangeRate,
   StoredV15DaimoInviteCodeStatus,
   StoredV15DaimoLinkNoteV2,
@@ -13,18 +12,21 @@ import {
   StoredV15KeyRotationClog,
   StoredV15LandlineAccount,
   StoredV15LinkedAccount,
-  StoredV15ProposedSwap,
   StoredV15RecommendedExchange,
   StoredV15SuggestedAction,
+  StoredV16Clog,
+  StoredV16ProposedSwap,
 } from "./storedTypes";
 
+//
 // This file describes the current schema for locally-stored user accounts.
 // IMPORTANT: do not edit these except to add new OPTIONAL fields or enums.
 // All other changes require a version bump + migration.
 // Stored accounts can only contain StoredV[...] types.
+//
 
-export interface StoredV15Account extends StoredModel {
-  storageVersion: 15;
+export interface StoredV16Account extends StoredModel {
+  storageVersion: 16;
 
   enclaveKeyName: string;
   enclavePubKey: Hex;
@@ -38,7 +40,7 @@ export interface StoredV15Account extends StoredModel {
   lastBlockTimestamp: number;
   lastBalance: string;
   lastFinalizedBlock: number;
-  recentTransfers: StoredV15Clog[];
+  recentTransfers: StoredV16Clog[];
   namedAccounts: StoredV15EAccount[];
   accountKeys: StoredV15KeyData[];
   pendingKeyRotation: StoredV15KeyRotationClog[];
@@ -53,11 +55,11 @@ export interface StoredV15Account extends StoredModel {
   inviteLinkStatus: StoredV15DaimoInviteCodeStatus | null;
   invitees: StoredV15EAccount[];
 
-  isOnboarded?: boolean;
+  isOnboarded: boolean;
 
   notificationRequestStatuses: StoredV15DaimoRequestV2Status[];
   lastReadNotifTimestamp: number;
-  proposedSwaps: StoredV15ProposedSwap[];
+  proposedSwaps: StoredV16ProposedSwap[];
   exchangeRates: StoredV15CurrencyExchangeRate[];
   sentPaymentLinks: StoredV15DaimoLinkNoteV2[];
 
