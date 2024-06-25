@@ -61,7 +61,7 @@ export function getSynthesizedMemo({
         : `${readableAmount} ${otherCoin.symbol} → ${coinName}`;
     } else {
       return isOutboundSwap
-        ? `Sent ${readableAmount} ${otherCoin.symbol} as ${coinName}`
+        ? `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`
         : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
     }
   }

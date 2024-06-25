@@ -97,12 +97,10 @@ export class SwapClogMatcher {
     const startTransfer = currentTransfer;
 
     const visited = new Set();
-    visited.add(currentTransfer.logIndex);
+    visited.add(startTransfer.logIndex);
 
     // Follow the chain of transfers to find the end of the cycle.
     while (true) {
-      if (visited.size === transfers.length) return null;
-
       const nextTransfer = transfers.find(
         (t) => t.from === currentTransfer!.to && !visited.has(t.logIndex)
       );
@@ -113,7 +111,16 @@ export class SwapClogMatcher {
       currentTransfer = nextTransfer;
     }
 
+    // Only create a corresponding swap transfer if the endpoint transfers
+    // are different coins.
+    if (currentTransfer.address === startTransfer.address) return null;
+
     this.correspondingSwapTransfers.set(startTransfer, currentTransfer);
+    console.log(
+      `[SWAP] matched ${JSON.stringify(startTransfer)} to ${JSON.stringify(
+        currentTransfer
+      )}`
+    );
     return currentTransfer;
   }
 }

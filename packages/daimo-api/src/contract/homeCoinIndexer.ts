@@ -232,11 +232,15 @@ export class HomeCoinIndexer extends Indexer {
 
     // If outbound swap, attach logical outbound info to create a swapClog.
     // use userop to get the transfer log
+    console.log(`[COIN] checking for outbound swap... ${transactionHash}`);
     const correspondingForeignSend =
       this.swapClogMatcher.getForeignTokenSendForSwap(
         transactionHash,
         logIndex
       );
+    console.log(
+      `[COIN] found outbound swap: ${JSON.stringify(correspondingForeignSend)}`
+    );
     const swapClogOutbound = correspondingForeignSend
       ? {
           coinOther: correspondingForeignSend.foreignToken,
@@ -253,8 +257,8 @@ export class HomeCoinIndexer extends Indexer {
       ),
 
       amount: Number(value),
-      from: correspondingForeignReceive?.from || from,
-      to,
+      from: getAddress(correspondingForeignReceive?.from || from),
+      to: getAddress(correspondingForeignSend?.to || to),
 
       blockNumber: Number(blockNumber),
       blockHash,
@@ -268,16 +272,19 @@ export class HomeCoinIndexer extends Indexer {
 
     const opEvent = (() => {
       if (!noteInfo) {
-        // If inbound or outbound swap (mutually exclusive), create a swapClog.
-        if (swapClogInbound || swapClogOutbound) {
+        if (swapClogInbound) {
           return {
             type: "swap",
             ...partialClog,
             ...swapClogInbound,
+          } as SwapClog;
+        } else if (swapClogOutbound) {
+          return {
+            type: "swap",
+            ...partialClog,
             ...swapClogOutbound,
           } as SwapClog;
         } else {
-          // TODO: if this is an outbound swap, should create a swapClog instead...
           return {
             type: "transfer",
             ...partialClog,
