@@ -15,6 +15,7 @@ import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
+import { SwapIndexer } from "./swapIndexer";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -45,7 +46,8 @@ export class HomeCoinIndexer extends Indexer {
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
-    private paymentMemoTracker: PaymentMemoTracker
+    private paymentMemoTracker: PaymentMemoTracker,
+    private swapIndexer: SwapIndexer
   ) {
     super("COIN");
   }
@@ -229,14 +231,15 @@ export class HomeCoinIndexer extends Indexer {
       : undefined;
 
     // If outbound swap, attach logical outbound info to create a swapClog.
-    // const correspondingForeignSend =
-    //   this.foreignCoinIndexer.getForeignTokenSendForSwap(to, transactionHash);
-    // const swapClogOutbound = correspondingForeignSend
-    //   ? {
-    //       coinOther: correspondingForeignSend.foreignToken,
-    //       amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
-    //     }
-    //   : undefined;
+    // use userop to get the transfer log
+    const correspondingForeignSend =
+      this.swapIndexer.getForeignTokenSendForSwap(transactionHash, logIndex);
+    const swapClogOutbound = correspondingForeignSend
+      ? {
+          coinOther: correspondingForeignSend.foreignToken,
+          amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
+        }
+      : undefined;
 
     // Base clog info (same for all TransferClog types).
     const partialClog = {
@@ -263,12 +266,12 @@ export class HomeCoinIndexer extends Indexer {
     const opEvent = (() => {
       if (!noteInfo) {
         // If inbound or outbound swap (mutually exclusive), create a swapClog.
-        if (swapClogInbound) {
+        if (swapClogInbound || swapClogOutbound) {
           return {
             type: "swap",
             ...partialClog,
             ...swapClogInbound,
-            // ...swapClogOutbound,
+            ...swapClogOutbound,
           } as SwapClog;
         } else {
           // TODO: if this is an outbound swap, should create a swapClog instead...

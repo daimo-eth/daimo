@@ -23,6 +23,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
+import { SwapIndexer } from "../contract/swapIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
@@ -70,17 +71,20 @@ async function main() {
   const tokenReg = new TokenRegistry();
   await tokenReg.load();
 
-  const opIndexer = new OpIndexer();
+  const swapIndexer = new SwapIndexer(tokenReg);
+  const opIndexer = new OpIndexer(swapIndexer);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
+
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
+    swapIndexer
   );
 
   const ethIndexer = new ETHIndexer(vc, nameReg);
