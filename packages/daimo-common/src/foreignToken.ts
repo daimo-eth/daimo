@@ -134,15 +134,27 @@ export function isNativeETH(
 
 // Any coin send (stablecoins + ETH).
 export const supportedSendCoins = new Map<string, ForeignToken>([
-  [baseUSDC.address, baseUSDC],
-  [baseDAI.address, baseDAI],
-  [baseUSDT.address, baseUSDT],
-  [baseWETH.address, baseWETH],
+  [getAddress(baseUSDC.address), baseUSDC],
+  [getAddress(baseDAI.address), baseDAI],
+  [getAddress(baseUSDT.address), baseUSDT],
+  [getAddress(baseETH.address), baseETH],
 ]);
 
 // Get stable coin by address.
 export function getSupportedSendCoinByAddress(
   address: string
 ): ForeignToken | undefined {
-  return supportedSendCoins.get(address);
+  return supportedSendCoins.get(getAddress(address));
+}
+
+// Supported home coins.
+export const supportedHomeCoins = new Map<string, ForeignToken>([
+  [getAddress(baseUSDC.address), baseUSDC],
+]);
+
+// Retrieve home coin by address.
+export function getSupportedHomeCoinByAddress(
+  address: string
+): ForeignToken | undefined {
+  return supportedHomeCoins.get(getAddress(address));
 }

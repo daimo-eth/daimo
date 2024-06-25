@@ -15,7 +15,7 @@ import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
-import { SwapIndexer } from "./swapIndexer";
+import { SwapClogMatcher } from "./SwapClogMatcher";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -47,7 +47,7 @@ export class HomeCoinIndexer extends Indexer {
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
     private paymentMemoTracker: PaymentMemoTracker,
-    private swapIndexer: SwapIndexer
+    private swapClogMatcher: SwapClogMatcher
   ) {
     super("COIN");
   }
@@ -233,7 +233,10 @@ export class HomeCoinIndexer extends Indexer {
     // If outbound swap, attach logical outbound info to create a swapClog.
     // use userop to get the transfer log
     const correspondingForeignSend =
-      this.swapIndexer.getForeignTokenSendForSwap(transactionHash, logIndex);
+      this.swapClogMatcher.getForeignTokenSendForSwap(
+        transactionHash,
+        logIndex
+      );
     const swapClogOutbound = correspondingForeignSend
       ? {
           coinOther: correspondingForeignSend.foreignToken,

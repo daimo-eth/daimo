@@ -5,13 +5,20 @@ import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { TokenRegistry } from "../server/tokenRegistry";
 import { retryBackoff } from "../utils/retryBackoff";
 
-export class SwapIndexer {
+export class SwapClogMatcher {
   /** Map of transactionHash to transfers that are within that transaction */
   private txHashToTransfers: Map<string, ForeignTokenTransfer[]> = new Map();
 
+  /** Map of starting "to" transfer to the corresponding "from" transfer */
+  private correspondingSwapTransfers: Map<
+    ForeignTokenTransfer,
+    ForeignTokenTransfer
+  > = new Map();
+
   constructor(private tokenReg: TokenRegistry) {}
 
-  // Given a userOp, load any transfers that are within the userOp.
+  // Given a set transaction hashes, load any transfers that are associated
+  // with those transactions.
   async loadSwapTransfers(
     pg: Pool,
     from: number,
@@ -20,37 +27,24 @@ export class SwapIndexer {
     transactionHashes: string[]
   ) {
     const startTime = Date.now();
+
+    const txHashes = transactionHashes.map((tx) => `\\x${tx.substring(2)}`);
+
     const result = await retryBackoff(
-      `swapIndexer-logs-query-${from}-${to}`,
-      () =>
-        pg.query(
-          `
-          select
-            chain_id,
-            block_num,
-            block_hash,
-            tx_hash,
-            tx_idx,
-            log_addr,
-            f as "from",
-            t as "to",
-            v as "value"
-          from erc20_transfers
-          where (
-            block_num >= $1
-            and block_num <= $2
-            and chain_id = $3
-            and tx_hash in ($4)
-          );
-        `,
-          [from, to, chainId, (transactionHashes as any).join(",")]
-        )
+      `swapClogMatcher-logs-query-${from}-${to}`,
+      async () => {
+        return await pg.query(
+          `SELECT * from erc20_transfers 
+          WHERE (block_num BETWEEN $1 AND $2) 
+          AND chain_id = $3
+          AND tx_hash = ANY($4::bytea[]);`,
+          [from, to, chainId, txHashes as any]
+        );
+      }
     );
 
     for (const row of result.rows) {
-      const token = this.tokenReg.getToken(row.address);
-      if (token == null) continue;
-      const log: ForeignTokenTransfer = {
+      const log = {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
@@ -60,11 +54,17 @@ export class SwapIndexer {
         from: getAddress(bytesToHex(row.f, { size: 20 })),
         to: getAddress(bytesToHex(row.t, { size: 20 })),
         value: BigInt(row.v),
+      };
+      const token = this.tokenReg.getToken(log.address, chainId, true);
+      if (token == null) continue;
+
+      const foreignTransfer: ForeignTokenTransfer = {
+        ...log,
         foreignToken: token,
       };
-      this.txHashToTransfers.set(log.transactionHash, [
-        ...(this.txHashToTransfers.get(log.transactionHash) || []),
-        log,
+      this.txHashToTransfers.set(foreignTransfer.transactionHash, [
+        ...(this.txHashToTransfers.get(foreignTransfer.transactionHash) || []),
+        foreignTransfer,
       ]);
     }
     console.log(
@@ -78,14 +78,23 @@ export class SwapIndexer {
   // transfer (from a Daimo account to a foreign account).
   getForeignTokenSendForSwap(
     transactionHash: string,
-    logIndex: number
+    directLogIndex: number
   ): ForeignTokenTransfer | null {
+    return this.matchSwapTransfers(transactionHash, directLogIndex);
+  }
+
+  // Within a transaction, match the starting "from" transfer and the ending
+  // "to" transfer (in between are a series of swaps).
+  matchSwapTransfers(transactionHash: string, logIndex?: number) {
     const transfers = this.txHashToTransfers.get(transactionHash);
     if (!transfers || transfers.length === 0) return null;
 
     // Get the corresponding transfer to the given logIndex transfer.
-    let currentTransfer = transfers.find((t) => t.logIndex === logIndex);
+    let currentTransfer = logIndex
+      ? transfers.find((t) => t.logIndex === logIndex)
+      : transfers[0];
     if (!currentTransfer) return null;
+    const startTransfer = currentTransfer;
 
     const visited = new Set();
     visited.add(currentTransfer.logIndex);
@@ -98,10 +107,13 @@ export class SwapIndexer {
         (t) => t.from === currentTransfer!.to && !visited.has(t.logIndex)
       );
 
-      if (!nextTransfer) return currentTransfer;
+      if (!nextTransfer) break;
 
       visited.add(nextTransfer.logIndex);
       currentTransfer = nextTransfer;
     }
+
+    this.correspondingSwapTransfers.set(startTransfer, currentTransfer);
+    return currentTransfer;
   }
 }
