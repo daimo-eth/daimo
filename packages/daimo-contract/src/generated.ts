@@ -861,6 +861,86 @@ export const daimoEphemeralNotesV2Config = {
 } as const;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoFastCCTP
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoFastCctpABI = [
+  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'cctpReceiver',
+        internalType: 'contract ICCTPReceiver',
+        type: 'address',
+      },
+      { name: 'messageBytes', internalType: 'bytes', type: 'bytes' },
+      { name: 'signature', internalType: 'bytes', type: 'bytes' },
+      { name: 'fromChainID', internalType: 'uint256', type: 'uint256' },
+      { name: 'fromAddr', internalType: 'address', type: 'address' },
+      { name: 'fromAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddr', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'contract IERC20', type: 'address' },
+      { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'claimTransfer',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'fromChainID', internalType: 'uint256', type: 'uint256' },
+      { name: 'fromAddr', internalType: 'address', type: 'address' },
+      { name: 'fromAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toChainID', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddr', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'contract IERC20', type: 'address' },
+      { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'fastFinishTransfer',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'handoffSent',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'handoffToRecipient',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'cctpMessenger',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
+      { name: 'fromToken', internalType: 'contract IERC20', type: 'address' },
+      { name: 'fromAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toChainID', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddr', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'contract IERC20', type: 'address' },
+      { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'startTransfer',
+    outputs: [],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoFlexSwapper
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2901,6 +2981,55 @@ export const entryPointABI = [
     name: "ValidationResultWithAggregation",
   },
 ] as const;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EphemeralHandoff
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const ephemeralHandoffABI = [
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '', internalType: 'uint256', type: 'uint256' },
+      { name: '', internalType: 'address', type: 'address' },
+      { name: 'fromAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'toChainID', internalType: 'uint256', type: 'uint256' },
+      { name: '', internalType: 'address', type: 'address' },
+      { name: '', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'contract IERC20', type: 'address' },
+      { name: '', internalType: 'uint256', type: 'uint256' },
+    ],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'destroy',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'receiveTransferAndSelfDestruct',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      {
+        name: 'cctpMessenger',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'startTransferAndSelfDestruct',
+    outputs: [],
+  },
+] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IMetaPaymaster
