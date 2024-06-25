@@ -7,6 +7,7 @@ import {
   canSendTo,
   getAccountName,
   getDisplayFromTo,
+  getSynthesizedMemo,
   now,
   timeAgo,
 } from "@daimo/common";
@@ -21,7 +22,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
-import { getSynthesizedMemo } from "./shared";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
@@ -37,6 +37,7 @@ import {
   TextLight,
   TextMeta,
 } from "../../shared/text";
+import { env } from "../../../env";
 
 interface HeaderObject {
   isHeader: true;
@@ -224,7 +225,7 @@ function DisplayOpRow({
 
   const opMemo = getSynthesizedMemo(
     displayOp,
-    daimoChainFromId(account.homeChainId),
+    env(daimoChainFromId(account.homeChainId)).chainConfig,
     true
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;

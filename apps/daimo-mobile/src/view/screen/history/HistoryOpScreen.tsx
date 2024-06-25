@@ -8,6 +8,7 @@ import {
   amountToDollars,
   getAccountName,
   getDisplayFromTo,
+  getSynthesizedMemo,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -17,7 +18,6 @@ import React, { createContext, useCallback, useContext } from "react";
 import { Linking, View } from "react-native";
 import { Address } from "viem";
 
-import { getSynthesizedMemo } from "./shared";
 import { Dispatcher, DispatcherContext } from "../../../action/dispatch";
 import {
   ParamListBottomSheet,
@@ -221,7 +221,7 @@ function TransferBody({
 
   const memoText = getSynthesizedMemo(
     op,
-    daimoChainFromId(account.homeChainId)
+    env(daimoChainFromId(account.homeChainId)).chainConfig
   );
 
   return (
