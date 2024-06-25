@@ -1,5 +1,5 @@
 import { ChainConfig } from "@daimo/contract";
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, zeroAddress } from "viem";
 
 /**
  * USDC token addresses taken from:
@@ -49,7 +49,7 @@ export enum TokenLogo {
 //
 
 export const baseSepoliaWETH: ForeignToken = {
-  address: "0x4200000000000000000000000000000000000006",
+  address: zeroAddress,
   decimals: 18,
   name: "Ethereum",
   symbol: "WETH",
@@ -66,11 +66,27 @@ export const baseSepoliaUSDC: ForeignToken = {
   chainId: baseSepolia.chainId,
 };
 
+export const baseSepoliaETH: ForeignToken = {
+  address: "0x0000000000000000000000000000000000000000",
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "ETH",
+  logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+  chainId: 84532,
+};
+
 //
 // Base Mainnet
 //
 
-// TODO: 0x0 sentinel value for actual native ETH vs rollup-native WETH?
+export const baseETH: ForeignToken = {
+  address: zeroAddress,
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "ETH",
+  logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+  chainId: 8453,
+};
 
 export const baseWETH: ForeignToken = {
   address: "0x4200000000000000000000000000000000000006",
@@ -290,6 +306,7 @@ export function getForeignCoinDisplayAmount(
 }
 
 const NON_DUST_TOKEN_WHITELIST = new Set([
+  baseETH.address,
   baseWETH.address,
   baseUSDC.address,
   baseUSDbC.address,
@@ -326,7 +343,7 @@ export function isNativeETH(
   chain: ChainConfig | number
 ): boolean {
   const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
-  return token.chainId === chainId && token.symbol === "ETH";
+  return token.chainId === chainId && token.address === zeroAddress;
 }
 
 // Any coin send (stablecoins + ETH).

@@ -6,12 +6,11 @@ import {
   baseUSDC,
   getForeignCoinDisplayAmount,
   hasAccountName,
-  isNativeETH,
   now,
 } from "@daimo/common";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useContext, useEffect, useMemo } from "react";
-import { ActivityIndicator, View, Image } from "react-native";
+import { ActivityIndicator, Image, View } from "react-native";
 
 import SwapLink from "../../../assets/swap-link.png";
 import { DispatcherContext } from "../../action/dispatch";
@@ -93,16 +92,12 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
         preSymbol="+"
         postText="USDC"
       />
-      {!isNativeETH(swap.fromCoin, account.homeChainId) && (
-        <>
-          <Spacer h={32} />
-          <AccountRow
-            acc={swap.fromAcc}
-            timestamp={swap.receivedAt}
-            viewAccount={() => navToAccountPage(swap.fromAcc!, nav)}
-          />
-        </>
-      )}
+      <Spacer h={32} />
+      <AccountRow
+        acc={swap.fromAcc}
+        timestamp={swap.receivedAt}
+        viewAccount={() => navToAccountPage(swap.fromAcc!, nav)}
+      />
       <Spacer h={32} />
       <SwapInfoRow swap={swap} />
       <Spacer h={32} />

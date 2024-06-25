@@ -1,11 +1,9 @@
 import {
   getAccountName,
   getForeignCoinDisplayAmount,
-  isNativeETH,
   now,
   timeAgo,
 } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import React, { useContext } from "react";
 import { ActivityIndicator, View, useWindowDimensions } from "react-native";
@@ -13,7 +11,6 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
-import { env } from "../../../env";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
@@ -48,8 +45,6 @@ export function SwapNotificationRow({
   };
 
   const accName = getAccountName(notif.swap.fromAcc);
-  const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  const homeCoinName = chainConfig.tokenSymbol.toUpperCase();
 
   const readableAmount = getForeignCoinDisplayAmount(
     notif.swap.fromAmount,
@@ -57,21 +52,12 @@ export function SwapNotificationRow({
   );
 
   const copy = (() => {
-    if (!isNativeETH(notif.swap.fromCoin, chainConfig)) {
-      return (
-        <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-          Accept {readableAmount} {coin.name} from{" "}
-          <TextBody color={color.midnight}>{accName}</TextBody>
-        </TextBody>
-      );
-    } else {
-      return (
-        <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-          Accept {readableAmount} {coin.name} as{" "}
-          <TextBody color={color.midnight}>{homeCoinName}</TextBody>
-        </TextBody>
-      );
-    }
+    return (
+      <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
+        Accept {readableAmount} {coin.name} from{" "}
+        <TextBody color={color.midnight}>{accName}</TextBody>
+      </TextBody>
+    );
   })();
 
   return (

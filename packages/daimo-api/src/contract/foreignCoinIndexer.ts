@@ -50,18 +50,18 @@ export class ForeignCoinIndexer extends Indexer {
     private vc: ViemClient,
     private tokenReg: TokenRegistry
   ) {
-    super("SWAPCOIN");
+    super("FOREIGN-COIN");
   }
 
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(
-      `swapCoinIndexer-logs-query-${from}-${to}`,
+      `foreignCoinIndexer-logs-query-${from}-${to}`,
       async () => {
         await Promise.all([
           pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`),
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
+          // pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
         ]);
         return await pg.query(
           `
@@ -75,13 +75,18 @@ export class ForeignCoinIndexer extends Indexer {
             block_hash,
             tx_idx,
             tx_hash,
-            '\\00' AS log_addr,
+            '\\x0000000000000000000000000000000000000000' AS log_addr,
             from as f,
             to as t,
             value as v,
             trace_action_idx as log_idx
-          FROM filtered_eth_transfers
-          WHERE block_num BETWEEN $1 AND $2
+          FROM eth_transfers et
+          JOIN names n
+          ON addr="from" OR addr="to"
+          WHERE ig_name = 'eth_transfers'
+          AND src_name = 'baseTrace'
+          AND "value" > 0
+          AND block_num BETWEEN $1 AND $2
           ORDER BY block_num ASC, tx_idx ASC,log_idx ASC
           ;`,
           [from, to]
@@ -110,28 +115,27 @@ export class ForeignCoinIndexer extends Indexer {
         ...t,
         foreignToken: this.tokenReg.getToken(t.address)!,
       }));
+    const elapsedMs = performance.now() - startTime;
     console.log(
-      `[SWAPCOIN] loaded ${logs.length} transfers ${from} ${to} in ${
-        Date.now() - startTime
-      }ms`
+      `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );
 
     if (logs.length === 0) return;
 
-    await this.processSwapCoinLogs(logs);
+    await this.processForeignCoinLogs(logs);
   }
 
-  async processSwapCoinLogs(logs: ForeignTokenTransfer[]) {
+  async processForeignCoinLogs(logs: ForeignTokenTransfer[]) {
     for (const log of logs) {
-      this.processSwapCoinDelta(getAddress(log.to), log.value, log);
-      this.processSwapCoinDelta(getAddress(log.from), -log.value, log);
+      this.processForeignCoinDelta(getAddress(log.to), log.value, log);
+      this.processForeignCoinDelta(getAddress(log.from), -log.value, log);
     }
 
     this.allTransfers = this.allTransfers.concat(logs);
     this.listeners.forEach((l) => l(logs));
   }
 
-  processSwapCoinDelta(
+  processForeignCoinDelta(
     addr: Address,
     delta: bigint,
     log: ForeignTokenTransfer
@@ -151,7 +155,7 @@ export class ForeignCoinIndexer extends Indexer {
 
       if (matchingPendingSwap == null) {
         console.log(
-          `[SWAPCOIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.address}`
+          `[FOREIGN-COIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.address}`
         );
         return;
       }
@@ -209,7 +213,9 @@ export class ForeignCoinIndexer extends Indexer {
     });
 
     console.log(
-      `[SWAPCOIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(swap)}`
+      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(
+        swap
+      )}`
     );
 
     if (!swap) return null;

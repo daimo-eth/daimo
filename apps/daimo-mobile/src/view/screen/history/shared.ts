@@ -1,8 +1,4 @@
-import {
-  DisplayOpEvent,
-  getForeignCoinDisplayAmount,
-  isNativeETH,
-} from "@daimo/common";
+import { DisplayOpEvent, getForeignCoinDisplayAmount } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 
 import { env } from "../../../env";
@@ -27,10 +23,6 @@ export function getSynthesizedMemo(
   if (op.requestStatus) {
     return op.requestStatus.memo;
   } else if (op.preSwapTransfer) {
-    if (isNativeETH(op.preSwapTransfer.coin, chainConfig)) {
-      return `ETH → ${coinName}`;
-    }
-
     const readableAmount = getForeignCoinDisplayAmount(
       op.preSwapTransfer.amount,
       op.preSwapTransfer.coin
