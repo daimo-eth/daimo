@@ -91,6 +91,8 @@ async function main() {
     vc,
     homeCoinIndexer,
     foreignCoinIndexer,
+    inviteCodeTracker,
+    inviteGraph,
     nameReg,
     monitor
   );

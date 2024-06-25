@@ -1,9 +1,9 @@
+import { ChainConfig } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
 import { ForeignToken, getForeignCoinDisplayAmount } from "./foreignToken";
 import { BigIntStr } from "./model";
-import { ChainConfig, DaimoChain } from "@daimo/contract";
 
 /**
  * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent

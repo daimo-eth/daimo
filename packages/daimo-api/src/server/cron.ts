@@ -182,17 +182,17 @@ export class Crontab {
         : undefined;
 
       return `${getAccountName(acc)} (${invitees.length} invitees, ${
-        inviteStatus?.usesLeft
-      } left)`;
+        inviteStatus?.usesLeft || 0
+      } available)`;
     };
 
     const memo = getSynthesizedMemo(opEvent, chainConfig);
 
     // Post to Clippy
     const parts = [
-      "Transfer: ",
+      "Transfer:",
       await getAccountInfo(fromAcc),
-      " -> ",
+      "->",
       await getAccountInfo(toAcc),
       "$" + amountToDollars(opEvent.amount),
       opEvent.type === "transfer" &&

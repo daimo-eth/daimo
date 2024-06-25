@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
+import { env } from "../../../env";
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -37,7 +38,6 @@ import {
   TextLight,
   TextMeta,
 } from "../../shared/text";
-import { env } from "../../../env";
 
 interface HeaderObject {
   isHeader: true;
