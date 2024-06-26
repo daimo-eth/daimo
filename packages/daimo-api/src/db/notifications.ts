@@ -22,7 +22,7 @@ export class DBNotifications extends EventEmitter {
     this.client = new Client(config);
     this.channels = new Set();
 
-    this.on("newListener", (event, listener) => {
+    this.on("newListener", (event) => {
       if (IGNORED_EVENTS.has(event)) {
         return;
       }
@@ -32,7 +32,7 @@ export class DBNotifications extends EventEmitter {
       }
     });
 
-    this.on("removeListener", (event, listener) => {
+    this.on("removeListener", (event) => {
       if (IGNORED_EVENTS.has(event)) {
         return;
       }
@@ -46,7 +46,6 @@ export class DBNotifications extends EventEmitter {
   async close() {
     if (this.client) {
       await this.client.end();
-
       this.channels.clear();
     }
   }

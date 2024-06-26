@@ -74,21 +74,20 @@ export class Watcher {
 
   async waitFor(blockNumber: number, tries: number): Promise<boolean> {
     const t0 = Date.now();
+    let tS;
     for (let i = 0; i < tries; i++) {
       if (this.latest >= blockNumber) {
+        tS = Date.now() - t0;
         console.log(
-          `[SHOVEL] waiting for block ${blockNumber}, found after ${
-            Date.now() - t0
-          }ms`
+          `[SHOVEL] waiting for block ${blockNumber}, found after ${tS}ms`
         );
         return true;
       }
       await new Promise((res) => setTimeout(res, 250));
     }
+    tS = Date.now() - t0;
     console.log(
-      `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${
-        this.latest
-      } after ${Date.now() - t0}ms`
+      `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${this.latest} after ${tS}ms`
     );
     return false;
   }
@@ -113,41 +112,46 @@ export class Watcher {
   // Watches shovel for new blocks, and indexes them.
   // Skip indexing if it's already indexing.
   async watch() {
-    this.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, async () => {
-      try {
-        if (this.isIndexing) {
-          console.log(`[SHOVEL] skipping tick, already indexing`);
-          return;
-        }
-        this.isIndexing = true;
+    this.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, async () => this.tick());
 
-        this.shovelLatest = await this.getShovelLatest();
-        const localLatest = await this.index(
-          this.latest + 1,
-          this.shovelLatest,
-          this.batchSize
-        );
-        const { shovelLatest } = this;
-        const tickSummary = JSON.stringify({ shovelLatest, localLatest });
-        console.log(`[SHOVEL] starting tick ${tickSummary}`);
+    // DB notifications unreliable. Backup tick.
+    setInterval(() => this.tick(), 1000);
+  }
 
-        if (localLatest - this.slowLatest > 3) {
-          // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
-          this.slowIndex(this.slowLatest + 1, localLatest);
-        }
-        // localLatest <= 0 when there are no new blocks in shovel
-        // or, for whatever reason, we are ahead of shovel.
-        if (localLatest > this.latest) this.latest = localLatest;
-
-        // Finally, check RPC to ensure shovel is up to date
-        this.rpcLatest = Number(await this.rpcClient.getBlockNumber());
-        this.lastGoodTickS = now();
-      } catch (e) {
-        console.error(`[SHOVEL] tick error`, e);
-      } finally {
-        this.isIndexing = false;
+  async tick() {
+    try {
+      if (this.isIndexing) {
+        console.log(`[SHOVEL] skipping tick, already indexing`);
+        return;
       }
-    });
+      this.isIndexing = true;
+
+      this.shovelLatest = await this.getShovelLatest();
+      const localLatest = await this.index(
+        this.latest + 1,
+        this.shovelLatest,
+        this.batchSize
+      );
+      const { shovelLatest } = this;
+      const tickSummary = JSON.stringify({ shovelLatest, localLatest });
+      console.log(`[SHOVEL] starting tick ${tickSummary}`);
+
+      if (localLatest - this.slowLatest > 3) {
+        // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
+        this.slowIndex(this.slowLatest + 1, localLatest);
+      }
+      // localLatest <= 0 when there are no new blocks in shovel
+      // or, for whatever reason, we are ahead of shovel.
+      if (localLatest > this.latest) this.latest = localLatest;
+
+      // Finally, check RPC to ensure shovel is up to date
+      this.rpcLatest = Number(await this.rpcClient.getBlockNumber());
+      this.lastGoodTickS = now();
+    } catch (e) {
+      console.error(`[SHOVEL] tick error`, e);
+    } finally {
+      this.isIndexing = false;
+    }
   }
 
   // Indexes batches till we get to the given block number, inclusive.
