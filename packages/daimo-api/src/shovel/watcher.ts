@@ -93,6 +93,13 @@ export class Watcher {
   }
 
   async migrateDB() {
+    console.log(`[SHOVEL] migrateDB: eth_transfers...`);
+    await this.pg.query(`
+      CREATE INDEX IF NOT EXISTS i_eth_from ON eth_transfers("from");
+      CREATE INDEX IF NOT EXISTS i_eth_to ON eth_transfers("to");
+    `);
+
+    console.log(`[SHOVEL] migrateDB: filtered_erc20_transfers...`);
     await this.pg.query(`
       CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (
         SELECT et.*
@@ -100,17 +107,18 @@ export class Watcher {
         JOIN names n ON n.addr = et.f
         OR n.addr = et.t
       );
-      
       CREATE INDEX IF NOT EXISTS i_block_num
         ON filtered_erc20_transfers (block_num);
+    `);
 
+    console.log(`[SHOVEL] migrateDB: filtered_eth_transfers...`);
+    await this.pg.query(`
       CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_eth_transfers AS (
         SELECT et.*
         FROM eth_transfers et
         JOIN names n ON n.addr = et.to
         OR n.addr = et.from
       );
-
       CREATE INDEX IF NOT EXISTS i_filtered_eth_transfers_block_num
         ON filtered_eth_transfers (block_num);
     `);

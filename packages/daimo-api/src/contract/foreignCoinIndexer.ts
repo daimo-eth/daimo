@@ -87,9 +87,9 @@ export class ForeignCoinIndexer extends Indexer {
               tx_idx,
               tx_hash,
               '\\x0000000000000000000000000000000000000000' AS log_addr,
-              from as f,
-              to as t,
-              value as v,
+              "from" as f,
+              "to" as t,
+              "value" as v,
               trace_action_idx as sort_idx
             FROM filtered_eth_transfers et
             WHERE block_num BETWEEN $1 AND $2
