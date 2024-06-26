@@ -280,3 +280,20 @@ jobs:
       - name: Build and publish update
         run: npm run build:prod
         working-directory: ./apps/daimo-mobile
+
+      - name: Build APK with EAS
+        run: eas build --platform android --profile preview --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Download APK from EAS
+        run: |
+          eas artifact:download --platform android
+        working-directory: ./apps/daimo-mobile
+
+      - name: Publish APK to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/daimo-mobile/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
