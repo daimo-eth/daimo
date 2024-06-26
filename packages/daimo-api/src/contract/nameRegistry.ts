@@ -233,6 +233,7 @@ export class NameRegistry extends Indexer {
     let promise = this.ensReverseLookups.get(address);
     if (promise == null) {
       promise = this.getENSReverseLookup(address);
+      this.ensReverseLookups.set(address, promise);
     }
     const ensName = await promise;
 
