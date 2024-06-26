@@ -7,6 +7,11 @@ import { Address, formatUnits } from "viem";
  * Testnet: https://developers.circle.com/stablecoins/docs/usdc-on-test-networks
  */
 
+/**
+ * WETH reference:
+ * https://github.com/Uniswap/sdks/blob/main/sdks/sdk-core/src/entities/weth9.ts
+ */
+
 import {
   Arbitrum,
   ArbitrumSepolia,
@@ -125,6 +130,15 @@ export const arbitrumUSDC: ForeignToken = {
   chainId: Arbitrum.chainId,
 };
 
+export const arbitrumWETH: ForeignToken = {
+  address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+  chainId: Arbitrum.chainId,
+};
+
 //
 // Arbitrum Sepolia
 //
@@ -135,6 +149,15 @@ export const arbitrumSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
+  chainId: ArbitrumSepolia.chainId,
+};
+
+export const arbitrumSepoliaWETH: ForeignToken = {
+  address: "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
   chainId: ArbitrumSepolia.chainId,
 };
 
@@ -151,6 +174,15 @@ export const optimismUSDC: ForeignToken = {
   chainId: Optimism.chainId,
 };
 
+export const optimismWETH: ForeignToken = {
+  address: "0x4200000000000000000000000000000000000006",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+  chainId: Optimism.chainId,
+};
+
 //
 // Optimism Sepolia
 //
@@ -164,6 +196,15 @@ export const optimismSepoliaUSDC: ForeignToken = {
   chainId: OptimismSepolia.chainId,
 };
 
+export const optimismSepoliaWETH: ForeignToken = {
+  address: "0x4200000000000000000000000000000000000006",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+  chainId: OptimismSepolia.chainId,
+};
+
 //
 // Polygon Mainnet
 //
@@ -174,6 +215,15 @@ export const polygonUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
+  chainId: Polygon.chainId,
+};
+
+export const polygonWETH: ForeignToken = {
+  address: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
   chainId: Polygon.chainId,
 };
 
@@ -200,6 +250,16 @@ export const avalancheUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
+  chainId: Avalanche.chainId,
+};
+
+// WETH.e
+export const avalancheWETH: ForeignToken = {
+  address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
   chainId: Avalanche.chainId,
 };
 

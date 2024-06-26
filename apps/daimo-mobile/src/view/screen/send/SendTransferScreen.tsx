@@ -201,7 +201,7 @@ function SendChooseAmount({
   const memoStatus = result.data;
 
   // Token swapping is not supported on testnet
-  const sendCoinChainFixed = isTestnetChain(daimoChainToId(daimoChain));
+  const testnetChainFixed = isTestnetChain(daimoChainToId(daimoChain));
 
   return (
     <View>
@@ -222,7 +222,7 @@ function SendChooseAmount({
         <SendCoinButton
           coin={coin}
           setCoin={setCoin}
-          isFixed={recipient.name != null || sendCoinChainFixed}
+          isFixed={recipient.name != null || testnetChainFixed}
         />
       </View>
       <Spacer h={16} />
@@ -301,7 +301,6 @@ function SendConfirm({
     daimoChainId: account!.homeChainId,
   });
   const route = homeCoin !== coin ? swapRoute : null;
-  console.log(`[SEND] swapRoute: ${JSON.stringify(swapRoute)}`);
 
   let button: ReactNode;
   if (isRequest) {

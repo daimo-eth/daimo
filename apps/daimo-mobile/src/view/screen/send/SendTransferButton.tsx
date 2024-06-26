@@ -81,7 +81,6 @@ export function SendTransferButton({
         return opSender.executeProposedSwap(route, opMetadata);
       }
       // Otherwise, just send home coin directly.
-      console.log(`[ACTION] sending direct transfer`);
       return opSender.erc20transfer(
         recipient.addr,
         dollarsStr,
