@@ -45,7 +45,7 @@ export function getSynthesizedMemo({
     const otherAmount =
       op.type === "transfer" ? op.preSwapTransfer!.amount : op.amountOther;
 
-    if (isNativeETH(otherCoin.address, chainConfig)) {
+    if (isNativeETH(otherCoin, chainConfig)) {
       return isOutboundSwap ? `${coinName} → ETH` : `ETH → ${coinName}`;
     }
 

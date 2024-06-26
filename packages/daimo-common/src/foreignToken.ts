@@ -1,5 +1,5 @@
 import { ChainConfig } from "@daimo/contract";
-import { Address, formatUnits } from "viem";
+import { Address, formatUnits, getAddress } from "viem";
 
 import { base, baseSepolia } from "./chain";
 import { amountToDollars } from "./coin";
@@ -137,7 +137,7 @@ export const supportedSendCoins = new Map<string, ForeignToken>([
   [getAddress(baseUSDC.address), baseUSDC],
   [getAddress(baseDAI.address), baseDAI],
   [getAddress(baseUSDT.address), baseUSDT],
-  [getAddress(baseETH.address), baseETH],
+  [getAddress(baseWETH.address), baseWETH],
 ]);
 
 // Get stable coin by address.
