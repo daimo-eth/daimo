@@ -232,21 +232,18 @@ export class HomeCoinIndexer extends Indexer {
 
     // If outbound swap, attach logical outbound info to create a swapClog.
     // use userop to get the transfer log
-    console.log(`[COIN] checking for outbound swap... ${transactionHash}`);
     const correspondingForeignSend =
-      this.swapClogMatcher.getForeignTokenSendForSwap(
-        transactionHash,
-        logIndex
-      );
-    console.log(
-      `[COIN] found outbound swap: ${JSON.stringify(correspondingForeignSend)}`
-    );
+      this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
     const swapClogOutbound = correspondingForeignSend
       ? {
           coinOther: correspondingForeignSend.foreignToken,
           amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
         }
       : undefined;
+    // Foreign receive and foreign send are mutually exclusive.
+    const outboundTo = correspondingForeignReceive
+      ? null
+      : correspondingForeignSend?.to;
 
     // Base clog info (same for all TransferClog types).
     const partialClog = {
@@ -258,7 +255,7 @@ export class HomeCoinIndexer extends Indexer {
 
       amount: Number(value),
       from: getAddress(correspondingForeignReceive?.from || from),
-      to: getAddress(correspondingForeignSend?.to || to),
+      to: getAddress(outboundTo || to),
 
       blockNumber: Number(blockNumber),
       blockHash,

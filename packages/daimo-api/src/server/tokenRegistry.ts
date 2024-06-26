@@ -86,15 +86,13 @@ export class TokenRegistry {
       .get(chainId ?? this.defaultChainId)
       ?.get(tokenAddress);
 
-    // Only log foreign token retrieval.
-    if (token)
-      console.log(
-        `[TOKEN-REG] retrieved token ${token?.symbol} for addr ${addr}`
-      );
-
-    if (includeHomeCoin && tokenAddress === chainConfig.tokenAddress) {
+    // If not a foreign token, check if it's a home token.
+    if (includeHomeCoin && !token) {
       token = getSupportedHomeCoinByAddress(tokenAddress);
     }
+
+    if (!token)
+      console.log(`[TOKEN-REG] could not retrieve token for addr ${addr}`);
 
     return token;
   }

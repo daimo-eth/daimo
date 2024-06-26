@@ -206,6 +206,7 @@ export type DaimoAccountCall = {
 // If the op is a swap, from = the pre-swap sender.
 export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   if (op.type === "transfer") {
+    // TODO: is this needed for backwards compat?
     if (op.preSwapTransfer) return [op.preSwapTransfer.from, op.to];
     else return [op.from, op.to];
   } else if (op.type === "swap") {

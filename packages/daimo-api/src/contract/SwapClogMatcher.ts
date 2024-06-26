@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { bytesToHex, getAddress } from "viem";
+import { Address, bytesToHex, getAddress } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { TokenRegistry } from "../server/tokenRegistry";
@@ -55,7 +55,7 @@ export class SwapClogMatcher {
         to: getAddress(bytesToHex(row.t, { size: 20 })),
         value: BigInt(row.v),
       };
-      const token = this.tokenReg.getToken(log.address, chainId, true);
+      const token = this.tokenReg.getToken(log.address, chainId, true); // include home coin
       if (token == null) continue;
 
       const foreignTransfer: ForeignTokenTransfer = {
@@ -76,23 +76,12 @@ export class SwapClogMatcher {
 
   // For a SwapClog, find the corresponding "to" transfer given the "from"
   // transfer (from a Daimo account to a foreign account).
-  getForeignTokenSendForSwap(
-    transactionHash: string,
-    directLogIndex: number
-  ): ForeignTokenTransfer | null {
-    return this.matchSwapTransfers(transactionHash, directLogIndex);
-  }
-
-  // Within a transaction, match the starting "from" transfer and the ending
-  // "to" transfer (in between are a series of swaps).
-  matchSwapTransfers(transactionHash: string, logIndex?: number) {
+  getMatchingSwapTransfer(from: Address, transactionHash: string) {
     const transfers = this.txHashToTransfers.get(transactionHash);
     if (!transfers || transfers.length === 0) return null;
 
     // Get the corresponding transfer to the given logIndex transfer.
-    let currentTransfer = logIndex
-      ? transfers.find((t) => t.logIndex === logIndex)
-      : transfers[0];
+    let currentTransfer = transfers.find((t) => t.from === from);
     if (!currentTransfer) return null;
     const startTransfer = currentTransfer;
 

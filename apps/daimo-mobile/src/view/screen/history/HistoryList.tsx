@@ -187,8 +187,7 @@ function DisplayOpRow({
 
   assert(displayOp.amount > 0);
   const [from, to] = getDisplayFromTo(displayOp);
-  console.log(`[HIST] DisplayOpRow ${from} ${to}`);
-  // assert([from, to].includes(getAddress(address)));
+  assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;
