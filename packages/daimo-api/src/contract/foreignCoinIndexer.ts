@@ -178,12 +178,13 @@ export class ForeignCoinIndexer extends Indexer {
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
+      const homeCoin = baseUSDC;
 
       return this.getProposedSwap(
         log.foreignToken.address,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        baseUSDC.address, // USDC
+        homeCoin.address, // TODO: retrieve correct home coin address
         log.to
       );
     });

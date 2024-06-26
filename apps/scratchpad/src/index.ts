@@ -5,6 +5,7 @@ import { NameRegistry } from "@daimo/api/src/contract/nameRegistry";
 import { NoteIndexer } from "@daimo/api/src/contract/noteIndexer";
 import { OpIndexer } from "@daimo/api/src/contract/opIndexer";
 import { RequestIndexer } from "@daimo/api/src/contract/requestIndexer";
+import { SwapClogMatcher } from "@daimo/api/src/contract/SwapClogMatcher";
 import { DB } from "@daimo/api/src/db/db";
 import { StubExternalApiCache } from "@daimo/api/src/db/externalApiCache";
 import { getViemClientFromEnv } from "@daimo/api/src/network/viemClient";
@@ -87,7 +88,8 @@ async function metrics() {
   const paymentMemoTracker = new PaymentMemoTracker(db);
   const tokenReg = new TokenRegistry();
 
-  const opIndexer = new OpIndexer();
+  const swapClogMatcher = new SwapClogMatcher(tokenReg);
+  const opIndexer = new OpIndexer(swapClogMatcher);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
@@ -97,7 +99,8 @@ async function metrics() {
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
+    swapClogMatcher
   );
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);

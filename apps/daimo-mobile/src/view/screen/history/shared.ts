@@ -1,5 +1,5 @@
 import {
-  DisplayOpEvent,
+  TransferClog,
   getForeignCoinDisplayAmount,
   isNativeETH,
 } from "@daimo/common";
@@ -11,11 +11,17 @@ import { env } from "../../../env";
 // Either uses the memo field for standard transfers, e.g. "for ice cream"
 // Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
 // or "Accepted 5 USDT as USDC" if long
-export function getSynthesizedMemo(
-  op: DisplayOpEvent,
-  daimoChain: DaimoChain,
-  short?: boolean
-) {
+export function getSynthesizedMemo({
+  op,
+  daimoChain,
+  short,
+  sentByUs,
+}: {
+  op: TransferClog;
+  daimoChain: DaimoChain;
+  short?: boolean;
+  sentByUs?: boolean;
+}) {
   const chainConfig = env(daimoChain).chainConfig;
   const coinName = chainConfig.tokenSymbol.toUpperCase();
 
@@ -23,22 +29,40 @@ export function getSynthesizedMemo(
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
   if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
 
-  if (op.type !== "transfer") return null;
-  if (op.requestStatus) {
+  if (op.type !== "transfer" && op.type !== "swap") return null;
+  if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
-  } else if (op.preSwapTransfer) {
-    if (isNativeETH(op.preSwapTransfer.coin, chainConfig)) {
-      return `ETH → ${coinName}`;
+  } else if (
+    (op.type === "transfer" && op.preSwapTransfer) ||
+    op.type === "swap"
+  ) {
+    const isOutboundSwap = !!(op.type === "swap" && sentByUs);
+
+    // TODO: do we need to explicitly handle preSwapTransfer && "transfer" for
+    // backwards compatibility?
+    const otherCoin =
+      op.type === "transfer" ? op.preSwapTransfer!.coin : op.coinOther;
+    const otherAmount =
+      op.type === "transfer" ? op.preSwapTransfer!.amount : op.amountOther;
+
+    if (isNativeETH(otherCoin, chainConfig)) {
+      return isOutboundSwap ? `${coinName} → ETH` : `ETH → ${coinName}`;
     }
 
     const readableAmount = getForeignCoinDisplayAmount(
-      op.preSwapTransfer.amount,
-      op.preSwapTransfer.coin
+      otherAmount,
+      otherCoin,
+      short ? 2 : 6
     );
+
     if (short) {
-      return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;
+      return isOutboundSwap
+        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+        : `${readableAmount} ${otherCoin.symbol} → ${coinName}`;
     } else {
-      return `Accepted ${readableAmount} ${op.preSwapTransfer.coin.symbol} as ${coinName}`;
+      return isOutboundSwap
+        ? `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`
+        : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
     }
   }
 }

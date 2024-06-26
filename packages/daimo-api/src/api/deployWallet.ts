@@ -1,7 +1,7 @@
 import {
   DaimoAccountCall,
   DaimoLinkStatus,
-  TransferOpEvent,
+  SimpleTransferClog,
   formatDaimoLink,
   getInviteStatus,
 } from "@daimo/common";
@@ -33,7 +33,7 @@ export async function deployWallet(
   telemetry: Telemetry,
   paymaster: Paymaster,
   inviteGraph: InviteGraph
-): Promise<{ address: Address; faucetTransfer?: TransferOpEvent }> {
+): Promise<{ address: Address; faucetTransfer?: SimpleTransferClog }> {
   // For now, invite is required
   const inviteStatus = getInviteStatus(inviteLinkStatus);
 
@@ -97,7 +97,7 @@ export async function deployWallet(
 
   // Send starter USDC only for invite links, and check for spam.
   let sendFaucet = false;
-  let faucetTransfer: TransferOpEvent | undefined;
+  let faucetTransfer: SimpleTransferClog | undefined;
   if (inviteLinkStatus.link.type === "invite") {
     const { requestInfo } = ctx;
     const isTestnet = chainConfig.chainL2.testnet;

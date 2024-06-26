@@ -1,4 +1,10 @@
-import { ForeignToken, baseUSDbC, assert, getChainName } from "@daimo/common";
+import {
+  ForeignToken,
+  baseUSDbC,
+  assert,
+  getChainName,
+  getSupportedHomeCoinByAddress,
+} from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -66,15 +72,26 @@ export class TokenRegistry {
   }
 
   // Get a token from the foreign token list.
-  public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
+  // If includeHomeCoin is true, include the home coin in the list.
+  public getToken(
+    addr: Address,
+    chainId?: number,
+    includeHomeCoin?: boolean
+  ): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
 
-    const token = this.foreignTokensByChain
+    let token = this.foreignTokensByChain
       .get(chainId ?? this.defaultChainId)
       ?.get(tokenAddress);
-    console.log(
-      `[TOKEN-REG] retrieved token ${token?.symbol} for addr ${addr}`
-    );
+
+    // If not a foreign token, check if it's a home token.
+    if (includeHomeCoin && !token) {
+      token = getSupportedHomeCoinByAddress(tokenAddress);
+    }
+
+    if (!token)
+      console.log(`[TOKEN-REG] could not retrieve token for addr ${addr}`);
+
     return token;
   }
 

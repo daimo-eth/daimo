@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { Indexer } from "./indexer";
+import { SwapClogMatcher } from "./SwapClogMatcher";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -20,7 +21,7 @@ export class OpIndexer extends Indexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
   private callbacks: Map<Hex, OpCallback[]> = new Map();
 
-  constructor() {
+  constructor(private swapClogMatcher: SwapClogMatcher) {
     super("OP");
   }
 
@@ -62,6 +63,7 @@ export class OpIndexer extends Indexer {
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
+    const transactionHashes: Hex[] = [];
     result.rows.forEach((row: any) => {
       const userOp: UserOp = {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
@@ -82,9 +84,17 @@ export class OpIndexer extends Indexer {
       if (!nonceMetadata) return;
 
       this.callback(userOp);
+      transactionHashes.push(userOp.transactionHash);
     });
     console.log(
       `[OP] processed ${result.rows.length} ops in ${Date.now() - startTime}ms`
+    );
+    this.swapClogMatcher.loadSwapTransfers(
+      pg,
+      from,
+      to,
+      chainConfig.chainL2.id,
+      transactionHashes
     );
   }
 

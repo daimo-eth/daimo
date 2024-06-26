@@ -5,7 +5,6 @@ import {
   DaimoInviteCodeStatus,
   DaimoLinkNoteV2,
   DaimoRequestV2Status,
-  DisplayOpEvent,
   EAccount,
   KeyData,
   KeyRotationOpEvent,
@@ -13,6 +12,7 @@ import {
   ProposedSwap,
   RecommendedExchange,
   SuggestedAction,
+  TransferClog,
   assert,
   now,
 } from "@daimo/common";
@@ -67,7 +67,7 @@ export type Account = {
   /** The latest finalized block as of the most recent sync. */
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
-  recentTransfers: DisplayOpEvent[];
+  recentTransfers: TransferClog[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */

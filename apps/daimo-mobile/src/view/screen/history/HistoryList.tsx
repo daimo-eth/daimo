@@ -1,6 +1,6 @@
 import {
   AddrLabel,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   assert,
@@ -19,6 +19,7 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAddress } from "viem";
 
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { getSynthesizedMemo } from "./shared";
@@ -46,7 +47,7 @@ interface HeaderObject {
 interface DisplayOpRenderObject {
   isHeader: false;
   id: string;
-  op: DisplayOpEvent;
+  op: TransferClog;
 }
 
 export function HistoryListSwipe({
@@ -88,7 +89,7 @@ export function HistoryListSwipe({
     );
   }
 
-  const renderRow = (t: DisplayOpEvent) => (
+  const renderRow = (t: TransferClog) => (
     <DisplayOpRow
       key={getDisplayOpId(t)}
       displayOp={t}
@@ -177,7 +178,7 @@ function DisplayOpRow({
   linkTo,
   showDate,
 }: {
-  displayOp: DisplayOpEvent;
+  displayOp: TransferClog;
   account: Account;
   linkTo: "op" | "account";
   showDate?: boolean;
@@ -186,7 +187,7 @@ function DisplayOpRow({
 
   assert(displayOp.amount > 0);
   const [from, to] = getDisplayFromTo(displayOp);
-  assert([from, to].includes(address));
+  assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;
@@ -222,11 +223,12 @@ function DisplayOpRow({
     opTitle = "cancelled link";
   }
 
-  const opMemo = getSynthesizedMemo(
-    displayOp,
-    daimoChainFromId(account.homeChainId),
-    true
-  );
+  const opMemo = getSynthesizedMemo({
+    op: displayOp,
+    daimoChain: daimoChainFromId(account.homeChainId),
+    short: true,
+    sentByUs: from === address,
+  });
   const memoCol = isPending ? color.gray3 : color.grayDark;
 
   return (
@@ -316,7 +318,7 @@ function TransferAmountDate({
   );
 }
 
-function getDisplayOpId(t: DisplayOpEvent): string {
+function getDisplayOpId(t: TransferClog): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 

@@ -4,7 +4,7 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   ForeignToken,
   OpStatus,
@@ -341,8 +341,8 @@ function createNotifierAliceBob() {
   } as unknown as KeyRegistry;
 
   const stubCoinIndexer = {
-    attachTransferOpProperties: (log: Transfer): DisplayOpEvent => {
-      const op: DisplayOpEvent = {
+    attachTransferOpProperties: (log: Transfer): TransferClog => {
+      const op: TransferClog = {
         type: "transfer",
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(

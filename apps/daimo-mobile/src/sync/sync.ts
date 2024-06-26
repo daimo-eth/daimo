@@ -1,6 +1,6 @@
 import { AccountHistoryResult } from "@daimo/api";
 import {
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   PendingOpEvent,
@@ -294,8 +294,8 @@ function applySync(
 
 export function syncFindSameOp(
   id: PendingOpEvent,
-  ops: DisplayOpEvent[]
-): DisplayOpEvent | null {
+  ops: TransferClog[]
+): TransferClog | null {
   return (
     ops.find(
       (r) =>
@@ -325,9 +325,9 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
-  old: DisplayOpEvent[],
-  logs: DisplayOpEvent[]
-): DisplayOpEvent[] {
+  old: TransferClog[],
+  logs: TransferClog[]
+): TransferClog[] {
   // Sort new logs
   logs.sort((a, b) => {
     if (a.blockNumber !== b.blockNumber) return a.blockNumber! - b.blockNumber!;
