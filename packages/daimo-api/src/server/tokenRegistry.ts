@@ -13,14 +13,12 @@ const customOverrides = [baseUSDbC] as ForeignToken[];
 
 // Token Registry sorted by chain id.
 export class TokenRegistry {
-  foreignTokensByChain: Map<number, Map<Address, ForeignToken>>;
-  private chains: number[];
-  private defaultChainId: number = chainConfig.chainL2.id;
+  private foreignTokensByChain = new Map<number, Map<Address, ForeignToken>>();
 
-  constructor(chains?: number[]) {
-    this.foreignTokensByChain = new Map<number, Map<Address, ForeignToken>>();
-    this.chains = chains ?? [this.defaultChainId]; // defaults to home chain
-  }
+  private defaultChainId = chainConfig.chainL2.id;
+
+  // No token registry on testnet
+  private chains = chainConfig.chainL2.testnet ? [] : [this.defaultChainId];
 
   public async load() {
     for (const chainId of this.chains) {

@@ -56,11 +56,6 @@ export class ForeignCoinIndexer extends Indexer {
   async load(pg: Pool, from: number, to: number) {
     const startTime = Date.now();
 
-    const chainId = this.vc.publicClient.chain.id;
-    if (this.tokenReg.foreignTokensByChain.get(chainId)?.size === 0) {
-      await this.tokenReg.load();
-    }
-
     const result = await retryBackoff(
       `swapCoinIndexer-logs-query-${from}-${to}`,
       async () => {
