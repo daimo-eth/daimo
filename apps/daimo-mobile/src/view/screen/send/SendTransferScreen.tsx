@@ -296,6 +296,7 @@ function SendConfirm({
     daimoChainId: account!.homeChainId,
   });
   const route = homeCoin !== coin ? swapRoute : null;
+  console.log(`[SEND] swapRoute: ${JSON.stringify(swapRoute)}`);
 
   let button: ReactNode;
   if (isRequest) {
