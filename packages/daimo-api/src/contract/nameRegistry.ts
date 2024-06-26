@@ -244,8 +244,9 @@ export class NameRegistry extends Indexer {
   async getENSReverseLookup(address: Address): Promise<string | undefined> {
     try {
       console.log(`[NAME-REG] looking up ENS name for ${address}`);
-      const ensName = (await this.vc.getEnsName({ address })) || undefined;
+      const ensName = await this.vc.getEnsName({ address });
       if (ensName == null) {
+        console.log(`[NAME-REG] no ENS name for ${address}`);
         return undefined;
       }
 
