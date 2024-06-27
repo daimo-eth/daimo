@@ -4,6 +4,7 @@ import {
   ProposedSwap,
   baseUSDC,
   getNativeWETHByChain,
+  isTestnetChain,
   now,
 } from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
@@ -44,6 +45,9 @@ export async function getSwapQuote({
   vc: ViemClient;
   tokenReg: TokenRegistry;
 }) {
+  // Swap quoter is not supported on testnet.
+  if (isTestnetChain(chainId)) return null;
+
   const amountIn: bigint = BigInt(amountInStr);
 
   const swapQuote = await vc.publicClient.readContract({

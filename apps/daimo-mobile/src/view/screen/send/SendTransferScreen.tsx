@@ -6,8 +6,10 @@ import {
   assert,
   assertNotNull,
   baseUSDC,
+  daimoChainToId,
   dollarsToAmount,
   getAccountName,
+  isTestnetChain,
   now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
@@ -198,6 +200,9 @@ function SendChooseAmount({
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
 
+  // Token swapping is not supported on testnet
+  const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
+
   return (
     <View>
       {infoBubble}
@@ -217,7 +222,7 @@ function SendChooseAmount({
         <SendCoinButton
           coin={coin}
           setCoin={setCoin}
-          isFixed={recipient.name != null && daimoChain !== "baseSepolia"}
+          isFixed={recipient.name != null || isTestnet}
         />
       </View>
       <Spacer h={16} />
