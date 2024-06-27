@@ -253,9 +253,8 @@ export const avalancheUSDC: ForeignToken = {
   chainId: Avalanche.chainId,
 };
 
-// WETH.e
 export const avalancheWETH: ForeignToken = {
-  address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
+  address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab", // WETH.e
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
@@ -267,7 +266,7 @@ export const avalancheWETH: ForeignToken = {
 // Avalanche Sepolia
 //
 
-export const avalancheSepoliaUSDC: ForeignToken = {
+export const avalancheFujiUSDC: ForeignToken = {
   address: "0x5425890298aed601595a70ab815c96711a31bc65",
   decimals: 6,
   name: "USD Coin",

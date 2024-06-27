@@ -9,13 +9,23 @@ import { DaimoChain } from "@daimo/contract";
 
 import {
   ForeignToken,
+  arbitrumSepoliaUSDC,
   arbitrumSepoliaWETH,
+  arbitrumUSDC,
   arbitrumWETH,
+  avalancheFujiUSDC,
+  avalancheUSDC,
   avalancheWETH,
+  baseSepoliaUSDC,
   baseSepoliaWETH,
+  baseUSDC,
   baseWETH,
+  optimismSepoliaUSDC,
   optimismSepoliaWETH,
+  optimismUSDC,
   optimismWETH,
+  polygonSepoliaUSDC,
+  polygonUSDC,
   polygonWETH,
 } from "./foreignToken";
 
@@ -23,7 +33,8 @@ export type AccountChain = {
   chainId: number;
   name: string;
   CCTPDomain: number;
-  nativeWETH?: ForeignToken;
+  bridgeCoin: ForeignToken;
+  nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
   isTestnet?: boolean;
 };
 
@@ -31,6 +42,7 @@ export const base: AccountChain = {
   chainId: 8453,
   name: "base",
   CCTPDomain: 6,
+  bridgeCoin: baseUSDC,
   nativeWETH: baseWETH,
 };
 
@@ -38,6 +50,7 @@ export const baseSepolia: AccountChain = {
   chainId: 84532,
   name: "baseSepolia",
   CCTPDomain: 6,
+  bridgeCoin: baseSepoliaUSDC,
   nativeWETH: baseSepoliaWETH,
   isTestnet: true,
 };
@@ -46,6 +59,7 @@ export const Arbitrum: AccountChain = {
   chainId: 42161,
   name: "Arbitrum",
   CCTPDomain: 3,
+  bridgeCoin: arbitrumUSDC,
   nativeWETH: arbitrumWETH,
 };
 
@@ -53,6 +67,7 @@ export const ArbitrumSepolia: AccountChain = {
   chainId: 421614,
   name: "ArbitrumSepolia",
   CCTPDomain: 3,
+  bridgeCoin: arbitrumSepoliaUSDC,
   nativeWETH: arbitrumSepoliaWETH,
   isTestnet: true,
 };
@@ -61,6 +76,7 @@ export const Optimism: AccountChain = {
   chainId: 10,
   name: "Optimism",
   CCTPDomain: 2,
+  bridgeCoin: optimismUSDC,
   nativeWETH: optimismWETH,
 };
 
@@ -68,14 +84,16 @@ export const OptimismSepolia: AccountChain = {
   chainId: 11155420,
   name: "OptimismSepolia",
   CCTPDomain: 2,
-  isTestnet: true,
+  bridgeCoin: optimismSepoliaUSDC,
   nativeWETH: optimismSepoliaWETH,
+  isTestnet: true,
 };
 
 export const Polygon: AccountChain = {
   chainId: 137,
   name: "Polygon",
   CCTPDomain: 7,
+  bridgeCoin: polygonUSDC,
   nativeWETH: polygonWETH,
 };
 
@@ -83,6 +101,7 @@ export const PolygonAmoy: AccountChain = {
   chainId: 80002,
   name: "PolygonSepolia",
   CCTPDomain: 7,
+  bridgeCoin: polygonSepoliaUSDC,
   isTestnet: true,
 };
 
@@ -90,6 +109,7 @@ export const Avalanche: AccountChain = {
   chainId: 43114,
   name: "Avalanche",
   CCTPDomain: 1,
+  bridgeCoin: avalancheUSDC,
   nativeWETH: avalancheWETH,
 };
 
@@ -97,6 +117,7 @@ export const AvalancheFuji: AccountChain = {
   chainId: 43113,
   name: "AvalancheFuji",
   CCTPDomain: 1,
+  bridgeCoin: avalancheFujiUSDC,
   isTestnet: true,
 };
 

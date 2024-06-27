@@ -12,7 +12,7 @@ import { Telemetry } from "../src/server/telemetry";
 import { TokenRegistry } from "../src/server/tokenRegistry";
 import { Watcher } from "../src/shovel/watcher";
 
-async function main() {
+export async function main() {
   const monitor = new Telemetry();
   const vc = getViemClientFromEnv(monitor, new StubExternalApiCache());
   const nameReg = new NameRegistry(
