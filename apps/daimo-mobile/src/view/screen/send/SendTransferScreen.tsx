@@ -201,7 +201,7 @@ function SendChooseAmount({
   const memoStatus = result.data;
 
   // Token swapping is not supported on testnet
-  const testnetChainFixed = isTestnetChain(daimoChainToId(daimoChain));
+  const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
 
   return (
     <View>
@@ -222,7 +222,7 @@ function SendChooseAmount({
         <SendCoinButton
           coin={coin}
           setCoin={setCoin}
-          isFixed={recipient.name != null || testnetChainFixed}
+          isFixed={recipient.name != null || isTestnet}
         />
       </View>
       <Spacer h={16} />

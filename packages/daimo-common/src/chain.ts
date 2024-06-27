@@ -32,7 +32,7 @@ import {
 export type AccountChain = {
   chainId: number;
   name: string;
-  CCTPDomain: number;
+  cctpDomain: number;
   bridgeCoin: ForeignToken;
   nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
   isTestnet?: boolean;
@@ -41,7 +41,7 @@ export type AccountChain = {
 export const base: AccountChain = {
   chainId: 8453,
   name: "base",
-  CCTPDomain: 6,
+  cctpDomain: 6,
   bridgeCoin: baseUSDC,
   nativeWETH: baseWETH,
 };
@@ -49,74 +49,74 @@ export const base: AccountChain = {
 export const baseSepolia: AccountChain = {
   chainId: 84532,
   name: "baseSepolia",
-  CCTPDomain: 6,
+  cctpDomain: 6,
   bridgeCoin: baseSepoliaUSDC,
   nativeWETH: baseSepoliaWETH,
   isTestnet: true,
 };
 
-export const Arbitrum: AccountChain = {
+export const arbitrum: AccountChain = {
   chainId: 42161,
-  name: "Arbitrum",
-  CCTPDomain: 3,
+  name: "arbitrum",
+  cctpDomain: 3,
   bridgeCoin: arbitrumUSDC,
   nativeWETH: arbitrumWETH,
 };
 
-export const ArbitrumSepolia: AccountChain = {
+export const arbitrumSepolia: AccountChain = {
   chainId: 421614,
-  name: "ArbitrumSepolia",
-  CCTPDomain: 3,
+  name: "arbitrumSepolia",
+  cctpDomain: 3,
   bridgeCoin: arbitrumSepoliaUSDC,
   nativeWETH: arbitrumSepoliaWETH,
   isTestnet: true,
 };
 
-export const Optimism: AccountChain = {
+export const optimism: AccountChain = {
   chainId: 10,
-  name: "Optimism",
-  CCTPDomain: 2,
+  name: "optimism",
+  cctpDomain: 2,
   bridgeCoin: optimismUSDC,
   nativeWETH: optimismWETH,
 };
 
-export const OptimismSepolia: AccountChain = {
+export const optimismSepolia: AccountChain = {
   chainId: 11155420,
-  name: "OptimismSepolia",
-  CCTPDomain: 2,
+  name: "optimismSepolia",
+  cctpDomain: 2,
   bridgeCoin: optimismSepoliaUSDC,
   nativeWETH: optimismSepoliaWETH,
   isTestnet: true,
 };
 
-export const Polygon: AccountChain = {
+export const polygon: AccountChain = {
   chainId: 137,
-  name: "Polygon",
-  CCTPDomain: 7,
+  name: "polygon",
+  cctpDomain: 7,
   bridgeCoin: polygonUSDC,
   nativeWETH: polygonWETH,
 };
 
-export const PolygonAmoy: AccountChain = {
+export const polygonAmoy: AccountChain = {
   chainId: 80002,
-  name: "PolygonSepolia",
-  CCTPDomain: 7,
+  name: "polygonSepolia",
+  cctpDomain: 7,
   bridgeCoin: polygonSepoliaUSDC,
   isTestnet: true,
 };
 
-export const Avalanche: AccountChain = {
+export const avalanche: AccountChain = {
   chainId: 43114,
-  name: "Avalanche",
-  CCTPDomain: 1,
+  name: "avalanche",
+  cctpDomain: 1,
   bridgeCoin: avalancheUSDC,
   nativeWETH: avalancheWETH,
 };
 
-export const AvalancheFuji: AccountChain = {
+export const avalancheFuji: AccountChain = {
   chainId: 43113,
-  name: "AvalancheFuji",
-  CCTPDomain: 1,
+  name: "avalancheFuji",
+  cctpDomain: 1,
   bridgeCoin: avalancheFujiUSDC,
   isTestnet: true,
 };
@@ -128,22 +128,22 @@ export function getAccountChain(chainId: number): AccountChain {
       return base;
     case baseSepolia.chainId:
       return baseSepolia;
-    case Arbitrum.chainId:
-      return Arbitrum;
-    case ArbitrumSepolia.chainId:
-      return ArbitrumSepolia;
-    case Optimism.chainId:
-      return Optimism;
-    case OptimismSepolia.chainId:
-      return OptimismSepolia;
-    case Polygon.chainId:
-      return Polygon;
-    case PolygonAmoy.chainId:
-      return PolygonAmoy;
-    case Avalanche.chainId:
-      return Avalanche;
-    case AvalancheFuji.chainId:
-      return AvalancheFuji;
+    case arbitrum.chainId:
+      return arbitrum;
+    case arbitrumSepolia.chainId:
+      return arbitrumSepolia;
+    case optimism.chainId:
+      return optimism;
+    case optimismSepolia.chainId:
+      return optimismSepolia;
+    case polygon.chainId:
+      return polygon;
+    case polygonAmoy.chainId:
+      return polygonAmoy;
+    case avalanche.chainId:
+      return avalanche;
+    case avalancheFuji.chainId:
+      return avalancheFuji;
     default:
       throw new Error(`Unknown chainId ${chainId}`);
   }
@@ -155,8 +155,8 @@ export function getChainName(chainId: number): string {
 }
 
 /** Returns the CCTP domain for the given chainId. */
-export function getCCTPDomain(chainId: number): number {
-  return getAccountChain(chainId).CCTPDomain;
+export function getCctpDomain(chainId: number): number {
+  return getAccountChain(chainId).cctpDomain;
 }
 
 /** Returns whether the chainId is a testnet. */

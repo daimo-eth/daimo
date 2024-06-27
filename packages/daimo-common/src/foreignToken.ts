@@ -13,14 +13,14 @@ import { Address, formatUnits } from "viem";
  */
 
 import {
-  Arbitrum,
-  ArbitrumSepolia,
-  Avalanche,
-  AvalancheFuji,
-  Optimism,
-  OptimismSepolia,
-  Polygon,
-  PolygonAmoy,
+  arbitrum,
+  arbitrumSepolia,
+  avalanche,
+  avalancheFuji,
+  optimism,
+  optimismSepolia,
+  polygon,
+  polygonAmoy,
   base,
   baseSepolia,
 } from "./chain";
@@ -127,7 +127,7 @@ export const arbitrumUSDC: ForeignToken = {
   symbol: "USDC",
   decimals: 6,
   logoURI: TokenLogo.USDC,
-  chainId: Arbitrum.chainId,
+  chainId: arbitrum.chainId,
 };
 
 export const arbitrumWETH: ForeignToken = {
@@ -136,7 +136,7 @@ export const arbitrumWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: Arbitrum.chainId,
+  chainId: arbitrum.chainId,
 };
 
 //
@@ -149,7 +149,7 @@ export const arbitrumSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: ArbitrumSepolia.chainId,
+  chainId: arbitrumSepolia.chainId,
 };
 
 export const arbitrumSepoliaWETH: ForeignToken = {
@@ -158,7 +158,7 @@ export const arbitrumSepoliaWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: ArbitrumSepolia.chainId,
+  chainId: arbitrumSepolia.chainId,
 };
 
 //
@@ -171,7 +171,7 @@ export const optimismUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: Optimism.chainId,
+  chainId: optimism.chainId,
 };
 
 export const optimismWETH: ForeignToken = {
@@ -180,7 +180,7 @@ export const optimismWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: Optimism.chainId,
+  chainId: optimism.chainId,
 };
 
 //
@@ -193,7 +193,7 @@ export const optimismSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: OptimismSepolia.chainId,
+  chainId: optimismSepolia.chainId,
 };
 
 export const optimismSepoliaWETH: ForeignToken = {
@@ -202,7 +202,7 @@ export const optimismSepoliaWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: OptimismSepolia.chainId,
+  chainId: optimismSepolia.chainId,
 };
 
 //
@@ -215,7 +215,7 @@ export const polygonUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: Polygon.chainId,
+  chainId: polygon.chainId,
 };
 
 export const polygonWETH: ForeignToken = {
@@ -224,7 +224,7 @@ export const polygonWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: Polygon.chainId,
+  chainId: polygon.chainId,
 };
 
 //
@@ -237,7 +237,7 @@ export const polygonSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: PolygonAmoy.chainId,
+  chainId: polygonAmoy.chainId,
 };
 
 //
@@ -250,7 +250,7 @@ export const avalancheUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: Avalanche.chainId,
+  chainId: avalanche.chainId,
 };
 
 export const avalancheWETH: ForeignToken = {
@@ -259,7 +259,7 @@ export const avalancheWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: Avalanche.chainId,
+  chainId: avalanche.chainId,
 };
 
 //
@@ -272,7 +272,7 @@ export const avalancheFujiUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: AvalancheFuji.chainId,
+  chainId: avalancheFuji.chainId,
 };
 
 /* --------------------- Token Utils --------------------- */
