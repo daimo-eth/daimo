@@ -12,6 +12,7 @@ import { Telemetry } from "../src/server/telemetry";
 import { TokenRegistry } from "../src/server/tokenRegistry";
 import { Watcher } from "../src/shovel/watcher";
 
+// Testing.
 export async function main() {
   const monitor = new Telemetry();
   const vc = getViemClientFromEnv(monitor, new StubExternalApiCache());
@@ -30,11 +31,8 @@ export async function main() {
     nameReg,
     paymentMemoTracker
   );
-  const foreignCoinIndexer = new ForeignCoinIndexer(
-    nameReg,
-    vc,
-    new TokenRegistry()
-  );
+  const tokenReg = new TokenRegistry();
+  const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
   const coinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
