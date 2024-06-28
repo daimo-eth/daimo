@@ -6,3 +6,4 @@ export {
   MAX_NONCE_ID_SIZE_BITS,
 } from "./nonce";
 export { SigningCallback, OpSenderCallback } from "./callback";
+export { DaimoOpMetadata } from "./daimoOpBuilder";
