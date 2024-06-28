@@ -1,4 +1,10 @@
-import { ForeignToken, baseUSDbC, assert, getChainName } from "@daimo/common";
+import {
+  ForeignToken,
+  assert,
+  baseUSDbC,
+  getChainName,
+  getNativeETHForChain,
+} from "@daimo/common";
 import { Address, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -25,6 +31,11 @@ export class TokenRegistry {
       const chainName = getChainName(chainId);
       const foreignTokens = new Map<Address, ForeignToken>();
 
+      // Add native ETH
+      const nativeETH = getNativeETHForChain(chainId);
+      if (nativeETH != null) foreignTokens.set(nativeETH.address, nativeETH);
+
+      // Add coins from CoinGecko
       const tokenList = (await (
         await fetchWithBackoff(
           `https://tokens.coingecko.com/${chainName}/all.json`

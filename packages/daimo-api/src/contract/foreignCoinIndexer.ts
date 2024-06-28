@@ -54,7 +54,7 @@ export class ForeignCoinIndexer extends Indexer {
   }
 
   async load(pg: Pool, from: number, to: number) {
-    const startTime = Date.now();
+    const startMs = performance.now();
 
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
@@ -122,7 +122,8 @@ export class ForeignCoinIndexer extends Indexer {
         ...t,
         foreignToken: this.tokenReg.getToken(t.address)!,
       }));
-    const elapsedMs = performance.now() - startTime;
+
+    const elapsedMs = performance.now() - startMs;
     console.log(
       `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );

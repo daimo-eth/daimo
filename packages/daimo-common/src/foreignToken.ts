@@ -66,27 +66,9 @@ export const baseSepoliaUSDC: ForeignToken = {
   chainId: baseSepolia.chainId,
 };
 
-export const baseSepoliaETH: ForeignToken = {
-  address: "0x0000000000000000000000000000000000000000",
-  decimals: 18,
-  name: "Ethereum",
-  symbol: "ETH",
-  logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-  chainId: 84532,
-};
-
 //
 // Base Mainnet
 //
-
-export const baseETH: ForeignToken = {
-  address: zeroAddress,
-  decimals: 18,
-  name: "Ethereum",
-  symbol: "ETH",
-  logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-  chainId: 8453,
-};
 
 export const baseWETH: ForeignToken = {
   address: "0x4200000000000000000000000000000000000006",
@@ -306,7 +288,7 @@ export function getForeignCoinDisplayAmount(
 }
 
 const NON_DUST_TOKEN_WHITELIST = new Set([
-  baseETH.address,
+  zeroAddress, // native ETH
   baseWETH.address,
   baseUSDC.address,
   baseUSDbC.address,
@@ -323,6 +305,28 @@ export function isAmountDust(
   if (Number(amountToDollars(usdcAmount)) >= 1) return false;
 
   return true;
+}
+
+// Get native ETH placeholder pseudo-token.
+export function getNativeETHForChain(
+  chainId: number
+): ForeignToken | undefined {
+  switch (chainId) {
+    case base.chainId:
+    case baseSepolia.chainId:
+      return {
+        address: zeroAddress,
+        decimals: 18,
+        name: "Ethereum",
+        symbol: "ETH",
+        logoURI:
+          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+        chainId,
+      };
+    default:
+      // Some chains, like Polygon PoS, don't have native ETH.
+      return undefined;
+  }
 }
 
 // Get native WETH token address using chainId.
