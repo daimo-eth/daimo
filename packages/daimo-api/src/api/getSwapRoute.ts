@@ -6,6 +6,7 @@ import {
   getNativeWETHByChain,
   isTestnetChain,
   now,
+  getUniswapRouterAddress,
 } from "@daimo/common";
 import { daimoUsdcSwapperABI } from "@daimo/contract";
 import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
@@ -14,12 +15,6 @@ import { Address, Hex, getAddress } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
-
-// Uniswap router on Base
-// From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
-export const UNISWAP_V3_02_ROUTER_ADDRESS = getAddress(
-  "0x2626664c2603336E57B271c5C0b26F421741e481"
-);
 
 // Direct path length is: 0x (1) + Token (20) + Fee (3) + Token (20) = 44 * 2.
 const SINGLE_POOL_LENGTH_HEX = 88;
@@ -46,13 +41,16 @@ export async function getSwapQuote({
   tokenReg: TokenRegistry;
 }) {
   // Swap quoter is not supported on testnet.
-  if (isTestnetChain(chainId)) return null;
+  if (isTestnetChain(chainId) || tokenIn === tokenOut) return null;
+
+  // Retrieve Uniswap router for this chain.
+  const routerAddress = getUniswapRouterAddress(chainId);
 
   const amountIn: bigint = BigInt(amountInStr);
 
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
-    address: "0x2F7e2Eee89A3c6937A22607c7e9B2231825a5418",
+    address: "0x2F7e2Eee89A3c6937A22607c7e9B2231825a5418", // TODO: change contract address depdnding on chain
     functionName: "quote",
     args: [amountIn, tokenIn, tokenOut],
   });
@@ -122,7 +120,7 @@ export async function getSwapQuote({
     toCoin: tokenOut,
     routeFound: true,
     toAmount: Number(amountOut),
-    execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
+    execRouterAddress: routerAddress,
     execCallData: callData as Hex,
     execValue: "0x00" as Hex,
   };
