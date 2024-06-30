@@ -2,24 +2,20 @@ import {
   BigIntStr,
   EAccount,
   ProposedSwap,
-  baseUSDC,
-  getNativeWETHByChain,
+  assert,
+  isNativeETH,
   isTestnetChain,
   now,
 } from "@daimo/common";
-import { daimoUsdcSwapperABI } from "@daimo/contract";
-import { SwapRouter as SwapRouter02 } from "@uniswap/router-sdk";
-import { ADDRESS_ZERO } from "@uniswap/v3-sdk";
-import { Address, Hex, getAddress } from "viem";
+import {
+  daimoUsdcSwapperABI,
+  swapRouter02Abi,
+  swapRouter02Address,
+} from "@daimo/contract";
+import { Address, Hex, encodeFunctionData, numberToHex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
-
-// Uniswap router on Base
-// From https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments
-export const UNISWAP_V3_02_ROUTER_ADDRESS = getAddress(
-  "0x2626664c2603336E57B271c5C0b26F421741e481"
-);
 
 // Direct path length is: 0x (1) + Token (20) + Fee (3) + Token (20) = 44 * 2.
 const SINGLE_POOL_LENGTH_HEX = 88;
@@ -49,6 +45,8 @@ export async function getSwapQuote({
   if (isTestnetChain(chainId)) return null;
 
   const amountIn: bigint = BigInt(amountInStr);
+  assert(amountIn > 0, "amountIn must be positive");
+  assert(tokenIn !== tokenOut, "tokenIn == tokenOut");
 
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
@@ -63,8 +61,10 @@ export async function getSwapQuote({
   // sent to the recipient.
   // Special case: if outputToken is native, then routerMustCustody is true.
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
-  const routerMustCustody = tokenOut === getNativeWETHByChain(chainId)?.address;
-  const recipient: Address = routerMustCustody ? ADDRESS_ZERO : toAddr;
+  // TODO: re-enable to support native ETH sends
+  // const routerMustCustody = tokenOut === getNativeWETHByChain(chainId)?.token;
+  // const recipient: Address = routerMustCustody ? zeroAddr : toAddr;
+  const recipient = toAddr;
 
   const t = now();
   const cacheUntil = t + 5 * 60; // 5 minutes
@@ -75,42 +75,62 @@ export async function getSwapQuote({
   let callData;
   if (pathIsDirectSwap(swapPath)) {
     const { tokenIn, fee, tokenOut } = decodeDirectPool(swapPath);
-
-    const exactInputSingleParams = {
-      tokenIn,
-      tokenOut,
-      fee,
-      recipient,
-      amountIn,
-      amountOutMinimum,
-      sqrtPriceLimitX96: 0,
-    };
-    callData = SwapRouter02.INTERFACE.encodeFunctionData("exactInputSingle", [
-      exactInputSingleParams,
-    ]);
+    callData = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "exactInputSingle",
+      args: [
+        {
+          tokenIn,
+          tokenOut,
+          fee,
+          recipient,
+          amountIn,
+          amountOutMinimum,
+          sqrtPriceLimitX96: 0n,
+        },
+      ],
+    });
   } else {
-    const exactInputParams = {
-      path: swapPath,
-      recipient,
-      amountIn,
-      amountOutMinimum,
-    };
-    callData = SwapRouter02.INTERFACE.encodeFunctionData("exactInput", [
-      exactInputParams,
-    ]);
+    callData = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "exactInput",
+      args: [
+        {
+          path: swapPath,
+          recipient,
+          amountIn,
+          amountOutMinimum,
+        },
+      ],
+    });
   }
+  assert(callData.length > 0);
 
-  if (!callData) return null;
-
-  let fromCoin;
   // TODO: in future, check home coin token using account (for now, baseUSDC)
-  if (tokenIn === getAddress(baseUSDC.address)) {
-    fromCoin = baseUSDC;
-  } else {
-    fromCoin = tokenReg.getToken(tokenIn); // Foreign tokens
-  }
+  // if (tokenIn === getAddress(baseUSDC.address)) {
+  //   fromCoin = baseUSDC;
+  // } else {
+  //   fromCoin = tokenReg.getToken(tokenIn); // Foreign tokens
+  // }
+  const fromCoin = tokenReg.getToken(tokenIn);
+  if (fromCoin == null) return null;
 
-  if (!fromCoin) return null;
+  // If swapping native ETH: pass it, wrap it, then swap from WETH
+  let execValue = 0n;
+  if (isNativeETH(fromCoin, chainId)) {
+    execValue = amountIn;
+    const wrapETHCall = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "wrapETH",
+      args: [amountIn],
+    });
+    callData = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "multicall",
+      args: [[wrapETHCall, callData]],
+    });
+  }
+  // TODO: unwrap weth if toCoin = native ETH
 
   const swap: ProposedSwap = {
     fromCoin,
@@ -122,9 +142,9 @@ export async function getSwapQuote({
     toCoin: tokenOut,
     routeFound: true,
     toAmount: Number(amountOut),
-    execRouterAddress: UNISWAP_V3_02_ROUTER_ADDRESS,
+    execRouterAddress: swapRouter02Address,
     execCallData: callData as Hex,
-    execValue: "0x00" as Hex,
+    execValue: numberToHex(execValue),
   };
 
   console.log("[SWAP QUOTE] swap quote: ", JSON.stringify(swap));

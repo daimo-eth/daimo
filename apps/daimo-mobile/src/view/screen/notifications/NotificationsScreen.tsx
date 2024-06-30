@@ -31,7 +31,7 @@ function NotificationsScreenInner({ account }: { account: Account }) {
   }, [unread]);
 
   const swapNotifKey = (swap: ProposedSwap) => {
-    return `${swap.fromCoin.address}-${swap.fromAmount}-${swap.toAmount}-${swap.receivedAt}`;
+    return `${swap.fromCoin.token}-${swap.fromAmount}-${swap.toAmount}-${swap.receivedAt}`;
   };
 
   return (

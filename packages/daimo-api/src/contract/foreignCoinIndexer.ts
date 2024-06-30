@@ -157,13 +157,12 @@ export class ForeignCoinIndexer extends Indexer {
       // Delete the first matching pending swap that is now swapped
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
-          t.foreignToken.address === log.foreignToken.address &&
-          t.value === -delta
+          t.foreignToken.token === log.foreignToken.token && t.value === -delta
       );
 
       if (matchingPendingSwap == null) {
         console.log(
-          `[FOREIGN-COIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.address}`
+          `[FOREIGN-COIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
         );
         return;
       }
@@ -212,10 +211,10 @@ export class ForeignCoinIndexer extends Indexer {
       const fromAcc = await this.nameReg.getEAccount(log.from);
 
       return this.getProposedSwap(
-        log.foreignToken.address,
+        log.foreignToken.token,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        baseUSDC.address, // USDC
+        baseUSDC.token, // USDC
         log.to
       );
     });
@@ -234,6 +233,9 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
+    console.log(
+      `[FOREIGN-COIN] getProposedSwaps for ${addr}: ${pendingSwaps.length} pending`
+    );
     const swaps = (
       await Promise.all(
         pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
@@ -260,7 +262,7 @@ export class ForeignCoinIndexer extends Indexer {
 
     return {
       ...correspondingReceive,
-      foreignToken: this.tokenReg.getToken(log.foreignToken.address)!,
+      foreignToken: this.tokenReg.getToken(log.foreignToken.token)!,
     };
   }
 

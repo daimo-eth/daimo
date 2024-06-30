@@ -293,8 +293,8 @@ function SendConfirm({
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
   const swapRoute = getSwapRoute({
-    fromToken: homeCoin.address,
-    toToken: coin.address,
+    fromToken: homeCoin.token,
+    toToken: coin.token,
     amountIn: numTokens,
     fromAccount: account,
     toAddress: recipient.addr,

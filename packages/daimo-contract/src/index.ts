@@ -1,5 +1,3 @@
-import { parseAbi } from "viem";
-
 import {
   daimoNameRegistryABI,
   daimoNameRegistryProxyAddress,
@@ -10,31 +8,27 @@ export const nameRegistryProxyConfig = {
   abi: daimoNameRegistryABI,
 } as const;
 
-export const pimlicoPaymasterAbi = parseAbi([
-  "function priceMarkup() view returns (uint32)",
-  "function previousPrice() view returns (uint192)",
-  "function token() view returns (address)",
-]);
-
 export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
 
 export const zeroAddr = "0x0000000000000000000000000000000000000000";
 
 export {
   daimoAccountABI,
-  daimoRequestABI,
-  daimoRequestAddress,
-  daimoRequestConfig,
   daimoAccountFactoryABI,
   daimoAccountFactoryAddress,
   daimoAccountFactoryConfig,
   daimoEphemeralNotesABI,
   daimoEphemeralNotesV2ABI,
-  daimoPaymasterV2Address,
   daimoPaymasterV2ABI,
+  daimoPaymasterV2Address,
+  daimoRequestABI,
+  daimoRequestAddress,
+  daimoRequestConfig,
   daimoUsdcSwapperABI,
   entryPointABI,
   erc20ABI,
 } from "./generated";
+
+export * from "./external";
 
 export * from "./chainConfig";

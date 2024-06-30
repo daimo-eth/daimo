@@ -78,7 +78,10 @@ export class KeyRegistry extends Indexer {
         }
         case "removed": {
           const keyData = this.addrToKeyData.get(addr);
-          if (!keyData) throw new Error("[KEY-REG] Invalid event, no key data");
+          if (keyData == null) {
+            console.error("[KEY-REG] ignoring invalid event, no key data");
+            break;
+          }
           this.addrToKeyData.set(
             addr,
             keyData.filter((k) => k.pubKey !== derKey)

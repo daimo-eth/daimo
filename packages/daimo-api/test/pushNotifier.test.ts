@@ -474,7 +474,7 @@ function createForeignTokenTransfer(args: {
 
 function createFakeForeignToken(): ForeignToken {
   return {
-    address: "0x0",
+    token: "0x0",
     name: "fake token",
     symbol: "FAKE",
     decimals: 5,

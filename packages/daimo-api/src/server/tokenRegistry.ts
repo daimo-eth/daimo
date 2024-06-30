@@ -33,7 +33,7 @@ export class TokenRegistry {
 
       // Add native ETH
       const nativeETH = getNativeETHForChain(chainId);
-      if (nativeETH != null) foreignTokens.set(nativeETH.address, nativeETH);
+      if (nativeETH != null) foreignTokens.set(nativeETH.token, nativeETH);
 
       // Add coins from CoinGecko
       const tokenList = (await (
@@ -50,17 +50,17 @@ export class TokenRegistry {
         const largeLogo = token.logoURI
           ?.split("?")[0]
           .replace("thumb", "large");
-        if (!isAddress(token.address)) continue; // ignore invalid addresses that Coingecko returns
-        const addr = getAddress(token.address);
+        if (!isAddress(token.token)) continue; // ignore invalid addresses that Coingecko returns
+        const addr = getAddress(token.token);
         if (addr === chainConfig.tokenAddress) continue; // excude home coin
 
         const override = customOverrides.find(
-          (o) => o.address === addr && o.chainId === chainId
+          (o) => o.token === addr && o.chainId === chainId
         );
         if (override) foreignTokens.set(addr, override);
         else {
           foreignTokens.set(addr, {
-            address: addr,
+            token: addr,
             decimals: token.decimals,
             name: token.name,
             symbol: token.symbol,

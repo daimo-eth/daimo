@@ -99,7 +99,7 @@ export function useInAppNotifications(): InAppNotificationInfo {
 
     // Proposed swaps
     account.proposedSwaps.map((swap) => {
-      console.log(`[IN-APP] pushing swap ${swap.fromCoin.address}`);
+      console.log(`[IN-APP] pushing swap ${swap.fromCoin.token}`);
       notifications.push({
         type: "swap",
         marksUnread: true,

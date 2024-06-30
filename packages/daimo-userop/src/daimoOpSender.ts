@@ -3,7 +3,9 @@ import {
   PendingOpEvent,
   ProposedSwap,
   UserOpHex,
+  assertNotNull,
   derKeytoContractFriendlyKey,
+  getNativeWETHByChain,
   isNativeETH,
   now,
   zUserOpHex,
@@ -335,26 +337,27 @@ export class DaimoOpSender {
     opMetadata: DaimoOpMetadata
   ) {
     console.log(
-      `[OP] execute swap ${swap.fromAmount} ${swap.fromCoin.symbol} ${swap.fromCoin.address} to ${swap.toAmount} ${swap.toCoin} via ${swap.execRouterAddress}`
+      `[OP] execute swap ${swap.fromAmount} ${swap.fromCoin.symbol} ${swap.fromCoin.token} to ${swap.toAmount} ${swap.toCoin} via ${swap.execRouterAddress}`
     );
 
+    // Approve, then swap
+    const { chainId } = this.opConfig;
+    const isETH = isNativeETH(swap.fromCoin, chainId);
+    const coinToApprove = isETH
+      ? assertNotNull(getNativeWETHByChain(chainId))
+      : swap.fromCoin;
     const executions: DaimoAccountCall[] = [
+      this.getTokenApproveCall(
+        swap.execRouterAddress,
+        BigInt(swap.fromAmount),
+        coinToApprove.token
+      ),
       {
         dest: swap.execRouterAddress,
         value: hexToBigInt(swap.execValue),
         data: swap.execCallData,
       },
     ];
-
-    if (!isNativeETH(swap.fromCoin, this.opConfig.chainId)) {
-      executions.unshift(
-        this.getTokenApproveCall(
-          swap.execRouterAddress,
-          BigInt(swap.fromAmount),
-          swap.fromCoin.address
-        )
-      );
-    }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 

@@ -59,15 +59,33 @@ interface StoredV15ForeignCoin {
   symbol: string;
   decimals: number;
   logoURI?: string;
+
+  // Due to a migration issue, AccountV15 proposedSwap coins may contain "token"
+  // or "address". We resolve this issue in the migration to V16.
+  token?: Address;
+  address?: Address;
 }
 
 export function migrateV15Clog(clog: StoredV15Clog): StoredV16Clog {
   if (clog.type === "transfer" && clog.preSwapTransfer) {
-    // Remove old preSwapTransfers missing token addresses.
-    // This is fixed on the next sync.
+    const { coin } = clog.preSwapTransfer;
+    const tokenAddress = coin.address || coin.token;
+    if (tokenAddress == null) {
+      return { ...clog, preSwapTransfer: undefined };
+    }
     return {
       ...clog,
-      preSwapTransfer: undefined,
+      preSwapTransfer: {
+        ...clog.preSwapTransfer,
+        coin: {
+          token: tokenAddress,
+          chainId: coin.chainId,
+          decimals: coin.decimals,
+          name: coin.name,
+          symbol: coin.symbol,
+          logoURI: coin.logoURI,
+        },
+      },
     };
   } else {
     return clog as StoredV16Clog;

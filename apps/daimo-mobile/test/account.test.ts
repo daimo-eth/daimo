@@ -1,3 +1,6 @@
+import { assertNotNull } from "@daimo/common";
+
+import largeAccountV15 from "./assets/accountDcposchV15.json";
 import {
   Account,
   parseAccount,
@@ -66,79 +69,94 @@ const account: Account = {
 };
 
 describe("Account", () => {
-  it("serializes", async () => {
+  it("serialize", async () => {
     const ser = serializeAccount(account);
     expect(ser).toEqual(correctSerV16);
   });
 
-  it("deserializes", () => {
+  it("deserialize", () => {
     const a = parseAccount(correctSerV16);
     expect(a).toEqual(account);
   });
 
-  it("fixes address checksum", () => {
+  it("fix address checksum", () => {
     const a = parseAccount(lowercaseAddrV13);
     expect(a?.address).toEqual("0xEf4396d9FF8107086d215a1c9f8866C54795D7c7");
     expect(a?.isOnboarded).toEqual(true);
   });
 
-  it("drops old accounts to V7", () => {
+  it("drop old accounts to V7", () => {
     // Drop V7 accounts, testnet users re-onboard.
     const a = parseAccount(correctSerV7);
     expect(a).toBeNull();
   });
 
-  it("migrates V8 correctly", () => {
+  it("migrate V8", () => {
     // Adds pendingKeyRotation
     const a = parseAccount(correctSerV8);
     expect(a).toEqual(account);
   });
 
-  it("migrates V9 correctly", () => {
+  it("migrate V9", () => {
     // Adds recommendedExchanges
     const a = parseAccount(correctSerV9);
     expect(a).toEqual(account);
   });
 
-  it("migrates V10 correctly", () => {
+  it("migrate V10", () => {
     // Adds suggestedActions, dismissedActionIDs
     const a = parseAccount(correctSerV10);
     expect(a).toEqual(account);
   });
 
-  it("migrates V11 correctly", () => {
+  it("migrate V11", () => {
     // Removes pendingNotes, changes transferLogs
     const a = parseAccount(correctSerV11);
     expect(a).toEqual(account);
   });
 
-  it("migrates V12 correctly", () => {
+  it("migrate V12", () => {
     // Adds inviteLinkStatus, invitees
     const a = parseAccount(correctSerV12);
     expect(a).toEqual(account);
   });
 
-  it("migrates V13 correctly", () => {
+  it("migrate V13", () => {
     // Adds requests
     const a = parseAccount(correctSerV13);
     expect(a).toEqual(account);
   });
 
-  it("migrates V14 correctly", () => {
+  it("migrate V14", () => {
     // Adds exchangeRates, sentPaymentLinks
     const a = parseAccount(correctSerV14);
     expect(a).toEqual(account);
   });
 
-  it("migrates V15 correctly", () => {
+  it("migrate V15", () => {
     // Adds landlineSessionKey, landlineAccounts
     const a = parseAccount(correctSerV15);
     expect(a).toEqual(account);
   });
 
-  it("migrates V15 correctly", () => {
+  it("migrate V16", () => {
     // Adds landlineSessionKey, landlineAccounts
     const a = parseAccount(correctSerV16);
     expect(a).toEqual(account);
+  });
+});
+
+describe("LargeAccount", () => {
+  it("migrate", () => {
+    const acc = parseAccount(JSON.stringify(largeAccountV15));
+
+    expect(acc).not.toBeNull();
+    expect(acc?.name).toBe("dcposch");
+
+    expect(acc?.proposedSwaps.length).toBe(1);
+    const swap = assertNotNull(acc).proposedSwaps[0];
+    expect(swap.fromCoin.token).toBe(
+      "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed"
+    );
   });
 });

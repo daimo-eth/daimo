@@ -70,7 +70,9 @@ export function loadOpSender({
   };
 
   promise = (async () => {
-    console.info(`[SEND] loading DaimoOpSender ${address} ${signer.type}`);
+    console.info(
+      `[SEND] loading DaimoOpSender ${chainId} ${address} ${signer.type}`
+    );
 
     const chainConfig = env(daimoChain).chainConfig;
     return await DaimoOpSender.init({

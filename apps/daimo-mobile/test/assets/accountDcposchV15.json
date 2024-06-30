@@ -1,0 +1,712 @@
+{
+  "storageVersion": 15,
+  "enclaveKeyName": "daimo-12",
+  "enclavePubKey": "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004af061f0d8e122053c9501ba2aff53db616c7797906e3c4958e818b78ca27ee2612d42c9fea18b4420a6b4f1a2abf4f4f7d580a63c660b18f664c9192c863fb7e",
+  "name": "dcposch",
+  "address": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+  "homeChainId": 8453,
+  "homeCoinAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "lastBalance": "3192729053",
+  "lastBlock": 16477383,
+  "lastBlockTimestamp": 1719744113,
+  "lastFinalizedBlock": 16476812,
+  "recentTransfers": [
+    {
+      "type": "transfer",
+      "status": "finalized",
+      "timestamp": 1698265293,
+      "from": "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A",
+      "to": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "amount": 100000000,
+      "blockNumber": 5737973,
+      "blockHash": "0x185b2fb9500f294562136868d1fde565c854a9066cfe7d36866ca07c9ba93e93",
+      "txHash": "0xdbff0ac62924fef423f48a8be00ee3877db00dcc63663cc39e9f3dcd61a053b1",
+      "logIndex": 0,
+      "requestStatus": null,
+      "feeAmount": 0
+    },
+    {
+      "type": "transfer",
+      "status": "finalized",
+      "timestamp": 1698266335,
+      "from": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "to": "0x27785Ad361898B526F37d87C4fAcFD757Ff0622F",
+      "amount": 4200000,
+      "blockNumber": 5738494,
+      "blockHash": "0x040c7a6661722a1a081c68e3e242c4e175173e7e0eed95db583406f79ef45e8f",
+      "txHash": "0x3e3c7b051d015ebada0bf99e63798a78bf456914df531322398d00944ecfdedf",
+      "logIndex": 24,
+      "nonceMetadata": "0x0000000000000000",
+      "opHash": "0xc63c9584fc9e7742eed9824f0d25ff4298e6b7919f8698b64a37dc4013bee9cb",
+      "requestStatus": null,
+      "feeAmount": 0
+    },
+    {
+      "type": "createLink",
+      "noteStatus": {
+        "status": "confirmed",
+        "dollars": "3.45",
+        "id": "EEt9k",
+        "contractAddress": "0x594bc666500fAeD35DC741F45a35C571399560d8",
+        "ephemeralOwner": "0x106272e5b007A1f775A4164757Ab9f9dF643c0cF",
+        "link": {
+          "type": "notev2",
+          "id": "EEt9k",
+          "sender": "dcposch",
+          "dollars": "3.45"
+        },
+        "sender": {
+          "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+          "name": "dcposch",
+          "timestamp": 1698265147,
+          "linkedAccounts": [
+            {
+              "type": "farcaster",
+              "id": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+              "fid": 56,
+              "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+              "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 4D350d99364634e07B01a9986662787DD3755F0A\nIssued At: 2024-06-26T09:10:31.471Z\nResources:\n- farcaster://fid/56",
+              "signature": "0x1ae2b062cc54af22deae1a8ac0bde1163bb0a308d9b8afb376c47210d9bb506221803c6265efc2072018b188ee78b0b0800e46b480c149107997587b6d4e71171b",
+              "verifications": [
+                "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d",
+                "0xdd7793bd6b1b782ef3f19436990d1809c835b4d0"
+              ],
+              "username": "dcposch.eth",
+              "displayName": "✳️ dcposch on daimo",
+              "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
+              "bio": "Real World Ethereum 🌎 \nbuilding /daimo ✳️ "
+            }
+          ],
+          "profilePicture": "https://daimo.com/profile/0x4D350d99364634e07B01a9986662787DD3755F0A/pfp"
+        },
+        "memo": "Hello"
+      },
+      "status": "finalized",
+      "timestamp": 1719602827,
+      "from": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "to": "0x594bc666500fAeD35DC741F45a35C571399560d8",
+      "amount": 3450000,
+      "blockNumber": 16406740,
+      "blockHash": "0xcf852c1eafd3f9f615a2031a510fce80a4a5c939e4e901af350eadd15ee45ffd",
+      "txHash": "0x990043cbcda759a5d2ccd6f55feff9717408472a4dd7c7b336a421f0f5dc20b7",
+      "logIndex": 168,
+      "nonceMetadata": "0x0100000000000000",
+      "opHash": "0x67bc9d6e5ae81c66aad5167fcb5b55a2a7e3db54d26cfd938535b8a8c5eddae8",
+      "memo": "Hello",
+      "feeAmount": 0
+    },
+    {
+      "type": "transfer",
+      "status": "finalized",
+      "timestamp": 1719710455,
+      "from": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "to": "0xE5E739E4d4f26a26BEFc2FF27289A0bd61A39f4c",
+      "amount": 230000,
+      "blockNumber": 16460554,
+      "blockHash": "0x197a2c1bdc6d4a5f782d51d071ae2dfe858b8ccbad500b09054005da3a7a4cd1",
+      "txHash": "0x9c6def43bd0cdcc66563bf0c98c357902c6b697a64f53c92fb7ec93d25a01e6c",
+      "logIndex": 153,
+      "nonceMetadata": "0x0000000000000000",
+      "opHash": "0x6b51ce649a85852079a547f44b9b294458b4c11ae5f70afb32fe0a79f6ea5e73",
+      "memo": "Hello !",
+      "requestStatus": null,
+      "feeAmount": 0
+    },
+    {
+      "type": "transfer",
+      "status": "finalized",
+      "timestamp": 1719710869,
+      "from": "0xE5E739E4d4f26a26BEFc2FF27289A0bd61A39f4c",
+      "to": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "amount": 420000,
+      "blockNumber": 16460761,
+      "blockHash": "0xa54a315cfd3c9451e6cb8d5018b0722121d86464d11d46a26f6b2f95106479d5",
+      "txHash": "0x0f6720c37d3c0fba7cf9e40dfae0df8fce87584bb2863437d471e34b5ac8573e",
+      "logIndex": 74,
+      "nonceMetadata": "0x0000000000000000",
+      "opHash": "0xa48527e9f95705c1604ce910f6411daf3b35de2c2a78e0daa1e1750e9defc383",
+      "memo": "greetings sir",
+      "requestStatus": null,
+      "feeAmount": 0
+    },
+    {
+      "type": "transfer",
+      "from": "0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D",
+      "to": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "amount": 1561368,
+      "preSwapTransfer": {
+        "coin": {
+          "address": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+          "decimals": 18,
+          "name": "Degen  Base ",
+          "symbol": "DEGEN",
+          "logoURI": "https://assets.coingecko.com/coins/images/34515/large/android-chrome-512x512.png",
+          "chainId": 8453
+        },
+        "from": "0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D",
+        "amount": "200000000000000000000"
+      },
+      "status": "pending",
+      "timestamp": 1719744112,
+      "opHash": "0x155b04c05ac996b554e23ececba72070f3782771b5a3f3d5e78d25ae57089dca",
+      "feeAmount": 0
+    }
+  ],
+  "namedAccounts": [
+    {
+      "addr": "0x20FE51A9229EEf2cF8Ad9E89d91CAb9312cF3b7A",
+      "label": "coinbase"
+    },
+    {
+      "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "name": "dcposch",
+      "timestamp": 1698265147,
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+          "fid": 56,
+          "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 4D350d99364634e07B01a9986662787DD3755F0A\nIssued At: 2024-06-26T09:10:31.471Z\nResources:\n- farcaster://fid/56",
+          "signature": "0x1ae2b062cc54af22deae1a8ac0bde1163bb0a308d9b8afb376c47210d9bb506221803c6265efc2072018b188ee78b0b0800e46b480c149107997587b6d4e71171b",
+          "verifications": [
+            "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d",
+            "0xdd7793bd6b1b782ef3f19436990d1809c835b4d0"
+          ],
+          "username": "dcposch.eth",
+          "displayName": "✳️ dcposch on daimo",
+          "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
+          "bio": "Real World Ethereum 🌎 \nbuilding /daimo ✳️ "
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0x4D350d99364634e07B01a9986662787DD3755F0A/pfp"
+    },
+    {
+      "addr": "0x27785Ad361898B526F37d87C4fAcFD757Ff0622F",
+      "name": "nibnalin",
+      "timestamp": 1698265121,
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
+          "fid": 363,
+          "custody": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 27785Ad361898B526F37d87C4fAcFD757Ff0622F\nIssued At: 2024-05-28T18:40:44.066Z\nResources:\n- farcaster://fid/363",
+          "signature": "0x44a46f585b913a92866829ff91ed1db07d29d9e1781522f917c1e01a47eae77d2f0c4302bf7020c6a7de0aa1b9e28495626a39549c61335e751b31cf63eee53e1c",
+          "verifications": ["0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"],
+          "username": "nibnalin.eth",
+          "displayName": "✳️ nibnalin on daimo",
+          "pfpUrl": "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ba1279-d655-464f-c851-ef7cbdb7d900/rectcrop3",
+          "bio": "real world ethereum /daimo\n"
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0x27785Ad361898B526F37d87C4fAcFD757Ff0622F/pfp"
+    },
+    {
+      "addr": "0xF05b5f04B7a77Ca549C0dE06beaF257f40C66FDB",
+      "ensName": "nibnalin.eth"
+    },
+    {
+      "addr": "0x4AdcA7cB84497c9c4c308063D2f219C7b6041183",
+      "label": "payment link"
+    },
+    {
+      "addr": "0x3a5e3028c436867f5330cE2e12bd28e35A84AeC4",
+      "name": "richard",
+      "timestamp": 1698276219,
+      "linkedAccounts": []
+    }
+  ],
+  "accountKeys": [
+    {
+      "pubKey": "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004af061f0d8e122053c9501ba2aff53db616c7797906e3c4958e818b78ca27ee2612d42c9fea18b4420a6b4f1a2abf4f4f7d580a63c660b18f664c9192c863fb7e",
+      "addedAt": 16110896,
+      "slot": 0
+    },
+    {
+      "pubKey": "0x3059301306072a8648ce3d020106082a8648ce3d0301070342000463917130b3f6d75cd75cb410714ac7a4f425ffc7aae74faeba954ef39c51d5c40e331799fbcd76c6d9fb098ecbdb9296a43df3739660a38bcdc4323f00188b49",
+      "addedAt": 6214210,
+      "slot": 128
+    },
+    {
+      "pubKey": "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004477e542b5a904e038f3a7c0b95361531c6048fbdb1f531a9985f437f59950e122bbf34b7c3106b2865e2939b8d4dd5515c32e8f9b80ab8ae7d79c3919e72b61b",
+      "addedAt": 6715689,
+      "slot": 129
+    },
+    {
+      "pubKey": "0x3059301306072a8648ce3d020106082a8648ce3d03010703420004a16c9f1b013d4f0714c925e6c6b9302215b83a3941036e635b762f7d406de22433c895e08a05fb228ce3d5bc131dcf7cf2cbdd59ddc35a45c1dcde1e601539c8",
+      "addedAt": 16301932,
+      "slot": 192
+    }
+  ],
+  "pendingKeyRotation": [],
+  "recommendedExchanges": [
+    {
+      "title": "Transfer from another chain",
+      "cta": "Bridge USDC from any wallet",
+      "url": "https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "logo": "https://daimo.com/assets/deposit/ethereum.png",
+      "sortId": 0
+    },
+    {
+      "title": "Send from Coinbase & other options",
+      "cta": "Deposit from Coinbase",
+      "url": "https://pay.coinbase.com/buy/select-asset?appId=2be3ccd9-6ee4-4dba-aba8-d4b458fe476d&defaultExperience=send&destinationWallets=%5B%7B%22address%22%3A%220x4D350d99364634e07B01a9986662787DD3755F0A%22%2C%22assets%22%3A%5B%22USDC%22%5D%2C%22supportedNetworks%22%3A%5B%22base%22%5D%7D%5D",
+      "logo": "https://daimo.com/assets/deposit/coinbase.png",
+      "sortId": 1
+    },
+    {
+      "title": "Cards, banks, & international options",
+      "cta": "Buy USDC",
+      "url": "https://app.ramp.network?hostApiKey=kkkkdu9jsw3dbc3qnf8o2bvmzoxkp63mrz27hrma&hostAppName=Daimo&hostLogoUrl=https://daimo.com/assets/icon-ramp.png&swapAsset=BASE_USDC&userAddress=0x4D350d99364634e07B01a9986662787DD3755F0A&finalUrl=https://daimo.com/l/deposit",
+      "logo": "https://daimo.com/assets/deposit/usdc.png",
+      "sortId": 3
+    }
+  ],
+  "suggestedActions": [],
+  "dismissedActionIDs": ["2023-12-join-tg-5"],
+  "chainGasConstants": {
+    "estimatedFee": 0,
+    "paymasterAddress": "0xa9E1CCB08053e4f5daBb506718352389C1547462",
+    "maxPriorityFeePerGas": "1110000",
+    "maxFeePerGas": "7329930",
+    "preVerificationGas": "1000000"
+  },
+  "pushToken": "ExponentPushToken[YVWD7jGDPHJC_ETbBP1M6Y]",
+  "linkedAccounts": [
+    {
+      "type": "farcaster",
+      "id": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+      "fid": 56,
+      "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+      "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 4D350d99364634e07B01a9986662787DD3755F0A\nIssued At: 2024-06-26T09:10:31.471Z\nResources:\n- farcaster://fid/56",
+      "signature": "0x1ae2b062cc54af22deae1a8ac0bde1163bb0a308d9b8afb376c47210d9bb506221803c6265efc2072018b188ee78b0b0800e46b480c149107997587b6d4e71171b",
+      "verifications": [
+        "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d",
+        "0xdd7793bd6b1b782ef3f19436990d1809c835b4d0"
+      ],
+      "username": "dcposch.eth",
+      "displayName": "✳️ dcposch on daimo",
+      "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
+      "bio": "Real World Ethereum 🌎 \nbuilding /daimo ✳️ "
+    }
+  ],
+  "inviteLinkStatus": {
+    "link": { "type": "invite", "code": "dc-aws" },
+    "createdAt": 1715710022,
+    "isValid": true,
+    "usesLeft": 97,
+    "bonusDollarsInvitee": 0.02,
+    "bonusDollarsInviter": 0,
+    "inviter": {
+      "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "name": "dcposch",
+      "timestamp": 1698265147,
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+          "fid": 56,
+          "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 4D350d99364634e07B01a9986662787DD3755F0A\nIssued At: 2024-06-26T09:10:31.471Z\nResources:\n- farcaster://fid/56",
+          "signature": "0x1ae2b062cc54af22deae1a8ac0bde1163bb0a308d9b8afb376c47210d9bb506221803c6265efc2072018b188ee78b0b0800e46b480c149107997587b6d4e71171b",
+          "verifications": [
+            "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d",
+            "0xdd7793bd6b1b782ef3f19436990d1809c835b4d0"
+          ],
+          "username": "dcposch.eth",
+          "displayName": "✳️ dcposch on daimo",
+          "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
+          "bio": "Real World Ethereum 🌎 \nbuilding /daimo ✳️ "
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0x4D350d99364634e07B01a9986662787DD3755F0A/pfp"
+    }
+  },
+  "invitees": [
+    {
+      "addr": "0x51abcB680aA05B72a968b5C9D25497ADBa991Ed9",
+      "name": "cma",
+      "timestamp": 1708920053,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0x75d610d712d14076D2760e481731A5C8f9e7212D",
+          "fid": 378,
+          "custody": "0x75d610d712d14076D2760e481731A5C8f9e7212D",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0x75d610d712d14076D2760e481731A5C8f9e7212D\n\nFarcaster Connect\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 51abcB680aA05B72a968b5C9D25497ADBa991Ed9\nIssued At: 2024-02-27T05:53:06.668Z\nResources:\n- farcaster://fid/378",
+          "signature": "0x6132a46627d780c30f5d8b79142aa10886af4a5d8a26b9773e4fe886af213b8a69e66f28a4369f55d73a5bc6b5c274ca889b5b0c3a850fcba27ffe2e0b41a0fa1c",
+          "verifications": ["0xbeec75a2025b34767cb60f0bea5c4c8be489ba6d"],
+          "username": "colin",
+          "displayName": "Colin Armstrong",
+          "pfpUrl": "https://lh3.googleusercontent.com/Bi85y1_3rVxhL-x8O4QSfSAL27fvgDNmjQ-RH05uuIIGI4i-LsS5TWBTStkYZgL2422kVvLoJ2O5FGWEijOGMQFTi_CvEdsotr6t5A",
+          "bio": "cma.xyz. Building /paragraph, previously at Google and Coinbase"
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0x51abcB680aA05B72a968b5C9D25497ADBa991Ed9/pfp"
+    },
+    {
+      "addr": "0x39b3E8E3760ab50b43A0f812e420616D789bf3D6",
+      "name": "tradesman",
+      "timestamp": 1708975905,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": []
+    },
+    {
+      "addr": "0x9E8d1F1c6FA0C4Cb18003ac39936e1c2f412af02",
+      "name": "chad",
+      "timestamp": 1710816061,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": []
+    },
+    {
+      "addr": "0xC399C8b53854a9341b8F61fF48eA79bDcfaFF53B",
+      "name": "silv",
+      "timestamp": 1710816963,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0x50AC21f297633BB949E068bC9021Eb7B9EE0bFAe",
+          "fid": 217341,
+          "custody": "0x50AC21f297633BB949E068bC9021Eb7B9EE0bFAe",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0x50AC21f297633BB949E068bC9021Eb7B9EE0bFAe\n\nFarcaster Connect\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: C399C8b53854a9341b8F61fF48eA79bDcfaFF53B\nIssued At: 2024-03-19T02:58:52.059Z\nResources:\n- farcaster://fid/217341",
+          "signature": "0x101cd19a856a8e3930d1e44f3ea6ae5c4e9b4bed2666988b60bc35e80b859d340ac0c87960d8fa3c1bf2475563e0f3fe5518a0751279c53348e063bbb69d1a2c1b",
+          "verifications": [
+            "0x3568609e962a84dffd0be2b73514cbf0e4b74360",
+            "0x59bdfb381ca2080d0d042903e776d3dcb548050a",
+            "0x22d0567f1d331f6e18452e2bb11f0ed3591ac485",
+            "0xb8ad88b9d89aca9261ddcbfee62177ed86d99454",
+            "2kcG8xdKuZHbzoXz6truvT4MF88SUkyK8z9bcLLCTpV6"
+          ],
+          "username": "silv.eth",
+          "displayName": "silv",
+          "pfpUrl": "https://i.imgur.com/CzRc8QW.gif",
+          "bio": "CTO, nft enthusiast, www.silv.blog"
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0xC399C8b53854a9341b8F61fF48eA79bDcfaFF53B/pfp"
+    },
+    {
+      "addr": "0x484C14D5f9B73B3A51667E83a2C78F50E1540427",
+      "name": "jaywooow",
+      "timestamp": 1710817255,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": [
+        {
+          "type": "farcaster",
+          "id": "0xa6758a171bD9CE7A519199AD77AE0a9A4e1D8584",
+          "fid": 722,
+          "custody": "0xa6758a171bD9CE7A519199AD77AE0a9A4e1D8584",
+          "message": "daimo.com wants you to sign in with your Ethereum account:\n0xa6758a171bD9CE7A519199AD77AE0a9A4e1D8584\n\nFarcaster Connect\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 484C14D5f9B73B3A51667E83a2C78F50E1540427\nIssued At: 2024-04-06T02:15:20.468Z\nResources:\n- farcaster://fid/722",
+          "signature": "0xecb8a11b1f78c13d10f210a4d1abc2d5225da039621db0395753967408464350602949cb45a5e99c1b71962504af015d19cb631b6b78f3112365d973b7d338d21b",
+          "verifications": [
+            "0xd0c3218303591c7ea68560509be2ef7b9e6d2191",
+            "0x9424116b9d61d04b678c5e5eddf8499f88ed9ade",
+            "CTcB3tLXcsChWKScQu2azdV8EvXLcVQY2cm2Q1v9WfuM"
+          ],
+          "username": "jaywooow.eth",
+          "displayName": "joão",
+          "pfpUrl": "https://i.imgur.com/itZFlWv.gif",
+          "bio": "CPO at Catena Labs • building /decent-ai\n\nPreviously: Jump Crypto, Protocol Labs, Netflix, Google AI • ML art nerd • Based™ in 🗽 \n\nwww.jfiadeiro.com"
+        }
+      ],
+      "profilePicture": "https://daimo.com/profile/0x484C14D5f9B73B3A51667E83a2C78F50E1540427/pfp"
+    },
+    {
+      "addr": "0x725e7eEb194675FaC7540719035Dfe571AA79d70",
+      "name": "automaticmanatee86",
+      "timestamp": 1718416879,
+      "inviter": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "linkedAccounts": []
+    }
+  ],
+  "isOnboarded": true,
+  "notificationRequestStatuses": [
+    {
+      "link": {
+        "type": "requestv2",
+        "id": "XUU91XDvHuk",
+        "recipient": "nibnalin",
+        "dollars": "0.20"
+      },
+      "recipient": {
+        "addr": "0x27785Ad361898B526F37d87C4fAcFD757Ff0622F",
+        "name": "nibnalin",
+        "timestamp": 1698265121,
+        "linkedAccounts": []
+      },
+      "creator": {
+        "addr": "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
+        "label": "team daimo"
+      },
+      "status": "fulfilled",
+      "metadata": "0x7b2276223a302c2266756c66696c6c6572223a22307834443335306439393336343633346530374230316139393836363632373837444433373535463041227d",
+      "createdAt": 1711051731,
+      "updatedAt": 1711186051,
+      "expectedFulfiller": {
+        "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+        "name": "dcposch",
+        "timestamp": 1698265147,
+        "linkedAccounts": []
+      },
+      "fulfilledBy": {
+        "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+        "name": "dcposch",
+        "timestamp": 1698265147,
+        "linkedAccounts": []
+      }
+    },
+    {
+      "link": {
+        "type": "requestv2",
+        "id": "EwnTARVoLtD",
+        "recipient": "dcposch",
+        "dollars": "4.84"
+      },
+      "recipient": {
+        "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+        "name": "dcposch",
+        "timestamp": 1698265147,
+        "linkedAccounts": []
+      },
+      "creator": {
+        "addr": "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
+        "label": "team daimo"
+      },
+      "status": "cancelled",
+      "metadata": "0x00",
+      "createdAt": 1711249543,
+      "updatedAt": 1717867315
+    },
+    {
+      "link": {
+        "type": "requestv2",
+        "id": "eHt6xt6WmZu",
+        "recipient": "mawuko",
+        "dollars": "10.00"
+      },
+      "recipient": {
+        "addr": "0xCeaf92dd5e3Df98469BEAbFeA42A6A065F670081",
+        "name": "mawuko",
+        "timestamp": 1703042749,
+        "linkedAccounts": []
+      },
+      "creator": {
+        "addr": "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
+        "label": "team daimo"
+      },
+      "status": "declined",
+      "metadata": "0x7b2276223a302c2266756c66696c6c6572223a22307834443335306439393336343633346530374230316139393836363632373837444433373535463041227d",
+      "createdAt": 1712349373,
+      "updatedAt": 1717867308,
+      "expectedFulfiller": {
+        "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+        "name": "dcposch",
+        "timestamp": 1698265147,
+        "linkedAccounts": []
+      }
+    },
+    {
+      "link": {
+        "type": "requestv2",
+        "id": "dfcULYyqVzn",
+        "recipient": "dcposch",
+        "dollars": "0.02"
+      },
+      "recipient": {
+        "addr": "0x4D350d99364634e07B01a9986662787DD3755F0A",
+        "name": "dcposch",
+        "timestamp": 1698265147,
+        "linkedAccounts": [
+          {
+            "type": "farcaster",
+            "id": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+            "fid": 56,
+            "custody": "0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8",
+            "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3c4a60a928aBCc556250E5aE36dc587231e6B7e8\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 4D350d99364634e07B01a9986662787DD3755F0A\nIssued At: 2024-06-26T09:10:31.471Z\nResources:\n- farcaster://fid/56",
+            "signature": "0x1ae2b062cc54af22deae1a8ac0bde1163bb0a308d9b8afb376c47210d9bb506221803c6265efc2072018b188ee78b0b0800e46b480c149107997587b6d4e71171b",
+            "verifications": [
+              "0xc60a0a0e8bbc32dac2e03030989ad6bee45a874d",
+              "0xdd7793bd6b1b782ef3f19436990d1809c835b4d0"
+            ],
+            "username": "dcposch.eth",
+            "displayName": "✳️ dcposch on daimo",
+            "pfpUrl": "https://i.seadn.io/gae/JUbGP1Idb08BeW4f7PQ3hp5PVk8DRCqzlh5ygxHdoSCUWMSNplJxoZBUJkMlPXx7FacPo3V2GA0SwD9NmBzekGejaNpCr9HJ_cwUlZI?w=500&auto=format",
+            "bio": "Real World Ethereum 🌎 \nbuilding /daimo ✳️ "
+          }
+        ],
+        "profilePicture": "https://daimo.com/profile/0x4D350d99364634e07B01a9986662787DD3755F0A/pfp"
+      },
+      "creator": {
+        "addr": "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7",
+        "label": "team daimo"
+      },
+      "status": "created",
+      "metadata": "0x7b2276223a302c2266756c66696c6c6572223a22307832373738354164333631383938423532364633376438374334664163464437353746663036323246227d",
+      "createdAt": 1719457641,
+      "updatedAt": 1719457641,
+      "expectedFulfiller": {
+        "addr": "0x27785Ad361898B526F37d87C4fAcFD757Ff0622F",
+        "name": "nibnalin",
+        "timestamp": 1698265121,
+        "linkedAccounts": [
+          {
+            "type": "farcaster",
+            "id": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
+            "fid": 363,
+            "custody": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
+            "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 27785Ad361898B526F37d87C4fAcFD757Ff0622F\nIssued At: 2024-05-28T18:40:44.066Z\nResources:\n- farcaster://fid/363",
+            "signature": "0x44a46f585b913a92866829ff91ed1db07d29d9e1781522f917c1e01a47eae77d2f0c4302bf7020c6a7de0aa1b9e28495626a39549c61335e751b31cf63eee53e1c",
+            "verifications": ["0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"],
+            "username": "nibnalin.eth",
+            "displayName": "✳️ nibnalin on daimo",
+            "pfpUrl": "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ba1279-d655-464f-c851-ef7cbdb7d900/rectcrop3",
+            "bio": "real world ethereum /daimo\n"
+          }
+        ],
+        "profilePicture": "https://daimo.com/profile/0x27785Ad361898B526F37d87C4fAcFD757Ff0622F/pfp"
+      },
+      "memo": "Testing"
+    }
+  ],
+  "lastReadNotifTimestamp": 1719744109,
+  "proposedSwaps": [
+    {
+      "fromCoin": {
+        "address": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+        "decimals": 18,
+        "name": "Degen  Base ",
+        "symbol": "DEGEN",
+        "logoURI": "https://assets.coingecko.com/coins/images/34515/large/android-chrome-512x512.png",
+        "chainId": 8453
+      },
+      "fromAmount": "200000000000000000000",
+      "fromAcc": {
+        "addr": "0xc60A0A0E8bBc32DAC2E03030989AD6BEe45A874D",
+        "ensName": "dcposch.eth"
+      },
+      "receivedAt": 1719744117,
+      "cacheUntil": 1719744417,
+      "execDeadline": 1719744717,
+      "toCoin": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "routeFound": true,
+      "toAmount": 1561368,
+      "execRouterAddress": "0x2626664c2603336E57B271c5C0b26F421741e481",
+      "execCallData": "0xb858183f000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000800000000000000000000000004d350d99364634e07b01a9986662787dd3755f0a00000000000000000000000000000000000000000000000ad78ebc5ac6200000000000000000000000000000000000000000000000000000000000000017961b00000000000000000000000000000000000000000000000000000000000000424ed4e862860bed51a9570b96d89af5e1b0efefed000bb842000000000000000000000000000000000000060001f4833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000000000000000000000000000000000000000",
+      "execValue": "0x00"
+    }
+  ],
+  "exchangeRates": [
+    {
+      "name": "Euro",
+      "symbol": "€",
+      "currency": "EUR",
+      "decimals": 2,
+      "rateUSD": 1.0715495034439602
+    },
+    {
+      "name": "Argentine Peso",
+      "symbol": "ARS",
+      "currency": "ARS",
+      "decimals": 0,
+      "rateUSD": 0.0010970927043335162
+    },
+    {
+      "name": "Ukrainian Hryvnia",
+      "symbol": "₴",
+      "currency": "UAH",
+      "decimals": 0,
+      "rateUSD": 0.024743037371141353
+    },
+    {
+      "name": "Naira",
+      "symbol": "₦",
+      "currency": "NGN",
+      "decimals": 0,
+      "rateUSD": 0.0007112375533428165
+    },
+    {
+      "name": "Turkish Lira",
+      "symbol": "₺",
+      "currency": "TRY",
+      "decimals": 0,
+      "rateUSD": 0.03053155436143254
+    },
+    {
+      "name": "Swiss Franc",
+      "symbol": "₣",
+      "currency": "CHF",
+      "decimals": 2,
+      "rateUSD": 1.1074393344732576
+    },
+    {
+      "name": "Japanese Yen",
+      "symbol": "¥",
+      "currency": "JPY",
+      "decimals": 0,
+      "rateUSD": 0.00621561985268981
+    },
+    {
+      "name": "Korean Won",
+      "symbol": "₩",
+      "currency": "KRW",
+      "decimals": 0,
+      "rateUSD": 0.0007239661763002432
+    },
+    {
+      "name": "Yuan",
+      "symbol": "¥",
+      "currency": "CNY",
+      "decimals": 0,
+      "rateUSD": 0.13760268600443082
+    },
+    {
+      "name": "Pound",
+      "symbol": "£",
+      "currency": "GBP",
+      "decimals": 2,
+      "rateUSD": 1.2652494186178922
+    },
+    {
+      "name": "Canadian Dollar",
+      "symbol": "C$",
+      "currency": "CAD",
+      "decimals": 2,
+      "rateUSD": 0.7302201613786556
+    },
+    {
+      "name": "Australian Dollar",
+      "symbol": "A$",
+      "currency": "AUD",
+      "decimals": 2,
+      "rateUSD": 0.6688005864043541
+    },
+    {
+      "name": "Singapore Dollar",
+      "symbol": "S$",
+      "currency": "SGD",
+      "decimals": 2,
+      "rateUSD": 0.7371913011426465
+    }
+  ],
+  "sentPaymentLinks": [
+    {
+      "type": "notev2",
+      "sender": "dcposch",
+      "dollars": "0.42",
+      "id": "48gFS",
+      "seed": "REDACTED"
+    },
+    {
+      "type": "notev2",
+      "sender": "dcposch",
+      "dollars": "2.34",
+      "id": "H3PtM",
+      "seed": "REDACTED"
+    }
+  ],
+  "landlineSessionKey": "",
+  "landlineAccounts": []
+}
