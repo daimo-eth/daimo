@@ -70,12 +70,17 @@ export async function getSwapQuote({
   const cacheUntil = t + 5 * 60; // 5 minutes
   const execDeadline = t + 10 * 60; // 10 minutes
 
-  const amountOutMinimum = amountOut - amountOut / 100n; // TODO: check amountOutMinimum
+  const amountOutMinimum = amountOut - amountOut / 100n; // max slippage: 1%
 
-  let callData;
+  // Special handling for fromCoin = native ETH
+  const fromCoin = tokenReg.getToken(tokenIn);
+  if (fromCoin == null) return null;
+  const isFromETH = isNativeETH(fromCoin, chainId);
+
+  let swapCallData;
   if (pathIsDirectSwap(swapPath)) {
     const { tokenIn, fee, tokenOut } = decodeDirectPool(swapPath);
-    callData = encodeFunctionData({
+    swapCallData = encodeFunctionData({
       abi: swapRouter02Abi,
       functionName: "exactInputSingle",
       args: [
@@ -84,39 +89,33 @@ export async function getSwapQuote({
           tokenOut,
           fee,
           recipient,
-          amountIn,
+          // amountIn 0 = use router's balance. When swapping from ETH, we wrap
+          // msg.value using wrapETH, giving the router a WETH balance.
+          amountIn: isFromETH ? 0n : amountIn,
           amountOutMinimum,
           sqrtPriceLimitX96: 0n,
         },
       ],
     });
   } else {
-    callData = encodeFunctionData({
+    swapCallData = encodeFunctionData({
       abi: swapRouter02Abi,
       functionName: "exactInput",
       args: [
         {
           path: swapPath,
           recipient,
-          amountIn,
+          amountIn: isFromETH ? 0n : amountIn,
           amountOutMinimum,
         },
       ],
     });
   }
-  assert(callData.length > 0);
-
-  // TODO: in future, check home coin token using account (for now, baseUSDC)
-  // if (tokenIn === getAddress(baseUSDC.address)) {
-  //   fromCoin = baseUSDC;
-  // } else {
-  //   fromCoin = tokenReg.getToken(tokenIn); // Foreign tokens
-  // }
-  const fromCoin = tokenReg.getToken(tokenIn);
-  if (fromCoin == null) return null;
+  assert(swapCallData.length > 0);
 
   // If swapping native ETH: pass it, wrap it, then swap from WETH
   let execValue = 0n;
+  let callData;
   if (isNativeETH(fromCoin, chainId)) {
     execValue = amountIn;
     const wrapETHCall = encodeFunctionData({
@@ -127,8 +126,10 @@ export async function getSwapQuote({
     callData = encodeFunctionData({
       abi: swapRouter02Abi,
       functionName: "multicall",
-      args: [[wrapETHCall, callData]],
+      args: [[wrapETHCall, swapCallData]],
     });
+  } else {
+    callData = swapCallData;
   }
   // TODO: unwrap weth if toCoin = native ETH
 

@@ -7,6 +7,7 @@ import {
   StoredV15ProposedSwap,
   StoredV15TransferClog,
   migrateV15Clog,
+  migrateV15ProposedSwaps,
 } from "./storedTypeMigrations";
 import {
   StoredV15ChainGasConstants,
@@ -649,7 +650,7 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       notificationRequestStatuses: a.notificationRequestStatuses || [],
       lastReadNotifTimestamp: a.lastReadNotifTimestamp || 0,
-      proposedSwaps: [], // Drop old proposedSwaps, will repopulate on sync
+      proposedSwaps: migrateV15ProposedSwaps(a.proposedSwaps),
       exchangeRates: a.exchangeRates || [],
       sentPaymentLinks: a.sentPaymentLinks || [],
 
