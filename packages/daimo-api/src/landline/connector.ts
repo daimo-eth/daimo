@@ -14,6 +14,11 @@ export interface LandlineAccount {
   createdAt: string;
 }
 
+export interface LandlineDepositAuth {
+  isAuthed: boolean;
+  authUrl: string;
+}
+
 export async function getLandlineSession(
   daimoAddress: Address
 ): Promise<string> {
@@ -33,4 +38,29 @@ export async function getLandlineAccounts(
       daimoAddress,
     });
   return landlineAccounts;
+}
+
+export async function landlineDepositAuthStatus(
+  daimoAddress: Address
+): Promise<LandlineDepositAuth> {
+  // @ts-ignore
+  const authStatus = await landlineTrpc.getDepositAuthStatus.query({
+    daimoAddress,
+  });
+  return authStatus;
+}
+
+export async function landlineDeposit(
+  daimoAddress: Address,
+  accountName: string,
+  amount: string,
+  memo: string
+): Promise<void> {
+  // @ts-ignore
+  await landlineTrpc.deposit.mutate({
+    daimoAddress,
+    accountName,
+    amount,
+    memo,
+  });
 }

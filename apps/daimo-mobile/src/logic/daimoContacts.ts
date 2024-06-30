@@ -14,6 +14,7 @@ import { Address } from "viem";
 import { getCachedEAccount } from "./addr";
 import { useSystemContactsSearch } from "./systemContacts";
 import { getRpcHook } from "./trpc";
+import IconDepositWallet from "../../assets/icon-deposit-wallet.png";
 import { Account } from "../storage/account";
 
 interface BaseDaimoContact {
@@ -104,8 +105,12 @@ export function getContactProfilePicture(
   if (r.type === "eAcc") {
     return r.profilePicture;
   } else if (r.type === "bridgeBankAccount") {
+    const defaultLogo = IconDepositWallet;
     // The bank logo is fetched as a base64 string for a png
-    return { uri: `data:image/png;base64,${r.bankLogo}` };
+    const logo = r.bankLogo
+      ? { uri: `data:image/png;base64,${r.bankLogo}` }
+      : defaultLogo;
+    return logo;
   } else {
     return undefined;
   }

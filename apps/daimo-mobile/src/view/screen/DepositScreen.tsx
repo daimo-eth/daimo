@@ -24,7 +24,11 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { useAccount } from "../../logic/accountManager";
-import { landlineAccountToContact } from "../../logic/daimoContacts";
+import {
+  DaimoContact,
+  getContactProfilePicture,
+  landlineAccountToContact,
+} from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
 import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -104,8 +108,6 @@ function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
   const nowS = useTime();
-  // TODO(andrew): Use bank logo
-  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   if (account == null) return null;
 
@@ -123,15 +125,13 @@ function LandlineAccountList() {
     <>
       {landlineAccounts.map((acc, idx) => {
         const accCreatedAtS = new Date(acc.createdAt).getTime() / 1000;
+        const recipient = landlineAccountToContact(acc) as DaimoContact;
         return (
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             cta={`${acc.bankName} ****${acc.lastFour}`}
             title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
-            // The bank logo is fetched as a base64 string for a png
-            logo={
-              { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
-            }
+            logo={getContactProfilePicture(recipient) as ImageSourcePropType}
             isAccount
             onClick={() => goToSendTransfer(acc)}
           />
