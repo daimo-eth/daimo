@@ -24,6 +24,7 @@ import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { Dispatcher } from "../action/dispatch";
+import { BankTransferOptions } from "../logic/bankTransferOptions";
 import {
   BridgeBankAccountContact,
   DaimoContact,
@@ -139,6 +140,7 @@ export interface LandlineTransferNavProp {
   recipient: BridgeBankAccountContact;
   money?: MoneyEntry;
   memo?: string;
+  bankTransferOption?: BankTransferOptions;
 }
 
 export type ParamListTab = {
