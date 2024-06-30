@@ -70,7 +70,8 @@ export async function getSwapQuote({
   const cacheUntil = t + 5 * 60; // 5 minutes
   const execDeadline = t + 10 * 60; // 10 minutes
 
-  const amountOutMinimum = amountOut - amountOut / 100n; // max slippage: 1%
+  const maxSlippagePercent = 5n;
+  const amountOutMinimum = amountOut - (maxSlippagePercent * amountOut) / 100n;
 
   // Special handling for fromCoin = native ETH
   const fromCoin = tokenReg.getToken(tokenIn);
