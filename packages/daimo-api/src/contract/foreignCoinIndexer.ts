@@ -117,7 +117,8 @@ export class ForeignCoinIndexer extends Indexer {
           value: BigInt(row.v),
         };
       })
-      .filter((t) => this.tokenReg.hasToken(t.address))
+      .filter((t) => t.address !== chainConfig.tokenAddress) // not home coin
+      .filter((t) => this.tokenReg.hasToken(t.address)) // no spam tokens
       .map((t) => ({
         ...t,
         foreignToken: this.tokenReg.getToken(t.address)!,
