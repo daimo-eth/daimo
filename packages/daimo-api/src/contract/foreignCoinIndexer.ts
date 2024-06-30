@@ -148,37 +148,47 @@ export class ForeignCoinIndexer extends Indexer {
     delta: bigint,
     log: ForeignTokenTransfer
   ) {
+    // Skip if addr is not a daimo account
+    const addrName = this.nameReg.resolveDaimoNameForAddr(addr);
+    if (addrName == null) return;
+
     if (delta < 0n) {
       // outbound transfer
       this.sendsByAddrTxHash.set(addrTxHashKey(addr, log.transactionHash), log);
 
-      const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
-
       // Delete the first matching pending swap that is now swapped
+      const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
           t.foreignToken.token === log.foreignToken.token && t.value === -delta
       );
 
+      // Special case: we previously swapped ETH in bulk
+      // If there's an unmatched outbound, clear prior inbounds.
       if (matchingPendingSwap == null) {
         console.log(
-          `[FOREIGN-COIN] SKIPPING outbound token transfer, no matching inbound found. from ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+          `[FOREIGN-COIN] UNMATCHED outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
         );
+        this.pendingSwapsByAddr.set(addr, []);
         return;
       }
 
+      // Record matching inbound (receive) > outbound (swap to home coin)
       this.correspondingReceiveOfSend.set(
         addrTxHashKey(addr, log.transactionHash),
         matchingPendingSwap
       );
 
+      // Clear specific pending swap
       const newPendingSwaps = pendingSwaps.filter(
         (t) => t.transactionHash !== matchingPendingSwap.transactionHash
       );
-
       this.pendingSwapsByAddr.set(addr, newPendingSwaps);
     } else {
       // inbound transfer, add as a pending swap
+      console.log(
+        `[FOREIGN-COIN] inbound token transfer to ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+      );
       const pending = this.pendingSwapsByAddr.get(addr);
       if (pending != null) {
         pending.push(log);
@@ -258,7 +268,8 @@ export class ForeignCoinIndexer extends Indexer {
 
     const correspondingReceive = this.correspondingReceiveOfSend.get(
       addrTxHashKey(addr, txHash)
-    )!;
+    );
+    if (correspondingReceive == null) return null;
 
     return {
       ...correspondingReceive,
@@ -275,7 +286,7 @@ export class ForeignCoinIndexer extends Indexer {
     toAddr: Address
   ): Promise<SwapQueryResult | null> {
     if (fromToken === toToken) return null;
-    const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
+    const chainId = chainConfig.chainL2.id;
 
     return await getSwapQuote({
       amountInStr: fromAmount,

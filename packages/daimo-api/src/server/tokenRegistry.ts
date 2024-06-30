@@ -1,21 +1,31 @@
 import {
   ForeignToken,
   assert,
+  baseUSDC,
   baseUSDbC,
   getChainName,
   getNativeETHForChain,
 } from "@daimo/common";
-import { Address, getAddress, isAddress } from "viem";
+import { Address, Hex, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
 
-interface TokenList {
-  tokens: ForeignToken[];
+interface CoinGeckoResponse {
+  tokens: CoinGeckoToken[];
   version: any;
 }
 
-const customOverrides = [baseUSDbC] as ForeignToken[];
+interface CoinGeckoToken {
+  chainId: number;
+  address: Hex;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoURI?: string;
+}
+
+const customOverrides = [baseUSDC, baseUSDbC] as ForeignToken[];
 
 // Token Registry sorted by chain id.
 export class TokenRegistry {
@@ -40,7 +50,7 @@ export class TokenRegistry {
         await fetchWithBackoff(
           `https://tokens.coingecko.com/${chainName}/all.json`
         )
-      ).json()) as TokenList;
+      ).json()) as CoinGeckoResponse;
 
       for (const token of tokenList.tokens) {
         assert(
@@ -50,9 +60,12 @@ export class TokenRegistry {
         const largeLogo = token.logoURI
           ?.split("?")[0]
           .replace("thumb", "large");
-        if (!isAddress(token.token)) continue; // ignore invalid addresses that Coingecko returns
-        const addr = getAddress(token.token);
-        if (addr === chainConfig.tokenAddress) continue; // excude home coin
+        // Ignore invalid addresses that Coingecko returns
+        if (!isAddress(token.address)) continue;
+        const addr = getAddress(token.address);
+
+        // TODO: add known coins, including all supported stables
+        // if (addr === chainConfig.tokenAddress) continue; // excude home coin
 
         const override = customOverrides.find(
           (o) => o.token === addr && o.chainId === chainId
