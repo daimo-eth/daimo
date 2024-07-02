@@ -16,6 +16,7 @@ import {
   assert,
   daimoDomainAddress,
   formatDaimoLink,
+  guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
 import semverLt from "semver/functions/lt";
@@ -33,7 +34,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
-import { getEnvApi } from "../env";
+import { chainConfig, getEnvApi } from "../env";
 import {
   LandlineAccount,
   getLandlineAccounts,
@@ -44,7 +45,6 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { getAppVersionTracker } from "../server/appVersion";
 import { TrpcRequestContext } from "../server/trpc";
-import { Watcher } from "../shovel/watcher";
 
 export interface AccountHistoryResult {
   address: Address;
@@ -86,7 +86,6 @@ export async function getAccountHistory(
   address: Address,
   inviteCode: string | undefined,
   sinceBlockNum: number,
-  watcher: Watcher,
   vc: ViemClient,
   homeCoinIndexer: HomeCoinIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
@@ -99,7 +98,8 @@ export async function getAccountHistory(
   keyReg: KeyRegistry,
   paymaster: Paymaster,
   db: DB,
-  extApiCache: ExternalApiCache
+  extApiCache: ExternalApiCache,
+  blockNumber: number
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
@@ -108,23 +108,22 @@ export async function getAccountHistory(
   console.log(`${log}: starting`);
 
   // Get latest finalized block. Next account sync, fetch since this block.
-  const finBlock = await vc.publicClient.getBlock({
-    blockTag: "finalized",
-  });
+  const finBlock = await vc.getFinalizedBlock();
   if (finBlock.number == null) throw new Error("No finalized block");
   if (finBlock.number < sinceBlockNum) {
     console.log(`${log}: sinceBlockNum > finalized block ${finBlock.number}`);
   }
 
   // Get the latest block + current balance.
-  const lastBlk = watcher.latestBlock();
-  if (lastBlk == null) throw new Error("No latest block");
   assert(
-    lastBlk.number >= finBlock.number,
-    `Latest block ${lastBlk.number} < finalized ${finBlock.number}`
+    blockNumber >= Number(finBlock.number),
+    `Latest block ${blockNumber} < finalized ${finBlock.number}`
   );
-  const lastBlock = Number(lastBlk.number);
-  const lastBlockTimestamp = lastBlk.timestamp;
+  const lastBlock = blockNumber;
+  const lastBlockTimestamp = guessTimestampFromNum(
+    lastBlock,
+    chainConfig.daimoChain
+  );
   const lastBalance = homeCoinIndexer.getCurrentBalance(address);
 
   // TODO: get userops, including reverted ones. Show failed sends.

@@ -353,7 +353,6 @@ export function createRouter(
           address,
           inviteCode,
           sinceBlockNum,
-          watcher,
           vc,
           homeCoinIndexer,
           foreignCoinIndexer,
@@ -366,7 +365,8 @@ export function createRouter(
           keyReg,
           paymaster,
           db,
-          extApiCache
+          extApiCache,
+          await watcher.getShovelLatest()
         );
       }),
 
@@ -733,13 +733,15 @@ export function createRouter(
         return observable<AccountHistoryResult>((emit) => {
           let lastEmittedBlock = opts.input.sinceBlockNum;
 
-          const pushHistory = (emitOnlyOnNewTransfers: boolean) => {
-            getAccountHistory(
+          const pushHistory = async (
+            blockNumber: number,
+            requireNewTransfers = false
+          ) => {
+            const history = await getAccountHistory(
               opts.ctx,
               address,
               inviteCode,
-              lastEmittedBlock,
-              watcher,
+              blockNumber,
               vc,
               homeCoinIndexer,
               foreignCoinIndexer,
@@ -752,42 +754,42 @@ export function createRouter(
               keyReg,
               paymaster,
               db,
-              extApiCache
-            ).then((history) => {
-              // we can have concurrent requests. discard interval pushes
-              // that arrived too late
-              if (
-                !emitOnlyOnNewTransfers &&
-                history.lastBlock <= lastEmittedBlock
-              ) {
-                return;
-              }
+              extApiCache,
+              blockNumber
+            );
 
-              if (emitOnlyOnNewTransfers && history.transferLogs.length === 0) {
-                return;
-              }
+            if (lastEmittedBlock >= history.lastBlock) {
+              return;
+            }
 
-              emit.next(history);
+            if (requireNewTransfers && history.transferLogs.length === 0) {
+              return;
+            }
 
-              lastEmittedBlock = history.lastBlock;
-            });
+            emit.next(history);
+
+            lastEmittedBlock = history.lastBlock;
           };
 
-          // when new block is produced,
-          // push history only if there are new transfers
-          const onNewBlock = async () => {
-            pushHistory(true);
+          // on new block, push state only when new transfers are available
+          const onNewBlock = async (payload: string) => {
+            const { block_number } = JSON.parse(payload);
+
+            pushHistory(block_number, true);
           };
 
           // for interval updates push full history
-          const intervalTimer = setInterval(() => {
-            pushHistory(false);
+          const intervalTimer = setInterval(async () => {
+            const blockNumber = await watcher.getShovelLatest();
+
+            pushHistory(blockNumber);
           }, refreshInterval);
 
           watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
 
           return () => {
             watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+
             clearInterval(intervalTimer);
           };
         });

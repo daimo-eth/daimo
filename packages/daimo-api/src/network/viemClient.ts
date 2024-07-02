@@ -26,6 +26,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { IExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
+import { lazyCache } from "../utils/cache";
 import { memoize } from "../utils/func";
 
 function getTransportFromEnv() {
@@ -289,6 +290,14 @@ export class ViemClient {
     this.waitForReceipt(ret);
     return ret;
   }
+
+  getFinalizedBlock = lazyCache(
+    () => {
+      return this.publicClient.getBlock({ blockTag: "finalized" });
+    },
+    2_000,
+    1_000
+  );
 }
 
 export type ContractType<TAbi extends Abi> = GetContractReturnType<
