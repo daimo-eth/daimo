@@ -1,9 +1,11 @@
 import {
   DisplayOpEvent,
+  EAccount,
   amountToDollars,
   formatDaimoLink,
   getAccountName,
   getForeignCoinDisplayAmount,
+  getSynthesizedMemo,
 } from "@daimo/common";
 import {
   daimoPaymasterV2ABI,
@@ -25,6 +27,8 @@ import { HomeCoinIndexer, Transfer } from "../contract/homeCoinIndexer";
 import { NameRegistry } from "../contract/nameRegistry";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
+import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
+import { InviteGraph } from "../offchain/inviteGraph";
 
 export class Crontab {
   private cronJobs: CronJob[] = [];
@@ -33,6 +37,8 @@ export class Crontab {
     private vc: ViemClient,
     private homeCoinIndexer: HomeCoinIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
+    private inviteCodeTracker: InviteCodeTracker,
+    private inviteGraph: InviteGraph,
     private nameRegistry: NameRegistry,
     private telemetry: Telemetry
   ) {}
@@ -164,17 +170,35 @@ export class Crontab {
       this.nameRegistry.getEAccount(opEvent.to),
     ]);
 
+    const getAccountInfo = async (acc: EAccount) => {
+      const invitees = this.inviteGraph.getInvitees(acc.addr);
+      const inviteCode =
+        await this.inviteCodeTracker.getBestInviteCodeForSender(acc.addr);
+      const inviteStatus = inviteCode
+        ? await this.inviteCodeTracker.getInviteCodeStatus({
+            type: "invite",
+            code: inviteCode,
+          })
+        : undefined;
+
+      return `${getAccountName(acc)} (${invitees.length} invitees, ${
+        inviteStatus?.usesLeft || 0
+      } available)`;
+    };
+
+    const memo = getSynthesizedMemo(opEvent, chainConfig);
+
     // Post to Clippy
     const parts = [
       "Transfer:",
-      getAccountName(fromAcc),
+      await getAccountInfo(fromAcc),
       "->",
-      getAccountName(toAcc),
+      await getAccountInfo(toAcc),
       "$" + amountToDollars(opEvent.amount),
       opEvent.type === "transfer" &&
         opEvent.requestStatus &&
         `for ${formatDaimoLink(opEvent.requestStatus.link)}`,
-      opEvent.type === "transfer" && opEvent.memo && `: ${opEvent.memo}`,
+      memo && `: ${memo}`,
       opEvent.blockNumber != null &&
         opEvent.logIndex != null &&
         `https://ethreceipts.org/l/${chainConfig.chainL2.id}/${opEvent.blockNumber}/${opEvent.logIndex}`,

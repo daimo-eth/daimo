@@ -1,7 +1,8 @@
+import { ChainConfig } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
-import { ForeignToken } from "./foreignToken";
+import { ForeignToken, getForeignCoinDisplayAmount } from "./foreignToken";
 import { BigIntStr } from "./model";
 
 /**
@@ -180,6 +181,37 @@ export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
         op.noteStatus.sender.addr,
         op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
       ];
+    }
+  }
+}
+
+// Get memo text for an op
+// Either uses the memo field for standard transfers, e.g. "for ice cream"
+// Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
+// or "Accepted 5 USDT as USDC" if long
+export function getSynthesizedMemo(
+  op: DisplayOpEvent,
+  chainConfig: ChainConfig,
+  short?: boolean
+) {
+  const coinName = chainConfig.tokenSymbol.toUpperCase();
+
+  if (op.memo) return op.memo;
+  if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
+  if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
+
+  if (op.type !== "transfer") return null;
+  if (op.requestStatus) {
+    return op.requestStatus.memo;
+  } else if (op.preSwapTransfer) {
+    const readableAmount = getForeignCoinDisplayAmount(
+      op.preSwapTransfer.amount,
+      op.preSwapTransfer.coin
+    );
+    if (short) {
+      return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;
+    } else {
+      return `Accepted ${readableAmount} ${op.preSwapTransfer.coin.symbol} as ${coinName}`;
     }
   }
 }
