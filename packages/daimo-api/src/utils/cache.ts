@@ -34,13 +34,9 @@ export function lazyCache<T>(
           cachedValue = value;
           cachedAt = performance.now();
           currentPromise = null;
-
-          console.log(`\t${new Date().toISOString()}\tdebug\tpromise set`);
         })
         .catch((e) => {
-          console.error(`[VIEM] pollFinalizedBlock error: ${e}`);
-
-          console.log(`\t${new Date().toISOString()}\tdebug\terror: ${e}`);
+          console.error("lazyCache error", e);
 
           cachedValue = undefinedCachedValue;
           cachedAt = -1;
@@ -52,21 +48,14 @@ export function lazyCache<T>(
     if (currentPromise) {
       // cache expired, waiting for current result
       if (currentPromise && now > cachedAt + cacheTime) {
-        console.log(
-          `\t${new Date().toISOString()}\tdebug\tawaiting. cache expired`
-        );
         return currentPromise as Promise<T>;
       }
 
       // no cached value yet, wait fn to finish
       if (cachedValue === undefinedCachedValue) {
-        console.log(`\t${new Date().toISOString()}\tdebug\tawaiting. no cache`);
-
         return currentPromise as Promise<T>;
       }
     }
-
-    console.log(`\t${new Date().toISOString()}\tdebug\treturning value`);
 
     // we have a cached value, return it
     return Promise.resolve(cachedValue as T);

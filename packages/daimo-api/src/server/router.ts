@@ -760,7 +760,7 @@ export function createRouter(
               blockNumber
             );
 
-            if (lastEmittedBlock > history.lastBlock) {
+            if (lastEmittedBlock >= history.lastBlock) {
               return;
             }
 
