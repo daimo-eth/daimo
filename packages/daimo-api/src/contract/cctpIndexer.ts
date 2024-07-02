@@ -3,9 +3,7 @@ import { Pool } from "pg";
 import { Hex } from "viem";
 
 import { Indexer } from "./indexer";
-import { NameRegistry } from "./nameRegistry";
 import { chainConfig } from "../env";
-import { UniswapClient } from "../network/uniswapClient";
 import { ViemClient } from "../network/viemClient";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -36,11 +34,7 @@ export type CCTPAttestation = {
 export class CCTPIndexer extends Indexer {
   private pendingMessages = new Map<string, CCTPDepositMessage>();
 
-  constructor(
-    private vc: ViemClient,
-    private uc: UniswapClient,
-    private nameReg: NameRegistry
-  ) {
+  constructor(private vc: ViemClient) {
     super("CCTP");
   }
 
