@@ -5,7 +5,8 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
-import { DaimoChain } from "@daimo/contract";
+import { ChainConfig, DaimoChain } from "@daimo/contract";
+import { Address, zeroAddress } from "viem";
 
 import {
   ForeignToken,
@@ -159,6 +160,11 @@ export function getCctpDomain(chainId: number): number {
   return getAccountChain(chainId).cctpDomain;
 }
 
+/** Returns the bridge coin address for the given chainId. */
+export function getBridgeCoin(chainId: number): ForeignToken {
+  return getAccountChain(chainId).bridgeCoin;
+}
+
 /** Returns whether the chainId is a testnet. */
 export function isTestnetChain(chainId: number): boolean {
   if (chainId === baseSepolia.chainId) return true;
@@ -176,3 +182,70 @@ export function daimoChainToId(chain: DaimoChain): number {
       throw new Error(`Unknown chain ${chain}`);
   }
 }
+
+/** Get native WETH token address using chainId. */
+export function getNativeWETHByChain(chainId: number): ForeignToken {
+  switch (chainId) {
+    case base.chainId:
+      return baseWETH;
+    case baseSepolia.chainId:
+      return baseSepoliaWETH;
+    default:
+      throw new Error(`No WETH for chain ${chainId}`);
+  }
+}
+
+// Checks if the token ETH or native WETH on the given chain.
+export function isNativeETH(
+  token: ForeignToken,
+  chain: ChainConfig | number
+): boolean {
+  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
+  return token.chainId === chainId && token.token === zeroAddress;
+}
+
+// Get native ETH placeholder pseudo-token.
+export function getNativeETHForChain(
+  chainId: number
+): ForeignToken | undefined {
+  switch (chainId) {
+    case base.chainId:
+    case baseSepolia.chainId:
+      return {
+        token: zeroAddress,
+        decimals: 18,
+        name: "Ethereum",
+        symbol: "ETH",
+        logoURI:
+          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+        chainId,
+      };
+    default:
+      // Some chains, like Polygon PoS, don't have native ETH.
+      return undefined;
+  }
+}
+
+// Link token to chain.
+baseUSDC.chainId = base.chainId;
+baseWETH.chainId = base.chainId;
+
+arbitrumUSDC.chainId = arbitrum.chainId;
+arbitrumWETH.chainId = arbitrum.chainId;
+
+optimismUSDC.chainId = optimism.chainId;
+optimismWETH.chainId = optimism.chainId;
+
+polygonUSDC.chainId = polygon.chainId;
+polygonWETH.chainId = polygon.chainId;
+
+avalancheUSDC.chainId = avalanche.chainId;
+avalancheWETH.chainId = avalanche.chainId;
+
+arbitrumSepoliaUSDC.chainId = arbitrumSepolia.chainId;
+arbitrumSepoliaWETH.chainId = arbitrumSepolia.chainId;
+
+optimismSepoliaUSDC.chainId = optimismSepolia.chainId;
+optimismSepoliaWETH.chainId = optimismSepolia.chainId;
+
+polygonSepoliaUSDC.chainId = polygonAmoy.chainId;

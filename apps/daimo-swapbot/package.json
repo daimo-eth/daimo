@@ -1,0 +1,26 @@
+{
+  "name": "@daimo/swapbot",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "echo Use 'npm start' for swapbot dev",
+    "start": "ts-node src/index.ts",
+    "lint": "npm run lint:deps && npm run lint:style",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
+    "lint:style": "eslint . --max-warnings=0"
+  },
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@daimo/api": "*",
+    "@daimo/common": "*",
+    "@daimo/contract": "*",
+    "@tsconfig/node20": "^20.1.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "viem": "^1.19.15"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  }
+}

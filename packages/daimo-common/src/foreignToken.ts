@@ -1,4 +1,3 @@
-import { ChainConfig } from "@daimo/contract";
 import { Address, formatUnits, zeroAddress } from "viem";
 
 /**
@@ -12,26 +11,14 @@ import { Address, formatUnits, zeroAddress } from "viem";
  * https://github.com/Uniswap/sdks/blob/main/sdks/sdk-core/src/entities/weth9.ts
  */
 
-import {
-  arbitrum,
-  arbitrumSepolia,
-  avalanche,
-  avalancheFuji,
-  base,
-  baseSepolia,
-  optimism,
-  optimismSepolia,
-  polygon,
-  polygonAmoy,
-} from "./chain";
 import { amountToDollars } from "./coin";
 
 export type ForeignToken = {
-  chainId: number;
   token: Address;
   name: string;
   symbol: string;
   decimals: number;
+  chainId?: number; // Make optional initially to avoid circular dependency.
   logoURI?: string;
 };
 
@@ -54,7 +41,6 @@ export const baseSepoliaWETH: ForeignToken = {
   name: "Ethereum",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: baseSepolia.chainId,
 };
 
 export const baseSepoliaUSDC: ForeignToken = {
@@ -63,7 +49,6 @@ export const baseSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: baseSepolia.chainId,
 };
 
 //
@@ -76,7 +61,6 @@ export const baseWETH: ForeignToken = {
   name: "Ethereum",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: base.chainId,
 };
 
 export const baseUSDC: ForeignToken = {
@@ -85,7 +69,6 @@ export const baseUSDC: ForeignToken = {
   symbol: "USDC",
   decimals: 6,
   logoURI: TokenLogo.USDC,
-  chainId: base.chainId,
 };
 
 export const baseUSDbC: ForeignToken = {
@@ -94,7 +77,6 @@ export const baseUSDbC: ForeignToken = {
   symbol: "USDbC",
   decimals: 6,
   logoURI: `https://daimo.com/assets/foreign-coin-logos/USDbC.png`,
-  chainId: base.chainId,
 };
 
 export const baseDAI: ForeignToken = {
@@ -103,7 +85,6 @@ export const baseDAI: ForeignToken = {
   symbol: "DAI",
   decimals: 18,
   logoURI: TokenLogo.DAI,
-  chainId: base.chainId,
 };
 
 export const baseUSDT: ForeignToken = {
@@ -112,7 +93,6 @@ export const baseUSDT: ForeignToken = {
   symbol: "USDT",
   decimals: 6,
   logoURI: TokenLogo.USDT,
-  chainId: base.chainId,
 };
 
 //
@@ -125,7 +105,6 @@ export const arbitrumUSDC: ForeignToken = {
   symbol: "USDC",
   decimals: 6,
   logoURI: TokenLogo.USDC,
-  chainId: arbitrum.chainId,
 };
 
 export const arbitrumWETH: ForeignToken = {
@@ -134,7 +113,6 @@ export const arbitrumWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: arbitrum.chainId,
 };
 
 //
@@ -147,7 +125,6 @@ export const arbitrumSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: arbitrumSepolia.chainId,
 };
 
 export const arbitrumSepoliaWETH: ForeignToken = {
@@ -156,7 +133,6 @@ export const arbitrumSepoliaWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: arbitrumSepolia.chainId,
 };
 
 //
@@ -169,7 +145,6 @@ export const optimismUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: optimism.chainId,
 };
 
 export const optimismWETH: ForeignToken = {
@@ -178,7 +153,6 @@ export const optimismWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: optimism.chainId,
 };
 
 //
@@ -191,7 +165,6 @@ export const optimismSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: optimismSepolia.chainId,
 };
 
 export const optimismSepoliaWETH: ForeignToken = {
@@ -200,7 +173,6 @@ export const optimismSepoliaWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: optimismSepolia.chainId,
 };
 
 //
@@ -213,7 +185,6 @@ export const polygonUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: polygon.chainId,
 };
 
 export const polygonWETH: ForeignToken = {
@@ -222,7 +193,6 @@ export const polygonWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: polygon.chainId,
 };
 
 //
@@ -235,7 +205,6 @@ export const polygonSepoliaUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: polygonAmoy.chainId,
 };
 
 //
@@ -248,7 +217,6 @@ export const avalancheUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: avalanche.chainId,
 };
 
 export const avalancheWETH: ForeignToken = {
@@ -257,7 +225,6 @@ export const avalancheWETH: ForeignToken = {
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: avalanche.chainId,
 };
 
 //
@@ -270,7 +237,6 @@ export const avalancheFujiUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: avalancheFuji.chainId,
 };
 
 /* --------------------- Token Utils --------------------- */
@@ -305,49 +271,6 @@ export function isAmountDust(
   if (Number(amountToDollars(usdcAmount)) >= 1) return false;
 
   return true;
-}
-
-// Get native ETH placeholder pseudo-token.
-export function getNativeETHForChain(
-  chainId: number
-): ForeignToken | undefined {
-  switch (chainId) {
-    case base.chainId:
-    case baseSepolia.chainId:
-      return {
-        token: zeroAddress,
-        decimals: 18,
-        name: "Ethereum",
-        symbol: "ETH",
-        logoURI:
-          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-        chainId,
-      };
-    default:
-      // Some chains, like Polygon PoS, don't have native ETH.
-      return undefined;
-  }
-}
-
-// Get native WETH token address using chainId.
-export function getNativeWETHByChain(chainId: number): ForeignToken {
-  switch (chainId) {
-    case base.chainId:
-      return baseWETH;
-    case baseSepolia.chainId:
-      return baseSepoliaWETH;
-    default:
-      throw new Error(`No WETH for chain ${chainId}`);
-  }
-}
-
-// Checks if the token ETH or native WETH on the given chain.
-export function isNativeETH(
-  token: ForeignToken,
-  chain: ChainConfig | number
-): boolean {
-  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
-  return token.chainId === chainId && token.token === zeroAddress;
 }
 
 // Any coin send (stablecoins + ETH).
