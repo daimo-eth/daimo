@@ -31,7 +31,7 @@ contract AccountVerify1271Test is Test {
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
         account = factory.createAccount(
-            84532, // home chain = Base Sepolia
+            8453, // home chain = Base Mainnet
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),

@@ -9,8 +9,9 @@ import "./DaimoAccountV2.sol";
 /**
  * This factory deploys ERC-4337 DaimoAccountV2 contracts using CREATE2.
  *
- * The factory's createAccount returns the target account address even if it it's already deployed.
- * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
+ * The factory's createAccount returns the target account address even if
+ * it's already deployed. This way, the entryPoint.getSenderAddress() can be
+ * called either before or after the account is created.
  */
 contract DaimoAccountFactoryV2 {
     DaimoAccountV2 public immutable accountImplementation;
@@ -24,8 +25,10 @@ contract DaimoAccountFactoryV2 {
     /**
      * Create an account, and return its address.
      * Returns the address even if the account is already deployed.
-     * Note that during UserOperation execution, this method is called only if the account is not deployed.
-     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation.
+     * Note that during UserOperation execution, this method is called only if
+     * the account is not deployed. This method returns an existing account
+     * address so that entryPoint.getSenderAddress() would work even after
+     * account creation.
      */
     function createAccount(
         uint256 _homeChain,
@@ -70,9 +73,8 @@ contract DaimoAccountFactoryV2 {
         );
     }
 
-    /**
-     * Calculate the counterfactual address of this account as it would be returned by createAccount()
-     */
+    /// Calculate the counterfactual address of this account as it would be
+    /// returned by createAccount().
     function getAddress(
         uint256 _homeChain,
         IERC20 _homeCoin,

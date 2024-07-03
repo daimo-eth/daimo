@@ -5,7 +5,8 @@ import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
-// See https://github.com/circlefin/evm-cctp-contracts/blob/master/src/TokenMessenger.sol
+/// TokenMessenger interface for CCTP.
+/// See https://github.com/circlefin/evm-cctp-contracts/blob/master/src/TokenMessenger.sol
 interface ITokenMessenger {
     function depositForBurn(
         uint256 amount,
@@ -25,10 +26,11 @@ interface IDaimoBridger {
 
 // todo: burnLimitsPerMessage
 // todo: minterAllowance
+
 contract DaimoCCTPBridger is IDaimoBridger {
-    // Constants used by CCTP.
+    // Constants used for CCTP.
     ITokenMessenger public cctpMessenger;
-    mapping(uint256 => uint32) public cctpDomainMapping; // chainId => domain
+    mapping(uint256 => uint32) public cctpDomainMapping; // chainId => domain.
 
     constructor(
         ITokenMessenger _cctpMessenger,
@@ -47,6 +49,7 @@ contract DaimoCCTPBridger is IDaimoBridger {
         return bytes32(uint256(uint160(addr)));
     }
 
+    /// Sendsa assets on the foreign chain to the account's home chain.
     function sendToHomeChain(
         uint256 homeChain,
         IERC20 tokenIn,

@@ -48,7 +48,7 @@ contract AccountSigningKeysTest is Test {
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
-            84532, // home chain = Base Sepolia
+            8453, // home chain = Base Mainnet
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),
@@ -59,7 +59,7 @@ contract AccountSigningKeysTest is Test {
         console.log("new account address:", address(acc));
         assertTrue(acc.numActiveKeys() == uint8(1));
 
-        vm.expectRevert("only self");
+        vm.expectRevert("DAv2: only self");
         acc.addSigningKey(1, key2);
 
         vm.startPrank(address(acc));
@@ -73,7 +73,7 @@ contract AccountSigningKeysTest is Test {
 
         // add zero key
         bytes32[2] memory keyZero = [bytes32(0), bytes32(0)];
-        vm.expectRevert("new key cannot be 0");
+        vm.expectRevert("DAv2: new key cannot be 0");
         acc.addSigningKey(1, keyZero);
 
         // remove key1
@@ -83,11 +83,11 @@ contract AccountSigningKeysTest is Test {
         assertTrue(acc.numActiveKeys() == uint8(1));
 
         // remove nonexistent key
-        vm.expectRevert("key does not exist");
+        vm.expectRevert("DAv2: key does not exist");
         acc.removeSigningKey(199);
 
         // remove key2
-        vm.expectRevert("cannot remove only signing key");
+        vm.expectRevert("DAv2: cannot remove only signing key");
         acc.removeSigningKey(200);
 
         vm.stopPrank();
@@ -108,7 +108,7 @@ contract AccountSigningKeysTest is Test {
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
-            84532, // home chain = Base Sepolia
+            8453, // home chain = Base Mainnet
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),
