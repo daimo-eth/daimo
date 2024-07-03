@@ -423,16 +423,16 @@ export class DB {
         [row.maxUses, row.code]
       );
     }
-    if (row.bonusDollarInviter != null) {
+    if (row.bonusDollarsInviter != null) {
       res = await this.pool.query<[], any[]>(
         `UPDATE invitecode SET bonus_cents_inviter = $1 WHERE code = $2`,
-        [row.bonusDollarInviter * 100, row.code]
+        [row.bonusDollarsInviter * 100, row.code]
       );
     }
-    if (row.bonusDollarInvitee != null) {
+    if (row.bonusDollarsInvitee != null) {
       res = await this.pool.query<[], any[]>(
         `UPDATE invitecode SET bonus_cents_invitee = $1 WHERE code = $2`,
-        [row.bonusDollarInvitee * 100, row.code]
+        [row.bonusDollarsInvitee * 100, row.code]
       );
     }
 
@@ -557,8 +557,8 @@ export interface InsertInviteCodeArgs {
 export interface UpdateInviteCodeArgs {
   code: string;
   maxUses?: number;
-  bonusDollarInviter?: number;
-  bonusDollarInvitee?: number;
+  bonusDollarsInvitee?: number;
+  bonusDollarsInviter?: number;
 }
 
 interface RawInviteCodeRow {
