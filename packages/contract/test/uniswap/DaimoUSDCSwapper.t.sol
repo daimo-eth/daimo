@@ -24,8 +24,10 @@ contract SwapperTest is Test {
 
     function setUp() public {
         IERC20[] memory hopTokens = new IERC20[](1);
-
         hopTokens[0] = weth;
+
+        IERC20[] memory outputTokens = new IERC20[](1);
+        outputTokens[0] = usdc;
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
@@ -34,9 +36,9 @@ contract SwapperTest is Test {
         oracleFeeTiers[3] = 10000;
 
         swapper = new DaimoUSDCSwapper({
-            _usdc: usdc,
             _weth: weth,
             _hopTokens: hopTokens,
+            _outputTokens: outputTokens,
             _uniswapRouter: ISwapRouter(
                 0x2626664c2603336E57B271c5C0b26F421741e481
             ),

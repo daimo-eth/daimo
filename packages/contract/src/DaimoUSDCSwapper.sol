@@ -33,9 +33,10 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
     // Constants used by Uniswap.
     ISwapRouter public uniswapRouter;
-    IERC20 public usdc;
     IERC20 public weth;
     IERC20[] public hopTokens;
+    IERC20[] public outputTokens;
+    mapping(IERC20 => bool) public isOutputToken;
     uint24[] public oracleFeeTiers;
     uint32 public oraclePeriod;
     IUniswapV3Factory public oraclePoolFactory;
@@ -44,21 +45,25 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     event LowLevelOracleError(address pool, uint32 secondsAgo, bytes reason);
 
     constructor(
-        IERC20 _usdc,
         IERC20 _weth,
         IERC20[] memory _hopTokens,
+        IERC20[] memory _outputTokens,
         ISwapRouter _uniswapRouter,
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
     ) {
-        usdc = _usdc;
         weth = _weth;
         hopTokens = _hopTokens;
+        outputTokens = _outputTokens;
         uniswapRouter = _uniswapRouter;
         oracleFeeTiers = _oracleFeeTiers;
         oraclePeriod = _oraclePeriod;
         oraclePoolFactory = _oraclePoolFactory;
+
+        for (uint256 i = 0; i < _outputTokens.length; i++) {
+            isOutputToken[_outputTokens[i]] = true;
+        }
     }
 
     // Gets TWAP and TWAL for a single pool.
@@ -240,7 +245,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
     function getFinalOutputToken(
         bytes memory swapPath
     ) public pure returns (IERC20) {
-        require(swapPath.length > 20, "invalid swap path");
+        require(swapPath.length > 20, "DUSDCS: invalid swap path");
         bytes memory outputToken = new bytes(20);
         for (uint256 i = 0; i < 20; i++) {
             outputToken[i] = swapPath[swapPath.length - 20 + i];
@@ -251,11 +256,16 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
 
     // Swap input coins to USDC at a fair price, given a path and possibly
     // an altruistic amount to prevent high slippage from blocking any swap.
-    function swapToBridgableCoin(
-        uint128 amountIn,
+    function swapToCoin(
         IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut,
         bytes calldata extraData
-    ) public returns (uint128 totalAmountOut, IERC20 tokenOut) {
+    ) public returns (uint256 totalAmountOut) {
+        // Ensure we support the output token
+        require(isOutputToken[tokenOut], "DUSDCS: unsupported output token");
+
+        // Decode Uniswap input
         DaimoUSDCSwapperExtraData memory extra = abi.decode(
             extraData,
             (DaimoUSDCSwapperExtraData)
@@ -264,8 +274,7 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         uint128 altruisticAmountOut = extra.altruisticAmountOut;
         address altruisticSender = extra.altruisticSender;
 
-        // Move input token from caller to this contract and approve
-        // uniswap router to spend it.
+        // Claim input token from caller, then approve it to the Uniswap router.
         TransferHelper.safeTransferFrom(
             address(tokenIn),
             msg.sender,
@@ -278,8 +287,11 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
             amountIn
         );
 
-        // // Compute a fair price for the input token swap.
-        (uint256 oracleAmountOut, ) = quote(amountIn, tokenIn, usdc);
+        // Compute a fair price for the input token swap.
+        require(amountIn < _MAX_UINT128, "DUSDCS: amountIn too large");
+        uint128 amountIn128 = uint128(amountIn);
+        (uint256 oracleAmountOut, ) = quote(amountIn128, tokenIn, tokenOut);
+        require(oracleAmountOut > 0, "DUSDCS: amountOut cannot be 0");
 
         // 1% slippage tolerance, to incentivize quick swaps via MEV.
         uint256 expectedAmountOut = oracleAmountOut - (oracleAmountOut / 100);
@@ -294,21 +306,19 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
                 amountOutMinimum: swapAmountOutMinimum
             });
 
-        uint256 swapAmountOut256 = uniswapRouter.exactInput(params);
-        require(swapAmountOut256 < _MAX_UINT128, "swap too large");
-        uint128 swapAmountOut = uint128(swapAmountOut256);
+        uint256 swapAmountOut = uniswapRouter.exactInput(params);
         IERC20 outputToken = getFinalOutputToken(swapPath);
-        require(outputToken == usdc, "not USDC");
+        require(outputToken == tokenOut, "DUSDCS: wrong output token");
 
         require(
             swapAmountOut + altruisticAmountOut >= expectedAmountOut,
-            "not enough output"
+            "DUSDCS: not enough output"
         );
 
         // Route altruistic funds to the caller.
         if (altruisticAmountOut > 0) {
             TransferHelper.safeTransferFrom(
-                address(usdc),
+                address(tokenOut),
                 altruisticSender,
                 msg.sender,
                 altruisticAmountOut
@@ -316,6 +326,5 @@ contract DaimoUSDCSwapper is IDaimoSwapper {
         }
 
         totalAmountOut = swapAmountOut + altruisticAmountOut;
-        tokenOut = usdc;
     }
 }

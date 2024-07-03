@@ -13,8 +13,10 @@ contract DaimoUniswapOracleTest is Test {
 
     function setUp() public {
         IERC20[] memory hopTokens = new IERC20[](1);
-
         hopTokens[0] = IERC20(0x4200000000000000000000000000000000000006);
+
+        IERC20[] memory outputTokens = new IERC20[](1);
+        outputTokens[0] = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
@@ -23,9 +25,9 @@ contract DaimoUniswapOracleTest is Test {
         oracleFeeTiers[3] = 10000;
 
         swapper = new DaimoUSDCSwapper({
-            _usdc: IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913),
             _weth: IERC20(0x4200000000000000000000000000000000000006),
             _hopTokens: hopTokens,
+            _outputTokens: outputTokens,
             _uniswapRouter: ISwapRouter(
                 0x2626664c2603336E57B271c5C0b26F421741e481
             ),

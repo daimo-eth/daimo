@@ -85,7 +85,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     event AccountInitialized(
         IEntryPoint indexed entryPoint,
         uint256 homeChain,
-        IERC20 homeCoin
+        IERC20 homeCoin,
+        IDaimoSwapper swapper,
+        IDaimoBridger bridger
     );
 
     /// Emitted on adding a new signing key (add device).
@@ -103,24 +105,35 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     );
 
     /// Emitted on foreign coin auto-swap.
-    event ForeignCoinSwap(
-        uint128 amountIn,
+    event AutoSwap(
         IERC20 tokenIn,
-        uint128 amountOut,
-        IERC20 tokenOut
+        uint256 amountIn,
+        IERC20 tokenOut,
+        uint256 amountOut
     );
 
     /// Emitted on foreign chains when we initiate a bridge to home chain.
-    event ForeignChainBridge(uint128 amountIn, IERC20 tokenIn);
-
-    /// Emitted on forwarding address changes.
-    event ForwardingAddressSet(address forwardingAddress);
-
-    /// Emitted when we forward an asset to the forwarding address.
-    event AssetForwarded(uint128 amountIn, IERC20 tokenIn);
+    event Collect(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenBridge,
+        uint256 amountBridge,
+        uint256 toChainID
+    );
 
     /// Emitted on home chain when we swap an asset to the home coin.
-    event HomeChainSwap(uint128 amountIn, IERC20 tokenIn);
+    event SwapToHomeCoin(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut,
+        uint256 amountOut
+    );
+
+    /// Emitted on forwarding address changes.
+    event SetForwardingAddress(address forwardingAddress);
+
+    /// Emitted when we forward an asset to the forwarding address.
+    event ForwardAsset(IERC20 tokenIn, uint256 amountIn);
 
     /// Verify caller is the 4337 EntryPoint. Used to validate & run userops.
     modifier onlyEntryPoint() {
@@ -130,14 +143,25 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Verify that we're in a valid userop, called via executeBatch.
     modifier onlyOp() {
         require(msg.sender == address(this), "DAv2: only self");
-        require(forwardingAddress == address(0), "DAv2: only not forwarding");
         require(block.chainid == homeChain, "DAv2: only home chain");
+        require(forwardingAddress == address(0), "DAv2: only not forwarding");
         _;
     }
 
     /// Verify that we're on the home chain & account is active, not forwarding.
     modifier onlyNotForwarding() {
+        require(block.chainid == homeChain, "DAv2: only home chain");
         require(forwardingAddress == address(0), "DAv2: only not forwarding");
+        _;
+    }
+
+    modifier onlyHomeChain() {
+        require(block.chainid == homeChain, "DAv2: only home chain");
+        _;
+    }
+
+    modifier onlyForeignChain() {
+        require(block.chainid != homeChain, "DAv2: only foreign chain");
         _;
     }
 
@@ -152,8 +176,8 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         _disableInitializers();
     }
 
-    /// Initializes a new account -- intended to be called with CREATE2
-    /// to enshrine the account's home state in the address.
+    /// Initializes a new account. Intended to be called with CREATE2 to
+    /// enshrine the account's home chain in the address on all chains.
     function initialize(
         uint256 _homeChain,
         IERC20 _homeCoin,
@@ -166,7 +190,13 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         homeCoin = _homeCoin;
         swapper = _swapper;
         bridger = _bridger;
-        emit AccountInitialized(entryPoint, homeChain, homeCoin);
+        emit AccountInitialized(
+            entryPoint,
+            homeChain,
+            homeCoin,
+            swapper,
+            bridger
+        );
 
         // Only the home account ever has signing keys.
         if (block.chainid == homeChain) {
@@ -339,41 +369,62 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         emit SigningKeyRemoved(this, slot, currentKey);
     }
 
-    /// Swap on behalf of the account to a bridgable token.
-    function swap(
-        uint128 amountIn,
+    /// Swap (if necessary) and bridge to home chain. Called on foreign chains.
+    function collect(
         IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenBridge,
+        bytes calldata extraDataSwap,
+        bytes calldata extraDataBridge
+    ) public onlyForeignChain {
+        uint256 amountBridge;
+        if (tokenIn == tokenBridge) {
+            amountBridge = amountIn;
+        } else {
+            // swapper is responsible for ensuring a fair price
+            amountBridge = _swap(tokenIn, amountIn, tokenBridge, extraDataSwap);
+        }
+
+        // bridger is responsible for checking it supports tokenBridge, etc
+        TransferHelper.safeApprove(
+            address(tokenBridge),
+            address(bridger),
+            amountBridge
+        );
+        bridger.sendToChain(
+            tokenBridge,
+            amountBridge,
+            homeChain,
+            extraDataBridge
+        );
+        emit Collect(tokenIn, amountIn, tokenBridge, amountBridge, homeChain);
+    }
+
+    /// Swap to home coin, if any. Called only on the home chain.
+    function swapToHomeCoin(
+        IERC20 tokenIn,
+        uint256 amountIn,
         bytes calldata extraData
-    ) public {
+    ) public onlyHomeChain {
+        require(address(homeCoin) != address(0), "DAv2: no home coin");
+        _swap(tokenIn, amountIn, homeCoin, extraData);
+    }
+
+    /// Swap on behalf of the account. This can happen either foreign chain, as
+    /// part of a collect(), or on home chain, as part of a swapToHomeCoin().
+    function _swap(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut,
+        bytes calldata extraData
+    ) private returns (uint256 amountOut) {
         TransferHelper.safeApprove(
             address(tokenIn),
             address(swapper),
             amountIn
         );
-        (uint128 totalAmountOut, IERC20 tokenOut) = swapper.swapToBridgableCoin(
-            amountIn,
-            tokenIn,
-            extraData
-        );
-
-        emit ForeignCoinSwap(amountIn, tokenIn, totalAmountOut, tokenOut);
-    }
-
-    /// Bridge assets from foreign chains to home chain.
-    function bridge(uint128 amountIn, IERC20 tokenIn) public {
-        require(
-            block.chainid != homeChain,
-            "DAv2: bridging only supported on foreign chains"
-        );
-
-        TransferHelper.safeApprove(
-            address(tokenIn),
-            address(bridger),
-            amountIn
-        );
-        bridger.sendToHomeChain(homeChain, tokenIn, amountIn);
-
-        emit ForeignChainBridge(amountIn, tokenIn);
+        amountOut = swapper.swapToCoin(tokenIn, amountIn, tokenOut, extraData);
+        emit AutoSwap(tokenIn, amountIn, tokenOut, amountOut);
     }
 
     /// Set the forwarding address for received assets on the account to be
@@ -389,7 +440,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         );
 
         forwardingAddress = newForwardingAddress;
-        emit ForwardingAddressSet(newForwardingAddress);
+        emit SetForwardingAddress(newForwardingAddress);
     }
 
     /// Forward assets from the account to the forwarding address.
