@@ -4,7 +4,8 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 /// Swaps assets automatically. More precisely, it lets any market maker swap
-/// swap tokens for a destination token, ensuring a fair price.
+/// swap tokens for a destination token, ensuring a fair price. The input comes
+/// from msg.sender (which must have already approved) and output goes to same.
 interface IDaimoSwapper {
     /// Called to swap tokenIn to tokenOut. Ensures fair price or reverts.
     /// @param extraData swap route or similar, depending on implementation

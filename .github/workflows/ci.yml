@@ -40,7 +40,6 @@ jobs:
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"
           git diff --exit-code
-        #  vivek swap
         working-directory: ./packages/contract
 
   lint:
