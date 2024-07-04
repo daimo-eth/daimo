@@ -26,6 +26,8 @@ struct CCTPDomain {
 // todo: burnLimitsPerMessage
 // todo: minterAllowance
 
+/// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
+/// so the only supported bridge token in USDC.
 contract DaimoCCTPBridger is IDaimoBridger {
     // Constants used for CCTP.
     ITokenMessenger public cctpMessenger;

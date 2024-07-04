@@ -31,20 +31,20 @@ contract DaimoAccountFactoryV2 {
      * account creation.
      */
     function createAccount(
-        uint256 _homeChain,
-        IERC20 _homeCoin,
-        IDaimoSwapper _swapper,
-        IDaimoBridger _bridger,
-        uint8 slot,
+        uint256 homeChain,
+        IERC20 homeCoin,
+        IDaimoSwapper swapper,
+        IDaimoBridger bridger,
+        uint8 keySlot,
         bytes32[2] calldata key,
         uint256 salt
     ) public payable returns (DaimoAccountV2 ret) {
         address addr = getAddress(
-            _homeChain,
-            _homeCoin,
-            _swapper,
-            _bridger,
-            slot,
+            homeChain,
+            homeCoin,
+            swapper,
+            bridger,
+            keySlot,
             key,
             salt
         );
@@ -66,7 +66,7 @@ contract DaimoAccountFactoryV2 {
                     address(accountImplementation),
                     abi.encodeCall(
                         DaimoAccountV2.initialize,
-                        (_homeChain, _homeCoin, _swapper, _bridger, slot, key)
+                        (homeChain, homeCoin, swapper, bridger, keySlot, key)
                     )
                 )
             )
@@ -76,11 +76,11 @@ contract DaimoAccountFactoryV2 {
     /// Calculate the counterfactual address of this account as it would be
     /// returned by createAccount().
     function getAddress(
-        uint256 _homeChain,
-        IERC20 _homeCoin,
-        IDaimoSwapper _swapper,
-        IDaimoBridger _bridger,
-        uint8 slot,
+        uint256 homeChain,
+        IERC20 homeCoin,
+        IDaimoSwapper swapper,
+        IDaimoBridger bridger,
+        uint8 keySlot,
         bytes32[2] calldata key,
         uint256 salt
     ) public view returns (address) {
@@ -95,11 +95,11 @@ contract DaimoAccountFactoryV2 {
                             abi.encodeCall(
                                 DaimoAccountV2.initialize,
                                 (
-                                    _homeChain,
-                                    _homeCoin,
-                                    _swapper,
-                                    _bridger,
-                                    slot,
+                                    homeChain,
+                                    homeCoin,
+                                    swapper,
+                                    bridger,
+                                    keySlot,
                                     key
                                 )
                             )

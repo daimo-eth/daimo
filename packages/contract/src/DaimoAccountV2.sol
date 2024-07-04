@@ -44,6 +44,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         string clientDataJSON;
         uint256 r;
         uint256 s;
+        // TODO: explain why we don't need v
     }
 
     /// no-op function with struct as argument to expose it in generated ABI
@@ -51,16 +52,18 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     function signatureStruct(Signature memory sig) public {}
 
     /// Account automatically collects funds on this chain.
+    /// Immutable after account initialization.
     uint256 public homeChain;
 
     /// If non-zero, the account auto-swaps to this coin on the homeChain.
+    /// Only used on home chain. Editable by the account owner.
     IERC20 public homeCoin;
 
     /// If non-zero, automatically forwards all assets to forwardingAddress,
     /// disabling the account's own functionality. Only used on home chain.
     address public forwardingAddress;
 
-    /// Swap assets to the bridgeable coin or the home coin.
+    /// Swaps assets to the bridgeable coin or the home coin.
     IDaimoSwapper public swapper;
 
     /// Forwards assets from foreign chains to homeChain.
@@ -105,7 +108,8 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         bytes32[2] key
     );
 
-    /// Emitted on foreign coin auto-swap.
+    /// Emitted on foreign chains (auto-swap as part of collect) and home chain
+    /// (auto-swap to home coin).
     event AutoSwap(
         IERC20 tokenIn,
         uint256 amountIn,
@@ -122,25 +126,21 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         uint256 toChainID
     );
 
-    /// Emitted on home chain when we swap an asset to the home coin.
-    event SwapToHomeCoin(
-        IERC20 tokenIn,
-        uint256 amountIn,
-        IERC20 tokenOut,
-        uint256 amountOut
-    );
-
-    /// Emitted on forwarding address changes.
+    /// Emitted at most once, when account offboards to a forwarding address.
     event SetForwardingAddress(address forwardingAddress);
 
-    /// Emitted when we forward an asset to the forwarding address.
+    /// Emitted after offboarding: forward an asset to the forwarding address.
     event ForwardAsset(IERC20 tokenIn, uint256 amountIn);
+
+    /// Emitted on home chain, when user updates their home coin.
+    event UpdateHomeCoin(IERC20 oldHomeCoin, IERC20 newHomeCoin);
 
     /// Verify caller is the 4337 EntryPoint. Used to validate & run userops.
     modifier onlyEntryPoint() {
         require(msg.sender == address(entryPoint), "DAv2: only entry point");
         _;
     }
+
     /// Verify that we're in a valid userop, called via executeBatch.
     modifier onlyOp() {
         require(msg.sender == address(this), "DAv2: only self");
@@ -187,10 +187,12 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         uint8 slot,
         bytes32[2] calldata key
     ) public virtual initializer {
+        // TODO: ensure entryPoint is set
         homeChain = _homeChain;
         homeCoin = _homeCoin;
         swapper = _swapper;
         bridger = _bridger;
+
         emit AccountInitialized(
             entryPoint,
             homeChain,
@@ -207,7 +209,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         }
     }
 
-    /// Execute multiple calls atomically.
+    /// Execute multiple calls atomically. Used on home chain only.
     /// All user-initiated account actions originate from here.
     function executeBatch(
         Call[] calldata calls
@@ -236,6 +238,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         virtual
         override
         onlyEntryPoint
+        onlyNotForwarding
         returns (uint256 validationData)
     {
         validationData = _validateUseropSignature(userOp, userOpHash);
@@ -250,8 +253,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         // userOp.signature bytes structure:
         //
         // - 6 bytes uint48 validUntil
-        // - 1 byte uint8 keySlot
-        // - (unknown) bytes (type Signature) signature
+        // - bytes (type Signature) signature
 
         // In all cases, we'll be checking a signature & returning a result.
         bytes memory messageToVerify;
@@ -277,15 +279,11 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         bytes memory message,
         bytes calldata signatureBytes
     ) private view returns (bool) {
-        // First bit identifies keySlot
-        uint8 keySlot = uint8(signatureBytes[0]);
+        Signature memory sig = abi.decode(signatureBytes, (Signature));
 
-        // If the keySlot is empty, this is an invalid key
-        uint256 x = uint256(keys[keySlot][0]);
-        uint256 y = uint256(keys[keySlot][1]);
-
-        if (signatureBytes.length == 0) return false;
-        Signature memory sig = abi.decode(signatureBytes[1:], (Signature));
+        // Retrieve pubkey to verify against
+        uint256 x = uint256(keys[sig.keySlot][0]);
+        uint256 y = uint256(keys[sig.keySlot][1]);
 
         return
             WebAuthn.verifySignature({
@@ -308,12 +306,14 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         }
     }
 
-    /// ERC1271: validate a user signature, verifying a valid Daimo account
-    /// signature. Signature format: [uint8 keySlot, encoded Signature struct]
+    /// ERC-1271: validate a user signature, verifying a valid Daimo account
+    /// signature. Signature format: [encoded Signature struct]
     function isValidSignature(
         bytes32 message,
         bytes calldata signature
     ) external view override onlyNotForwarding returns (bytes4 magicValue) {
+        // TODO: should this *revert* in the forwarding or foreign-chain case,
+        // or should it just return invalid?
         if (_validateSignature(bytes.concat(message), signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
@@ -395,7 +395,16 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
             homeChain,
             extraDataBridge
         );
+
         emit Collect(tokenIn, amountIn, tokenBridge, amountBridge, homeChain);
+    }
+
+    /// Account owner can edit their home coin. Used only on the home chain.
+    function updateHomeCoin(IERC20 newHomeCoin) public onlyOp {
+        require(newHomeCoin != homeCoin);
+        homeCoin = newHomeCoin;
+
+        emit UpdateHomeCoin(homeCoin, newHomeCoin);
     }
 
     /// Swap to home coin, if any. Called only on the home chain.

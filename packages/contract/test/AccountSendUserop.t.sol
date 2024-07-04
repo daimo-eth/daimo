@@ -53,26 +53,23 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
-        uint8 version = 1;
         uint48 validUntil = 0;
         bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
         bytes memory challengeToSign = abi.encodePacked(
-            version,
             validUntil,
             expectedUserOpHash
         );
 
         bytes memory ownerSig = abi.encodePacked(
-            version,
             validUntil,
-            uint8(0), // keySlot
-            abi.encode( // signature
-                    Utils.rawSignatureToSignature({
-                        challenge: challengeToSign,
-                        r: 0x95287be7cb8c72c4aeee050bb0448fed83b1330a1ba2edcb6835525c9c07b006,
-                        s: 0x656E96974C5170EFA7D65FFB4F61A793B0DA4AC9E346E5B28F9739FE3AF2B096
-                    })
-                )
+            abi.encode(
+                Utils.rawSignatureToSignature({
+                    keySlot: 0,
+                    challenge: challengeToSign,
+                    r: 0x95287be7cb8c72c4aeee050bb0448fed83b1330a1ba2edcb6835525c9c07b006,
+                    s: 0x656E96974C5170EFA7D65FFB4F61A793B0DA4AC9E346E5B28F9739FE3AF2B096
+                })
+            )
         );
 
         // Create a new Daimo account
@@ -163,26 +160,23 @@ contract AccountSendUseropTest is Test {
         ];
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
-        uint8 version = 1;
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
         bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
         bytes memory challengeToSign = abi.encodePacked(
-            version,
             validUntil,
             expectedUserOpHash
         );
 
         bytes memory ownerSig = abi.encodePacked(
-            version,
             validUntil,
-            uint8(0), // keySlot
-            abi.encode( // signature
-                    Utils.rawSignatureToSignature({
-                        challenge: challengeToSign,
-                        r: 0x2b17a942c427b4c0e691feb6efe6d65abdcdc5d56ca45bf1aa4822c3d8935f47,
-                        s: 0x37E6C05C93ABA7F7ED5A8921499F65BC7462959B92E8D371BA23367EBA564B9E
-                    })
-                )
+            abi.encode(
+                Utils.rawSignatureToSignature({
+                    keySlot: 0,
+                    challenge: challengeToSign,
+                    r: 0x2b17a942c427b4c0e691feb6efe6d65abdcdc5d56ca45bf1aa4822c3d8935f47,
+                    s: 0x37E6C05C93ABA7F7ED5A8921499F65BC7462959B92E8D371BA23367EBA564B9E
+                })
+            )
         );
 
         // Create a new Daimo account

@@ -8,6 +8,7 @@ import "../src/DaimoAccountV2.sol";
 
 library Utils {
     function rawSignatureToSignature(
+        uint8 keySlot,
         bytes memory challenge,
         uint256 r,
         uint256 s
@@ -27,7 +28,7 @@ library Utils {
 
         return
             DaimoAccountV2.Signature({
-                keySlot: 0,
+                keySlot: keySlot,
                 authenticatorData: authenticatorData,
                 clientDataJSON: clientDataJSON,
                 r: r,

@@ -2,10 +2,9 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
+
 import "../src/DaimoCCTPBridger.sol";
 import "./Constants.s.sol";
-
-import {CREATE3Factory} from "create3-factory/src/CREATE3Factory.sol";
 
 contract DeployDaimoCCTPBridger is Script {
     function run() public {
@@ -33,13 +32,20 @@ contract DeployDaimoCCTPBridger is Script {
 
         vm.startBroadcast();
 
-        DaimoCCTPBridger bridger = new DaimoCCTPBridger{salt: 0}(
-            tokenMessenger,
-            inputChainIds,
-            outputDomains
+        DaimoCCTPBridger bridger = DaimoCCTPBridger(
+            CREATE3.deploy(
+                keccak256("DaimoCCTPBridger-2"),
+                bytes.concat(
+                    type(DaimoCCTPBridger).creationCode,
+                    abi.encode(tokenMessenger, inputChainIds, outputDomains)
+                )
+            )
         );
         console.log("bridger deployed at address:", address(bridger));
 
         vm.stopBroadcast();
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }

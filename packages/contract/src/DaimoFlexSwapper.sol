@@ -55,6 +55,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
 
     uint256 private constant _MAX_UINT128 = type(uint128).max;
 
+    // TODO: should this contract have an owner?
+    // Ability to modify hopTokens / outputTokens / maxSlippage etc?
+
     /// Weth, used for handling input or output native ETH.
     IERC20 public weth;
     /// Hop tokens. We search for two-pool routes going thru these tokens.
@@ -212,16 +215,18 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     }
 
     /// Fetch a best-effort quote for a given token pair + exact input amount.
-    /// For both input and output, token = 0x0 refers to ETH > will use WETH.
+    /// For both input and output, token = 0x0 refers to ETH or the native asset
+    /// (eg MATIC on Polygon). Uses Uniswap TWAP/TWAL.
     function quote(
         IERC20 tokenIn,
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint256 amountOut, bytes memory swapPath) {
+        // TODO: handle MATIC on Polygon
         if (address(tokenIn) == address(0)) tokenIn = weth;
         if (address(tokenOut) == address(0)) tokenOut = weth;
 
-        // Same token swap.
+        // Same token = no swap.
         if (tokenIn == tokenOut) {
             amountOut = amountIn;
             swapPath = new bytes(0);
@@ -254,6 +259,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     }
 
     /// Direct 1-hop quote: [tokenIn -> tokenOut]
+    /// Uses the pool with best TWAL = time-weighted average liquidity.
     function quoteDirect(
         IERC20 tokenIn,
         uint128 amountIn,
@@ -269,6 +275,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     }
 
     /// 2-hop paths: [tokenIn -> hopToken -> tokenOut]
+    /// Uses quoteDirect() for each leg, then chooses the highest TWAP path.
     function quoteViaHop(
         IERC20 tokenIn,
         uint128 amountIn,
@@ -349,7 +356,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
 
                 if (estAmountOut256 > _MAX_UINT128) continue; // swap too large
 
-                uint256 requiredXY = uint256(amountIn) * estAmountOut256; // x * y of trade
+                // required = approximate x * y of trade
+                // available = approximate x * y = mean(sqrt(xy))^2
+                uint256 requiredXY = uint256(amountIn) * estAmountOut256;
                 uint256 availableXY = uint256(harmonicMeanLiquidity) *
                     uint256(harmonicMeanLiquidity);
 

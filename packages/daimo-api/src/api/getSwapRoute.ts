@@ -8,7 +8,8 @@ import {
   now,
 } from "@daimo/common";
 import {
-  daimoUsdcSwapperABI,
+  daimoFlexSwapperABI,
+  daimoFlexSwapperAddress,
   swapRouter02Abi,
   swapRouter02Address,
 } from "@daimo/contract";
@@ -49,10 +50,10 @@ export async function getSwapQuote({
   assert(tokenIn !== tokenOut, "tokenIn == tokenOut");
 
   const swapQuote = await vc.publicClient.readContract({
-    abi: daimoUsdcSwapperABI,
-    address: "0x2F7e2Eee89A3c6937A22607c7e9B2231825a5418",
+    abi: daimoFlexSwapperABI,
+    address: daimoFlexSwapperAddress,
     functionName: "quote",
-    args: [amountIn, tokenIn, tokenOut],
+    args: [tokenIn, amountIn, tokenOut],
   });
   const amountOut: bigint = swapQuote[0];
   const swapPath: Hex = swapQuote[1];

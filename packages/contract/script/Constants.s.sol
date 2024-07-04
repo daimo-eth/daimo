@@ -162,3 +162,25 @@ function _isTestnet(uint256 chainId) pure returns (bool) {
         chainId == BASE_TESTNET ||
         chainId == POLYGON_TESTNET;
 }
+
+// ----------------- Deployment ----------------- //
+
+ICREATE3Factory constant CREATE3 = ICREATE3Factory(
+    0x9fBB3DF7C40Da2e5A0dE984fFE2CCB7C47cd0ABf
+);
+
+/// @title Factory for deploying contracts to deterministic addresses via CREATE3
+/// @author zefram.eth
+/// @notice Enables deploying contracts using CREATE3. Each deployer (msg.sender) has
+/// its own namespace for deployed addresses.
+interface ICREATE3Factory {
+    /// @notice Deploys a contract using CREATE3
+    /// @dev The provided salt is hashed together with msg.sender to generate the final salt
+    /// @param salt The deployer-specific salt for determining the deployed contract's address
+    /// @param creationCode The creation code of the contract to deploy
+    /// @return deployed The address of the deployed contract
+    function deploy(
+        bytes32 salt,
+        bytes memory creationCode
+    ) external payable returns (address deployed);
+}
