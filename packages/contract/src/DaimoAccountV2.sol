@@ -14,7 +14,7 @@ import "account-abstraction/interfaces/IEntryPoint.sol";
 
 import "p256-verifier/WebAuthn.sol";
 
-import "./DaimoUSDCSwapper.sol";
+import "./DaimoFlexSwapper.sol";
 import "./DaimoCCTPBridger.sol";
 
 /**
@@ -304,10 +304,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Only used if there's no paymaster.
     function _payPrefund(uint256 missingAccountFunds) private {
         if (missingAccountFunds > 0) {
-            payable(msg.sender).call{
-                value: missingAccountFunds,
-                gas: type(uint256).max
-            }("");
+            TransferHelper.safeTransferETH(msg.sender, missingAccountFunds);
         }
     }
 

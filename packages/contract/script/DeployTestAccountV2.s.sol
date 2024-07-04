@@ -4,14 +4,14 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
-import "../src/DaimoUSDCSwapper.sol";
+import "../src/DaimoFlexSwapper.sol";
 import "../src/DaimoCCTPBridger.sol";
 import "./Constants.s.sol";
 
 contract DeployScript is Script {
     function run(
         DaimoAccountFactoryV2 factory,
-        DaimoUSDCSwapper swapper,
+        DaimoFlexSwapper swapper,
         DaimoCCTPBridger bridger
     ) public {
         vm.startBroadcast();

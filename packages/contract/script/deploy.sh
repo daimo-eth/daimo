@@ -47,7 +47,7 @@ forge script script/ManagePaymaster.s.sol --sig "start(address)" $PAYMASTER_ADDR
 forge script script/DeployOffchainUtils.s.sol --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
 
 # Deploy USDC Swapper
-forge script script/DeployDaimoUSDCSwapper.s.sol --sig "runBase()" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
+forge script script/DeployDaimoFlexSwapper.s.sol --sig "runBase()" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY
 
 # # Add paymaster deposit
 # forge script script/ManagePaymaster.s.sol --sig "addDeposit(address)" $PAYMASTER_ADDR --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY

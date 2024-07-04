@@ -4,8 +4,6 @@ pragma solidity ^0.8.12;
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@uniswap/v3-periphery/contracts/libraries/Path.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 
@@ -57,8 +55,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
 
     uint256 private constant _MAX_UINT128 = type(uint128).max;
 
-    /// Uniswap router for executing swaps.
-    ISwapRouter public uniswapRouter;
     /// Weth, used for handling input or output native ETH.
     IERC20 public weth;
     /// Hop tokens. We search for two-pool routes going thru these tokens.
@@ -73,6 +69,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     uint32 public oraclePeriod;
     /// Uniswap pool factory, for looking up pools by (tokenA, tokenB, feeTier).
     IUniswapV3Factory public oraclePoolFactory;
+    /// Uniswap router, default option for executing swaps.
+    /// See https://github.com/Uniswap/swap-router-contracts/blob/main/contracts/SwapRouter02.sol
+    address public swapRouter02;
 
     /// Emitted on each successful swap.
     event SwapToCoin(
@@ -89,7 +88,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         IERC20 _weth,
         IERC20[] memory _hopTokens,
         IERC20[] memory _outputTokens,
-        ISwapRouter _uniswapRouter,
+        address _swapRouter02,
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
@@ -97,7 +96,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         weth = _weth;
         hopTokens = _hopTokens;
         outputTokens = _outputTokens;
-        uniswapRouter = _uniswapRouter;
+        swapRouter02 = _swapRouter02;
         oracleFeeTiers = _oracleFeeTiers;
         oraclePeriod = _oraclePeriod;
         oraclePoolFactory = _oraclePoolFactory;
@@ -142,18 +141,17 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
             callData = extra.callData;
         } else {
             // Option 2: call Uniswaap, use the reference quote path
-            callDest = address(uniswapRouter);
-            callData = _getUniswapCalldata(swapPath, amountIn);
+            callDest = address(swapRouter02);
+            callData = _getUniswapCalldata(swapPath);
         }
 
-        // Claim input token from caller, then approve it to the swap contract.
+        // Send input token directly from caller to the swap contract.
         TransferHelper.safeTransferFrom(
             address(tokenIn),
             msg.sender,
-            address(this),
+            callDest,
             amountIn
         );
-        TransferHelper.safeApprove(address(tokenIn), callDest, amountIn);
 
         // Execute swap
         (bool success, ) = callDest.call(callData);
@@ -229,6 +227,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
             swapPath = new bytes(0);
             return (amountOut, swapPath);
         }
+
         (uint256 directAmountOut, uint24 directFee) = quoteDirect(
             tokenIn,
             amountIn,
@@ -402,23 +401,25 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     }
 
     function _getUniswapCalldata(
-        bytes memory swapPath,
-        uint256 amountIn
+        bytes memory swapPath
     ) private view returns (bytes memory callData) {
-        ISwapRouter.ExactInputParams memory params = ISwapRouter
-            .ExactInputParams({
-                path: swapPath,
-                recipient: msg.sender, // Routed directly to caller
-                deadline: block.timestamp,
-                amountIn: amountIn,
-                amountOutMinimum: 0 // Output validated in swapToCoin
-            });
-
         callData = abi.encodeWithSelector(
-            bytes4(
-                keccak256("exactInput((bytes,address,uint256,uint256,uint256))")
-            ),
-            params
+            bytes4(keccak256("exactInput((bytes,address,uint256,uint256))")),
+            ExactInputParams(
+                swapPath,
+                address(this), // recipient
+                0, // amountIn = 0. swap entire amount transferred in.
+                0 // amountOutMinimum = 0. validate output in swapToCoin.
+            )
         );
+    }
+
+    // Uniswap's libraries have several, incompatible exactInput()s.
+    // We're using the one from SwapRouter02.
+    struct ExactInputParams {
+        bytes swapPath;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
     }
 }
