@@ -6,7 +6,7 @@ import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
 import "./Constants.s.sol";
 
-contract DeployScript is Script {
+contract DeployTestAccountV2Script is Script {
     function run() public {
         require(block.chainid == BASE_MAINNET || block.chainid == OP_MAINNET);
 

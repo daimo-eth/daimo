@@ -6,7 +6,7 @@ import "forge-std/Script.sol";
 import "../src/DaimoCCTPBridger.sol";
 import "./Constants.s.sol";
 
-contract DeployDaimoCCTPBridger is Script {
+contract DeployCCTPBridgerScript is Script {
     function run() public {
         uint256 chainId = block.chainid;
         bool testnet = _isTestnet(chainId);

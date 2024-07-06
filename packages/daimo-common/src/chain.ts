@@ -6,7 +6,7 @@
  */
 
 import { ChainConfig, DaimoChain } from "@daimo/contract";
-import { Address, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 
 import {
   ForeignToken,

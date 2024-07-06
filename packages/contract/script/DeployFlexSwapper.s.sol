@@ -6,7 +6,7 @@ import "forge-std/Script.sol";
 import "../src/DaimoFlexSwapper.sol";
 import "./Constants.s.sol";
 
-contract DeployDaimoFlexSwapper is Script {
+contract DeployFlexSwapperScript is Script {
     function run() public {
         uint256 chainId = block.chainid;
 

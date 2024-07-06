@@ -6,7 +6,7 @@ import "forge-std/console2.sol";
 import "../src/DaimoPaymasterV2.sol";
 import "openzeppelin-contracts/contracts/utils/Create2.sol";
 
-contract DeployPaymasterScript is Script {
+contract ManagePaymasterScript is Script {
     // From https://docs.stackup.sh/docs/entity-addresses#entrypoint
     IEntryPoint public entryPoint =
         IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);

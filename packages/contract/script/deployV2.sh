@@ -1,23 +1,35 @@
 #!/bin/bash
 set -e
 
-# Requirements
-# RPC_URL for the target chain 
+# Requirements:
+# ALCHEMY_API_KEY
 # PRIVATE_KEY for the deployer
-# ETHERSCAN_API_KEY for the target chain
+# ETHERSCAN_API_KEY_... for each target chain
 
-# Build
-forge build --via-ir
+SCRIPTS=(
+    "script/DeployFastCCTP.s.sol"
+    # "script/DeployDaimoFlexSwapper.s.sol"
+    # "script/DeployDaimoCCTPBridger.s.sol"
+    # "script/DeployAccountFactoryV2.s.sol"
+    # "script/DeployTestAccountV2.s.sol"
+)
+CHAINS=(
+    "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
+    # ",https://avalanche-c-chain-rpc.publicnode.com"  # No Etherscan or Alchemy for Avalanche
+)
 
-# Deploy USDC Swapper
-forge script script/DeployDaimoFlexSwapper.s.sol --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY --via-ir
-
-# Deploy CCTP Bridger
-forge script script/DeployDaimoCCTPBridger.s.sol --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify  --etherscan-api-key $ETHERSCAN_API_KEY --via-ir
-
-# Deploy Account Factory V2
-forge script script/DeployAccountFactoryV2.s.sol --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY --via-ir
-
-# Deploy Account V2 test account
-# Requirements: addresses for the deployed factory, swapper, and bridger
-forge script script/DeployTestAccountV2.s.sol --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+for SCRIPT in "${SCRIPTS[@]}"; do
+    for CHAIN in "${CHAINS[@]}"; do
+        IFS=',' read -r ETHERSCAN_API_KEY RPC_URL <<< "$CHAIN"
+        echo ""
+        echo "======= RUNNING $SCRIPT ========" 
+        echo "ETHERSCAN_API_KEY: $ETHERSCAN_API_KEY"
+        echo "RPC_URL          : $RPC_URL"
+        echo ""
+        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --via-ir
+    done
+done

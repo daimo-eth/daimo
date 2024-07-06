@@ -3,6 +3,7 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/utils/Create2.sol";
 
 import "../vendor/cctp/ICCTPReceiver.sol";
 import "../vendor/cctp/ICCTPTokenMessenger.sol";
@@ -12,148 +13,245 @@ import "../vendor/cctp/ICCTPTokenMessenger.sol";
 // funds arrive at the DaimoFastCCTP contract deployed on chain B. Bob can call
 // `claimTransfer` to claim the funds. Alternately, immdiately after the first
 // call, an LP can call `fastFinishTransfer` to send Bob his funds immediately.
-// Later, when the funds arrive from CCTP, the LP (rather than Bob) will be able
-// to claim.
+// Later, when the funds arrive from CCTP, the LP (rather than Bob) will claim.
 contract DaimoFastCCTP {
-  using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20;
 
-  // Commit to transfer details in a handoff address. See EphemeralHandoff.
-  mapping(address => bool) public handoffSent;
-  // On receiving chain, map each transfer to recipient (LP or Bob).
-  mapping(address => address) public handoffToRecipient;
+    /// Commit to transfer details in a handoff address. See EphemeralHandoff.
+    mapping(address => bool) public handoffSent;
+    /// On the receiving chain, map each transfer to a recipient (LP or Bob).
+    mapping(address => address) public handoffToRecipient;
 
-  constructor() {}
+    constructor() {}
 
-  // Called by Alice on Chain A. Requires approval for (fromToken, fromAmount).
-  // Initiates a CCTP transfer.
-  function startTransfer(
-    ICCTPTokenMessenger cctpMessenger,
-    IERC20 fromToken,
-    uint256 fromAmount,
-    uint256 toChainID,
-    address toAddr,
-    uint256 toAmount,
-    IERC20 toToken,
-    uint256 nonce
-  ) public {
-    require(fromAmount >= toAmount, "FCCTP: fromAmount < toAmount");
-
-    // Deploy CCTP sender
-    uint256 fromChainID = block.chainid;
-    address fromAddr = msg.sender;
-    EphemeralHandoff handoff = new EphemeralHandoff{salt: 0}(
-      fromChainID,
-      fromAddr,
-      fromAmount,
-      toChainID,
-      toAddr,
-      toAmount,
-      toToken,
-      nonce
+    // Transfer initiated on chain A
+    event Start(
+        address indexed handoffAddr,
+        address fromToken,
+        uint256 fromAmount,
+        uint256 toChainID,
+        address toAddr,
+        address toToken,
+        uint256 toAmount,
+        uint256 nonce
     );
 
-    // Ensure we don't reuse nonces. This covers the case where Alice sends Bob
-    // the same amount twice in a row = otherwise identical transfers = no way
-    // for an LP to fastFinish() the second one without a distinct handoff addr.
-    require(
-      !handoffSent[address(handoff)],
-      "FCCTP: identical transfer already sent"
-    );
-    handoffSent[address(handoff)] = true;
-
-    // Receive funds from Alice
-    fromToken.safeTransferFrom(fromAddr, address(handoff), fromAmount);
-
-    // Initiate transfer + destroy handoff, minimizing gas consumption.
-    handoff.startTransferAndSelfDestruct(cctpMessenger, fromToken);
-  }
-
-  // Pays Bob immediately on chain B. The caller LP sends (toToken, toAmount).
-  // Later, when the slower CCTP transfer arrives, the LP will be able to claim
-  // (toToken, fromAmount), keeping the spread (if any) between the amounts.
-  function fastFinishTransfer(
-    uint256 fromChainID,
-    address fromAddr,
-    uint256 fromAmount,
-    uint256 toChainID,
-    address toAddr,
-    uint256 toAmount,
-    IERC20 toToken,
-    uint256 nonce
-  ) public {
-    // Calculate handoff address
-    EphemeralHandoff handoff = new EphemeralHandoff{salt: 0}(
-      fromChainID,
-      fromAddr,
-      fromAmount,
-      toChainID,
-      toAddr,
-      toAmount,
-      toToken,
-      nonce
-    );
-    handoff.destroy();
-
-    // Only for transfers which have not already been fastFinished or claimed.
-    require(
-      handoffToRecipient[address(handoff)] == address(0),
-      "FCCTP: already finished"
+    // Transfer completed ~immediately on chain B
+    event FastFinish(
+        address indexed handoffAddr,
+        address indexed newRecipient,
+        uint256 fromChainID,
+        address fromAddr,
+        uint256 fromAmount,
+        address toAddr,
+        address toToken,
+        uint256 toAmount,
+        uint256 nonce
     );
 
-    // Record LP as new recipient
-    handoffToRecipient[address(handoff)] = msg.sender;
-
-    // LP pays original recipient
-    toToken.safeTransferFrom(msg.sender, toAddr, toAmount);
-  }
-
-  // Claims a CCTP transfer to its current recipient. If fastFinish... was
-  // called for this transfer, then recipient = the LP who fronted the amount.
-  // Otherwise, the recipient remains the original toAddr, eg Bob.
-  function claimTransfer(
-    ICCTPReceiver cctpReceiver,
-    bytes calldata messageBytes,
-    bytes calldata signature,
-    uint256 fromChainID,
-    address fromAddr,
-    uint256 fromAmount,
-    address toAddr,
-    uint256 toAmount,
-    IERC20 toToken,
-    uint256 nonce
-  ) public {
-    uint256 toChainID = block.chainid;
-    EphemeralHandoff handoff = new EphemeralHandoff{salt: 0}(
-      fromChainID,
-      fromAddr,
-      fromAmount,
-      toChainID,
-      toAddr,
-      toAmount,
-      toToken,
-      nonce
+    // Transfer settled later, once the underlying CCTP transfer completes.
+    event Claim(
+        address indexed handoffAddr,
+        address indexed finalRecipient,
+        uint256 fromChainID,
+        address fromAddr,
+        uint256 fromAmount,
+        address toAddr,
+        address toToken,
+        uint256 toAmount,
+        uint256 nonce
     );
 
-    // Claim from CCTP to handoff
-    cctpReceiver.receiveMessage(messageBytes, signature);
+    // Called by Alice on Chain A. Requires (fromToken, fromAmount) approval.
+    // Initiates a CCTP transfer. This is a convenience function: you can
+    // achieve the same by initiating a CCTP transfer directly. Sender must
+    // ensure that CCTP supports (toToken, toDomain, toChainID).
+    function startTransfer(
+        ICCTPTokenMessenger cctpMessenger,
+        IERC20 fromToken,
+        uint256 fromAmount,
+        uint256 toChainID,
+        uint32 toDomain,
+        address toAddr,
+        IERC20 toToken,
+        uint256 toAmount,
+        uint256 nonce
+    ) public {
+        require(fromAmount >= toAmount, "FCCTP: fromAmount < toAmount");
 
-    // Move from handoff to FastCCTP
-    handoff.receiveTransferAndSelfDestruct();
+        // Deploy CCTP sender
+        uint256 fromChainID = block.chainid;
+        address fromAddr = msg.sender;
+        address handoffAddr = getHandoffAddr({
+            fromChainID: fromChainID,
+            fromAddr: fromAddr,
+            fromAmount: fromAmount,
+            toChainID: toChainID,
+            toAddr: toAddr,
+            toToken: toToken,
+            toAmount: toAmount,
+            nonce: nonce
+        });
 
-    // Finally, forward to current recipient
-    address recipient = handoffToRecipient[address(handoff)];
-    if (recipient == address(0)) {
-      recipient = toAddr;
+        // Ensure we don't reuse a nonce in the case where Alice is sending Bob
+        // the same amount, same source and destination chain, multiple times.
+        require(!handoffSent[handoffAddr], "FCCTP: already sent");
+        handoffSent[handoffAddr] = true;
 
-      // Record claimer as recipient. This ensures that nobody can mistakenly
-      // fastFinish() a transfer that has already been claimed.
-      handoffToRecipient[address(handoff)] = toAddr;
+        // Transfer funds from Alice. Approve to CCTP.
+        fromToken.safeTransferFrom(fromAddr, address(this), fromAmount);
+        fromToken.safeApprove(address(cctpMessenger), fromAmount);
+
+        // Send (burn) to CCTP. Recipient = EphemeralHandoff address on chain B.
+        bytes32 mintRecipient = bytes32(uint256(uint160(handoffAddr)));
+        cctpMessenger.depositForBurn({
+            amount: fromAmount,
+            destinationDomain: toDomain,
+            mintRecipient: mintRecipient,
+            burnToken: address(fromToken)
+        });
+
+        emit Start({
+            handoffAddr: handoffAddr,
+            fromToken: address(fromToken),
+            fromAmount: fromAmount,
+            toChainID: toChainID,
+            toAddr: toAddr,
+            toToken: address(toToken),
+            toAmount: toAmount,
+            nonce: nonce
+        });
     }
 
-    // If an LP fastFinish'd the transfer previously (recipient != toAddr),
-    // then the LP gains the difference fromAmount - toAmount (which can be 0).
-    toToken.transfer(recipient, fromAmount);
-  }
+    // Pays Bob immediately on chain B. The caller LP sends (toToken, toAmount).
+    // Later, when the slower CCTP transfer arrives, the LP will be able to claim
+    // (toToken, fromAmount), keeping the spread (if any) between the amounts.
+    function fastFinishTransfer(
+        uint256 fromChainID,
+        address fromAddr,
+        uint256 fromAmount,
+        address toAddr,
+        IERC20 toToken,
+        uint256 toAmount,
+        uint256 nonce
+    ) public {
+        // Calculate handoff address
+        uint256 toChainID = block.chainid;
+        address handoffAddr = getHandoffAddr({
+            fromChainID: fromChainID,
+            fromAddr: fromAddr,
+            fromAmount: fromAmount,
+            toChainID: toChainID,
+            toAddr: toAddr,
+            toToken: toToken,
+            toAmount: toAmount,
+            nonce: nonce
+        });
+
+        // Optimistic fast finish is only for transfers which haven't already
+        // been fastFinished or claimed.
+        require(
+            handoffToRecipient[handoffAddr] == address(0),
+            "FCCTP: already finished"
+        );
+
+        // Record LP as new recipient
+        handoffToRecipient[handoffAddr] = msg.sender;
+
+        // LP pays original recipient
+        toToken.safeTransferFrom(msg.sender, toAddr, toAmount);
+
+        emit FastFinish({
+            handoffAddr: handoffAddr,
+            newRecipient: msg.sender,
+            fromChainID: fromChainID,
+            fromAddr: fromAddr,
+            fromAmount: fromAmount,
+            toAddr: toAddr,
+            toToken: address(toToken),
+            toAmount: toAmount,
+            nonce: nonce
+        });
+    }
+
+    // Claims a CCTP transfer to its current recipient. If FastFinish happened
+    // for this transfer, then the recipient is the LP who fronted the amount.
+    // Otherwise, the recipient remains the original toAddr. The CCTP message
+    // must already have been relayed; coins are already in handoff.
+    function claimTransfer(
+        uint256 fromChainID,
+        address fromAddr,
+        uint256 fromAmount,
+        address toAddr,
+        IERC20 toToken,
+        uint256 toAmount,
+        uint256 nonce
+    ) public {
+        uint256 toChainID = block.chainid;
+        EphemeralHandoff handoff = new EphemeralHandoff{salt: 0}(
+            fromChainID,
+            fromAddr,
+            fromAmount,
+            toChainID,
+            toAddr,
+            toToken,
+            toAmount,
+            nonce
+        );
+
+        // Transfer from handoff to FastCCTP
+        handoff.receiveTransferAndSelfDestruct();
+
+        // Finally, forward the balance to the current recipient
+        address recipient = handoffToRecipient[address(handoff)];
+        if (recipient == address(0)) {
+            // There was no LP. Record original recipient. This ensures that
+            // nobody can mistakenly fastFinish() an already-claimed transfer.
+            recipient = toAddr;
+            handoffToRecipient[address(handoff)] = toAddr;
+        }
+
+        // If an LP fastFinish'd the transfer previously (recipient != toAddr),
+        // then the LP keeps the tip (fromAmount - toAmount), which is >= 0.
+        toToken.transfer(recipient, fromAmount);
+
+        emit Claim({
+            handoffAddr: address(handoff),
+            finalRecipient: recipient,
+            fromChainID: fromChainID,
+            fromAddr: fromAddr,
+            fromAmount: fromAmount,
+            toAddr: toAddr,
+            toToken: address(toToken),
+            toAmount: toAmount,
+            nonce: nonce
+        });
+    }
+
+    /// Computes an ephemeral handoff address
+    function getHandoffAddr(
+        uint256 fromChainID,
+        address fromAddr,
+        uint256 fromAmount,
+        uint256 toChainID,
+        address toAddr,
+        IERC20 toToken,
+        uint256 toAmount,
+        uint256 nonce
+    ) public view returns (address) {
+        bytes memory creationCode = abi.encodePacked(
+            type(EphemeralHandoff).creationCode,
+            abi.encode(fromChainID),
+            abi.encode(fromAddr),
+            abi.encode(fromAmount),
+            abi.encode(toChainID),
+            abi.encode(toAddr),
+            abi.encode(toToken),
+            abi.encode(toAmount),
+            abi.encode(nonce)
+        );
+        return Create2.computeAddress(0, keccak256(creationCode));
+    }
 }
 
 // This contract is deployed, then destroyed again in the same transaction.
@@ -161,81 +259,40 @@ contract DaimoFastCCTP {
 // sender, recipient, token, amount. This contract lets us encode all of the
 // FastCCTP send parameters into the sender address via CREATE2.
 contract EphemeralHandoff {
-  address payable private immutable _creator;
-  uint256 private immutable _fromAmount;
-  uint256 private immutable _toChainID;
-  IERC20 private immutable _toToken;
+    address payable private immutable _creator;
+    uint256 private immutable _fromAmount;
+    uint256 private immutable _toChainID;
+    IERC20 private immutable _toToken;
 
-  constructor(
-    uint256 /* fromChainID */,
-    address /* fromAddr */,
-    uint256 fromAmount,
-    uint256 toChainID,
-    address /* toAddr */,
-    uint256 /* toAmount */,
-    IERC20 toToken,
-    uint256 /* nonce */
-  ) {
-    _creator = payable(msg.sender);
-    _fromAmount = fromAmount;
-    _toChainID = toChainID;
-    _toToken = toToken;
-  }
+    constructor(
+        uint256 /* fromChainID */,
+        address /* fromAddr */,
+        uint256 fromAmount,
+        uint256 toChainID,
+        address /* toAddr */,
+        IERC20 toToken,
+        uint256 /* toAmount */,
+        uint256 /* nonce */
+    ) {
+        _creator = payable(msg.sender);
+        _fromAmount = fromAmount;
+        _toChainID = toChainID;
+        _toToken = toToken;
+    }
 
-  modifier onlyCreator() {
-    require(msg.sender == _creator, "Only creator can call this function");
-    _;
-  }
+    // Called immediately after the CCTP claim.
+    // Checks that the correct amount was received, then forwards to FastCCTP.
+    function receiveTransferAndSelfDestruct() public {
+        require(msg.sender == _creator, "FCCTP: only creator");
+        uint256 amount = _toToken.balanceOf(address(this));
+        require(amount >= _fromAmount, "FCCTP: insufficient balance received");
 
-  function startTransferAndSelfDestruct(
-    ICCTPTokenMessenger cctpMessenger,
-    IERC20 token
-  ) public onlyCreator {
-    token.approve(address(cctpMessenger), _fromAmount);
+        // Send to FastCCTP, which will forward to current recipient
+        _toToken.transfer(_creator, amount);
 
-    // Send to CCTP. Recipient = this same EphemeralHandoff address on chain B.
-    uint32 destinationDomain = _chainIDToDomain(_toChainID);
-    bytes32 mintRecipient = bytes32(bytes20(address(this)));
-    cctpMessenger.depositForBurn(
-      _fromAmount,
-      destinationDomain,
-      mintRecipient,
-      address(token)
-    );
-
-    // Finally, self-destruct
-    destroy();
-  }
-
-  // Called immediately after the CCTP claim.
-  // Checks that the correct amount was received, then forwards to FastCCTP.
-  function receiveTransferAndSelfDestruct() public onlyCreator {
-    uint256 balanceReceived = _toToken.balanceOf(address(this));
-    require(balanceReceived == _fromAmount, "FCCTP: wrong balance received");
-
-    // Send to FastCCTP, which will forward to current recipient
-    _toToken.transfer(_creator, _fromAmount);
-
-    // Finally, self-destruct
-    destroy();
-  }
-
-  function destroy() public onlyCreator {
-    // This use of SELFDESTRUCT is compatible with EIP-6780.
-    // EphemeralHandoffs are deployed, then destroyed in the same transaction.
-    // solhint-disable-next-line
-    selfdestruct(_creator);
-  }
-
-  // This list only restricts destination chains = compatiable DaimoAccountV2
-  // home chains. The source chain could be any chain CCTP adds in the future.
-  function _chainIDToDomain(uint256 chainID) private pure returns (uint32) {
-    if (chainID == 1) return 0; // Ethereum
-    if (chainID == 43114) return 1; // AVAX
-    if (chainID == 10) return 2; // OP Mainnet
-    if (chainID == 42161) return 3; // Arbitrum
-    if (chainID == 8453) return 6; // Base
-    if (chainID == 137) return 7; // Polygon
-    revert("Unsupported chainID");
-  }
+        // This use of SELFDESTRUCT is compatible with EIP-6780. Handoff
+        // contracts are deployed, then destroyed in the same transaction.
+        // solhint-disable-next-line
+        selfdestruct(_creator);
+    }
 }
