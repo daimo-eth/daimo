@@ -25,7 +25,7 @@ import {
   optimismSepoliaWETH,
   optimismUSDC,
   optimismWETH,
-  polygonSepoliaUSDC,
+  polygonAmoyUSDC,
   polygonUSDC,
   polygonWETH,
 } from "./foreignToken";
@@ -100,9 +100,9 @@ export const polygon: AccountChain = {
 
 export const polygonAmoy: AccountChain = {
   chainId: 80002,
-  name: "polygonSepolia",
+  name: "polygonAmoy",
   cctpDomain: 7,
-  bridgeCoin: polygonSepoliaUSDC,
+  bridgeCoin: polygonAmoyUSDC,
   isTestnet: true,
 };
 
@@ -225,27 +225,3 @@ export function getNativeETHForChain(
       return undefined;
   }
 }
-
-// Link token to chain.
-baseUSDC.chainId = base.chainId;
-baseWETH.chainId = base.chainId;
-
-arbitrumUSDC.chainId = arbitrum.chainId;
-arbitrumWETH.chainId = arbitrum.chainId;
-
-optimismUSDC.chainId = optimism.chainId;
-optimismWETH.chainId = optimism.chainId;
-
-polygonUSDC.chainId = polygon.chainId;
-polygonWETH.chainId = polygon.chainId;
-
-avalancheUSDC.chainId = avalanche.chainId;
-avalancheWETH.chainId = avalanche.chainId;
-
-arbitrumSepoliaUSDC.chainId = arbitrumSepolia.chainId;
-arbitrumSepoliaWETH.chainId = arbitrumSepolia.chainId;
-
-optimismSepoliaUSDC.chainId = optimismSepolia.chainId;
-optimismSepoliaWETH.chainId = optimismSepolia.chainId;
-
-polygonSepoliaUSDC.chainId = polygonAmoy.chainId;
