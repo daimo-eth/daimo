@@ -14,28 +14,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// This is an experiment.
-// Hard-code for now, can productize if successful.
-const items: POSItem[] = [
-  { name: "☕️ Espresso", price: 4 },
-  { name: "☕️ Cortado", price: 5 },
-  { name: "☕️ Flat White", price: 6 },
-
-  { name: "☕️ Latte", price: 6 },
-  { name: "🍵 Matcha Lt.", price: 6 },
-  { name: "🦴 Bone Broth", price: 8 },
-
-  { name: "☕️ Filtered/CB", price: 5 },
-  { name: "🫖 Tea", price: 5 },
-  { name: "💦 Pellegrino", price: 6 },
-
-  { name: "💦 Box Water", price: 5 },
-  { name: "🍞 Oatmeal", price: 6 },
-  { name: "🍫 Bar", price: 4 },
-];
-
-const storeAddress = getAddress("0x8FdA17665A52A98D7c60D1527aDD42f0723B8515");
-const tag = "ecd";
+const storeAddress = getAddress("0x29A2Aa538F3b0E53B006ebCF6E616DeFBa216195");
+const tag = "ecc";
 
 export default function CafePOSPage(props: {
   searchParams: { token?: string };
@@ -45,7 +25,7 @@ export default function CafePOSPage(props: {
 
   return (
     <RpcHookProvider>
-      <PointOfSalePage {...{ tag, updateToken, items, storeAddress }} />
+      <PointOfSalePage {...{ tag, updateToken, storeAddress }} />
     </RpcHookProvider>
   );
 }
