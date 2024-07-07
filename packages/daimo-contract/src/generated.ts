@@ -1581,7 +1581,11 @@ export const daimoFlexSwapperABI = [
     stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
-      { name: '_weth', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: '_wrappedNativeToken',
+        internalType: 'contract IERC20',
+        type: 'address',
+      },
       {
         name: '_hopTokens',
         internalType: 'contract IERC20[]',
@@ -1804,7 +1808,7 @@ export const daimoFlexSwapperABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [],
-    name: 'weth',
+    name: 'wrappedNativeToken',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
   },
   {
