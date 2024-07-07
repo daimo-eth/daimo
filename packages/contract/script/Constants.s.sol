@@ -68,6 +68,18 @@ address constant OP_TESTNET_USDC = 0x5fd84259d66Cd46123540766Be93DFE6D43130D7;
 address constant OP_TESTNET_UNISWAP_ROUTER = 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4;
 address constant OP_TESTNET_UNISWAP_FACTORY = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
 
+// WETH and wrapped native tokens
+address constant ETH_MAINNET_WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+address constant ETH_TESTNET_WETH = 0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9;
+address constant OP_STACK_WETH = 0x4200000000000000000000000000000000000006;
+address constant ARB_MAINNET_WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+address constant ARB_TESTNET_WETH = 0x980B62Da83eFf3D4576C647993b0c1D7faf17c73;
+address constant POLYGON_WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+address constant AVAX_WETH = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
+
+address constant POLYGON_WMATIC = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+address constant AVAX_WAVAX = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
+
 function _getUSDCAddress(uint256 chainId) pure returns (address) {
     // Mainnets
     if (chainId == ETH_MAINNET) return ETH_MAINNET_USDC;
@@ -108,6 +120,36 @@ function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
     if (chainId == OP_TESTNET) return OP_TESTNET_UNISWAP_FACTORY;
 
     revert("Unsupported chainID");
+}
+
+function _getWETH(uint256 chainId) pure returns (address) {
+    // Mainnets
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_WETH;
+    if (chainId == BASE_MAINNET) return OP_STACK_WETH;
+    if (chainId == OP_MAINNET) return OP_STACK_WETH;
+    if (chainId == ARBITRUM_MAINNET) return ARB_MAINNET_WETH;
+    if (chainId == POLYGON_MAINNET) return POLYGON_WETH;
+    if (chainId == AVAX_MAINNET) return AVAX_WETH;
+
+    // Testnets
+    if (chainId == ETH_TESTNET) return ETH_TESTNET_WETH;
+    if (chainId == BASE_TESTNET) return OP_STACK_WETH;
+    if (chainId == OP_TESTNET) return OP_STACK_WETH;
+    if (chainId == ARBITRUM_TESTNET) return ARB_TESTNET_WETH;
+    if (chainId == POLYGON_TESTNET) return POLYGON_WETH;
+    if (chainId == AVAX_TESTNET) return AVAX_WETH;
+
+    revert("Unsupported chainID");
+}
+
+function _getWrappedNativeToken(uint256 chainId) pure returns (address) {
+    if (chainId == POLYGON_MAINNET) return POLYGON_WMATIC;
+    if (chainId == AVAX_MAINNET) return AVAX_WAVAX;
+
+    if (chainId == POLYGON_TESTNET) return POLYGON_WMATIC;
+    if (chainId == AVAX_TESTNET) return AVAX_WAVAX;
+
+    return _getWETH(chainId);
 }
 
 // ----------------- CCTP Bridger ----------------- //

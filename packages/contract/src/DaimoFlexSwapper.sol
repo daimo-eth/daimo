@@ -58,8 +58,8 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     // TODO: should this contract have an owner?
     // Ability to modify hopTokens / outputTokens / maxSlippage etc?
 
-    /// Weth, used for handling input or output native ETH.
-    IERC20 public weth;
+    /// WETH / WMATIC / etc, the ERC-20 wrapped native token.
+    IERC20 public wrappedNativeToken;
     /// Hop tokens. We search for two-pool routes going thru these tokens.
     IERC20[] public hopTokens;
     /// Supported output tokens, generally popular stablecoins.
@@ -88,7 +88,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
     );
 
     constructor(
-        IERC20 _weth,
+        IERC20 _wrappedNativeToken,
         IERC20[] memory _hopTokens,
         IERC20[] memory _outputTokens,
         address _swapRouter02,
@@ -96,7 +96,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
     ) {
-        weth = _weth;
+        wrappedNativeToken = _wrappedNativeToken;
         hopTokens = _hopTokens;
         outputTokens = _outputTokens;
         swapRouter02 = _swapRouter02;
@@ -222,9 +222,8 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint256 amountOut, bytes memory swapPath) {
-        // TODO: handle MATIC on Polygon
-        if (address(tokenIn) == address(0)) tokenIn = weth;
-        if (address(tokenOut) == address(0)) tokenOut = weth;
+        if (address(tokenIn) == address(0)) tokenIn = wrappedNativeToken;
+        if (address(tokenOut) == address(0)) tokenOut = wrappedNativeToken;
 
         // Same token = no swap.
         if (tokenIn == tokenOut) {

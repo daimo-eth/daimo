@@ -196,7 +196,7 @@ export const optimismSepoliaWETH: ForeignToken = {
 
 export const polygonUSDC: ForeignToken = {
   chainId: 137,
-  token: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+  token: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
@@ -213,12 +213,12 @@ export const polygonWETH: ForeignToken = {
 };
 
 //
-// Polygon Sepolia
+// Polygon Amoy
 //
 
 export const polygonAmoyUSDC: ForeignToken = {
   chainId: 80002,
-  token: "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582",
+  token: "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
@@ -240,7 +240,7 @@ export const avalancheUSDC: ForeignToken = {
 
 export const avalancheWETH: ForeignToken = {
   chainId: 43114,
-  token: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab", // WETH.e
+  token: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", // WETH.e
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",

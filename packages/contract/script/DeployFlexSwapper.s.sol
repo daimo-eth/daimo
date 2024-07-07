@@ -10,16 +10,17 @@ contract DeployFlexSwapperScript is Script {
     function run() public {
         uint256 chainId = block.chainid;
 
-        // TODO: change to get correct WETH address per chain. For now, just OPStack.
-        require(
-            chainId == BASE_MAINNET ||
-                chainId == BASE_TESTNET ||
-                chainId == OP_MAINNET ||
-                chainId == OP_TESTNET
-        );
-        IERC20 weth = IERC20(0x4200000000000000000000000000000000000006);
-        IERC20[] memory hopTokens = new IERC20[](1);
-        hopTokens[0] = weth;
+        IERC20 wrappedNative = IERC20(_getWrappedNativeToken(chainId));
+        IERC20 weth = IERC20(_getWETH(chainId));
+        IERC20[] memory hopTokens;
+        if (weth == wrappedNative) {
+            hopTokens = new IERC20[](1);
+            hopTokens[0] = weth;
+        } else {
+            hopTokens = new IERC20[](2);
+            hopTokens[0] = weth;
+            hopTokens[1] = wrappedNative;
+        }
 
         // Supported output tokens
         IERC20 usdc = IERC20(_getUSDCAddress(chainId));
@@ -47,7 +48,7 @@ contract DeployFlexSwapperScript is Script {
                 bytes.concat(
                     type(DaimoFlexSwapper).creationCode,
                     abi.encode(
-                        weth,
+                        wrappedNative,
                         hopTokens,
                         outputTokens,
                         uniswapRouter,
