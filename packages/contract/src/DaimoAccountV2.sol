@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-// TODO: delete?
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
@@ -32,19 +31,21 @@ import "./DaimoCCTPBridger.sol";
  * forwarding address that all future received assets will be forwarded to.
  */
 contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
+    // Represent an arbitrary contract call on the home chain.
     struct Call {
         address dest;
         uint256 value;
         bytes data;
     }
 
+    // Signature, including the key slot identifying the signing key.
+    // See WebAuthn.sol for verification details.
     struct Signature {
         uint8 keySlot;
         bytes authenticatorData;
         string clientDataJSON;
         uint256 r;
         uint256 s;
-        // TODO: explain why we don't need v
     }
 
     /// no-op function with struct as argument to expose it in generated ABI
@@ -60,7 +61,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     IERC20 public homeCoin;
 
     /// If non-zero, automatically forwards all assets to forwardingAddress,
-    /// disabling the account's own functionality. Only used on home chain.
+    /// deactivating the account's own functionality. Only used on home chain.
     address public forwardingAddress;
 
     /// Swaps assets to the bridgeable coin or the home coin.
@@ -132,7 +133,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Emitted after offboarding: forward an asset to the forwarding address.
     event ForwardAsset(IERC20 tokenIn, uint256 amountIn);
 
-    /// Emitted on home chain, when user updates their home coin.
+    /// Emitted on home chain, when the user updates their home coin.
     event UpdateHomeCoin(IERC20 oldHomeCoin, IERC20 newHomeCoin);
 
     /// Verify caller is the 4337 EntryPoint. Used to validate & run userops.
@@ -144,15 +145,15 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Verify that we're in a valid userop, called via executeBatch.
     modifier onlyOp() {
         require(msg.sender == address(this), "DAv2: only self");
-        require(block.chainid == homeChain, "DAv2: only home chain");
         require(forwardingAddress == address(0), "DAv2: only not forwarding");
+        require(block.chainid == homeChain, "DAv2: only home chain");
         _;
     }
 
     /// Verify that we're on the home chain & account is active, not forwarding.
-    modifier onlyNotForwarding() {
-        require(block.chainid == homeChain, "DAv2: only home chain");
+    modifier onlyActive() {
         require(forwardingAddress == address(0), "DAv2: only not forwarding");
+        require(block.chainid == homeChain, "DAv2: only home chain");
         _;
     }
 
@@ -187,7 +188,6 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         uint8 slot,
         bytes32[2] calldata key
     ) public virtual initializer {
-        // TODO: ensure entryPoint is set
         homeChain = _homeChain;
         homeCoin = _homeCoin;
         swapper = _swapper;
@@ -213,7 +213,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// All user-initiated account actions originate from here.
     function executeBatch(
         Call[] calldata calls
-    ) external onlyEntryPoint onlyNotForwarding {
+    ) external onlyEntryPoint onlyActive {
         for (uint256 i = 0; i < calls.length; i++) {
             _call(calls[i].dest, calls[i].value, calls[i].data);
         }
@@ -238,7 +238,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         virtual
         override
         onlyEntryPoint
-        onlyNotForwarding
+        onlyActive
         returns (uint256 validationData)
     {
         validationData = _validateUseropSignature(userOp, userOpHash);
@@ -250,26 +250,21 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         UserOperation calldata userOp,
         bytes32 userOpHash
     ) private view returns (uint256 validationData) {
-        // userOp.signature bytes structure:
-        //
-        // - 6 bytes uint48 validUntil
-        // - bytes (type Signature) signature
-
-        // In all cases, we'll be checking a signature & returning a result.
-        bytes memory messageToVerify;
-        bytes calldata signature;
-        ValidationData memory returnIfValid;
-
+        // userOp.signature structure:
+        // 6 bytes (uint48)         : validUntil
+        // n bytes (type Signature) : signature
         uint256 sigLength = userOp.signature.length;
         if (sigLength < 6) return _SIG_VALIDATION_FAILED;
-        uint48 validUntil = uint48(bytes6(userOp.signature[0:6]));
 
-        signature = userOp.signature[6:];
-        messageToVerify = abi.encodePacked(validUntil, userOpHash);
-        returnIfValid.validUntil = validUntil;
+        uint48 validUntil = uint48(bytes6(userOp.signature[0:6]));
+        bytes calldata signature = userOp.signature[6:];
+
+        bytes memory messageToVerify = abi.encodePacked(validUntil, userOpHash);
 
         if (_validateSignature(messageToVerify, signature)) {
-            return _packValidationData(returnIfValid);
+            ValidationData memory validData;
+            validData.validUntil = validUntil;
+            return _packValidationData(validData);
         }
         return _SIG_VALIDATION_FAILED;
     }
@@ -307,13 +302,14 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     }
 
     /// ERC-1271: validate a user signature, verifying a valid Daimo account
-    /// signature. Signature format: [encoded Signature struct]
+    /// signature. The signature is an ABI-encoded Signature struct.
+    ///
+    /// Only active (non-forwarding) accounts can sign messages.
+    /// isValidSignature() reverts on foreign chains and in forwarded accounts.
     function isValidSignature(
         bytes32 message,
         bytes calldata signature
-    ) external view override onlyNotForwarding returns (bytes4 magicValue) {
-        // TODO: should this *revert* in the forwarding or foreign-chain case,
-        // or should it just return invalid?
+    ) external view override onlyActive returns (bytes4 magicValue) {
         if (_validateSignature(bytes.concat(message), signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
@@ -379,11 +375,11 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         if (tokenIn == tokenBridge) {
             amountBridge = amountIn;
         } else {
-            // swapper is responsible for ensuring a fair price
+            // Swapper is responsible for ensuring a fair price
             amountBridge = _swap(tokenIn, amountIn, tokenBridge, extraDataSwap);
         }
 
-        // bridger is responsible for checking it supports tokenBridge, etc
+        // Bridger is responsible for checking that it supports tokenBridge, etc
         TransferHelper.safeApprove(
             address(tokenBridge),
             address(bridger),
