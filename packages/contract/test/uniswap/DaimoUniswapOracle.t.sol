@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "forge-std/StdJson.sol";
+import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
 import "../../src/DaimoFlexSwapper.sol";
 
 using stdJson for string;
@@ -25,7 +27,11 @@ contract DaimoUniswapOracleTest is Test {
         oracleFeeTiers[2] = 3000;
         oracleFeeTiers[3] = 10000;
 
-        swapper = new DaimoFlexSwapper({
+        address swapperImpl = address(new DaimoFlexSwapper());
+        swapper = DaimoFlexSwapper(address(new ERC1967Proxy(swapperImpl, "")));
+
+        swapper.init({
+            _initialOwner: address(this),
             _wrappedNativeToken: weth,
             _hopTokens: hopTokens,
             _outputTokens: outputTokens,

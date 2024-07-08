@@ -13,8 +13,8 @@ import "account-abstraction/interfaces/IEntryPoint.sol";
 
 import "p256-verifier/WebAuthn.sol";
 
-import "./DaimoFlexSwapper.sol";
-import "./DaimoCCTPBridger.sol";
+import "./IDaimoSwapper.sol";
+import "./IDaimoBridger.sol";
 
 /**
  * DaimoAccountV2 is a collector structure in which the contract is deployed at

@@ -28,7 +28,9 @@ contract DeployCCTPBridgerScript is Script {
         outputDomains[5] = POLYGON_DOMAIN;
 
         address tokenMessengerAddress = _getTokenMessengerAddress(chainId);
-        ITokenMessenger tokenMessenger = ITokenMessenger(tokenMessengerAddress);
+        ICCTPTokenMessenger tokenMessenger = ICCTPTokenMessenger(
+            tokenMessengerAddress
+        );
 
         vm.startBroadcast();
 
