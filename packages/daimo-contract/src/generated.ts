@@ -1038,26 +1038,24 @@ export const daimoAccountV2ABI = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const daimoCctpBridgerABI = [
+  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
   {
     stateMutability: 'nonpayable',
-    type: 'constructor',
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
     inputs: [
-      {
-        name: '_cctpMessenger',
-        internalType: 'contract ITokenMessenger',
-        type: 'address',
-      },
-      {
-        name: '_cctpInputChainIds',
-        internalType: 'uint256[]',
-        type: 'uint256[]',
-      },
-      {
-        name: '_cctpOutputDomains',
-        internalType: 'uint32[]',
-        type: 'uint32[]',
-      },
+      { name: 'chainID', internalType: 'uint256', type: 'uint256' },
+      { name: 'domain', internalType: 'uint32', type: 'uint32' },
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
+    name: 'addCCTPDomain',
+    outputs: [],
   },
   {
     stateMutability: 'view',
@@ -1065,8 +1063,8 @@ export const daimoCctpBridgerABI = [
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'cctpDomainMapping',
     outputs: [
-      { name: 'valid', internalType: 'bool', type: 'bool' },
       { name: 'domain', internalType: 'uint32', type: 'uint32' },
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
   },
   {
@@ -1075,8 +1073,89 @@ export const daimoCctpBridgerABI = [
     inputs: [],
     name: 'cctpMessenger',
     outputs: [
-      { name: '', internalType: 'contract ITokenMessenger', type: 'address' },
+      {
+        name: '',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
     ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'fastCCTP',
+    outputs: [
+      { name: '', internalType: 'contract DaimoFastCCTP', type: 'address' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'fastCCTPNonce',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'implementation',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_initialOwner', internalType: 'address', type: 'address' },
+      {
+        name: '_cctpMessenger',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
+      {
+        name: '_fastCCTP',
+        internalType: 'contract DaimoFastCCTP',
+        type: 'address',
+      },
+      { name: '_cctpChainIDs', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_cctpDomains', internalType: 'uint32[]', type: 'uint32[]' },
+      {
+        name: '_cctpTokens',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
+    ],
+    name: 'init',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
   },
   {
     stateMutability: 'nonpayable',
@@ -1089,6 +1168,123 @@ export const daimoCctpBridgerABI = [
     ],
     name: 'sendToChain',
     outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'upgradeTo',
+    outputs: [],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+      { name: 'data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
   },
 ] as const
 
@@ -1577,35 +1773,7 @@ export const daimoFastCctpABI = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const daimoFlexSwapperABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_wrappedNativeToken',
-        internalType: 'contract IERC20',
-        type: 'address',
-      },
-      {
-        name: '_hopTokens',
-        internalType: 'contract IERC20[]',
-        type: 'address[]',
-      },
-      {
-        name: '_outputTokens',
-        internalType: 'contract IERC20[]',
-        type: 'address[]',
-      },
-      { name: '_swapRouter02', internalType: 'address', type: 'address' },
-      { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
-      { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
-      {
-        name: '_oraclePoolFactory',
-        internalType: 'contract IUniswapV3Factory',
-        type: 'address',
-      },
-    ],
-  },
+  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1679,6 +1847,45 @@ export const daimoFlexSwapperABI = [
   {
     stateMutability: 'view',
     type: 'function',
+    inputs: [],
+    name: 'implementation',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: '_initialOwner', internalType: 'address', type: 'address' },
+      {
+        name: '_wrappedNativeToken',
+        internalType: 'contract IERC20',
+        type: 'address',
+      },
+      {
+        name: '_hopTokens',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
+      {
+        name: '_outputTokens',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
+      { name: '_swapRouter02', internalType: 'address', type: 'address' },
+      { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
+      { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
+      {
+        name: '_oraclePoolFactory',
+        internalType: 'contract IUniswapV3Factory',
+        type: 'address',
+      },
+    ],
+    name: 'init',
+    outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
     inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
     name: 'isOutputToken',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -1726,6 +1933,13 @@ export const daimoFlexSwapperABI = [
     inputs: [],
     name: 'pendingOwner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
   },
   {
     stateMutability: 'view',
@@ -1805,11 +2019,70 @@ export const daimoFlexSwapperABI = [
     outputs: [],
   },
   {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'upgradeTo',
+    outputs: [],
+  },
+  {
+    stateMutability: 'payable',
+    type: 'function',
+    inputs: [
+      { name: 'newImplementation', internalType: 'address', type: 'address' },
+      { name: 'data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+  },
+  {
     stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'wrappedNativeToken',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
   },
   {
     type: 'event',
@@ -1897,6 +2170,19 @@ export const daimoFlexSwapperABI = [
       },
     ],
     name: 'SwapToCoin',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
   },
   { type: 'error', inputs: [], name: 'T' },
 ] as const
@@ -2865,6 +3151,66 @@ export const erc1967UpgradeABI = [
       },
     ],
     name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ERC1967UpgradeUpgradeable
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const erc1967UpgradeUpgradeableABI = [
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+    ],
+    name: 'Initialized',
   },
   {
     type: 'event',
