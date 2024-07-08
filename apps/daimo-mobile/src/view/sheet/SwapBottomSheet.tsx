@@ -51,16 +51,12 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       });
     },
     pendingOp: {
-      type: "transfer",
+      type: "outboundSwap",
       from: swap.fromAcc.addr,
       to: account!.address,
       amount: swap.toAmount,
-      preSwapTransfer: {
-        // TODO:
-        coin: swap.fromCoin,
-        from: swap.fromAcc.addr,
-        amount: swap.fromAmount,
-      },
+      coinOther: swap.fromCoin,
+      amountOther: swap.fromAmount,
       status: OpStatus.pending,
       timestamp: now(),
     },

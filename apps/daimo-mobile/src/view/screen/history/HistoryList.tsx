@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAddress } from "viem";
 
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
@@ -187,7 +188,7 @@ function DisplayOpRow({
 
   assert(displayOp.amount > 0);
   const [from, to] = getDisplayFromTo(displayOp);
-  assert([from, to].includes(address));
+  assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;

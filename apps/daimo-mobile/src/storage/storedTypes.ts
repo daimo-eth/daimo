@@ -16,9 +16,32 @@ import { Address, Hex } from "viem";
 // This file contains current types. For old versions, see storedTypeMigrations.
 //
 
-export type StoredV16Clog = StoredV16TransferClog | StoredV15PaymentLinkClog;
+export type StoredV16Clog =
+  | StoredV16SimpleTransferClog
+  | StoredV15PaymentLinkClog
+  | StoredV16SwapClog;
 
-interface StoredV16TransferClog {
+interface StoredV16SwapClog {
+  timestamp: number;
+  status: OpStatus;
+  opHash?: Hex;
+  txHash?: Hex;
+  blockNumber?: number;
+  blockHash?: string;
+  logIndex?: number;
+  feeAmount?: number;
+  type: "inboundSwap" | "outboundSwap";
+  from: Address;
+  to: Address;
+  amount: number;
+  nonceMetadata?: Hex;
+  requestStatus?: StoredV15DaimoRequestV2Status;
+  memo?: string;
+  coinOther: StoredV16ForeignCoin;
+  amountOther: BigIntStr;
+}
+
+interface StoredV16SimpleTransferClog {
   timestamp: number;
   status: OpStatus;
   opHash?: Hex;
@@ -34,11 +57,6 @@ interface StoredV16TransferClog {
   nonceMetadata?: Hex;
   requestStatus?: StoredV15DaimoRequestV2Status;
   memo?: string;
-  preSwapTransfer?: {
-    coin: StoredV16ForeignCoin;
-    amount: BigIntStr;
-    from: Address;
-  };
 }
 
 export interface StoredV15PaymentLinkClog {

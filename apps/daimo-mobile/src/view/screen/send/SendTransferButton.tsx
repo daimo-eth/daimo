@@ -1,4 +1,5 @@
 import {
+  BigIntStr,
   EAccount,
   ForeignToken,
   OpStatus,
@@ -62,6 +63,17 @@ export function SendTransferButton({
     []
   );
 
+  // Note whether the transfer has a swap or not for op creation.
+  const isSwap = !!(route && route.routeFound);
+  const pendingOpBase = {
+    from: account.address,
+    to: recipient.addr,
+    amount: Number(dollarsToAmount(dollarsStr)),
+    memo,
+    status: OpStatus.pending,
+    timestamp: 0,
+  };
+
   // On exec, request signature from device enclave, send transfer.
   const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
     dollarsToSend: dollars,
@@ -76,7 +88,7 @@ export function SendTransferButton({
       };
 
       // Swap and transfer if outbound coin is different than home coin.
-      if (route && route.routeFound) {
+      if (isSwap) {
         console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);
       }
@@ -88,15 +100,17 @@ export function SendTransferButton({
         memo
       );
     },
-    pendingOp: {
-      type: "transfer",
-      from: account.address,
-      to: recipient.addr,
-      amount: Number(dollarsToAmount(dollarsStr)),
-      memo,
-      status: OpStatus.pending,
-      timestamp: 0,
-    },
+    pendingOp: isSwap
+      ? {
+          type: "outboundSwap",
+          ...pendingOpBase,
+          coinOther: toCoin,
+          amountOther: `${route.toAmount}` as BigIntStr,
+        }
+      : {
+          type: "transfer",
+          ...pendingOpBase,
+        },
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),

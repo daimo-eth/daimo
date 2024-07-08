@@ -55,7 +55,11 @@ test("PushNotifier", async () => {
 
   await test("transfer to external address", async () => {
     const input: Transfer[] = [
-      createTransfer({ from: addrAlice, to: addrCharlie, value: 690000n }),
+      createTransfer({
+        from: addrAlice,
+        to: addrCharlie,
+        value: 690000n,
+      }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
 
@@ -265,6 +269,7 @@ test("PushNotifier", async () => {
     );
   });
 
+  // SimpleTransferClog
   await test("foreign token transfer", async () => {
     const input: ForeignTokenTransfer = createForeignTokenTransfer({
       from: addrCharlie,
@@ -279,13 +284,14 @@ test("PushNotifier", async () => {
     assert.strictEqual(output[0].body, "Accept 10 FAKE as $1.00 USDC");
   });
 
-  await test("foreign token swap", async () => {
+  // SwapClog
+  await test("foreign token inbound swap", async () => {
     const input: Transfer[] = [
       createTransfer({
         from: addrCharlie,
         to: addrBob,
         value: 1000000n,
-        isSwapOutput: true,
+        isSwap: true,
       }),
     ];
     const output = await pn.getPushMessagesFromTransfers(input);
@@ -342,8 +348,7 @@ function createNotifierAliceBob() {
 
   const stubCoinIndexer = {
     attachTransferOpProperties: (log: Transfer): TransferClog => {
-      const op: TransferClog = {
-        type: "transfer",
+      const baseClog = {
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(
           Number(log.blockNumber),
@@ -357,22 +362,29 @@ function createNotifierAliceBob() {
         blockHash: log.blockHash,
         txHash: log.transactionHash,
         logIndex: log.logIndex,
-        requestStatus:
-          stubRequestIndexer.getRequestStatusByFulfillLogCoordinate(
-            log.transactionHash,
-            log.logIndex - 1
-          ) || undefined,
         memo: log.transactionHash === "0x43" ? "hello" : undefined,
-        preSwapTransfer:
-          log.transactionHash === "0x44"
-            ? {
-                coin: createFakeForeignToken(),
-                from: addrCharlie,
-                amount: "111111",
-              }
-            : undefined,
       };
-      return op;
+
+      // SwapClog (hard-coded txHash)
+      if (log.transactionHash === "0x44") {
+        return {
+          ...baseClog,
+          type: "inboundSwap",
+          amountOther: "111111",
+          coinOther: createFakeForeignToken(),
+        } as TransferClog;
+      } else {
+        // SimpleTransferClog
+        return {
+          ...baseClog,
+          type: "transfer",
+          requestStatus:
+            stubRequestIndexer.getRequestStatusByFulfillLogCoordinate(
+              log.transactionHash,
+              log.logIndex - 1
+            ) || undefined,
+        } as TransferClog;
+      }
     },
   } as unknown as HomeCoinIndexer;
 
@@ -405,6 +417,29 @@ function createNotifierAliceBob() {
         });
       }
     },
+
+    attachTransferOpProperties: (log: Transfer): TransferClog => {
+      const op: TransferClog = {
+        type: "inboundSwap",
+        status: OpStatus.confirmed,
+        timestamp: guessTimestampFromNum(
+          Number(log.blockNumber),
+          daimoChainFromId(chainConfig.chainL2.id)
+        ),
+        from: log.from,
+        to: log.to,
+        amount: Number(log.value),
+        blockNumber: Number(log.blockNumber),
+
+        blockHash: log.blockHash,
+        txHash: log.transactionHash,
+        logIndex: log.logIndex,
+
+        amountOther: "1000000" as `${bigint}`,
+        coinOther: createFakeForeignToken(),
+      };
+      return op;
+    },
   } as unknown as ForeignCoinIndexer;
 
   const nullAny = null as any;
@@ -429,14 +464,14 @@ function createTransfer(args: {
   value: bigint;
   memo?: boolean;
   isRequestResponse?: boolean;
-  isSwapOutput?: boolean;
+  isSwap?: boolean;
 }): Transfer {
   // hardcoded txHash used in stub classes
   const txHash = args.isRequestResponse
     ? "0x42"
     : args.memo
     ? "0x43"
-    : args.isSwapOutput
+    : args.isSwap
     ? "0x44"
     : "0x0";
 

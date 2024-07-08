@@ -5,6 +5,7 @@ import { NameRegistry } from "../src/contract/nameRegistry";
 import { NoteIndexer } from "../src/contract/noteIndexer";
 import { OpIndexer } from "../src/contract/opIndexer";
 import { RequestIndexer } from "../src/contract/requestIndexer";
+import { SwapClogMatcher } from "../src/contract/SwapClogMatcher";
 import { StubExternalApiCache } from "../src/db/externalApiCache";
 import { getViemClientFromEnv } from "../src/network/viemClient";
 import { PaymentMemoTracker } from "../src/offchain/paymentMemoTracker";
@@ -24,14 +25,15 @@ export async function main() {
   );
   const paymentMemoTracker = new PaymentMemoTracker(null as any);
 
-  const opIndexer = new OpIndexer();
+  const tokenReg = new TokenRegistry();
+  const swapClogMatcher = new SwapClogMatcher(tokenReg);
+  const opIndexer = new OpIndexer(swapClogMatcher);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(
     null as any,
     nameReg,
     paymentMemoTracker
   );
-  const tokenReg = new TokenRegistry();
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
   const coinIndexer = new HomeCoinIndexer(
     vc,
@@ -39,7 +41,8 @@ export async function main() {
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
+    swapClogMatcher
   );
   const keyReg = new KeyRegistry();
 

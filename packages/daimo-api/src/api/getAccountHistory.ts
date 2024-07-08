@@ -58,7 +58,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: TransferClog[];
+  transferLogs: TransferClog[]; // TODO: rename to transferClogs
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -129,15 +129,15 @@ export async function getAccountHistory(
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
-  const transferLogs = homeCoinIndexer.filterTransfers({
+  const transferClogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
   let elapsedMs = performance.now() - startMs;
-  console.log(`${log}: ${elapsedMs}ms ${transferLogs.length} logs`);
+  console.log(`${log}: ${elapsedMs}ms ${transferClogs.length} logs`);
 
   // Get named accounts
-  const namedAccounts = await getNamedAccountsFromClogs(transferLogs, nameReg);
+  const namedAccounts = await getNamedAccountsFromClogs(transferClogs, nameReg);
 
   // Get account keys
   const accountKeys = keyReg.resolveAddressKeys(address);
@@ -208,7 +208,7 @@ export async function getAccountHistory(
     recommendedExchanges,
     suggestedActions: [],
 
-    transferLogs,
+    transferLogs: transferClogs,
     namedAccounts,
     accountKeys,
     linkedAccounts,
@@ -242,8 +242,6 @@ async function getNamedAccountsFromClogs(
     if (clog.type === "claimLink" || clog.type === "createLink") {
       if (clog.noteStatus.claimer) addrs.add(clog.noteStatus.claimer.addr);
       addrs.add(clog.noteStatus.sender.addr);
-    } else if (clog.type === "transfer" && clog.preSwapTransfer) {
-      addrs.add(clog.preSwapTransfer.from);
     }
   });
   const namedAccounts = (

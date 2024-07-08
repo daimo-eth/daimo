@@ -149,23 +149,23 @@ export class PushNotifier {
         continue;
       }
 
-      const opEvent = this.coinIndexer.attachTransferOpProperties(log);
-      const [from, to] = getDisplayFromTo(opEvent);
+      const transferClog = this.coinIndexer.attachTransferOpProperties(log);
+      const [from, to] = getDisplayFromTo(transferClog);
 
       const [a, b] = await Promise.all([
         this.getPushMessagesFromTransfer(
           log.transactionHash,
           from,
           to,
-          -opEvent.amount,
-          opEvent
+          -transferClog.amount,
+          transferClog
         ),
         this.getPushMessagesFromTransfer(
           log.transactionHash,
           to,
           from,
-          opEvent.amount,
-          opEvent
+          transferClog.amount,
+          transferClog
         ),
       ]);
       messages.push(...a, ...b);
@@ -237,9 +237,15 @@ export class PushNotifier {
     addr: Address,
     other: Address,
     amount: number,
-    opEvent: TransferClog
+    transferClog: TransferClog
   ): Promise<ExpoPushMessage[]> {
-    if (opEvent.type !== "transfer") return []; // Only transfer opEvents handled here
+    // Only handle simple transfers and swaps
+    if (
+      transferClog.type !== "transfer" &&
+      transferClog.type !== "inboundSwap" &&
+      transferClog.type !== "outboundSwap"
+    )
+      return [];
 
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens || pushTokens.length === 0) return [];
@@ -249,52 +255,76 @@ export class PushNotifier {
 
     // Get the other side
     const otherAcc = await this.nameReg.getEAccount(other);
-
-    if (otherAcc.label === AddrLabel.Paymaster) {
-      // ignore paymaster transfers
-      return [];
-    }
-
-    const otherStr = getAccountName(otherAcc);
+    if (otherAcc.label === AddrLabel.Paymaster) return []; // ignore paymaster transfers
+    const otherAccStr = getAccountName(otherAcc);
 
     const title = (() => {
-      if (opEvent.preSwapTransfer) {
-        assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
-        return `Accepted $${dollars} from ${otherStr}`;
-      } else if (amount < 0) return `Sent $${dollars} to ${otherStr}`;
-      else return `Received $${dollars} from ${otherStr}`;
+      // Simple transfer: same coin.
+      if (transferClog.type === "transfer") {
+        return amount < 0
+          ? `Sent $${dollars} to ${otherAccStr}`
+          : `Received $${dollars} from ${otherAccStr}`;
+      }
+      // Outbound or inbound swap: different coins.
+      else {
+        const otherDollars = transferClog.amountOther;
+        if (transferClog.type === "outboundSwap") {
+          return amount > 0
+            ? `Sent $${dollars} to ${otherAccStr}`
+            : `Accepted $${otherDollars} from ${otherAccStr}`;
+        } else {
+          return amount > 0
+            ? `Accepted $${dollars} from ${otherAccStr}`
+            : `Sent $${otherDollars} to ${otherAccStr}`;
+        }
+      }
     })();
 
     const body = (() => {
       // Transfer with memo
-      if (opEvent.memo) return opEvent.memo;
-      if (opEvent.requestStatus?.memo) return opEvent.requestStatus.memo;
+      if (transferClog.memo) return transferClog.memo;
 
-      // Transfer fulilling request
-      if (opEvent.requestStatus) {
-        assert(opEvent.requestStatus.status === DaimoRequestState.Fulfilled);
-        if (amount > 0) {
-          return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
-        } else {
-          return `You fulfilled ${dollars} ${tokenSymbol} request`;
+      // Transfer as a request
+      if (transferClog.type === "transfer") {
+        if (transferClog.requestStatus?.memo)
+          return transferClog.requestStatus.memo;
+
+        // Transfer fulilling request
+        if (transferClog.requestStatus) {
+          assert(
+            transferClog.requestStatus.status === DaimoRequestState.Fulfilled
+          );
+          if (amount > 0) {
+            return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
+          } else {
+            return `You fulfilled ${dollars} ${tokenSymbol} request`;
+          }
         }
       }
 
-      // Swap
-      if (opEvent.preSwapTransfer) {
-        assert(amount > 0); // foreignCoin can only be involved in receiving ends of swaps
+      // Inbound swap (receiving end)
+      if (transferClog.type === "inboundSwap") {
         const readableAmount = getForeignCoinDisplayAmount(
-          opEvent.preSwapTransfer.amount,
-          opEvent.preSwapTransfer.coin
+          transferClog.amountOther,
+          transferClog.coinOther
         );
-        return `You accepted ${readableAmount} ${opEvent.preSwapTransfer.coin.symbol} as $${dollars} ${tokenSymbol}`;
+        return `You accepted ${readableAmount} ${transferClog.coinOther.symbol} as $${dollars} ${tokenSymbol}`;
       }
 
-      // Vanilla transfer
+      // Outbound swap (sending end)
+      if (transferClog.type === "outboundSwap") {
+        const readableAmount = getForeignCoinDisplayAmount(
+          transferClog.amountOther,
+          transferClog.coinOther
+        );
+        return `You sent ${readableAmount} ${transferClog.coinOther.symbol} to ${otherAccStr}`;
+      }
+
+      // Simple transfer
       if (amount < 0) {
-        return `You sent ${dollars} ${tokenSymbol} to ${otherStr}`;
+        return `You sent ${dollars} ${tokenSymbol} to ${otherAccStr}`;
       } else {
-        return `You received ${dollars} ${tokenSymbol} from ${otherStr}`;
+        return `You received ${dollars} ${tokenSymbol} from ${otherAccStr}`;
       }
     })();
 
