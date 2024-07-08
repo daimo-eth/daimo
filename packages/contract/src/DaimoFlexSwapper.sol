@@ -6,6 +6,7 @@ import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IDaimoSwapper.sol";
 
@@ -32,7 +33,7 @@ import "./IDaimoSwapper.sol";
 ///    that the (tokenOut) balance increased by the expected amount.
 /// 2. Passing the zero address + no calldata. In this case, DaimoFlexSwapper
 ///    uses the Uniswap route found when quoting the reference price.
-contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
+contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     /// Describes how to perform the swap to achieve the quoted price or better.
     struct DaimoFlexSwapperExtraData {
         /// Swap contract to call, or address(0) to use the quoted Uniswap path.
@@ -87,7 +88,16 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         uint256 totalAmountOut
     );
 
-    constructor(
+    constructor() {
+        _disableInitializers();
+    }
+
+    // ----- ADMIN FUNCTIONS -----
+
+    /// We specify the initial owner (rather than using msg.sender) so that we
+    /// can deploy the proxy via CREATE3 at a deterministic address.
+    function init(
+        address _initialOwner,
         IERC20 _wrappedNativeToken,
         IERC20[] memory _hopTokens,
         IERC20[] memory _outputTokens,
@@ -95,7 +105,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
-    ) {
+    ) public initializer {
+        _transferOwnership(_initialOwner);
+
         wrappedNativeToken = _wrappedNativeToken;
         hopTokens = _hopTokens;
         outputTokens = _outputTokens;
@@ -108,6 +120,16 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step {
             isOutputToken[_outputTokens[i]] = true;
         }
     }
+
+    /// UUPSUpsgradeable: only allow owner to upgrade
+    function _authorizeUpgrade(address) internal view override onlyOwner {}
+
+    /// UUPSUpgradeable: expose implementation
+    function implementation() public view returns (address) {
+        return _getImplementation();
+    }
+
+    // ----- PUBLIC FUNCTIONS -----
 
     /// Swap input to output token at a fair price, given a path and possibly a
     /// tip amount to prevent high slippage from blocking any swap.

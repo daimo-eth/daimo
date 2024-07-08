@@ -3,58 +3,85 @@ pragma solidity ^0.8.12;
 
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./IDaimoBridger.sol";
-
-/// TokenMessenger interface for CCTP.
-/// See https://github.com/circlefin/evm-cctp-contracts/blob/master/src/TokenMessenger.sol
-interface ITokenMessenger {
-    function depositForBurn(
-        uint256 amount,
-        uint32 destinationDomain,
-        bytes32 mintRecipient,
-        address burnToken
-    ) external returns (uint64 _nonce);
-}
+import "./DaimoFastCCTP.sol";
 
 /// CCTP uses 0 as a domain. Distinguish valid domains from the not-found case.
 struct CCTPDomain {
-    bool valid;
+    /** CCTP domain. 0 = Ethereum, 1 = Avalanche, etc. */
     uint32 domain;
+    /** Token on the other chain. */
+    IERC20 token;
 }
-
-// todo: burnLimitsPerMessage
-// todo: minterAllowance
 
 /// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
 /// so the only supported bridge token in USDC.
-contract DaimoCCTPBridger is IDaimoBridger {
-    // Constants used for CCTP.
-    ITokenMessenger public cctpMessenger;
+contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
+    // CCTP TokenMessenger for this chain.
+    ICCTPTokenMessenger public cctpMessenger;
 
     // Map chainID
     mapping(uint256 => CCTPDomain) public cctpDomainMapping;
 
-    constructor(
-        ITokenMessenger _cctpMessenger,
-        uint256[] memory _cctpInputChainIds,
-        uint32[] memory _cctpOutputDomains
-    ) {
-        cctpMessenger = _cctpMessenger;
+    // FastCCTP contract.
+    DaimoFastCCTP public fastCCTP;
 
-        require(
-            _cctpInputChainIds.length == _cctpOutputDomains.length,
-            "DCCTPB: wrong input length"
-        );
-        for (uint256 i = 0; i < _cctpInputChainIds.length; i++) {
-            CCTPDomain memory domain = CCTPDomain(true, _cctpOutputDomains[i]);
-            cctpDomainMapping[_cctpInputChainIds[i]] = domain;
+    // FastCCTP nonce.
+    uint256 public fastCCTPNonce;
+
+    constructor() {
+        _disableInitializers();
+    }
+
+    // ----- ADMIN FUNCTIONS -----
+
+    /// Initialize. Specify owner (not msg.sender) to allow CREATE3 deployment.
+    function init(
+        address _initialOwner,
+        ICCTPTokenMessenger _cctpMessenger,
+        DaimoFastCCTP _fastCCTP,
+        uint256[] memory _cctpChainIDs,
+        uint32[] memory _cctpDomains,
+        IERC20[] memory _cctpTokens
+    ) public initializer {
+        _transferOwnership(_initialOwner);
+
+        cctpMessenger = _cctpMessenger;
+        fastCCTP = _fastCCTP;
+
+        uint256 n = _cctpChainIDs.length;
+        require(n == _cctpDomains.length, "DCCTPB: wrong cctpDomains length");
+        require(n == _cctpTokens.length, "DCCTPB: wrong cctpTokens length");
+
+        for (uint256 i = 0; i < n; i++) {
+            addCCTPDomain(_cctpChainIDs[i], _cctpDomains[i], _cctpTokens[i]);
         }
     }
 
-    function _addressToBytes32(address addr) internal pure returns (bytes32) {
-        return bytes32(uint256(uint160(addr)));
+    /// UUPSUpsgradeable: only allow owner to upgrade
+    function _authorizeUpgrade(address) internal view override onlyOwner {}
+
+    /// UUPSUpgradeable: expose implementation
+    function implementation() public view returns (address) {
+        return _getImplementation();
     }
+
+    /// Adds a new supported CCTP recipient chain.
+    function addCCTPDomain(
+        uint256 chainID,
+        uint32 domain,
+        IERC20 token
+    ) public onlyOwner {
+        require(chainID != 0, "DCCTPB: missing chainID");
+        require(address(token) != address(0), "DCCTPB: missing token");
+        CCTPDomain memory domainInfo = CCTPDomain(domain, token);
+        cctpDomainMapping[chainID] = domainInfo;
+    }
+
+    // ----- PUBLIC FUNCTIONS -----
 
     /// Sends assets on the foreign chain to the account's home chain.
     function sendToChain(
@@ -64,27 +91,35 @@ contract DaimoCCTPBridger is IDaimoBridger {
         bytes calldata /* extraData */
     ) public {
         // Move input token from caller to this contract and approve
-        // CCTP TokenMessenger to spend it.
-        TransferHelper.safeTransferFrom(
-            address(tokenIn),
-            msg.sender,
-            address(this),
-            amountIn
-        );
-        TransferHelper.safeApprove(
-            address(tokenIn),
-            address(cctpMessenger),
-            amountIn
-        );
+        // FastCCTP to spend it.
+        TransferHelper.safeTransferFrom({
+            token: address(tokenIn),
+            from: msg.sender,
+            to: address(this),
+            value: amountIn
+        });
+        TransferHelper.safeApprove({
+            token: address(tokenIn),
+            to: address(fastCCTP),
+            value: amountIn
+        });
 
         CCTPDomain memory domain = cctpDomainMapping[toChainID];
-        require(domain.valid, "DCCTPB: unsupported toChainID");
+        bool valid = address(domain.token) != address(0);
+        require(valid, "DCCTPB: unsupported toChainID");
 
-        cctpMessenger.depositForBurn(
-            amountIn,
-            domain.domain,
-            _addressToBytes32(address(msg.sender)),
-            address(tokenIn)
-        );
+        // Increment nonce, then send
+        fastCCTPNonce += 1;
+        fastCCTP.startTransfer({
+            cctpMessenger: cctpMessenger,
+            fromToken: tokenIn,
+            fromAmount: amountIn,
+            toChainID: toChainID,
+            toDomain: domain.domain,
+            toAddr: msg.sender,
+            toToken: domain.token,
+            toAmount: amountIn,
+            nonce: fastCCTPNonce
+        });
     }
 }
