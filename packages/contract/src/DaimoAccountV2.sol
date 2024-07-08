@@ -27,11 +27,11 @@ import "./IDaimoBridger.sol";
  * automatically swapped to the bridge coin (if necessary), bridged to the
  * home chain, and then swapped to the home coin (if necessary).
  *
- * An account address can be "upgraded" at most one time by setting a
- * forwarding address that all future received assets will be forwarded to.
+ * An account can be deactivated by setting a forwarding address that all future
+ * received assets will be forwarded to.
  */
 contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
-    // Represent an arbitrary contract call on the home chain.
+    // Represents an arbitrary contract call on the home chain.
     struct Call {
         address dest;
         uint256 value;
@@ -143,10 +143,8 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     }
 
     /// Verify that we're in a valid userop, called via executeBatch.
-    modifier onlyOp() {
+    modifier onlySelf() {
         require(msg.sender == address(this), "DAv2: only self");
-        require(forwardingAddress == address(0), "DAv2: only not forwarding");
-        require(block.chainid == homeChain, "DAv2: only home chain");
         _;
     }
 
@@ -203,9 +201,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
 
         // Only the home account ever has signing keys.
         if (block.chainid == homeChain) {
-            keys[slot] = key;
-            numActiveKeys = 1;
-            emit SigningKeyAdded(this, slot, key);
+            addSigningKey(slot, key);
         }
     }
 
@@ -301,11 +297,11 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         }
     }
 
-    /// ERC-1271: validate a user signature, verifying a valid Daimo account
-    /// signature. The signature is an ABI-encoded Signature struct.
+    /// ERC-1271: validate a Daimo user signature. The signature is an
+    /// ABI-encoded Signature struct.
     ///
-    /// Only active (non-forwarding) accounts can sign messages.
-    /// isValidSignature() reverts on foreign chains and in forwarded accounts.
+    /// Only active (home chain, non-forwarding) accounts can sign messages.
+    /// isValidSignature() reverts on foreign chains and on inactive accounts.
     function isValidSignature(
         bytes32 message,
         bytes calldata signature
@@ -343,7 +339,10 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Add a signing key to the account.
     /// @param slot the empty slot index to use for this key
     /// @param key the P256 public key to add
-    function addSigningKey(uint8 slot, bytes32[2] memory key) public onlyOp {
+    function addSigningKey(
+        uint8 slot,
+        bytes32[2] memory key
+    ) public onlySelf onlyActive {
         require(keys[slot][0] == bytes32(0), "DAv2: key already exists");
         require(key[0] != bytes32(0), "DAv2: new key cannot be 0");
         require(numActiveKeys < maxKeys, "DAv2: max keys reached");
@@ -354,7 +353,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
 
     /// Remove a signing key from the account.
     /// @param slot the slot of the key to remove
-    function removeSigningKey(uint8 slot) public onlyOp {
+    function removeSigningKey(uint8 slot) public onlySelf onlyActive {
         require(keys[slot][0] != bytes32(0), "DAv2: key does not exist");
         require(numActiveKeys > 1, "DAv2: cannot remove only signing key");
         bytes32[2] memory currentKey = keys[slot];
@@ -371,6 +370,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         bytes calldata extraDataSwap,
         bytes calldata extraDataBridge
     ) public onlyForeignChain {
+        // TODO: no reentrancy
         uint256 amountBridge;
         if (tokenIn == tokenBridge) {
             amountBridge = amountIn;
@@ -380,6 +380,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         }
 
         // Bridger is responsible for checking that it supports tokenBridge, etc
+        // TODO: use only SafeERC20 or TransferHelper, not both
         TransferHelper.safeApprove(
             address(tokenBridge),
             address(bridger),
@@ -396,7 +397,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     }
 
     /// Account owner can edit their home coin. Used only on the home chain.
-    function updateHomeCoin(IERC20 newHomeCoin) public onlyOp {
+    function updateHomeCoin(IERC20 newHomeCoin) public onlySelf onlyActive {
         require(newHomeCoin != homeCoin);
         homeCoin = newHomeCoin;
 
@@ -432,18 +433,12 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
 
     /// Set the forwarding address for received assets on the account to be
     /// forwarded to, effectively deprecating the account.
-    function setForwardingAddress(address newForwardingAddress) public onlyOp {
-        require(
-            newForwardingAddress != address(0),
-            "DAv2: forwarding address cannot be 0"
-        );
-        require(
-            newForwardingAddress != address(this),
-            "DAv2: cannot forward to self"
-        );
+    function setForwardingAddress(address newAddr) public onlySelf onlyActive {
+        require(newAddr != address(0), "DAv2: forwarding address cannot be 0");
+        require(newAddr != address(this), "DAv2: cannot forward to self");
 
-        forwardingAddress = newForwardingAddress;
-        emit SetForwardingAddress(newForwardingAddress);
+        forwardingAddress = newAddr;
+        emit SetForwardingAddress(newAddr);
     }
 
     /// Forward assets from the account to the forwarding address.
@@ -455,5 +450,8 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
             forwardingAddress,
             balance
         );
+
+        emit ForwardAsset(tokenIn, balance);
+        // TODO: support 721, 1155...?
     }
 }

@@ -26,9 +26,7 @@ contract DaimoAccountFactoryV2 {
      * Create an account, and return its address.
      * Returns the address even if the account is already deployed.
      * Note that during UserOperation execution, this method is called only if
-     * the account is not deployed. This method returns an existing account
-     * address so that entryPoint.getSenderAddress() would work even after
-     * account creation.
+     * the account is not deployed.
      */
     function createAccount(
         uint256 homeChain,
@@ -94,6 +92,7 @@ contract DaimoAccountFactoryV2 {
                             address(accountImplementation),
                             abi.encodeCall(
                                 DaimoAccountV2.initialize,
+                                // TODO: named args if possible
                                 (
                                     homeChain,
                                     homeCoin,

@@ -20,12 +20,12 @@ import "./IDaimoSwapper.sol";
 /// tokenIn to a hopToken to tokenOut. Hop tokens are other popular tokens, such
 /// as WETH, that often appear in liquid Uniswap pools.
 ///
-/// This ensures that if tokenIn is a token with an active Uniswap pool with
-/// either the output stablecoin or any of the hopTokens, the price is accurate.
-///
 /// Market makers auto-swap Daimo assets on foreign chains to a bridgeable coin
 /// (for accounts using DaimoCCTPBridger, this is USDC), and on home chains to
 /// the account's home coin.
+///
+/// Supports all Uniswap-compatible input ERC20 tokens, including USDT (which is
+/// not quite an ERC20) and not including ERC20s with amounts > 2^128.
 ///
 /// Market makers can use this swapper in one of two ways:
 /// 1. Passing an arbitrary contract call. In this case, DaimoFlexSwapper
@@ -56,7 +56,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
     uint256 private constant _MAX_UINT128 = type(uint128).max;
 
-    // TODO: should this contract have an owner?
+    // TODO:
     // Ability to modify hopTokens / outputTokens / maxSlippage etc?
 
     /// WETH / WMATIC / etc, the ERC-20 wrapped native token.
@@ -70,6 +70,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     /// Fee tiers. We search through these to find the one with highest TWAL.
     uint24[] public oracleFeeTiers;
     /// TWAP/TWAL period in seconds.
+    /// TODO: refine the default value
     uint32 public oraclePeriod;
     /// Uniswap pool factory, for looking up pools by (tokenA, tokenB, feeTier).
     IUniswapV3Factory public oraclePoolFactory;
@@ -139,6 +140,8 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         IERC20 tokenOut,
         bytes calldata extraData
     ) public returns (uint256 totalAmountOut) {
+        // TODO: no reentrancy
+
         // Input checks
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
@@ -155,6 +158,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
         // 1% slippage tolerance = should be plenty for the stablecoin-to-
         // stablecoin common case. Edge cases handled via tipToExactAmount.
+        // TODO: add a stablecoin whitelist, enforce price = 1 for those
         uint256 minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
 
         // Next, prepare the swap.
