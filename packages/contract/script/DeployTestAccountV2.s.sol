@@ -8,8 +8,6 @@ import "./Constants.s.sol";
 
 contract DeployTestAccountV2Script is Script {
     function run() public {
-        require(block.chainid == BASE_MAINNET || block.chainid == OP_MAINNET);
-
         vm.startBroadcast();
 
         // hardcoded from swift playground
@@ -18,7 +16,7 @@ contract DeployTestAccountV2Script is Script {
         bytes32[2] memory key = [bytes32(k0), bytes32(k1)];
 
         // from deployments
-        address factory = 0x682b862b13d1C208E0A37740525180DD4223e66e;
+        address factory = 0xA0862b0D973E52ee4abacbb6d5F2DC35575fa5ce;
         address swapper = 0x6C3D6f8be26913bCECBC582e36Ee12451b8c11C8;
         address bridger = 0x360019a39c449e55Ea4053dFc05086C8467F3444;
 

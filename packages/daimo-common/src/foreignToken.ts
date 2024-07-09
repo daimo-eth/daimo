@@ -32,6 +32,31 @@ export enum TokenLogo {
 /* --------------------- Tokens Constants --------------------- */
 
 //
+// Eth Sepolia
+//
+
+export const ethereumSepoliaUSDC: ForeignToken = {
+  chainId: 11155111,
+  token: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+//
+// Eth Mainnet
+//
+export const ethereumUSDC: ForeignToken = {
+  chainId: 1,
+  token: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+//
 // Base Sepolia
 //
 
@@ -152,7 +177,7 @@ export const arbitrumSepoliaWETH: ForeignToken = {
 
 export const optimismUSDC: ForeignToken = {
   chainId: 10,
-  token: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+  token: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
@@ -253,7 +278,7 @@ export const avalancheWETH: ForeignToken = {
 
 export const avalancheFujiUSDC: ForeignToken = {
   chainId: 43113,
-  token: "0x5425890298aed601595a70ab815c96711a31bc65",
+  token: "0x5425890298aed601595a70AB815c96711a31Bc65",
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",

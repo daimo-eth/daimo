@@ -1,7 +1,7 @@
 import { assert, now } from "@daimo/common";
 import axios from "axios";
 import dotenv from "dotenv";
-import { mnemonicToAccount } from "viem/accounts";
+import { Address, mnemonicToAccount } from "viem/accounts";
 
 // Codified version of steps in this guide:
 // https://docs.neynar.com/docs/write-to-farcaster-with-neynar-managed-signers
@@ -33,8 +33,7 @@ const generateSignature = async (publicKey: string) => {
     name: "Farcaster SignedKeyRequestValidator",
     version: "1",
     chainId: 10,
-    verifyingContract:
-      "0x00000000fc700472606ed4fa22623acf62c60553" as `0x${string}`,
+    verifyingContract: "0x00000000FC700472606ED4fA22623Acf62c60553" as Address,
   };
 
   // DO NOT CHANGE ANY VALUES IN THIS CONSTANT

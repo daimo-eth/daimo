@@ -1,5 +1,3 @@
-import { getEnvApi } from "@daimo/api/src/env";
-import { getEOA } from "@daimo/api/src/network/viemClient";
 import { getBridgeCoin, isTestnetChain } from "@daimo/common";
 import {
   cctpMessageTransmitterABI,
@@ -7,117 +5,275 @@ import {
   daimoAccountV2ABI,
   daimoFlexSwapperABI,
   swapRouter02Abi,
+  daimoFastCctpABI,
+  daimoFastCctpAddress,
+  daimoFlexSwapperAddress,
 } from "@daimo/contract";
 import {
   Address,
-  Chain,
   Hex,
-  PrivateKeyAccount,
-  PublicClient,
-  Transport,
-  WalletClient,
-  createPublicClient,
-  createWalletClient,
   decodeEventLog,
   encodeFunctionData,
-  http,
   keccak256,
   parseAbi,
 } from "viem";
 
-import { getCCTPMessageTransmitterAddress, getViemChainConfig } from "./utils";
-
-const funderAccount = getEOA(getEnvApi().DAIMO_API_PRIVATE_KEY);
+import {
+  getCCTPMessageTransmitterAddress,
+  getViemClient,
+  ViemClient,
+} from "./config";
 
 /**
- * Swap bot is in charge of (1) initiating swap + CCTP on foreign chains
- * to home coin on the home chain and (2) receiving assets on the home chain.
+ * The purpose of swapbot is to automatically settle assets from foreign chains
+ * to a DaimoAccountV2's home chain.
  *
- * There is one bot per chain.
+ * Swapbot handles:
+ *  (1) swapping a foreignCoin to the bridgeCoin on a foreign chain
+ *  (2) initiating FastCCTP on a foreign chain using the bridgeCoin
+ *  (3) receiving the bridgeCoin on the home chain
+ *  (4) swapping the bridgeCoin to the homeCoin on the home chain
  */
 export class SwapBot {
-  private walletClient: WalletClient;
-  private publicClient: PublicClient<Transport, Chain>;
-  private account: PrivateKeyAccount;
-  chain: Chain;
-
-  constructor(private chainId: number) {
-    this.chain = getViemChainConfig(this.chainId);
-    this.publicClient = createPublicClient({
-      chain: this.chain,
-      transport: http(), // TODO: change
-    }) as any;
-    this.walletClient = createWalletClient({
-      account: funderAccount,
-      chain: this.chain,
-      transport: http(), // TODO: change
-    });
-    this.account = funderAccount;
-
-    console.log(`[SWAPBOT] initialized swapbot for chain ${this.chain.name}`);
+  constructor() {
+    console.log(`[SWAPBOT] initialized swapbot`);
   }
 
   /** Collects money from a foreign chain and receives it on the home chain. */
-  public async collectOnForeignChain(
-    accountAddress: Address,
-    tokenForeign: Address
-  ) {
+  public async collect({
+    foreignChainId,
+    accountAddress,
+    tokenForeign,
+  }: {
+    foreignChainId: number;
+    accountAddress: Address;
+    tokenForeign: Address;
+  }) {
+    const vc = getViemClient(foreignChainId);
+
     // Get balance of the foreign asset in the account.
-    const tokenForeignBalance = await this.publicClient.readContract({
+    const tokenForeignBalance = await vc.publicClient.readContract({
       address: tokenForeign,
       abi: erc20ABI,
       functionName: "balanceOf",
       args: [accountAddress],
     });
+    console.log(`[SWAPBOT] found ${tokenForeignBalance} of ${tokenForeign}`);
 
-    // Get home chain of the account.
-    const homeChainId = await this.publicClient.readContract({
-      abi: daimoAccountV2ABI,
-      address: accountAddress,
-      functionName: "homeChain",
-    });
-
-    // Collect swaps to bridge coin if necessary then initiates bridge.
-    const tokenBridgeAddr = getBridgeCoin(this.chainId).token;
+    // on-chain collect() first swaps to the bridgeCoin (if necessary) and
+    // then initiates the FastCCTP on the foreign chain using the bridgeCoin.
+    const tokenBridgeAddr = getBridgeCoin(foreignChainId).token;
     try {
-      const collectTxHash = await this.walletClient.writeContract({
-        account: this.account,
+      const collectTxHash = await vc.walletClient.writeContract({
+        account: vc.account,
         address: accountAddress,
         abi: daimoAccountV2ABI,
         functionName: "collect",
         args: [tokenForeign, tokenForeignBalance, tokenBridgeAddr, "0x", "0x"],
-        chain: this.chain,
+        chain: vc.chain,
       });
       console.log(
-        `[SWAPBOT] initiated collect for account ${accountAddress} on chain ${this.chain.name} for foreign token ${tokenForeign}`
+        `[SWAPBOT] initiated collect() for account ${accountAddress} on chain ${vc.chain.name} for foreign token ${tokenForeign}`
       );
       return {
         collectTxHash,
-        homeChainId,
+        homeChainId: await this.getAccountHomeChain(accountAddress, vc),
       };
     } catch (e) {
       console.log(`[SWAPBOT] collect failed: ${e}`);
     }
   }
 
+  /** Handles a swap from foreignToken to homeToken.*/
+  async swapToHomeCoin({
+    chainId,
+    tokenIn,
+    amountIn,
+    accountAddress,
+    extraData,
+  }: {
+    chainId: number;
+    tokenIn: Address;
+    amountIn: bigint;
+    accountAddress: Address;
+    extraData?: Hex;
+  }) {
+    const vc = getViemClient(chainId);
+
+    try {
+      const swapTxHash = await vc.walletClient.writeContract({
+        address: accountAddress,
+        abi: daimoAccountV2ABI,
+        functionName: "swapToHomeCoin",
+        args: [tokenIn, amountIn, extraData || "0x"],
+        account: vc.account,
+        chain: vc.chain,
+      });
+      console.log(`[SWAPBOT] swap successful. Tx hash: ${swapTxHash}`);
+    } catch (e) {
+      console.log(`[SWAPBOT] swap failed: ${e}`);
+    }
+  }
+
+  /** Receive money on the home chain via attestation. */
+  async receive(chainId: number, message: Hex) {
+    const vc = getViemClient(chainId);
+
+    // Unlock mint bridge coin on home chain.
+    const attestation = await this.getAttestation(message, vc);
+    const unlockTxHash = await vc.walletClient.writeContract({
+      account: vc.account,
+      address: getCCTPMessageTransmitterAddress(vc.chain.id),
+      abi: cctpMessageTransmitterABI,
+      functionName: "receiveMessage",
+      args: [message, attestation],
+      chain: vc.chain,
+    });
+    console.log(
+      `[SWAPBOT] unlocked mint on home chain ${vc.chain.name}: ${unlockTxHash}`
+    );
+    return unlockTxHash;
+  }
+
+  /** Fast Finish a CCTP transfer by fronting the money. */
+  async fastCCTPFinish({
+    fromChainId,
+    fromAddr,
+    fromAmount,
+    toChainId,
+    toAddr,
+    toToken,
+    toAmount,
+    nonce,
+  }: {
+    fromChainId: number;
+    fromAddr: Address;
+    fromAmount: bigint;
+    toChainId: number;
+    toAddr: Address;
+    toToken: Address;
+    toAmount: bigint;
+    nonce: bigint;
+  }) {
+    const vc = getViemClient(toChainId);
+    try {
+      const fastFinishTxHash = await vc.walletClient.writeContract({
+        account: vc.account,
+        chain: vc.chain,
+        address: daimoFastCctpAddress,
+        abi: daimoFastCctpABI,
+        functionName: "fastFinishTransfer",
+        args: [
+          BigInt(fromChainId),
+          fromAddr,
+          fromAmount,
+          toAddr,
+          toToken,
+          toAmount,
+          nonce,
+        ],
+      });
+      console.log(
+        `[SWAPBOT] fastFinishTransfer initiated. txHash: ${fastFinishTxHash}`
+      );
+      return fastFinishTxHash;
+    } catch (e) {
+      console.log(`[SWAPBOT] fastFinishTransfer failed: ${e}`);
+    }
+  }
+
+  /** Retrieve the messageSent() event on the foreign chain txHash */
+  async getMessageSent(chainId: number, txHash: Hex) {
+    const vc = getViemClient(chainId);
+    const { logs } = await vc.publicClient.waitForTransactionReceipt({
+      hash: txHash,
+    });
+
+    // CCTP MEssageSent event selector.
+    const eventTopic =
+      "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
+    const log = logs.find((l) => l.topics[0] === eventTopic);
+    if (!log) return;
+    const decodedLog = decodeEventLog({
+      abi: parseAbi(["event MessageSent(bytes message)"]),
+      data: log.data,
+      topics: log.topics,
+    });
+
+    return decodedLog.args.message;
+  }
+
+  /** Query the circle API for the attestation signature for a message. */
+  async getAttestation(message: Hex, vc: ViemClient) {
+    const messageHash = keccak256(message);
+    console.log(
+      `[SWAPBOT] retrieving CCTP attestation for message hash ${messageHash}`
+    );
+    const queryURL = isTestnetChain(vc.chain.id)
+      ? `https://iris-api-sandbox.circle.com/attestations/${messageHash}`
+      : `https://iris-api.circle.com/attestations/${messageHash}`;
+
+    // Attestations are "pending" until Circle is satisfied with block finality.
+    // Est. wait times vary by chain:
+    // https://developers.circle.com/stablecoins/docs/required-block-confirmations
+    let attestationResponse = { status: "pending" } as any;
+    while (attestationResponse.status !== "complete") {
+      const res = await fetch(queryURL);
+      attestationResponse = await res.json();
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    console.log(
+      `[SWAPBOT] retrieved CTTP attestation: ${JSON.stringify(
+        attestationResponse
+      )}`
+    );
+    return attestationResponse.attestation;
+  }
+
+  // -------------- STATE GET FUNCTIONS  --------------
+  // Helper functions for getting state from the DaimoAccountV2 contract.
+
+  /** Get home chain of the account. */
+  async getAccountHomeChain(accountAddress: Address, vc: ViemClient) {
+    return await vc.publicClient.readContract({
+      abi: daimoAccountV2ABI,
+      address: accountAddress,
+      functionName: "homeChain",
+    });
+  }
+
+  /** Get home coin of the account. */
+  async getAccountHomeCoin(accountAddress: Address, vc: ViemClient) {
+    return await vc.publicClient.readContract({
+      abi: daimoAccountV2ABI,
+      address: accountAddress,
+      functionName: "homeCoin",
+    });
+  }
+
+  // -------------- READ FUNCTIONS  --------------
+  // These functions are used for testing on-chain mechanisms.
+
   /** Test swap quote mechanism. */
-  async quoteSwap({
+  async readQuoteSwap({
+    chainId,
     tokenIn,
     amountIn,
     tokenOut,
-    swapperAddress,
   }: {
+    chainId: number;
     tokenIn: Address;
     amountIn: bigint;
     tokenOut: Address;
-    swapperAddress: Address;
   }) {
+    const vc = getViemClient(chainId);
+
     // Get direct quote.
     let directQuote;
     try {
-      directQuote = await this.publicClient.readContract({
+      directQuote = await vc.publicClient.readContract({
         abi: daimoFlexSwapperABI,
-        address: swapperAddress,
+        address: daimoFlexSwapperAddress,
         functionName: "quoteDirect",
         args: [tokenIn, amountIn, tokenOut],
       });
@@ -130,9 +286,9 @@ export class SwapBot {
     // Get quote via hop.
     let hopQuote;
     try {
-      hopQuote = await this.publicClient.readContract({
+      hopQuote = await vc.publicClient.readContract({
         abi: daimoFlexSwapperABI,
-        address: swapperAddress,
+        address: daimoFlexSwapperAddress,
         functionName: "quoteViaHop",
         args: [tokenIn, amountIn, tokenOut],
       });
@@ -145,9 +301,9 @@ export class SwapBot {
     // Get best quote.
     let swapQuote;
     try {
-      swapQuote = await this.publicClient.readContract({
+      swapQuote = await vc.publicClient.readContract({
         abi: daimoFlexSwapperABI,
-        address: swapperAddress,
+        address: daimoFlexSwapperAddress,
         functionName: "quote",
         args: [tokenIn, amountIn, tokenOut],
       });
@@ -179,12 +335,14 @@ export class SwapBot {
         amountOut,
         swapPath,
         hopPathTaken: swapPath === swapPathViaHop,
-        swapperAddress,
+        daimoFlexSwapperAddress,
       },
     };
   }
 
-  async simulateSwap({
+  /** Simulate the swap swap on-chain. */
+  async readSimulateSwap({
+    chainId,
     tokenIn,
     amountIn,
     tokenOut,
@@ -192,6 +350,7 @@ export class SwapBot {
     swapperAddress,
     accountAddress,
   }: {
+    chainId: number;
     tokenIn: Address;
     amountIn: bigint;
     tokenOut: Address;
@@ -199,8 +358,9 @@ export class SwapBot {
     swapperAddress: Address;
     accountAddress: Address;
   }) {
+    const vc = getViemClient(chainId);
+
     // Encode uniswap call data
-    // TODO: support native ETH sends
     const callData = encodeFunctionData({
       abi: swapRouter02Abi,
       functionName: "exactInput",
@@ -219,7 +379,7 @@ export class SwapBot {
       callDest: swapperAddress,
       callData,
       tipToExactAmountOut: 0n, // TODO: do we want to test with tips?
-      tipPayer: funderAccount.address,
+      tipPayer: vc.account.address,
     };
     const extraData = encodeFunctionData({
       abi: daimoFlexSwapperABI,
@@ -228,7 +388,7 @@ export class SwapBot {
     });
 
     // Ensure the account has enough balance to pay for the swap.
-    const balance = await this.publicClient.readContract({
+    const balance = await vc.publicClient.readContract({
       abi: erc20ABI,
       address: tokenIn,
       functionName: "balanceOf",
@@ -240,7 +400,7 @@ export class SwapBot {
 
     // Simulate on-chain swap and return the result.
     try {
-      const { result } = await this.publicClient.simulateContract({
+      const { result } = await vc.publicClient.simulateContract({
         abi: daimoFlexSwapperABI,
         address: swapperAddress,
         functionName: "swapToCoin",
@@ -262,17 +422,20 @@ export class SwapBot {
     }
   }
 
-  async getOracleData(
+  /** Retrieve oracle data for the given swap inputs. */
+  async readOracleData(
+    chainId: number,
     tokenIn: Address,
     amountIn: bigint,
     tokenOut: Address,
     oraclePeriod: number,
     swapperAddress: Address
   ) {
+    const vc = getViemClient(chainId);
     // Get best pool tick for token A <> token B and amountIn.
     let bestPoolTick;
     try {
-      bestPoolTick = await this.publicClient.readContract({
+      bestPoolTick = await vc.publicClient.readContract({
         abi: daimoFlexSwapperABI,
         address: swapperAddress,
         functionName: "getBestPoolTick",
@@ -295,7 +458,7 @@ export class SwapBot {
     // Consult the oracle for pool data.
     let oracleConsult;
     try {
-      oracleConsult = await this.publicClient.readContract({
+      oracleConsult = await vc.publicClient.readContract({
         abi: daimoFlexSwapperABI,
         address: swapperAddress,
         functionName: "consultOracle",
@@ -325,104 +488,5 @@ export class SwapBot {
       },
       swapperAddress,
     };
-  }
-
-  // Get the account's swapper address.
-  async getSwapperAddress(accountAddress: Address) {
-    return await this.publicClient.readContract({
-      abi: daimoAccountV2ABI,
-      address: accountAddress,
-      functionName: "swapper",
-    });
-  }
-
-  /** Handles a swap on the foreign chain from foreignToken to homeToken.*/
-  async swapToHomeCoin({
-    tokenIn,
-    amountIn,
-    accountAddress,
-    extraData,
-  }: {
-    tokenIn: Address;
-    amountIn: bigint;
-    accountAddress: Address;
-    extraData?: Hex;
-  }) {
-    // Execute the swap.
-    try {
-      await this.walletClient.writeContract({
-        address: accountAddress,
-        abi: daimoAccountV2ABI,
-        functionName: "swapToHomeCoin",
-        args: [tokenIn, amountIn, extraData || "0x"],
-        account: this.account,
-        chain: this.chain,
-      });
-      console.log(`[SWAPBOT] swap successful`);
-    } catch (e) {
-      console.log(`[SWAPBOT] swap failed: ${e}`);
-    }
-  }
-
-  /** Receive money on the home chain. */
-  async receiveOnHomeChain(message: Hex) {
-    const attestation = await this.getAttestation(message);
-
-    // Unlock mint on home chain.
-    const unlockTxHash = await this.walletClient.writeContract({
-      account: this.account,
-      address: getCCTPMessageTransmitterAddress(this.chainId),
-      abi: cctpMessageTransmitterABI,
-      functionName: "receiveMessage",
-      args: [message, attestation],
-      chain: this.chain,
-    });
-    console.log(
-      `[SWAPBOT] unlocked mint on home chain ${this.chain.name}: ${unlockTxHash}`
-    );
-    return unlockTxHash;
-  }
-  // Retrieve the messageSent() event on the foreign chain txHash.
-  async getMessageSent(txHash: Hex) {
-    const { logs } = await this.publicClient.waitForTransactionReceipt({
-      hash: txHash,
-    });
-
-    // CCTP MEssageSent event selector.
-    const eventTopic =
-      "0x8c5261668696ce22758910d05bab8f186d6eb247ceac2af2e82c7dc17669b036";
-    const log = logs.find((l) => l.topics[0] === eventTopic);
-    if (!log) return;
-    const decodedLog = decodeEventLog({
-      abi: parseAbi(["event MessageSent(bytes message)"]),
-      data: log.data,
-      topics: log.topics,
-    });
-
-    return decodedLog.args.message;
-  }
-
-  // Query the circle API for the attestation signature for a message.
-  async getAttestation(message: Hex) {
-    const messageHash = keccak256(message);
-    console.log(
-      `[SWAPBOT] retrieving attestation for message hash ${messageHash}`
-    );
-    const queryURL = isTestnetChain(this.chain.id)
-      ? `https://iris-api-sandbox.circle.com/attestations/${messageHash}`
-      : `https://iris-api.circle.com/attestations/${messageHash}`;
-
-    let attestationResponse = { status: "pending" } as any;
-    while (attestationResponse.status !== "complete") {
-      const res = await fetch(queryURL);
-      attestationResponse = await res.json();
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-    console.log(
-      `[SWAPBOT] retrieved Circle attestation: ${JSON.stringify(
-        attestationResponse
-      )}`
-    );
-    return attestationResponse.attestation;
   }
 }

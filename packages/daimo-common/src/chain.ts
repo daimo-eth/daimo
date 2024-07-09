@@ -28,6 +28,8 @@ import {
   polygonAmoyUSDC,
   polygonUSDC,
   polygonWETH,
+  ethereumSepoliaUSDC,
+  ethereumUSDC,
 } from "./foreignToken";
 
 export type AccountChain = {
@@ -37,6 +39,21 @@ export type AccountChain = {
   bridgeCoin: ForeignToken;
   nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
   isTestnet?: boolean;
+};
+
+export const ethereum: AccountChain = {
+  chainId: 1,
+  name: "mainnet",
+  cctpDomain: 0,
+  bridgeCoin: ethereumUSDC,
+};
+
+export const ethereumSepolia: AccountChain = {
+  chainId: 11155111,
+  name: "sepolia",
+  cctpDomain: 0,
+  bridgeCoin: ethereumSepoliaUSDC,
+  isTestnet: true,
 };
 
 export const base: AccountChain = {
@@ -125,6 +142,10 @@ export const avalancheFuji: AccountChain = {
 /** Given a chain ID, return the chain. */
 export function getAccountChain(chainId: number): AccountChain {
   switch (chainId) {
+    case ethereum.chainId:
+      return ethereum;
+    case ethereumSepolia.chainId:
+      return ethereumSepolia;
     case base.chainId:
       return base;
     case baseSepolia.chainId:

@@ -2,9 +2,11 @@ import { defineConfig } from "@wagmi/cli";
 import { foundry } from "@wagmi/cli/plugins";
 
 import latestAccountFactoryV2 from "../contract/broadcast/DeployAccountFactoryV2.s.sol/8453/run-latest.json";
+import latestCCTPBridger from "../contract/broadcast/DeployDaimoCCTPBridger.s.sol/8453/run-latest.json";
 import latestFlexSwapper from "../contract/broadcast/DeployDaimoFlexSwapper.s.sol/8453/run-latest.json";
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
 import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/8453/run-latest.json";
+import latestFastCCTP from "../contract/broadcast/DeployFastCCTP.s.sol/8453/run-latest.json";
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
 import latestRequest from "../contract/broadcast/DeployRequest.s.sol/8453/run-latest.json";
 import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/8453/deploy-latest.json";
@@ -22,6 +24,8 @@ const deployments = Object.fromEntries(
     ...latestRequest.transactions,
     ...latestPaymaster.transactions,
     ...latestFlexSwapper.transactions,
+    ...latestCCTPBridger.transactions,
+    ...latestFastCCTP.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
     .map((r) => [r.contractName, r.contractAddress as `0x${string}`])

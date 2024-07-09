@@ -19,7 +19,10 @@ export {
   daimoRequestABI,
   daimoRequestAddress,
   daimoRequestConfig,
+  daimoCctpBridgerABI,
   daimoFlexSwapperABI,
+  daimoFastCctpABI,
+  daimoFastCctpAddress,
   entryPointABI,
   erc20ABI,
 } from "./generated";

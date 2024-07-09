@@ -4,176 +4,115 @@ import * as dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import { Address, Hex } from "viem";
 
-import { SwapBotCollective } from "./swapbotCollective";
+import { SwapBot } from "./swapbot";
 
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+
 const port = 3008;
 
-// Setup swap bot on every chain.
-const swapBotCollective = new SwapBotCollective();
+// Set up swappy the swapbot.
+const swapbot = new SwapBot();
 
 app.use(bodyParser.json());
 app.get("/health", (req: Request, res: Response) => res.send("Up!"));
 
-// test account
-const accountAddress = "0x18E2633925059B6678654513Bd19B03e55e992e9";
+/** Collect assets on foreign chain. */
+app.post("/collect", async (req: Request, res: Response) => {
+  const chainId = Number(req.query.chainId);
+  const accountAddress = req.query.accountAddress as Address;
+  const token = req.query.token as Address;
 
-// Collect assets on foreign chain.
-// TODO: change to post
-app.get(
-  "/collect/:chainId/:accountAddress/:token",
-  async (req: Request, res: Response) => {
-    const chainId = Number(req.params.chainId);
-    const accountAddress = req.params.accountAddress as Address;
-    const token = req.params.token as Address; // foreign token to collect
-    console.log(`[SWAPBOT] collecting ${token} on foreign chain ${chainId}`);
-
-    const foreignSwapBot = swapBotCollective.getSwapBot(chainId);
-    const collected = await foreignSwapBot.collectOnForeignChain(
+  console.log(`[SWAPBOT] collecting ${token} on foreign chain ${chainId}`);
+  try {
+    const collected = await swapbot.collect({
+      foreignChainId: chainId,
       accountAddress,
-      token
-    );
-
+      tokenForeign: token,
+    });
     if (!collected) {
       return res.status(500).json({ error: "Failed to collect!" });
     }
 
-    const { collectTxHash, homeChainId } = collected;
     res.json({
       message: "Collected from foreign chain!",
-      collectTxHash,
-      homeChainId,
+      foreignChainId: chainId,
+      collectTxHash: collected.collectTxHash,
+      homeChainId: collected.homeChainId,
     });
-
-    // Receive on home chain swapbot.
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to collect!", e });
   }
-);
+});
 
-// Receive assets on home chain.
-app.get(
-  "/receive/:foreignChainId/:homeChainId/:txHash",
-  async (req: Request, res: Response) => {
-    const foreignChainId = Number(req.params.foreignChainId);
-    const homeChainId = Number(req.params.homeChainId);
+/** Receive assets on home chain. */
+app.post("/receive", async (req: Request, res: Response) => {
+  const foreignChainId = Number(req.query.foreignChainId);
+  const homeChainId = Number(req.query.homeChainId);
+  const txHash = req.query.txHash as Hex;
 
-    const homeSwapBot = swapBotCollective.getSwapBot(homeChainId);
-    const foreignSwapBot = swapBotCollective.getSwapBot(foreignChainId);
+  // Get the CCTP message from the foreign chain.
+  const message = await swapbot.getMessageSent(foreignChainId, txHash);
+  if (!message)
+    return res.status(500).json({ error: "Failed to fetch CCTP message!" });
 
-    const txHash = req.params.txHash as Hex;
-    const message = await foreignSwapBot.getMessageSent(txHash);
-    if (!message) return res.status(500).json({ error: "Failed to receive!" });
+  // Receive the assets on the home chain.
+  console.log(`[SWAPBOT] receiving assets on home chain ${homeChainId}`);
+  const unlockTxHash = await swapbot.receive(homeChainId, message);
+  if (!unlockTxHash)
+    return res.status(500).json({ error: "Failed to receive!" });
 
-    console.log(`[SWAPBOT] receiving assets on home chain ${homeChainId}`);
-    const unlockTxHash = await homeSwapBot.receiveOnHomeChain(message);
-    if (!unlockTxHash)
-      return res.status(500).json({ error: "Failed to receive!" });
-    res.json({ message: "Received!", unlockTxHash });
+  res.json({ message: "Received!", unlockTxHash });
+});
+
+/** Fast Finish CCTP on the home chain. */
+app.post("/fastcctp", async (req: Request, res: Response) => {
+  const fromChainId = Number(req.query.fromChainId);
+  const fromAddr = req.query.fromAddr as Address;
+  const fromAmount = BigInt(Number(req.query.fromAmount));
+  const toChainId = Number(req.query.toChainId);
+  const toAddr = req.query.toAddr as Address;
+  const toToken = req.query.toToken as Address;
+  const toAmount = BigInt(Number(req.query.toAmount));
+  const nonce = BigInt(Number(req.query.nonce));
+
+  try {
+    const fastFinishTxHash = await swapbot.fastCCTPFinish({
+      fromChainId,
+      fromAddr,
+      fromAmount,
+      toChainId,
+      toAddr,
+      toToken,
+      toAmount,
+      nonce,
+    });
+    res.json({ message: "FastFinish transfer initiated!", fastFinishTxHash });
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to fastFinish!", e });
   }
-);
+});
 
-// Get oracle data.
-app.get(
-  "/oracle/:chainId/:tokenIn/:amountIn/:tokenOut/:secondsAgo",
-  async (req, res) => {
-    const chainId = Number(req.params.chainId);
-    const tokenIn = req.params.tokenIn as Address;
-    const amountIn = req.params.amountIn as BigIntStr;
-    const tokenOut = req.params.tokenOut as Address;
-    const secondsAgo = Number(req.params.secondsAgo);
-
-    const swapBot = swapBotCollective.getSwapBot(chainId);
-    const swapperAddress = await swapBot.getSwapperAddress(accountAddress);
-
-    // Retrieve all oracle data.
-    const result = await swapBot.getOracleData(
-      tokenIn,
-      BigInt(amountIn),
-      tokenOut,
-      secondsAgo,
-      swapperAddress
-    );
-    if (result.error) {
-      return res.status(500).json({ error: result.error });
-    }
-    res.json(result);
-  }
-);
-
-// Simulate swap on-chain.
+/** Retrieve on-chain quote: (tokenIn, amountIn) --> (tokenOut, amountOut). */
 app.get("/quote/:chainId/:tokenIn/:amountIn/:tokenOut", async (req, res) => {
   const chainId = Number(req.params.chainId);
   const tokenIn = req.params.tokenIn as Address;
   const amountIn = req.params.amountIn as BigIntStr;
   const tokenOut = req.params.tokenOut as Address;
 
-  const swapBot = swapBotCollective.getSwapBot(chainId);
-  const swapperAddress = await swapBot.getSwapperAddress(accountAddress);
-
   // Get quote swap.
-  const result = await swapBot.quoteSwap({
+  const result = await swapbot.readQuoteSwap({
+    chainId,
     tokenIn,
     amountIn: BigInt(amountIn),
     tokenOut,
-    swapperAddress,
   });
 
   res.json(result);
 });
 
-app.get("/simulate/:chainId/:tokenIn/:amountIn/:tokenOut", async (req, res) => {
-  const chainId = Number(req.params.chainId);
-  const tokenIn = req.params.tokenIn as Address;
-  const amountIn = req.params.amountIn as BigIntStr;
-  const tokenOut = req.params.tokenOut as Address;
-
-  const swapBot = swapBotCollective.getSwapBot(chainId);
-  const swapperAddress = await swapBot.getSwapperAddress(accountAddress);
-
-  // Get quote swap.
-  const quoteResult = await swapBot.quoteSwap({
-    tokenIn,
-    amountIn: BigInt(amountIn),
-    tokenOut,
-    swapperAddress,
-  });
-  if (
-    quoteResult.error ||
-    !quoteResult.finalQuote ||
-    !quoteResult.finalQuote.swapPath
-  ) {
-    return res.status(500).json({
-      message: "Unable to retrieve on-chain swap quote",
-      error: quoteResult.error,
-    });
-  }
-
-  // Simulate swap on-chain.
-  const swapResult = await swapBot.simulateSwap({
-    tokenIn,
-    amountIn: BigInt(amountIn),
-    tokenOut,
-    swapPath: quoteResult.finalQuote.swapPath,
-    accountAddress,
-    swapperAddress: quoteResult.finalQuote.swapperAddress,
-  });
-  if (!swapResult || swapResult.error) {
-    return res
-      .status(500)
-      .json({ message: "Simulated swap failed.", error: swapResult?.error });
-  }
-
-  res.json({
-    message: "Simulated swap successful!",
-    tokenIn,
-    amountIn,
-    tokenOut,
-    amountOut: swapResult.amountOut,
-  });
-});
-
-// Error handling
 // Global error handlers
 process.on("uncaughtException", (err) => {
   console.error("There was an uncaught error", err);

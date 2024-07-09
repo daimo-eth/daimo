@@ -7,19 +7,25 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    "script/DeployFastCCTP.s.sol"
-    # "script/DeployDaimoFlexSwapper.s.sol"
-    # "script/DeployDaimoCCTPBridger.s.sol"
+    # "script/DeployFastCCTP.s.sol"
+    # "script/DeployFlexSwapper.s.sol"
+    # "script/DeployCCTPBridger.s.sol"
     # "script/DeployAccountFactoryV2.s.sol"
-    # "script/DeployTestAccountV2.s.sol"
+    "script/DeployTestAccountV2.s.sol"
 )
 CHAINS=(
-    "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # MAINNETS
+    # "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
     # ",https://avalanche-c-chain-rpc.publicnode.com"  # No Etherscan or Alchemy for Avalanche
+
+    # TESTNETS
+    "$ETHERSCAN_API_KEY_ETH_SEPOLIA,wss://ethereum-sepolia-rpc.publicnode.com"
+    # "$ETHERSCAN_API_KEY_BASE_TESTNET,https://sepolia.base.org"
+ 
 )
 
 for SCRIPT in "${SCRIPTS[@]}"; do
