@@ -20,7 +20,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
-    # ",https://avalanche-c-chain-rpc.publicnode.com"  # No Etherscan or Alchemy for Avalanche
+    # "verifyContract,https://avalanche-c-chain-rpc.publicnode.com"  # No Alchemy for Avalanche, Etherscan key is "verifyContract"
 
     # TESTNETS
     "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"

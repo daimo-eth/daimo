@@ -84,15 +84,31 @@ contract DeployFlexSwapperScript is Script {
             hopTokens[1] = wrappedNative;
         }
 
-        // Supported output tokens
-        IERC20 usdc = IERC20(_getUSDCAddress(chainId));
-        outputTokens = new IERC20[](1);
-        outputTokens[0] = usdc;
-
         // Stablecoins
-        // TODO: add USDT and DAI
-        stablecoins = new IERC20[](1);
-        stablecoins[0] = usdc;
+        IERC20 usdc = IERC20(_getUSDCAddress(chainId));
+        IERC20 dai = IERC20(_getDAIAddress(chainId));
+        IERC20 usdt = IERC20(_getUSDTAddress(chainId));
+
+        if (_isTestnet(chainId)) {
+            // There is no swapping liquidity on testnets so no need for
+            // stablecoin options.
+            stablecoins = new IERC20[](1);
+            stablecoins[0] = usdc;
+        } else {
+            stablecoins = new IERC20[](3);
+            stablecoins[0] = usdc;
+            stablecoins[1] = usdt;
+            stablecoins[2] = dai;
+        }
+
+        // Supported output tokens (stablecoins + hopTokens)
+        outputTokens = new IERC20[](stablecoins.length + hopTokens.length);
+        for (uint256 i = 0; i < stablecoins.length; i++) {
+            outputTokens[i] = stablecoins[i];
+        }
+        for (uint256 i = 0; i < hopTokens.length; i++) {
+            outputTokens[i + stablecoins.length] = hopTokens[i];
+        }
 
         uniswapRouter = _getUniswapSwapRouterAddress(chainId);
 

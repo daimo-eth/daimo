@@ -23,6 +23,7 @@ contract DeployTestAccountV2Script is Script {
         bool testnet = _isTestnet(block.chainid);
         uint256 homeChain = testnet ? BASE_TESTNET : BASE_MAINNET;
         address homeCoin = _getUSDCAddress(homeChain);
+
         DaimoAccountFactoryV2(factory).createAccount({
             homeChain: homeChain,
             homeCoin: IERC20(homeCoin),
