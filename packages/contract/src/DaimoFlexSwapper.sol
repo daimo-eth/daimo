@@ -154,36 +154,11 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         DaimoFlexSwapperExtraData memory extra = _decodeExtraData(extraData);
 
         // Get quote = best-effort price and path from tokenIn to tokenOut.
-        uint128 amountIn128 = uint128(amountIn);
-        (uint256 swapEstAmountOut, bytes memory swapPath) = quote(
-            tokenIn,
-            amountIn128,
-            tokenOut
-        );
-        require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
-
-        // Next, compute the minimum output amount.
-        uint256 minAmountOut;
-        if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
-            // Require stables to be exchanged 1-to-1.
-            uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
-            uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
-            if (decIn > decOut) {
-                minAmountOut = amountIn / (10 ** (decIn - decOut));
-            } else {
-                minAmountOut = amountIn * (10 ** (decOut - decIn));
-            }
-
-            // Sanity check: liquidity must exist within 4% of 1:1
-            // Casts cannot overflow; both arguments are known to be < 2^128.
-            require(minAmountOut < _MAX_UINT128, "DFS: minAmountOut too large");
-            int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
-            uint256 absDiff = uint256(diff < 0 ? -diff : diff);
-            require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
-        } else {
-            // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
-            minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
-        }
+        (
+            uint256 minAmountOut,
+            uint256 swapEstAmountOut,
+            bytes memory swapPath
+        ) = _getMinAmountOut(tokenIn, amountIn, tokenOut);
 
         // Next, prepare the swap.
         address callDest;
@@ -210,9 +185,70 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         require(swapAmountOut < _MAX_UINT128, "DFS: excessive swap output");
 
         // Receive tip or pay tip, if any
+        totalAmountOut = _handleTip(tokenOut, swapAmountOut, extra);
+        require(totalAmountOut >= minAmountOut, "DFS: insufficient output");
+
+        // Finally, send the total output amount to msg.sender
+        tokenOut.safeTransfer(msg.sender, totalAmountOut);
+
+        emit SwapToCoin(
+            msg.sender,
+            address(tokenIn),
+            amountIn,
+            address(tokenOut),
+            swapEstAmountOut,
+            swapAmountOut,
+            totalAmountOut
+        );
+    }
+
+    function _getMinAmountOut(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut
+    )
+        private
+        view
+        returns (
+            uint256 minAmountOut,
+            uint256 swapEstAmountOut,
+            bytes memory swapPath
+        )
+    {
+        uint128 amountIn128 = uint128(amountIn);
+        (swapEstAmountOut, swapPath) = quote(tokenIn, amountIn128, tokenOut);
+        require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
+
+        // Next, compute the minimum output amount.
+        if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
+            // Require stables to be exchanged 1-to-1.
+            uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
+            uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
+            if (decIn > decOut) {
+                minAmountOut = amountIn / (10 ** (decIn - decOut));
+            } else {
+                minAmountOut = amountIn * (10 ** (decOut - decIn));
+            }
+
+            // Sanity check: liquidity must exist within 4% of 1:1
+            // Casts cannot overflow; both arguments are known to be < 2^128.
+            require(minAmountOut < _MAX_UINT128, "DFS: minAmountOut too large");
+            int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
+            uint256 absDiff = uint256(diff < 0 ? -diff : diff);
+            require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
+        } else {
+            // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
+            minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
+        }
+    }
+
+    function _handleTip(
+        IERC20 tokenOut,
+        uint256 swapAmountOut,
+        DaimoFlexSwapperExtraData memory extra
+    ) private returns (uint256 totalAmountOut) {
         if (extra.tipToExactAmountOut > 0) {
             totalAmountOut = extra.tipToExactAmountOut;
-            require(totalAmountOut >= minAmountOut, "DFS: insufficient tip");
 
             // Tip the difference
             // Guaranteed not to overflow, both sides verified to fit in uint128
@@ -231,22 +267,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         } else {
             // No tip. Ensure that the amount received from the swap is enough.
             totalAmountOut = swapAmountOut;
-            require(totalAmountOut >= minAmountOut, "DFS: insufficient output");
         }
-        assert(totalAmountOut > 0); // Since minAmountOut guaranteed > 0
-
-        // Finally, send the total output amount to msg.sender
-        tokenOut.safeTransfer(msg.sender, totalAmountOut);
-
-        emit SwapToCoin(
-            msg.sender,
-            address(tokenIn),
-            amountIn,
-            address(tokenOut),
-            swapEstAmountOut,
-            swapAmountOut,
-            totalAmountOut
-        );
     }
 
     /// Fetch a best-effort quote for a given token pair + exact input amount.

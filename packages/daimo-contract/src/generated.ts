@@ -726,13 +726,7 @@ export const daimoAccountV2ABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [
-      {
-        name: 'newForwardingAddress',
-        internalType: 'address',
-        type: 'address',
-      },
-    ],
+    inputs: [{ name: 'newAddr', internalType: 'address', type: 'address' }],
     name: 'setForwardingAddress',
     outputs: [],
   },
@@ -1879,6 +1873,11 @@ export const daimoFlexSwapperABI = [
         internalType: 'contract IERC20[]',
         type: 'address[]',
       },
+      {
+        name: '_stablecoins',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
       { name: '_swapRouter02', internalType: 'address', type: 'address' },
       { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
       { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
@@ -1896,6 +1895,13 @@ export const daimoFlexSwapperABI = [
     type: 'function',
     inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
     name: 'isOutputToken',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    name: 'isStablecoin',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
@@ -1997,6 +2003,13 @@ export const daimoFlexSwapperABI = [
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'stablecoins',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
   },
   {
     stateMutability: 'view',

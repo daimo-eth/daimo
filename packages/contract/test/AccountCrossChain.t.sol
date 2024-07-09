@@ -33,7 +33,7 @@ contract AccountCrossChainTest is Test {
             swapper: swapper,
             bridger: bridger,
             keySlot: 0,
-            key: [bytes32(0), bytes32(0)],
+            key: [bytes32(uint256(1)), bytes32(uint256(2))],
             salt: 0
         });
 

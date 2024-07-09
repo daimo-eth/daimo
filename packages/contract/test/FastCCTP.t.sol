@@ -26,7 +26,7 @@ contract FastCCTPTest is Test {
     address immutable _lp = 0x2222222222222222222222222222222222222222;
     uint256 immutable _lpToTokenInitBalance = 1000;
 
-    address immutable _handoffAddr = 0xD0EcA7336c8B63B2cF26d088F02B77482B710d58;
+    address immutable _handoffAddr = 0x7Bf8CF6E7C9EdcEFa8C32925B9Ab96072aaeC096;
 
     function testStart() public {
         vm.chainId(_fromChainID);
@@ -126,7 +126,7 @@ contract FastCCTPTest is Test {
     }
 }
 
-contract DummyCCTPMessenger is ICCTPTokenMessenger {
+contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
     address public immutable expectedBurnToken;
     uint256 public amountBurned;
 
@@ -140,11 +140,11 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger {
         bytes32 mintRecipient,
         address burnToken
     ) external returns (uint64 _nonce) {
-        assert(amount == 100);
-        assert(destinationDomain == 6);
-        address expectedRecipient = 0xD0EcA7336c8B63B2cF26d088F02B77482B710d58;
-        assert(mintRecipient == bytes32(uint256(uint160(expectedRecipient))));
-        assert(burnToken == expectedBurnToken);
+        assertEq(amount, 100);
+        assertEq(destinationDomain, 6);
+        address expectedRecipient = 0x7Bf8CF6E7C9EdcEFa8C32925B9Ab96072aaeC096;
+        assertEq(mintRecipient, bytes32(uint256(uint160(expectedRecipient))));
+        assertEq(burnToken, expectedBurnToken);
 
         // Burn it
         IERC20(burnToken).transferFrom(msg.sender, address(0xdead), amount);

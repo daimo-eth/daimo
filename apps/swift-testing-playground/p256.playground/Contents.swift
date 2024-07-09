@@ -52,14 +52,10 @@ func base64ToBase64url(base64: String) -> String {
 }
 
 var messageHex = (
-    "01" + // version
-     "00003B9ACA00" + // validUntil 1e9
-//     "000000000000" + // validUntil 0
-    "5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b" // userOpHash
+    // "00003B9ACA00" + // validUntil 1e9
+    "000000000000" + // validUntil 0
+    "6d03315273395a97603f0e1eaafd6f9b755f33975ed12e6b555d831f1ddf026d" // userOpHash
 )
-
-// isValidSignature ERC1271 test
-//messageHex = "15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5"
 
 let challengeB64 = Data(fromHexEncodedString: messageHex)!.base64EncodedString()
 let challengeB64URL = base64ToBase64url(base64: challengeB64)
@@ -94,6 +90,9 @@ let hexSignature = signature.rawRepresentation.hexEncodedString()
 print("sig raw", hexSignature)
 print("sig r", signature.rawRepresentation[..<32].hexEncodedString())
 print("sig s", signature.rawRepresentation[32...].hexEncodedString())
+print("if s>N/2, must calculate N-s to avoid malleability")
+
+// let s = signature.rawRepresentation[32...]
 
 
 // ANDROID TEST BELOW

@@ -35,6 +35,7 @@ contract DaimoUniswapOracleTest is Test {
             _wrappedNativeToken: weth,
             _hopTokens: hopTokens,
             _outputTokens: outputTokens,
+            _stablecoins: new IERC20[](0),
             _swapRouter02: 0x2626664c2603336E57B271c5C0b26F421741e481,
             _oracleFeeTiers: oracleFeeTiers,
             _oraclePeriod: 1 minutes,

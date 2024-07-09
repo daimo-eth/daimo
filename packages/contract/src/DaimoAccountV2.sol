@@ -204,7 +204,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
         // Only the home account ever has signing keys.
         if (block.chainid == homeChain) {
-            addSigningKey(slot, key);
+            _addSigningKey(slot, key);
         }
     }
 
@@ -296,6 +296,8 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     /// Only used if there's no paymaster.
     function _payPrefund(uint256 missingAccountFunds) private {
         if (missingAccountFunds == 0) return;
+
+        address payable to = payable(msg.sender);
         (bool ok, ) = to.call{value: missingAccountFunds}(new bytes(0));
         require(ok, "DAv2: prefund failed");
     }
@@ -346,11 +348,17 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         uint8 slot,
         bytes32[2] memory key
     ) public onlySelf onlyActive {
+        _addSigningKey(slot, key);
+    }
+
+    function _addSigningKey(uint8 slot, bytes32[2] memory key) private {
         require(keys[slot][0] == bytes32(0), "DAv2: key already exists");
         require(key[0] != bytes32(0), "DAv2: new key cannot be 0");
         require(numActiveKeys < maxKeys, "DAv2: max keys reached");
+
         keys[slot] = key;
         numActiveKeys++;
+
         emit SigningKeyAdded(this, slot, key);
     }
 
@@ -359,9 +367,11 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     function removeSigningKey(uint8 slot) public onlySelf onlyActive {
         require(keys[slot][0] != bytes32(0), "DAv2: key does not exist");
         require(numActiveKeys > 1, "DAv2: cannot remove only signing key");
+
         bytes32[2] memory currentKey = keys[slot];
         keys[slot] = [bytes32(0), bytes32(0)];
         numActiveKeys--;
+
         emit SigningKeyRemoved(this, slot, currentKey);
     }
 

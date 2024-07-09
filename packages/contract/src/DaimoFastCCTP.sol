@@ -80,10 +80,9 @@ contract DaimoFastCCTP {
         require(fromAmount >= toAmount, "FCCTP: fromAmount < toAmount");
 
         // Deploy CCTP sender
-        uint256 fromChainID = block.chainid;
         address fromAddr = msg.sender;
         address handoffAddr = getHandoffAddr({
-            fromChainID: fromChainID,
+            fromChainID: block.chainid,
             fromAddr: fromAddr,
             fromAmount: fromAmount,
             toChainID: toChainID,

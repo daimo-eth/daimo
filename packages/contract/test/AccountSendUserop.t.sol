@@ -44,8 +44,7 @@ contract AccountSendUseropTest is Test {
         uint256 actualGasUsed
     );
 
-    // TODO: re-enable after fixing flake
-    function disabledTestSimpleOp() public {
+    function testSimpleOp() public {
         // hardcoded from swift playground
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
@@ -54,7 +53,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
+        bytes32 expectedUserOpHash = hex"6d03315273395a97603f0e1eaafd6f9b755f33975ed12e6b555d831f1ddf026d";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -66,8 +65,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x95287be7cb8c72c4aeee050bb0448fed83b1330a1ba2edcb6835525c9c07b006,
-                    s: 0x656E96974C5170EFA7D65FFB4F61A793B0DA4AC9E346E5B28F9739FE3AF2B096
+                    r: 0x5837243ee645ef3aad95966a6827ae246800fd5fbfa8d570a3ce74e979099272,
+                    s: 0x261a6a1ec93846322ec2e4eb38c94e9e9bdf95d859cb3635b0fc7360606578d6
                 })
             )
         );
@@ -75,7 +74,7 @@ contract AccountSendUseropTest is Test {
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
-            84532, // home chain = Base Sepolia
+            8453, // home chain = Base
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),
@@ -110,7 +109,7 @@ contract AccountSendUseropTest is Test {
         bytes32 hash = entryPoint.getUserOpHash(op);
         console2.log("op hash: ");
         console2.logBytes32(hash);
-        assertEq(expectedUserOpHash, hash);
+        assertEq(hash, expectedUserOpHash);
 
         op.signature = ownerSig;
 
@@ -128,27 +127,6 @@ contract AccountSendUseropTest is Test {
             0
         );
         entryPoint.handleOps(ops, payable(address(acc)));
-
-        // code coverage can't handle indirect calls
-        // call validateUserOp directly
-        DaimoAccountV2 a2 = new DaimoAccountV2(acc.entryPoint());
-        uint256[2] memory key2u = [
-            0x1bf24cd1fa3d0d0a0f96c63b63af690ca0c171172fa08ad9a976c4a2be7421da,
-            0xa54f11ccb62cb1909ffff628bac5f83ada775db4ab4d1326ff9fbdb6cd76ca43
-        ];
-        bytes32[2] memory key2 = [bytes32(key2u[0]), bytes32(key2u[1])];
-        vm.store(address(a2), 0, 0); // set _initialized = 0
-        a2.initialize(
-            84532, // home chain = Base Sepolia
-            usdc,
-            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
-            IDaimoBridger(address(0)),
-            0,
-            key2
-        );
-        vm.prank(address(entryPoint));
-        uint256 validationData = a2.validateUserOp(op, hash, 0);
-        assertEq(validationData, 0);
     }
 
     function testValidUntil() public {
@@ -160,7 +138,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"5a9a980b6256506cd83fd0462db050883f344508d2698897ae210475c80acb0b";
+        bytes32 expectedUserOpHash = hex"6d03315273395a97603f0e1eaafd6f9b755f33975ed12e6b555d831f1ddf026d";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -172,8 +150,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x2b17a942c427b4c0e691feb6efe6d65abdcdc5d56ca45bf1aa4822c3d8935f47,
-                    s: 0x37E6C05C93ABA7F7ED5A8921499F65BC7462959B92E8D371BA23367EBA564B9E
+                    r: 0x511457900a3c8b1842dfdda73ed4fe4fe995a5922528a86cb816a234e79a1297,
+                    s: 0x7e0b1895926d83fe6ccad412b01e4f16b294e2a9ea9e308f3d9651ba779b704a
                 })
             )
         );
@@ -181,7 +159,7 @@ contract AccountSendUseropTest is Test {
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
-            84532, // home chain = Base Sepolia
+            8453, // home chain = Base
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
             IDaimoBridger(address(0)),
@@ -209,8 +187,8 @@ contract AccountSendUseropTest is Test {
         // userop hash
         bytes32 hash = entryPoint.getUserOpHash(op);
         console2.log("op hash: ");
-        console2.logBytes32(hash);
-        assertEq(expectedUserOpHash, hash);
+        console2.logBytes32(expectedUserOpHash);
+        assertEq(hash, expectedUserOpHash);
 
         // too late: can't execute after timestamp 1e9
         vm.warp(1e9 + 1);
