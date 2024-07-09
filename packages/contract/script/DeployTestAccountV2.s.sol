@@ -16,9 +16,9 @@ contract DeployTestAccountV2Script is Script {
         bytes32[2] memory key = [bytes32(k0), bytes32(k1)];
 
         // from deployments
-        address factory = 0x255Cf5AaF15Bbb96E90b822eD6045877Cb288669;
-        address swapper = 0x9D6DC61411b580299C1DC2F557f4D3f0DB683684;
-        address bridger = 0xBcA0Af530570E447Ce7C8B9CB7a9bA357F5D3654;
+        address factory = 0xD65245e5e40FB7bf2935aa922AF223a888523353;
+        address swapper = 0xd4f52859A6Fa075A6253C46A4D6367f2F8247165;
+        address bridger = 0xaaC79980B0Cc6475544946003605a98118407b63;
 
         bool testnet = _isTestnet(block.chainid);
         uint256 homeChain = testnet ? BASE_TESTNET : BASE_MAINNET;

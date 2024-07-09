@@ -299,7 +299,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         _sendNativeToken(payable(msg.sender), missingAccountFunds);
     }
 
-    // Sends native token, eg ETH or MATIC.
+    /// Safely send native token, eg ETH or MATIC.
     function _sendNativeToken(address payable to, uint256 value) private {
         (bool ok, ) = to.call{value: value}(new bytes(0));
         require(ok, "DAv2: native token transfer failed");

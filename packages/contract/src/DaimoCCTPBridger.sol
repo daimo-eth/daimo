@@ -96,8 +96,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         uint256 toChainID,
         bytes calldata /* extraData */
     ) public {
-        // Move input token from caller to this contract and approve
-        // FastCCTP to spend it.
+        // Move input token from caller to this contract and approve FastCCTP.
         tokenIn.safeTransferFrom({
             from: msg.sender,
             to: address(this),
@@ -109,7 +108,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         bool valid = address(domain.token) != address(0);
         require(valid, "DCCTPB: unsupported toChainID");
 
-        // Increment nonce, then send
+        // Increment nonce, then send.
         fastCCTPNonce += 1;
         fastCCTP.startTransfer({
             cctpMessenger: cctpMessenger,

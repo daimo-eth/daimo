@@ -15,7 +15,7 @@ contract DeployFlexSwapperScript is Script {
 
         DaimoFlexSwapper implementation = new DaimoFlexSwapper{salt: 0}();
         address swapper = CREATE3.deploy(
-            keccak256("DaimoFlexSwapper-7"),
+            keccak256("DaimoFlexSwapper-9"),
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(address(implementation), initCall)

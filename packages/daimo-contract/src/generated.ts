@@ -529,7 +529,7 @@ export const daimoAccountFactoryV2ABI = [
 ] as const
 
 export const daimoAccountFactoryV2Address =
-  '0x682b862b13d1C208E0A37740525180DD4223e66e' as const
+  '0xD65245e5e40FB7bf2935aa922AF223a888523353' as const
 
 export const daimoAccountFactoryV2Config = {
   address: daimoAccountFactoryV2Address,
@@ -1765,7 +1765,7 @@ export const daimoFastCctpABI = [
 ] as const
 
 export const daimoFastCctpAddress =
-  '0x3D335E4C81a7768d98Cc5d3b8dc650D099CcfE39' as const
+  '0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838' as const
 
 export const daimoFastCctpConfig = {
   address: daimoFastCctpAddress,
