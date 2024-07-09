@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-
 import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "account-abstraction/core/Helpers.sol";
 import "account-abstraction/interfaces/IAccount.sol";
@@ -28,9 +28,12 @@ import "./IDaimoBridger.sol";
  * home chain, and then swapped to the home coin (if necessary).
  *
  * An account can be deactivated by setting a forwarding address that all future
- * received assets will be forwarded to.
+ * received assets will be forwarded to. collect() and forward() support the
+ * native asset (eg ETH) and ERC-20 tokens only, no NFTs.
  */
-contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
+contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     // Represents an arbitrary contract call on the home chain.
     struct Call {
         address dest;
@@ -292,9 +295,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     /// Prefund the entrypoint (msg.sender) gas for this transaction.
     /// Only used if there's no paymaster.
     function _payPrefund(uint256 missingAccountFunds) private {
-        if (missingAccountFunds > 0) {
-            TransferHelper.safeTransferETH(msg.sender, missingAccountFunds);
-        }
+        if (missingAccountFunds == 0) return;
+        (bool ok, ) = to.call{value: missingAccountFunds}(new bytes(0));
+        require(ok, "DAv2: prefund failed");
     }
 
     /// ERC-1271: validate a Daimo user signature. The signature is an
@@ -369,8 +372,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         IERC20 tokenBridge,
         bytes calldata extraDataSwap,
         bytes calldata extraDataBridge
-    ) public onlyForeignChain {
-        // TODO: no reentrancy
+    ) public onlyForeignChain nonReentrant {
         uint256 amountBridge;
         if (tokenIn == tokenBridge) {
             amountBridge = amountIn;
@@ -380,12 +382,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         }
 
         // Bridger is responsible for checking that it supports tokenBridge, etc
-        // TODO: use only SafeERC20 or TransferHelper, not both
-        TransferHelper.safeApprove(
-            address(tokenBridge),
-            address(bridger),
-            amountBridge
-        );
+        tokenBridge.safeApprove(address(bridger), amountBridge);
         bridger.sendToChain(
             tokenBridge,
             amountBridge,
@@ -400,7 +397,6 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
     function updateHomeCoin(IERC20 newHomeCoin) public onlySelf onlyActive {
         require(newHomeCoin != homeCoin);
         homeCoin = newHomeCoin;
-
         emit UpdateHomeCoin(homeCoin, newHomeCoin);
     }
 
@@ -409,7 +405,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         IERC20 tokenIn,
         uint256 amountIn,
         bytes calldata extraData
-    ) public onlyHomeChain {
+    ) public onlyHomeChain nonReentrant {
         require(address(homeCoin) != address(0), "DAv2: no home coin");
         _swap(tokenIn, amountIn, homeCoin, extraData);
     }
@@ -422,11 +418,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         IERC20 tokenOut,
         bytes calldata extraData
     ) private returns (uint256 amountOut) {
-        TransferHelper.safeApprove(
-            address(tokenIn),
-            address(swapper),
-            amountIn
-        );
+        tokenIn.safeApprove(address(swapper), amountIn);
         amountOut = swapper.swapToCoin(tokenIn, amountIn, tokenOut, extraData);
         emit AutoSwap(tokenIn, amountIn, tokenOut, amountOut);
     }
@@ -438,20 +430,19 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271 {
         require(newAddr != address(this), "DAv2: cannot forward to self");
 
         forwardingAddress = newAddr;
+
         emit SetForwardingAddress(newAddr);
     }
 
     /// Forward assets from the account to the forwarding address.
-    function forward(IERC20 tokenIn) public {
+    function forward(IERC20 tokenIn) public nonReentrant {
+        // Reentrancy guard not strictly necessary here, but used everywhere an
+        // arbitrary unauthenticated caller can call this contract.
         require(forwardingAddress != address(0), "DAv2: not forwarding");
+
         uint256 balance = tokenIn.balanceOf(address(this));
-        TransferHelper.safeTransfer(
-            address(tokenIn),
-            forwardingAddress,
-            balance
-        );
+        tokenIn.safeTransfer(forwardingAddress, balance);
 
         emit ForwardAsset(tokenIn, balance);
-        // TODO: support 721, 1155...?
     }
 }

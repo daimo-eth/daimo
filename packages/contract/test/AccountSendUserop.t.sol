@@ -151,8 +151,7 @@ contract AccountSendUseropTest is Test {
         assertEq(validationData, 0);
     }
 
-    // TODO: re-enable after fixing flake
-    function disabledTestValidUntil() public {
+    function testValidUntil() public {
         // hardcoded from swift playground
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,

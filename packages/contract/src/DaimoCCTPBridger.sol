@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
@@ -20,6 +20,8 @@ struct CCTPDomain {
 /// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
 /// so the only supported bridge token in USDC.
 contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
+    using SafeERC20 for IERC20;
+
     // CCTP TokenMessenger for this chain.
     ICCTPTokenMessenger public cctpMessenger;
 
@@ -92,17 +94,12 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
     ) public {
         // Move input token from caller to this contract and approve
         // FastCCTP to spend it.
-        TransferHelper.safeTransferFrom({
-            token: address(tokenIn),
+        tokenIn.safeTransferFrom({
             from: msg.sender,
             to: address(this),
             value: amountIn
         });
-        TransferHelper.safeApprove({
-            token: address(tokenIn),
-            to: address(fastCCTP),
-            value: amountIn
-        });
+        tokenIn.safeApprove({spender: address(fastCCTP), value: amountIn});
 
         CCTPDomain memory domain = cctpDomainMapping[toChainID];
         bool valid = address(domain.token) != address(0);

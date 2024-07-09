@@ -92,7 +92,6 @@ contract DaimoAccountFactoryV2 {
                             address(accountImplementation),
                             abi.encodeCall(
                                 DaimoAccountV2.initialize,
-                                // TODO: named args if possible
                                 (
                                     homeChain,
                                     homeCoin,

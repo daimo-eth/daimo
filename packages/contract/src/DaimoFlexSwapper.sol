@@ -3,8 +3,10 @@ pragma solidity ^0.8.12;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
@@ -34,6 +36,8 @@ import "./IDaimoSwapper.sol";
 /// 2. Passing the zero address + no calldata. In this case, DaimoFlexSwapper
 ///    uses the Uniswap route found when quoting the reference price.
 contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
+    using SafeERC20 for IERC20;
+
     /// Describes how to perform the swap to achieve the quoted price or better.
     struct DaimoFlexSwapperExtraData {
         /// Swap contract to call, or address(0) to use the quoted Uniswap path.
@@ -56,21 +60,19 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
     uint256 private constant _MAX_UINT128 = type(uint128).max;
 
-    // TODO:
-    // Ability to modify hopTokens / outputTokens / maxSlippage etc?
-
     /// WETH / WMATIC / etc, the ERC-20 wrapped native token.
     IERC20 public wrappedNativeToken;
     /// Hop tokens. We search for two-pool routes going thru these tokens.
     IERC20[] public hopTokens;
     /// Supported output tokens, generally popular stablecoins.
     IERC20[] public outputTokens;
-    /// See outputTokens
     mapping(IERC20 => bool) public isOutputToken;
+    /// Stablecoins. Price is fixed at $1. Must implement decimals().
+    IERC20[] public stablecoins;
+    mapping(IERC20 => bool) public isStablecoin;
     /// Fee tiers. We search through these to find the one with highest TWAL.
     uint24[] public oracleFeeTiers;
     /// TWAP/TWAL period in seconds.
-    /// TODO: refine the default value
     uint32 public oraclePeriod;
     /// Uniswap pool factory, for looking up pools by (tokenA, tokenB, feeTier).
     IUniswapV3Factory public oraclePoolFactory;
@@ -102,6 +104,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         IERC20 _wrappedNativeToken,
         IERC20[] memory _hopTokens,
         IERC20[] memory _outputTokens,
+        IERC20[] memory _stablecoins,
         address _swapRouter02,
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
@@ -109,9 +112,11 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     ) public initializer {
         _transferOwnership(_initialOwner);
 
+        // All of the below are fixed at deployment time, editable via upgrade.
         wrappedNativeToken = _wrappedNativeToken;
         hopTokens = _hopTokens;
         outputTokens = _outputTokens;
+        stablecoins = _stablecoins;
         swapRouter02 = _swapRouter02;
         oracleFeeTiers = _oracleFeeTiers;
         oraclePeriod = _oraclePeriod;
@@ -119,6 +124,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
         for (uint256 i = 0; i < _outputTokens.length; i++) {
             isOutputToken[_outputTokens[i]] = true;
+        }
+        for (uint256 i = 0; i < _stablecoins.length; i++) {
+            isStablecoin[_stablecoins[i]] = true;
         }
     }
 
@@ -140,8 +148,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         IERC20 tokenOut,
         bytes calldata extraData
     ) public returns (uint256 totalAmountOut) {
-        // TODO: no reentrancy
-
         // Input checks
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
@@ -156,10 +162,28 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         );
         require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
 
-        // 1% slippage tolerance = should be plenty for the stablecoin-to-
-        // stablecoin common case. Edge cases handled via tipToExactAmount.
-        // TODO: add a stablecoin whitelist, enforce price = 1 for those
-        uint256 minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
+        // Next, compute the minimum output amount.
+        uint256 minAmountOut;
+        if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
+            // Require stables to be exchanged 1-to-1.
+            uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
+            uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
+            if (decIn > decOut) {
+                minAmountOut = amountIn / (10 ** (decIn - decOut));
+            } else {
+                minAmountOut = amountIn * (10 ** (decOut - decIn));
+            }
+
+            // Sanity check: liquidity must exist within 4% of 1:1
+            // Casts cannot overflow; both arguments are known to be < 2^128.
+            require(minAmountOut < _MAX_UINT128, "DFS: minAmountOut too large");
+            int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
+            uint256 absDiff = uint256(diff < 0 ? -diff : diff);
+            require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
+        } else {
+            // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
+            minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
+        }
 
         // Next, prepare the swap.
         address callDest;
@@ -169,18 +193,13 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
             callDest = extra.callDest;
             callData = extra.callData;
         } else {
-            // Option 2: call Uniswaap, use the reference quote path
+            // Option 2: call Uniswap using the reference quote path
             callDest = address(swapRouter02);
             callData = _getUniswapCalldata(swapPath);
         }
 
         // Send input token directly from caller to the swap contract.
-        TransferHelper.safeTransferFrom(
-            address(tokenIn),
-            msg.sender,
-            callDest,
-            amountIn
-        );
+        tokenIn.safeTransferFrom(msg.sender, callDest, amountIn);
 
         // Execute swap
         (bool success, ) = callDest.call(callData);
@@ -201,19 +220,13 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
             if (shortfall > 0) {
                 // Tip payer approves() some maximum tip beforehand. If
                 // insufficient, the swap fails.
-                TransferHelper.safeTransferFrom(
-                    address(tokenOut),
+                tokenOut.safeTransferFrom(
                     extra.tipPayer,
                     address(this),
                     uint256(shortfall)
                 );
             } else if (shortfall < 0) {
-                TransferHelper.safeTransferFrom(
-                    address(tokenOut),
-                    address(this),
-                    extra.tipPayer,
-                    uint256(-shortfall)
-                );
+                tokenOut.safeTransfer(extra.tipPayer, uint256(-shortfall));
             }
         } else {
             // No tip. Ensure that the amount received from the swap is enough.
@@ -223,11 +236,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         assert(totalAmountOut > 0); // Since minAmountOut guaranteed > 0
 
         // Finally, send the total output amount to msg.sender
-        TransferHelper.safeTransfer(
-            address(tokenOut),
-            msg.sender,
-            totalAmountOut
-        );
+        tokenOut.safeTransfer(msg.sender, totalAmountOut);
 
         emit SwapToCoin(
             msg.sender,
@@ -398,7 +407,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
                     bestAmountOut = uint128(estAmountOut256);
                 }
             } catch {
-                // Ignore errors. No event emits, to keep this a view function.
+                // Ignore errors. This is a view function, so no logs either.
                 // Can trace to debug oracle issues if needed.
             }
         }
