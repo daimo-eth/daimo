@@ -79,6 +79,34 @@ contract AccountCrossChainTest is Test {
         assertEq(baseUSDbC.balanceOf(address(acc)), 0);
         assertEq(baseUSDC.balanceOf(address(acc)), 97);
     }
+
+    function testForward() public {
+        vm.expectRevert("DAv2: not forwarding");
+        acc.forward(baseUSDC);
+
+        vm.expectRevert("DAv2: only self");
+        address payable s = payable(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF);
+        acc.setForwardingAddress(s);
+
+        // Alice deactivates the account, forwarding to s
+        vm.prank(address(acc));
+        acc.setForwardingAddress(s);
+
+        // Receive $1 into deactivated account
+        baseUSDC.transfer(address(acc), 1e6);
+
+        // Anyone can forward, not just the account owner
+        acc.forward(baseUSDC);
+        assertEq(baseUSDC.balanceOf(address(acc)), 0);
+        assertEq(baseUSDC.balanceOf(s), 1e6);
+
+        // Finally, test forwarding ETH
+        vm.deal(address(acc), 1 ether);
+
+        acc.forward(IERC20(address(0)));
+        assertEq(address(acc).balance, 0);
+        assertEq(s.balance, 1 ether);
+    }
 }
 
 contract DummySwapper is IDaimoSwapper {
@@ -104,7 +132,7 @@ contract DummySwapper is IDaimoSwapper {
         uint256 amountIn,
         IERC20 tokenOut,
         bytes calldata extraData
-    ) external returns (uint256 amountOut) {
+    ) external payable returns (uint256 amountOut) {
         IERC20 expectedTokenIn;
         IERC20 expectedTokenOut;
         if (block.chainid == 10) {

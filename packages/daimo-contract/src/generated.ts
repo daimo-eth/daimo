@@ -626,7 +626,7 @@ export const daimoAccountV2ABI = [
     type: 'function',
     inputs: [],
     name: 'forwardingAddress',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
   },
   {
     stateMutability: 'view',
@@ -726,7 +726,9 @@ export const daimoAccountV2ABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [{ name: 'newAddr', internalType: 'address', type: 'address' }],
+    inputs: [
+      { name: 'newAddr', internalType: 'address payable', type: 'address' },
+    ],
     name: 'setForwardingAddress',
     outputs: [],
   },
@@ -2019,7 +2021,7 @@ export const daimoFlexSwapperABI = [
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },

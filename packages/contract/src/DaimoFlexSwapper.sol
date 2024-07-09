@@ -29,12 +29,9 @@ import "./IDaimoSwapper.sol";
 /// Supports all Uniswap-compatible input ERC20 tokens, including USDT (which is
 /// not quite an ERC20) and not including ERC20s with amounts > 2^128.
 ///
-/// Market makers can use this swapper in one of two ways:
-/// 1. Passing an arbitrary contract call. In this case, DaimoFlexSwapper
-///    approves the contract for (tokenIn, amountIn), calls it, and validates
-///    that the (tokenOut) balance increased by the expected amount.
-/// 2. Passing the zero address + no calldata. In this case, DaimoFlexSwapper
-///    uses the Uniswap route found when quoting the reference price.
+/// Market makers can use this swapper by assing an arbitrary contract call.
+/// DaimoFlexSwapper sends input tokens, calls the contract, then validates that
+/// the (tokenOut) balance increased by the expected amount.
 contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     using SafeERC20 for IERC20;
 
@@ -141,43 +138,41 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     // ----- PUBLIC FUNCTIONS -----
 
     /// Swap input to output token at a fair price, given a path and possibly a
-    /// tip amount to prevent high slippage from blocking any swap.
+    /// tip amount to prevent high slippage from blocking any swap. Input token
+    /// 0x0 refers to the native token, eg ETH. Output token cannot be 0x0.
     function swapToCoin(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut,
         bytes calldata extraData
-    ) public returns (uint256 totalAmountOut) {
+    ) public payable returns (uint256 totalAmountOut) {
         // Input checks
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
-        DaimoFlexSwapperExtraData memory extra = _decodeExtraData(extraData);
+        DaimoFlexSwapperExtraData memory extra;
+        extra = abi.decode(extraData, (DaimoFlexSwapperExtraData));
 
         // Get quote = best-effort price and path from tokenIn to tokenOut.
-        (
-            uint256 minAmountOut,
-            uint256 swapEstAmountOut,
-            bytes memory swapPath
-        ) = _getMinAmountOut(tokenIn, amountIn, tokenOut);
+        (uint256 minAmountOut, uint256 swapEstAmountOut) = _getMinAmountOut({
+            tokenIn: tokenIn,
+            amountIn: amountIn,
+            tokenOut: tokenOut
+        });
 
-        // Next, prepare the swap.
-        address callDest;
-        bytes memory callData;
-        if (extra.callDest != address(0)) {
-            // Option 1: pass an arbitrary contract call
-            callDest = extra.callDest;
-            callData = extra.callData;
+        // Transfer native token or ERC-20 to the swap contract.
+        address callDest = extra.callDest;
+        bytes memory callData = extra.callData;
+        uint256 callValue = 0;
+        if (address(tokenIn) == address(0)) {
+            require(msg.value == amountIn, "DFS: incorrect msg.value");
+            callValue = amountIn;
         } else {
-            // Option 2: call Uniswap using the reference quote path
-            callDest = address(swapRouter02);
-            callData = _getUniswapCalldata(swapPath);
+            require(msg.value == 0, "DFS: unexpected msg.value");
+            tokenIn.safeTransferFrom(msg.sender, callDest, amountIn);
         }
 
-        // Send input token directly from caller to the swap contract.
-        tokenIn.safeTransferFrom(msg.sender, callDest, amountIn);
-
         // Execute swap
-        (bool success, ) = callDest.call(callData);
+        (bool success, ) = callDest.call{value: callValue}(callData);
         require(success, "DFS: swap failed");
 
         uint256 swapAmountOut = tokenOut.balanceOf(address(this));
@@ -191,37 +186,29 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         // Finally, send the total output amount to msg.sender
         tokenOut.safeTransfer(msg.sender, totalAmountOut);
 
-        emit SwapToCoin(
-            msg.sender,
-            address(tokenIn),
-            amountIn,
-            address(tokenOut),
-            swapEstAmountOut,
-            swapAmountOut,
-            totalAmountOut
-        );
+        emit SwapToCoin({
+            account: msg.sender,
+            tokenIn: address(tokenIn),
+            amountIn: amountIn,
+            tokenOut: address(tokenOut),
+            estAmountOut: swapEstAmountOut,
+            swapAmountOut: swapAmountOut,
+            totalAmountOut: totalAmountOut
+        });
     }
 
     function _getMinAmountOut(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut
-    )
-        private
-        view
-        returns (
-            uint256 minAmountOut,
-            uint256 swapEstAmountOut,
-            bytes memory swapPath
-        )
-    {
+    ) private view returns (uint256 minAmountOut, uint256 swapEstAmountOut) {
         uint128 amountIn128 = uint128(amountIn);
-        (swapEstAmountOut, swapPath) = quote(tokenIn, amountIn128, tokenOut);
+        (swapEstAmountOut, ) = quote(tokenIn, amountIn128, tokenOut);
         require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
 
         // Next, compute the minimum output amount.
         if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
-            // Require stables to be exchanged 1-to-1.
+            // Require USD stablecoins to be exchanged 1-to-1.
             uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
             uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
             if (decIn > decOut) {
@@ -230,9 +217,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
                 minAmountOut = amountIn * (10 ** (decOut - decIn));
             }
 
-            // Sanity check: liquidity must exist within 4% of 1:1
-            // Casts cannot overflow; both arguments are known to be < 2^128.
+            // Sanity check: liquidity must exist within 4% of 1:1.
             require(minAmountOut < _MAX_UINT128, "DFS: minAmountOut too large");
+            // Casts cannot overflow; both arguments are known to be < 2^128.
             int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
             uint256 absDiff = uint256(diff < 0 ? -diff : diff);
             require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
@@ -256,11 +243,11 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
             if (shortfall > 0) {
                 // Tip payer approves() some maximum tip beforehand. If
                 // insufficient, the swap fails.
-                tokenOut.safeTransferFrom(
-                    extra.tipPayer,
-                    address(this),
-                    uint256(shortfall)
-                );
+                tokenOut.safeTransferFrom({
+                    from: extra.tipPayer,
+                    to: address(this),
+                    value: uint256(shortfall)
+                });
             } else if (shortfall < 0) {
                 tokenOut.safeTransfer(extra.tipPayer, uint256(-shortfall));
             }
@@ -395,7 +382,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
             if (pool == address(0)) continue;
 
-            // Consult TWAP/TWAL data, gracefully ignore reverts on observation being too old:
+            // Consult TWAP/TWAL data. Gracefully ignore old-observation reverts
             // https://docs.uniswap.org/contracts/v3/reference/error-codes
             try this.consultOracle(pool, oraclePeriod) returns (
                 int24 arithmeticMeanTick,
@@ -453,37 +440,4 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
     /// Exists to expose DaimoFlexSwapperExtraData in generated ABI.
     function extraDataStruct(DaimoFlexSwapperExtraData memory sig) public {}
-
-    function _decodeExtraData(
-        bytes calldata extraData
-    ) private pure returns (DaimoFlexSwapperExtraData memory) {
-        // Allow passing empty extra data
-        if (extraData.length == 0) {
-            return DaimoFlexSwapperExtraData(address(0), "", 0, address(0));
-        }
-        return abi.decode(extraData, (DaimoFlexSwapperExtraData));
-    }
-
-    function _getUniswapCalldata(
-        bytes memory swapPath
-    ) private view returns (bytes memory callData) {
-        callData = abi.encodeWithSelector(
-            bytes4(keccak256("exactInput((bytes,address,uint256,uint256))")),
-            ExactInputParams(
-                swapPath,
-                address(this), // recipient
-                0, // amountIn = 0. swap entire amount transferred in.
-                0 // amountOutMinimum = 0. validate output in swapToCoin.
-            )
-        );
-    }
-
-    // Uniswap's libraries have several, incompatible exactInput()s.
-    // We're using the one from SwapRouter02.
-    struct ExactInputParams {
-        bytes swapPath;
-        address recipient;
-        uint256 amountIn;
-        uint256 amountOutMinimum;
-    }
 }

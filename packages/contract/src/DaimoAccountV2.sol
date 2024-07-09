@@ -65,7 +65,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// If non-zero, automatically forwards all assets to forwardingAddress,
     /// deactivating the account's own functionality. Only used on home chain.
-    address public forwardingAddress;
+    address payable public forwardingAddress;
 
     /// Swaps assets to the bridgeable coin or the home coin.
     IDaimoSwapper public swapper;
@@ -296,10 +296,13 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     /// Only used if there's no paymaster.
     function _payPrefund(uint256 missingAccountFunds) private {
         if (missingAccountFunds == 0) return;
+        _sendNativeToken(payable(msg.sender), missingAccountFunds);
+    }
 
-        address payable to = payable(msg.sender);
-        (bool ok, ) = to.call{value: missingAccountFunds}(new bytes(0));
-        require(ok, "DAv2: prefund failed");
+    // Sends native token, eg ETH or MATIC.
+    function _sendNativeToken(address payable to, uint256 value) private {
+        (bool ok, ) = to.call{value: value}(new bytes(0));
+        require(ok, "DAv2: native token transfer failed");
     }
 
     /// ERC-1271: validate a Daimo user signature. The signature is an
@@ -376,6 +379,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     }
 
     /// Swap (if necessary) and bridge to home chain. Called on foreign chains.
+    /// Input token 0x0 refers to the native token. Bridge token cannot be 0x0.
     function collect(
         IERC20 tokenIn,
         uint256 amountIn,
@@ -411,6 +415,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     }
 
     /// Swap to home coin, if any. Called only on the home chain.
+    // Input token 0x0 refers to the native token.
     function swapToHomeCoin(
         IERC20 tokenIn,
         uint256 amountIn,
@@ -428,14 +433,30 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         IERC20 tokenOut,
         bytes calldata extraData
     ) private returns (uint256 amountOut) {
-        tokenIn.safeApprove(address(swapper), amountIn);
-        amountOut = swapper.swapToCoin(tokenIn, amountIn, tokenOut, extraData);
+        require(amountIn > 0, "DAv2: amountIn is zero");
+        require(address(tokenOut) != address(0), "DAv2: tokenOut is zero");
+
+        uint256 value = 0;
+        if (address(tokenIn) == address(0)) {
+            value = amountIn; // native token
+        } else {
+            tokenIn.safeApprove(address(swapper), amountIn);
+        }
+        amountOut = swapper.swapToCoin{value: value}({
+            tokenIn: tokenIn,
+            amountIn: amountIn,
+            tokenOut: tokenOut,
+            extraData: extraData
+        });
+
         emit AutoSwap(tokenIn, amountIn, tokenOut, amountOut);
     }
 
     /// Set the forwarding address for received assets on the account to be
     /// forwarded to, effectively deprecating the account.
-    function setForwardingAddress(address newAddr) public onlySelf onlyActive {
+    function setForwardingAddress(
+        address payable newAddr
+    ) public onlySelf onlyActive {
         require(newAddr != address(0), "DAv2: forwarding address cannot be 0");
         require(newAddr != address(this), "DAv2: cannot forward to self");
 
@@ -450,8 +471,14 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         // arbitrary unauthenticated caller can call this contract.
         require(forwardingAddress != address(0), "DAv2: not forwarding");
 
-        uint256 balance = tokenIn.balanceOf(address(this));
-        tokenIn.safeTransfer(forwardingAddress, balance);
+        uint256 balance;
+        if (address(tokenIn) == address(0)) {
+            balance = address(this).balance;
+            _sendNativeToken(forwardingAddress, balance); // send ETH, AVAX, etc
+        } else {
+            balance = tokenIn.balanceOf(address(this));
+            tokenIn.safeTransfer(forwardingAddress, balance); // send ERC-20
+        }
 
         emit ForwardAsset(tokenIn, balance);
     }
