@@ -127,6 +127,13 @@ address constant ARBITRUM_MAINNET_USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FC
 address constant POLYGON_MAINNET_USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
 address constant AVAX_MAINNET_USDT = 0xc7198437980c041c805A1EDcbA50c1Ce5db95118;
 
+// USDC.e or USDbC (bridged USDC)
+address constant BASE_MAINNET_BRIDGED_USDC = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
+address constant OP_MAINNET_BRIDGED_USDC = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
+address constant ARBITRUM_MAINNET_BRIDGED_USDC = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
+address constant POLYGON_MAINNET_BRIDGED_USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+address constant AVAX_MAINNET_BRIDGED_USDC = 0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664;
+
 function _getUSDCAddress(uint256 chainId) pure returns (address) {
     // Mainnets
     if (chainId == ETH_MAINNET) return ETH_MAINNET_USDC;
@@ -245,6 +252,16 @@ function _getUSDTAddress(uint256 chainId) pure returns (address) {
     revert("Unsupported chainID");
 }
 
+function _getBridgedUSDCAddress(uint256 chainId) pure returns (address) {
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_BRIDGED_USDC;
+    if (chainId == OP_MAINNET) return OP_MAINNET_BRIDGED_USDC;
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_BRIDGED_USDC;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_BRIDGED_USDC;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_BRIDGED_USDC;
+
+    revert("Unsupported chainID");
+}
+
 // ----------------- CCTP Bridger ----------------- //
 
 address constant ETH_MAINNET_TOKEN_MESSENGER = 0xBd3fa81B58Ba92a82136038B25aDec7066af3155;
@@ -281,7 +298,7 @@ function _getTokenMessengerAddress(uint256 chainId) pure returns (address) {
     revert("Unsupported chainID");
 }
 
-// Get whether the chain is a testnet.
+// Check whether the chain is a testnet.
 function _isTestnet(uint256 chainId) pure returns (bool) {
     return
         chainId == ETH_TESTNET ||
@@ -290,6 +307,11 @@ function _isTestnet(uint256 chainId) pure returns (bool) {
         chainId == ARBITRUM_TESTNET ||
         chainId == BASE_TESTNET ||
         chainId == POLYGON_TESTNET;
+}
+
+// Check whether the chain is L1.
+function _isL1(uint256 chainId) pure returns (bool) {
+    return chainId == ETH_MAINNET;
 }
 
 // ----------------- Deployment ----------------- //

@@ -94,11 +94,20 @@ contract DeployFlexSwapperScript is Script {
             // stablecoin options.
             stablecoins = new IERC20[](1);
             stablecoins[0] = usdc;
-        } else {
+        } else if (_isL1(chainId)) {
+            // No bridged USDC on L1
             stablecoins = new IERC20[](3);
             stablecoins[0] = usdc;
             stablecoins[1] = usdt;
             stablecoins[2] = dai;
+        } else {
+            IERC20 bridgedUsdc = IERC20(_getBridgedUSDCAddress(chainId));
+
+            stablecoins = new IERC20[](4);
+            stablecoins[0] = usdc;
+            stablecoins[1] = usdt;
+            stablecoins[2] = dai;
+            stablecoins[3] = bridgedUsdc;
         }
 
         // Supported output tokens (stablecoins + hopTokens)
