@@ -59,7 +59,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         require(n == _cctpTokens.length, "DCCTPB: wrong cctpTokens length");
 
         for (uint256 i = 0; i < n; i++) {
-            addCCTPDomain(_cctpChainIDs[i], _cctpDomains[i], _cctpTokens[i]);
+            _addDomain(_cctpChainIDs[i], _cctpDomains[i], _cctpTokens[i]);
         }
     }
 
@@ -77,6 +77,10 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         uint32 domain,
         IERC20 token
     ) public onlyOwner {
+        _addDomain(chainID, domain, token);
+    }
+
+    function _addDomain(uint256 chainID, uint32 domain, IERC20 token) private {
         require(chainID != 0, "DCCTPB: missing chainID");
         require(address(token) != address(0), "DCCTPB: missing token");
         CCTPDomain memory domainInfo = CCTPDomain(domain, token);

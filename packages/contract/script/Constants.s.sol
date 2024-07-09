@@ -68,6 +68,16 @@ address constant OP_TESTNET_USDC = 0x5fd84259d66Cd46123540766Be93DFE6D43130D7;
 address constant OP_TESTNET_UNISWAP_ROUTER = 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4;
 address constant OP_TESTNET_UNISWAP_FACTORY = 0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24;
 
+// USDC on other chains
+address constant ARBITRUM_MAINNET_USDC = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
+address constant ARBITRUM_TESTNET_USDC = 0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d;
+
+address constant POLYGON_MAINNET_USDC = 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359;
+address constant POLYGON_TESTNET_USDC = 0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582;
+
+address constant AVAX_MAINNET_USDC = 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
+address constant AVAX_TESTNET_USDC = 0x5425890298aed601595a70AB815c96711a31Bc65;
+
 // WETH and wrapped native tokens
 address constant ETH_MAINNET_WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant ETH_TESTNET_WETH = 0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9;
@@ -85,11 +95,17 @@ function _getUSDCAddress(uint256 chainId) pure returns (address) {
     if (chainId == ETH_MAINNET) return ETH_MAINNET_USDC;
     if (chainId == BASE_MAINNET) return BASE_MAINNET_USDC;
     if (chainId == OP_MAINNET) return OP_MAINNET_USDC;
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_USDC;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_USDC;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_USDC;
 
     // Testnets
     if (chainId == ETH_TESTNET) return ETH_TESTNET_USDC;
     if (chainId == BASE_TESTNET) return BASE_TESTNET_USDC;
     if (chainId == OP_TESTNET) return OP_TESTNET_USDC;
+    if (chainId == ARBITRUM_TESTNET) return ARBITRUM_TESTNET_USDC;
+    if (chainId == POLYGON_TESTNET) return POLYGON_TESTNET_USDC;
+    if (chainId == AVAX_TESTNET) return AVAX_TESTNET_USDC;
 
     revert("Unsupported chainID");
 }

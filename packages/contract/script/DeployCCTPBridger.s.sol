@@ -2,50 +2,86 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
+import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../src/DaimoCCTPBridger.sol";
 import "./Constants.s.sol";
 
 contract DeployCCTPBridgerScript is Script {
     function run() public {
-        uint256 chainId = block.chainid;
-        bool testnet = _isTestnet(chainId);
+        address tokenMessenger = _getTokenMessengerAddress(block.chainid);
 
-        uint256[] memory inputChainIds = new uint256[](6);
-        inputChainIds[0] = testnet ? ETH_TESTNET : ETH_MAINNET;
-        inputChainIds[1] = testnet ? AVAX_TESTNET : AVAX_MAINNET;
-        inputChainIds[2] = testnet ? OP_TESTNET : OP_MAINNET;
-        inputChainIds[3] = testnet ? ARBITRUM_TESTNET : ARBITRUM_MAINNET;
-        inputChainIds[4] = testnet ? BASE_TESTNET : BASE_MAINNET;
-        inputChainIds[5] = testnet ? POLYGON_TESTNET : POLYGON_MAINNET;
+        (
+            uint256[] memory chainIDs,
+            uint32[] memory domains,
+            address[] memory tokens
+        ) = _getChains();
 
-        uint32[] memory outputDomains = new uint32[](6);
-        outputDomains[0] = ETH_DOMAIN;
-        outputDomains[1] = AVAX_DOMAIN;
-        outputDomains[2] = OP_DOMAIN;
-        outputDomains[3] = ARBITRUM_DOMAIN;
-        outputDomains[4] = BASE_DOMAIN;
-        outputDomains[5] = POLYGON_DOMAIN;
-
-        address tokenMessengerAddress = _getTokenMessengerAddress(chainId);
-        ICCTPTokenMessenger tokenMessenger = ICCTPTokenMessenger(
-            tokenMessengerAddress
-        );
+        address fastCCTP = 0x6EA8257d8062aB2AA5756C76DB4D63656Fef4F48;
 
         vm.startBroadcast();
 
-        DaimoCCTPBridger bridger = DaimoCCTPBridger(
-            CREATE3.deploy(
-                keccak256("DaimoCCTPBridger-2"),
-                bytes.concat(
-                    type(DaimoCCTPBridger).creationCode,
-                    abi.encode(tokenMessenger, inputChainIds, outputDomains)
+        DaimoCCTPBridger implementation = new DaimoCCTPBridger{salt: 0}();
+
+        address initialOwner = address(this);
+
+        address bridger = CREATE3.deploy(
+            keccak256("DaimoCCTPBridger-3"),
+            abi.encodePacked(
+                type(ERC1967Proxy).creationCode,
+                abi.encode(
+                    address(implementation),
+                    abi.encodeWithSelector(
+                        DaimoCCTPBridger.init.selector,
+                        initialOwner,
+                        tokenMessenger,
+                        fastCCTP,
+                        chainIDs,
+                        domains,
+                        tokens
+                    )
                 )
             )
         );
         console.log("bridger deployed at address:", address(bridger));
 
         vm.stopBroadcast();
+    }
+
+    function _getChains()
+        private
+        view
+        returns (
+            uint256[] memory chainIDs,
+            uint32[] memory domains,
+            address[] memory tokens
+        )
+    {
+        bool testnet = _isTestnet(block.chainid);
+
+        chainIDs = new uint256[](6);
+        chainIDs[0] = testnet ? ETH_TESTNET : ETH_MAINNET;
+        chainIDs[1] = testnet ? AVAX_TESTNET : AVAX_MAINNET;
+        chainIDs[2] = testnet ? OP_TESTNET : OP_MAINNET;
+        chainIDs[3] = testnet ? ARBITRUM_TESTNET : ARBITRUM_MAINNET;
+        chainIDs[4] = testnet ? BASE_TESTNET : BASE_MAINNET;
+        chainIDs[5] = testnet ? POLYGON_TESTNET : POLYGON_MAINNET;
+
+        domains = new uint32[](6);
+        domains[0] = ETH_DOMAIN;
+        domains[1] = AVAX_DOMAIN;
+        domains[2] = OP_DOMAIN;
+        domains[3] = ARBITRUM_DOMAIN;
+        domains[4] = BASE_DOMAIN;
+        domains[5] = POLYGON_DOMAIN;
+
+        tokens = new address[](6);
+        tokens[0] = _getUSDCAddress(chainIDs[0]);
+        tokens[1] = _getUSDCAddress(chainIDs[1]);
+        tokens[2] = _getUSDCAddress(chainIDs[2]);
+        tokens[3] = _getUSDCAddress(chainIDs[3]);
+        tokens[4] = _getUSDCAddress(chainIDs[4]);
+        tokens[5] = _getUSDCAddress(chainIDs[5]);
     }
 
     // Exclude from forge coverage

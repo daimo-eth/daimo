@@ -7,10 +7,10 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    # "script/DeployFastCCTP.s.sol"
-    # "script/DeployFlexSwapper.s.sol"
-    # "script/DeployCCTPBridger.s.sol"
-    # "script/DeployAccountFactoryV2.s.sol"
+     "script/DeployFastCCTP.s.sol"
+     "script/DeployFlexSwapper.s.sol"
+     "script/DeployCCTPBridger.s.sol"
+     "script/DeployAccountFactoryV2.s.sol"
     "script/DeployTestAccountV2.s.sol"
 )
 CHAINS=(
@@ -23,8 +23,8 @@ CHAINS=(
     # ",https://avalanche-c-chain-rpc.publicnode.com"  # No Etherscan or Alchemy for Avalanche
 
     # TESTNETS
-    "$ETHERSCAN_API_KEY_ETH_SEPOLIA,wss://ethereum-sepolia-rpc.publicnode.com"
-    # "$ETHERSCAN_API_KEY_BASE_TESTNET,https://sepolia.base.org"
+    "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"
+    # "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
  
 )
 
@@ -35,7 +35,8 @@ for SCRIPT in "${SCRIPTS[@]}"; do
         echo "======= RUNNING $SCRIPT ========" 
         echo "ETHERSCAN_API_KEY: $ETHERSCAN_API_KEY"
         echo "RPC_URL          : $RPC_URL"
+        echo forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --via-ir
         echo ""
-        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --via-ir
+        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --via-ir || exit 1
     done
 done

@@ -16,11 +16,12 @@ contract DeployTestAccountV2Script is Script {
         bytes32[2] memory key = [bytes32(k0), bytes32(k1)];
 
         // from deployments
-        address factory = 0xA0862b0D973E52ee4abacbb6d5F2DC35575fa5ce;
-        address swapper = 0x6C3D6f8be26913bCECBC582e36Ee12451b8c11C8;
-        address bridger = 0x360019a39c449e55Ea4053dFc05086C8467F3444;
+        address factory = 0x255Cf5AaF15Bbb96E90b822eD6045877Cb288669;
+        address swapper = 0x9D6DC61411b580299C1DC2F557f4D3f0DB683684;
+        address bridger = 0xBcA0Af530570E447Ce7C8B9CB7a9bA357F5D3654;
 
-        uint256 homeChain = BASE_MAINNET;
+        bool testnet = _isTestnet(block.chainid);
+        uint256 homeChain = testnet ? BASE_TESTNET : BASE_MAINNET;
         address homeCoin = _getUSDCAddress(homeChain);
         DaimoAccountFactoryV2(factory).createAccount({
             homeChain: homeChain,
