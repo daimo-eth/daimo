@@ -223,6 +223,12 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
             int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
             uint256 absDiff = uint256(diff < 0 ? -diff : diff);
             require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
+        } else if (
+            address(tokenIn) == address(0) && tokenOut == wrappedNativeToken
+        ) {
+            // Native token to wrapped native token, require 1:1
+            minAmountOut = amountIn;
+            assert(swapEstAmountOut == amountIn); // quote() guarantees this
         } else {
             // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
             minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
