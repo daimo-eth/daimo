@@ -39,8 +39,9 @@ export interface PhoneNumberContact extends BaseDaimoContact {
   name?: string;
 }
 
-export interface BridgeBankAccountContact extends EAccount, BaseDaimoContact {
-  type: "bridgeBankAccount";
+export interface LandlineBankAccountContact extends EAccount, BaseDaimoContact {
+  type: "landlineBankAccount";
+  landlineAccountId: string;
   bankName: string;
   lastFour: string;
   bankLogo: string | undefined;
@@ -53,7 +54,7 @@ export type DaimoContact =
   | EAccountContact
   | EmailContact
   | PhoneNumberContact
-  | BridgeBankAccountContact;
+  | LandlineBankAccountContact;
 
 // A MsgContact is a contact that is not a EAccount. (i.e. not an
 // on-chain account)
@@ -70,7 +71,7 @@ export function getDaimoContactKey(contact: DaimoContact): string {
       return contact.email;
     case "phoneNumber":
       return contact.phoneNumber;
-    case "bridgeBankAccount":
+    case "landlineBankAccount":
       return contact.addr;
   }
 }
@@ -94,7 +95,7 @@ export function getContactName(r: DaimoContact) {
   if (r.type === "eAcc") return getAccountName(r);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
-  else if (r.type === "bridgeBankAccount")
+  else if (r.type === "landlineBankAccount")
     return `${r.bankName} ****${r.lastFour}`;
   else throw new Error(`Unknown recipient type ${r}`);
 }
@@ -104,7 +105,7 @@ export function getContactProfilePicture(
 ): string | { uri: string } | undefined {
   if (r.type === "eAcc") {
     return r.profilePicture;
-  } else if (r.type === "bridgeBankAccount") {
+  } else if (r.type === "landlineBankAccount") {
     const defaultLogo = IconDepositWallet;
     // The bank logo is fetched as a base64 string for a png
     const logo = r.bankLogo
@@ -221,9 +222,10 @@ export function useContactSearch(
 
 export function landlineAccountToContact(
   landlineAccount: LandlineAccount
-): BridgeBankAccountContact {
+): LandlineBankAccountContact {
   return {
-    type: "bridgeBankAccount",
+    type: "landlineBankAccount",
+    landlineAccountId: landlineAccount.landlineAccountId,
     addr: landlineAccount.liquidationAddress,
     bankName: landlineAccount.bankName,
     lastFour: landlineAccount.lastFour,

@@ -4,6 +4,7 @@ import { landlineTrpc } from "./trpc";
 
 export interface LandlineAccount {
   daimoAddress: Address;
+  landlineAccountId: string;
   bankName: string;
   accountName: string;
   lastFour: string;
@@ -12,11 +13,6 @@ export interface LandlineAccount {
   destinationCurrency: string;
   bankLogo?: string;
   createdAt: string;
-}
-
-export interface LandlineDepositAuth {
-  isAuthed: boolean;
-  authUrl: string;
 }
 
 export async function getLandlineSession(
@@ -40,26 +36,16 @@ export async function getLandlineAccounts(
   return landlineAccounts;
 }
 
-export async function landlineDepositAuthStatus(
-  daimoAddress: Address
-): Promise<LandlineDepositAuth> {
-  // @ts-ignore
-  const authStatus = await landlineTrpc.getDepositAuthStatus.query({
-    daimoAddress,
-  });
-  return authStatus;
-}
-
 export async function landlineDeposit(
   daimoAddress: Address,
-  accountName: string,
+  landlineAccountId: string,
   amount: string,
-  memo: string
+  memo: string | undefined
 ): Promise<void> {
   // @ts-ignore
   await landlineTrpc.deposit.mutate({
     daimoAddress,
-    accountName,
+    landlineAccountId,
     amount,
     memo,
   });

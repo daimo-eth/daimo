@@ -63,7 +63,7 @@ import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
-import { landlineDepositAuthStatus } from "../landline/connector";
+import { landlineDeposit } from "../landline/connector";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
@@ -685,11 +685,24 @@ export function createRouter(
         await reqIndexer.declineRequest(requestId, decliner);
       }),
 
-    getLandlineAuthStatus: publicProcedure
-      .input(z.object({ daimoAddress: zAddress }))
-      .query(async (opts) => {
-        const { daimoAddress } = opts.input;
-        return await landlineDepositAuthStatus(daimoAddress);
+    depositFromLandline: publicProcedure
+      .input(
+        z.object({
+          daimoAddress: zAddress,
+          landlineAccountId: z.string(),
+          amount: zBigIntStr,
+          memo: z.string().optional(),
+        })
+      )
+      .mutation(async (opts) => {
+        // TODO: add authentication this endpoint
+        const { daimoAddress, landlineAccountId, amount, memo } = opts.input;
+        return await landlineDeposit(
+          daimoAddress,
+          landlineAccountId,
+          amount,
+          memo
+        );
       }),
 
     // @deprecated, remove by 2024 Q4
