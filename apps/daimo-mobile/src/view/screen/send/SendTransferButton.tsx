@@ -9,6 +9,7 @@ import {
   dollarsToAmount,
   hasAccountName,
 } from "@daimo/common";
+import { daimoChainFromId } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -23,10 +24,12 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
+import { BankTransferOptions } from "../../../logic/bankTransferOptions";
 import {
-  BridgeBankAccountContact,
+  LandlineBankAccountContact,
   EAccountContact,
 } from "../../../logic/daimoContacts";
+import { getRpcFunc } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
@@ -41,14 +44,16 @@ export function SendTransferButton({
   memo,
   minTransferAmount = 0,
   route,
+  landlineBankTransferOption,
 }: {
   account: Account;
-  recipient: EAccountContact | BridgeBankAccountContact;
+  recipient: EAccountContact | LandlineBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
+  landlineBankTransferOption?: BankTransferOptions | null;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
@@ -133,6 +138,26 @@ export function SendTransferButton({
   })();
   const disabled = sendDisabledReason != null || dollars === 0;
 
+  let handlePress = undefined;
+  if (landlineBankTransferOption === BankTransferOptions.Deposit) {
+    assert(
+      recipient.type === "landlineBankAccount",
+      "Recipient of Landline deposit must be a landline bank account"
+    );
+    // TODO: authenticate this call
+    handlePress = () => {
+      const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+      rpcFunc.depositFromLandline.mutate({
+        daimoAddress: account.address,
+        landlineAccountId: recipient.landlineAccountId,
+        amount: dollarsStr,
+        memo,
+      });
+    };
+  } else {
+    handlePress = exec;
+  }
+
   const button = (function () {
     switch (status) {
       case "idle":
@@ -140,7 +165,7 @@ export function SendTransferButton({
         return (
           <LongPressBigButton
             title="HOLD TO SEND"
-            onPress={disabled ? undefined : exec}
+            onPress={disabled ? undefined : handlePress}
             type="primary"
             disabled={disabled}
             duration={400}

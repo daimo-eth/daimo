@@ -17,7 +17,7 @@ import {
 } from "../../common/nav";
 import { BankTransferOptions } from "../../logic/bankTransferOptions";
 import {
-  BridgeBankAccountContact,
+  LandlineBankAccountContact,
   DaimoContact,
   getContactName,
 } from "../../logic/daimoContacts";
@@ -126,7 +126,7 @@ function SendChooseAmount({
   daimoChain,
   onCancel,
 }: {
-  recipient: BridgeBankAccountContact;
+  recipient: LandlineBankAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
 }) {
@@ -224,7 +224,7 @@ function SendConfirm({
   bankTransferOption,
 }: {
   account: Account;
-  recipient: BridgeBankAccountContact;
+  recipient: LandlineBankAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
   bankTransferOption: BankTransferOptions;
@@ -254,7 +254,8 @@ function SendConfirm({
       // Minimum USDC withdrawal amount specified by bridgexyz
       // https://apidocs.bridge.xyz/docs/liquidation-address
       minTransferAmount={1.0}
-      toCoin={baseUSDC} // TODO: get home coin bfrom account
+      toCoin={baseUSDC} // TODO: get home coin from account
+      landlineBankTransferOption={bankTransferOption}
     />
   );
 

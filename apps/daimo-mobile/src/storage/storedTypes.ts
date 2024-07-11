@@ -252,6 +252,7 @@ interface StoredV16ForeignCoin {
 
 export interface StoredV15LandlineAccount {
   daimoAddress: Address;
+  landlineAccountId: string;
   bankName: string;
   accountName: string;
   lastFour: string;

@@ -25,7 +25,7 @@ import { Hex } from "viem";
 import { Dispatcher } from "../action/dispatch";
 import { BankTransferOptions } from "../logic/bankTransferOptions";
 import {
-  BridgeBankAccountContact,
+  LandlineBankAccountContact,
   DaimoContact,
   EAccountContact,
   MsgContact,
@@ -135,7 +135,7 @@ export interface SendNavProp {
 }
 
 export interface LandlineTransferNavProp {
-  recipient: BridgeBankAccountContact;
+  recipient: LandlineBankAccountContact;
   money?: MoneyEntry;
   memo?: string;
   bankTransferOption?: BankTransferOptions;

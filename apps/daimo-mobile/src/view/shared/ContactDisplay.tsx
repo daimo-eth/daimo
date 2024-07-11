@@ -23,7 +23,7 @@ export function ContactDisplay({
   const isAccount = contact.type === "eAcc";
   const disp = getContactName(contact);
 
-  const isBridgeBankAccount = contact.type === "bridgeBankAccount";
+  const isLandlineBankAccount = contact.type === "landlineBankAccount";
 
   const subtitle = (function () {
     switch (contact.type) {
@@ -69,7 +69,7 @@ export function ContactDisplay({
           justifyContent: "center",
         }}
       >
-        {!isBridgeBankAccount && <TextH2>{disp}</TextH2>}
+        {!isLandlineBankAccount && <TextH2>{disp}</TextH2>}
         {showFarcaster && <Spacer w={8} />}
         {showFarcaster && (
           <FarcasterButton
