@@ -108,11 +108,11 @@ export const zPhoneNumber = z.string().regex(phoneNumberRegex);
 
 export type PhoneNumber = z.infer<typeof zPhoneNumber>;
 
-export interface TagRedirectEvent {
+export type TagRedirectEvent = {
   time: number;
   tag: string;
   link: string;
-}
+};
 
 export const zCreateInviteLinkArgs = z.object({
   code: z.string(),

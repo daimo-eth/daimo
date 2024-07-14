@@ -26,7 +26,7 @@ import { KeyChange, KeyRegistry } from "../src/contract/keyRegistry";
 import { NameRegistry } from "../src/contract/nameRegistry";
 import { RequestIndexer } from "../src/contract/requestIndexer";
 import { chainConfig } from "../src/env";
-import { PushNotifier } from "../src/server/pushNotifier";
+import { PushNotification, PushNotifier } from "../src/server/pushNotifier";
 
 const addrAlice = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b94");
 const addrBob = getAddress("0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93");
@@ -41,16 +41,19 @@ test("PushNotifier", async () => {
     const input: Transfer[] = [
       createTransfer({ from: addrAlice, to: addrBob, value: 1000000n }),
     ];
-    const output = await pn.getPushMessagesFromTransfers(input);
+    const output = await pn.getPushNotifsFromTransfers(input);
 
     assert.strictEqual(output.length, 2);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $1.00 to bob");
-    assert.strictEqual(output[0].body, "You sent 1.00 USDC to bob");
+    assertKey(output[0], addrAlice, `transfer-0x0-0`);
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Sent $1.00 to bob");
+    assert.strictEqual(push0.body, "You sent 1.00 USDC to bob");
 
-    assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[1].title, "Received $1.00 from alice");
-    assert.strictEqual(output[1].body, "You received 1.00 USDC from alice");
+    const push1 = output[1].expoPush;
+    assert.deepStrictEqual(push1.to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(push1.title, "Received $1.00 from alice");
+    assert.strictEqual(push1.body, "You received 1.00 USDC from alice");
   });
 
   await test("transfer to external address", async () => {
@@ -61,12 +64,13 @@ test("PushNotifier", async () => {
         value: 690000n,
       }),
     ];
-    const output = await pn.getPushMessagesFromTransfers(input);
+    const output = await pn.getPushNotifsFromTransfers(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $0.69 to charlie.eth");
-    assert.strictEqual(output[0].body, "You sent 0.69 USDC to charlie.eth");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Sent $0.69 to charlie.eth");
+    assert.strictEqual(push0.body, "You sent 0.69 USDC to charlie.eth");
   });
 
   await test("transfer fulfilling request", async () => {
@@ -78,12 +82,13 @@ test("PushNotifier", async () => {
         isRequestResponse: true,
       }),
     ];
-    const output = await pn.getPushMessagesFromTransfers(input);
+    const output = await pn.getPushNotifsFromTransfers(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Received $5.00 from charlie.eth");
-    assert.strictEqual(output[0].body, "👀");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Received $5.00 from charlie.eth");
+    assert.strictEqual(push0.body, "👀");
   });
 
   await test("transfer with memo", async () => {
@@ -95,23 +100,25 @@ test("PushNotifier", async () => {
         memo: true,
       }),
     ];
-    const output = await pn.getPushMessagesFromTransfers(input);
+    const output = await pn.getPushNotifsFromTransfers(input);
 
     assert.strictEqual(output.length, 2);
-    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[0].title, "Sent $1.00 to alice");
-    assert.strictEqual(output[0].body, "hello");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(push0.title, "Sent $1.00 to alice");
+    assert.strictEqual(push0.body, "hello");
 
-    assert.deepStrictEqual(output[1].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[1].title, "Received $1.00 from bob");
-    assert.strictEqual(output[1].body, "hello");
+    const push1 = output[1].expoPush;
+    assert.deepStrictEqual(push1.to, ["pushTokenAlice"]);
+    assert.strictEqual(push1.title, "Received $1.00 from bob");
+    assert.strictEqual(push1.body, "hello");
   });
 
   const paymentLinkFromAlice: DaimoLinkNote = {
     type: "note",
     previewSender: "alice",
     previewDollars: "1.00",
-    ephemeralOwner: "0x0",
+    ephemeralOwner: "0x001234",
   };
 
   await test("send payment link", async () => {
@@ -122,14 +129,16 @@ test("PushNotifier", async () => {
         dollars: "1.00",
         link: paymentLinkFromAlice,
         contractAddress: notesV2Address,
+        ephemeralOwner: "0x001234",
       },
     ];
-    const output = pn.getPushMessagesFromNoteOps(input);
+    const output = pn.getPushNotifsFromNoteOps(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $1.00");
-    assert.strictEqual(output[0].body, "You sent 1.00 USDC to a payment link");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Sent $1.00");
+    assert.strictEqual(push0.body, "You sent 1.00 USDC to a payment link");
   });
 
   await test("send payment link with memo", async () => {
@@ -141,14 +150,17 @@ test("PushNotifier", async () => {
         link: paymentLinkFromAlice,
         contractAddress: notesV2Address,
         memo: "international dollar",
+        ephemeralOwner: "0x001234",
       },
     ];
-    const output = pn.getPushMessagesFromNoteOps(input);
+    const output = pn.getPushNotifsFromNoteOps(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Sent $1.00 · international dollar");
-    assert.strictEqual(output[0].body, "You sent 1.00 USDC to a payment link");
+    assertKey(output[0], addrAlice, "confirmed-note-0x001234");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Sent $1.00 · international dollar");
+    assert.strictEqual(push0.body, "You sent 1.00 USDC to a payment link");
   });
 
   await test("claim payment link with memo", async () => {
@@ -161,20 +173,20 @@ test("PushNotifier", async () => {
         link: paymentLinkFromAlice,
         contractAddress: notesV2Address,
         memo: "testing 123",
+        ephemeralOwner: "0x001234",
       },
     ];
-    const output = pn.getPushMessagesFromNoteOps(input);
+    const output = pn.getPushNotifsFromNoteOps(input);
 
     assert.strictEqual(output.length, 2);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "$1.00 sent · testing 123");
-    assert.strictEqual(
-      output[0].body,
-      "bob accepted your 1.00 USDC payment link"
-    );
-    assert.deepStrictEqual(output[1].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[1].title, "Received $1.00 · testing 123");
-    assert.strictEqual(output[1].body, "You received 1.00 USDC from alice");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "$1.00 sent · testing 123");
+    assert.strictEqual(push0.body, "bob accepted your 1.00 USDC payment link");
+    const push1 = output[1].expoPush;
+    assert.deepStrictEqual(push1.to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(push1.title, "Received $1.00 · testing 123");
+    assert.strictEqual(push1.body, "You received 1.00 USDC from alice");
   });
 
   await test("simple remove device", async () => {
@@ -192,12 +204,13 @@ test("PushNotifier", async () => {
         change: "removed",
       }),
     ];
-    const output = pn.getPushMessagesFromKeyRotations(input);
+    const output = pn.getPushNotifsFromKeyRotations(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Phone removed");
-    assert.strictEqual(output[0].body, "You removed Phone from your account");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Phone removed");
+    assert.strictEqual(push0.body, "You removed Phone from your account");
   });
 
   await test("complex add/removes", async () => {
@@ -233,18 +246,17 @@ test("PushNotifier", async () => {
         change: "added",
       }),
     ];
-    const output = pn.getPushMessagesFromKeyRotations(input);
+    const output = pn.getPushNotifsFromKeyRotations(input);
     assert.strictEqual(output.length, 3);
-    for (const msg of output) {
-      assert.deepStrictEqual(msg.to, ["pushTokenBob1", "pushTokenBob2"]);
+    for (const n of output) {
+      assert.deepStrictEqual(n.expoPush.to, ["pushTokenBob1", "pushTokenBob2"]);
     }
-    assert.strictEqual(output[0].title, "Passkey Backup added");
-    assert.strictEqual(
-      output[0].body,
-      "You added Passkey Backup to your account"
-    );
-    assert.strictEqual(output[1].title, "Phone removed");
-    assert.strictEqual(output[2].title, "Phone 26 added");
+
+    const [push0, push1, push2] = output.map((o) => o.expoPush);
+    assert.strictEqual(push0.title, "Passkey Backup added");
+    assert.strictEqual(push0.body, "You added Passkey Backup to your account");
+    assert.strictEqual(push1.title, "Phone removed");
+    assert.strictEqual(push2.title, "Phone 26 added");
   });
 
   await test("cancel payment link", async () => {
@@ -256,17 +268,16 @@ test("PushNotifier", async () => {
         dollars: "4.20",
         link: paymentLinkFromAlice,
         contractAddress: notesV2Address,
+        ephemeralOwner: "0x001234",
       },
     ];
-    const output = pn.getPushMessagesFromNoteOps(input);
+    const output = pn.getPushNotifsFromNoteOps(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenAlice"]);
-    assert.strictEqual(output[0].title, "Reclaimed $4.20");
-    assert.strictEqual(
-      output[0].body,
-      "You cancelled your 4.20 USDC payment link"
-    );
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenAlice"]);
+    assert.strictEqual(push0.title, "Reclaimed $4.20");
+    assert.strictEqual(push0.body, "You cancelled your 4.20 USDC payment link");
   });
 
   // SimpleTransferClog
@@ -276,12 +287,13 @@ test("PushNotifier", async () => {
       to: addrBob,
       value: 1000000n,
     });
-    const output = await pn.getPushMessagesFromForeignCoinTransfer(input);
+    const output = await pn.getPushNotifsFromForeignCoinTransfer(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[0].title, "Received 10 FAKE from charlie.eth");
-    assert.strictEqual(output[0].body, "Accept 10 FAKE as $1.00 USDC");
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(push0.title, "Received 10 FAKE from charlie.eth");
+    assert.strictEqual(push0.body, "Accept 10 FAKE as $1.00 USDC");
   });
 
   // SwapClog
@@ -294,15 +306,13 @@ test("PushNotifier", async () => {
         isSwap: true,
       }),
     ];
-    const output = await pn.getPushMessagesFromTransfers(input);
+    const output = await pn.getPushNotifsFromTransfers(input);
 
     assert.strictEqual(output.length, 1);
-    assert.deepStrictEqual(output[0].to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(output[0].title, "Accepted $1.00 from charlie.eth");
-    assert.strictEqual(
-      output[0].body,
-      "You accepted 1.11111 FAKE as $1.00 USDC"
-    );
+    const push0 = output[0].expoPush;
+    assert.deepStrictEqual(push0.to, ["pushTokenBob1", "pushTokenBob2"]);
+    assert.strictEqual(push0.title, "Accepted $1.00 from charlie.eth");
+    assert.strictEqual(push0.body, "You accepted 1.11111 FAKE as $1.00 USDC");
   });
 });
 
@@ -534,4 +544,9 @@ function createKeyRotation(args: {
     keySlot: args.keySlot,
     key: ["0x0", "0x0"],
   };
+}
+
+function assertKey(pn: PushNotification, addr: Address, key: string) {
+  assert.strictEqual(pn.address, addr);
+  assert.strictEqual(pn.key, key);
 }

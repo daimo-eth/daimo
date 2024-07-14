@@ -32,6 +32,16 @@ import { retryBackoff } from "../utils/retryBackoff";
 
 const pushEnabled = getEnvApi().DAIMO_PUSH_ENABLED;
 
+/** Represents a single push notification sent to a single user. */
+export interface PushNotification {
+  /** Daimo account address */
+  address: Address;
+  /** Unique key (per-address), prevents duplicate push. */
+  key: string;
+  /** Push title, body, and metadata. */
+  expoPush: ExpoPushMessage;
+}
+
 /**
  * Subscribes to coin transfers onchain. Whenever a transfer affects a Daimo
  * account, sends a push notification to each of the user's devices.
@@ -69,50 +79,72 @@ export class PushNotifier {
     }
 
     this.isInitialized = true;
-    console.log(
-      `[PUSH] initialized, future indexing will be pushed notifications`
-    );
+    console.log(`[PUSH] initialized, push notifs enabled: ${pushEnabled}`);
   }
 
   private handleNoteOps = async (logs: DaimoNoteStatus[]) => {
     console.log(`[PUSH] got ${logs.length} note ops`);
-    const messages = this.getPushMessagesFromNoteOps(logs);
-    this.maybeSendNotifications(messages);
+    const notifs = this.getPushNotifsFromNoteOps(logs);
+    this.maybeSendNotifications(notifs);
   };
 
   private handleTransfers = async (logs: Transfer[]) => {
     console.log(`[PUSH] got ${logs.length} transfers`);
-    const messages = await this.getPushMessagesFromTransfers(logs);
-    this.maybeSendNotifications(messages);
+    const notifs = await this.getPushNotifsFromTransfers(logs);
+    this.maybeSendNotifications(notifs);
   };
 
   private handleForeignCoinTransfers = async (logs: ForeignTokenTransfer[]) => {
     console.log(`[PUSH] got ${logs.length} foreign coin transfers`);
-    const messages: ExpoPushMessage[] = [];
-
+    const notifs: PushNotification[] = [];
     for (const log of logs) {
-      messages.push(
-        ...(await this.getPushMessagesFromForeignCoinTransfer(log))
-      );
+      const logNotifs = await this.getPushNotifsFromForeignCoinTransfer(log);
+      notifs.push(...logNotifs);
     }
 
-    this.maybeSendNotifications(messages);
+    this.maybeSendNotifications(notifs);
   };
 
   private handleKeyRotations = async (logs: KeyChange[]) => {
     console.log(`[PUSH] got ${logs.length} key rotations`);
-    const messages = this.getPushMessagesFromKeyRotations(logs);
-    this.maybeSendNotifications(messages);
+    const notifs = this.getPushNotifsFromKeyRotations(logs);
+    this.maybeSendNotifications(notifs);
   };
 
   private handleRequests = async (logs: DaimoRequestV2Status[]) => {
     console.log(`[PUSH] got ${logs.length} requests`);
-    const messages = this.getPushMessagesFromRequests(logs);
-    this.maybeSendNotifications(messages);
+    const notifs = this.getPushNotifsFromRequests(logs);
+    this.maybeSendNotifications(notifs);
   };
 
-  /** NOT MEANT TO BE CALLED DIRECTLY: Always use maybeSendNotifications */
-  private async sendExpoNotifications(messages: ExpoPushMessage[]) {
+  private async maybeSendNotifications(notifs: PushNotification[]) {
+    // Don't double notify
+    const promises = notifs.map((m) => this.db.tryInsertPushNotification(m));
+    const insertResults = await Promise.all(promises);
+
+    // Log the notification. In local development, stop there
+    const messages = [] as ExpoPushMessage[];
+    for (let i = 0; i < notifs.length; i++) {
+      const msg = notifs[i].expoPush;
+      const alreadySent = insertResults[i] === 0;
+      const msgStr = `${msg.to}: ${msg.title}: ${msg.body}`;
+      if (!pushEnabled) {
+        console.log(`[PUSH] SKIPPING, push disabled: ${msgStr}`);
+      } else if (alreadySent) {
+        console.log(`[PUSH] SKIPPING, already sent: ${msgStr}`);
+      } else {
+        console.log(`[PUSH] notifying: ${msgStr}`);
+        messages.push(msg);
+      }
+    }
+
+    // Send unsent push notifications, if any
+    if (messages.length === 0) return;
+    console.log(`[PUSH] sending ${messages.length} notifications`);
+    this._sendExpoNotifications(messages);
+  }
+
+  private async _sendExpoNotifications(messages: ExpoPushMessage[]) {
     try {
       const chunks = this.expo.chunkPushNotifications(messages);
 
@@ -123,54 +155,6 @@ export class PushNotifier {
     } catch (e) {
       console.error(`[PUSH] error sending notifications: ${e}`);
     }
-  }
-
-  async maybeSendNotifications(messages: ExpoPushMessage[]) {
-    if (messages.length === 0) return;
-
-    // Log the notification. In local development, stop there.
-    const verb = pushEnabled ? "notifying" : "NOT notifying";
-    for (const msg of messages) {
-      console.log(`[PUSH] ${verb} ${msg.to}: ${msg.title}: ${msg.body}`);
-    }
-
-    if (pushEnabled) {
-      console.log(`[PUSH] sending ${messages.length} notifications`);
-      if (messages.length !== 0) this.sendExpoNotifications(messages);
-    }
-  }
-
-  async getPushMessagesFromTransfers(logs: Transfer[]) {
-    const messages: ExpoPushMessage[] = [];
-    for (const log of logs) {
-      const logId = `${log.transactionHash}:${log.logIndex}`;
-      if (log.transactionHash == null) {
-        console.warn(`[PUSH] skipping unconfirmed tx: ${logId}`);
-        continue;
-      }
-
-      const transferClog = this.coinIndexer.attachTransferOpProperties(log);
-      const [from, to] = getDisplayFromTo(transferClog);
-
-      const [a, b] = await Promise.all([
-        this.getPushMessagesFromTransfer(
-          log.transactionHash,
-          from,
-          to,
-          -transferClog.amount,
-          transferClog
-        ),
-        this.getPushMessagesFromTransfer(
-          log.transactionHash,
-          to,
-          from,
-          transferClog.amount,
-          transferClog
-        ),
-      ]);
-      messages.push(...a, ...b);
-    }
-    return messages;
   }
 
   /** Validates the push token, then subscribes to events affecting addr.  */
@@ -189,9 +173,13 @@ export class PushNotifier {
       ),
       this.maybeSendNotifications([
         {
-          to: pushToken,
-          title: "Welcome to Daimo",
-          body: "You'll get a notification when you receive a payment.",
+          address: addr,
+          key: "welcome",
+          expoPush: {
+            to: pushToken,
+            title: "Welcome to Daimo",
+            body: "You'll get a notification when you receive a payment.",
+          },
         },
       ]),
     ]);
@@ -214,7 +202,9 @@ export class PushNotifier {
 
   getPushNotificationForRequestCreated(
     log: DaimoRequestV2Status
-  ): ExpoPushMessage[] {
+  ): PushNotification[] {
+    const key = `req-created-${log.link.id}`;
+
     // Parse log
     const recipientAddr = getAddress(log.recipient.addr);
     const { dollars } = log.link;
@@ -225,27 +215,61 @@ export class PushNotifier {
     // Get push notification for the requester (= payment recipient)
     const { tokenSymbol } = chainConfig;
     const fromStr = fromName ? ` from ${fromName}` : "";
-    return this.getPushMessages(
+    return this.getPushNotifs(
       recipientAddr,
+      key,
       "Request created",
       `Requesting $${dollars} ${tokenSymbol}${fromStr}`
     );
   }
 
-  async getPushMessagesFromTransfer(
+  async getPushNotifsFromTransfers(logs: Transfer[]) {
+    const notifs: PushNotification[] = [];
+    for (const log of logs) {
+      assert(log.transactionHash != null, "transfer missing txHash");
+
+      const opEvent = this.coinIndexer.attachTransferOpProperties(log);
+      const [from, to] = getDisplayFromTo(opEvent);
+
+      const [a, b] = await Promise.all([
+        this.getPushNotifsFromTransfer(
+          log.transactionHash,
+          log.logIndex,
+          from,
+          to,
+          -opEvent.amount,
+          opEvent
+        ),
+        this.getPushNotifsFromTransfer(
+          log.transactionHash,
+          log.logIndex,
+          to,
+          from,
+          opEvent.amount,
+          opEvent
+        ),
+      ]);
+      notifs.push(...a, ...b);
+    }
+    return notifs;
+  }
+
+  async getPushNotifsFromTransfer(
     txHash: Hex,
+    logIndex: number,
     addr: Address,
     other: Address,
     amount: number,
     transferClog: TransferClog
-  ): Promise<ExpoPushMessage[]> {
+  ): Promise<PushNotification[]> {
     // Only handle simple transfers and swaps
     if (
       transferClog.type !== "transfer" &&
       transferClog.type !== "inboundSwap" &&
       transferClog.type !== "outboundSwap"
-    )
+    ) {
       return [];
+    }
 
     const pushTokens = this.pushTokens.get(addr);
     if (!pushTokens || pushTokens.length === 0) return [];
@@ -330,18 +354,22 @@ export class PushNotifier {
 
     return [
       {
-        to: pushTokens,
-        badge: 1,
-        title,
-        body,
-        data: { txHash },
+        address: addr,
+        key: `transfer-${txHash}-${logIndex}`,
+        expoPush: {
+          to: pushTokens,
+          badge: 1,
+          title,
+          body,
+          data: { txHash, logIndex },
+        },
       },
     ];
   }
 
-  async getPushMessagesFromForeignCoinTransfer(
+  async getPushNotifsFromForeignCoinTransfer(
     log: ForeignTokenTransfer
-  ): Promise<ExpoPushMessage[]> {
+  ): Promise<PushNotification[]> {
     const pushTokens = this.pushTokens.get(getAddress(log.to));
     if (!pushTokens || pushTokens.length === 0) return [];
 
@@ -363,18 +391,22 @@ export class PushNotifier {
 
     return [
       {
-        to: pushTokens,
-        badge: 1,
-        title,
-        body,
-        data: { txHash: log.transactionHash },
+        address: log.to,
+        key: `foreign-transfer-${log.transactionHash}-${log.logIndex}`,
+        expoPush: {
+          to: pushTokens,
+          badge: 1,
+          title,
+          body,
+          data: { txHash: log.transactionHash },
+        },
       },
     ];
   }
 
-  private getPushMessagesFromRequests(
+  private getPushNotifsFromRequests(
     logs: DaimoRequestV2Status[]
-  ): ExpoPushMessage[] {
+  ): PushNotification[] {
     const messages = [];
     const { tokenSymbol } = chainConfig;
 
@@ -391,10 +423,12 @@ export class PushNotifier {
         // Don't notify recipient = the account sending the request here
         // This push notif is sent earlier, during createRequestSponsored()
         // Notify fulfiller = the account they're requesting from
-        console.log(`[PUSH] request created, notifying fulfiller`);
+        const key = `created-req-${log.link.id}`;
+        console.log(`[PUSH] request created, notifying fulfiller: ${key}`);
         messages.push(
-          ...this.getPushMessages(
+          ...this.getPushNotifs(
             fulfiller,
+            key,
             "Request received",
             `${log.recipient.name} requested $${dollars} ${tokenSymbol}`
           )
@@ -405,47 +439,52 @@ export class PushNotifier {
     return messages;
   }
 
-  getPushMessagesFromNoteOps(logs: DaimoNoteStatus[]) {
+  getPushNotifsFromNoteOps(logs: DaimoNoteStatus[]) {
     const symbol = chainConfig.tokenSymbol;
 
-    const messages: ExpoPushMessage[] = [];
+    const messages: PushNotification[] = [];
     for (const log of logs) {
       const { memo } = log;
-
       if (log.status === DaimoNoteState.Confirmed) {
         // To Alice: "You sent $3.50 to a payment link"
-        const { sender, dollars } = log;
+        const { sender, dollars, ephemeralOwner } = log;
+        const key = `confirmed-note-${assertNotNull(ephemeralOwner)}`;
         const title = addMemo(`Sent $${dollars}`, memo);
         const body = `You sent ${dollars} ${symbol} to a payment link`;
-        messages.push(...this.getPushMessages(sender.addr, title, body));
+        messages.push(...this.getPushNotifs(sender.addr, key, title, body));
       } else if (log.status === DaimoNoteState.Claimed) {
         // To Bob: "You received $1.00 from alice"
         // To Alice: "Bob accepted your $1.00 payment link"
         const claimer = assertNotNull(log.claimer);
         const { sender, dollars } = log;
         assert(sender.addr !== claimer.addr);
+        const key = `claimed-note-${assertNotNull(log.ephemeralOwner)}`;
         messages.push(
-          ...this.getPushMessages(
+          ...this.getPushNotifs(
             sender.addr,
+            key,
             addMemo(`$${dollars} sent`, memo),
             `${getAccountName(
               claimer
             )} accepted your ${dollars} ${symbol} payment link`
           ),
-          ...this.getPushMessages(
+          ...this.getPushNotifs(
             claimer.addr,
+            key,
             addMemo(`Received $${dollars}`, memo),
             `You received ${dollars} ${symbol} from ${getAccountName(sender)}`
           )
         );
       } else {
         // To Alice: "You cancelled your $1.00 payment link"
-        const { sender, dollars } = log;
+        const { sender, dollars, ephemeralOwner } = log;
         assert(log.status === DaimoNoteState.Cancelled);
         assert(log.claimer?.addr === sender.addr);
+        const key = `cancelled-note-${assertNotNull(ephemeralOwner)}`;
         messages.push(
-          ...this.getPushMessages(
+          ...this.getPushNotifs(
             sender.addr,
+            key,
             addMemo(`Reclaimed $${dollars}`, memo),
             `You cancelled your ${dollars} ${symbol} payment link`
           )
@@ -456,11 +495,12 @@ export class PushNotifier {
     return messages;
   }
 
-  getPushMessagesFromKeyRotations(logs: KeyChange[]) {
-    const messages: ExpoPushMessage[] = [];
+  getPushNotifsFromKeyRotations(logs: KeyChange[]) {
+    const messages: PushNotification[] = [];
     for (const log of logs) {
       const addr = getAddress(log.address);
       const keyLabel = getSlotLabel(log.keySlot);
+      const key = `${log.transactionHash}-${log.logIndex}`;
 
       // Skip notifications for account creation
       if (this.keyReg.isDeploymentKeyRotationLog(log)) continue;
@@ -468,32 +508,32 @@ export class PushNotifier {
       if (log.change === "added") {
         const title = `${keyLabel} added`;
         const body = `You added ${keyLabel} to your account`;
-        messages.push(...this.getPushMessages(addr, title, body));
+        messages.push(...this.getPushNotifs(addr, key, title, body));
       } else {
         assert(log.change === "removed");
         const title = `${keyLabel} removed`;
         const body = `You removed ${keyLabel} from your account`;
-        messages.push(...this.getPushMessages(addr, title, body));
+        messages.push(...this.getPushNotifs(addr, key, title, body));
       }
     }
 
     return messages;
   }
 
-  private getPushMessages(
-    to: Address,
+  private getPushNotifs(
+    address: Address,
+    key: string,
     title: string,
     body: string
-  ): ExpoPushMessage[] {
-    const pushTokens = this.pushTokens.get(to);
+  ): PushNotification[] {
+    const pushTokens = this.pushTokens.get(address);
     if (pushTokens == null) return [];
 
     return [
       {
-        to: pushTokens,
-        badge: 1,
-        title,
-        body,
+        address,
+        key,
+        expoPush: { to: pushTokens, badge: 1, title, body },
       },
     ];
   }
