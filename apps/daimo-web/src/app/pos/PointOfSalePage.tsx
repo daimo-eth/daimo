@@ -30,13 +30,11 @@ export function PointOfSalePage({
   tag,
   updateToken,
   title,
-  items,
   storeAddress,
 }: {
   tag: string;
   updateToken: string;
   title?: string;
-  items: POSItem[];
   storeAddress: Address;
 }) {
   // Get history
@@ -44,58 +42,45 @@ export function PointOfSalePage({
   const refetch = useCallback(() => queryHist.refetch(), [queryHist]);
 
   const { data, isError, error } = queryHist;
-  const time1HAgo = now() - 60 * 60;
-  const orders = data && data.filter((o) => o.time > time1HAgo);
 
   return (
-    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch px-[4%]">
+    <main className="max-w-md mx-auto py-8 flex flex-col items-stretch px-[4%] text-midnight">
       {title && <TextH1>{title}</TextH1>}
       {title && <Spacer h={32} />}
       <NewOrderForm
-        {...{ items, tag, updateToken, storeAddress }}
+        {...{ tag, updateToken, storeAddress }}
         onCreated={refetch}
       />
       <Spacer h={16} />
       {isError && <TextError>{error.message}</TextError>}
-      {!isError && <RecentOrders orders={orders} />}
+      {!isError && <RecentOrders orders={data} />}
     </main>
   );
 }
 
 function NewOrderForm({
-  items,
   tag,
   updateToken,
   storeAddress,
   onCreated,
 }: {
-  items: POSItem[];
   tag: string;
   updateToken: string;
   storeAddress: Address;
   onCreated: () => void;
 }) {
-  const [order, setOrder] = useState<POSItem[]>([]);
-
-  // Track order in progress
-  const total = order.reduce((acc, item) => acc + item.price, 0);
+  const [euros, setEuros] = useState(0);
+  const dollars = (euros * 1.08).toFixed(2);
 
   // Place order
   // const mutCreateReq = rpcHook.trpc.createRequestSponsored.useMutation();
   const mut = rpcHook.trpc.updateTagToNewRequest.useMutation();
   const placeOrder = () => {
     const recipient = storeAddress;
-    const amount = "" + dollarsToAmount(total);
+    const amount = "" + dollarsToAmount(dollars);
 
-    // Format memo, eg "cappucino, 2x iced coffee"
-    const itenNames = new Set(order.map((item) => item.name));
-    const parts = [];
-    for (const name of itenNames) {
-      const count = order.filter((item) => item.name === name).length;
-      if (count === 1) parts.push(`${name}`);
-      else parts.push(`${count}x ${name}`);
-    }
-    const memo = parts.join(", ");
+    // Format memo, eg "€ 1.08 • Jeff's Coffee"
+    const memo = "€ " + euros.toFixed(2) + " • Jeff's Coffee";
 
     mut.mutate({ tag, updateToken, recipient, amount, memo });
   };
@@ -106,7 +91,7 @@ function NewOrderForm({
     console.log(`✅ order successful: ${mut.data}`);
     onCreated();
     setTimeout(() => {
-      setOrder([]);
+      setEuros(0);
       mut.reset();
     }, 1200);
   });
@@ -115,98 +100,56 @@ function NewOrderForm({
     <div className="flex flex-col items-stretch">
       <TextH3Subtle>NEW ORDER</TextH3Subtle>
       <Spacer h={16} />
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <AddItemButton key={item.name} {...{ item, order, setOrder }} />
-        ))}
+      <div className="flex flex-wrap gap-2 justify-center">
+        <InputNumber euros={euros} setEuros={setEuros} />
       </div>
       <Spacer h={16} />
-      <TextH1>Total: ${total.toFixed(2)}</TextH1>
+      <TextH1>
+        Total: €{euros.toFixed(2)} ~ ${dollars}
+      </TextH1>
       <Spacer h={16} />
       <button
         className="bg-grayLight rounded-lg p-4 flex flex-col items-center disabled:opacity-25"
         onClick={placeOrder}
-        disabled={mut.isPending || mut.isSuccess || order.length === 0}
+        disabled={mut.isPending || mut.isSuccess || euros === 0}
       >
         <TextH1>Place Order</TextH1>
       </button>
       <Spacer h={8} />
       <center>
-        {mut.isIdle && <TextBold>&nbsp;</TextBold>}
-        {mut.isPending && <TextBold>...</TextBold>}
-        {mut.isSuccess && <TextBold>✅ ordered</TextBold>}
-        {mut.isError && <TextBold>❌ {mut.error.message}</TextBold>}
+        {mut.isIdle && <TextBold textColor="text-midnight">&nbsp;</TextBold>}
+        {mut.isPending && <TextBold textColor="text-midnight">...</TextBold>}
+        {mut.isSuccess && (
+          <TextBold textColor="text-midnight">✅ ordered</TextBold>
+        )}
+        {mut.isError && (
+          <TextBold textColor="text-midnight">❌ {mut.error.message}</TextBold>
+        )}
       </center>
     </div>
   );
 }
 
-function AddItemButton({
-  item,
-  order,
-  setOrder,
+function InputNumber({
+  euros,
+  setEuros,
 }: {
-  item: POSItem;
-  order: POSItem[];
-  setOrder: (order: POSItem[]) => void;
+  euros: number;
+  setEuros: (value: number) => void;
 }) {
-  const add = useCallback(
-    () => setOrder([...order, item]),
-    [setOrder, order, item]
+  return (
+    <div className="ext-md text-[3rem] font-semibold text-midnight whitespace-nowrap text-ellipsis flex justify-center items-center mb-8">
+      <span className="mr-2">€</span>
+      <input
+        className="w-32 text-center"
+        type="number"
+        placeholder="0"
+        min="0"
+        value={euros > 0 ? euros : ""}
+        onChange={(e) => setEuros(Number(e.target.value))}
+      />
+    </div>
   );
-  const sub = useCallback(() => {
-    const i = order.findIndex((i) => i.name === item.name);
-    if (i === -1) return;
-    const copy = order.slice();
-    copy.splice(i, 1);
-    setOrder(copy);
-  }, [order, setOrder, item.name]);
-
-  const count = order.filter((i) => i.name === item.name).length;
-
-  const inner = (
-    <>
-      {" "}
-      <p className="ext-md font-semibold text-midnight  whitespace-nowrap text-ellipsis">
-        {item.name}
-      </p>
-      {count === 0 && (
-        <div className="text-[1.25rem] font-semibold">
-          ${item.price.toFixed(2)}
-        </div>
-      )}
-      {count > 0 && (
-        <div className="flex flex-row text-[1.25rem] font-semibold">
-          <button className="px-5" onClick={sub}>
-            -
-          </button>
-          <div>{count}</div>
-          <button className="px-5" onClick={add}>
-            +
-          </button>
-        </div>
-      )}
-    </>
-  );
-
-  if (count === 0) {
-    return (
-      <button
-        className={`bg-grayLight w-[31.5%] h-16 rounded-lg py-2 flex flex-col items-center select-none relative`}
-        onClick={count === 0 ? add : undefined}
-      >
-        {inner}
-      </button>
-    );
-  } else {
-    return (
-      <div
-        className={`bg-success w-[31.5%] h-16 rounded-lg py-2 flex flex-col items-center select-none relative`}
-      >
-        {inner}
-      </div>
-    );
-  }
 }
 
 function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
@@ -227,9 +170,13 @@ function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
     <div>
       <TextH3Subtle>LATEST ORDERS</TextH3Subtle>
       <Spacer h={16} />
-      {orders == null && <TextBold>Loading...</TextBold>}
+      {orders == null && (
+        <TextBold textColor="text-midnight">Loading...</TextBold>
+      )}
       {isError && <TextError>{error.message}</TextError>}
-      {orders?.length === 0 && <TextBold>No orders yet</TextBold>}
+      {orders?.length === 0 && (
+        <TextBold textColor="text-midnight">No orders yet</TextBold>
+      )}
       <div className="flex flex-col gap-4">
         {orders?.map((order, index) => (
           <Order
@@ -269,7 +216,7 @@ function Order({
   return (
     <div className={`flex flex-row ${font} text-midnight gap-4 items-center`}>
       <div className="w-12 text-center">
-        {stat == null && <TextBold>⋯</TextBold>}
+        {stat == null && <TextBold textColor="text-midnight">⋯</TextBold>}
         {isOrdered && "🟡"}
         {isFulfilled && "✅"}
         {isCancelled && "❌"}
@@ -285,8 +232,10 @@ function Order({
         </p>
       </div>
       <div className="w-16 text-right">
-        <TextBold>{timeAgo(order.time, now(), true)}</TextBold>$
-        {Number(link.dollars).toFixed(2)}
+        <TextBold textColor="text-midnight">
+          {timeAgo(order.time, now(), true)}
+        </TextBold>
+        ${Number(link.dollars).toFixed(2)}
       </div>
       <div className="w-16 text-right">
         <a className="text-primary" href={order.link} target="_blank">
