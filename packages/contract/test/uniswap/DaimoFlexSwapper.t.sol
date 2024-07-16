@@ -6,7 +6,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../../src/DaimoFlexSwapper.sol";
-import "../../src/DaimoTestUSDC.sol";
+import "../dummy/DaimoDummyUSDC.sol";
 
 contract SwapperTest is Test {
     IERC20 public usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);

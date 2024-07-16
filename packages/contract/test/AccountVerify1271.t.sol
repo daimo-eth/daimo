@@ -7,7 +7,7 @@ import "account-abstraction/core/EntryPoint.sol";
 
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
-import "../src/DaimoTestUSDC.sol";
+import "./dummy/DaimoDummyUSDC.sol";
 import "./Utils.sol";
 
 contract AccountVerify1271Test is Test {

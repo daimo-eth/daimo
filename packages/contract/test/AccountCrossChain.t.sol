@@ -6,9 +6,11 @@ import "forge-std/console2.sol";
 import "account-abstraction/core/EntryPoint.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 
-import "../src/DaimoTestUSDC.sol";
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
+import "./dummy/DaimoDummyUSDC.sol";
+import "./dummy/DaimoDummySwapper.sol";
+import "./dummy/DaimoDummyBridger.sol";
 
 contract AccountCrossChainTest is Test {
     TestUSDC public opUSDCe = new TestUSDC{salt: bytes32(uint256(1))}();
@@ -106,82 +108,5 @@ contract AccountCrossChainTest is Test {
         acc.forward(IERC20(address(0)));
         assertEq(address(acc).balance, 0);
         assertEq(s.balance, 1 ether);
-    }
-}
-
-contract DummySwapper is IDaimoSwapper {
-    IERC20 public expectedTokenInA;
-    IERC20 public expectedTokenOutA;
-    IERC20 public expectedTokenInB;
-    IERC20 public expectedTokenOutB;
-
-    constructor(
-        IERC20 tokenInA,
-        IERC20 tokenOutA,
-        IERC20 tokenInB,
-        IERC20 tokenOutB
-    ) {
-        expectedTokenInA = tokenInA;
-        expectedTokenOutA = tokenOutA;
-        expectedTokenInB = tokenInB;
-        expectedTokenOutB = tokenOutB;
-    }
-
-    function swapToCoin(
-        IERC20 tokenIn,
-        uint256 amountIn,
-        IERC20 tokenOut,
-        bytes calldata extraData
-    ) external payable returns (uint256 amountOut) {
-        IERC20 expectedTokenIn;
-        IERC20 expectedTokenOut;
-        if (block.chainid == 10) {
-            expectedTokenIn = expectedTokenInA;
-            expectedTokenOut = expectedTokenOutA;
-        } else if (block.chainid == 8453) {
-            expectedTokenIn = expectedTokenInB;
-            expectedTokenOut = expectedTokenOutB;
-        } else {
-            revert("unsupported chain");
-        }
-
-        require(tokenIn == expectedTokenIn, "wrong tokenIn");
-        require(tokenOut == expectedTokenOut, "wrong tokenOut");
-        require(extraData.length == 0, "wrong extraData");
-        tokenIn.transferFrom(msg.sender, address(this), amountIn);
-
-        amountOut = amountIn - 3;
-        tokenOut.transfer(msg.sender, amountOut);
-    }
-}
-
-contract DummyBridger is IDaimoBridger {
-    IERC20 public expectedTokenIn;
-    uint256 public expectedToChainId;
-    bytes public expectedExtraData;
-    mapping(address => uint256) public bridges;
-
-    constructor(IERC20 tokenIn, uint256 toChainId, bytes memory extraData) {
-        expectedTokenIn = tokenIn;
-        expectedToChainId = toChainId;
-        expectedExtraData = extraData;
-    }
-
-    function sendToChain(
-        IERC20 tokenIn,
-        uint256 amountIn,
-        uint256 toChainId,
-        bytes calldata extraData
-    ) external {
-        require(tokenIn == expectedTokenIn, "wrong tokenIn");
-        require(toChainId == expectedToChainId, "wrong toChainId");
-        require(
-            keccak256(extraData) == keccak256(expectedExtraData),
-            "wrong extraData"
-        );
-
-        bridges[msg.sender] += amountIn;
-
-        tokenIn.transferFrom(msg.sender, address(this), amountIn);
     }
 }

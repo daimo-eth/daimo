@@ -10,7 +10,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.s
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "./IDaimoSwapper.sol";
+import "./interfaces/IDaimoSwapper.sol";
 
 /// Fully automatic on-chain swap executor.
 ///

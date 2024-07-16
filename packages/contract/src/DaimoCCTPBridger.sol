@@ -6,7 +6,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-import "./IDaimoBridger.sol";
+import "./interfaces/IDaimoBridger.sol";
 import "./DaimoFastCCTP.sol";
 
 /// CCTP uses 0 as a domain. Distinguish valid domains from the not-found case.

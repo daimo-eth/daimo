@@ -7,7 +7,7 @@ import "account-abstraction/interfaces/UserOperation.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
 import "../src/DaimoFastCCTP.sol";
-import "../src/DaimoTestUSDC.sol";
+import "./dummy/DaimoDummyUSDC.sol";
 
 contract FastCCTPTest is Test {
     DaimoFastCCTP public fc = new DaimoFastCCTP{salt: 0}();
@@ -26,7 +26,7 @@ contract FastCCTPTest is Test {
     address immutable _lp = 0x2222222222222222222222222222222222222222;
     uint256 immutable _lpToTokenInitBalance = 1000;
 
-    address immutable _handoffAddr = 0x7Bf8CF6E7C9EdcEFa8C32925B9Ab96072aaeC096;
+    address immutable _handoffAddr = 0x5DCb155b54b8999dBa4590b9cfce09805C48077F;
 
     function testStart() public {
         vm.chainId(_fromChainID);
@@ -142,7 +142,7 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
     ) external returns (uint64 _nonce) {
         assertEq(amount, 100);
         assertEq(destinationDomain, 6);
-        address expectedRecipient = 0x7Bf8CF6E7C9EdcEFa8C32925B9Ab96072aaeC096;
+        address expectedRecipient = 0x5DCb155b54b8999dBa4590b9cfce09805C48077F;
         assertEq(mintRecipient, bytes32(uint256(uint160(expectedRecipient))));
         assertEq(burnToken, expectedBurnToken);
 

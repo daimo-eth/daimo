@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-import "../src/DaimoTestUSDC.sol";
+import "./dummy/DaimoDummyUSDC.sol";
 
 contract TestUSDCTest is Test {
     function testCoin() public {
