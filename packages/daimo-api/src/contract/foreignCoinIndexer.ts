@@ -61,7 +61,7 @@ export class ForeignCoinIndexer extends Indexer {
       async () => {
         await Promise.all([
           pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`),
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
+          // pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
         ]);
         return await pg.query(
           `
@@ -79,7 +79,14 @@ export class ForeignCoinIndexer extends Indexer {
               log_idx as sort_idx
             FROM filtered_erc20_transfers 
             WHERE block_num BETWEEN $1 AND $2
-          UNION ALL
+          )
+          ORDER BY block_num ASC, tx_idx ASC, sort_idx ASC
+          ;`,
+          [from, to]
+        );
+
+        /*
+         UNION ALL
             SELECT
               chain_id,
               block_num,
@@ -93,11 +100,7 @@ export class ForeignCoinIndexer extends Indexer {
               trace_action_idx as sort_idx
             FROM filtered_eth_transfers et
             WHERE block_num BETWEEN $1 AND $2
-          )
-          ORDER BY block_num ASC, tx_idx ASC, sort_idx ASC
-          ;`,
-          [from, to]
-        );
+            */
       }
     );
 
