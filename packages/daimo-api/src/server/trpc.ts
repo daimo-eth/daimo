@@ -37,22 +37,21 @@ function getHeader(h: string | string[] | undefined) {
 export function onTrpcError(telemetry: Telemetry) {
   return ({ error, ctx }: { error: TRPCError; ctx?: TrpcRequestContext }) => {
     const err = `${error.code} ${error.name} ${error.message}`;
-    if (ctx) {
+    let reqStr = "unknown req";
+    if (ctx != null) {
       ctx.span?.setAttribute("rpc.error", err);
+      reqStr = `${ctx.req.method} ${ctx.req.url}`; // eg. "GET [...]/search"
     }
     if (error.code === "PRECONDITION_FAILED") {
-      console.log(
-        `[API] NOT READY, skipped ${ctx?.req.method} ${ctx?.req.url}`
-      );
+      console.log(`[API] NOT READY, skipping ${reqStr}`);
+    } else if (error.code === "UNAUTHORIZED") {
+      console.log(`[API] UNAUTHORIZED, skipping ${reqStr}`);
     } else {
-      console.error(`[API] ${ctx?.req.method} ${ctx?.req.url}`, error);
+      console.error(`[API] ${reqStr}`, error);
 
-      // Log to slack if we can
+      // Log to Slack
       try {
-        telemetry.recordClippy(
-          `TRPC Error ${ctx?.req.method} ${ctx?.req.url}: ${err}`,
-          "error"
-        );
+        telemetry.recordClippy(`TRPC Error ${reqStr}: ${err}`, "error");
       } catch (e) {
         console.error("Telemetry error", e);
       }

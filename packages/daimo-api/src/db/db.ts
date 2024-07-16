@@ -525,11 +525,16 @@ export class DB {
   /// Inserts a new push notification. Returns rows affected = 1 or 0 if dupe.
   async tryInsertPushNotification(push: PushNotification) {
     console.log(`[DB] inserting push notif`);
-    const res = await this.pool.query(
-      `INSERT INTO push_notifications (created_at, address, push_key, push_json) VALUES (NOW(), $1, $2, $3, $4)`,
-      [push.address, push.key, JSON.stringify(push.expoPush)]
-    );
-    return res.rowCount || 0;
+    const res = await this.kdb
+      .insertInto("push_notification")
+      .values({
+        created_at: new Date(),
+        address: push.address,
+        push_key: push.key,
+        push_json: JSON.stringify(push.expoPush),
+      })
+      .executeTakeFirst();
+    return Number(res.numInsertedOrUpdatedRows || 0);
   }
 }
 
