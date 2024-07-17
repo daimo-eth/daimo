@@ -34,7 +34,7 @@ export class SwapClogMatcher {
       `swapClogMatcher-logs-query-${from}-${to}`,
       async () => {
         return await pg.query(
-          `SELECT * from erc20_transfers 
+          `SELECT * from erc20_transfers WHERE 
           tx_hash = ANY($1::bytea[]);`,
           [txHashes as any]
         );
