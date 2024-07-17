@@ -240,6 +240,7 @@ export class HomeCoinIndexer extends Indexer {
           amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
         }
       : undefined;
+
     // Foreign receive and foreign send are mutually exclusive.
     const outboundTo = correspondingForeignReceive
       ? null

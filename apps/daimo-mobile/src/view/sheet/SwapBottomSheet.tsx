@@ -29,7 +29,7 @@ import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextH3 } from "../shared/text";
 
-// Bottom sheet for proposed swap
+// Bottom sheet for proposed inbound swap
 export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   const account = useAccount();
   const nav = useNav();
@@ -51,7 +51,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       });
     },
     pendingOp: {
-      type: "outboundSwap",
+      type: "inboundSwap",
       from: swap.fromAcc.addr,
       to: account!.address,
       amount: swap.toAmount,

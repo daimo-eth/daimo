@@ -238,21 +238,20 @@ export function getSynthesizedMemo(
   if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
   } else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
-    const isOutboundSwap = op.type === "inboundSwap";
     const otherCoin = op.coinOther;
     const readableAmount = getForeignCoinDisplayAmount(
       op.amountOther,
       otherCoin
     );
 
-    if (short) {
-      return isOutboundSwap
-        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
-        : `${readableAmount} ${otherCoin.symbol} → ${coinName}`;
-    } else {
-      return isOutboundSwap
-        ? `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`
+    if (op.type === "inboundSwap") {
+      return short
+        ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
         : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
+    } else {
+      return short
+        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+        : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
     }
   }
 }

@@ -141,7 +141,13 @@ export function useSendAsync({
 export function transferAccountTransform(namedAccounts: EAccount[]) {
   return (account: Account, pendingOp: OpEvent): Account => {
     assert(
-      ["transfer", "createLink", "claimLink", "swap"].includes(pendingOp.type)
+      [
+        "transfer",
+        "createLink",
+        "claimLink",
+        "inboundSwap",
+        "outboundSwap",
+      ].includes(pendingOp.type)
     );
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>

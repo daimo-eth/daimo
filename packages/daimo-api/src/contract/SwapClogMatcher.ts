@@ -33,10 +33,10 @@ export class SwapClogMatcher {
     const result = await retryBackoff(
       `swapClogMatcher-logs-query-${from}-${to}`,
       async () => {
-        return await pg.query(
+        return pg.query(
           `SELECT * from erc20_transfers WHERE 
           tx_hash = ANY($1::bytea[]);`,
-          [txHashes as any]
+          [txHashes]
         );
       }
     );
