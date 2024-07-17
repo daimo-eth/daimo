@@ -79,6 +79,8 @@ async function LinkPageInner(props: LinkProps) {
                   style={{
                     objectFit: "cover",
                     borderRadius: "100px",
+                    width: "32px",
+                    height: "32px",
                   }}
                 />
               </div>
