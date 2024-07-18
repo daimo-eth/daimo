@@ -32,7 +32,7 @@ export class Watcher {
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest = 5699999;
   private slowLatest = 5699999;
-  private batchSize = 100000;
+  private batchSize = 25000;
   private isIndexing = false;
   private isSlowIndexing = false;
 
@@ -97,30 +97,6 @@ export class Watcher {
     await this.pg.query(`
       CREATE INDEX IF NOT EXISTS i_eth_from ON eth_transfers("from");
       CREATE INDEX IF NOT EXISTS i_eth_to ON eth_transfers("to");
-    `);
-
-    console.log(`[SHOVEL] migrateDB: filtered_erc20_transfers...`);
-    await this.pg.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (
-        SELECT et.*
-        FROM erc20_transfers et
-        JOIN names n ON n.addr = et.f
-        OR n.addr = et.t
-      );
-      CREATE INDEX IF NOT EXISTS i_block_num
-        ON filtered_erc20_transfers (block_num);
-    `);
-
-    console.log(`[SHOVEL] migrateDB: filtered_eth_transfers...`);
-    await this.pg.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_eth_transfers AS (
-        SELECT et.*
-        FROM eth_transfers et
-        JOIN names n ON n.addr = et.to
-        OR n.addr = et.from
-      );
-      CREATE INDEX IF NOT EXISTS i_filtered_eth_transfers_block_num
-        ON filtered_eth_transfers (block_num);
     `);
   }
 

@@ -59,10 +59,6 @@ export class ForeignCoinIndexer extends Indexer {
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
       async () => {
-        await Promise.all([
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`),
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
-        ]);
         return await pg.query(
           `
           SELECT * FROM (
@@ -77,8 +73,11 @@ export class ForeignCoinIndexer extends Indexer {
               t,
               v,
               log_idx as sort_idx
-            FROM filtered_erc20_transfers 
-            WHERE block_num BETWEEN $1 AND $2
+            FROM erc20_transfers
+            WHERE ig_name='erc20_transfers'
+            AND src_name='base'
+            AND block_num BETWEEN $1 AND $2
+            AND ((t in (SELECT addr FROM names)) OR (f in (SELECT addr FROM names)))
           UNION ALL
             SELECT
               chain_id,
@@ -91,8 +90,11 @@ export class ForeignCoinIndexer extends Indexer {
               "to" as t,
               "value" as v,
               trace_action_idx as sort_idx
-            FROM filtered_eth_transfers et
-            WHERE block_num BETWEEN $1 AND $2
+            FROM eth_transfers et
+            WHERE ig_name='eth_transfers'
+            AND src_name='baseTrace'
+            AND block_num BETWEEN $1 AND $2
+            AND (("to" in (SELECT addr FROM names)) OR ("from" in (SELECT addr FROM names)))
           )
           ORDER BY block_num ASC, tx_idx ASC, sort_idx ASC
           ;`,
