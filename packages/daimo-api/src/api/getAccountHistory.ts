@@ -316,7 +316,7 @@ function getRampNetworkURL(account: EAccount) {
 }
 
 function getBridgeURL(account: EAccount) {
-  return `https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
+  return `https://www.relay.link/app/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
 }
 
 function getCoinbaseURL(account: EAccount) {
@@ -337,7 +337,7 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   return [
     {
       title: "Transfer from another chain",
-      cta: "Bridge USDC from any wallet",
+      cta: "Bridge coins from any wallet",
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
       sortId: 0,
