@@ -179,7 +179,7 @@ function NamePicker({
       <InputBig
         placeholder="choose a username"
         value={name}
-        onChange={onChange}
+        onChange={(input) => onChange(input.toLowerCase())}
         center
         autoFocus
       />
