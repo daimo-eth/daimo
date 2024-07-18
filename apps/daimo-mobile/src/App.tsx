@@ -5,8 +5,11 @@ import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { localStorageDetector } from "typesafe-i18n/detectors";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
+import TypesafeI18n from "./i18n/i18n-react";
+import { detectLocale } from "./i18n/i18n-util";
 import { useAccount } from "./logic/accountManager";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -14,6 +17,9 @@ import { TabNav } from "./view/TabNav";
 import { renderErrorFallback } from "./view/screen/errorScreens";
 import { color } from "./view/shared/style";
 import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
+
+// i18n locale
+const detectedLocale = detectLocale(localStorageDetector);
 
 export default function App() {
   const account = useAccount();
@@ -39,9 +45,11 @@ export default function App() {
           <DispatcherContext.Provider value={dispatcher}>
             <ErrorBoundary fallbackRender={renderErrorFallback}>
               <SafeAreaProvider>
-                <TabNav />
-                <StatusBar style="auto" />
-                <GlobalBottomSheet />
+                <TypesafeI18n locale={detectedLocale}>
+                  <TabNav />
+                  <StatusBar style="auto" />
+                  <GlobalBottomSheet />
+                </TypesafeI18n>
               </SafeAreaProvider>
             </ErrorBoundary>
           </DispatcherContext.Provider>
