@@ -22,6 +22,7 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
+import { SwapClogMatcher } from "../contract/SwapClogMatcher";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
@@ -69,17 +70,20 @@ async function main() {
   const tokenReg = new TokenRegistry();
   await tokenReg.load();
 
-  const opIndexer = new OpIndexer();
+  const swapClogMatcher = new SwapClogMatcher(tokenReg);
+  const opIndexer = new OpIndexer(swapClogMatcher);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
+
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
+    swapClogMatcher
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);

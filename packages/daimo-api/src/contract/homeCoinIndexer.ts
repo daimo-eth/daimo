@@ -1,10 +1,10 @@
 import {
-  DisplayOpEvent,
+  TransferClog,
   OpStatus,
-  PaymentLinkOpEvent,
-  PreSwapTransfer,
-  TransferOpEvent,
+  PaymentLinkClog,
+  SimpleTransferClog,
   guessTimestampFromNum,
+  SwapClog,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Pool } from "pg";
@@ -15,6 +15,7 @@ import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
+import { SwapClogMatcher } from "./SwapClogMatcher";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -45,7 +46,8 @@ export class HomeCoinIndexer extends Indexer {
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
-    private paymentMemoTracker: PaymentMemoTracker
+    private paymentMemoTracker: PaymentMemoTracker,
+    private swapClogMatcher: SwapClogMatcher
   ) {
     super("COIN");
   }
@@ -155,7 +157,7 @@ export class HomeCoinIndexer extends Indexer {
     addr: Address;
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
-  }): DisplayOpEvent[] {
+  }): TransferClog[] {
     let relevantTransfers = this.allTransfers.filter(
       (log) => log.from === addr || log.to === addr
     );
@@ -181,8 +183,11 @@ export class HomeCoinIndexer extends Indexer {
 
   /* Populates atomic properties of logs to convert it to an Op Event.
    * Does not account for fees since they involve multiple transfer logs.
+   *
+   * Coalesced logs can be attributed to a simple transfer (same coin, same
+   * chain), swap (different coins, same chain), or payment link.
    */
-  attachTransferOpProperties(log: Transfer): DisplayOpEvent {
+  attachTransferOpProperties(log: Transfer): TransferClog {
     const {
       blockNumber,
       blockHash,
@@ -212,32 +217,48 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // If transfer occured as a result of a swap, attach logical origin info.
+    // If inbound swap, attach logical origin info to create a swapClog.
     const correspondingForeignReceive =
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
         transactionHash
       );
-    const preSwapTransfer: PreSwapTransfer | undefined =
-      correspondingForeignReceive
-        ? {
-            coin: correspondingForeignReceive.foreignToken,
-            from: correspondingForeignReceive.from,
-            amount: `${correspondingForeignReceive.value}` as `${bigint}`,
-          }
-        : undefined;
+    const swapClogInbound = correspondingForeignReceive
+      ? {
+          coinOther: correspondingForeignReceive.foreignToken,
+          amountOther: `${correspondingForeignReceive.value}` as `${bigint}`,
+        }
+      : undefined;
 
-    const partialOp = {
+    // If outbound swap, attach logical outbound info to create a swapClog.
+    // use userop to get the transfer log
+    const correspondingForeignSend =
+      this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
+    const swapClogOutbound = correspondingForeignSend
+      ? {
+          coinOther: correspondingForeignSend.foreignToken,
+          amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
+        }
+      : undefined;
+
+    // Foreign receive and foreign send are mutually exclusive.
+    const outboundTo = correspondingForeignReceive
+      ? null
+      : correspondingForeignSend?.to;
+
+    // Base clog info (same for all TransferClog types).
+    const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
         chainConfig.daimoChain
       ),
-      from,
-      to,
-      amount: Number(value),
-      blockNumber: Number(blockNumber),
 
+      amount: Number(value),
+      from: getAddress(correspondingForeignReceive?.from || from),
+      to: getAddress(outboundTo || to),
+
+      blockNumber: Number(blockNumber),
       blockHash,
       txHash: transactionHash,
       logIndex,
@@ -249,12 +270,25 @@ export class HomeCoinIndexer extends Indexer {
 
     const opEvent = (() => {
       if (!noteInfo) {
-        return {
-          type: "transfer",
-          ...partialOp,
-          requestStatus,
-          preSwapTransfer,
-        } as TransferOpEvent;
+        if (swapClogInbound) {
+          return {
+            type: "inboundSwap",
+            ...partialClog,
+            ...swapClogInbound,
+          } as SwapClog;
+        } else if (swapClogOutbound) {
+          return {
+            type: "outboundSwap",
+            ...partialClog,
+            ...swapClogOutbound,
+          } as SwapClog;
+        } else {
+          return {
+            type: "transfer",
+            ...partialClog,
+            requestStatus,
+          } as SimpleTransferClog;
+        }
       }
 
       const [noteStatus, noteEventType] = noteInfo;
@@ -262,14 +296,14 @@ export class HomeCoinIndexer extends Indexer {
         return {
           type: "createLink",
           noteStatus,
-          ...partialOp,
-        } as PaymentLinkOpEvent;
+          ...partialClog,
+        } as PaymentLinkClog;
       } else if (noteEventType === "claim") {
         return {
           type: "claimLink",
           noteStatus,
-          ...partialOp,
-        } as PaymentLinkOpEvent;
+          ...partialClog,
+        } as PaymentLinkClog;
       } else {
         throw new Error(`Unexpected note event type: ${noteEventType}`);
       }
@@ -283,8 +317,8 @@ export class HomeCoinIndexer extends Indexer {
    * TODO: unit test this function
    */
   private attachFeeAmounts(
-    transferOpsIncludingPaymaster: DisplayOpEvent[]
-  ): DisplayOpEvent[] {
+    transferOpsIncludingPaymaster: TransferClog[]
+  ): TransferClog[] {
     // Map of opHash to fee amount paid to paymaster address
     const opHashToFee = new Map<Hex, number>();
     for (const op of transferOpsIncludingPaymaster) {

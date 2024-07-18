@@ -1,6 +1,6 @@
 import {
   AddrLabel,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   assert,
@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAddress } from "viem";
 
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
@@ -44,10 +45,10 @@ interface HeaderObject {
   id: string;
   month: string;
 }
-interface DisplayOpRenderObject {
+interface displayClogRenderObject {
   isHeader: false;
   id: string;
-  op: DisplayOpEvent;
+  op: TransferClog;
 }
 
 export function HistoryListSwipe({
@@ -89,10 +90,10 @@ export function HistoryListSwipe({
     );
   }
 
-  const renderRow = (t: DisplayOpEvent) => (
-    <DisplayOpRow
-      key={getDisplayOpId(t)}
-      displayOp={t}
+  const renderRow = (t: TransferClog) => (
+    <DisplayClogRow
+      key={getdisplayClogId(t)}
+      displayClog={t}
       account={account}
       {...{ linkTo, showDate }}
     />
@@ -112,7 +113,7 @@ export function HistoryListSwipe({
 
   // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
-  const rows: (DisplayOpRenderObject | HeaderObject)[] = [];
+  const rows: (displayClogRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
@@ -132,7 +133,7 @@ export function HistoryListSwipe({
     }
     rows.push({
       isHeader: false,
-      id: getDisplayOpId(op),
+      id: getdisplayClogId(op),
       op,
     });
   }
@@ -150,8 +151,8 @@ export function HistoryListSwipe({
           return <HeaderRow key={item.month} title={item.month} />;
         }
         return (
-          <DisplayOpRow
-            displayOp={item.op}
+          <DisplayClogRow
+            displayClog={item.op}
             account={account}
             showDate
             {...{ linkTo }}
@@ -172,34 +173,35 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
-function DisplayOpRow({
-  displayOp,
+function DisplayClogRow({
+  displayClog,
   account,
   linkTo,
   showDate,
 }: {
-  displayOp: DisplayOpEvent;
+  displayClog: TransferClog;
   account: Account;
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
   const address = account.address;
 
-  assert(displayOp.amount > 0);
-  const [from, to] = getDisplayFromTo(displayOp);
-  assert([from, to].includes(address));
+  assert(displayClog.amount > 0);
+  const [from, to] = getDisplayFromTo(displayClog);
+  assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
-  const amountDelta = from === address ? -displayOp.amount : displayOp.amount;
+  const amountDelta =
+    from === address ? -displayClog.amount : displayClog.amount;
 
   const nav = useNav();
   const viewOp = () => {
-    const height = displayOp.type === "createLink" ? 490 : 440;
+    const height = displayClog.type === "createLink" ? 490 : 440;
     setBottomSheetDetailHeight(height);
     (nav as any).navigate("BottomSheetHistoryOp", {
-      op: displayOp,
+      op: displayClog,
       shouldAddInset: false,
     });
   };
@@ -208,23 +210,23 @@ function DisplayOpRow({
     else viewOp();
   };
 
-  const isPending = displayOp.status === OpStatus.pending;
+  const isPending = displayClog.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
   let opTitle = getAccountName(otherAcc);
   if (
     opTitle === AddrLabel.PaymentLink &&
-    displayOp.type === "claimLink" &&
-    displayOp.noteStatus.sender.addr === address &&
-    displayOp.noteStatus.claimer?.addr === address
+    displayClog.type === "claimLink" &&
+    displayClog.noteStatus.sender.addr === address &&
+    displayClog.noteStatus.claimer?.addr === address
   ) {
     // Special case: we cancelled our own payment link
     opTitle = "cancelled link";
   }
 
   const opMemo = getSynthesizedMemo(
-    displayOp,
+    displayClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
     true
   );
@@ -235,9 +237,9 @@ function DisplayOpRow({
       <TouchableHighlight
         onPress={viewOp}
         {...touchHighlightUnderlay.subtle}
-        style={styles.displayOpRowWrap}
+        style={styles.displayClogRowWrap}
       >
-        <View style={styles.displayOpRow}>
+        <View style={styles.displayClogRow}>
           <View style={styles.transferOtherAccount}>
             <TouchableOpacity
               onPress={viewAccount}
@@ -264,7 +266,7 @@ function DisplayOpRow({
           </View>
           <TransferAmountDate
             amount={amountDelta}
-            timestamp={displayOp.timestamp}
+            timestamp={displayClog.timestamp}
             showDate={showDate}
             {...{ isPending }}
           />
@@ -317,7 +319,7 @@ function TransferAmountDate({
   );
 }
 
-function getDisplayOpId(t: DisplayOpEvent): string {
+function getdisplayClogId(t: TransferClog): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
@@ -338,10 +340,10 @@ const styles = StyleSheet.create({
     borderColor: color.grayLight,
     backgroundColor: "white",
   },
-  displayOpRowWrap: {
+  displayClogRowWrap: {
     marginHorizontal: -24,
   },
-  displayOpRow: {
+  displayClogRow: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     flexDirection: "row",
