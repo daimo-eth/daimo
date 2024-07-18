@@ -13,11 +13,15 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
+import SelectDropdown from "react-native-select-dropdown";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
+import { useI18nContext } from "../../i18n/i18n-react";
+import { Locales } from "../../i18n/i18n-types";
+import { loadLocaleAsync } from "../../i18n/i18n-util.async";
 import { useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
@@ -31,6 +35,7 @@ import {
   DescriptiveClickableRow,
   TextButton,
 } from "../shared/Button";
+import { DropdownPickButton } from "../shared/DropdownPickButton";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { Icon } from "../shared/Icon";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
@@ -40,6 +45,7 @@ import Spacer from "../shared/Spacer";
 import { openSupportTG } from "../shared/error";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
+  DaimoText,
   TextBody,
   TextBodyMedium,
   TextColor,
@@ -50,21 +56,32 @@ import {
 
 export function SettingsScreen() {
   const account = useAccount();
+  const { locale, LL, setLocale } = useI18nContext();
 
   const [showDetails, setShowDetails] = useState(false);
 
   if (!account) return null;
 
+  // i18n locale
+  const onLocaleSelected = async ({ target }: any) => {
+    const locale = target.value as Locales;
+    localStorage.setItem("lang", locale);
+    await loadLocaleAsync(locale);
+    setLocale(locale);
+  };
+
   return (
     <View style={styles.pageWrap}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Settings" />
+        <ScreenHeader title={LL.SETTINGS()} />
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={16} />
         <AccountSection account={account} />
         <Spacer h={32} />
         <DevicesSection account={account} />
+        <Spacer h={32} />
+        <LocaleSelector locale={locale} onLocaleSelected={onLocaleSelected} />
         <TextButton
           title={showDetails ? "Hide details" : "Show details"}
           onPress={() => setShowDetails(!showDetails)}
@@ -107,6 +124,51 @@ function AccountSection({ account }: { account: Account }) {
         title="VIEW ACCOUNT ON EXPLORER"
         onPress={linkToExplorer}
       />
+    </View>
+  );
+}
+
+function LocaleSelector({
+  locale,
+  onLocaleSelected,
+}: {
+  locale: Locales;
+  onLocaleSelected: (e: any) => void;
+}) {
+  return (
+    <SelectDropdown
+      data={["en", "es"]}
+      defaultValue="en"
+      onSelect={onLocaleSelected}
+      renderButton={() => (
+        <View>
+          <DropdownPickButton />
+        </View>
+      )}
+      renderItem={(l) => (
+        <View>
+          <LocaleLanguage language={l} />
+        </View>
+      )}
+    />
+  );
+}
+
+function LocaleLanguage({ language }: { language: Locales }) {
+  return (
+    <View
+      style={{
+        borderBottomWidth: 1,
+        borderBottomColor: color.grayLight,
+        paddingHorizontal: 24,
+        paddingVertical: 13,
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <DaimoText variant="dropdown">
+        {language === "en" ? "English" : "Español"}
+      </DaimoText>
     </View>
   );
 }
