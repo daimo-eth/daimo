@@ -19,6 +19,7 @@ const data: [string, string, string, number][] = [
   ["Argentine Peso", "ARS", "ARS", 0],
   ["Ukrainian Hryvnia", "₴", "UAH", 0],
   ["Naira", "₦", "NGN", 0],
+  ["New Taiwan Dollar", "NT$", "TWD", 0],
   ["Turkish Lira", "₺", "TRY", 0],
   ["Swiss Franc", "₣", "CHF", 2],
   ["Japanese Yen", "¥", "JPY", 0],
