@@ -6,7 +6,7 @@ export const initFormatters: FormattersInitializer<Locales, Formatters> = (
   locale: Locales
 ) => {
   const formatters: Formatters = {
-    // add your formatter functions here
+    lower: (str: string) => str.toLowerCase(),
   };
 
   return formatters;
