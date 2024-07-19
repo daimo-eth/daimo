@@ -113,7 +113,7 @@ async function main() {
   shovelWatcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
-    [noteIndexer, requestIndexer, foreignCoinIndexer],
+    [noteIndexer, requestIndexer],
     [homeCoinIndexer]
   );
 
