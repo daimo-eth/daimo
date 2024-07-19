@@ -333,6 +333,11 @@ function getCoinbaseURL(account: EAccount) {
   });
 }
 
+function getLemonURL(account: EAccount) {
+  const { addr } = account;
+  return `https://www.lemon.me/app/cash-out-crypto?network=base&address=${addr}&currency=USDC&amount=0&partner=daimo`;
+}
+
 function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   return [
     {
@@ -351,11 +356,18 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
     },
     // 2 is Binance, loaded client-side on demand.
     {
+      title: "Deposit from Lemon",
+      cta: "Send USDC from Lemon Cash",
+      url: getLemonURL(account),
+      logo: `${daimoDomainAddress}/assets/deposit/lemon.png`,
+      sortId: 3,
+    },
+    {
       title: "Cards, banks, & international options",
       cta: "Buy USDC",
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
-      sortId: 3,
+      sortId: 4,
     },
   ];
 }
