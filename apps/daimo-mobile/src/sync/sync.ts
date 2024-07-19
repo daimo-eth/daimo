@@ -1,119 +1,127 @@
 import { AccountHistoryResult } from "@daimo/api";
 import {
-  TransferClog,
   EAccount,
   OpStatus,
   PendingOpEvent,
+  TransferClog,
   amountToDollars,
   assert,
   assertNotNull,
+  now,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
+import * as SplashScreen from "expo-splash-screen";
 
-import { updateNetworkState, updateNetworkStateOnline } from "./networkState";
+import { getNetworkState, updateNetworkState } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { getRpcFunc } from "../logic/trpc";
 import { Account } from "../storage/account";
 
-class SyncManager {
-  manager = getAccountManager();
-  currentAccount: Account | null = null;
-
-  private _trpcUnsubscribe: (() => void) | null = null;
-
-  start() {
-    this.manager.addListener(this._onAccountChange);
-  }
-
-  stop() {
-    this.manager.removeListener(this._onAccountChange);
-
-    this.unsubscribe();
-  }
-
-  subscribe(account: Account) {
-    const daimoChain = daimoChainFromId(account.homeChainId);
-    const rpcFunc = getRpcFunc(daimoChain);
-
-    this.currentAccount = account;
-
-    const sub = rpcFunc.onAccountUpdate.subscribe(
-      {
-        address: account.address,
-        sinceBlockNum: 0,
-      },
-      {
-        onStarted: () => {
-          updateNetworkStateOnline();
-        },
-
-        onData: (data) => {
-          this.manager.transform((a) => applySync(a, data, false));
-        },
-      }
-    );
-
-    this._trpcUnsubscribe = sub.unsubscribe;
-  }
-
-  unsubscribe() {
-    this._trpcUnsubscribe?.();
-
-    this.currentAccount = null;
-
-    updateNetworkState(() => {
-      return {
-        status: "offline",
-        syncAttemptsFailed: 0,
-      };
-    });
-  }
-
-  _onAccountChange = (newAccount: Account | null) => {
-    if (!newAccount) {
-      this.unsubscribe();
-
-      return;
-    }
-
-    // do nothing if we still use the same wallet
-    if (this.currentAccount?.address === newAccount.address) {
-      return;
-    }
-
-    this.unsubscribe();
-
-    this.subscribe(newAccount);
-  };
-}
-
+/**
+ * Sync strategy:
+ * - On app load, load account from storage
+ * - Then, sync from API
+ * - After, sync from API:
+ * - ...immediately on push notification
+ * - ...frequently while there's a pending transaction
+ * - ...occasionally otherwise
+ */
 export function startSync() {
   console.log("[SYNC] APP LOAD, starting sync");
+  maybeSync(true)
+    .then((status) => {
+      if (status !== "failed") return;
+      updateNetworkState(() => ({ status: "offline", syncAttemptsFailed: 1 }));
+    })
+    .finally(() => SplashScreen.hideAsync());
+  setInterval(maybeSync, 1_000);
+}
 
-  const manager = new SyncManager();
+let lastSyncS = 0;
+let lastPushNotificationS = 0;
 
-  manager.start();
+/** Sync more frequently for a few seconds after each push notification. */
+export function syncAfterPushNotification() {
+  lastPushNotificationS = now();
+}
 
-  return manager;
+type SyncStatus = "success" | "failed" | "skipped" | "skipped";
+
+async function maybeSync(fromScratch?: boolean): Promise<SyncStatus> {
+  const manager = getAccountManager();
+  const account = manager.getAccount();
+  if (account == null) return "skipped";
+
+  // Synced recently? Wait first.
+  const nowS = now();
+  let intervalS = 10;
+
+  // Sync faster for 1. pending ops or expired swaps, and 2. recently-failed sync
+  if (hasPendingOps(account) || hasCacheExpiredSwaps(account)) {
+    intervalS = 1;
+  }
+
+  const netState = getNetworkState();
+  if (netState.status === "online" && netState.syncAttemptsFailed > 0) {
+    intervalS = 1;
+  }
+
+  if (fromScratch) {
+    return await resync(`initial sync from scratch`, true);
+  } else if (lastPushNotificationS + 10 > nowS) {
+    return await resync(
+      `push notification ${nowS - lastPushNotificationS}s ago`
+    );
+  } else if (lastSyncS + intervalS > nowS) {
+    console.log(`[SYNC] skipping sync, attempted sync recently`);
+    return "skipped";
+  } else {
+    return await resync(`interval ${intervalS}s`);
+  }
+}
+
+function hasPendingOps(account: Account) {
+  return (
+    account.recentTransfers.find((t) => t.status === "pending") != null ||
+    account.pendingKeyRotation.length > 0
+  );
+}
+
+function hasCacheExpiredSwaps(account: Account) {
+  return account.proposedSwaps.some((s) => s.cacheUntil < now());
 }
 
 /** Gets latest balance & history for this account, in the background. */
-export async function resync(reason: string, fromScratch?: boolean) {
+export async function resync(
+  reason: string,
+  fromScratch?: boolean
+): Promise<SyncStatus> {
   const manager = getAccountManager();
   const accOld = manager.getAccount();
   assert(!!accOld, `no account, skipping sync: ${reason}`);
 
-  console.log(`[RESYNC] New ${accOld.name}, ${reason}`);
+  console.log(`[SYNC] RESYNC ${accOld.name}, ${reason}`);
+  lastSyncS = now();
 
   try {
     const res = await fetchSync(accOld, fromScratch);
     assertNotNull(manager.getAccount(), "deleted during sync");
-
     manager.transform((a) => applySync(a, res, !!fromScratch));
-    console.log(`[RESYNC] SUCCEEDED ${accOld.name}`);
+    console.log(`[SYNC] SUCCEEDED ${accOld.name}`);
+    // We are automatically marked online when any RPC req succeeds
+    return "success";
   } catch (e) {
-    console.error(`[RESYNC] FAILED ${accOld.name}`, e);
+    console.error(`[SYNC] FAILED ${accOld.name}`, e);
+    // Mark offline
+    updateNetworkState((state) => {
+      const syncAttemptsFailed = state.syncAttemptsFailed + 1;
+      return {
+        syncAttemptsFailed,
+        status: syncAttemptsFailed > 3 ? "offline" : "online",
+      };
+    });
+    return "failed";
   }
 }
 
