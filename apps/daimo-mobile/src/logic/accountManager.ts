@@ -20,12 +20,16 @@ import {
   daimoChainFromId,
   daimoChainFromStr,
 } from "@daimo/contract";
+import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
+import { Locales } from "../i18n/i18n-types";
+import { detectLocale, isLocale } from "../i18n/i18n-util";
+import { loadLocaleAsync } from "../i18n/i18n-util.async";
 import { cacheEAccounts } from "../logic/addr";
 import {
   EnclaveKeyInfo,
@@ -93,12 +97,20 @@ class AccountManager {
    */
   private createAccountHandle: ActHandle | null = null;
 
+  // /**
+  //  * The current locale for i18n. Defaults to "en".
+  //  */
+  // private locale: Locales = "en";
+
   constructor() {
     // On first load, load+save to ensure latest serialization version.
     const accountJSON = this.mmkv.getString("account");
     console.log(`[ACCOUNT] read account JSON: ${accountJSON}`);
     this.currentAccount = parseAccount(accountJSON);
     this.setCurrentAccount(this.currentAccount);
+
+    // TODO: Load locale
+    // this.loadLocale();
 
     // Load enclave key
     this.loadEnclaveKey();
@@ -117,9 +129,17 @@ class AccountManager {
     }
   }
 
+  // async loadLocale() {
+  //   // Get default locale from device settings.
+  //   const DEFAULT_LOCALE =
+  //     getLocales()
+  //       .map((it) => it.languageTag)
+  //       .find(isLocale) ?? "en";
+  //   this.setLocale(DEFAULT_LOCALE);
+  // }
+
   private notifyListeners() {
     try {
-      console.log(`[ACCOUNT] notifying ${this.listeners.size} listeners`);
       this.listeners.forEach((l) => l(this.currentAccount));
     } catch (e) {
       console.log(`[ACCOUNT] error notifying listeners: ${e}`);
@@ -184,6 +204,17 @@ class AccountManager {
     this.daimoChain = daimoChain;
     this.notifyListeners();
   }
+
+  // getLocale(): Locales {
+  //   return this.locale;
+  // }
+
+  // setLocale(locale: Locales) {
+  //   if (this.locale === locale) return;
+
+  //   this.locale = locale;
+  //   this.notifyListeners();
+  // }
 
   // Find existing account
   async pollForAccountByKey() {
@@ -462,3 +493,16 @@ export function useDaimoChain(): DaimoChain {
 
   return chain;
 }
+
+// export function useLocale(): Locales {
+//   const manager = getAccountManager();
+//   const [locale, setLocale] = useState<Locales>(manager.getLocale());
+
+//   useEffect(() => {
+//     const listener = () => setLocale(manager.getLocale());
+//     manager.addListener(listener);
+//     return () => manager.removeListener(listener);
+//   }, []);
+
+//   return locale;
+// }

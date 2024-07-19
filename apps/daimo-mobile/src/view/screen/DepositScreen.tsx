@@ -23,8 +23,10 @@ import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywher
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
+import { TranslationFunctions } from "../../i18n/i18n-types";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
+import { useI18n } from "../../logic/i18n";
 import { useTime } from "../../logic/time";
 import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -42,19 +44,20 @@ export default function DepositScreen() {
 }
 
 function DepositScreenInner({ account }: { account: Account }) {
+  const i18n = useI18n();
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Deposit or Withdraw" />
+        <ScreenHeader title={i18n.deposit.screenHeader()} />
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
         <Spacer h={16} />
-        <LandlineList />
+        <LandlineList _i18n={i18n} />
         <Spacer h={24} />
-        <DepositList account={account} />
+        <DepositList account={account} _i18n={i18n} />
         <Spacer h={16} />
-        <WithdrawList />
+        <WithdrawList _i18n={i18n} />
       </ScrollView>
     </View>
   );
@@ -65,7 +68,7 @@ const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
   return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
 };
 
-function LandlineList() {
+function LandlineList({ _i18n }: { _i18n: TranslationFunctions }) {
   const account = useAccount();
   if (account == null) return null;
   const showLandline =
@@ -74,10 +77,15 @@ function LandlineList() {
 
   const isLandlineConnected = account.landlineAccounts.length > 0;
 
-  return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
+  return isLandlineConnected ? (
+    <LandlineAccountList _i18n={_i18n} />
+  ) : (
+    <LandlineConnect _i18n={_i18n} />
+  );
 }
 
-function LandlineConnect() {
+function LandlineConnect({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.deposit;
   const account = useAccount();
 
   const openLandline = useCallback(() => {
@@ -91,8 +99,8 @@ function LandlineConnect() {
 
   return (
     <LandlineOptionRow
-      cta="Connect with Landline"
-      title="Deposit or withdraw directly from a US bank account"
+      cta={i18n.landline.cta()}
+      title={i18n.landline.title()}
       // TODO(andrew): Update with real landline logo
       logo={IntroIconEverywhere}
       onClick={openLandline}
@@ -100,7 +108,7 @@ function LandlineConnect() {
   );
 }
 
-function LandlineAccountList() {
+function LandlineAccountList({ _i18n }: { _i18n: TranslationFunctions }) {
   const account = useAccount();
   const nav = useNav();
   const nowS = useTime();
@@ -127,7 +135,9 @@ function LandlineAccountList() {
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             cta={`${acc.bankName} ****${acc.lastFour}`}
-            title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
+            title={_i18n.deposit.landline.optionRowTitle({
+              timeAgo: timeAgo(accCreatedAtS, nowS),
+            })}
             // The bank logo is fetched as a base64 string for a png
             logo={
               { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
@@ -149,8 +159,10 @@ function LandlineAccountList() {
 // in Binance app, so we can't include it in the recommendedExchanges API-side.
 function getOnDemandExchanges(
   account: Account,
-  setProgress: (progress: Progress) => void
+  setProgress: (progress: Progress) => void,
+  _i18n: TranslationFunctions
 ) {
+  const i18n = _i18n.deposit;
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
 
   const platform = ["ios", "android"].includes(Platform.OS)
@@ -183,8 +195,8 @@ function getOnDemandExchanges(
 
   return [
     {
-      cta: "Deposit from Binance",
-      title: "Send from Binance balance",
+      cta: i18n.binance.cta(),
+      title: i18n.binance.title(),
       logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
       loadingId: progressId,
       isExternal: true,
@@ -196,9 +208,16 @@ function getOnDemandExchanges(
 
 type Progress = "idle" | "loading-binance-deposit" | "started";
 
-function DepositList({ account }: { account: Account }) {
+function DepositList({
+  account,
+  _i18n,
+}: {
+  account: Account;
+  _i18n: TranslationFunctions;
+}) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
+  const i18n = _i18n.deposit;
 
   const [progress, setProgress] = useState<Progress>("idle");
 
@@ -217,8 +236,8 @@ function DepositList({ account }: { account: Account }) {
 
   const options: OptionRowProps[] = [
     {
-      cta: "Deposit to address",
-      title: "Send to your address",
+      cta: i18n.default.cta(),
+      title: i18n.default.title(),
       logo: defaultLogo,
       sortId: 100, // Standin for infinite
       onClick: openAddressDeposit,
@@ -228,14 +247,14 @@ function DepositList({ account }: { account: Account }) {
   if (!isTestnet) {
     options.push(
       ...account.recommendedExchanges.map((rec) => ({
-        title: rec.title || "Loading...",
+        title: rec.title || i18n.loading(),
         cta: rec.cta,
         logo: rec.logo || defaultLogo,
         isExternal: true,
         sortId: rec.sortId || 0,
         onClick: () => openExchange(rec.url),
       })),
-      ...getOnDemandExchanges(account, setProgress)
+      ...getOnDemandExchanges(account, setProgress, _i18n)
     );
     options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }
@@ -248,8 +267,8 @@ function DepositList({ account }: { account: Account }) {
           <Spacer h={16} />
           <InfoBox
             icon="check"
-            title="Deposit initiated"
-            subtitle="Complete in browser, then funds should arrive in a few minutes."
+            title={i18n.initiated.title()}
+            subtitle={i18n.initiated.subtitle()}
           />
         </>
       )}
@@ -261,7 +280,8 @@ function DepositList({ account }: { account: Account }) {
   );
 }
 
-function WithdrawList() {
+function WithdrawList({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.deposit;
   const dispatcher = useContext(DispatcherContext);
 
   const openAddressWithdraw = () => {
@@ -272,11 +292,11 @@ function WithdrawList() {
 
   return (
     <View style={styles.section}>
-      <TextBody color={color.gray3}>Withdraw</TextBody>
+      <TextBody color={color.gray3}>{i18n.withdraw.cta()}</TextBody>
       <Spacer h={16} />
       <OptionRow
-        cta="Withdraw"
-        title="Withdraw to any wallet or exchange"
+        cta={i18n.withdraw.cta()}
+        title={i18n.withdraw.title()}
         logo={defaultLogo}
         onClick={openAddressWithdraw}
       />

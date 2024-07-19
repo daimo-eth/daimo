@@ -27,6 +27,8 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
+import { TranslationFunctions } from "../../i18n/i18n-types";
+import { useI18n } from "../../logic/i18n";
 import { Account } from "../../storage/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -46,6 +48,7 @@ import { useWithAccount } from "../shared/withAccount";
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
+  const i18n = useI18n();
 
   const handleBack = useCallback(() => {
     if (activeStep === 1) {
@@ -59,7 +62,11 @@ export function SeedPhraseScreen() {
     <SeedPhraseProvider>
       <View style={styles.screen}>
         <ScreenHeader
-          title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
+          title={
+            activeStep === 0
+              ? i18n.seedPhrase.title.copy()
+              : i18n.seedPhrase.title.verify()
+          }
           onBack={handleBack}
           secondaryHeader={
             <View style={{ marginVertical: 16, alignItems: "center" }}>
@@ -69,7 +76,7 @@ export function SeedPhraseScreen() {
         />
         <Spacer h={24} />
         {activeStep === 0 ? (
-          <CopySeedPhrase setActiveStep={setActiveStep} />
+          <CopySeedPhrase setActiveStep={setActiveStep} _i18n={i18n} />
         ) : (
           <VerifySeedPhrase />
         )}
@@ -80,8 +87,10 @@ export function SeedPhraseScreen() {
 
 function CopySeedPhrase({
   setActiveStep,
+  _i18n,
 }: {
   setActiveStep: (value: 0 | 1) => void;
+  _i18n: TranslationFunctions;
 }) {
   const [saved, toggleSaved] = useReducer((s) => !s, false);
   const { words } = useSeedPhraseContext();
@@ -89,19 +98,23 @@ function CopySeedPhrase({
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <TextBody color={color.grayMid}>
-        This seed phrase will be added to your account, allowing you to recover
-        it even if you lose your device.
+        {_i18n.seedPhrase.description()}
       </TextBody>
       <Spacer h={24} />
       <SeedPhraseDisplay words={words} />
       <Spacer h={24} />
-      <CopyToClipboard />
+      <CopyToClipboard _i18n={_i18n} />
       <Spacer h={24} />
-      <ConfirmPhraseSave saved={saved} toggleSaved={toggleSaved} />
+      <ConfirmPhraseSave
+        saved={saved}
+        toggleSaved={toggleSaved}
+        _i18n={_i18n}
+      />
+
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="Continue"
+        title={_i18n.seedPhrase.button.continue()}
         disabled={!saved}
         onPress={() => setActiveStep(1)}
       />
@@ -109,7 +122,7 @@ function CopySeedPhrase({
   );
 }
 
-function CopyToClipboard() {
+function CopyToClipboard({ _i18n }: { _i18n: TranslationFunctions }) {
   const { mnemonic } = useSeedPhraseContext();
   const [justCopied, setJustCopied] = useState(false);
 
@@ -138,7 +151,7 @@ function CopyToClipboard() {
             style={[ss.text.btnCaps, { textTransform: "uppercase" }]}
             color={color.primary}
           >
-            COPY TO CLIPBOARD
+            {_i18n.seedPhrase.copy.clipboard()}
           </TextBtnCaps>
         </>
       </TouchableHighlight>
@@ -165,16 +178,18 @@ function Checkbox({ active, toggle }: { active: boolean; toggle(): void }) {
 function ConfirmPhraseSave({
   saved,
   toggleSaved,
+  _i18n,
 }: {
   saved: boolean;
   toggleSaved(): void;
+  _i18n: TranslationFunctions;
 }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Checkbox active={saved} toggle={toggleSaved} />
       <Spacer w={4} />
       <TextBody color={color.grayMid}>
-        I've saved this seed phrase securely
+        {_i18n.seedPhrase.copy.confirm()}
       </TextBody>
     </View>
   );
@@ -182,6 +197,7 @@ function ConfirmPhraseSave({
 
 function VerifySeedPhraseInner({ account }: { account: Account }) {
   const nav = useNav();
+  const i18n = useI18n().seedPhrase;
   const { isValid, publicKey, state, dispatch } = useSeedPhraseContext();
 
   const seedPhraseSlot = useMemo(
@@ -191,14 +207,12 @@ function VerifySeedPhraseInner({ account }: { account: Account }) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <TextBody color={color.grayMid}>
-        Type your seed phrase into the input box.
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18n.verify.description()}</TextBody>
       <Spacer h={24} />
       <SeedPhraseEntry {...{ state, dispatch }} />
       <Spacer h={24} />
       <AddKeySlotButton
-        buttonTitle="Finish Setup"
+        buttonTitle={i18n.button.finish()}
         account={account}
         slot={seedPhraseSlot}
         knownPubkey={publicKey}

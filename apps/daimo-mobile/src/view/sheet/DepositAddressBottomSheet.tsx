@@ -8,6 +8,8 @@ import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../env";
+import { TranslationFunctions } from "../../i18n/i18n-types";
+import { useI18n } from "../../logic/i18n";
 import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -24,6 +26,7 @@ export function DepositAddressBottomSheet() {
 
 function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   const dispatcher = useContext(DispatcherContext);
+  const i18n = useI18n();
 
   const { tokenSymbol, chainL2 } = env(
     daimoChainFromId(account.homeChainId)
@@ -44,15 +47,16 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
       />
       <Spacer h={16} />
       <TextPara color={color.grayDark}>
-        Send {tokenSymbol} to your address below. Any other ERC-20 tokens will
-        be converted to USDC. Confirm that you're sending:
+        {i18n.depositAddressBottom.description({ tokenSymbol })}
       </TextPara>
       <Spacer h={12} />
       <CheckLabel value={check} setValue={setCheck}>
-        On <TextBold>{chainL2.name}</TextBold>, not any other chain
+        {i18n.depositAddressBottom.checkChain.on()}{" "}
+        <TextBold>{chainL2.name}</TextBold>{" "}
+        {i18n.depositAddressBottom.checkChain.notOther()}
       </CheckLabel>
       <Spacer h={16} />
-      <AddressCopier addr={account.address} disabled={!check} />
+      <AddressCopier addr={account.address} disabled={!check} _i18n={i18n} />
       <Spacer h={64} />
     </View>
   );
@@ -61,9 +65,11 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
 function AddressCopier({
   addr,
   disabled,
+  _i18n,
 }: {
   addr: Address;
   disabled?: boolean;
+  _i18n: TranslationFunctions;
 }) {
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
@@ -93,7 +99,9 @@ function AddressCopier({
           <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
-      <TextLight>{justCopied ? "Copied" : " "}</TextLight>
+      <TextLight>
+        {justCopied ? _i18n.depositAddressBottom.copied() : " "}
+      </TextLight>
     </View>
   );
 }

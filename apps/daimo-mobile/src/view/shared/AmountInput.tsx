@@ -23,6 +23,7 @@ import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
 import { useAccount } from "../../logic/accountManager";
+import { useI18n } from "../../logic/i18n";
 import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
 
 // Input components allows entry in range $0.01 to $99,999.99
@@ -49,6 +50,8 @@ export function AmountChooser({
 }) {
   // Show how much we have available
   const account = useAccount();
+  const i18n = useI18n().amountInput;
+
   if (account == null) return null;
 
   const dollarsAvailStr = getAmountText({ amount: account.lastBalance });
@@ -79,7 +82,9 @@ export function AmountChooser({
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
-          <TextLight>{dollarsAvailStr} available</TextLight>
+          <TextLight>
+            {i18n.dollarsAvailable({ dollars: dollarsAvailStr })}
+          </TextLight>
         )}
       </View>
     </View>

@@ -3,6 +3,7 @@ import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { useNav } from "../../../common/nav";
+import { useI18n } from "../../../logic/i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
@@ -21,6 +22,7 @@ export function ReceiveNavScreen() {
   }, [nav]);
 
   const textInputRef = useRef<TextInput>(null);
+  const i18n = useI18n().receiveNav;
 
   useEffect(() => {
     const unsubscribe = nav.addListener("transitionEnd", () => {
@@ -35,7 +37,7 @@ export function ReceiveNavScreen() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Request" onBack={goBack} />
+        <ScreenHeader title={i18n.screenHeader()} onBack={goBack} />
         <Spacer h={8} />
         <View style={{ flex: 1, flexDirection: "column" }}>
           <SearchScreen

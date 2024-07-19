@@ -18,7 +18,9 @@ import {
 
 import InviteBackground from "../../../assets/invite-background.png";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { TranslationFunctions } from "../../i18n/i18n-types";
 import { shareURL } from "../../logic/externalAction";
+import { useI18n } from "../../logic/i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ButtonBig, ButtonMed, TextButton } from "../shared/Button";
@@ -46,6 +48,7 @@ export function InviteScreen() {
 
 function InviteScreenInner({ account }: { account: Account }) {
   const inviteLinkStatus = account.inviteLinkStatus;
+  const i18n = useI18n();
 
   console.log(
     `[INVITE] render ${account.name}, ${JSON.stringify(inviteLinkStatus)}`
@@ -56,15 +59,17 @@ function InviteScreenInner({ account }: { account: Account }) {
       <Header
         invitees={account.invitees}
         inviteLinkStatus={inviteLinkStatus || undefined}
+        _i18n={i18n}
       />
     ) : (
-      <LockedHeader />
+      <LockedHeader _i18n={i18n} />
     );
 
   const footer = inviteLinkStatus?.isValid ? (
     <ReferralButtonsFooter
       inviteCodeStatus={inviteLinkStatus}
       account={account}
+      _i18n={i18n}
     />
   ) : (
     <LockedFooter />
@@ -98,8 +103,15 @@ function InviteeBubble({ invitee }: { invitee: EAccount }) {
   );
 }
 
-function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
+function InviteesBubbles({
+  invitees,
+  _i18n,
+}: {
+  invitees: EAccount[];
+  _i18n: TranslationFunctions;
+}) {
   const nav = useNav();
+  const i18n = _i18n.invite;
 
   const displayInvitees = invitees.slice(-3); // Most recent invitees
   const moreInvitees =
@@ -114,7 +126,7 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
         <>
           <Spacer w={8} />
           <PressableText
-            text={`+${moreInvitees} more`}
+            text={i18n.more({ moreInvitees })}
             onPress={() => nav.push("YourInvites")}
             hitSlop={16}
           />
@@ -124,11 +136,17 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
   );
 }
 
-function HeaderGraphic({ invitees }: { invitees?: EAccount[] }) {
+function HeaderGraphic({
+  invitees,
+  _i18n,
+}: {
+  invitees?: EAccount[];
+  _i18n: TranslationFunctions;
+}) {
   return invitees && invitees.length > 0 ? (
     <View style={styles.imageContainer}>
       <ImageBackground source={InviteBackground} style={styles.image}>
-        <InviteesBubbles invitees={invitees} />
+        <InviteesBubbles invitees={invitees} _i18n={_i18n} />
       </ImageBackground>
     </View>
   ) : (
@@ -139,11 +157,14 @@ function HeaderGraphic({ invitees }: { invitees?: EAccount[] }) {
 function HeaderCountText({
   invitees,
   usesLeft,
+  _i18n,
 }: {
   invitees?: EAccount[];
   usesLeft?: number;
+  _i18n: TranslationFunctions;
 }) {
   const nav = useNav();
+  const i18n = _i18n.invite;
 
   const showInviteesCount = invitees != null && invitees.length > 0;
   const showUsesLeft = usesLeft != null && (showInviteesCount || usesLeft > 0);
@@ -157,8 +178,7 @@ function HeaderCountText({
           children={({ pressed }) => (
             <TextCenter>
               <TextBody color={pressed ? color.primaryBgLight : color.primary}>
-                You've invited {invitees?.length}{" "}
-                {invitees?.length === 1 ? "friend" : "friends"}
+                {i18n.invited({ invited: invitees?.length })}
               </TextBody>
             </TextCenter>
           )}
@@ -176,16 +196,15 @@ function HeaderCountText({
   );
 }
 
-const headerTitle = "Invite your friends and earn USDC!";
-
-function LockedHeader() {
+function LockedHeader({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.invite;
   return (
     <View>
-      <ScreenHeader title="Invite Friends" />
-      <HeaderGraphic />
+      <ScreenHeader title={i18n.screenHeader()} />
+      <HeaderGraphic _i18n={_i18n} />
       <Spacer h={32} />
       <TextCenter>
-        <TextH2>{headerTitle}</TextH2>
+        <TextH2>{i18n.locked.header()}</TextH2>
       </TextCenter>
     </View>
   );
@@ -193,6 +212,7 @@ function LockedHeader() {
 
 function LockedFooter() {
   const nav = useNav();
+  const i18n = useI18n().invite;
   const goToSend = () =>
     nav.navigate("SendTab", {
       screen: "SendNav",
@@ -207,13 +227,10 @@ function LockedFooter() {
       </TextCenter>
       <Spacer h={32} />
       <TextCenter>
-        <TextBody color={color.gray3}>
-          Use Daimo more to unlock invites. Send a payment link to onboard your
-          contacts.
-        </TextBody>
+        <TextBody color={color.gray3}>{i18n.locked.description()}</TextBody>
       </TextCenter>
       <Spacer h={32} />
-      <ButtonMed type="primary" title="SEND" onPress={goToSend} />
+      <ButtonMed type="primary" title={i18n.sendButton()} onPress={goToSend} />
     </View>
   );
 }
@@ -221,22 +238,26 @@ function LockedFooter() {
 function Header({
   invitees,
   inviteLinkStatus,
+  _i18n,
 }: {
   invitees: EAccount[];
   inviteLinkStatus?: DaimoInviteCodeStatus;
+  _i18n: TranslationFunctions;
 }) {
+  const i18n = _i18n.invite;
   return (
     <View>
-      <ScreenHeader title="Invite Friends" />
-      <HeaderGraphic invitees={invitees} />
+      <ScreenHeader title={i18n.screenHeader()} />
+      <HeaderGraphic invitees={invitees} _i18n={_i18n} />
       <Spacer h={8} />
       <HeaderCountText
         invitees={invitees}
         usesLeft={inviteLinkStatus?.usesLeft}
+        _i18n={_i18n}
       />
       <Spacer h={32} />
       <TextCenter>
-        <TextH2>{headerTitle}</TextH2>
+        <TextH2>{i18n.locked.header()}</TextH2>
       </TextCenter>
     </View>
   );
@@ -245,12 +266,15 @@ function Header({
 function ReferralButtonsFooter({
   inviteCodeStatus,
   account,
+  _i18n,
 }: {
   inviteCodeStatus: DaimoInviteCodeStatus;
   account: Account;
+  _i18n: TranslationFunctions;
 }) {
   const { link, bonusDollarsInvitee, bonusDollarsInviter } = inviteCodeStatus;
   const url = formatDaimoLink(link);
+  const i18n = _i18n.invite;
 
   const bonusSubtitle = (() => {
     if (
@@ -258,17 +282,17 @@ function ReferralButtonsFooter({
       bonusDollarsInviter &&
       bonusDollarsInvitee === bonusDollarsInviter
     ) {
-      return ` and we'll send you both $${bonusDollarsInvitee} USDC`;
+      return i18n.referral.bonusBoth({ bonusDollarsInvitee });
     } else if (bonusDollarsInvitee) {
-      return ` and we'll send them $${bonusDollarsInvitee} USDC`;
+      return i18n.referral.bonusInvitee({ bonusDollarsInvitee });
     } else if (bonusDollarsInviter) {
-      return ` and we'll send you $${bonusDollarsInviter} USDC`;
+      return i18n.referral.bonusInviter({ bonusDollarsInviter });
     } else return "";
   })();
 
   const shareFarcaster = () => {
     console.log(`[INVITE] share on farcaster`);
-    const msg = "Join+me+on+Daimo";
+    const msg = i18n.referral.share.farcasterMsg();
     const frameUrl = `https://daimo.com/frame/invite/${account.address}`;
     const url = `https://warpcast.com/~/compose?text=${msg}&embeds[]=${frameUrl}`;
     Linking.openURL(url);
@@ -279,21 +303,21 @@ function ReferralButtonsFooter({
       <Spacer h={32} />
       <TextCenter>
         <TextLight>
-          You'll get credit for the invite on their profile{bonusSubtitle}
+          {i18n.referral.creditForInvite({ bonusSubtitle })}
         </TextLight>
       </TextCenter>
       <Spacer h={32} />
       <View style={styles.referralButtons}>
         <View style={styles.referralHalfScreen}>
           <TextCenter>
-            <TextLight>Invite Code</TextLight>
+            <TextLight>{i18n.referral.inviteCode()}</TextLight>
           </TextCenter>
           <Spacer h={8} />
           <InviteCodeCopier code={link.code} url={url} />
         </View>
         <View style={styles.referralHalfScreen}>
           <TextCenter>
-            <TextLight>Invite Link</TextLight>
+            <TextLight>{i18n.referral.inviteLink()}</TextLight>
           </TextCenter>
           <Spacer h={8} />
           <ButtonBig
@@ -313,7 +337,7 @@ function ReferralButtonsFooter({
             />
             <Spacer w={8} />
             <TextBtnCaps color={color.grayDark}>
-              SHARE FRAME ON FARCASTER
+              {i18n.referral.share.farcasterButton()}
             </TextBtnCaps>
           </View>
         </TextButton>

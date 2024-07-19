@@ -2,6 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { StyleSheet, View } from "react-native";
 
+import { useI18n } from "../../logic/i18n";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
@@ -20,6 +21,7 @@ function OnboardingChecklistBottomSheetInner({
 }: {
   account: Account;
 }) {
+  const i18n = useI18n().onboardingChecklistBottom;
   const {
     hasBackup,
     farcasterConnected,
@@ -30,31 +32,31 @@ function OnboardingChecklistBottomSheetInner({
 
   return (
     <View>
-      <TextH3 style={{ textAlign: "center" }}>Onboarding checklist</TextH3>
+      <TextH3 style={{ textAlign: "center" }}>{i18n.sheetHeader()}</TextH3>
       <Spacer h={16} />
       <TextBody style={{ textAlign: "center", color: color.grayMid }}>
-        Complete these items to finish account setup
+        {i18n.description()}
       </TextBody>
       <Spacer h={24} />
       <View style={styles.separator} />
       <ChecklistRow
         step={1}
-        title="Secure your account"
-        description="Add a backup to your account"
+        title={i18n.secureAccount.title()}
+        description={i18n.secureAccount.description()}
         onPress={handleSecureAccount}
         done={hasBackup}
       />
       <ChecklistRow
         step={2}
-        title="Connect Farcaster"
-        description="Import profile picture and connections"
+        title={i18n.connectFarcaster.title()}
+        description={i18n.connectFarcaster.description()}
         onPress={handleConnectFarcaster}
         done={farcasterConnected}
       />
       <Spacer h={16} />
       <View style={ss.container.padH24}>
         {dismissChecklist && (
-          <TextButton title="DISMISS" onPress={dismissChecklist} />
+          <TextButton title={i18n.dismissButton()} onPress={dismissChecklist} />
         )}
       </View>
       <Spacer h={48} />

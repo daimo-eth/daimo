@@ -19,10 +19,9 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { useI18nContext } from "../../i18n/i18n-react";
-import { Locales } from "../../i18n/i18n-types";
-import { loadLocaleAsync } from "../../i18n/i18n-util.async";
-import { useAccount } from "../../logic/accountManager";
+import { Locales, TranslationFunctions } from "../../i18n/i18n-types";
+import { getAccountManager, useAccount } from "../../logic/accountManager";
+import { useI18n } from "../../logic/i18n";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../storage/account";
@@ -56,34 +55,30 @@ import {
 
 export function SettingsScreen() {
   const account = useAccount();
-  const { locale, LL, setLocale } = useI18nContext();
+  const i18n = useI18n();
 
   const [showDetails, setShowDetails] = useState(false);
 
   if (!account) return null;
 
-  // i18n locale
-  const onLocaleSelected = async ({ target }: any) => {
-    const locale = target.value as Locales;
-    localStorage.setItem("lang", locale);
-    await loadLocaleAsync(locale);
-    setLocale(locale);
-  };
-
   return (
     <View style={styles.pageWrap}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title={LL.SETTINGS()} />
+        <ScreenHeader title={i18n.settings.screenHeader()} />
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={16} />
-        <AccountSection account={account} />
+        <AccountSection account={account} _i18n={i18n} />
         <Spacer h={32} />
         <DevicesSection account={account} />
         <Spacer h={32} />
-        <LocaleSelector locale={locale} onLocaleSelected={onLocaleSelected} />
+        {/* <LocaleSelector locale="en" /> */}
         <TextButton
-          title={showDetails ? "Hide details" : "Show details"}
+          title={
+            showDetails
+              ? i18n.settings.hideDetails()
+              : i18n.settings.showDetails()
+          }
           onPress={() => setShowDetails(!showDetails)}
         />
         <Spacer h={16} />
@@ -93,7 +88,14 @@ export function SettingsScreen() {
   );
 }
 
-function AccountSection({ account }: { account: Account }) {
+function AccountSection({
+  account,
+  _i18n,
+}: {
+  account: Account;
+  _i18n: TranslationFunctions;
+}) {
+  const i18n = _i18n.settings.account;
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
@@ -113,7 +115,7 @@ function AccountSection({ account }: { account: Account }) {
         <>
           <ButtonMed
             type="primary"
-            title="CONNECT FARCASTER"
+            title={i18n.connectFarcaster()}
             onPress={connectFarc}
           />
           <Spacer h={16} />
@@ -121,38 +123,34 @@ function AccountSection({ account }: { account: Account }) {
       )}
       <ButtonMed
         type="subtle"
-        title="VIEW ACCOUNT ON EXPLORER"
+        title={i18n.viewAccountOnExplorer()}
         onPress={linkToExplorer}
       />
     </View>
   );
 }
 
-function LocaleSelector({
-  locale,
-  onLocaleSelected,
-}: {
-  locale: Locales;
-  onLocaleSelected: (e: any) => void;
-}) {
-  return (
-    <SelectDropdown
-      data={["en", "es"]}
-      defaultValue="en"
-      onSelect={onLocaleSelected}
-      renderButton={() => (
-        <View>
-          <DropdownPickButton />
-        </View>
-      )}
-      renderItem={(l) => (
-        <View>
-          <LocaleLanguage language={l} />
-        </View>
-      )}
-    />
-  );
-}
+// function LocaleSelector({ locale }: { locale: Locales }) {
+//   return (
+//     <SelectDropdown
+//       data={["en"]} // TODO: add all locales
+//       defaultValue={locale}
+//       onSelect={(selectedLocale: Locales) => {
+//         getAccountManager().setLocale(selectedLocale);
+//       }}
+//       renderButton={() => (
+//         <View>
+//           <DropdownPickButton />
+//         </View>
+//       )}
+//       renderItem={(l) => (
+//         <View>
+//           <LocaleLanguage language={l} />
+//         </View>
+//       )}
+//     />
+//   );
+// }
 
 function LocaleLanguage({ language }: { language: Locales }) {
   return (
@@ -217,11 +215,14 @@ function LinkedAccountsRow({
 }: {
   linkedAccounts: Account["linkedAccounts"];
 }) {
+  const i18n = useI18n().settings.account;
   const dispatcher = useContext(DispatcherContext);
   const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
 
   if (linkedAccounts.length === 0) {
-    return <BadgeButton title="NO SOCIALS CONNECTED" onPress={connectFarc} />;
+    return (
+      <BadgeButton title={i18n.noSocialsConnected()} onPress={connectFarc} />
+    );
   }
 
   // Generalize once needed
@@ -230,6 +231,7 @@ function LinkedAccountsRow({
 }
 
 function DevicesSection({ account }: { account: Account }) {
+  const i18n = useI18n().settings.devices;
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
@@ -268,18 +270,12 @@ function DevicesSection({ account }: { account: Account }) {
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
-      title: "What is a Passkey Backup?",
+      title: i18n.passkeys.title(),
       content: (
         <>
-          <TextPara>
-            Passkeys are a convenient and phishing-resistant alternative to seed
-            phrases.
-          </TextPara>
+          <TextPara>{i18n.passkeys.description.firstPara()}</TextPara>
           <Spacer h={16} />
-          <TextPara>
-            Passkeys are generated and stored in your password manager, and
-            allow you to recover your account even if you lose your device.
-          </TextPara>
+          <TextPara>{i18n.passkeys.description.secondPara()}</TextPara>
         </>
       ),
     });
@@ -287,7 +283,7 @@ function DevicesSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>My devices &amp; backups</TextLight>
+        <TextLight>{i18n.title()}</TextLight>
       </View>
       <Spacer h={8} />
       <View
@@ -296,23 +292,31 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <Spacer h={24} />
       <DescriptiveClickableRow
-        title="Create a Backup"
-        message="Passkey, security key, or seed phrase"
+        title={i18n.createBackup.title()}
+        message={i18n.createBackup.msg()}
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
         onPressHelp={openHelpModal}
       />
-      <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
+      <ButtonMed
+        type="subtle"
+        title={i18n.createBackup.button()}
+        onPress={createBackup}
+      />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title="Add a Device"
-        message="Use your account on another device"
+        title={i18n.addDevice.title()}
+        message={i18n.addDevice.msg()}
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
       />
-      <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
+      <ButtonMed
+        type="subtle"
+        title={i18n.addDevice.button()}
+        onPress={addDevice}
+      />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title="Questions? Feedback?"
-        message="Contact us on Telegram"
+        title={i18n.contactSupport.title()}
+        message={i18n.contactSupport.msg()}
         icon={
           <Icon
             name="help-circle"
@@ -324,7 +328,7 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <ButtonMed
         type="subtle"
-        title="CONTACT SUPPORT"
+        title={i18n.contactSupport.button()}
         onPress={openSupportTG}
       />
       <View style={styles.separator} />
@@ -343,6 +347,7 @@ function DeviceRow({
   chain: DaimoChain;
   pendingRemoval: boolean;
 }) {
+  const i18n = useI18n().settings;
   const nowS = useTime();
   const nav = useNav();
 
@@ -358,8 +363,8 @@ function DeviceRow({
 
   const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
-    ? "Pending"
-    : "Added " + timeAgo(addAtS, nowS, true);
+    ? i18n.pending()
+    : i18n.addedAgo({ timeAgo: timeAgo(addAtS, nowS, true) });
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
@@ -374,7 +379,7 @@ function DeviceRow({
             <TextBody color={textCol}>{dispName}</TextBody>
             {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
             {isCurrentDevice && !pendingRemoval && (
-              <Badge color={color.grayMid}>THIS DEVICE</Badge>
+              <Badge color={color.grayMid}>{i18n.devices.thisDevice()}</Badge>
             )}
             {pendingRemoval && <PendingDot />}
           </View>
@@ -384,8 +389,8 @@ function DeviceRow({
             )}
             {!isCurrentDevice && <Spacer w={16} />}
             <TextMeta color={pendingRemoval ? color.gray3 : color.primary}>
-              {isCurrentDevice && "Log out"}
-              {!isCurrentDevice && "Remove"}
+              {isCurrentDevice && i18n.logOut()}
+              {!isCurrentDevice && i18n.remove()}
             </TextMeta>
           </View>
         </View>
@@ -396,6 +401,7 @@ function DeviceRow({
 
 function PendingDeviceRow({ slot }: { slot: number }) {
   const dispName = getSlotLabel(slot);
+  const i18n = useI18n().settings;
 
   return (
     <View style={styles.rowBorder}>
@@ -411,7 +417,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
             <PendingDot />
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={color.gray3}>Pending</TextMeta>
+            <TextMeta color={color.gray3}>{i18n.pending()}</TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -421,13 +427,14 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 
 function DetailsSection({ account }: { account: Account }) {
   const { ask } = useNotificationsAccess();
+  const i18n = useI18n().settings.details;
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
 
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>Device details</TextLight>
+        <TextLight>{i18n.title()}</TextLight>
       </View>
       <Spacer h={4} />
       <View style={styles.kvList}>
@@ -437,10 +444,18 @@ function DetailsSection({ account }: { account: Account }) {
       </View>
       <Spacer h={24} />
       {!account.pushToken && (
-        <ButtonMed type="subtle" title="Enable notifications" onPress={ask} />
+        <ButtonMed
+          type="subtle"
+          title={i18n.enableNotifications()}
+          onPress={ask}
+        />
       )}
       {!account.pushToken && <Spacer h={16} />}
-      <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
+      <ButtonMed
+        type="subtle"
+        title={i18n.sendDebugLog()}
+        onPress={sendDebugLog}
+      />
       <Spacer h={32} />
     </View>
   );

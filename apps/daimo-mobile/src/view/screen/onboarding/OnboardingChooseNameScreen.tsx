@@ -18,10 +18,12 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import {
   getAccountManager,
   useDaimoChain,
 } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import { generateRandomName } from "../../../logic/name";
 import { getRpcHook } from "../../../logic/trpc";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -39,6 +41,7 @@ import {
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
 export function OnboardingChooseNameScreen({ route }: Props) {
+  const i18n = useI18n();
   const daimoChain = useDaimoChain();
   const [name, setName] = useState("");
   const { inviteLink } = route.params;
@@ -58,7 +61,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
         <OnboardingHeader
-          title="Choose Username"
+          title={i18n.onboardingChooseName.screenHeader()}
           onPrev={useExitBack()}
           steps={steps}
           activeStep={steps - 2}
@@ -67,7 +70,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
         <View style={ss.container.padH24}>
           <CoverVideo video={VidUsernameAnimation} />
           <Spacer h={12} />
-          <Instructions />
+          <Instructions _i18n={i18n} />
           <Spacer h={24} />
           <View style={styles.namePickerWrap}>
             <NamePicker
@@ -75,6 +78,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
               daimoChain={daimoChain}
               onChange={setName}
               onChoose={createAccount}
+              _i18n={i18n}
             />
           </View>
         </View>
@@ -83,11 +87,11 @@ export function OnboardingChooseNameScreen({ route }: Props) {
   );
 }
 
-function Instructions() {
+function Instructions({ _i18n }: { _i18n: TranslationFunctions }) {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        Choose a username you'll go by on Daimo. Your username is public.
+        {_i18n.onboardingChooseName.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
@@ -109,12 +113,15 @@ function NamePicker({
   daimoChain,
   onChange,
   onChoose,
+  _i18n,
 }: {
   name: string;
   daimoChain: DaimoChain;
   onChange: (name: string) => void;
   onChoose: () => void;
+  _i18n: TranslationFunctions;
 }) {
+  const i18n = _i18n.onboardingChooseName.picker;
   // First, validate the name & check if it's available
   let error = "";
   try {
@@ -147,7 +154,9 @@ function NamePicker({
               style={{ width: 16, height: 16, zIndex: -1 }}
             />
             <Spacer w={8} />
-            <TextBtnCaps color={color.primary}>GENERATE RANDOM</TextBtnCaps>
+            <TextBtnCaps color={color.primary}>
+              {i18n.generateRandom()}
+            </TextBtnCaps>
           </View>
         </TextButton>
       );
@@ -158,9 +167,9 @@ function NamePicker({
     } else if (result.isLoading) {
       return <IconRow color={color.grayMid} title="..." />;
     } else if (result.error) {
-      return <IconRow icon="alert" title="offline?" />;
+      return <IconRow icon="alert" title={i18n.error()} />;
     } else if (result.isSuccess && result.data) {
-      return <IconRow icon="alert" title="sorry, that name is taken" />;
+      return <IconRow icon="alert" title={i18n.taken()} />;
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true;
       return (
@@ -177,7 +186,7 @@ function NamePicker({
   return (
     <View>
       <InputBig
-        placeholder="choose a username"
+        placeholder={i18n.title()}
         value={name}
         onChange={onChange}
         center
@@ -188,7 +197,7 @@ function NamePicker({
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="CREATE ACCOUNT"
+        title={i18n.createButton()}
         onPress={onChoose}
         disabled={!isAvailable}
       />

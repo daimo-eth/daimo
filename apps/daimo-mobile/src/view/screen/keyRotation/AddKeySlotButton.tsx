@@ -18,6 +18,7 @@ import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
+import { useI18n } from "../../../logic/i18n";
 import { createPasskey } from "../../../logic/passkey";
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
@@ -39,6 +40,7 @@ export function AddKeySlotButton({
   disabled?: boolean;
   onSuccess?: () => void;
 }) {
+  const i18n = useI18n().addKeySlot;
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.AddKey)),
     [knownPubkey, slot]
@@ -103,7 +105,7 @@ export function AddKeySlotButton({
         return message;
       case "error":
         if (didUserCancel) {
-          return "Cancelled";
+          return i18n.userCancelled();
         }
         return <TextError>{message}</TextError>;
       default:
