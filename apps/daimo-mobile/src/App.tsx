@@ -1,16 +1,16 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { getLocales } from "expo-localization";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
 import TypesafeI18n from "./i18n/i18n-react";
-import { isLocale } from "./i18n/i18n-util";
+import { loadAllLocales, loadLocale } from "./i18n/i18n-util.sync";
 import { useAccount } from "./logic/accountManager";
+import { useI18n, useLocale } from "./logic/i18n";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
@@ -18,15 +18,16 @@ import { renderErrorFallback } from "./view/screen/errorScreens";
 import { color } from "./view/shared/style";
 import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
 
-// const DEFAULT_LOCALE =
-//   getLocales()
-//     .map((it) => it.languageTag)
-//     .find(isLocale) ?? "en";
-
 export default function App() {
   const account = useAccount();
   const onb = account?.isOnboarded ? "onboarded" : "not onboarded";
   console.log(`[APP] rendering ${account?.name || "no account"}, ${onb}`);
+
+  // Load Locales
+  // const locale = useLocale();
+  // const locale = "en";
+  // loadAllLocales();
+  const i18n = useI18n();
 
   // Display notifications, listen for push notifications
   useInitNotifications();
@@ -40,16 +41,12 @@ export default function App() {
   // Global dispatcher
   const dispatcher = useMemo(() => new Dispatcher(), []);
 
-  // Locale for i18n
-  // const locale = useLocale();
-  const locale = "en";
-
   return (
     <RpcProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer theme={theme}>
           <DispatcherContext.Provider value={dispatcher}>
-            <TypesafeI18n locale={locale}>
+            <TypesafeI18n locale="en">
               <ErrorBoundary fallbackRender={renderErrorFallback}>
                 <SafeAreaProvider>
                   <TabNav />

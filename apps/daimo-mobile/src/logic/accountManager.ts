@@ -97,20 +97,12 @@ class AccountManager {
    */
   private createAccountHandle: ActHandle | null = null;
 
-  // /**
-  //  * The current locale for i18n. Defaults to "en".
-  //  */
-  // private locale: Locales = "en";
-
   constructor() {
     // On first load, load+save to ensure latest serialization version.
     const accountJSON = this.mmkv.getString("account");
     console.log(`[ACCOUNT] read account JSON: ${accountJSON}`);
     this.currentAccount = parseAccount(accountJSON);
     this.setCurrentAccount(this.currentAccount);
-
-    // TODO: Load locale
-    // this.loadLocale();
 
     // Load enclave key
     this.loadEnclaveKey();
@@ -128,15 +120,6 @@ class AccountManager {
       console.error(`[ACCOUNT] error loading enclave key: ${e}`);
     }
   }
-
-  // async loadLocale() {
-  //   // Get default locale from device settings.
-  //   const DEFAULT_LOCALE =
-  //     getLocales()
-  //       .map((it) => it.languageTag)
-  //       .find(isLocale) ?? "en";
-  //   this.setLocale(DEFAULT_LOCALE);
-  // }
 
   private notifyListeners() {
     try {

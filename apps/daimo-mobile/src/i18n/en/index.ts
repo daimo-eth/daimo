@@ -1,6 +1,6 @@
 import { BaseTranslation, Translation } from "../i18n-types";
 
-const en: BaseTranslation = {
+const en: Translation = {
   // Common text components
   shared: {
     buttonStatus: {
@@ -15,7 +15,7 @@ const en: BaseTranslation = {
       confirm: "Confirm",
       cancel: "Cancel",
       decline: "Decline",
-      reqest: "Request",
+      request: "Request",
       send: "Send",
       accept: "Accept",
       submit: "Submit",
@@ -55,7 +55,7 @@ const en: BaseTranslation = {
       title: "About this transfer",
       description: {
         firstPara:
-          "This transaction settled on {chainName:string}, an Ethereum rollup.",
+          "This transaction settled on {chainName}, an Ethereum rollup.",
         secondPara:
           "Rollups inherit the strong security guarantees of Ethereum, at lower cost.",
         thirdPara:
@@ -65,7 +65,7 @@ const en: BaseTranslation = {
     feeText: {
       free: "FREE",
       pending: "PENDING",
-      fee: "{amount:string} FEE",
+      fee: "{amount} FEE",
     },
   },
 
@@ -77,8 +77,8 @@ const en: BaseTranslation = {
       "Link a new device to your account by scanning its QR code during setup.",
     scanQR: {
       error: "Error Parsing QR Code",
-      scanned: "Scanned {slot:string}",
-      add: "Add {slot:string}",
+      scanned: "Scanned {slot}",
+      add: "Add {slot}",
     },
   },
   // AddKeySlotButton.tsx
@@ -89,9 +89,9 @@ const en: BaseTranslation = {
   device: {
     deleted: "Deleted device",
     remove: {
-      title: "Remove {deviceName:string}\n",
+      title: "Remove {deviceName}\n",
       msg: "Are you sure you want to remove this device?",
-      remove: "Remove {deviceName:string}",
+      remove: "Remove {deviceName}",
       cancel: "Cancel",
     },
     current: {
@@ -109,18 +109,18 @@ const en: BaseTranslation = {
     accept: {
       title: "Accept",
       link: "Accept link",
-      long: "Accept this link, receiving {dollars:string}",
+      long: "Accept this link, receiving {dollars}",
       loading: "Accepting link...",
     },
     accepted: {
       title: "Accepted",
       link: "Accepted Link",
-      long: "Accepted by {name:string}",
+      long: "Accepted by {name}",
     },
     cancel: {
       title: "Cancel",
       link: "Cancel link",
-      long: "Cancel this link, reclaiming {dollars:string}",
+      long: "Cancel this link, reclaiming {dollars}",
     },
     cancelled: {
       title: "Cancelled",
@@ -135,7 +135,7 @@ const en: BaseTranslation = {
     invalid: "Payment link invalid",
     send: {
       self: "you sent",
-      other: "{name:string} sent",
+      other: "{name} sent",
     },
   },
   // SendNoteScreen.tsx
@@ -159,7 +159,7 @@ const en: BaseTranslation = {
   // ------------ NOTIFICATIONS ------------
   // InvitesNotificationRow.tsx
   invitesNotification: {
-    description: "You have {inviteCount:number} invite{{s}} available.",
+    description: "You have {inviteCount} invite{{s}} available.",
   },
   // NotificationsScreen.tsx
   notifications: {
@@ -196,7 +196,7 @@ const en: BaseTranslation = {
   },
   // SwapNotificationRow.tsx
   swapNotification: {
-    msg: "Accept {readableAmount:string} {coinName:string} from ",
+    msg: "Accept {readableAmount} {coinName} from ",
   },
 
   // ------------ ONBOARDING ------------
@@ -239,7 +239,7 @@ const en: BaseTranslation = {
   },
   // LogInButton.tsx
   logIn: {
-    button: "LOG IN WITH {keyType:string}",
+    button: "LOG IN WITH {keyType}",
     fromSeed: {
       error: "Seed phrase not on account. Removed?",
       button: "LOG IN WITH SEED PHRASE",
@@ -363,12 +363,12 @@ const en: BaseTranslation = {
     holdButton: "HOLD TO FULFILL",
     statusMsg: {
       paymentsPublic: "Payments are public",
-      totalDollars: "Total incl. fees {dollars:string}",
+      totalDollars: "Total incl. fees {dollars}",
     },
   },
   // MemoDisplay.tsx
   memoDisplay: {
-    status: "memo {status:string}",
+    status: "memo {status}",
     placeholder: "WHAT'S THIS FOR?",
   },
   // NoteAction.tsx
@@ -377,7 +377,7 @@ const en: BaseTranslation = {
       insufficientFunds: "Insufficient funds",
     },
     statusMsg: {
-      totalDollars: "Total incl. fees {dollars:string}",
+      totalDollars: "Total incl. fees {dollars}",
     },
     externalAction: {
       sms: "SEND SMS",
@@ -388,7 +388,7 @@ const en: BaseTranslation = {
   },
   // RouteDisplay.tsx
   routeDisplay: {
-    theyWillReceive: "They will receive {amount:string} {tokenSymbol:string}",
+    theyWillReceive: "They will receive {amount} {tokenSymbol}",
   },
   // SendNavScreen.tsx
   sendNav: {
@@ -397,7 +397,7 @@ const en: BaseTranslation = {
   // SendNoteScreen.tsx
   sendNote: {
     screenHeader: "Send Link",
-    info: "Send {tokenSymbol:string} via link",
+    info: "Send {tokenSymbol} via link",
     help: {
       title: "How Payment Links Work",
       learn: "Learn how",
@@ -421,20 +421,20 @@ const en: BaseTranslation = {
       self: "Can't send to yourself",
       other: "Can't send to this account",
       zero: "Enter an amount",
-      min: "Minimum transfer amount is {minTransferAmount:number} USDC",
+      min: "Minimum transfer amount is {minTransferAmount} USDC",
     },
     holdButton: "HOLD TO SEND",
     statusMsg: {
-      insufficientFundsPlusFee: "You need at least {totalStr:string} to send",
+      insufficientFundsPlusFee: "You need at least {totalStr} to send",
       insufficientFunds: "Insufficient funds",
-      totalDollars: "Total with fees {totalStr:string}",
+      totalDollars: "Total with fees {totalStr}",
       paymentsPublic: "Payments are public",
     },
   },
   // SendTransferScreen.tsx
   sendTransferScreen: {
     screenHeader: "Send to",
-    firstTime: "First time paying {name:string}",
+    firstTime: "First time paying {name}",
   },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
@@ -443,7 +443,7 @@ const en: BaseTranslation = {
     landline: {
       cta: "Connect with Landline",
       title: "Deposit or withdraw directly from a US bank account",
-      optionRowTitle: "Connected {timeAgo:string} ago",
+      optionRowTitle: "Connected {timeAgo} ago",
     },
     binance: {
       cta: "Deposit from Binance",
@@ -470,15 +470,15 @@ const en: BaseTranslation = {
   },
   // HomeScreen.tsx
   home: {
-    pending: "+ ${pendingDollars:string} PENDING",
+    pending: "+ ${pendingDollars} PENDING",
     finishAccountSetUp: "Finish setting up your account",
   },
   // InviteScreen.tsx
   invite: {
     screenHeader: "Invite Friends",
-    more: "+{moreInvitees:number} more",
-    invited: "You've invited {invited:number} friend{{s}}",
-    left: "{usesLeft:number} invite{{s}} left",
+    more: "+{moreInvitees} more",
+    invited: "You've invited {invited} friend{{s}}",
+    left: "{usesLeft} invite{{s}} left",
     locked: {
       header: "Invite your friends and earn USDC!",
       description:
@@ -487,10 +487,10 @@ const en: BaseTranslation = {
     sendButton: "SEND",
     referral: {
       creditForInvite:
-        "You'll get credit for the invite on their profile {bonusSubtitle:string}",
-      bonusBoth: "and we'll send you both ${bonusDollarsInvitee:number} USDC",
-      bonusInvitee: "and we'll send them ${bonusDollarsInvitee:number} USDC",
-      bonusInviter: "and we'll send you ${bonusDollarsInviter:number} USDC",
+        "You'll get credit for the invite on their profile {bonusSubtitle}",
+      bonusBoth: "and we'll send you both ${bonusDollarsInvitee} USDC",
+      bonusInvitee: "and we'll send them ${bonusDollarsInvitee} USDC",
+      bonusInviter: "and we'll send you ${bonusDollarsInviter} USDC",
       inviteCode: "Invite Code",
       inviteLink: "Invite Link",
       share: {
@@ -514,16 +514,16 @@ const en: BaseTranslation = {
     error: {
       account: {
         title: "Account not found",
-        msg: "Couldn't load account {account:string}",
+        msg: "Couldn't load account {account}",
       },
       invite: {
         title: "Invite not found",
-        msg: "Couldn't load invite {code:string}",
+        msg: "Couldn't load invite {code}",
       },
     },
     subtitle: {
       invitedBy: "Invited by ",
-      joined: "Joined {timeAgo:string}",
+      joined: "Joined {timeAgo}",
     },
   },
   // QRScreen.tsx
@@ -596,7 +596,7 @@ const en: BaseTranslation = {
     logOut: "Log out",
     remove: "Remove",
     pending: "Pending",
-    addedAgo: "Added {timeAgo:string}",
+    addedAgo: "Added {timeAgo}",
     details: {
       title: "Device details",
       enableNotifications: "Enable notifications",
@@ -606,13 +606,13 @@ const en: BaseTranslation = {
   // YourInvitesScreen.tsx
   yourInvites: {
     screenHeader: "Your Invites",
-    joinedAgo: "Joined {timeAgo:string} ago",
+    joinedAgo: "Joined {timeAgo} ago",
   },
 
   // -------------------------- SHARED --------------------------
   // AmountInput.tsx
   amountInput: {
-    dollarsAvailable: "{dollars:string} available",
+    dollarsAvailable: "{dollars} available",
   },
   // OfflineHeader.tsx
   offlineHeader: {
@@ -631,8 +631,8 @@ const en: BaseTranslation = {
   searchResults: {
     noResults: "No results",
     paymentLinkButton: "SEND PAYMENT LINK INSTEAD",
-    sentAgo: "Sent {timeAgo:string}",
-    receivedAgo: "Received {timeAgo:string}",
+    sentAgo: "Sent {timeAgo}",
+    receivedAgo: "Received {timeAgo}",
     extra: {
       contact: "Send to contact",
       requestLink: "Request via link",
@@ -670,7 +670,7 @@ const en: BaseTranslation = {
     addKey: {
       passkey: "PASSKEY",
       securityKey: "SECURITY KEY",
-      button: "BACK UP WITH {slotType:string}",
+      button: "BACK UP WITH {slotType}",
     },
     recommended: {
       compact: "REC.",
@@ -687,7 +687,7 @@ const en: BaseTranslation = {
   // DepositAddressBottomSheet.tsx
   depositAddressBottom: {
     sheetHeader: "Deposit",
-    description: `Send {tokenSymbol:string} to your address below. Any other ERC-20 tokens 
+    description: `Send {tokenSymbol} to your address below. Any other ERC-20 tokens 
       will be converted to USDC. Confirm that you're sending:`,
     checkChain: {
       on: "On ",
@@ -701,7 +701,7 @@ const en: BaseTranslation = {
     linked: "Your account is linked",
     connect: "Connect Farcaster",
     openWarpcastButton: "OPEN IN WARPCAST",
-    welcome: "Welcome, {fcUsername:string}",
+    welcome: "Welcome, {fcUsername}",
     loading: "Loading...",
   },
   // HelpBottomSheet.tsx
