@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Spacer from "./Spacer";
 import { color } from "./style";
 import { TextBody } from "./text";
+import { useI18n } from "../../logic/i18n";
 import { useNetworkState } from "../../sync/networkState";
 import { resync } from "../../sync/sync";
 
@@ -22,6 +23,7 @@ export function OfflineHeader({
   const [refreshing, setRefreshing] = useState(false);
   const netState = useNetworkState();
   const isOffline = netState.status === "offline";
+  const i18n = useI18n().offlineHeader;
 
   const ins = useSafeAreaInsets();
   const top = Math.max(ins.top, 16);
@@ -58,14 +60,14 @@ export function OfflineHeader({
         {refreshing && (
           <TextBody color={color.midnight}>
             <Spacer w={8} />
-            Retrying...
+            {i18n.retrying()}
           </TextBody>
         )}
         {isOffline && !refreshing && (
           <TextBody color={color.midnight}>
             <Octicons name="alert" size={14} />
             <Spacer w={8} />
-            Offline
+            {i18n.header()}
           </TextBody>
         )}
       </TouchableOpacity>

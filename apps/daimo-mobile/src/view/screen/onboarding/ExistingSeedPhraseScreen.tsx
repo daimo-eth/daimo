@@ -9,6 +9,7 @@ import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import {
   SeedPhraseEntry,
   useSeedPhraseInput,
@@ -18,6 +19,8 @@ import { ss } from "../../shared/style";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingSeedPhrase">;
 export function ExistingSeedPhraseScreen({ route }: Props) {
+  const i18n = useI18n();
+
   // The account we're logging in to
   const { targetAccount } = route.params;
 
@@ -33,7 +36,7 @@ export function ExistingSeedPhraseScreen({ route }: Props) {
   return (
     <View>
       <OnboardingHeader
-        title="Log in with seed phrase"
+        title={i18n.existingSeedPhrase.screenHeader()}
         onPrev={useExitBack()}
       />
       <View style={ss.container.padH24}>
@@ -43,6 +46,7 @@ export function ExistingSeedPhraseScreen({ route }: Props) {
         <LogInFromSeedButton
           account={targetAccount}
           {...{ daimoChain, pubKeyHex, mnemonic }}
+          _i18n={i18n}
         />
       </View>
     </View>

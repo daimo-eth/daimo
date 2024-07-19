@@ -13,12 +13,14 @@ import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { NoteActionButton } from "./NoteActionButton";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import { useAccount } from "../../../logic/accountManager";
 import {
   ExternalAction,
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { useI18n } from "../../../logic/i18n";
 import { zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcHook } from "../../../logic/trpc";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -40,6 +42,7 @@ type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
 
 export function SendNoteScreen({ route }: Props) {
   const { recipient } = route.params || {};
+  const i18n = useI18n();
 
   // Account, home coin, home chain
   const account = useAccount();
@@ -96,7 +99,11 @@ export function SendNoteScreen({ route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send Link" onBack={goBack} onExit={goHome} />
+        <ScreenHeader
+          title={i18n.sendNote.screenHeader()}
+          onBack={goBack}
+          onExit={goHome}
+        />
         <Spacer h={8} />
         <InfoBox
           icon="link"
@@ -104,13 +111,13 @@ export function SendNoteScreen({ route }: Props) {
             <View style={{ flexDirection: "row" }}>
               <TextBody>Send {tokenSymbol} via link </TextBody>
               <HelpButton
-                helpTitle="How Payment Links Work"
-                helpContent={<HelpContentPaymentLink />}
-                title="Learn how"
+                helpTitle={i18n.sendNote.help.title()}
+                helpContent={<HelpContentPaymentLink _i18n={i18n} />}
+                title={i18n.sendNote.help.learn()}
               />
             </View>
           }
-          subtitle="Anyone with the link can claim"
+          subtitle={i18n.sendNote.help.subtitle()}
         />
         <Spacer h={24} />
         {recipient ? (
@@ -118,7 +125,7 @@ export function SendNoteScreen({ route }: Props) {
         ) : (
           <>
             <TextCenter>
-              <TextLight>Enter amount</TextLight>
+              <TextLight>{i18n.sendNote.enterAmount()}</TextLight>
             </TextCenter>
           </>
         )}
@@ -159,7 +166,7 @@ export function SendNoteScreen({ route }: Props) {
         {(!amountChosen || !memoChosen) && (
           <ButtonBig
             type="primary"
-            title="Create Payment Link"
+            title={i18n.sendNote.createLinkButton()}
             disabled={!(noteMoney.dollars > 0)}
             onPress={onTapCreate}
           />
@@ -176,26 +183,19 @@ export function SendNoteScreen({ route }: Props) {
   );
 }
 
-function HelpContentPaymentLink() {
+function HelpContentPaymentLink({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.sendNote.help;
   return (
     <View style={ss.container.padH16}>
       <TextPara>
-        <TextBold>
-          Payment links carry money in a link, so that you can send it to
-          anyone.
-        </TextBold>
+        <TextBold>{i18n.description.firstPara()}</TextBold>
       </TextPara>
       <Spacer h={24} />
-      <TextPara>
-        You can cancel an unclaimed link to get your money back.
-      </TextPara>
+      <TextPara>{i18n.description.secondPara()}</TextPara>
       <Spacer h={24} />
-      <TextPara>They're self-custody. The key is part of the URL.</TextPara>
+      <TextPara>{i18n.description.thirdPara()}</TextPara>
       <Spacer h={24} />
-      <TextPara>
-        Each link doubles as a Daimo invite. Plus, anyone with the link can
-        claim with any wallet, like Rainbow or Metamask.
-      </TextPara>
+      <TextPara>{i18n.description.fourthPara()}</TextPara>
     </View>
   );
 }

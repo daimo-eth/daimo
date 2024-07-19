@@ -16,6 +16,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { BridgeBankAccountContact } from "../../logic/daimoContacts";
+import { useI18n } from "../../logic/i18n";
 import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -153,14 +154,15 @@ function SendChooseAmount({
 }
 
 function PublicWarning() {
+  const i18n = useI18n().landlineBankTransfer;
   return (
     <View style={{ flexDirection: "column" }}>
       <TextCenter>
-        <TextLight>Withdrawals are public</TextLight>
+        <TextLight>{i18n.warning.title()}</TextLight>
       </TextCenter>
       <Spacer h={4} />
       <TextCenter>
-        <TextLight>Minimum withdrawal of 1 USDC</TextLight>
+        <TextLight>{i18n.warning.minimum()}</TextLight>
       </TextCenter>
     </View>
   );

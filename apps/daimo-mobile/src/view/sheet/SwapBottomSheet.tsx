@@ -20,6 +20,7 @@ import {
 } from "../../action/useSendAsync";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
+import { useI18n } from "../../logic/i18n";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { TokenBubble } from "../shared/Bubble";
@@ -34,6 +35,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
+  const i18n = useI18n().swapBottom;
 
   // Generate nonce
   const nonce = useMemo(
@@ -82,7 +84,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title="Accept"
+        title={i18n.sheetHeader()}
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}

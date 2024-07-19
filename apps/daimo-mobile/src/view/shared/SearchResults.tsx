@@ -20,6 +20,7 @@ import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { TranslationFunctions } from "../../i18n/i18n-types";
 import {
   DaimoContact,
   EAccountContact,
@@ -27,6 +28,7 @@ import {
   getDaimoContactKey,
   useContactSearch,
 } from "../../logic/daimoContacts";
+import { useI18n } from "../../logic/i18n";
 import { ContactsAccess } from "../../logic/systemContacts";
 import { Account } from "../../storage/account";
 import { useKeyboardHeight } from "../../vendor/useKeyboardHeight";
@@ -66,6 +68,7 @@ function SearchResultsScroll({
     contactsPermission?.granted || false,
     mode === "receive"
   );
+  const i18n = useI18n();
 
   const recentsOnly = prefix === "";
 
@@ -83,6 +86,7 @@ function SearchResultsScroll({
           contactsPermission={contactsPermission}
           requestContactsPermission={requestContactsPermission}
           mode={mode}
+          _i18n={i18n}
         />
       )}
       {res.recipients.length > 0 && (
@@ -91,7 +95,12 @@ function SearchResultsScroll({
         </View>
       )}
       {res.recipients.map((r) => (
-        <ContactNav key={getDaimoContactKey(r)} contact={r} mode={mode} />
+        <ContactNav
+          key={getDaimoContactKey(r)}
+          contact={r}
+          mode={mode}
+          _i18n={i18n}
+        />
       ))}
       {res.status === "success" &&
         res.recipients.length === 0 &&
@@ -102,7 +111,8 @@ function SearchResultsScroll({
   );
 }
 
-function NoSearchResults() {
+function NoSearchResults({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.searchResults;
   const nav = useNav();
   const sendPaymentLink = () =>
     nav.navigate("SendTab", {
@@ -114,12 +124,12 @@ function NoSearchResults() {
     <View>
       <Spacer h={16} />
       <TextCenter>
-        <TextLight>No results</TextLight>
+        <TextLight>{i18n.noResults()}</TextLight>
       </TextCenter>
       <Spacer h={32} />
       <ButtonMed
         type="subtle"
-        title="SEND PAYMENT LINK INSTEAD"
+        title={i18n.paymentLinkButton()}
         onPress={sendPaymentLink}
       />
     </View>
@@ -129,9 +139,11 @@ function NoSearchResults() {
 function ContactNav({
   contact,
   mode,
+  _i18n,
 }: {
   contact: DaimoContact;
   mode: "send" | "account" | "receive";
+  _i18n: TranslationFunctions;
 }) {
   const name = getContactName(contact);
   const nav = useNav();
@@ -170,17 +182,22 @@ function ContactNav({
     }
   }, [name, mode]);
 
-  return <SearchResultRow contact={contact} onPress={goToAccount} />;
+  return (
+    <SearchResultRow contact={contact} onPress={goToAccount} _i18n={_i18n} />
+  );
 }
 
 export function SearchResultRow({
   contact,
   onPress,
+  _i18n,
 }: {
   contact: DaimoContact;
   onPress: () => void;
+  _i18n: TranslationFunctions;
 }) {
   const name = getContactName(contact);
+  const i18n = _i18n.searchResults;
 
   const lightText = (function () {
     switch (contact.type) {
@@ -192,10 +209,12 @@ export function SearchResultRow({
         const nowS = now();
         const { lastSendTime, lastRecvTime } = contact;
         const lastSendMessage = lastSendTime
-          ? `Sent ${timeAgo(lastSendTime, nowS, true)}`
+          ? `${i18n.sentAgo({ timeAgo: timeAgo(lastSendTime, nowS, true) })}`
           : undefined;
         const lastRecvMessage = lastRecvTime
-          ? `Received ${timeAgo(lastRecvTime, nowS, true)}`
+          ? `${i18n.receivedAgo({
+              timeAgo: timeAgo(lastRecvTime, nowS, true),
+            })}`
           : undefined;
 
         if ((lastSendTime || 0) > (lastRecvTime || 0)) {
@@ -245,24 +264,27 @@ function ExtraRows({
   contactsPermission,
   requestContactsPermission,
   mode,
+  _i18n,
 }: {
   contactsPermission: Contacts.PermissionResponse;
   requestContactsPermission: () => void;
   mode: "send" | "receive" | "account";
+  _i18n: TranslationFunctions;
 }) {
   const nav = useNav();
+  const i18n = _i18n.searchResults.extra;
 
   return (
     <>
       {!contactsPermission.granted && mode !== "receive" && (
         <ExtraRow
-          title="Send to contact"
+          title={i18n.contact()}
           inside={<Octicons name="person" size={14} color={color.primary} />}
           onPress={requestContactsPermission}
         />
       )}
       <ExtraRow
-        title={mode === "receive" ? "Request via link" : "Send via link"}
+        title={mode === "receive" ? i18n.requestLink() : i18n.sendLink()}
         inside={<Octicons name="link" size={14} color={color.primary} />}
         onPress={() => {
           if (mode === "receive") {
@@ -279,7 +301,7 @@ function ExtraRows({
         }}
       />
       <ExtraRow
-        title={mode === "receive" ? "Show QR code" : "Scan QR code"}
+        title={mode === "receive" ? i18n.showQR() : i18n.scanQR()}
         inside={<Octicons name="apps" size={14} color={color.primary} />}
         onPress={() => {
           if (mode === "receive") {

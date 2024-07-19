@@ -35,12 +35,14 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import { getAccountManager } from "../../../logic/accountManager";
 import {
   EAccountContact,
   addLastTransferTimes,
   getContactName,
 } from "../../../logic/daimoContacts";
+import { useI18n } from "../../../logic/i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getSwapRoute } from "../../../logic/swapRoute";
@@ -83,6 +85,7 @@ function SendScreenInner({
     | DaimoRequestV2Status
     | null;
 
+  const i18n = useI18n();
   const nav = useNav();
   const goHome = useExitToHome();
   const goBack = useCallback(() => {
@@ -140,6 +143,7 @@ function SendScreenInner({
             onCancel={goBack}
             daimoChain={daimoChain}
             defaultHomeCoin={defaultHomeCoin}
+            _i18n={i18n}
           />
         );
       else
@@ -150,7 +154,11 @@ function SendScreenInner({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
+        <ScreenHeader
+          title={i18n.sendTransferScreen.screenHeader()}
+          onBack={goBack}
+          onExit={goHome}
+        />
         <Spacer h={8} />
         {sendDisplay}
       </View>
@@ -163,11 +171,13 @@ function SendChooseAmount({
   daimoChain,
   onCancel,
   defaultHomeCoin,
+  _i18n,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
   defaultHomeCoin: ForeignToken;
+  _i18n: TranslationFunctions;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -190,7 +200,11 @@ function SendChooseAmount({
   let infoBubble = <Spacer h={16} />;
   if (recipient.lastSendTime == null) {
     infoBubble = (
-      <InfoBox title={`First time paying ${getContactName(recipient)}`} />
+      <InfoBox
+        title={_i18n.sendTransferScreen.firstTime({
+          name: getContactName(recipient),
+        })}
+      />
     );
   }
   const hasLinkedAccounts =

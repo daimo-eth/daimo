@@ -12,10 +12,12 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import {
   Account,
   createEmptyAccount,
@@ -32,20 +34,28 @@ import { TextBodyMedium, TextCenter, TextH2 } from "../../shared/text";
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingUseBackup">;
 export function ExistingUseBackupScreen({ route }: Props) {
   const { targetEAcc } = route.params;
+  const i18n = useI18n();
 
   return (
     <View style={ss.container.flexGrow}>
       <OnboardingHeader
-        title="Choose a recovery option"
+        title={i18n.existingUseBackup.screenHeader()}
         onPrev={useExitBack()}
       />
       <Spacer h={16} />
-      <LogInOptions eAcc={targetEAcc} />
+      <LogInOptions eAcc={targetEAcc} _i18n={i18n} />
     </View>
   );
 }
 
-function LogInOptions({ eAcc }: { eAcc: EAccount }) {
+function LogInOptions({
+  eAcc,
+  _i18n,
+}: {
+  eAcc: EAccount;
+  _i18n: TranslationFunctions;
+}) {
+  const i18n = _i18n.existingUseBackup;
   // Passkey, security key: just log in
   const { keyInfo } = useAccountAndKeyInfo();
   const pubKeyHex = assertNotNull(keyInfo?.pubKeyHex, "Missing pubKeyHex");
@@ -85,8 +95,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
         <Spacer h={32} />
         <TextCenter>
           <TextBodyMedium color={color.grayMid}>
-            Log in with a backup key.{"\n"}
-            This adds your device to the account.
+            {i18n.description()}
           </TextBodyMedium>
         </TextCenter>
       </View>
@@ -120,7 +129,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
             )}
             <ButtonBig
               type="subtle"
-              title="LOG IN WITH SEED PHRASE"
+              title={i18n.logInWithSeedPhrase()}
               onPress={chooseSeed}
             />
           </>

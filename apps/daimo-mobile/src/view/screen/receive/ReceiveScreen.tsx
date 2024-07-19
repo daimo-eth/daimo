@@ -29,6 +29,7 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { useI18n } from "../../../logic/i18n";
 import { MoneyEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
@@ -61,6 +62,7 @@ function RequestScreenInner({
   const nav = useNav();
   const goBack = useExitBack();
   const goHome = useExitToHome();
+  const i18n = useI18n().receive;
 
   // Enter amount, autofocus
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -97,7 +99,7 @@ function RequestScreenInner({
   const [as, setAS] = useActStatus("request");
   const sendRequest = async () => {
     textInputRef.current?.blur();
-    setAS("loading", "Requesting...");
+    setAS("loading", i18n.sendRequest.loading());
 
     // Create-request transaction
     const { txHash, pendingRequestStatus } = await createRequestOnChain(
@@ -131,12 +133,12 @@ function RequestScreenInner({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Request from" onBack={goBack || goHome} />
+        <ScreenHeader title={i18n.screenHeader()} onBack={goBack || goHome} />
         <Spacer h={8} />
         {!fulfiller && (
           <InfoBox
-            title="Send a request link"
-            subtitle="Request USDC from someone using any messaging app"
+            title={i18n.sendRequest.title()}
+            subtitle={i18n.sendRequest.subtitle()}
           />
         )}
         <Spacer h={24} />

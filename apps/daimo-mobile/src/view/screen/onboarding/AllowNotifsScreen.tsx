@@ -8,7 +8,9 @@ import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
 import VidBellAnimation from "../../../../assets/onboarding/bell-animation.mp4";
 import { ParamListOnboarding, useOnboardingNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import { useDaimoChain } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
@@ -23,6 +25,7 @@ type Props = NativeStackScreenProps<ParamListOnboarding, "AllowNotifs">;
 export function AllowNotifsScreen({ route }: Props) {
   const { showProgressBar } = route.params;
   const notificationsAccess = useNotificationsAccess();
+  const i18n = useI18n();
 
   const daimoChain = useDaimoChain();
   const [displayMacVideo, setDisplayMacVideo] = useState<boolean>(false);
@@ -44,11 +47,15 @@ export function AllowNotifsScreen({ route }: Props) {
 
   return (
     <View style={ss.container.flexGrow}>
-      <OnboardingHeader title="Notifications" {...{ steps, activeStep }} />
+      <OnboardingHeader
+        title={i18n.allowNotifs.screenHeader()}
+        {...{ steps, activeStep }}
+      />
       <RequestNotificationsPage
         displayMacVideo={displayMacVideo}
         requestPermission={requestNotificationsPermission}
         skip={finish}
+        _i18n={i18n}
       />
     </View>
   );
@@ -58,11 +65,14 @@ function RequestNotificationsPage({
   requestPermission,
   skip,
   displayMacVideo,
+  _i18n,
 }: {
   requestPermission: () => Promise<void>;
   skip: () => void;
   displayMacVideo: boolean;
+  _i18n: TranslationFunctions;
 }) {
+  const i18n = _i18n.allowNotifs;
   return (
     <View style={ss.container.topBottom}>
       <View key="top" style={ss.container.padH24}>
@@ -72,13 +82,13 @@ function RequestNotificationsPage({
           <CoverVideo video={VidBellAnimation} />
         )}
         <Spacer h={32} />
-        <Instructions />
+        <Instructions _i18n={_i18n} />
       </View>
       <View key="bottom" style={ss.container.padH24}>
         {displayMacVideo ? (
           <>
             <Spacer h={16} />
-            <TextButton title="Skip" onPress={skip} />
+            <TextButton title={i18n.skipButton()} onPress={skip} />
             <Spacer h={16} />
           </>
         ) : (
@@ -86,7 +96,7 @@ function RequestNotificationsPage({
             <Spacer h={16} />
             <ButtonBig
               type="primary"
-              title="Allow Notifications"
+              title={i18n.allowButton()}
               onPress={requestPermission}
             />
             <Spacer h={16} />
@@ -99,11 +109,11 @@ function RequestNotificationsPage({
   );
 }
 
-function Instructions() {
+function Instructions({ _i18n }: { _i18n: TranslationFunctions }) {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        You will only be notified about activity on your account.
+        {_i18n.allowNotifs.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );

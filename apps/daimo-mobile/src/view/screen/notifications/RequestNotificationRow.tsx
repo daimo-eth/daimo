@@ -20,6 +20,7 @@ import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { DaimoContact } from "../../../logic/daimoContacts";
+import { useI18n } from "../../../logic/i18n";
 import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { ContactBubble } from "../../shared/Bubble";
@@ -132,12 +133,13 @@ function RequestNotificationMessage({
   otherAcc: EAccount;
   reqStatus: DaimoRequestV2Status;
 }) {
+  const i18n = useI18n().requestNotification;
   const otherAccVerb =
     otherAcc.label === AddrLabel.RequestLink
-      ? "via"
+      ? i18n.msgVerb.via()
       : type === "recipient"
-      ? "from"
-      : "for";
+      ? i18n.msgVerb.from()
+      : i18n.msgVerb.for();
 
   const otherAccText = (
     <TextBody color={color.midnight}>{getAccountName(otherAcc)}</TextBody>
@@ -146,47 +148,60 @@ function RequestNotificationMessage({
   const dollars = (
     <TextBody color={color.midnight}>${reqStatus.link.dollars}</TextBody>
   );
-
+  const requestStr = i18n.requestState.request();
   switch (reqStatus.status) {
     case DaimoRequestState.Pending:
     case DaimoRequestState.Created:
       return type === "recipient" ? (
+        // You requested...
         <>
-          You requested {dollars} {otherAccVerb} {otherAccText}
+          {i18n.requestState.created.self()} {dollars} {otherAccVerb}{" "}
+          {otherAccText}
         </>
       ) : (
+        // ...requested $
         <>
-          {otherAccText} requested {dollars}
+          {otherAccText} {i18n.requestState.created.other()} {dollars}
         </>
       );
     case DaimoRequestState.Fulfilled:
       return type === "recipient" ? (
+        // ... fulfilled your $ request
         <>
-          {otherAccText} fulfilled your {dollars} request
+          {otherAccText} {i18n.requestState.fulfilled.self()} {dollars}{" "}
+          {requestStr}
         </>
       ) : (
+        // You fulfilled a request from {otherAccText} for $
         <>
-          You fulfilled {otherAccText}'s {dollars} request
+          {i18n.requestState.fulfilled.other()} {otherAccText}{" "}
+          {i18n.msgVerb.for()} {dollars}
         </>
       );
     case DaimoRequestState.Cancelled:
       return type === "recipient" ? (
+        // You cancelled your $ request
         <>
-          You cancelled your {dollars} request {otherAccVerb} {otherAccText}
+          {i18n.requestState.cancelled.self()} {dollars} {requestStr}{" "}
+          {otherAccVerb} {otherAccText}
         </>
       ) : (
+        // ...cancelled their request for $
         <>
-          {otherAccText} cancelled their {dollars} request
+          {otherAccText} {i18n.requestState.cancelled.other()} {dollars}
         </>
       );
     case DaimoRequestState.Declined:
       return type === "recipient" ? (
+        /// ...declined your request for $
         <>
-          {otherAccText} declined your {dollars} request
+          {otherAccText} {i18n.requestState.declined.self()} {dollars}
         </>
       ) : (
+        // You declined a request from {otherAccText} for $
         <>
-          You declined {otherAccText}'s {dollars} request
+          {i18n.requestState.declined.other()} {otherAccText}{" "}
+          {i18n.msgVerb.for()} {dollars}
         </>
       );
   }

@@ -6,6 +6,7 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./AddKeySlotButton";
 import { useNav } from "../../../common/nav";
+import { useI18n } from "../../../logic/i18n";
 import { parseAddDeviceString } from "../../../logic/key";
 import { Account } from "../../../storage/account";
 import { Scanner } from "../../shared/Scanner";
@@ -44,18 +45,16 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
     }
   };
 
+  const i18n = useI18n().addDevice;
   const nav = useNav();
   const goBack = () => nav.goBack();
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Add Device" onBack={goBack} />
+      <ScreenHeader title={i18n.screenHeader()} onBack={goBack} />
       <Spacer h={32} />
       <View style={ss.container.padH16}>
-        <TextPara>
-          Link a new device to your account by scanning its QR code during
-          setup.
-        </TextPara>
+        <TextPara>{i18n.headerDescription()}</TextPara>
       </View>
       <Spacer h={32} />
       {barCodeStatus === "idle" && (
@@ -63,20 +62,24 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
       )}
       {barCodeStatus === "error" && (
         <TextCenter>
-          <TextH2>Error Parsing QR Code</TextH2>
+          <TextH2>{i18n.scanQR.error()}</TextH2>
         </TextCenter>
       )}
       {barCodeStatus === "scanned" && newKeyAndSlot && (
         <>
           <TextCenter>
-            <TextH2>Scanned {getSlotLabel(newKeyAndSlot.slot)}</TextH2>
+            <TextH2>
+              {i18n.scanQR.scanned({ slot: getSlotLabel(newKeyAndSlot.slot) })}
+            </TextH2>
           </TextCenter>
           <Spacer h={32} />
           <AddKeySlotButton
             account={account}
             slot={newKeyAndSlot.slot}
             knownPubkey={newKeyAndSlot.key}
-            buttonTitle={`Add ${getSlotLabel(newKeyAndSlot.slot)}`}
+            buttonTitle={i18n.scanQR.add({
+              slot: getSlotLabel(newKeyAndSlot.slot),
+            })}
           />
         </>
       )}

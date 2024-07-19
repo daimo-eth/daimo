@@ -11,6 +11,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
+import { useI18n } from "../../../logic/i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
@@ -29,6 +30,7 @@ export function SwapNotificationRow({
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 
   const dispatcher = useContext(DispatcherContext);
+  const i18n = useI18n().swapNotification;
 
   const ts = timeAgo(notif.timestamp, now(), true);
 
@@ -54,7 +56,7 @@ export function SwapNotificationRow({
   const copy = (() => {
     return (
       <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-        Accept {readableAmount} {coin.name} from{" "}
+        {i18n.msg({ readableAmount, coinName: coin.name })}
         <TextBody color={color.midnight}>{accName}</TextBody>
       </TextBody>
     );

@@ -4,6 +4,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { useNav } from "../../../common/nav";
+import { useI18n } from "../../../logic/i18n";
 import { InvitesNotification } from "../../../logic/inAppNotifications";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody } from "../../shared/text";
@@ -14,6 +15,7 @@ export function InvitesNotificationRow({
   notif: InvitesNotification;
 }) {
   const nav = useNav();
+  const i18n = useI18n().invitesNotification;
 
   const inviteCount = notif.inviteLinkStatus.usesLeft || 0;
 
@@ -28,8 +30,7 @@ export function InvitesNotificationRow({
             <TextBody>✨</TextBody>
           </View>
           <TextBody color={color.midnight}>
-            You have {inviteCount} invite{inviteCount === 1 ? "" : "s"}{" "}
-            available.
+            {i18n.description({ inviteCount })}
           </TextBody>
         </View>
         <View>

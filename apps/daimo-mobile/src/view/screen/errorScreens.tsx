@@ -50,7 +50,7 @@ export function renderErrorFallback({
       <View style={ss.container.padH8}>
         <Spacer h={192} />
         <ErrorBanner
-          displayTitle="An error occurred"
+          displayTitle="An error occurred" // TODO: i18n
           error={error}
           onGoHome={resetErrorBoundary}
         />

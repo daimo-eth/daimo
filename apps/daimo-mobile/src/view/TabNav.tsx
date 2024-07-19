@@ -68,7 +68,9 @@ import {
   useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
+import { TranslationFunctions } from "../i18n/i18n-types";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
+import { useI18n } from "../logic/i18n";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -134,13 +136,13 @@ function MainTabNavigator() {
     // keyboard transitions, making the transitions look a bit janky.
     tabBarHideOnKeyboard: Platform.OS === "android",
   };
-
+  const i18n = useI18n();
   const ins = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
-      screenOptions={(props) => getTabOptions(ins, props)}
+      screenOptions={(props) => getTabOptions(ins, props, i18n)}
       backBehavior="initialRoute"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
@@ -259,8 +261,10 @@ function errorBottomSheetInterpolator({
 
 function getTabOptions(
   safeInsets: EdgeInsets,
-  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
+  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> },
+  _i18n: TranslationFunctions
 ): BottomTabNavigationOptions {
+  const i18n = _i18n.tabNav;
   const opts: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
@@ -289,21 +293,29 @@ function getTabOptions(
   };
   switch (route.name) {
     case "DepositTab":
-      return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
+      return {
+        title: i18n.deposit(),
+        tabBarIcon: getIcon("plus-circle"),
+        ...opts,
+      };
     case "InviteTab":
-      return { title: "Invite", tabBarIcon: getIcon("mail"), ...opts };
+      return { title: i18n.invite(), tabBarIcon: getIcon("mail"), ...opts };
     case "HomeTab":
       return {
-        title: "Home",
+        title: i18n.home(),
         tabBarIcon: ({ color }) => {
           return <IconHome color={color} />;
         },
         ...opts,
       };
     case "SendTab":
-      return { title: "Send", tabBarIcon: getIcon("paper-airplane"), ...opts };
+      return {
+        title: i18n.send(),
+        tabBarIcon: getIcon("paper-airplane"),
+        ...opts,
+      };
     case "SettingsTab":
-      return { title: "Settings", tabBarIcon: getIcon("gear"), ...opts };
+      return { title: i18n.settings(), tabBarIcon: getIcon("gear"), ...opts };
     default:
       assertUnreachable(route.name);
   }

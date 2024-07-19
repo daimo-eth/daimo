@@ -26,6 +26,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { ParamListHome, useExitBack } from "../../../common/nav";
+import { useI18n } from "../../../logic/i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { getRpcFunc } from "../../../logic/trpc";
@@ -56,6 +57,7 @@ export default function NoteScreen(props: Props) {
 function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const { link } = route.params;
   console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
+  const i18n = useI18n().note;
 
   // Connect to the relevant DaimoEphemeralNotes[V2] contract info
   const chain = daimoChainFromId(account.homeChainId);
@@ -65,11 +67,11 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const title = (function (): string {
     switch (noteStatus?.status) {
       case DaimoNoteState.Claimed:
-        return "Accepted Link";
+        return i18n.accepted.link();
       case DaimoNoteState.Cancelled:
-        return "Cancelled Link";
+        return i18n.cancelled.link();
       default:
-        return "Payment Link";
+        return i18n.payment();
     }
   })();
 
@@ -81,7 +83,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
         {noteFetch.error && (
           <ErrorBanner
             error={noteFetch.error}
-            displayTitle="Payment link invalid"
+            displayTitle={i18n.invalid()}
             displayMessage={noteFetch.error.message}
           />
         )}
@@ -117,11 +119,14 @@ function NoteDisplayInner({
   hideAmount?: boolean;
   leaveScreen?: () => void;
 }) {
+  const i18n = useI18n().note;
+  const i18nButton = useI18n().shared;
+
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address
-      ? "You sent"
-      : getAccountName(noteStatus.sender) + " sent";
+      ? i18n.send.self()
+      : i18n.send.other({ name: getAccountName(noteStatus.sender) });
 
   // The note itself and signature
   const ephemeralOwner = noteStatus.ephemeralOwner!;
@@ -143,13 +148,13 @@ function NoteDisplayInner({
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
   const customHandler = isV2RecipientClaim
     ? async (setAS: SetActStatus) => {
-        setAS("loading", "Accepting link...");
+        setAS("loading", i18n.accept.loading());
         const txHash = await rpcFunc.claimEphemeralNoteSponsored.mutate({
           ephemeralOwner,
           recipient: account.address,
           signature: ephemeralSignature,
         });
-        setAS("success", "Accepted link");
+        setAS("success", i18n.accept.link());
         return { txHash } as PendingOp;
       }
     : undefined;
@@ -232,16 +237,18 @@ function NoteDisplayInner({
     switch (noteStatus.status) {
       case DaimoNoteState.Claimed:
         return (
-          <TextBold>Accepted by {getAccountName(noteStatus.claimer!)}</TextBold>
+          <TextBold>
+            {i18n.accepted.long({ name: getAccountName(noteStatus.claimer!) })}
+          </TextBold>
         );
       case DaimoNoteState.Cancelled:
         if (isOwnSentNote) {
-          return <TextBody>You cancelled this payment link</TextBody>;
+          return <TextBody>{i18n.cancelled.longSelf()}</TextBody>;
         } else {
-          return <TextError>Cancelled by sender</TextError>;
+          return <TextError>{i18n.cancelled.longOther()}</TextError>;
         }
       case DaimoNoteState.Pending: // Note is not yet onchain.
-        return <TextBody>Payment link not found. Pending?</TextBody>;
+        return <TextBody>{i18n.pending.long()}</TextBody>;
       case DaimoNoteState.Confirmed: // Note is onchain, claimable, see below.
         break;
       default:
@@ -252,11 +259,11 @@ function NoteDisplayInner({
     switch (status) {
       case "idle":
         if (netRecv === 0) {
-          return `Gas too high to claim`;
+          return i18n.gasTooHigh();
         } else if (isOwnSentNote) {
-          return `Cancel this link, reclaiming ${netDollarsReceivedStr}`;
+          return i18n.cancel.long({ dollars: netDollarsReceivedStr });
         } else {
-          return `Accept this link, receiving ${netDollarsReceivedStr}`;
+          return i18n.accept.long({ dollars: netDollarsReceivedStr });
         }
       case "loading":
         return message;
@@ -279,7 +286,7 @@ function NoteDisplayInner({
           return (
             <ButtonBig
               type="primary"
-              title="Cancel"
+              title={i18nButton.buttonAction.cancel()}
               onPress={exec}
               disabled={!isClaimable || netRecv === 0}
               showBiometricIcon
@@ -289,7 +296,7 @@ function NoteDisplayInner({
           return (
             <ButtonBig
               type="primary"
-              title="Accept"
+              title={i18nButton.buttonAction.accept()}
               onPress={exec}
               disabled={!isClaimable || netRecv === 0}
             />
@@ -298,9 +305,17 @@ function NoteDisplayInner({
       case "loading":
         return <ActivityIndicator size="large" />;
       case "success":
-        return <ButtonBig type="success" title="Success" disabled />;
+        return (
+          <ButtonBig
+            type="success"
+            title={i18nButton.buttonStatus.success()}
+            disabled
+          />
+        );
       case "error":
-        return <ButtonBig type="danger" title="Error" disabled />;
+        return (
+          <ButtonBig type="danger" title={i18nButton.buttonStatus.error()} />
+        );
     }
   })();
 

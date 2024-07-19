@@ -17,6 +17,8 @@ import { Hex } from "viem";
 
 import { useSendAsync } from "../../../action/useSendAsync";
 import { env } from "../../../env";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { useI18n } from "../../../logic/i18n";
 import { getWrappedMnemonicSigner } from "../../../logic/key";
 import { getWrappedPasskeySigner } from "../../../logic/passkey";
 import {
@@ -41,6 +43,7 @@ export function LogInFromKeyButton({
   daimoChain: DaimoChain;
   useSecurityKey: boolean;
 }) {
+  const i18n = useI18n();
   const wrappedSigner = getWrappedPasskeySigner(daimoChain, useSecurityKey);
 
   const signer = useMemo(() => {
@@ -50,8 +53,9 @@ export function LogInFromKeyButton({
       return { type: "passkey", account, wrappedSigner } as PasskeySigner;
     }
   }, [account, useSecurityKey]);
-
-  const title = `LOG IN WITH ${useSecurityKey ? "SECURITY KEY" : "PASSKEY"}`;
+  const title = i18n.logIn.button({
+    keyType: useSecurityKey ? "SECURITY KEY" : "PASSKEY",
+  });
   return <LogInButton {...{ account, pubKeyHex, daimoChain, signer, title }} />;
 }
 
@@ -61,12 +65,15 @@ export function LogInFromSeedButton({
   pubKeyHex,
   daimoChain,
   mnemonic,
+  _i18n,
 }: {
   account: Account;
   pubKeyHex: Hex;
   daimoChain: DaimoChain;
   mnemonic: string;
+  _i18n: TranslationFunctions;
 }) {
+  const i18n = _i18n.logIn;
   // Figure out which slot the mnmemonic (seed phrase) key is in
   const parsedKey = tryOrNull(() => mnemonicToPublicKey(mnemonic));
   const keySlot = account.accountKeys.find(
@@ -92,11 +99,11 @@ export function LogInFromSeedButton({
   if (parsedKey == null) {
     return <ButtonBig type="primary" title="LOG IN" disabled />;
   } else if (signer == null) {
-    return <ErrorRowCentered message="Seed phrase not on account. Removed?" />;
+    return <ErrorRowCentered message={i18n.fromSeed.error()} />;
   } else {
     return (
       <LogInButton
-        title="LOG IN WITH SEED PHRASE"
+        title={i18n.fromSeed.button()}
         {...{ account, pubKeyHex, daimoChain, signer }}
       />
     );

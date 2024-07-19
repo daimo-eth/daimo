@@ -11,6 +11,7 @@ import { PressableText } from "./PressableText";
 import { SearchResults } from "./SearchResults";
 import Spacer from "./Spacer";
 import { ss } from "./style";
+import { useI18n } from "../../logic/i18n";
 import { useContactsPermission } from "../../logic/systemContacts";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
@@ -30,12 +31,13 @@ export function SearchScreen({
   textInputRef,
   mode,
 }: SearchScreenProps) {
+  const i18n = useI18n().searchScreen;
   const [inputFocused, setInputFocused] = useState(autoFocus ?? false);
   const contactsAccess = useContactsPermission();
 
   const placeHolderText = contactsAccess.permission?.granted
-    ? "Search user, ENS, contact, or email..."
-    : "Search user, ENS, email, or phone...";
+    ? i18n.placeholderWithContact()
+    : i18n.placeholderWithoutContact();
 
   const handleFocus = () => {
     setInputFocused(true);

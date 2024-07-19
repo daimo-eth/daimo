@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 import { View } from "react-native";
 
+import { useI18n } from "../../logic/i18n";
 import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { ss } from "../shared/style";
@@ -15,6 +16,7 @@ export function HelpBottomSheet({
   title: string;
   onPress(): void;
 }) {
+  const i18n = useI18n().helpBottom;
   return (
     <View style={ss.container.padH16}>
       <Spacer h={16} />
@@ -24,7 +26,7 @@ export function HelpBottomSheet({
       <Spacer h={24} />
       {content}
       <Spacer h={32} />
-      <ButtonMed title="GOT IT" onPress={onPress} type="subtle" />
+      <ButtonMed title={i18n.gotItButton()} onPress={onPress} type="subtle" />
       <Spacer h={48} />
     </View>
   );

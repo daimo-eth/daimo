@@ -26,6 +26,7 @@ import {
 } from "../../../action/useSendAsync";
 import { useNav } from "../../../common/nav";
 import { ExternalAction } from "../../../logic/externalAction";
+import { useI18n } from "../../../logic/i18n";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -59,6 +60,7 @@ function NoteActionButtonInner({
   memo?: string;
   externalAction: ExternalAction;
 }) {
+  const i18n = useI18n().noteAction;
   const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
   const noteId = getNoteId(noteAddress);
 
@@ -124,7 +126,7 @@ function NoteActionButtonInner({
 
   const sendDisabledReason =
     account.lastBalance < dollarsToAmount(cost.totalDollars)
-      ? "Insufficient funds"
+      ? i18n.disabledReason.insufficientFunds()
       : undefined;
   const sendDisabled = sendDisabledReason != null || dollars === 0;
 
@@ -136,9 +138,11 @@ function NoteActionButtonInner({
         if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         }
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
+        return i18n.statusMsg.totalDollars({
+          dollars: getAmountText({
+            dollars: cost.totalDollars,
+          }),
+        });
       case "loading":
         return message;
       case "error":
@@ -172,11 +176,11 @@ function NoteActionButtonInner({
   const externalActionButtonTitle = (function () {
     switch (externalAction.type) {
       case "phoneNumber":
-        return "SEND SMS";
+        return i18n.externalAction.sms();
       case "email":
-        return "SEND MAIL";
+        return i18n.externalAction.email();
       case "share":
-        return "SEND PAYMENT LINK";
+        return i18n.externalAction.paymentLink();
     }
   })();
 
@@ -194,7 +198,7 @@ function NoteActionButtonInner({
         return (
           <LongPressBigButton
             type="primary"
-            title="HOLD TO CONFIRM"
+            title={i18n.holdButton()}
             onPress={exec}
             disabled={sendDisabled}
             duration={400}

@@ -20,6 +20,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
+import { useI18n } from "../../../logic/i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
@@ -33,6 +34,7 @@ export function FulfillRequestButton({
   account: Account;
   requestStatus: DaimoRequestV2Status;
 }) {
+  const i18n = useI18n().fulfillRequest;
   const requestIdString = requestStatus.link.id;
   const dollars = Number(requestStatus.link.dollars);
 
@@ -77,13 +79,13 @@ export function FulfillRequestButton({
 
   const sendDisabledReason = (() => {
     if (requestStatus.status === DaimoRequestState.Fulfilled)
-      return "Request already fulfilled";
+      return i18n.disabledReason.fulfilled();
     else if (requestStatus.status === DaimoRequestState.Cancelled)
-      return "Request cancelled";
+      return i18n.disabledReason.cancelled();
     else if (requestStatus.recipient.addr === account.address)
-      return "Can't send to yourself";
+      return i18n.disabledReason.self();
     else if (account.lastBalance < dollarsToAmount(cost.totalDollars))
-      return "Insufficient funds";
+      return i18n.disabledReason.insufficientFunds();
     else return undefined;
   })();
 
@@ -93,7 +95,7 @@ export function FulfillRequestButton({
       case "error":
         return (
           <LongPressBigButton
-            title="HOLD TO FULFILL"
+            title={i18n.holdButton()}
             onPress={sendDisabledReason != null ? undefined : exec}
             type="primary"
             disabled={sendDisabledReason != null}
@@ -113,10 +115,12 @@ export function FulfillRequestButton({
       case "idle":
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return "Payments are public";
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
+        if (dollars === 0) return i18n.statusMsg.paymentsPublic();
+        return i18n.statusMsg.totalDollars({
+          dollars: getAmountText({
+            dollars: cost.totalDollars,
+          }),
+        });
       case "loading":
         return message;
       case "error":

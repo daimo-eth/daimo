@@ -29,6 +29,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
+import { useI18n } from "../../logic/i18n";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { useWarmDeviceKeySenderCache } from "../../logic/opSender";
 import { useContactsPermission } from "../../logic/systemContacts";
@@ -290,6 +291,8 @@ function AmountAndButtons({ account }: { account: Account }) {
 
 function PendingTag({ pendingDollars }: { pendingDollars: string }) {
   const nav = useNav();
+  const i18n = useI18n().home;
+
   const onPress = () => nav.navigate("Notifications");
   return (
     <Pressable onPress={onPress} hitSlop={8}>
@@ -305,7 +308,7 @@ function PendingTag({ pendingDollars }: { pendingDollars: string }) {
           }}
         >
           <TextBtnCaps color={color.grayDark}>
-            + ${pendingDollars} PENDING
+            {i18n.pending({ pendingDollars })}
           </TextBtnCaps>
         </View>
       )}
@@ -356,6 +359,7 @@ function IconButton({
 
 function CompleteOnboarding() {
   const dispatcher = useContext(DispatcherContext);
+  const i18n = useI18n().home;
 
   const openChecklist = useCallback(() => {
     dispatcher.dispatch({ name: "onboardingChecklist" });
@@ -376,7 +380,7 @@ function CompleteOnboarding() {
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />
-        <DaimoText variant="body">Finish setting up your account</DaimoText>
+        <DaimoText variant="body">{i18n.finishAccountSetUp()}</DaimoText>
       </View>
       <Octicons size={24} color={color.primary} name="arrow-right" />
     </Pressable>

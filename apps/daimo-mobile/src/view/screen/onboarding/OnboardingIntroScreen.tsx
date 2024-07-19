@@ -20,11 +20,13 @@ import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
+import { TranslationFunctions } from "../../../i18n/i18n-types";
 import {
   getAccountManager,
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
@@ -41,6 +43,7 @@ const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
+  const i18n = useI18n();
 
   // Create new enclave key in background if we don't have one.
   const { keyInfo } = useAccountAndKeyInfo();
@@ -86,18 +89,18 @@ export function OnboardingIntroScreen() {
           />
         </View>
         <Spacer h={isCompact ? 24 : 32} />
-        <IntroRows />
+        <IntroRows _i18n={i18n} />
       </View>
       <View style={styles.introButtonsCenter}>
         <View style={styles.introButtonsWrap}>
           <ButtonBig
             type="primary"
-            title="ACCEPT INVITE"
+            title={i18n.onboardingIntro.acceptInviteButton()}
             onPress={pasteInviteLink}
           />
           <Spacer h={16} />
           <TextButton
-            title="ALREADY HAVE AN ACCOUNT?"
+            title={i18n.onboardingIntro.alreadyHaveAccountButton()}
             onPress={goToUseExisting}
           />
           <Spacer h={16} />
@@ -113,26 +116,27 @@ const icons = {
   "intro-on-ethereum": IntroIconOnEthereum,
 };
 
-function IntroRows() {
+function IntroRows({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.onboardingIntro.rows;
   return (
     <View style={styles.introRows}>
-      <IntroRow icon="intro-your-keys" title="Your keys, your coins">
-        <TextBody color={color.gray3}>USDC on Base.</TextBody>
+      <IntroRow icon="intro-your-keys" title={i18n.selfCustody.title()}>
+        <TextBody color={color.gray3}>
+          {i18n.selfCustody.description()}
+        </TextBody>
         <HelpButton
-          title="Learn more"
-          helpTitle="How does USDC work?"
-          helpContent={<HelpModalUSDC />}
+          title={i18n.help.button()}
+          helpTitle={i18n.help.description()}
+          helpContent={<HelpModalUSDC _i18n={_i18n} />}
         />
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-everywhere" title="Works everywhere">
-        <TextBody color={color.gray3}>
-          Instant, 24/7 transfers to any contact
-        </TextBody>
+      <IntroRow icon="intro-everywhere" title={i18n.everywhere.title()}>
+        <TextBody color={color.gray3}>{i18n.everywhere.description()}</TextBody>
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-on-ethereum" title="Runs on Ethereum">
-        <TextBody color={color.gray3}>Daimo runs on Base, a rollup</TextBody>
+      <IntroRow icon="intro-on-ethereum" title={i18n.onEthereum.title()}>
+        <TextBody color={color.gray3}>{i18n.onEthereum.description()}</TextBody>
       </IntroRow>
     </View>
   );
@@ -163,20 +167,18 @@ function IntroRow({
   );
 }
 
-function HelpModalUSDC() {
+function HelpModalUSDC({ _i18n }: { _i18n: TranslationFunctions }) {
+  const i18n = _i18n.onboardingIntro.helpModalUSDC;
   return (
     <View>
-      <TextLight>
-        USDC is a regulated, digital currency that can always be redeemed 1:1
-        for US dollars.
-      </TextLight>
+      <TextLight>{i18n.description()}</TextLight>
       <Spacer h={24} />
       <TextLight>
-        Learn more about USDC{" "}
+        {i18n.learnMore()}
         <TextLink
           onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
         >
-          here
+          {i18n.here()}
         </TextLink>
         .
       </TextLight>

@@ -1,15 +1,15 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import { getLocales } from "expo-localization";
 import { StatusBar } from "expo-status-bar";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { localStorageDetector } from "typesafe-i18n/detectors";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
 import TypesafeI18n from "./i18n/i18n-react";
-import { detectLocale } from "./i18n/i18n-util";
+import { isLocale } from "./i18n/i18n-util";
 import { useAccount } from "./logic/accountManager";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
@@ -18,8 +18,10 @@ import { renderErrorFallback } from "./view/screen/errorScreens";
 import { color } from "./view/shared/style";
 import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
 
-// i18n locale
-const detectedLocale = detectLocale(localStorageDetector);
+// const DEFAULT_LOCALE =
+//   getLocales()
+//     .map((it) => it.languageTag)
+//     .find(isLocale) ?? "en";
 
 export default function App() {
   const account = useAccount();
@@ -38,20 +40,24 @@ export default function App() {
   // Global dispatcher
   const dispatcher = useMemo(() => new Dispatcher(), []);
 
+  // Locale for i18n
+  // const locale = useLocale();
+  const locale = "en";
+
   return (
     <RpcProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer theme={theme}>
           <DispatcherContext.Provider value={dispatcher}>
-            <ErrorBoundary fallbackRender={renderErrorFallback}>
-              <SafeAreaProvider>
-                <TypesafeI18n locale={detectedLocale}>
+            <TypesafeI18n locale={locale}>
+              <ErrorBoundary fallbackRender={renderErrorFallback}>
+                <SafeAreaProvider>
                   <TabNav />
                   <StatusBar style="auto" />
                   <GlobalBottomSheet />
-                </TypesafeI18n>
-              </SafeAreaProvider>
-            </ErrorBoundary>
+                </SafeAreaProvider>
+              </ErrorBoundary>
+            </TypesafeI18n>
           </DispatcherContext.Provider>
         </NavigationContainer>
       </GestureHandlerRootView>

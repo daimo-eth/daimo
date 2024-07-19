@@ -26,6 +26,7 @@ import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
 import { getCachedEAccount } from "../../../logic/addr";
+import { useI18n } from "../../../logic/i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
@@ -63,6 +64,7 @@ export function HistoryListSwipe({
   otherAcc?: EAccount;
 }) {
   const ins = useSafeAreaInsets();
+  const i18n = useI18n().historyList;
 
   // Get relevant transfers in reverse chronological order
   let ops = account.recentTransfers.slice().reverse();
@@ -84,7 +86,7 @@ export function HistoryListSwipe({
       <View>
         <Spacer h={16} />
         <TextCenter>
-          <TextLight>No transactions yet</TextLight>
+          <TextLight>{i18n.empty()}</TextLight>
         </TextCenter>
       </View>
     );
@@ -101,7 +103,10 @@ export function HistoryListSwipe({
 
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
-    const title = otherAcc == null ? "Recent activity" : `Between you`;
+    const title =
+      otherAcc == null
+        ? i18n.screenHeader.default()
+        : i18n.screenHeader.other();
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />
@@ -178,6 +183,7 @@ function TransferClogRow({
   showDate?: boolean;
 }) {
   const address = account.address;
+  const i18n = useI18n().historyList;
 
   assert(transferClog.amount > 0);
   const [from, to] = getDisplayFromTo(transferClog);
@@ -215,7 +221,7 @@ function TransferClogRow({
     transferClog.noteStatus.claimer?.addr === address
   ) {
     // Special case: we cancelled our own payment link
-    opTitle = "cancelled link";
+    opTitle = i18n.op.cancelledLink();
   }
 
   const opMemo = getSynthesizedMemo(
@@ -280,13 +286,14 @@ function TransferAmountDate({
   showDate?: boolean;
   isPending?: boolean;
 }) {
+  const i18n = useI18n().historyList;
   const dollarStr = getAmountText({ amount: BigInt(Math.abs(amount)) });
   const sign = amount < 0 ? "-" : "+";
   const amountColor = amount < 0 ? color.midnight : color.success;
 
   let timeStr: string;
   if (isPending) {
-    timeStr = "Pending";
+    timeStr = i18n.op.pending();
   } else if (showDate) {
     timeStr = new Date(timestamp * 1000).toLocaleString("default", {
       month: "numeric",

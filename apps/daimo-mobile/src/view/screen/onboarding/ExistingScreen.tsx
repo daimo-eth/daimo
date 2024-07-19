@@ -9,6 +9,7 @@ import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
+import { useI18n } from "../../../logic/i18n";
 import { createAddDeviceString } from "../../../logic/key";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
@@ -24,6 +25,7 @@ import { QRCodeBox } from "../QRScreen";
 export function ExistingScreen() {
   // On-chain signing key slot identifies key type (phone, computer, etc)
   const daimoChain = useDaimoChain();
+  const i18n = useI18n().existing;
   const slotType =
     env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
 
@@ -44,11 +46,11 @@ export function ExistingScreen() {
   if (pubKeyHex == null) {
     return (
       <View>
-        <OnboardingHeader title="Existing Account" onPrev={onPrev} />
+        <OnboardingHeader title={i18n.screenHeader()} onPrev={onPrev} />
         <View style={ss.container.padH24}>
           <Spacer h={24} />
           <TextCenter>
-            <TextBody>Generating keys...</TextBody>
+            <TextBody>{i18n.generatingKeys()}</TextBody>
           </TextCenter>
         </View>
       </View>
@@ -57,23 +59,24 @@ export function ExistingScreen() {
 
   return (
     <View>
-      <OnboardingHeader title="Existing Account" onPrev={onPrev} />
+      <OnboardingHeader title={i18n.screenHeader()} onPrev={onPrev} />
       <View style={ss.container.padH24}>
         <Spacer h={16} />
         <QRCodeBox value={createAddDeviceString(pubKeyHex, slotType)} />
         <Spacer h={16} />
         <TextCenter>
-          <TextBodyMedium color={color.grayMid}>
-            Scan this QR code from another device to add this phone to an
-            existing Daimo account.
-          </TextBodyMedium>
+          <TextBodyMedium color={color.grayMid}>{i18n.scanQR()}</TextBodyMedium>
         </TextCenter>
         <Spacer h={24} />
         <TextCenter>
           <TextLight>or</TextLight>
         </TextCenter>
         <Spacer h={24} />
-        <ButtonBig type="primary" title="Use Backup" onPress={onUseBackup} />
+        <ButtonBig
+          type="primary"
+          title={i18n.useBackup()}
+          onPress={onUseBackup}
+        />
       </View>
     </View>
   );
