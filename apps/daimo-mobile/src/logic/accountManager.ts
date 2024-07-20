@@ -20,16 +20,12 @@ import {
   daimoChainFromId,
   daimoChainFromStr,
 } from "@daimo/contract";
-import { getLocales } from "expo-localization";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
-import { Locales } from "../i18n/i18n-types";
-import { detectLocale, isLocale } from "../i18n/i18n-util";
-import { loadLocaleAsync } from "../i18n/i18n-util.async";
 import { cacheEAccounts } from "../logic/addr";
 import {
   EnclaveKeyInfo,
