@@ -24,8 +24,7 @@
     "lint:style": "eslint . --max-warnings=0",
     "fix:deps": "expo install --fix",
     "fix:style": "eslint --fix .",
-    "eas-build-post-install": "cd ../.. && npm run build:mobile",
-    "typesafe-i18n": "typesafe-i18n"
+    "eas-build-post-install": "cd ../.. && npm run build:mobile"
   },
   "dependencies": {
     "@babel/core": "^7.20.0",
@@ -102,7 +101,6 @@
     "stream-browserify": "^3.0.0",
     "text-encoding-polyfill": "^0.6.7",
     "ts-unused-exports": "^9.0.4",
-    "typesafe-i18n": "^5.26.2",
     "typescript": "^5.3.0",
     "viem": "^1.19.15",
     "zod": "^3.23.8"

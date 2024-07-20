@@ -20,13 +20,12 @@ import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { color } from "../../shared/style";
@@ -43,7 +42,6 @@ const isAndroid = Platform.OS === "android";
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
-  const i18n = useI18n();
 
   // Create new enclave key in background if we don't have one.
   const { keyInfo } = useAccountAndKeyInfo();
@@ -89,7 +87,7 @@ export function OnboardingIntroScreen() {
           />
         </View>
         <Spacer h={isCompact ? 24 : 32} />
-        <IntroRows _i18n={i18n} />
+        <IntroRows />
       </View>
       <View style={styles.introButtonsCenter}>
         <View style={styles.introButtonsWrap}>
@@ -116,27 +114,26 @@ const icons = {
   "intro-on-ethereum": IntroIconOnEthereum,
 };
 
-function IntroRows({ _i18n }: { _i18n: TranslationFunctions }) {
-  const i18n = _i18n.onboardingIntro.rows;
+function IntroRows() {
+  const i18 = i18n.onboardingIntro.rows;
+
   return (
     <View style={styles.introRows}>
-      <IntroRow icon="intro-your-keys" title={i18n.selfCustody.title()}>
-        <TextBody color={color.gray3}>
-          {i18n.selfCustody.description()}
-        </TextBody>
+      <IntroRow icon="intro-your-keys" title={i18.selfCustody.title()}>
+        <TextBody color={color.gray3}>{i18.selfCustody.description()}</TextBody>
         <HelpButton
-          title={i18n.help.button()}
-          helpTitle={i18n.help.description()}
-          helpContent={<HelpModalUSDC _i18n={_i18n} />}
+          title={i18.help.button()}
+          helpTitle={i18.help.description()}
+          helpContent={<HelpModalUSDC />}
         />
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-everywhere" title={i18n.everywhere.title()}>
-        <TextBody color={color.gray3}>{i18n.everywhere.description()}</TextBody>
+      <IntroRow icon="intro-everywhere" title={i18.everywhere.title()}>
+        <TextBody color={color.gray3}>{i18.everywhere.description()}</TextBody>
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-on-ethereum" title={i18n.onEthereum.title()}>
-        <TextBody color={color.gray3}>{i18n.onEthereum.description()}</TextBody>
+      <IntroRow icon="intro-on-ethereum" title={i18.onEthereum.title()}>
+        <TextBody color={color.gray3}>{i18.onEthereum.description()}</TextBody>
       </IntroRow>
     </View>
   );
@@ -167,18 +164,18 @@ function IntroRow({
   );
 }
 
-function HelpModalUSDC({ _i18n }: { _i18n: TranslationFunctions }) {
-  const i18n = _i18n.onboardingIntro.helpModalUSDC;
+function HelpModalUSDC() {
+  const i18 = i18n.onboardingIntro.helpModalUSDC;
   return (
     <View>
-      <TextLight>{i18n.description()}</TextLight>
+      <TextLight>{i18.description()}</TextLight>
       <Spacer h={24} />
       <TextLight>
-        {i18n.learnMore()}
+        {i18.learnMore()}
         <TextLink
           onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
         >
-          {i18n.here()}
+          {i18.here()}
         </TextLink>
         .
       </TextLight>
