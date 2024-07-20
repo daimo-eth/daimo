@@ -17,7 +17,7 @@ export async function healthCheck(
   return healthCheckInner(db, watcher, startTimeS, []);
 }
 
-export async function heathDebug(
+export async function healthDebug(
   db: DB,
   watcher: Watcher,
   startTimeS: number,

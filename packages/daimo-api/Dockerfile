@@ -20,7 +20,7 @@ RUN npm run build:api
 EXPOSE 3000
 
 # Set the path to include node_modules/.bin for easier script execution
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 
 # Run the app using tsx
 CMD ["tsx", "--max-old-space-size=7000", "packages/daimo-api/src/server/server.ts"]
