@@ -10,7 +10,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../storage/account";
@@ -23,6 +23,7 @@ type Props = NativeStackScreenProps<
   ParamListOnboarding,
   "CreateSetupKey" | "ExistingSetupKey"
 >;
+const i18 = i18n.onboardingSetupKey;
 export function OnboardingSetupKeyScreen(props: Props) {
   const [loading, setLoading] = useState(false);
   const [askToSetPin, setAskToSetPin] = useState(false);
@@ -30,7 +31,6 @@ export function OnboardingSetupKeyScreen(props: Props) {
 
   const nav = useOnboardingNav();
   const route = useRoute();
-  const i18n = useI18n().onboardingSetupKey;
   const isCreatingAccount = route.name === "CreateSetupKey";
 
   // Nav
@@ -78,7 +78,7 @@ export function OnboardingSetupKeyScreen(props: Props) {
   return (
     <View>
       <OnboardingHeader
-        title={i18n.screenHeader()}
+        title={i18.screenHeader()}
         onPrev={onPrev}
         {...progress}
       />
@@ -94,9 +94,9 @@ export function OnboardingSetupKeyScreen(props: Props) {
         <View style={ss.container.padH16}>
           <TextCenter>
             {!askToSetPin && (
-              <TextBody>{i18n.pin.generateDescription()}</TextBody>
+              <TextBody>{i18.pin.generateDescription()}</TextBody>
             )}
-            {askToSetPin && <TextBody>{i18n.pin.failedDescription()}</TextBody>}
+            {askToSetPin && <TextBody>{i18.pin.failedDescription()}</TextBody>}
           </TextCenter>
         </View>
         <Spacer h={118} />
@@ -105,9 +105,7 @@ export function OnboardingSetupKeyScreen(props: Props) {
           <ButtonBig
             type="primary"
             title={
-              askToSetPin
-                ? i18n.pin.tryAgainButton()
-                : i18n.pin.generateButton()
+              askToSetPin ? i18.pin.tryAgainButton() : i18.pin.generateButton()
             }
             onPress={trySignatureGeneration}
             showBiometricIcon={Platform.OS === "android" && !askToSetPin}

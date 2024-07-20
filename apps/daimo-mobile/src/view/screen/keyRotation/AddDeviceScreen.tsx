@@ -6,7 +6,7 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./AddKeySlotButton";
 import { useNav } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { parseAddDeviceString } from "../../../logic/key";
 import { Account } from "../../../storage/account";
 import { Scanner } from "../../shared/Scanner";
@@ -15,6 +15,8 @@ import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 import { TextCenter, TextH2, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+
+const i18 = i18n.addDevice;
 
 export function AddDeviceScreen() {
   const Inner = useWithAccount(AddDeviceScreenInner);
@@ -45,16 +47,15 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
     }
   };
 
-  const i18n = useI18n().addDevice;
   const nav = useNav();
   const goBack = () => nav.goBack();
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title={i18n.screenHeader()} onBack={goBack} />
+      <ScreenHeader title={i18.screenHeader()} onBack={goBack} />
       <Spacer h={32} />
       <View style={ss.container.padH16}>
-        <TextPara>{i18n.headerDescription()}</TextPara>
+        <TextPara>{i18.headerDescription()}</TextPara>
       </View>
       <Spacer h={32} />
       {barCodeStatus === "idle" && (
@@ -62,14 +63,14 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
       )}
       {barCodeStatus === "error" && (
         <TextCenter>
-          <TextH2>{i18n.scanQR.error()}</TextH2>
+          <TextH2>{i18.scanQR.error()}</TextH2>
         </TextCenter>
       )}
       {barCodeStatus === "scanned" && newKeyAndSlot && (
         <>
           <TextCenter>
             <TextH2>
-              {i18n.scanQR.scanned({ slot: getSlotLabel(newKeyAndSlot.slot) })}
+              {i18.scanQR.scanned(getSlotLabel(newKeyAndSlot.slot))}
             </TextH2>
           </TextCenter>
           <Spacer h={32} />
@@ -77,9 +78,7 @@ function AddDeviceScreenInner({ account }: { account: Account }) {
             account={account}
             slot={newKeyAndSlot.slot}
             knownPubkey={newKeyAndSlot.key}
-            buttonTitle={i18n.scanQR.add({
-              slot: getSlotLabel(newKeyAndSlot.slot),
-            })}
+            buttonTitle={i18.scanQR.add(getSlotLabel(newKeyAndSlot.slot))}
           />
         </>
       )}

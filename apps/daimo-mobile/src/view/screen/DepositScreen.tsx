@@ -23,10 +23,9 @@ import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywher
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
-import { TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
-import { useI18n } from "../../logic/i18n";
 import { useTime } from "../../logic/time";
 import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -38,26 +37,27 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
+const i18 = i18n.deposit;
+
 export default function DepositScreen() {
   const Inner = useWithAccount(DepositScreenInner);
   return <Inner />;
 }
 
 function DepositScreenInner({ account }: { account: Account }) {
-  const i18n = useI18n();
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title={i18n.deposit.screenHeader()} />
+        <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
         <Spacer h={16} />
-        <LandlineList _i18n={i18n} />
+        <LandlineList />
         <Spacer h={24} />
-        <DepositList account={account} _i18n={i18n} />
+        <DepositList account={account} />
         <Spacer h={16} />
-        <WithdrawList _i18n={i18n} />
+        <WithdrawList />
       </ScrollView>
     </View>
   );
@@ -68,7 +68,7 @@ const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
   return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
 };
 
-function LandlineList({ _i18n }: { _i18n: TranslationFunctions }) {
+function LandlineList() {
   const account = useAccount();
   if (account == null) return null;
   const showLandline =
@@ -77,15 +77,10 @@ function LandlineList({ _i18n }: { _i18n: TranslationFunctions }) {
 
   const isLandlineConnected = account.landlineAccounts.length > 0;
 
-  return isLandlineConnected ? (
-    <LandlineAccountList _i18n={_i18n} />
-  ) : (
-    <LandlineConnect _i18n={_i18n} />
-  );
+  return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
 }
 
-function LandlineConnect({ _i18n }: { _i18n: TranslationFunctions }) {
-  const i18n = _i18n.deposit;
+function LandlineConnect() {
   const account = useAccount();
 
   const openLandline = useCallback(() => {
@@ -99,8 +94,8 @@ function LandlineConnect({ _i18n }: { _i18n: TranslationFunctions }) {
 
   return (
     <LandlineOptionRow
-      cta={i18n.landline.cta()}
-      title={i18n.landline.title()}
+      cta={i18.landline.cta()}
+      title={i18.landline.title()}
       // TODO(andrew): Update with real landline logo
       logo={IntroIconEverywhere}
       onClick={openLandline}
@@ -108,7 +103,7 @@ function LandlineConnect({ _i18n }: { _i18n: TranslationFunctions }) {
   );
 }
 
-function LandlineAccountList({ _i18n }: { _i18n: TranslationFunctions }) {
+function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
   const nowS = useTime();
@@ -135,9 +130,7 @@ function LandlineAccountList({ _i18n }: { _i18n: TranslationFunctions }) {
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             cta={`${acc.bankName} ****${acc.lastFour}`}
-            title={_i18n.deposit.landline.optionRowTitle({
-              timeAgo: timeAgo(accCreatedAtS, nowS),
-            })}
+            title={i18.landline.optionRowTitle(timeAgo(accCreatedAtS, nowS))}
             // The bank logo is fetched as a base64 string for a png
             logo={
               { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
@@ -159,10 +152,8 @@ function LandlineAccountList({ _i18n }: { _i18n: TranslationFunctions }) {
 // in Binance app, so we can't include it in the recommendedExchanges API-side.
 function getOnDemandExchanges(
   account: Account,
-  setProgress: (progress: Progress) => void,
-  _i18n: TranslationFunctions
+  setProgress: (progress: Progress) => void
 ) {
-  const i18n = _i18n.deposit;
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
 
   const platform = ["ios", "android"].includes(Platform.OS)
@@ -195,8 +186,8 @@ function getOnDemandExchanges(
 
   return [
     {
-      cta: i18n.binance.cta(),
-      title: i18n.binance.title(),
+      cta: i18.binance.cta(),
+      title: i18.binance.title(),
       logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
       loadingId: progressId,
       isExternal: true,
@@ -208,16 +199,9 @@ function getOnDemandExchanges(
 
 type Progress = "idle" | "loading-binance-deposit" | "started";
 
-function DepositList({
-  account,
-  _i18n,
-}: {
-  account: Account;
-  _i18n: TranslationFunctions;
-}) {
+function DepositList({ account }: { account: Account }) {
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
-  const i18n = _i18n.deposit;
 
   const [progress, setProgress] = useState<Progress>("idle");
 
@@ -236,8 +220,8 @@ function DepositList({
 
   const options: OptionRowProps[] = [
     {
-      cta: i18n.default.cta(),
-      title: i18n.default.title(),
+      cta: i18.default.cta(),
+      title: i18.default.title(),
       logo: defaultLogo,
       sortId: 100, // Standin for infinite
       onClick: openAddressDeposit,
@@ -247,14 +231,14 @@ function DepositList({
   if (!isTestnet) {
     options.push(
       ...account.recommendedExchanges.map((rec) => ({
-        title: rec.title || i18n.loading(),
+        title: rec.title || i18.loading(),
         cta: rec.cta,
         logo: rec.logo || defaultLogo,
         isExternal: true,
         sortId: rec.sortId || 0,
         onClick: () => openExchange(rec.url),
       })),
-      ...getOnDemandExchanges(account, setProgress, _i18n)
+      ...getOnDemandExchanges(account, setProgress)
     );
     options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }
@@ -267,8 +251,8 @@ function DepositList({
           <Spacer h={16} />
           <InfoBox
             icon="check"
-            title={i18n.initiated.title()}
-            subtitle={i18n.initiated.subtitle()}
+            title={i18.initiated.title()}
+            subtitle={i18.initiated.subtitle()}
           />
         </>
       )}
@@ -280,8 +264,7 @@ function DepositList({
   );
 }
 
-function WithdrawList({ _i18n }: { _i18n: TranslationFunctions }) {
-  const i18n = _i18n.deposit;
+function WithdrawList() {
   const dispatcher = useContext(DispatcherContext);
 
   const openAddressWithdraw = () => {
@@ -292,11 +275,11 @@ function WithdrawList({ _i18n }: { _i18n: TranslationFunctions }) {
 
   return (
     <View style={styles.section}>
-      <TextBody color={color.gray3}>{i18n.withdraw.cta()}</TextBody>
+      <TextBody color={color.gray3}>{i18.withdraw.cta()}</TextBody>
       <Spacer h={16} />
       <OptionRow
-        cta={i18n.withdraw.cta()}
-        title={i18n.withdraw.title()}
+        cta={i18.withdraw.cta()}
+        title={i18.withdraw.title()}
         logo={defaultLogo}
         onClick={openAddressWithdraw}
       />

@@ -1,13 +1,12 @@
 import { StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useAccountAndKeyInfo,
 } from "../../../logic/accountManager";
 import { EnclaveKeyInfo } from "../../../logic/enclave";
-import { useI18n } from "../../../logic/i18n";
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
@@ -15,8 +14,9 @@ import { ss } from "../../shared/style";
 import { TextH3, TextPara } from "../../shared/text";
 import { AccountHeader } from "../SettingsScreen";
 
+const i18 = i18n.missingKey;
+
 export function MissingKeyScreen() {
-  const i18n = useI18n();
   const { account, keyInfo } = useAccountAndKeyInfo();
 
   const logout = () => getAccountManager().deleteAccountAndKey();
@@ -24,7 +24,7 @@ export function MissingKeyScreen() {
   if (account == null) return null;
   if (keyInfo == null) return null;
 
-  const [title, desc] = getKeyErrorDesc(account, keyInfo, i18n);
+  const [title, desc] = getKeyErrorDesc(account, keyInfo);
 
   console.log(
     `[ONBOARDING] MISSING KEY ${account.name}, ${account.accountKeys.length} keys, ${account.pendingKeyRotation.length} pending rotations, pubKeyHex: ${keyInfo.pubKeyHex} title: ${title}, desc: ${desc}`
@@ -32,7 +32,7 @@ export function MissingKeyScreen() {
 
   return (
     <View>
-      <OnboardingHeader title={i18n.missingKey.screenHeader()} />
+      <OnboardingHeader title={i18.screenHeader()} />
       <View style={styles.paddedPage}>
         <AccountHeader account={account} noLinkedAccounts />
         <Spacer h={32} />
@@ -42,37 +42,26 @@ export function MissingKeyScreen() {
           <TextPara>{desc}</TextPara>
         </View>
         <Spacer h={32} />
-        <ButtonBig
-          type="primary"
-          title={i18n.missingKey.logOut()}
-          onPress={logout}
-        />
+        <ButtonBig type="primary" title={i18.logOut()} onPress={logout} />
       </View>
     </View>
   );
 }
 
-function getKeyErrorDesc(
-  account: Account,
-  keyInfo: EnclaveKeyInfo,
-  i18n: TranslationFunctions
-) {
+function getKeyErrorDesc(account: Account, keyInfo: EnclaveKeyInfo) {
   console.log(
     `[ONBOARDING] getKeyErrorDesc ${account.name} ${JSON.stringify(keyInfo)}`
   );
   if (keyInfo.pubKeyHex == null) {
-    return [
-      i18n.missingKey.keyErrorDesc.noKey.title(),
-      i18n.missingKey.keyErrorDesc.noKey.desc(),
-    ];
+    return [i18.keyErrorDesc.noKey.title(), i18.keyErrorDesc.noKey.desc()];
   }
   if (account.accountKeys.find((k) => k.pubKey === keyInfo.pubKeyHex) == null) {
     return [
-      i18n.missingKey.keyErrorDesc.removedKey.title(),
-      i18n.missingKey.keyErrorDesc.removedKey.desc(),
+      i18.keyErrorDesc.removedKey.title(),
+      i18.keyErrorDesc.removedKey.desc(),
     ];
   }
-  return [i18n.missingKey.keyErrorDesc.unhandledKeyError.title(), ""];
+  return [i18.keyErrorDesc.unhandledKeyError.title(), ""];
 }
 
 const styles = StyleSheet.create({

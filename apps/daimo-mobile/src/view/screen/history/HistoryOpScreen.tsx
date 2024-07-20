@@ -25,10 +25,9 @@ import {
   useNav,
 } from "../../../common/nav";
 import { env } from "../../../env";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { shareURL } from "../../../logic/externalAction";
-import { useI18n } from "../../../logic/i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../storage/account";
 import { syncFindSameOp } from "../../../sync/sync";
@@ -59,6 +58,8 @@ type Props = NativeStackScreenProps<
 // detail screen.
 export const SetBottomSheetDetailHeight = createContext((height: number) => {});
 
+const i18 = i18n.historyOp;
+
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
   return <Inner {...props} />;
@@ -68,7 +69,6 @@ function HistoryOpScreenInner({
   account,
   route,
 }: Props & { account: Account }) {
-  const i18n = useI18n();
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   // Load the latest version of this op. If the user opens the detail screen
@@ -99,7 +99,7 @@ function HistoryOpScreenInner({
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title={getOpVerb(op, account.address, i18n)}
+        title={getOpVerb(op, account.address)}
         onExit={leaveScreen}
         hideOfflineHeader
       />
@@ -112,7 +112,7 @@ function HistoryOpScreenInner({
         {shareLinkAgain && (
           <ButtonBig
             type="subtle"
-            title={i18n.historyOp.shareLinkAgain()}
+            title={i18.shareLinkAgain()}
             onPress={shareLinkAgain}
           />
         )}
@@ -170,7 +170,6 @@ function LinkToExplorer({
   chainConfig: ChainConfig;
   op: TransferClog;
 }) {
-  const i18n = useI18n().historyOp;
   // Ethreceipts
   const chainId = chainConfig.chainL2.id;
   const { blockNumber, logIndex } = op;
@@ -179,13 +178,12 @@ function LinkToExplorer({
   const openURL = useCallback(() => Linking.openURL(url), [url]);
 
   return (
-    <ButtonBig onPress={openURL} type="subtle" title={i18n.viewReceipt()} />
+    <ButtonBig onPress={openURL} type="subtle" title={i18.viewReceipt()} />
   );
 }
 
 function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const nav = useNav();
-  const i18n = useI18n();
 
   const sentByUs = op.from === account.address;
   const [displayFrom, displayTo] = getDisplayFromTo(op);
@@ -198,8 +196,7 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   // Help button to explain fees, chain, etc
   const dispatcher = useContext(DispatcherContext);
   const onShowHelp = useCallback(
-    () =>
-      showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, coinName, i18n),
+    () => showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, coinName),
     []
   );
 
@@ -209,7 +206,7 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
     <React.Fragment key="coin">{coinName}</React.Fragment>,
     <React.Fragment key="chain">{chainName}</React.Fragment>,
     <React.Fragment key="fees">
-      <TextBodyCaps color={col}>{getFeeText(i18n, op.feeAmount)}</TextBodyCaps>
+      <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
       <Spacer w={8} />
       <Octicons size={16} name="info" color={col} />
     </React.Fragment>,
@@ -258,53 +255,49 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   );
 }
 
-function getOpVerb(
-  op: TransferClog,
-  accountAddress: Address,
-  _i18n: TranslationFunctions
-) {
-  const i18n = _i18n.historyOp.opVerb;
+function getOpVerb(op: TransferClog, accountAddress: Address) {
   const isPayLink = op.type === "createLink" || op.type === "claimLink";
   const sentByUs = op.from === accountAddress;
   const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
 
   if (isPayLink) {
-    if (sentByUs) return i18n.createdLink();
+    if (sentByUs) return i18.opVerb.createdLink();
     const fromUs = op.noteStatus.sender.addr === accountAddress;
-    return fromUs ? i18n.cancelledLink() : i18n.acceptedLink();
+    return fromUs ? i18.opVerb.cancelledLink() : i18.opVerb.acceptedLink();
   } else if (isRequestResponse) {
-    return sentByUs ? i18n.fulfilledRequest() : i18n.receivedRequest();
+    return sentByUs
+      ? i18.opVerb.fulfilledRequest()
+      : i18.opVerb.receivedRequest();
   } else {
-    return sentByUs ? i18n.sent() : i18n.received();
+    return sentByUs ? i18.opVerb.sent() : i18.opVerb.received();
   }
 }
 
 function showHelpWhyNoFees(
   dispatcher: Dispatcher,
   chainName: string,
-  coinName: string,
-  _i18n: TranslationFunctions
+  coinName: string
 ) {
-  const i18n = _i18n.historyOp.whyNoFees;
   dispatcher.dispatch({
     name: "helpModal",
-    title: i18n.title(),
+    title: i18.whyNoFees.title(),
     content: (
       <View style={ss.container.padH8}>
-        <TextPara>{i18n.description.firstPara({ chainName })}</TextPara>
+        <TextPara>
+          {i18.whyNoFees.description.firstPara({ chainName })}
+        </TextPara>
         <Spacer h={24} />
-        <TextPara>{i18n.description.secondPara()}</TextPara>
+        <TextPara>{i18.whyNoFees.description.secondPara()}</TextPara>
         <Spacer h={24} />
-        <TextPara>{i18n.description.thirdPara()}</TextPara>
+        <TextPara>{i18.whyNoFees.description.thirdPara()}</TextPara>
       </View>
     ),
   });
 }
 
-function getFeeText(_i18n: TranslationFunctions, amount?: number) {
-  const i18n = _i18n.historyOp.feeText;
+function getFeeText(amount?: number) {
   if (amount == null) {
-    return i18n.pending();
+    return i18.feeText.pending();
   }
 
   let feeStr = "$" + amountToDollars(amount);
@@ -312,6 +305,6 @@ function getFeeText(_i18n: TranslationFunctions, amount?: number) {
     feeStr = "< $0.01";
   }
   return amount === 0
-    ? i18n.free()
-    : feeStr + " " + i18n.fee({ amount: feeStr });
+    ? i18.feeText.free()
+    : feeStr + " " + i18.feeText.fee({ amount: feeStr });
 }

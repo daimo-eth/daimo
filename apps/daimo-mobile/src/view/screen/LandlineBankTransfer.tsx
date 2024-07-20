@@ -15,8 +15,8 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { BridgeBankAccountContact } from "../../logic/daimoContacts";
-import { useI18n } from "../../logic/i18n";
 import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -32,6 +32,7 @@ import { TextCenter, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListDeposit, "LandlineTransfer">;
+const i18 = i18n.landlineBankTransfer;
 
 export default function LandlineTransferScreen({ route }: Props) {
   console.log(
@@ -154,15 +155,14 @@ function SendChooseAmount({
 }
 
 function PublicWarning() {
-  const i18n = useI18n().landlineBankTransfer;
   return (
     <View style={{ flexDirection: "column" }}>
       <TextCenter>
-        <TextLight>{i18n.warning.title()}</TextLight>
+        <TextLight>{i18.warning.title()}</TextLight>
       </TextCenter>
       <Spacer h={4} />
       <TextCenter>
-        <TextLight>{i18n.warning.minimum()}</TextLight>
+        <TextLight>{i18.warning.minimum()}</TextLight>
       </TextCenter>
     </View>
   );

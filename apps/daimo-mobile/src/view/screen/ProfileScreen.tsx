@@ -25,10 +25,9 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n } from "../../i18n";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
-import { useI18n } from "../../logic/i18n";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
@@ -45,6 +44,7 @@ import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "Profile">;
+const i18 = i18n.profile;
 
 export function ProfileScreen(props: Props) {
   const Inner = useWithAccount(ProfileScreenInner);
@@ -54,7 +54,6 @@ export function ProfileScreen(props: Props) {
 function ProfileScreenInner(props: Props & { account: Account }) {
   const goBack = useExitBack();
   const goHome = useExitToHome();
-  const i18n = useI18n();
 
   const { params } = props.route;
 
@@ -79,18 +78,13 @@ function ProfileScreenInner(props: Props & { account: Account }) {
       </View>
       <Spacer h={32} />
       {"link" in params && (
-        <ProfileScreenLoader
-          account={props.account}
-          link={params.link}
-          _i18n={i18n}
-        />
+        <ProfileScreenLoader account={props.account} link={params.link} />
       )}
       {"eAcc" in params && (
         <ProfileScreenBody
           account={props.account}
           eAcc={params.eAcc}
           inviterEAcc={params.inviterEAcc}
-          _i18n={i18n}
         />
       )}
     </View>
@@ -100,18 +94,15 @@ function ProfileScreenInner(props: Props & { account: Account }) {
 function ProfileScreenLoader({
   account,
   link,
-  _i18n,
 }: {
   account: Account;
   link: DaimoLinkAccount | DaimoLinkInviteCode;
-  _i18n: TranslationFunctions;
 }) {
   console.log(`[ACCOUNT] loading account from link`, link);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const status = useFetchLinkStatus(link, daimoChain)!;
 
   const nav = useNav();
-  const i18n = _i18n.profile;
   useEffect(() => {
     if (status.data == null) return;
 
@@ -144,19 +135,15 @@ function ProfileScreenLoader({
         {status.error && link.type === "account" && (
           <ErrorBanner
             error={status.error}
-            displayTitle={i18n.error.account.title()}
-            displayMessage={i18n.error.account.msg({
-              account: link.account,
-            })}
+            displayTitle={i18.error.account.title()}
+            displayMessage={i18.error.account.msg(link.account)}
           />
         )}
         {status.error && link.type === "invite" && (
           <ErrorBanner
             error={status.error}
-            displayTitle={i18n.error.invite.title()}
-            displayMessage={i18n.error.invite.msg({
-              code: link.code,
-            })}
+            displayTitle={i18.error.invite.title()}
+            displayMessage={i18.error.invite.msg(link.code)}
           />
         )}
       </View>
@@ -172,12 +159,10 @@ function ProfileScreenBody({
   account,
   eAcc,
   inviterEAcc,
-  _i18n,
 }: {
   account: Account;
   eAcc: EAccount;
   inviterEAcc?: EAccount;
-  _i18n: TranslationFunctions;
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
@@ -191,7 +176,6 @@ function ProfileScreenBody({
       params: { recipient: contact },
     });
   }, [nav, eAcc, account]);
-  const i18n = _i18n.profile;
 
   const canRequest = canRequestFrom(eAcc);
   const goToRequest = () => {
@@ -231,7 +215,7 @@ function ProfileScreenBody({
     if (inviterEAcc)
       return (
         <TextBody color={color.gray3}>
-          {i18n.subtitle.invitedBy()}
+          {i18.subtitle.invitedBy()}
           <TextBody color={color.midnight} onPress={onInviterPress}>
             {getAccountName(inviterEAcc)}
           </TextBody>
@@ -240,7 +224,7 @@ function ProfileScreenBody({
     else if (eAcc.timestamp)
       return (
         <TextBody color={color.gray3}>
-          {i18n.subtitle.joined({ timeAgo: timeMonth(eAcc.timestamp) })}
+          {i18.subtitle.joined(timeMonth(eAcc.timestamp))}
         </TextBody>
       );
     else if (getAccountName(eAcc) !== getAddressContraction(eAcc.addr))

@@ -68,13 +68,13 @@ import {
   useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
-import { TranslationFunctions } from "../i18n/i18n-types";
+import { i18n } from "../i18n";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
-import { useI18n } from "../logic/i18n";
 
 SplashScreen.preventAutoHideAsync();
 
 const { add, multiply } = Animated;
+const i18 = i18n.tabNav;
 
 // Onboarding navigator.
 const OnStack = createStackNavigator<ParamListOnboarding>();
@@ -136,13 +136,13 @@ function MainTabNavigator() {
     // keyboard transitions, making the transitions look a bit janky.
     tabBarHideOnKeyboard: Platform.OS === "android",
   };
-  const i18n = useI18n();
+
   const ins = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
-      screenOptions={(props) => getTabOptions(ins, props, i18n)}
+      screenOptions={(props) => getTabOptions(ins, props)}
       backBehavior="initialRoute"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
@@ -261,10 +261,8 @@ function errorBottomSheetInterpolator({
 
 function getTabOptions(
   safeInsets: EdgeInsets,
-  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> },
-  _i18n: TranslationFunctions
+  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
 ): BottomTabNavigationOptions {
-  const i18n = _i18n.tabNav;
   const opts: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
@@ -294,15 +292,15 @@ function getTabOptions(
   switch (route.name) {
     case "DepositTab":
       return {
-        title: i18n.deposit(),
+        title: i18.deposit(),
         tabBarIcon: getIcon("plus-circle"),
         ...opts,
       };
     case "InviteTab":
-      return { title: i18n.invite(), tabBarIcon: getIcon("mail"), ...opts };
+      return { title: i18.invite(), tabBarIcon: getIcon("mail"), ...opts };
     case "HomeTab":
       return {
-        title: i18n.home(),
+        title: i18.home(),
         tabBarIcon: ({ color }) => {
           return <IconHome color={color} />;
         },
@@ -310,12 +308,12 @@ function getTabOptions(
       };
     case "SendTab":
       return {
-        title: i18n.send(),
+        title: i18.send(),
         tabBarIcon: getIcon("paper-airplane"),
         ...opts,
       };
     case "SettingsTab":
-      return { title: i18n.settings(), tabBarIcon: getIcon("gear"), ...opts };
+      return { title: i18.settings(), tabBarIcon: getIcon("gear"), ...opts };
     default:
       assertUnreachable(route.name);
   }

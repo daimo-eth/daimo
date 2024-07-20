@@ -25,8 +25,8 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
-import { useI18n } from "../../../logic/i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
@@ -52,6 +52,8 @@ interface displayClogRenderObject {
   op: TransferClog;
 }
 
+const i18 = i18n.historyList;
+
 export function HistoryListSwipe({
   account,
   showDate,
@@ -64,7 +66,6 @@ export function HistoryListSwipe({
   otherAcc?: EAccount;
 }) {
   const ins = useSafeAreaInsets();
-  const i18n = useI18n().historyList;
 
   // Get relevant transfers in reverse chronological order
   let ops = account.recentTransfers.slice().reverse();
@@ -86,7 +87,7 @@ export function HistoryListSwipe({
       <View>
         <Spacer h={16} />
         <TextCenter>
-          <TextLight>{i18n.empty()}</TextLight>
+          <TextLight>{i18.empty()}</TextLight>
         </TextCenter>
       </View>
     );
@@ -104,9 +105,7 @@ export function HistoryListSwipe({
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
     const title =
-      otherAcc == null
-        ? i18n.screenHeader.default()
-        : i18n.screenHeader.other();
+      otherAcc == null ? i18.screenHeader.default() : i18.screenHeader.other();
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />
@@ -190,7 +189,6 @@ function DisplayClogRow({
   showDate?: boolean;
 }) {
   const address = account.address;
-  const i18n = useI18n().historyList;
 
   assert(displayClog.amount > 0);
   const [from, to] = getDisplayFromTo(displayClog);
@@ -228,7 +226,7 @@ function DisplayClogRow({
     displayClog.noteStatus.claimer?.addr === address
   ) {
     // Special case: we cancelled our own payment link
-    opTitle = i18n.op.cancelledLink();
+    opTitle = i18.op.cancelledLink();
   }
 
   const opMemo = getSynthesizedMemo(
@@ -293,14 +291,13 @@ function TransferAmountDate({
   showDate?: boolean;
   isPending?: boolean;
 }) {
-  const i18n = useI18n().historyList;
   const dollarStr = getAmountText({ amount: BigInt(Math.abs(amount)) });
   const sign = amount < 0 ? "-" : "+";
   const amountColor = amount < 0 ? color.midnight : color.success;
 
   let timeStr: string;
   if (isPending) {
-    timeStr = i18n.op.pending();
+    timeStr = i18.op.pending();
   } else if (showDate) {
     timeStr = new Date(timestamp * 1000).toLocaleString("default", {
       month: "numeric",

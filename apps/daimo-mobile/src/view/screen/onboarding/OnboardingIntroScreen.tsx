@@ -38,6 +38,7 @@ import {
 } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
+const i18 = i18n.onboardingIntro;
 
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
@@ -93,12 +94,12 @@ export function OnboardingIntroScreen() {
         <View style={styles.introButtonsWrap}>
           <ButtonBig
             type="primary"
-            title={i18n.onboardingIntro.acceptInviteButton()}
+            title={i18.acceptInviteButton()}
             onPress={pasteInviteLink}
           />
           <Spacer h={16} />
           <TextButton
-            title={i18n.onboardingIntro.alreadyHaveAccountButton()}
+            title={i18.alreadyHaveAccountButton()}
             onPress={goToUseExisting}
           />
           <Spacer h={16} />
@@ -115,25 +116,29 @@ const icons = {
 };
 
 function IntroRows() {
-  const i18 = i18n.onboardingIntro.rows;
-
   return (
     <View style={styles.introRows}>
-      <IntroRow icon="intro-your-keys" title={i18.selfCustody.title()}>
-        <TextBody color={color.gray3}>{i18.selfCustody.description()}</TextBody>
+      <IntroRow icon="intro-your-keys" title={i18.rows.selfCustody.title()}>
+        <TextBody color={color.gray3}>
+          {i18.rows.selfCustody.description()}
+        </TextBody>
         <HelpButton
-          title={i18.help.button()}
-          helpTitle={i18.help.description()}
+          title={i18.rows.help.button()}
+          helpTitle={i18.rows.help.description()}
           helpContent={<HelpModalUSDC />}
         />
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-everywhere" title={i18.everywhere.title()}>
-        <TextBody color={color.gray3}>{i18.everywhere.description()}</TextBody>
+      <IntroRow icon="intro-everywhere" title={i18.rows.everywhere.title()}>
+        <TextBody color={color.gray3}>
+          {i18.rows.everywhere.description()}
+        </TextBody>
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-on-ethereum" title={i18.onEthereum.title()}>
-        <TextBody color={color.gray3}>{i18.onEthereum.description()}</TextBody>
+      <IntroRow icon="intro-on-ethereum" title={i18.rows.onEthereum.title()}>
+        <TextBody color={color.gray3}>
+          {i18.rows.onEthereum.description()}
+        </TextBody>
       </IntroRow>
     </View>
   );
@@ -165,17 +170,16 @@ function IntroRow({
 }
 
 function HelpModalUSDC() {
-  const i18 = i18n.onboardingIntro.helpModalUSDC;
   return (
     <View>
-      <TextLight>{i18.description()}</TextLight>
+      <TextLight>{i18.helpModalUSDC.description()}</TextLight>
       <Spacer h={24} />
       <TextLight>
-        {i18.learnMore()}
+        {i18.helpModalUSDC.learnMore()}
         <TextLink
           onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
         >
-          {i18.here()}
+          {i18.helpModalUSDC.here()}
         </TextLink>
         .
       </TextLight>

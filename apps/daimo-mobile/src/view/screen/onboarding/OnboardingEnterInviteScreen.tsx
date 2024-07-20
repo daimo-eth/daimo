@@ -14,9 +14,8 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import { fetchInviteLinkStatus } from "../../../logic/linkStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
@@ -25,13 +24,14 @@ import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
 
+const i18 = i18n.onboardingEnterInvite;
+
 export function OnboardingEnterInviteScreen() {
   // No invite code? Join waitlist
   const linkToWaitlist = () => {
     const url = `https://daimo.com/waitlist`;
     Linking.openURL(url);
   };
-  const i18n = useI18n();
 
   const nav = useOnboardingNav();
 
@@ -48,16 +48,13 @@ export function OnboardingEnterInviteScreen() {
           <Spacer h={24} />
           <CoverVideo video={VidInviteAnimation} />
           <Spacer h={12} />
-          <Instructions _i18n={i18n} />
+          <Instructions />
           <Spacer h={24} />
           <EnterCodeForm nav={nav} />
         </View>
         <View key="bottom">
           <Spacer h={16} />
-          <TextButton
-            title={i18n.onboardingEnterInvite.waitlistButton()}
-            onPress={linkToWaitlist}
-          />
+          <TextButton title={i18.waitlistButton()} onPress={linkToWaitlist} />
           <Spacer h={16} />
         </View>
       </View>
@@ -65,11 +62,11 @@ export function OnboardingEnterInviteScreen() {
   );
 }
 
-function Instructions({ _i18n }: { _i18n: TranslationFunctions }) {
+function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        {_i18n.onboardingEnterInvite.instructions()}
+        {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
@@ -131,7 +128,6 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
   };
 
   render = () => {
-    const i18n = useI18n();
     // User enters their invite code. Check validity.
     const { text, inviteStatus } = this.state;
 

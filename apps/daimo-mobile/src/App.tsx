@@ -7,10 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { Dispatcher, DispatcherContext } from "./action/dispatch";
-import TypesafeI18n from "./i18n/i18n-react";
-import { loadAllLocales, loadLocale } from "./i18n/i18n-util.sync";
 import { useAccount } from "./logic/accountManager";
-import { useI18n, useLocale } from "./logic/i18n";
 import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
@@ -22,12 +19,6 @@ export default function App() {
   const account = useAccount();
   const onb = account?.isOnboarded ? "onboarded" : "not onboarded";
   console.log(`[APP] rendering ${account?.name || "no account"}, ${onb}`);
-
-  // Load Locales
-  // const locale = useLocale();
-  // const locale = "en";
-  // loadAllLocales();
-  const i18n = useI18n();
 
   // Display notifications, listen for push notifications
   useInitNotifications();
@@ -46,15 +37,13 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <NavigationContainer theme={theme}>
           <DispatcherContext.Provider value={dispatcher}>
-            <TypesafeI18n locale="en">
-              <ErrorBoundary fallbackRender={renderErrorFallback}>
-                <SafeAreaProvider>
-                  <TabNav />
-                  <StatusBar style="auto" />
-                  <GlobalBottomSheet />
-                </SafeAreaProvider>
-              </ErrorBoundary>
-            </TypesafeI18n>
+            <ErrorBoundary fallbackRender={renderErrorFallback}>
+              <SafeAreaProvider>
+                <TabNav />
+                <StatusBar style="auto" />
+                <GlobalBottomSheet />
+              </SafeAreaProvider>
+            </ErrorBoundary>
           </DispatcherContext.Provider>
         </NavigationContainer>
       </GestureHandlerRootView>

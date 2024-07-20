@@ -11,13 +11,15 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
+
+const i18 = i18n.swapNotification;
 
 export function SwapNotificationRow({
   notif,
@@ -30,7 +32,6 @@ export function SwapNotificationRow({
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 
   const dispatcher = useContext(DispatcherContext);
-  const i18n = useI18n().swapNotification;
 
   const ts = timeAgo(notif.timestamp, now(), true);
 
@@ -56,7 +57,7 @@ export function SwapNotificationRow({
   const copy = (() => {
     return (
       <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-        {i18n.msg({ readableAmount, coinName: coin.name })}
+        {i18.msg(readableAmount, coin.name)}
         <TextBody color={color.midnight}>{accName}</TextBody>
       </TextBody>
     );

@@ -34,14 +34,13 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import {
   EAccountContact,
   addLastTransferTimes,
   getContactName,
 } from "../../../logic/daimoContacts";
-import { useI18n } from "../../../logic/i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getSwapRoute } from "../../../logic/swapRoute";
@@ -60,6 +59,7 @@ import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
+const i18 = i18n.sendTransferScreen;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
@@ -84,7 +84,6 @@ function SendScreenInner({
     | DaimoRequestV2Status
     | null;
 
-  const i18n = useI18n();
   const nav = useNav();
   const goHome = useExitToHome();
   const goBack = useCallback(() => {
@@ -142,7 +141,6 @@ function SendScreenInner({
             onCancel={goBack}
             daimoChain={daimoChain}
             defaultHomeCoin={defaultHomeCoin}
-            _i18n={i18n}
           />
         );
       else
@@ -154,7 +152,7 @@ function SendScreenInner({
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader
-          title={i18n.sendTransferScreen.screenHeader()}
+          title={i18.screenHeader()}
           onBack={goBack}
           onExit={goHome}
         />
@@ -170,13 +168,11 @@ function SendChooseAmount({
   daimoChain,
   onCancel,
   defaultHomeCoin,
-  _i18n,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
   defaultHomeCoin: ForeignToken;
-  _i18n: TranslationFunctions;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -198,13 +194,7 @@ function SendChooseAmount({
   // Warn if paying new account
   let infoBubble = <Spacer h={16} />;
   if (recipient.lastSendTime == null) {
-    infoBubble = (
-      <InfoBox
-        title={_i18n.sendTransferScreen.firstTime({
-          name: getContactName(recipient),
-        })}
-      />
-    );
+    infoBubble = <InfoBox title={i18.firstTime(getContactName(recipient))} />;
   }
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;

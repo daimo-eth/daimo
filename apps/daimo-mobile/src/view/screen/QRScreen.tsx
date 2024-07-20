@@ -27,10 +27,9 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { decodeQR } from "../../logic/decodeQR";
-import { useI18n } from "../../logic/i18n";
 import { TextButton } from "../shared/Button";
 import { ButtonCircle } from "../shared/ButtonCircle";
 import { Scanner } from "../shared/Scanner";
@@ -42,15 +41,14 @@ import { color, ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "QR">;
+const i18 = i18n.qr;
 
 export function QRScreen(props: Props) {
   const { option } = props.route.params;
   const [tab, setTab] = useState<QRScreenOptions>(option || "PAY ME");
   const tabs = useRef(["PAY ME", "SCAN"] as QRScreenOptions[]).current;
-  const i18n = useI18n();
 
-  const title =
-    tab === "PAY ME" ? i18n.qr.title.display() : i18n.qr.title.scan();
+  const title = tab === "PAY ME" ? i18.title.display() : i18.title.scan();
 
   const goBack = useExitBack();
   const goHome = useExitToHome();
@@ -61,13 +59,13 @@ export function QRScreen(props: Props) {
       <Spacer h={8} />
       <SegmentSlider {...{ tabs, tab, setTab }} />
       <Spacer h={24} />
-      {tab === "PAY ME" && <QRDisplay _i18n={i18n} />}
+      {tab === "PAY ME" && <QRDisplay />}
       {tab === "SCAN" && <QRScan />}
     </View>
   );
 }
 
-function QRDisplay({ _i18n }: { _i18n: TranslationFunctions }) {
+function QRDisplay() {
   const [recentlyCopied, setRecentlyCopied] = useState(false);
   const account = useAccount();
   const nav = useNav();
@@ -76,7 +74,7 @@ function QRDisplay({ _i18n }: { _i18n: TranslationFunctions }) {
   const url = formatDaimoLink({ type: "account", account: account.name });
 
   const subtitle = recentlyCopied
-    ? _i18n.qr.copiedAddress()
+    ? i18.copiedAddress()
     : getAddressContraction(account.address);
 
   const onLongPress = () => {
@@ -111,7 +109,7 @@ function QRDisplay({ _i18n }: { _i18n: TranslationFunctions }) {
         <ShareButton name={account.name} />
       </View>
       <View style={styles.accountShare}>
-        <TextButton title={_i18n.qr.depositButton()} onPress={goToDeposit} />
+        <TextButton title={i18.depositButton()} onPress={goToDeposit} />
       </View>
     </View>
   );

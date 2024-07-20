@@ -4,16 +4,16 @@ import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { ParamListSend } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
+const i18 = i18n.sendNav;
 
 export function SendNavScreen({ route }: Props) {
-  const i18n = useI18n().sendNav;
   const { autoFocus } = route.params || {};
 
   // Search prefix
@@ -27,7 +27,7 @@ export function SendNavScreen({ route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title={i18n.screenHeader()} />
+        <ScreenHeader title={i18.screenHeader()} />
         <Spacer h={8} />
         <View style={{ flex: 1, flexDirection: "column" }}>
           <SearchScreen

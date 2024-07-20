@@ -8,8 +8,7 @@ import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../env";
-import { TranslationFunctions } from "../../i18n/i18n-types";
-import { useI18n } from "../../logic/i18n";
+import { i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -24,9 +23,10 @@ export function DepositAddressBottomSheet() {
   return <Inner />;
 }
 
+const i18 = i18n.depositAddressBottom;
+
 function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   const dispatcher = useContext(DispatcherContext);
-  const i18n = useI18n();
 
   const { tokenSymbol, chainL2 } = env(
     daimoChainFromId(account.homeChainId)
@@ -46,17 +46,14 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
         hideOfflineHeader
       />
       <Spacer h={16} />
-      <TextPara color={color.grayDark}>
-        {i18n.depositAddressBottom.description({ tokenSymbol })}
-      </TextPara>
+      <TextPara color={color.grayDark}>{i18.description(tokenSymbol)}</TextPara>
       <Spacer h={12} />
       <CheckLabel value={check} setValue={setCheck}>
-        {i18n.depositAddressBottom.checkChain.on()}{" "}
-        <TextBold>{chainL2.name}</TextBold>{" "}
-        {i18n.depositAddressBottom.checkChain.notOther()}
+        {i18.checkChain.on()} <TextBold>{chainL2.name}</TextBold>{" "}
+        {i18.checkChain.notOther()}
       </CheckLabel>
       <Spacer h={16} />
-      <AddressCopier addr={account.address} disabled={!check} _i18n={i18n} />
+      <AddressCopier addr={account.address} disabled={!check} />
       <Spacer h={64} />
     </View>
   );
@@ -65,11 +62,9 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
 function AddressCopier({
   addr,
   disabled,
-  _i18n,
 }: {
   addr: Address;
   disabled?: boolean;
-  _i18n: TranslationFunctions;
 }) {
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
@@ -99,9 +94,7 @@ function AddressCopier({
           <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
-      <TextLight>
-        {justCopied ? _i18n.depositAddressBottom.copied() : " "}
-      </TextLight>
+      <TextLight>{justCopied ? i18.copied() : " "}</TextLight>
     </View>
   );
 }

@@ -22,6 +22,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import {
@@ -29,7 +30,6 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
-import { useI18n } from "../../../logic/i18n";
 import { MoneyEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
@@ -45,6 +45,7 @@ import { useWithAccount } from "../../shared/withAccount";
 import { SendMemoButton } from "../send/MemoDisplay";
 
 type Props = NativeStackScreenProps<ParamListHome, "Receive">;
+const i18 = i18n.receive;
 
 export function ReceiveScreen({ route }: Props) {
   const Inner = useWithAccount(RequestScreenInner);
@@ -62,7 +63,6 @@ function RequestScreenInner({
   const nav = useNav();
   const goBack = useExitBack();
   const goHome = useExitToHome();
-  const i18n = useI18n().receive;
 
   // Enter amount, autofocus
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -99,7 +99,7 @@ function RequestScreenInner({
   const [as, setAS] = useActStatus("request");
   const sendRequest = async () => {
     textInputRef.current?.blur();
-    setAS("loading", i18n.sendRequest.loading());
+    setAS("loading", i18.sendRequest.loading());
 
     // Create-request transaction
     const { txHash, pendingRequestStatus } = await createRequestOnChain(
@@ -133,12 +133,12 @@ function RequestScreenInner({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title={i18n.screenHeader()} onBack={goBack || goHome} />
+        <ScreenHeader title={i18.screenHeader()} onBack={goBack || goHome} />
         <Spacer h={8} />
         {!fulfiller && (
           <InfoBox
-            title={i18n.sendRequest.title()}
-            subtitle={i18n.sendRequest.subtitle()}
+            title={i18.sendRequest.title()}
+            subtitle={i18.sendRequest.subtitle()}
           />
         )}
         <Spacer h={24} />

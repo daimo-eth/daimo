@@ -7,7 +7,7 @@ import { NotificationRow } from "./NotificationRow";
 import { RequestNotificationRow } from "./RequestNotificationRow";
 import { SwapNotificationRow } from "./SwapNotificationRow";
 import { useNav } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { useInAppNotifications } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { ScreenHeader } from "../../shared/ScreenHeader";
@@ -15,6 +15,8 @@ import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextCenter, TextH3 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+
+const i18 = i18n.notifications;
 
 // In-app notifications screen.
 export function NotificationsScreen() {
@@ -24,7 +26,6 @@ export function NotificationsScreen() {
 
 function NotificationsScreenInner({ account }: { account: Account }) {
   const nav = useNav();
-  const i18n = useI18n().notifications;
 
   const { unread, notifications, markRead } = useInAppNotifications();
 
@@ -39,12 +40,12 @@ function NotificationsScreenInner({ account }: { account: Account }) {
   return (
     <View style={ss.container.screenWithoutPadding}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title={i18n.screenHeader()} onBack={nav.goBack} />
+        <ScreenHeader title={i18.screenHeader()} onBack={nav.goBack} />
         {notifications.length === 0 && (
           <>
             <Spacer h={64} />
             <TextCenter>
-              <TextH3 color={color.gray3}>{i18n.noNotifications()}</TextH3>
+              <TextH3 color={color.gray3}>{i18.noNotifications()}</TextH3>
             </TextCenter>
           </>
         )}

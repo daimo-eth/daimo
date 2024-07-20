@@ -14,8 +14,8 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useSendWithDeviceKeyAsync } from "../../action/useSendAsync";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
-import { useI18n } from "../../logic/i18n";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonMed } from "../shared/Button";
@@ -23,6 +23,8 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextCenter } from "../shared/text";
+
+const i18 = i18n.ownRequestBottom;
 
 // Bottom sheet for request made by the user
 export function OwnRequestBottomSheet({
@@ -33,7 +35,6 @@ export function OwnRequestBottomSheet({
   const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
-  const i18n = useI18n().ownRequestBottom;
 
   // Generate nonce
   const nonce = useMemo(
@@ -84,7 +85,7 @@ export function OwnRequestBottomSheet({
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title={i18n.sheetHeader()}
+        title={i18.sheetHeader()}
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}
@@ -116,7 +117,7 @@ export function OwnRequestBottomSheet({
       <Spacer h={32} />
       {status === "idle" && (
         <ButtonMed
-          title={i18n.cancelButton()}
+          title={i18.cancelButton()}
           onPress={onCancel}
           type="subtle"
           showBiometricIcon

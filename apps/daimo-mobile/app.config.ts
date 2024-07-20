@@ -129,7 +129,6 @@ const config: ExpoConfig = {
     ],
     ["react-native-email-link"],
     ["./android-deeplink-config-plugin", "custom"],
-    ["expo-localization"],
   ],
 };
 

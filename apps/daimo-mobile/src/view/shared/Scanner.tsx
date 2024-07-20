@@ -3,8 +3,10 @@ import { useEffect } from "react";
 import { Platform, StyleSheet, View, ViewStyle } from "react-native";
 
 import { ButtonMed } from "./Button";
-import { useI18n } from "../../logic/i18n";
+import { i18n } from "../../i18n";
 import { useScannerAccess } from "../../logic/scanner";
+
+const i18 = i18n.scanner;
 
 /** Scans a QR code. */
 export function Scanner({
@@ -13,7 +15,6 @@ export function Scanner({
   handleBarCodeScanned: BarCodeScannedCallback;
 }) {
   const { permission, ask } = useScannerAccess();
-  const i18n = useI18n().scanner;
 
   useEffect(() => {
     if (!permission) return;
@@ -21,7 +22,7 @@ export function Scanner({
   }, [permission?.granted, permission?.canAskAgain]);
 
   return !permission?.granted ? (
-    <ButtonMed type="primary" title={i18n.enableCamera()} onPress={ask} />
+    <ButtonMed type="primary" title={i18.enableCamera()} onPress={ask} />
   ) : (
     <View style={styles.cameraBox}>
       <BarCodeScanner

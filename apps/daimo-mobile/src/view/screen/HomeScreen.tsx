@@ -27,9 +27,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HistoryListSwipe } from "./history/HistoryList";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
-import { useI18n } from "../../logic/i18n";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { useWarmDeviceKeySenderCache } from "../../logic/opSender";
 import { useContactsPermission } from "../../logic/systemContacts";
@@ -49,6 +49,8 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextBtnCaps, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.home;
 
 export default function HomeScreen() {
   const Inner = useWithAccount(HomeScreenPullToRefreshWrap);
@@ -291,7 +293,6 @@ function AmountAndButtons({ account }: { account: Account }) {
 
 function PendingTag({ pendingDollars }: { pendingDollars: string }) {
   const nav = useNav();
-  const i18n = useI18n().home;
 
   const onPress = () => nav.navigate("Notifications");
   return (
@@ -308,7 +309,7 @@ function PendingTag({ pendingDollars }: { pendingDollars: string }) {
           }}
         >
           <TextBtnCaps color={color.grayDark}>
-            {i18n.pending({ pendingDollars })}
+            {i18.pending(pendingDollars)}
           </TextBtnCaps>
         </View>
       )}
@@ -359,7 +360,6 @@ function IconButton({
 
 function CompleteOnboarding() {
   const dispatcher = useContext(DispatcherContext);
-  const i18n = useI18n().home;
 
   const openChecklist = useCallback(() => {
     dispatcher.dispatch({ name: "onboardingChecklist" });
@@ -380,7 +380,7 @@ function CompleteOnboarding() {
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />
-        <DaimoText variant="body">{i18n.finishAccountSetUp()}</DaimoText>
+        <DaimoText variant="body">{i18.finishAccountSetUp()}</DaimoText>
       </View>
       <Octicons size={24} color={color.primary} name="arrow-right" />
     </Pressable>

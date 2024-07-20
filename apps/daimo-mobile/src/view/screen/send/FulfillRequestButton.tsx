@@ -20,12 +20,14 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
+
+const i18 = i18n.fulfillRequest;
 
 export function FulfillRequestButton({
   account,
@@ -34,7 +36,6 @@ export function FulfillRequestButton({
   account: Account;
   requestStatus: DaimoRequestV2Status;
 }) {
-  const i18n = useI18n().fulfillRequest;
   const requestIdString = requestStatus.link.id;
   const dollars = Number(requestStatus.link.dollars);
 
@@ -79,13 +80,13 @@ export function FulfillRequestButton({
 
   const sendDisabledReason = (() => {
     if (requestStatus.status === DaimoRequestState.Fulfilled)
-      return i18n.disabledReason.fulfilled();
+      return i18.disabledReason.fulfilled();
     else if (requestStatus.status === DaimoRequestState.Cancelled)
-      return i18n.disabledReason.cancelled();
+      return i18.disabledReason.cancelled();
     else if (requestStatus.recipient.addr === account.address)
-      return i18n.disabledReason.self();
+      return i18.disabledReason.self();
     else if (account.lastBalance < dollarsToAmount(cost.totalDollars))
-      return i18n.disabledReason.insufficientFunds();
+      return i18.disabledReason.insufficientFunds();
     else return undefined;
   })();
 
@@ -95,7 +96,7 @@ export function FulfillRequestButton({
       case "error":
         return (
           <LongPressBigButton
-            title={i18n.holdButton()}
+            title={i18.holdButton()}
             onPress={sendDisabledReason != null ? undefined : exec}
             type="primary"
             disabled={sendDisabledReason != null}
@@ -115,12 +116,12 @@ export function FulfillRequestButton({
       case "idle":
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return i18n.statusMsg.paymentsPublic();
-        return i18n.statusMsg.totalDollars({
-          dollars: getAmountText({
+        if (dollars === 0) return i18.statusMsg.paymentsPublic();
+        return i18.statusMsg.totalDollars(
+          getAmountText({
             dollars: cost.totalDollars,
-          }),
-        });
+          })
+        );
       case "loading":
         return message;
       case "error":

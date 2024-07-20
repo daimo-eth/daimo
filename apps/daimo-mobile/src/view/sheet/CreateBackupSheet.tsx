@@ -7,9 +7,8 @@ import { useSafeAreaFrame } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
-import { TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
-import { useI18n } from "../../logic/i18n";
 import { AddKeySlotButton } from "../screen/keyRotation/AddKeySlotButton";
 import { Badge } from "../shared/Badge";
 import { ButtonBig } from "../shared/Button";
@@ -19,57 +18,46 @@ import Spacer from "../shared/Spacer";
 import { color } from "../shared/style";
 import { TextBody, TextCenter, TextH3 } from "../shared/text";
 
+const i18 = i18n.createBackup;
+
 export function CreateBackupSheet() {
   const [step, setStep] = useState<0 | 1>(0);
-  const i18n = useI18n();
 
   return (
     <View>
       {step === 0 ? (
-        <CreateBackupContent setStep={setStep} _i18n={i18n} />
+        <CreateBackupContent setStep={setStep} />
       ) : (
-        <OfflineBackupContent setStep={setStep} _i18n={i18n} />
+        <OfflineBackupContent setStep={setStep} />
       )}
       <Spacer h={36} />
     </View>
   );
 }
 
-function AddKeyButton({
-  slotType,
-  _i18n,
-}: {
-  slotType: SlotType;
-  _i18n: TranslationFunctions;
-}) {
+function AddKeyButton({ slotType }: { slotType: SlotType }) {
   const account = useAccount();
   assert(account != null);
-  const i18 = _i18n.createBackup.addKey;
 
   const slot = useMemo(() => findAccountUnusedSlot(account, slotType), []);
 
   const isPasskey = slotType === SlotType.PasskeyBackup;
   const isSecurityKey = slotType === SlotType.SecurityKeyBackup;
   assert(isPasskey || isSecurityKey, "Unknown slot type");
-  const slotTypeStr = isPasskey ? i18.passkey() : i18.securityKey();
+  const slotTypeStr = isPasskey
+    ? i18.addKey.passkey()
+    : i18.addKey.securityKey();
 
   return (
     <AddKeySlotButton
-      buttonTitle={`${i18.button({ slotType: slotTypeStr })}`}
+      buttonTitle={`${i18.addKey.button(slotTypeStr)}`}
       account={account}
       slot={slot}
     />
   );
 }
 
-function CreateBackupContent({
-  setStep,
-  _i18n,
-}: {
-  setStep: (value: 0 | 1) => void;
-  _i18n: TranslationFunctions;
-}) {
-  const i18n = _i18n.createBackup;
+function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
   return (
     <Animated.View
       entering={FadeIn}
@@ -77,26 +65,25 @@ function CreateBackupContent({
       style={{ paddingHorizontal: 24 }}
     >
       <TextCenter>
-        <TextH3>{i18n.default.header()}</TextH3>
+        <TextH3>{i18.default.header()}</TextH3>
       </TextCenter>
       <Spacer h={16} />
       <View style={styles.separator} />
       <Spacer h={16} />
       <BackupOptionRow
         icon="key"
-        title={i18n.default.passkeyTitle()}
+        title={i18.default.passkeyTitle()}
         recommended
-        _i18n={_i18n}
       />
       <Spacer h={16} />
-      <BulletRow text={i18n.default.passkeyBullet1()} />
-      <BulletRow text={i18n.default.passkeyBullet2()} />
+      <BulletRow text={i18.default.passkeyBullet1()} />
+      <BulletRow text={i18.default.passkeyBullet2()} />
       <Spacer h={24} />
-      <AddKeyButton slotType={SlotType.PasskeyBackup} _i18n={_i18n} />
+      <AddKeyButton slotType={SlotType.PasskeyBackup} />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title={i18n.default.offlineInsteadButton()}
+        title={i18.default.offlineInsteadButton()}
         onPress={() => setStep(1)}
       />
     </Animated.View>
@@ -117,14 +104,11 @@ function BulletRow({ text }: { text: string }) {
 
 function OfflineBackupContent({
   setStep,
-  _i18n,
 }: {
   setStep: (value: 0 | 1) => void;
-  _i18n: TranslationFunctions;
 }) {
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
-  const i18n = _i18n.createBackup.offline;
 
   const goToSeedPhrase = useCallback(() => {
     dispatcher.dispatch({ name: "hideBottomSheet" });
@@ -138,7 +122,7 @@ function OfflineBackupContent({
       style={{ paddingHorizontal: 24 }}
     >
       <ScreenHeader
-        title={i18n.header()}
+        title={i18.offline.header()}
         onBack={() => setStep(0)}
         hideOfflineHeader
       />
@@ -146,31 +130,23 @@ function OfflineBackupContent({
       <Spacer h={20} />
       {Platform.OS !== "android" && (
         <>
-          <BackupOptionRow
-            icon="key"
-            title={i18n.securityKeyTitle()}
-            _i18n={_i18n}
-          />
+          <BackupOptionRow icon="key" title={i18.offline.securityKeyTitle()} />
           <Spacer h={16} />
-          <BulletRow text={i18n.securityKeyBullet1()} />
+          <BulletRow text={i18.offline.securityKeyBullet1()} />
           <Spacer h={24} />
-          <AddKeyButton slotType={SlotType.SecurityKeyBackup} _i18n={_i18n} />
+          <AddKeyButton slotType={SlotType.SecurityKeyBackup} />
           <Spacer h={20} />
           <View style={styles.separator} />
           <Spacer h={20} />
         </>
       )}
-      <BackupOptionRow
-        icon="comment"
-        title={i18n.seedPhraseTitle()}
-        _i18n={_i18n}
-      />
+      <BackupOptionRow icon="comment" title={i18.offline.seedPhraseTitle()} />
       <Spacer h={16} />
-      <BulletRow text={i18n.seedPhraseBullet1()} />
+      <BulletRow text={i18.offline.seedPhraseBullet1()} />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title={i18n.seedPhraseButton()}
+        title={i18.offline.seedPhraseButton()}
         onPress={goToSeedPhrase}
       />
     </Animated.View>
@@ -181,16 +157,13 @@ function BackupOptionRow({
   icon,
   title,
   recommended,
-  _i18n,
 }: {
   icon: OctName;
   title: string;
   recommended?: boolean;
-  _i18n: TranslationFunctions;
 }) {
   const { width } = useSafeAreaFrame();
   const isCompact = width < 400;
-  const i18 = _i18n.createBackup;
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
