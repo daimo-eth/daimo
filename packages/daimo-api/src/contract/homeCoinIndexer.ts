@@ -1,10 +1,9 @@
 import {
-  TransferClog,
   OpStatus,
   PaymentLinkClog,
-  SimpleTransferClog,
+  PreSwapTransfer,
+  TransferClog,
   guessTimestampFromNum,
-  SwapClog,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
@@ -219,34 +218,45 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // If inbound swap, attach logical origin info to create a swapClog.
+    // If transfer occured as a result of a swap, attach logical origin info.
     const correspondingForeignReceive =
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
         transactionHash
       );
-    const swapClogInbound = correspondingForeignReceive
-      ? {
-          coinOther: correspondingForeignReceive.foreignToken,
-          amountOther: `${correspondingForeignReceive.value}` as `${bigint}`,
-        }
-      : undefined;
+    const preSwapTransfer: PreSwapTransfer | undefined =
+      correspondingForeignReceive
+        ? {
+            coin: correspondingForeignReceive.foreignToken,
+            from: correspondingForeignReceive.from,
+            amount: `${correspondingForeignReceive.value}` as `${bigint}`,
+          }
+        : undefined;
 
-    // If outbound swap, attach logical outbound info to create a swapClog.
-    // use userop to get the transfer log
-    const correspondingForeignSend =
-      this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
-    const swapClogOutbound = correspondingForeignSend
-      ? {
-          coinOther: correspondingForeignSend.foreignToken,
-          amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
-        }
-      : undefined;
+    // TODO: older app versions expect preSwapTransfer.
+    //
+    // const swapClogInbound = correspondingForeignReceive
+    //   ? {
+    //       coinOther: correspondingForeignReceive.foreignToken,
+    //       amountOther: `${correspondingForeignReceive.value}` as `${bigint}`,
+    //     }
+    //   : undefined;
 
-    // Foreign receive and foreign send are mutually exclusive.
-    const outboundTo = correspondingForeignReceive
-      ? null
-      : correspondingForeignSend?.to;
+    // // If outbound swap, attach logical outbound info to create a swapClog.
+    // // use userop to get the transfer log
+    // const correspondingForeignSend =
+    //   this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
+    // const swapClogOutbound = correspondingForeignSend
+    //   ? {
+    //       coinOther: correspondingForeignSend.foreignToken,
+    //       amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
+    //     }
+    //   : undefined;
+
+    // // Foreign receive and foreign send are mutually exclusive.
+    // const outboundTo = correspondingForeignReceive
+    //   ? null
+    //   : correspondingForeignSend?.to;
 
     // Base clog info (same for all TransferClog types).
     const partialClog = {
@@ -258,7 +268,7 @@ export class HomeCoinIndexer extends Indexer {
 
       amount: Number(value),
       from: getAddress(correspondingForeignReceive?.from || from),
-      to: getAddress(outboundTo || to),
+      to: getAddress(to),
 
       blockNumber: Number(blockNumber),
       blockHash,
@@ -272,25 +282,12 @@ export class HomeCoinIndexer extends Indexer {
 
     const opEvent = (() => {
       if (!noteInfo) {
-        if (swapClogInbound) {
-          return {
-            type: "inboundSwap",
-            ...partialClog,
-            ...swapClogInbound,
-          } as SwapClog;
-        } else if (swapClogOutbound) {
-          return {
-            type: "outboundSwap",
-            ...partialClog,
-            ...swapClogOutbound,
-          } as SwapClog;
-        } else {
-          return {
-            type: "transfer",
-            ...partialClog,
-            requestStatus,
-          } as SimpleTransferClog;
-        }
+        return {
+          type: "transfer",
+          ...partialClog,
+          requestStatus,
+          preSwapTransfer,
+        } as TransferClog;
       }
 
       const [noteStatus, noteEventType] = noteInfo;

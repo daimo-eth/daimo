@@ -58,7 +58,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: TransferClog[]; // TODO: rename to transferClogs
+  transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
