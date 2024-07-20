@@ -37,7 +37,7 @@ import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
 import { getSwapQuote } from "../api/getSwapRoute";
-import { healthDebug } from "../api/healthCheck";
+import { healthCheck, healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -185,14 +185,13 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async () => {
-      // See readyMiddleware for ready check
-      return { status: "healthy" };
+      const ret = await healthCheck(db, watcher, startTimeS);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     healthDebug: publicProcedure.query(async () => {
-      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
-      console.log(`[API] health check: ${ret.status}`);
-      return ret;
+      return await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
     }),
 
     search: publicProcedure

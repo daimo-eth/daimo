@@ -31,7 +31,7 @@ export class Watcher {
 
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest;
-  private batchSize = 25000;
+  private batchSize = 2000;
   private isIndexing = false;
 
   // The latest block present in shovel DB, as of the most recent tick.
