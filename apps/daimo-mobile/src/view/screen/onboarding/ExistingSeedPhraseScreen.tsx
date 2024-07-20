@@ -5,11 +5,11 @@ import { View } from "react-native";
 import { LogInFromSeedButton } from "./LogInButton";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { ParamListOnboarding, useExitBack } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import {
   SeedPhraseEntry,
   useSeedPhraseInput,
@@ -17,10 +17,10 @@ import {
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 
+const i18 = i18n.existingSeedPhrase;
+
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingSeedPhrase">;
 export function ExistingSeedPhraseScreen({ route }: Props) {
-  const i18n = useI18n();
-
   // The account we're logging in to
   const { targetAccount } = route.params;
 
@@ -35,10 +35,7 @@ export function ExistingSeedPhraseScreen({ route }: Props) {
 
   return (
     <View>
-      <OnboardingHeader
-        title={i18n.existingSeedPhrase.screenHeader()}
-        onPrev={useExitBack()}
-      />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={useExitBack()} />
       <View style={ss.container.padH24}>
         <Spacer h={16} />
         <SeedPhraseEntry {...{ state, dispatch }} />
@@ -46,7 +43,6 @@ export function ExistingSeedPhraseScreen({ route }: Props) {
         <LogInFromSeedButton
           account={targetAccount}
           {...{ daimoChain, pubKeyHex, mnemonic }}
-          _i18n={i18n}
         />
       </View>
     </View>

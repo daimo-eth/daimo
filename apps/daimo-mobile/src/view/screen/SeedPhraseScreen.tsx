@@ -27,8 +27,7 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
-import { TranslationFunctions } from "../../i18n/i18n-types";
-import { useI18n } from "../../logic/i18n";
+import { i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -45,10 +44,11 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
+const i18 = i18n.seedPhrase;
+
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
-  const i18n = useI18n();
 
   const handleBack = useCallback(() => {
     if (activeStep === 1) {
@@ -62,11 +62,7 @@ export function SeedPhraseScreen() {
     <SeedPhraseProvider>
       <View style={styles.screen}>
         <ScreenHeader
-          title={
-            activeStep === 0
-              ? i18n.seedPhrase.title.copy()
-              : i18n.seedPhrase.title.verify()
-          }
+          title={activeStep === 0 ? i18.title.copy() : i18.title.verify()}
           onBack={handleBack}
           secondaryHeader={
             <View style={{ marginVertical: 16, alignItems: "center" }}>
@@ -76,7 +72,7 @@ export function SeedPhraseScreen() {
         />
         <Spacer h={24} />
         {activeStep === 0 ? (
-          <CopySeedPhrase setActiveStep={setActiveStep} _i18n={i18n} />
+          <CopySeedPhrase setActiveStep={setActiveStep} />
         ) : (
           <VerifySeedPhrase />
         )}
@@ -87,34 +83,26 @@ export function SeedPhraseScreen() {
 
 function CopySeedPhrase({
   setActiveStep,
-  _i18n,
 }: {
   setActiveStep: (value: 0 | 1) => void;
-  _i18n: TranslationFunctions;
 }) {
   const [saved, toggleSaved] = useReducer((s) => !s, false);
   const { words } = useSeedPhraseContext();
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <TextBody color={color.grayMid}>
-        {_i18n.seedPhrase.description()}
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.description()}</TextBody>
       <Spacer h={24} />
       <SeedPhraseDisplay words={words} />
       <Spacer h={24} />
-      <CopyToClipboard _i18n={_i18n} />
+      <CopyToClipboard />
       <Spacer h={24} />
-      <ConfirmPhraseSave
-        saved={saved}
-        toggleSaved={toggleSaved}
-        _i18n={_i18n}
-      />
+      <ConfirmPhraseSave saved={saved} toggleSaved={toggleSaved} />
 
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title={_i18n.seedPhrase.button.continue()}
+        title={i18.button.continue()}
         disabled={!saved}
         onPress={() => setActiveStep(1)}
       />
@@ -122,7 +110,7 @@ function CopySeedPhrase({
   );
 }
 
-function CopyToClipboard({ _i18n }: { _i18n: TranslationFunctions }) {
+function CopyToClipboard() {
   const { mnemonic } = useSeedPhraseContext();
   const [justCopied, setJustCopied] = useState(false);
 
@@ -151,7 +139,7 @@ function CopyToClipboard({ _i18n }: { _i18n: TranslationFunctions }) {
             style={[ss.text.btnCaps, { textTransform: "uppercase" }]}
             color={color.primary}
           >
-            {_i18n.seedPhrase.copy.clipboard()}
+            {i18.copy.clipboard()}
           </TextBtnCaps>
         </>
       </TouchableHighlight>
@@ -178,26 +166,21 @@ function Checkbox({ active, toggle }: { active: boolean; toggle(): void }) {
 function ConfirmPhraseSave({
   saved,
   toggleSaved,
-  _i18n,
 }: {
   saved: boolean;
   toggleSaved(): void;
-  _i18n: TranslationFunctions;
 }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Checkbox active={saved} toggle={toggleSaved} />
       <Spacer w={4} />
-      <TextBody color={color.grayMid}>
-        {_i18n.seedPhrase.copy.confirm()}
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.copy.confirm()}</TextBody>
     </View>
   );
 }
 
 function VerifySeedPhraseInner({ account }: { account: Account }) {
   const nav = useNav();
-  const i18n = useI18n().seedPhrase;
   const { isValid, publicKey, state, dispatch } = useSeedPhraseContext();
 
   const seedPhraseSlot = useMemo(
@@ -207,12 +190,12 @@ function VerifySeedPhraseInner({ account }: { account: Account }) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <TextBody color={color.grayMid}>{i18n.verify.description()}</TextBody>
+      <TextBody color={color.grayMid}>{i18.verify.description()}</TextBody>
       <Spacer h={24} />
       <SeedPhraseEntry {...{ state, dispatch }} />
       <Spacer h={24} />
       <AddKeySlotButton
-        buttonTitle={i18n.button.finish()}
+        buttonTitle={i18.button.finish()}
         account={account}
         slot={seedPhraseSlot}
         knownPubkey={publicKey}

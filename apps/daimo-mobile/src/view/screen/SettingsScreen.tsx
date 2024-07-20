@@ -5,6 +5,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import { Locale } from "expo-localization";
 import React, { useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -19,9 +20,8 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { Locales, TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n, localeToLanguage } from "../../i18n";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
-import { useI18n } from "../../logic/i18n";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../storage/account";
@@ -53,9 +53,11 @@ import {
   TextPara,
 } from "../shared/text";
 
+const i18 = i18n.settings;
+
 export function SettingsScreen() {
   const account = useAccount();
-  const i18n = useI18n();
+  const locale = getAccountManager().getLocale();
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -68,11 +70,11 @@ export function SettingsScreen() {
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={16} />
-        <AccountSection account={account} _i18n={i18n} />
+        <AccountSection account={account} />
         <Spacer h={32} />
         <DevicesSection account={account} />
         <Spacer h={32} />
-        {/* <LocaleSelector locale="en" /> */}
+        <LocaleSelector locale={locale} />
         <TextButton
           title={
             showDetails
@@ -88,14 +90,7 @@ export function SettingsScreen() {
   );
 }
 
-function AccountSection({
-  account,
-  _i18n,
-}: {
-  account: Account;
-  _i18n: TranslationFunctions;
-}) {
-  const i18n = _i18n.settings.account;
+function AccountSection({ account }: { account: Account }) {
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
@@ -115,7 +110,7 @@ function AccountSection({
         <>
           <ButtonMed
             type="primary"
-            title={i18n.connectFarcaster()}
+            title={i18.account.connectFarcaster()}
             onPress={connectFarc}
           />
           <Spacer h={16} />
@@ -123,36 +118,36 @@ function AccountSection({
       )}
       <ButtonMed
         type="subtle"
-        title={i18n.viewAccountOnExplorer()}
+        title={i18.account.viewAccountOnExplorer()}
         onPress={linkToExplorer}
       />
     </View>
   );
 }
 
-// function LocaleSelector({ locale }: { locale: Locales }) {
-//   return (
-//     <SelectDropdown
-//       data={["en"]} // TODO: add all locales
-//       defaultValue={locale}
-//       onSelect={(selectedLocale: Locales) => {
-//         getAccountManager().setLocale(selectedLocale);
-//       }}
-//       renderButton={() => (
-//         <View>
-//           <DropdownPickButton />
-//         </View>
-//       )}
-//       renderItem={(l) => (
-//         <View>
-//           <LocaleLanguage language={l} />
-//         </View>
-//       )}
-//     />
-//   );
-// }
+function LocaleSelector({ locale }: { locale: Locale }) {
+  return (
+    <SelectDropdown
+      data={["en"]} // TODO: add all locales
+      defaultValue={locale}
+      onSelect={(selectedLocale: Locale) => {
+        getAccountManager().setLocale(selectedLocale);
+      }}
+      renderButton={() => (
+        <View>
+          <DropdownPickButton />
+        </View>
+      )}
+      renderItem={(l) => (
+        <View>
+          <LocaleLanguage locale={l} />
+        </View>
+      )}
+    />
+  );
+}
 
-function LocaleLanguage({ language }: { language: Locales }) {
+function LocaleLanguage({ locale }: { locale: Locale }) {
   return (
     <View
       style={{
@@ -164,9 +159,7 @@ function LocaleLanguage({ language }: { language: Locales }) {
         justifyContent: "space-between",
       }}
     >
-      <DaimoText variant="dropdown">
-        {language === "en" ? "English" : "Español"}
-      </DaimoText>
+      <DaimoText variant="dropdown">{localeToLanguage(locale)}</DaimoText>
     </View>
   );
 }
@@ -215,13 +208,15 @@ function LinkedAccountsRow({
 }: {
   linkedAccounts: Account["linkedAccounts"];
 }) {
-  const i18n = useI18n().settings.account;
   const dispatcher = useContext(DispatcherContext);
   const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
 
   if (linkedAccounts.length === 0) {
     return (
-      <BadgeButton title={i18n.noSocialsConnected()} onPress={connectFarc} />
+      <BadgeButton
+        title={i18.account.noSocialsConnected()}
+        onPress={connectFarc}
+      />
     );
   }
 
@@ -231,7 +226,6 @@ function LinkedAccountsRow({
 }
 
 function DevicesSection({ account }: { account: Account }) {
-  const i18n = useI18n().settings.devices;
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
@@ -270,12 +264,12 @@ function DevicesSection({ account }: { account: Account }) {
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
-      title: i18n.passkeys.title(),
+      title: i18.devices.passkeys.title(),
       content: (
         <>
-          <TextPara>{i18n.passkeys.description.firstPara()}</TextPara>
+          <TextPara>{i18.devices.passkeys.description.firstPara()}</TextPara>
           <Spacer h={16} />
-          <TextPara>{i18n.passkeys.description.secondPara()}</TextPara>
+          <TextPara>{i18.devices.passkeys.description.secondPara()}</TextPara>
         </>
       ),
     });
@@ -283,7 +277,7 @@ function DevicesSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>{i18n.title()}</TextLight>
+        <TextLight>{i18.devices.title()}</TextLight>
       </View>
       <Spacer h={8} />
       <View
@@ -292,31 +286,31 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <Spacer h={24} />
       <DescriptiveClickableRow
-        title={i18n.createBackup.title()}
-        message={i18n.createBackup.msg()}
+        title={i18.devices.createBackup.title()}
+        message={i18.devices.createBackup.msg()}
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
         onPressHelp={openHelpModal}
       />
       <ButtonMed
         type="subtle"
-        title={i18n.createBackup.button()}
+        title={i18.devices.createBackup.button()}
         onPress={createBackup}
       />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title={i18n.addDevice.title()}
-        message={i18n.addDevice.msg()}
+        title={i18.devices.addDevice.title()}
+        message={i18.devices.addDevice.msg()}
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
       />
       <ButtonMed
         type="subtle"
-        title={i18n.addDevice.button()}
+        title={i18.devices.addDevice.button()}
         onPress={addDevice}
       />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title={i18n.contactSupport.title()}
-        message={i18n.contactSupport.msg()}
+        title={i18.devices.contactSupport.title()}
+        message={i18.devices.contactSupport.msg()}
         icon={
           <Icon
             name="help-circle"
@@ -328,7 +322,7 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <ButtonMed
         type="subtle"
-        title={i18n.contactSupport.button()}
+        title={i18.devices.contactSupport.button()}
         onPress={openSupportTG}
       />
       <View style={styles.separator} />
@@ -347,7 +341,6 @@ function DeviceRow({
   chain: DaimoChain;
   pendingRemoval: boolean;
 }) {
-  const i18n = useI18n().settings;
   const nowS = useTime();
   const nav = useNav();
 
@@ -363,8 +356,8 @@ function DeviceRow({
 
   const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
-    ? i18n.pending()
-    : i18n.addedAgo({ timeAgo: timeAgo(addAtS, nowS, true) });
+    ? i18.pending()
+    : i18.addedAgo(timeAgo(addAtS, nowS, true));
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
@@ -379,7 +372,7 @@ function DeviceRow({
             <TextBody color={textCol}>{dispName}</TextBody>
             {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
             {isCurrentDevice && !pendingRemoval && (
-              <Badge color={color.grayMid}>{i18n.devices.thisDevice()}</Badge>
+              <Badge color={color.grayMid}>{i18.devices.thisDevice()}</Badge>
             )}
             {pendingRemoval && <PendingDot />}
           </View>
@@ -389,8 +382,8 @@ function DeviceRow({
             )}
             {!isCurrentDevice && <Spacer w={16} />}
             <TextMeta color={pendingRemoval ? color.gray3 : color.primary}>
-              {isCurrentDevice && i18n.logOut()}
-              {!isCurrentDevice && i18n.remove()}
+              {isCurrentDevice && i18.logOut()}
+              {!isCurrentDevice && i18.remove()}
             </TextMeta>
           </View>
         </View>
@@ -401,7 +394,6 @@ function DeviceRow({
 
 function PendingDeviceRow({ slot }: { slot: number }) {
   const dispName = getSlotLabel(slot);
-  const i18n = useI18n().settings;
 
   return (
     <View style={styles.rowBorder}>
@@ -417,7 +409,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
             <PendingDot />
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={color.gray3}>{i18n.pending()}</TextMeta>
+            <TextMeta color={color.gray3}>{i18.pending()}</TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -427,14 +419,13 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 
 function DetailsSection({ account }: { account: Account }) {
   const { ask } = useNotificationsAccess();
-  const i18n = useI18n().settings.details;
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
 
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>{i18n.title()}</TextLight>
+        <TextLight>{i18.details.title()}</TextLight>
       </View>
       <Spacer h={4} />
       <View style={styles.kvList}>
@@ -446,14 +437,14 @@ function DetailsSection({ account }: { account: Account }) {
       {!account.pushToken && (
         <ButtonMed
           type="subtle"
-          title={i18n.enableNotifications()}
+          title={i18.details.enableNotifications()}
           onPress={ask}
         />
       )}
       {!account.pushToken && <Spacer h={16} />}
       <ButtonMed
         type="subtle"
-        title={i18n.sendDebugLog()}
+        title={i18.details.sendDebugLog()}
         onPress={sendDebugLog}
       />
       <Spacer h={32} />
@@ -471,7 +462,6 @@ function KV({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   pageWrap: {
     flex: 1,

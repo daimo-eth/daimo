@@ -21,8 +21,8 @@ import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
 import { ParamListSettings, useNav } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager, useAccount } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
@@ -37,11 +37,11 @@ import {
 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListSettings, "Device">;
+const i18 = i18n.device;
 
 export function DeviceScreen({ route, navigation }: Props) {
   const account = useAccount();
   const nav = useNav();
-  const i18n = useI18n().device;
 
   const { pubKey: devicePubkey } = route.params;
   const device = account?.accountKeys?.find((k) => k.pubKey === devicePubkey);
@@ -86,13 +86,13 @@ export function DeviceScreen({ route, navigation }: Props) {
   });
 
   const removeDevice = useCallback(() => {
-    Alert.alert(i18n.remove.title({ deviceName }), i18n.remove.msg(), [
+    Alert.alert(i18.remove.title(deviceName), i18.remove.msg(), [
       {
-        text: i18n.remove.remove({ deviceName }),
+        text: i18.remove.remove(deviceName),
         onPress: removeKey,
       },
       {
-        text: i18n.remove.cancel(),
+        text: i18.remove.cancel(),
         style: "cancel",
       },
     ]);
@@ -129,7 +129,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         if (canRemove) {
           return formatFeeAmountOrNull(cost.totalDollars);
         } else {
-          return i18n.current.cannotRemove();
+          return i18.current.cannotRemove();
         }
       case "loading":
         return message;
@@ -146,7 +146,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         return (
           <ButtonBig
             type="danger"
-            title={i18n.remove.remove({ deviceName })}
+            title={i18.remove.remove(deviceName)}
             onPress={removeDevice}
             disabled={!canRemove}
             showBiometricIcon
@@ -182,8 +182,8 @@ export function DeviceScreen({ route, navigation }: Props) {
       <Spacer h={32} />
       {isCurrentDevice && (
         <InfoBox
-          title={i18n.current.usingTitle()}
-          subtitle={i18n.current.usingSubtitle()}
+          title={i18.current.usingTitle()}
+          subtitle={i18.current.usingSubtitle()}
         />
       )}
       <Spacer h={64} />

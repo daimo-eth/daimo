@@ -25,8 +25,8 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useNav } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { ExternalAction } from "../../../logic/externalAction";
-import { useI18n } from "../../../logic/i18n";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -34,6 +34,8 @@ import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+
+const i18 = i18n.noteAction;
 
 /** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
 export function NoteActionButton({
@@ -60,7 +62,6 @@ function NoteActionButtonInner({
   memo?: string;
   externalAction: ExternalAction;
 }) {
-  const i18n = useI18n().noteAction;
   const [[noteSeed, noteAddress]] = useState(generateNoteSeedAddress);
   const noteId = getNoteId(noteAddress);
 
@@ -126,7 +127,7 @@ function NoteActionButtonInner({
 
   const sendDisabledReason =
     account.lastBalance < dollarsToAmount(cost.totalDollars)
-      ? i18n.disabledReason.insufficientFunds()
+      ? i18.disabledReason.insufficientFunds()
       : undefined;
   const sendDisabled = sendDisabledReason != null || dollars === 0;
 
@@ -138,11 +139,11 @@ function NoteActionButtonInner({
         if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         }
-        return i18n.statusMsg.totalDollars({
-          dollars: getAmountText({
+        return i18.statusMsg.totalDollars(
+          getAmountText({
             dollars: cost.totalDollars,
-          }),
-        });
+          })
+        );
       case "loading":
         return message;
       case "error":
@@ -176,11 +177,11 @@ function NoteActionButtonInner({
   const externalActionButtonTitle = (function () {
     switch (externalAction.type) {
       case "phoneNumber":
-        return i18n.externalAction.sms();
+        return i18.externalAction.sms();
       case "email":
-        return i18n.externalAction.email();
+        return i18.externalAction.email();
       case "share":
-        return i18n.externalAction.paymentLink();
+        return i18.externalAction.paymentLink();
     }
   })();
 
@@ -198,7 +199,7 @@ function NoteActionButtonInner({
         return (
           <LongPressBigButton
             type="primary"
-            title={i18n.holdButton()}
+            title={i18.holdButton()}
             onPress={exec}
             disabled={sendDisabled}
             duration={400}

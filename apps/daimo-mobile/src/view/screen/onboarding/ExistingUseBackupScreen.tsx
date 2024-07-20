@@ -12,12 +12,11 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import {
   Account,
   createEmptyAccount,
@@ -32,30 +31,21 @@ import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter, TextH2 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingUseBackup">;
+const i18 = i18n.existingUseBackup;
+
 export function ExistingUseBackupScreen({ route }: Props) {
   const { targetEAcc } = route.params;
-  const i18n = useI18n();
 
   return (
     <View style={ss.container.flexGrow}>
-      <OnboardingHeader
-        title={i18n.existingUseBackup.screenHeader()}
-        onPrev={useExitBack()}
-      />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={useExitBack()} />
       <Spacer h={16} />
-      <LogInOptions eAcc={targetEAcc} _i18n={i18n} />
+      <LogInOptions eAcc={targetEAcc} />
     </View>
   );
 }
 
-function LogInOptions({
-  eAcc,
-  _i18n,
-}: {
-  eAcc: EAccount;
-  _i18n: TranslationFunctions;
-}) {
-  const i18n = _i18n.existingUseBackup;
+function LogInOptions({ eAcc }: { eAcc: EAccount }) {
   // Passkey, security key: just log in
   const { keyInfo } = useAccountAndKeyInfo();
   const pubKeyHex = assertNotNull(keyInfo?.pubKeyHex, "Missing pubKeyHex");
@@ -95,7 +85,7 @@ function LogInOptions({
         <Spacer h={32} />
         <TextCenter>
           <TextBodyMedium color={color.grayMid}>
-            {i18n.description()}
+            {i18.description()}
           </TextBodyMedium>
         </TextCenter>
       </View>
@@ -129,7 +119,7 @@ function LogInOptions({
             )}
             <ButtonBig
               type="subtle"
-              title={i18n.logInWithSeedPhrase()}
+              title={i18.logInWithSeedPhrase()}
               onPress={chooseSeed}
             />
           </>

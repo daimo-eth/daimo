@@ -26,7 +26,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { ParamListHome, useExitBack } from "../../../common/nav";
-import { useI18n } from "../../../logic/i18n";
+import { i18n } from "../../../i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { getRpcFunc } from "../../../logic/trpc";
@@ -48,6 +48,7 @@ import {
 import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "Note">;
+const i18 = i18n.note;
 
 export default function NoteScreen(props: Props) {
   const Inner = useWithAccount(NoteScreenInner);
@@ -57,7 +58,6 @@ export default function NoteScreen(props: Props) {
 function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const { link } = route.params;
   console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
-  const i18n = useI18n().note;
 
   // Connect to the relevant DaimoEphemeralNotes[V2] contract info
   const chain = daimoChainFromId(account.homeChainId);
@@ -67,11 +67,11 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
   const title = (function (): string {
     switch (noteStatus?.status) {
       case DaimoNoteState.Claimed:
-        return i18n.accepted.link();
+        return i18.accepted.link();
       case DaimoNoteState.Cancelled:
-        return i18n.cancelled.link();
+        return i18.cancelled.link();
       default:
-        return i18n.payment();
+        return i18.payment();
     }
   })();
 
@@ -83,7 +83,7 @@ function NoteScreenInner({ route, account }: Props & { account: Account }) {
         {noteFetch.error && (
           <ErrorBanner
             error={noteFetch.error}
-            displayTitle={i18n.invalid()}
+            displayTitle={i18.invalid()}
             displayMessage={noteFetch.error.message}
           />
         )}
@@ -119,14 +119,11 @@ function NoteDisplayInner({
   hideAmount?: boolean;
   leaveScreen?: () => void;
 }) {
-  const i18n = useI18n().note;
-  const i18nButton = useI18n().shared;
-
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address
-      ? i18n.send.self()
-      : i18n.send.other({ name: getAccountName(noteStatus.sender) });
+      ? i18.send.self()
+      : i18.send.other(getAccountName(noteStatus.sender));
 
   // The note itself and signature
   const ephemeralOwner = noteStatus.ephemeralOwner!;
@@ -148,13 +145,13 @@ function NoteDisplayInner({
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
   const customHandler = isV2RecipientClaim
     ? async (setAS: SetActStatus) => {
-        setAS("loading", i18n.accept.loading());
+        setAS("loading", i18.accept.loading());
         const txHash = await rpcFunc.claimEphemeralNoteSponsored.mutate({
           ephemeralOwner,
           recipient: account.address,
           signature: ephemeralSignature,
         });
-        setAS("success", i18n.accept.link());
+        setAS("success", i18.accept.link());
         return { txHash } as PendingOp;
       }
     : undefined;
@@ -238,17 +235,17 @@ function NoteDisplayInner({
       case DaimoNoteState.Claimed:
         return (
           <TextBold>
-            {i18n.accepted.long({ name: getAccountName(noteStatus.claimer!) })}
+            {i18.accepted.long(getAccountName(noteStatus.claimer!))}
           </TextBold>
         );
       case DaimoNoteState.Cancelled:
         if (isOwnSentNote) {
-          return <TextBody>{i18n.cancelled.longSelf()}</TextBody>;
+          return <TextBody>{i18.cancelled.longSelf()}</TextBody>;
         } else {
-          return <TextError>{i18n.cancelled.longOther()}</TextError>;
+          return <TextError>{i18.cancelled.longOther()}</TextError>;
         }
       case DaimoNoteState.Pending: // Note is not yet onchain.
-        return <TextBody>{i18n.pending.long()}</TextBody>;
+        return <TextBody>{i18.pending.long()}</TextBody>;
       case DaimoNoteState.Confirmed: // Note is onchain, claimable, see below.
         break;
       default:
@@ -259,11 +256,11 @@ function NoteDisplayInner({
     switch (status) {
       case "idle":
         if (netRecv === 0) {
-          return i18n.gasTooHigh();
+          return i18.gasTooHigh();
         } else if (isOwnSentNote) {
-          return i18n.cancel.long({ dollars: netDollarsReceivedStr });
+          return i18.cancel.long(netDollarsReceivedStr);
         } else {
-          return i18n.accept.long({ dollars: netDollarsReceivedStr });
+          return i18.accept.long(netDollarsReceivedStr);
         }
       case "loading":
         return message;
@@ -279,6 +276,7 @@ function NoteDisplayInner({
     // Claimed and cancelled notes are no longer claimable.
     // Only "confirmed" notes are claimable.
     const isClaimable = noteStatus.status === DaimoNoteState.Confirmed;
+    const i18nButton = i18n.shared;
 
     switch (status) {
       case "idle":

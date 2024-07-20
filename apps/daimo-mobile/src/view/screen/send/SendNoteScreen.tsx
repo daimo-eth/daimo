@@ -13,14 +13,13 @@ import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { NoteActionButton } from "./NoteActionButton";
 import { ParamListSend, useExitToHome, useNav } from "../../../common/nav";
 import { env } from "../../../env";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import { useAccount } from "../../../logic/accountManager";
 import {
   ExternalAction,
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
-import { useI18n } from "../../../logic/i18n";
 import { zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcHook } from "../../../logic/trpc";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -39,10 +38,10 @@ import {
 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
+const i18 = i18n.sendNote;
 
 export function SendNoteScreen({ route }: Props) {
   const { recipient } = route.params || {};
-  const i18n = useI18n();
 
   // Account, home coin, home chain
   const account = useAccount();
@@ -100,7 +99,7 @@ export function SendNoteScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
         <ScreenHeader
-          title={i18n.sendNote.screenHeader()}
+          title={i18.screenHeader()}
           onBack={goBack}
           onExit={goHome}
         />
@@ -111,13 +110,13 @@ export function SendNoteScreen({ route }: Props) {
             <View style={{ flexDirection: "row" }}>
               <TextBody>Send {tokenSymbol} via link </TextBody>
               <HelpButton
-                helpTitle={i18n.sendNote.help.title()}
-                helpContent={<HelpContentPaymentLink _i18n={i18n} />}
-                title={i18n.sendNote.help.learn()}
+                helpTitle={i18.help.title()}
+                helpContent={<HelpContentPaymentLink />}
+                title={i18.help.learn()}
               />
             </View>
           }
-          subtitle={i18n.sendNote.help.subtitle()}
+          subtitle={i18.help.subtitle()}
         />
         <Spacer h={24} />
         {recipient ? (
@@ -125,7 +124,7 @@ export function SendNoteScreen({ route }: Props) {
         ) : (
           <>
             <TextCenter>
-              <TextLight>{i18n.sendNote.enterAmount()}</TextLight>
+              <TextLight>{i18.enterAmount()}</TextLight>
             </TextCenter>
           </>
         )}
@@ -166,7 +165,7 @@ export function SendNoteScreen({ route }: Props) {
         {(!amountChosen || !memoChosen) && (
           <ButtonBig
             type="primary"
-            title={i18n.sendNote.createLinkButton()}
+            title={i18.createLinkButton()}
             disabled={!(noteMoney.dollars > 0)}
             onPress={onTapCreate}
           />
@@ -183,19 +182,18 @@ export function SendNoteScreen({ route }: Props) {
   );
 }
 
-function HelpContentPaymentLink({ _i18n }: { _i18n: TranslationFunctions }) {
-  const i18n = _i18n.sendNote.help;
+function HelpContentPaymentLink() {
   return (
     <View style={ss.container.padH16}>
       <TextPara>
-        <TextBold>{i18n.description.firstPara()}</TextBold>
+        <TextBold>{i18.help.description.firstPara()}</TextBold>
       </TextPara>
       <Spacer h={24} />
-      <TextPara>{i18n.description.secondPara()}</TextPara>
+      <TextPara>{i18.help.description.secondPara()}</TextPara>
       <Spacer h={24} />
-      <TextPara>{i18n.description.thirdPara()}</TextPara>
+      <TextPara>{i18.help.description.thirdPara()}</TextPara>
       <Spacer h={24} />
-      <TextPara>{i18n.description.fourthPara()}</TextPara>
+      <TextPara>{i18.help.description.fourthPara()}</TextPara>
     </View>
   );
 }

@@ -22,16 +22,18 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   BridgeBankAccountContact,
   EAccountContact,
 } from "../../../logic/daimoContacts";
-import { useI18n } from "../../../logic/i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
+
+const i18 = i18n.sendTransferButton;
 
 export function SendTransferButton({
   account,
@@ -51,7 +53,6 @@ export function SendTransferButton({
   route?: ProposedSwap | null;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
-  const i18n = useI18n().sendTransferButton;
 
   // Get exact amount. No partial cents.
   assert(dollars >= 0);
@@ -119,18 +120,18 @@ export function SendTransferButton({
     ),
   });
 
-  const insufficientFundsStr = i18n.disabledReason.insufficientFunds();
+  const insufficientFundsStr = i18.disabledReason.insufficientFunds();
   const sendDisabledReason = (function () {
     if (account.lastBalance < dollarsToAmount(cost.totalDollars)) {
       return insufficientFundsStr;
     } else if (account.address === recipient.addr) {
-      return i18n.disabledReason.self();
+      return i18.disabledReason.self();
     } else if (!canSendTo(recipient)) {
-      return i18n.disabledReason.other();
+      return i18.disabledReason.other();
     } else if (Number(dollarsStr) === 0) {
-      return i18n.disabledReason.zero();
+      return i18.disabledReason.zero();
     } else if (Number(dollarsStr) < minTransferAmount) {
-      return i18n.disabledReason.min({ minTransferAmount });
+      return i18.disabledReason.min(minTransferAmount);
     } else {
       return undefined;
     }
@@ -143,7 +144,7 @@ export function SendTransferButton({
       case "error":
         return (
           <LongPressBigButton
-            title={i18n.holdButton()}
+            title={i18.holdButton()}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
@@ -166,7 +167,7 @@ export function SendTransferButton({
         if (sendDisabledReason === insufficientFundsStr && hasFee) {
           return (
             <TextError>
-              {i18n.statusMsg.insufficientFundsPlusFee({ totalStr })}
+              {i18.statusMsg.insufficientFundsPlusFee(totalStr)}
             </TextError>
           );
         } else if (sendDisabledReason === insufficientFundsStr) {
@@ -174,11 +175,9 @@ export function SendTransferButton({
         } else if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         } else if (hasFee) {
-          return i18n.statusMsg.totalDollars({
-            totalStr,
-          });
+          return i18.statusMsg.totalDollars(totalStr);
         } else {
-          return i18n.statusMsg.paymentsPublic();
+          return i18.statusMsg.paymentsPublic();
         }
       }
       case "loading": {

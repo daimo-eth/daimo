@@ -8,7 +8,6 @@ export const en = {
       sent: () => `Sent`,
       request: () => `Request`,
     },
-    // Often used with .toUpperCase()
     buttonAction: {
       confirm: () => `Confirm`,
       cancel: () => `Cancel`,
@@ -75,8 +74,8 @@ export const en = {
       `Link a new device to your account by scanning its QR code during setup.`,
     scanQR: {
       error: () => `Error Parsing QR Code`,
-      scanned: () => `Scanned {slot}`,
-      add: () => `Add {slot}`,
+      scanned: (slot: string) => `Scanned ${slot}`,
+      add: (slot: string) => `Add ${slot}`,
     },
   },
   // AddKeySlotButton.tsx
@@ -87,9 +86,9 @@ export const en = {
   device: {
     deleted: () => `Deleted device`,
     remove: {
-      title: () => `Remove {deviceName}\n`,
+      title: (deviceName: string) => `Remove ${deviceName}\n`,
       msg: () => `Are you sure you want to remove this device?`,
-      remove: () => `Remove {deviceName}`,
+      remove: (deviceName: string) => `Remove ${deviceName}`,
       cancel: () => `Cancel`,
     },
     current: {
@@ -107,18 +106,18 @@ export const en = {
     accept: {
       title: () => `Accept`,
       link: () => `Accept link`,
-      long: () => `Accept this link, receiving {dollars}`,
+      long: (dollars: string) => `Accept this link, receiving ${dollars}`,
       loading: () => `Accepting link...`,
     },
     accepted: {
       title: () => `Accepted`,
       link: () => `Accepted Link`,
-      long: () => `Accepted by {name}`,
+      long: (name: string) => `Accepted by ${name}`,
     },
     cancel: {
       title: () => `Cancel`,
       link: () => `Cancel link`,
-      long: () => `Cancel this link, reclaiming {dollars}`,
+      long: (dollars: string) => `Cancel this link, reclaiming ${dollars}`,
     },
     cancelled: {
       title: () => `Cancelled`,
@@ -133,7 +132,7 @@ export const en = {
     invalid: () => `Payment link invalid`,
     send: {
       self: () => `you sent`,
-      other: () => `{name} sent`,
+      other: (name: string) => `${name} sent`,
     },
   },
   // SendNoteScreen.tsx
@@ -158,7 +157,8 @@ export const en = {
   // ------------ NOTIFICATIONS ------------
   // InvitesNotificationRow.tsx
   invitesNotification: {
-    description: () => `You have {inviteCount} invite{{s}} available.`,
+    description: (inviteCount: number) =>
+      `You have ${pluralize(inviteCount, "invite")} available.`,
   },
   // NotificationsScreen.tsx
   notifications: {
@@ -195,7 +195,8 @@ export const en = {
   },
   // SwapNotificationRow.tsx
   swapNotification: {
-    msg: () => `Accept {readableAmount} {coinName} from `,
+    msg: (readableAmount: string, coinName: string) =>
+      `Accept ${readableAmount} ${coinName} from `,
   },
 
   // ------------ ONBOARDING ------------
@@ -239,7 +240,7 @@ export const en = {
   },
   // LogInButton.tsx
   logIn: {
-    button: () => `LOG IN WITH {keyType}`,
+    button: (keyType: string) => `LOG IN WITH ${keyType}`,
     fromSeed: {
       error: () => `Seed phrase not on account. Removed?`,
       button: () => `LOG IN WITH SEED PHRASE`,
@@ -362,12 +363,12 @@ export const en = {
     holdButton: () => `HOLD TO FULFILL`,
     statusMsg: {
       paymentsPublic: () => `Payments are public`,
-      totalDollars: () => `Total incl. fees {dollars}`,
+      totalDollars: (dollars: string) => `Total incl. fees ${dollars}`,
     },
   },
   // MemoDisplay.tsx
   memoDisplay: {
-    status: () => `memo {status}`,
+    status: (status: string) => `memo ${status}`,
     placeholder: () => `WHAT'S THIS FOR?`,
   },
   // NoteAction.tsx
@@ -376,7 +377,7 @@ export const en = {
       insufficientFunds: () => `Insufficient funds`,
     },
     statusMsg: {
-      totalDollars: () => `Total incl. fees {dollars}`,
+      totalDollars: (dollars: string) => `Total incl. fees ${dollars}`,
     },
     externalAction: {
       sms: () => `SEND SMS`,
@@ -387,7 +388,8 @@ export const en = {
   },
   // RouteDisplay.tsx
   routeDisplay: {
-    theyWillReceive: () => `They will receive {amount} {tokenSymbol}`,
+    theyWillReceive: (amount: string, tokenSymbol: string) =>
+      `They will receive ${amount} ${tokenSymbol}`,
   },
   // SendNavScreen.tsx
   sendNav: {
@@ -396,7 +398,7 @@ export const en = {
   // SendNoteScreen.tsx
   sendNote: {
     screenHeader: () => `Send Link`,
-    info: () => `Send {tokenSymbol} via link`,
+    info: (tokenSymbol: string) => `Send ${tokenSymbol} via link`,
     help: {
       title: () => `How Payment Links Work`,
       learn: () => `Learn how`,
@@ -421,20 +423,22 @@ export const en = {
       self: () => `Can't send to yourself`,
       other: () => `Can't send to this account`,
       zero: () => `Enter an amount`,
-      min: () => `Minimum transfer amount is {minTransferAmount} USDC`,
+      min: (minTransferAmount: number) =>
+        `Minimum transfer amount is ${minTransferAmount} USDC`,
     },
     holdButton: () => `HOLD TO SEND`,
     statusMsg: {
-      insufficientFundsPlusFee: () => `You need at least {totalStr} to send`,
+      insufficientFundsPlusFee: (totalStr: string) =>
+        `You need at least ${totalStr} to send`,
       insufficientFunds: () => `Insufficient funds`,
-      totalDollars: () => `Total with fees {totalStr}`,
+      totalDollars: (totalStr: string) => `Total with fees ${totalStr}`,
       paymentsPublic: () => `Payments are public`,
     },
   },
   // SendTransferScreen.tsx
   sendTransferScreen: {
     screenHeader: () => `Send to`,
-    firstTime: () => `First time paying {name}`,
+    firstTime: (name: string) => `First time paying ${name}`,
   },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
@@ -443,7 +447,7 @@ export const en = {
     landline: {
       cta: () => `Connect with Landline`,
       title: () => `Deposit or withdraw directly from a US bank account`,
-      optionRowTitle: () => `Connected {timeAgo} ago`,
+      optionRowTitle: (timeAgo: string) => `Connected ${timeAgo} ago`,
     },
     binance: {
       cta: () => `Deposit from Binance`,
@@ -470,13 +474,13 @@ export const en = {
   },
   // HomeScreen.tsx
   home: {
-    pending: () => `+ ${pendingDollars} PENDING`,
+    pending: (pendingDollars: string) => `+ $${pendingDollars} PENDING`,
     finishAccountSetUp: () => `Finish setting up your account`,
   },
   // InviteScreen.tsx
   invite: {
     screenHeader: () => `Invite Friends`,
-    more: () => `+{moreInvitees} more`,
+    more: (moreInvitees: number) => `+${moreInvitees} more`,
     invited: ({ invited }: { invited: number }) =>
       `You've invited ${pluralize(invited, "friend")}`,
     left: () => `{usesLeft} invite{{s}} left`,
@@ -487,11 +491,14 @@ export const en = {
     },
     sendButton: () => `SEND`,
     referral: {
-      creditForInvite: () =>
-        `You'll get credit for the invite on their profile {bonusSubtitle}`,
-      bonusBoth: () => `and we'll send you both ${bonusDollarsInvitee} USDC`,
-      bonusInvitee: () => `and we'll send them ${bonusDollarsInvitee} USDC`,
-      bonusInviter: () => `and we'll send you ${bonusDollarsInviter} USDC`,
+      creditForInvite: (bonusSubtitle: string) =>
+        `You'll get credit for the invite on their profile ${bonusSubtitle}`,
+      bonusBoth: (bonusDollarsInvitee: number) =>
+        `and we'll send you both $${bonusDollarsInvitee} USDC`,
+      bonusInvitee: (bonusDollarsInvitee: number) =>
+        `and we'll send them $${bonusDollarsInvitee} USDC`,
+      bonusInviter: (bonusDollarsInviter: number) =>
+        `and we'll send you $${bonusDollarsInviter} USDC`,
       inviteCode: () => `Invite Code`,
       inviteLink: () => `Invite Link`,
       share: {
@@ -515,16 +522,16 @@ export const en = {
     error: {
       account: {
         title: () => `Account not found`,
-        msg: () => `Couldn't load account {account}`,
+        msg: (account: string) => `Couldn't load account ${account}`,
       },
       invite: {
         title: () => `Invite not found`,
-        msg: () => `Couldn't load invite {code}`,
+        msg: (code: string) => `Couldn't load invite ${code}`,
       },
     },
     subtitle: {
       invitedBy: () => `Invited by `,
-      joined: () => `Joined {timeAgo}`,
+      joined: (timeAgo: string) => `Joined ${timeAgo}`,
     },
   },
   // QRScreen.tsx
@@ -597,7 +604,7 @@ export const en = {
     logOut: () => `Log out`,
     remove: () => `Remove`,
     pending: () => `Pending`,
-    addedAgo: () => `Added {timeAgo}`,
+    addedAgo: (timeAgo: string) => `Added ${timeAgo}`,
     details: {
       title: () => `Device details`,
       enableNotifications: () => `Enable notifications`,
@@ -607,13 +614,13 @@ export const en = {
   // YourInvitesScreen.tsx
   yourInvites: {
     screenHeader: () => `Your Invites`,
-    joinedAgo: () => `Joined {timeAgo} ago`,
+    joinedAgo: (timeAgo: string) => `Joined ${timeAgo} ago`,
   },
 
   // -------------------------- SHARED --------------------------
   // AmountInput.tsx
   amountInput: {
-    dollarsAvailable: () => `{dollars} available`,
+    dollarsAvailable: (dollars: string) => `${dollars} available`,
   },
   // OfflineHeader.tsx
   offlineHeader: {
@@ -632,8 +639,8 @@ export const en = {
   searchResults: {
     noResults: () => `No results`,
     paymentLinkButton: () => `SEND PAYMENT LINK INSTEAD`,
-    sentAgo: () => `Sent {timeAgo}`,
-    receivedAgo: () => `Received {timeAgo}`,
+    sentAgo: (timeAgo: string) => `Sent ${timeAgo}`,
+    receivedAgo: (timeAgo: string) => `Received ${timeAgo}`,
     extra: {
       contact: () => `Send to contact`,
       requestLink: () => `Request via link`,
@@ -671,7 +678,7 @@ export const en = {
     addKey: {
       passkey: () => `PASSKEY`,
       securityKey: () => `SECURITY KEY`,
-      button: () => `BACK UP WITH {slotType}`,
+      button: (slotType: string) => `BACK UP WITH ${slotType}`,
     },
     recommended: {
       compact: () => `REC.`,
@@ -688,8 +695,8 @@ export const en = {
   // DepositAddressBottomSheet.tsx
   depositAddressBottom: {
     sheetHeader: () => `Deposit`,
-    description: () =>
-      `Send {tokenSymbol} to your address below. Any other ERC-20 tokens will be converted to USDC. Confirm that you're sending:`,
+    description: (tokenSymbol: string) =>
+      `Send ${tokenSymbol} to your address below. Any other ERC-20 tokens will be converted to USDC. Confirm that you're sending:`,
     checkChain: {
       on: () => `On `,
       notOther: () => `, not any other chain`,
@@ -702,7 +709,7 @@ export const en = {
     linked: () => `Your account is linked`,
     connect: () => `Connect Farcaster`,
     openWarpcastButton: () => `OPEN IN WARPCAST`,
-    welcome: () => `Welcome, {fcUsername}`,
+    welcome: (fcUsername: string) => `Welcome, ${fcUsername}`,
     loading: () => `Loading...`,
   },
   // HelpBottomSheet.tsx

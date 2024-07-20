@@ -18,12 +18,11 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
-import { TranslationFunctions } from "../../../i18n/i18n-types";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import { generateRandomName } from "../../../logic/name";
 import { getRpcHook } from "../../../logic/trpc";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -39,9 +38,10 @@ import {
   TextCenter,
 } from "../../shared/text";
 
+const i18 = i18n.onboardingChooseName;
+
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
 export function OnboardingChooseNameScreen({ route }: Props) {
-  const i18n = useI18n();
   const daimoChain = useDaimoChain();
   const [name, setName] = useState("");
   const { inviteLink } = route.params;
@@ -61,7 +61,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
         <OnboardingHeader
-          title={i18n.onboardingChooseName.screenHeader()}
+          title={i18.screenHeader()}
           onPrev={useExitBack()}
           steps={steps}
           activeStep={steps - 2}
@@ -70,7 +70,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
         <View style={ss.container.padH24}>
           <CoverVideo video={VidUsernameAnimation} />
           <Spacer h={12} />
-          <Instructions _i18n={i18n} />
+          <Instructions />
           <Spacer h={24} />
           <View style={styles.namePickerWrap}>
             <NamePicker
@@ -78,7 +78,6 @@ export function OnboardingChooseNameScreen({ route }: Props) {
               daimoChain={daimoChain}
               onChange={setName}
               onChoose={createAccount}
-              _i18n={i18n}
             />
           </View>
         </View>
@@ -87,11 +86,11 @@ export function OnboardingChooseNameScreen({ route }: Props) {
   );
 }
 
-function Instructions({ _i18n }: { _i18n: TranslationFunctions }) {
+function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        {_i18n.onboardingChooseName.instructions()}
+        {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
@@ -113,15 +112,12 @@ function NamePicker({
   daimoChain,
   onChange,
   onChoose,
-  _i18n,
 }: {
   name: string;
   daimoChain: DaimoChain;
   onChange: (name: string) => void;
   onChoose: () => void;
-  _i18n: TranslationFunctions;
 }) {
-  const i18n = _i18n.onboardingChooseName.picker;
   // First, validate the name & check if it's available
   let error = "";
   try {
@@ -155,7 +151,7 @@ function NamePicker({
             />
             <Spacer w={8} />
             <TextBtnCaps color={color.primary}>
-              {i18n.generateRandom()}
+              {i18.picker.generateRandom()}
             </TextBtnCaps>
           </View>
         </TextButton>
@@ -167,9 +163,9 @@ function NamePicker({
     } else if (result.isLoading) {
       return <IconRow color={color.grayMid} title="..." />;
     } else if (result.error) {
-      return <IconRow icon="alert" title={i18n.error()} />;
+      return <IconRow icon="alert" title={i18.picker.error()} />;
     } else if (result.isSuccess && result.data) {
-      return <IconRow icon="alert" title={i18n.taken()} />;
+      return <IconRow icon="alert" title={i18.picker.taken()} />;
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true;
       return (
@@ -186,7 +182,7 @@ function NamePicker({
   return (
     <View>
       <InputBig
-        placeholder={i18n.title()}
+        placeholder={i18.picker.title()}
         value={name}
         onChange={(input) => onChange(input.toLowerCase())}
         center
@@ -197,7 +193,7 @@ function NamePicker({
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title={i18n.createButton()}
+        title={i18.picker.createButton()}
         onPress={onChoose}
         disabled={!isAvailable}
       />

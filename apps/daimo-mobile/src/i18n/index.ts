@@ -1,10 +1,10 @@
-import { getLocales } from "expo-localization";
+import { getLocales, Locale } from "expo-localization";
 
 import { en } from "./languages/en";
 
 type I18NTranslation = typeof en;
 
-export function getI18NLocale() {
+export function getI18NLocale(): Locale {
   return getLocales()[0];
 }
 
@@ -19,3 +19,13 @@ export const i18n: I18NTranslation = (function () {
       return en;
   }
 })();
+
+export function localeToLanguage(locale: Locale) {
+  switch (locale.languageCode) {
+    case "es":
+      return "Español";
+    case "en":
+    default:
+      return "English";
+  }
+}

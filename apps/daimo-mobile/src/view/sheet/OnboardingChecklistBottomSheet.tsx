@@ -2,7 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { StyleSheet, View } from "react-native";
 
-import { useI18n } from "../../logic/i18n";
+import { i18n } from "../../i18n";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
@@ -15,13 +15,13 @@ export function OnboardingChecklistBottomSheet() {
   const Inner = useWithAccount(OnboardingChecklistBottomSheetInner);
   return <Inner />;
 }
+const i18 = i18n.onboardingChecklistBottom;
 
 function OnboardingChecklistBottomSheetInner({
   account,
 }: {
   account: Account;
 }) {
-  const i18n = useI18n().onboardingChecklistBottom;
   const {
     hasBackup,
     farcasterConnected,
@@ -32,31 +32,31 @@ function OnboardingChecklistBottomSheetInner({
 
   return (
     <View>
-      <TextH3 style={{ textAlign: "center" }}>{i18n.sheetHeader()}</TextH3>
+      <TextH3 style={{ textAlign: "center" }}>{i18.sheetHeader()}</TextH3>
       <Spacer h={16} />
       <TextBody style={{ textAlign: "center", color: color.grayMid }}>
-        {i18n.description()}
+        {i18.description()}
       </TextBody>
       <Spacer h={24} />
       <View style={styles.separator} />
       <ChecklistRow
         step={1}
-        title={i18n.secureAccount.title()}
-        description={i18n.secureAccount.description()}
+        title={i18.secureAccount.title()}
+        description={i18.secureAccount.description()}
         onPress={handleSecureAccount}
         done={hasBackup}
       />
       <ChecklistRow
         step={2}
-        title={i18n.connectFarcaster.title()}
-        description={i18n.connectFarcaster.description()}
+        title={i18.connectFarcaster.title()}
+        description={i18.connectFarcaster.description()}
         onPress={handleConnectFarcaster}
         done={farcasterConnected}
       />
       <Spacer h={16} />
       <View style={ss.container.padH24}>
         {dismissChecklist && (
-          <TextButton title={i18n.dismissButton()} onPress={dismissChecklist} />
+          <TextButton title={i18.dismissButton()} onPress={dismissChecklist} />
         )}
       </View>
       <Spacer h={48} />

@@ -5,11 +5,11 @@ import { View } from "react-native";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { useExitBack, useOnboardingNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { i18n } from "../../../i18n";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
 } from "../../../logic/accountManager";
-import { useI18n } from "../../../logic/i18n";
 import { createAddDeviceString } from "../../../logic/key";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
@@ -22,10 +22,11 @@ import {
 } from "../../shared/text";
 import { QRCodeBox } from "../QRScreen";
 
+const i18 = i18n.existing;
+
 export function ExistingScreen() {
   // On-chain signing key slot identifies key type (phone, computer, etc)
   const daimoChain = useDaimoChain();
-  const i18n = useI18n().existing;
   const slotType =
     env(daimoChain).deviceType === "phone" ? SlotType.Phone : SlotType.Computer;
 
@@ -46,11 +47,11 @@ export function ExistingScreen() {
   if (pubKeyHex == null) {
     return (
       <View>
-        <OnboardingHeader title={i18n.screenHeader()} onPrev={onPrev} />
+        <OnboardingHeader title={i18.screenHeader()} onPrev={onPrev} />
         <View style={ss.container.padH24}>
           <Spacer h={24} />
           <TextCenter>
-            <TextBody>{i18n.generatingKeys()}</TextBody>
+            <TextBody>{i18.generatingKeys()}</TextBody>
           </TextCenter>
         </View>
       </View>
@@ -59,13 +60,13 @@ export function ExistingScreen() {
 
   return (
     <View>
-      <OnboardingHeader title={i18n.screenHeader()} onPrev={onPrev} />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={onPrev} />
       <View style={ss.container.padH24}>
         <Spacer h={16} />
         <QRCodeBox value={createAddDeviceString(pubKeyHex, slotType)} />
         <Spacer h={16} />
         <TextCenter>
-          <TextBodyMedium color={color.grayMid}>{i18n.scanQR()}</TextBodyMedium>
+          <TextBodyMedium color={color.grayMid}>{i18.scanQR()}</TextBodyMedium>
         </TextCenter>
         <Spacer h={24} />
         <TextCenter>
@@ -74,7 +75,7 @@ export function ExistingScreen() {
         <Spacer h={24} />
         <ButtonBig
           type="primary"
-          title={i18n.useBackup()}
+          title={i18.useBackup()}
           onPress={onUseBackup}
         />
       </View>

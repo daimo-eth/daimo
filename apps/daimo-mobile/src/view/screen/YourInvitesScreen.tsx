@@ -2,14 +2,15 @@ import { EAccount, timeAgo } from "@daimo/common";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
-import { TranslationFunctions } from "../../i18n/i18n-types";
-import { useI18n } from "../../logic/i18n";
+import { i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.yourInvites;
 
 export function YourInvitesScreen() {
   const Inner = useWithAccount(YourInvitesScreenInner);
@@ -18,32 +19,22 @@ export function YourInvitesScreen() {
 
 function YourInvitesScreenInner({ account }: { account: Account }) {
   const nav = useNav();
-  const i18n = useI18n();
 
   const invitees = account.invitees;
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader
-        title={i18n.yourInvites.screenHeader()}
-        onBack={nav.goBack}
-      />
+      <ScreenHeader title={i18.screenHeader()} onBack={nav.goBack} />
       <ScrollView style={styles.list}>
         {invitees.map((invitee) => (
-          <InviteeRow key={invitee.addr} invitee={invitee} _i18n={i18n} />
+          <InviteeRow key={invitee.addr} invitee={invitee} />
         ))}
       </ScrollView>
     </View>
   );
 }
 
-function InviteeRow({
-  invitee,
-  _i18n,
-}: {
-  invitee: EAccount;
-  _i18n: TranslationFunctions;
-}) {
+function InviteeRow({ invitee }: { invitee: EAccount }) {
   const nav = useNav();
 
   return (
@@ -61,9 +52,7 @@ function InviteeRow({
           <View style={styles.inviteeRowRight}>
             {invitee.timestamp && (
               <TextBody color={color.gray3}>
-                {_i18n.yourInvites.joinedAgo({
-                  timeAgo: timeAgo(invitee.timestamp),
-                })}
+                {i18.joinedAgo(timeAgo(invitee.timestamp))}
               </TextBody>
             )}
           </View>

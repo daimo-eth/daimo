@@ -12,9 +12,8 @@ import { stringToBytes } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { signAsync } from "../../action/sign";
-import { TranslationFunctions } from "../../i18n/i18n-types";
+import { i18n } from "../../i18n";
 import { getAccountManager } from "../../logic/accountManager";
-import { useI18n } from "../../logic/i18n";
 import { getRpcFunc } from "../../logic/trpc";
 import { FarcasterClient } from "../../profile/farcaster";
 import { Account } from "../../storage/account";
@@ -35,10 +34,10 @@ export function FarcasterBottomSheet() {
 }
 
 const fc = new FarcasterClient();
+const i18 = i18n.farcasterBottom;
 
 function FarcasterBottomSheetInner({ account }: { account: Account }) {
   const nonce = account.address.substring(2);
-  const i18n = useI18n();
 
   const [error, setError] = useState<Error>();
   const [url, setUrl] = useState<string>();
@@ -76,9 +75,9 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
   const isLoading = fcAccount == null && !error && !data;
   const hasFcAccount = fcAccount != null || (!error && data);
   const header = (function () {
-    if (!error && data) return i18n.farcasterBottom.verified();
-    else if (fcAccount != null) return i18n.farcasterBottom.linked();
-    else return i18n.farcasterBottom.connect();
+    if (!error && data) return i18.verified();
+    else if (fcAccount != null) return i18.linked();
+    else return i18.connect();
   })();
 
   return (
@@ -86,25 +85,15 @@ function FarcasterBottomSheetInner({ account }: { account: Account }) {
       <Spacer h={16} />
       <TextH3>{header}</TextH3>
       <Spacer h={12} />
-      {isLoading && url == null && (
-        <TextLight>{i18n.farcasterBottom.loading()}</TextLight>
-      )}
-      {isLoading && url != null && <FarcasterQRButton url={url} _i18n={i18n} />}
-      {hasFcAccount && (
-        <LinkFarcasterSection {...{ account, data }} _i18n={i18n} />
-      )}
+      {isLoading && url == null && <TextLight>{i18.loading()}</TextLight>}
+      {isLoading && url != null && <FarcasterQRButton url={url} />}
+      {hasFcAccount && <LinkFarcasterSection {...{ account, data }} />}
       {error && <ErrorRowCentered error={error} />}
     </View>
   );
 }
 
-function FarcasterQRButton({
-  url,
-  _i18n,
-}: {
-  url: string;
-  _i18n: TranslationFunctions;
-}) {
+function FarcasterQRButton({ url }: { url: string }) {
   const openInWarpcast = useCallback(() => {
     Linking.openURL(url);
   }, [url]);
@@ -115,7 +104,7 @@ function FarcasterQRButton({
       <Spacer h={16} />
       <ButtonMed
         type="subtle"
-        title={_i18n.farcasterBottom.openWarpcastButton()}
+        title={i18.openWarpcastButton()}
         onPress={openInWarpcast}
       />
     </>
@@ -125,11 +114,9 @@ function FarcasterQRButton({
 function LinkFarcasterSection({
   account,
   data,
-  _i18n,
 }: {
   account: Account;
   data?: StatusAPIResponse;
-  _i18n: TranslationFunctions;
 }) {
   // Account we've already linked
   const linkedAcc = account.linkedAccounts.find((l) => l.type === "farcaster");
@@ -173,9 +160,7 @@ function LinkFarcasterSection({
 
   return (
     <View>
-      <TextBody color={color.grayMid}>
-        {_i18n.farcasterBottom.welcome({ fcUsername })}
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.welcome(fcUsername)}</TextBody>
       <Spacer h={64} />
       <ProfilePreview fcAccount={fcAcc} />
       <Spacer h={64} />

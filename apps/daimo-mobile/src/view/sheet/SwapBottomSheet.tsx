@@ -19,8 +19,8 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../action/useSendAsync";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
-import { useI18n } from "../../logic/i18n";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { TokenBubble } from "../shared/Bubble";
@@ -30,12 +30,13 @@ import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextH3 } from "../shared/text";
 
+const i18 = i18n.swapBottom;
+
 // Bottom sheet for proposed inbound swap
 export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
-  const i18n = useI18n().swapBottom;
 
   // Generate nonce
   const nonce = useMemo(
@@ -84,7 +85,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title={i18n.sheetHeader()}
+        title={i18.sheetHeader()}
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}
