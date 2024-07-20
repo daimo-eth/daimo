@@ -134,9 +134,9 @@ export class NameRegistry extends Indexer {
     });
     this.logs.push(...names);
     names.forEach(this.cacheAccount);
-    console.log(
-      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`
-    );
+
+    const elapsedMs = (Date.now() - startTime) | 0;
+    console.log(`[NAME-REG] loaded ${names.length} names in ${elapsedMs}ms`);
   }
 
   /** Cache an account in memory. */

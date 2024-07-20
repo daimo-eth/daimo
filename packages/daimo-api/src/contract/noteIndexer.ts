@@ -59,7 +59,10 @@ export class NoteIndexer extends Indexer {
     const startMs = Date.now();
     const logs = await this.loadNoteLogs(pg, from, to);
     if (logs.length === 0) return;
-    console.log(`[NOTE] ${Date.now() - startMs}ms: loaded ${logs.length} logs`);
+
+    const elapsedMs = (Date.now() - startMs) | 0;
+    console.log(`[NOTE] ${elapsedMs}ms: loaded ${logs.length} logs`);
+
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
     // Update in-memory note statuses

@@ -65,10 +65,10 @@ export class SwapClogMatcher {
         foreignTransfer,
       ]);
     }
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[SWAP] loaded ${result.rows.length} bundled transfers in ${
-        Date.now() - startTime
-      }ms`
+      `[SWAP] loaded ${result.rows.length} bundled transfers in ${elapsedMs}ms`
     );
   }
 

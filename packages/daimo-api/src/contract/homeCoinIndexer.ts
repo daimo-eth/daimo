@@ -106,10 +106,10 @@ export class HomeCoinIndexer extends Indexer {
       };
     });
     if (logs.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${
-        Date.now() - startTime
-      }ms`
+      `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );
 
     this.allTransfers = this.allTransfers.concat(logs);

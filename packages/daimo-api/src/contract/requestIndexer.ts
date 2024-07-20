@@ -73,10 +73,10 @@ export class RequestIndexer extends Indexer {
     statuses.push(...(await this.loadCancelled(pg, from, to)));
     statuses.push(...(await this.loadFulfilled(pg, from, to)));
     if (statuses.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[REQUEST] loaded ${statuses.length} statuses in ${
-        Date.now() - startTime
-      }ms`
+      `[REQUEST] loaded ${statuses.length} statuses in ${elapsedMs}ms`
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;

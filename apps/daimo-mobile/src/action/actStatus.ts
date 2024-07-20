@@ -37,7 +37,7 @@ export function useActStatus(name: string): [ActHandle, SetActStatus] {
       if (status === "loading") {
         if (as.status !== "loading") startTime.current = Date.now();
       }
-      const elapsedMs = Date.now() - startTime.current;
+      const elapsedMs = (Date.now() - startTime.current) | 0;
       console.log(
         `[ACTION] ${name} - ${elapsedMs}ms: ${as.status} > ${status} ${message}`
       );

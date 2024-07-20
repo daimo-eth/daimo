@@ -130,7 +130,7 @@ export class ForeignCoinIndexer extends Indexer {
         foreignToken: this.tokenReg.getToken(t.address)!,
       }));
 
-    const elapsedMs = performance.now() - startMs;
+    const elapsedMs = (performance.now() - startMs) | 0;
     console.log(
       `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );

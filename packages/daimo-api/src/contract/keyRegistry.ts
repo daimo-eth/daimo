@@ -94,10 +94,10 @@ export class KeyRegistry extends Indexer {
       }
     }
     if (changes.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[KEY-REG] loaded ${changes.length} key changes in ${
-        Date.now() - startTime
-      }ms`
+      `[KEY-REG] loaded ${changes.length} key changes in ${elapsedMs}ms`
     );
 
     this.listeners.forEach((l) => l(changes));

@@ -113,9 +113,8 @@ export class BundlerClient {
             "op.log_index": userOp.logIndex,
           });
           span.end();
-          console.log(
-            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`
-          );
+          const elapsedMs = (Date.now() - opStart) | 0;
+          console.log(`[BUNDLER] user op completed in ${elapsedMs}ms`);
         });
       }
 

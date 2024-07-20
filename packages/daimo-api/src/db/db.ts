@@ -186,7 +186,7 @@ export class DB {
       throw e;
     } finally {
       const status = success ? "success" : "error";
-      const elapsedMs = performance.now() - startMs;
+      const elapsedMs = (performance.now() - startMs) | 0;
       console.log(`[DB] migration ${status} in ${elapsedMs}ms`);
     }
   }
