@@ -1,4 +1,4 @@
-import { guessTimestampFromNum, now } from "@daimo/common";
+import { assertNotNull, guessTimestampFromNum, now } from "@daimo/common";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
 
@@ -30,11 +30,9 @@ export class Watcher {
   readonly notifications: DBNotifications;
 
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
-  private latest = 5699999;
-  private slowLatest = 5699999;
+  private latest;
   private batchSize = 25000;
   private isIndexing = false;
-  private isSlowIndexing = false;
 
   // The latest block present in shovel DB, as of the most recent tick.
   private shovelLatest = 0;
@@ -43,11 +41,9 @@ export class Watcher {
   // The latest successful tick.
   private lastGoodTickS = 0;
 
-  // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
+  // indexers by dependency layers.
+  // indexers[0] are indexed first concurrently, indexers[1] second, etc.
   private indexerLayers: Indexer[][] = [];
-  // indexers that are ignored for synchronization, i.e. while they are indexing a old range other
-  // indexers may be ahead of them -- this is all for ETHIndexer which sucks.
-  private slowIndexers: Indexer[] = [];
 
   private pg: Pool;
 
@@ -55,14 +51,14 @@ export class Watcher {
     const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
     this.notifications = new DBNotifications(dbConfig);
+
+    const { testnet } = assertNotNull(rpcClient.chain);
+    if (testnet) this.latest = 12000000 - 1;
+    else this.latest = 5700000 - 1;
   }
 
   add(...i: Indexer[][]) {
     this.indexerLayers.push(...i);
-  }
-
-  slowAdd(...i: Indexer[]) {
-    this.slowIndexers.push(...i);
   }
 
   latestBlock(): { number: number; timestamp: number } {
@@ -92,16 +88,7 @@ export class Watcher {
     return false;
   }
 
-  async migrateDB() {
-    console.log(`[SHOVEL] migrateDB: eth_transfers...`);
-    await this.pg.query(`
-      CREATE INDEX IF NOT EXISTS i_eth_from ON eth_transfers("from");
-      CREATE INDEX IF NOT EXISTS i_eth_to ON eth_transfers("to");
-    `);
-  }
-
   async init() {
-    await this.migrateDB();
     this.shovelLatest = await this.getShovelLatest();
     await this.catchUpTo(this.shovelLatest);
   }
@@ -133,10 +120,6 @@ export class Watcher {
       const tickSummary = JSON.stringify({ shovelLatest, localLatest });
       console.log(`[SHOVEL] starting tick ${tickSummary}`);
 
-      if (localLatest - this.slowLatest > 3) {
-        // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
-        this.slowIndex(this.slowLatest + 1, localLatest);
-      }
       // localLatest <= 0 when there are no new blocks in shovel
       // or, for whatever reason, we are ahead of shovel.
       if (localLatest > this.latest) this.latest = localLatest;
@@ -156,7 +139,6 @@ export class Watcher {
     while (this.latest < stop) {
       this.latest = await this.index(this.latest + 1, stop, this.batchSize);
     }
-    await this.slowIndex(this.slowLatest + 1, stop); // jumps ethIndexer to the end in one go
     console.log(`[SHOVEL] initialized to ${this.latest}`);
   }
 
@@ -177,16 +159,6 @@ export class Watcher {
       `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
     return start + limit;
-  }
-
-  private async slowIndex(start: number, stop: number) {
-    if (this.isSlowIndexing) return;
-    this.isSlowIndexing = true;
-    for (const i of this.slowIndexers) {
-      await i.load(this.pg, start, stop);
-    }
-    this.slowLatest = stop;
-    this.isSlowIndexing = false;
   }
 
   async getShovelLatest(): Promise<number> {
