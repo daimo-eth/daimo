@@ -1,8 +1,10 @@
 import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { retryBackoff } from "../utils/retryBackoff";
 
@@ -35,7 +37,7 @@ export class KeyRegistry extends Indexer {
     this.listeners.push(listener);
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));

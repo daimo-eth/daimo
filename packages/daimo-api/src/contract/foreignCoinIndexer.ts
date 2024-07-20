@@ -7,6 +7,7 @@ import {
   baseUSDC,
   isAmountDust,
 } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -14,6 +15,7 @@ import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
@@ -53,8 +55,10 @@ export class ForeignCoinIndexer extends Indexer {
     super("FOREIGN-COIN");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startMs = performance.now();
+
+    const { event, trace } = this.shovelSource;
 
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
@@ -75,7 +79,7 @@ export class ForeignCoinIndexer extends Indexer {
               log_idx as sort_idx
             FROM erc20_transfers
             WHERE ig_name='erc20_transfers'
-            AND src_name='base'
+            AND src_name='${event}'
             AND block_num BETWEEN $1 AND $2
             AND ((t in (SELECT addr FROM names)) OR (f in (SELECT addr FROM names)))
           UNION ALL
@@ -92,7 +96,7 @@ export class ForeignCoinIndexer extends Indexer {
               trace_action_idx as sort_idx
             FROM eth_transfers et
             WHERE ig_name='eth_transfers'
-            AND src_name='baseTrace'
+            AND src_name='${trace}'
             AND block_num BETWEEN $1 AND $2
             AND (("to" in (SELECT addr FROM names)) OR ("from" in (SELECT addr FROM names)))
           )

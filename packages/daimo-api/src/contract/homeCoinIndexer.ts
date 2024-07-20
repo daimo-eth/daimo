@@ -7,6 +7,7 @@ import {
   SwapClog,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
@@ -16,6 +17,7 @@ import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
 import { SwapClogMatcher } from "./SwapClogMatcher";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -56,7 +58,7 @@ export class HomeCoinIndexer extends Indexer {
     return { numTransfers: this.allTransfers.length };
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(

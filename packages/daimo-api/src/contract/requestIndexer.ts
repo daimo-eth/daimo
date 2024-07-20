@@ -10,11 +10,13 @@ import {
   AddrLabel,
   decodeRequestIdString,
 } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -64,7 +66,7 @@ export class RequestIndexer extends Indexer {
     super("REQUEST");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
     const statuses: DaimoRequestV2Status[] = [];
     statuses.push(...(await this.loadCreated(pg, from, to)));

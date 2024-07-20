@@ -6,12 +6,14 @@ import {
   getEAccountStr,
   getNoteId,
 } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { OpIndexer } from "./opIndexer";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { senderIdKey, logCoordinateKey } from "../utils/indexing";
@@ -52,7 +54,7 @@ export class NoteIndexer extends Indexer {
     super("NOTE");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     // Load notes contract event logs
     const startMs = Date.now();
     const logs = await this.loadNoteLogs(pg, from, to);

@@ -1,7 +1,9 @@
 import { assertNotNull, guessTimestampFromNum, now } from "@daimo/common";
+import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
 
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { Indexer } from "../contract/indexer";
 import { DBNotifications, DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { chainConfig } from "../env";
@@ -45,11 +47,15 @@ export class Watcher {
   // indexers[0] are indexed first concurrently, indexers[1] second, etc.
   private indexerLayers: Indexer[][] = [];
 
-  private pg: Pool;
+  private readonly pg: Pool;
+  private readonly kdb: Kysely<ShovelDB>;
 
   constructor(private rpcClient: PublicClient, dbUrl?: string) {
     const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
+    this.kdb = new Kysely<ShovelDB>({
+      dialect: new PostgresDialect({ pool: this.pg }),
+    });
     this.notifications = new DBNotifications(dbConfig);
 
     const { testnet } = assertNotNull(rpcClient.chain);
@@ -73,7 +79,7 @@ export class Watcher {
     let tS;
     for (let i = 0; i < tries; i++) {
       if (this.latest >= blockNumber) {
-        tS = Date.now() - t0;
+        tS = (Date.now() - t0) | 0;
         console.log(
           `[SHOVEL] waiting for block ${blockNumber}, found after ${tS}ms`
         );
@@ -81,7 +87,7 @@ export class Watcher {
       }
       await new Promise((res) => setTimeout(res, 250));
     }
-    tS = Date.now() - t0;
+    tS = (Date.now() - t0) | 0;
     console.log(
       `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${this.latest} after ${tS}ms`
     );
@@ -152,7 +158,7 @@ export class Watcher {
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
-        layer.map((i) => i.load(this.pg, start, start + limit))
+        layer.map((i) => i.load(this.pg, this.kdb, start, start + limit))
       );
     }
     console.log(
