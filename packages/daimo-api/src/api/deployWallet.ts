@@ -59,7 +59,8 @@ export async function deployWallet(
     {
       // Approve paymaster contract infinite spending on behalf of the account
       // While we no longer use the Pimlico paymaster, we approve it as a backup
-      // in case our own free paymaster is failing in future.
+      // in case our own free paymaster is failing in future. This is a non-
+      // upgradeable, audited contract that lets you pay gas in stablecoins.
       dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({

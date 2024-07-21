@@ -12,6 +12,10 @@ export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
 
 export const zeroAddr = "0x0000000000000000000000000000000000000000";
 
+export * from "./external";
+
+export * from "./chainConfig";
+
 export {
   daimoAccountABI,
   daimoAccountFactoryABI,
@@ -29,6 +33,7 @@ export {
   erc20ABI,
 } from "./generated";
 
-export * from "./external";
-
-export * from "./chainConfig";
+export const daimoAccountFactoryV2Config = {
+  address: "0xTODO",
+  abi: {},
+};
