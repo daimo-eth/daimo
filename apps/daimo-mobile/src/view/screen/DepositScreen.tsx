@@ -133,10 +133,10 @@ function LandlineAccountList() {
         return (
           <LandlineOptionRow
             key={`landline-account-${idx}`}
-            cta={`${acc.bankName} ****${acc.lastFour}`}
             title={i18.landline.optionRowTitle(
               timeAgo(accCreatedAtS, i18NLocale, nowS)
             )}
+            cta={`${acc.bankName} ****${acc.accountNumberLastFour}`}
             logo={getContactProfilePicture(recipient) as ImageSourcePropType}
             isAccount
             onClick={() => goToSendTransfer(acc)}

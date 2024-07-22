@@ -41,10 +41,10 @@ export interface PhoneNumberContact extends BaseDaimoContact {
 
 export interface LandlineBankAccountContact extends EAccount, BaseDaimoContact {
   type: "landlineBankAccount";
-  landlineAccountId: string;
+  landlineAccountUuid: string;
   bankName: string;
-  lastFour: string;
-  bankLogo: string | undefined;
+  bankLogo: string | null;
+  accountNumberLastFour: string;
 }
 
 // A DaimoContact is a "contact" of the user in the app.
@@ -96,7 +96,7 @@ export function getContactName(r: DaimoContact) {
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
   else if (r.type === "landlineBankAccount")
-    return `${r.bankName} ****${r.lastFour}`;
+    return `${r.bankName} ****${r.accountNumberLastFour}`;
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
@@ -225,10 +225,10 @@ export function landlineAccountToContact(
 ): LandlineBankAccountContact {
   return {
     type: "landlineBankAccount",
-    landlineAccountId: landlineAccount.landlineAccountId,
+    landlineAccountUuid: landlineAccount.landlineAccountUuid,
     addr: landlineAccount.liquidationAddress,
     bankName: landlineAccount.bankName,
-    lastFour: landlineAccount.lastFour,
+    accountNumberLastFour: landlineAccount.accountNumberLastFour,
     bankLogo: landlineAccount.bankLogo,
   };
 }
