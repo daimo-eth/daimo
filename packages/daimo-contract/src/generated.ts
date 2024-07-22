@@ -4363,10 +4363,10 @@ export const iMetaPaymasterABI = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SwapbotTipmaster
+// SwapbotLP
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const swapbotTipmasterABI = [
+export const swapbotLpABI = [
   {
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -4403,7 +4403,7 @@ export const swapbotTipmasterABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [{ name: 'swapAction', internalType: 'bytes', type: 'bytes' }],
+    inputs: [{ name: 'swapbotAction', internalType: 'bytes', type: 'bytes' }],
     name: 'run',
     outputs: [],
   },

@@ -6,14 +6,14 @@ import "forge-std/console2.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
-import "../src/DaimoSwapbotTipmaster.sol";
+import "../src/DaimoSwapbotLP.sol";
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 import "./dummy/DaimoDummySwapper.sol";
 import "./dummy/DaimoDummyBridger.sol";
 
-contract SwapbotTipmasterTest is Test {
+contract SwapbotLPTest is Test {
     TestUSDC public opUSDCe = new TestUSDC{salt: bytes32(uint256(1))}();
     TestUSDC public opUSDC = new TestUSDC{salt: bytes32(uint256(2))}();
     TestUSDC public baseUSDbC = new TestUSDC{salt: bytes32(uint256(3))}();
@@ -26,7 +26,7 @@ contract SwapbotTipmasterTest is Test {
 
     address public swapbotEOA = makeAddr("swapbotEOA");
 
-    SwapbotTipmaster public tipmaster;
+    SwapbotLP public tipmaster;
     DaimoAccountV2 public acc;
 
     function setUp() public {
@@ -45,7 +45,7 @@ contract SwapbotTipmasterTest is Test {
             salt: 0
         });
 
-        tipmaster = new SwapbotTipmaster(swapbotEOA);
+        tipmaster = new SwapbotLP(swapbotEOA);
 
         // Equip swapbot EOA and swapper for tip and output token, respectively
         deal(address(baseUSDC), address(tipmaster), 100);
@@ -71,23 +71,22 @@ contract SwapbotTipmasterTest is Test {
             extraData
         );
 
-        SwapbotTipmaster.SwapAction memory action = SwapbotTipmaster
-            .SwapAction({
-                daimoAccountAddr: address(acc),
-                callData: swapCallData,
-                swapperAddr: address(swapper),
-                tokenTipAddr: address(baseUSDC), // tip in output token
-                maxTipAmount: 4 // max tip is 4% of input
-            });
+        SwapbotLP.SwapbotAction memory action = SwapbotLP.SwapbotAction({
+            actioneeAddr: address(acc),
+            callData: swapCallData,
+            spenderAddr: address(swapper),
+            tokenOutAddr: address(baseUSDC), // tip in output token
+            maxTokenOutAmount: 4 // max tip is 4% of input
+        });
 
         // Run the swap action
         tipmaster.run(abi.encode(action));
 
         // Check that the allowance was set back to 0
         assertEq(
-            IERC20(action.tokenTipAddr).allowance(
+            IERC20(action.tokenOutAddr).allowance(
                 address(tipmaster),
-                action.swapperAddr
+                action.spenderAddr
             ),
             0
         );
