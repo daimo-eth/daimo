@@ -1,5 +1,4 @@
 import { EAccount, assertNotNull, getAccountName } from "@daimo/common";
-import { DaimoChain } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
@@ -56,7 +55,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
   const [account, setAccount] = useState<Account>();
   const [loadAccountErr, setLoadAccountErr] = useState<Error>();
   useEffect(() => {
-    loadAccount(eAcc, pubKeyHex, daimoChain)
+    loadAccount(eAcc, pubKeyHex)
       .then(setAccount)
       .catch((e: any) => {
         console.error(`[ONBOARDING] loadAccount error: ${e}`);
@@ -131,20 +130,16 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
   );
 }
 
-async function loadAccount(
-  eAcc: EAccount,
-  pubKeyHex: Hex,
-  daimoChain: DaimoChain
-) {
-  const newAccount = createEmptyAccount(
-    {
-      name: assertNotNull(eAcc.name),
-      address: eAcc.addr,
-      enclaveKeyName: defaultEnclaveKeyName,
-      enclavePubKey: pubKeyHex,
-    },
-    daimoChain
-  );
+async function loadAccount(eAcc: EAccount, pubKeyHex: Hex) {
+  const newAccount = createEmptyAccount({
+    enclaveKeyName: defaultEnclaveKeyName,
+    enclavePubKey: pubKeyHex,
+    address: eAcc.addr,
+    name: assertNotNull(eAcc.name),
+    accountVersion: assertNotNull(eAcc.accountVersion),
+    homeChainId: assertNotNull(eAcc.homeChain),
+    homeCoinAddress: assertNotNull(eAcc.homeCoin),
+  });
 
   return await hydrateAccount(newAccount);
 }

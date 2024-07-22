@@ -32,6 +32,7 @@ export interface StoredV16Account extends StoredModel {
   enclavePubKey: Hex;
   name: string;
   address: string;
+  accountVersion?: "v1" | "v2";
 
   homeChainId: number;
   homeCoinAddress: Address;

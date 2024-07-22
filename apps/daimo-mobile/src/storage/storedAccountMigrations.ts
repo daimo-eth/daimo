@@ -311,6 +311,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -355,6 +356,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -399,6 +401,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -444,6 +447,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -489,6 +493,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -533,6 +538,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -578,6 +584,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 
@@ -622,6 +629,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       name: a.name,
       address: getAddress(a.address),
 
+      accountVersion: "v1",
       homeChainId: a.homeChainId,
       homeCoinAddress: getAddress(a.homeCoinAddress),
 

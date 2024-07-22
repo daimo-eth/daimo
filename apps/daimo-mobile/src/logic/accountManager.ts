@@ -3,9 +3,9 @@ import {
   DaimoLink,
   DaimoLinkNoteV2,
   DaimoNoteStatus,
-  TransferClog,
   EAccount,
   OpStatus,
+  TransferClog,
   assert,
   assertEqual,
   assertNotNull,
@@ -22,7 +22,7 @@ import {
 } from "@daimo/contract";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
-import { Address, Hex } from "viem";
+import { Address } from "viem";
 
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
@@ -35,6 +35,7 @@ import {
 } from "../logic/enclave";
 import {
   Account,
+  EmptyAccountInfo,
   createEmptyAccount,
   defaultEnclaveKeyName,
   deviceAPIKeyName,
@@ -224,7 +225,15 @@ class AccountManager {
     }
 
     // Current account guaranteed null, set it to the found account:
-    this.setNewAccount(enclaveKeyName, pubKeyHex, acc.name, acc.addr);
+    this.setNewAccount({
+      enclaveKeyName,
+      enclavePubKey: pubKeyHex,
+      name: acc.name,
+      address: acc.addr,
+      accountVersion: acc.accountVersion || "v1",
+      homeChainId: assertNotNull(acc.homeChain, "homeChain missing"),
+      homeCoinAddress: assertNotNull(acc.homeCoin, "homeCoin missing"),
+    });
   }
 
   // Create new account
@@ -256,7 +265,7 @@ class AccountManager {
     this.notifyListeners();
     try {
       console.log(`[ACCOUNT] createAccount running deployWallet ${name}`);
-      const result = await rpcFunc.deployWallet.mutate({
+      const result = await rpcFunc.deployWalletV2.mutate({
         name,
         pubKeyHex,
         inviteLink: sanitizedUrl,
@@ -264,13 +273,21 @@ class AccountManager {
       });
       console.log(`[ACCOUNT] deployWallet returned: ${JSON.stringify(result)}`);
       assertEqual(result.status, "success");
-      const { address, faucetTransfer } = result;
+      const { eAcc, faucetTransfer } = result;
 
       // Save the newly created account.
       // (Avoid a race where we find it via polling)
       if (this.currentAccount == null) {
-        console.log(`[ACCOUNT] createAccount saving ${name}, ${address}`);
-        this.setNewAccount(enclaveKeyName, pubKeyHex, name, address);
+        console.log(`[ACCOUNT] createAccount saving ${name}, ${eAcc.addr}`);
+        this.setNewAccount({
+          enclaveKeyName,
+          enclavePubKey: pubKeyHex,
+          address: eAcc.addr,
+          name: assertNotNull(eAcc.name),
+          accountVersion: assertNotNull(eAcc.accountVersion),
+          homeChainId: assertNotNull(eAcc.homeChain),
+          homeCoinAddress: assertNotNull(eAcc.homeCoin),
+        });
       } else {
         console.log(
           `[ACCOUNT] createAccount NOT saving, existing (polled) acct ${this.currentAccount.name}`
@@ -293,7 +310,7 @@ class AccountManager {
 
       // Finally, if invite is a payment link, claim & add as pending transfer
       if (inviteLink.type === "notev2") {
-        this.tryClaimPaymentLink(address, inviteLink);
+        this.tryClaimPaymentLink(eAcc.addr, inviteLink);
       }
     } catch (e: any) {
       console.error(`[ACCOUNT] createAccount error: ${e}`);
@@ -303,22 +320,9 @@ class AccountManager {
     }
   }
 
-  private setNewAccount(
-    enclaveKeyName: string,
-    enclavePubKey: Hex,
-    name: string,
-    address: Address
-  ) {
+  private setNewAccount(info: EmptyAccountInfo) {
     assert(this.currentAccount == null, "Can't create, have existing account");
-    const newAcc = createEmptyAccount(
-      {
-        enclaveKeyName,
-        enclavePubKey,
-        name,
-        address,
-      },
-      this.daimoChain
-    );
+    const newAcc = createEmptyAccount(info);
     this.setCurrentAccount(newAcc); // Saves account, notifies listeners
   }
 

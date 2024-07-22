@@ -17,7 +17,6 @@ import {
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
-import { observable } from "@trpc/server/observable";
 import { getAddress, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -28,11 +27,8 @@ import { TokenRegistry } from "./tokenRegistry";
 import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
-import { deployWallet } from "../api/deployWallet";
-import {
-  AccountHistoryResult,
-  getAccountHistory,
-} from "../api/getAccountHistory";
+import { deployWalletV2 } from "../api/deployWallet";
+import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
@@ -60,7 +56,6 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
-import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
@@ -365,7 +360,7 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          watcher.latestBlock().number
+          accountFactory
         );
       }),
 
@@ -411,6 +406,20 @@ export function createRouter(
         })
       )
       .mutation(async (opts) => {
+        // Don't allow new DaimoAccountV1 deployments from old app installs.
+        throw new Error("Please upgrade to the latest version of Daimo.");
+      }),
+
+    deployWalletV2: publicProcedure
+      .input(
+        z.object({
+          name: z.string(),
+          pubKeyHex: zHex,
+          inviteLink: z.string(),
+          deviceAttestationString: zHex,
+        })
+      )
+      .mutation(async (opts) => {
         const { name, pubKeyHex, inviteLink, deviceAttestationString } =
           opts.input;
         telemetry.recordUserAction(opts.ctx, {
@@ -426,7 +435,7 @@ export function createRouter(
           inviteCodeTracker,
           db
         );
-        const { address, faucetTransfer } = await deployWallet(
+        const { eAcc, faucetTransfer } = await deployWalletV2(
           opts.ctx,
           name,
           pubKeyHex,
@@ -440,7 +449,7 @@ export function createRouter(
           paymaster,
           inviteGraph
         );
-        return { status: "success", address, faucetTransfer };
+        return { status: "success", eAcc, faucetTransfer };
       }),
 
     // Get memo from a transaction hash and log index.
@@ -715,82 +724,86 @@ export function createRouter(
         );
       }),
 
-    onAccountUpdate: publicProcedure
-      .input(
-        z.object({
-          address: zAddress,
-          inviteCode: z.string().optional(),
-          sinceBlockNum: z.number(),
-        })
-      )
-      .subscription(async (opts) => {
-        const { address, inviteCode } = opts.input;
-        // how often to send updates regardless of new transfers
-        // useful to update keys, exchange rates and others.
-        const refreshInterval = 10_000;
+    // TODO: revisit, simplified & with SSE instead of websockets.
+    //
+    // onAccountUpdate: publicProcedure
+    //   .input(
+    //     z.object({
+    //       address: zAddress,
+    //       inviteCode: z.string().optional(),
+    //       sinceBlockNum: z.number(),
+    //     })
+    //   )
+    //   .subscription(async (opts) => {
+    //     const { address, inviteCode } = opts.input;
+    //     // how often to send updates regardless of new transfers
+    //     // useful to update keys, exchange rates and others.
+    //     const refreshInterval = 10_000;
 
-        return observable<AccountHistoryResult>((emit) => {
-          let lastEmittedBlock = opts.input.sinceBlockNum;
+    //     return observable<AccountHistoryResult>((emit) => {
+    //       let lastEmittedBlock = opts.input.sinceBlockNum;
 
-          const pushHistory = async (
-            blockNumber: number,
-            requireNewTransfers = false
-          ) => {
-            const history = await getAccountHistory(
-              opts.ctx,
-              address,
-              inviteCode,
-              blockNumber,
-              vc,
-              homeCoinIndexer,
-              foreignCoinIndexer,
-              profileCache,
-              noteIndexer,
-              reqIndexer,
-              inviteCodeTracker,
-              inviteGraph,
-              nameReg,
-              keyReg,
-              paymaster,
-              db,
-              extApiCache,
-              blockNumber
-            );
+    //       const pushHistory = async (
+    //         blockNumber: number,
+    //         requireNewTransfers = false
+    //       ) => {
+    //         const history = await getAccountHistory(
+    //           opts.ctx,
+    //           address,
+    //           inviteCode,
+    //           blockNumber,
+    //           vc,
+    //           homeCoinIndexer,
+    //           foreignCoinIndexer,
+    //           profileCache,
+    //           noteIndexer,
+    //           reqIndexer,
+    //           inviteCodeTracker,
+    //           inviteGraph,
+    //           nameReg,
+    //           keyReg,
+    //           paymaster,
+    //           db,
+    //           extApiCache,
+    //           accountFactory
+    //         );
 
-            if (lastEmittedBlock >= history.lastBlock) {
-              return;
-            }
+    //         if (lastEmittedBlock >= history.lastBlock) {
+    //           return;
+    //         }
 
-            if (requireNewTransfers && history.transferLogs.length === 0) {
-              return;
-            }
+    //         if (requireNewTransfers && history.transferLogs.length === 0) {
+    //           return;
+    //         }
 
-            emit.next(history);
+    //         emit.next(history);
 
-            lastEmittedBlock = history.lastBlock;
-          };
+    //         lastEmittedBlock = history.lastBlock;
+    //       };
 
-          // on new block, push state only when new transfers are available
-          const onNewBlock = async (payload: string) => {
-            const { block_number } = JSON.parse(payload);
-            pushHistory(block_number, true);
-          };
+    //       // on new block, push state only when new transfers are available
+    //       const onNewBlock = async (payload: string) => {
+    //         const { block_number } = JSON.parse(payload);
 
-          // for interval updates push full history
-          const intervalTimer = setInterval(async () => {
-            const blockNumber = watcher.latestBlock().number;
-            pushHistory(blockNumber);
-          }, refreshInterval);
+    //         pushHistory(block_number, true);
+    //       };
 
-          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+    //       // for interval updates push full history
+    //       const intervalTimer = setInterval(async () => {
+    //         const blockNumber = await watcher.getShovelLatest();
 
-          return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+    //         pushHistory(blockNumber);
+    //       }, refreshInterval);
 
-            clearInterval(intervalTimer);
-          };
-        });
-      }),
+    //       watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+
+    //       return () => {
+    //         watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
+
+    //         clearInterval(intervalTimer);
+    //       };
+    //     });
+    //   }),
   });
 }
 

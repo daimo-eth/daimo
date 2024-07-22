@@ -8,6 +8,12 @@ export const zEAccount = z.object({
   addr: zAddress,
   /** Daimo account name */
   name: z.string().optional(),
+  /** Daimo home chain ID */
+  homeChain: z.number().optional(),
+  /** Daimo home coin address */
+  homeCoin: zAddress.optional(),
+  /** Daimo account version */
+  accountVersion: z.enum(["v1", "v2"]).optional(),
   /** Daimo account registration time */
   timestamp: z.number().optional(),
   /** Daimo account inviter address */
