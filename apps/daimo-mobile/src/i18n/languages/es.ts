@@ -103,129 +103,129 @@ export const en = {
   // ------------ LINK ------------
   // NoteScreen.tsx
   note: {
-    payment: () => `Payment Link`,
+    payment: () => `Link de Pago`,
     accept: {
-      title: () => `Accept`,
-      link: () => `Accept link`,
-      long: (dollars: string) => `Accept this link, receiving ${dollars}`,
-      loading: () => `Accepting link...`,
+      title: () => `Aceptar`,
+      link: () => `Link aceptar`,
+      long: (dollars: string) => `Aceptar este link, reciviendo ${dollars}`,
+      loading: () => `Aceptando link...`,
     },
     accepted: {
-      title: () => `Accepted`,
-      link: () => `Accepted Link`,
-      long: (name: string) => `Accepted by ${name}`,
+      title: () => `Aceptado`,
+      link: () => `Link Aceptado`,
+      long: (name: string) => `Aceptado por ${name}`,
     },
     cancel: {
-      title: () => `Cancel`,
-      link: () => `Cancel link`,
-      long: (dollars: string) => `Cancel this link, reclaiming ${dollars}`,
+      title: () => `Cancelar`,
+      link: () => `link cancelar`,
+      long: (dollars: string) => `Cancelar este link, reclamando ${dollars}`,
     },
     cancelled: {
-      title: () => `Cancelled`,
-      link: () => `Cancelled Link`,
-      longSelf: () => `You cancelled this payment link`,
-      longOther: () => `Cancelled by sender`,
+      title: () => `Cancelado`,
+      link: () => `Link Cancelado`,
+      longSelf: () => `Has cancelado este link de pago`,
+      longOther: () => `Cancelado por emisor`,
     },
     pending: {
-      long: () => `Payment link not found. Pending?`,
+      long: () => `Link de pago no encontrado. Pendiente?`,
     },
-    gasTooHigh: () => `Gas too high to claim`,
-    invalid: () => `Payment link invalid`,
+    gasTooHigh: () => `El gas es muy caro para reclamar`,
+    invalid: () => `Link de pago inválido`,
     send: {
-      self: () => `you sent`,
-      other: (name: string) => `${name} sent`,
+      self: () => `has enviado`,
+      other: (name: string) => `${name} enviado`,
     },
   },
   // SendNoteScreen.tsx
   send_note: {
-    title: () => `Send Link`,
+    title: () => `Enviar link`,
     help: {
-      title: () => `Learn how`,
-      subtitle: () => `How Payment Links Work`,
+      title: () => `Aprende como`,
+      subtitle: () => `Cómo funcionan los links de pago`,
       description: {
         firstPara: () =>
-          `Payment links carry money in a link, so that you can send it to anyone.`,
+          `Links de pago transportan dinero en un link, que puedas enviarlo a cualquier persona.`,
         secondPara: () =>
-          `You can cancel an unclaimed link to get your money back.`,
-        thirdPara: () => `They're self-custody. The key is part of the URL.`,
+          `Puedes cancelar un link sin reclamar y conseguir de vuelta los fondos.`,
+        thirdPara: () => `Son auto-custodiales. La clave forma parte del URL.`,
         fourthPara: () =>
-          `Each link doubles as a Daimo invite. Plus, anyone with the link can claim with any wallet, like Rainbow or Metamask.`,
+          `Cada link funciona como una invitación a Daimo. Además, cualquiera que tenga el link puede reclamar con cualquier cartera, como Rainbow o Metamask.`,
       },
     },
-    create: () => `Create Payment Link`,
+    create: () => `Crear Link de Pago`,
   },
 
   // ------------ NOTIFICATIONS ------------
   // InvitesNotificationRow.tsx
   invitesNotification: {
     description: (inviteCount: number) =>
-      `You have ${pluralize(inviteCount, "invite")} available.`,
+      `Tienes ${pluralize(inviteCount, "invitación")} disponibles.`,
   },
   // NotificationsScreen.tsx
   notifications: {
-    screenHeader: () => `Notifications`,
-    noNotifications: () => `No notifications`,
+    screenHeader: () => `Notificaciones`,
+    noNotifications: () => `No notificaciones`,
   },
   // RequestNotificationRow.tsx
   requestNotification: {
     msgVerb: {
       via: () => `via`,
-      from: () => `from`,
-      for: () => `for`,
+      from: () => `desde`,
+      for: () => `para`,
     },
     // TODO: figure out a better way to do this
     requestState: {
       created: {
-        self: () => `You requested`,
-        other: () => `requested`,
+        self: () => `Ha Solicitado`,
+        other: () => `solicitaste`,
       },
-      request: () => `request`,
+      request: () => `solicitud`,
       fulfilled: {
-        self: () => `fulfilled your`,
-        other: () => `You fulfilled a request from`,
+        self: () => `aceptada su`,
+        other: () => `Has aceptado la solicitud de`,
       },
       cancelled: {
-        self: () => `You cancelled your`,
-        other: () => `cancelled their request for `,
+        self: () => `Ha cancelado su`,
+        other: () => `cancelada su solicitud para `,
       },
       declined: {
-        self: () => `declined your request for`,
-        other: () => `You declined a request from `,
+        self: () => `rechazada su solicitud para`,
+        other: () => `Ha rechazado una solicitud de `,
       },
     },
   },
   // SwapNotificationRow.tsx
   swapNotification: {
     msg: (readableAmount: string, coinName: string) =>
-      `Accept ${readableAmount} ${coinName} from `,
+      `Aceptado ${readableAmount} ${coinName} de `,
   },
 
   // ------------ ONBOARDING ------------
   // AllowNotifsScreen.tsx
   allowNotifs: {
-    screenHeader: () => `Notifications`,
-    allowButton: () => `Allow Notifications`,
-    skipButton: () => `Skip`,
+    screenHeader: () => `Notificaciones`,
+    allowButton: () => `Permitir Notificaciones`,
+    skipButton: () => `Saltar`,
     instructions: () =>
-      `You will only be notified about activity on your account.`,
+      `Serás solo notificado sobre actividad en tu cuenta.`,
   },
   // ExistingChooseAccountScreen.tsx
   existingChooseAccount: {
-    screenHeader: () => `Load account`,
+    screenHeader: () => `Cargar cuenta`,
     selectAccount: {
-      placeholder: () => `Enter username...`,
-      description: () => `Choose which account you're logging in to.`,
+      placeholder: () => `Introduzca usuario...`,
+      description: () => `Elija la cuenta que desea cargar`,
     },
     searchResults: {
-      empty: () => `No results`,
+      empty: () => `Sin resultados`,
     },
   },
   // ExistingScreen.tsx
   existing: {
-    screenHeader: () => `Existing Account`,
-    generatingKeys: () => `Generating keys...`,
+    screenHeader: () => `Cuenta existente`,
+    generatingKeys: () => `Generando claves...`,
     scanQR: () =>
-      `Scan this QR code from another device to add this phone to an existing Daimo account.`,
+      `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo.`,
     useBackup: () => `Use Backup`,
   },
   // ExistingSeedPhraseScreen.tsx
@@ -784,6 +784,11 @@ export const en = {
 
 // TODO: adapt this function to sanish
 function pluralize(n: number, noun: string) {
-  if (n === 1) return `${n} ${noun}`; // "1 apple"
-  return `${n} ${noun}s`; // "0 apples" or "2 apples"
+  if (n === 1) return `${n} ${noun}`; // "1 manzana"
+  
+  if (noun.slice(-3) === "ión") {
+    return `${n} ${noun.slice(0, -3)}iones`; // "2 canciones" o "{n} canciones"
+  }
+
+  return `${n} ${noun}s`; // "2 manzanas" o "{n} manzanas"
 }
