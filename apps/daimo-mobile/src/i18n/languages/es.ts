@@ -226,60 +226,60 @@ export const en = {
     generatingKeys: () => `Generando claves...`,
     scanQR: () =>
       `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo.`,
-    useBackup: () => `Use Backup`,
+    useBackup: () => `Usar Copia de Seguridad`,
   },
   // ExistingSeedPhraseScreen.tsx
   existingSeedPhrase: {
-    screenHeader: () => `Log in with seed phrase`,
+    screenHeader: () => `Inicie sesión con frase semilla`,
   },
   // ExistingUseBackupScreen.tsx
   existingUseBackup: {
-    screenHeader: () => `Choose a recovery option`,
+    screenHeader: () => `Elija una opción de recuperación`,
     description: () =>
-      `Log in with a backup key.\nThis adds your device to the account.`,
-    logInWithSeedPhrase: () => `LOG IN WITH SEED PHRASE`,
+      `Inicie con una frase semilla.\nEsto añade tu dispositivo a la cuenta.`,
+    logInWithSeedPhrase: () => `INICIE SESIÓN CON FRASE SEMILLA`,
   },
   // LogInButton.tsx
   logIn: {
-    button: (keyType: string) => `LOG IN WITH ${keyType}`,
+    button: (keyType: string) => `I ${keyType}`,
     fromSeed: {
-      error: () => `Seed phrase not on account. Removed?`,
-      button: () => `LOG IN WITH SEED PHRASE`,
+      error: () => `La frase semilla no fue encontrada. Eliminada?`,
+      button: () => `INICIE SESIÓN CON FRASE SEMILLA`,
     },
   },
   // MissingKeyScreen.tsx
   missingKey: {
-    screenHeader: () => `Missing Key`,
-    logOut: () => `LOG OUT`,
+    screenHeader: () => `Clave faltante`,
+    logOut: () => `CERRAR SESIÓN`,
     keyErrorDesc: {
       noKey: {
-        title: () => `New phone?`,
+        title: () => `Nuevo teléfono?`,
         desc: () =>
-          `We found your account, but no device key. Keys in secure hardware never leave your device, so they don't transfer when you get a new phone. Log out, then log in using a backup key.`,
+          `Encontramos tu cuenta, pero no clave privada. Claves en hardware seguro nunca salen del dispositivo, asique no son transferidos cuando obtienes un nuevo móvil. Cierre sesión, e inicie sessión usando una clave de respaldo.`,
       },
       removedKey: {
-        title: () => `Device removed`,
+        title: () => `Dispositivo eliminado`,
         desc: () =>
-          `It looks like the key on this device was removed from your account. Log out, then log in using a backup key.`,
+          `Parece que la clave de este dispositivo fue eliminado de tu cuenta. Cierre sesión, luego inice sesión con la clave de respaldo.`,
       },
       unhandledKeyError: {
-        title: () => `Unhandled key error`,
+        title: () => `Error de clave no gestionado`,
         desc: () => ``,
       },
     },
   },
   // OnboardingChooseNameScreen.tsx
   onboardingChooseName: {
-    screenHeader: () => `Choose Username`,
+    screenHeader: () => `Elija su Usuario`,
     instructions: () =>
-      `Choose a username you'll go by on Daimo. Your username is public.`,
+      `Elija a un nombre de usuario que utilizará en Daimo. Tu usuario es publico.`,
     picker: {
-      title: () => `choose a username`,
-      createButton: () => `CREATE ACCOUNT`,
-      generateRandom: () => `GENERATE RANDOM`,
-      error: () => `offline?`,
-      taken: () => `sorry, that name is taken`,
-      available: () => `available`,
+      title: () => `elija un usuario`,
+      createButton: () => `CREAR CUENTA`,
+      generateRandom: () => `GENERAR RANDOM`,
+      error: () => `sin conexión?`,
+      taken: () => `lo sentimos, ese nombre no está disponible`,
+      available: () => `disponible`,
     },
   },
   // OnboardingEnterInviteScreen.tsx
