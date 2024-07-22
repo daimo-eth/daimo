@@ -39,6 +39,8 @@ interface DaimoOpConfig {
   notesAddressV2: Address;
   /** Daimo account address. */
   accountAddress: Address;
+  /** Daimo account contract version. */
+  accountVersion: "v1" | "v2";
   /** Signs userops. Must, in some form, check user presence. */
   accountSigner: SigningCallback;
   /** Sends userops. Returns userOpHash. */
@@ -61,8 +63,12 @@ export class DaimoOpSender {
    * Initializes with all configuration provided: no env vars required.
    */
   public static async init(opConfig: DaimoOpConfig): Promise<DaimoOpSender> {
-    const { accountAddress, accountSigner } = opConfig;
-    const builder = await DaimoOpBuilder.init(accountAddress, accountSigner);
+    const { accountAddress, accountVersion, accountSigner } = opConfig;
+    const builder = await DaimoOpBuilder.init(
+      accountAddress,
+      accountVersion,
+      accountSigner
+    );
 
     const { tokenAddress, tokenDecimals } = opConfig;
     console.log(

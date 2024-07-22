@@ -45,6 +45,7 @@ export function useSendDebugLog(
     Version: `${envObj.nativeApplicationVersion} #${envObj.nativeBuildVersion}`,
     Commit: `${envObj.gitHash} ${envObj.buildProfile}`,
     Notifications: account?.pushToken ? "enabled" : "disabled",
+    Contract: account?.accountVersion || "no account",
   };
   if (sec) {
     envKV["Key Security"] = getKeySecDescription(sec);
