@@ -129,7 +129,7 @@ function LandlineAccountList() {
         return (
           <LandlineOptionRow
             key={`landline-account-${idx}`}
-            cta={`${acc.bankName} ****${acc.lastFour}`}
+            cta={`${acc.bankName} ****${acc.accountNumberLastFour}`}
             title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
             logo={getContactProfilePicture(recipient) as ImageSourcePropType}
             isAccount

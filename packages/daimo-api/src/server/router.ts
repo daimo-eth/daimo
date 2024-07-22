@@ -670,17 +670,17 @@ export function createRouter(
       .input(
         z.object({
           daimoAddress: zAddress,
-          landlineAccountId: z.string(),
+          landlineAccountUuid: z.string(),
           amount: zBigIntStr,
           memo: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
         // TODO: add authentication this endpoint
-        const { daimoAddress, landlineAccountId, amount, memo } = opts.input;
+        const { daimoAddress, landlineAccountUuid, amount, memo } = opts.input;
         return await landlineDeposit(
           daimoAddress,
-          landlineAccountId,
+          landlineAccountUuid,
           amount,
           memo
         );

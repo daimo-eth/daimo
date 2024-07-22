@@ -149,7 +149,7 @@ export function SendTransferButton({
       const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
       rpcFunc.depositFromLandline.mutate({
         daimoAddress: account.address,
-        landlineAccountId: recipient.landlineAccountId,
+        landlineAccountUuid: recipient.landlineAccountUuid,
         amount: dollarsStr,
         memo,
       });
