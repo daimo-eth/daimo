@@ -96,7 +96,7 @@ function SearchResultsScroll({
       {res.status === "success" &&
         res.recipients.length === 0 &&
         prefix !== "" && <NoSearchResults />}
-      <Spacer h={32} />
+      <Spacer h={64} />
       {Platform.OS === "ios" && <Spacer h={kbH} />}
     </ScrollView>
   );
