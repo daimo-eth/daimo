@@ -284,71 +284,71 @@ export const en = {
   },
   // OnboardingEnterInviteScreen.tsx
   onboardingEnterInvite: {
-    screenHeader: () => `Enter Invite Code`,
-    waitlistButton: () => `JOIN WAITLIST`,
+    screenHeader: () => `Introduzca el Código de Invitación`,
+    waitlistButton: () => `UNIRSE A LA LISTA DE ESPERA`,
     instructions: () =>
-      `Type your invite code below or paste a link.\nJoin the waitlist if you don't have a code.`,
+      `Introduzca su código debajo o pegue un link.\nÚnase a la lista de espera si no tiene uno.`,
     inviteCode: {
-      title: () => `enter invite code`,
-      button: () => `Submit`,
+      title: () => `Introduzca el código de invitación`,
+      button: () => `Enviar`,
     },
   },
   // OnboardingIntroScreen.tsx
   onboardingIntro: {
-    title: () => `Welcome to Daimo`,
-    subtitle: () => `Pay or receive USDC anywhere`,
-    acceptInviteButton: () => `ACCEPT INVITE`,
-    alreadyHaveAccountButton: () => `ALREADY HAVE AN ACCOUNT?`,
+    title: () => `Bienvenido a Daimo`,
+    subtitle: () => `Pague o reciva USDC donde sea`,
+    acceptInviteButton: () => `ACEPTAR INVITACIÓN`,
+    alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA_`, 
     rows: {
       selfCustody: {
-        title: () => `Your keys, your coins`,
-        description: () => `USDC on Base.`,
+        title: () => `Tus llaves, tus tokens`,
+        description: () => `USDC en Base.`,
       },
       help: {
-        button: () => `Learn more`,
-        description: () => `How does USDC work?`,
+        button: () => `Aprenda más`,
+        description: () => `Cómo funciona USDC?`,
       },
       everywhere: {
-        title: () => `Works everywhere`,
-        description: () => `Instant, 24/7 transfers to any contact`,
+        title: () => `Funciona en todas partes`,
+        description: () => `Instantáneo, 24/7 envíos a cuelquier contacto`,
       },
       onEthereum: {
-        title: () => `Runs on Ethereum`,
-        description: () => `Daimo runs on Base, a rollup`,
+        title: () => `Se ejecuta en Ethereum`,
+        description: () => `Daimo se ejecuta en Base, un rollup`,
       },
     },
     helpModalUSDC: {
       description: () =>
-        `USDC is a regulated, digital currency that can always be redeemed 1:1 for US dollars.`,
-      learnMore: () => `Learn more about USDC`,
-      here: () => `here`,
+        `USDC es una moneda digital regulada, que puede ser siempre cambiada 1:1 con dólares americanos.`,
+      learnMore: () => `Aprenda más sobre USDC`,
+      here: () => `aquí`,
     },
   },
   // OnboardingSetupKeyPage.tsx
   onboardingSetupKey: {
-    screenHeader: () => `Set up device`,
+    screenHeader: () => `Configurar dispositivo`,
     pin: {
       generateDescription: () =>
-        `Generate your Daimo device key. This key is generated and stored on your device, and secures access to your Daimo account.`,
+        `Genere tu clave de dispositivo Daimo. Esta clave es generada y guardada seguramente en tu dispositivo, y asegura aceso a su cuenta Daimo.`,
       failedDescription: () =>
-        `Authentication failed. Does your phone have a secure lock screen set up? You'll need one to secure your Daimo account.`,
-      tryAgainButton: () => `Try again`,
-      generateButton: () => `Generate`,
+        `Autentificación faillida. Su dispositivo tiene método seguro de acceso? Necesitará uno para asegurar su cuenta Daimo.`,
+      tryAgainButton: () => `Intente de nuevo`,
+      generateButton: () => `Generar`,
     },
   },
 
   // ------------ RECEIVE ------------
   // ReceiveNavScreen.tsx
   receiveNav: {
-    screenHeader: () => `Request`,
+    screenHeader: () => `Solicitud`,
   },
   // ReceiveScreen.tsx
   receive: {
-    screenHeader: () => `Request from`,
+    screenHeader: () => `Solicitud de`,
     sendRequest: {
-      loading: () => `Requesting...`,
-      title: () => `Send a request link`,
-      subtitle: () => `Request USDC from someone using any messaging app`,
+      loading: () => `Solicitando...`,
+      title: () => `Envíe una solicitud`,
+      subtitle: () => `Solicite USDC a alguien usando cualquier app de mensajería`,
     },
   },
 
@@ -356,21 +356,21 @@ export const en = {
   // FulfillRequestButton.tsx
   fulfillRequest: {
     disabledReason: {
-      fulfilled: () => `Request already fulfilled`,
-      cancelled: () => `Request cancelled`,
-      self: () => `Can't send to yourself`,
-      insufficientFunds: () => `Insufficient funds`,
+      fulfilled: () => `Solicitud ya satisfecha`,
+      cancelled: () => `Solicitud cancelada`,
+      self: () => `Ne puedes enviarte a ti mismo`,
+      insufficientFunds: () => `Fondos insuficientes`,
     },
-    holdButton: () => `HOLD TO FULFILL`,
+    holdButton: () => `MANTENGA PARA CONFIRMAR`,
     statusMsg: {
-      paymentsPublic: () => `Payments are public`,
-      totalDollars: (dollars: string) => `Total incl. fees ${dollars}`,
+      paymentsPublic: () => `Pagos son públicos`,
+      totalDollars: (dollars: string) => `Tasas totales incl. ${dollars}`,
     },
   },
   // MemoDisplay.tsx
   memoDisplay: {
-    status: (status: string) => `memo ${status}`,
-    placeholder: () => `WHAT'S THIS FOR?`,
+    status: (status: string) => `aviso ${status}`,
+    placeholder: () => `PARA QUÉ ES ESTO?`,
   },
   // NoteAction.tsx
   noteAction: {
