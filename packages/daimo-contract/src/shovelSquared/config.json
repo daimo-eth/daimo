@@ -1,0 +1,797 @@
+{
+  "dashboard": {},
+  "pg_url": "$SHOVEL_SQUARED_DATABASE_URL",
+  "eth_sources": [
+    {
+      "name": "$BASE_CHAIN_NAME",
+      "chain_id": "$BASE_CHAIN_ID",
+      "ws_url": "$BASE_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$BASE_CHAIN_RPC_URL",
+        "$BASE_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$BASE_CHAIN_TRACE_NAME",
+      "chain_id": "$BASE_CHAIN_ID",
+      "urls": [
+        "$BASE_CHAIN_TRACE_RPC_URL",
+        "$BASE_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "$OPTIMISM_CHAIN_NAME",
+      "chain_id": "$OPTIMISM_CHAIN_ID",
+      "ws_url": "$OPTIMISM_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$OPTIMISM_CHAIN_RPC_URL",
+        "$OPTIMISM_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$OPTIMISM_CHAIN_TRACE_NAME",
+      "chain_id": "$OPTIMISM_CHAIN_ID",
+      "urls": [
+        "$OPTIMISM_CHAIN_TRACE_RPC_URL",
+        "$OPTIMISM_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "$ETH_CHAIN_NAME",
+      "chain_id": "$ETH_CHAIN_ID",
+      "ws_url": "$ETH_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$ETH_CHAIN_RPC_URL",
+        "$ETH_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$ETH_CHAIN_TRACE_NAME",
+      "chain_id": "$ETH_CHAIN_ID",
+      "urls": [
+        "$ETH_CHAIN_TRACE_RPC_URL",
+        "$ETH_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "$AVAX_CHAIN_NAME",
+      "chain_id": "$AVAX_CHAIN_ID",
+      "ws_url": "$AVAX_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$AVAX_CHAIN_RPC_URL",
+        "$AVAX_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$AVAX_CHAIN_TRACE_NAME",
+      "chain_id": "$AVAX_CHAIN_ID",
+      "urls": [
+        "$AVAX_CHAIN_TRACE_RPC_URL",
+        "$AVAX_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "$POLYGON_CHAIN_NAME",
+      "chain_id": "$POLYGON_CHAIN_ID",
+      "ws_url": "$POLYGON_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$POLYGON_CHAIN_RPC_URL",
+        "$POLYGON_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$POLYGON_CHAIN_TRACE_NAME",
+      "chain_id": "$POLYGON_CHAIN_ID",
+      "urls": [
+        "$POLYGON_CHAIN_TRACE_RPC_URL",
+        "$POLYGON_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "$ARBITRUM_CHAIN_NAME",
+      "chain_id": "$ARBITRUM_CHAIN_ID",
+      "ws_url": "$ARBITRUM_CHAIN_RPC_WS_URL",
+      "urls": [
+        "$ARBITRUM_CHAIN_RPC_URL",
+        "$ARBITRUM_CHAIN_RPC_URL_BACKUP"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "$ARBITRUM_CHAIN_TRACE_NAME",
+      "chain_id": "$ARBITRUM_CHAIN_ID",
+      "urls": [
+        "$ARBITRUM_CHAIN_TRACE_RPC_URL",
+        "$ARBITRUM_CHAIN_TRACE_RPC_URL_BACKUP"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    }
+  ],
+  "integrations": [
+    {
+      "name": "erc20_transfers",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "$CHAIN_NAME",
+          "start": "$CHAIN_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "erc20_transfers",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "log_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "f",
+            "type": "bytea"
+          },
+          {
+            "name": "t",
+            "type": "bytea"
+          },
+          {
+            "name": "v",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "log_addr",
+          "column": "log_addr"
+        }
+      ],
+      "event": {
+        "name": "Transfer",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "name": "from",
+            "type": "address",
+            "column": "f"
+          },
+          {
+            "indexed": true,
+            "name": "to",
+            "type": "address",
+            "column": "t"
+          },
+          {
+            "indexed": false,
+            "name": "value",
+            "type": "uint256",
+            "column": "v"
+          }
+        ]
+      }
+    },
+    {
+      "name": "eth_transfers",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "$CHAIN_TRACE_NAME",
+          "start": "$CHAIN_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "eth_transfers",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "call_type",
+            "type": "text"
+          },
+          {
+            "name": "from",
+            "type": "bytea"
+          },
+          {
+            "name": "to",
+            "type": "bytea"
+          },
+          {
+            "name": "value",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "trace_action_call_type",
+          "column": "call_type",
+          "filter_op": "eq",
+          "filter_arg": [
+            "call"
+          ]
+        },
+        {
+          "name": "trace_action_from",
+          "column": "from"
+        },
+        {
+          "name": "trace_action_to",
+          "column": "to"
+        },
+        {
+          "name": "trace_action_value",
+          "column": "value",
+          "filter_op": "gt",
+          "filter_arg": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "start_fast_cctp",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "$CHAIN_NAME",
+          "start": "$CHAIN_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "start_cctp",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "log_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "handoff_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "from_token",
+            "type": "bytea"
+          },
+          {
+            "name": "from_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "to_chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "to_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "to_token",
+            "type": "bytea"
+          },
+          {
+            "name": "to_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "nonce",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
+        }
+      ],
+      "event": {
+        "name": "Start",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "handoffAddr",
+            "type": "address",
+            "column": "handoff_addr",
+            "indexed": true
+          },
+          {
+            "name": "fromToken",
+            "type": "address",
+            "column": "from_token"
+          },
+          {
+            "name": "fromAmount",
+            "type": "uint256",
+            "column": "from_amount"
+          },
+          {
+            "name": "toChainID",
+            "type": "uint256",
+            "column": "to_chain_id"
+          },
+          {
+            "name": "toAddr",
+            "type": "address",
+            "column": "to_addr"
+          },
+          {
+            "name": "toToken",
+            "type": "address",
+            "column": "to_token"
+          },
+          {
+            "name": "toAmount",
+            "type": "uint256",
+            "column": "to_amount"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "column": "nonce"
+          }
+        ]
+      }
+    },
+    {
+      "name": "fast_finish_cctp",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "$CHAIN_NAME",
+          "start": "$CHAIN_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "fast_finish_cctp",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "log_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "handoff_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "new_recipient",
+            "type": "bytea"
+          },
+          {
+            "name": "from_chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "from_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "from_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "to_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "to_token",
+            "type": "bytea"
+          },
+          {
+            "name": "to_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "nonce",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
+        }
+      ],
+      "event": {
+        "name": "FastFinish",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "handoffAddr",
+            "type": "address",
+            "column": "handoff_addr",
+            "indexed": true
+          },
+          {
+            "name": "newRecipient",
+            "type": "address",
+            "column": "new_recipient",
+            "indexed": true
+          },
+          {
+            "name": "fromChainID",
+            "type": "uint256",
+            "column": "from_chain_id"
+          },
+          {
+            "name": "fromAddr",
+            "type": "address",
+            "column": "from_addr"
+          },
+          {
+            "name": "fromAmount",
+            "type": "uint256",
+            "column": "from_amount"
+          },
+          {
+            "name": "toAddr",
+            "type": "address",
+            "column": "to_addr"
+          },
+          {
+            "name": "toToken",
+            "type": "address",
+            "column": "to_token"
+          },
+          {
+            "name": "toAmount",
+            "type": "uint256",
+            "column": "to_amount"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "column": "nonce"
+          }
+        ]
+      }
+    },
+    {
+      "name": "claim_cctp",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "$CHAIN_NAME",
+          "start": "$CHAIN_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "claim_cctp",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "log_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "handoff_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "final_recipient",
+            "type": "bytea"
+          },
+          {
+            "name": "from_chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "from_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "from_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "to_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "to_token",
+            "type": "bytea"
+          },
+          {
+            "name": "to_amount",
+            "type": "numeric"
+          },
+          {
+            "name": "nonce",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
+        }
+      ],
+      "event": {
+        "name": "Claim",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "handoffAddr",
+            "type": "address",
+            "column": "handoff_addr",
+            "indexed": true
+          },
+          {
+            "name": "finalRecipient",
+            "type": "address",
+            "column": "final_recipient",
+            "indexed": true
+          },
+          {
+            "name": "fromChainID",
+            "type": "uint256",
+            "column": "from_chain_id"
+          },
+          {
+            "name": "fromAddr",
+            "type": "address",
+            "column": "from_addr"
+          },
+          {
+            "name": "fromAmount",
+            "type": "uint256",
+            "column": "from_amount"
+          },
+          {
+            "name": "toAddr",
+            "type": "address",
+            "column": "to_addr"
+          },
+          {
+            "name": "toToken",
+            "type": "address",
+            "column": "to_token"
+          },
+          {
+            "name": "toAmount",
+            "type": "uint256",
+            "column": "to_amount"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "column": "nonce"
+          }
+        ]
+      }
+    }
+  ]
+}
