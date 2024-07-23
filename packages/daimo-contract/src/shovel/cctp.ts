@@ -2,7 +2,7 @@ import type { Integration, Table } from "@indexsupply/shovel-config";
 
 import { daimoFastCctpAddress } from "../generated";
 
-const startFastCCTP: Table = {
+const startFastCctp: Table = {
   name: "start_cctp",
   columns: [
     { name: "chain_id", type: "numeric" },
@@ -12,18 +12,18 @@ const startFastCCTP: Table = {
     { name: "tx_hash", type: "bytea" },
     { name: "log_addr", type: "bytea" },
 
-    { name: "handoffAddr", type: "bytea" },
-    { name: "fromToken", type: "bytea" },
-    { name: "fromAmount", type: "numeric" },
-    { name: "toChainID", type: "numeric" },
-    { name: "toAddr", type: "bytea" },
-    { name: "toToken", type: "bytea" },
-    { name: "toAmount", type: "numeric" },
+    { name: "handoff_addr", type: "bytea" },
+    { name: "from_token", type: "bytea" },
+    { name: "from_amount", type: "numeric" },
+    { name: "to_chain_id", type: "numeric" },
+    { name: "to_addr", type: "bytea" },
+    { name: "to_token", type: "bytea" },
+    { name: "to_amount", type: "numeric" },
     { name: "nonce", type: "numeric" },
   ],
 };
 
-const fastFinishCCTP: Table = {
+const fastFinishCctp: Table = {
   name: "fast_finish_cctp",
   columns: [
     { name: "chain_id", type: "numeric" },
@@ -33,19 +33,19 @@ const fastFinishCCTP: Table = {
     { name: "tx_hash", type: "bytea" },
     { name: "log_addr", type: "bytea" },
 
-    { name: "handoffAddr", type: "bytea" },
-    { name: "newRecipient", type: "bytea" },
-    { name: "fromChainID", type: "numeric" },
-    { name: "fromAddr", type: "bytea" },
-    { name: "fromAmount", type: "numeric" },
-    { name: "toAddr", type: "bytea" },
-    { name: "toToken", type: "bytea" },
-    { name: "toAmount", type: "numeric" },
+    { name: "handoff_addr", type: "bytea" },
+    { name: "new_recipient", type: "bytea" },
+    { name: "from_chain_id", type: "numeric" },
+    { name: "from_addr", type: "bytea" },
+    { name: "from_amount", type: "numeric" },
+    { name: "to_addr", type: "bytea" },
+    { name: "to_token", type: "bytea" },
+    { name: "to_amount", type: "numeric" },
     { name: "nonce", type: "numeric" },
   ],
 };
 
-const claimCCTP: Table = {
+const claimCctp: Table = {
   name: "claim_cctp",
   columns: [
     { name: "chain_id", type: "numeric" },
@@ -55,14 +55,14 @@ const claimCCTP: Table = {
     { name: "tx_hash", type: "bytea" },
     { name: "log_addr", type: "bytea" },
 
-    { name: "handoffAddr", type: "bytea" },
-    { name: "finalRecipient", type: "bytea" },
-    { name: "fromChainID", type: "numeric" },
-    { name: "fromAddr", type: "bytea" },
-    { name: "fromAmount", type: "numeric" },
-    { name: "toAddr", type: "bytea" },
-    { name: "toToken", type: "bytea" },
-    { name: "toAmount", type: "numeric" },
+    { name: "handoff_addr", type: "bytea" },
+    { name: "final_recipient", type: "bytea" },
+    { name: "from_chain_id", type: "numeric" },
+    { name: "from_addr", type: "bytea" },
+    { name: "from_amount", type: "numeric" },
+    { name: "to_addr", type: "bytea" },
+    { name: "to_token", type: "bytea" },
+    { name: "to_amount", type: "numeric" },
     { name: "nonce", type: "numeric" },
   ],
 };
@@ -71,7 +71,7 @@ export const startCCTPIntegration: Integration = {
   name: "start_fast_cctp",
   enabled: true,
   sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: startFastCCTP,
+  table: startFastCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },
@@ -138,7 +138,7 @@ export const fastFinishCCTPIntegration: Integration = {
   name: "fast_finish_cctp",
   enabled: true,
   sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: fastFinishCCTP,
+  table: fastFinishCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },
@@ -211,7 +211,7 @@ export const claimCCTPIntegration: Integration = {
   name: "claim_cctp",
   enabled: true,
   sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: claimCCTP,
+  table: claimCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },
