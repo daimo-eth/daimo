@@ -1,8 +1,7 @@
-import { DaimoLinkStatus, getInviteStatus } from "@daimo/common";
+import { DaimoLinkStatus, getInviteStatus, retryBackoff } from "@daimo/common";
 import { Address } from "viem";
 
 import { DB, InviteGraphRow } from "../db/db";
-import { retryBackoff } from "../utils/retryBackoff";
 
 /** Offchain invite graph. Used for rich profile displays and invite tab. */
 export class InviteGraph {

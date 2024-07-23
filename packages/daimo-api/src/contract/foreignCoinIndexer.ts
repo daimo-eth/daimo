@@ -6,6 +6,7 @@ import {
   SwapQueryResult,
   baseUSDC,
   isAmountDust,
+  retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
@@ -20,7 +21,6 @@ import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 // An in/outbound swap coin transfer with swap coin metadata.
 export type ForeignTokenTransfer = Transfer & {

@@ -5,6 +5,7 @@ import {
   assertNotNull,
   getEAccountStr,
   getNoteId,
+  retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
@@ -17,7 +18,6 @@ import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { senderIdKey, logCoordinateKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface NoteLog {
   blockNum: number;

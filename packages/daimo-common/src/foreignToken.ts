@@ -1,4 +1,3 @@
-import { ChainConfig } from "@daimo/contract";
 import { Address, formatUnits, getAddress, zeroAddress } from "viem";
 
 /**
@@ -12,18 +11,6 @@ import { Address, formatUnits, getAddress, zeroAddress } from "viem";
  * https://github.com/Uniswap/sdks/blob/main/sdks/sdk-core/src/entities/weth9.ts
  */
 
-import {
-  arbitrum,
-  arbitrumSepolia,
-  avalanche,
-  avalancheFuji,
-  base,
-  baseSepolia,
-  optimism,
-  optimismSepolia,
-  polygon,
-  polygonAmoy,
-} from "./chain";
 import { amountToDollars } from "./coin";
 
 export type ForeignToken = {
@@ -45,25 +32,50 @@ export enum TokenLogo {
 /* --------------------- Tokens Constants --------------------- */
 
 //
+// Eth Sepolia
+//
+
+export const ethereumSepoliaUSDC: ForeignToken = {
+  chainId: 11155111,
+  token: getAddress("0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"),
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+//
+// Eth Mainnet
+//
+export const ethereumUSDC: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+//
 // Base Sepolia
 //
 
 export const baseSepoliaWETH: ForeignToken = {
+  chainId: 84532,
   token: getAddress("0x4200000000000000000000000000000000000006"),
   decimals: 18,
   name: "Ethereum",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: baseSepolia.chainId,
 };
 
 export const baseSepoliaUSDC: ForeignToken = {
+  chainId: 84532,
   token: getAddress("0x036CbD53842c5426634e7929541eC2318f3dCF7e"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: baseSepolia.chainId,
 };
 
 //
@@ -71,48 +83,48 @@ export const baseSepoliaUSDC: ForeignToken = {
 //
 
 export const baseWETH: ForeignToken = {
+  chainId: 8453,
   token: getAddress("0x4200000000000000000000000000000000000006"),
   decimals: 18,
   name: "Ethereum",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: base.chainId,
 };
 
 export const baseUSDC: ForeignToken = {
+  chainId: 8453,
   token: getAddress("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
   name: "USD Coin",
   symbol: "USDC",
   decimals: 6,
   logoURI: TokenLogo.USDC,
-  chainId: base.chainId,
 };
 
 export const baseUSDbC: ForeignToken = {
+  chainId: 8453,
   token: getAddress("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA"),
   name: "Bridged USD Coin", // USDbC has a bad name & logo on CoinGecko
   symbol: "USDbC",
   decimals: 6,
   logoURI: `https://daimo.com/assets/foreign-coin-logos/USDbC.png`,
-  chainId: base.chainId,
 };
 
 export const baseDAI: ForeignToken = {
+  chainId: 8453,
   token: getAddress("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"),
   name: "Dai Stablecoin",
   symbol: "DAI",
   decimals: 18,
   logoURI: TokenLogo.DAI,
-  chainId: base.chainId,
 };
 
 export const baseUSDT: ForeignToken = {
+  chainId: 8453,
   token: getAddress("0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2"),
   name: "Tether USD",
   symbol: "USDT",
   decimals: 6,
   logoURI: TokenLogo.USDT,
-  chainId: base.chainId,
 };
 
 //
@@ -120,21 +132,21 @@ export const baseUSDT: ForeignToken = {
 //
 
 export const arbitrumUSDC: ForeignToken = {
+  chainId: 42161,
   token: getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831"),
   name: "USD Coin",
   symbol: "USDC",
   decimals: 6,
   logoURI: TokenLogo.USDC,
-  chainId: arbitrum.chainId,
 };
 
 export const arbitrumWETH: ForeignToken = {
+  chainId: 42161,
   token: getAddress("0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"),
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: arbitrum.chainId,
 };
 
 //
@@ -142,21 +154,21 @@ export const arbitrumWETH: ForeignToken = {
 //
 
 export const arbitrumSepoliaUSDC: ForeignToken = {
+  chainId: 421614,
   token: getAddress("0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: arbitrumSepolia.chainId,
 };
 
 export const arbitrumSepoliaWETH: ForeignToken = {
+  chainId: 421614,
   token: getAddress("0x980B62Da83eFf3D4576C647993b0c1D7faf17c73"),
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: arbitrumSepolia.chainId,
 };
 
 //
@@ -164,21 +176,21 @@ export const arbitrumSepoliaWETH: ForeignToken = {
 //
 
 export const optimismUSDC: ForeignToken = {
-  token: getAddress("0x0b2c639c533813f4aa9d7837caf62653d097ff85"),
+  chainId: 10,
+  token: getAddress("0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: optimism.chainId,
 };
 
 export const optimismWETH: ForeignToken = {
+  chainId: 10,
   token: getAddress("0x4200000000000000000000000000000000000006"),
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: optimism.chainId,
 };
 
 //
@@ -186,21 +198,21 @@ export const optimismWETH: ForeignToken = {
 //
 
 export const optimismSepoliaUSDC: ForeignToken = {
+  chainId: 11155420,
   token: getAddress("0x5fd84259d66Cd46123540766Be93DFE6D43130D7"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: optimismSepolia.chainId,
 };
 
 export const optimismSepoliaWETH: ForeignToken = {
+  chainId: 11155420,
   token: getAddress("0x4200000000000000000000000000000000000006"),
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: optimismSepolia.chainId,
 };
 
 //
@@ -208,34 +220,34 @@ export const optimismSepoliaWETH: ForeignToken = {
 //
 
 export const polygonUSDC: ForeignToken = {
-  token: getAddress("0x3c499c542cef5e3811e1192ce70d8cc03d5c3359"),
+  chainId: 137,
+  token: getAddress("0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: polygon.chainId,
 };
 
 export const polygonWETH: ForeignToken = {
+  chainId: 137,
   token: getAddress("0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"),
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: polygon.chainId,
 };
 
 //
-// Polygon Sepolia
+// Polygon Amoy
 //
 
-export const polygonSepoliaUSDC: ForeignToken = {
-  token: getAddress("0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582"),
+export const polygonAmoyUSDC: ForeignToken = {
+  chainId: 80002,
+  token: getAddress("0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: polygonAmoy.chainId,
 };
 
 //
@@ -243,42 +255,41 @@ export const polygonSepoliaUSDC: ForeignToken = {
 //
 
 export const avalancheUSDC: ForeignToken = {
+  chainId: 43114,
   token: getAddress("0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: avalanche.chainId,
 };
 
 export const avalancheWETH: ForeignToken = {
-  token: getAddress("0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab"), // WETH.e
+  chainId: 43114,
+  token: getAddress("0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB"), // WETH.e
   decimals: 18,
   name: "Wrapped Ether",
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
-  chainId: avalanche.chainId,
 };
 
 //
-// Avalanche Sepolia
+// Avalanche Fuji
 //
 
 export const avalancheFujiUSDC: ForeignToken = {
-  token: getAddress("0x5425890298aed601595a70ab815c96711a31bc65"),
+  chainId: 43113,
+  token: getAddress("0x5425890298aed601595a70AB815c96711a31Bc65"),
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
-  chainId: avalancheFuji.chainId,
 };
 
 /* --------------------- Token Utils --------------------- */
 
 export function getForeignCoinDisplayAmount(
   amount: `${bigint}`,
-  coin: ForeignToken,
-  numDecimals?: number
+  coin: ForeignToken
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
   const maxDecimals = 6;
@@ -308,49 +319,6 @@ export function isAmountDust(
   return true;
 }
 
-// Get native ETH placeholder pseudo-token.
-export function getNativeETHForChain(
-  chainId: number
-): ForeignToken | undefined {
-  switch (chainId) {
-    case base.chainId:
-    case baseSepolia.chainId:
-      return {
-        token: zeroAddress,
-        decimals: 18,
-        name: "Ethereum",
-        symbol: "ETH",
-        logoURI:
-          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-        chainId,
-      };
-    default:
-      // Some chains, like Polygon PoS, don't have native ETH.
-      return undefined;
-  }
-}
-
-// Get native WETH token address using chainId.
-export function getNativeWETHByChain(chainId: number): ForeignToken {
-  switch (chainId) {
-    case base.chainId:
-      return baseWETH;
-    case baseSepolia.chainId:
-      return baseSepoliaWETH;
-    default:
-      throw new Error(`No WETH for chain ${chainId}`);
-  }
-}
-
-// Checks if the token ETH or native WETH on the given chain.
-export function isNativeETH(
-  token: ForeignToken,
-  chain: ChainConfig | number
-): boolean {
-  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
-  return token.chainId === chainId && token.token === zeroAddress;
-}
-
 // Any coin send (stablecoins + ETH).
 export const supportedSendCoins = new Map<string, ForeignToken>([
   [baseUSDC.token, baseUSDC],
@@ -363,15 +331,5 @@ export const supportedSendCoins = new Map<string, ForeignToken>([
 export function getSupportedSendCoinByAddress(
   address: string
 ): ForeignToken | undefined {
-  return supportedSendCoins.get(getAddress(address));
-}
-
-// Supported home coins.
-export const supportedHomeCoins: ForeignToken[] = [baseUSDC];
-
-// Retrieve home coin by address.
-export function getSupportedHomeCoinByAddress(
-  address: string
-): ForeignToken | undefined {
-  return supportedHomeCoins.find((coin) => coin.token === address);
+  return supportedSendCoins.get(address);
 }

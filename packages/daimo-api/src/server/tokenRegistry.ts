@@ -3,7 +3,7 @@ import {
   baseUSDbC,
   assert,
   getChainName,
-  getSupportedHomeCoinByAddress,
+  getSupportedSendCoinByAddress,
   baseUSDC,
   getNativeETHForChain,
 } from "@daimo/common";
@@ -105,7 +105,7 @@ export class TokenRegistry {
 
     // If not a foreign token, check if it's a home token.
     if (includeHomeCoin && !token) {
-      token = getSupportedHomeCoinByAddress(tokenAddress);
+      token = getSupportedSendCoinByAddress(tokenAddress);
     }
 
     if (!token)

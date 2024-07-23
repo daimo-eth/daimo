@@ -13,6 +13,7 @@ import {
   getForeignCoinDisplayAmount,
   getSlotLabel,
   parseRequestMetadata,
+  retryBackoff,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, Hex, getAddress } from "viem";
@@ -28,7 +29,6 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { chainConfig, getEnvApi } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 const pushEnabled = getEnvApi().DAIMO_PUSH_ENABLED;
 

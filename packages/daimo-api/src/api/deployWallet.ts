@@ -4,6 +4,7 @@ import {
   SimpleTransferClog,
   formatDaimoLink,
   getInviteStatus,
+  retryBackoff,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
@@ -18,7 +19,6 @@ import { AntiSpam } from "../server/antiSpam";
 import { Telemetry } from "../server/telemetry";
 import { TrpcRequestContext } from "../server/trpc";
 import { Watcher } from "../shovel/watcher";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export async function deployWallet(
   ctx: TrpcRequestContext,

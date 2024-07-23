@@ -1,7 +1,7 @@
+import { retryBackoff } from "@daimo/common";
 import { Hex } from "viem";
 
 import { DB, PaymentMemoRow } from "../db/db";
-import { retryBackoff } from "../utils/retryBackoff";
 
 /** Offchain payment memos. User-generated notes for the transfer. */
 export class PaymentMemoTracker {

@@ -1,4 +1,4 @@
-import { retryBackoff } from "../utils/retryBackoff";
+import { retryBackoff } from "@daimo/common";
 
 // Wrap fetch() using retryBackoff, with a 1s timeout on each fetch attempt.
 // Max total time: ~6s if all 3 attempts time out.

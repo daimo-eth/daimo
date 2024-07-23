@@ -9,6 +9,7 @@ import {
   now,
   AddrLabel,
   decodeRequestIdString,
+  retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
@@ -21,7 +22,6 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface RequestCreatedLog {
   transactionHash: Hex;

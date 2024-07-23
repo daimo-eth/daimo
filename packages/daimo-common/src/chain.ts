@@ -5,7 +5,8 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
-import { DaimoChain } from "@daimo/contract";
+import { ChainConfig, DaimoChain } from "@daimo/contract";
+import { zeroAddress } from "viem";
 
 import {
   ForeignToken,
@@ -24,9 +25,11 @@ import {
   optimismSepoliaWETH,
   optimismUSDC,
   optimismWETH,
-  polygonSepoliaUSDC,
+  polygonAmoyUSDC,
   polygonUSDC,
   polygonWETH,
+  ethereumSepoliaUSDC,
+  ethereumUSDC,
 } from "./foreignToken";
 
 export type AccountChain = {
@@ -36,6 +39,21 @@ export type AccountChain = {
   bridgeCoin: ForeignToken;
   nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
   isTestnet?: boolean;
+};
+
+export const ethereum: AccountChain = {
+  chainId: 1,
+  name: "mainnet",
+  cctpDomain: 0,
+  bridgeCoin: ethereumUSDC,
+};
+
+export const ethereumSepolia: AccountChain = {
+  chainId: 11155111,
+  name: "sepolia",
+  cctpDomain: 0,
+  bridgeCoin: ethereumSepoliaUSDC,
+  isTestnet: true,
 };
 
 export const base: AccountChain = {
@@ -99,9 +117,9 @@ export const polygon: AccountChain = {
 
 export const polygonAmoy: AccountChain = {
   chainId: 80002,
-  name: "polygonSepolia",
+  name: "polygonAmoy",
   cctpDomain: 7,
-  bridgeCoin: polygonSepoliaUSDC,
+  bridgeCoin: polygonAmoyUSDC,
   isTestnet: true,
 };
 
@@ -124,6 +142,10 @@ export const avalancheFuji: AccountChain = {
 /** Given a chain ID, return the chain. */
 export function getAccountChain(chainId: number): AccountChain {
   switch (chainId) {
+    case ethereum.chainId:
+      return ethereum;
+    case ethereumSepolia.chainId:
+      return ethereumSepolia;
     case base.chainId:
       return base;
     case baseSepolia.chainId:
@@ -159,6 +181,11 @@ export function getCctpDomain(chainId: number): number {
   return getAccountChain(chainId).cctpDomain;
 }
 
+/** Returns the bridge coin address for the given chainId. */
+export function getBridgeCoin(chainId: number): ForeignToken {
+  return getAccountChain(chainId).bridgeCoin;
+}
+
 /** Returns whether the chainId is a testnet. */
 export function isTestnetChain(chainId: number): boolean {
   if (chainId === baseSepolia.chainId) return true;
@@ -174,5 +201,48 @@ export function daimoChainToId(chain: DaimoChain): number {
       return baseSepolia.chainId;
     default:
       throw new Error(`Unknown chain ${chain}`);
+  }
+}
+
+/** Get native WETH token address using chainId. */
+export function getNativeWETHByChain(chainId: number): ForeignToken {
+  switch (chainId) {
+    case base.chainId:
+      return baseWETH;
+    case baseSepolia.chainId:
+      return baseSepoliaWETH;
+    default:
+      throw new Error(`No WETH for chain ${chainId}`);
+  }
+}
+
+// Checks if the token ETH or native WETH on the given chain.
+export function isNativeETH(
+  token: ForeignToken,
+  chain: ChainConfig | number
+): boolean {
+  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
+  return token.chainId === chainId && token.token === zeroAddress;
+}
+
+// Get native ETH placeholder pseudo-token.
+export function getNativeETHForChain(
+  chainId: number
+): ForeignToken | undefined {
+  switch (chainId) {
+    case base.chainId:
+    case baseSepolia.chainId:
+      return {
+        token: zeroAddress,
+        decimals: 18,
+        name: "Ethereum",
+        symbol: "ETH",
+        logoURI:
+          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+        chainId,
+      };
+    default:
+      // Some chains, like Polygon PoS, don't have native ETH.
+      return undefined;
   }
 }

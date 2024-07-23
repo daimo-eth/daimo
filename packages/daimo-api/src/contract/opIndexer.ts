@@ -1,4 +1,4 @@
-import { assertNotNull } from "@daimo/common";
+import { assertNotNull, retryBackoff } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
@@ -8,7 +8,6 @@ import { Indexer } from "./indexer";
 import { SwapClogMatcher } from "./SwapClogMatcher";
 import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface UserOp {
   transactionHash: Hex;

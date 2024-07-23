@@ -1,4 +1,9 @@
-import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
+import {
+  KeyData,
+  assert,
+  contractFriendlyKeyToDER,
+  retryBackoff,
+} from "@daimo/common";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
@@ -6,7 +11,6 @@ import { Address, Hex, bytesToHex, getAddress } from "viem";
 import { Indexer } from "./indexer";
 import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface KeyChange {
   change: "added" | "removed";

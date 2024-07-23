@@ -1,4 +1,9 @@
-import { assertNotNull, guessTimestampFromNum, now } from "@daimo/common";
+import {
+  assertNotNull,
+  guessTimestampFromNum,
+  now,
+  retryBackoff,
+} from "@daimo/common";
 import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
@@ -7,7 +12,6 @@ import { DB as ShovelDB } from "../codegen/dbShovel";
 import { Indexer } from "../contract/indexer";
 import { DBNotifications, DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 function getShovelDBConfig(dbUrl?: string) {
   const dbConfig: ClientConfig = {
