@@ -1,9 +1,10 @@
 import type { Integration, Table } from "@indexsupply/shovel-config";
 
 import { daimoFastCctpAddress } from "../generated";
+import { integrationSources } from "../shovelConfig";
 
-const startFastCctp: Table = {
-  name: "start_cctp",
+const fastCctp: Table = {
+  name: "fast_cctp",
   columns: [
     { name: "chain_id", type: "numeric" },
     { name: "block_num", type: "numeric" },
@@ -12,66 +13,29 @@ const startFastCctp: Table = {
     { name: "tx_hash", type: "bytea" },
     { name: "log_addr", type: "bytea" },
 
+    // Shared across all FastCCTP events
     { name: "handoff_addr", type: "bytea" },
-    { name: "from_token", type: "bytea" },
-    { name: "from_amount", type: "numeric" },
-    { name: "to_chain_id", type: "numeric" },
-    { name: "to_addr", type: "bytea" },
-    { name: "to_token", type: "bytea" },
-    { name: "to_amount", type: "numeric" },
-    { name: "nonce", type: "numeric" },
-  ],
-};
-
-const fastFinishCctp: Table = {
-  name: "fast_finish_cctp",
-  columns: [
-    { name: "chain_id", type: "numeric" },
-    { name: "block_num", type: "numeric" },
-    { name: "block_hash", type: "bytea" },
-    { name: "tx_idx", type: "numeric" },
-    { name: "tx_hash", type: "bytea" },
-    { name: "log_addr", type: "bytea" },
-
-    { name: "handoff_addr", type: "bytea" },
-    { name: "new_recipient", type: "bytea" },
     { name: "from_chain_id", type: "numeric" },
-    { name: "from_addr", type: "bytea" },
     { name: "from_amount", type: "numeric" },
     { name: "to_addr", type: "bytea" },
     { name: "to_token", type: "bytea" },
     { name: "to_amount", type: "numeric" },
     { name: "nonce", type: "numeric" },
-  ],
-};
 
-const claimCctp: Table = {
-  name: "claim_cctp",
-  columns: [
-    { name: "chain_id", type: "numeric" },
-    { name: "block_num", type: "numeric" },
-    { name: "block_hash", type: "bytea" },
-    { name: "tx_idx", type: "numeric" },
-    { name: "tx_hash", type: "bytea" },
-    { name: "log_addr", type: "bytea" },
-
-    { name: "handoff_addr", type: "bytea" },
-    { name: "final_recipient", type: "bytea" },
-    { name: "from_chain_id", type: "numeric" },
-    { name: "from_addr", type: "bytea" },
-    { name: "from_amount", type: "numeric" },
-    { name: "to_addr", type: "bytea" },
-    { name: "to_token", type: "bytea" },
-    { name: "to_amount", type: "numeric" },
-    { name: "nonce", type: "numeric" },
+    // Nullable based on the event (used for filtering by event type)
+    { name: "new_recipient", type: "bytea", nullable: true }, // fastFinish
+    { name: "final_recipient", type: "bytea", nullable: true }, // claim
+    { name: "from_addr", type: "bytea", nullable: true }, // fastFinish or claim
+    { name: "from_token", type: "bytea", nullable: true }, // Start
+    { name: "to_chain_id", type: "numeric", nullable: true }, // Start
   ],
 };
 
 export const startCCTPIntegration: Integration = {
   name: "start_fast_cctp",
   enabled: true,
-  sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: startFastCctp,
+  sources: integrationSources,
+  table: fastCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },
@@ -137,8 +101,8 @@ export const startCCTPIntegration: Integration = {
 export const fastFinishCCTPIntegration: Integration = {
   name: "fast_finish_cctp",
   enabled: true,
-  sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: fastFinishCctp,
+  sources: integrationSources,
+  table: fastCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },
@@ -210,8 +174,8 @@ export const fastFinishCCTPIntegration: Integration = {
 export const claimCCTPIntegration: Integration = {
   name: "claim_cctp",
   enabled: true,
-  sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
-  table: claimCctp,
+  sources: integrationSources,
+  table: fastCctp,
   block: [
     { name: "chain_id", column: "chain_id" },
     { name: "block_num", column: "block_num" },

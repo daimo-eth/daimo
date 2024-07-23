@@ -1,24 +1,23 @@
 {
   "dashboard": {},
-  "pg_url": "$DATABASE_URL",
+  "pg_url": "$SHOVEL_DATABASE_URL",
   "eth_sources": [
     {
-      "name": "$BASE_CHAIN_NAME",
-      "chain_id": "$BASE_CHAIN_ID",
-      "ws_url": "$BASE_CHAIN_RPC_WS_URL",
+      "name": "base",
+      "chain_id": 8453,
+      "ws_url": "wss://base-mainnet.g.alchemy.com/v2/undefined/",
       "urls": [
-        "$BASE_CHAIN_RPC_URL",
-        "$BASE_CHAIN_RPC_URL_BACKUP"
+        "https://base-mainnet.g.alchemy.com/v2/undefined/",
+        "https://undefined.base-mainnet.quiknode.pro/undefined"
       ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
-      "name": "$BASE_CHAIN_TRACE_NAME",
-      "chain_id": "$BASE_CHAIN_ID",
+      "name": "baseTrace",
+      "chain_id": 8453,
       "urls": [
-        "$BASE_CHAIN_TRACE_RPC_URL",
-        "$BASE_CHAIN_TRACE_RPC_URL_BACKUP"
+        "https://undefined.com/undefined"
       ],
       "batch_size": 32,
       "concurrency": 2

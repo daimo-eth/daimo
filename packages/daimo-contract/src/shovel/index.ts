@@ -11,21 +11,30 @@ import {
   requestFulfilledIntegration,
 } from "./requests";
 import { userOpIntegration } from "./userop";
+import {
+  alchemyRpc,
+  chainstackRpc,
+  quicknodeRpc,
+  shovelSourceName,
+  shovelSources,
+} from "../shovelConfig";
 
-// Note: config is Base on prod api, Base Sepolia on staging api
-const source: Source = {
-  name: "$BASE_CHAIN_NAME",
-  chain_id: "$BASE_CHAIN_ID",
-  ws_url: "$BASE_CHAIN_RPC_WS_URL",
-  urls: ["$BASE_CHAIN_RPC_URL", "$BASE_CHAIN_RPC_URL_BACKUP"],
+const sourceConfig: Source = {
+  name: shovelSourceName,
+  chain_id: shovelSources[shovelSourceName].chainId,
+  ws_url: `wss://${alchemyRpc(shovelSourceName)}`,
+  urls: [
+    `https://${alchemyRpc(shovelSourceName)}`,
+    `https://${quicknodeRpc(shovelSourceName)}`,
+  ],
   batch_size: 100,
   concurrency: 4,
 } as any; // TODO: remove once @indexsupply/shovel-config updates
 
-const traceSource: Source = {
-  name: "$BASE_CHAIN_TRACE_NAME",
-  chain_id: "$BASE_CHAIN_ID",
-  urls: ["$BASE_CHAIN_TRACE_RPC_URL", "$BASE_CHAIN_TRACE_RPC_URL_BACKUP"],
+const traceSourceConfig: Source = {
+  name: `${shovelSourceName}Trace`,
+  chain_id: shovelSources[shovelSourceName].chainId,
+  urls: [`https://${chainstackRpc(shovelSourceName)}`],
   batch_size: 32,
   concurrency: 2,
 } as any;
@@ -43,8 +52,8 @@ const integrations = [
 ];
 
 const config = makeConfig({
-  pg_url: "$DATABASE_URL",
-  sources: [source, traceSource],
+  pg_url: "$SHOVEL_DATABASE_URL",
+  sources: [sourceConfig, traceSourceConfig],
   integrations,
 });
 

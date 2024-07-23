@@ -1,5 +1,7 @@
 import type { Integration, Table } from "@indexsupply/shovel-config";
 
+import { integrationSources } from "../shovelConfig";
+
 const table: Table = {
   name: "erc20_transfers",
   columns: [
@@ -18,7 +20,7 @@ const table: Table = {
 export const erc20TransfersIntegration: Integration = {
   name: "erc20_transfers",
   enabled: true,
-  sources: [{ name: "$CHAIN_NAME", start: "$CHAIN_START_BLOCK" }],
+  sources: integrationSources,
   table,
   block: [
     { name: "chain_id", column: "chain_id" },

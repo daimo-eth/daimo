@@ -1,144 +1,12 @@
 {
   "dashboard": {},
   "pg_url": "$SHOVEL_SQUARED_DATABASE_URL",
-  "eth_sources": [
-    {
-      "name": "$BASE_CHAIN_NAME",
-      "chain_id": "$BASE_CHAIN_ID",
-      "ws_url": "$BASE_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$BASE_CHAIN_RPC_URL",
-        "$BASE_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$BASE_CHAIN_TRACE_NAME",
-      "chain_id": "$BASE_CHAIN_ID",
-      "urls": [
-        "$BASE_CHAIN_TRACE_RPC_URL",
-        "$BASE_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "$OPTIMISM_CHAIN_NAME",
-      "chain_id": "$OPTIMISM_CHAIN_ID",
-      "ws_url": "$OPTIMISM_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$OPTIMISM_CHAIN_RPC_URL",
-        "$OPTIMISM_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$OPTIMISM_CHAIN_TRACE_NAME",
-      "chain_id": "$OPTIMISM_CHAIN_ID",
-      "urls": [
-        "$OPTIMISM_CHAIN_TRACE_RPC_URL",
-        "$OPTIMISM_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "$ETH_CHAIN_NAME",
-      "chain_id": "$ETH_CHAIN_ID",
-      "ws_url": "$ETH_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$ETH_CHAIN_RPC_URL",
-        "$ETH_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$ETH_CHAIN_TRACE_NAME",
-      "chain_id": "$ETH_CHAIN_ID",
-      "urls": [
-        "$ETH_CHAIN_TRACE_RPC_URL",
-        "$ETH_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "$AVAX_CHAIN_NAME",
-      "chain_id": "$AVAX_CHAIN_ID",
-      "ws_url": "$AVAX_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$AVAX_CHAIN_RPC_URL",
-        "$AVAX_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$AVAX_CHAIN_TRACE_NAME",
-      "chain_id": "$AVAX_CHAIN_ID",
-      "urls": [
-        "$AVAX_CHAIN_TRACE_RPC_URL",
-        "$AVAX_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "$POLYGON_CHAIN_NAME",
-      "chain_id": "$POLYGON_CHAIN_ID",
-      "ws_url": "$POLYGON_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$POLYGON_CHAIN_RPC_URL",
-        "$POLYGON_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$POLYGON_CHAIN_TRACE_NAME",
-      "chain_id": "$POLYGON_CHAIN_ID",
-      "urls": [
-        "$POLYGON_CHAIN_TRACE_RPC_URL",
-        "$POLYGON_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "$ARBITRUM_CHAIN_NAME",
-      "chain_id": "$ARBITRUM_CHAIN_ID",
-      "ws_url": "$ARBITRUM_CHAIN_RPC_WS_URL",
-      "urls": [
-        "$ARBITRUM_CHAIN_RPC_URL",
-        "$ARBITRUM_CHAIN_RPC_URL_BACKUP"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "$ARBITRUM_CHAIN_TRACE_NAME",
-      "chain_id": "$ARBITRUM_CHAIN_ID",
-      "urls": [
-        "$ARBITRUM_CHAIN_TRACE_RPC_URL",
-        "$ARBITRUM_CHAIN_TRACE_RPC_URL_BACKUP"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    }
-  ],
+  "eth_sources": [],
   "integrations": [
     {
       "name": "erc20_transfers",
       "enabled": true,
-      "sources": [
-        {
-          "name": "$CHAIN_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
+      "sources": [],
       "table": {
         "name": "erc20_transfers",
         "columns": [
@@ -235,12 +103,7 @@
     {
       "name": "eth_transfers",
       "enabled": true,
-      "sources": [
-        {
-          "name": "$CHAIN_TRACE_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
+      "sources": [],
       "table": {
         "name": "eth_transfers",
         "columns": [
@@ -269,15 +132,15 @@
             "type": "text"
           },
           {
-            "name": "from",
+            "name": "f",
             "type": "bytea"
           },
           {
-            "name": "to",
+            "name": "t",
             "type": "bytea"
           },
           {
-            "name": "value",
+            "name": "v",
             "type": "numeric"
           }
         ]
@@ -313,15 +176,15 @@
         },
         {
           "name": "trace_action_from",
-          "column": "from"
+          "column": "f"
         },
         {
           "name": "trace_action_to",
-          "column": "to"
+          "column": "t"
         },
         {
           "name": "trace_action_value",
-          "column": "value",
+          "column": "v",
           "filter_op": "gt",
           "filter_arg": [
             "0"
@@ -332,14 +195,9 @@
     {
       "name": "start_fast_cctp",
       "enabled": true,
-      "sources": [
-        {
-          "name": "$CHAIN_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
+      "sources": [],
       "table": {
-        "name": "start_cctp",
+        "name": "fast_cctp",
         "columns": [
           {
             "name": "chain_id",
@@ -370,15 +228,11 @@
             "type": "bytea"
           },
           {
-            "name": "from_token",
-            "type": "bytea"
-          },
-          {
-            "name": "from_amount",
+            "name": "from_chain_id",
             "type": "numeric"
           },
           {
-            "name": "to_chain_id",
+            "name": "from_amount",
             "type": "numeric"
           },
           {
@@ -396,6 +250,31 @@
           {
             "name": "nonce",
             "type": "numeric"
+          },
+          {
+            "name": "new_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "final_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_addr",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_token",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "to_chain_id",
+            "type": "numeric",
+            "nullable": true
           }
         ]
       },
@@ -480,14 +359,9 @@
     {
       "name": "fast_finish_cctp",
       "enabled": true,
-      "sources": [
-        {
-          "name": "$CHAIN_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
+      "sources": [],
       "table": {
-        "name": "fast_finish_cctp",
+        "name": "fast_cctp",
         "columns": [
           {
             "name": "chain_id",
@@ -518,16 +392,8 @@
             "type": "bytea"
           },
           {
-            "name": "new_recipient",
-            "type": "bytea"
-          },
-          {
             "name": "from_chain_id",
             "type": "numeric"
-          },
-          {
-            "name": "from_addr",
-            "type": "bytea"
           },
           {
             "name": "from_amount",
@@ -548,6 +414,31 @@
           {
             "name": "nonce",
             "type": "numeric"
+          },
+          {
+            "name": "new_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "final_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_addr",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_token",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "to_chain_id",
+            "type": "numeric",
+            "nullable": true
           }
         ]
       },
@@ -638,14 +529,9 @@
     {
       "name": "claim_cctp",
       "enabled": true,
-      "sources": [
-        {
-          "name": "$CHAIN_NAME",
-          "start": "$CHAIN_START_BLOCK"
-        }
-      ],
+      "sources": [],
       "table": {
-        "name": "claim_cctp",
+        "name": "fast_cctp",
         "columns": [
           {
             "name": "chain_id",
@@ -676,16 +562,8 @@
             "type": "bytea"
           },
           {
-            "name": "final_recipient",
-            "type": "bytea"
-          },
-          {
             "name": "from_chain_id",
             "type": "numeric"
-          },
-          {
-            "name": "from_addr",
-            "type": "bytea"
           },
           {
             "name": "from_amount",
@@ -706,6 +584,31 @@
           {
             "name": "nonce",
             "type": "numeric"
+          },
+          {
+            "name": "new_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "final_recipient",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_addr",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "from_token",
+            "type": "bytea",
+            "nullable": true
+          },
+          {
+            "name": "to_chain_id",
+            "type": "numeric",
+            "nullable": true
           }
         ]
       },

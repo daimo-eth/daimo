@@ -2,6 +2,14 @@ import { makeConfig, toJSON } from "@indexsupply/shovel-config";
 import type { Source } from "@indexsupply/shovel-config";
 import { writeFileSync } from "fs";
 
+import {
+  alchemyRpc,
+  chainstackRpc,
+  quicknodeRpc,
+  ShovelSource,
+  shovelSquaredSourceNames,
+  shovelSources,
+} from "../shovelConfig";
 import { erc20TransfersIntegration } from "../shovelSquared/erc20Transfers";
 import { ethTransfersIntegration } from "../shovelSquared/ethTransfers";
 import {
@@ -10,32 +18,30 @@ import {
   startCCTPIntegration,
 } from "../shovelSquared/fastCctp";
 
-// Note: config is sepolia on staging api
-const supportedChains = ["BASE", "OP", "ETH", "AVAX", "POLYGON", "ARBITRUM"];
-
-const allSources: Source[] = [];
-for (const chain of supportedChains) {
-  const source: Source = {
-    name: `$${chain}_CHAIN_NAME`,
-    chain_id: `$${chain}_CHAIN_ID`,
-    ws_url: `$${chain}_CHAIN_RPC_WS_URL`,
-    urls: [`$${chain}_CHAIN_RPC_URL`, `$${chain}_CHAIN_RPC_URL_BACKUP`],
+const allSourceConfigs: Source[] = [];
+for (const sourceName of shovelSquaredSourceNames) {
+  const source: ShovelSource = shovelSources[sourceName];
+  const sourceConfig: Source = {
+    name: sourceName,
+    chain_id: source.chainId,
+    ws_url: `wss://${alchemyRpc(sourceName)}`,
+    urls: [
+      `https://${alchemyRpc(sourceName)}`,
+      `https://${quicknodeRpc(sourceName)}`,
+    ],
     batch_size: 100,
     concurrency: 4,
   } as any;
 
-  const traceSource: Source = {
-    name: `$${chain}_CHAIN_TRACE_NAME`,
-    chain_id: `$${chain}_CHAIN_ID`,
-    urls: [
-      `$${chain}_CHAIN_TRACE_RPC_URL`,
-      `$${chain}_CHAIN_TRACE_RPC_URL_BACKUP`,
-    ],
+  const traceSourceConfig: Source = {
+    name: `${sourceName}Trace`,
+    chain_id: source.chainId,
+    urls: [`https://${chainstackRpc(sourceName)}`],
     batch_size: 32,
     concurrency: 2,
   } as any;
 
-  allSources.push(source, traceSource);
+  allSourceConfigs.push(sourceConfig, traceSourceConfig);
 }
 
 // Track all transfers and CCTP events on all chains
@@ -49,7 +55,7 @@ const integrations = [
 
 const config = makeConfig({
   pg_url: "$SHOVEL_SQUARED_DATABASE_URL",
-  sources: allSources,
+  sources: allSourceConfigs,
   integrations,
 });
 

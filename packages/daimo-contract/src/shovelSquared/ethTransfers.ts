@@ -1,5 +1,7 @@
 import type { Integration, Table } from "@indexsupply/shovel-config";
 
+import { integrationSources } from "../shovelConfig";
+
 const table: Table = {
   name: "eth_transfers",
   columns: [
@@ -9,16 +11,16 @@ const table: Table = {
     { name: "tx_idx", type: "numeric" },
     { name: "tx_hash", type: "bytea" },
     { name: "call_type", type: "text" },
-    { name: "from", type: "bytea" },
-    { name: "to", type: "bytea" },
-    { name: "value", type: "numeric" },
+    { name: "f", type: "bytea" },
+    { name: "t", type: "bytea" },
+    { name: "v", type: "numeric" },
   ],
 };
 
 export const ethTransfersIntegration = {
   name: "eth_transfers",
   enabled: true,
-  sources: [{ name: "$CHAIN_TRACE_NAME", start: "$CHAIN_START_BLOCK" }],
+  sources: integrationSources,
   table,
   block: [
     { name: "chain_id", column: "chain_id" },
@@ -34,15 +36,15 @@ export const ethTransfersIntegration = {
     },
     {
       name: "trace_action_from",
-      column: "from",
+      column: "f",
     },
     {
       name: "trace_action_to",
-      column: "to",
+      column: "t",
     },
     {
       name: "trace_action_value",
-      column: "value",
+      column: "v",
       filter_op: "gt",
       filter_arg: ["0"],
     },
