@@ -375,52 +375,52 @@ export const en = {
   // NoteAction.tsx
   noteAction: {
     disabledReason: {
-      insufficientFunds: () => `Insufficient funds`,
+      insufficientFunds: () => `Fondos insuficientes`,
     },
     statusMsg: {
-      totalDollars: (dollars: string) => `Total incl. fees ${dollars}`,
+      totalDollars: (dollars: string) => `Tasas totales incl. ${dollars}`,
     },
     externalAction: {
-      sms: () => `SEND SMS`,
-      email: () => `SEND MAIL`,
-      paymentLink: () => `SEND PAYMENT LINK`,
+      sms: () => `ENVIAR SMS`,
+      email: () => `ENVIAR MAIL`,
+      paymentLink: () => `ENVIAR LINK DE PAGO`,
     },
-    holdButton: () => `HOLD TO CONFIRM`,
+    holdButton: () => `MANTENGA PARA CONFIRMAR`,
   },
   // RouteDisplay.tsx
   routeDisplay: {
     theyWillReceive: (amount: string, tokenSymbol: string) =>
-      `They will receive ${amount} ${tokenSymbol}`,
+      `Recibirán ${amount} ${tokenSymbol}`,
   },
   // SendNavScreen.tsx
   sendNav: {
-    screenHeader: () => `Send`,
+    screenHeader: () => `Enviar`,
   },
   // SendNoteScreen.tsx
   sendNote: {
-    screenHeader: () => `Send Link`,
-    info: (tokenSymbol: string) => `Send ${tokenSymbol} via link`,
+    screenHeader: () => `Enviar Link`,
+    info: (tokenSymbol: string) => `Enviar ${tokenSymbol} via link`,
     help: {
-      title: () => `How Payment Links Work`,
-      learn: () => `Learn how`,
-      subtitle: () => `Anyone with the link can claim`,
+      title: () => `Como los Links de Pago funcionan`,
+      learn: () => `Aprende cómo`,
+      subtitle: () => `Cualquiera con el link puede reclamarlo`,
       description: {
         firstPara: () =>
-          `Payment links carry money in a link, so that you can send it to anyone.`,
+          `Links de pago transportan dinero en un link, que puedas enviarlo a cualquier persona.`,
         secondPara: () =>
-          `You can cancel an unclaimed link to get your money back.`,
-        thirdPara: () => `They're self-custody. The key is part of the URL.`,
+          `Puedes cancelar un link sin reclamar y conseguir de vuelta los fondos.`,
+        thirdPara: () => `Son auto-custodiales. La clave forma parte del URL.`,
         fourthPara: () =>
-          `Each link doubles as a Daimo invite. Plus, anyone with the link can claim with any wallet, like Rainbow or Metamask.`,
+          `Cada link funciona como una invitación a Daimo. Además, cualquiera que tenga el link puede reclamar con cualquier cartera, como Rainbow o Metamask.`,
       },
     },
-    enterAmount: () => `Enter amount`,
-    createLinkButton: () => `Create Payment Link`,
+    enterAmount: () => `Introduza cantidad`,
+    createLinkButton: () => `Cree Link de Pago`,
   },
   // SendTransferButton.tsx
   sendTransferButton: {
     disabledReason: {
-      insufficientFunds: () => `Insufficient funds`,
+      insufficientFunds: () => `Fondos Insuficientes`,
       self: () => `Can't send to yourself`,
       other: () => `Can't send to this account`,
       zero: () => `Enter an amount`,
