@@ -1,9 +1,13 @@
-import { CurrencyExchangeRate, assert, nonUsdCurrencies } from "@daimo/common";
+import {
+  CurrencyExchangeRate,
+  assert,
+  nonUsdCurrencies,
+  retryBackoff,
+} from "@daimo/common";
 
 import { ExternalApiCache } from "../db/externalApiCache";
 import { getEnvApi } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
-import { retryBackoff } from "../utils/retryBackoff";
 
 let promise: Promise<CurrencyExchangeRate[]> | null = null;
 

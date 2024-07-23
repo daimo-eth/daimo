@@ -6,6 +6,7 @@ import {
   dollarsToAmount,
   formatDaimoLink,
   now,
+  retryBackoff,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex } from "viem";
@@ -19,7 +20,6 @@ import {
 } from "../db/db";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-import { retryBackoff } from "../utils/retryBackoff";
 
 /** Invite codes. Used for invite gating the app and referral bonuses. */
 export class InviteCodeTracker {

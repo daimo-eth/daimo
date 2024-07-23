@@ -4,6 +4,7 @@ import {
   PreSwapTransfer,
   TransferClog,
   guessTimestampFromNum,
+  retryBackoff,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
@@ -20,7 +21,6 @@ import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface Transfer {
   address: Hex;

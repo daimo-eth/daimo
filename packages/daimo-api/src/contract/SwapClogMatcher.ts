@@ -1,9 +1,9 @@
+import { retryBackoff } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, bytesToHex, getAddress } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { TokenRegistry } from "../server/tokenRegistry";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export class SwapClogMatcher {
   /** Map of transactionHash to transfers that are within that transaction */

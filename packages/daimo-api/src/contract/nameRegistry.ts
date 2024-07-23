@@ -9,6 +9,7 @@ import {
   isValidName,
   now,
   validateName,
+  retryBackoff,
 } from "@daimo/common";
 import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
@@ -29,7 +30,6 @@ import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
-import { retryBackoff } from "../utils/retryBackoff";
 
 // Special labels are append-only. Historical addresses remain labelled.
 export const specialAddrLabels: { [_: Address]: AddrLabel } = {
