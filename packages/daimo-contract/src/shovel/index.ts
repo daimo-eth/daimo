@@ -2,6 +2,11 @@ import { makeConfig, toJSON } from "@indexsupply/shovel-config";
 import type { Source } from "@indexsupply/shovel-config";
 import { writeFileSync } from "fs";
 
+import {
+  claimCCTPIntegration,
+  fastFinishCCTPIntegration,
+  startCCTPIntegration,
+} from "./cctp";
 import { erc20TransfersIntegration } from "./erc20Transfers";
 import { ethTransfersIntegration } from "./ethTransfers";
 import { keyAddedIntegration, keyRemovedIntegration } from "./keyRotation";
@@ -45,6 +50,9 @@ const integrations = [
   requestCancelledIntegration,
   requestFulfilledIntegration,
   userOpIntegration,
+  startCCTPIntegration,
+  fastFinishCCTPIntegration,
+  claimCCTPIntegration,
 ];
 
 const config = makeConfig({
