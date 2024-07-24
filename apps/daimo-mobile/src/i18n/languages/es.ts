@@ -1,5 +1,5 @@
 
-export const en = {
+export const es = {
   // Common text components
   shared: {
     buttonStatus: {
