@@ -3,8 +3,10 @@ import {
   PaymentLinkClog,
   PreSwapTransfer,
   TransferClog,
+  assertNotNull,
   guessTimestampFromNum,
   retryBackoff,
+  hexToBuffer,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
@@ -22,12 +24,14 @@ import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 
+/**  */
 export interface Transfer {
   address: Hex;
   blockNumber: bigint;
   blockHash: Hex;
   transactionHash: Hex;
   transactionIndex: number;
+  /** Backcompat: not actually log index, but rather a sort index. */
   logIndex: number;
   from: Address;
   to: Address;
@@ -63,45 +67,38 @@ export class HomeCoinIndexer extends Indexer {
     const result = await retryBackoff(
       `homeCoinIndexer-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `
-        select
-          block_num,
-          block_hash,
-          tx_hash,
-          tx_idx,
-          log_idx,
-          log_addr,
-          f as "from",
-          t as "to",
-          v as "value"
-        from transfers
-        where (
-          block_num >= $1
-          and block_num <= $2
-        )
-        and (
-          f in (select addr from "names")
-          or t in (select addr from "names")
-        );
-      `,
-          [from, to]
-        )
+        kdb
+          .selectFrom("daimo_transfers")
+          .select([
+            "block_num",
+            "block_hash",
+            "tx_hash",
+            "tx_idx",
+            "sort_idx",
+            "token",
+            "f",
+            "t",
+            "amount",
+          ])
+          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where((e) => e.between("block_num", "" + from, "" + to))
+          .where("token", "=", hexToBuffer(chainConfig.tokenAddress))
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const logs: Transfer[] = result.rows.map((row) => {
+    const logs: Transfer[] = result.map((row) => {
       return {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: row.tx_idx,
-        logIndex: row.log_idx,
-        address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
-        from: getAddress(bytesToHex(row.from, { size: 20 })),
-        to: getAddress(bytesToHex(row.to, { size: 20 })),
-        value: BigInt(row.value),
+        logIndex: row.sort_idx / 2,
+        address: getAddress(bytesToHex(assertNotNull(row.token), { size: 20 })),
+        from: getAddress(bytesToHex(row.f, { size: 20 })),
+        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        value: BigInt(row.amount),
       };
     });
     if (logs.length === 0) return;
