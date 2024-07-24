@@ -137,7 +137,7 @@ export class RequestIndexer extends Indexer {
       try {
         return this.handleRequestCreated(l);
       } catch (e) {
-        console.error(`[REQUEST] Error handling RequestCreated: ${e}`);
+        console.error(`[REQUEST] error handling RequestCreated: ${e}`);
         return null;
       }
     });
@@ -234,7 +234,7 @@ export class RequestIndexer extends Indexer {
       .map((req) => {
         const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestCancelled: ${req.id}`);
+          console.error(`[REQUEST] error handling RequestCancelled: ${req.id}`);
           return null;
         }
         request.status = DaimoRequestState.Cancelled;
@@ -277,7 +277,7 @@ export class RequestIndexer extends Indexer {
       .map(async (req) => {
         const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestFulfilled: ${req.id}`);
+          console.error(`[REQUEST] error handling RequestFulfilled: ${req.id}`);
           return null;
         }
         const fulfilledBy = await this.nameReg.getEAccount(req.fulfiller);

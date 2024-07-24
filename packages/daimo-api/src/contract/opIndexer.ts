@@ -50,15 +50,10 @@ export class OpIndexer extends Indexer {
       `opIndexer-logs-query-${from}-${to}`,
       () =>
         kdb
-          .selectFrom("erc4337_user_op")
+          .selectFrom("daimo_ops")
           .select(["tx_hash", "log_idx", "op_nonce", "op_hash"])
-          .where("ig_name", "=", "erc4337_user_op")
-          .where("src_name", "=", this.shovelSource.event)
           .where((eb) => eb.between("block_num", "" + from, "" + to))
-          .where("chain_id", "=", "" + chainConfig.chainL2.id)
-          .where("op_sender", "in", (eb) =>
-            eb.selectFrom("names").select("addr")
-          )
+          .where("chain_id", "=", chainConfig.chainL2.id)
           .execute()
     );
     if (result.length === 0) return;

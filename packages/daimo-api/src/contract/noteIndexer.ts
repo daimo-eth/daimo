@@ -3,6 +3,7 @@ import {
   DaimoNoteStatus,
   amountToDollars,
   assertNotNull,
+  debugJson,
   getEAccountStr,
   getNoteId,
   retryBackoff,
@@ -132,7 +133,7 @@ export class NoteIndexer extends Indexer {
         if (l.redeemer == null) statuses.push(await this.handleNoteCreated(l));
         else statuses.push(await this.handleNoteRedeemed(l));
       } catch (e) {
-        console.error(`[NOTE] Error handling NoteLog: ${e} ${l}`);
+        console.error(`[NOTE] error handling NoteLog: ${e} ${debugJson(l)}`);
       }
     }
     return statuses;

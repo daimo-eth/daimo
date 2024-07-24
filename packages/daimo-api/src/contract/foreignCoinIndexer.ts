@@ -8,6 +8,7 @@ import {
   isAmountDust,
   retryBackoff,
 } from "@daimo/common";
+import { zeroAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
@@ -68,6 +69,7 @@ export class ForeignCoinIndexer extends Indexer {
             "block_num",
             "tx_hash",
             "tx_idx",
+            "sort_idx",
             "token",
             "f",
             "t",
@@ -81,19 +83,20 @@ export class ForeignCoinIndexer extends Indexer {
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
     const logs: ForeignTokenTransfer[] = result
-      .map((row) => {
-        return {
-          blockHash: bytesToHex(row.block_hash, { size: 32 }),
-          blockNumber: BigInt(row.block_num),
-          transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-          transactionIndex: row.tx_idx,
-          logIndex: row.,
-          address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
-          from: getAddress(bytesToHex(row.f, { size: 20 })),
-          to: getAddress(bytesToHex(row.t, { size: 20 })),
-          value: BigInt(row.v),
-        };
-      })
+      .map((row) => ({
+        blockHash: bytesToHex(row.block_hash, { size: 32 }),
+        blockNumber: BigInt(row.block_num),
+        transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
+        transactionIndex: row.tx_idx,
+        logIndex: row.sort_idx,
+        address:
+          row.token == null
+            ? zeroAddr // ETH / native token transfer
+            : getAddress(bytesToHex(row.token, { size: 20 })), // ERC-20
+        from: getAddress(bytesToHex(row.f, { size: 20 })),
+        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        value: BigInt(row.amount),
+      }))
       .filter((t) => t.address !== chainConfig.tokenAddress) // not home coin
       .filter((t) => this.tokenReg.hasToken(t.address)) // no spam tokens
       .map((t) => ({

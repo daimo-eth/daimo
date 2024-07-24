@@ -32,6 +32,23 @@ export interface Blocks {
   chain_id: number;
 }
 
+export interface DaimoOps {
+  block_hash: Buffer;
+  block_num: Int8;
+  block_ts: Int8;
+  chain_id: number;
+  log_idx: number;
+  op_actual_gas_cost: Numeric;
+  op_actual_gas_used: Numeric;
+  op_hash: Buffer;
+  op_nonce: Numeric;
+  op_paymaster: Buffer;
+  op_sender: Buffer;
+  op_success: boolean;
+  tx_hash: Buffer;
+  tx_idx: number;
+}
+
 export interface DaimoTransfers {
   amount: Numeric;
   block_hash: Buffer;
@@ -298,6 +315,7 @@ export interface Transfers {
 
 export interface DB {
   blocks: Blocks;
+  daimo_ops: DaimoOps;
   daimo_transfers: DaimoTransfers;
   erc20_transfers: Erc20Transfers;
   erc4337_user_op: Erc4337UserOp;
