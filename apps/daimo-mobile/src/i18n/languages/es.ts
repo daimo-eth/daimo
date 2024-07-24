@@ -518,7 +518,7 @@ export const es = {
   },
   // ProfileScreen.tsx
   profile: {
-    screenHeader: () => `Perfil`,
+    screenHeader: () => `Perfíl`,
     // TODO: check if need status.data translations
     error: {
       account: {
