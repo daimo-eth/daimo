@@ -480,17 +480,17 @@ export const en = {
   },
   // InviteScreen.tsx
   invite: {
-    screenHeader: () => `Invite Amigos`,
+    screenHeader: () => `Invitar Amigos`,
     more: (moreInvitees: number) => `+${moreInvitees} más`,
     invited: ({ invited }: { invited: number }) =>
       `Has invitado a ${pluralize(invited, "amigo")}`,
-    left: ({usesLeft}: {usesLeft: number}) => `${usesLeft} ${pluralize( usesLeft,"invitacion")} restantes`,
+    left: ({usesLeft}: {usesLeft: number}) => `${usesLeft} ${pluralize( usesLeft,"invitación")} ${pluralize(usesLeft,"restantes")}`,
     locked: {
-      header: () => `Invite your friends and earn USDC!`,
+      header: () => `Invita tus amigos y consigue USDC!`,
       description: () =>
-        `Use Daimo more to unlock invites. Send a payment link to onboard your contacts.`,
+        `Usa Daimo más para desbloquear invitaciones. Incorpore sus contactos enviando un link de Pago.`,
     },
-    sendButton: () => `SEND`,
+    sendButton: () => `ENVIAR`,
     referral: {
       creditForInvite: (bonusSubtitle: string) =>
         `You'll get credit for the invite on their profile ${bonusSubtitle}`,
@@ -503,72 +503,72 @@ export const en = {
       inviteCode: () => `Invite Code`,
       inviteLink: () => `Invite Link`,
       share: {
-        button: () => `Share Link`,
-        farcasterButton: () => `SHARE FRAME ON FARCASTER`,
-        farcasterMsg: () => `Join+me+on+Daimo`,
+        button: () => `Comparta Link`,
+        farcasterButton: () => `COMPARTIR FRAME EN FARCASTER`,
+        farcasterMsg: () => `Únete+a+mi+en+Daimo`,
       },
     },
   },
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
     warning: {
-      title: () => `Withdrawals are public`,
-      minimum: () => `Minimum withdrawal of 1 USDC`,
+      title: () => `Los retiros son públicos`,
+      minimum: () => `La cantidad mínima para retirar es 1 USDC`,
     },
   },
   // ProfileScreen.tsx
   profile: {
-    screenHeader: () => `Profile`,
+    screenHeader: () => `Perfil`,
     // TODO: check if need status.data translations
     error: {
       account: {
-        title: () => `Account not found`,
-        msg: (account: string) => `Couldn't load account ${account}`,
+        title: () => `Cuenta no encontrada`,
+        msg: (account: string) => `No se pudo cargar cuenta ${account}`,
       },
       invite: {
-        title: () => `Invite not found`,
-        msg: (code: string) => `Couldn't load invite ${code}`,
+        title: () => `Invitación no encontrada`,
+        msg: (code: string) => `No se cargó la invitación ${code}`,
       },
     },
     subtitle: {
-      invitedBy: () => `Invited by `,
-      joined: (timeAgo: string) => `Joined ${timeAgo}`,
+      invitedBy: () => `Invitado por `,
+      joined: (timeAgo: string) => `Se unió hace ${timeAgo}`,
     },
   },
   // QRScreen.tsx
   qr: {
     title: {
-      display: () => `Display QR Code`,
-      scan: () => `Scan QR Code`,
+      display: () => `Mostrar código QR`,
+      scan: () => `Escanea código QR`,
     },
-    copiedAddress: () => `Copied address`,
-    depositButton: () => `DEPOSIT FROM EXCHANGE ›`,
+    copiedAddress: () => `Dirección copiada`,
+    depositButton: () => `DEPOSITAR DESDE EXCHANGE ›`,
   },
   // SeedPhraseScreen.tsx
   seedPhrase: {
     title: {
-      copy: () => `Copy seed phrase`,
-      verify: () => `Verify seed phrase`,
+      copy: () => `Copiar frase semilla`,
+      verify: () => `Verificar frase semilla`,
     },
     description: () =>
-      `This seed phrase will be added to your account, allowing you to recover it even if you lose your device.`,
+      `Esta frase semilla será añadida a tu account, permitiendote recuperarla incluso si pierde su dispositivo.`,
     button: {
-      continue: () => `Continue`,
-      finish: () => `Finish Setup`,
+      continue: () => `Continuar`,
+      finish: () => `Terminar Configuración`,
     },
     copy: {
       confirm: () => `I've saved this seed phrase securely`,
-      clipboard: () => `COPY TO CLIPBOARD`,
+      clipboard: () => `COPIAR AL PORTAPAPELES`,
     },
     verify: {
-      description: () => `Type your seed phrase into the input box.`,
+      description: () => `Introduzca su frase semilla en las casillas.`,
     },
   },
   // SettingsScreen.tsx
   settings: {
-    screenHeader: () => `Settings`,
-    showDetails: () => `Show details`,
-    hideDetails: () => `Hide details`,
+    screenHeader: () => `Ajustes`,
+    showDetails: () => `Mostrar detalles`,
+    hideDetails: () => `Esconder detalles`,
     account: {
       connectFarcaster: () => `CONNECT FARCASTER`,
       viewAccountOnExplorer: () => `VIEW ACCOUNT ON EXPLORER`,
