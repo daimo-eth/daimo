@@ -1,12 +1,158 @@
 {
   "dashboard": {},
-  "pg_url": "$SHOVEL_SQUARED_DATABASE_URL",
-  "eth_sources": [],
+  "pg_url": "$JUMBO_DATABASE_URL",
+  "eth_sources": [
+    {
+      "name": "baseSepolia",
+      "chain_id": 84532,
+      "ws_url": "$BASE_ALCHEMY_WS_RPC",
+      "urls": [
+        "$BASE_ALCHEMY_RPC",
+        "$BASE_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "baseSepoliaTrace",
+      "chain_id": 84532,
+      "urls": [
+        "$BASE_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "optimismSepolia",
+      "chain_id": 11155420,
+      "ws_url": "$OPTIMISM_ALCHEMY_WS_RPC",
+      "urls": [
+        "$OPTIMISM_ALCHEMY_RPC",
+        "$OPTIMISM_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "optimismSepoliaTrace",
+      "chain_id": 11155420,
+      "urls": [
+        "$OPTIMISM_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "arbitrumSepolia",
+      "chain_id": 421614,
+      "ws_url": "$ARBITRUM_ALCHEMY_WS_RPC",
+      "urls": [
+        "$ARBITRUM_ALCHEMY_RPC",
+        "$ARBITRUM_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "arbitrumSepoliaTrace",
+      "chain_id": 421614,
+      "urls": [
+        "$ARBITRUM_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "polygonAmoy",
+      "chain_id": 80002,
+      "ws_url": "$POLYGON_ALCHEMY_WS_RPC",
+      "urls": [
+        "$POLYGON_ALCHEMY_RPC",
+        "$POLYGON_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "polygonAmoyTrace",
+      "chain_id": 80002,
+      "urls": [
+        "$POLYGON_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "avalancheFuji",
+      "chain_id": 43113,
+      "ws_url": "$AVAX_ALCHEMY_WS_RPC",
+      "urls": [
+        "$AVAX_ALCHEMY_RPC",
+        "$AVAX_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "avalancheFujiTrace",
+      "chain_id": 43113,
+      "urls": [
+        "$AVAX_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    },
+    {
+      "name": "ethSepolia",
+      "chain_id": 11155111,
+      "ws_url": "$ETH_ALCHEMY_WS_RPC",
+      "urls": [
+        "$ETH_ALCHEMY_RPC",
+        "$ETH_CHAINSTACK_RPC"
+      ],
+      "batch_size": 100,
+      "concurrency": 4
+    },
+    {
+      "name": "ethSepoliaTrace",
+      "chain_id": 11155111,
+      "urls": [
+        "$ETH_CHAINSTACK_RPC"
+      ],
+      "batch_size": 32,
+      "concurrency": 2
+    }
+  ],
   "integrations": [
     {
       "name": "erc20_transfers",
       "enabled": true,
-      "sources": [],
+      "sources": [
+        {
+          "name": "baseSepolia",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimismSepolia",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrumSepolia",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygonAmoy",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalancheFuji",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethSepolia",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
       "table": {
         "name": "erc20_transfers",
         "columns": [
@@ -101,101 +247,34 @@
       }
     },
     {
-      "name": "eth_transfers",
-      "enabled": true,
-      "sources": [],
-      "table": {
-        "name": "eth_transfers",
-        "columns": [
-          {
-            "name": "chain_id",
-            "type": "numeric"
-          },
-          {
-            "name": "block_num",
-            "type": "numeric"
-          },
-          {
-            "name": "block_hash",
-            "type": "bytea"
-          },
-          {
-            "name": "tx_idx",
-            "type": "numeric"
-          },
-          {
-            "name": "tx_hash",
-            "type": "bytea"
-          },
-          {
-            "name": "call_type",
-            "type": "text"
-          },
-          {
-            "name": "f",
-            "type": "bytea"
-          },
-          {
-            "name": "t",
-            "type": "bytea"
-          },
-          {
-            "name": "v",
-            "type": "numeric"
-          }
-        ]
-      },
-      "block": [
-        {
-          "name": "chain_id",
-          "column": "chain_id"
-        },
-        {
-          "name": "block_num",
-          "column": "block_num"
-        },
-        {
-          "name": "block_hash",
-          "column": "block_hash"
-        },
-        {
-          "name": "tx_idx",
-          "column": "tx_idx"
-        },
-        {
-          "name": "tx_hash",
-          "column": "tx_hash"
-        },
-        {
-          "name": "trace_action_call_type",
-          "column": "call_type",
-          "filter_op": "eq",
-          "filter_arg": [
-            "call"
-          ]
-        },
-        {
-          "name": "trace_action_from",
-          "column": "f"
-        },
-        {
-          "name": "trace_action_to",
-          "column": "t"
-        },
-        {
-          "name": "trace_action_value",
-          "column": "v",
-          "filter_op": "gt",
-          "filter_arg": [
-            "0"
-          ]
-        }
-      ]
-    },
-    {
       "name": "start_fast_cctp",
       "enabled": true,
-      "sources": [],
+      "sources": [
+        {
+          "name": "baseSepolia",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimismSepolia",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrumSepolia",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygonAmoy",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalancheFuji",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethSepolia",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
       "table": {
         "name": "fast_cctp",
         "columns": [
@@ -253,28 +332,23 @@
           },
           {
             "name": "new_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "final_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_addr",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_token",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "to_chain_id",
-            "type": "numeric",
-            "nullable": true
+            "type": "numeric"
           }
         ]
       },
@@ -359,7 +433,32 @@
     {
       "name": "fast_finish_cctp",
       "enabled": true,
-      "sources": [],
+      "sources": [
+        {
+          "name": "baseSepolia",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimismSepolia",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrumSepolia",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygonAmoy",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalancheFuji",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethSepolia",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
       "table": {
         "name": "fast_cctp",
         "columns": [
@@ -417,28 +516,23 @@
           },
           {
             "name": "new_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "final_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_addr",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_token",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "to_chain_id",
-            "type": "numeric",
-            "nullable": true
+            "type": "numeric"
           }
         ]
       },
@@ -529,7 +623,32 @@
     {
       "name": "claim_cctp",
       "enabled": true,
-      "sources": [],
+      "sources": [
+        {
+          "name": "baseSepolia",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimismSepolia",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrumSepolia",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygonAmoy",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalancheFuji",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethSepolia",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
       "table": {
         "name": "fast_cctp",
         "columns": [
@@ -587,28 +706,23 @@
           },
           {
             "name": "new_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "final_recipient",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_addr",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "from_token",
-            "type": "bytea",
-            "nullable": true
+            "type": "bytea"
           },
           {
             "name": "to_chain_id",
-            "type": "numeric",
-            "nullable": true
+            "type": "numeric"
           }
         ]
       },
@@ -695,6 +809,123 @@
           }
         ]
       }
+    },
+    {
+      "name": "eth_transfers",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "baseSepoliaTrace",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimismSepoliaTrace",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrumSepoliaTrace",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygonAmoyTrace",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalancheFujiTrace",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethSepoliaTrace",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "eth_transfers",
+        "columns": [
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "call_type",
+            "type": "text"
+          },
+          {
+            "name": "f",
+            "type": "bytea"
+          },
+          {
+            "name": "t",
+            "type": "bytea"
+          },
+          {
+            "name": "v",
+            "type": "numeric"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "trace_action_call_type",
+          "column": "call_type",
+          "filter_op": "eq",
+          "filter_arg": [
+            "call"
+          ]
+        },
+        {
+          "name": "trace_action_from",
+          "column": "f"
+        },
+        {
+          "name": "trace_action_to",
+          "column": "t"
+        },
+        {
+          "name": "trace_action_value",
+          "column": "v",
+          "filter_op": "gt",
+          "filter_arg": [
+            "0"
+          ]
+        }
+      ]
     }
   ]
 }

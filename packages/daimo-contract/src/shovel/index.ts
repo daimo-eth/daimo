@@ -11,30 +11,21 @@ import {
   requestFulfilledIntegration,
 } from "./requests";
 import { userOpIntegration } from "./userop";
-import {
-  alchemyRpc,
-  chainstackRpc,
-  quicknodeRpc,
-  shovelSourceName,
-  shovelSources,
-} from "../shovelConfig";
 
+// Shovel only runs on Base / Base Sepolia
 const sourceConfig: Source = {
-  name: shovelSourceName,
-  chain_id: shovelSources[shovelSourceName].chainId,
-  ws_url: `wss://${alchemyRpc(shovelSourceName)}`,
-  urls: [
-    `https://${alchemyRpc(shovelSourceName)}`,
-    `https://${quicknodeRpc(shovelSourceName)}`,
-  ],
+  name: "$CHAIN_NAME",
+  chain_id: "$CHAIN_ID",
+  ws_url: `$BASE_ALCHEMY_WS_RPC`,
+  urls: [`$BASE_ALCHEMY_RPC`, `$BASE_CHAINSTACK_RPC`],
   batch_size: 100,
   concurrency: 4,
 } as any; // TODO: remove once @indexsupply/shovel-config updates
 
 const traceSourceConfig: Source = {
-  name: `${shovelSourceName}Trace`,
-  chain_id: shovelSources[shovelSourceName].chainId,
-  urls: [`https://${chainstackRpc(shovelSourceName)}`],
+  name: `$CHAIN_NAME_TRACE`,
+  chain_id: `$CHAIN_ID`,
+  urls: [`$BASE_CHAINSTACK_RPC`],
   batch_size: 32,
   concurrency: 2,
 } as any;
