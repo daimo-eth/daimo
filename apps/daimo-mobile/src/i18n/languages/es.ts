@@ -746,11 +746,11 @@ export const es = {
     wallet: {
       title: () => `Retirar a otra cartera`,
       description: () =>
-        `Tap Send, then paste in your wallet address. Remember that you're sending USDC on Base.`,
+        `Haga click, y copie su dirección de cartera. Recuerde que está enviando USDC con Base.`,
     },
     coinbase: {
-      title: () => `Withdraw to Coinbase`,
-      description: () => `Go to Coinbase, then tap `,
+      title: () => `Retirar a Coinbase`,
+      description: () => `Ve a Coinbase, y haga click `,
       steps: {
         sendReceive: () => `Enviar y Recivir`,
         receive: () => `Recivir`,
@@ -769,7 +769,7 @@ export const es = {
     paymentLink: () => `link de pago`,
     requestLink: () => `solicitar link`,
     paymaster: () => `tasa`,
-    uniswapETHPool: () => `swapped ETH`,
+    uniswapETHPool: () => `ETH cambiado`,
   },
 
   tabNav: {
