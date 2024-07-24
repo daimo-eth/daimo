@@ -421,70 +421,70 @@ export const en = {
   sendTransferButton: {
     disabledReason: {
       insufficientFunds: () => `Fondos Insuficientes`,
-      self: () => `Can't send to yourself`,
-      other: () => `Can't send to this account`,
-      zero: () => `Enter an amount`,
+      self: () => `No puede enviarse a sí mismo`,
+      other: () => `No puede enviar a esta cuenta`,
+      zero: () => `Introduzca cantidad`,
       min: (minTransferAmount: number) =>
-        `Minimum transfer amount is ${minTransferAmount} USDC`,
+        `La cantidad mínima de envío son ${minTransferAmount} USDC`,
     },
     holdButton: () => `HOLD TO SEND`,
     statusMsg: {
       insufficientFundsPlusFee: (totalStr: string) =>
-        `You need at least ${totalStr} to send`,
-      insufficientFunds: () => `Insufficient funds`,
-      totalDollars: (totalStr: string) => `Total with fees ${totalStr}`,
-      paymentsPublic: () => `Payments are public`,
+        `Necesitas al menos ${totalStr} para enviar`,
+      insufficientFunds: () => `Fondos insuficientes`,
+      totalDollars: (totalStr: string) => `Total con tasas ${totalStr}`,
+      paymentsPublic: () => `Los pagos son publicos`,
     },
   },
   // SendTransferScreen.tsx
   sendTransferScreen: {
-    screenHeader: () => `Send to`,
-    firstTime: (name: string) => `First time paying ${name}`,
+    screenHeader: () => `Enviar a`,
+    firstTime: (name: string) => `Primera vez pagando ${name}`,
   },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
-    screenHeader: () => `Deposit or Withdraw`,
+    screenHeader: () => `Deposite o Retire`,
     landline: {
-      cta: () => `Connect with Landline`,
-      title: () => `Deposit or withdraw directly from a US bank account`,
-      optionRowTitle: (timeAgo: string) => `Connected ${timeAgo} ago`,
+      cta: () => `Conectar con Landline`,
+      title: () => `Deposite o retire directamente de un banco americano`,
+      optionRowTitle: (timeAgo: string) => `Conectado hace ${timeAgo}`,
     },
     binance: {
-      cta: () => `Deposit from Binance`,
-      title: () => `Send from Binance balance`,
+      cta: () => `Deposite desde Binance`,
+      title: () => `Envíe desde el balance de Binance`,
     },
     default: {
-      cta: () => `Deposit to address`,
-      title: () => `Send to your address`,
+      cta: () => `Deposite a dirección`,
+      title: () => `Enviar a su dirección`,
     },
-    loading: () => `loading...`,
+    loading: () => `cargando...`,
     initiated: {
-      title: () => `Deposit initiated`,
+      title: () => `Deposito iniciado`,
       subtitle: () =>
-        `Complete in browser, then funds should arrive in a few minutes.`,
+        `Completar en el navegador, los fondos deberían llegar en unos minutos.`,
     },
     withdraw: {
-      cta: () => `Withdraw`,
-      title: () => `Withdraw to any wallet or exchange`,
+      cta: () => `Retire`,
+      title: () => `Retire a cualquier cartera o exchange`,
     },
   },
   // errorScreens.tsx
   error: {
-    banner: () => `An error occurred`,
+    banner: () => `Un error ocurrió`,
   },
   // HomeScreen.tsx
   home: {
-    pending: (pendingDollars: string) => `+ $${pendingDollars} PENDING`,
-    finishAccountSetUp: () => `Finish setting up your account`,
+    pending: (pendingDollars: string) => `+ $${pendingDollars} PENDIENTE`,
+    finishAccountSetUp: () => `Terminar de configurar su cuenta`,
   },
   // InviteScreen.tsx
   invite: {
-    screenHeader: () => `Invite Friends`,
-    more: (moreInvitees: number) => `+${moreInvitees} more`,
+    screenHeader: () => `Invite Amigos`,
+    more: (moreInvitees: number) => `+${moreInvitees} más`,
     invited: ({ invited }: { invited: number }) =>
-      `You've invited ${pluralize(invited, "friend")}`,
-    left: () => `{usesLeft} invite{{s}} left`,
+      `Has invitado a ${pluralize(invited, "amigo")}`,
+    left: ({usesLeft}: {usesLeft: number}) => `${usesLeft} ${pluralize( usesLeft,"invitacion")} restantes`,
     locked: {
       header: () => `Invite your friends and earn USDC!`,
       description: () =>
