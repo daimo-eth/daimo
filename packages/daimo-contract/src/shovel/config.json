@@ -5,19 +5,19 @@
     {
       "name": "$CHAIN_NAME",
       "chain_id": "$CHAIN_ID",
-      "ws_url": "$BASE_ALCHEMY_WS_RPC",
+      "ws_url": "$CHAIN_RPC_WS_URL",
       "urls": [
-        "$BASE_ALCHEMY_RPC",
-        "$BASE_CHAINSTACK_RPC"
+        "$CHAIN_RPC_URL",
+        "$CHAIN_RPC_URL_BACKUP"
       ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
-      "name": "$CHAIN_NAME_TRACE",
+      "name": "$CHAIN_TRACE_NAME",
       "chain_id": "$CHAIN_ID",
       "urls": [
-        "$BASE_CHAINSTACK_RPC"
+        "$CHAIN_TRACE_RPC_URL"
       ],
       "batch_size": 32,
       "concurrency": 2

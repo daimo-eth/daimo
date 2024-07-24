@@ -12,20 +12,20 @@ import {
 } from "./requests";
 import { userOpIntegration } from "./userop";
 
-// Shovel only runs on Base / Base Sepolia
+// Shovel only runs on Base / Base Sepolia (Daimo events)
 const sourceConfig: Source = {
   name: "$CHAIN_NAME",
   chain_id: "$CHAIN_ID",
-  ws_url: `$BASE_ALCHEMY_WS_RPC`,
-  urls: [`$BASE_ALCHEMY_RPC`, `$BASE_CHAINSTACK_RPC`],
+  ws_url: `$CHAIN_RPC_WS_URL`,
+  urls: [`$CHAIN_RPC_URL`, `$CHAIN_RPC_URL_BACKUP`],
   batch_size: 100,
   concurrency: 4,
 } as any; // TODO: remove once @indexsupply/shovel-config updates
 
 const traceSourceConfig: Source = {
-  name: `$CHAIN_NAME_TRACE`,
+  name: `$CHAIN_TRACE_NAME`,
   chain_id: `$CHAIN_ID`,
-  urls: [`$BASE_CHAINSTACK_RPC`],
+  urls: [`$CHAIN_TRACE_RPC_URL`],
   batch_size: 32,
   concurrency: 2,
 } as any;

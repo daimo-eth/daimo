@@ -6,14 +6,19 @@
       "name": "base",
       "chain_id": 8453,
       "ws_url": "$BASE_ALCHEMY_WS_RPC",
-      "urls": ["$BASE_ALCHEMY_RPC", "$BASE_CHAINSTACK_RPC"],
+      "urls": [
+        "$BASE_ALCHEMY_RPC",
+        "$BASE_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "baseTrace",
       "chain_id": 8453,
-      "urls": ["$BASE_CHAINSTACK_RPC"],
+      "urls": [
+        "$BASE_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     },
@@ -21,14 +26,19 @@
       "name": "optimism",
       "chain_id": 10,
       "ws_url": "$OPTIMISM_ALCHEMY_WS_RPC",
-      "urls": ["$OPTIMISM_ALCHEMY_RPC", "$OPTIMISM_CHAINSTACK_RPC"],
+      "urls": [
+        "$OPTIMISM_ALCHEMY_RPC",
+        "$OPTIMISM_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "optimismTrace",
       "chain_id": 10,
-      "urls": ["$OPTIMISM_CHAINSTACK_RPC"],
+      "urls": [
+        "$OPTIMISM_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     },
@@ -36,14 +46,19 @@
       "name": "arbitrum",
       "chain_id": 42161,
       "ws_url": "$ARBITRUM_ALCHEMY_WS_RPC",
-      "urls": ["$ARBITRUM_ALCHEMY_RPC", "$ARBITRUM_CHAINSTACK_RPC"],
+      "urls": [
+        "$ARBITRUM_ALCHEMY_RPC",
+        "$ARBITRUM_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "arbitrumTrace",
       "chain_id": 42161,
-      "urls": ["$ARBITRUM_CHAINSTACK_RPC"],
+      "urls": [
+        "$ARBITRUM_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     },
@@ -51,14 +66,19 @@
       "name": "polygon",
       "chain_id": 137,
       "ws_url": "$POLYGON_ALCHEMY_WS_RPC",
-      "urls": ["$POLYGON_ALCHEMY_RPC", "$POLYGON_CHAINSTACK_RPC"],
+      "urls": [
+        "$POLYGON_ALCHEMY_RPC",
+        "$POLYGON_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "polygonTrace",
       "chain_id": 137,
-      "urls": ["$POLYGON_CHAINSTACK_RPC"],
+      "urls": [
+        "$POLYGON_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     },
@@ -66,14 +86,19 @@
       "name": "avalanche",
       "chain_id": 43114,
       "ws_url": "$AVAX_ALCHEMY_WS_RPC",
-      "urls": ["$AVAX_ALCHEMY_RPC", "$AVAX_CHAINSTACK_RPC"],
+      "urls": [
+        "$AVAX_ALCHEMY_RPC",
+        "$AVAX_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "avalancheTrace",
       "chain_id": 43114,
-      "urls": ["$AVAX_CHAINSTACK_RPC"],
+      "urls": [
+        "$AVAX_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     },
@@ -81,14 +106,19 @@
       "name": "ethereum",
       "chain_id": 1,
       "ws_url": "$ETH_ALCHEMY_WS_RPC",
-      "urls": ["$ETH_ALCHEMY_RPC", "$ETH_CHAINSTACK_RPC"],
+      "urls": [
+        "$ETH_ALCHEMY_RPC",
+        "$ETH_CHAINSTACK_RPC"
+      ],
       "batch_size": 100,
       "concurrency": 4
     },
     {
       "name": "ethereumTrace",
       "chain_id": 1,
-      "urls": ["$ETH_CHAINSTACK_RPC"],
+      "urls": [
+        "$ETH_CHAINSTACK_RPC"
+      ],
       "batch_size": 32,
       "concurrency": 2
     }
@@ -346,7 +376,9 @@
         {
           "name": "log_addr",
           "column": "log_addr",
-          "filter_arg": ["0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"]
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
         }
       ],
       "event": {
@@ -528,7 +560,9 @@
         {
           "name": "log_addr",
           "column": "log_addr",
-          "filter_arg": ["0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"]
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
         }
       ],
       "event": {
@@ -716,7 +750,9 @@
         {
           "name": "log_addr",
           "column": "log_addr",
-          "filter_arg": ["0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"]
+          "filter_arg": [
+            "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838"
+          ]
         }
       ],
       "event": {
@@ -869,7 +905,9 @@
           "name": "trace_action_call_type",
           "column": "call_type",
           "filter_op": "eq",
-          "filter_arg": ["call"]
+          "filter_arg": [
+            "call"
+          ]
         },
         {
           "name": "trace_action_from",
@@ -883,7 +921,9 @@
           "name": "trace_action_value",
           "column": "v",
           "filter_op": "gt",
-          "filter_arg": ["0"]
+          "filter_arg": [
+            "0"
+          ]
         }
       ]
     }
