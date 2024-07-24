@@ -561,7 +561,7 @@ export const en = {
       clipboard: () => `COPIAR AL PORTAPAPELES`,
     },
     verify: {
-      description: () => `Introduzca su frase semilla en las casillas.`,
+      description: () => `Introduzca su frase semilla.`,
     },
   },
   // SettingsScreen.tsx
@@ -570,181 +570,181 @@ export const en = {
     showDetails: () => `Mostrar detalles`,
     hideDetails: () => `Esconder detalles`,
     account: {
-      connectFarcaster: () => `CONNECT FARCASTER`,
-      viewAccountOnExplorer: () => `VIEW ACCOUNT ON EXPLORER`,
-      noSocialsConnected: () => `NO SOCIALS CONNECTED`,
+      connectFarcaster: () => `CONECTAR FARCASTER`,
+      viewAccountOnExplorer: () => `VER CUENTA EN EXPLORADOR`,
+      noSocialsConnected: () => `NINGUNA RED SOCIAL CONECTADA`,
     },
     devices: {
-      title: () => `My devices & backups`,
-      thisDevice: () => `THIS DEVICE`,
+      title: () => `Mis dispositivos y respaldos`,
+      thisDevice: () => `ESTE DISPOSITIVO`,
       passkeys: {
-        title: () => `What is a Passkey Backup?`,
+        title: () => `Qué es el respaldo Llave de acceso?`,
         description: {
           firstPara: () =>
-            `Passkeys are a convenient and phishing-resistant alternative to seed phrases`,
+            `Las llaves de acceso son una alternativa conveniente y anti-phising para frases semillas`,
           secondPara: () =>
-            `Passkeys are generated and stored in your password manager, and allow you to recover your account even if you lose your device.`,
+            `Las llaves de acceso son generadas y guardadas en tu llavero de iCloud, y te permite resuperar tu cuenta incluso si pierde su dispositivo.`,
         },
       },
       createBackup: {
-        title: () => `Create a Backup`,
-        msg: () => `Passkey, security key, or seed phrase`,
-        button: () => `CREATE BACKUP`,
+        title: () => `Crear un Respaldo`,
+        msg: () => `Llave de acceso, clave de seguridad, o frase semilla`,
+        button: () => `CREAR RESPALDO`,
       },
       addDevice: {
-        title: () => `Add a Device`,
-        msg: () => `Use your account on another device`,
-        button: () => `ADD DEVICE`,
+        title: () => `Añadir un Dispositivo`,
+        msg: () => `Usa tu cuenta en otro dispositivo`,
+        button: () => `AÑADIR DISPOSITIVO`,
       },
       contactSupport: {
-        title: () => `Questions? Feedback?`,
-        msg: () => `Contact us on Telegram`,
-        button: () => `CONTACT SUPPORT`,
+        title: () => `Preguntas? Sugerencias?`,
+        msg: () => `Contactanos en Telegram`,
+        button: () => `CONTACTAR SOPORTE`,
       },
     },
-    logOut: () => `Log out`,
-    remove: () => `Remove`,
-    pending: () => `Pending`,
-    addedAgo: (timeAgo: string) => `Added ${timeAgo}`,
+    logOut: () => `Cerrar sesión`,
+    remove: () => `Eliminar`,
+    pending: () => `Pendiente`,
+    addedAgo: (timeAgo: string) => `Añadida ${timeAgo}`,
     details: {
-      title: () => `Device details`,
-      enableNotifications: () => `Enable notifications`,
-      sendDebugLog: () => `Send debug log`,
+      title: () => `Detalles del dispositivo`,
+      enableNotifications: () => `Habilitar notificaciones`,
+      sendDebugLog: () => `Enviar log`,
     },
   },
   // YourInvitesScreen.tsx
   yourInvites: {
-    screenHeader: () => `Your Invites`,
-    joinedAgo: (timeAgo: string) => `Joined ${timeAgo} ago`,
+    screenHeader: () => `Tus Invitaciones`,
+    joinedAgo: (timeAgo: string) => `Se unió hace ${timeAgo}`,
   },
 
   // -------------------------- SHARED --------------------------
   // AmountInput.tsx
   amountInput: {
-    dollarsAvailable: (dollars: string) => `${dollars} available`,
+    dollarsAvailable: (dollars: string) => `${dollars} disponibles`,
   },
   // OfflineHeader.tsx
   offlineHeader: {
-    header: () => `Offline`,
-    retrying: () => `Retrying...`,
+    header: () => `Desconectado`,
+    retrying: () => `Reintentando...`,
   },
   // Scanner.tsx
   scanner: {
-    enableCamera: () => `Enable camera access`,
+    enableCamera: () => `Habilita aceso a la cámara`,
   },
   // SearchHeader.tsx
   searchHeader: {
-    searchUser: () => `Search for user...`,
+    searchUser: () => `Busca un usuario...`,
   },
   // SearchResults.tsx
   searchResults: {
-    noResults: () => `No results`,
-    paymentLinkButton: () => `SEND PAYMENT LINK INSTEAD`,
-    sentAgo: (timeAgo: string) => `Sent ${timeAgo}`,
-    receivedAgo: (timeAgo: string) => `Received ${timeAgo}`,
+    noResults: () => `Sin resultados`,
+    paymentLinkButton: () => `ENVÍA LINK PAGO EN SU LUGAR`,
+    sentAgo: (timeAgo: string) => `Enviado ${timeAgo}`,
+    receivedAgo: (timeAgo: string) => `Recivido ${timeAgo}`,
     extra: {
-      contact: () => `Send to contact`,
-      requestLink: () => `Request via link`,
-      sendLink: () => `Send via link`,
-      showQR: () => `Show QR code`,
-      scanQR: () => `Scan QR code`,
+      contact: () => `Enviar a contacto`,
+      requestLink: () => `Solicitar via link`,
+      sendLink: () => `Enviar via link`,
+      showQR: () => `Mostrar código QR`,
+      scanQR: () => `Escanear código QR`,
     },
   },
   // SearchScreen.tsx
   searchScreen: {
-    placeholderWithContact: () => `Search user, ENS, contact, or email...`,
-    placeholderWithoutContact: () => `Search user, ENS, email, or phone...`,
+    placeholderWithContact: () => `Busca usuarios, ENS, contacto, o email...`,
+    placeholderWithoutContact: () => `Busca usuarios, ENS, email, o teléfono...`,
   },
 
   // -------------------------- SHEET --------------------------
   // CreateBackupSheet.tsx
   createBackup: {
     default: {
-      header: () => `Create a backup`,
-      passkeyTitle: () => `Set up a passkey backup`,
-      passkeyBullet1: () => `Convenient, secure, and resistant to phishing`,
+      header: () => `Crear un respaldo`,
+      passkeyTitle: () => `Configurar respaldo de llave de acceso`,
+      passkeyBullet1: () => `Conveniente, seguro, y resistente a phishing`,
       passkeyBullet2: () =>
-        `Stored by your password manager, like iCloud Keychain or 1Password`,
-      offlineInsteadButton: () => `Back up offline instead`,
+        `Guardado por tu llavero de contraseñas, como iCloud Keychain o 1Password`,
+      offlineInsteadButton: () => `Respaldarlo offline`,
     },
     offline: {
-      header: () => `Create an offline backup`,
-      securityKeyTitle: () => `Set up a security key backup`,
-      securityKeyBullet1: () => `Use a physical FIDO key, such as a YubiKey`,
-      seedPhraseTitle: () => `Set up a seed phrase`,
+      header: () => `Crear un respaldo offline`,
+      securityKeyTitle: () => `Configurar un respaldo de la clave de seguridad`,
+      securityKeyBullet1: () => `Usa una llave física FIDO, como YubiKey`,
+      seedPhraseTitle: () => `Configurar frase semilla`,
       seedPhraseBullet1: () =>
-        `Your funds are connected to a phrase you can store securely`,
-      seedPhraseButton: () => `Backup with seed phrase`,
+        `Tus fondos están conectados a una frase que puedes almacenar de forma segura`,
+      seedPhraseButton: () => `Respaldar con frase semilla`,
     },
     addKey: {
-      passkey: () => `PASSKEY`,
-      securityKey: () => `SECURITY KEY`,
-      button: (slotType: string) => `BACK UP WITH ${slotType}`,
+      passkey: () => `LLAVE DE ACCESO`,
+      securityKey: () => `CLAVE SECURIDAD`,
+      button: (slotType: string) => `RESPALDO CON ${slotType}`,
     },
     recommended: {
       compact: () => `REC.`,
-      default: () => `RECOMMENDED`,
+      default: () => `RECOMENDADO`,
     },
   },
   // DebugBottomSheet.tsx
   debugBottom: {
-    sheetHeader: () => `Did something go wrong?`,
+    sheetHeader: () => `Algo salió mal?`,
     description: () =>
-      `Contact us on Telegram, then tap Send Debug Log to send us more information. We'll get to the bottom of it.`,
-    helpButton: () => `CONTACT SUPPORT`,
+      `Contactanos por Telegram, luego haz click en Enviar Log para enviarnos más información. Llegaremos al fondo del asunto.`,
+    helpButton: () => `CONTACTAR SOPORTE`,
   },
   // DepositAddressBottomSheet.tsx
   depositAddressBottom: {
-    sheetHeader: () => `Deposit`,
+    sheetHeader: () => `Depositar`,
     description: (tokenSymbol: string) =>
-      `Send ${tokenSymbol} to your address below. Any other ERC-20 tokens will be converted to USDC. Confirm that you're sending:`,
+      `Enviar ${tokenSymbol} a tu dirección debajo. Cualquier otro token ERC-20 serán convertidos a USDC. Confirma que estés enviando:`,
     checkChain: {
-      on: () => `On `,
-      notOther: () => `, not any other chain`,
+      on: () => `En `,
+      notOther: () => `, no otra cadena`,
     },
-    copied: () => `Copied`,
+    copied: () => `Copiado`,
   },
   // FarcasterBottomSheet.tsx
   farcasterBottom: {
-    verified: () => `Your account is verified`,
-    linked: () => `Your account is linked`,
-    connect: () => `Connect Farcaster`,
-    openWarpcastButton: () => `OPEN IN WARPCAST`,
-    welcome: (fcUsername: string) => `Welcome, ${fcUsername}`,
-    loading: () => `Loading...`,
+    verified: () => `Tu cuenta está verificada`,
+    linked: () => `Tu cuenta está conectada`,
+    connect: () => `Conectar Farcaster`,
+    openWarpcastButton: () => `ABRIR EN WARPCAST`,
+    welcome: (fcUsername: string) => `Bienvenido, ${fcUsername}`,
+    loading: () => `Cargando...`,
   },
   // HelpBottomSheet.tsx
   helpBottom: {
-    gotItButton: () => `GOT IT`,
+    gotItButton: () => `CAPTADO`,
   },
   // OnboardingChecklistBottomSheet.tsx
   onboardingChecklistBottom: {
-    sheetHeader: () => `Onboarding checklist`,
-    description: () => `Complete these items to finish account setup`,
+    sheetHeader: () => `Incorporando lista de requisitos`,
+    description: () => `Completa estas acciones para acapar de configurar tu cuenta`,
     secureAccount: {
-      title: () => `Secure your account`,
-      description: () => `Add a backup to your account`,
+      title: () => `Asegura tu cuenta`,
+      description: () => `Añadir un respaldo a tu cuenta`,
     },
     connectFarcaster: {
-      title: () => `Connect Farcaster`,
-      description: () => `Import profile picture and connections`,
+      title: () => `Conectar Farcaster`,
+      description: () => `Importar foto de perfil y conexiones`,
     },
-    dismissButton: () => `DISMISS`,
+    dismissButton: () => `DESCARTAR`,
   },
   // OwnRequestBottomSheet.tsx
   ownRequestBottom: {
-    sheetHeader: () => `You requested`,
-    cancelButton: () => `CANCEL REQUEST`,
+    sheetHeader: () => `Tu solicitaste`,
+    cancelButton: () => `CANCELAR SOLICITUD`,
   },
   // SwapBottomSheet.tsx
   swapBottom: {
-    sheetHeader: () => `Accept`,
+    sheetHeader: () => `Aceptar`,
   },
   // WithdrawInstructionsBottomSheet.tsx
   withdrawInstructionsBottom: {
-    sheetHeader: () => `Withdraw`,
+    sheetHeader: () => `Retirar`,
     wallet: {
-      title: () => `Withdraw to another wallet`,
+      title: () => `Retirar a otra cartera`,
       description: () =>
         `Tap Send, then paste in your wallet address. Remember that you're sending USDC on Base.`,
     },
@@ -752,32 +752,32 @@ export const en = {
       title: () => `Withdraw to Coinbase`,
       description: () => `Go to Coinbase, then tap `,
       steps: {
-        sendReceive: () => `Send & Receive`,
-        receive: () => `Receive`,
-        choose: () => `Choose`,
-        setNetwork: () => `Set Network to`,
+        sendReceive: () => `Enviar y Recivir`,
+        receive: () => `Recivir`,
+        choose: () => `Elegir`,
+        setNetwork: () => `Cambiar la Red a`,
       },
       sendToAddress: () =>
-        `Use Daimo to send to the address shown. Funds should appear on Coinbase in a few minutes.`,
+        `Usa Daimo para enviar a la dirección mostrada. Los fondos deberían aparecer en Coinbase en unos minutos.`,
     },
   },
 
   // -------------------------- MISC --------------------------
   // AddrLabels for account history contacts
   addrLabel: {
-    faucet: () => `team Daimo`,
-    paymentLink: () => `payment link`,
-    requestLink: () => `request link`,
-    paymaster: () => `fee`,
+    faucet: () => `equipo Daimo`,
+    paymentLink: () => `link de pago`,
+    requestLink: () => `solicitar link`,
+    paymaster: () => `tasa`,
     uniswapETHPool: () => `swapped ETH`,
   },
 
   tabNav: {
-    deposit: () => `Deposit`,
-    invite: () => `Invite`,
-    home: () => `Home`,
-    send: () => `Send`,
-    settings: () => `Settings`,
+    deposit: () => `Depositar`,
+    invite: () => `Invitar`,
+    home: () => `Casa`,
+    send: () => `Enviar`,
+    settings: () => `Ajustes`,
   },
 };
 
