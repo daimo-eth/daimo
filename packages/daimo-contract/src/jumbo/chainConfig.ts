@@ -6,6 +6,7 @@ export type ChainConfig = {
   chainId: number;
 };
 
+// Mainnet chains to be used for Jumbo shovel config
 export const mainnetChains = [
   {
     name: "base",
@@ -39,6 +40,8 @@ export const mainnetChains = [
   },
 ];
 
+// Testnet chains to be used for Jumbo shovel config
+// Note: for now, only run on chains that support DAv2 with CREATE3 deployment
 export const testnetChains = [
   {
     name: "baseSepolia",
@@ -46,30 +49,30 @@ export const testnetChains = [
     chainId: 84532,
   },
   {
-    name: "optimismSepolia",
-    env: "OPTIMISM",
-    chainId: 11155420,
-  },
-  {
-    name: "arbitrumSepolia",
-    env: "ARBITRUM",
-    chainId: 421614,
-  },
-  {
-    name: "polygonAmoy",
-    env: "POLYGON",
-    chainId: 80002,
-  },
-  {
-    name: "avalancheFuji",
-    env: "AVAX",
-    chainId: 43113,
-  },
-  {
     name: "ethSepolia",
     env: "ETH",
     chainId: 11155111,
   },
+  // {
+  //   name: "optimismSepolia",
+  //   env: "OPTIMISM",
+  //   chainId: 11155420,
+  // },
+  // {
+  //   name: "arbitrumSepolia",
+  //   env: "ARBITRUM",
+  //   chainId: 421614,
+  // },
+  // {
+  //   name: "polygonAmoy",
+  //   env: "POLYGON",
+  //   chainId: 80002,
+  // },
+  // {
+  //   name: "avalancheFuji",
+  //   env: "AVAX",
+  //   chainId: 43113,
+  // },
 ];
 
 // Make the sources for each integration with the given chain info

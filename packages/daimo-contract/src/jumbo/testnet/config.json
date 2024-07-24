@@ -23,86 +23,6 @@
       "concurrency": 2
     },
     {
-      "name": "optimismSepolia",
-      "chain_id": 11155420,
-      "ws_url": "$OPTIMISM_ALCHEMY_WS_RPC",
-      "urls": [
-        "$OPTIMISM_ALCHEMY_RPC",
-        "$OPTIMISM_CHAINSTACK_RPC"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "optimismSepoliaTrace",
-      "chain_id": 11155420,
-      "urls": [
-        "$OPTIMISM_CHAINSTACK_RPC"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "arbitrumSepolia",
-      "chain_id": 421614,
-      "ws_url": "$ARBITRUM_ALCHEMY_WS_RPC",
-      "urls": [
-        "$ARBITRUM_ALCHEMY_RPC",
-        "$ARBITRUM_CHAINSTACK_RPC"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "arbitrumSepoliaTrace",
-      "chain_id": 421614,
-      "urls": [
-        "$ARBITRUM_CHAINSTACK_RPC"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "polygonAmoy",
-      "chain_id": 80002,
-      "ws_url": "$POLYGON_ALCHEMY_WS_RPC",
-      "urls": [
-        "$POLYGON_ALCHEMY_RPC",
-        "$POLYGON_CHAINSTACK_RPC"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "polygonAmoyTrace",
-      "chain_id": 80002,
-      "urls": [
-        "$POLYGON_CHAINSTACK_RPC"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
-      "name": "avalancheFuji",
-      "chain_id": 43113,
-      "ws_url": "$AVAX_ALCHEMY_WS_RPC",
-      "urls": [
-        "$AVAX_ALCHEMY_RPC",
-        "$AVAX_CHAINSTACK_RPC"
-      ],
-      "batch_size": 100,
-      "concurrency": 4
-    },
-    {
-      "name": "avalancheFujiTrace",
-      "chain_id": 43113,
-      "urls": [
-        "$AVAX_CHAINSTACK_RPC"
-      ],
-      "batch_size": 32,
-      "concurrency": 2
-    },
-    {
       "name": "ethSepolia",
       "chain_id": 11155111,
       "ws_url": "$ETH_ALCHEMY_WS_RPC",
@@ -131,22 +51,6 @@
         {
           "name": "baseSepolia",
           "start": "$BASE_START_BLOCK"
-        },
-        {
-          "name": "optimismSepolia",
-          "start": "$OPTIMISM_START_BLOCK"
-        },
-        {
-          "name": "arbitrumSepolia",
-          "start": "$ARBITRUM_START_BLOCK"
-        },
-        {
-          "name": "polygonAmoy",
-          "start": "$POLYGON_START_BLOCK"
-        },
-        {
-          "name": "avalancheFuji",
-          "start": "$AVAX_START_BLOCK"
         },
         {
           "name": "ethSepolia",
@@ -253,22 +157,6 @@
         {
           "name": "baseSepolia",
           "start": "$BASE_START_BLOCK"
-        },
-        {
-          "name": "optimismSepolia",
-          "start": "$OPTIMISM_START_BLOCK"
-        },
-        {
-          "name": "arbitrumSepolia",
-          "start": "$ARBITRUM_START_BLOCK"
-        },
-        {
-          "name": "polygonAmoy",
-          "start": "$POLYGON_START_BLOCK"
-        },
-        {
-          "name": "avalancheFuji",
-          "start": "$AVAX_START_BLOCK"
         },
         {
           "name": "ethSepolia",
@@ -437,22 +325,6 @@
         {
           "name": "baseSepolia",
           "start": "$BASE_START_BLOCK"
-        },
-        {
-          "name": "optimismSepolia",
-          "start": "$OPTIMISM_START_BLOCK"
-        },
-        {
-          "name": "arbitrumSepolia",
-          "start": "$ARBITRUM_START_BLOCK"
-        },
-        {
-          "name": "polygonAmoy",
-          "start": "$POLYGON_START_BLOCK"
-        },
-        {
-          "name": "avalancheFuji",
-          "start": "$AVAX_START_BLOCK"
         },
         {
           "name": "ethSepolia",
@@ -629,22 +501,6 @@
           "start": "$BASE_START_BLOCK"
         },
         {
-          "name": "optimismSepolia",
-          "start": "$OPTIMISM_START_BLOCK"
-        },
-        {
-          "name": "arbitrumSepolia",
-          "start": "$ARBITRUM_START_BLOCK"
-        },
-        {
-          "name": "polygonAmoy",
-          "start": "$POLYGON_START_BLOCK"
-        },
-        {
-          "name": "avalancheFuji",
-          "start": "$AVAX_START_BLOCK"
-        },
-        {
           "name": "ethSepolia",
           "start": "$ETH_START_BLOCK"
         }
@@ -817,22 +673,6 @@
         {
           "name": "baseSepoliaTrace",
           "start": "$BASE_START_BLOCK"
-        },
-        {
-          "name": "optimismSepoliaTrace",
-          "start": "$OPTIMISM_START_BLOCK"
-        },
-        {
-          "name": "arbitrumSepoliaTrace",
-          "start": "$ARBITRUM_START_BLOCK"
-        },
-        {
-          "name": "polygonAmoyTrace",
-          "start": "$POLYGON_START_BLOCK"
-        },
-        {
-          "name": "avalancheFujiTrace",
-          "start": "$AVAX_START_BLOCK"
         },
         {
           "name": "ethSepoliaTrace",

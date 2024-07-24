@@ -1,8 +1,4 @@
-import type {
-  Integration,
-  SourceReference,
-  Table,
-} from "@indexsupply/shovel-config";
+import type { Integration, Table } from "@indexsupply/shovel-config";
 
 import { ChainConfig, makeIntegrationSources } from "./chainConfig";
 import { daimoFastCctpAddress } from "../generated";
