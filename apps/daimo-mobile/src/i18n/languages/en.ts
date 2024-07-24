@@ -483,7 +483,7 @@ export const en = {
     more: (moreInvitees: number) => `+${moreInvitees} more`,
     invited: ({ invited }: { invited: number }) =>
       `You've invited ${pluralize(invited, "friend")}`,
-    left: () => `{usesLeft} invite{{s}} left`,
+    left: ({usesLeft} : {usesLeft: number}) => `${usesLeft} ${pluralize(usesLeft, "invite")} left`,
     locked: {
       header: () => `Invite your friends and earn USDC!`,
       description: () =>
