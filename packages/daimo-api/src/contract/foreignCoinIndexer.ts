@@ -58,65 +58,36 @@ export class ForeignCoinIndexer extends Indexer {
   async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startMs = performance.now();
 
-    const { event, trace } = this.shovelSource;
-
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
-      async () => {
-        return await pg.query(
-          `
-          SELECT * FROM (
-            SELECT
-              chain_id,
-              block_num,
-              block_hash,
-              tx_idx,
-              tx_hash,
-              log_addr,
-              f,
-              t,
-              v,
-              log_idx as sort_idx
-            FROM erc20_transfers
-            WHERE ig_name='erc20_transfers'
-            AND src_name='${event}'
-            AND block_num BETWEEN $1 AND $2
-            AND ((t in (SELECT addr FROM names)) OR (f in (SELECT addr FROM names)))
-          UNION ALL
-            SELECT
-              chain_id,
-              block_num,
-              block_hash,
-              tx_idx,
-              tx_hash,
-              '\\x0000000000000000000000000000000000000000' AS log_addr,
-              "from" as f,
-              "to" as t,
-              "value" as v,
-              trace_action_idx as sort_idx
-            FROM eth_transfers et
-            WHERE ig_name='eth_transfers'
-            AND src_name='${trace}'
-            AND block_num BETWEEN $1 AND $2
-            AND (("to" in (SELECT addr FROM names)) OR ("from" in (SELECT addr FROM names)))
-          )
-          ORDER BY block_num ASC, tx_idx ASC, sort_idx ASC
-          ;`,
-          [from, to]
-        );
-      }
+      async () =>
+        kdb
+          .selectFrom("daimo_transfers")
+          .select([
+            "block_hash",
+            "block_num",
+            "tx_hash",
+            "tx_idx",
+            "token",
+            "f",
+            "t",
+            "amount",
+          ])
+          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const logs: ForeignTokenTransfer[] = result.rows
+    const logs: ForeignTokenTransfer[] = result
       .map((row) => {
         return {
           blockHash: bytesToHex(row.block_hash, { size: 32 }),
           blockNumber: BigInt(row.block_num),
           transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
           transactionIndex: row.tx_idx,
-          logIndex: row.log_idx,
+          logIndex: row.,
           address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
           from: getAddress(bytesToHex(row.f, { size: 20 })),
           to: getAddress(bytesToHex(row.t, { size: 20 })),
