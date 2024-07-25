@@ -1,6 +1,8 @@
 import { assert } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
-import { ReactNode, useEffect, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
 
 import { useExitToHome } from "../../../common/nav";
 import { LandlineBankAccountContact } from "../../../logic/daimoContacts";
@@ -24,7 +26,9 @@ export function LandlineDepositButton({
   minTransferAmount?: number;
 }) {
   console.log(`[SEND] rendering LandlineDepositButton ${dollars}`);
-  const [depositSuccess, setDepositSuccess] = useState(false);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   // Get exact amount. No partial cents.
   assert(dollars >= 0);
@@ -47,30 +51,42 @@ export function LandlineDepositButton({
   const disabled = sendDisabledReason != null || dollars === 0;
 
   // TODO: authenticate this call
-  const handlePress = () => {
+  const handlePress = useCallback(async () => {
     const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
-    const response = rpcFunc.depositFromLandline.mutate({
+    const response = await rpcFunc.depositFromLandline.mutate({
       daimoAddress: account.address,
       landlineAccountUuid: recipient.landlineAccountUuid,
       amount: dollarsStr,
       memo,
     });
     if (response.status === "success") {
-      setDepositSuccess(true);
+      // Vibrate on success
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setStatus("success");
+    } else {
+      setStatus("error");
     }
-  };
+  }, [account.address, dollarsStr, memo, recipient.landlineAccountUuid]);
 
   const button = (function () {
-    return (
-      <LongPressBigButton
-        title="HOLD TO SEND"
-        onPress={disabled ? undefined : handlePress}
-        type="primary"
-        disabled={disabled}
-        duration={400}
-        showBiometricIcon
-      />
-    );
+    switch (status) {
+      case "idle":
+      case "error":
+        return (
+          <LongPressBigButton
+            title="HOLD TO DEPOSIT"
+            onPress={disabled ? undefined : handlePress}
+            type="primary"
+            disabled={disabled}
+            duration={400}
+            showBiometricIcon
+          />
+        );
+      case "loading":
+        return <ActivityIndicator size="large" />;
+      case "success":
+        return null;
+    }
   })();
 
   const statusMessage = (function (): ReactNode {
@@ -79,16 +95,17 @@ export function LandlineDepositButton({
     } else if (sendDisabledReason != null) {
       return <TextError>{sendDisabledReason}</TextError>;
     } else {
-      return "Payments are public";
+      return null;
     }
   })();
 
-  // On success, go home, show newly created transaction
+  // On success, go home
+  // TODO: show notification
   const goHome = useExitToHome();
   useEffect(() => {
-    if (!depositSuccess) return;
+    if (status !== "success") return;
     goHome();
-  }, [depositSuccess]);
+  }, [status]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;
 }

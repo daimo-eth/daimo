@@ -16,6 +16,11 @@ export interface LandlineAccount {
   createdAt: string;
 }
 
+export interface LandlineDepositResponse {
+  status: string;
+  error?: string;
+}
+
 export async function getLandlineSession(
   daimoAddress: Address
 ): Promise<string> {
@@ -42,9 +47,9 @@ export async function landlineDeposit(
   landlineAccountUuid: string,
   amount: string,
   memo: string | undefined
-): Promise<void> {
+): Promise<LandlineDepositResponse> {
   // @ts-ignore
-  await landlineTrpc.deposit.mutate({
+  return await landlineTrpc.deposit.mutate({
     daimoAddress,
     landlineAccountUuid,
     amount,

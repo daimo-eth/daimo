@@ -9,6 +9,7 @@ import {
   now,
   zAddress,
   zBigIntStr,
+  zDollarStr,
   zEAccount,
   zHex,
   zInviteCodeStr,
@@ -690,19 +691,22 @@ export function createRouter(
         z.object({
           daimoAddress: zAddress,
           landlineAccountUuid: z.string(),
-          amount: zBigIntStr,
+          amount: zDollarStr,
           memo: z.string().optional(),
         })
       )
       .mutation(async (opts) => {
         // TODO: add authentication this endpoint
         const { daimoAddress, landlineAccountUuid, amount, memo } = opts.input;
-        return await landlineDeposit(
+
+        const response = await landlineDeposit(
           daimoAddress,
           landlineAccountUuid,
           amount,
           memo
         );
+
+        return response;
       }),
 
     // @deprecated, remove by 2024 Q4
