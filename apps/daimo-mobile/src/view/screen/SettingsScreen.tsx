@@ -128,7 +128,7 @@ function AccountSection({ account }: { account: Account }) {
 function LocaleSelector({ locale }: { locale: Locale }) {
   return (
     <SelectDropdown
-      data={["en"]} // TODO: add all locales
+      data={["en", "es"]} // TODO: add all locales
       defaultValue={locale}
       onSelect={(selectedLocale: Locale) => {
         getAccountManager().setLocale(selectedLocale);
