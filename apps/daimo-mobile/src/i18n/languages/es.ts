@@ -455,8 +455,8 @@ export const es = {
       title: () => `Envíe desde el balance de Binance`,
     },
     default: {
-      cta: () => `Deposite a dirección`,
-      title: () => `Enviar a su dirección`,
+      cta: () => `Deposite`,
+      title: () => `Envíe a su cartera`,
     },
     loading: () => `cargando...`,
     initiated: {
@@ -697,10 +697,10 @@ export const es = {
   depositAddressBottom: {
     sheetHeader: () => `Depositar`,
     description: (tokenSymbol: string) =>
-      `Enviar ${tokenSymbol} a tu dirección debajo. Cualquier otro token ERC-20 serán convertidos a USDC. Confirma que estés enviando:`,
+      `Envíe ${tokenSymbol} a su dirección debajo. Cualquier otro token ERC-20 será convertido a USDC. Confirme que esté enviando:`,
     checkChain: {
       on: () => `En `,
-      notOther: () => `, no otra cadena`,
+      notOther: () => `, y no otra cadena`,
     },
     copied: () => `Copiado`,
   },
@@ -775,7 +775,7 @@ export const es = {
   tabNav: {
     deposit: () => `Depositar`,
     invite: () => `Invitar`,
-    home: () => `Casa`,
+    home: () => `Inicio`,
     send: () => `Enviar`,
     settings: () => `Ajustes`,
   },
