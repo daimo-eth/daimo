@@ -24,7 +24,7 @@ import {
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
 import {
-  BridgeBankAccountContact,
+  LandlineBankAccountContact,
   EAccountContact,
 } from "../../../logic/daimoContacts";
 import { Account } from "../../../storage/account";
@@ -43,7 +43,7 @@ export function SendTransferButton({
   route,
 }: {
   account: Account;
-  recipient: EAccountContact | BridgeBankAccountContact;
+  recipient: EAccountContact | LandlineBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
   memo?: string;

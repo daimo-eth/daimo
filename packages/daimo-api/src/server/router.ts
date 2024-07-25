@@ -9,6 +9,7 @@ import {
   now,
   zAddress,
   zBigIntStr,
+  zDollarStr,
   zEAccount,
   zHex,
   zInviteCodeStr,
@@ -62,6 +63,7 @@ import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
+import { landlineDeposit } from "../landline/connector";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
@@ -663,6 +665,29 @@ export function createRouter(
       .mutation(async (opts) => {
         const { requestId, decliner } = opts.input;
         await reqIndexer.declineRequest(requestId, decliner);
+      }),
+
+    depositFromLandline: publicProcedure
+      .input(
+        z.object({
+          daimoAddress: zAddress,
+          landlineAccountUuid: z.string(),
+          amount: zDollarStr,
+          memo: z.string().optional(),
+        })
+      )
+      .mutation(async (opts) => {
+        // TODO: add authentication this endpoint
+        const { daimoAddress, landlineAccountUuid, amount, memo } = opts.input;
+
+        const response = await landlineDeposit(
+          daimoAddress,
+          landlineAccountUuid,
+          amount,
+          memo
+        );
+
+        return response;
       }),
 
     // @deprecated, remove by 2024 Q4
