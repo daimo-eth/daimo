@@ -63,7 +63,7 @@ export class Watcher {
     this.notifications = new DBNotifications(dbConfig);
 
     const { testnet } = assertNotNull(rpcClient.chain);
-    if (testnet) this.latest = 10626717 - 1;
+    if (testnet) this.latest = 12000000 - 1;
     else this.latest = 5700000 - 1;
   }
 

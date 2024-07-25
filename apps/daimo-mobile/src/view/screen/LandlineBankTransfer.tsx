@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { LandlineDepositButton } from "./send/LandlineDepositButton";
 import {
   LandlineTransferNavProp,
   ParamListDeposit,
@@ -17,9 +18,9 @@ import {
 } from "../../common/nav";
 import { BankTransferOptions } from "../../logic/bankTransferOptions";
 import {
-  LandlineBankAccountContact,
   DaimoContact,
   getContactName,
+  LandlineBankAccountContact,
 } from "../../logic/daimoContacts";
 import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
@@ -245,19 +246,28 @@ function SendConfirm({
   if (memo != null) {
     memoParts.push(memo);
   }
-  const button: ReactNode = (
-    <SendTransferButton
-      account={account}
-      memo={memoParts.join(" · ")}
-      recipient={recipient}
-      dollars={money.dollars}
-      // Minimum USDC withdrawal amount specified by bridgexyz
-      // https://apidocs.bridge.xyz/docs/liquidation-address
-      minTransferAmount={1.0}
-      toCoin={baseUSDC} // TODO: get home coin from account
-      landlineBankTransferOption={bankTransferOption}
-    />
-  );
+
+  const button: ReactNode =
+    bankTransferOption === BankTransferOptions.Withdraw ? (
+      <SendTransferButton
+        account={account}
+        memo={memoParts.join(" · ")}
+        recipient={recipient}
+        dollars={money.dollars}
+        // Minimum USDC withdrawal amount specified by bridgexyz
+        // https://apidocs.bridge.xyz/docs/liquidation-address
+        minTransferAmount={0}
+        toCoin={baseUSDC} // TODO: get home coin from account
+      />
+    ) : (
+      <LandlineDepositButton
+        account={account}
+        recipient={recipient}
+        dollars={money.dollars}
+        memo={memoParts.join(" · ")}
+        minTransferAmount={0.01}
+      />
+    );
 
   return (
     <View>
