@@ -321,3 +321,108 @@ jobs:
           files: apps/daimo-mobile/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  jumbo-deploy:
+    name: Jumbo Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          mask-aws-account-id: true
+
+      - id: login-ecr
+        name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # this naming is misleading --> we are actually building both mainnet and
+      # testnet images every run (just use mainnet cluster for prod)
+      - name: Set branch-level configuration
+        run: |
+          if [[ ${{ github.ref }} == "refs/heads/prod" ]]; then
+            echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Check for existing image with GIT_SHA
+        env:
+          GIT_SHA: ${{ github.sha }}
+          REPO: daimo-jumbo
+        run: |
+          image_manifest=$(aws ecr batch-get-image --repository-name $REPO --image-ids imageTag=$GIT_SHA --query 'images[0].imageManifest')
+          echo "IMAGE_MANIFEST=$image_manifest" >> $GITHUB_ENV
+
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # mainnet docker image
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Build, tag, and push MAINNET jumbo docker image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=gha
+          cache-to: type=gha
+          context: ./packages/daimo-contract/src/jumbo
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/daimo-jumbo:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/daimo-jumbo:mainnet-${{ env.IMAGE_TAG }}
+          build-args: |
+            NETWORK=mainnet
+
+      # testnet docker image
+      - if: env.IMAGE_MANIFEST == 'null'
+        name: Build, tag, and push TESTNET jumbo docker image to Amazon ECR
+        uses: docker/build-push-action@v5
+        with:
+          cache-from: type=gha
+          cache-to: type=gha
+          context: ./packages/daimo-contract/src/jumbo
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/daimo-jumbo:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/daimo-jumbo:testnet-${{ env.IMAGE_TAG }}
+          build-args: |
+            NETWORK=testnet
+
+      - if: env.IMAGE_MANIFEST != 'null'
+        name: Add tag to existing image.
+        env:
+          REPO: daimo-jumbo
+        run: |
+          echo "Image exists with GIT_SHA tag, adding tag \"$IMAGE_TAG\" to it."
+          IMAGE_MANIFEST=$(echo $IMAGE_MANIFEST | jq -c -r)
+
+          set +e
+          output=$(aws ecr put-image --repository-name $REPO --image-tag $IMAGE_TAG --image-manifest "$IMAGE_MANIFEST" 2>&1)
+          status=$?
+          set -e
+
+          if [[ $status -ne 0 ]]; then
+            if [[ ! "$output" =~ "ImageAlreadyExistsException" ]]; then
+              echo $output
+              exit $status
+            else
+              echo "Image already tagged with \"$IMAGE_TAG.\""
+            fi
+          fi
+
+      # redeploy both jumbo mainnet and testnet services
+      - name: Deploy to ECS
+        env:
+          MAINNET_CLUSTER: ${{ vars.AWS_ECS_JUMBO_CLUSTER_MAINNET }}
+          MAINNET_SERVICE: ${{ vars.AWS_ECS_JUMBO_SERVICE_MAINNET }}
+          TESTNET_CLUSTER: ${{ vars.AWS_ECS_JUMBO_CLUSTER_TESTNET }}
+          TESTNET_SERVICE: ${{ vars.AWS_ECS_JUMBO_SERVICE_TESTNET }}
+        run: |
+          aws ecs update-service --cluster $MAINNET_CLUSTER  --service $MAINNET_SERVICE --force-new-deployment > /dev/null
+          aws ecs update-service --cluster $TESTNET_CLUSTER --service $TESTNET_SERVICE --force-new-deployment > /dev/null

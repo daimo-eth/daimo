@@ -1,7 +1,5 @@
 FROM indexsupply/shovel:2096
-
-COPY mainnet/config.json ./mainnet-config.json
-COPY testnet/config.json ./testnet-config.json
-
-# must specify which config to use (mainnet or testnet)
-CMD shovel -config ${NETWORK}-config.json -l :$PORT
+ARG NETWORK
+RUN if [ "$NETWORK" != "mainnet" ] && [ "$NETWORK" != "testnet" ]; then echo "NETWORK must be mainnet or testnet" && exit 1; fi
+COPY ${NETWORK}/config.json ./config.json
+CMD shovel -config config.json -l :$PORT
