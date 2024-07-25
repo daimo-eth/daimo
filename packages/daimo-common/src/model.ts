@@ -20,6 +20,7 @@ export enum AddrLabel {
   LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
   Binance = "binance",
+  FastCCTP = "instant cross-chain",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */

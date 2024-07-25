@@ -156,27 +156,27 @@ export class HomeCoinIndexer extends Indexer {
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
   }): TransferClog[] {
-    let relevantTransfers = this.allTransfers.filter(
+    let filtered = this.allTransfers.filter(
       (log) => log.from === addr || log.to === addr
     );
     if (sinceBlockNum) {
-      relevantTransfers = relevantTransfers.filter(
+      filtered = filtered.filter(
         (log) => (log.blockNumber || 0n) >= sinceBlockNum
       );
     }
     if (txHashes !== undefined) {
-      relevantTransfers = relevantTransfers.filter((log) =>
+      filtered = filtered.filter((log) =>
         txHashes.includes(log.transactionHash || "0x")
       );
     }
 
-    const transferOpsIncludingPaymaster = relevantTransfers.map((log) =>
-      this.attachTransferOpProperties(log)
-    );
+    // Add swap /  info
+    const clogs = filtered.map((log) => this.attachTransferOpProperties(log));
 
-    const transferOps = this.attachFeeAmounts(transferOpsIncludingPaymaster);
+    // Filter out ERC20 paymaster transfers, attach as fees to other transfers
+    const clogsWithFees = this.attachFeeAmounts(clogs);
 
-    return transferOps;
+    return clogsWithFees;
   }
 
   /* Populates atomic properties of logs to convert it to an Op Event.
@@ -256,6 +256,8 @@ export class HomeCoinIndexer extends Indexer {
     //   : correspondingForeignSend?.to;
 
     // Base clog info (same for all TransferClog types).
+    const fromAddr = getAddress(from);
+
     const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
@@ -264,7 +266,13 @@ export class HomeCoinIndexer extends Indexer {
       ),
 
       amount: Number(value),
-      from: getAddress(correspondingForeignReceive?.from || from),
+
+      // TODO: replace this with a cleaner coalescing strategy.
+      // Fixes https://github.com/daimo-eth/daimo/issues/1233
+      from:
+        fromAddr === chainConfig.pimlicoPaymasterAddress
+          ? fromAddr
+          : correspondingForeignReceive?.from || fromAddr,
       to: getAddress(to),
 
       blockNumber: Number(blockNumber),
@@ -308,7 +316,8 @@ export class HomeCoinIndexer extends Indexer {
     return opEvent;
   }
 
-  /* Attach fee amounts to transfer ops and filter out transfers involving
+  /**
+   * Attach fee amounts to transfer ops and filter out transfers involving
    * paymaster.
    * TODO: unit test this function
    */
@@ -316,15 +325,16 @@ export class HomeCoinIndexer extends Indexer {
     transferOpsIncludingPaymaster: TransferClog[]
   ): TransferClog[] {
     // Map of opHash to fee amount paid to paymaster address
+    const paymasterAddr = chainConfig.pimlicoPaymasterAddress;
     const opHashToFee = new Map<Hex, number>();
     for (const op of transferOpsIncludingPaymaster) {
       if (op.opHash === undefined) continue;
 
       const prevFee = opHashToFee.get(op.opHash) || 0;
 
-      if (op.to === chainConfig.pimlicoPaymasterAddress) {
+      if (op.to === paymasterAddr) {
         opHashToFee.set(op.opHash, prevFee + op.amount);
-      } else if (op.from === chainConfig.pimlicoPaymasterAddress) {
+      } else if (op.from === paymasterAddr) {
         // Account for fee refund
         opHashToFee.set(op.opHash, prevFee - op.amount);
       }
@@ -333,9 +343,7 @@ export class HomeCoinIndexer extends Indexer {
     const transferOps = transferOpsIncludingPaymaster
       .filter(
         // Remove paymaster logs
-        (op) =>
-          op.from !== chainConfig.pimlicoPaymasterAddress &&
-          op.to !== chainConfig.pimlicoPaymasterAddress
+        (op) => op.from !== paymasterAddr && op.to !== paymasterAddr
       )
       .map((op) => {
         // Attach fee amounts to other transfers

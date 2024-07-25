@@ -11,7 +11,11 @@ import {
   validateName,
   retryBackoff,
 } from "@daimo/common";
-import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
+import {
+  daimoFastCctpAddress,
+  nameRegistryProxyConfig,
+  teamDaimoFaucetAddr,
+} from "@daimo/contract";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
 import {
@@ -62,6 +66,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0xb4CB800910B228ED3d0834cF79D697127BBB00e5": AddrLabel.UniswapETHPool,
   // Known Binance addresses on Base
   "0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A": AddrLabel.Binance,
+  // FastCCTP address on all chains
+  "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838": AddrLabel.FastCCTP,
 };
 
 // Validate that current addresses are correctly recorded.
@@ -73,6 +79,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   assertEqual(s[chainConfig.notesV1Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.notesV2Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.uniswapETHPoolAddress], AddrLabel.UniswapETHPool);
+  assertEqual(s[daimoFastCctpAddress], AddrLabel.FastCCTP);
 }
 
 // Represents a Daimo name registration.
@@ -112,13 +119,11 @@ export class NameRegistry extends Indexer {
       `nameRegistry-logs-query-${from}-${to}`,
       () =>
         pg.query(
-          `
-        select block_num, addr, name
-        from names
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-      `,
+          `select block_num, addr, name
+          from names
+          where block_num >= $1
+          and block_num <= $2
+          and chain_id = $3`,
           [from, to, chainConfig.chainL2.id]
         )
     );

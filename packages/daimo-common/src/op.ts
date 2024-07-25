@@ -23,7 +23,7 @@ import { BigIntStr } from "./model";
  */
 export type OpEvent = TransferClog | KeyRotationOpEvent;
 
-export type TransferClog = SimpleTransferClog | PaymentLinkClog | SwapClog;
+export type TransferClog = SimpleTransferClog | PaymentLinkClog;
 
 /**
  *  Fetched data for a pending OpEvent. For a pending op, we (usually)
@@ -39,15 +39,15 @@ export type PendingOpEvent = {
 };
 
 /*
- * DEPRECATED in favor of SwapClog.
- *
- * Use SwapClog instead for transfers that involve a swap on the same chain.
+ * Original (non-home-coin) inbound transfer, for an inbound swap.
  */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
 };
+
+// TODO: PostSwapTransfer for sends.
 
 /**
  * Represents a transfer of the same tokens from one address to another on the
@@ -96,6 +96,9 @@ export interface SimpleTransferClog extends OpEventBase {
 
   /** Memo, user-generated text for the transfer */
   memo?: string;
+
+  /** Swap info, if this transfer was a swap */
+  preSwapTransfer?: PreSwapTransfer;
 }
 
 export interface PaymentLinkClog extends OpEventBase {
@@ -124,28 +127,28 @@ export interface PaymentLinkClog extends OpEventBase {
  * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
  * foreign token transfer to Bob).
  */
-export interface SwapClog extends OpEventBase {
-  type: "inboundSwap" | "outboundSwap";
+// export interface SwapClog extends OpEventBase {
+//   type: "inboundSwap" | "outboundSwap";
 
-  from: Address;
-  to: Address;
+//   from: Address;
+//   to: Address;
 
-  /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
-  amount: number; // amount that affects the user
+//   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
+//   amount: number; // amount that affects the user
 
-  /** "Other" coin involved in the swap (i.e. not homeCoin) */
-  coinOther: ForeignToken;
+//   /** "Other" coin involved in the swap (i.e. not homeCoin) */
+//   coinOther: ForeignToken;
 
-  /** Amount of the coinOther in the swap (in native unit of coinOther)
-   * Uses BigIntStr to avoid number type overflows */
-  amountOther: BigIntStr;
+//   /** Amount of the coinOther in the swap (in native unit of coinOther)
+//    * Uses BigIntStr to avoid number type overflows */
+//   amountOther: BigIntStr;
 
-  /** Userop nonce, if this transfer occurred in a userop */
-  nonceMetadata?: Hex;
+//   /** Userop nonce, if this transfer occurred in a userop */
+//   nonceMetadata?: Hex;
 
-  /** Memo, user-generated text for the transfer */
-  memo?: string;
-}
+//   /** Memo, user-generated text for the transfer */
+//   memo?: string;
+// }
 
 export interface KeyRotationOpEvent extends OpEventBase {
   type: "keyRotation";
@@ -237,21 +240,32 @@ export function getSynthesizedMemo(
 
   if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
-  } else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
-    const otherCoin = op.coinOther;
+  } else if (op.type === "transfer" && op.preSwapTransfer) {
+    const otherCoin = op.preSwapTransfer.coin;
     const readableAmount = getForeignCoinDisplayAmount(
-      op.amountOther,
+      op.preSwapTransfer.amount,
       otherCoin
     );
-
-    if (op.type === "inboundSwap") {
-      return short
-        ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
-        : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
-    } else {
-      return short
-        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
-        : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
-    }
+    return short
+      ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
+      : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
   }
+  // TODO: postSwapTransfer
+  //  else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
+  //   const otherCoin = op.coinOther;
+  //   const readableAmount = getForeignCoinDisplayAmount(
+  //     op.amountOther,
+  //     otherCoin
+  //   );
+
+  //   if (op.type === "inboundSwap") {
+  //     return short
+  //       ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
+  //       : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
+  //   } else {
+  //     return short
+  //       ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+  //       : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
+  //   }
+  // }
 }

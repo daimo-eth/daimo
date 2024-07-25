@@ -263,11 +263,7 @@ export class PushNotifier {
     transferClog: TransferClog
   ): Promise<PushNotification[]> {
     // Only handle simple transfers and swaps
-    if (
-      transferClog.type !== "transfer" &&
-      transferClog.type !== "inboundSwap" &&
-      transferClog.type !== "outboundSwap"
-    ) {
+    if (transferClog.type !== "transfer") {
       return [];
     }
 
@@ -283,25 +279,11 @@ export class PushNotifier {
     const otherAccStr = getAccountName(otherAcc);
 
     const title = (() => {
+      // TODO: special handling for in/outbound swap = pre/postSwapTransfer ?
       // Simple transfer: same coin.
-      if (transferClog.type === "transfer") {
-        return amount < 0
-          ? `Sent $${dollars} to ${otherAccStr}`
-          : `Received $${dollars} from ${otherAccStr}`;
-      }
-      // Outbound or inbound swap: different coins.
-      else {
-        const otherDollars = transferClog.amountOther;
-        if (transferClog.type === "outboundSwap") {
-          return amount > 0
-            ? `Sent $${dollars} to ${otherAccStr}`
-            : `Accepted $${otherDollars} from ${otherAccStr}`;
-        } else {
-          return amount > 0
-            ? `Accepted $${dollars} from ${otherAccStr}`
-            : `Sent $${otherDollars} to ${otherAccStr}`;
-        }
-      }
+      return amount < 0
+        ? `Sent $${dollars} to ${otherAccStr}`
+        : `Received $${dollars} from ${otherAccStr}`;
     })();
 
     const body = (() => {
@@ -327,25 +309,19 @@ export class PushNotifier {
       }
 
       // Inbound swap (receiving end)
-      if (transferClog.type === "inboundSwap") {
-        const readableAmount = getForeignCoinDisplayAmount(
-          transferClog.amountOther,
-          transferClog.coinOther
-        );
-        return `You accepted ${readableAmount} ${transferClog.coinOther.symbol} as $${dollars} ${tokenSymbol}`;
+      if (transferClog.preSwapTransfer) {
+        const { amount, coin } = transferClog.preSwapTransfer;
+        const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+        return `You accepted ${readableAmount} ${coin.symbol} as $${dollars} ${tokenSymbol}`;
       }
-
-      // Outbound swap (sending end)
-      if (transferClog.type === "outboundSwap") {
-        const readableAmount = getForeignCoinDisplayAmount(
-          transferClog.amountOther,
-          transferClog.coinOther
-        );
-        return `You sent ${readableAmount} ${transferClog.coinOther.symbol} to ${otherAccStr}`;
-      }
-
+      // TODO: Outbound swap (sending end)
+      // else if (transferClog.postSwapTransfer) {
+      //   const {amount, coin} = transferClog.postSwapTransfer;
+      //   const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+      //   return `You sent ${readableAmount} ${coin.symbol} to ${otherAccStr}`;
+      // }
       // Simple transfer
-      if (amount < 0) {
+      else if (amount < 0) {
         return `You sent ${dollars} ${tokenSymbol} to ${otherAccStr}`;
       } else {
         return `You received ${dollars} ${tokenSymbol} from ${otherAccStr}`;

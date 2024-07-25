@@ -311,7 +311,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(output.length, 1);
     const push0 = output[0].expoPush;
     assert.deepStrictEqual(push0.to, ["pushTokenBob1", "pushTokenBob2"]);
-    assert.strictEqual(push0.title, "Accepted $1.00 from charlie.eth");
+    assert.strictEqual(push0.title, "Received $1.00 from charlie.eth");
     assert.strictEqual(push0.body, "You accepted 1.11111 FAKE as $1.00 USDC");
   });
 });
@@ -375,13 +375,16 @@ function createNotifierAliceBob() {
         memo: log.transactionHash === "0x43" ? "hello" : undefined,
       };
 
-      // SwapClog (hard-coded txHash)
+      // Inbound swap (hard-coded txHash)
       if (log.transactionHash === "0x44") {
         return {
           ...baseClog,
-          type: "inboundSwap",
-          amountOther: "111111",
-          coinOther: createFakeForeignToken(),
+          type: "transfer",
+          preSwapTransfer: {
+            coin: createFakeForeignToken(),
+            amount: "111111",
+            from: log.from,
+          },
         } as TransferClog;
       } else {
         // SimpleTransferClog
@@ -430,7 +433,7 @@ function createNotifierAliceBob() {
 
     attachTransferOpProperties: (log: Transfer): TransferClog => {
       const op: TransferClog = {
-        type: "inboundSwap",
+        type: "transfer",
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(
           Number(log.blockNumber),
@@ -445,8 +448,11 @@ function createNotifierAliceBob() {
         txHash: log.transactionHash,
         logIndex: log.logIndex,
 
-        amountOther: "1000000" as `${bigint}`,
-        coinOther: createFakeForeignToken(),
+        preSwapTransfer: {
+          coin: createFakeForeignToken(),
+          amount: "1000000" as `${bigint}`,
+          from: log.from,
+        },
       };
       return op;
     },
