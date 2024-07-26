@@ -25,7 +25,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { i18n } from "../../i18n";
+import { getI18NLocale, i18n } from "../../i18n";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
@@ -166,6 +166,7 @@ function ProfileScreenBody({
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const locale = getI18NLocale();
 
   const contact = addLastTransferTimes(account, eAcc);
 
@@ -217,7 +218,7 @@ function ProfileScreenBody({
         <TextBody color={color.gray3}>
           {i18.subtitle.invitedBy()}
           <TextBody color={color.midnight} onPress={onInviterPress}>
-            {getAccountName(inviterEAcc)}
+            {getAccountName(inviterEAcc, locale)}
           </TextBody>
         </TextBody>
       );
@@ -227,7 +228,7 @@ function ProfileScreenBody({
           {i18.subtitle.joined(timeMonth(eAcc.timestamp))}
         </TextBody>
       );
-    else if (getAccountName(eAcc) !== getAddressContraction(eAcc.addr))
+    else if (getAccountName(eAcc, locale) !== getAddressContraction(eAcc.addr))
       return (
         <TextBody color={color.gray3}>
           {getAddressContraction(eAcc.addr)}
@@ -245,7 +246,7 @@ function ProfileScreenBody({
         <View style={styles.mainContent}>
           <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
           <Spacer h={16} />
-          <TextH2>{getAccountName(eAcc)}</TextH2>
+          <TextH2>{getAccountName(eAcc, locale)}</TextH2>
           <Spacer h={4} />
           {subtitle}
           <Spacer h={4} />

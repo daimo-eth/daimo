@@ -5,6 +5,7 @@ import { ContactBubble } from "./Bubble";
 import { PendingDot } from "./PendingDot";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextPara } from "./text";
+import { getI18NLocale } from "../../i18n";
 
 export function AccountRow({
   acc,
@@ -21,6 +22,7 @@ export function AccountRow({
   const textLight = pending ? color.gray3 : color.grayMid;
 
   const date = timeString(timestamp);
+  const locale = getI18NLocale();
 
   return (
     <View style={styles.border}>
@@ -37,7 +39,7 @@ export function AccountRow({
               size={36}
               isPending={pending}
             />
-            <TextBody color={textDark}>{getAccountName(acc)}</TextBody>
+            <TextBody color={textDark}>{getAccountName(acc, locale)}</TextBody>
             {pending && <PendingDot />}
           </View>
           <TextPara color={textLight}>{date}</TextPara>
