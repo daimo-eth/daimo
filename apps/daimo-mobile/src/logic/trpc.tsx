@@ -2,24 +2,14 @@ import type { AppRouter } from "@daimo/api";
 import { assert } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  CreateTRPCClientOptions,
-  createTRPCClient,
-  createWSClient,
-  httpBatchLink,
-  splitLink,
-  wsLink,
-} from "@trpc/client";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { nativeApplicationVersion, nativeBuildVersion } from "expo-application";
 import { ReactNode, createContext } from "react";
 import { Platform } from "react-native";
 
 import { getEnvMobile } from "../env";
-import {
-  updateNetworkState,
-  updateNetworkStateOnline,
-} from "../sync/networkState";
+import { updateNetworkStateOnline } from "../sync/networkState";
 
 const apiUrlT =
   getEnvMobile().DAIMO_APP_API_URL_TESTNET || getEnvMobile().DAIMO_APP_API_URL;
@@ -66,106 +56,73 @@ function chooseChain<T>({
   else return testnet;
 }
 
-const customTRPCfetch = async (
-  input: RequestInfo | URL,
-  init?: RequestInit
-) => {
-  const url = (() => {
-    if (input instanceof URL) return input;
-    else if (input instanceof Request) return new URL(input.url);
-    else return new URL(input);
-  })();
+function getOpts(daimoChain: DaimoChain) {
+  return {
+    links: [
+      httpBatchLink({
+        url: chooseChain({
+          daimoChain,
+          mainnet: apiUrlMainnetWithChain,
+          testnet: apiUrlTestnetWithChain,
+        }),
+        fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = (() => {
+            if (input instanceof URL) return input;
+            else if (input instanceof Request) return new URL(input.url);
+            else return new URL(input);
+          })();
 
-  init = init ?? {};
-  init.headers = (init.headers ?? {}) as Record<string, string>;
+          init = init ?? {};
+          init.headers = (init.headers ?? {}) as Record<string, string>;
 
-  const platform = `${Platform.OS} ${Platform.Version}`;
-  const version = `${nativeApplicationVersion} #${nativeBuildVersion}`;
-  init.headers["x-daimo-platform"] = platform;
-  init.headers["x-daimo-version"] = version;
+          const platform = `${Platform.OS} ${Platform.Version}`;
+          const version = `${nativeApplicationVersion} #${nativeBuildVersion}`;
+          init.headers["x-daimo-platform"] = platform;
+          init.headers["x-daimo-version"] = version;
 
-  // Fetch timeout
-  const { pathname } = url;
-  const func = pathname.split("/").slice(-1)[0] as keyof AppRouter;
-  const timeout = (() => {
-    if (func === "deployWallet") return 60_000; // 1 minute
-    else return 10_000; // default: 10 seconds
-  })();
-  console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
-  let promise: Promise<Response> | undefined;
-  const controller = new AbortController();
-  const timeoutID = setTimeout(() => {
-    if (promise == null) return; // Completed
-    console.log(`[TRPC] timed out after ${timeout}ms: ${input}`);
-    controller.abort();
-  }, timeout);
-  init.signal = controller.signal;
+          // Fetch timeout
+          const { pathname } = url;
+          const func = pathname.split("/").slice(-1)[0] as keyof AppRouter;
+          const timeout = (() => {
+            if (func === "deployWallet") return 60_000; // 1 minute
+            else return 10_000; // default: 10 seconds
+          })();
+          console.log(`[TRPC] fetching ${url}, timeout ${timeout}ms`, init);
+          let promise: Promise<Response> | undefined;
+          const controller = new AbortController();
+          const timeoutID = setTimeout(() => {
+            if (promise == null) return; // Completed
+            console.log(`[TRPC] timeout after ${timeout}ms: ${input}`);
+            controller.abort();
+          }, timeout);
+          init.signal = controller.signal;
 
-  // Fetch
-  const startMs = performance.now();
-  promise = fetch(input, init).then((res) => {
-    // When a request succeeds, mark us online immediately.
-    if (res.ok) updateNetworkStateOnline();
-    return res;
-  });
-  const ret = await promise;
-  promise = undefined;
-  clearTimeout(timeoutID);
-
-  // Log
-  const ms = (performance.now() - startMs) | 0;
-  const method = init.method || "GET";
-  console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}ms`);
-
-  return ret;
-};
-
-function getTRPCOpts(
-  daimoChain: DaimoChain
-): CreateTRPCClientOptions<AppRouter> {
-  const url = chooseChain({
-    daimoChain,
-    mainnet: apiUrlMainnetWithChain,
-    testnet: apiUrlTestnetWithChain,
-  });
-
-  const daimoHttpLink = httpBatchLink({ url, fetch: customTRPCfetch });
-  let daimoLink = daimoHttpLink;
-
-  // TRPC client tries to connect to WebSocket on creation which breaks
-  // test environment that expects any resources to be defined explicitly in unit body
-  // or mocked altogether.
-  // Since TRPC client is currently tangled together with top-level code,
-  // we avoid using WebSocket link when running in no-browser environment (like tests.)
-  if (typeof WebSocket !== "undefined") {
-    console.log("[TRPC] WebSocket available, using ws for subscriptions");
-    const daimoWebsocketLink = wsLink({
-      client: createWSClient({
-        url,
-        retryDelayMs: () => 1_000,
-        onClose: () => {
-          console.warn("[TRPC] WebSocket closed");
-          updateNetworkState(() => {
-            return { status: "offline", syncAttemptsFailed: 0 };
+          // Fetch
+          const startMs = performance.now();
+          promise = fetch(input, init).then((res) => {
+            // When a request succeeds, mark us online immediately.
+            if (res.ok) updateNetworkStateOnline();
+            return res;
           });
+          const ret = await promise;
+          promise = undefined;
+          clearTimeout(timeoutID);
+
+          // Log
+          const ms = (performance.now() - startMs) | 0;
+          const method = init.method || "GET";
+          console.log(`[TRPC] ${method} ${func} ${ret.status} in ${ms}ms`);
+
+          return ret;
         },
       }),
-    });
-
-    daimoLink = splitLink({
-      condition: (op) => op.type === "subscription",
-      true: daimoWebsocketLink,
-      false: daimoHttpLink,
-    });
-  } else {
-    console.log("[TRPC] WebSocket not available, using http for subscriptions");
-  }
-
-  return { links: [daimoLink] };
+    ],
+    transformer: undefined,
+  };
 }
 
-const optsMainnet = getTRPCOpts("base");
-const optsTestnet = getTRPCOpts("baseSepolia");
+const optsMainnet = getOpts("base");
+const optsTestnet = getOpts("baseSepolia");
 const rpcHookMainnetClient = rpcHookMainnet.trpc.createClient(optsMainnet);
 const rpcHookTestnetClient = rpcHookTestnet.trpc.createClient(optsTestnet);
 

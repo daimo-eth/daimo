@@ -1,9 +1,9 @@
+import { debugJson, retryBackoff } from "@daimo/common";
 import { Pool } from "pg";
 import { Address, bytesToHex, getAddress } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { TokenRegistry } from "../server/tokenRegistry";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export class SwapClogMatcher {
   /** Map of transactionHash to transfers that are within that transaction */
@@ -34,8 +34,7 @@ export class SwapClogMatcher {
       `swapClogMatcher-logs-query-${from}-${to}`,
       async () => {
         return pg.query(
-          `SELECT * from erc20_transfers WHERE 
-          tx_hash = ANY($1::bytea[]);`,
+          `SELECT * FROM erc20_transfers WHERE tx_hash = ANY($1::bytea[]);`,
           [txHashes]
         );
       }
@@ -65,10 +64,10 @@ export class SwapClogMatcher {
         foreignTransfer,
       ]);
     }
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[SWAP] loaded ${result.rows.length} bundled transfers in ${
-        Date.now() - startTime
-      }ms`
+      `[SWAP] loaded ${result.rows.length} bundled transfers in ${elapsedMs}ms`
     );
   }
 
@@ -79,9 +78,9 @@ export class SwapClogMatcher {
     if (!transfers || transfers.length === 0) return null;
 
     // Get the corresponding transfer to the given logIndex transfer.
-    let currentTransfer = transfers.find((t) => t.from === from);
-    if (!currentTransfer) return null;
-    const startTransfer = currentTransfer;
+    let curTransfer = transfers.find((t) => t.from === from);
+    if (!curTransfer) return null;
+    const startTransfer = curTransfer;
 
     const visited = new Set();
     visited.add(startTransfer.logIndex);
@@ -89,25 +88,22 @@ export class SwapClogMatcher {
     // Follow the chain of transfers to find the end of the cycle.
     while (true) {
       const nextTransfer = transfers.find(
-        (t) => t.from === currentTransfer!.to && !visited.has(t.logIndex)
+        (t) => t.from === curTransfer!.to && !visited.has(t.logIndex)
       );
-
       if (!nextTransfer) break;
 
       visited.add(nextTransfer.logIndex);
-      currentTransfer = nextTransfer;
+      curTransfer = nextTransfer;
     }
 
     // Only create a corresponding swap transfer if the endpoint transfers
     // are different coins.
-    if (currentTransfer.address === startTransfer.address) return null;
+    if (curTransfer.address === startTransfer.address) return null;
 
-    this.correspondingSwapTransfers.set(startTransfer, currentTransfer);
+    this.correspondingSwapTransfers.set(startTransfer, curTransfer);
     console.log(
-      `[SWAP] matched ${JSON.stringify(startTransfer)} to ${JSON.stringify(
-        currentTransfer
-      )}`
+      `[SWAP] matched ${debugJson(startTransfer)} to ${debugJson(curTransfer)}`
     );
-    return currentTransfer;
+    return curTransfer;
   }
 }

@@ -9,17 +9,19 @@ import {
   now,
   AddrLabel,
   decodeRequestIdString,
+  retryBackoff,
 } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface RequestCreatedLog {
   transactionHash: Hex;
@@ -64,17 +66,17 @@ export class RequestIndexer extends Indexer {
     super("REQUEST");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
     const statuses: DaimoRequestV2Status[] = [];
     statuses.push(...(await this.loadCreated(pg, from, to)));
     statuses.push(...(await this.loadCancelled(pg, from, to)));
     statuses.push(...(await this.loadFulfilled(pg, from, to)));
     if (statuses.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[REQUEST] loaded ${statuses.length} statuses in ${
-        Date.now() - startTime
-      }ms`
+      `[REQUEST] loaded ${statuses.length} statuses in ${elapsedMs}ms`
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -135,7 +137,7 @@ export class RequestIndexer extends Indexer {
       try {
         return this.handleRequestCreated(l);
       } catch (e) {
-        console.error(`[REQUEST] Error handling RequestCreated: ${e}`);
+        console.error(`[REQUEST] error handling RequestCreated: ${e}`);
         return null;
       }
     });
@@ -232,7 +234,7 @@ export class RequestIndexer extends Indexer {
       .map((req) => {
         const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestCancelled: ${req.id}`);
+          console.error(`[REQUEST] error handling RequestCancelled: ${req.id}`);
           return null;
         }
         request.status = DaimoRequestState.Cancelled;
@@ -275,7 +277,7 @@ export class RequestIndexer extends Indexer {
       .map(async (req) => {
         const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestFulfilled: ${req.id}`);
+          console.error(`[REQUEST] error handling RequestFulfilled: ${req.id}`);
           return null;
         }
         const fulfilledBy = await this.nameReg.getEAccount(req.fulfiller);

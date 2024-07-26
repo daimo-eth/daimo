@@ -223,7 +223,9 @@ async function grantInvite(kwargs: Map<string, string>): Promise<string> {
 
   await createInviteCode(code, dollars, dollars, maxUses, addr);
 
-  return `Granted ${name} an invite. Bonus: $${dollars}. Max uses: ${maxUses}`;
+  const link = formatDaimoLink({ type: "invite", code });
+
+  return `Granted ${name} invite: ${link}\n\nBonus: $${dollars}. Max uses: ${maxUses}`;
 }
 
 async function createInvite(kwargs: Map<string, string>): Promise<string> {

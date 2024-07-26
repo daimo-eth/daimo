@@ -68,23 +68,25 @@ interface StoredV15ForeignCoin {
 
 export function migrateV15Clog(clog: StoredV15Clog): StoredV16Clog {
   if (clog.type === "transfer" && clog.preSwapTransfer) {
-    const { coin } = clog.preSwapTransfer;
+    // if preSwapTransfer is present for V15, the clog is an inbound swap.s
+    const { coin, amount, from } = clog.preSwapTransfer;
     const tokenAddress = coin.address || coin.token;
     if (tokenAddress == null) {
-      return { ...clog };
+      return { ...clog, preSwapTransfer: undefined };
     }
-    // if preSwapTransfer is present for V15, the clog is an inbound swapClog.
     return {
       ...clog,
-      type: "inboundSwap",
-      amountOther: clog.preSwapTransfer.amount,
-      coinOther: {
-        token: tokenAddress,
-        chainId: coin.chainId,
-        decimals: coin.decimals,
-        name: coin.name,
-        symbol: coin.symbol,
-        logoURI: coin.logoURI,
+      preSwapTransfer: {
+        coin: {
+          chainId: coin.chainId,
+          decimals: coin.decimals,
+          name: coin.name,
+          symbol: coin.symbol,
+          logoURI: coin.logoURI,
+          token: tokenAddress,
+        },
+        amount,
+        from,
       },
     };
   } else {

@@ -37,7 +37,7 @@ import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
 import { getSwapQuote } from "../api/getSwapRoute";
-import { healthDebug } from "../api/healthCheck";
+import { healthCheck, healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -185,14 +185,13 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async () => {
-      // See readyMiddleware for ready check
-      return { status: "healthy" };
+      const ret = await healthCheck(db, watcher, startTimeS);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     healthDebug: publicProcedure.query(async () => {
-      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
-      console.log(`[API] health check: ${ret.status}`);
-      return ret;
+      return await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
     }),
 
     search: publicProcedure
@@ -215,7 +214,7 @@ export function createRouter(
         z.object({
           amountIn: zBigIntStr,
           fromToken: zAddress,
-          fromAccount: zEAccount,
+          fromAccount: zEAccount, // TODO: zAddress
           toToken: zAddress,
           toAddr: zAddress,
           chainId: z.number(),
@@ -366,7 +365,7 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          await watcher.getShovelLatest()
+          watcher.latestBlock().number
         );
       }),
 
@@ -774,14 +773,12 @@ export function createRouter(
           // on new block, push state only when new transfers are available
           const onNewBlock = async (payload: string) => {
             const { block_number } = JSON.parse(payload);
-
             pushHistory(block_number, true);
           };
 
           // for interval updates push full history
           const intervalTimer = setInterval(async () => {
-            const blockNumber = await watcher.getShovelLatest();
-
+            const blockNumber = watcher.latestBlock().number;
             pushHistory(blockNumber);
           }, refreshInterval);
 

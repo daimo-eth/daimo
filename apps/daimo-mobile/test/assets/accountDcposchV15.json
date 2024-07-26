@@ -243,8 +243,8 @@
   "recommendedExchanges": [
     {
       "title": "Transfer from another chain",
-      "cta": "Bridge USDC from any wallet",
-      "url": "https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=0x4D350d99364634e07B01a9986662787DD3755F0A",
+      "cta": "Bridge coins from any wallet",
+      "url": "https://www.relay.link/app/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=0x4D350d99364634e07B01a9986662787DD3755F0A",
       "logo": "https://daimo.com/assets/deposit/ethereum.png",
       "sortId": 0
     },

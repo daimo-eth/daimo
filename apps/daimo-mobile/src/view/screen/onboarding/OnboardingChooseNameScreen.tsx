@@ -184,7 +184,7 @@ function NamePicker({
       <InputBig
         placeholder={i18.picker.title()}
         value={name}
-        onChange={onChange}
+        onChange={(input) => onChange(input.toLowerCase())}
         center
         autoFocus
       />

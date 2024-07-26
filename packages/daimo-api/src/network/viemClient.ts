@@ -234,7 +234,7 @@ export class ViemClient {
     await this.lockNonce.acquireAsync();
 
     try {
-      const elapsedMs = () => Math.round(performance.now() - startMs);
+      const elapsedMs = () => (performance.now() - startMs) | 0;
       console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: got lock`);
       await this.updateNonce();
       console.log(

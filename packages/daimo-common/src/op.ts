@@ -1,12 +1,14 @@
 import { ChainConfig } from "@daimo/contract";
+import { Locale } from "expo-localization";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
 import { ForeignToken, getForeignCoinDisplayAmount } from "./foreignToken";
+import { i18n } from "./i18n";
 import { BigIntStr } from "./model";
 
 /**
- * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
+ * An Clog is an onchain event affecting a Daimo account. Each Clog
  * corresponds to an Ethereum event log. Usually--but not always--it is also
  * 1:1 with a Daimo userop.
  *
@@ -21,32 +23,32 @@ import { BigIntStr } from "./model";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferClog | KeyRotationOpEvent;
+export type Clog = TransferClog | KeyRotationClog;
 
-export type TransferClog = SimpleTransferClog | PaymentLinkClog | SwapClog;
+export type TransferClog = TransferSwapClog | PaymentLinkClog;
 
 /**
- *  Fetched data for a pending OpEvent. For a pending op, we (usually)
- *  only know either the opHash or the txHash. Set only one of them in this
- *  type to uniquely identify a pending user action.
- *  Additionally include data that the API may have pre-fetched for the now
- *  authenticated user.
+ * Fetched data for a pending userop or sponsored transaction. Set exactly one
+ * of (opHash, txHash) to uniquely identify a pending user action.
  */
-export type PendingOpEvent = {
+export type PendingOp = {
   opHash?: Hex;
   txHash?: Hex;
   inviteCode?: string;
 };
 
-/*
- * DEPRECATED in favor of SwapClog.
- *
- * Use SwapClog instead for transfers that involve a swap on the same chain.
- */
+/** Original (non-home-coin) inbound transfer, for an inbound swap. */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
+};
+
+/** Non-home-coin outbound transfer, for an outbound swap. */
+export type PostSwapTransfer = {
+  coin: ForeignToken;
+  amount: BigIntStr; // in native unit of the token
+  to: Address;
 };
 
 /**
@@ -79,7 +81,7 @@ export type PreSwapTransfer = {
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface SimpleTransferClog extends OpEventBase {
+export interface TransferSwapClog extends ClogBase {
   type: "transfer";
 
   from: Address;
@@ -96,9 +98,15 @@ export interface SimpleTransferClog extends OpEventBase {
 
   /** Memo, user-generated text for the transfer */
   memo?: string;
+
+  /** Original amount before swap to home coin */
+  preSwapTransfer?: PreSwapTransfer;
+
+  /** Output amount after swap from home coin */
+  postSwapTransfer?: PostSwapTransfer;
 }
 
-export interface PaymentLinkClog extends OpEventBase {
+export interface PaymentLinkClog extends ClogBase {
   type: "createLink" | "claimLink";
 
   from: Address;
@@ -124,37 +132,37 @@ export interface PaymentLinkClog extends OpEventBase {
  * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
  * foreign token transfer to Bob).
  */
-export interface SwapClog extends OpEventBase {
-  type: "inboundSwap" | "outboundSwap";
+// export interface SwapClog extends ClogBase {
+//   type: "inboundSwap" | "outboundSwap";
 
-  from: Address;
-  to: Address;
+//   from: Address;
+//   to: Address;
 
-  /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
-  amount: number; // amount that affects the user
+//   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
+//   amount: number; // amount that affects the user
 
-  /** "Other" coin involved in the swap (i.e. not homeCoin) */
-  coinOther: ForeignToken;
+//   /** "Other" coin involved in the swap (i.e. not homeCoin) */
+//   coinOther: ForeignToken;
 
-  /** Amount of the coinOther in the swap (in native unit of coinOther)
-   * Uses BigIntStr to avoid number type overflows */
-  amountOther: BigIntStr;
+//   /** Amount of the coinOther in the swap (in native unit of coinOther)
+//    * Uses BigIntStr to avoid number type overflows */
+//   amountOther: BigIntStr;
 
-  /** Userop nonce, if this transfer occurred in a userop */
-  nonceMetadata?: Hex;
+//   /** Userop nonce, if this transfer occurred in a userop */
+//   nonceMetadata?: Hex;
 
-  /** Memo, user-generated text for the transfer */
-  memo?: string;
-}
+//   /** Memo, user-generated text for the transfer */
+//   memo?: string;
+// }
 
-export interface KeyRotationOpEvent extends OpEventBase {
+export interface KeyRotationClog extends ClogBase {
   type: "keyRotation";
 
   slot: number;
   rotationType: "add" | "remove";
 }
 
-interface OpEventBase {
+interface ClogBase {
   /** Unix seconds. When pending, bundler accept time. Otherwise, block time. */
   timestamp: number;
 
@@ -203,7 +211,9 @@ export type DaimoAccountCall = {
 // If the op claims a payment link, from = sender, to = claimer.
 export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   if (op.type === "transfer") {
-    return [op.from, op.to];
+    const from = op.preSwapTransfer?.from || op.from;
+    const to = op.postSwapTransfer?.to || op.to;
+    return [from, to];
   } else if (op.type === "claimLink" || op.type === "createLink") {
     // Self-transfer via payment link shows up as two payment link transfers
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
@@ -227,9 +237,12 @@ export function getDisplayFromTo(op: TransferClog): [Address, Address] {
 export function getSynthesizedMemo(
   op: TransferClog,
   chainConfig: ChainConfig,
+  locale?: Locale,
   short?: boolean
 ) {
-  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  const i18 = i18n(locale).op;
+  // TODO: use home coin from account
+  const homeCoinSymbol = chainConfig.tokenSymbol.toUpperCase();
 
   if (op.memo) return op.memo;
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
@@ -237,21 +250,36 @@ export function getSynthesizedMemo(
 
   if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
-  } else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
-    const otherCoin = op.coinOther;
-    const readableAmount = getForeignCoinDisplayAmount(
-      op.amountOther,
-      otherCoin
-    );
-
-    if (op.type === "inboundSwap") {
-      return short
-        ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
-        : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
-    } else {
-      return short
-        ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
-        : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
-    }
+  } else if (op.type === "transfer" && op.preSwapTransfer) {
+    const { amount, coin } = op.preSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+    return short
+      ? `${readableAmount} ${coin.symbol} → ${homeCoinSymbol}`
+      : i18.acceptedInboundSwap(readableAmount, coin.symbol, homeCoinSymbol);
+  } else if (op.type === "transfer" && op.postSwapTransfer) {
+    const { amount, coin } = op.postSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+    return short
+      ? `${homeCoinSymbol} → ${readableAmount} ${coin.symbol}`
+      : i18.sentOutboundSwap(readableAmount, coin.symbol);
   }
+
+  // TODO: postSwapTransfer
+  //  else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
+  //   const otherCoin = op.coinOther;
+  //   const readableAmount = getForeignCoinDisplayAmount(
+  //     op.amountOther,
+  //     otherCoin
+  //   );
+
+  //   if (op.type === "inboundSwap") {
+  //     return short
+  //       ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
+  //       : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
+  //   } else {
+  //     return short
+  //       ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+  //       : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
+  //   }
+  // }
 }

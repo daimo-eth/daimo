@@ -7,7 +7,7 @@ import {
   DaimoRequestV2Status,
   EAccount,
   KeyData,
-  KeyRotationOpEvent,
+  KeyRotationClog,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
@@ -73,7 +73,7 @@ export type Account = {
   /** P-256 keys authorised by the Daimo account, in DER format */
   accountKeys: KeyData[];
   /** Pending changes to authorised keys  */
-  pendingKeyRotation: KeyRotationOpEvent[];
+  pendingKeyRotation: KeyRotationClog[];
 
   /** Current gas and paymaster related constants */
   chainGasConstants: ChainGasConstants;

@@ -73,6 +73,14 @@ export interface PaymentMemo {
   ophash_hex: string;
 }
 
+export interface PushNotification {
+  address: string;
+  created_at: Timestamp;
+  id: Generated<number>;
+  push_json: string;
+  push_key: string;
+}
+
 export interface Pushtoken {
   address: string;
   pushtoken: string;
@@ -114,6 +122,7 @@ export interface DB {
   offchain_action: OffchainAction;
   paymaster_whitelist: PaymasterWhitelist;
   payment_memo: PaymentMemo;
+  push_notification: PushNotification;
   pushtoken: Pushtoken;
   tag_redirect: TagRedirect;
   tag_redirect_history: TagRedirectHistory;

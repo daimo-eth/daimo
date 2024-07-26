@@ -1,4 +1,4 @@
-import { PendingOpEvent, UserOpHex } from "@daimo/common";
+import { PendingOp, UserOpHex } from "@daimo/common";
 import { Hex } from "viem";
 
 // Message signature, along with key slot identifying the signing keypair.
@@ -19,4 +19,4 @@ export type SigningCallback = (msgHex: Hex) => Promise<SigResponse>;
 export type OpSenderCallback = (
   op: UserOpHex,
   memo?: string
-) => Promise<PendingOpEvent>;
+) => Promise<PendingOp>;

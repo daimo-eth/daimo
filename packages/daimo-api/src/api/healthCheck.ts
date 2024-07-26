@@ -9,11 +9,29 @@ const inspector = require("node:inspector/promises");
 const session = new inspector.Session();
 session.connect();
 
+export async function healthCheck(
+  db: DB,
+  watcher: Watcher,
+  startTimeS: number
+) {
+  return healthCheckInner(db, watcher, startTimeS, []);
+}
+
 export async function healthDebug(
   db: DB,
   watcher: Watcher,
   startTimeS: number,
   trpcReqsInFlight: string[]
+) {
+  return healthCheckInner(db, watcher, startTimeS, trpcReqsInFlight, true);
+}
+
+async function healthCheckInner(
+  db: DB,
+  watcher: Watcher,
+  startTimeS: number,
+  trpcReqsInFlight: string[],
+  showDetailedDebug?: boolean
 ) {
   // Additional debug diagnostics
   const nowS = now();
@@ -35,18 +53,25 @@ export async function healthDebug(
     status = "shovel-db-overloaded";
   }
 
-  const nPromises = await countPromises();
-
-  return {
+  let ret = {
     status,
     nowS,
     uptimeS,
     node,
     apiDB,
     indexer,
-    nPromises,
-    trpcReqsInFlight: trpcReqsInFlight.slice(),
   };
+
+  if (showDetailedDebug) {
+    const nPromises = await countPromises();
+    ret = {
+      ...ret,
+      nPromises,
+      trpcReqsInFlight: trpcReqsInFlight.slice(),
+    } as any;
+  }
+
+  return ret;
 }
 
 async function countPromises() {

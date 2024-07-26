@@ -1,12 +1,16 @@
 import {
-  TransferClog,
   OpStatus,
   PaymentLinkClog,
-  SimpleTransferClog,
+  PostSwapTransfer,
+  PreSwapTransfer,
+  TransferClog,
+  assertNotNull,
   guessTimestampFromNum,
-  SwapClog,
+  hexToBuffer,
+  retryBackoff,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
@@ -16,17 +20,19 @@ import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
 import { SwapClogMatcher } from "./SwapClogMatcher";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { retryBackoff } from "../utils/retryBackoff";
 
+/** ERC-20 or native token transfer. See daimo_transfers table. */
 export interface Transfer {
   address: Hex;
   blockNumber: bigint;
   blockHash: Hex;
   transactionHash: Hex;
   transactionIndex: number;
+  /** Backcompat: not actually log index, but rather a sort index. */
   logIndex: number;
   from: Address;
   to: Address;
@@ -56,58 +62,51 @@ export class HomeCoinIndexer extends Indexer {
     return { numTransfers: this.allTransfers.length };
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(
       `homeCoinIndexer-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `
-        select
-          block_num,
-          block_hash,
-          tx_hash,
-          tx_idx,
-          log_idx,
-          log_addr,
-          f as "from",
-          t as "to",
-          v as "value"
-        from transfers
-        where (
-          block_num >= $1
-          and block_num <= $2
-        )
-        and (
-          f in (select addr from "names")
-          or t in (select addr from "names")
-        );
-      `,
-          [from, to]
-        )
+        kdb
+          .selectFrom("daimo_transfers")
+          .select([
+            "block_num",
+            "block_hash",
+            "tx_hash",
+            "tx_idx",
+            "sort_idx",
+            "token",
+            "f",
+            "t",
+            "amount",
+          ])
+          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where((e) => e.between("block_num", "" + from, "" + to))
+          .where("token", "=", hexToBuffer(chainConfig.tokenAddress))
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const logs: Transfer[] = result.rows.map((row) => {
+    const logs: Transfer[] = result.map((row) => {
       return {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: row.tx_idx,
-        logIndex: row.log_idx,
-        address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
-        from: getAddress(bytesToHex(row.from, { size: 20 })),
-        to: getAddress(bytesToHex(row.to, { size: 20 })),
-        value: BigInt(row.value),
+        logIndex: row.sort_idx / 2,
+        address: getAddress(bytesToHex(assertNotNull(row.token), { size: 20 })),
+        from: getAddress(bytesToHex(row.f, { size: 20 })),
+        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        value: BigInt(row.amount),
       };
     });
     if (logs.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${
-        Date.now() - startTime
-      }ms`
+      `[COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );
 
     this.allTransfers = this.allTransfers.concat(logs);
@@ -158,27 +157,27 @@ export class HomeCoinIndexer extends Indexer {
     sinceBlockNum?: bigint;
     txHashes?: Hex[];
   }): TransferClog[] {
-    let relevantTransfers = this.allTransfers.filter(
+    let filtered = this.allTransfers.filter(
       (log) => log.from === addr || log.to === addr
     );
     if (sinceBlockNum) {
-      relevantTransfers = relevantTransfers.filter(
+      filtered = filtered.filter(
         (log) => (log.blockNumber || 0n) >= sinceBlockNum
       );
     }
     if (txHashes !== undefined) {
-      relevantTransfers = relevantTransfers.filter((log) =>
+      filtered = filtered.filter((log) =>
         txHashes.includes(log.transactionHash || "0x")
       );
     }
 
-    const transferOpsIncludingPaymaster = relevantTransfers.map((log) =>
-      this.attachTransferOpProperties(log)
-    );
+    // Add swap /  info
+    const clogs = filtered.map((l) => this.createTransferClog(l, addr));
 
-    const transferOps = this.attachFeeAmounts(transferOpsIncludingPaymaster);
+    // Filter out ERC20 paymaster transfers, attach as fees to other transfers
+    const clogsWithFees = this.attachFeeAmounts(clogs);
 
-    return transferOps;
+    return clogsWithFees;
   }
 
   /* Populates atomic properties of logs to convert it to an Op Event.
@@ -187,7 +186,8 @@ export class HomeCoinIndexer extends Indexer {
    * Coalesced logs can be attributed to a simple transfer (same coin, same
    * chain), swap (different coins, same chain), or payment link.
    */
-  attachTransferOpProperties(log: Transfer): TransferClog {
+  createTransferClog(log: Transfer, accountAddr: Address): TransferClog {
+    // Gather information about this transfer, potentially across multiple logs.
     const {
       blockNumber,
       blockHash,
@@ -204,11 +204,14 @@ export class HomeCoinIndexer extends Indexer {
           numberToHex(userOp.nonce, { size: 32 })
         )?.metadata.toHex()
       : undefined;
+
+    // Sent or claimed a payment link?
     const noteInfo = this.noteIndexer.getNoteStatusbyLogCoordinate(
       transactionHash,
       logIndex - 1
     );
 
+    // Fulfilled a request?
     const requestStatus =
       this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
         transactionHash,
@@ -217,47 +220,49 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // If inbound swap, attach logical origin info to create a swapClog.
+    // If inbound swap, attach original sender + token + amount info.
+    const notSwapAddrs = [chainConfig.pimlicoPaymasterAddress];
+    const notSwap = notSwapAddrs.includes(from) || notSwapAddrs.includes(to);
     const correspondingForeignReceive =
+      to === accountAddr &&
+      !notSwap &&
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
         transactionHash
       );
-    const swapClogInbound = correspondingForeignReceive
-      ? {
-          coinOther: correspondingForeignReceive.foreignToken,
-          amountOther: `${correspondingForeignReceive.value}` as `${bigint}`,
-        }
-      : undefined;
+    const preSwapTransfer: PreSwapTransfer | undefined =
+      correspondingForeignReceive
+        ? {
+            coin: correspondingForeignReceive.foreignToken,
+            from: correspondingForeignReceive.from,
+            amount: `${correspondingForeignReceive.value}` as `${bigint}`,
+          }
+        : undefined;
 
-    // If outbound swap, attach logical outbound info to create a swapClog.
-    // use userop to get the transfer log
+    // If outbound swap, attach final destination info.
     const correspondingForeignSend =
+      from === accountAddr &&
+      !notSwap &&
       this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
-    const swapClogOutbound = correspondingForeignSend
-      ? {
-          coinOther: correspondingForeignSend.foreignToken,
-          amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
-        }
-      : undefined;
+    const postSwapTransfer: PostSwapTransfer | undefined =
+      correspondingForeignSend
+        ? {
+            to: correspondingForeignSend.to,
+            coin: correspondingForeignSend.foreignToken,
+            amount: `${correspondingForeignSend.value}` as `${bigint}`,
+          }
+        : undefined;
 
-    // Foreign receive and foreign send are mutually exclusive.
-    const outboundTo = correspondingForeignReceive
-      ? null
-      : correspondingForeignSend?.to;
-
-    // Base clog info (same for all TransferClog types).
+    // Base clog info (same for all TransferClog types)
     const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
         Number(blockNumber),
         chainConfig.daimoChain
       ),
-
+      from: preSwapTransfer?.from || getAddress(from),
+      to: postSwapTransfer?.to || getAddress(to),
       amount: Number(value),
-      from: getAddress(correspondingForeignReceive?.from || from),
-      to: getAddress(outboundTo || to),
-
       blockNumber: Number(blockNumber),
       blockHash,
       txHash: transactionHash,
@@ -269,26 +274,14 @@ export class HomeCoinIndexer extends Indexer {
     };
 
     const opEvent = (() => {
-      if (!noteInfo) {
-        if (swapClogInbound) {
-          return {
-            type: "inboundSwap",
-            ...partialClog,
-            ...swapClogInbound,
-          } as SwapClog;
-        } else if (swapClogOutbound) {
-          return {
-            type: "outboundSwap",
-            ...partialClog,
-            ...swapClogOutbound,
-          } as SwapClog;
-        } else {
-          return {
-            type: "transfer",
-            ...partialClog,
-            requestStatus,
-          } as SimpleTransferClog;
-        }
+      if (noteInfo == null) {
+        return {
+          type: "transfer",
+          ...partialClog,
+          requestStatus,
+          preSwapTransfer,
+          postSwapTransfer,
+        } as TransferClog;
       }
 
       const [noteStatus, noteEventType] = noteInfo;
@@ -312,7 +305,8 @@ export class HomeCoinIndexer extends Indexer {
     return opEvent;
   }
 
-  /* Attach fee amounts to transfer ops and filter out transfers involving
+  /**
+   * Attach fee amounts to transfer ops and filter out transfers involving
    * paymaster.
    * TODO: unit test this function
    */
@@ -320,15 +314,16 @@ export class HomeCoinIndexer extends Indexer {
     transferOpsIncludingPaymaster: TransferClog[]
   ): TransferClog[] {
     // Map of opHash to fee amount paid to paymaster address
+    const paymasterAddr = chainConfig.pimlicoPaymasterAddress;
     const opHashToFee = new Map<Hex, number>();
     for (const op of transferOpsIncludingPaymaster) {
       if (op.opHash === undefined) continue;
 
       const prevFee = opHashToFee.get(op.opHash) || 0;
 
-      if (op.to === chainConfig.pimlicoPaymasterAddress) {
+      if (op.to === paymasterAddr) {
         opHashToFee.set(op.opHash, prevFee + op.amount);
-      } else if (op.from === chainConfig.pimlicoPaymasterAddress) {
+      } else if (op.from === paymasterAddr) {
         // Account for fee refund
         opHashToFee.set(op.opHash, prevFee - op.amount);
       }
@@ -337,9 +332,7 @@ export class HomeCoinIndexer extends Indexer {
     const transferOps = transferOpsIncludingPaymaster
       .filter(
         // Remove paymaster logs
-        (op) =>
-          op.from !== chainConfig.pimlicoPaymasterAddress &&
-          op.to !== chainConfig.pimlicoPaymasterAddress
+        (op) => op.from !== paymasterAddr && op.to !== paymasterAddr
       )
       .map((op) => {
         // Attach fee amounts to other transfers

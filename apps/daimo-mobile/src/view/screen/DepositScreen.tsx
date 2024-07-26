@@ -23,7 +23,7 @@ import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywher
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
-import { i18n } from "../../i18n";
+import { getI18NLocale, i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
@@ -130,7 +130,9 @@ function LandlineAccountList() {
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             cta={`${acc.bankName} ****${acc.lastFour}`}
-            title={i18.landline.optionRowTitle(timeAgo(accCreatedAtS, nowS))}
+            title={i18.landline.optionRowTitle(
+              timeAgo(accCreatedAtS, getI18NLocale(), nowS)
+            )}
             // The bank logo is fetched as a base64 string for a png
             logo={
               { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo

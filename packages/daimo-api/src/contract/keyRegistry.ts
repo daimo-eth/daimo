@@ -1,10 +1,16 @@
-import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
+import {
+  KeyData,
+  assert,
+  contractFriendlyKeyToDER,
+  retryBackoff,
+} from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface KeyChange {
   change: "added" | "removed";
@@ -35,7 +41,7 @@ export class KeyRegistry extends Indexer {
     this.listeners.push(listener);
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startTime = Date.now();
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
@@ -92,10 +98,10 @@ export class KeyRegistry extends Indexer {
       }
     }
     if (changes.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[KEY-REG] loaded ${changes.length} key changes in ${
-        Date.now() - startTime
-      }ms`
+      `[KEY-REG] loaded ${changes.length} key changes in ${elapsedMs}ms`
     );
 
     this.listeners.forEach((l) => l(changes));

@@ -3,19 +3,22 @@ import {
   DaimoNoteStatus,
   amountToDollars,
   assertNotNull,
+  debugJson,
   getEAccountStr,
   getNoteId,
+  retryBackoff,
 } from "@daimo/common";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { OpIndexer } from "./opIndexer";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { senderIdKey, logCoordinateKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface NoteLog {
   blockNum: number;
@@ -52,12 +55,15 @@ export class NoteIndexer extends Indexer {
     super("NOTE");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     // Load notes contract event logs
     const startMs = Date.now();
     const logs = await this.loadNoteLogs(pg, from, to);
     if (logs.length === 0) return;
-    console.log(`[NOTE] ${Date.now() - startMs}ms: loaded ${logs.length} logs`);
+
+    const elapsedMs = (Date.now() - startMs) | 0;
+    console.log(`[NOTE] ${elapsedMs}ms: loaded ${logs.length} logs`);
+
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
     // Update in-memory note statuses
@@ -127,7 +133,7 @@ export class NoteIndexer extends Indexer {
         if (l.redeemer == null) statuses.push(await this.handleNoteCreated(l));
         else statuses.push(await this.handleNoteRedeemed(l));
       } catch (e) {
-        console.error(`[NOTE] Error handling NoteLog: ${e} ${l}`);
+        console.error(`[NOTE] error handling NoteLog: ${e} ${debugJson(l)}`);
       }
     }
     return statuses;

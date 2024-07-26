@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { getAddress } from "viem";
 
-import { POSItem, PointOfSalePage } from "./PointOfSalePage";
+import { PointOfSalePage } from "./PointOfSalePage";
 import { RpcHookProvider } from "../../utils/rpcHook";
 
 export async function generateMetadata(): Promise<Metadata> {

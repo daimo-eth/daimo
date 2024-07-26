@@ -19,7 +19,11 @@ import {
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
+<<<<<<< HEAD
 import { i18n } from "../../../i18n";
+=======
+import { getI18NLocale, i18n } from "../../../i18n";
+>>>>>>> klee/i18n
 import { DaimoContact } from "../../../logic/daimoContacts";
 import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
@@ -56,7 +60,7 @@ export function RequestNotificationRow({
       ? notif.request.recipient
       : notif.request.expectedFulfiller || requestLinkContact;
 
-  const ts = timeAgo(notif.timestamp, now(), true);
+  const ts = timeAgo(notif.timestamp, getI18NLocale(), now(), true);
   const dispatcher = useContext(DispatcherContext);
 
   const onPress =

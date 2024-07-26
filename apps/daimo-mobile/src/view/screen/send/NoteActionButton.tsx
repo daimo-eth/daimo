@@ -2,7 +2,7 @@ import {
   AddrLabel,
   DaimoLink,
   DaimoNoteState,
-  OpEvent,
+  Clog,
   OpStatus,
   assertNotNull,
   dollarsToAmount,
@@ -116,7 +116,7 @@ function NoteActionButtonInner({
         memo,
       },
     },
-    accountTransform: (account: Account, pendingOp: OpEvent) => {
+    accountTransform: (account: Account, pendingOp: Clog) => {
       const notesAcc = { addr: notesV2Addr, label: AddrLabel.PaymentLink };
       return {
         ...transferAccountTransform([notesAcc])(account, pendingOp),

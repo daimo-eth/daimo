@@ -1,5 +1,4 @@
 import {
-  BigIntStr,
   EAccount,
   ForeignToken,
   OpStatus,
@@ -103,17 +102,19 @@ export function SendTransferButton({
         memo
       );
     },
-    pendingOp: isSwap
-      ? {
-          type: "outboundSwap",
-          ...pendingOpBase,
-          coinOther: toCoin,
-          amountOther: `${route.toAmount}` as BigIntStr,
-        }
-      : {
-          type: "transfer",
-          ...pendingOpBase,
-        },
+    pendingOp: { type: "transfer", ...pendingOpBase },
+    // TODO: outbound swap, postSwapTransfer
+    // pendingOp: isSwap
+    //   ? {
+    //       type: "outboundSwap",
+    //       ...pendingOpBase,
+    //       coinOther: toCoin,
+    //       amountOther: `${route.toAmount}` as BigIntStr,
+    //     }
+    //   : {
+    //       type: "transfer",
+    //       ...pendingOpBase,
+    //     },
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),

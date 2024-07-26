@@ -25,6 +25,44 @@ export type Numeric = ColumnType<string, number | string, number | string>;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Blocks {
+  block_hash: Buffer;
+  block_num: Int8;
+  block_ts: Int8;
+  chain_id: number;
+}
+
+export interface DaimoOps {
+  block_hash: Buffer;
+  block_num: Int8;
+  block_ts: Int8;
+  chain_id: number;
+  log_idx: number;
+  op_actual_gas_cost: Numeric;
+  op_actual_gas_used: Numeric;
+  op_hash: Buffer;
+  op_nonce: Numeric;
+  op_paymaster: Buffer;
+  op_sender: Buffer;
+  op_success: boolean;
+  tx_hash: Buffer;
+  tx_idx: number;
+}
+
+export interface DaimoTransfers {
+  amount: Numeric;
+  block_hash: Buffer;
+  block_num: Int8;
+  block_ts: Int8;
+  chain_id: number;
+  f: Buffer;
+  sort_idx: number;
+  t: Buffer;
+  token: Buffer | null;
+  tx_hash: Buffer;
+  tx_idx: number;
+}
+
 export interface Erc20Transfers {
   abi_idx: number | null;
   block_hash: Buffer | null;
@@ -175,92 +213,6 @@ export interface NoteRedeemed {
   tx_idx: Numeric | null;
 }
 
-export interface PublicDeclinedRequests {
-  created_at: Generated<Timestamp | null>;
-  decliner: string;
-  request_id: string;
-}
-
-export interface PublicInvitecode {
-  bonus_cents_invitee: Generated<number>;
-  bonus_cents_inviter: Generated<number>;
-  code: string;
-  created_at: Generated<Timestamp | null>;
-  inviter: Generated<string | null>;
-  max_uses: Generated<number>;
-  use_count: number;
-  zupass_email: string | null;
-}
-
-export interface PublicInviteGraph {
-  created_at: Generated<Timestamp | null>;
-  invitee: string;
-  inviter: string;
-}
-
-export interface PublicLinkedAccount {
-  account_json: string | null;
-  address: string;
-  created_at: Generated<Timestamp | null>;
-  linked_id: string | null;
-  linked_type: string;
-}
-
-export interface PublicNameBlacklist {
-  name: string;
-}
-
-export interface PublicOffchainAction {
-  action_json: string;
-  address: string | null;
-  created_at: Generated<Timestamp | null>;
-  id: Generated<number>;
-  signature_hex: string;
-  time: Int8;
-  type: string;
-}
-
-export interface PublicPaymasterWhitelist {
-  name: string;
-}
-
-export interface PublicPaymentMemo {
-  created_at: Generated<Timestamp | null>;
-  memo: string;
-  ophash_hex: string;
-}
-
-export interface PublicPushtoken {
-  address: string;
-  pushtoken: string;
-}
-
-export interface PublicTagRedirect {
-  link: string;
-  tag: string;
-  update_token: Generated<string | null>;
-}
-
-export interface PublicTagRedirectHistory {
-  id: Generated<number>;
-  link: string;
-  tag: string;
-  time: Generated<Timestamp>;
-  update_token: Generated<string | null>;
-}
-
-export interface PublicUsedFaucetAttestations {
-  attestation: string;
-  created_at: Generated<Timestamp | null>;
-}
-
-export interface PublicWaitlist {
-  created_at: Generated<Timestamp | null>;
-  email: string;
-  name: string;
-  socials: string;
-}
-
 export interface RequestCancelled {
   abi_idx: number | null;
   block_hash: Buffer | null;
@@ -341,6 +293,10 @@ export interface TaskUpdates {
   stop: Numeric | null;
 }
 
+export interface TmpDel {
+  max_blk: Int8;
+}
+
 export interface Transfers {
   abi_idx: number | null;
   block_hash: Buffer | null;
@@ -358,6 +314,9 @@ export interface Transfers {
 }
 
 export interface DB {
+  blocks: Blocks;
+  daimo_ops: DaimoOps;
+  daimo_transfers: DaimoTransfers;
   erc20_transfers: Erc20Transfers;
   erc4337_user_op: Erc4337UserOp;
   eth_transfers: EthTransfers;
@@ -369,24 +328,12 @@ export interface DB {
   names: Names;
   note_created: NoteCreated;
   note_redeemed: NoteRedeemed;
-  "public.declined_requests": PublicDeclinedRequests;
-  "public.invite_graph": PublicInviteGraph;
-  "public.invitecode": PublicInvitecode;
-  "public.linked_account": PublicLinkedAccount;
-  "public.name_blacklist": PublicNameBlacklist;
-  "public.offchain_action": PublicOffchainAction;
-  "public.paymaster_whitelist": PublicPaymasterWhitelist;
-  "public.payment_memo": PublicPaymentMemo;
-  "public.pushtoken": PublicPushtoken;
-  "public.tag_redirect": PublicTagRedirect;
-  "public.tag_redirect_history": PublicTagRedirectHistory;
-  "public.used_faucet_attestations": PublicUsedFaucetAttestations;
-  "public.waitlist": PublicWaitlist;
   request_cancelled: RequestCancelled;
   request_created: RequestCreated;
   request_fulfilled: RequestFulfilled;
   source_updates: SourceUpdates;
   sources: Sources;
   task_updates: TaskUpdates;
+  tmp_del: TmpDel;
   transfers: Transfers;
 }

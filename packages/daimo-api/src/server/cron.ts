@@ -2,6 +2,7 @@ import {
   EAccount,
   TransferClog,
   amountToDollars,
+  assert,
   formatDaimoLink,
   getAccountName,
   getForeignCoinDisplayAmount,
@@ -148,8 +149,13 @@ export class Crontab {
 
   private pipeTransfers = (logs: Transfer[]) => {
     for (const transfer of logs) {
-      const opEvent = this.homeCoinIndexer.attachTransferOpProperties(transfer);
-      this.postRecentTransfer(opEvent);
+      const fromName = this.nameRegistry.resolveDaimoNameForAddr(transfer.from);
+      const toName = this.nameRegistry.resolveDaimoNameForAddr(transfer.to);
+      if (fromName == null && toName == null) return;
+
+      const acct = getAddress(fromName == null ? transfer.to : transfer.from);
+      const opEvent = this.homeCoinIndexer.createTransferClog(transfer, acct);
+      this.postRecentTransfer(opEvent, fromName, toName);
     }
   };
 
@@ -159,11 +165,12 @@ export class Crontab {
     }
   };
 
-  async postRecentTransfer(opEvent: TransferClog) {
-    const fromName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.from);
-    const toName = this.nameRegistry.resolveDaimoNameForAddr(opEvent.to);
-
-    if (fromName == null && toName == null) return;
+  async postRecentTransfer(
+    opEvent: TransferClog,
+    fromName?: string,
+    toName?: string
+  ) {
+    assert(fromName != null || toName != null);
 
     const [fromAcc, toAcc] = await Promise.all([
       this.nameRegistry.getEAccount(opEvent.from),

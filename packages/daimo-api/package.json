@@ -12,8 +12,8 @@
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daimo --project daimo-api ./dist && sentry-cli sourcemaps upload --org daimo --project daimo-api ./dist",
-    "codegen:shovel": "kysely-codegen --out-file src/codegen/dbShovel.ts --schema shovel",
-    "codegen:api": "kysely-codegen --out-file src/codegen/dbApi.ts --schema public"
+    "codegen:shovel": "kysely-codegen --include-pattern='shovel.*' --out-file src/codegen/dbShovel.ts --schema shovel",
+    "codegen:api": "kysely-codegen --include-pattern='public.*' --out-file src/codegen/dbApi.ts --schema public"
   },
   "repository": "https://github.com/daimo-eth/daimo.git",
   "dependencies": {

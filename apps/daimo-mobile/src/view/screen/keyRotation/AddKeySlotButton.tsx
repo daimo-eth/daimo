@@ -18,7 +18,11 @@ import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
+<<<<<<< HEAD
 import { i18n } from "../../../i18n";
+=======
+import { getI18NLocale, i18n } from "../../../i18n";
+>>>>>>> klee/i18n
 import { createPasskey } from "../../../logic/passkey";
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
@@ -101,7 +105,7 @@ export function AddKeySlotButton({
   const statusMessage = (function () {
     switch (status) {
       case "idle":
-        return formatFeeAmountOrNull(cost.totalDollars);
+        return formatFeeAmountOrNull(getI18NLocale(), cost.totalDollars);
       case "loading":
         return message;
       case "error":

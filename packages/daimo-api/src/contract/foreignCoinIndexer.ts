@@ -5,8 +5,12 @@ import {
   ProposedSwap,
   SwapQueryResult,
   baseUSDC,
+  debugJson,
   isAmountDust,
+  retryBackoff,
 } from "@daimo/common";
+import { zeroAddr } from "@daimo/contract";
+import { Kysely } from "kysely";
 import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
@@ -14,11 +18,11 @@ import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 // An in/outbound swap coin transfer with swap coin metadata.
 export type ForeignTokenTransfer = Transfer & {
@@ -53,70 +57,47 @@ export class ForeignCoinIndexer extends Indexer {
     super("FOREIGN-COIN");
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
     const startMs = performance.now();
 
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
-      async () => {
-        await Promise.all([
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_erc20_transfers;`),
-          pg.query(`REFRESH MATERIALIZED VIEW filtered_eth_transfers;`),
-        ]);
-        return await pg.query(
-          `
-          SELECT * FROM (
-            SELECT
-              chain_id,
-              block_num,
-              block_hash,
-              tx_idx,
-              tx_hash,
-              log_addr,
-              f,
-              t,
-              v,
-              log_idx as sort_idx
-            FROM filtered_erc20_transfers 
-            WHERE block_num BETWEEN $1 AND $2
-          UNION ALL
-            SELECT
-              chain_id,
-              block_num,
-              block_hash,
-              tx_idx,
-              tx_hash,
-              '\\x0000000000000000000000000000000000000000' AS log_addr,
-              "from" as f,
-              "to" as t,
-              "value" as v,
-              trace_action_idx as sort_idx
-            FROM filtered_eth_transfers et
-            WHERE block_num BETWEEN $1 AND $2
-          )
-          ORDER BY block_num ASC, tx_idx ASC, sort_idx ASC
-          ;`,
-          [from, to]
-        );
-      }
+      async () =>
+        kdb
+          .selectFrom("daimo_transfers")
+          .select([
+            "block_hash",
+            "block_num",
+            "tx_hash",
+            "tx_idx",
+            "sort_idx",
+            "token",
+            "f",
+            "t",
+            "amount",
+          ])
+          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const logs: ForeignTokenTransfer[] = result.rows
-      .map((row) => {
-        return {
-          blockHash: bytesToHex(row.block_hash, { size: 32 }),
-          blockNumber: BigInt(row.block_num),
-          transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-          transactionIndex: row.tx_idx,
-          logIndex: row.log_idx,
-          address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
-          from: getAddress(bytesToHex(row.f, { size: 20 })),
-          to: getAddress(bytesToHex(row.t, { size: 20 })),
-          value: BigInt(row.v),
-        };
-      })
+    const logs: ForeignTokenTransfer[] = result
+      .map((row) => ({
+        blockHash: bytesToHex(row.block_hash, { size: 32 }),
+        blockNumber: BigInt(row.block_num),
+        transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
+        transactionIndex: row.tx_idx,
+        logIndex: row.sort_idx,
+        address:
+          row.token == null
+            ? zeroAddr // ETH / native token transfer
+            : getAddress(bytesToHex(row.token, { size: 20 })), // ERC-20
+        from: getAddress(bytesToHex(row.f, { size: 20 })),
+        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        value: BigInt(row.amount),
+      }))
       .filter((t) => t.address !== chainConfig.tokenAddress) // not home coin
       .filter((t) => this.tokenReg.hasToken(t.address)) // no spam tokens
       .map((t) => ({
@@ -124,7 +105,7 @@ export class ForeignCoinIndexer extends Indexer {
         foreignToken: this.tokenReg.getToken(t.address)!,
       }));
 
-    const elapsedMs = performance.now() - startMs;
+    const elapsedMs = (performance.now() - startMs) | 0;
     console.log(
       `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
     );
@@ -232,9 +213,7 @@ export class ForeignCoinIndexer extends Indexer {
     });
 
     console.log(
-      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(
-        swap
-      )}`
+      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${debugJson(swap)}`
     );
 
     if (!swap) return null;
@@ -245,14 +224,14 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
-    console.log(
-      `[FOREIGN-COIN] getProposedSwaps for ${addr}: ${pendingSwaps.length} pending`
-    );
     const swaps = (
       await Promise.all(
         pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
       )
     ).filter((s): s is ProposedSwap => s != null);
+    console.log(
+      `[FOREIGN-COIN] getProposedSwaps ${addr}: ${pendingSwaps.length} pending, ${swaps.length} proposedSwaps`
+    );
 
     return swaps;
   }

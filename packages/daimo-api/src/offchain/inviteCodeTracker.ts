@@ -2,10 +2,11 @@ import {
   DaimoInviteCodeStatus,
   DaimoLinkInviteCode,
   OpStatus,
-  SimpleTransferClog,
+  TransferSwapClog,
   dollarsToAmount,
   formatDaimoLink,
   now,
+  retryBackoff,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex } from "viem";
@@ -19,7 +20,6 @@ import {
 } from "../db/db";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
-import { retryBackoff } from "../utils/retryBackoff";
 
 /** Invite codes. Used for invite gating the app and referral bonuses. */
 export class InviteCodeTracker {
@@ -36,7 +36,7 @@ export class InviteCodeTracker {
     invitee: Address,
     code: InviteCodeRow,
     deviceAttestationString: Hex
-  ): Promise<SimpleTransferClog | undefined> {
+  ): Promise<TransferSwapClog | undefined> {
     const isFaucetAttestationUsed = await this.db.isFaucetAttestationUsed(
       deviceAttestationString
     );
@@ -53,7 +53,7 @@ export class InviteCodeTracker {
     }
 
     // Try sending bonus
-    let faucetTransfer: SimpleTransferClog | undefined;
+    let faucetTransfer: TransferSwapClog | undefined;
     if (code.bonusDollarsInvitee > 0) {
       console.log(
         `[INVITE] sending faucet to invitee ${invitee} ${code.bonusDollarsInvitee}`
@@ -105,7 +105,7 @@ export class InviteCodeTracker {
     deviceAttestationString: Hex,
     invCode: string,
     maybeSendFaucet: boolean
-  ): Promise<{ isValid: boolean; faucetTransfer?: SimpleTransferClog }> {
+  ): Promise<{ isValid: boolean; faucetTransfer?: TransferSwapClog }> {
     await retryBackoff(`incrementInviteCodeUseCount`, () =>
       this.db.incrementInviteCodeUseCount(invCode)
     );

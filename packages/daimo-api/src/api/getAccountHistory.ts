@@ -58,7 +58,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: TransferClog[]; // TODO: rename to transferClogs
+  transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -133,7 +133,7 @@ export async function getAccountHistory(
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
-  let elapsedMs = performance.now() - startMs;
+  let elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}ms ${transferClogs.length} logs`);
 
   // Get named accounts
@@ -166,7 +166,7 @@ export async function getAccountHistory(
   const invitees = inviteeAddrs
     .map((addr) => nameReg.getDaimoAccount(addr))
     .filter((acc) => acc != null) as EAccount[];
-  elapsedMs = performance.now() - startMs;
+  elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}ms: ${invitees.length} invitees`);
 
   // Get pfps from linked accounts
@@ -177,7 +177,7 @@ export async function getAccountHistory(
 
   // Get proposed swaps of non-home coin tokens for address
   const swaps = await foreignCoinIndexer.getProposedSwapsForAddr(address);
-  elapsedMs = performance.now() - startMs;
+  elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}: ${swaps.length} swaps`);
 
   // Get exchange rates
@@ -226,8 +226,8 @@ export async function getAccountHistory(
   // Suggest an action to the user, like backing up their account
   const suggestedActions = getSuggestedActions(eAcc, ret, ctx);
 
-  elapsedMs = Date.now() - startMs;
-  console.log(`${log}: ${elapsedMs}: done, returning`);
+  elapsedMs = (performance.now() - startMs) | 0;
+  console.log(`${log}: ${elapsedMs}ms: done, returning`);
   return { ...ret, suggestedActions };
 }
 
@@ -316,7 +316,7 @@ function getRampNetworkURL(account: EAccount) {
 }
 
 function getBridgeURL(account: EAccount) {
-  return `https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
+  return `https://www.relay.link/app/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
 }
 
 function getCoinbaseURL(account: EAccount) {
@@ -337,7 +337,7 @@ function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
   return [
     {
       title: "Transfer from another chain",
-      cta: "Bridge USDC from any wallet",
+      cta: "Bridge coins from any wallet",
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
       sortId: 0,

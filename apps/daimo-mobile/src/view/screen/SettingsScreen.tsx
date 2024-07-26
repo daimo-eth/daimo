@@ -20,7 +20,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { i18n, localeToLanguage, stringToLocale, supportedLocales } from "../../i18n";
+import { getI18NLocale, i18n, localeToLanguage } from "../../i18n";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
@@ -128,17 +128,17 @@ function AccountSection({ account }: { account: Account }) {
 function LocaleSelector({ locale }: { locale: Locale }) {
   return (
     <SelectDropdown
-      data={supportedLocales} // TODO: add all locales TODO: get the list from i18n??
+      data={["en"]} // TODO: add all locales
       defaultValue={locale}
-      onSelect={(selectedLocale: String) => {
-        getAccountManager().setLocale(stringToLocale(selectedLocale));
+      onSelect={(selectedLocale: Locale) => {
+        getAccountManager().setLocale(selectedLocale);
       }}
       renderButton={() => (
         <View>
           <DropdownPickButton />
         </View>
       )}
-      renderItem={(l: string) => (
+      renderItem={(l) => (
         <View>
           <LocaleLanguage locale={l} />
         </View>
@@ -357,7 +357,7 @@ function DeviceRow({
   const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
     ? i18.pending()
-    : i18.addedAgo(timeAgo(addAtS, nowS, true));
+    : i18.addedAgo(timeAgo(addAtS, getI18NLocale(), nowS, true));
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (

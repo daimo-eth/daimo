@@ -1,11 +1,17 @@
-import { guessTimestampFromNum, now } from "@daimo/common";
+import {
+  assertNotNull,
+  guessTimestampFromNum,
+  now,
+  retryBackoff,
+} from "@daimo/common";
+import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
 
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { Indexer } from "../contract/indexer";
 import { DBNotifications, DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 function getShovelDBConfig(dbUrl?: string) {
   const dbConfig: ClientConfig = {
@@ -30,11 +36,9 @@ export class Watcher {
   readonly notifications: DBNotifications;
 
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
-  private latest = 5699999;
-  private slowLatest = 5699999;
-  private batchSize = 100000;
+  private latest;
+  private batchSize = 1_000_000;
   private isIndexing = false;
-  private isSlowIndexing = false;
 
   // The latest block present in shovel DB, as of the most recent tick.
   private shovelLatest = 0;
@@ -43,26 +47,28 @@ export class Watcher {
   // The latest successful tick.
   private lastGoodTickS = 0;
 
-  // indexers by dependency layers, indexers[0] are indexed first parallely, indexers[1] second, etc.
+  // indexers by dependency layers.
+  // indexers[0] are indexed first concurrently, indexers[1] second, etc.
   private indexerLayers: Indexer[][] = [];
-  // indexers that are ignored for synchronization, i.e. while they are indexing a old range other
-  // indexers may be ahead of them -- this is all for ETHIndexer which sucks.
-  private slowIndexers: Indexer[] = [];
 
-  private pg: Pool;
+  private readonly pg: Pool;
+  private readonly kdb: Kysely<ShovelDB>;
 
   constructor(private rpcClient: PublicClient, dbUrl?: string) {
     const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
+    this.kdb = new Kysely<ShovelDB>({
+      dialect: new PostgresDialect({ pool: this.pg }),
+    });
     this.notifications = new DBNotifications(dbConfig);
+
+    const { testnet } = assertNotNull(rpcClient.chain);
+    if (testnet) this.latest = 12000000 - 1;
+    else this.latest = 5700000 - 1;
   }
 
   add(...i: Indexer[][]) {
     this.indexerLayers.push(...i);
-  }
-
-  slowAdd(...i: Indexer[]) {
-    this.slowIndexers.push(...i);
   }
 
   latestBlock(): { number: number; timestamp: number } {
@@ -77,7 +83,7 @@ export class Watcher {
     let tS;
     for (let i = 0; i < tries; i++) {
       if (this.latest >= blockNumber) {
-        tS = Date.now() - t0;
+        tS = (Date.now() - t0) | 0;
         console.log(
           `[SHOVEL] waiting for block ${blockNumber}, found after ${tS}ms`
         );
@@ -85,47 +91,14 @@ export class Watcher {
       }
       await new Promise((res) => setTimeout(res, 250));
     }
-    tS = Date.now() - t0;
+    tS = (Date.now() - t0) | 0;
     console.log(
       `[SHOVEL] waiting for block ${blockNumber}, NOT FOUND, still on ${this.latest} after ${tS}ms`
     );
     return false;
   }
 
-  async migrateDB() {
-    console.log(`[SHOVEL] migrateDB: eth_transfers...`);
-    await this.pg.query(`
-      CREATE INDEX IF NOT EXISTS i_eth_from ON eth_transfers("from");
-      CREATE INDEX IF NOT EXISTS i_eth_to ON eth_transfers("to");
-    `);
-
-    console.log(`[SHOVEL] migrateDB: filtered_erc20_transfers...`);
-    await this.pg.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_erc20_transfers AS (
-        SELECT et.*
-        FROM erc20_transfers et
-        JOIN names n ON n.addr = et.f
-        OR n.addr = et.t
-      );
-      CREATE INDEX IF NOT EXISTS i_block_num
-        ON filtered_erc20_transfers (block_num);
-    `);
-
-    console.log(`[SHOVEL] migrateDB: filtered_eth_transfers...`);
-    await this.pg.query(`
-      CREATE MATERIALIZED VIEW IF NOT EXISTS filtered_eth_transfers AS (
-        SELECT et.*
-        FROM eth_transfers et
-        JOIN names n ON n.addr = et.to
-        OR n.addr = et.from
-      );
-      CREATE INDEX IF NOT EXISTS i_filtered_eth_transfers_block_num
-        ON filtered_eth_transfers (block_num);
-    `);
-  }
-
   async init() {
-    await this.migrateDB();
     this.shovelLatest = await this.getShovelLatest();
     await this.catchUpTo(this.shovelLatest);
   }
@@ -147,26 +120,25 @@ export class Watcher {
       }
       this.isIndexing = true;
 
-      this.shovelLatest = await this.getShovelLatest();
-      const localLatest = await this.index(
-        this.latest + 1,
-        this.shovelLatest,
-        this.batchSize
-      );
-      const { shovelLatest } = this;
-      const tickSummary = JSON.stringify({ shovelLatest, localLatest });
-      console.log(`[SHOVEL] starting tick ${tickSummary}`);
-
-      if (localLatest - this.slowLatest > 3) {
-        // for now, only run ethIndexer every 3 blocks, and don't wait for it to catch up
-        this.slowIndex(this.slowLatest + 1, localLatest);
+      // Get tip block number
+      const res = await Promise.all([
+        this.getShovelLatest(),
+        this.rpcClient.getBlockNumber(),
+      ]);
+      this.shovelLatest = res[0];
+      this.rpcLatest = Number(res[1]);
+      if (this.shovelLatest <= this.latest) {
+        console.log(`[SHOVEL] skipping tick, no new blocks`);
+        return;
       }
-      // localLatest <= 0 when there are no new blocks in shovel
-      // or, for whatever reason, we are ahead of shovel.
-      if (localLatest > this.latest) this.latest = localLatest;
 
-      // Finally, check RPC to ensure shovel is up to date
-      this.rpcLatest = Number(await this.rpcClient.getBlockNumber());
+      // New block(s) available. Index them.
+      const { latest, shovelLatest, batchSize } = this;
+      const newLatest = await this.index(latest + 1, shovelLatest, batchSize);
+
+      const tickSummary = JSON.stringify({ shovelLatest, latest, newLatest });
+      console.log(`[SHOVEL] tick success ${tickSummary}`);
+      this.latest = newLatest;
       this.lastGoodTickS = now();
     } catch (e) {
       console.error(`[SHOVEL] tick error`, e);
@@ -180,7 +152,6 @@ export class Watcher {
     while (this.latest < stop) {
       this.latest = await this.index(this.latest + 1, stop, this.batchSize);
     }
-    await this.slowIndex(this.slowLatest + 1, stop); // jumps ethIndexer to the end in one go
     console.log(`[SHOVEL] initialized to ${this.latest}`);
   }
 
@@ -194,23 +165,13 @@ export class Watcher {
     console.log(`[SHOVEL] loading ${start} to ${start + limit}`);
     for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
-        layer.map((i) => i.load(this.pg, start, start + limit))
+        layer.map((i) => i.load(this.pg, this.kdb, start, start + limit))
       );
     }
     console.log(
       `[SHOVEL] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
     );
     return start + limit;
-  }
-
-  private async slowIndex(start: number, stop: number) {
-    if (this.isSlowIndexing) return;
-    this.isSlowIndexing = true;
-    for (const i of this.slowIndexers) {
-      await i.load(this.pg, start, stop);
-    }
-    this.slowLatest = stop;
-    this.isSlowIndexing = false;
   }
 
   async getShovelLatest(): Promise<number> {

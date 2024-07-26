@@ -25,7 +25,11 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
+<<<<<<< HEAD
 import { i18n } from "../../../i18n";
+=======
+import { getI18NLocale, i18n } from "../../../i18n";
+>>>>>>> klee/i18n
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -46,7 +50,7 @@ interface HeaderObject {
   id: string;
   month: string;
 }
-interface displayClogRenderObject {
+interface transferClogRenderObject {
   isHeader: false;
   id: string;
   op: TransferClog;
@@ -94,9 +98,9 @@ export function HistoryListSwipe({
   }
 
   const renderRow = (t: TransferClog) => (
-    <DisplayClogRow
-      key={getdisplayClogId(t)}
-      displayClog={t}
+    <TransferClogRow
+      key={getTransferClogId(t)}
+      transferClog={t}
       account={account}
       {...{ linkTo, showDate }}
     />
@@ -117,7 +121,7 @@ export function HistoryListSwipe({
 
   // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
-  const rows: (displayClogRenderObject | HeaderObject)[] = [];
+  const rows: (transferClogRenderObject | HeaderObject)[] = [];
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
@@ -137,7 +141,7 @@ export function HistoryListSwipe({
     }
     rows.push({
       isHeader: false,
-      id: getdisplayClogId(op),
+      id: getTransferClogId(op),
       op,
     });
   }
@@ -154,14 +158,7 @@ export function HistoryListSwipe({
         if (item.isHeader) {
           return <HeaderRow key={item.month} title={item.month} />;
         }
-        return (
-          <DisplayClogRow
-            displayClog={item.op}
-            account={account}
-            showDate
-            {...{ linkTo }}
-          />
-        );
+        return renderRow(item.op);
       }}
     />
   );
@@ -177,35 +174,35 @@ function HeaderRow({ title }: { title: string }) {
   );
 }
 
-function DisplayClogRow({
-  displayClog,
+function TransferClogRow({
+  transferClog,
   account,
   linkTo,
   showDate,
 }: {
-  displayClog: TransferClog;
+  transferClog: TransferClog;
   account: Account;
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
   const address = account.address;
 
-  assert(displayClog.amount > 0);
-  const [from, to] = getDisplayFromTo(displayClog);
+  assert(transferClog.amount > 0);
+  const [from, to] = getDisplayFromTo(transferClog);
   assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherAddr = from === address ? to : from;
   const otherAcc = getCachedEAccount(otherAddr);
   const amountDelta =
-    from === address ? -displayClog.amount : displayClog.amount;
+    from === address ? -transferClog.amount : transferClog.amount;
 
   const nav = useNav();
   const viewOp = () => {
-    const height = displayClog.type === "createLink" ? 490 : 440;
+    const height = transferClog.type === "createLink" ? 490 : 440;
     setBottomSheetDetailHeight(height);
     (nav as any).navigate("BottomSheetHistoryOp", {
-      op: displayClog,
+      op: transferClog,
       shouldAddInset: false,
     });
   };
@@ -214,24 +211,25 @@ function DisplayClogRow({
     else viewOp();
   };
 
-  const isPending = displayClog.status === OpStatus.pending;
+  const isPending = transferClog.status === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
   let opTitle = getAccountName(otherAcc);
   if (
     opTitle === AddrLabel.PaymentLink &&
-    displayClog.type === "claimLink" &&
-    displayClog.noteStatus.sender.addr === address &&
-    displayClog.noteStatus.claimer?.addr === address
+    transferClog.type === "claimLink" &&
+    transferClog.noteStatus.sender.addr === address &&
+    transferClog.noteStatus.claimer?.addr === address
   ) {
     // Special case: we cancelled our own payment link
     opTitle = i18.op.cancelledLink();
   }
 
   const opMemo = getSynthesizedMemo(
-    displayClog,
+    transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
+    getI18NLocale(),
     true
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
@@ -241,9 +239,9 @@ function DisplayClogRow({
       <TouchableHighlight
         onPress={viewOp}
         {...touchHighlightUnderlay.subtle}
-        style={styles.displayClogRowWrap}
+        style={styles.transferClogRowWrap}
       >
-        <View style={styles.displayClogRow}>
+        <View style={styles.transferClogRow}>
           <View style={styles.transferOtherAccount}>
             <TouchableOpacity
               onPress={viewAccount}
@@ -270,7 +268,7 @@ function DisplayClogRow({
           </View>
           <TransferAmountDate
             amount={amountDelta}
-            timestamp={displayClog.timestamp}
+            timestamp={transferClog.timestamp}
             showDate={showDate}
             {...{ isPending }}
           />
@@ -305,7 +303,7 @@ function TransferAmountDate({
     });
   } else {
     const nowS = now();
-    timeStr = timeAgo(timestamp, nowS);
+    timeStr = timeAgo(timestamp, getI18NLocale(), nowS);
   }
 
   const textCol = isPending ? color.gray3 : color.midnight;
@@ -323,7 +321,7 @@ function TransferAmountDate({
   );
 }
 
-function getdisplayClogId(t: TransferClog): string {
+function getTransferClogId(t: TransferClog): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
@@ -344,10 +342,10 @@ const styles = StyleSheet.create({
     borderColor: color.grayLight,
     backgroundColor: "white",
   },
-  displayClogRowWrap: {
+  transferClogRowWrap: {
     marginHorizontal: -24,
   },
-  displayClogRow: {
+  transferClogRow: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     flexDirection: "row",

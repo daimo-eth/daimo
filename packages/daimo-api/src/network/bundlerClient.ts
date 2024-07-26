@@ -113,9 +113,8 @@ export class BundlerClient {
             "op.log_index": userOp.logIndex,
           });
           span.end();
-          console.log(
-            `[BUNDLER] user op completed in ${Date.now() - opStart}ms`
-          );
+          const elapsedMs = (Date.now() - opStart) | 0;
+          console.log(`[BUNDLER] user op completed in ${elapsedMs}ms`);
         });
       }
 
@@ -157,13 +156,12 @@ export class BundlerClient {
   async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
     const beneficiary = viemClient.account.address;
     try {
-      const { request } = await viemClient.publicClient.simulateContract({
+      const txHash = await viemClient.writeContract({
         abi: entryPointABI,
         address: Constants.ERC4337.EntryPoint as Address,
         functionName: "handleOps",
         args: [[userOpFromHex(op)], beneficiary],
       });
-      const txHash = await viemClient.writeContract(request);
       console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
       return txHash;
     } catch (err) {

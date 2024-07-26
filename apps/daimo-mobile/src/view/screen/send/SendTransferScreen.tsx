@@ -3,6 +3,7 @@ import {
   DaimoRequestStatus,
   DaimoRequestV2Status,
   ForeignToken,
+  ProposedSwap,
   assert,
   assertNotNull,
   baseUSDC,
@@ -296,15 +297,17 @@ function SendConfirm({
   const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
-  const swapRoute = getSwapRoute({
-    fromToken: homeCoin.token,
-    toToken: coin.token,
-    amountIn: numTokens,
-    fromAccount: account,
-    toAddress: recipient.addr,
-    daimoChainId: account!.homeChainId,
-  });
-  const route = homeCoin !== coin ? swapRoute : null;
+  let route = null as ProposedSwap | null;
+  if (homeCoin.token !== coin.token) {
+    route = getSwapRoute({
+      fromToken: homeCoin.token,
+      toToken: coin.token,
+      amountIn: numTokens,
+      fromAccount: account,
+      toAddress: recipient.addr,
+      daimoChainId: account!.homeChainId,
+    });
+  }
 
   let button: ReactNode;
   if (isRequest) {

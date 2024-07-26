@@ -20,6 +20,7 @@ export enum AddrLabel {
   LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
   Binance = "binance",
+  FastCCTP = "instant cross-chain",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */
@@ -108,11 +109,11 @@ export const zPhoneNumber = z.string().regex(phoneNumberRegex);
 
 export type PhoneNumber = z.infer<typeof zPhoneNumber>;
 
-export interface TagRedirectEvent {
+export type TagRedirectEvent = {
   time: number;
   tag: string;
   link: string;
-}
+};
 
 export const zCreateInviteLinkArgs = z.object({
   code: z.string(),
