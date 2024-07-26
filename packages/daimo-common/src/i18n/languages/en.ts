@@ -59,3 +59,6 @@ function displayAddrLabel(type: AddrLabel): string {
       return `unknown`;
   }
 }
+
+// ts-unused-exports:disable-next-line
+export type LanguageDefinition = typeof en;
