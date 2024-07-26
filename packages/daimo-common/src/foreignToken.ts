@@ -25,8 +25,10 @@ export type ForeignToken = {
 export enum TokenLogo {
   ETH = "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
   USDC = "https://assets.coingecko.com/coins/images/6319/large/usdc.png",
-  USDT = "https://assets.coingecko.com/coins/images/325/large/tether.png?1547034089",
-  DAI = "https://assets.coingecko.com/coins/images/9956/large/dai-multi-collateral-mcd.png?1574218774",
+  USDT = "https://assets.coingecko.com/coins/images/325/large/tether.png",
+  DAI = "https://assets.coingecko.com/coins/images/9956/large/dai-multi-collateral-mcd.png",
+  MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
+  AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -34,6 +36,15 @@ export enum TokenLogo {
 //
 // Eth Sepolia
 //
+
+export const ethereumSepoliaWETH: ForeignToken = {
+  chainId: 11155111,
+  token: getAddress("0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9"),
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+};
 
 export const ethereumSepoliaUSDC: ForeignToken = {
   chainId: 11155111,
@@ -47,6 +58,16 @@ export const ethereumSepoliaUSDC: ForeignToken = {
 //
 // Eth Mainnet
 //
+
+export const ethereumWETH: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"),
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+};
+
 export const ethereumUSDC: ForeignToken = {
   chainId: 1,
   token: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
@@ -237,6 +258,15 @@ export const polygonWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const polygonWMATIC: ForeignToken = {
+  chainId: 137,
+  token: getAddress("0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"),
+  decimals: 18,
+  name: "Wrapped Matic",
+  symbol: "WMATIC",
+  logoURI: TokenLogo.MATIC,
+};
+
 //
 // Polygon Amoy
 //
@@ -248,6 +278,15 @@ export const polygonAmoyUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
+};
+
+export const polygonAmoyWMATIC: ForeignToken = {
+  chainId: 80002,
+  token: getAddress("0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9"),
+  decimals: 18,
+  name: "Wrapped Matic",
+  symbol: "WMATIC",
+  logoURI: TokenLogo.MATIC,
 };
 
 //
@@ -272,6 +311,15 @@ export const avalancheWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const avalancheWAVAX: ForeignToken = {
+  chainId: 43114,
+  token: getAddress("0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"),
+  decimals: 18,
+  name: "Wrapped AVAX",
+  symbol: "WAVAX",
+  logoURI: TokenLogo.AVAX,
+};
+
 //
 // Avalanche Fuji
 //
@@ -283,6 +331,15 @@ export const avalancheFujiUSDC: ForeignToken = {
   name: "USD Coin",
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
+};
+
+export const avalancheFujiWAVAX: ForeignToken = {
+  chainId: 43113,
+  token: getAddress("0xd00ae08403B9bbb9124bB305C09058E32C39A48c"),
+  decimals: 18,
+  name: "Wrapped AVAX",
+  symbol: "WAVAX",
+  logoURI: TokenLogo.AVAX,
 };
 
 /* --------------------- Token Utils --------------------- */

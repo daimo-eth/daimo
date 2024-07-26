@@ -179,6 +179,7 @@ export async function createAccount() {
     notesAddressV1: assertNotNull(notesV1AddressMap.get(chainId)),
     notesAddressV2: assertNotNull(notesV2AddressMap.get(chainId)),
     accountAddress: address,
+    accountVersion: "v1",
     accountSigner: signer,
     opSender: sender,
     deadlineSecs: 60,

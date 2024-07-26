@@ -44,7 +44,11 @@ export function LogInFromKeyButton({
   daimoChain: DaimoChain;
   useSecurityKey: boolean;
 }) {
-  const wrappedSigner = getWrappedPasskeySigner(daimoChain, useSecurityKey);
+  const wrappedSigner = getWrappedPasskeySigner(
+    daimoChain,
+    useSecurityKey,
+    account.accountVersion
+  );
 
   const signer = useMemo(() => {
     if (useSecurityKey) {
@@ -81,7 +85,11 @@ export function LogInFromSeedButton({
     if (keySlot == null) return null;
 
     // Mnemonic key is present on the account
-    const wrappedSigner = getWrappedMnemonicSigner(mnemonic, keySlot);
+    const wrappedSigner = getWrappedMnemonicSigner(
+      mnemonic,
+      keySlot,
+      account.accountVersion
+    );
     return {
       type: "mnemonic",
       keySlot,

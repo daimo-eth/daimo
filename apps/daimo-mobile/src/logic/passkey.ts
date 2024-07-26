@@ -1,10 +1,15 @@
 import {
   SlotType,
+  assert,
   getSlotLabel,
   getSlotType,
   parseAndNormalizeSig,
 } from "@daimo/common";
-import { DaimoChain, daimoAccountABI } from "@daimo/contract";
+import {
+  DaimoChain,
+  daimoAccountABI,
+  daimoAccountV2ABI,
+} from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
 import { base64 } from "@scure/base";
@@ -73,7 +78,8 @@ export async function createPasskey(
 // @daimo/userop compatible Signer for Webauthn signatures
 export function getWrappedPasskeySigner(
   daimoChain: DaimoChain,
-  useSecurityKey: boolean
+  useSecurityKey: boolean,
+  accountVersion: "v1" | "v2"
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -97,21 +103,39 @@ export function getWrappedPasskeySigner(
 
     const { r, s } = parseAndNormalizeSig(derSig);
 
-    const signatureStruct = getAbiItem({
-      abi: daimoAccountABI,
-      name: "signatureStruct",
-    }).inputs;
+    let encodedSig: Hex;
 
-    const encodedSig = encodeAbiParameters(signatureStruct, [
-      {
-        authenticatorData: bytesToHex(rawAuthenticatorData),
-        clientDataJSON,
-        challengeLocation,
-        responseTypeLocation,
-        r,
-        s,
-      },
-    ]);
+    if (accountVersion === "v1") {
+      const signatureStruct = getAbiItem({
+        abi: daimoAccountABI,
+        name: "signatureStruct",
+      }).inputs;
+      encodedSig = encodeAbiParameters(signatureStruct, [
+        {
+          authenticatorData: bytesToHex(rawAuthenticatorData),
+          clientDataJSON,
+          challengeLocation,
+          responseTypeLocation,
+          r,
+          s,
+        },
+      ]);
+    } else {
+      assert(accountVersion === "v2");
+      const signatureStruct = getAbiItem({
+        abi: daimoAccountV2ABI,
+        name: "signatureStruct",
+      }).inputs;
+      encodedSig = encodeAbiParameters(signatureStruct, [
+        {
+          keySlot,
+          authenticatorData: bytesToHex(rawAuthenticatorData),
+          clientDataJSON,
+          r,
+          s,
+        },
+      ]);
+    }
 
     return {
       keySlot,

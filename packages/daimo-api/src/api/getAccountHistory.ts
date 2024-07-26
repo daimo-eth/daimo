@@ -25,6 +25,7 @@ import { Address } from "viem";
 import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
+import { AccountFactory } from "../contract/accountFactory";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -58,6 +59,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
+  accountVersion: "v1" | "v2";
   transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
@@ -99,7 +101,7 @@ export async function getAccountHistory(
   paymaster: Paymaster,
   db: DB,
   extApiCache: ExternalApiCache,
-  blockNumber: number
+  accountFactory: AccountFactory
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
@@ -115,6 +117,7 @@ export async function getAccountHistory(
   }
 
   // Get the latest block + current balance.
+  const blockNumber = homeCoinIndexer.status().lastProcessedBlock;
   assert(
     blockNumber >= Number(finBlock.number),
     `Latest block ${blockNumber} < finalized ${finBlock.number}`
@@ -126,7 +129,8 @@ export async function getAccountHistory(
   );
   const lastBalance = homeCoinIndexer.getCurrentBalance(address);
 
-  // TODO: get userops, including reverted ones. Show failed sends.
+  // Get account version
+  const accountVersion = await accountFactory.getAccountVersion(address);
 
   // Get successful transfers since sinceBlockNum
   const transferClogs = homeCoinIndexer.filterTransfers({
@@ -149,8 +153,10 @@ export async function getAccountHistory(
   // Prefetch info required to deposit to your Daimo account.
   const recommendedExchanges = fetchRecommendedExchanges(eAcc);
 
-  // Get linked accounts
+  // Get linked accounts (rich profile)
   const linkedAccounts = profileCache.getLinkedAccounts(address);
+
+  // Get invite tab info
   const inviteLinkStatus = inviteCode
     ? ((await getLinkStatus(
         formatDaimoLink({ type: "invite", code: inviteCode }),
@@ -161,7 +167,6 @@ export async function getAccountHistory(
         db
       )) as DaimoInviteCodeStatus)
     : null;
-
   const inviteeAddrs = inviteGraph.getInvitees(address);
   const invitees = inviteeAddrs
     .map((addr) => nameReg.getDaimoAccount(addr))
@@ -208,6 +213,7 @@ export async function getAccountHistory(
     recommendedExchanges,
     suggestedActions: [],
 
+    accountVersion,
     transferLogs: transferClogs,
     namedAccounts,
     accountKeys,

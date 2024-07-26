@@ -5,7 +5,7 @@ import {
   SlotType,
   signWithMnemonic,
 } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
+import { daimoAccountABI, daimoAccountV2ABI } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { SigningCallback } from "@daimo/userop";
 import { base64urlnopad } from "@scure/base";
@@ -52,7 +52,8 @@ export function createAddDeviceString(pubKey: Hex, slot: SlotType): string {
 // This makes verification easier on-chain.
 function wrapRawSignerAsWebauthn(
   sign: (message: Hex) => Promise<Hex>,
-  keySlot: number
+  keySlot: number,
+  accountVersion: "v1" | "v2"
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -82,20 +83,37 @@ function wrapRawSignerAsWebauthn(
     const challengeLocation = BigInt(clientDataJSON.indexOf('"challenge":'));
     const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
 
-    const signatureStruct = getAbiItem({
-      abi: daimoAccountABI,
-      name: "signatureStruct",
-    }).inputs;
+    let encodedSig: Hex;
 
-    const sigFields = {
-      authenticatorData: bytesToHex(authenticatorData),
-      clientDataJSON,
-      challengeLocation,
-      responseTypeLocation,
-      r,
-      s,
-    };
-    const encodedSig = encodeAbiParameters(signatureStruct, [sigFields]);
+    if (accountVersion === "v1") {
+      const signatureStruct = getAbiItem({
+        abi: daimoAccountABI,
+        name: "signatureStruct",
+      }).inputs;
+      const sigFields = {
+        authenticatorData: bytesToHex(authenticatorData),
+        clientDataJSON,
+        challengeLocation,
+        responseTypeLocation,
+        r,
+        s,
+      };
+      encodedSig = encodeAbiParameters(signatureStruct, [sigFields]);
+    } else {
+      assert(accountVersion === "v2");
+      const signatureStruct = getAbiItem({
+        abi: daimoAccountV2ABI,
+        name: "signatureStruct",
+      }).inputs;
+      const sigFields = {
+        keySlot,
+        authenticatorData: bytesToHex(authenticatorData),
+        clientDataJSON,
+        r,
+        s,
+      };
+      encodedSig = encodeAbiParameters(signatureStruct, [sigFields]);
+    }
 
     return {
       keySlot,
@@ -106,7 +124,8 @@ function wrapRawSignerAsWebauthn(
 
 export function getWrappedDeviceKeySigner(
   enclaveKeyName: string,
-  keySlot: number
+  keySlot: number,
+  accountVersion: "v1" | "v2"
 ): SigningCallback {
   return wrapRawSignerAsWebauthn(
     (message) =>
@@ -115,7 +134,8 @@ export function getWrappedDeviceKeySigner(
         message.slice(2),
         "Authorize transaction"
       ),
-    keySlot
+    keySlot,
+    accountVersion
   );
 }
 
@@ -140,10 +160,12 @@ export async function requestEnclaveSignature(
 
 export function getWrappedMnemonicSigner(
   mnemonic: string,
-  keySlot: number
+  keySlot: number,
+  accountVersion: "v1" | "v2"
 ): SigningCallback {
   return wrapRawSignerAsWebauthn(
     (message) => signWithMnemonic(mnemonic, message),
-    keySlot
+    keySlot,
+    accountVersion
   );
 }

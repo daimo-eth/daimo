@@ -19,7 +19,7 @@ export const SEND_DEADLINE_SECS = 120;
 
 /** Warm the DaimoOpSender cache. */
 export function useWarmDeviceKeySenderCache(account: Account) {
-  const { enclaveKeyName, address } = account;
+  const { enclaveKeyName, address, accountVersion } = account;
   const chainId = account.homeChainId;
   const keySlot = account.accountKeys.find(
     (keyData) => keyData.pubKey === account.enclavePubKey
@@ -31,12 +31,17 @@ export function useWarmDeviceKeySenderCache(account: Account) {
     const signer: DeviceKeySigner = {
       type: "deviceKey",
       keySlot,
-      wrappedSigner: getWrappedDeviceKeySigner(account.enclaveKeyName, keySlot),
+      wrappedSigner: getWrappedDeviceKeySigner(
+        enclaveKeyName,
+        keySlot,
+        accountVersion
+      ),
       account,
     };
 
     loadOpSender({
       address,
+      accountVersion,
       signer,
       chainId,
     });
@@ -50,10 +55,12 @@ const accountCache: Map<
 
 export function loadOpSender({
   address,
+  accountVersion,
   signer,
   chainId,
 }: {
   address: Address;
+  accountVersion: "v1" | "v2";
   signer: Signer;
   chainId: number;
 }) {
@@ -82,6 +89,7 @@ export function loadOpSender({
       notesAddressV1: assertNotNull(notesV1AddressMap.get(chainId)),
       notesAddressV2: assertNotNull(notesV2AddressMap.get(chainId)),
       accountAddress: address,
+      accountVersion,
       accountSigner: signer.wrappedSigner,
       opSender: sender,
       deadlineSecs: SEND_DEADLINE_SECS,

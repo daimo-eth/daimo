@@ -16,13 +16,13 @@ import {
   assert,
   now,
 } from "@daimo/common";
-import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
+import { daimoPaymasterV2Address } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredV16Account } from "./storedAccount";
 import { migrateOldAccount } from "./storedAccountMigrations";
 import { StoredModel } from "./storedModel";
-import { env, getEnvMobile } from "../env";
+import { getEnvMobile } from "../env";
 
 const appVariant = getEnvMobile().DAIMO_APP_VARIANT;
 
@@ -51,6 +51,8 @@ export type Account = {
   name: string;
   /** Contract wallet address */
   address: Address;
+  /** Contract version. */
+  accountVersion: "v1" | "v2";
 
   /** Home chain where we hold our balance */
   homeChainId: number;
@@ -158,6 +160,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     enclavePubKey: a.enclavePubKey,
     name: a.name,
     address: getAddress(a.address),
+    accountVersion: a.accountVersion || "v1",
 
     homeChainId: a.homeChainId,
     homeCoinAddress: getAddress(a.homeCoinAddress),
@@ -206,6 +209,7 @@ export function serializeAccount(account: Account | null): string {
     enclavePubKey: account.enclavePubKey,
     name: account.name,
     address: account.address,
+    accountVersion: account.accountVersion,
 
     homeChainId: account.homeChainId,
     homeCoinAddress: account.homeCoinAddress,
@@ -246,20 +250,24 @@ export function serializeAccount(account: Account | null): string {
   return JSON.stringify(model);
 }
 
-export function createEmptyAccount(
-  inputAccount: {
-    enclaveKeyName: string;
-    enclavePubKey: Hex;
-    name: string;
-    address: Address;
-  },
-  daimoChain: DaimoChain
-): Account {
+/** Describes a local account pre-sync (no balance, history, or profile). */
+export type EmptyAccountInfo = {
+  enclaveKeyName: string;
+  enclavePubKey: Hex;
+  address: Address;
+  name: string;
+  accountVersion: "v1" | "v2";
+  homeChainId: number;
+  homeCoinAddress: Address;
+};
+
+/**
+ * Creates an empty account with just identifying information and a local
+ * signing key. Used for both new and existing accounts (rest filled via sync).
+ */
+export function createEmptyAccount(inputAccount: EmptyAccountInfo): Account {
   return {
     ...inputAccount,
-
-    homeChainId: env(daimoChain).chainConfig.chainL2.id,
-    homeCoinAddress: env(daimoChain).chainConfig.tokenAddress,
 
     lastBalance: BigInt(0),
     lastBlockTimestamp: 0,

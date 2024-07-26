@@ -15,12 +15,16 @@ export async function signAsync({
   console.log(`[SIGN] signing message: ${bytesToString(messageBytes)}`);
 
   // Load account information, including the device key we're using
-  const { enclaveKeyName, enclavePubKey } = account;
+  const { enclaveKeyName, enclavePubKey, accountVersion } = account;
   const key = account.accountKeys.find((k) => k.pubKey === enclavePubKey);
   const keySlot = assertNotNull(key, "Key removed from account.").slot;
 
   // Get a (hardware enclave) signer. No passkey support required, for now.
-  const signer = getWrappedDeviceKeySigner(enclaveKeyName, keySlot);
+  const signer = getWrappedDeviceKeySigner(
+    enclaveKeyName,
+    keySlot,
+    accountVersion
+  );
 
   // Create an EIP-191 message hash
   const hashHex = hashMessage({ raw: messageBytes });

@@ -11,6 +11,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
+import { Address } from "viem";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
 import { getAccountManager } from "../logic/accountManager";
@@ -134,21 +135,25 @@ export async function hydrateAccount(account: Account): Promise<Account> {
 /** Loads all account history since the last finalized block as of the previous sync.
  * This means we're guaranteed to see all events even if there were reorgs. */
 async function fetchSync(
-  account: Account,
+  accountQuery: {
+    lastFinalizedBlock: number;
+    homeChainId: number;
+    address: Address;
+    inviteCode?: string;
+  },
   fromScratch?: boolean
 ): Promise<AccountHistoryResult> {
-  const sinceBlockNum = fromScratch ? 0 : account.lastFinalizedBlock;
+  const sinceBlockNum = fromScratch ? 0 : accountQuery.lastFinalizedBlock;
 
-  const daimoChain = daimoChainFromId(account.homeChainId);
+  const daimoChain = daimoChainFromId(accountQuery.homeChainId);
   const rpcFunc = getRpcFunc(daimoChain);
   const result = await rpcFunc.getAccountHistory.query({
-    address: account.address,
-    inviteCode: account.inviteLinkStatus?.link.code,
+    address: accountQuery.address,
+    inviteCode: accountQuery.inviteCode,
     sinceBlockNum,
   });
   const syncSummary = {
-    address: account.address,
-    name: account.name,
+    address: accountQuery.address,
     sinceBlockNum,
     lastBlock: result.lastBlock,
     lastBlockTimestamp: result.lastBlockTimestamp,
@@ -171,7 +176,7 @@ async function fetchSync(
   console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
   // Validation
-  assert(result.address === account.address, "wrong address");
+  assert(result.address === accountQuery.address, "wrong address");
   assert(result.sinceBlockNum === sinceBlockNum, "wrong sinceBlockNum");
   assert(result.lastBlock >= result.sinceBlockNum, "invalid lastBlock");
   assert(result.lastBlockTimestamp > 0, "invalid lastBlockTimestamp");
@@ -188,7 +193,8 @@ function applySync(
   result: AccountHistoryResult,
   fromScratch: boolean
 ): Account {
-  assert(result.address === account.address);
+  assert(result.address === account.address, "address mismatch");
+  assert(result.accountVersion === account.accountVersion, "version mismatch");
   if (result.lastFinalizedBlock < account.lastFinalizedBlock) {
     console.log(
       `[SYNC] Server has finalized block ${result.lastFinalizedBlock} < local ${account.lastFinalizedBlock}`

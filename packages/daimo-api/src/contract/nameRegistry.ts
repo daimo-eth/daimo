@@ -216,10 +216,30 @@ export class NameRegistry extends Indexer {
     const { addr, name, timestamp } = reg;
     const inviter = this.inviteGraph.getInviter(address);
     const linkedAccounts = this.profileCache.getLinkedAccounts(addr);
+
     // In the future, we can get this image from multiple sources.
     // In that case, we will have to determine the order of preference.
     const profilePicture = this.profileCache.getProfilePicture(addr);
-    return { addr, name, timestamp, inviter, linkedAccounts, profilePicture };
+
+    // TODO: index home coin, home chain, & account version
+    // TODO: handle account replacement (eg ansgar AccountV1 > ansgar V2)
+    const homeChain = chainConfig.chainL2.id;
+    const homeCoin = chainConfig.tokenAddress;
+    // TODO: handle this more robustly by indexing ER1967 Upgraded events.
+    const v2DeployTs = chainConfig.chainL2.testnet ? 1698265121 : 0;
+    const accountVersion = reg.timestamp < v2DeployTs ? "v1" : "v2";
+
+    return {
+      addr,
+      name,
+      homeChain,
+      homeCoin,
+      accountVersion,
+      timestamp,
+      inviter,
+      linkedAccounts,
+      profilePicture,
+    };
   }
 
   /** Gets an Ethereum account, including name, ENS, label if available. */

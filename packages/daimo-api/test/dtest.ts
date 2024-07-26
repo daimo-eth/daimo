@@ -36,7 +36,6 @@ export async function main() {
   );
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
   const coinIndexer = new HomeCoinIndexer(
-    vc,
     opIndexer,
     noteIndexer,
     requestIndexer,

@@ -77,7 +77,8 @@ export function useSendWithDeviceKeyAsync(args: UseSendArgs) {
           keySlot,
           wrappedSigner: getWrappedDeviceKeySigner(
             deviceAccount.enclaveKeyName,
-            keySlot
+            keySlot,
+            deviceAccount.accountVersion
           ),
           account: deviceAccount,
         } as DeviceKeySigner)
@@ -192,7 +193,7 @@ async function sendAsync(
   sendFn: SendOpFn
 ): Promise<PendingOp> {
   try {
-    const { address, homeChainId } = account;
+    const { address, accountVersion, homeChainId } = account;
 
     if (!signer) {
       setAS("error", "Device removed from account");
@@ -202,6 +203,7 @@ async function sendAsync(
     setAS("loading", "Loading account..."); // "account" is shown in the UI, internally it's the op sender.
     const opSender = await loadOpSender({
       address,
+      accountVersion,
       signer,
       chainId: homeChainId,
     });
