@@ -773,11 +773,6 @@ export const es = {
   },
 
   // -------------------------- MISC --------------------------
-  // AddrLabels for account history contacts
-  addrLabel: {
-    label: (type: AddrLabel) => displayAddrLabel(type),
-  },
-
   tabNav: {
     deposit: () => `Depositar`,
     invite: () => `Invitar`,
