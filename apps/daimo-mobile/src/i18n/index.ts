@@ -32,5 +32,15 @@ export function localeToLanguage(locale: String) {
   }
 }
 
+export function stringToLocale(locale: String) {
+  switch (locale) {
+    case "es":
+      return es;
+    case "en":
+    default:
+      return en;
+  }
+}
+
 // list of supported locales
 export const supportedLocales = ["en", "es"];

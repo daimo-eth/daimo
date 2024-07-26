@@ -20,7 +20,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { i18n, localeToLanguage, supportedLocales } from "../../i18n";
+import { i18n, localeToLanguage, stringToLocale, supportedLocales } from "../../i18n";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
@@ -130,8 +130,8 @@ function LocaleSelector({ locale }: { locale: Locale }) {
     <SelectDropdown
       data={supportedLocales} // TODO: add all locales TODO: get the list from i18n??
       defaultValue={locale}
-      onSelect={(selectedLocale: Locale) => {
-        getAccountManager().setLocale(selectedLocale);
+      onSelect={(selectedLocale: String) => {
+        getAccountManager().setLocale(stringToLocale(selectedLocale));
       }}
       renderButton={() => (
         <View>
