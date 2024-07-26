@@ -12,6 +12,7 @@ import { Platform, StyleSheet, TouchableHighlight, View } from "react-native";
 import Spacer from "./Spacer";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextH2, TextH3 } from "./text";
+import { getI18NLocale } from "../../i18n";
 
 /** Displays an EAccount, and lets you copy a Daimo deeplink to it. */
 export function AccountCopyLinkButton({
@@ -23,6 +24,7 @@ export function AccountCopyLinkButton({
   size: "h2" | "h3";
   center?: boolean;
 }) {
+  const locale = getI18NLocale();
   const acctUrl = formatDaimoLink({
     type: "account",
     account: getEAccountStr(eAcc),
@@ -49,7 +51,7 @@ export function AccountCopyLinkButton({
     >
       <Elem>
         {center && <Spacer w={iconSize} />}
-        {getAccountName(eAcc)}
+        {getAccountName(eAcc, locale)}
         <Spacer w={8} />
         <View style={iconStyle}>
           <Octicons

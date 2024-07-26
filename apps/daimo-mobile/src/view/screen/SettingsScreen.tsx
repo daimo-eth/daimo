@@ -5,7 +5,6 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import { Locale } from "expo-localization";
 import React, { useCallback, useContext, useState } from "react";
 import {
   Linking,
@@ -14,14 +13,13 @@ import {
   TouchableHighlight,
   View,
 } from "react-native";
-import SelectDropdown from "react-native-select-dropdown";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { getI18NLocale, i18n, localeToLanguage } from "../../i18n";
-import { getAccountManager, useAccount } from "../../logic/accountManager";
+import { getI18NLocale, i18n } from "../../i18n";
+import { useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
 import { Account, toEAccount } from "../../storage/account";
@@ -34,7 +32,6 @@ import {
   DescriptiveClickableRow,
   TextButton,
 } from "../shared/Button";
-import { DropdownPickButton } from "../shared/DropdownPickButton";
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { Icon } from "../shared/Icon";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
@@ -44,7 +41,6 @@ import Spacer from "../shared/Spacer";
 import { openSupportTG } from "../shared/error";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
-  DaimoText,
   TextBody,
   TextBodyMedium,
   TextColor,
@@ -57,7 +53,6 @@ const i18 = i18n.settings;
 
 export function SettingsScreen() {
   const account = useAccount();
-  const locale = getAccountManager().getLocale();
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -73,8 +68,6 @@ export function SettingsScreen() {
         <AccountSection account={account} />
         <Spacer h={32} />
         <DevicesSection account={account} />
-        <Spacer h={32} />
-        <LocaleSelector locale={locale} />
         <TextButton
           title={
             showDetails
@@ -121,45 +114,6 @@ function AccountSection({ account }: { account: Account }) {
         title={i18.account.viewAccountOnExplorer()}
         onPress={linkToExplorer}
       />
-    </View>
-  );
-}
-
-function LocaleSelector({ locale }: { locale: Locale }) {
-  return (
-    <SelectDropdown
-      data={["en"]} // TODO: add all locales
-      defaultValue={locale}
-      onSelect={(selectedLocale: Locale) => {
-        getAccountManager().setLocale(selectedLocale);
-      }}
-      renderButton={() => (
-        <View>
-          <DropdownPickButton />
-        </View>
-      )}
-      renderItem={(l) => (
-        <View>
-          <LocaleLanguage locale={l} />
-        </View>
-      )}
-    />
-  );
-}
-
-function LocaleLanguage({ locale }: { locale: Locale }) {
-  return (
-    <View
-      style={{
-        borderBottomWidth: 1,
-        borderBottomColor: color.grayLight,
-        paddingHorizontal: 24,
-        paddingVertical: 13,
-        flexDirection: "row",
-        justifyContent: "space-between",
-      }}
-    >
-      <DaimoText variant="dropdown">{localeToLanguage(locale)}</DaimoText>
     </View>
   );
 }

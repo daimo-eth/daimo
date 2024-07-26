@@ -135,6 +135,7 @@ function RequestNotificationMessage({
   otherAcc: EAccount;
   reqStatus: DaimoRequestV2Status;
 }) {
+  const locale = getI18NLocale();
   const otherAccVerb =
     otherAcc.label === AddrLabel.RequestLink
       ? i18.msgVerb.via()
@@ -143,7 +144,9 @@ function RequestNotificationMessage({
       : i18.msgVerb.for();
 
   const otherAccText = (
-    <TextBody color={color.midnight}>{getAccountName(otherAcc)}</TextBody>
+    <TextBody color={color.midnight}>
+      {getAccountName(otherAcc, locale)}
+    </TextBody>
   );
 
   const dollars = (

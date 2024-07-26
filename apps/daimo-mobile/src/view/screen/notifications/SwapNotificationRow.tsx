@@ -28,12 +28,13 @@ export function SwapNotificationRow({
   notif: SwapNotification;
   account: Account;
 }) {
+  const locale = getI18NLocale();
   // should be very rare, but we write this defensively
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 
   const dispatcher = useContext(DispatcherContext);
 
-  const ts = timeAgo(notif.timestamp, getI18NLocale(), now(), true);
+  const ts = timeAgo(notif.timestamp, locale, now(), true);
 
   const coin = notif.swap.fromCoin;
   const width = useWindowDimensions().width;
@@ -47,7 +48,7 @@ export function SwapNotificationRow({
     });
   };
 
-  const accName = getAccountName(notif.swap.fromAcc);
+  const accName = getAccountName(notif.swap.fromAcc, locale);
 
   const readableAmount = getForeignCoinDisplayAmount(
     notif.swap.fromAmount,
