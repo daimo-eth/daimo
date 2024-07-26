@@ -26,7 +26,7 @@ export const es = {
   // ------------ HISTORY ------------
   // HistoryList.tsx
   historyList: {
-    empty: () => `Ninguna transacción aún`,
+    empty: () => `Ninguna transacción`,
     screenHeader: {
       default: () => `Actividad reciente`,
       other: () => `Between you`, // TODO
@@ -488,7 +488,7 @@ export const es = {
     locked: {
       header: () => `Invita tus amigos y gana USDC!`,
       description: () =>
-        `Usa Daimo más para desbloquear invitaciones. Incorpore sus contactos enviando un link de Pago.`,
+        `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando un link de Pago.`,
     },
     sendButton: () => `ENVIAR`,
     referral: {
