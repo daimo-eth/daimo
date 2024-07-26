@@ -22,8 +22,8 @@ export const i18n: I18NTranslation = (function () {
   }
 })();
 
-export function localeToLanguage(locale: Locale) {
-  switch (locale.languageCode) {
+export function localeToLanguage(locale: String) {
+  switch (locale) {
     case "es":
       return "Español";
     case "en":
