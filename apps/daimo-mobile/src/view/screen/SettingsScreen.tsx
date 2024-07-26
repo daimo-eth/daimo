@@ -148,10 +148,6 @@ function LocaleSelector({ locale }: { locale: Locale }) {
 }
 
 function LocaleLanguage({ locale }: { locale: Locale }) {
-
-  // DEBUGGING
-  console.log("The locale is: ", locale);
-
   return (
     <View
       style={{
