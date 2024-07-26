@@ -20,14 +20,12 @@ import {
   daimoChainFromId,
   daimoChainFromStr,
 } from "@daimo/contract";
-import { Locale } from "expo-localization";
 import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
-import { getI18NLocale } from "../i18n";
 import { cacheEAccounts } from "../logic/addr";
 import {
   EnclaveKeyInfo,
@@ -95,11 +93,6 @@ class AccountManager {
    */
   private createAccountHandle: ActHandle | null = null;
 
-  /**
-   * The current locale. Defaults to system locale.
-   */
-  private locale: Locale = getI18NLocale();
-
   constructor() {
     // On first load, load+save to ensure latest serialization version.
     const accountJSON = this.mmkv.getString("account");
@@ -126,6 +119,7 @@ class AccountManager {
 
   private notifyListeners() {
     try {
+      console.log(`[ACCOUNT] notifying ${this.listeners.size} listeners`);
       this.listeners.forEach((l) => l(this.currentAccount));
     } catch (e) {
       console.log(`[ACCOUNT] error notifying listeners: ${e}`);
@@ -189,16 +183,6 @@ class AccountManager {
     }
     this.daimoChain = daimoChain;
     this.notifyListeners();
-  }
-
-  getLocale(): Locale {
-    return this.locale;
-  }
-
-  setLocale(locale: Locale) {
-    if (this.locale === locale) return;
-
-    this.locale = locale;
   }
 
   // Find existing account

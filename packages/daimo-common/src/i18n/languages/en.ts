@@ -19,7 +19,7 @@ export const en = {
 
   // time.ts
   time: {
-    now: (long?: boolean) => (long ? "just now" : "now"),
+    now: (long?: boolean) => `${long ? "just now" : "now"}`,
     minutesAgo: (minutes: number, long?: boolean) =>
       `${minutes}m ${long ? "ago" : ""}`,
     hoursAgo: (hours: number, long?: boolean) =>
@@ -59,3 +59,5 @@ function displayAddrLabel(type: AddrLabel): string {
       return `unknown`;
   }
 }
+
+export type LanguageDefinition = typeof en;

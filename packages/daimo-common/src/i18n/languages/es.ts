@@ -1,6 +1,7 @@
+import { LanguageDefinition } from "./en";
 import { AddrLabel } from "../../model";
 
-export const es = {
+export const es: LanguageDefinition = {
   // format.ts
   format: {
     fee: () => "Tasas:",
@@ -19,7 +20,7 @@ export const es = {
 
   // time.ts
   time: {
-    now: (long?: boolean) => (long ? "justo ahora" : "ahora"),
+    now: (long?: boolean) => `${long ? "justo ahora" : "ahora"}`,
     minutesAgo: (minutes: number, long?: boolean) =>
       `${long ? "hace" : ""} ${minutes}m`,
     hoursAgo: (hours: number, long?: boolean) =>

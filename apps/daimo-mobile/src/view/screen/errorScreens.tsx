@@ -4,12 +4,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ParamListMain } from "../../common/nav";
 import { SendDebugLogButton } from "../../common/useSendDebugLog";
+import { i18n } from "../../i18n";
 import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { ErrorBanner } from "../shared/error";
 import { ss } from "../shared/style";
 
 type Props = NativeStackScreenProps<ParamListMain, "LinkErrorModal">;
+const i18 = i18n.error;
 
 export function ErrorScreen(props: Props) {
   const { displayTitle, displayMessage, showDownloadButton } =
@@ -50,7 +52,7 @@ export function renderErrorFallback({
       <View style={ss.container.padH8}>
         <Spacer h={192} />
         <ErrorBanner
-          displayTitle="An error occurred" // TODO: i18n
+          displayTitle={i18.banner()}
           error={error}
           onGoHome={resetErrorBoundary}
         />

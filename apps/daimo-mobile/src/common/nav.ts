@@ -51,7 +51,7 @@ export type ParamListOnboarding = {
   Finish: undefined;
 };
 
-export type QRScreenOptions = "PAY ME" | "SCAN";  // TODO: implement i18n
+export type QRScreenOptions = "PAY ME" | "SCAN"; // TODO: implement i18n
 
 export type ParamListHome = {
   Home: undefined;

@@ -51,7 +51,7 @@ export const en = {
     whyNoFees: {
       title: () => `About this transfer`,
       description: {
-        firstPara: ({ chainName }: { chainName: string }) =>
+        firstPara: (chainName: string) =>
           `This transaction settled on ${chainName}, an Ethereum rollup.`,
         secondPara: () =>
           `Rollups inherit the strong security guarantees of Ethereum, at lower cost.`,
@@ -62,7 +62,7 @@ export const en = {
     feeText: {
       free: () => `FREE`,
       pending: () => `PENDING`,
-      fee: ({ amount }: { amount: string }) => `${amount} FEE`,
+      fee: (amount: string) => `${amount} FEE`,
     },
   },
 
@@ -484,9 +484,9 @@ export const en = {
   invite: {
     screenHeader: () => `Invite Friends`,
     more: (moreInvitees: number) => `+${moreInvitees} more`,
-    invited: ({ invited }: { invited: number }) =>
+    invited: (invited: number) =>
       `You've invited ${pluralize(invited, "friend")}`,
-    left: ({ usesLeft }: { usesLeft: number }) =>
+    left: (usesLeft: number) =>
       `${usesLeft} ${pluralize(usesLeft, "invite")} left`,
     locked: {
       header: () => `Invite your friends and earn USDC!`,
@@ -779,3 +779,6 @@ function pluralize(n: number, noun: string) {
   if (n === 1) return `${n} ${noun}`; // "1 apple"
   return `${n} ${noun}s`; // "0 apples" or "2 apples"
 }
+
+// ts-unused-exports:disable-next-line
+export type LanguageDefinition = typeof en;

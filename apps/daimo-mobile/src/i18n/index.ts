@@ -16,18 +16,9 @@ export const i18n: I18NTranslation = (function () {
   switch (languageCode) {
     // TODO: handle other languages here
     case "es":
-      es;
+      return es;
+    case "en":
     default:
       return en;
   }
 })();
-
-export function localeToLanguage(locale: Locale) {
-  switch (locale.languageCode) {
-    case "es":
-      return "Español";
-    case "en":
-    default:
-      return "English";
-  }
-}

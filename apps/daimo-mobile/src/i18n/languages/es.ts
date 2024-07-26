@@ -1,6 +1,6 @@
-import { AddrLabel } from "@daimo/common";
+import { LanguageDefinition } from "./en";
 
-export const es = {
+export const es: LanguageDefinition = {
   // Common text components
   shared: {
     buttonStatus: {
@@ -53,7 +53,7 @@ export const es = {
     whyNoFees: {
       title: () => `Sobre esta transferencia`,
       description: {
-        firstPara: ({ chainName }: { chainName: string }) =>
+        firstPara: (chainName: string) =>
           `Esta transacción fue resuelta en ${chainName}, un rollup de Ethereum.`,
         secondPara: () =>
           `Las Rollups heredan la seguridad de Ethereum, a un coste menor.`,
@@ -64,7 +64,7 @@ export const es = {
     feeText: {
       free: () => `GRATIS`,
       pending: () => `PENDIENTE`,
-      fee: ({ amount }: { amount: string }) => `${amount} TASA`,
+      fee: (amount: string) => `${amount} TASA`,
     },
   },
 
@@ -486,9 +486,9 @@ export const es = {
   invite: {
     screenHeader: () => `Invitar Amigos`,
     more: (moreInvitees: number) => `+${moreInvitees} más`,
-    invited: ({ invited }: { invited: number }) =>
+    invited: (invited: number) =>
       `Has invitado a ${pluralize(invited, "amigo")}`,
-    left: ({ usesLeft }: { usesLeft: number }) =>
+    left: (usesLeft: number) =>
       `${usesLeft} ${pluralize(usesLeft, "invitación")} ${pluralize(
         usesLeft,
         "restantes"
