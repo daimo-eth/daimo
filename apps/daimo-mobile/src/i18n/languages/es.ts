@@ -797,31 +797,3 @@ function pluralize(n: number, noun: string) {
 
   return `${n} ${noun}s`; // "2 manzanas" o "{n} manzanas"
 }
-
-// Addr label display function
-function displayAddrLabel(type: AddrLabel): string {
-  switch (type) {
-    case AddrLabel.Faucet:
-      return `equipo Daimo`;
-    case AddrLabel.PaymentLink:
-      return `link de pago`;
-    case AddrLabel.RequestLink:
-      return `solicitar link`;
-    case AddrLabel.Paymaster:
-      return `tasa`;
-    case AddrLabel.Coinbase:
-      return `coinbase`;
-    case AddrLabel.Relay:
-      return `relay.link`;
-    case AddrLabel.LiFi:
-      return `puente li.fi`;
-    case AddrLabel.UniswapETHPool:
-      return `ETH cambiado`;
-    case AddrLabel.Binance:
-      return `binance`;
-    case AddrLabel.FastCCTP:
-      return `cross-chain instantáneo`;
-    default:
-      throw new Error(`Invalid AddrLabel: ${type}`);
-  }
-}
