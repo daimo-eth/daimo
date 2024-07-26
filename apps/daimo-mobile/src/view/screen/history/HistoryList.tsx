@@ -25,11 +25,7 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
-<<<<<<< HEAD
-import { i18n } from "../../../i18n";
-=======
 import { getI18NLocale, i18n } from "../../../i18n";
->>>>>>> klee/i18n
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
