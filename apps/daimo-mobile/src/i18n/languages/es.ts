@@ -598,7 +598,7 @@ export const es = {
       },
       contactSupport: {
         title: () => `Preguntas? Sugerencias?`,
-        msg: () => `Contactanos en Telegram`,
+        msg: () => `Contáctanos en Telegram`,
         button: () => `CONTACTAR SOPORTE`,
       },
     },
@@ -723,7 +723,7 @@ export const es = {
     description: () => `Completa estas acciones para acabar de configurar tu cuenta`,
     secureAccount: {
       title: () => `Asegura tu cuenta`,
-      description: () => `Añadir un respaldo a tu cuenta`,
+      description: () => `Configurar un respaldo`,
     },
     connectFarcaster: {
       title: () => `Conectar Farcaster`,
