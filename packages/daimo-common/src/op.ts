@@ -6,7 +6,7 @@ import { ForeignToken, getForeignCoinDisplayAmount } from "./foreignToken";
 import { BigIntStr } from "./model";
 
 /**
- * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
+ * An Clog is an onchain event affecting a Daimo account. Each Clog
  * corresponds to an Ethereum event log. Usually--but not always--it is also
  * 1:1 with a Daimo userop.
  *
@@ -21,18 +21,15 @@ import { BigIntStr } from "./model";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferClog | KeyRotationClog;
+export type Clog = TransferClog | KeyRotationClog;
 
 export type TransferClog = TransferSwapClog | PaymentLinkClog;
 
 /**
- *  Fetched data for a pending OpEvent. For a pending op, we (usually)
- *  only know either the opHash or the txHash. Set only one of them in this
- *  type to uniquely identify a pending user action.
- *  Additionally include data that the API may have pre-fetched for the now
- *  authenticated user.
+ * Fetched data for a pending userop or sponsored transaction. Set exactly one
+ * of (opHash, txHash) to uniquely identify a pending user action.
  */
-export type PendingOpEvent = {
+export type PendingOp = {
   opHash?: Hex;
   txHash?: Hex;
   inviteCode?: string;
@@ -82,7 +79,7 @@ export type PostSwapTransfer = {
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface TransferSwapClog extends OpEventBase {
+export interface TransferSwapClog extends ClogBase {
   type: "transfer";
 
   from: Address;
@@ -107,7 +104,7 @@ export interface TransferSwapClog extends OpEventBase {
   postSwapTransfer?: PostSwapTransfer;
 }
 
-export interface PaymentLinkClog extends OpEventBase {
+export interface PaymentLinkClog extends ClogBase {
   type: "createLink" | "claimLink";
 
   from: Address;
@@ -133,7 +130,7 @@ export interface PaymentLinkClog extends OpEventBase {
  * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
  * foreign token transfer to Bob).
  */
-// export interface SwapClog extends OpEventBase {
+// export interface SwapClog extends ClogBase {
 //   type: "inboundSwap" | "outboundSwap";
 
 //   from: Address;
@@ -156,14 +153,14 @@ export interface PaymentLinkClog extends OpEventBase {
 //   memo?: string;
 // }
 
-export interface KeyRotationClog extends OpEventBase {
+export interface KeyRotationClog extends ClogBase {
   type: "keyRotation";
 
   slot: number;
   rotationType: "add" | "remove";
 }
 
-interface OpEventBase {
+interface ClogBase {
   /** Unix seconds. When pending, bundler accept time. Otherwise, block time. */
   timestamp: number;
 

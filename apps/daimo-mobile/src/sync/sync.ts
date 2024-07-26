@@ -2,7 +2,7 @@ import { AccountHistoryResult } from "@daimo/api";
 import {
   EAccount,
   OpStatus,
-  PendingOpEvent,
+  PendingOp,
   TransferClog,
   amountToDollars,
   assert,
@@ -301,7 +301,7 @@ function applySync(
 }
 
 export function syncFindSameOp(
-  id: PendingOpEvent,
+  id: PendingOp,
   ops: TransferClog[]
 ): TransferClog | null {
   return (

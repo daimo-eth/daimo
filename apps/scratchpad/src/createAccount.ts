@@ -2,12 +2,7 @@ import { StubExternalApiCache } from "@daimo/api/src/db/externalApiCache";
 import { getBundlerClientFromEnv } from "@daimo/api/src/network/bundlerClient";
 import { ViemClient } from "@daimo/api/src/network/viemClient";
 import { Telemetry } from "@daimo/api/src/server/telemetry";
-import {
-  PendingOpEvent,
-  UserOpHex,
-  assert,
-  assertNotNull,
-} from "@daimo/common";
+import { PendingOp, UserOpHex, assert, assertNotNull } from "@daimo/common";
 import {
   daimoAccountABI,
   daimoAccountFactoryConfig,
@@ -144,7 +139,7 @@ export async function createAccount() {
     );
     const hash = await bundlerClient.getOpHash(op, vc.publicClient);
     console.log(`NOT sending userOp. Hash: ${hash}`);
-    return { opHash: hash } as PendingOpEvent;
+    return { opHash: hash } as PendingOp;
     // return bundlerClient.sendUserOp(op, vc);
   };
 

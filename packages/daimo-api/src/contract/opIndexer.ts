@@ -89,6 +89,7 @@ export class OpIndexer extends Indexer {
 
     elapsedMs = (Date.now() - startTime) | 0;
     console.log(`[OP] processed ${result.length} ops in ${elapsedMs}ms`);
+
     this.swapClogMatcher.loadSwapTransfers(
       pg,
       from,

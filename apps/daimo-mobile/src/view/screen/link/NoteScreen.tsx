@@ -4,7 +4,7 @@ import {
   DaimoNoteStatus,
   EAccount,
   OpStatus,
-  PendingOpEvent,
+  PendingOp,
   dollarsToAmount,
   getAccountName,
   now,
@@ -150,7 +150,7 @@ function NoteDisplayInner({
           signature: ephemeralSignature,
         });
         setAS("success", "Accepted link");
-        return { txHash } as PendingOpEvent;
+        return { txHash } as PendingOp;
       }
     : undefined;
 

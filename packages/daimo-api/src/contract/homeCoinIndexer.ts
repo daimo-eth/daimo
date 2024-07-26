@@ -25,7 +25,7 @@ import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 
-/**  */
+/** ERC-20 or native token transfer. See daimo_transfers table. */
 export interface Transfer {
   address: Hex;
   blockNumber: bigint;
@@ -172,7 +172,7 @@ export class HomeCoinIndexer extends Indexer {
     }
 
     // Add swap /  info
-    const clogs = filtered.map((log) => this.attachTransferOpProperties(log));
+    const clogs = filtered.map((l) => this.createTransferClog(l, addr));
 
     // Filter out ERC20 paymaster transfers, attach as fees to other transfers
     const clogsWithFees = this.attachFeeAmounts(clogs);
@@ -186,7 +186,7 @@ export class HomeCoinIndexer extends Indexer {
    * Coalesced logs can be attributed to a simple transfer (same coin, same
    * chain), swap (different coins, same chain), or payment link.
    */
-  attachTransferOpProperties(log: Transfer): TransferClog {
+  createTransferClog(log: Transfer, accountAddr: Address): TransferClog {
     // Gather information about this transfer, potentially across multiple logs.
     const {
       blockNumber,
@@ -221,7 +221,11 @@ export class HomeCoinIndexer extends Indexer {
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
     // If inbound swap, attach original sender + token + amount info.
+    const notSwapAddrs = [chainConfig.pimlicoPaymasterAddress];
+    const notSwap = notSwapAddrs.includes(from) || notSwapAddrs.includes(to);
     const correspondingForeignReceive =
+      to === accountAddr &&
+      !notSwap &&
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
         transactionHash
@@ -237,6 +241,8 @@ export class HomeCoinIndexer extends Indexer {
 
     // If outbound swap, attach final destination info.
     const correspondingForeignSend =
+      from === accountAddr &&
+      !notSwap &&
       this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
     const postSwapTransfer: PostSwapTransfer | undefined =
       correspondingForeignSend
@@ -254,12 +260,9 @@ export class HomeCoinIndexer extends Indexer {
         Number(blockNumber),
         chainConfig.daimoChain
       ),
-
+      from: preSwapTransfer?.from || getAddress(from),
+      to: postSwapTransfer?.to || getAddress(to),
       amount: Number(value),
-
-      from: getAddress(from),
-      to: getAddress(to),
-
       blockNumber: Number(blockNumber),
       blockHash,
       txHash: transactionHash,

@@ -84,32 +84,37 @@ export class ShovelSquared extends Indexer {
     console.log(`[SHOVEL] s^2 add blocks: ${from}-${to} in ${elapsedMs}ms`);
 
     // Delete extraneous rows from [erc20,eth]_transfers
-    await Promise.all([
-      retryBackoff(`shovel^2-del-eth-${from}-${to}`, async () =>
-        pg.query(
-          `DELETE FROM eth_transfers
-          WHERE ig_name='eth_transfers'
-          AND src_name='${trace}'
-          AND block_num BETWEEN $1 AND $2
-          AND "from" NOT IN (SELECT addr FROM names)
-          AND "to" NOT IN (SELECT addr FROM names)`,
-          [from, to]
-        )
-      ),
-      retryBackoff(`shovel^2-del-erc20-${from}-${to}`, async () =>
-        pg.query(
-          `DELETE FROM erc20_transfers
-          WHERE ig_name='erc20_transfers'
-          AND src_name='${event}'
-          AND block_num BETWEEN $1 AND $2
-          AND "f" NOT IN (SELECT addr FROM names)
-          AND "t" NOT IN (SELECT addr FROM names)`,
-          [from, to]
-        )
-      ),
-    ]);
-    elapsedMs = (performance.now() - startMs) | 0;
-    console.log(`[SHOVEL] s^2 del transfers: ${from}-${to} in ${elapsedMs}ms`);
+    // This breaks SwapClogMatcher, which relies on the existence of transfers
+    // between (Uniswap pool, non-Daimo adddress).
+    //
+    // Disabling, replacing [erc20,eth]_transfers with daimo_transfers soon.
+    //
+    // await Promise.all([
+    //   retryBackoff(`shovel^2-del-eth-${from}-${to}`, async () =>
+    //     pg.query(
+    //       `DELETE FROM eth_transfers
+    //       WHERE ig_name='eth_transfers'
+    //       AND src_name='${trace}'
+    //       AND block_num BETWEEN $1 AND $2
+    //       AND "from" NOT IN (SELECT addr FROM names)
+    //       AND "to" NOT IN (SELECT addr FROM names)`,
+    //       [from, to]
+    //     )
+    //   ),
+    //   retryBackoff(`shovel^2-del-erc20-${from}-${to}`, async () =>
+    //     pg.query(
+    //       `DELETE FROM erc20_transfers
+    //       WHERE ig_name='erc20_transfers'
+    //       AND src_name='${event}'
+    //       AND block_num BETWEEN $1 AND $2
+    //       AND "f" NOT IN (SELECT addr FROM names)
+    //       AND "t" NOT IN (SELECT addr FROM names)`,
+    //       [from, to]
+    //     )
+    //   ),
+    // ]);
+    // elapsedMs = (performance.now() - startMs) | 0;
+    // console.log(`[SHOVEL] s^2 del transfers: ${from}-${to} in ${elapsedMs}ms`);
 
     // Insert remaining rows into daimo_transfers
     await pg.query(
@@ -164,6 +169,7 @@ export class ShovelSquared extends Indexer {
         ON CONFLICT DO NOTHING`,
       [from, to, blockTsOffset, chainID]
     );
+    elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[SHOVEL] s^2 add transfers: ${from}-${to} in ${elapsedMs}ms`);
 
     // Finally, add userops
@@ -208,6 +214,7 @@ export class ShovelSquared extends Indexer {
       ON CONFLICT DO NOTHING;`,
       [from, to, blockTsOffset, chainID]
     );
+    elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[SHOVEL] s^2 add userops: ${from}-${to} in ${elapsedMs}ms`);
   }
 }

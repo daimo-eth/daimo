@@ -357,7 +357,7 @@ function createNotifierAliceBob() {
   } as unknown as KeyRegistry;
 
   const stubCoinIndexer = {
-    attachTransferOpProperties: (log: Transfer): TransferClog => {
+    createTransferClog: (log: Transfer, _: Address): TransferClog => {
       const baseClog = {
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(

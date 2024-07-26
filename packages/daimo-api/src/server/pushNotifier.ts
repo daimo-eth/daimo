@@ -4,10 +4,10 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
-  TransferClog,
   amountToDollars,
   assert,
   assertNotNull,
+  debugJson,
   getAccountName,
   getDisplayFromTo,
   getForeignCoinDisplayAmount,
@@ -16,7 +16,7 @@ import {
   retryBackoff,
 } from "@daimo/common";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
-import { Address, Hex, getAddress } from "viem";
+import { Address, getAddress } from "viem";
 
 import {
   ForeignCoinIndexer,
@@ -228,26 +228,9 @@ export class PushNotifier {
     for (const log of logs) {
       assert(log.transactionHash != null, "transfer missing txHash");
 
-      const opEvent = this.coinIndexer.attachTransferOpProperties(log);
-      const [from, to] = getDisplayFromTo(opEvent);
-
       const [a, b] = await Promise.all([
-        this.getPushNotifsFromTransfer(
-          log.transactionHash,
-          log.logIndex,
-          from,
-          to,
-          -opEvent.amount,
-          opEvent
-        ),
-        this.getPushNotifsFromTransfer(
-          log.transactionHash,
-          log.logIndex,
-          to,
-          from,
-          opEvent.amount,
-          opEvent
-        ),
+        this.getPushNotifsFromTransfer(log, log.from),
+        this.getPushNotifsFromTransfer(log, log.to),
       ]);
       notifs.push(...a, ...b);
     }
@@ -255,13 +238,25 @@ export class PushNotifier {
   }
 
   async getPushNotifsFromTransfer(
-    txHash: Hex,
-    logIndex: number,
-    addr: Address,
-    other: Address,
-    amount: number,
-    transferClog: TransferClog
+    log: Transfer,
+    addr: Address
   ): Promise<PushNotification[]> {
+    const transferClog = this.coinIndexer.createTransferClog(log, addr);
+
+    const { txHash, logIndex } = transferClog;
+    const [from, to] = getDisplayFromTo(transferClog);
+    let other;
+    let amount;
+    if (transferClog.to === addr) {
+      amount = transferClog.amount;
+      other = from;
+    } else if (transferClog.from === addr) {
+      amount = -transferClog.amount;
+      other = to;
+    } else {
+      throw new Error(`wrong from/to ${debugJson({ addr, transferClog })}`);
+    }
+
     // Only handle simple transfers and swaps
     if (transferClog.type !== "transfer") {
       return [];

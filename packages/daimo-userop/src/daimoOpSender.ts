@@ -1,6 +1,6 @@
 import {
   DaimoAccountCall,
-  PendingOpEvent,
+  PendingOp,
   ProposedSwap,
   UserOpHex,
   assertNotNull,
@@ -81,11 +81,11 @@ export class DaimoOpSender {
     return getAddress(this.opBuilder.getSender());
   }
 
-  /** Submits a user op to bundler. Returns PendingOpEvent. */
+  /** Submits a user op to bundler. Returns PendingOp. */
   public async sendUserOp(
     opBuilder: DaimoOpBuilder,
     memo?: string
-  ): Promise<PendingOpEvent> {
+  ): Promise<PendingOp> {
     const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
