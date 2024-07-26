@@ -217,7 +217,7 @@ export const es = {
       description: () => `Elija la cuenta que desea cargar`,
     },
     searchResults: {
-      empty: () => `Sin resultados`,
+      empty: () => `Ningún usuario encontrado`,
     },
   },
   // ExistingScreen.tsx
@@ -572,7 +572,7 @@ export const es = {
     account: {
       connectFarcaster: () => `CONECTAR FARCASTER`,
       viewAccountOnExplorer: () => `VER CUENTA EN EXPLORADOR`,
-      noSocialsConnected: () => `NINGUNA RED SOCIAL CONECTADA`,
+      noSocialsConnected: () => `NINGUNA RED SOCIAL\nCONECTADA`,
     },
     devices: {
       title: () => `Mis dispositivos y respaldos`,
@@ -661,11 +661,11 @@ export const es = {
   createBackup: {
     default: {
       header: () => `Crear un respaldo`,
-      passkeyTitle: () => `Configurar respaldo de llave de acceso`,
+      passkeyTitle: () => `Configurar respaldo con\nllave de acceso`,
       passkeyBullet1: () => `Conveniente, seguro, y resistente a phishing`,
       passkeyBullet2: () =>
-        `Guardado por tu llavero de contraseñas, como iCloud Keychain o 1Password`,
-      offlineInsteadButton: () => `Respaldarlo offline`,
+        `Guardado por tu llavero de contraseñas, como iCloud o 1Password`,
+      offlineInsteadButton: () => `Respaldar offline`,
     },
     offline: {
       header: () => `Crear un respaldo offline`,
