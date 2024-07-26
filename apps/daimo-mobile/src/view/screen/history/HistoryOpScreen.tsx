@@ -136,12 +136,13 @@ function NoteView({
   note: PaymentLinkClog;
   leaveScreen: () => void;
 }) {
+  const locale = getI18NLocale();
   const daimoChain = daimoChainFromId(account.homeChainId);
   // Strip seed from link
   const link: DaimoLinkNoteV2 = {
     type: "notev2",
     id: note.noteStatus!.id!,
-    sender: getAccountName(note.noteStatus!.sender),
+    sender: getAccountName(note.noteStatus!.sender, locale),
     dollars: amountToDollars(note.amount),
     seed: "",
   };

@@ -182,6 +182,7 @@ function TransferClogRow({
   showDate?: boolean;
 }) {
   const address = account.address;
+  const locale = getI18NLocale();
 
   assert(transferClog.amount > 0);
   const [from, to] = getDisplayFromTo(transferClog);
@@ -211,7 +212,7 @@ function TransferClogRow({
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
-  let opTitle = getAccountName(otherAcc);
+  let opTitle = getAccountName(otherAcc, locale);
   if (
     opTitle === AddrLabel.PaymentLink &&
     transferClog.type === "claimLink" &&
