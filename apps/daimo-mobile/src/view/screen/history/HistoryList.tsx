@@ -25,7 +25,7 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
-import { i18n } from "../../../i18n";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -225,6 +225,7 @@ function TransferClogRow({
   const opMemo = getSynthesizedMemo(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
+    getI18NLocale(),
     true
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
@@ -298,7 +299,7 @@ function TransferAmountDate({
     });
   } else {
     const nowS = now();
-    timeStr = timeAgo(timestamp, nowS);
+    timeStr = timeAgo(timestamp, getI18NLocale(), nowS);
   }
 
   const textCol = isPending ? color.gray3 : color.midnight;

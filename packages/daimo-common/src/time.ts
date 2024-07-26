@@ -1,4 +1,7 @@
 import { DaimoChain } from "@daimo/contract";
+import { Locale } from "expo-localization";
+
+import { i18n } from "./i18n";
 
 /** Returns current unix time, in seconds */
 export function now() {
@@ -6,15 +9,21 @@ export function now() {
 }
 
 /** Returns "now", "1m", "2h", etc. Long form: "just now", "1m ago", ... */
-export function timeAgo(sinceS: number, nowS?: number, long?: boolean) {
+export function timeAgo(
+  sinceS: number,
+  locale?: Locale,
+  nowS?: number,
+  long?: boolean
+) {
+  const i18 = i18n(locale).time;
   if (nowS == null) nowS = now();
 
   const seconds = Math.floor(nowS - sinceS);
-  if (seconds < 60) return long ? `just now` : `now`;
+  if (seconds < 60) return i18.now(long);
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m` + (long ? ` ago` : ``);
+  if (minutes < 60) return i18.minutesAgo(minutes, long);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h` + (long ? ` ago` : ``);
+  if (hours < 24) return i18.hoursAgo(hours, long);
   const days = Math.floor(hours / 24);
   return `${days}d` + (long ? ` ago` : ``);
 }

@@ -11,7 +11,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
-import { i18n } from "../../../i18n";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
@@ -33,7 +33,7 @@ export function SwapNotificationRow({
 
   const dispatcher = useContext(DispatcherContext);
 
-  const ts = timeAgo(notif.timestamp, now(), true);
+  const ts = timeAgo(notif.timestamp, getI18NLocale(), now(), true);
 
   const coin = notif.swap.fromCoin;
   const width = useWindowDimensions().width;

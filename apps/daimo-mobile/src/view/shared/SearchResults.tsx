@@ -20,7 +20,7 @@ import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";
-import { i18n } from "../../i18n";
+import { getI18NLocale, i18n } from "../../i18n";
 import {
   DaimoContact,
   EAccountContact,
@@ -195,10 +195,12 @@ export function SearchResultRow({
         const nowS = now();
         const { lastSendTime, lastRecvTime } = contact;
         const lastSendMessage = lastSendTime
-          ? `${i18.sentAgo(timeAgo(lastSendTime, nowS, true))}`
+          ? `${i18.sentAgo(timeAgo(lastSendTime, getI18NLocale(), nowS, true))}`
           : undefined;
         const lastRecvMessage = lastRecvTime
-          ? `${i18.receivedAgo(timeAgo(lastRecvTime, nowS, true))}`
+          ? `${i18.receivedAgo(
+              timeAgo(lastRecvTime, getI18NLocale(), nowS, true)
+            )}`
           : undefined;
 
         if ((lastSendTime || 0) > (lastRecvTime || 0)) {

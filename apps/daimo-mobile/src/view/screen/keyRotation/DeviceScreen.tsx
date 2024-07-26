@@ -21,7 +21,7 @@ import { ActivityIndicator, Alert, View } from "react-native";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
 import { ParamListSettings, useNav } from "../../../common/nav";
-import { i18n } from "../../../i18n";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { getAccountManager, useAccount } from "../../../logic/accountManager";
 import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
@@ -127,7 +127,7 @@ export function DeviceScreen({ route, navigation }: Props) {
     switch (status) {
       case "idle":
         if (canRemove) {
-          return formatFeeAmountOrNull(cost.totalDollars);
+          return formatFeeAmountOrNull(getI18NLocale(), cost.totalDollars);
         } else {
           return i18.current.cannotRemove();
         }

@@ -25,7 +25,7 @@ import {
   useNav,
 } from "../../../common/nav";
 import { env } from "../../../env";
-import { i18n } from "../../../i18n";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
@@ -220,7 +220,8 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
 
   const memoText = getSynthesizedMemo(
     op,
-    env(daimoChainFromId(account.homeChainId)).chainConfig
+    env(daimoChainFromId(account.homeChainId)).chainConfig,
+    getI18NLocale()
   );
 
   return (
