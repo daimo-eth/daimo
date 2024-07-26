@@ -59,3 +59,5 @@ function displayAddrLabel(type: AddrLabel): string {
       return `unknown`;
   }
 }
+
+export type LanguageDefinition = typeof en;
