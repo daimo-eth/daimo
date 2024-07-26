@@ -11,11 +11,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
-<<<<<<< HEAD
-import { i18n } from "../../../i18n";
-=======
 import { getI18NLocale, i18n } from "../../../i18n";
->>>>>>> klee/i18n
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";

@@ -152,11 +152,7 @@ function NoteDisplayInner({
           signature: ephemeralSignature,
         });
         setAS("success", i18.accept.link());
-<<<<<<< HEAD
-        return { txHash } as PendingOpEvent;
-=======
         return { txHash } as PendingOp;
->>>>>>> klee/i18n
       }
     : undefined;
 
