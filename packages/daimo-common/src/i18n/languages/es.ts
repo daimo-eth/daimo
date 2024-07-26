@@ -19,12 +19,12 @@ export const es = {
 
   // time.ts
   time: {
-    now: (long?: boolean) => (long ? "just now" : "now"),
+    now: (long?: boolean) => (long ? "justo ahora" : "ahora"),
     minutesAgo: (minutes: number, long?: boolean) =>
-      `${minutes}m ${long ? "ago" : ""}`,
+      `${long ? "hace" : ""} ${minutes}m`,
     hoursAgo: (hours: number, long?: boolean) =>
-      `${hours}h ${long ? "ago" : ""}`,
-    daysAgo: (days: number, long?: boolean) => `${days}d ${long ? "ago" : ""}`,
+      `${long ? "hace" : ""} ${hours}h`,
+    daysAgo: (days: number, long?: boolean) => `${long ? "hace" : ""} ${days}d`,
   },
 
   // AddrLabels for account history contacts
