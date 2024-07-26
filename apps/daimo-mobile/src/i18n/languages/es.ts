@@ -583,7 +583,7 @@ export const es = {
           firstPara: () =>
             `Las llaves de acceso son una alternativa conveniente y anti-phising para frases semillas`,
           secondPara: () =>
-            `Las llaves de acceso son generadas y guardadas en tu llavero de iCloud, y te permite resuperar tu cuenta incluso si pierde su dispositivo.`,
+            `Las llaves de acceso son generadas y guardadas en tu llavero de iCloud, y te permite recuperar tu cuenta incluso si pierde su dispositivo.`,
         },
       },
       createBackup: {
