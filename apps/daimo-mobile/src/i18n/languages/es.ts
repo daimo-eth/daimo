@@ -1,3 +1,4 @@
+import { AddrLabel } from "@daimo/common";
 
 export const es = {
   // Common text components
@@ -206,8 +207,7 @@ export const es = {
     screenHeader: () => `Notificaciones`,
     allowButton: () => `Permitir Notificaciones`,
     skipButton: () => `Saltar`,
-    instructions: () =>
-      `Serás solo notificado sobre actividad en tu cuenta.`,
+    instructions: () => `Serás solo notificado sobre actividad en tu cuenta.`,
   },
   // ExistingChooseAccountScreen.tsx
   existingChooseAccount: {
@@ -298,7 +298,7 @@ export const es = {
     title: () => `Bienvenido a Daimo`,
     subtitle: () => `Pague o reciva USDC donde sea`,
     acceptInviteButton: () => `ACEPTAR INVITACIÓN`,
-    alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA_`, 
+    alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA_`,
     rows: {
       selfCustody: {
         title: () => `Tus llaves, tus tokens`,
@@ -348,7 +348,8 @@ export const es = {
     sendRequest: {
       loading: () => `Solicitando...`,
       title: () => `Envíe una solicitud`,
-      subtitle: () => `Solicite USDC a alguien usando cualquier app de mensajería`,
+      subtitle: () =>
+        `Solicite USDC a alguien usando cualquier app de mensajería`,
     },
   },
 
@@ -445,10 +446,13 @@ export const es = {
   // DepositScreen.tsx
   deposit: {
     screenHeader: () => `Deposite o Retire`,
+    go: () => `Ir`,
+    continue: () => `Continuar`,
     landline: {
       cta: () => `Conectar con Landline`,
       title: () => `Deposite o retire directamente de un banco americano`,
       optionRowTitle: (timeAgo: string) => `Conectado hace ${timeAgo}`,
+      startTransfer: () => `Empezar transferencia`,
     },
     binance: {
       cta: () => `Deposite desde Binance`,
@@ -484,7 +488,11 @@ export const es = {
     more: (moreInvitees: number) => `+${moreInvitees} más`,
     invited: ({ invited }: { invited: number }) =>
       `Has invitado a ${pluralize(invited, "amigo")}`,
-    left: ({usesLeft}: {usesLeft: number}) => `${usesLeft} ${pluralize( usesLeft,"invitación")} ${pluralize(usesLeft,"restantes")}`,
+    left: ({ usesLeft }: { usesLeft: number }) =>
+      `${usesLeft} ${pluralize(usesLeft, "invitación")} ${pluralize(
+        usesLeft,
+        "restantes"
+      )}`,
     locked: {
       header: () => `Invita tus amigos y gana USDC!`,
       description: () =>
@@ -653,7 +661,8 @@ export const es = {
   // SearchScreen.tsx
   searchScreen: {
     placeholderWithContact: () => `Busca usuarios, ENS, contacto, o email...`,
-    placeholderWithoutContact: () => `Busca usuarios, ENS, email, o teléfono...`,
+    placeholderWithoutContact: () =>
+      `Busca usuarios, ENS, email, o teléfono...`,
   },
 
   // -------------------------- SHEET --------------------------
@@ -720,7 +729,8 @@ export const es = {
   // OnboardingChecklistBottomSheet.tsx
   onboardingChecklistBottom: {
     sheetHeader: () => `Incorporando lista de requisitos`,
-    description: () => `Completa estas acciones para acabar de configurar tu cuenta`,
+    description: () =>
+      `Completa estas acciones para acabar de configurar tu cuenta`,
     secureAccount: {
       title: () => `Asegura tu cuenta`,
       description: () => `Configurar un respaldo`,
@@ -765,11 +775,7 @@ export const es = {
   // -------------------------- MISC --------------------------
   // AddrLabels for account history contacts
   addrLabel: {
-    faucet: () => `equipo Daimo`,
-    paymentLink: () => `link de pago`,
-    requestLink: () => `solicitar link`,
-    paymaster: () => `tasa`,
-    uniswapETHPool: () => `ETH cambiado`,
+    label: (type: AddrLabel) => displayAddrLabel(type),
   },
 
   tabNav: {
@@ -781,14 +787,41 @@ export const es = {
   },
 };
 
-
 // TODO: adapt this function to sanish
 function pluralize(n: number, noun: string) {
   if (n === 1) return `${n} ${noun}`; // "1 manzana"
-  
+
   if (noun.slice(-3) === "ión") {
     return `${n} ${noun.slice(0, -3)}iones`; // "2 canciones" o "{n} canciones"
   }
 
   return `${n} ${noun}s`; // "2 manzanas" o "{n} manzanas"
+}
+
+// Addr label display function
+function displayAddrLabel(type: AddrLabel): string {
+  switch (type) {
+    case AddrLabel.Faucet:
+      return `equipo Daimo`;
+    case AddrLabel.PaymentLink:
+      return `link de pago`;
+    case AddrLabel.RequestLink:
+      return `solicitar link`;
+    case AddrLabel.Paymaster:
+      return `tasa`;
+    case AddrLabel.Coinbase:
+      return `coinbase`;
+    case AddrLabel.Relay:
+      return `relay.link`;
+    case AddrLabel.LiFi:
+      return `puente li.fi`;
+    case AddrLabel.UniswapETHPool:
+      return `ETH cambiado`;
+    case AddrLabel.Binance:
+      return `binance`;
+    case AddrLabel.FastCCTP:
+      return `cross-chain instantáneo`;
+    default:
+      throw new Error(`Invalid AddrLabel: ${type}`);
+  }
 }
