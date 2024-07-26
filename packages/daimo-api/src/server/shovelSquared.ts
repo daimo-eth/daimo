@@ -31,8 +31,8 @@ export class ShovelSquared extends Indexer {
     // The source shovel tables ShovelSquared shovels from are very large. Limit
     // batch size to avoid query timeoutes.
     const batchSize = 100;
-    for (let i = Math.max(maxBlockNum, from); i < to; i += batchSize) {
-      await this._loadInner(pg, i, Math.min(i + batchSize, to));
+    for (let i = Math.max(maxBlockNum + 1, from); i <= to; i += batchSize) {
+      await this._loadInner(pg, i, Math.min(i + batchSize - 1, to));
     }
   }
 

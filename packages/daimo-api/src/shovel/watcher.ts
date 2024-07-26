@@ -120,22 +120,25 @@ export class Watcher {
       }
       this.isIndexing = true;
 
-      this.shovelLatest = await this.getShovelLatest();
-      const localLatest = await this.index(
-        this.latest + 1,
-        this.shovelLatest,
-        this.batchSize
-      );
-      const { shovelLatest } = this;
-      const tickSummary = JSON.stringify({ shovelLatest, localLatest });
-      console.log(`[SHOVEL] starting tick ${tickSummary}`);
+      // Get tip block number
+      const res = await Promise.all([
+        this.getShovelLatest(),
+        this.rpcClient.getBlockNumber(),
+      ]);
+      this.shovelLatest = res[0];
+      this.rpcLatest = Number(res[1]);
+      if (this.shovelLatest <= this.latest) {
+        console.log(`[SHOVEL] skipping tick, no new blocks`);
+        return;
+      }
 
-      // localLatest <= 0 when there are no new blocks in shovel
-      // or, for whatever reason, we are ahead of shovel.
-      if (localLatest > this.latest) this.latest = localLatest;
+      // New block(s) available. Index them.
+      const { latest, shovelLatest, batchSize } = this;
+      const newLatest = await this.index(latest + 1, shovelLatest, batchSize);
 
-      // Finally, check RPC to ensure shovel is up to date
-      this.rpcLatest = Number(await this.rpcClient.getBlockNumber());
+      const tickSummary = JSON.stringify({ shovelLatest, latest, newLatest });
+      console.log(`[SHOVEL] tick success ${tickSummary}`);
+      this.latest = newLatest;
       this.lastGoodTickS = now();
     } catch (e) {
       console.error(`[SHOVEL] tick error`, e);

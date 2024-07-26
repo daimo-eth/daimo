@@ -5,6 +5,7 @@ import {
   ProposedSwap,
   SwapQueryResult,
   baseUSDC,
+  debugJson,
   isAmountDust,
   retryBackoff,
 } from "@daimo/common";
@@ -212,9 +213,7 @@ export class ForeignCoinIndexer extends Indexer {
     });
 
     console.log(
-      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${JSON.stringify(
-        swap
-      )}`
+      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${debugJson(swap)}`
     );
 
     if (!swap) return null;
@@ -225,14 +224,14 @@ export class ForeignCoinIndexer extends Indexer {
 
   async getProposedSwapsForAddr(addr: Address): Promise<ProposedSwap[]> {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
-    console.log(
-      `[FOREIGN-COIN] getProposedSwaps for ${addr}: ${pendingSwaps.length} pending`
-    );
     const swaps = (
       await Promise.all(
         pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
       )
     ).filter((s): s is ProposedSwap => s != null);
+    console.log(
+      `[FOREIGN-COIN] getProposedSwaps ${addr}: ${pendingSwaps.length} pending, ${swaps.length} proposedSwaps`
+    );
 
     return swaps;
   }
