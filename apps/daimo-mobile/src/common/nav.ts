@@ -51,7 +51,7 @@ export type ParamListOnboarding = {
   Finish: undefined;
 };
 
-export type QRScreenOptions = "PAY ME" | "SCAN";
+export type QRScreenOptions = "PAY ME" | "SCAN";  // TODO: implement i18n
 
 export type ParamListHome = {
   Home: undefined;
@@ -153,7 +153,7 @@ export const defaultError = {
   displayMessage:
     "Check if you have an old version of the app or if there are any errors in your URL",
   showDownloadButton: true,
-};
+}; // TODO: Implement i18n
 
 export type ParamListBottomSheet = {
   BottomSheetList: undefined;
