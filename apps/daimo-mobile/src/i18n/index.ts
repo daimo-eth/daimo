@@ -31,3 +31,6 @@ export function localeToLanguage(locale: Locale) {
       return "English";
   }
 }
+
+// list of supported locales
+export const locales = ["en", "es"];
