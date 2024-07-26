@@ -33,4 +33,4 @@ export function localeToLanguage(locale: Locale) {
 }
 
 // list of supported locales
-export const locales = ["en", "es"];
+export const supportedLocales = ["en", "es"];
