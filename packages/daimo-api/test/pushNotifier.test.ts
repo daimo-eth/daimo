@@ -280,7 +280,7 @@ test("PushNotifier", async () => {
     assert.strictEqual(push0.body, "You cancelled your 4.20 USDC payment link");
   });
 
-  // SimpleTransferClog
+  // TransferSwapClog
   await test("foreign token transfer", async () => {
     const input: ForeignTokenTransfer = createForeignTokenTransfer({
       from: addrCharlie,
@@ -387,7 +387,7 @@ function createNotifierAliceBob() {
           },
         } as TransferClog;
       } else {
-        // SimpleTransferClog
+        // TransferSwapClog
         return {
           ...baseClog,
           type: "transfer",

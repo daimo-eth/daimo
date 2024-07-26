@@ -41,7 +41,11 @@ interface StoredV16TransferClog {
     from: Address;
   };
 
-  // TODO: postSwapTransfer
+  postSwapTransfer?: {
+    coin: StoredV16ForeignCoin;
+    amount: BigIntStr;
+    to: Address;
+  };
 }
 
 export interface StoredV15PaymentLinkClog {

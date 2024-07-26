@@ -23,7 +23,6 @@ export function useActStatus(name: string): [ActHandle, SetActStatus] {
 
   const startTime = useRef(0);
 
-  // TODO: track timing and reliability
   const setAS: SetActStatus = useCallback(
     (status: ActStatus | Error, message?: string) => {
       if (typeof status !== "string") {
@@ -33,7 +32,6 @@ export function useActStatus(name: string): [ActHandle, SetActStatus] {
       if (message == null) message = "";
 
       // Basic performance tracking, console only for now
-      // TODO: ensure valid state transitions
       if (status === "loading") {
         if (as.status !== "loading") startTime.current = Date.now();
       }

@@ -1,12 +1,13 @@
 import {
   OpStatus,
   PaymentLinkClog,
+  PostSwapTransfer,
   PreSwapTransfer,
   TransferClog,
   assertNotNull,
   guessTimestampFromNum,
-  retryBackoff,
   hexToBuffer,
+  retryBackoff,
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
@@ -186,6 +187,7 @@ export class HomeCoinIndexer extends Indexer {
    * chain), swap (different coins, same chain), or payment link.
    */
   attachTransferOpProperties(log: Transfer): TransferClog {
+    // Gather information about this transfer, potentially across multiple logs.
     const {
       blockNumber,
       blockHash,
@@ -202,11 +204,14 @@ export class HomeCoinIndexer extends Indexer {
           numberToHex(userOp.nonce, { size: 32 })
         )?.metadata.toHex()
       : undefined;
+
+    // Sent or claimed a payment link?
     const noteInfo = this.noteIndexer.getNoteStatusbyLogCoordinate(
       transactionHash,
       logIndex - 1
     );
 
+    // Fulfilled a request?
     const requestStatus =
       this.requestIndexer.getRequestStatusByFulfillLogCoordinate(
         transactionHash,
@@ -215,7 +220,7 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // If transfer occured as a result of a swap, attach logical origin info.
+    // If inbound swap, attach original sender + token + amount info.
     const correspondingForeignReceive =
       this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
@@ -230,34 +235,19 @@ export class HomeCoinIndexer extends Indexer {
           }
         : undefined;
 
-    // TODO: older app versions expect preSwapTransfer.
-    //
-    // const swapClogInbound = correspondingForeignReceive
-    //   ? {
-    //       coinOther: correspondingForeignReceive.foreignToken,
-    //       amountOther: `${correspondingForeignReceive.value}` as `${bigint}`,
-    //     }
-    //   : undefined;
+    // If outbound swap, attach final destination info.
+    const correspondingForeignSend =
+      this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
+    const postSwapTransfer: PostSwapTransfer | undefined =
+      correspondingForeignSend
+        ? {
+            to: correspondingForeignSend.to,
+            coin: correspondingForeignSend.foreignToken,
+            amount: `${correspondingForeignSend.value}` as `${bigint}`,
+          }
+        : undefined;
 
-    // // If outbound swap, attach logical outbound info to create a swapClog.
-    // // use userop to get the transfer log
-    // const correspondingForeignSend =
-    //   this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
-    // const swapClogOutbound = correspondingForeignSend
-    //   ? {
-    //       coinOther: correspondingForeignSend.foreignToken,
-    //       amountOther: `${correspondingForeignSend.value}` as `${bigint}`,
-    //     }
-    //   : undefined;
-
-    // // Foreign receive and foreign send are mutually exclusive.
-    // const outboundTo = correspondingForeignReceive
-    //   ? null
-    //   : correspondingForeignSend?.to;
-
-    // Base clog info (same for all TransferClog types).
-    const fromAddr = getAddress(from);
-
+    // Base clog info (same for all TransferClog types)
     const partialClog = {
       status: OpStatus.confirmed,
       timestamp: guessTimestampFromNum(
@@ -267,12 +257,7 @@ export class HomeCoinIndexer extends Indexer {
 
       amount: Number(value),
 
-      // TODO: replace this with a cleaner coalescing strategy.
-      // Fixes https://github.com/daimo-eth/daimo/issues/1233
-      from:
-        fromAddr === chainConfig.pimlicoPaymasterAddress
-          ? fromAddr
-          : correspondingForeignReceive?.from || fromAddr,
+      from: getAddress(from),
       to: getAddress(to),
 
       blockNumber: Number(blockNumber),
@@ -286,12 +271,13 @@ export class HomeCoinIndexer extends Indexer {
     };
 
     const opEvent = (() => {
-      if (!noteInfo) {
+      if (noteInfo == null) {
         return {
           type: "transfer",
           ...partialClog,
           requestStatus,
           preSwapTransfer,
+          postSwapTransfer,
         } as TransferClog;
       }
 

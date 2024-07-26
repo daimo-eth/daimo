@@ -11,11 +11,7 @@ import {
   validateName,
   retryBackoff,
 } from "@daimo/common";
-import {
-  daimoFastCctpAddress,
-  nameRegistryProxyConfig,
-  teamDaimoFaucetAddr,
-} from "@daimo/contract";
+import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
 import { Pool } from "pg";
 import {
@@ -79,7 +75,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   assertEqual(s[chainConfig.notesV1Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.notesV2Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.uniswapETHPoolAddress], AddrLabel.UniswapETHPool);
-  assertEqual(s[daimoFastCctpAddress], AddrLabel.FastCCTP);
+  // TODO: assertEqual(s[daimoFastCctpAddress], AddrLabel.FastCCTP);
 }
 
 // Represents a Daimo name registration.

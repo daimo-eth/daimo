@@ -365,7 +365,7 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          await watcher.getShovelLatest()
+          watcher.latestBlock().number
         );
       }),
 
@@ -773,14 +773,12 @@ export function createRouter(
           // on new block, push state only when new transfers are available
           const onNewBlock = async (payload: string) => {
             const { block_number } = JSON.parse(payload);
-
             pushHistory(block_number, true);
           };
 
           // for interval updates push full history
           const intervalTimer = setInterval(async () => {
-            const blockNumber = await watcher.getShovelLatest();
-
+            const blockNumber = watcher.latestBlock().number;
             pushHistory(blockNumber);
           }, refreshInterval);
 

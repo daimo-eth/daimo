@@ -308,20 +308,16 @@ export class PushNotifier {
         }
       }
 
-      // Inbound swap (receiving end)
+      // Inbound swap, outbound swap, or home coin + home chain standard transfer.
       if (transferClog.preSwapTransfer) {
         const { amount, coin } = transferClog.preSwapTransfer;
         const readableAmount = getForeignCoinDisplayAmount(amount, coin);
         return `You accepted ${readableAmount} ${coin.symbol} as $${dollars} ${tokenSymbol}`;
-      }
-      // TODO: Outbound swap (sending end)
-      // else if (transferClog.postSwapTransfer) {
-      //   const {amount, coin} = transferClog.postSwapTransfer;
-      //   const readableAmount = getForeignCoinDisplayAmount(amount, coin);
-      //   return `You sent ${readableAmount} ${coin.symbol} to ${otherAccStr}`;
-      // }
-      // Simple transfer
-      else if (amount < 0) {
+      } else if (transferClog.postSwapTransfer) {
+        const { amount, coin } = transferClog.postSwapTransfer;
+        const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+        return `You sent ${readableAmount} ${coin.symbol} to ${otherAccStr}`;
+      } else if (amount < 0) {
         return `You sent ${dollars} ${tokenSymbol} to ${otherAccStr}`;
       } else {
         return `You received ${dollars} ${tokenSymbol} from ${otherAccStr}`;

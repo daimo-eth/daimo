@@ -21,9 +21,9 @@ import { BigIntStr } from "./model";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferClog | KeyRotationOpEvent;
+export type OpEvent = TransferClog | KeyRotationClog;
 
-export type TransferClog = SimpleTransferClog | PaymentLinkClog;
+export type TransferClog = TransferSwapClog | PaymentLinkClog;
 
 /**
  *  Fetched data for a pending OpEvent. For a pending op, we (usually)
@@ -38,16 +38,19 @@ export type PendingOpEvent = {
   inviteCode?: string;
 };
 
-/*
- * Original (non-home-coin) inbound transfer, for an inbound swap.
- */
+/** Original (non-home-coin) inbound transfer, for an inbound swap. */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
 };
 
-// TODO: PostSwapTransfer for sends.
+/** Non-home-coin outbound transfer, for an outbound swap. */
+export type PostSwapTransfer = {
+  coin: ForeignToken;
+  amount: BigIntStr; // in native unit of the token
+  to: Address;
+};
 
 /**
  * Represents a transfer of the same tokens from one address to another on the
@@ -79,7 +82,7 @@ export type PreSwapTransfer = {
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface SimpleTransferClog extends OpEventBase {
+export interface TransferSwapClog extends OpEventBase {
   type: "transfer";
 
   from: Address;
@@ -97,8 +100,11 @@ export interface SimpleTransferClog extends OpEventBase {
   /** Memo, user-generated text for the transfer */
   memo?: string;
 
-  /** Swap info, if this transfer was a swap */
+  /** Original amount before swap to home coin */
   preSwapTransfer?: PreSwapTransfer;
+
+  /** Output amount after swap from home coin */
+  postSwapTransfer?: PostSwapTransfer;
 }
 
 export interface PaymentLinkClog extends OpEventBase {
@@ -150,7 +156,7 @@ export interface PaymentLinkClog extends OpEventBase {
 //   memo?: string;
 // }
 
-export interface KeyRotationOpEvent extends OpEventBase {
+export interface KeyRotationClog extends OpEventBase {
   type: "keyRotation";
 
   slot: number;
@@ -206,7 +212,9 @@ export type DaimoAccountCall = {
 // If the op claims a payment link, from = sender, to = claimer.
 export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   if (op.type === "transfer") {
-    return [op.from, op.to];
+    const from = op.preSwapTransfer?.from || op.from;
+    const to = op.postSwapTransfer?.to || op.to;
+    return [from, to];
   } else if (op.type === "claimLink" || op.type === "createLink") {
     // Self-transfer via payment link shows up as two payment link transfers
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
@@ -232,7 +240,8 @@ export function getSynthesizedMemo(
   chainConfig: ChainConfig,
   short?: boolean
 ) {
-  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  // TODO: use home coin from account
+  const homeCoinSymbol = chainConfig.tokenSymbol.toUpperCase();
 
   if (op.memo) return op.memo;
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
@@ -241,15 +250,19 @@ export function getSynthesizedMemo(
   if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
   } else if (op.type === "transfer" && op.preSwapTransfer) {
-    const otherCoin = op.preSwapTransfer.coin;
-    const readableAmount = getForeignCoinDisplayAmount(
-      op.preSwapTransfer.amount,
-      otherCoin
-    );
+    const { amount, coin } = op.preSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
     return short
-      ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
-      : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
+      ? `${readableAmount} ${coin.symbol} → ${homeCoinSymbol}`
+      : `Accepted ${readableAmount} ${coin.symbol} as ${homeCoinSymbol}`;
+  } else if (op.type === "transfer" && op.postSwapTransfer) {
+    const { amount, coin } = op.postSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+    return short
+      ? `${homeCoinSymbol} → ${readableAmount} ${coin.symbol}`
+      : `Sent ${readableAmount} ${coin.symbol}`;
   }
+
   // TODO: postSwapTransfer
   //  else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
   //   const otherCoin = op.coinOther;
