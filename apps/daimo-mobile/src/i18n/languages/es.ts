@@ -720,7 +720,7 @@ export const es = {
   // OnboardingChecklistBottomSheet.tsx
   onboardingChecklistBottom: {
     sheetHeader: () => `Incorporando lista de requisitos`,
-    description: () => `Completa estas acciones para acapar de configurar tu cuenta`,
+    description: () => `Completa estas acciones para acabar de configurar tu cuenta`,
     secureAccount: {
       title: () => `Asegura tu cuenta`,
       description: () => `Añadir un respaldo a tu cuenta`,
