@@ -10,6 +10,7 @@ export const zAddress = z
   .regex(/^0x[0-9a-f]{40}$/i)
   .refine((s): s is Address => true);
 
+// Don't edit these for backcompat
 export enum AddrLabel {
   Faucet = "team daimo",
   PaymentLink = "payment link",

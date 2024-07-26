@@ -1,3 +1,5 @@
+import { AddrLabel } from "@daimo/common";
+
 export const en = {
   // Common text components
   shared: {
@@ -444,10 +446,13 @@ export const en = {
   // DepositScreen.tsx
   deposit: {
     screenHeader: () => `Deposit or Withdraw`,
+    go: () => `Go`,
+    continue: () => `Continue`,
     landline: {
       cta: () => `Connect with Landline`,
       title: () => `Deposit or withdraw directly from a US bank account`,
       optionRowTitle: (timeAgo: string) => `Connected ${timeAgo} ago`,
+      startTransfer: () => `Start transfer`,
     },
     binance: {
       cta: () => `Deposit from Binance`,
@@ -765,11 +770,7 @@ export const en = {
   // -------------------------- MISC --------------------------
   // AddrLabels for account history contacts
   addrLabel: {
-    faucet: () => `team Daimo`,
-    paymentLink: () => `payment link`,
-    requestLink: () => `request link`,
-    paymaster: () => `fee`,
-    uniswapETHPool: () => `swapped ETH`,
+    label: (type: AddrLabel) => displayAddrLabel(type),
   },
 
   tabNav: {
@@ -784,4 +785,32 @@ export const en = {
 function pluralize(n: number, noun: string) {
   if (n === 1) return `${n} ${noun}`; // "1 apple"
   return `${n} ${noun}s`; // "0 apples" or "2 apples"
+}
+
+// Addr label display function
+function displayAddrLabel(type: AddrLabel): string {
+  switch (type) {
+    case AddrLabel.Faucet:
+      return `team Daimo`;
+    case AddrLabel.PaymentLink:
+      return `payment link`;
+    case AddrLabel.RequestLink:
+      return `request link`;
+    case AddrLabel.Paymaster:
+      return `fee`;
+    case AddrLabel.Coinbase:
+      return `coinbase`;
+    case AddrLabel.Relay:
+      return `relay.link`;
+    case AddrLabel.LiFi:
+      return `li.fi bridge`;
+    case AddrLabel.UniswapETHPool:
+      return `swapped ETH`;
+    case AddrLabel.Binance:
+      return `binance`;
+    case AddrLabel.FastCCTP:
+      return `instant cross-chain`;
+    default:
+      throw new Error(`Invalid AddrLabel: ${type}`);
+  }
 }

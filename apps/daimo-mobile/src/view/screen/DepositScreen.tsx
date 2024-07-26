@@ -328,10 +328,12 @@ function LandlineOptionRow({
       </View>
       <View style={styles.optionRowRight}>
         {isAccount ? (
-          <TextBody color={color.primary}>Start transfer</TextBody>
+          <TextBody color={color.primary}>
+            {i18.landline.startTransfer()}
+          </TextBody>
         ) : (
           <TextBody color={color.primary}>
-            Go{"  "}
+            {i18.go()}
             <Octicons name="link-external" />
           </TextBody>
         )}
@@ -368,12 +370,12 @@ function OptionRow({
     if (isExternal) {
       return (
         <TextBody color={color.primary}>
-          Go{"  "}
+          {i18.go()}
           <Octicons name="link-external" />
         </TextBody>
       );
     } else {
-      return <TextBody color={color.primary}>Continue</TextBody>;
+      return <TextBody color={color.primary}>{i18.continue()}</TextBody>;
     }
   })();
 
