@@ -926,6 +926,186 @@
           ]
         }
       ]
+    },
+    {
+      "name": "daimo_addr_reg",
+      "enabled": true,
+      "sources": [
+        {
+          "name": "base",
+          "start": "$BASE_START_BLOCK"
+        },
+        {
+          "name": "optimism",
+          "start": "$OPTIMISM_START_BLOCK"
+        },
+        {
+          "name": "arbitrum",
+          "start": "$ARBITRUM_START_BLOCK"
+        },
+        {
+          "name": "polygon",
+          "start": "$POLYGON_START_BLOCK"
+        },
+        {
+          "name": "avalanche",
+          "start": "$AVAX_START_BLOCK"
+        },
+        {
+          "name": "ethereum",
+          "start": "$ETH_START_BLOCK"
+        }
+      ],
+      "table": {
+        "name": "daimo_addr_reg",
+        "columns": [
+          {
+            "name": "addr",
+            "type": "bytea"
+          },
+          {
+            "name": "block_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "block_num",
+            "type": "numeric"
+          },
+          {
+            "name": "chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "tx_hash",
+            "type": "bytea"
+          },
+          {
+            "name": "log_addr",
+            "type": "bytea"
+          },
+          {
+            "name": "log_idx",
+            "type": "numeric"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "version",
+            "type": "numeric"
+          },
+          {
+            "name": "home_chain_id",
+            "type": "numeric"
+          },
+          {
+            "name": "home_coin",
+            "type": "bytea"
+          },
+          {
+            "name": "swapper",
+            "type": "bytea"
+          },
+          {
+            "name": "bridger",
+            "type": "bytea"
+          },
+          {
+            "name": "keyslot",
+            "type": "bytea"
+          },
+          {
+            "name": "key",
+            "type": "bytea"
+          },
+          {
+            "name": "salt",
+            "type": "bytea"
+          }
+        ]
+      },
+      "block": [
+        {
+          "name": "chain_id",
+          "column": "chain_id"
+        },
+        {
+          "name": "block_num",
+          "column": "block_num"
+        },
+        {
+          "name": "block_hash",
+          "column": "block_hash"
+        },
+        {
+          "name": "tx_idx",
+          "column": "tx_idx"
+        },
+        {
+          "name": "tx_hash",
+          "column": "tx_hash"
+        },
+        {
+          "name": "log_addr",
+          "column": "log_addr",
+          "filter_arg": [
+            "0xD65245e5e40FB7bf2935aa922AF223a888523353"
+          ]
+        }
+      ],
+      "event": {
+        "name": "CreateAccount",
+        "type": "event",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "account",
+            "type": "address",
+            "column": "addr",
+            "indexed": true
+          },
+          {
+            "name": "homeChain",
+            "type": "uint256",
+            "column": "home_chain_id"
+          },
+          {
+            "name": "homeCoin",
+            "type": "address",
+            "column": "home_coin"
+          },
+          {
+            "name": "swapper",
+            "type": "address",
+            "column": "swapper"
+          },
+          {
+            "name": "bridger",
+            "type": "address",
+            "column": "bridger"
+          },
+          {
+            "name": "keyslot",
+            "type": "uint8",
+            "column": "keyslot"
+          },
+          {
+            "name": "key",
+            "type": "bytes32[2]",
+            "column": "key"
+          },
+          {
+            "name": "salt",
+            "type": "uint256",
+            "column": "salt"
+          }
+        ]
+      }
     }
   ]
 }

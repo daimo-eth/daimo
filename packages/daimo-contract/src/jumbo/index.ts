@@ -6,6 +6,7 @@ import {
   makeAllSourceConfigs,
   testnetChains,
 } from "./chainConfig";
+import { daimoAccV2Integration } from "./daimoAccReg";
 import { erc20TransfersIntegration } from "./erc20Transfers";
 import { ethTransfersIntegration } from "./ethTransfers";
 import {
@@ -20,6 +21,7 @@ const integrationsFuncs = [
   fastFinishCCTPIntegration,
   claimCCTPIntegration,
   ethTransfersIntegration,
+  daimoAccV2Integration,
 ];
 
 // Mainnet jumbo config
