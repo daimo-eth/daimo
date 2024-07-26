@@ -140,7 +140,7 @@ export const es = {
   send_note: {
     title: () => `Enviar link`,
     help: {
-      title: () => `Aprende como`,
+      title: () => `Aprenda como`,
       subtitle: () => `Cómo funcionan los links de pago`,
       description: {
         firstPara: () =>
@@ -476,7 +476,7 @@ export const es = {
   // HomeScreen.tsx
   home: {
     pending: (pendingDollars: string) => `+ $${pendingDollars} PENDIENTE`,
-    finishAccountSetUp: () => `Terminar de configurar su cuenta`,
+    finishAccountSetUp: () => `Terminar de configurar cuenta`,
   },
   // InviteScreen.tsx
   invite: {
@@ -486,7 +486,7 @@ export const es = {
       `Has invitado a ${pluralize(invited, "amigo")}`,
     left: ({usesLeft}: {usesLeft: number}) => `${usesLeft} ${pluralize( usesLeft,"invitación")} ${pluralize(usesLeft,"restantes")}`,
     locked: {
-      header: () => `Invita tus amigos y consigue USDC!`,
+      header: () => `Invita tus amigos y gana USDC!`,
       description: () =>
         `Usa Daimo más para desbloquear invitaciones. Incorpore sus contactos enviando un link de Pago.`,
     },
