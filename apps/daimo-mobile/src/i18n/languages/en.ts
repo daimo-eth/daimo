@@ -1,4 +1,6 @@
-export const en = {
+import { LanguageDefinition } from "../generate/languageDefinition";
+
+export const en: LanguageDefinition = {
   // Common text components
   shared: {
     buttonStatus: {
@@ -51,7 +53,7 @@ export const en = {
     whyNoFees: {
       title: () => `About this transfer`,
       description: {
-        firstPara: ({ chainName }: { chainName: string }) =>
+        firstPara: (chainName: string) =>
           `This transaction settled on ${chainName}, an Ethereum rollup.`,
         secondPara: () =>
           `Rollups inherit the strong security guarantees of Ethereum, at lower cost.`,
@@ -62,7 +64,7 @@ export const en = {
     feeText: {
       free: () => `FREE`,
       pending: () => `PENDING`,
-      fee: ({ amount }: { amount: string }) => `${amount} FEE`,
+      fee: (amount: string) => `${amount} FEE`,
     },
   },
 
@@ -484,9 +486,9 @@ export const en = {
   invite: {
     screenHeader: () => `Invite Friends`,
     more: (moreInvitees: number) => `+${moreInvitees} more`,
-    invited: ({ invited }: { invited: number }) =>
+    invited: (invited: number) =>
       `You've invited ${pluralize(invited, "friend")}`,
-    left: ({ usesLeft }: { usesLeft: number }) =>
+    left: (usesLeft: number) =>
       `${usesLeft} ${pluralize(usesLeft, "invite")} left`,
     locked: {
       header: () => `Invite your friends and earn USDC!`,

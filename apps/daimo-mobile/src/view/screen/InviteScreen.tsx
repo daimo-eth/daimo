@@ -160,7 +160,7 @@ function HeaderCountText({
           children={({ pressed }) => (
             <TextCenter>
               <TextBody color={pressed ? color.primaryBgLight : color.primary}>
-                {i18.invited({ invited: invitees?.length })}
+                {i18.invited(invitees?.length)}
               </TextBody>
             </TextCenter>
           )}

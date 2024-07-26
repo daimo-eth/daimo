@@ -285,9 +285,7 @@ function showHelpWhyNoFees(
     title: i18.whyNoFees.title(),
     content: (
       <View style={ss.container.padH8}>
-        <TextPara>
-          {i18.whyNoFees.description.firstPara({ chainName })}
-        </TextPara>
+        <TextPara>{i18.whyNoFees.description.firstPara(chainName)}</TextPara>
         <Spacer h={24} />
         <TextPara>{i18.whyNoFees.description.secondPara()}</TextPara>
         <Spacer h={24} />
@@ -308,5 +306,5 @@ function getFeeText(amount?: number) {
   }
   return amount === 0
     ? i18.feeText.free()
-    : feeStr + " " + i18.feeText.fee({ amount: feeStr });
+    : feeStr + " " + i18.feeText.fee(feeStr);
 }
