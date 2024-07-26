@@ -310,7 +310,7 @@ export const es = {
       },
       everywhere: {
         title: () => `Funciona en todas partes`,
-        description: () => `Instantáneo, 24/7 envíos a cuelquier contacto`,
+        description: () => `Instantáneo, 24/7 envíos a cualquier contacto`,
       },
       onEthereum: {
         title: () => `Se ejecuta en Ethereum`,
@@ -699,7 +699,7 @@ export const es = {
   debugBottom: {
     sheetHeader: () => `Algo salió mal?`,
     description: () =>
-      `Contactanos por Telegram, luego haz click en Enviar Log para enviarnos más información. Llegaremos al fondo del asunto.`,
+      `Contáctanos por Telegram, luego haz click en Enviar Log para enviarnos más información. Llegaremos al fondo del asunto.`,
     helpButton: () => `CONTACTAR SOPORTE`,
   },
   // DepositAddressBottomSheet.tsx
