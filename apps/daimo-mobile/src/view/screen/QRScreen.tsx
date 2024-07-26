@@ -27,6 +27,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { decodeQR } from "../../logic/decodeQR";
 import { TextButton } from "../shared/Button";
@@ -40,12 +41,14 @@ import { color, ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "QR">;
+const i18 = i18n.qr;
 
 export function QRScreen(props: Props) {
   const { option } = props.route.params;
   const [tab, setTab] = useState<QRScreenOptions>(option || "PAY ME");
   const tabs = useRef(["PAY ME", "SCAN"] as QRScreenOptions[]).current;
-  const title = tab === "PAY ME" ? "Display QR Code" : "Scan QR Code";
+
+  const title = tab === "PAY ME" ? i18.title.display() : i18.title.scan();
 
   const goBack = useExitBack();
   const goHome = useExitToHome();
@@ -71,7 +74,7 @@ function QRDisplay() {
   const url = formatDaimoLink({ type: "account", account: account.name });
 
   const subtitle = recentlyCopied
-    ? "Copied address"
+    ? i18.copiedAddress()
     : getAddressContraction(account.address);
 
   const onLongPress = () => {
@@ -106,7 +109,7 @@ function QRDisplay() {
         <ShareButton name={account.name} />
       </View>
       <View style={styles.accountShare}>
-        <TextButton title="DEPOSIT FROM EXCHANGE ›" onPress={goToDeposit} />
+        <TextButton title={i18.depositButton()} onPress={goToDeposit} />
       </View>
     </View>
   );

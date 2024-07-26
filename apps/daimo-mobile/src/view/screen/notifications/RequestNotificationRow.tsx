@@ -19,6 +19,7 @@ import {
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
@@ -26,6 +27,8 @@ import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
+
+const i18 = i18n.requestNotification;
 
 export function RequestNotificationRow({
   notif,
@@ -53,7 +56,7 @@ export function RequestNotificationRow({
       ? notif.request.recipient
       : notif.request.expectedFulfiller || requestLinkContact;
 
-  const ts = timeAgo(notif.timestamp, now(), true);
+  const ts = timeAgo(notif.timestamp, getI18NLocale(), now(), true);
   const dispatcher = useContext(DispatcherContext);
 
   const onPress =
@@ -132,61 +135,77 @@ function RequestNotificationMessage({
   otherAcc: EAccount;
   reqStatus: DaimoRequestV2Status;
 }) {
+  const locale = getI18NLocale();
   const otherAccVerb =
     otherAcc.label === AddrLabel.RequestLink
-      ? "via"
+      ? i18.msgVerb.via()
       : type === "recipient"
-      ? "from"
-      : "for";
+      ? i18.msgVerb.from()
+      : i18.msgVerb.for();
 
   const otherAccText = (
-    <TextBody color={color.midnight}>{getAccountName(otherAcc)}</TextBody>
+    <TextBody color={color.midnight}>
+      {getAccountName(otherAcc, locale)}
+    </TextBody>
   );
 
   const dollars = (
     <TextBody color={color.midnight}>${reqStatus.link.dollars}</TextBody>
   );
-
+  const requestStr = i18.requestState.request();
   switch (reqStatus.status) {
     case DaimoRequestState.Pending:
     case DaimoRequestState.Created:
       return type === "recipient" ? (
+        // You requested...
         <>
-          You requested {dollars} {otherAccVerb} {otherAccText}
+          {i18.requestState.created.self()} {dollars} {otherAccVerb}{" "}
+          {otherAccText}
         </>
       ) : (
+        // ...requested $
         <>
-          {otherAccText} requested {dollars}
+          {otherAccText} {i18.requestState.created.other()} {dollars}
         </>
       );
     case DaimoRequestState.Fulfilled:
       return type === "recipient" ? (
+        // ... fulfilled your $ request
         <>
-          {otherAccText} fulfilled your {dollars} request
+          {otherAccText} {i18.requestState.fulfilled.self()} {dollars}{" "}
+          {requestStr}
         </>
       ) : (
+        // You fulfilled a request from {otherAccText} for $
         <>
-          You fulfilled {otherAccText}'s {dollars} request
+          {i18.requestState.fulfilled.other()} {otherAccText}{" "}
+          {i18.msgVerb.for()} {dollars}
         </>
       );
     case DaimoRequestState.Cancelled:
       return type === "recipient" ? (
+        // You cancelled your $ request
         <>
-          You cancelled your {dollars} request {otherAccVerb} {otherAccText}
+          {i18.requestState.cancelled.self()} {dollars} {requestStr}{" "}
+          {otherAccVerb} {otherAccText}
         </>
       ) : (
+        // ...cancelled their request for $
         <>
-          {otherAccText} cancelled their {dollars} request
+          {otherAccText} {i18.requestState.cancelled.other()} {dollars}
         </>
       );
     case DaimoRequestState.Declined:
       return type === "recipient" ? (
+        /// ...declined your request for $
         <>
-          {otherAccText} declined your {dollars} request
+          {otherAccText} {i18.requestState.declined.self()} {dollars}
         </>
       ) : (
+        // You declined a request from {otherAccText} for $
         <>
-          You declined {otherAccText}'s {dollars} request
+          {i18.requestState.declined.other()} {otherAccText} {i18.msgVerb.for()}{" "}
+          {dollars}
         </>
       );
   }

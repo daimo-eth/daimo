@@ -20,6 +20,7 @@ import {
   handleOnboardingDeepLink,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useAccountAndKeyInfo,
@@ -37,6 +38,7 @@ import {
 } from "../../shared/text";
 
 const isAndroid = Platform.OS === "android";
+const i18 = i18n.onboardingIntro;
 
 export function OnboardingIntroScreen() {
   const dc = useDaimoChain();
@@ -92,12 +94,12 @@ export function OnboardingIntroScreen() {
         <View style={styles.introButtonsWrap}>
           <ButtonBig
             type="primary"
-            title="ACCEPT INVITE"
+            title={i18.acceptInviteButton()}
             onPress={pasteInviteLink}
           />
           <Spacer h={16} />
           <TextButton
-            title="ALREADY HAVE AN ACCOUNT?"
+            title={i18.alreadyHaveAccountButton()}
             onPress={goToUseExisting}
           />
           <Spacer h={16} />
@@ -116,23 +118,27 @@ const icons = {
 function IntroRows() {
   return (
     <View style={styles.introRows}>
-      <IntroRow icon="intro-your-keys" title="Your keys, your coins">
-        <TextBody color={color.gray3}>USDC on Base.</TextBody>
+      <IntroRow icon="intro-your-keys" title={i18.rows.selfCustody.title()}>
+        <TextBody color={color.gray3}>
+          {i18.rows.selfCustody.description()}
+        </TextBody>
         <HelpButton
-          title="Learn more"
-          helpTitle="How does USDC work?"
+          title={i18.rows.help.button()}
+          helpTitle={i18.rows.help.description()}
           helpContent={<HelpModalUSDC />}
         />
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-everywhere" title="Works everywhere">
+      <IntroRow icon="intro-everywhere" title={i18.rows.everywhere.title()}>
         <TextBody color={color.gray3}>
-          Instant, 24/7 transfers to any contact
+          {i18.rows.everywhere.description()}
         </TextBody>
       </IntroRow>
       <Spacer h={16} />
-      <IntroRow icon="intro-on-ethereum" title="Runs on Ethereum">
-        <TextBody color={color.gray3}>Daimo runs on Base, a rollup</TextBody>
+      <IntroRow icon="intro-on-ethereum" title={i18.rows.onEthereum.title()}>
+        <TextBody color={color.gray3}>
+          {i18.rows.onEthereum.description()}
+        </TextBody>
       </IntroRow>
     </View>
   );
@@ -166,17 +172,14 @@ function IntroRow({
 function HelpModalUSDC() {
   return (
     <View>
-      <TextLight>
-        USDC is a regulated, digital currency that can always be redeemed 1:1
-        for US dollars.
-      </TextLight>
+      <TextLight>{i18.helpModalUSDC.description()}</TextLight>
       <Spacer h={24} />
       <TextLight>
-        Learn more about USDC{" "}
+        {i18.helpModalUSDC.learnMore()}
         <TextLink
           onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
         >
-          here
+          {i18.helpModalUSDC.here()}
         </TextLink>
         .
       </TextLight>

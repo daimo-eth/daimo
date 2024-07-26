@@ -1,8 +1,10 @@
 import { ChainConfig } from "@daimo/contract";
+import { Locale } from "expo-localization";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
 import { ForeignToken, getForeignCoinDisplayAmount } from "./foreignToken";
+import { i18n } from "./i18n";
 import { BigIntStr } from "./model";
 
 /**
@@ -235,8 +237,10 @@ export function getDisplayFromTo(op: TransferClog): [Address, Address] {
 export function getSynthesizedMemo(
   op: TransferClog,
   chainConfig: ChainConfig,
+  locale?: Locale,
   short?: boolean
 ) {
+  const i18 = i18n(locale).op;
   // TODO: use home coin from account
   const homeCoinSymbol = chainConfig.tokenSymbol.toUpperCase();
 
@@ -251,13 +255,13 @@ export function getSynthesizedMemo(
     const readableAmount = getForeignCoinDisplayAmount(amount, coin);
     return short
       ? `${readableAmount} ${coin.symbol} → ${homeCoinSymbol}`
-      : `Accepted ${readableAmount} ${coin.symbol} as ${homeCoinSymbol}`;
+      : i18.acceptedInboundSwap(readableAmount, coin.symbol, homeCoinSymbol);
   } else if (op.type === "transfer" && op.postSwapTransfer) {
     const { amount, coin } = op.postSwapTransfer;
     const readableAmount = getForeignCoinDisplayAmount(amount, coin);
     return short
       ? `${homeCoinSymbol} → ${readableAmount} ${coin.symbol}`
-      : `Sent ${readableAmount} ${coin.symbol}`;
+      : i18.sentOutboundSwap(readableAmount, coin.symbol);
   }
 
   // TODO: postSwapTransfer

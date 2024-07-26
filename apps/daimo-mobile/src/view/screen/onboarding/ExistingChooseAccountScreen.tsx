@@ -4,6 +4,7 @@ import { Platform, ScrollView, StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
 import { useExitBack, useOnboardingNav } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import { getRpcHook } from "../../../logic/trpc";
 import { useKeyboardHeight } from "../../../vendor/useKeyboardHeight";
@@ -14,8 +15,11 @@ import { ErrorRowCentered } from "../../shared/error";
 import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter, TextLight } from "../../shared/text";
 
+const i18 = i18n.existingChooseAccount;
+
 export function ExistingChooseAccountScreen() {
   const nav = useOnboardingNav();
+
   const setEAcc = useCallback(
     (targetEAcc: EAccount) => nav.navigate("ExistingUseBackup", { targetEAcc }),
     [nav]
@@ -23,7 +27,7 @@ export function ExistingChooseAccountScreen() {
 
   return (
     <View>
-      <OnboardingHeader title="Load account" onPrev={useExitBack()} />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={useExitBack()} />
       <Spacer h={16} />
       <SelectAccount setEAcc={setEAcc} />
     </View>
@@ -37,13 +41,13 @@ function SelectAccount({ setEAcc }: { setEAcc: (eAcc: EAccount) => void }) {
     <View>
       <View style={ss.container.padH24}>
         <TextBodyMedium color={color.grayMid}>
-          Choose which account you're logging in to.
+          {i18.selectAccount.description()}
         </TextBodyMedium>
         <Spacer h={16} />
         <InputBig
           autoFocus
           icon="search"
-          placeholder="Enter username..."
+          placeholder={i18.selectAccount.placeholder()}
           value={prefix}
           onChange={setPrefix}
         />
@@ -98,7 +102,7 @@ function NoSearchResults() {
     <View>
       <Spacer h={16} />
       <TextCenter>
-        <TextLight>No results</TextLight>
+        <TextLight>{i18.searchResults.empty()}</TextLight>
       </TextCenter>
     </View>
   );

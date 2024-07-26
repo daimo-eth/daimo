@@ -25,6 +25,7 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -50,6 +51,8 @@ interface transferClogRenderObject {
   id: string;
   op: TransferClog;
 }
+
+const i18 = i18n.historyList;
 
 export function HistoryListSwipe({
   account,
@@ -84,7 +87,7 @@ export function HistoryListSwipe({
       <View>
         <Spacer h={16} />
         <TextCenter>
-          <TextLight>No transactions yet</TextLight>
+          <TextLight>{i18.empty()}</TextLight>
         </TextCenter>
       </View>
     );
@@ -101,7 +104,8 @@ export function HistoryListSwipe({
 
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
-    const title = otherAcc == null ? "Recent activity" : `Between you`;
+    const title =
+      otherAcc == null ? i18.screenHeader.default() : i18.screenHeader.other();
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />
@@ -178,6 +182,7 @@ function TransferClogRow({
   showDate?: boolean;
 }) {
   const address = account.address;
+  const locale = getI18NLocale();
 
   assert(transferClog.amount > 0);
   const [from, to] = getDisplayFromTo(transferClog);
@@ -207,7 +212,7 @@ function TransferClogRow({
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
-  let opTitle = getAccountName(otherAcc);
+  let opTitle = getAccountName(otherAcc, locale);
   if (
     opTitle === AddrLabel.PaymentLink &&
     transferClog.type === "claimLink" &&
@@ -215,12 +220,13 @@ function TransferClogRow({
     transferClog.noteStatus.claimer?.addr === address
   ) {
     // Special case: we cancelled our own payment link
-    opTitle = "cancelled link";
+    opTitle = i18.op.cancelledLink();
   }
 
   const opMemo = getSynthesizedMemo(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
+    getI18NLocale(),
     true
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
@@ -286,7 +292,7 @@ function TransferAmountDate({
 
   let timeStr: string;
   if (isPending) {
-    timeStr = "Pending";
+    timeStr = i18.op.pending();
   } else if (showDate) {
     timeStr = new Date(timestamp * 1000).toLocaleString("default", {
       month: "numeric",
@@ -294,7 +300,7 @@ function TransferAmountDate({
     });
   } else {
     const nowS = now();
-    timeStr = timeAgo(timestamp, nowS);
+    timeStr = timeAgo(timestamp, getI18NLocale(), nowS);
   }
 
   const textCol = isPending ? color.gray3 : color.midnight;

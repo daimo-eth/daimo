@@ -7,6 +7,7 @@ import { useSafeAreaFrame } from "react-native-safe-area-context";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { AddKeySlotButton } from "../screen/keyRotation/AddKeySlotButton";
 import { Badge } from "../shared/Badge";
@@ -16,6 +17,8 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color } from "../shared/style";
 import { TextBody, TextCenter, TextH3 } from "../shared/text";
+
+const i18 = i18n.createBackup;
 
 export function CreateBackupSheet() {
   const [step, setStep] = useState<0 | 1>(0);
@@ -41,11 +44,13 @@ function AddKeyButton({ slotType }: { slotType: SlotType }) {
   const isPasskey = slotType === SlotType.PasskeyBackup;
   const isSecurityKey = slotType === SlotType.SecurityKeyBackup;
   assert(isPasskey || isSecurityKey, "Unknown slot type");
-  const slotTypeStr = isPasskey ? "PASSKEY" : "SECURITY KEY";
+  const slotTypeStr = isPasskey
+    ? i18.addKey.passkey()
+    : i18.addKey.securityKey();
 
   return (
     <AddKeySlotButton
-      buttonTitle={`BACK UP WITH ${slotTypeStr}`}
+      buttonTitle={`${i18.addKey.button(slotTypeStr)}`}
       account={account}
       slot={slot}
     />
@@ -60,21 +65,25 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
       style={{ paddingHorizontal: 24 }}
     >
       <TextCenter>
-        <TextH3>Create a backup</TextH3>
+        <TextH3>{i18.default.header()}</TextH3>
       </TextCenter>
       <Spacer h={16} />
       <View style={styles.separator} />
       <Spacer h={16} />
-      <BackupOptionRow icon="key" title="Set up a passkey backup" recommended />
+      <BackupOptionRow
+        icon="key"
+        title={i18.default.passkeyTitle()}
+        recommended
+      />
       <Spacer h={16} />
-      <BulletRow text="Convenient, secure, and resistant to phishing" />
-      <BulletRow text="Stored by your password manager, like iCloud Keychain or 1Password" />
+      <BulletRow text={i18.default.passkeyBullet1()} />
+      <BulletRow text={i18.default.passkeyBullet2()} />
       <Spacer h={24} />
       <AddKeyButton slotType={SlotType.PasskeyBackup} />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title="Back up offline instead"
+        title={i18.default.offlineInsteadButton()}
         onPress={() => setStep(1)}
       />
     </Animated.View>
@@ -113,7 +122,7 @@ function OfflineBackupContent({
       style={{ paddingHorizontal: 24 }}
     >
       <ScreenHeader
-        title="Create an offline backup"
+        title={i18.offline.header()}
         onBack={() => setStep(0)}
         hideOfflineHeader
       />
@@ -121,9 +130,9 @@ function OfflineBackupContent({
       <Spacer h={20} />
       {Platform.OS !== "android" && (
         <>
-          <BackupOptionRow icon="key" title="Set up a security key backup" />
+          <BackupOptionRow icon="key" title={i18.offline.securityKeyTitle()} />
           <Spacer h={16} />
-          <BulletRow text="Use a physical FIDO key, such as a YubiKey" />
+          <BulletRow text={i18.offline.securityKeyBullet1()} />
           <Spacer h={24} />
           <AddKeyButton slotType={SlotType.SecurityKeyBackup} />
           <Spacer h={20} />
@@ -131,13 +140,13 @@ function OfflineBackupContent({
           <Spacer h={20} />
         </>
       )}
-      <BackupOptionRow icon="comment" title="Set up a seed phrase" />
+      <BackupOptionRow icon="comment" title={i18.offline.seedPhraseTitle()} />
       <Spacer h={16} />
-      <BulletRow text="Your funds are connected to a phrase you can store securely" />
+      <BulletRow text={i18.offline.seedPhraseBullet1()} />
       <Spacer h={24} />
       <ButtonBig
         type="subtle"
-        title="Backup with seed phrase"
+        title={i18.offline.seedPhraseButton()}
         onPress={goToSeedPhrase}
       />
     </Animated.View>
@@ -167,7 +176,7 @@ function BackupOptionRow({
         <>
           <Spacer w={12} />
           <Badge color={color.primary}>
-            {isCompact ? "REC." : "RECOMMENDED"}
+            {isCompact ? i18.recommended.compact() : i18.recommended.default()}
           </Badge>
         </>
       )}

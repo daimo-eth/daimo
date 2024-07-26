@@ -18,6 +18,7 @@ import {
 
 import InviteBackground from "../../../assets/invite-background.png";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { shareURL } from "../../logic/externalAction";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
@@ -38,6 +39,8 @@ import {
   TextLight,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.invite;
 
 export function InviteScreen() {
   const Inner = useWithAccount(InviteScreenInner);
@@ -114,7 +117,7 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
         <>
           <Spacer w={8} />
           <PressableText
-            text={`+${moreInvitees} more`}
+            text={i18.more(moreInvitees)}
             onPress={() => nav.push("YourInvites")}
             hitSlop={16}
           />
@@ -157,8 +160,7 @@ function HeaderCountText({
           children={({ pressed }) => (
             <TextCenter>
               <TextBody color={pressed ? color.primaryBgLight : color.primary}>
-                You've invited {invitees?.length}{" "}
-                {invitees?.length === 1 ? "friend" : "friends"}
+                {i18.invited(invitees?.length)}
               </TextBody>
             </TextCenter>
           )}
@@ -176,16 +178,14 @@ function HeaderCountText({
   );
 }
 
-const headerTitle = "Invite your friends and earn USDC!";
-
 function LockedHeader() {
   return (
     <View>
-      <ScreenHeader title="Invite Friends" />
+      <ScreenHeader title={i18.screenHeader()} />
       <HeaderGraphic />
       <Spacer h={32} />
       <TextCenter>
-        <TextH2>{headerTitle}</TextH2>
+        <TextH2>{i18.locked.header()}</TextH2>
       </TextCenter>
     </View>
   );
@@ -207,13 +207,10 @@ function LockedFooter() {
       </TextCenter>
       <Spacer h={32} />
       <TextCenter>
-        <TextBody color={color.gray3}>
-          Use Daimo more to unlock invites. Send a payment link to onboard your
-          contacts.
-        </TextBody>
+        <TextBody color={color.gray3}>{i18.locked.description()}</TextBody>
       </TextCenter>
       <Spacer h={32} />
-      <ButtonMed type="primary" title="SEND" onPress={goToSend} />
+      <ButtonMed type="primary" title={i18.sendButton()} onPress={goToSend} />
     </View>
   );
 }
@@ -227,7 +224,7 @@ function Header({
 }) {
   return (
     <View>
-      <ScreenHeader title="Invite Friends" />
+      <ScreenHeader title={i18.screenHeader()} />
       <HeaderGraphic invitees={invitees} />
       <Spacer h={8} />
       <HeaderCountText
@@ -236,7 +233,7 @@ function Header({
       />
       <Spacer h={32} />
       <TextCenter>
-        <TextH2>{headerTitle}</TextH2>
+        <TextH2>{i18.locked.header()}</TextH2>
       </TextCenter>
     </View>
   );
@@ -258,17 +255,17 @@ function ReferralButtonsFooter({
       bonusDollarsInviter &&
       bonusDollarsInvitee === bonusDollarsInviter
     ) {
-      return ` and we'll send you both $${bonusDollarsInvitee} USDC`;
+      return i18.referral.bonusBoth(bonusDollarsInvitee);
     } else if (bonusDollarsInvitee) {
-      return ` and we'll send them $${bonusDollarsInvitee} USDC`;
+      return i18.referral.bonusInvitee(bonusDollarsInvitee);
     } else if (bonusDollarsInviter) {
-      return ` and we'll send you $${bonusDollarsInviter} USDC`;
+      return i18.referral.bonusInviter(bonusDollarsInviter);
     } else return "";
   })();
 
   const shareFarcaster = () => {
     console.log(`[INVITE] share on farcaster`);
-    const msg = "Join+me+on+Daimo";
+    const msg = i18.referral.share.farcasterMsg();
     const frameUrl = `https://daimo.com/frame/invite/${account.address}`;
     const url = `https://warpcast.com/~/compose?text=${msg}&embeds[]=${frameUrl}`;
     Linking.openURL(url);
@@ -278,22 +275,20 @@ function ReferralButtonsFooter({
     <View>
       <Spacer h={32} />
       <TextCenter>
-        <TextLight>
-          You'll get credit for the invite on their profile{bonusSubtitle}
-        </TextLight>
+        <TextLight>{i18.referral.creditForInvite(bonusSubtitle)}</TextLight>
       </TextCenter>
       <Spacer h={32} />
       <View style={styles.referralButtons}>
         <View style={styles.referralHalfScreen}>
           <TextCenter>
-            <TextLight>Invite Code</TextLight>
+            <TextLight>{i18.referral.inviteCode()}</TextLight>
           </TextCenter>
           <Spacer h={8} />
           <InviteCodeCopier code={link.code} url={url} />
         </View>
         <View style={styles.referralHalfScreen}>
           <TextCenter>
-            <TextLight>Invite Link</TextLight>
+            <TextLight>{i18.referral.inviteLink()}</TextLight>
           </TextCenter>
           <Spacer h={8} />
           <ButtonBig
@@ -313,7 +308,7 @@ function ReferralButtonsFooter({
             />
             <Spacer w={8} />
             <TextBtnCaps color={color.grayDark}>
-              SHARE FRAME ON FARCASTER
+              {i18.referral.share.farcasterButton()}
             </TextBtnCaps>
           </View>
         </TextButton>

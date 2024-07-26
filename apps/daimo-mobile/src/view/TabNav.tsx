@@ -68,11 +68,13 @@ import {
   useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
+import { i18n } from "../i18n";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
 
 SplashScreen.preventAutoHideAsync();
 
 const { add, multiply } = Animated;
+const i18 = i18n.tabNav;
 
 // Onboarding navigator.
 const OnStack = createStackNavigator<ParamListOnboarding>();
@@ -289,21 +291,29 @@ function getTabOptions(
   };
   switch (route.name) {
     case "DepositTab":
-      return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
+      return {
+        title: i18.deposit(),
+        tabBarIcon: getIcon("plus-circle"),
+        ...opts,
+      };
     case "InviteTab":
-      return { title: "Invite", tabBarIcon: getIcon("mail"), ...opts };
+      return { title: i18.invite(), tabBarIcon: getIcon("mail"), ...opts };
     case "HomeTab":
       return {
-        title: "Home",
+        title: i18.home(),
         tabBarIcon: ({ color }) => {
           return <IconHome color={color} />;
         },
         ...opts,
       };
     case "SendTab":
-      return { title: "Send", tabBarIcon: getIcon("paper-airplane"), ...opts };
+      return {
+        title: i18.send(),
+        tabBarIcon: getIcon("paper-airplane"),
+        ...opts,
+      };
     case "SettingsTab":
-      return { title: "Settings", tabBarIcon: getIcon("gear"), ...opts };
+      return { title: i18.settings(), tabBarIcon: getIcon("gear"), ...opts };
     default:
       assertUnreachable(route.name);
   }

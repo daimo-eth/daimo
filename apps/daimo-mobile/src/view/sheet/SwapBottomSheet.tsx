@@ -19,6 +19,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../action/useSendAsync";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
@@ -28,6 +29,8 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextH3 } from "../shared/text";
+
+const i18 = i18n.swapBottom;
 
 // Bottom sheet for proposed inbound swap
 export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
@@ -82,7 +85,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title="Accept"
+        title={i18.sheetHeader()}
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}

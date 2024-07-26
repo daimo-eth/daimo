@@ -11,12 +11,15 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
+
+const i18 = i18n.swapNotification;
 
 export function SwapNotificationRow({
   notif,
@@ -25,12 +28,13 @@ export function SwapNotificationRow({
   notif: SwapNotification;
   account: Account;
 }) {
+  const locale = getI18NLocale();
   // should be very rare, but we write this defensively
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 
   const dispatcher = useContext(DispatcherContext);
 
-  const ts = timeAgo(notif.timestamp, now(), true);
+  const ts = timeAgo(notif.timestamp, locale, now(), true);
 
   const coin = notif.swap.fromCoin;
   const width = useWindowDimensions().width;
@@ -44,7 +48,7 @@ export function SwapNotificationRow({
     });
   };
 
-  const accName = getAccountName(notif.swap.fromAcc);
+  const accName = getAccountName(notif.swap.fromAcc, locale);
 
   const readableAmount = getForeignCoinDisplayAmount(
     notif.swap.fromAmount,
@@ -54,7 +58,7 @@ export function SwapNotificationRow({
   const copy = (() => {
     return (
       <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-        Accept {readableAmount} {coin.name} from{" "}
+        {i18.msg(readableAmount, coin.name)}
         <TextBody color={color.midnight}>{accName}</TextBody>
       </TextBody>
     );

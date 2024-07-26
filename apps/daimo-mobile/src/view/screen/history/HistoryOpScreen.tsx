@@ -25,6 +25,7 @@ import {
   useNav,
 } from "../../../common/nav";
 import { env } from "../../../env";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
@@ -56,6 +57,8 @@ type Props = NativeStackScreenProps<
 // screen and only display the half screen snap point when the user is on the
 // detail screen.
 export const SetBottomSheetDetailHeight = createContext((height: number) => {});
+
+const i18 = i18n.historyOp;
 
 export function HistoryOpScreen(props: Props) {
   const Inner = useWithAccount(HistoryOpScreenInner);
@@ -109,7 +112,7 @@ function HistoryOpScreenInner({
         {shareLinkAgain && (
           <ButtonBig
             type="subtle"
-            title="SHARE LINK AGAIN"
+            title={i18.shareLinkAgain()}
             onPress={shareLinkAgain}
           />
         )}
@@ -133,12 +136,13 @@ function NoteView({
   note: PaymentLinkClog;
   leaveScreen: () => void;
 }) {
+  const locale = getI18NLocale();
   const daimoChain = daimoChainFromId(account.homeChainId);
   // Strip seed from link
   const link: DaimoLinkNoteV2 = {
     type: "notev2",
     id: note.noteStatus!.id!,
-    sender: getAccountName(note.noteStatus!.sender),
+    sender: getAccountName(note.noteStatus!.sender, locale),
     dollars: amountToDollars(note.amount),
     seed: "",
   };
@@ -174,7 +178,9 @@ function LinkToExplorer({
 
   const openURL = useCallback(() => Linking.openURL(url), [url]);
 
-  return <ButtonBig onPress={openURL} type="subtle" title="VIEW RECEIPT" />;
+  return (
+    <ButtonBig onPress={openURL} type="subtle" title={i18.viewReceipt()} />
+  );
 }
 
 function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
@@ -215,7 +221,8 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
 
   const memoText = getSynthesizedMemo(
     op,
-    env(daimoChainFromId(account.homeChainId)).chainConfig
+    env(daimoChainFromId(account.homeChainId)).chainConfig,
+    getI18NLocale()
   );
 
   return (
@@ -256,13 +263,15 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
   const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
 
   if (isPayLink) {
-    if (sentByUs) return "Created link";
+    if (sentByUs) return i18.opVerb.createdLink();
     const fromUs = op.noteStatus.sender.addr === accountAddress;
-    return fromUs ? "Cancelled link" : "Accepted link";
+    return fromUs ? i18.opVerb.cancelledLink() : i18.opVerb.acceptedLink();
   } else if (isRequestResponse) {
-    return sentByUs ? "Fulfilled request" : "Received request";
+    return sentByUs
+      ? i18.opVerb.fulfilledRequest()
+      : i18.opVerb.receivedRequest();
   } else {
-    return sentByUs ? "Sent" : "Received";
+    return sentByUs ? i18.opVerb.sent() : i18.opVerb.received();
   }
 }
 
@@ -273,22 +282,14 @@ function showHelpWhyNoFees(
 ) {
   dispatcher.dispatch({
     name: "helpModal",
-    title: "About this transfer",
+    title: i18.whyNoFees.title(),
     content: (
       <View style={ss.container.padH8}>
-        <TextPara>
-          This transaction settled on {chainName}, an Ethereum rollup.
-        </TextPara>
+        <TextPara>{i18.whyNoFees.description.firstPara(chainName)}</TextPara>
         <Spacer h={24} />
-        <TextPara>
-          Rollups inherit the strong security guarantees of Ethereum, at lower
-          cost.
-        </TextPara>
+        <TextPara>{i18.whyNoFees.description.secondPara()}</TextPara>
         <Spacer h={24} />
-        <TextPara>
-          Transactions cost a few cents. Daimo sponsored this transfer, making
-          it free.
-        </TextPara>
+        <TextPara>{i18.whyNoFees.description.thirdPara()}</TextPara>
       </View>
     ),
   });
@@ -296,12 +297,14 @@ function showHelpWhyNoFees(
 
 function getFeeText(amount?: number) {
   if (amount == null) {
-    return "PENDING";
+    return i18.feeText.pending();
   }
 
   let feeStr = "$" + amountToDollars(amount);
   if (amount > 0 && feeStr === "$0.00") {
     feeStr = "< $0.01";
   }
-  return amount === 0 ? "FREE" : feeStr + " FEE";
+  return amount === 0
+    ? i18.feeText.free()
+    : feeStr + " " + i18.feeText.fee(feeStr);
 }

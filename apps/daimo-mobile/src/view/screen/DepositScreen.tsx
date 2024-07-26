@@ -23,6 +23,7 @@ import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywher
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
+import { getI18NLocale, i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { landlineAccountToContact } from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
@@ -36,6 +37,8 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextMeta } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 
+const i18 = i18n.deposit;
+
 export default function DepositScreen() {
   const Inner = useWithAccount(DepositScreenInner);
   return <Inner />;
@@ -45,7 +48,7 @@ function DepositScreenInner({ account }: { account: Account }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Deposit or Withdraw" />
+        <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
         <CoverGraphic type="deposit" />
@@ -91,8 +94,8 @@ function LandlineConnect() {
 
   return (
     <LandlineOptionRow
-      cta="Connect with Landline"
-      title="Deposit or withdraw directly from a US bank account"
+      cta={i18.landline.cta()}
+      title={i18.landline.title()}
       // TODO(andrew): Update with real landline logo
       logo={IntroIconEverywhere}
       onClick={openLandline}
@@ -127,7 +130,9 @@ function LandlineAccountList() {
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             cta={`${acc.bankName} ****${acc.lastFour}`}
-            title={`Connected ${timeAgo(accCreatedAtS, nowS)} ago`}
+            title={i18.landline.optionRowTitle(
+              timeAgo(accCreatedAtS, getI18NLocale(), nowS)
+            )}
             // The bank logo is fetched as a base64 string for a png
             logo={
               { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
@@ -183,8 +188,8 @@ function getOnDemandExchanges(
 
   return [
     {
-      cta: "Deposit from Binance",
-      title: "Send from Binance balance",
+      cta: i18.binance.cta(),
+      title: i18.binance.title(),
       logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
       loadingId: progressId,
       isExternal: true,
@@ -217,8 +222,8 @@ function DepositList({ account }: { account: Account }) {
 
   const options: OptionRowProps[] = [
     {
-      cta: "Deposit to address",
-      title: "Send to your address",
+      cta: i18.default.cta(),
+      title: i18.default.title(),
       logo: defaultLogo,
       sortId: 100, // Standin for infinite
       onClick: openAddressDeposit,
@@ -228,7 +233,7 @@ function DepositList({ account }: { account: Account }) {
   if (!isTestnet) {
     options.push(
       ...account.recommendedExchanges.map((rec) => ({
-        title: rec.title || "Loading...",
+        title: rec.title || i18.loading(),
         cta: rec.cta,
         logo: rec.logo || defaultLogo,
         isExternal: true,
@@ -248,8 +253,8 @@ function DepositList({ account }: { account: Account }) {
           <Spacer h={16} />
           <InfoBox
             icon="check"
-            title="Deposit initiated"
-            subtitle="Complete in browser, then funds should arrive in a few minutes."
+            title={i18.initiated.title()}
+            subtitle={i18.initiated.subtitle()}
           />
         </>
       )}
@@ -272,11 +277,11 @@ function WithdrawList() {
 
   return (
     <View style={styles.section}>
-      <TextBody color={color.gray3}>Withdraw</TextBody>
+      <TextBody color={color.gray3}>{i18.withdraw.cta()}</TextBody>
       <Spacer h={16} />
       <OptionRow
-        cta="Withdraw"
-        title="Withdraw to any wallet or exchange"
+        cta={i18.withdraw.cta()}
+        title={i18.withdraw.title()}
         logo={defaultLogo}
         onClick={openAddressWithdraw}
       />
@@ -323,10 +328,12 @@ function LandlineOptionRow({
       </View>
       <View style={styles.optionRowRight}>
         {isAccount ? (
-          <TextBody color={color.primary}>Start transfer</TextBody>
+          <TextBody color={color.primary}>
+            {i18.landline.startTransfer()}
+          </TextBody>
         ) : (
           <TextBody color={color.primary}>
-            Go{"  "}
+            {i18.go()}
             <Octicons name="link-external" />
           </TextBody>
         )}
@@ -363,12 +370,12 @@ function OptionRow({
     if (isExternal) {
       return (
         <TextBody color={color.primary}>
-          Go{"  "}
+          {i18.go()}
           <Octicons name="link-external" />
         </TextBody>
       );
     } else {
-      return <TextBody color={color.primary}>Continue</TextBody>;
+      return <TextBody color={color.primary}>{i18.continue()}</TextBody>;
     }
   })();
 

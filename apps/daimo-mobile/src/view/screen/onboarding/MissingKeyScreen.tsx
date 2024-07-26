@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 import { OnboardingHeader } from "./OnboardingHeader";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useAccountAndKeyInfo,
@@ -12,6 +13,8 @@ import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
 import { TextH3, TextPara } from "../../shared/text";
 import { AccountHeader } from "../SettingsScreen";
+
+const i18 = i18n.missingKey;
 
 export function MissingKeyScreen() {
   const { account, keyInfo } = useAccountAndKeyInfo();
@@ -29,7 +32,7 @@ export function MissingKeyScreen() {
 
   return (
     <View>
-      <OnboardingHeader title="Missing Key" />
+      <OnboardingHeader title={i18.screenHeader()} />
       <View style={styles.paddedPage}>
         <AccountHeader account={account} noLinkedAccounts />
         <Spacer h={32} />
@@ -39,7 +42,7 @@ export function MissingKeyScreen() {
           <TextPara>{desc}</TextPara>
         </View>
         <Spacer h={32} />
-        <ButtonBig type="primary" title="LOG OUT" onPress={logout} />
+        <ButtonBig type="primary" title={i18.logOut()} onPress={logout} />
       </View>
     </View>
   );
@@ -50,21 +53,15 @@ function getKeyErrorDesc(account: Account, keyInfo: EnclaveKeyInfo) {
     `[ONBOARDING] getKeyErrorDesc ${account.name} ${JSON.stringify(keyInfo)}`
   );
   if (keyInfo.pubKeyHex == null) {
-    return [
-      "New phone?",
-      "We found your account, but no device key. Keys in secure hardware " +
-        "never leave your device, so they don't transfer when you get a new " +
-        "phone. Log out, then log in using a backup key.",
-    ];
+    return [i18.keyErrorDesc.noKey.title(), i18.keyErrorDesc.noKey.desc()];
   }
   if (account.accountKeys.find((k) => k.pubKey === keyInfo.pubKeyHex) == null) {
     return [
-      "Device removed",
-      "It looks like the key on this device was removed from your account. " +
-        "Log out, then log in using a backup key.",
+      i18.keyErrorDesc.removedKey.title(),
+      i18.keyErrorDesc.removedKey.desc(),
     ];
   }
-  return ["Unhandled key error", ""];
+  return [i18.keyErrorDesc.unhandledKeyError.title(), ""];
 }
 
 const styles = StyleSheet.create({

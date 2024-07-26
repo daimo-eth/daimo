@@ -18,6 +18,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useDaimoChain,
@@ -36,6 +37,8 @@ import {
   TextBtnCaps,
   TextCenter,
 } from "../../shared/text";
+
+const i18 = i18n.onboardingChooseName;
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
 export function OnboardingChooseNameScreen({ route }: Props) {
@@ -58,7 +61,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
         <OnboardingHeader
-          title="Choose Username"
+          title={i18.screenHeader()}
           onPrev={useExitBack()}
           steps={steps}
           activeStep={steps - 2}
@@ -87,7 +90,7 @@ function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        Choose a username you'll go by on Daimo. Your username is public.
+        {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
@@ -147,7 +150,9 @@ function NamePicker({
               style={{ width: 16, height: 16, zIndex: -1 }}
             />
             <Spacer w={8} />
-            <TextBtnCaps color={color.primary}>GENERATE RANDOM</TextBtnCaps>
+            <TextBtnCaps color={color.primary}>
+              {i18.picker.generateRandom()}
+            </TextBtnCaps>
           </View>
         </TextButton>
       );
@@ -158,9 +163,9 @@ function NamePicker({
     } else if (result.isLoading) {
       return <IconRow color={color.grayMid} title="..." />;
     } else if (result.error) {
-      return <IconRow icon="alert" title="offline?" />;
+      return <IconRow icon="alert" title={i18.picker.error()} />;
     } else if (result.isSuccess && result.data) {
-      return <IconRow icon="alert" title="sorry, that name is taken" />;
+      return <IconRow icon="alert" title={i18.picker.taken()} />;
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true;
       return (
@@ -177,7 +182,7 @@ function NamePicker({
   return (
     <View>
       <InputBig
-        placeholder="choose a username"
+        placeholder={i18.picker.title()}
         value={name}
         onChange={(input) => onChange(input.toLowerCase())}
         center
@@ -188,7 +193,7 @@ function NamePicker({
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="CREATE ACCOUNT"
+        title={i18.picker.createButton()}
         onPress={onChoose}
         disabled={!isAvailable}
       />

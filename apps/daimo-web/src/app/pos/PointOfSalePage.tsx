@@ -233,7 +233,9 @@ function Order({
       </div>
       <div className="w-16 text-right">
         <TextBold textColor="text-midnight">
-          {timeAgo(order.time, now(), true)}
+          {
+            timeAgo(order.time, undefined, now(), true) // TODO: get actual locale from context
+          }
         </TextBold>
         ${Number(link.dollars).toFixed(2)}
       </div>

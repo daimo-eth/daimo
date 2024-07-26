@@ -25,6 +25,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useNav } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { ExternalAction } from "../../../logic/externalAction";
 import { useAvailMessagingApps } from "../../../logic/messagingApps";
 import { Account } from "../../../storage/account";
@@ -33,6 +34,8 @@ import { ButtonBig, LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+
+const i18 = i18n.noteAction;
 
 /** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
 export function NoteActionButton({
@@ -124,7 +127,7 @@ function NoteActionButtonInner({
 
   const sendDisabledReason =
     account.lastBalance < dollarsToAmount(cost.totalDollars)
-      ? "Insufficient funds"
+      ? i18.disabledReason.insufficientFunds()
       : undefined;
   const sendDisabled = sendDisabledReason != null || dollars === 0;
 
@@ -136,9 +139,11 @@ function NoteActionButtonInner({
         if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         }
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
+        return i18.statusMsg.totalDollars(
+          getAmountText({
+            dollars: cost.totalDollars,
+          })
+        );
       case "loading":
         return message;
       case "error":
@@ -172,11 +177,11 @@ function NoteActionButtonInner({
   const externalActionButtonTitle = (function () {
     switch (externalAction.type) {
       case "phoneNumber":
-        return "SEND SMS";
+        return i18.externalAction.sms();
       case "email":
-        return "SEND MAIL";
+        return i18.externalAction.email();
       case "share":
-        return "SEND PAYMENT LINK";
+        return i18.externalAction.paymentLink();
     }
   })();
 
@@ -194,7 +199,7 @@ function NoteActionButtonInner({
         return (
           <LongPressBigButton
             type="primary"
-            title="HOLD TO CONFIRM"
+            title={i18.holdButton()}
             onPress={exec}
             disabled={sendDisabled}
             duration={400}

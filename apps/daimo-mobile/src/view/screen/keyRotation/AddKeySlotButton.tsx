@@ -18,11 +18,14 @@ import { ActivityIndicator } from "react-native";
 import { Hex } from "viem";
 
 import { useSendWithDeviceKeyAsync } from "../../../action/useSendAsync";
+import { getI18NLocale, i18n } from "../../../i18n";
 import { createPasskey } from "../../../logic/passkey";
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { TextCenter, TextError, TextLight } from "../../shared/text";
+
+const i18 = i18n.addKeySlot;
 
 export function AddKeySlotButton({
   account,
@@ -98,12 +101,12 @@ export function AddKeySlotButton({
   const statusMessage = (function () {
     switch (status) {
       case "idle":
-        return formatFeeAmountOrNull(cost.totalDollars);
+        return formatFeeAmountOrNull(getI18NLocale(), cost.totalDollars);
       case "loading":
         return message;
       case "error":
         if (didUserCancel) {
-          return "Cancelled";
+          return i18.userCancelled();
         }
         return <TextError>{message}</TextError>;
       default:

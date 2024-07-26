@@ -20,6 +20,7 @@ import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { getI18NLocale, i18n } from "../../i18n";
 import {
   DaimoContact,
   EAccountContact,
@@ -30,6 +31,8 @@ import {
 import { ContactsAccess } from "../../logic/systemContacts";
 import { Account } from "../../storage/account";
 import { useKeyboardHeight } from "../../vendor/useKeyboardHeight";
+
+const i18 = i18n.searchResults;
 
 export function SearchResults({
   contactsAccess,
@@ -114,12 +117,12 @@ function NoSearchResults() {
     <View>
       <Spacer h={16} />
       <TextCenter>
-        <TextLight>No results</TextLight>
+        <TextLight>{i18.noResults()}</TextLight>
       </TextCenter>
       <Spacer h={32} />
       <ButtonMed
         type="subtle"
-        title="SEND PAYMENT LINK INSTEAD"
+        title={i18.paymentLinkButton()}
         onPress={sendPaymentLink}
       />
     </View>
@@ -192,10 +195,12 @@ export function SearchResultRow({
         const nowS = now();
         const { lastSendTime, lastRecvTime } = contact;
         const lastSendMessage = lastSendTime
-          ? `Sent ${timeAgo(lastSendTime, nowS, true)}`
+          ? `${i18.sentAgo(timeAgo(lastSendTime, getI18NLocale(), nowS, true))}`
           : undefined;
         const lastRecvMessage = lastRecvTime
-          ? `Received ${timeAgo(lastRecvTime, nowS, true)}`
+          ? `${i18.receivedAgo(
+              timeAgo(lastRecvTime, getI18NLocale(), nowS, true)
+            )}`
           : undefined;
 
         if ((lastSendTime || 0) > (lastRecvTime || 0)) {
@@ -256,13 +261,15 @@ function ExtraRows({
     <>
       {!contactsPermission.granted && mode !== "receive" && (
         <ExtraRow
-          title="Send to contact"
+          title={i18.extra.contact()}
           inside={<Octicons name="person" size={14} color={color.primary} />}
           onPress={requestContactsPermission}
         />
       )}
       <ExtraRow
-        title={mode === "receive" ? "Request via link" : "Send via link"}
+        title={
+          mode === "receive" ? i18.extra.requestLink() : i18.extra.sendLink()
+        }
         inside={<Octicons name="link" size={14} color={color.primary} />}
         onPress={() => {
           if (mode === "receive") {
@@ -279,7 +286,7 @@ function ExtraRows({
         }}
       />
       <ExtraRow
-        title={mode === "receive" ? "Show QR code" : "Scan QR code"}
+        title={mode === "receive" ? i18.extra.showQR() : i18.extra.scanQR()}
         inside={<Octicons name="apps" size={14} color={color.primary} />}
         onPress={() => {
           if (mode === "receive") {

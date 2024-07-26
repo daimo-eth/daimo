@@ -22,6 +22,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   BridgeBankAccountContact,
   EAccountContact,
@@ -31,6 +32,8 @@ import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
+
+const i18 = i18n.sendTransferButton;
 
 export function SendTransferButton({
   account,
@@ -117,17 +120,18 @@ export function SendTransferButton({
     ),
   });
 
+  const insufficientFundsStr = i18.disabledReason.insufficientFunds();
   const sendDisabledReason = (function () {
     if (account.lastBalance < dollarsToAmount(cost.totalDollars)) {
-      return "Insufficient funds";
+      return insufficientFundsStr;
     } else if (account.address === recipient.addr) {
-      return "Can't send to yourself";
+      return i18.disabledReason.self();
     } else if (!canSendTo(recipient)) {
-      return "Can't send to this account";
+      return i18.disabledReason.other();
     } else if (Number(dollarsStr) === 0) {
-      return "Enter an amount";
+      return i18.disabledReason.zero();
     } else if (Number(dollarsStr) < minTransferAmount) {
-      return `Minimum transfer amount is ${minTransferAmount} USDC`;
+      return i18.disabledReason.min(minTransferAmount);
     } else {
       return undefined;
     }
@@ -140,7 +144,7 @@ export function SendTransferButton({
       case "error":
         return (
           <LongPressBigButton
-            title="HOLD TO SEND"
+            title={i18.holdButton()}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
@@ -160,16 +164,20 @@ export function SendTransferButton({
       case "idle": {
         const totalStr = getAmountText({ dollars: cost.totalDollars });
         const hasFee = cost.feeDollars > 0;
-        if (sendDisabledReason === "Insufficient funds" && hasFee) {
-          return <TextError>You need at least {totalStr} to send</TextError>;
-        } else if (sendDisabledReason === "Insufficient funds") {
-          return <TextError>Insufficient funds</TextError>;
+        if (sendDisabledReason === insufficientFundsStr && hasFee) {
+          return (
+            <TextError>
+              {i18.statusMsg.insufficientFundsPlusFee(totalStr)}
+            </TextError>
+          );
+        } else if (sendDisabledReason === insufficientFundsStr) {
+          return <TextError>{insufficientFundsStr}</TextError>;
         } else if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
         } else if (hasFee) {
-          return `Total with fees ${totalStr}`;
+          return i18.statusMsg.totalDollars(totalStr);
         } else {
-          return "Payments are public";
+          return i18.statusMsg.paymentsPublic();
         }
       }
       case "loading": {

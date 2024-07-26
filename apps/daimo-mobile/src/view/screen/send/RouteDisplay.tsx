@@ -1,7 +1,10 @@
 import { ForeignToken, ProposedSwap, amountToDollars } from "@daimo/common";
 import { View, StyleSheet } from "react-native";
 
+import { i18n } from "../../../i18n";
 import { TextLight } from "../../shared/text";
+
+const i18 = i18n.routeDisplay;
 
 export function RoutePellet({
   route,
@@ -16,9 +19,7 @@ export function RoutePellet({
 
   return (
     <View style={styles.route}>
-      <TextLight>
-        They will receive {toAmount} {toCoin.symbol}
-      </TextLight>
+      <TextLight>{i18.theyWillReceive(toAmount, toCoin.symbol)}</TextLight>
     </View>
   );
 }

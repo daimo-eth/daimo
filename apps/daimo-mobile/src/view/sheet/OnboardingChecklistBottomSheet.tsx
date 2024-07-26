@@ -2,6 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableHighlight } from "@gorhom/bottom-sheet";
 import { StyleSheet, View } from "react-native";
 
+import { i18n } from "../../i18n";
 import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
@@ -14,6 +15,7 @@ export function OnboardingChecklistBottomSheet() {
   const Inner = useWithAccount(OnboardingChecklistBottomSheetInner);
   return <Inner />;
 }
+const i18 = i18n.onboardingChecklistBottom;
 
 function OnboardingChecklistBottomSheetInner({
   account,
@@ -30,31 +32,31 @@ function OnboardingChecklistBottomSheetInner({
 
   return (
     <View>
-      <TextH3 style={{ textAlign: "center" }}>Onboarding checklist</TextH3>
+      <TextH3 style={{ textAlign: "center" }}>{i18.sheetHeader()}</TextH3>
       <Spacer h={16} />
       <TextBody style={{ textAlign: "center", color: color.grayMid }}>
-        Complete these items to finish account setup
+        {i18.description()}
       </TextBody>
       <Spacer h={24} />
       <View style={styles.separator} />
       <ChecklistRow
         step={1}
-        title="Secure your account"
-        description="Add a backup to your account"
+        title={i18.secureAccount.title()}
+        description={i18.secureAccount.description()}
         onPress={handleSecureAccount}
         done={hasBackup}
       />
       <ChecklistRow
         step={2}
-        title="Connect Farcaster"
-        description="Import profile picture and connections"
+        title={i18.connectFarcaster.title()}
+        description={i18.connectFarcaster.description()}
         onPress={handleConnectFarcaster}
         done={farcasterConnected}
       />
       <Spacer h={16} />
       <View style={ss.container.padH24}>
         {dismissChecklist && (
-          <TextButton title="DISMISS" onPress={dismissChecklist} />
+          <TextButton title={i18.dismissButton()} onPress={dismissChecklist} />
         )}
       </View>
       <Spacer h={48} />

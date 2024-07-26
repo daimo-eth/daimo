@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { LogInFromSeedButton } from "./LogInButton";
 import { OnboardingHeader } from "./OnboardingHeader";
 import { ParamListOnboarding, useExitBack } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
@@ -15,6 +16,8 @@ import {
 } from "../../shared/SeedPhraseDisplay";
 import Spacer from "../../shared/Spacer";
 import { ss } from "../../shared/style";
+
+const i18 = i18n.existingSeedPhrase;
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingSeedPhrase">;
 export function ExistingSeedPhraseScreen({ route }: Props) {
@@ -32,10 +35,7 @@ export function ExistingSeedPhraseScreen({ route }: Props) {
 
   return (
     <View>
-      <OnboardingHeader
-        title="Log in with seed phrase"
-        onPrev={useExitBack()}
-      />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={useExitBack()} />
       <View style={ss.container.padH24}>
         <Spacer h={16} />
         <SeedPhraseEntry {...{ state, dispatch }} />

@@ -25,6 +25,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { getI18NLocale, i18n } from "../../i18n";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
@@ -43,6 +44,7 @@ import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListHome, "Profile">;
+const i18 = i18n.profile;
 
 export function ProfileScreen(props: Props) {
   const Inner = useWithAccount(ProfileScreenInner);
@@ -69,7 +71,7 @@ function ProfileScreenInner(props: Props & { account: Account }) {
     <View style={[ss.container.screen, styles.noPadding]}>
       <View style={styles.screenPadding}>
         <ScreenHeader
-          title="Profile"
+          title={i18n.profile.screenHeader()}
           onBack={goBack || goHome}
           onShare={onShare}
         />
@@ -133,15 +135,15 @@ function ProfileScreenLoader({
         {status.error && link.type === "account" && (
           <ErrorBanner
             error={status.error}
-            displayTitle="Account not found"
-            displayMessage={`Couldn't load account ${link.account}`}
+            displayTitle={i18.error.account.title()}
+            displayMessage={i18.error.account.msg(link.account)}
           />
         )}
         {status.error && link.type === "invite" && (
           <ErrorBanner
             error={status.error}
-            displayTitle="Invite not found"
-            displayMessage={`Couldn't load invite ${link.code}`}
+            displayTitle={i18.error.invite.title()}
+            displayMessage={i18.error.invite.msg(link.code)}
           />
         )}
       </View>
@@ -164,6 +166,7 @@ function ProfileScreenBody({
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
+  const locale = getI18NLocale();
 
   const contact = addLastTransferTimes(account, eAcc);
 
@@ -213,19 +216,19 @@ function ProfileScreenBody({
     if (inviterEAcc)
       return (
         <TextBody color={color.gray3}>
-          Invited by{" "}
+          {i18.subtitle.invitedBy()}
           <TextBody color={color.midnight} onPress={onInviterPress}>
-            {getAccountName(inviterEAcc)}
+            {getAccountName(inviterEAcc, locale)}
           </TextBody>
         </TextBody>
       );
     else if (eAcc.timestamp)
       return (
         <TextBody color={color.gray3}>
-          Joined {timeMonth(eAcc.timestamp)}
+          {i18.subtitle.joined(timeMonth(eAcc.timestamp))}
         </TextBody>
       );
-    else if (getAccountName(eAcc) !== getAddressContraction(eAcc.addr))
+    else if (getAccountName(eAcc, locale) !== getAddressContraction(eAcc.addr))
       return (
         <TextBody color={color.gray3}>
           {getAddressContraction(eAcc.addr)}
@@ -243,7 +246,7 @@ function ProfileScreenBody({
         <View style={styles.mainContent}>
           <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
           <Spacer h={16} />
-          <TextH2>{getAccountName(eAcc)}</TextH2>
+          <TextH2>{getAccountName(eAcc, locale)}</TextH2>
           <Spacer h={4} />
           {subtitle}
           <Spacer h={4} />

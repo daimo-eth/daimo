@@ -22,11 +22,13 @@ import { DropdownPickButton } from "./DropdownPickButton";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
 
 // Input components allows entry in range $0.01 to $99,999.99
 const MAX_TOTAL_DIGITS = 7;
+const i18 = i18n.amountInput;
 
 export function AmountChooser({
   moneyEntry,
@@ -49,6 +51,7 @@ export function AmountChooser({
 }) {
   // Show how much we have available
   const account = useAccount();
+
   if (account == null) return null;
 
   const dollarsAvailStr = getAmountText({ amount: account.lastBalance });
@@ -79,7 +82,7 @@ export function AmountChooser({
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
-          <TextLight>{dollarsAvailStr} available</TextLight>
+          <TextLight>{i18.dollarsAvailable(dollarsAvailStr)}</TextLight>
         )}
       </View>
     </View>

@@ -3,9 +3,12 @@ import { useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableHighlight, View } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
+import { i18n } from "../../../i18n";
 import Spacer from "../../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import { TextBtnCaps, TextCenter, TextColor } from "../../shared/text";
+
+const i18 = i18n.memoDisplay;
 
 export function SendMemoButton({
   memo,
@@ -52,7 +55,7 @@ export function SendMemoButton({
           <TextInput
             ref={ref}
             value={memo}
-            placeholder="WHAT'S THIS FOR?"
+            placeholder={i18.placeholder()}
             placeholderTextColor={
               memo || isFocused ? color.grayMid : color.midnight
             }
@@ -84,7 +87,7 @@ export function SendMemoButton({
           <Spacer h={8} />
           <TextCenter>
             <TextColor color={color.danger}>
-              {"memo " + memoStatus.toLowerCase()}
+              {i18.status(memoStatus.toLowerCase())}
             </TextColor>
           </TextCenter>
         </>

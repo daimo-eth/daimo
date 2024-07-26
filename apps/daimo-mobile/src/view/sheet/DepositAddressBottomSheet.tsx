@@ -8,6 +8,7 @@ import { Address } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../env";
+import { i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -21,6 +22,8 @@ export function DepositAddressBottomSheet() {
   const Inner = useWithAccount(DepositAddressBottomSheetInner);
   return <Inner />;
 }
+
+const i18 = i18n.depositAddressBottom;
 
 function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   const dispatcher = useContext(DispatcherContext);
@@ -43,13 +46,11 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
         hideOfflineHeader
       />
       <Spacer h={16} />
-      <TextPara color={color.grayDark}>
-        Send {tokenSymbol} to your address below. Any other ERC-20 tokens will
-        be converted to USDC. Confirm that you're sending:
-      </TextPara>
+      <TextPara color={color.grayDark}>{i18.description(tokenSymbol)}</TextPara>
       <Spacer h={12} />
       <CheckLabel value={check} setValue={setCheck}>
-        On <TextBold>{chainL2.name}</TextBold>, not any other chain
+        {i18.checkChain.on()} <TextBold>{chainL2.name}</TextBold>{" "}
+        {i18.checkChain.notOther()}
       </CheckLabel>
       <Spacer h={16} />
       <AddressCopier addr={account.address} disabled={!check} />
@@ -93,7 +94,7 @@ function AddressCopier({
           <Octicons name="copy" size={16} color={col} />
         </View>
       </TouchableHighlight>
-      <TextLight>{justCopied ? "Copied" : " "}</TextLight>
+      <TextLight>{justCopied ? i18.copied() : " "}</TextLight>
     </View>
   );
 }

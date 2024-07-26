@@ -35,6 +35,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import {
   EAccountContact,
@@ -59,6 +60,7 @@ import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
+const i18 = i18n.sendTransferScreen;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
@@ -150,7 +152,11 @@ function SendScreenInner({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
+        <ScreenHeader
+          title={i18.screenHeader()}
+          onBack={goBack}
+          onExit={goHome}
+        />
         <Spacer h={8} />
         {sendDisplay}
       </View>
@@ -189,9 +195,7 @@ function SendChooseAmount({
   // Warn if paying new account
   let infoBubble = <Spacer h={16} />;
   if (recipient.lastSendTime == null) {
-    infoBubble = (
-      <InfoBox title={`First time paying ${getContactName(recipient)}`} />
-    );
+    infoBubble = <InfoBox title={i18.firstTime(getContactName(recipient))} />;
   }
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;

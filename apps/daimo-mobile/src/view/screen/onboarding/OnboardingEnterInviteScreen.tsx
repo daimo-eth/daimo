@@ -14,6 +14,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import { fetchInviteLinkStatus } from "../../../logic/linkStatus";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -22,6 +23,8 @@ import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
+
+const i18 = i18n.onboardingEnterInvite;
 
 export function OnboardingEnterInviteScreen() {
   // No invite code? Join waitlist
@@ -35,7 +38,7 @@ export function OnboardingEnterInviteScreen() {
   return (
     <View style={ss.container.flexGrow}>
       <OnboardingHeader
-        title="Enter Invite Code"
+        title={i18n.onboardingEnterInvite.screenHeader()}
         onPrev={useExitBack()}
         steps={getNumOnboardingSteps()}
         activeStep={0}
@@ -51,7 +54,7 @@ export function OnboardingEnterInviteScreen() {
         </View>
         <View key="bottom">
           <Spacer h={16} />
-          <TextButton title="JOIN WAITLIST" onPress={linkToWaitlist} />
+          <TextButton title={i18.waitlistButton()} onPress={linkToWaitlist} />
           <Spacer h={16} />
         </View>
       </View>
@@ -63,8 +66,7 @@ function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        Type your invite code below or paste a link.{"\n"}
-        Join the waitlist if you don&apos;t have a code.
+        {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
@@ -125,14 +127,14 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
     else nav.navigate("CreateChooseName", { inviteLink });
   };
 
-  render() {
+  render = () => {
     // User enters their invite code. Check validity.
     const { text, inviteStatus } = this.state;
 
     return (
       <View>
         <InputBig
-          placeholder="enter invite code"
+          placeholder={i18n.onboardingEnterInvite.inviteCode.title()}
           value={text}
           onChange={this.editText}
           center={text.length < 16} // Workaround for Android centering bug
@@ -140,11 +142,11 @@ class EnterCodeForm extends PureComponent<EnterCodeProps, EnterCodeState> {
         <Spacer h={24} />
         <ButtonBig
           type="primary"
-          title="Submit"
+          title={i18n.shared.buttonAction.submit()}
           onPress={this.goToNextStep}
           disabled={inviteStatus == null || !inviteStatus.isValid}
         />
       </View>
     );
-  }
+  };
 }

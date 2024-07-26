@@ -12,6 +12,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   useAccountAndKeyInfo,
   useDaimoChain,
@@ -30,15 +31,14 @@ import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter, TextH2 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingUseBackup">;
+const i18 = i18n.existingUseBackup;
+
 export function ExistingUseBackupScreen({ route }: Props) {
   const { targetEAcc } = route.params;
 
   return (
     <View style={ss.container.flexGrow}>
-      <OnboardingHeader
-        title="Choose a recovery option"
-        onPrev={useExitBack()}
-      />
+      <OnboardingHeader title={i18.screenHeader()} onPrev={useExitBack()} />
       <Spacer h={16} />
       <LogInOptions eAcc={targetEAcc} />
     </View>
@@ -85,8 +85,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
         <Spacer h={32} />
         <TextCenter>
           <TextBodyMedium color={color.grayMid}>
-            Log in with a backup key.{"\n"}
-            This adds your device to the account.
+            {i18.description()}
           </TextBodyMedium>
         </TextCenter>
       </View>
@@ -120,7 +119,7 @@ function LogInOptions({ eAcc }: { eAcc: EAccount }) {
             )}
             <ButtonBig
               type="subtle"
-              title="LOG IN WITH SEED PHRASE"
+              title={i18.logInWithSeedPhrase()}
               onPress={chooseSeed}
             />
           </>

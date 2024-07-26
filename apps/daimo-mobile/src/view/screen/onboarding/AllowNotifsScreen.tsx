@@ -8,6 +8,7 @@ import { OnboardingHeader, getNumOnboardingSteps } from "./OnboardingHeader";
 import VidBellAnimation from "../../../../assets/onboarding/bell-animation.mp4";
 import { ParamListOnboarding, useOnboardingNav } from "../../../common/nav";
 import { env } from "../../../env";
+import { i18n } from "../../../i18n";
 import { useDaimoChain } from "../../../logic/accountManager";
 import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
@@ -17,6 +18,7 @@ import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "AllowNotifs">;
+const i18 = i18n.allowNotifs;
 
 // This screen shows final steps for onboarding (eg allow notifications),
 // then a spinner while waiting for account creation, or error.
@@ -44,7 +46,10 @@ export function AllowNotifsScreen({ route }: Props) {
 
   return (
     <View style={ss.container.flexGrow}>
-      <OnboardingHeader title="Notifications" {...{ steps, activeStep }} />
+      <OnboardingHeader
+        title={i18n.allowNotifs.screenHeader()}
+        {...{ steps, activeStep }}
+      />
       <RequestNotificationsPage
         displayMacVideo={displayMacVideo}
         requestPermission={requestNotificationsPermission}
@@ -78,7 +83,7 @@ function RequestNotificationsPage({
         {displayMacVideo ? (
           <>
             <Spacer h={16} />
-            <TextButton title="Skip" onPress={skip} />
+            <TextButton title={i18.skipButton()} onPress={skip} />
             <Spacer h={16} />
           </>
         ) : (
@@ -86,7 +91,7 @@ function RequestNotificationsPage({
             <Spacer h={16} />
             <ButtonBig
               type="primary"
-              title="Allow Notifications"
+              title={i18.allowButton()}
               onPress={requestPermission}
             />
             <Spacer h={16} />
@@ -103,7 +108,7 @@ function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        You will only be notified about activity on your account.
+        {i18n.allowNotifs.instructions()}
       </TextBodyMedium>
     </TextCenter>
   );
