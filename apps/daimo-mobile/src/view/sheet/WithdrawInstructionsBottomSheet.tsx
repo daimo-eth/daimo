@@ -19,7 +19,6 @@ export function WithdrawInstructionsBottomSheet() {
 
   console.log("WithdrawInstructionsBottomSheet");
 
-  // tmp
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
