@@ -51,7 +51,7 @@ function DepositScreenInner({ account }: { account: Account }) {
         <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
-        <CoverGraphic type="deposit" />
+        <CoverGraphic type="deposit" /> // maybe in here is the problem?
         <Spacer h={16} />
         <LandlineList />
         <Spacer h={24} />
