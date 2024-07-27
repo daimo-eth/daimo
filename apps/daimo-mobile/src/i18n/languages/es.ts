@@ -512,7 +512,7 @@ export const es: LanguageDefinition = {
       description: () =>
         `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando un link de Pago.`,
     },
-    sendButton: () => `ENVIAR`,
+    sendButton: () => `INVITAR`,
     referral: {
       creditForInvite: (bonusSubtitle: string) =>
         `Recibirás crédito por la invitación en su perfil ${bonusSubtitle}`,
