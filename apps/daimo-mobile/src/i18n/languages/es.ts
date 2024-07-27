@@ -242,11 +242,12 @@ export const es: LanguageDefinition = {
   },
   // LogInButton.tsx
   logIn: {
-    logIn: () => `INICIE`,
-    logInWith: ({ keyType }: { keyType: string }) => `I ${keyType}`,
+    logIn: () => `INICIAR SESIÓN`,
+    logInWith: ({ keyType }: { keyType: string }) =>
+      `INICIE SESIÓN CON ${keyType}`,
     type: {
-      securityKey: () => `SECURITY KEY`,
-      passkey: () => `PASSKEY`,
+      passkey: () => `LLAVE DE ACCESO`,
+      securityKey: () => `CLAVE DE SECURIDAD`,
     },
     fromSeed: {
       error: () => `La frase semilla no fue encontrada. Eliminada?`,
@@ -255,7 +256,7 @@ export const es: LanguageDefinition = {
   },
   // MissingKeyScreen.tsx
   missingKey: {
-    screenHeader: () => `Clave faltante`,
+    screenHeader: () => `Clave ausente`,
     logOut: () => `CERRAR SESIÓN`,
     keyErrorDesc: {
       noKey: {
@@ -490,7 +491,7 @@ export const es: LanguageDefinition = {
   home: {
     pending: (pendingDollars: string) => `+ $${pendingDollars} PENDIENTE`,
     finishAccountSetUp: () => `Terminar de configurar cuenta`,
-    yourBalance: () => `Tu saldo`,
+    yourBalance: () => `Balance`,
     deposit: () => `Depositar`,
     request: () => `Solicitar`,
     send: () => `Enviar`,
@@ -520,11 +521,11 @@ export const es: LanguageDefinition = {
       bonusInvitee: (bonusDollarsInvitee: number) =>
         `y les enviaremos a ellos $${bonusDollarsInvitee} USDC`,
       bonusInviter: (bonusDollarsInviter: number) =>
-        `y te enviaremos a ti $${bonusDollarsInviter} USDC`,
+        `y te enviaremos $${bonusDollarsInviter} USDC`,
       inviteCode: () => `Código de Invitación`,
       inviteLink: () => `Link de Invitación`,
       share: {
-        button: () => `Comparta Link`,
+        button: () => `Compartir Link`,
         farcasterButton: () => `COMPARTIR FRAME EN FARCASTER`,
         farcasterMsg: () => `Únete+a+mi+en+Daimo`,
       },
@@ -704,7 +705,7 @@ export const es: LanguageDefinition = {
     },
     addKey: {
       passkey: () => `LLAVE DE ACCESO`,
-      securityKey: () => `CLAVE SECURIDAD`,
+      securityKey: () => `CLAVE DE SECURIDAD`,
       button: (slotType: string) => `RESPALDO CON ${slotType}`,
     },
     recommended: {
