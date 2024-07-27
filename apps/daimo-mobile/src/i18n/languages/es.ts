@@ -244,14 +244,14 @@ export const es: LanguageDefinition = {
   logIn: {
     logIn: () => `INICIAR SESIÓN`,
     logInWith: ({ keyType }: { keyType: string }) =>
-      `INICIE SESIÓN CON ${keyType}`,
+      `INICIAR SESIÓN CON ${keyType}`,
     type: {
       passkey: () => `LLAVE DE ACCESO`,
       securityKey: () => `CLAVE DE SECURIDAD`,
     },
     fromSeed: {
       error: () => `La frase semilla no fue encontrada. Eliminada?`,
-      button: () => `INICIE SESIÓN CON FRASE SEMILLA`,
+      button: () => `INICIAR SESIÓN CON FRASE SEMILLA`,
     },
   },
   // MissingKeyScreen.tsx
