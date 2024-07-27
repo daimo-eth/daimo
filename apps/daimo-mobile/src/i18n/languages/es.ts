@@ -510,7 +510,7 @@ export const es: LanguageDefinition = {
     locked: {
       header: () => `Invita tus amigos y gana USDC!`,
       description: () =>
-        `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando un link de Pago.`,
+        `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando\nun link de Pago.`,
     },
     sendButton: () => `INVITAR`,
     referral: {
