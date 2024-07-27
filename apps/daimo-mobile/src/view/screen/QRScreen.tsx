@@ -45,10 +45,10 @@ const i18 = i18n.qr;
 
 export function QRScreen(props: Props) {
   const { option } = props.route.params;
-  const [tab, setTab] = useState<QRScreenOptions>(option || "PAY ME");
-  const tabs = useRef(["PAY ME", "SCAN"] as QRScreenOptions[]).current;
+  const [tab, setTab] = useState<QRScreenOptions>(option || "PayMe");
+  const tabs = useRef(["PayMe", "Scan"] as QRScreenOptions[]).current;
 
-  const title = tab === "PAY ME" ? i18.title.display() : i18.title.scan();
+  const title = tab === "PayMe" ? i18.title.display() : i18.title.scan();
 
   const goBack = useExitBack();
   const goHome = useExitToHome();

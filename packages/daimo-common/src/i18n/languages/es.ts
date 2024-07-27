@@ -1,9 +1,10 @@
+import { LanguageDefinition } from "./en";
 import { AddrLabel } from "../../model";
 
-export const en = {
+export const es: LanguageDefinition = {
   // format.ts
   format: {
-    fee: () => "Fee:",
+    fee: () => "Tasas:",
   },
 
   // op.ts
@@ -12,19 +13,19 @@ export const en = {
       readableAmount: string,
       otherCoinSymbol: string,
       homeCoinSymbol: string
-    ) => `Accepted ${readableAmount} ${otherCoinSymbol} as ${homeCoinSymbol}`,
+    ) => `Aceptado ${readableAmount} ${otherCoinSymbol} como ${homeCoinSymbol}`,
     sentOutboundSwap: (readableAmount: string, coinSymbol: string) =>
-      `Sent ${readableAmount} ${coinSymbol}`,
+      `Envidado ${readableAmount} ${coinSymbol}`,
   },
 
   // time.ts
   time: {
-    now: (long?: boolean) => `${long ? "just now" : "now"}`,
+    now: (long?: boolean) => `${long ? "justo ahora" : "ahora"}`,
     minutesAgo: (minutes: number, long?: boolean) =>
-      `${minutes}m ${long ? "ago" : ""}`,
+      `${long ? "hace" : ""} ${minutes}m`,
     hoursAgo: (hours: number, long?: boolean) =>
-      `${hours}h ${long ? "ago" : ""}`,
-    daysAgo: (days: number, long?: boolean) => `${days}d ${long ? "ago" : ""}`,
+      `${long ? "hace" : ""} ${hours}h`,
+    daysAgo: (days: number, long?: boolean) => `${long ? "hace" : ""} ${days}d`,
   },
 
   // AddrLabels for account history contacts
@@ -32,32 +33,31 @@ export const en = {
     label: (type: AddrLabel) => displayAddrLabel(type),
   },
 };
+
 // Addr label display function
 function displayAddrLabel(type: AddrLabel): string {
   switch (type) {
     case AddrLabel.Faucet:
-      return `team Daimo`;
+      return `equipo Daimo`;
     case AddrLabel.PaymentLink:
-      return `payment link`;
+      return `link de pago`;
     case AddrLabel.RequestLink:
-      return `request link`;
+      return `solicitar link`;
     case AddrLabel.Paymaster:
-      return `fee`;
+      return `tasa`;
     case AddrLabel.Coinbase:
       return `coinbase`;
     case AddrLabel.Relay:
       return `relay.link`;
     case AddrLabel.LiFi:
-      return `li.fi bridge`;
+      return `puente li.fi`;
     case AddrLabel.UniswapETHPool:
-      return `swapped ETH`;
+      return `ETH cambiado`;
     case AddrLabel.Binance:
       return `binance`;
     case AddrLabel.FastCCTP:
-      return `instant cross-chain`;
+      return `cross-chain instantáneo`;
     default:
-      return `unknown`;
+      throw new Error(`Invalid AddrLabel: ${type}`);
   }
 }
-
-export type LanguageDefinition = typeof en;
