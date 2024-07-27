@@ -90,7 +90,7 @@ function SearchResultsScroll({
       )}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
-          <TextLight>{recentsOnly ? "Recents" : "Search results"}</TextLight> // export to i18n
+          <TextLight>{recentsOnly ? "Recents" : "Search results"}</TextLight>
         </View>
       )}
       {res.recipients.map((r) => (
