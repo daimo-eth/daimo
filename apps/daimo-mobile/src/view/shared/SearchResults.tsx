@@ -95,7 +95,6 @@ function SearchResultsScroll({
               ? i18n.viewShared.recents()
               : i18n.viewShared.searchResults()}
           </TextLight>{" "}
-          // export to i18n
         </View>
       )}
       {res.recipients.map((r) => (
