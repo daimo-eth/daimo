@@ -563,7 +563,7 @@ export const es: LanguageDefinition = {
       scan: () => `Escanea código QR`,
     },
     slider: {
-      payMe: () => `PÁGAME`,
+      payMe: () => `RECIBIR`,
       scan: () => `ESCANEAR`,
     },
     copiedAddress: () => `Dirección copiada`,
