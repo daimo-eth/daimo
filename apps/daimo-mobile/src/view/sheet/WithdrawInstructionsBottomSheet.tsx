@@ -23,7 +23,7 @@ export function WithdrawInstructionsBottomSheet() {
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title="Withdraw"
+        title="Withdraw" 
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}
