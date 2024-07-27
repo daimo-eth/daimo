@@ -44,7 +44,6 @@ export default function DepositScreen() {
   return <Inner />;
 }
 
-
 // maybe is in here is the problem?
 function DepositScreenInner({ account }: { account: Account }) {
   return (
