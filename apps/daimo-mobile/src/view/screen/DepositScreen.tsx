@@ -44,6 +44,8 @@ export default function DepositScreen() {
   return <Inner />;
 }
 
+
+// maybe is in here is the problem?
 function DepositScreenInner({ account }: { account: Account }) {
   return (
     <View style={{ flex: 1 }}>
@@ -51,7 +53,7 @@ function DepositScreenInner({ account }: { account: Account }) {
         <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
-        <CoverGraphic type="deposit" /> // maybe in here is the problem?
+        <CoverGraphic type="deposit" />
         <Spacer h={16} />
         <LandlineList />
         <Spacer h={24} />
