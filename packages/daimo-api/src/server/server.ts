@@ -26,6 +26,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { SwapClogMatcher } from "../contract/SwapClogMatcher";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
+import { migrateDB } from "../db/migrations";
 import { chainConfig, getEnvApi } from "../env";
 import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
@@ -46,11 +47,14 @@ async function main() {
 
   console.log(`[API] initializing db...`);
   const db = new DB();
-  await db.migrateDB();
+  await migrateDB(db.kdb, "api");
 
-  console.log(`[API] starting...`);
+  console.log(`[API] initializing viem and shovel...`);
   const extApiCache = new ExternalApiCache(db.kdb);
   const vc = getViemClientFromEnv(monitor, extApiCache);
+  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
+  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
+  shovelWatcher.migrateShovelDB();
 
   console.log(`[API] using wallet ${vc.account.address}`);
   const inviteGraph = new InviteGraph(db);
@@ -59,12 +63,7 @@ async function main() {
   const binanceClient = new BinanceClient();
 
   const keyReg = new KeyRegistry();
-  const nameReg = new NameRegistry(
-    vc,
-    inviteGraph,
-    profileCache,
-    await db.loadNameBlacklist()
-  );
+  const nameReg = new NameRegistry(vc, inviteGraph, profileCache);
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
 
@@ -113,8 +112,6 @@ async function main() {
   );
 
   // Set up indexers
-  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
-  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
   const shovelSquared = new ShovelSquared();
   shovelWatcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.

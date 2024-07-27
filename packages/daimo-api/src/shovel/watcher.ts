@@ -10,6 +10,7 @@ import { PublicClient } from "viem";
 
 import { DB as ShovelDB } from "../codegen/dbShovel";
 import { Indexer } from "../contract/indexer";
+import { migrateDB } from "../db/migrations";
 import { DBNotifications, DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { chainConfig } from "../env";
 
@@ -65,6 +66,10 @@ export class Watcher {
     const { testnet } = assertNotNull(rpcClient.chain);
     if (testnet) this.latest = 12000000 - 1;
     else this.latest = 5700000 - 1;
+  }
+
+  migrateShovelDB() {
+    migrateDB(this.kdb, "shovel");
   }
 
   add(...i: Indexer[][]) {

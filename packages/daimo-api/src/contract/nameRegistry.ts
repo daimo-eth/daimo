@@ -85,7 +85,7 @@ interface Registration {
   addr: Address;
 }
 
-/* Interface to the NameRegistry contract. */
+/* Tracks Daimo accounts, including the NameRegistry. */
 export class NameRegistry extends Indexer {
   /* In-memory indexer, for now. */
   private nameToReg = new Map<string, Registration>();
@@ -99,8 +99,7 @@ export class NameRegistry extends Indexer {
   constructor(
     private vc: ViemClient,
     private inviteGraph: InviteGraph,
-    private profileCache: ProfileCache,
-    private nameBlacklist: Set<string>
+    private profileCache: ProfileCache
   ) {
     super("NAME-REG");
   }
@@ -155,11 +154,6 @@ export class NameRegistry extends Indexer {
 
     console.log(`[NAME-REG] caching ${reg.name} -> ${reg.addr}`);
     this.nameToReg.set(reg.name, reg);
-
-    if (this.nameBlacklist.has(reg.name)) {
-      console.log(`[NAME-REG] hiding blacklisted name ${reg.name}`);
-      return;
-    }
     this.addrToReg.set(reg.addr, reg);
     this.accounts.push(reg);
   };
