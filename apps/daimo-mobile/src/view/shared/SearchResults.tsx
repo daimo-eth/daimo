@@ -292,12 +292,12 @@ function ExtraRows({
           if (mode === "receive") {
             nav.navigate("HomeTab", {
               screen: "QR",
-              params: { option: "PAY ME" },
+              params: { option: "PayMe" },
             });
           } else {
             nav.navigate("SendTab", {
               screen: "QR",
-              params: { option: "SCAN" },
+              params: { option: "Scan" },
             });
           }
         }}

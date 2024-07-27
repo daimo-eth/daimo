@@ -7,9 +7,9 @@ import {
   DaimoLinkRequest,
   DaimoLinkRequestV2,
   DaimoLinkTag,
-  TransferClog,
   EAccount,
   ForeignToken,
+  TransferClog,
   getEAccountStr,
   parseDaimoLink,
   parseInviteCodeOrLink,
@@ -51,7 +51,7 @@ export type ParamListOnboarding = {
   Finish: undefined;
 };
 
-export type QRScreenOptions = "PAY ME" | "SCAN"; // TODO: implement i18n
+export type QRScreenOptions = "PayMe" | "Scan";
 
 export type ParamListHome = {
   Home: undefined;

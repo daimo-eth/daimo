@@ -30,7 +30,7 @@ export const es: LanguageDefinition = {
     empty: () => `Ninguna transacción`,
     screenHeader: {
       default: () => `Actividad reciente`,
-      other: () => `Between you`, // TODO
+      other: () => `Entre ustedes`,
     },
     op: {
       cancelledLink: () => `link cancelado`,
