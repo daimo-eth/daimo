@@ -13,9 +13,9 @@ export const es: LanguageDefinition = {
       readableAmount: string,
       otherCoinSymbol: string,
       homeCoinSymbol: string
-    ) => `Aceptado ${readableAmount} ${otherCoinSymbol} as ${homeCoinSymbol}`,
+    ) => `Aceptado ${readableAmount} ${otherCoinSymbol} como ${homeCoinSymbol}`,
     sentOutboundSwap: (readableAmount: string, coinSymbol: string) =>
-      `Sent ${readableAmount} ${coinSymbol}`,
+      `Envidado ${readableAmount} ${coinSymbol}`,
   },
 
   // time.ts

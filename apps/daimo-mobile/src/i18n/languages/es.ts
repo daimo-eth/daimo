@@ -174,7 +174,6 @@ export const es: LanguageDefinition = {
       from: () => `desde`,
       for: () => `para`,
     },
-    // TODO: figure out a better way to do this
     requestState: {
       created: {
         self: () => `Ha Solicitado`,
@@ -527,7 +526,6 @@ export const es: LanguageDefinition = {
   // ProfileScreen.tsx
   profile: {
     screenHeader: () => `Perfíl`,
-    // TODO: check if need status.data translations
     error: {
       account: {
         title: () => `Cuenta no encontrada`,
@@ -782,7 +780,6 @@ export const es: LanguageDefinition = {
   },
 };
 
-// TODO: adapt this function to sanish
 function pluralize(n: number, noun: string) {
   if (n === 1) return `${n} ${noun}`; // "1 manzana"
 

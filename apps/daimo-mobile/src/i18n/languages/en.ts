@@ -172,7 +172,6 @@ export const en = {
       from: () => `from`,
       for: () => `for`,
     },
-    // TODO: figure out a better way to do this
     requestState: {
       created: {
         self: () => `You requested`,
@@ -522,7 +521,6 @@ export const en = {
   // ProfileScreen.tsx
   profile: {
     screenHeader: () => `Profile`,
-    // TODO: check if need status.data translations
     error: {
       account: {
         title: () => `Account not found`,
@@ -780,5 +778,4 @@ function pluralize(n: number, noun: string) {
   return `${n} ${noun}s`; // "0 apples" or "2 apples"
 }
 
-// ts-unused-exports:disable-next-line
 export type LanguageDefinition = typeof en;
