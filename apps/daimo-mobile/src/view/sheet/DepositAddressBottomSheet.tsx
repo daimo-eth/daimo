@@ -36,10 +36,11 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
 
   assert(tokenSymbol === "USDC", "Unsupported coin: " + tokenSymbol);
 
+  // tmp
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title="Deposit" // tmp
+        title="Deposit" 
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}
