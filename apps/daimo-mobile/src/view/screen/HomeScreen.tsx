@@ -272,7 +272,7 @@ function AmountAndButtons({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback accessible={false}>
       <View style={styles.amountAndButtons}>
-        <TextLight>Your balance</TextLight>
+        <TextLight>{i18.yourBalance()}</TextLight>
         <TitleAmount amount={account.lastBalance} />
         {Number(pendingDollars) > 0 && (
           <>
@@ -282,9 +282,9 @@ function AmountAndButtons({ account }: { account: Account }) {
         )}
         <Spacer h={16} />
         <View style={styles.buttonRow}>
-          <IconButton title="Deposit" onPress={goDeposit} />
-          <IconButton title="Request" onPress={goRequest} />
-          <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+          <IconButton type="Deposit" onPress={goDeposit} />
+          <IconButton type="Request" onPress={goRequest} />
+          <IconButton type="Send" onPress={goSend} disabled={isEmpty} />
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -318,24 +318,24 @@ function PendingTag({ pendingDollars }: { pendingDollars: string }) {
 }
 
 function IconButton({
-  title,
+  type,
   onPress,
   disabled,
 }: {
-  title: string;
+  type: "Deposit" | "Request" | "Send";
   onPress: () => void;
   disabled?: boolean;
 }) {
-  const name: OctName = (function () {
-    switch (title) {
+  const [name, title] = (function (): [OctName, string] {
+    switch (type) {
       case "Deposit":
-        return "plus";
+        return ["plus", i18.deposit()];
       case "Request":
-        return "arrow-down";
+        return ["arrow-down", i18.request()];
       case "Send":
-        return "paper-airplane";
+        return ["paper-airplane", i18.send()];
       default:
-        return "question";
+        throw new Error(`unhandled IconButton "${type}"`);
     }
   })();
 

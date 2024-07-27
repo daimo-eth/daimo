@@ -8,7 +8,10 @@ import Spacer from "./Spacer";
 import { color } from "./style";
 import { TextBtnCaps, TextH2, TextLight } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { DaimoContact, getContactName } from "../../logic/daimoContacts";
+
+const i18 = i18n.contactDisplay;
 
 export function ContactDisplay({
   contact,
@@ -58,7 +61,7 @@ export function ContactDisplay({
         <ContactBubble contact={contact} size={64} transparent />
       </ButtonCircle>
       <Spacer h={8} />
-      {isRequest && <TextLight>Requested by</TextLight>}
+      {isRequest && <TextLight>{i18.requestedBy()}</TextLight>}
       {isRequest && <Spacer h={4} />}
       <View
         style={{

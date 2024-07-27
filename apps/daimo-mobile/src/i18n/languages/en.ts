@@ -16,10 +16,19 @@ export const en = {
       send: () => `Send`,
       accept: () => `Accept`,
       submit: () => `Submit`,
+      continue: () => `Continue`,
     },
     textPressable: {
       cancel: () => `Cancel`,
     },
+  },
+  // useSendAsync for sending userops
+  sendUserOp: {
+    loadingAccount: () => `Loading account...`,
+    authorizing: () => `Authorizing...`,
+    accepted: () => `Accepted`,
+    offline: () => `Request failed. Offline?`,
+    error: () => `Error sending transaction`,
   },
   // -------------------------- SCREENS --------------------------
   // ------------ HISTORY ------------
@@ -135,24 +144,6 @@ export const en = {
       other: (name: string) => `${name} sent`,
     },
   },
-  // SendNoteScreen.tsx
-  send_note: {
-    title: () => `Send Link`,
-    help: {
-      title: () => `Learn how`,
-      subtitle: () => `How Payment Links Work`,
-      description: {
-        firstPara: () =>
-          `Payment links carry money in a link, so that you can send it to anyone.`,
-        secondPara: () =>
-          `You can cancel an unclaimed link to get your money back.`,
-        thirdPara: () => `They're self-custody. The key is part of the URL.`,
-        fourthPara: () =>
-          `Each link doubles as a Daimo invite. Plus, anyone with the link can claim with any wallet, like Rainbow or Metamask.`,
-      },
-    },
-    create: () => `Create Payment Link`,
-  },
 
   // ------------ NOTIFICATIONS ------------
   // InvitesNotificationRow.tsx
@@ -207,6 +198,17 @@ export const en = {
     instructions: () =>
       `You will only be notified about activity on your account.`,
   },
+  // settings.ts
+  settingsModal: {
+    modalTitle: () => `Enable access in Settings`,
+    modalBody: ({ settingPhrase }: { settingPhrase: string }) =>
+      `Visit Settings » Daimo and enable ${settingPhrase}.`,
+    settingPhrase: {
+      contacts: () => `contacts`,
+      notifications: () => `notifications`,
+      camera: () => `camera access`,
+    },
+  },
   // ExistingChooseAccountScreen.tsx
   existingChooseAccount: {
     screenHeader: () => `Load account`,
@@ -239,7 +241,12 @@ export const en = {
   },
   // LogInButton.tsx
   logIn: {
-    button: (keyType: string) => `LOG IN WITH ${keyType}`,
+    logIn: () => `LOG IN`,
+    logInWith: ({ keyType }: { keyType: string }) => `LOG IN WITH ${keyType}`,
+    type: {
+      securityKey: () => `SECURITY KEY`,
+      passkey: () => `PASSKEY`,
+    },
     fromSeed: {
       error: () => `Seed phrase not on account. Removed?`,
       button: () => `LOG IN WITH SEED PHRASE`,
@@ -397,7 +404,8 @@ export const en = {
   // SendNoteScreen.tsx
   sendNote: {
     screenHeader: () => `Send Link`,
-    info: (tokenSymbol: string) => `Send ${tokenSymbol} via link`,
+    info: ({ tokenSymbol }: { tokenSymbol: string }) =>
+      `Send ${tokenSymbol} via link`,
     help: {
       title: () => `How Payment Links Work`,
       learn: () => `Learn how`,
@@ -439,6 +447,9 @@ export const en = {
     screenHeader: () => `Send to`,
     firstTime: (name: string) => `First time paying ${name}`,
   },
+  contactDisplay: {
+    requestedBy: () => `Requested by`,
+  },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
@@ -478,6 +489,10 @@ export const en = {
   home: {
     pending: (pendingDollars: string) => `+ $${pendingDollars} PENDING`,
     finishAccountSetUp: () => `Finish setting up your account`,
+    yourBalance: () => `Your balance`,
+    deposit: () => `Deposit`,
+    request: () => `Request`,
+    send: () => `Send`,
   },
   // InviteScreen.tsx
   invite: {
@@ -541,6 +556,10 @@ export const en = {
     title: {
       display: () => `Display QR Code`,
       scan: () => `Scan QR Code`,
+    },
+    slider: {
+      payMe: () => "PAY ME",
+      scan: () => "SCAN",
     },
     copiedAddress: () => `Copied address`,
     depositButton: () => `DEPOSIT FROM EXCHANGE ›`,
@@ -655,6 +674,7 @@ export const en = {
   searchScreen: {
     placeholderWithContact: () => `Search user, ENS, contact, or email...`,
     placeholderWithoutContact: () => `Search user, ENS, email, or phone...`,
+    cancel: () => `Cancel`,
   },
 
   // -------------------------- SHEET --------------------------
@@ -713,6 +733,8 @@ export const en = {
     openWarpcastButton: () => `OPEN IN WARPCAST`,
     welcome: (fcUsername: string) => `Welcome, ${fcUsername}`,
     loading: () => `Loading...`,
+    removeFromProfile: () => `REMOVE FROM PROFILE`,
+    addToProfile: () => `ADD TO PROFILE`,
   },
   // HelpBottomSheet.tsx
   helpBottom: {
@@ -740,6 +762,7 @@ export const en = {
   // SwapBottomSheet.tsx
   swapBottom: {
     sheetHeader: () => `Accept`,
+    acceptButton: () => `ACCEPT`,
   },
   // WithdrawInstructionsBottomSheet.tsx
   withdrawInstructionsBottom: {

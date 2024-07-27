@@ -4,10 +4,10 @@ import { StyleSheet, Text, TextStyle } from "react-native";
 import Spacer from "./Spacer";
 import { color } from "./style";
 import { DaimoText } from "./text";
-import { getI18NLocale } from "../../i18n";
+import { i18NLocale } from "../../i18n";
 
 /** 1.23 or 1,23 depending on user locale */
-export const amountSeparator = getI18NLocale().decimalSeparator || ".";
+export const amountSeparator = i18NLocale.decimalSeparator || ".";
 
 /** Returns eg "$1.00" or "$1,23" or "$1.2345" */
 export function getAmountText({

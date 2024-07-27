@@ -13,6 +13,7 @@ import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
+import { i18NLocale } from "../i18n";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
 import { getRpcFunc } from "../logic/trpc";
@@ -145,6 +146,7 @@ async function fetchSync(
     address: account.address,
     inviteCode: account.inviteLinkStatus?.link.code,
     sinceBlockNum,
+    lang: i18NLocale.languageCode || undefined,
   });
   const syncSummary = {
     address: account.address,

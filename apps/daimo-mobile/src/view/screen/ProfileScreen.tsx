@@ -25,7 +25,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
-import { getI18NLocale, i18n } from "../../i18n";
+import { i18NLocale, i18n } from "../../i18n";
 import { addLastTransferTimes } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
@@ -166,7 +166,6 @@ function ProfileScreenBody({
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-  const locale = getI18NLocale();
 
   const contact = addLastTransferTimes(account, eAcc);
 
@@ -213,27 +212,30 @@ function ProfileScreenBody({
 
   // TODO: show other accounts coin+chain, once we support multiple.
   const subtitle = (() => {
-    if (inviterEAcc)
+    if (inviterEAcc) {
       return (
         <TextBody color={color.gray3}>
           {i18.subtitle.invitedBy()}
           <TextBody color={color.midnight} onPress={onInviterPress}>
-            {getAccountName(inviterEAcc, locale)}
+            {getAccountName(inviterEAcc, i18NLocale)}
           </TextBody>
         </TextBody>
       );
-    else if (eAcc.timestamp)
+    } else if (eAcc.timestamp) {
       return (
         <TextBody color={color.gray3}>
           {i18.subtitle.joined(timeMonth(eAcc.timestamp))}
         </TextBody>
       );
-    else if (getAccountName(eAcc, locale) !== getAddressContraction(eAcc.addr))
+    } else if (
+      getAccountName(eAcc, i18NLocale) !== getAddressContraction(eAcc.addr)
+    ) {
       return (
         <TextBody color={color.gray3}>
           {getAddressContraction(eAcc.addr)}
         </TextBody>
       );
+    }
     return null;
   })();
 
@@ -246,7 +248,7 @@ function ProfileScreenBody({
         <View style={styles.mainContent}>
           <ContactBubble contact={{ type: "eAcc", ...eAcc }} size={64} />
           <Spacer h={16} />
-          <TextH2>{getAccountName(eAcc, locale)}</TextH2>
+          <TextH2>{getAccountName(eAcc, i18NLocale)}</TextH2>
           <Spacer h={4} />
           {subtitle}
           <Spacer h={4} />

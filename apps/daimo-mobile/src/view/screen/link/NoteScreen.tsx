@@ -26,7 +26,7 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { ParamListHome, useExitBack } from "../../../common/nav";
-import { getI18NLocale, i18n } from "../../../i18n";
+import { i18NLocale, i18n } from "../../../i18n";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { useEphemeralSignature } from "../../../logic/note";
 import { getRpcFunc } from "../../../logic/trpc";
@@ -119,12 +119,11 @@ function NoteDisplayInner({
   hideAmount?: boolean;
   leaveScreen?: () => void;
 }) {
-  const locale = getI18NLocale();
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address
       ? i18.send.self()
-      : i18.send.other(getAccountName(noteStatus.sender, locale));
+      : i18.send.other(getAccountName(noteStatus.sender, i18NLocale));
 
   // The note itself and signature
   const ephemeralOwner = noteStatus.ephemeralOwner!;
@@ -236,7 +235,7 @@ function NoteDisplayInner({
       case DaimoNoteState.Claimed:
         return (
           <TextBold>
-            {i18.accepted.long(getAccountName(noteStatus.claimer!, locale))}
+            {i18.accepted.long(getAccountName(noteStatus.claimer!, i18NLocale))}
           </TextBold>
         );
       case DaimoNoteState.Cancelled:

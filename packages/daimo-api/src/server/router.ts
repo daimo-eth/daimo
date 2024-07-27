@@ -342,16 +342,18 @@ export function createRouter(
           address: zAddress,
           inviteCode: z.string().optional(),
           sinceBlockNum: z.number(),
+          lang: z.string().optional(),
         })
       )
       .query(async (opts) => {
-        const { inviteCode, sinceBlockNum } = opts.input;
+        const { inviteCode, sinceBlockNum, lang } = opts.input;
         const address = getAddress(opts.input.address);
         return getAccountHistory(
           opts.ctx,
           address,
           inviteCode,
           sinceBlockNum,
+          lang,
           vc,
           homeCoinIndexer,
           foreignCoinIndexer,
@@ -721,10 +723,11 @@ export function createRouter(
           address: zAddress,
           inviteCode: z.string().optional(),
           sinceBlockNum: z.number(),
+          lang: z.string().optional(),
         })
       )
       .subscription(async (opts) => {
-        const { address, inviteCode } = opts.input;
+        const { address, inviteCode, lang } = opts.input;
         // how often to send updates regardless of new transfers
         // useful to update keys, exchange rates and others.
         const refreshInterval = 10_000;
@@ -741,6 +744,7 @@ export function createRouter(
               address,
               inviteCode,
               blockNumber,
+              lang,
               vc,
               homeCoinIndexer,
               foreignCoinIndexer,

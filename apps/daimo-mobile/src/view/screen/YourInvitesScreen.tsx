@@ -2,7 +2,7 @@ import { EAccount, timeAgo } from "@daimo/common";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
-import { getI18NLocale, i18n } from "../../i18n";
+import { i18NLocale, i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
@@ -52,7 +52,7 @@ function InviteeRow({ invitee }: { invitee: EAccount }) {
           <View style={styles.inviteeRowRight}>
             {invitee.timestamp && (
               <TextBody color={color.gray3}>
-                {i18.joinedAgo(timeAgo(invitee.timestamp, getI18NLocale()))}
+                {i18.joinedAgo(timeAgo(invitee.timestamp, i18NLocale))}
               </TextBody>
             )}
           </View>

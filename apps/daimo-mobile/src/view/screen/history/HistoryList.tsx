@@ -25,7 +25,7 @@ import { getAddress } from "viem";
 import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
-import { getI18NLocale, i18n } from "../../../i18n";
+import { i18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -182,7 +182,6 @@ function TransferClogRow({
   showDate?: boolean;
 }) {
   const address = account.address;
-  const locale = getI18NLocale();
 
   assert(transferClog.amount > 0);
   const [from, to] = getDisplayFromTo(transferClog);
@@ -212,7 +211,7 @@ function TransferClogRow({
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
-  let opTitle = getAccountName(otherAcc, locale);
+  let opTitle = getAccountName(otherAcc, i18NLocale);
   if (
     opTitle === AddrLabel.PaymentLink &&
     transferClog.type === "claimLink" &&
@@ -226,7 +225,7 @@ function TransferClogRow({
   const opMemo = getSynthesizedMemo(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
-    getI18NLocale(),
+    i18NLocale,
     true
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
@@ -300,7 +299,7 @@ function TransferAmountDate({
     });
   } else {
     const nowS = now();
-    timeStr = timeAgo(timestamp, getI18NLocale(), nowS);
+    timeStr = timeAgo(timestamp, i18NLocale, nowS);
   }
 
   const textCol = isPending ? color.gray3 : color.midnight;

@@ -108,7 +108,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       <Spacer h={32} />
       {status === "idle" && (
         <ButtonMed
-          title="ACCEPT"
+          title={i18.acceptButton()}
           onPress={onCancel}
           type="primary"
           showBiometricIcon

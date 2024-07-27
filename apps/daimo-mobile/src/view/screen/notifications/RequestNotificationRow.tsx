@@ -19,7 +19,7 @@ import {
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
 import { navToAccountPage, useNav } from "../../../common/nav";
-import { getI18NLocale, i18n } from "../../../i18n";
+import { i18NLocale, i18n } from "../../../i18n";
 import { DaimoContact } from "../../../logic/daimoContacts";
 import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
@@ -56,7 +56,7 @@ export function RequestNotificationRow({
       ? notif.request.recipient
       : notif.request.expectedFulfiller || requestLinkContact;
 
-  const ts = timeAgo(notif.timestamp, getI18NLocale(), now(), true);
+  const ts = timeAgo(notif.timestamp, i18NLocale, now(), true);
   const dispatcher = useContext(DispatcherContext);
 
   const onPress =
@@ -135,7 +135,6 @@ function RequestNotificationMessage({
   otherAcc: EAccount;
   reqStatus: DaimoRequestV2Status;
 }) {
-  const locale = getI18NLocale();
   const otherAccVerb =
     otherAcc.label === AddrLabel.RequestLink
       ? i18.msgVerb.via()
@@ -145,7 +144,7 @@ function RequestNotificationMessage({
 
   const otherAccText = (
     <TextBody color={color.midnight}>
-      {getAccountName(otherAcc, locale)}
+      {getAccountName(otherAcc, i18NLocale)}
     </TextBody>
   );
 
