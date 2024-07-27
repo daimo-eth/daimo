@@ -785,8 +785,8 @@ export const es: LanguageDefinition = {
       steps: {
         sendReceive: () => `Enviar y Recivir`,
         receive: () => `Recivir`,
-        choose: () => `Elegir`,
-        setNetwork: () => `Cambiar la Red a`,
+        choose: () => `Elije`,
+        setNetwork: () => `Cambia la red a`,
       },
       sendToAddress: () =>
         `Usa Daimo para enviar a la dirección mostrada. Los fondos deberían aparecer en Coinbase en unos minutos.`,
