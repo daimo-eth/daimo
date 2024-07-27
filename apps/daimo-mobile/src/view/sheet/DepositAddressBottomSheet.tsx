@@ -39,7 +39,7 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
-        title="Deposit"
+        title="Deposit" // tmp
         onExit={() => {
           dispatcher.dispatch({ name: "hideBottomSheet" });
         }}
