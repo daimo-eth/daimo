@@ -94,7 +94,7 @@ function SearchResultsScroll({
             {recentsOnly
               ? i18n.viewShared.recents()
               : i18n.viewShared.searchResults()}
-          </TextLight>{" "}
+          </TextLight>
         </View>
       )}
       {res.recipients.map((r) => (
