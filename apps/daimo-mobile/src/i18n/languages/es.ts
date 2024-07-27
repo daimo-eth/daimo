@@ -801,6 +801,18 @@ export const es: LanguageDefinition = {
     send: () => `Enviar`,
     settings: () => `Ajustes`,
   },
+
+  // view/sheet/ components
+  sheets: {
+    withdraw: () => `Retirar`,
+    deposit: () => `Depositar`,
+  },
+
+  // view/shared components
+  viewShared: {
+    recents: () => `Recientes`,
+    searchResults: () => `Resultados de busqueda`,
+  },
 };
 
 function pluralize(n: number, noun: string) {

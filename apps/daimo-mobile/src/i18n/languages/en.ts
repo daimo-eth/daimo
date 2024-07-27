@@ -794,6 +794,18 @@ export const en = {
     send: () => `Send`,
     settings: () => `Settings`,
   },
+
+  // view/sheet/ components
+  sheets: {
+    withdraw: () => `Withdraw`,
+    deposit: () => `Deposit`,
+  },
+
+  // view/shared components
+  viewShared: {
+    recents: () => `Recents`,
+    searchResults: () => `Search results`,
+  },
 };
 
 function pluralize(n: number, noun: string) {

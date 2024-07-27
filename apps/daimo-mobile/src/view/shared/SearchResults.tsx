@@ -90,7 +90,12 @@ function SearchResultsScroll({
       )}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
-          <TextLight>{recentsOnly ? "Recents" : "Search results"}</TextLight> // export to i18n
+          <TextLight>
+            {recentsOnly
+              ? i18n.viewShared.recents()
+              : i18n.viewShared.searchResults()}
+          </TextLight>{" "}
+          // export to i18n
         </View>
       )}
       {res.recipients.map((r) => (
