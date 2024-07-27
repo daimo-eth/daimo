@@ -5,7 +5,7 @@ export const es: LanguageDefinition = {
   recommendedExchange: {
     bridge: {
       cta: () => "Transfiera monedas desde cualquier billetera",
-      title: () => "Transferir desde otra cadena",
+      title: () => "Transferir desde otra blockchain",
     },
     coinbase: {
       cta: () => "Depositar desde Coinbase",
@@ -27,7 +27,7 @@ export const es: LanguageDefinition = {
     backup: {
       title: () => "Asegura Tu Cuenta",
       subtitle: () =>
-        "Mantén tu cuenta segura con una copia de seguridad de clave de acceso",
+        "Mantén tu cuenta segura con una copia de seguridad de tu clave de acceso",
     },
     feedback: {
       title: () => "¿Sugerencias? ¿Ideas?",
