@@ -622,7 +622,7 @@ export const es: LanguageDefinition = {
         button: () => `AÑADIR DISPOSITIVO`,
       },
       contactSupport: {
-        title: () => `Preguntas? Sugerencias?`,
+        title: () => `¿Preguntas? ¿Sugerencias?`,
         msg: () => `Contáctanos en Telegram`,
         button: () => `CONTACTAR SOPORTE`,
       },
