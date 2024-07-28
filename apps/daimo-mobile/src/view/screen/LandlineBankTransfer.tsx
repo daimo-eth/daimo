@@ -135,12 +135,16 @@ function SendChooseAmount({
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>
-          <ButtonBig type="subtle" title="CANCEL" onPress={onCancel} />
+          <ButtonBig
+            type="subtle"
+            title={i18n.shared.buttonAction.cancel()}
+            onPress={onCancel}
+          />
         </View>
         <View style={styles.buttonGrow}>
           <ButtonBig
             type="primary"
-            title="CONFIRM"
+            title={i18n.shared.buttonAction.confirm()}
             onPress={setSendAmount}
             disabled={
               money.dollars === 0 || (memoStatus && memoStatus !== "ok")

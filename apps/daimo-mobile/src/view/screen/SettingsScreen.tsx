@@ -18,7 +18,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
-import { getI18NLocale, i18n } from "../../i18n";
+import { i18NLocale, i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
@@ -311,7 +311,7 @@ function DeviceRow({
   const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
     ? i18.pending()
-    : i18.addedAgo(timeAgo(addAtS, getI18NLocale(), nowS, true));
+    : i18.addedAgo(timeAgo(addAtS, i18NLocale, nowS, true));
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (

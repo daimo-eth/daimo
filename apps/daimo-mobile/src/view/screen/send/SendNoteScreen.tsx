@@ -108,7 +108,7 @@ export function SendNoteScreen({ route }: Props) {
           icon="link"
           title={
             <View style={{ flexDirection: "row" }}>
-              <TextBody>Send {tokenSymbol} via link </TextBody>
+              <TextBody>{i18.info({ tokenSymbol })}</TextBody>
               <HelpButton
                 helpTitle={i18.help.title()}
                 helpContent={<HelpContentPaymentLink />}

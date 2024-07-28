@@ -166,11 +166,14 @@ function LinkFarcasterSection({
       <Spacer h={64} />
       <ButtonMed
         type="primary"
-        title={linkedAcc ? "REMOVE FROM PROFILE" : "ADD TO PROFILE"}
+        title={linkedAcc ? i18.removeFromProfile() : i18.addToProfile()}
         onPress={linkedAcc ? unlinkFC : linkFC}
       />
       <Spacer h={16} />
-      <TextButton title="CANCEL" onPress={cancelFC} />
+      <TextButton
+        title={i18n.shared.buttonAction.cancel()}
+        onPress={cancelFC}
+      />
     </View>
   );
 }

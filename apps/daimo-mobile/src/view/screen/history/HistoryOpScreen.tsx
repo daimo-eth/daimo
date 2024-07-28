@@ -25,7 +25,7 @@ import {
   useNav,
 } from "../../../common/nav";
 import { env } from "../../../env";
-import { getI18NLocale, i18n } from "../../../i18n";
+import { i18NLocale, i18n } from "../../../i18n";
 import { getCachedEAccount } from "../../../logic/addr";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
@@ -136,13 +136,12 @@ function NoteView({
   note: PaymentLinkClog;
   leaveScreen: () => void;
 }) {
-  const locale = getI18NLocale();
   const daimoChain = daimoChainFromId(account.homeChainId);
   // Strip seed from link
   const link: DaimoLinkNoteV2 = {
     type: "notev2",
     id: note.noteStatus!.id!,
-    sender: getAccountName(note.noteStatus!.sender, locale),
+    sender: getAccountName(note.noteStatus!.sender, i18NLocale),
     dollars: amountToDollars(note.amount),
     seed: "",
   };
@@ -222,7 +221,7 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const memoText = getSynthesizedMemo(
     op,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
-    getI18NLocale()
+    i18NLocale
   );
 
   return (
@@ -304,7 +303,5 @@ function getFeeText(amount?: number) {
   if (amount > 0 && feeStr === "$0.00") {
     feeStr = "< $0.01";
   }
-  return amount === 0
-    ? i18.feeText.free()
-    : feeStr + " " + i18.feeText.fee(feeStr);
+  return amount === 0 ? i18.feeText.free() : i18.feeText.fee(feeStr);
 }

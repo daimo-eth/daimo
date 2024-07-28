@@ -169,7 +169,7 @@ function RequestScreenInner({
               <View style={styles.buttonGrow}>
                 <ButtonBig
                   type="subtle"
-                  title="Cancel"
+                  title={i18n.shared.buttonAction.cancel()}
                   onPress={goBack || goHome}
                 />
               </View>

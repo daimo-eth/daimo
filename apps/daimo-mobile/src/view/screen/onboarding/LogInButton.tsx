@@ -53,7 +53,9 @@ export function LogInFromKeyButton({
       return { type: "passkey", account, wrappedSigner } as PasskeySigner;
     }
   }, [account, useSecurityKey]);
-  const title = i18.button(useSecurityKey ? "SECURITY KEY" : "PASSKEY");
+
+  const keyType = useSecurityKey ? i18.type.securityKey() : i18.type.passkey();
+  const title = i18.logInWith({ keyType });
   return <LogInButton {...{ account, pubKeyHex, daimoChain, signer, title }} />;
 }
 
@@ -92,7 +94,7 @@ export function LogInFromSeedButton({
 
   // Handle case where user hasn't finished entering a seed phrase yet.
   if (parsedKey == null) {
-    return <ButtonBig type="primary" title="LOG IN" disabled />;
+    return <ButtonBig type="primary" title={i18.logIn()} disabled />;
   } else if (signer == null) {
     return <ErrorRowCentered message={i18.fromSeed.error()} />;
   } else {

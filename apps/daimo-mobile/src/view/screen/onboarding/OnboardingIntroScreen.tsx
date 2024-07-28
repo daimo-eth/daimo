@@ -73,9 +73,9 @@ export function OnboardingIntroScreen() {
     <SafeAreaView style={styles.onboardingPage}>
       <View style={styles.onboardingPageTop}>
         <Spacer h={isCompact ? 24 : 32} />
-        <TextH1 color={color.midnight}>Welcome to Daimo</TextH1>
+        <TextH1 color={color.midnight}>{i18.title()}</TextH1>
         <Spacer h={4} />
-        <TextH3 color={color.gray3}>Pay or receive USDC anywhere</TextH3>
+        <TextH3 color={color.gray3}>{i18.subtitle()}</TextH3>
         <Spacer h={16} />
         <View style={{ display: "flex", alignItems: "center" }}>
           <Image

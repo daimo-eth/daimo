@@ -35,6 +35,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
+import { i18n } from "../i18n";
 import {
   LandlineAccount,
   getLandlineAccounts,
@@ -86,6 +87,7 @@ export async function getAccountHistory(
   address: Address,
   inviteCode: string | undefined,
   sinceBlockNum: number,
+  lang: string | undefined,
   vc: ViemClient,
   homeCoinIndexer: HomeCoinIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
@@ -147,7 +149,7 @@ export async function getAccountHistory(
   const chainGasConstants = await paymaster.calculateChainGasConstants(eAcc);
 
   // Prefetch info required to deposit to your Daimo account.
-  const recommendedExchanges = fetchRecommendedExchanges(eAcc);
+  const recommendedExchanges = fetchRecommendedExchanges(eAcc, lang);
 
   // Get linked accounts
   const linkedAccounts = profileCache.getLinkedAccounts(address);
@@ -224,7 +226,7 @@ export async function getAccountHistory(
   };
 
   // Suggest an action to the user, like backing up their account
-  const suggestedActions = getSuggestedActions(eAcc, ret, ctx);
+  const suggestedActions = getSuggestedActions(eAcc, ret, ctx, lang);
 
   elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}ms: done, returning`);
@@ -254,9 +256,11 @@ async function getNamedAccountsFromClogs(
 function getSuggestedActions(
   eAcc: EAccount,
   hist: AccountHistoryResult,
-  ctx: TrpcRequestContext
+  ctx: TrpcRequestContext,
+  lang?: string
 ) {
   const ret: SuggestedAction[] = [];
+  const t = i18n(lang).suggestedActions;
 
   // Not on latest version? Ask them to upgrade.
   const latestVersion = getAppVersionTracker().getLatestVersion();
@@ -265,8 +269,8 @@ function getSuggestedActions(
   if (appVersion && latestVersion && semverLt(appVersion, latestVersion)) {
     ret.push({
       id: `2024-02-update-${appVersion}-to-${latestVersion}`,
-      title: "Upgrade Available",
-      subtitle: `Tap to update to ${latestVersion}`,
+      title: t.upgrade.title(),
+      subtitle: t.upgrade.subtitle(latestVersion),
       url: appStoreLinks[daimoPlatform.startsWith("ios") ? "ios" : "android"],
     });
   }
@@ -275,8 +279,8 @@ function getSuggestedActions(
   if (hist.accountKeys.length === 1) {
     ret.push({
       id: "2024-02-passkey-backup",
-      title: "Secure Your Account",
-      subtitle: "Keep your account safe with a passkey backup",
+      title: t.backup.title(),
+      subtitle: t.backup.subtitle(),
       url: `daimo://settings/add-passkey`,
     });
   }
@@ -295,10 +299,10 @@ function getSuggestedActions(
 
   if (hasReceived) {
     ret.push({
-      id: "2023-12-join-tg-5",
+      id: "2023-12-join-tg-6",
       icon: "comment-discussion",
-      title: "Feedback? Ideas?",
-      subtitle: "Join our Telegram group.",
+      title: t.feedback.title(),
+      subtitle: t.feedback.subtitle(),
       url: `https://t.me/+to2ghQJfgic0YjA9`,
     });
   }
@@ -333,26 +337,31 @@ function getCoinbaseURL(account: EAccount) {
   });
 }
 
-function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
+function fetchRecommendedExchanges(
+  account: EAccount,
+  lang?: string
+): RecommendedExchange[] {
+  const i18 = i18n(lang).recommendedExchange;
+
   return [
     {
-      title: "Transfer from another chain",
-      cta: "Bridge coins from any wallet",
+      cta: i18.bridge.cta(),
+      title: i18.bridge.title(),
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
       sortId: 0,
     },
     {
-      title: "Send from Coinbase & other options",
-      cta: "Deposit from Coinbase",
+      cta: i18.coinbase.cta(),
+      title: i18.coinbase.title(),
       url: getCoinbaseURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
       sortId: 1,
     },
     // 2 is Binance, loaded client-side on demand.
     {
-      title: "Cards, banks, & international options",
-      cta: "Buy USDC",
+      title: i18.ramp.title(),
+      cta: i18.ramp.cta(),
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
       sortId: 3,

@@ -95,7 +95,7 @@ function RequestNotificationsPage({
               onPress={requestPermission}
             />
             <Spacer h={16} />
-            <TextButton title="Skip" onPress={skip} />
+            <TextButton title={i18.skipButton()} onPress={skip} />
             <Spacer h={16} />
           </>
         )}

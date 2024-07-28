@@ -68,7 +68,6 @@ function NotificationsScreenInner({ account }: { account: Account }) {
                 <SwapNotificationRow
                   key={swapNotifKey(notif.swap)}
                   notif={notif}
-                  account={account}
                 />
               );
           }

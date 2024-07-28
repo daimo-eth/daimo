@@ -17,11 +17,20 @@ export const es: LanguageDefinition = {
       request: () => `Solicitar`,
       send: () => `Enviar`,
       accept: () => `Aceptar`,
-      submit: () => `Enviar`, // TODO: see the context
+      submit: () => `Enviar`,
+      continue: () => `Continuar`,
     },
     textPressable: {
       cancel: () => `Cancelar`,
     },
+  },
+  // useSendAsync for sending userops
+  sendUserOp: {
+    loadingAccount: () => `Cargando cuenta...`,
+    authorizing: () => `Autorizando...`,
+    accepted: () => `Aceptado`,
+    offline: () => `Solicitud fallida. ¿Sin conexión?`,
+    error: () => `Error al enviar la transacción`,
   },
   // -------------------------- SCREENS --------------------------
   // ------------ HISTORY ------------
@@ -46,7 +55,7 @@ export const es: LanguageDefinition = {
       acceptedLink: () => `Link aceptado`,
       receivedRequest: () => `Petición recibida`,
       fulfilledRequest: () => `Petición satisfecha`,
-      cancelledLink: () => `Cancelled link`,
+      cancelledLink: () => `Link cancelado`,
       sent: () => `Enviado`,
       received: () => `Recivida`,
     },
@@ -137,24 +146,6 @@ export const es: LanguageDefinition = {
       other: (name: string) => `${name} enviado`,
     },
   },
-  // SendNoteScreen.tsx
-  send_note: {
-    title: () => `Enviar link`,
-    help: {
-      title: () => `Aprenda como`,
-      subtitle: () => `Cómo funcionan los links de pago`,
-      description: {
-        firstPara: () =>
-          `Links de pago transportan dinero en un link, que puedas enviarlo a cualquier persona.`,
-        secondPara: () =>
-          `Puedes cancelar un link sin reclamar y conseguir de vuelta los fondos.`,
-        thirdPara: () => `Son auto-custodiales. La clave forma parte del URL.`,
-        fourthPara: () =>
-          `Cada link funciona como una invitación a Daimo. Además, cualquiera que tenga el link puede reclamar con cualquier cartera, como Rainbow o Metamask.`,
-      },
-    },
-    create: () => `Crear Link de Pago`,
-  },
 
   // ------------ NOTIFICATIONS ------------
   // InvitesNotificationRow.tsx
@@ -208,6 +199,17 @@ export const es: LanguageDefinition = {
     skipButton: () => `Saltar`,
     instructions: () => `Serás solo notificado sobre actividad en tu cuenta.`,
   },
+  // settings.ts
+  settingsModal: {
+    modalTitle: () => `Activar acceso en Configuración`,
+    modalBody: ({ settingPhrase }: { settingPhrase: string }) =>
+      `Visita Configuración » Daimo y activa ${settingPhrase}.`,
+    settingPhrase: {
+      contacts: () => `contactos`,
+      notifications: () => `notificaciones`,
+      camera: () => `acceso a la cámara`,
+    },
+  },
   // ExistingChooseAccountScreen.tsx
   existingChooseAccount: {
     screenHeader: () => `Cargar cuenta`,
@@ -240,15 +242,21 @@ export const es: LanguageDefinition = {
   },
   // LogInButton.tsx
   logIn: {
-    button: (keyType: string) => `I ${keyType}`,
+    logIn: () => `INICIAR SESIÓN`,
+    logInWith: ({ keyType }: { keyType: string }) =>
+      `INICIAR SESIÓN CON ${keyType}`,
+    type: {
+      passkey: () => `LLAVE DE ACCESO`,
+      securityKey: () => `CLAVE DE SECURIDAD`,
+    },
     fromSeed: {
       error: () => `La frase semilla no fue encontrada. Eliminada?`,
-      button: () => `INICIE SESIÓN CON FRASE SEMILLA`,
+      button: () => `INICIAR SESIÓN CON FRASE SEMILLA`,
     },
   },
   // MissingKeyScreen.tsx
   missingKey: {
-    screenHeader: () => `Clave faltante`,
+    screenHeader: () => `Clave ausente`,
     logOut: () => `CERRAR SESIÓN`,
     keyErrorDesc: {
       noKey: {
@@ -297,7 +305,7 @@ export const es: LanguageDefinition = {
     title: () => `Bienvenido a Daimo`,
     subtitle: () => `Pague o reciva USDC donde sea`,
     acceptInviteButton: () => `ACEPTAR INVITACIÓN`,
-    alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA_`,
+    alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA?`,
     rows: {
       selfCustody: {
         title: () => `Tus llaves, tus tokens`,
@@ -399,7 +407,7 @@ export const es: LanguageDefinition = {
   // SendNoteScreen.tsx
   sendNote: {
     screenHeader: () => `Enviar Link`,
-    info: (tokenSymbol: string) => `Enviar ${tokenSymbol} via link`,
+    info: ({ tokenSymbol }: { tokenSymbol: string }) => `Enviar ${tokenSymbol}`,
     help: {
       title: () => `Como los Links de Pago funcionan`,
       learn: () => `Aprende cómo`,
@@ -441,6 +449,9 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Enviar a`,
     firstTime: (name: string) => `Primera vez pagando ${name}`,
   },
+  contactDisplay: {
+    requestedBy: () => `Solicitado por`,
+  },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
@@ -480,6 +491,10 @@ export const es: LanguageDefinition = {
   home: {
     pending: (pendingDollars: string) => `+ $${pendingDollars} PENDIENTE`,
     finishAccountSetUp: () => `Terminar de configurar cuenta`,
+    yourBalance: () => `Balance`,
+    deposit: () => `Depositar`,
+    request: () => `Solicitar`,
+    send: () => `Enviar`,
   },
   // InviteScreen.tsx
   invite: {
@@ -495,22 +510,22 @@ export const es: LanguageDefinition = {
     locked: {
       header: () => `Invita tus amigos y gana USDC!`,
       description: () =>
-        `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando un link de Pago.`,
+        `Usa Daimo para desbloquear invitaciones. Incorpore a sus contactos enviando\nun link de Pago.`,
     },
-    sendButton: () => `ENVIAR`,
+    sendButton: () => `INVITAR`,
     referral: {
       creditForInvite: (bonusSubtitle: string) =>
-        `You'll get credit for the invite on their profile ${bonusSubtitle}`,
+        `Recibirás crédito por la invitación en su perfil ${bonusSubtitle}`,
       bonusBoth: (bonusDollarsInvitee: number) =>
-        `and we'll send you both $${bonusDollarsInvitee} USDC`,
+        `y les enviaremos a ambos $${bonusDollarsInvitee} USDC`,
       bonusInvitee: (bonusDollarsInvitee: number) =>
-        `and we'll send them $${bonusDollarsInvitee} USDC`,
+        `y les enviaremos a ellos $${bonusDollarsInvitee} USDC`,
       bonusInviter: (bonusDollarsInviter: number) =>
-        `and we'll send you $${bonusDollarsInviter} USDC`,
-      inviteCode: () => `Invite Code`,
-      inviteLink: () => `Invite Link`,
+        `y te enviaremos $${bonusDollarsInviter} USDC`,
+      inviteCode: () => `Código de Invitación`,
+      inviteLink: () => `Link de Invitación`,
       share: {
-        button: () => `Comparta Link`,
+        button: () => `Compartir Link`,
         farcasterButton: () => `COMPARTIR FRAME EN FARCASTER`,
         farcasterMsg: () => `Únete+a+mi+en+Daimo`,
       },
@@ -546,6 +561,10 @@ export const es: LanguageDefinition = {
     title: {
       display: () => `Mostrar código QR`,
       scan: () => `Escanea código QR`,
+    },
+    slider: {
+      payMe: () => `RECIBIR`,
+      scan: () => `ESCANEAR`,
     },
     copiedAddress: () => `Dirección copiada`,
     depositButton: () => `DEPOSITAR DESDE EXCHANGE ›`,
@@ -603,7 +622,7 @@ export const es: LanguageDefinition = {
         button: () => `AÑADIR DISPOSITIVO`,
       },
       contactSupport: {
-        title: () => `Preguntas? Sugerencias?`,
+        title: () => `¿Preguntas? ¿Sugerencias?`,
         msg: () => `Contáctanos en Telegram`,
         button: () => `CONTACTAR SOPORTE`,
       },
@@ -661,6 +680,7 @@ export const es: LanguageDefinition = {
     placeholderWithContact: () => `Busca usuarios, ENS, contacto, o email...`,
     placeholderWithoutContact: () =>
       `Busca usuarios, ENS, email, o teléfono...`,
+    cancel: () => `Cancelar`,
   },
 
   // -------------------------- SHEET --------------------------
@@ -685,7 +705,7 @@ export const es: LanguageDefinition = {
     },
     addKey: {
       passkey: () => `LLAVE DE ACCESO`,
-      securityKey: () => `CLAVE SECURIDAD`,
+      securityKey: () => `CLAVE DE SECURIDAD`,
       button: (slotType: string) => `RESPALDO CON ${slotType}`,
     },
     recommended: {
@@ -719,6 +739,8 @@ export const es: LanguageDefinition = {
     openWarpcastButton: () => `ABRIR EN WARPCAST`,
     welcome: (fcUsername: string) => `Bienvenido, ${fcUsername}`,
     loading: () => `Cargando...`,
+    removeFromProfile: () => `QUITAR DEL PERFIL`,
+    addToProfile: () => `AÑADIR AL PERFIL`,
   },
   // HelpBottomSheet.tsx
   helpBottom: {
@@ -747,6 +769,7 @@ export const es: LanguageDefinition = {
   // SwapBottomSheet.tsx
   swapBottom: {
     sheetHeader: () => `Aceptar`,
+    acceptButton: () => `ACEPTAR`,
   },
   // WithdrawInstructionsBottomSheet.tsx
   withdrawInstructionsBottom: {
@@ -762,8 +785,8 @@ export const es: LanguageDefinition = {
       steps: {
         sendReceive: () => `Enviar y Recivir`,
         receive: () => `Recivir`,
-        choose: () => `Elegir`,
-        setNetwork: () => `Cambiar la Red a`,
+        choose: () => `Elije`,
+        setNetwork: () => `Cambia la red a`,
       },
       sendToAddress: () =>
         `Usa Daimo para enviar a la dirección mostrada. Los fondos deberían aparecer en Coinbase en unos minutos.`,
@@ -777,6 +800,18 @@ export const es: LanguageDefinition = {
     home: () => `Inicio`,
     send: () => `Enviar`,
     settings: () => `Ajustes`,
+  },
+
+  // view/sheet/ components
+  sheets: {
+    withdraw: () => `Retirar`,
+    deposit: () => `Depositar`,
+  },
+
+  // view/shared components
+  viewShared: {
+    recents: () => `Recientes`,
+    searchResults: () => `Resultados de busqueda`,
   },
 };
 

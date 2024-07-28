@@ -15,6 +15,7 @@ import { useCallback } from "react";
 import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { i18n } from "../i18n";
 import { getAccountManager, useAccount } from "../logic/accountManager";
 import { getWrappedDeviceKeySigner } from "../logic/key";
 import { NamedError } from "../logic/log";
@@ -185,6 +186,8 @@ function addInviteLinkStatus(account: Account, pendingOp: PendingOp): Account {
   };
 }
 
+const i18 = i18n.sendUserOp;
+
 async function sendAsync(
   setAS: SetActStatus,
   account: Account,
@@ -199,16 +202,16 @@ async function sendAsync(
       throw new Error("Device removed from account");
     }
 
-    setAS("loading", "Loading account..."); // "account" is shown in the UI, internally it's the op sender.
+    setAS("loading", i18.loadingAccount());
     const opSender = await loadOpSender({
       address,
       signer,
       chainId: homeChainId,
     });
 
-    setAS("loading", "Authorizing...");
+    setAS("loading", i18.authorizing());
     const pendingOp = await sendFn(opSender);
-    setAS("success", "Accepted");
+    setAS("success", i18.accepted());
 
     return pendingOp;
   } catch (e: any) {
@@ -220,9 +223,9 @@ async function sendAsync(
     ) {
       setAS("error", e.message);
     } else if (e.message === "Network request failed") {
-      setAS("error", "Request failed. Offline?");
+      setAS("error", i18.offline());
     } else {
-      setAS("error", "Error sending transaction");
+      setAS("error", i18.error());
     }
     console.error(`[SEND] error: ${e}`);
     throw e;

@@ -20,7 +20,7 @@ import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";
-import { getI18NLocale, i18n } from "../../i18n";
+import { i18NLocale, i18n } from "../../i18n";
 import {
   DaimoContact,
   EAccountContact,
@@ -90,7 +90,11 @@ function SearchResultsScroll({
       )}
       {res.recipients.length > 0 && (
         <View style={styles.resultsHeader}>
-          <TextLight>{recentsOnly ? "Recents" : "Search results"}</TextLight>
+          <TextLight>
+            {recentsOnly
+              ? i18n.viewShared.recents()
+              : i18n.viewShared.searchResults()}
+          </TextLight>
         </View>
       )}
       {res.recipients.map((r) => (
@@ -195,12 +199,10 @@ export function SearchResultRow({
         const nowS = now();
         const { lastSendTime, lastRecvTime } = contact;
         const lastSendMessage = lastSendTime
-          ? `${i18.sentAgo(timeAgo(lastSendTime, getI18NLocale(), nowS, true))}`
+          ? `${i18.sentAgo(timeAgo(lastSendTime, i18NLocale, nowS, true))}`
           : undefined;
         const lastRecvMessage = lastRecvTime
-          ? `${i18.receivedAgo(
-              timeAgo(lastRecvTime, getI18NLocale(), nowS, true)
-            )}`
+          ? `${i18.receivedAgo(timeAgo(lastRecvTime, i18NLocale, nowS, true))}`
           : undefined;
 
         if ((lastSendTime || 0) > (lastRecvTime || 0)) {

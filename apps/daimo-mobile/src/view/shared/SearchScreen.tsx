@@ -70,7 +70,7 @@ export function SearchScreen({
         {inputFocused && (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
             <PressableText
-              text="Cancel"
+              text={i18.cancel()}
               onPress={blurInput}
               style={{ marginLeft: 16 }}
             />
