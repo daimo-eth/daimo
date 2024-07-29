@@ -9,7 +9,6 @@ import { getAppVersionTracker } from "./appVersion";
 import { Crontab } from "./cron";
 import { PushNotifier } from "./pushNotifier";
 import { createRouter } from "./router";
-import { ShovelSquared } from "./shovelSquared";
 import { Telemetry } from "./telemetry";
 import { TokenRegistry } from "./tokenRegistry";
 import { createContext, onTrpcError } from "./trpc";
@@ -115,7 +114,6 @@ async function main() {
   // Set up indexers
   const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
   const watcher = new Watcher(vc.publicClient, shovelDbUrl);
-  const s2 = new ShovelSquared(watcher.pg, watcher.kdb, keyReg.shovelSource);
   watcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],

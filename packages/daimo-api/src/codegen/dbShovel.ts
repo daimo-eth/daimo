@@ -5,9 +5,17 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
 
-export type Interval = ColumnType<IPostgresInterval, IPostgresInterval | number, IPostgresInterval | number>;
+export type Interval = ColumnType<
+  IPostgresInterval,
+  IPostgresInterval | number,
+  IPostgresInterval | number
+>;
 
 export type Json = JsonValue;
 
@@ -61,57 +69,6 @@ export interface DaimoTransfers {
   token: Buffer | null;
   tx_hash: Buffer;
   tx_idx: number;
-}
-
-export interface Erc20Transfers {
-  abi_idx: number | null;
-  block_hash: Buffer | null;
-  block_num: Numeric | null;
-  chain_id: Numeric | null;
-  f: Buffer | null;
-  ig_name: string | null;
-  log_addr: Buffer | null;
-  log_idx: number | null;
-  src_name: string | null;
-  t: Buffer | null;
-  tx_hash: Buffer | null;
-  tx_idx: Numeric | null;
-  v: Numeric | null;
-}
-
-export interface Erc4337UserOp {
-  abi_idx: number | null;
-  block_hash: Buffer | null;
-  block_num: Numeric | null;
-  chain_id: Numeric | null;
-  ig_name: string | null;
-  log_addr: Buffer | null;
-  log_idx: number | null;
-  op_actual_gas_cost: Numeric | null;
-  op_actual_gas_used: Numeric | null;
-  op_hash: Buffer | null;
-  op_nonce: Numeric | null;
-  op_paymaster: Buffer | null;
-  op_sender: Buffer | null;
-  op_success: boolean | null;
-  src_name: string | null;
-  tx_hash: Buffer | null;
-  tx_idx: Numeric | null;
-}
-
-export interface EthTransfers {
-  block_hash: Buffer | null;
-  block_num: Numeric | null;
-  call_type: string | null;
-  chain_id: Numeric | null;
-  from: Buffer | null;
-  ig_name: string | null;
-  src_name: string | null;
-  to: Buffer | null;
-  trace_action_idx: number | null;
-  tx_hash: Buffer | null;
-  tx_idx: Numeric | null;
-  value: Numeric | null;
 }
 
 export interface IgUpdates {
@@ -317,9 +274,6 @@ export interface DB {
   blocks: Blocks;
   daimo_ops: DaimoOps;
   daimo_transfers: DaimoTransfers;
-  erc20_transfers: Erc20Transfers;
-  erc4337_user_op: Erc4337UserOp;
-  eth_transfers: EthTransfers;
   ig_updates: IgUpdates;
   integrations: Integrations;
   key_added: KeyAdded;
