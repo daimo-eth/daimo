@@ -31,6 +31,7 @@ export function InvitePreviewImg({ name }: { name: string }) {
   );
 }
 
+// TODO: i18n
 function Content({ name }: { name: string }) {
   return (
     <div

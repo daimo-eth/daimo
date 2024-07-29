@@ -36,6 +36,7 @@ type TitleDesc = {
   linkStatus?: DaimoLinkStatus;
 };
 
+// TODO: i18n
 const defaultMeta = metadata(
   "Daimo",
   "Payments on Ethereum",
@@ -83,6 +84,7 @@ export default async function LinkPage(props: LinkProps) {
   );
 }
 
+// TODO: i18n
 async function LinkPageInner(props: LinkProps) {
   const { name, action, dollars, description, linkStatus } =
     (await loadTitleDesc(getUrl(props))) || {
@@ -143,6 +145,7 @@ function metadata(
   };
 }
 
+// TODO: i18n
 async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
   let res: DaimoLinkStatus;
   try {

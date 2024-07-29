@@ -66,6 +66,7 @@ export function getFrameForLinkStatus(
     const linkUrl = formatDaimoLink(linkStatus.link);
     const linkParam = encodeURIComponent(linkUrl);
 
+    // TODO: i18n ??
     let buttons: [FrameButtonMetadata, ...FrameButtonMetadata[]];
     if (isFinalized) {
       buttons = [{ label: "Open in Daimo", action: "link", target: linkUrl }];

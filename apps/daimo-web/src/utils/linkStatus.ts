@@ -23,6 +23,7 @@ export interface LinkStatusDesc {
   memo?: string;
 }
 
+// TODO: i18n ??
 export async function loadLinkStatusDesc(
   url: string
 ): Promise<LinkStatusDesc | null> {

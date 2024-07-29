@@ -35,6 +35,7 @@ export function getFrameLinkServiceFromEnv(): FrameLinkService {
   return envFrameLinkService;
 }
 
+// TODO: i18n
 export class FrameLinkService {
   constructor(
     private neynarClient: NeynarAPIClient,

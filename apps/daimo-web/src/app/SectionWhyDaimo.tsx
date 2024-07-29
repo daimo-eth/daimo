@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
+// TODO: i18n
 const features = [
   {
     name: "Secure",

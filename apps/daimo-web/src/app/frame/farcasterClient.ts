@@ -2,6 +2,7 @@ import { assert } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
+// TODO: i18n
 export class FarcasterCacheClient {
   private readonly client: NeynarAPIClient;
 

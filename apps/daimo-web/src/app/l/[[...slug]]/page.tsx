@@ -21,6 +21,7 @@ type LinkProps = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
+// TODO: i18n
 const defaultMeta = createMetadata(
   "Daimo",
   "Payments on Ethereum",

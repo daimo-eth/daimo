@@ -8,6 +8,7 @@ import {
   DownloadLinkButtonMobileNav,
 } from "../components/DownloadLink";
 
+// TODO: i18n
 export function SectionHero() {
   return (
     <section className="overflow-hidden md:pb-28 px-8 m-auto max-w-screen-xl bg-[#000000]/20 lg:bg-[#000]/0">

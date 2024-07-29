@@ -5,6 +5,7 @@ import React from "react";
 import { PrimaryButton } from "../../../components/buttons";
 import { downloadMetadata } from "../../../utils/platform";
 
+// TODO: i18n
 export default function DownloadPage() {
   return (
     <main className="max-w-2xl mx-auto px-4">

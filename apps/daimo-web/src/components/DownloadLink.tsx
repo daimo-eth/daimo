@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { TextBold } from "./typography";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
+// TODO: i18n
 export function DownloadLink() {
   return (
     <Link

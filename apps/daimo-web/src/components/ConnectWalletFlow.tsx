@@ -46,6 +46,7 @@ export function ConnectWalletFlow({
   const [action, setAction] = useState<WagmiPrep[]>();
   const [currentStep, setCurrentStep] = useState(0);
 
+  // TODO: i18n
   const descriptionVerb = description.split(" ")[0].toUpperCase();
   const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
   const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";

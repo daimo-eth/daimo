@@ -5,6 +5,7 @@ import { neueMontreal } from "../fonts/font";
 import "./globals.css";
 import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 
+// TODO: adapt to i18n
 export const metadata: Metadata = {
   metadataBase: new URL(getAbsoluteUrl("/")),
   title: "Daimo",
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1, minimum-scale=0.4",
 };
 
+// TODO: adapt to i18n
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${neueMontreal.variable} font-sans`}>

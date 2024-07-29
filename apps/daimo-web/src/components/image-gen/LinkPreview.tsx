@@ -121,6 +121,7 @@ function Content({
   );
 }
 
+// TODO: i18n
 function Footer({
   paidBy,
   cancelled,

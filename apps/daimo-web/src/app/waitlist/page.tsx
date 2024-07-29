@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { PrimaryButton } from "../../components/buttons";
 import { rpc } from "../../utils/rpc";
 
+// TODO: i18n
 export default function WaitlistPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

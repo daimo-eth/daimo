@@ -4,6 +4,7 @@ import { getAddress } from "viem";
 import { PointOfSalePage } from "./PointOfSalePage";
 import { RpcHookProvider } from "../../utils/rpcHook";
 
+// TODO: i18n
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Daimo Point-Of-Sale",

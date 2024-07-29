@@ -1,6 +1,7 @@
 import { Spacer } from "../components/Spacer";
 import TestimonialAccent from "../components/TestimonialAccent";
 
+// TODO: i18n
 export function SectionTestimonial() {
   return (
     <section className="m-auto max-w-screen-xl">

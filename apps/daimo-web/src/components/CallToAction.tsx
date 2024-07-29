@@ -34,6 +34,7 @@ export function CallToAction({
     );
   }, [directDeepLink]);
 
+  // TODO: i18n
   return (
     <>
       {isWalletAction ? (

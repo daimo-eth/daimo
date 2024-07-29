@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   return handle(req);
 }
 
+// TODO: i18n
 async function handle(req: NextRequest) {
   const reqURL = new URL(req.url);
   const rawLink = reqURL.searchParams.get("link");

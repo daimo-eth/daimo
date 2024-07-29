@@ -31,6 +31,8 @@ export async function GET(_: Request, { params }: Context) {
 
     if (result == null) {
       console.warn(`[PROFILE] No image found for ${addr}`);
+
+      // TODO: i18n
       return NextResponse.json({ error: "No image found" }, { status: 404 });
     }
 

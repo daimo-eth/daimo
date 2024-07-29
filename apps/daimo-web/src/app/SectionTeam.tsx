@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Spacer } from "../components/Spacer";
 import { TextH1 } from "../components/typography";
 
+// TODO: i18n
 export function SectionTeam() {
   return (
     <section className="bg-white py-24" id="team">

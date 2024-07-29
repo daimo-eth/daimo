@@ -12,6 +12,7 @@ export function detectPlatform(ua: string): PlatformType {
   return "other";
 }
 
+// TODO: i18n
 export const downloadMetadata = {
   ios: {
     title: "Download on App Store",

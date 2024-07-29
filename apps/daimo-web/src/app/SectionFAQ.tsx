@@ -24,6 +24,7 @@ const faqStyle = `
   }
 `;
 
+// TODO: i18n
 export function SectionFAQ() {
   const [faq, setFaq] = useState([] as FAQ[]);
   useEffect(() => setFaq(parseFAQs(readmeMD)), []);

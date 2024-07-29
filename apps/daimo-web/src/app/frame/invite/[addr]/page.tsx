@@ -54,6 +54,7 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   return metadata;
 }
 
+// TODO: i18n
 export default async function Page({ params }: LinkProps) {
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
