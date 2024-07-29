@@ -5,13 +5,12 @@
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "scripts": {
-    "codegen": "wagmi -v && wagmi generate && tsx src/shovel/index.ts",
+    "codegen": "wagmi -v && wagmi generate",
     "build": "tsc"
   },
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@indexsupply/shovel-config": "^0.0.9",
     "@pimlico/erc20-paymaster": "^0.1.1",
     "@tsconfig/node20": "^20.1.0",
     "@wagmi/cli": "^1.4.1",

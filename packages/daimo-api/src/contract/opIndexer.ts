@@ -91,7 +91,7 @@ export class OpIndexer extends Indexer {
     console.log(`[OP] processed ${result.length} ops in ${elapsedMs}ms`);
 
     this.swapClogMatcher.loadSwapTransfers(
-      pg,
+      kdb,
       from,
       to,
       chainConfig.chainL2.id,
