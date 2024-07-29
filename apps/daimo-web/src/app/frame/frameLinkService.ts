@@ -50,6 +50,8 @@ export class FrameLinkService {
   // Validate POST body info = Farcaster user who clicked the frame
   async validateFrameAction(req: NextRequest): Promise<ValidatedFrameAction> {
     const { neynarClient } = this;
+    const { fcClient } = this;
+    const i18 = fcClient.i18.FrameLinkService;
 
     const body: FrameRequest = await req.json();
     const { valid, action } = await neynarClient.validateFrameAction(
@@ -58,18 +60,20 @@ export class FrameLinkService {
     );
     console.log("Frame request. valid? " + valid);
 
-    if (!valid) throw new Error("Invalid frame request");
+    if (!valid) throw new Error(i18.requests.invalidRequest());
     return action;
   }
 
   // Handle a frame button click
   async respond(req: NextRequest, frameId: number): Promise<NextResponse> {
     const action = await this.validateFrameAction(req);
+    const { fcClient } = this;
+    const i18 = fcClient.i18.FrameLinkService;
 
     // The frame being clicked on
     const frame = inviteFrameLinks.find((l) => l.id === frameId);
     if (frame == null) {
-      throw new Error(`Unknown frame: ${req.nextUrl.pathname}`);
+      throw new Error(i18.requests.unknownFrame(req.nextUrl.pathname));
     }
 
     return this.respondToFrameClick(action, frame);
@@ -84,10 +88,11 @@ export class FrameLinkService {
     // The user who clicked
     const { fid } = action.interactor;
     const user = await fcClient.getUser(fid);
+    const i18 = fcClient.i18.FrameLinkService;
 
     // Should we give them a Daimo invite?
     const [bonus, authMsg] = await this.auth(user, frame);
-    const bonusStr = bonus ? "BONUS" : "NO BONUS";
+    const bonusStr = bonus ? i18.response.bonus() : i18.response.noBonus();
     console.log(
       `[FRAME] frame click from ${fid} @${user.username} ${bonusStr} ${authMsg}`
     );
@@ -99,7 +104,9 @@ export class FrameLinkService {
     const inviteUrl = await this.createInviteLink(fid, frameWithBonus);
 
     // Success = user allowed, invite link found or created
-    const buttonText = bonus ? `✳️ ${authMsg}` : `✳️ Claim Invite · ${authMsg}`;
+    const buttonText = bonus
+      ? `✳️ ${authMsg}`
+      : i18.response.claimInvite(authMsg);
     return this.successResponse(frame, inviteUrl, buttonText);
   }
 
@@ -108,13 +115,14 @@ export class FrameLinkService {
     user: User,
     frame: InviteFrameLink
   ): Promise<[boolean, string]> {
+    const i18 = this.fcClient.i18.FrameLinkService;
     const { auth } = frame;
     console.log(`[FRAME] authenticating ${JSON.stringify(user)}`);
 
     if (auth.mustBePowerUser && !(user as any).power_badge) {
-      return [false, "Not a power user"];
+      return [false, i18.response.notAPowerUser()];
     } else if (auth.fidMustBeBelow && user.fid > auth.fidMustBeBelow) {
-      return [false, "FID too high"];
+      return [false, i18.response.fidToHigh()];
     }
     for (const whitelist of auth.fidWhitelists || []) {
       if (whitelist.fids.includes(user.fid)) {
@@ -122,7 +130,7 @@ export class FrameLinkService {
       }
     }
     if ((auth.fidWhitelists || []).length > 0) {
-      return [false, "Not on list"];
+      return [false, i18.response.notOnList()];
     }
     for (const whitelist of auth.addressWhitelists || []) {
       const whitelistAddrs = new Set(
@@ -134,7 +142,7 @@ export class FrameLinkService {
       }
     }
     if ((auth.addressWhitelists || []).length > 0) {
-      return [false, "Not on list"];
+      return [false, i18.response.notOnList()];
     }
     return [true, frame.appearance.buttonSuccess];
   }

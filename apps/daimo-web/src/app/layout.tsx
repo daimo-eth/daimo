@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
-import "@rainbow-me/rainbowkit/styles.css";
 import { neueMontreal } from "../fonts/font";
 import { getI18N } from "../i18n";
+import { I18NProvider } from "../i18n/context";
 import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
+
 import "./globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
 
 export function generateMetadata(): Metadata {
   const i18n = getI18N(headers().get("accept-language"));
@@ -38,7 +40,9 @@ export default function RootLayout({
   const i18n = getI18N(headers().get("accept-language"));
   return (
     <html lang={i18n.lang} className={`${neueMontreal.variable} font-sans`}>
-      <body>{children}</body>
+      <body>
+        <I18NProvider lang={i18n.lang}>{children}</I18NProvider>
+      </body>
     </html>
   );
 }

@@ -1,4 +1,7 @@
+"use client";
+
 import { UserBubble } from "./UserBubble";
+import { useI18N } from "../../i18n/context";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function LinkPreviewImg({
@@ -128,6 +131,8 @@ function Footer({
   paidBy?: string;
   cancelled?: boolean;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.linkPreview;
   const hasStatus = paidBy || cancelled;
   return (
     <div
@@ -158,7 +163,7 @@ function Footer({
           color: "#262626",
         }}
       >
-        {cancelled ? `❌` : paidBy ? `✅ Paid by ${paidBy}` : "Daimo"}
+        {cancelled ? `❌` : paidBy ? i18.paidBy(paidBy) : "Daimo"}
       </div>
     </div>
   );

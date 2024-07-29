@@ -6,6 +6,8 @@ import { CallToAction } from "../../../components/CallToAction";
 import { chainsDaimoL2, Providers } from "../../../components/Providers";
 import { I18NProvider } from "../../../i18n/context";
 import { LinkStatusDesc } from "../../../utils/linkStatus";
+import { getI18N } from "../../../i18n";
+import { getReqLang } from "../../../i18n/server";
 
 export default function LinkPage({
   lang,
@@ -32,10 +34,11 @@ function LinkPageInner({
   statusDesc: LinkStatusDesc | null;
   pfp: string | undefined;
 }) {
+  const i18n = getI18N(getReqLang());
   const { name, action, dollars, description, linkStatus, memo } =
     statusDesc || {
-      title: "Daimo",
-      description: "Payments on Ethereum",
+      title: i18n.l.defaultMetadata.title(),
+      description: i18n.l.defaultMetadata.description(),
     };
 
   return (

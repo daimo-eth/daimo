@@ -1,6 +1,7 @@
 import { EAccount } from "@daimo/common";
 import { Address } from "viem";
 
+// TODO: i18n ???
 // A special Daimo invite link that shows a Farcaster frame.
 export interface InviteFrameLink {
   // URL: https://daimo.com/frame/[id]

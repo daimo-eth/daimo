@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DaimoLinkStatus,
   DaimoNoteStatus,
@@ -30,6 +32,8 @@ import {
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
+import { useI18N } from "../i18n/context";
+import { LanguageDefinition } from "../i18n/languages/en";
 
 export function ConnectWalletFlow({
   linkStatus,
@@ -40,6 +44,9 @@ export function ConnectWalletFlow({
   description: string;
   setSecondary: () => void;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
+
   const { address, isConnected } = useAccount();
   const [creationError, setCreationError] = useState<string>();
 
@@ -47,8 +54,8 @@ export function ConnectWalletFlow({
   const [currentStep, setCurrentStep] = useState(0);
 
   const descriptionVerb = description.split(" ")[0].toUpperCase();
-  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
-  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
+  const secondaryTitle = descriptionVerb + i18.withConnected();
+  const secondaryConnectTitle = descriptionVerb + i18.withAnother();
 
   useEffect(() => {
     (async () => {
@@ -58,14 +65,19 @@ export function ConnectWalletFlow({
         // URL hash part is not readable server side.
         const hash = window.location.hash.slice(1);
 
-        const action = await linkStatusToAction(linkStatus, address, hash);
+        const action = await linkStatusToAction(
+          linkStatus,
+          address,
+          hash,
+          i18n
+        );
         console.log("action", action);
         setAction(action);
       } catch (e: any) {
         setCreationError(e.message);
       }
     })();
-  }, [linkStatus, address]);
+  }, [linkStatus, address, i18n]);
 
   const incrementStep = useMemo(() => {
     if (currentStep < (action?.length ?? 0) - 1)
@@ -118,6 +130,8 @@ function WagmiButton({
   incrementStep?: () => void;
   setSecondary: () => void;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
   const { chain } = useNetwork();
   const { config, error } = usePrepareContractWrite(wagmiPrep);
   const { data, isLoading, isSuccess, write } = useContractWrite(config);
@@ -125,17 +139,17 @@ function WagmiButton({
   const humanReadableError = useMemo(() => {
     if (!error || !error.message) return undefined;
     if (error.message.match(/ERC20: transfer amount exceeds balance/)) {
-      return "Not enough USDC in wallet";
+      return i18.errors.notEnoughFunds();
     } else if (error.message.match(/note does not exist/)) {
-      return "Already claimed"; // Only shown on out of date page load
+      return i18.errors.alreadyClaimed(); // Only shown on out of date page load
     } else if (error.message.match(/already fulfilled or cancelled/)) {
-      return "Request already fulfilled or cancelled"; // Only shown on out of date page load
+      return i18.errors.alreadyFulfilledOrCancelled(); // Only shown on out of date page load
     } else if (error instanceof InsufficientFundsError) {
-      return "Insufficient ETH for transaction gas";
+      return i18.errors.insufficientEth();
     } else {
       return error.message;
     }
-  }, [error]);
+  }, [error, i18]);
 
   useEffect(() => {
     if (isSuccess && incrementStep) incrementStep();
@@ -162,9 +176,9 @@ function WagmiButton({
             buttonType={isSuccess ? "success" : undefined}
           >
             {isLoading
-              ? "SENDING"
+              ? i18.misc.sending()
               : isSuccess && !incrementStep
-              ? "VIEW ON BLOCK EXPLORER"
+              ? i18.misc.viewInExplorer()
               : title}
           </SecondaryButton>
           <div className="h-4" />
@@ -183,6 +197,8 @@ function WagmiButton({
 }
 
 function CustomConnectButton({ title }: { title: string }): JSX.Element {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
   return (
     <ConnectButton.Custom>
       {({
@@ -223,14 +239,14 @@ function CustomConnectButton({ title }: { title: string }): JSX.Element {
               if (chain.unsupported) {
                 return (
                   <TextButton onClick={openChainModal} buttonType="danger">
-                    WRONG NETWORK
+                    {i18.misc.wrongNetwork()}
                   </TextButton>
                 );
               }
 
               return (
                 <TextButton onClick={openConnectModal}>
-                  CONNECTED TO {account.displayName.toUpperCase()}
+                  {i18.misc.connectedTo(account.displayName.toUpperCase())}
                 </TextButton>
               );
             })()}
@@ -265,9 +281,12 @@ async function getNoteSignature(
 async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
-  urlHash: string
+  urlHash: string,
+  i18n: LanguageDefinition
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
+
+  const i18 = i18n.components.connectWallet;
 
   switch (linkStatus.link.type) {
     case "request": {
@@ -350,9 +369,7 @@ async function linkStatusToAction(
       }
     }
     default: {
-      throw new Error(
-        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`
-      );
+      throw new Error(i18.errors.unexpected(linkStatus.link.type));
     }
   }
 }

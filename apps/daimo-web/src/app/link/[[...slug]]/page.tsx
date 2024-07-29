@@ -42,6 +42,7 @@ type TitleDesc = {
   linkStatus?: DaimoLinkStatus;
 };
 
+// how to load i18n
 const defaultMeta = metadata(
   "Daimo",
   "Payments on Ethereum",

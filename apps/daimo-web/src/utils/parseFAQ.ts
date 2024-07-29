@@ -5,6 +5,7 @@ export interface FAQ {
   answerHtml: string;
 }
 
+// TODO: i18n ??
 export function parseFAQs(markdown: string): FAQ[] {
   console.log(`[WEB] parsing FAQ, input README.md ${markdown.length} chars`);
 

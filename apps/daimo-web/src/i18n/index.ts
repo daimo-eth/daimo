@@ -1,4 +1,4 @@
-import { en, LangDef } from "./languages/en";
+import { LangDef, en } from "./languages/en";
 import { es } from "./languages/es";
 
 export function getI18N(lang: string | null): LangDef {

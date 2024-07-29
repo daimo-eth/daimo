@@ -2,12 +2,16 @@ import Image from "next/image";
 
 import { Spacer } from "../components/Spacer";
 import { TextH1 } from "../components/typography";
+import { useI18N } from "../i18n/context";
 
 export function SectionTeam() {
+  const i18n = useI18N();
+  const i18 = i18n.homePage.team;
+
   return (
     <section className="bg-white py-24" id="team">
       <center className="m-auto w-[32rem]">
-        <TextH1>Meet the team</TextH1>
+        <TextH1>{i18.meetTheTeam()}</TextH1>
         <Spacer h={48} />
         <div className="flex gap-12">
           <Person

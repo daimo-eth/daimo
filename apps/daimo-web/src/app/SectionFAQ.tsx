@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import readmeMD from "../../../../README.md";
 import { Spacer } from "../components/Spacer";
-import { FAQ, parseFAQs } from "../utils/parseFAQ";
+import { useI18N } from "../i18n/context";
 
 const faqStyle = `
   details > summary {
@@ -25,8 +24,8 @@ const faqStyle = `
 `;
 
 export function SectionFAQ() {
-  const [faq, setFaq] = useState([] as FAQ[]);
-  useEffect(() => setFaq(parseFAQs(readmeMD)), []);
+  const i18n = useI18N();
+  const i18 = i18n.homePage.faq;
 
   return (
     <section className="bg-midnight-gradient pt-24" id="faq">
@@ -34,11 +33,11 @@ export function SectionFAQ() {
         <style dangerouslySetInnerHTML={{ __html: faqStyle }} />
         <div className="m-auto max-w-screen-xl px-8 section-faq">
           <h1 className="text-[32px] md:text-[50px] lg:text-[77px] tracking-tight">
-            Frequently asked questions
+            {i18.text1()}
           </h1>
           <Spacer h={48} />
           <ul>
-            {faq.map((qna, i) => (
+            {i18.faqs().map((qna, i) => (
               <Question key={i} {...qna} />
             ))}
           </ul>
@@ -73,6 +72,7 @@ function Question({
           </span>
         </summary>
         <p
+          style={{ whiteSpace: "pre-line" }}
           className="text-[16px] md:text-[22px] text-[#777] leading-snug"
           dangerouslySetInnerHTML={{ __html: answerHtml }}
         />

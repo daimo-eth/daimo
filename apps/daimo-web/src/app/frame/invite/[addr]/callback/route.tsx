@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { getAddress } from "viem";
 
+import { getI18N } from "../../../../../i18n";
+import { getReqLang } from "../../../../../i18n/server";
 import { InviteFrameLink } from "../../../frameLink";
 import { getFrameLinkServiceFromEnv } from "../../../frameLinkService";
 
@@ -8,6 +10,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { addr: string } }
 ): Promise<Response> {
+  const i18n = getI18N(req.headers.get("accept-language"));
+  const i18 = i18n.frame.invite.callback;
   const addr = getAddress(params.addr);
   const service = getFrameLinkServiceFromEnv();
   const action = await service.validateFrameAction(req);
@@ -25,7 +29,7 @@ export async function POST(
       imgSuccess: "/assets/frame/InvFrameSuccess.png",
       imgFail: "/assets/frame/InvFrameFail.png",
       buttonInit: "",
-      buttonSuccess: "Welcome · Claim Invite + $10 ✳️",
+      buttonSuccess: i18.welcomeClaimInvite(),
     },
   };
 

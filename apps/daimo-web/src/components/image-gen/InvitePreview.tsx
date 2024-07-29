@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18N } from "../../i18n/context";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function InvitePreviewImg({ name }: { name: string }) {
@@ -32,6 +35,8 @@ export function InvitePreviewImg({ name }: { name: string }) {
 }
 
 function Content({ name }: { name: string }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.invitePreview;
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
@@ -45,7 +50,7 @@ function Content({ name }: { name: string }) {
           textAlign: "center",
         }}
       >
-        +$10 BONUS FOR POWER USERS
+        {i18.bonusForPowerUsers()}
       </div>
       <div
         style={{
@@ -56,7 +61,7 @@ function Content({ name }: { name: string }) {
           gap: 8,
         }}
       >
-        Join {name} on <span style={{ color: "#489e35" }}>Daimo.</span>
+        {i18.JoinNameOn(name)} <span style={{ color: "#489e35" }}>Daimo.</span>
       </div>
     </div>
   );

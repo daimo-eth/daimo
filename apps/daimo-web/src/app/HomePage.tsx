@@ -7,11 +7,10 @@ import { SectionWhyDaimo } from "./SectionWhyDaimo";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 import { HeroBackground } from "../components/HeroBackground";
-import { I18NProvider } from "../i18n/context";
 
-export function HomePage({ lang }: { lang: string | null }) {
+export function HomePage() {
   return (
-    <I18NProvider lang={lang}>
+    <>
       <HeroBackground>
         <Header />
         <SectionHero />
@@ -20,6 +19,6 @@ export function HomePage({ lang }: { lang: string | null }) {
       <SectionTestimonial />
       <SectionFAQ />
       <Footer />
-    </I18NProvider>
+    </>
   );
 }

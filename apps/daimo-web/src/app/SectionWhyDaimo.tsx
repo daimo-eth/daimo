@@ -7,39 +7,7 @@ import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-const features = [
-  {
-    name: "Secure",
-    title: "Your keys, your coins.",
-    description: [
-      "No seed phrase.",
-      "Keys live in secure hardware on your phone. Secure passkey backups.",
-      "The freedom of self-custody, easier than ever before.",
-    ],
-    imageUrl: "/assets/why-daimo-secure.png",
-  },
-  {
-    name: "Global",
-    title: "Works everywhere.",
-    description: [
-      "Pay and receive stablecoins globally.",
-      "Instant, 24/7 transfers to any of your contacts or any wallet address.",
-      "Send a request link, get paid on-chain.",
-    ],
-    imageUrl: "/assets/why-daimo-global.png",
-  },
-  {
-    name: "Multi-chain",
-    title: 'What is "bridging"?',
-    description: [
-      "Receive any coin on any chain.",
-      "Skip slow and expensive bridges.",
-      "We're cooking up a really clean way to do this... shipping soon.",
-    ],
-    comingSoon: true,
-    imageUrl: "/assets/why-daimo-multi-chain.png",
-  },
-];
+import { useI18N } from "../i18n/context";
 
 export function SectionWhyDaimo() {
   return (
@@ -55,6 +23,12 @@ export function SectionWhyDaimo() {
 }
 
 function FeaturesDesktop() {
+  const i18n = useI18N();
+  const i18 = i18n.homePage.whyDaimo;
+
+  // moved this definition to i18n for easier transl
+  const features = i18.features();
+
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const goToNextTab = () => {
@@ -85,11 +59,12 @@ function FeaturesDesktop() {
       <div className="flex flex-col flex-1 w-full justify-center items-center bg-[url('/assets/why-gradient.jpg')] bg-cover bg-no-repeat min-h-[80vh] py-24">
         <div>
           <h2 className="font-medium text-[32px] px-10 leading-tight md:text-[40px] lg:text-[65px] text-[#111111] pb-3">
-            Why Daimo?
+            {i18.texts.whyDaimo()}
           </h2>
           <p className="font-normal text-left text-sm md:text-[18px] px-10 lg:text-[24px] text-[#535353] pb-8 leading-snug tracking-wide max-w-xl ">
-            Secure, audited, and fully open source.<br></br>
-            The safest, fastest way to stablecoin.
+            {i18.texts.text1()}
+            <br></br>
+            {i18.texts.text2()}
           </p>
         </div>
         <div className="flex flex-row justify-center items-center space-x-4 lg:space-x-10">
@@ -168,7 +143,7 @@ function FeaturesDesktop() {
               >
                 {feature.comingSoon && (
                   <p className="py-2 text-base font-bold tracking-widest text-royalblue">
-                    COMING SOON
+                    {i18.texts.commingSoon()}
                   </p>
                 )}
                 <h3 className="text-[38px] font-medium">{feature.title}</h3>
@@ -190,6 +165,12 @@ function FeaturesMobile() {
   const [activeIndex, setActiveIndex] = useState(0);
   const slideContainerRef = useRef<React.ElementRef<"div">>(null);
   const slideRefs = useRef<React.ElementRef<"div">[]>([]);
+
+  const i18n = useI18N();
+  const i18 = i18n.homePage.whyDaimo;
+
+  // moved this definition to i18n for easier transl
+  const features = i18.features();
 
   useEffect(() => {
     const observer = new window.IntersectionObserver(
@@ -220,10 +201,10 @@ function FeaturesMobile() {
 
   return (
     <div className="flex flex-col pt-10 min-h-[90vh]">
-      <h2 className="text-3xl font-medium px-6">Why Daimo?</h2>
+      <h2 className="text-3xl font-medium px-6">{i18.texts.whyDaimo()}</h2>
       <p className="mt-4 text-grayMid pb-8 px-6">
-        Secure, audited, and fully open source. The safest, fastest way to
-        stablecoin.
+        {i18.texts.text1()}
+        {i18.texts.text2()}
       </p>
       <div className="my-6 flex justify-center gap-4">
         {features.map((_, featureIndex) => (
@@ -290,7 +271,9 @@ function FeaturesMobile() {
                   />
                 </div>
                 {feature.comingSoon && (
-                  <p className="py-1 text-xs text-royalblue">COMING SOON</p>
+                  <p className="py-1 text-xs text-royalblue">
+                    {i18.texts.commingSoon()}
+                  </p>
                 )}
                 <h3 className="text-3xl font-medium text-black sm:text-3xl">
                   {feature.title}
