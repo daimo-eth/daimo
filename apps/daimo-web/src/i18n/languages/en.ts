@@ -58,6 +58,13 @@ export const en = {
       },
     },
   },
+
+  l: {
+    defaultMetadata: {
+      title: () => "Daimo",
+      description: () => "Payments on Ethereum",
+    },
+  },
 };
 
 function pluralize(n: number, noun: string) {

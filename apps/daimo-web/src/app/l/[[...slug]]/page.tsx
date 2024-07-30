@@ -16,6 +16,9 @@ import { loadLinkStatusDesc } from "../../../utils/linkStatus";
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";
 
+import { i18n } from "../../../i18n";
+const i18 = i18n.l;
+
 type LinkProps = {
   params: { slug?: string[] };
   searchParams: { [key: string]: string | string[] | undefined };
@@ -23,8 +26,8 @@ type LinkProps = {
 
 // TODO: i18n
 const defaultMeta = createMetadata(
-  "Daimo",
-  "Payments on Ethereum",
+  i18.defaultMetadata.title(),
+  i18.defaultMetadata.description(),
   getAbsoluteUrl(`/logo-link-preview.png`)
 );
 
@@ -54,8 +57,8 @@ export default async function LinkPage(props: LinkProps) {
 async function LinkPageInner(props: LinkProps) {
   const { name, action, dollars, description, linkStatus, memo } =
     (await loadLinkStatusDesc(getUrl(props))) || {
-      title: "Daimo",
-      description: "Payments on Ethereum",
+      title: i18.defaultMetadata.title(),
+      description: i18.defaultMetadata.description(),
     };
   const pfp = name ? await loadPFPUrl(name) : undefined;
 
