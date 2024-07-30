@@ -1,6 +1,5 @@
 import { rpc } from "./rpc";
 
-// TODO: i18n
 // Fetches a profile picture from a Daimo account name.
 export async function loadPFPUrl(name: string): Promise<string | undefined> {
   const addr = await rpc.resolveName.query({ name });

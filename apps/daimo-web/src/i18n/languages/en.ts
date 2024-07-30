@@ -79,6 +79,9 @@ export const en = {
       sent: () => `sent`,
       cancelledSend: () => `cancelled send`,
       invitedYou: () => "invited you to Daimo",
+      cancelledRequest: () => `cancelled request`,
+
+      // for convenience
     },
 
     errors: {
@@ -141,6 +144,29 @@ export const en = {
     submitted: () => `Submitted! We'll reach out on email soon.`,
     isLimited: () =>
       "Daimo is currently in limited release. Sign up for early access",
+  },
+
+  utils: {
+    metaTags: {
+      checkStatus: () => "Check Status",
+      buttons: {
+        openInDaimo: () => "Open in Daimo",
+        payRequest: () => "Pay Request",
+      },
+    },
+    linkStatus: {
+      // some of these are duplicated in this.link so those we reused
+      unhandeledLink: (linkType: any) => `Unhandled link type: ${linkType}`,
+      unhandeledLinkForType: (linkType: any) =>
+        `Unhandled link status for type: ${linkType}`,
+    },
+
+    platform: {
+      ios: () => "Download on App Store",
+      mac: () => "Download on Mac App Store",
+      android: () => "Get it on Google Play",
+      other: () => "Download on App Store or Google Play",
+    },
   },
 };
 

@@ -15,6 +15,9 @@ import {
   getFrameMetadata,
 } from "../app/frame/frameUtils";
 
+import { i18n } from "../i18n";
+const i18 = i18n.utils.metaTags;
+
 export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const { name, action, dollars } = desc;
 
@@ -35,7 +38,7 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const meta = createMetadata(title, desc.description, previewURL);
 
   // If it's a request, make it frame with button to check status.
-  const frameMeta = getFrameForLinkStatus(desc, "Check Status");
+  const frameMeta = getFrameForLinkStatus(desc, i18.checkStatus());
   console.log(
     `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`
   );
@@ -66,14 +69,23 @@ export function getFrameForLinkStatus(
     const linkUrl = formatDaimoLink(linkStatus.link);
     const linkParam = encodeURIComponent(linkUrl);
 
-    // TODO: i18n ??
     let buttons: [FrameButtonMetadata, ...FrameButtonMetadata[]];
     if (isFinalized) {
-      buttons = [{ label: "Open in Daimo", action: "link", target: linkUrl }];
+      buttons = [
+        {
+          label: i18.buttons.openInDaimo(),
+          action: "link",
+          target: linkUrl,
+        },
+      ];
     } else {
       buttons = [
         { label: recheckLabel },
-        { label: "Pay Request", action: "link", target: linkUrl },
+        {
+          label: i18.buttons.payRequest(),
+          action: "link",
+          target: linkUrl,
+        },
       ];
     }
 

@@ -11,6 +11,7 @@ import {
 } from "@daimo/common";
 
 import { rpc } from "./rpc";
+import { i18n } from "../i18n";
 
 // Daimo deep link status (pending, fulfilled, cancelled, etc)
 // with a human-readable description.
@@ -23,7 +24,6 @@ export interface LinkStatusDesc {
   memo?: string;
 }
 
-// TODO: i18n ??
 export async function loadLinkStatusDesc(
   url: string
 ): Promise<LinkStatusDesc | null> {
@@ -45,7 +45,7 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
   if (link == null) {
     return {
       name: "Daimo",
-      description: "Unrecognized link",
+      description: i18n.link.errors.unrecognizedLink(),
     };
   }
 
@@ -53,35 +53,35 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
     case "account":
       return {
         name: `${link.account}`,
-        description: "Couldn't load account",
+        description: i18n.link.errors.loadAccount(),
       };
     case "request":
     case "requestv2":
       return {
         name: `${link.recipient}`,
-        action: `is requesting`,
+        action: i18n.link.actions.requesting(),
         dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load request status",
+        description: i18n.link.errors.loadStatus(),
         memo: link.type === "requestv2" ? link.memo : undefined,
       };
     case "notev2":
       return {
         name: `${link.sender}`,
-        action: `sent you`,
+        action: i18n.link.actions.sentYou(),
         dollars: `${Number(link.dollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load payment link",
+        description: i18n.link.errors.loadPayLink(),
       };
     case "note":
       return {
         name: `${link.previewSender}`,
-        action: `sent you`,
+        action: i18n.link.actions.sentYou(),
         dollars: `${Number(link.previewDollars).toFixed(2)}` as `${number}`,
-        description: "Couldn't load payment link",
+        description: i18n.link.errors.loadPayLink(),
       };
     default:
       return {
         name: "Daimo",
-        description: "Unhandled link type: " + link.type,
+        description: i18n.utils.linkStatus.unhandeledLink(link.type),
       };
   }
 }
@@ -94,7 +94,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       const { account } = res as DaimoAccountStatus;
       return {
         name: getAccountName(account),
-        description: "Get Daimo to send or receive payments",
+        description: i18n.link.responses.account.desc(),
       };
     }
     case "request": {
@@ -103,16 +103,18 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       if (fulfilledBy === undefined) {
         return {
           name: `${name}`,
-          action: `is requesting`,
+          action: i18n.link.actions.requesting(),
           dollars: `${res.link.dollars}`,
-          description: "Pay with Daimo",
+          description: i18n.link.responses.request.desc1(),
         };
       } else {
         return {
           name: `${name}`,
-          action: `requested`,
+          action: i18n.link.actions.requested(),
           dollars: `${res.link.dollars}`,
-          description: `Paid by ${getAccountName(fulfilledBy)}`,
+          description: i18n.link.responses.request.desc2(
+            getAccountName(fulfilledBy)
+          ),
         };
       }
     }
@@ -125,32 +127,36 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
         case DaimoRequestState.Created: {
           return {
             name: `${name}`,
-            action: `is requesting`,
+            action: i18n.link.actions.requesting(),
             dollars: `${res.link.dollars}`,
-            description: "Pay with Daimo",
+            description: i18n.link.responses.requestsv2.created(),
             memo: res.link.memo,
           };
         }
         case DaimoRequestState.Cancelled: {
           return {
             name: `${name}`,
-            action: `cancelled request`,
+            action: i18n.link.actions.cancelledRequest(),
             dollars: `${res.link.dollars}`,
-            description: `Cancelled by ${getAccountName(recipient)}`,
+            description: i18n.link.responses.requestsv2.canceled(
+              getAccountName(recipient)
+            ),
             memo: res.link.memo,
           };
         }
         case DaimoRequestState.Fulfilled: {
           return {
             name: `${name}`,
-            action: `requested`,
+            action: i18n.link.actions.requested(),
             dollars: `${res.link.dollars}`,
-            description: `Paid by ${getAccountName(fulfilledBy!)}`,
+            description: i18n.link.responses.requestsv2.fulfilled(
+              getAccountName(fulfilledBy!)
+            ),
             memo: res.link.memo,
           };
         }
         default: {
-          throw new Error(`unexpected DaimoRequestState ${status}`);
+          throw new Error(i18n.link.responses.requestsv2.default(status));
         }
       }
     }
@@ -162,35 +168,37 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
         case "confirmed": {
           return {
             name: `${getAccountName(sender)}`,
-            action: `sent you`,
+            action: i18n.link.actions.sentYou(),
             dollars: `${dollars}`,
-            description: "Accept with Daimo",
+            description: i18n.link.responses.notev2.confirmed(),
             memo,
           };
         }
         case "claimed": {
           const claim = claimer
             ? getAccountName(claimer)
-            : "(missing receiver)";
+            : i18n.link.responses.notev2.claimed.missingReceiver();
           return {
             name: `${getAccountName(sender)}`,
-            action: `sent`,
+            action: i18n.link.actions.sent(),
             dollars: `${dollars}`,
-            description: `Accepted by ${claim}`,
+            description: i18n.link.responses.notev2.claimed.desc(claim),
             memo,
           };
         }
         case "cancelled": {
           return {
             name: `${getAccountName(sender)}`,
-            action: `cancelled send`,
+            action: i18n.link.actions.cancelledSend(),
             dollars: `${dollars}`,
-            description: `Cancelled by ${getAccountName(sender)}`,
+            description: i18n.link.responses.notev2.cancelled(
+              getAccountName(sender)
+            ),
             memo,
           };
         }
         default: {
-          throw new Error(`unexpected DaimoNoteStatus ${status}`);
+          throw new Error(i18n.link.responses.notev2.default(status));
         }
       }
     }
@@ -199,27 +207,31 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
         res as DaimoInviteCodeStatus;
 
       const description = (() => {
-        if (!isValid) return "Invite expired";
+        if (!isValid) return i18n.link.responses.invite.expired();
         if (
           bonusDollarsInvitee &&
           bonusDollarsInviter &&
           bonusDollarsInvitee === bonusDollarsInviter
         ) {
-          return `Accept their invite and we'll send you both $${bonusDollarsInvitee} USDC`;
+          return i18n.link.responses.invite.acceptTheInviteBoth(
+            bonusDollarsInvitee
+          );
         } else if (bonusDollarsInvitee) {
-          return `Accept their invite and we'll send you $${bonusDollarsInvitee} USDC`;
-        } else return "Get Daimo to send or receive payments";
+          return i18n.link.responses.invite.acceptTheInvite(
+            bonusDollarsInvitee
+          );
+        } else return i18n.link.responses.invite.getDaimo();
       })();
       return {
         name: `${inviter ? getAccountName(inviter) : "daimo"}`,
-        action: `invited you to Daimo`,
+        action: i18n.link.actions.invitedYou(),
         description,
       };
     }
     default: {
       return {
         name: "Daimo",
-        description: "Unhandled link status for type: " + resLinkType,
+        description: i18n.utils.linkStatus.unhandeledLinkForType(resLinkType"Unhandled link status for type: " +),
       };
     }
   }
