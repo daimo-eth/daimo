@@ -70,10 +70,10 @@ contract DaimoFlexSwapper is
 
     /// Emitted on each successful swap.
     event SwapToCoin(
-        address account,
-        address tokenIn,
+        address indexed account,
+        address indexed tokenIn,
         uint256 amountIn,
-        address tokenOut,
+        address indexed tokenOut,
         uint256 estAmountOut,
         uint256 swapAmountOut
     );

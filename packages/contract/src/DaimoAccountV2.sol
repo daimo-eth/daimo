@@ -117,29 +117,32 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     /// Emitted on foreign chains (auto-swap as part of collect) and home chain
     /// (auto-swap to home coin).
     event AutoSwap(
-        IERC20 tokenIn,
+        IERC20 indexed tokenIn,
         uint256 amountIn,
-        IERC20 tokenOut,
+        IERC20 indexed tokenOut,
         uint256 amountOut
     );
 
     /// Emitted on foreign chains when we initiate a bridge to home chain.
     event Collect(
-        IERC20 tokenIn,
+        IERC20 indexed tokenIn,
         uint256 amountIn,
-        IERC20 tokenBridge,
+        IERC20 indexed tokenBridge,
         uint256 amountBridge,
-        uint256 toChainID
+        uint256 indexed toChainID
     );
 
     /// Emitted at most once, when account offboards to a forwarding address.
     event SetForwardingAddress(address forwardingAddress);
 
     /// Emitted after offboarding: forward an asset to the forwarding address.
-    event ForwardAsset(IERC20 tokenIn, uint256 amountIn);
+    event ForwardAsset(IERC20 indexed tokenIn, uint256 indexed amountIn);
 
     /// Emitted on home chain, when the user updates their home coin.
-    event UpdateHomeCoin(IERC20 oldHomeCoin, IERC20 newHomeCoin);
+    event UpdateHomeCoin(
+        IERC20 indexed oldHomeCoin,
+        IERC20 indexed newHomeCoin
+    );
 
     /// Verify caller is the 4337 EntryPoint. Used to validate & run userops.
     modifier onlyEntryPoint() {
