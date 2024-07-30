@@ -6,6 +6,9 @@ import readmeMD from "../../../../README.md";
 import { Spacer } from "../components/Spacer";
 import { FAQ, parseFAQs } from "../utils/parseFAQ";
 
+import { i18n } from "../i18n";
+const i18 = i18n.app.faq;
+
 const faqStyle = `
   details > summary {
     list-style: none;
@@ -24,7 +27,6 @@ const faqStyle = `
   }
 `;
 
-// TODO: i18n
 export function SectionFAQ() {
   const [faq, setFaq] = useState([] as FAQ[]);
   useEffect(() => setFaq(parseFAQs(readmeMD)), []);
@@ -35,7 +37,7 @@ export function SectionFAQ() {
         <style dangerouslySetInnerHTML={{ __html: faqStyle }} />
         <div className="m-auto max-w-screen-xl px-8 section-faq">
           <h1 className="text-[32px] md:text-[50px] lg:text-[77px] tracking-tight">
-            Frequently asked questions
+            {i18.text1()}
           </h1>
           <Spacer h={48} />
           <ul>

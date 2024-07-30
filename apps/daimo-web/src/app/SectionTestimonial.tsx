@@ -1,7 +1,9 @@
 import { Spacer } from "../components/Spacer";
 import TestimonialAccent from "../components/TestimonialAccent";
 
-// TODO: i18n
+import { i18n } from "../i18n";
+const i18 = i18n.app.testimonials;
+
 export function SectionTestimonial() {
   return (
     <section className="m-auto max-w-screen-xl">
@@ -9,18 +11,17 @@ export function SectionTestimonial() {
         <div className="relative max-w-screen-xl px-16 md:px-32 z-10">
           <QuoteIcon />
           <div className="text-[40px] leading-[35px] lg:text-[84px] lg:leading-[71px] lg:-tracking-[3px] font-normal text-white pt-[49px]">
-            There are these apps that just feel good to use but you can&apos;t
-            exactly describe why. Daimo is one of those.
+            {i18.text1()}
           </div>
           <Spacer h={24} />
           <div className="text-2xl tracking-[1px] font-light text-white">
-            Kristof Gazso
+            {i18.text2()}
           </div>
           <Spacer h={8} />
           <p className="text-2xl tracking-[1px] font-light text-[#aaa]">
-            ERC-4337 coauthor, founder of{" "}
+            {i18.text3()}
             <a href="https://pimlico.io" target="blank" className="underline">
-              Pimlico
+              {i18.text4()}
             </a>
           </p>
         </div>

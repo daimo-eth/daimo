@@ -204,6 +204,74 @@ export const en = {
       JoinNameOn: (name: string) => `Join ${name} on`,
     },
   },
+
+  app: {
+    layout: {
+      metadata: {
+        description: () => "Stablecoin payments app",
+      },
+    },
+    whyDaimo: {
+      features: () => [
+        {
+          name: "Secure",
+          title: "Your keys, your coins.",
+          description: [
+            "No seed phrase.",
+            "Keys live in secure hardware on your phone. Secure passkey backups.",
+            "The freedom of self-custody, easier than ever before.",
+          ],
+          imageUrl: "/assets/why-daimo-secure.png",
+        },
+        {
+          name: "Global",
+          title: "Works everywhere.",
+          description: [
+            "Pay and receive stablecoins globally.",
+            "Instant, 24/7 transfers to any of your contacts or any wallet address.",
+            "Send a request link, get paid on-chain.",
+          ],
+          imageUrl: "/assets/why-daimo-global.png",
+        },
+        {
+          name: "Multi-chain",
+          title: 'What is "bridging"?',
+          description: [
+            "Receive any coin on any chain.",
+            "Skip slow and expensive bridges.",
+            "We're cooking up a really clean way to do this... shipping soon.",
+          ],
+          comingSoon: true,
+          imageUrl: "/assets/why-daimo-multi-chain.png",
+        },
+      ],
+      texts: {
+        whyDaimo: () => "Why Daimo?",
+        text1: () => "Secure, audited, and fully open source.",
+        text2: () => "The safest, fastest way to stablecoin.",
+        commingSoon: () => "COMING SOON",
+      },
+    },
+    testimonials: {
+      text1: () =>
+        "There are these apps that just feel good to use but you can't exactly describe why. Daimo is one of those.",
+      text2: () => "Kristof Gazso",
+      text3: () => "ERC-4337 coauthor, founder of ",
+      text4: () => "Pimlico",
+    },
+    team: {
+      meetTheTeam: () => "Meet the team",
+    },
+    hero: {
+      text1: () => "Your own bank, on Ethereum.",
+      text2: () =>
+        "Store money using secure hardware on your phone. Yours alone, like cash.",
+      text3: () => "Learn more",
+    },
+    faq: {
+      text1: () => "Frequently asked questions",
+    },
+  },
 };
 
 function pluralize(n: number, noun: string) {

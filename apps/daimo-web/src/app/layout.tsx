@@ -5,11 +5,13 @@ import { neueMontreal } from "../fonts/font";
 import "./globals.css";
 import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 
-// TODO: adapt to i18n
+import { i18n } from "../i18n";
+const i18 = i18n.app.layout;
+
 export const metadata: Metadata = {
   metadataBase: new URL(getAbsoluteUrl("/")),
   title: "Daimo",
-  description: "Stablecoin payments app",
+  description: i18.metadata.description(),
   icons: {
     icon: "/logo-web-favicon.png",
   },
@@ -26,7 +28,6 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1, minimum-scale=0.4",
 };
 
-// TODO: adapt to i18n
 function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${neueMontreal.variable} font-sans`}>
