@@ -130,6 +130,18 @@ export const en = {
   profile: {
     errorNoImage: () => "No image found",
   },
+
+  waitlist: {
+    signUp: () => "Sign up for Daimo",
+    name: () => "Name",
+    email: () => "Email",
+    social: () => "Social (Twiter, Warpcat, etc)",
+    submit: () => "SUBMIT",
+    submitting: () => "SUBMITTING",
+    submitted: () => `Submitted! We'll reach out on email soon.`,
+    isLimited: () =>
+      "Daimo is currently in limited release. Sign up for early access",
+  },
 };
 
 function pluralize(n: number, noun: string) {
