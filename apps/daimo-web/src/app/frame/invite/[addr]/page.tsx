@@ -7,6 +7,7 @@ import { TextH1, TextLight } from "../../../../components/typography";
 import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../../utils/rpc";
 import { getFrameMetadata } from "../../frameUtils";
+import { i18n } from "../../../../i18n";
 
 interface LinkProps {
   params: { addr: string };
@@ -31,7 +32,7 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const frameMetadata = getFrameMetadata({
     buttons: [
       {
-        label: `✳️ Get Daimo ✳️`,
+        label: i18n.frame.invite.frameMetadata.label(),
       },
     ],
     image: frameImg,
@@ -39,11 +40,11 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   });
 
   const metadata: Metadata = {
-    title: "Daimo Invite Frame",
-    description: "Fast payments, self custody, open source, one-tap invites.",
+    title: i18n.frame.invite.metadata.title(),
+    description: i18n.frame.invite.metadata.description(),
     openGraph: {
-      title: "Daimo Invite Frame",
-      description: "Fast payments, self custody, one-tap invites.",
+      title: i18n.frame.invite.metadata.openGraph.title(),
+      description: i18n.frame.invite.metadata.openGraph.description(),
       images: [frameImg],
     },
     other: {
@@ -54,19 +55,17 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   return metadata;
 }
 
-// TODO: i18n
 export default async function Page({ params }: LinkProps) {
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
 
+  const i18 = i18n.frame.invite.html;
+
   return (
     <div className="p-4 max-w-md">
-      <TextH1>✳️ Daimo Invite Frame</TextH1>
+      <TextH1>{i18.title()}</TextH1>
       <div className="h-4" />
-      <TextLight>
-        This is a personalized frame invite from {eAcc.name} on Daimo. Post to
-        Farcaster to invite people to join. They&apos;ll get a starter $10 USDC.
-      </TextLight>
+      <TextLight>{i18.body(eAcc.name)}</TextLight>
     </div>
   );
 }
