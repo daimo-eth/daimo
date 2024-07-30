@@ -4,11 +4,14 @@ import { getAddress } from "viem";
 import { PointOfSalePage } from "./PointOfSalePage";
 import { RpcHookProvider } from "../../utils/rpcHook";
 
+import { i18n } from "../../i18n";
+const i18 = i18n.pos;
+
 // TODO: i18n
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Daimo Point-Of-Sale",
-    description: "One-tap USDC checkout.",
+    title: i18.title(),
+    description: i18.description(),
     icons: {
       icon: "/logo-web-favicon.png",
     },

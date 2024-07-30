@@ -121,6 +121,11 @@ export const en = {
       },
     },
   },
+
+  pos: {
+    title: () => "Daimo Point-Of-Sale",
+    description: () => "One-tap USDC checkout.",
+  },
 };
 
 function pluralize(n: number, noun: string) {
