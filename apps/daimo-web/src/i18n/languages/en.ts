@@ -126,6 +126,10 @@ export const en = {
     title: () => "Daimo Point-Of-Sale",
     description: () => "One-tap USDC checkout.",
   },
+
+  profile: {
+    errorNoImage: () => "No image found",
+  },
 };
 
 function pluralize(n: number, noun: string) {

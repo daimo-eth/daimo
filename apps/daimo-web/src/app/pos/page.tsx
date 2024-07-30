@@ -7,7 +7,6 @@ import { RpcHookProvider } from "../../utils/rpcHook";
 import { i18n } from "../../i18n";
 const i18 = i18n.pos;
 
-// TODO: i18n
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: i18.title(),

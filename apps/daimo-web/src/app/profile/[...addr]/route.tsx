@@ -4,6 +4,9 @@ import sharp from "sharp";
 
 import { rpc } from "../../../utils/rpc";
 
+import { i18n } from "../../../i18n";
+const i18 = i18n.profile;
+
 type Context = {
   params: { addr: string };
 };
@@ -32,8 +35,7 @@ export async function GET(_: Request, { params }: Context) {
     if (result == null) {
       console.warn(`[PROFILE] No image found for ${addr}`);
 
-      // TODO: i18n
-      return NextResponse.json({ error: "No image found" }, { status: 404 });
+      return NextResponse.json({ error: i18.errorNoImage() }, { status: 404 });
     }
 
     console.log(`[PROFILE] returning ${result.size}b PFP for ${addr}`);
