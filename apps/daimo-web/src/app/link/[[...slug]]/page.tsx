@@ -226,7 +226,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         case DaimoRequestState.Created: {
           return {
             name: `${name}`,
-            action: `is requesting`,
+            action: i18.actions.requesting(),
             dollars: `${res.link.dollars}`,
             description: i18.responses.requestsv2.created(),
             linkStatus: res,
@@ -235,7 +235,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         case DaimoRequestState.Cancelled: {
           return {
             name: `${name}`,
-            action: `cancelled request`,
+            action: i18.actions.cancelledRequest(),
             dollars: `${res.link.dollars}`,
             description: i18.responses.requestsv2.canceled(
               getAccountName(recipient)
@@ -245,7 +245,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         case DaimoRequestState.Fulfilled: {
           return {
             name: `${name}`,
-            action: `requested`,
+            action: i18.actions.requested(),
             dollars: `${res.link.dollars}`,
             description: i18.responses.requestsv2.fulfilled(
               getAccountName(fulfilledBy!)
