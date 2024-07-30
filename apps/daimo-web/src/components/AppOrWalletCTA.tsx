@@ -6,6 +6,9 @@ import { useState } from "react";
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 import { ConnectWalletFlow } from "./ConnectWalletFlow";
 
+import { i18n } from "../i18n";
+const i18 = i18n.components.connectWallet.misc;
+
 export function AppOrWalletCTA({
   linkStatus,
   description,
@@ -34,7 +37,7 @@ export function AppOrWalletCTA({
               window.open(directDeepLink, "_blank");
             }}
           >
-            ALREADY HAVE IT? OPEN IN APP
+            {i18.alreadyHaveIt()}
           </SecondaryButton>
           <div className="h-4" />
         </>

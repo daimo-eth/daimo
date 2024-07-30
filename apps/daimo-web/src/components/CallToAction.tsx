@@ -11,6 +11,9 @@ import { useEffect, useState } from "react";
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 
+import { i18n } from "../i18n";
+const i18 = i18n.components.callToAction;
+
 export function CallToAction({
   description,
   linkStatus,
@@ -34,7 +37,6 @@ export function CallToAction({
     );
   }, [directDeepLink]);
 
-  // TODO: i18n
   return (
     <>
       {isWalletAction ? (
@@ -57,7 +59,7 @@ export function CallToAction({
               window.open(directDeepLink, "_blank");
             }}
           >
-            ALREADY HAVE IT? OPEN IN APP
+            {i18.alreadyHaveIt()}
           </SecondaryButton>
         </>
       )}

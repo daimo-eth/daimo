@@ -1,6 +1,9 @@
 import { UserBubble } from "./UserBubble";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
+import { i18n } from "../../i18n";
+const i18 = i18n.components.linkPreview;
+
 export function LinkPreviewImg({
   name,
   action,
@@ -121,7 +124,6 @@ function Content({
   );
 }
 
-// TODO: i18n
 function Footer({
   paidBy,
   cancelled,
@@ -159,7 +161,7 @@ function Footer({
           color: "#262626",
         }}
       >
-        {cancelled ? `❌` : paidBy ? `✅ Paid by ${paidBy}` : "Daimo"}
+        {cancelled ? `❌` : paidBy ? i18.paidBy(paidBy) : "Daimo"}
       </div>
     </div>
   );

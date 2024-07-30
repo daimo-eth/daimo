@@ -180,6 +180,7 @@ export const en = {
         viewInExplorer: () => "VIEW ON BLOCK EXPLORER",
         wrongNetwork: () => "WRONG NETWORK",
         connectedTo: (network: string) => `CONNECTED TO ${network}`,
+        alreadyHaveIt: () => "ALREADY HAVE IT? OPEN IN APP",
       },
 
       errors: {
@@ -188,9 +189,19 @@ export const en = {
         alreadyFulfilledOrCancelled: () =>
           "Request already fulfilled or cancelled",
         insufficientEth: () => "Insufficient ETH for transaction gas",
-        unspected: (err: any) =>
+        unexpected: (err: any) =>
           `unexpected DaimoLinkStatus ${err} for wallet action`,
       },
+    },
+    callToAction: {
+      alreadyHaveIt: () => "ALREADY HAVE IT? OPEN IN APP",
+    },
+    linkPreview: {
+      paidBy: (name: string) => `Paid by ${name}`,
+    },
+    invitePreview: {
+      bonusForPowerUsers: () => "+$10 BONUS FOR POWER USERS",
+      JoinNameOn: (name: string) => `Join ${name} on`,
     },
   },
 };

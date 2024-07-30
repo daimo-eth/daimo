@@ -1,5 +1,8 @@
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
+import { i18n } from "../../i18n";
+const i18 = i18n.components.invitePreview;
+
 export function InvitePreviewImg({ name }: { name: string }) {
   return (
     <div
@@ -31,7 +34,6 @@ export function InvitePreviewImg({ name }: { name: string }) {
   );
 }
 
-// TODO: i18n
 function Content({ name }: { name: string }) {
   return (
     <div
@@ -46,7 +48,7 @@ function Content({ name }: { name: string }) {
           textAlign: "center",
         }}
       >
-        +$10 BONUS FOR POWER USERS
+        {i18.bonusForPowerUsers()}
       </div>
       <div
         style={{
@@ -57,7 +59,7 @@ function Content({ name }: { name: string }) {
           gap: 8,
         }}
       >
-        Join {name} on <span style={{ color: "#489e35" }}>Daimo.</span>
+        {i18.JoinNameOn(name)} <span style={{ color: "#489e35" }}>Daimo.</span>
       </div>
     </div>
   );
