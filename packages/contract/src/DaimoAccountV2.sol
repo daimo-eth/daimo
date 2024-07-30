@@ -16,21 +16,23 @@ import "p256-verifier/WebAuthn.sol";
 import "./interfaces/IDaimoSwapper.sol";
 import "./interfaces/IDaimoBridger.sol";
 
-/**
- * DaimoAccountV2 is a collector structure in which the contract is deployed at
- * the same address on every chain but declares one home chain. The account's
- * assets are stored on the home chain in the form of the account's home coin.
- * Any account contract on a foreign chains (a non-home chain) is a collector.
- *
- * Collector accounts serve one purpose: to funnel an account's assets on
- * foreign chains to the home chain. Any asset received on a foreign chain is
- * automatically swapped to the bridge coin (if necessary), bridged to the
- * home chain, and then swapped to the home coin (if necessary).
- *
- * An account can be deactivated by setting a forwarding address that all future
- * received assets will be forwarded to. collect() and forward() support the
- * native asset (eg ETH) and ERC-20 tokens only, no NFTs.
- */
+/// @title V2 of Daimo's account contract
+/// @author The Daimo team
+/// @custom:security-contact security@daimo.com
+///
+/// DaimoAccountV2 is a collector structure in which the contract is deployed at
+/// the same address on every chain but declares one home chain. The account's
+/// assets are stored on the home chain in the form of the account's home coin.
+/// Any account contract on a foreign chains (a non-home chain) is a collector.
+///
+/// Collector accounts serve one purpose: to funnel an account's assets on
+/// foreign chains to the home chain. Any asset received on a foreign chain is
+/// automatically swapped to the bridge coin (if necessary), bridged to the
+/// home chain, and then swapped to the home coin (if necessary).
+///
+/// An account can be deactivated by setting a forwarding address that all future
+/// received assets will be forwarded to. collect() and forward() support the
+/// native asset (eg ETH) and ERC-20 tokens only, no NFTs.
 contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     using SafeERC20 for IERC20;
 

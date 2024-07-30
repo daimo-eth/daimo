@@ -17,6 +17,10 @@ struct CCTPDomain {
     IERC20 token;
 }
 
+/// @title Bridger implementation for Circle's Cross-Chain Transfer Protocol (CCTP)
+/// @author The Daimo team
+/// @custom:security-contact security@daimo.com
+///
 /// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
 /// so the only supported bridge token in USDC.
 contract DaimoCCTPBridger is

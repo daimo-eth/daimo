@@ -12,7 +12,9 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable
 
 import "./interfaces/IDaimoSwapper.sol";
 
-/// Fully automatic on-chain swap executor.
+/// @title Fully automatic on-chain swap executor
+/// @author The Daimo team
+/// @custom:security-contact security@daimo.com
 ///
 /// Starts by quoting an accurate reference price from any input (token, amount)
 /// to a list of supported output stablecoins using Uniswap V3 TWAP/TWALs. See
