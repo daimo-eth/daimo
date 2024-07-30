@@ -1,5 +1,3 @@
-import { unknown } from "zod";
-
 export const en = {
   download: {
     downloadDaimo: () => "Download Daimo",
@@ -166,6 +164,33 @@ export const en = {
       mac: () => "Download on Mac App Store",
       android: () => "Get it on Google Play",
       other: () => "Download on App Store or Google Play",
+    },
+  },
+
+  components: {
+    downloadLink: {
+      download: () => "Download",
+    },
+    connectWallet: {
+      withConnected: () => " WITH CONNECTED WALLET",
+      withAnother: () => " WITH ANOTHER WALLET",
+
+      misc: {
+        sending: () => "SENDING",
+        viewInExplorer: () => "VIEW ON BLOCK EXPLORER",
+        wrongNetwork: () => "WRONG NETWORK",
+        connectedTo: (network: string) => `CONNECTED TO ${network}`,
+      },
+
+      errors: {
+        notEnoughFunds: () => "Not enough USDC in wallet",
+        alreadyClaimed: () => "Already claimed",
+        alreadyFulfilledOrCancelled: () =>
+          "Request already fulfilled or cancelled",
+        insufficientEth: () => "Insufficient ETH for transaction gas",
+        unspected: (err: any) =>
+          `unexpected DaimoLinkStatus ${err} for wallet action`,
+      },
     },
   },
 };

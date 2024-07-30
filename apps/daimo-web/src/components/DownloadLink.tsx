@@ -7,7 +7,9 @@ import { useEffect, useState } from "react";
 import { TextBold } from "./typography";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
-// TODO: i18n
+import { i18n } from "../i18n";
+const i18 = i18n.components.downloadLink;
+
 export function DownloadLink() {
   return (
     <Link
@@ -15,7 +17,7 @@ export function DownloadLink() {
       target="_blank"
       className="px-9 py-5 bg-primary rounded-lg"
     >
-      <TextBold>Download</TextBold>
+      <TextBold>{i18.download()}</TextBold>
     </Link>
   );
 }
@@ -27,7 +29,7 @@ export function DownloadLinkButton() {
       target="_blank"
       className="flex items-center space-x-2 lg:space-x-4 rounded-lg py-[15px] px-[36px] bg-primary text-white font-semibold md:text-2xl tracking-tight whitespace-nowrap min-w-[240px] "
     >
-      <div>Download</div>
+      <div>{i18.download()}</div>
       <Image
         src={"/assets/daimo-qr-download.png"}
         width={72}

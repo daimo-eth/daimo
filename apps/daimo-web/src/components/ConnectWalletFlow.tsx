@@ -31,6 +31,9 @@ import {
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
 
+import { i18n } from "../i18n";
+const i18 = i18n.components.connectWallet;
+
 export function ConnectWalletFlow({
   linkStatus,
   description,
@@ -46,10 +49,10 @@ export function ConnectWalletFlow({
   const [action, setAction] = useState<WagmiPrep[]>();
   const [currentStep, setCurrentStep] = useState(0);
 
-  // TODO: i18n
+  // TODO: i18n ??
   const descriptionVerb = description.split(" ")[0].toUpperCase();
-  const secondaryTitle = descriptionVerb + " WITH CONNECTED WALLET";
-  const secondaryConnectTitle = descriptionVerb + " WITH ANOTHER WALLET";
+  const secondaryTitle = descriptionVerb + i18.withConnected();
+  const secondaryConnectTitle = descriptionVerb + i18.withAnother();
 
   useEffect(() => {
     (async () => {
@@ -126,13 +129,13 @@ function WagmiButton({
   const humanReadableError = useMemo(() => {
     if (!error || !error.message) return undefined;
     if (error.message.match(/ERC20: transfer amount exceeds balance/)) {
-      return "Not enough USDC in wallet";
+      return i18.errors.notEnoughFunds();
     } else if (error.message.match(/note does not exist/)) {
-      return "Already claimed"; // Only shown on out of date page load
+      return i18.errors.alreadyClaimed(); // Only shown on out of date page load
     } else if (error.message.match(/already fulfilled or cancelled/)) {
-      return "Request already fulfilled or cancelled"; // Only shown on out of date page load
+      return i18.errors.alreadyFulfilledOrCancelled(); // Only shown on out of date page load
     } else if (error instanceof InsufficientFundsError) {
-      return "Insufficient ETH for transaction gas";
+      return i18.errors.insufficientEth();
     } else {
       return error.message;
     }
@@ -163,9 +166,9 @@ function WagmiButton({
             buttonType={isSuccess ? "success" : undefined}
           >
             {isLoading
-              ? "SENDING"
+              ? i18.misc.sending()
               : isSuccess && !incrementStep
-              ? "VIEW ON BLOCK EXPLORER"
+              ? i18.misc.viewInExplorer()
               : title}
           </SecondaryButton>
           <div className="h-4" />
@@ -224,14 +227,14 @@ function CustomConnectButton({ title }: { title: string }): JSX.Element {
               if (chain.unsupported) {
                 return (
                   <TextButton onClick={openChainModal} buttonType="danger">
-                    WRONG NETWORK
+                    {i18.misc.wrongNetwork()}
                   </TextButton>
                 );
               }
 
               return (
                 <TextButton onClick={openConnectModal}>
-                  CONNECTED TO {account.displayName.toUpperCase()}
+                  {i18.misc.connectedTo(account.displayName.toUpperCase())}
                 </TextButton>
               );
             })()}
@@ -345,9 +348,7 @@ async function linkStatusToAction(
       }
     }
     default: {
-      throw new Error(
-        `unexpected DaimoLinkStatus ${linkStatus.link.type} for wallet action`
-      );
+      throw new Error(i18.errors.unexpected(linkStatus.link.type));
     }
   }
 }
