@@ -216,7 +216,7 @@ contract DaimoFastCCTP {
 
         // If an LP fastFinish'd the transfer previously (recipient != toAddr),
         // then the LP keeps the tip (fromAmount - toAmount), which is >= 0.
-        toToken.transfer(recipient, fromAmount);
+        toToken.safeTransfer(recipient, fromAmount);
 
         emit Claim({
             handoffAddr: address(handoff),
@@ -262,6 +262,8 @@ contract DaimoFastCCTP {
 // sender, recipient, token, amount. This contract lets us encode all of the
 // FastCCTP send parameters into the sender address via CREATE2.
 contract EphemeralHandoff {
+    using SafeERC20 for IERC20;
+
     address payable private immutable _creator;
     uint256 private immutable _fromAmount;
     IERC20 private immutable _toToken;
@@ -289,7 +291,7 @@ contract EphemeralHandoff {
         require(amount >= _fromAmount, "FCCTP: insufficient balance received");
 
         // Send to FastCCTP, which will forward to current recipient
-        _toToken.transfer(_creator, amount);
+        _toToken.safeTransfer(_creator, amount);
 
         // This use of SELFDESTRUCT is compatible with EIP-6780. Handoff
         // contracts are deployed, then destroyed in the same transaction.
