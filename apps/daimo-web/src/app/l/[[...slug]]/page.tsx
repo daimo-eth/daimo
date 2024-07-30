@@ -24,7 +24,6 @@ type LinkProps = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-// TODO: i18n
 const defaultMeta = createMetadata(
   i18.defaultMetadata.title(),
   i18.defaultMetadata.description(),

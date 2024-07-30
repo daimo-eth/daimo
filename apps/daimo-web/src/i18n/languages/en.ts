@@ -65,6 +65,62 @@ export const en = {
       description: () => "Payments on Ethereum",
     },
   },
+
+  link: {
+    metadata: {
+      title: () => "Daimo",
+      description: () => "Payments on Ethereum",
+    },
+
+    actions: {
+      requesting: () => `is requesting`,
+      sentYou: () => `sent you`,
+      requested: () => `requested`,
+      sent: () => `sent`,
+      cancelledSend: () => `cancelled send`,
+      invitedYou: () => "invited you to Daimo",
+    },
+
+    errors: {
+      unrecognizedLink: () => "Unrecognized link",
+      loadAccount: () => "Couldn't load account",
+      loadStatus: () => "Couldn't load request status",
+      loadPayLink: () => "Couldn't load payment link",
+    },
+
+    responses: {
+      account: {
+        desc: () => "Get Daimo to send or receive payments",
+      },
+      request: {
+        desc1: () => "Pay with Daimo",
+        desc2: (name: string) => `Paid by ${name}`,
+      },
+      requestsv2: {
+        created: () => "Pay with Daimo",
+        canceled: (name: string) => `Cancelled by ${name}`,
+        fulfilled: (name: string) => `Paid by ${name}`,
+        default: (err: any) => `unexpected DaimoRequestState ${err}`,
+      },
+      notev2: {
+        confirmed: () => "Accept with Daimo",
+        claimed: {
+          missingReceiver: () => "(missing receiver)",
+          desc: (claim: string) => `Accepted by ${claim}`,
+        },
+        cancelled: (name: string) => `Cancelled by ${name}`,
+        default: (status: any) => `unexpected DaimoNoteStatus ${status}`,
+      },
+      invite: {
+        expired: () => "Invite expired",
+        acceptTheInviteBoth: (bonusDollarsInvitee: any) =>
+          `Accept their invite and we'll send you both $${bonusDollarsInvitee} USDC`,
+        acceptTheInvite: (bonusDollarsInvitee: any) =>
+          `Accept their invite and we'll send you $${bonusDollarsInvitee} USDC`,
+        getDaimo: () => "Get Daimo to send or receive payments",
+      },
+    },
+  },
 };
 
 function pluralize(n: number, noun: string) {
