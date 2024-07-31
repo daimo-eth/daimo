@@ -33,7 +33,7 @@ import "./interfaces/IDaimoSwapper.sol";
 ///
 /// Market makers can use this swapper by assing an arbitrary contract call.
 /// DaimoFlexSwapper sends input tokens, calls the contract, then validates that
-/// the (tokenOut) balance increased by the expected amount.
+/// the output swap amount was received.
 contract DaimoFlexSwapper is
     IDaimoSwapper,
     Ownable2StepUpgradeable,
@@ -43,9 +43,9 @@ contract DaimoFlexSwapper is
 
     /// Describes how to perform the swap to achieve the quoted price or better.
     struct DaimoFlexSwapperExtraData {
-        /// Swap contract to call, or address(0) to use the quoted Uniswap path.
+        /// Swap contract to call.
         address callDest;
-        /// Calldata to pass to the swap. Must be empty if callDest is zero.
+        /// Calldata to pass to the swap.
         bytes callData;
     }
 
