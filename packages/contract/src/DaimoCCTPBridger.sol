@@ -22,7 +22,7 @@ struct CCTPDomain {
 /// @custom:security-contact security@daimo.com
 ///
 /// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
-/// so the only supported bridge token in USDC.
+/// so the only supported bridge token is USDC.
 contract DaimoCCTPBridger is
     IDaimoBridger,
     Ownable2StepUpgradeable,

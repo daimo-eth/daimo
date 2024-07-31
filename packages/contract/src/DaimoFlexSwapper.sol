@@ -31,7 +31,7 @@ import "./interfaces/IDaimoSwapper.sol";
 /// Supports all Uniswap-compatible input ERC20 tokens, including USDT (which is
 /// not quite an ERC20) and not including ERC20s with amounts > 2^128.
 ///
-/// Market makers can use this swapper by assing an arbitrary contract call.
+/// Market makers can use this swapper by passing an arbitrary contract call.
 /// DaimoFlexSwapper sends input tokens, calls the contract, then validates that
 /// the output swap amount was received.
 contract DaimoFlexSwapper is
@@ -215,7 +215,7 @@ contract DaimoFlexSwapper is
             minAmountOut = amountIn;
             assert(swapEstAmountOut == amountIn); // quote() guarantees this
         } else {
-            // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
+            // Non-stablecoins: use the swap estimate with 1% slippage tolerance.
             minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
         }
     }

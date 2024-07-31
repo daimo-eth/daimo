@@ -16,7 +16,7 @@ import "../vendor/cctp/ITokenMinter.sol";
 /// Wraps CCTP. Allows optimistic fast transfers. Alice initiates a transfer by
 /// calling `startTransfer` on chain A. After the CCTP delay (currently 10+ min),
 /// funds arrive at the DaimoFastCCTP contract deployed on chain B. Bob can call
-/// `claimTransfer` to claim the funds. Alternately, immdiately after the first
+/// `claimTransfer` to claim the funds. Alternately, immediately after the first
 /// call, an LP can call `fastFinishTransfer` to send Bob his funds immediately.
 /// Later, when the funds arrive from CCTP, the LP (rather than Bob) will claim.
 contract DaimoFastCCTP {
