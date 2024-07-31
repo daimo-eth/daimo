@@ -280,7 +280,8 @@ contract DaimoFlexSwapper is
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint256 amountOut, bytes memory swapPath) {
-        for (uint256 i = 0; i < hopTokens.length; ++i) {
+        uint256 hopTokensLength = hopTokens.length;
+        for (uint256 i = 0; i < hopTokensLength; ++i) {
             IERC20 hopToken = hopTokens[i];
 
             if (hopToken == tokenIn) continue; // Covered by direct quote
@@ -330,7 +331,8 @@ contract DaimoFlexSwapper is
         )
     {
         uint128 bestLiquidity = 0;
-        for (uint256 i = 0; i < oracleFeeTiers.length; ++i) {
+        uint256 oracleFeeTiersLength = oracleFeeTiers.length;
+        for (uint256 i = 0; i < oracleFeeTiersLength; ++i) {
             address pool = oraclePoolFactory.getPool({
                 tokenA: address(tokenA),
                 tokenB: address(tokenB),
