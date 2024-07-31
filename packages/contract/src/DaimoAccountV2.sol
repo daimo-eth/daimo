@@ -76,7 +76,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     IDaimoBridger public bridger;
 
     /// DaimoAccountV2 is a 1-of-n multisig using P256/WebAuthn keys.
-    mapping(uint8 => bytes32[2]) public keys;
+    mapping(uint8 keySlot => bytes32[2]) public keys;
 
     /// See keys. This is equal to the number of non-zero key slots.
     uint8 public numActiveKeys;

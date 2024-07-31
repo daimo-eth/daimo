@@ -250,7 +250,7 @@ export const daimoAccountV2ABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [
-      { name: '', internalType: 'uint8', type: 'uint8' },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
       { name: '', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'keys',
@@ -624,7 +624,7 @@ export const daimoCctpBridgerABI = [
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
     name: 'cctpDomainMapping',
     outputs: [
       { name: 'domain', internalType: 'uint32', type: 'uint32' },
@@ -1160,14 +1160,14 @@ export const daimoFastCctpABI = [
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
     name: 'handoffSent',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
     name: 'handoffToRecipient',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
@@ -1516,14 +1516,18 @@ export const daimoFlexSwapperABI = [
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
     name: 'isOutputToken',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
     name: 'isStablecoin',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },

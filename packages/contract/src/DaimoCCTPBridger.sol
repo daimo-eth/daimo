@@ -33,8 +33,8 @@ contract DaimoCCTPBridger is
     // CCTP TokenMessenger for this chain.
     ICCTPTokenMessenger public cctpMessenger;
 
-    // Map chainID
-    mapping(uint256 => CCTPDomain) public cctpDomainMapping;
+    // Map chainID to CCTP domain.
+    mapping(uint256 chainId => CCTPDomain) public cctpDomainMapping;
 
     // FastCCTP contract.
     DaimoFastCCTP public fastCCTP;

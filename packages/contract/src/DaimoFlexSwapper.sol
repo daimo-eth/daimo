@@ -57,10 +57,10 @@ contract DaimoFlexSwapper is
     IERC20[] public hopTokens;
     /// Supported output tokens, generally popular stablecoins.
     IERC20[] public outputTokens;
-    mapping(IERC20 => bool) public isOutputToken;
+    mapping(IERC20 token => bool) public isOutputToken;
     /// Stablecoins. Price is fixed at $1. Must implement decimals().
     IERC20[] public stablecoins;
-    mapping(IERC20 => bool) public isStablecoin;
+    mapping(IERC20 token => bool) public isStablecoin;
     /// Fee tiers. We search through these to find the one with highest TWAL.
     uint24[] public oracleFeeTiers;
     /// TWAP/TWAL period in seconds.

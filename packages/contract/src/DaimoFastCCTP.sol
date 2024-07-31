@@ -25,9 +25,9 @@ contract DaimoFastCCTP {
     /// The CCTP token minter contract.
     ITokenMinter public immutable tokenMinter;
     /// Commit to transfer details in a handoff address. See EphemeralHandoff.
-    mapping(address => bool) public handoffSent;
+    mapping(address handoffAddr => bool) public handoffSent;
     /// On the receiving chain, map each transfer to a recipient (LP or Bob).
-    mapping(address => address) public handoffToRecipient;
+    mapping(address handoffAddr => address) public handoffToRecipient;
 
     // Transfer initiated on chain A
     event Start(
