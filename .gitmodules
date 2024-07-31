@@ -20,6 +20,3 @@
 	path = packages/contract/lib/p256-verifier
 	url = https://github.com/daimo-eth/p256-verifier
 	branch = solc
-[submodule "packages/contract/lib/evm-cctp-contracts"]
-	path = packages/contract/lib/evm-cctp-contracts
-	url = https://github.com/circlefin/evm-cctp-contracts

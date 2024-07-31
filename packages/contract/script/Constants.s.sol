@@ -11,7 +11,12 @@ pragma solidity ^0.8.13;
 // https://developers.circle.com/stablecoins/docs/usdc-on-test-networks
 
 // CCTP Token Messenger deployments
-// https://developers.circle.com/stablecoins/docs/evm-smart-contracts
+// https://developers.circle.com/stablecoins/docs/evm-smart-contracts#tokenmessenger-mainnet
+// https://developers.circle.com/stablecoins/docs/evm-smart-contracts#tokenmessenger-testnet
+
+// CCTP Token Minter deployments
+// https://developers.circle.com/stablecoins/docs/evm-smart-contracts#tokenminter-mainnet
+// https://developers.circle.com/stablecoins/docs/evm-smart-contracts#tokenminter-testnet
 
 // ----------------- Chain IDs ----------------- //
 uint256 constant ETH_MAINNET = 1;
@@ -312,6 +317,41 @@ function _isTestnet(uint256 chainId) pure returns (bool) {
 // Check whether the chain is L1.
 function _isL1(uint256 chainId) pure returns (bool) {
     return chainId == ETH_MAINNET;
+}
+
+// ----------------- Fast CCTP ----------------- //
+address constant ETH_MAINNET_TOKEN_MINTER = 0xc4922d64a24675E16e1586e3e3Aa56C06fABe907;
+address constant AVAX_MAINNET_TOKEN_MINTER = 0x420F5035fd5dC62a167E7e7f08B604335aE272b8;
+address constant OP_MAINNET_TOKEN_MINTER = 0x33E76C5C31cb928dc6FE6487AB3b2C0769B1A1e3;
+address constant ARBITRUM_MAINNET_TOKEN_MINTER = 0xE7Ed1fa7f45D05C508232aa32649D89b73b8bA48;
+address constant BASE_MAINNET_TOKEN_MINTER = 0xe45B133ddc64bE80252b0e9c75A8E74EF280eEd6;
+address constant POLYGON_MAINNET_TOKEN_MINTER = 0x10f7835F827D6Cf035115E10c50A853d7FB2D2EC;
+
+// Same on all testnets except Avax.
+address constant TESTNET_TOKEN_MINTER = 0xE997d7d2F6E065a9A93Fa2175E878Fb9081F1f0A;
+address constant AVAX_TESTNET_TOKEN_MINTER = 0x4ED8867f9947A5fe140C9dC1c6f207F3489F501E;
+
+// Retrieve the token messenger address for a given chainId.
+function _getTokenMinterAddress(uint256 chainId) pure returns (address) {
+    // Mainnets
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_TOKEN_MINTER;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_TOKEN_MINTER;
+    if (chainId == OP_MAINNET) return OP_MAINNET_TOKEN_MINTER;
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_TOKEN_MINTER;
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_TOKEN_MINTER;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_TOKEN_MINTER;
+
+    // Testnets
+    if (chainId == AVAX_TESTNET) return AVAX_TESTNET_TOKEN_MINTER;
+    if (
+        chainId == ETH_TESTNET ||
+        chainId == OP_TESTNET ||
+        chainId == ARBITRUM_TESTNET ||
+        chainId == BASE_TESTNET ||
+        chainId == POLYGON_TESTNET
+    ) return TESTNET_TOKEN_MINTER;
+
+    revert("Unsupported chainID");
 }
 
 // ----------------- Deployment ----------------- //

@@ -7,6 +7,7 @@ import "openzeppelin-contracts/contracts/utils/Create2.sol";
 
 import "../vendor/cctp/ICCTPReceiver.sol";
 import "../vendor/cctp/ICCTPTokenMessenger.sol";
+import "../vendor/cctp/ITokenMinter.sol";
 
 /// @title Wraps Cross-Chain Transfer Protocol (CCTP) for fast transfers
 /// @author The Daimo team
@@ -21,12 +22,12 @@ import "../vendor/cctp/ICCTPTokenMessenger.sol";
 contract DaimoFastCCTP {
     using SafeERC20 for IERC20;
 
+    /// The CCTP token minter contract.
+    ITokenMinter public immutable tokenMinter;
     /// Commit to transfer details in a handoff address. See EphemeralHandoff.
     mapping(address => bool) public handoffSent;
     /// On the receiving chain, map each transfer to a recipient (LP or Bob).
     mapping(address => address) public handoffToRecipient;
-
-    constructor() {}
 
     // Transfer initiated on chain A
     event Start(
@@ -66,6 +67,10 @@ contract DaimoFastCCTP {
         uint256 nonce
     );
 
+    constructor(address _tokenMinter) {
+        tokenMinter = ITokenMinter(_tokenMinter);
+    }
+
     // Called by Alice on Chain A. Requires (fromToken, fromAmount) approval.
     // Initiates a CCTP transfer. This is a convenience function: you can
     // achieve the same by initiating a CCTP transfer directly. Sender must
@@ -82,6 +87,13 @@ contract DaimoFastCCTP {
         uint256 nonce
     ) public {
         require(fromAmount >= toAmount, "FCCTP: fromAmount < toAmount");
+        require(
+            tokenMinter.getLocalToken(
+                toDomain,
+                bytes32(uint256(uint160(address(toToken))))
+            ) == address(fromToken),
+            "FCCTP: fromToken and toToken mismatch"
+        );
 
         // Deploy CCTP sender
         address fromAddr = msg.sender;

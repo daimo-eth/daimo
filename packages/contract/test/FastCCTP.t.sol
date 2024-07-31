@@ -8,10 +8,11 @@ import "account-abstraction/core/EntryPoint.sol";
 import "../src/DaimoFastCCTP.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant HANDOFF_ADDR = 0x92e7f3817323bC93D6E959751B7b869C07E76aF4;
+address constant HANDOFF_ADDR = 0x7C74F0c633Ca8B37bC460ea0A11f3c6dD25afCB2;
 
 contract FastCCTPTest is Test {
-    DaimoFastCCTP public fc = new DaimoFastCCTP{salt: 0}();
+    DaimoFastCCTP public fc;
+    DummyTokenMinter public tokenMinter;
 
     uint256 immutable _fromChainID = 10; // Optimism
     address immutable _alice = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
@@ -26,6 +27,18 @@ contract FastCCTPTest is Test {
 
     address immutable _lp = 0x2222222222222222222222222222222222222222;
     uint256 immutable _lpToTokenInitBalance = 1000;
+
+    function setUp() public {
+        tokenMinter = new DummyTokenMinter();
+        fc = new DaimoFastCCTP(address(tokenMinter));
+
+        // Set up token mappings for testing
+        tokenMinter.setLocalToken(
+            _toDomain,
+            bytes32(uint256(uint160(address(_toToken)))),
+            address(_fromToken)
+        );
+    }
 
     function testStart() public {
         vm.chainId(_fromChainID);
@@ -124,6 +137,35 @@ contract FastCCTPTest is Test {
 
         assertEq(actual, HANDOFF_ADDR);
     }
+
+    function testFromAndToTokenMismatch() public {
+        // Deploy a new token that's not registered by the token minter
+        IERC20 newToken = new TestUSDC{salt: bytes32(uint256(420))}();
+
+        DummyCCTPMessenger messenger = new DummyCCTPMessenger(
+            address(newToken)
+        );
+
+        // Alice initiates a transfer
+        vm.startPrank(_alice);
+        newToken.approve(address(fc), _fromAmount);
+        require(newToken.allowance(_alice, address(fc)) == _fromAmount);
+
+        // Expect revert due to token mismatch
+        vm.expectRevert("FCCTP: fromToken and toToken mismatch");
+        fc.startTransfer({
+            cctpMessenger: messenger,
+            fromToken: IERC20(newToken),
+            fromAmount: _fromAmount,
+            toChainID: _toChainID,
+            toDomain: _toDomain,
+            toAddr: _bob,
+            toToken: IERC20(_toToken),
+            toAmount: _toAmount,
+            nonce: _nonce
+        });
+        vm.stopPrank();
+    }
 }
 
 contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
@@ -151,5 +193,38 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
         amountBurned += amount;
 
         return 0;
+    }
+}
+
+contract DummyTokenMinter is ITokenMinter, Test {
+    mapping(uint32 => mapping(bytes32 => address)) private localTokens;
+
+    function mint(
+        uint32 /*sourceDomain*/,
+        bytes32 /*burnToken*/,
+        address /*to*/,
+        uint256 /*amount*/
+    ) external pure returns (address mintToken) {
+        mintToken = address(0);
+    }
+
+    function burn(address /*burnToken*/, uint256 /*amount*/) external {}
+
+    function getLocalToken(
+        uint32 remoteDomain,
+        bytes32 remoteToken
+    ) public view returns (address) {
+        return localTokens[remoteDomain][remoteToken];
+    }
+
+    function setTokenController(address /*newTokenController*/) external {}
+
+    // Helper function to set up token mappings for testing
+    function setLocalToken(
+        uint32 remoteDomain,
+        bytes32 remoteToken,
+        address localToken
+    ) external {
+        localTokens[remoteDomain][remoteToken] = localToken;
     }
 }

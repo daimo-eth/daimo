@@ -1104,7 +1104,13 @@ export const daimoEphemeralNotesV2Config = {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const daimoFastCctpABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+    inputs: [
+      { name: '_tokenMinter', internalType: 'address', type: 'address' },
+    ],
+  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1185,6 +1191,15 @@ export const daimoFastCctpABI = [
     ],
     name: 'startTransfer',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'tokenMinter',
+    outputs: [
+      { name: '', internalType: 'contract ITokenMinter', type: 'address' },
+    ],
   },
   {
     type: 'event',
@@ -3472,6 +3487,11 @@ export const ephemeralHandoffABI = [
     inputs: [],
     name: 'receiveTransferAndSelfDestruct',
     outputs: [],
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
   },
 ] as const
 
