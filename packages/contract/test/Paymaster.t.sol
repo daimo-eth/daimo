@@ -28,7 +28,12 @@ contract PaymasterTest is Test {
 
         assertTrue(paymaster.bundlerWhitelist(whitelist[0]));
 
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                address(this)
+            )
+        );
         paymaster.setBundlerWhitelist(whitelist, false);
     }
 

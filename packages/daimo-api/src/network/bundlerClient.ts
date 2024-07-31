@@ -15,7 +15,9 @@ import {
   ContractFunctionRevertedError,
   Hex,
   PublicClient,
+  concatHex,
   hexToBigInt,
+  numberToHex,
 } from "viem";
 
 import { CompressionInfo, compressBundle } from "./bundleCompression";
@@ -133,7 +135,7 @@ export class BundlerClient {
       abi: entryPointABI,
       address: Constants.ERC4337.EntryPoint as Address,
       functionName: "getUserOpHash",
-      args: [userOpFromHex(op)],
+      args: [packedUserOpFromHex(op)],
     });
   }
 
@@ -161,7 +163,7 @@ export class BundlerClient {
         abi: entryPointABI,
         address: Constants.ERC4337.EntryPoint as Address,
         functionName: "handleOps",
-        args: [[userOpFromHex(op)], beneficiary],
+        args: [[packedUserOpFromHex(op)], beneficiary],
       });
       const txHash = await viemClient.writeContract(request);
       console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
@@ -200,18 +202,49 @@ export function getBundlerClientFromEnv(opIndexer?: OpIndexer) {
   return new BundlerClient(getEnvApi().DAIMO_BUNDLER_RPC, opIndexer);
 }
 
-function userOpFromHex(op: UserOpHex) {
+function packedUserOpFromHex(op: UserOpHex) {
   return {
-    callData: op.callData,
-    callGasLimit: hexToBigInt(op.callGasLimit),
-    initCode: op.initCode,
-    maxFeePerGas: hexToBigInt(op.maxFeePerGas),
-    maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
-    preVerificationGas: hexToBigInt(op.preVerificationGas),
-    verificationGasLimit: hexToBigInt(op.verificationGasLimit),
-    nonce: hexToBigInt(op.nonce),
-    paymasterAndData: op.paymasterAndData,
     sender: op.sender,
+    nonce: hexToBigInt(op.nonce),
+    initCode: op.initCode,
+    callData: op.callData,
+    accountGasLimits: packAccountGasLimits({
+      verificationGasLimit: hexToBigInt(op.verificationGasLimit),
+      callGasLimit: hexToBigInt(op.callGasLimit),
+    }),
+    preVerificationGas: hexToBigInt(op.preVerificationGas),
+    gasFees: packGasFees({
+      maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
+      maxFeePerGas: hexToBigInt(op.maxFeePerGas),
+    }),
+    paymasterAndData: op.paymasterAndData,
     signature: op.signature,
   };
+}
+
+function packAccountGasLimits({
+  verificationGasLimit,
+  callGasLimit,
+}: {
+  verificationGasLimit: bigint;
+  callGasLimit: bigint;
+}) {
+  return packHiLo(verificationGasLimit, callGasLimit);
+}
+
+function packGasFees({
+  maxPriorityFeePerGas,
+  maxFeePerGas,
+}: {
+  maxPriorityFeePerGas: bigint;
+  maxFeePerGas: bigint;
+}) {
+  return packHiLo(maxPriorityFeePerGas, maxFeePerGas);
+}
+
+function packHiLo(hi: bigint, lo: bigint) {
+  return concatHex([
+    numberToHex(hi, { size: 16 }),
+    numberToHex(lo, { size: 32 }),
+  ]);
 }

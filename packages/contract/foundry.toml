@@ -5,7 +5,8 @@ libs = ['lib']
 fs_permissions = [{ access = "read", path = "./"}]
 
 # Compiler settings
-solc = "0.8.24"
+solc = "0.8.26"
+via_ir = true
 optimizer = true
 optimizer_runs = 999_999
 evm_version = "cancun"

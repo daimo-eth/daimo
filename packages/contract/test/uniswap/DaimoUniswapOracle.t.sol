@@ -46,7 +46,7 @@ contract DaimoUniswapOracleTest is Test {
         assert(block.number == 14513720); // These tests are block number / chain config dependent
     }
 
-    function testPools() public {
+    function testPools() public view {
         string memory file = "./test/uniswap/data/uniswapPools.jsonl";
 
         while (true) {
@@ -72,7 +72,7 @@ contract DaimoUniswapOracleTest is Test {
         }
     }
 
-    function testQuotes() public {
+    function testQuotes() public view {
         string memory file = "./test/uniswap/data/uniswapQuotes.jsonl";
 
         while (true) {
@@ -81,12 +81,12 @@ contract DaimoUniswapOracleTest is Test {
 
             IERC20 tokenIn = IERC20(query.readAddress(".tokenIn"));
             uint128 amountIn = uint128(query.readUint(".amountIn"));
-            uint expectedOut = query.readUint(".expectedOut");
+            uint256 expectedOut = query.readUint(".expectedOut");
             IERC20 baseUSDC = IERC20(
                 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
             );
 
-            (uint amountOut, ) = swapper.quote(tokenIn, amountIn, baseUSDC);
+            (uint256 amountOut, ) = swapper.quote(tokenIn, amountIn, baseUSDC);
             assertEq(amountOut / 10 ** 4, expectedOut / 10 ** 4); // matches in cents
         }
     }

@@ -51,7 +51,7 @@ contract SwapperTest is Test {
         assert(block.number == 14513720); // These tests are block number / chain config dependent
     }
 
-    function testNoSwap() public {
+    function testNoSwap() public view {
         (uint256 quotedAmountOut, bytes memory swapPath) = swapper.quote({
             tokenIn: usdc,
             amountIn: 100,

@@ -43,7 +43,7 @@ contract AccountSendUseropTest is Test {
     );
 
     function testSimpleOp() public {
-        // hardcoded from swift playground
+        // Generated from private key in apps/swift-testing-playground/p256.playground/Contents.swift
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
@@ -51,20 +51,22 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"6d03315273395a97603f0e1eaafd6f9b755f33975ed12e6b555d831f1ddf026d";
+        bytes32 expectedUserOpHash = hex"94461af841877398433a1f682eb630228cecc921ddef09e30c17ac094dec3b30";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
         );
 
+        // (r, s) signature generated from public key, user op hash, and validUntil in
+        // apps/swift-testing-playground/p256.playground/Contents.swift
         bytes memory ownerSig = abi.encodePacked(
             validUntil,
             abi.encode(
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x5837243ee645ef3aad95966a6827ae246800fd5fbfa8d570a3ce74e979099272,
-                    s: 0x261a6a1ec93846322ec2e4eb38c94e9e9bdf95d859cb3635b0fc7360606578d6
+                    r: 0x32b6a392c1c5be5a95ba46663c78def4b5a30c7a82c3de253a4abf2b11f2ba80,
+                    s: 0x677a8210ff6f6e63e06d85cdccec41191e970a9106ee446f34f4c7bf647b034c
                 })
             )
         );
@@ -126,7 +128,7 @@ contract AccountSendUseropTest is Test {
     }
 
     function testValidUntil() public {
-        // hardcoded from swift playground
+        // Generated from private key in apps/swift-testing-playground/p256.playground/Contents.swift
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
@@ -134,20 +136,22 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"6d03315273395a97603f0e1eaafd6f9b755f33975ed12e6b555d831f1ddf026d";
+        bytes32 expectedUserOpHash = hex"94461af841877398433a1f682eb630228cecc921ddef09e30c17ac094dec3b30";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
         );
 
+        // (r, s) signature generated from public key, user op hash, and validUntil in
+        // apps/swift-testing-playground/p256.playground/Contents.swift
         bytes memory ownerSig = abi.encodePacked(
             validUntil,
             abi.encode(
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x511457900a3c8b1842dfdda73ed4fe4fe995a5922528a86cb816a234e79a1297,
-                    s: 0x7e0b1895926d83fe6ccad412b01e4f16b294e2a9ea9e308f3d9651ba779b704a
+                    r: 0x74702a0f98c14d9a05680a54db807b291f6c453a27214c670692f7237e1df6ec,
+                    s: 0x7c135d88af9dcbd4ee3fe74809d313e6f8e2de3c4b5f964884591b21dc8fa0b5
                 })
             )
         );

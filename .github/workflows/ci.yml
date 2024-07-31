@@ -43,6 +43,19 @@ jobs:
           BASE_MAINNET_RPC: ${{ vars.BASE_MAINNET_RPC }}
         run: |
           echo Using RPC $BASE_MAINNET_RPC
+          forge build --extra-output-files metadata
+          echo SOURCE
+          git status
+          git submodule foreach --recursive 'git rev-parse HEAD'
+          find src -type f -exec shasum {} + | sort
+          echo TOOLCHAIN
+          forge --version
+          echo COMPILED OUTPUT
+          grep . out/*/*.metadata.json
+          sudo apt-get install -y jq
+          cat out/DaimoAccountV2.sol/DaimoAccountV2.json | jq .bytecode | fold -w 80
+          cat out/DaimoAccountV2.sol/DaimoAccountV2.json | jq .bytecode | shasum
+          echo TEST
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --no-match-path "test/uniswap/*"
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
           forge test -vvv --fork-url "$BASE_MAINNET_RPC" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"

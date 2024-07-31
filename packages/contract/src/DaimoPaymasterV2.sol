@@ -3,12 +3,6 @@ pragma solidity ^0.8.12;
 
 import "account-abstraction/core/BasePaymaster.sol";
 
-/// Coinbase MetaPaymaster
-/// See https://github.com/base-org/paymaster/pull/22
-interface IMetaPaymaster {
-    function fund(address target, uint256 amount) external;
-}
-
 /// This paymaster sponsors userops efficiently. Normally, sponsoring paymasters
 /// must sign tickets for each userop. This uses at minimum an extra 64 bytes
 /// per op, nearly doubling the cost.
@@ -28,7 +22,6 @@ interface IMetaPaymaster {
 /// while still retaining strong censorship resistance for a reasonable price.
 contract DaimoPaymasterV2 is BasePaymaster {
     mapping(address => bool) public bundlerWhitelist;
-    IMetaPaymaster public metaPaymaster;
 
     uint256 private constant _POST_OP_OVERHEAD = 34982;
 
@@ -51,10 +44,6 @@ contract DaimoPaymasterV2 is BasePaymaster {
         for (uint256 i = 0; i < addresses.length; i++) {
             bundlerWhitelist[addresses[i]] = isWhitelisted;
         }
-    }
-
-    function setMetaPaymaster(IMetaPaymaster _metaPaymaster) public onlyOwner {
-        metaPaymaster = _metaPaymaster;
     }
 
     function _validatePaymasterUserOp(

@@ -8,6 +8,8 @@ import "account-abstraction/core/EntryPoint.sol";
 import "../src/DaimoFastCCTP.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
+address constant HANDOFF_ADDR = 0x6e48b871cCE782b01864D5BC71AbbA63B223E688;
+
 contract FastCCTPTest is Test {
     DaimoFastCCTP public fc = new DaimoFastCCTP{salt: 0}();
 
@@ -24,8 +26,6 @@ contract FastCCTPTest is Test {
 
     address immutable _lp = 0x2222222222222222222222222222222222222222;
     uint256 immutable _lpToTokenInitBalance = 1000;
-
-    address immutable _handoffAddr = 0x48205283EB6bE6bf644f9dC7ED08b482847185Bb;
 
     function testStart() public {
         vm.chainId(_fromChainID);
@@ -89,7 +89,7 @@ contract FastCCTPTest is Test {
         vm.warp(block.timestamp + 20 minutes);
 
         // CCTP receiveMessage() sends funds to the handoff address
-        _toToken.transfer(_handoffAddr, _fromAmount);
+        _toToken.transfer(HANDOFF_ADDR, _fromAmount);
 
         // Then, LP claims the funds
         vm.prank(_lp);
@@ -104,7 +104,7 @@ contract FastCCTPTest is Test {
         });
 
         // LP received funds from handoff, is now net up the tip = 1 unit
-        assertEq(_toToken.balanceOf(_handoffAddr), 0);
+        assertEq(_toToken.balanceOf(HANDOFF_ADDR), 0);
         assertEq(_toToken.balanceOf(_lp), _lpToTokenInitBalance + 1);
         assertEq(_toToken.balanceOf(_bob), 99);
     }
@@ -121,7 +121,7 @@ contract FastCCTPTest is Test {
             _nonce
         );
 
-        assertEq(actual, _handoffAddr);
+        assertEq(actual, HANDOFF_ADDR);
     }
 }
 
@@ -141,7 +141,7 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
     ) external returns (uint64 _nonce) {
         assertEq(amount, 100);
         assertEq(destinationDomain, 6);
-        address expectedRecipient = 0x48205283EB6bE6bf644f9dC7ED08b482847185Bb;
+        address expectedRecipient = HANDOFF_ADDR;
         assertEq(mintRecipient, bytes32(uint256(uint160(expectedRecipient))));
         assertEq(burnToken, expectedBurnToken);
 

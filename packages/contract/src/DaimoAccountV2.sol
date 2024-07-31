@@ -332,7 +332,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     {
         activeSigningKeys = new bytes32[2][](numActiveKeys);
         activeSigningKeySlots = new uint8[](numActiveKeys);
-        uint activeKeyIdx = 0;
+        uint256 activeKeyIdx = 0;
         for (uint256 i = 0; i < 256; ++i) {
             uint8 slot = uint8(i);
             if (keys[slot][0] != bytes32(0)) {

@@ -3,7 +3,9 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+
 import "../src/DaimoNameRegistry.sol";
 import "../src/DaimoNameRegistryProxy.sol";
 
@@ -38,7 +40,7 @@ contract UpgradeableBrick is UUPSUpgradeable, OwnableUpgradeable {
 contract NameRegistryTest is Test {
     address public implementation;
     DaimoNameRegistry public registry;
-    address constant initOwner = address(0x1010);
+    address private immutable _initOwner = address(0x1010);
 
     event Registered(bytes32 indexed name, address indexed addr);
 
@@ -46,7 +48,7 @@ contract NameRegistryTest is Test {
         implementation = address(new DaimoNameRegistry{salt: 0}());
         DaimoNameRegistryProxy proxy = new DaimoNameRegistryProxy{salt: 0}(
             implementation,
-            abi.encodeWithSelector(DaimoNameRegistry.init.selector, initOwner)
+            abi.encodeWithSelector(DaimoNameRegistry.init.selector, _initOwner)
         );
         registry = DaimoNameRegistry(address(proxy));
     }
@@ -97,11 +99,16 @@ contract NameRegistryTest is Test {
 
         // nobody else can force register
         vm.prank(address(0x4337));
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                address(0x4337)
+            )
+        );
         registry.forceRegister("foo", address(0x999));
 
         // owner can force register
-        vm.prank(initOwner);
+        vm.prank(_initOwner);
         registry.forceRegister("foo", address(0x999));
 
         // once done, the old name is deregistered
@@ -117,22 +124,32 @@ contract NameRegistryTest is Test {
         assertEq(registry.implementation(), implementation);
 
         // Call owner() to show it's correct
-        assertEq(registry.owner(), initOwner);
+        assertEq(registry.owner(), _initOwner);
 
         // Transfer ownership
         address newOwner = address(0x5555);
-        vm.prank(initOwner);
+        vm.prank(_initOwner);
         registry.transferOwnership(newOwner);
         assertEq(registry.owner(), newOwner);
 
         // Old owner can't upgrade
-        vm.expectRevert("Ownable: caller is not the owner");
-        vm.prank(initOwner);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                _initOwner
+            )
+        );
+        vm.prank(_initOwner);
         registry.upgradeToAndCall(address(0x123), "");
 
         // Using new owner, try bricking the contract. Can't, not UUPS.
         Brick brick = new Brick();
-        vm.expectRevert("ERC1967Upgrade: new implementation is not UUPS");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ERC1967Utils.ERC1967InvalidImplementation.selector,
+                address(brick)
+            )
+        );
         vm.prank(newOwner);
         registry.upgradeToAndCall(address(brick), "");
 

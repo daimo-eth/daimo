@@ -72,7 +72,9 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint256 swapAmountOut
     );
 
-    constructor() Ownable(address(0)) {
+    constructor() Ownable(msg.sender) {
+        // Implementation contract has no owner
+        renounceOwnership();
         _disableInitializers();
     }
 

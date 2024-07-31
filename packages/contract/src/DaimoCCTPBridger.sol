@@ -34,8 +34,9 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
     // FastCCTP nonce.
     uint256 public fastCCTPNonce;
 
-    constructor() Ownable(address(0)) {
+    constructor() Ownable(msg.sender) {
         // Implementation contract has no owner
+        renounceOwnership();
         _disableInitializers();
     }
 
