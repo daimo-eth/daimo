@@ -256,14 +256,16 @@ contract DaimoFastCCTP {
     ) public view returns (address) {
         bytes memory creationCode = abi.encodePacked(
             type(EphemeralHandoff).creationCode,
-            abi.encode(fromChainID),
-            abi.encode(fromAddr),
-            abi.encode(fromAmount),
-            abi.encode(toChainID),
-            abi.encode(toAddr),
-            abi.encode(toToken),
-            abi.encode(toAmount),
-            abi.encode(nonce)
+            abi.encode(
+                fromChainID,
+                fromAddr,
+                fromAmount,
+                toChainID,
+                toAddr,
+                toToken,
+                toAmount,
+                nonce
+            )
         );
         return Create2.computeAddress(0, keccak256(creationCode));
     }
