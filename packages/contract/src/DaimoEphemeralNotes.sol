@@ -4,6 +4,7 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 
 struct Note {
     address ephemeralOwner;
@@ -74,7 +75,7 @@ contract DaimoEphemeralNotes {
             "EphemeralNotes: note does not exist"
         );
 
-        bytes32 message = ECDSA.toEthSignedMessageHash(
+        bytes32 message = MessageHashUtils.toEthSignedMessageHash(
             keccak256(abi.encodePacked(msg.sender))
         );
         address signer = ECDSA.recover(message, _signature);

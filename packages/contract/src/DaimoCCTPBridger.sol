@@ -34,7 +34,8 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
     // FastCCTP nonce.
     uint256 public fastCCTPNonce;
 
-    constructor() {
+    constructor() Ownable(address(0)) {
+        // Implementation contract has no owner
         _disableInitializers();
     }
 
@@ -68,7 +69,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
 
     /// UUPSUpgradeable: expose implementation
     function implementation() public view returns (address) {
-        return _getImplementation();
+        return ERC1967Utils.getImplementation();
     }
 
     /// Adds a new supported CCTP recipient chain.
@@ -102,7 +103,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
             to: address(this),
             value: amountIn
         });
-        tokenIn.safeApprove({spender: address(fastCCTP), value: amountIn});
+        tokenIn.forceApprove({spender: address(fastCCTP), value: amountIn});
 
         CCTPDomain memory domain = cctpDomainMapping[toChainID];
         bool valid = address(domain.token) != address(0);

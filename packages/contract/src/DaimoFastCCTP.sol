@@ -99,7 +99,7 @@ contract DaimoFastCCTP {
 
         // Transfer funds from Alice. Approve to CCTP.
         fromToken.safeTransferFrom(fromAddr, address(this), fromAmount);
-        fromToken.safeApprove(address(cctpMessenger), fromAmount);
+        fromToken.forceApprove(address(cctpMessenger), fromAmount);
 
         // Send (burn) to CCTP. Recipient = EphemeralHandoff address on chain B.
         bytes32 mintRecipient = bytes32(uint256(uint160(handoffAddr)));

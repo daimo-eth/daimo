@@ -3,11 +3,11 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
-import "account-abstraction/interfaces/UserOperation.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
 import "../src/DaimoPaymasterV2.sol";
 import "../src/DaimoAccountV2.sol";
+import "./Utils.sol";
 
 contract PaymasterTest is Test {
     DaimoPaymasterV2 public paymaster;
@@ -36,16 +36,20 @@ contract PaymasterTest is Test {
         address bundlerAddr = address(0x420);
 
         // dummy op
-        UserOperation memory op = UserOperation({
+        PackedUserOperation memory op = PackedUserOperation({
             sender: 0x5555555555555555555555555555555555555555,
             nonce: 0,
             initCode: hex"",
             callData: hex"00",
-            callGasLimit: 0,
-            verificationGasLimit: 150000,
+            accountGasLimits: Utils.packAccountGasLimits({
+                verificationGasLimit: 150000,
+                callGasLimit: 0
+            }),
             preVerificationGas: 21000,
-            maxFeePerGas: 0,
-            maxPriorityFeePerGas: 1e9,
+            gasFees: Utils.packGasFees({
+                maxPriorityFeePerGas: 1e9,
+                maxFeePerGas: 0
+            }),
             paymasterAndData: hex"",
             signature: hex"00"
         });

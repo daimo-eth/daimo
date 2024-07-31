@@ -10,8 +10,6 @@ import "../src/DaimoAccountV2.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
 contract AccountSigningKeysTest is Test {
-    using UserOperationLib for UserOperation;
-
     EntryPoint public entryPoint;
     DaimoAccountFactoryV2 public factory;
 

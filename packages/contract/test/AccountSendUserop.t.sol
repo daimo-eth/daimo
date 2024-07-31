@@ -12,8 +12,6 @@ import "./dummy/DaimoDummyUSDC.sol";
 import "./Utils.sol";
 
 contract AccountSendUseropTest is Test {
-    using UserOperationLib for UserOperation;
-
     EntryPoint public entryPoint;
     DaimoAccountFactoryV2 public factory;
 
@@ -31,8 +29,8 @@ contract AccountSendUseropTest is Test {
      * @param paymaster - if non-null, the paymaster that pays for this request.
      * @param nonce - the nonce value from the request.
      * @param success - true if the sender transaction succeeded, false if reverted.
-     * @param actualGasCost - actual amount paid (by account or paymaster) for this UserOperation.
-     * @param actualGasUsed - total gas used by this UserOperation (including preVerification, creation, validation and execution).
+     * @param actualGasCost - actual amount paid (by account or paymaster) for this userop.
+     * @param actualGasUsed - total gas used by this userop (including preVerification, creation, validation and execution).
      */
     event UserOperationEvent(
         bytes32 indexed userOpHash,
@@ -86,25 +84,23 @@ contract AccountSendUseropTest is Test {
         vm.deal(address(acc), 1 ether);
 
         // dummy op
-        UserOperation memory op = UserOperation({
-            sender: address(0),
+        PackedUserOperation memory op = PackedUserOperation({
+            sender: address(acc),
             nonce: 0,
             initCode: hex"",
             callData: hex"00",
-            callGasLimit: 0,
-            verificationGasLimit: 150000,
+            accountGasLimits: Utils.packAccountGasLimits({
+                verificationGasLimit: 2000000,
+                callGasLimit: 200000
+            }),
             preVerificationGas: 21000,
-            maxFeePerGas: 0,
-            maxPriorityFeePerGas: 1e9,
+            gasFees: Utils.packGasFees({
+                maxPriorityFeePerGas: 1e9,
+                maxFeePerGas: 3e9
+            }),
             paymasterAndData: hex"",
             signature: hex"00"
         });
-
-        // fill data
-        op.sender = address(acc);
-        op.callGasLimit = 200000;
-        op.verificationGasLimit = 2000000;
-        op.maxFeePerGas = 3e9;
 
         bytes32 hash = entryPoint.getUserOpHash(op);
         console2.log("op hash: ");
@@ -114,7 +110,7 @@ contract AccountSendUseropTest is Test {
         op.signature = ownerSig;
 
         // expect a valid but reverting op
-        UserOperation[] memory ops = new UserOperation[](1);
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = op;
         vm.expectEmit(true, true, true, false);
         emit UserOperationEvent(
@@ -170,16 +166,20 @@ contract AccountSendUseropTest is Test {
         vm.deal(address(acc), 1 ether);
 
         // valid (but reverting) dummy userop
-        UserOperation memory op = UserOperation({
+        PackedUserOperation memory op = PackedUserOperation({
             sender: address(acc),
             nonce: 0,
             initCode: hex"",
             callData: hex"00",
-            callGasLimit: 200000,
-            verificationGasLimit: 2000000,
+            accountGasLimits: Utils.packAccountGasLimits({
+                verificationGasLimit: 2000000,
+                callGasLimit: 200000
+            }),
             preVerificationGas: 21000,
-            maxFeePerGas: 3e9,
-            maxPriorityFeePerGas: 1e9,
+            gasFees: Utils.packGasFees({
+                maxPriorityFeePerGas: 1e9,
+                maxFeePerGas: 3e9
+            }),
             paymasterAndData: hex"",
             signature: ownerSig
         });
@@ -192,7 +192,7 @@ contract AccountSendUseropTest is Test {
 
         // too late: can't execute after timestamp 1e9
         vm.warp(1e9 + 1);
-        UserOperation[] memory ops = new UserOperation[](1);
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = op;
         vm.expectRevert(
             abi.encodeWithSelector(

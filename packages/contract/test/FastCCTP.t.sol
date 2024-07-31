@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
-import "account-abstraction/interfaces/UserOperation.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
 import "../src/DaimoFastCCTP.sol";
@@ -110,7 +109,7 @@ contract FastCCTPTest is Test {
         assertEq(_toToken.balanceOf(_bob), 99);
     }
 
-    function testGetHandoffAddr() public {
+    function testGetHandoffAddr() public view {
         address actual = fc.getHandoffAddr(
             _fromChainID,
             _alice,

@@ -5,7 +5,7 @@ import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
 import "account-abstraction/core/Helpers.sol";
 import "account-abstraction/interfaces/IAccount.sol";
@@ -229,7 +229,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// Validation for userops.
     function validateUserOp(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash,
         uint256 missingAccountFunds
     )
@@ -246,7 +246,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// Validate userop by verifying a Daimo account signature.
     function _validateUseropSignature(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata userOp,
         bytes32 userOpHash
     ) private view returns (uint256 validationData) {
         // userOp.signature structure:
@@ -396,7 +396,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         }
 
         // Bridger is responsible for checking that it supports tokenBridge, etc
-        tokenBridge.safeApprove(address(bridger), amountBridge);
+        tokenBridge.forceApprove(address(bridger), amountBridge);
         bridger.sendToChain(
             tokenBridge,
             amountBridge,
@@ -440,7 +440,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         if (address(tokenIn) == address(0)) {
             value = amountIn; // native token
         } else {
-            tokenIn.safeApprove(address(swapper), amountIn);
+            tokenIn.forceApprove(address(swapper), amountIn);
         }
         amountOut = swapper.swapToCoin{value: value}({
             tokenIn: tokenIn,

@@ -58,7 +58,7 @@ contract DaimoPaymasterV2 is BasePaymaster {
     }
 
     function _validatePaymasterUserOp(
-        UserOperation calldata userOp,
+        PackedUserOperation calldata /* userOp */,
         bytes32 userOpHash,
         uint256 requiredPreFund
     ) internal override returns (bytes memory context, uint256 validationData) {
@@ -67,36 +67,7 @@ contract DaimoPaymasterV2 is BasePaymaster {
         require(isWhitelisted, "DaimoPaymaster: non-whitelisted tx.origin");
 
         emit UserOperationSponsored(userOpHash, requiredPreFund);
-        return (
-            abi.encode(userOp.maxFeePerGas, userOp.maxPriorityFeePerGas),
-            0
-        );
-    }
-
-    // From https://github.com/base-org/paymaster/pull/22
-    function _postOp(
-        PostOpMode mode,
-        bytes calldata context,
-        uint256 actualGasCost
-    ) internal override {
-        if (metaPaymaster == IMetaPaymaster(address(0))) {
-            return;
-        }
-        if (mode == PostOpMode.postOpReverted) {
-            return;
-        }
-        (uint256 maxFeePerGas, uint256 maxPriorityFeePerGas) = abi.decode(
-            context,
-            (uint256, uint256)
-        );
-        uint256 gasPrice = _min(
-            maxFeePerGas,
-            maxPriorityFeePerGas + block.basefee
-        );
-        metaPaymaster.fund(
-            address(this),
-            actualGasCost + _POST_OP_OVERHEAD * gasPrice
-        );
+        return ("", 0);
     }
 
     function _min(uint256 a, uint256 b) internal pure returns (uint256) {

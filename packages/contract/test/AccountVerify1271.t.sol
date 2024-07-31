@@ -11,8 +11,6 @@ import "./dummy/DaimoDummyUSDC.sol";
 import "./Utils.sol";
 
 contract AccountVerify1271Test is Test {
-    using UserOperationLib for UserOperation;
-
     EntryPoint public entryPoint;
     DaimoAccountFactoryV2 public factory;
     DaimoAccountV2 public account;
@@ -46,7 +44,7 @@ contract AccountVerify1271Test is Test {
         console.log("account address:", address(account));
     }
 
-    function testVerifySig() public {
+    function testVerifySig() public view {
         // Non-malleable signature. s is <= n/2
         bytes memory sig = abi.encode(
             Utils.rawSignatureToSignature({
@@ -72,7 +70,7 @@ contract AccountVerify1271Test is Test {
         assertEq(ret, bytes4(0xffffffff));
     }
 
-    function testSignatureMalleability() public {
+    function testSignatureMalleability() public view {
         // Malleable signature. s is > n/2
         uint256 s = 0xd52300d32f903c332fc1de1a1b3e686e7e501350fa0bd79b29f884bb4d13eb1a;
         bytes memory sig = abi.encode(

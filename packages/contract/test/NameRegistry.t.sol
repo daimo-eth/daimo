@@ -128,13 +128,13 @@ contract NameRegistryTest is Test {
         // Old owner can't upgrade
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(initOwner);
-        registry.upgradeTo(address(0x123));
+        registry.upgradeToAndCall(address(0x123), "");
 
         // Using new owner, try bricking the contract. Can't, not UUPS.
         Brick brick = new Brick();
         vm.expectRevert("ERC1967Upgrade: new implementation is not UUPS");
         vm.prank(newOwner);
-        registry.upgradeTo(address(brick));
+        registry.upgradeToAndCall(address(brick), "");
 
         // Register Alice, show that worked
         registry.register("alice", address(0x123));
@@ -143,14 +143,14 @@ contract NameRegistryTest is Test {
         // Brick the contract
         UpgradeableBrick upBrick = new UpgradeableBrick();
         vm.prank(newOwner);
-        registry.upgradeTo(address(upBrick));
+        registry.upgradeToAndCall(address(upBrick), "");
 
         // Confirm it's bricked
         assertEq(registry.resolveAddr(bytes32("alice")), address(0xdead));
 
         // Unbrick the contract
         vm.prank(newOwner);
-        registry.upgradeTo(implementation);
+        registry.upgradeToAndCall(implementation, "");
 
         // Confirm unbricked, state still good
         assertEq(registry.resolveAddr(bytes32("alice")), address(0x123));

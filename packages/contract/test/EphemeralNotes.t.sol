@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 import "../src/DaimoEphemeralNotes.sol";
 
 contract TestDAI is ERC20 {
@@ -39,7 +40,7 @@ contract EphemeralNotesTest is Test {
     function createEphemeralSignature(
         address redeemer
     ) internal pure returns (bytes memory) {
-        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
+        bytes32 messageHash = MessageHashUtils.toEthSignedMessageHash(
             keccak256(abi.encodePacked(redeemer))
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
@@ -51,8 +52,8 @@ contract EphemeralNotesTest is Test {
         return signature;
     }
 
-    function testECDSA() public {
-        bytes32 messageHash = ECDSA.toEthSignedMessageHash(
+    function testECDSA() public view {
+        bytes32 messageHash = MessageHashUtils.toEthSignedMessageHash(
             keccak256(abi.encodePacked(ALICE))
         );
         assertTrue(

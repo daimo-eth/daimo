@@ -12,7 +12,7 @@ library Utils {
         bytes memory challenge,
         uint256 r,
         uint256 s
-    ) public view returns (DaimoAccountV2.Signature memory) {
+    ) public pure returns (DaimoAccountV2.Signature memory) {
         string memory challengeb64url = Base64URL.encode(challenge);
         string memory clientDataJSON = string(
             abi.encodePacked(
@@ -34,5 +34,38 @@ library Utils {
                 r: r,
                 s: s
             });
+    }
+
+    function packAccountGasLimits(
+        uint128 verificationGasLimit,
+        uint128 callGasLimit
+    ) public pure returns (bytes32) {
+        return packHiLo(verificationGasLimit, callGasLimit);
+    }
+
+    function packGasFees(
+        uint128 maxPriorityFeePerGas,
+        uint128 maxFeePerGas
+    ) public pure returns (bytes32) {
+        return packHiLo(maxPriorityFeePerGas, maxFeePerGas);
+    }
+
+    function packPaymasterAndData(
+        address paymaster,
+        uint128 validationGasLimit,
+        uint128 postOpGasLimit,
+        bytes memory data
+    ) public pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                paymaster,
+                validationGasLimit,
+                postOpGasLimit,
+                data
+            );
+    }
+
+    function packHiLo(uint128 hi, uint128 lo) public pure returns (bytes32) {
+        return bytes32((uint256(hi) << 128) | uint256(lo));
     }
 }

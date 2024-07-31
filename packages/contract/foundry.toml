@@ -5,8 +5,9 @@ libs = ['lib']
 fs_permissions = [{ access = "read", path = "./"}]
 
 # Compiler settings
-solc = "0.8.21"
+solc = "0.8.24"
 optimizer = true
 optimizer_runs = 999_999
+evm_version = "cancun"
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

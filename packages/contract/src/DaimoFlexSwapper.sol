@@ -72,7 +72,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint256 swapAmountOut
     );
 
-    constructor() {
+    constructor() Ownable(address(0)) {
         _disableInitializers();
     }
 
@@ -114,7 +114,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
     /// UUPSUpgradeable: expose implementation
     function implementation() public view returns (address) {
-        return _getImplementation();
+        return ERC1967Utils.getImplementation();
     }
 
     // ----- PUBLIC FUNCTIONS -----

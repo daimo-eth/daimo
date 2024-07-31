@@ -35,7 +35,7 @@ contract DaimoNameRegistry is OwnableUpgradeable, UUPSUpgradeable {
 
     /// UUPSUpgradeable: expose implementation
     function implementation() public view returns (address) {
-        return _getImplementation();
+        return ERC1967Utils.getImplementation();
     }
 
     /// Enforces uniqueness. Doesn't do any validation on name. The app
