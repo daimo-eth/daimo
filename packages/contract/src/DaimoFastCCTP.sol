@@ -32,6 +32,7 @@ contract DaimoFastCCTP {
     // Transfer initiated on chain A
     event Start(
         address indexed handoffAddr,
+        address fromAddr,
         address fromToken,
         uint256 fromAmount,
         uint256 toChainID,
@@ -128,6 +129,7 @@ contract DaimoFastCCTP {
 
         emit Start({
             handoffAddr: handoffAddr,
+            fromAddr: fromAddr,
             fromToken: address(fromToken),
             fromAmount: fromAmount,
             toChainID: toChainID,
