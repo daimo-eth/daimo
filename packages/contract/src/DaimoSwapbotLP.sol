@@ -2,7 +2,8 @@
 pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /*
  * SwapbotLP is a liquidity provider contract that funds swapbot actions.
@@ -19,9 +20,32 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
  * allowed to invoke SwapbotLP and spend the contract's balance.
  */
 contract SwapbotLP is Ownable2Step {
+    using SafeERC20 for IERC20;
+
     constructor(address _owner) {
         transferOwnership(_owner);
     }
+
+    /// Emitted when a swapbot action is run.
+    event Run(
+        address actioneeAddr,
+        bytes callData,
+        bool isSwapAndTip,
+        address tokenOutAddr,
+        bytes32 tipAmounts
+    );
+
+    /// Emitted when a swap + tip to exact output action is performed.
+    event SwapAndTip(
+        address tokenIn,
+        uint256 amountIn,
+        address tokenOut,
+        address callDest,
+        bytes callData,
+        uint256 swapAmountOut,
+        uint256 totalAmountOut,
+        uint256 maxTip
+    );
 
     /// Describes the swapbot action to be performed.
     struct SwapbotAction {
@@ -32,20 +56,21 @@ contract SwapbotLP is Ownable2Step {
         /// Calldata to be run on the actioneeAddr. E.g. the encoded collect(),
         /// swapToHomeCoin(), or FastFinishTransfer() calldata.
         bytes callData;
-        /// Address of the contract that is allowed to spend the tipmaster's
-        /// balance (up to maxTokenOutAmount). This is either:
-        /// 1. The DaimoFlexSwapper contract, which will perform the swap.
-        /// 2. The FastCCTP contract, which will perform the fastFinish action.
-        address spenderAddr;
+        /// Whether to send tokenOut to actioneeAddr vs waiting for a reentrant
+        /// swapAndTip() call.
+        bool isSwapAndTip;
         /// Address of the token to give to the recipient, which is the tokenOut
         /// of the swapbot action. E.g. if the action is a fastCCTPFinish, the
         /// tokenOutAddr is USDC.
         address tokenOutAddr;
-        /// The max tokenOut to be spent by the spender. This is in the decimal
-        /// of the tokenOut. E.g. if action is a swap, the maxTipAmount is at
-        /// most 10_000_000 (= 10 USDC) to tip the recipient.
-        uint256 maxTokenOutAmount;
+        /// Packed value.
+        /// Hi uint128: the exact total output amount.
+        /// Lo uint128: max tokenOut to tip.
+        bytes32 tipAmounts;
     }
+
+    address private _curTokenOut;
+    bytes32 private _curAmounts;
 
     /// Run the swap action on the DAv2 account. Only callable by the owner.
     function run(bytes calldata swapbotAction) external onlyOwner {
@@ -55,13 +80,94 @@ contract SwapbotLP is Ownable2Step {
         IERC20 tokenOut = IERC20(action.tokenOutAddr);
 
         // Allow the spender to spend the maxTokenOutAmount
-        tokenOut.approve(action.spenderAddr, action.maxTokenOutAmount);
+        (uint128 totalAmount, uint128 maxTip) = _unpackHiLo(action.tipAmounts);
+        if (action.isSwapAndTip) {
+            _curTokenOut = action.tokenOutAddr;
+            _curAmounts = action.tipAmounts;
+        } else {
+            require(maxTip == 0, "DSLP: maxTip must be 0 for non-swapAndTip");
+            tokenOut.approve(action.actioneeAddr, uint256(totalAmount));
+        }
 
         // Run the swapbot action on the DAv2 account or FastCCTP contract
         (bool success, ) = action.actioneeAddr.call(action.callData);
-        require(success, "SwapbotTipmaster: swap action failed");
+        require(success, "DSLP: swap action failed");
 
         // Set the allowance back to 0
-        tokenOut.approve(action.spenderAddr, 0);
+        if (action.isSwapAndTip) {
+            _curTokenOut = address(0);
+        } else {
+            tokenOut.approve(action.actioneeAddr, 0);
+        }
+
+        emit Run({
+            actioneeAddr: action.actioneeAddr,
+            callData: action.callData,
+            isSwapAndTip: action.isSwapAndTip,
+            tokenOutAddr: action.tokenOutAddr,
+            tipAmounts: action.tipAmounts
+        });
+    }
+
+    /// Reentrant call from DaimoFlexSwapper. Swap + pay or receive tip.
+    /// @param callDest Swap contract to call.
+    /// @param callData Calldata to pass to the swap.
+    function swapAndTip(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut,
+        address callDest,
+        bytes calldata callData
+    ) external payable {
+        // Check that we're in context of a run()
+        require(_curTokenOut != address(0), "DSLP: not reentrant");
+        require(_curTokenOut == address(tokenOut), "DSLP: wrong tokenOut");
+        (uint128 totalAmountOut, uint128 maxTip) = _unpackHiLo(_curAmounts);
+
+        // If tokenIn is ERC20, claim amountIn from msg.sender & approve swap
+        if (address(tokenIn) == address(0)) {
+            require(amountIn == msg.value, "DSLP: wrong msg.value");
+        } else {
+            tokenIn.safeTransferFrom(msg.sender, address(this), amountIn);
+            // forceApprove() not necessary, we check correct tokenOut amount
+            tokenIn.approve(callDest, amountIn);
+        }
+
+        // Execute (inner) swap
+        uint256 amountPre = tokenOut.balanceOf(address(this));
+        (bool success, ) = callDest.call{value: msg.value}(callData);
+        require(success, "DSLP: swap failed");
+
+        uint256 swapAmountOut = tokenOut.balanceOf(address(this)) - amountPre;
+        require(swapAmountOut > 0, "DSLP: swap produced no output");
+        require(swapAmountOut < type(uint128).max, "DSLP: excessive output");
+
+        // Tip the difference; make sure it's not too much. May be negative.
+        // Guaranteed not to overflow, both sides verified to fit in uint128.
+        int256 shortfall = int256(uint256(totalAmountOut)) -
+            int256(swapAmountOut);
+        assert(shortfall < int256(uint256(maxTip)));
+
+        // Send exact amount out
+        tokenOut.transfer(msg.sender, totalAmountOut);
+
+        emit SwapAndTip({
+            tokenIn: address(tokenIn),
+            amountIn: amountIn,
+            tokenOut: address(tokenOut),
+            callDest: callDest,
+            callData: callData,
+            swapAmountOut: swapAmountOut,
+            totalAmountOut: totalAmountOut,
+            maxTip: maxTip
+        });
+    }
+
+    /// Helper function to unpack the packed tipAmounts value.
+    function _unpackHiLo(
+        bytes32 packed
+    ) private pure returns (uint128 hi, uint128 lo) {
+        hi = uint128(uint256(packed) >> 128);
+        lo = uint128(uint256(packed));
     }
 }

@@ -7,8 +7,8 @@ import "../../src/interfaces/IDaimoSwapper.sol";
 contract DummySwapper is IDaimoSwapper {
     // Dummy extra data for tip mechanism
     struct DummySwapperExtraData {
-        uint256 tipToExactAmountOut;
-        address tipPayer;
+        address callDest;
+        bytes callData;
     }
 
     IERC20 public expectedTokenInA;
@@ -50,17 +50,25 @@ contract DummySwapper is IDaimoSwapper {
         require(tokenOut == expectedTokenOut, "wrong tokenOut");
         tokenIn.transferFrom(msg.sender, address(this), amountIn);
 
-        amountOut = amountIn - 3;
-        tokenOut.transfer(msg.sender, amountOut);
-
-        // If extraData, then tip the difference
         if (extraData.length > 0) {
+            // Call the reentrant swapAndTip() function
             DummySwapperExtraData memory data = abi.decode(
                 extraData,
                 (DummySwapperExtraData)
             );
-            uint256 tip = data.tipToExactAmountOut - amountOut;
-            tokenOut.transferFrom(data.tipPayer, msg.sender, tip);
+            tokenIn.approve(data.callDest, amountIn);
+            (bool success, ) = data.callDest.call{value: msg.value}(
+                data.callData
+            );
+            require(success, "swapAndTip failed");
+
+            // Send result back to msg.sender
+            amountOut = tokenOut.balanceOf(address(this));
+            tokenOut.transfer(msg.sender, amountOut);
+        } else {
+            // Just fake the swap, send back amount directly
+            amountOut = amountIn - 3;
+            tokenOut.transfer(msg.sender, amountOut);
         }
     }
 }

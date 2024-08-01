@@ -23,10 +23,12 @@ contract SwapbotLPTest is Test {
         new DummySwapper{salt: 0}(opUSDCe, opUSDC, baseUSDbC, baseUSDC);
     DummyBridger public bridger =
         new DummyBridger{salt: 0}(opUSDC, 8453, hex"1234");
+    DummyUniswap public uni =
+        new DummyUniswap{salt: 0}(baseUSDbC, baseUSDC, 100, 97);
 
     address public swapbotEOA = makeAddr("swapbotEOA");
 
-    SwapbotLP public tipmaster;
+    SwapbotLP public lp;
     DaimoAccountV2 public acc;
 
     function setUp() public {
@@ -45,21 +47,29 @@ contract SwapbotLPTest is Test {
             salt: 0
         });
 
-        tipmaster = new SwapbotLP(swapbotEOA);
+        lp = new SwapbotLP(swapbotEOA);
 
         // Equip swapbot EOA and swapper for tip and output token, respectively
-        deal(address(baseUSDC), address(tipmaster), 100);
-        deal(address(baseUSDC), address(swapper), 1e6);
+        deal(address(baseUSDC), address(lp), 10);
+        deal(address(baseUSDC), address(uni), 1e6);
     }
 
     function testRun() public {
         vm.chainId(8453);
         baseUSDbC.transfer(address(acc), 100);
 
+        // Reentrant call into SwapbotLP.swapAndTip()
         bytes memory extraData = abi.encode(
             DummySwapper.DummySwapperExtraData({
-                tipToExactAmountOut: 100, // 1:1 for stablecoins
-                tipPayer: address(tipmaster)
+                callDest: address(lp),
+                callData: abi.encodeWithSelector(
+                    SwapbotLP.swapAndTip.selector,
+                    baseUSDbC,
+                    100,
+                    baseUSDC,
+                    address(uni),
+                    abi.encodeWithSelector(DummyUniswap.swap.selector)
+                )
             })
         );
 
@@ -74,22 +84,13 @@ contract SwapbotLPTest is Test {
         SwapbotLP.SwapbotAction memory action = SwapbotLP.SwapbotAction({
             actioneeAddr: address(acc),
             callData: swapCallData,
-            spenderAddr: address(swapper),
+            isSwapAndTip: true,
             tokenOutAddr: address(baseUSDC), // tip in output token
-            maxTokenOutAmount: 4 // max tip is 4% of input
+            tipAmounts: bytes32((uint256(100) << 128) | uint256(4))
         });
 
         // Run the swap action
-        tipmaster.run(abi.encode(action));
-
-        // Check that the allowance was set back to 0
-        assertEq(
-            IERC20(action.tokenOutAddr).allowance(
-                address(tipmaster),
-                action.spenderAddr
-            ),
-            0
-        );
+        lp.run(abi.encode(action));
 
         // Check that the account received the correct amount of USDC
         // (swapper rate is 100:97 --> but tip should bring it to 1:1)
@@ -97,6 +98,30 @@ contract SwapbotLPTest is Test {
         assertEq(baseUSDC.balanceOf(address(acc)), 100);
 
         // Check that the swapbot EOA provided the tip
-        assertEq(baseUSDC.balanceOf(address(tipmaster)), 97);
+        assertEq(baseUSDC.balanceOf(address(lp)), 7);
+    }
+}
+
+contract DummyUniswap {
+    IERC20 public tokenIn;
+    IERC20 public tokenOut;
+    uint256 public amountIn;
+    uint256 public amountOut;
+
+    constructor(
+        IERC20 _tokenIn,
+        IERC20 _tokenOut,
+        uint256 _amountIn,
+        uint256 _amountOut
+    ) {
+        tokenIn = _tokenIn;
+        tokenOut = _tokenOut;
+        amountIn = _amountIn;
+        amountOut = _amountOut;
+    }
+
+    function swap() public {
+        tokenIn.transferFrom(msg.sender, address(this), amountIn);
+        tokenOut.transfer(msg.sender, amountOut);
     }
 }
