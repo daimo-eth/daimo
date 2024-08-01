@@ -80,6 +80,56 @@ export const daimoAccountFactoryV2ABI = [
     name: 'getAddress',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'addr',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'homeChain',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'homeCoin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'swapper',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'bridger',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'key',
+        internalType: 'bytes32[2]',
+        type: 'bytes32[2]',
+        indexed: false,
+      },
+      {
+        name: 'salt',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'CreateAccount',
+  },
 ] as const
 
 export const daimoAccountFactoryV2Address =
@@ -1332,6 +1382,12 @@ export const daimoFastCctpABI = [
         internalType: 'address',
         type: 'address',
         indexed: true,
+      },
+      {
+        name: 'fromAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
       },
       {
         name: 'fromToken',

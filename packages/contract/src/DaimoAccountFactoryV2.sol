@@ -22,6 +22,17 @@ contract DaimoAccountFactoryV2 {
         accountImplementation = new DaimoAccountV2(_entryPoint);
     }
 
+    event CreateAccount(
+        address addr,
+        uint256 homeChain,
+        address homeCoin,
+        address swapper,
+        address bridger,
+        uint8 keySlot,
+        bytes32[2] key,
+        uint256 salt
+    );
+
     /**
      * Create an account and return its address.
      * Returns the address even if the account is already deployed.
@@ -68,6 +79,19 @@ contract DaimoAccountFactoryV2 {
                 )
             )
         );
+        assert(address(ret) == addr);
+
+        // Emit log, with all info needed to deploy on other chains
+        emit CreateAccount({
+            addr: addr,
+            homeChain: homeChain,
+            homeCoin: address(homeCoin),
+            swapper: address(swapper),
+            bridger: address(bridger),
+            keySlot: keySlot,
+            key: key,
+            salt: salt
+        });
     }
 
     /// Calculate the counterfactual address of this account as it would be
