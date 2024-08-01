@@ -82,14 +82,10 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     uint8 public numActiveKeys;
 
     /// Invariant: numActiveKeys <= maxKeys
-    uint8 public immutable maxKeys = 20;
+    uint8 public constant maxKeys = 20;
 
     // Deployment-time state, used by all accounts.
     IEntryPoint public immutable entryPoint;
-
-    // Return value in case of signature failure.
-    // Equivalent to _packValidationData(true,0,0)
-    uint256 private constant _SIG_VALIDATION_FAILED = 1;
 
     /// Emitted during initialization = on upgradeTo() this implementation.
     event AccountInitialized(
@@ -156,8 +152,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         _;
     }
 
-    /// Verify that we're on the home chain & account is active, not forwarding.
-    modifier onlyActive() {
+    /// Verify that the account is active, not forwarding, and that
+    /// we're on the home chain.
+    modifier onlyActiveAndHomeChain() {
         require(forwardingAddress == address(0), "DAv2: only not forwarding");
         require(block.chainid == homeChain, "DAv2: only home chain");
         _;
@@ -217,7 +214,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     /// All user-initiated account actions originate from here.
     function executeBatch(
         Call[] calldata calls
-    ) external onlyEntryPoint onlyActive {
+    ) external onlyEntryPoint onlyActiveAndHomeChain {
         for (uint256 i = 0; i < calls.length; ++i) {
             _call(calls[i].dest, calls[i].value, calls[i].data);
         }
@@ -242,7 +239,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         virtual
         override
         onlyEntryPoint
-        onlyActive
+        onlyActiveAndHomeChain
         returns (uint256 validationData)
     {
         validationData = _validateUseropSignature(userOp, userOpHash);
@@ -258,7 +255,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         // 6 bytes (uint48)         : validUntil
         // n bytes (type Signature) : signature
         uint256 sigLength = userOp.signature.length;
-        if (sigLength < 6) return _SIG_VALIDATION_FAILED;
+        if (sigLength < 6) return SIG_VALIDATION_FAILED;
 
         uint48 validUntil = uint48(bytes6(userOp.signature[0:6]));
         bytes calldata signature = userOp.signature[6:];
@@ -270,7 +267,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
             validData.validUntil = validUntil;
             return _packValidationData(validData);
         }
-        return _SIG_VALIDATION_FAILED;
+        return SIG_VALIDATION_FAILED;
     }
 
     /// Validate any Daimo account signature, whether for a userop or 1271 sig.
@@ -318,7 +315,13 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     function isValidSignature(
         bytes32 message,
         bytes calldata signature
-    ) external view override onlyActive returns (bytes4 magicValue) {
+    )
+        external
+        view
+        override
+        onlyActiveAndHomeChain
+        returns (bytes4 magicValue)
+    {
         if (_validateSignature(bytes.concat(message), signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
@@ -355,7 +358,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     function addSigningKey(
         uint8 slot,
         bytes32[2] memory key
-    ) public onlySelf onlyActive {
+    ) public onlySelf onlyActiveAndHomeChain {
         _addSigningKey(slot, key);
     }
 
@@ -372,7 +375,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// Remove a signing key from the account.
     /// @param slot the slot of the key to remove
-    function removeSigningKey(uint8 slot) public onlySelf onlyActive {
+    function removeSigningKey(
+        uint8 slot
+    ) public onlySelf onlyActiveAndHomeChain {
         require(keys[slot][0] != bytes32(0), "DAv2: key does not exist");
         require(numActiveKeys > 1, "DAv2: cannot remove only signing key");
 
@@ -413,7 +418,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     }
 
     /// Account owner can edit their home coin. Used only on the home chain.
-    function updateHomeCoin(IERC20 newHomeCoin) public onlySelf onlyActive {
+    function updateHomeCoin(
+        IERC20 newHomeCoin
+    ) public onlySelf onlyActiveAndHomeChain {
         require(newHomeCoin != homeCoin, "DAv2: same coin");
         emit UpdateHomeCoin(homeCoin, newHomeCoin);
         homeCoin = newHomeCoin;
@@ -461,7 +468,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     /// forwarded to, effectively deprecating the account.
     function setForwardingAddress(
         address payable newAddr
-    ) public onlySelf onlyActive {
+    ) public onlySelf onlyActiveAndHomeChain {
         require(newAddr != address(0), "DAv2: forwarding address cannot be 0");
         require(newAddr != address(this), "DAv2: cannot forward to self");
 
