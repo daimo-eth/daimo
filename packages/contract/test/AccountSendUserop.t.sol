@@ -51,7 +51,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"94461af841877398433a1f682eb630228cecc921ddef09e30c17ac094dec3b30";
+        bytes32 expectedUserOpHash = hex"f8a76c8c428c21d5b3940a34861079ded59efd427edee75d7983875996bbc51c";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -65,8 +65,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x32b6a392c1c5be5a95ba46663c78def4b5a30c7a82c3de253a4abf2b11f2ba80,
-                    s: 0x677a8210ff6f6e63e06d85cdccec41191e970a9106ee446f34f4c7bf647b034c
+                    r: 0x651f58864a6cb90c859cf444474ffc81f612f0a5ae08169b77a2c8c68a3a814e,
+                    s: 0x2945611d9e7ecdcccf30ebe40192bb23e6f0036c3997315ffe612939d938f567
                 })
             )
         );
@@ -136,7 +136,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"94461af841877398433a1f682eb630228cecc921ddef09e30c17ac094dec3b30";
+        bytes32 expectedUserOpHash = hex"f8a76c8c428c21d5b3940a34861079ded59efd427edee75d7983875996bbc51c";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -150,8 +150,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x74702a0f98c14d9a05680a54db807b291f6c453a27214c670692f7237e1df6ec,
-                    s: 0x7c135d88af9dcbd4ee3fe74809d313e6f8e2de3c4b5f964884591b21dc8fa0b5
+                    r: 0x70acbff444e05edc2661627e4ac6ec3284c4e3f5f09439e9a6555a9696bddd7a,
+                    s: 0x67d0e43bfe9f6324c2652d75a07024f8ed278bf4689fadcfda30ae593ac8f447
                 })
             )
         );
