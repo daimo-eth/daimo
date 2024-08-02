@@ -36,7 +36,7 @@ export const en = {
 function displayAddrLabel(type: AddrLabel): string {
   switch (type) {
     case AddrLabel.Faucet:
-      return `team Daimo`;
+      return `team daimo`;
     case AddrLabel.PaymentLink:
       return `payment link`;
     case AddrLabel.RequestLink:

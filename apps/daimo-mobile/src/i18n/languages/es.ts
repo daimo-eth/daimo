@@ -167,7 +167,7 @@ export const es: LanguageDefinition = {
     },
     requestState: {
       created: {
-        self: () => `Ha Solicitado`,
+        self: () => `Ha solicitado`,
         other: () => `solicitaste`,
       },
       request: () => `solicitud`,
@@ -603,7 +603,7 @@ export const es: LanguageDefinition = {
       title: () => `Mis dispositivos y respaldos`,
       thisDevice: () => `ESTE DISPOSITIVO`,
       passkeys: {
-        title: () => `Qué es el respaldo Llave de acceso?`,
+        title: () => `Qué es el respaldo llave de acceso?`,
         description: {
           firstPara: () =>
             `Las llaves de acceso son una alternativa conveniente y anti-phising para frases semillas`,

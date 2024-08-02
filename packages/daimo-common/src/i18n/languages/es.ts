@@ -38,7 +38,7 @@ export const es: LanguageDefinition = {
 function displayAddrLabel(type: AddrLabel): string {
   switch (type) {
     case AddrLabel.Faucet:
-      return `equipo Daimo`;
+      return `equipo daimo`;
     case AddrLabel.PaymentLink:
       return `link de pago`;
     case AddrLabel.RequestLink:
