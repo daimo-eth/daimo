@@ -409,9 +409,9 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Enviar Link`,
     info: ({ tokenSymbol }: { tokenSymbol: string }) => `Enviar ${tokenSymbol}`,
     help: {
-      title: () => `Como los Links de Pago funcionan`,
+      title: () => `Como los Links de Pago Funcionan`,
       learn: () => `Aprende cómo`,
-      subtitle: () => `Cualquiera con el link puede reclamarlo`,
+      subtitle: () => `cualquiera con el link puede reclamarlo`,
       description: {
         firstPara: () =>
           `Links de pago transportan dinero en un link, que puedas enviarlo a cualquier persona.`,

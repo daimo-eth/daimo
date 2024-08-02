@@ -409,7 +409,7 @@ export const en = {
     help: {
       title: () => `How Payment Links Work`,
       learn: () => `Learn how`,
-      subtitle: () => `Anyone with the link can claim`,
+      subtitle: () => `anyone with the link can claim`,
       description: {
         firstPara: () =>
           `Payment links carry money in a link, so that you can send it to anyone.`,
