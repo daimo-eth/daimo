@@ -1470,6 +1470,24 @@ export const daimoFlexSwapperABI = [
     outputs: [],
   },
   {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'addOutputToken',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'addStablecoin',
+    outputs: [],
+  },
+  {
     stateMutability: 'view',
     type: 'function',
     inputs: [
@@ -1506,6 +1524,19 @@ export const daimoFlexSwapperABI = [
   {
     stateMutability: 'view',
     type: 'function',
+    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    name: 'feedRegistry',
+    outputs: [
+      {
+        name: '',
+        internalType: 'contract AggregatorV2V3Interface',
+        type: 'address',
+      },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
     inputs: [
       { name: 'tokenA', internalType: 'contract IERC20', type: 'address' },
       { name: 'amountIn', internalType: 'uint128', type: 'uint128' },
@@ -1517,6 +1548,31 @@ export const daimoFlexSwapperABI = [
       { name: 'tick', internalType: 'int24', type: 'int24' },
       { name: 'bestFee', internalType: 'uint24', type: 'uint24' },
       { name: 'bestAmountOut', internalType: 'uint128', type: 'uint128' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'getChainlinkPrice',
+    outputs: [
+      { name: 'price', internalType: 'uint256', type: 'uint256' },
+      { name: 'decimals', internalType: 'uint8', type: 'uint8' },
+    ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [
+      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amountIn', internalType: 'uint256', type: 'uint256' },
+      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'getChainlinkQuote',
+    outputs: [
+      { name: 'feedEstAmountOut', internalType: 'uint256', type: 'uint256' },
     ],
   },
   {
@@ -1565,6 +1621,17 @@ export const daimoFlexSwapperABI = [
         internalType: 'contract IUniswapV3Factory',
         type: 'address',
       },
+      {
+        name: '_feedTokens',
+        internalType: 'contract IERC20[]',
+        type: 'address[]',
+      },
+      {
+        name: '_feedAggregators',
+        internalType: 'contract AggregatorV2V3Interface[]',
+        type: 'address[]',
+      },
+      { name: '_maxFeedRoundAge', internalType: 'uint32', type: 'uint32' },
     ],
     name: 'init',
     outputs: [],
@@ -1586,6 +1653,13 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'isStablecoin',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'maxFeedRoundAge',
+    outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
   },
   {
     stateMutability: 'view',
@@ -1685,6 +1759,20 @@ export const daimoFlexSwapperABI = [
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
+    outputs: [],
+  },
+  {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+      {
+        name: 'aggregator',
+        internalType: 'contract AggregatorV2V3Interface',
+        type: 'address',
+      },
+    ],
+    name: 'setFeedAggregator',
     outputs: [],
   },
   {

@@ -10,6 +10,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.s
 import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+import "../vendor/chainlink/AggregatorV2V3Interface.sol";
 import "./interfaces/IDaimoSwapper.sol";
 
 /// @title Fully automatic on-chain swap executor
@@ -67,6 +68,10 @@ contract DaimoFlexSwapper is
     uint32 public oraclePeriod;
     /// Uniswap pool factory, for looking up pools by (tokenA, tokenB, feeTier).
     IUniswapV3Factory public oraclePoolFactory;
+    /// Chainlink DataFeed aggregators: from token T to T-USD price aggregator.
+    mapping(IERC20 => AggregatorV2V3Interface) public feedRegistry;
+    /// Max round age for Chainlink DataFeed aggregators.
+    uint32 public maxFeedRoundAge;
 
     /// Emitted on each successful swap.
     event SwapToCoin(
@@ -94,7 +99,10 @@ contract DaimoFlexSwapper is
         IERC20[] memory _stablecoins,
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
-        IUniswapV3Factory _oraclePoolFactory
+        IUniswapV3Factory _oraclePoolFactory,
+        IERC20[] memory _feedTokens,
+        AggregatorV2V3Interface[] memory _feedAggregators,
+        uint32 _maxFeedRoundAge
     ) public initializer {
         __Ownable_init(_initialOwner);
 
@@ -106,12 +114,16 @@ contract DaimoFlexSwapper is
         oracleFeeTiers = _oracleFeeTiers;
         oraclePeriod = _oraclePeriod;
         oraclePoolFactory = _oraclePoolFactory;
+        maxFeedRoundAge = _maxFeedRoundAge;
 
         for (uint256 i = 0; i < _outputTokens.length; ++i) {
-            isOutputToken[_outputTokens[i]] = true;
+            addOutputToken(_outputTokens[i]);
         }
         for (uint256 i = 0; i < _stablecoins.length; ++i) {
-            isStablecoin[_stablecoins[i]] = true;
+            addStablecoin(_stablecoins[i]);
+        }
+        for (uint256 i = 0; i < _feedTokens.length; ++i) {
+            setFeedAggregator(_feedTokens[i], _feedAggregators[i]);
         }
     }
 
@@ -121,6 +133,31 @@ contract DaimoFlexSwapper is
     /// UUPSUpgradeable: expose implementation
     function implementation() public view returns (address) {
         return ERC1967Utils.getImplementation();
+    }
+
+    /// Add a supported output token.
+    function addOutputToken(IERC20 token) public onlyOwner {
+        require(address(token) != address(0), "DFS: missing token");
+        require(isOutputToken[token] == false, "DFS: token already added");
+        outputTokens.push(token);
+        isOutputToken[token] = true;
+    }
+
+    /// Add a USD stablecoin, price defined as $1.
+    function addStablecoin(IERC20 token) public onlyOwner {
+        require(address(token) != address(0), "DFS: missing token");
+        require(isStablecoin[token] == false, "DFS: token already added");
+        stablecoins.push(token);
+        isStablecoin[token] = true;
+    }
+
+    /// Add or update Chainlink DataFeed aggregator for a token (against USD).
+    function setFeedAggregator(
+        IERC20 token,
+        AggregatorV2V3Interface aggregator
+    ) public onlyOwner {
+        require(address(token) != address(0), "DFS: missing token");
+        feedRegistry[token] = aggregator;
     }
 
     // ----- PUBLIC FUNCTIONS -----
@@ -166,7 +203,7 @@ contract DaimoFlexSwapper is
 
         swapAmountOut = tokenOut.balanceOf(address(this));
         require(swapAmountOut > 0, "DFS: swap produced no output");
-        require(swapAmountOut < _MAX_UINT128, "DFS: excessive output");
+        require(swapAmountOut < _MAX_UINT128, "DFS: output too large");
         require(swapAmountOut >= minAmountOut, "DFS: insufficient output");
 
         // Finally, send the total output amount to msg.sender
@@ -182,17 +219,31 @@ contract DaimoFlexSwapper is
         });
     }
 
+    /// Gets the minimum output amount for a given input amount.
+    /// DaimoFlexSwapper is responsible for ensuring a fair minimum price even
+    /// when called via an adversarial party. We use Uniswap TWAP/TWAL, with a
+    /// Chainlink sanity check where available. For both input  and output,
+    /// token = 0x0 refers to ETH or the native asset (eg MATIC on Polygon).
     function _getMinAmountOut(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut
     ) private view returns (uint256 minAmountOut, uint256 swapEstAmountOut) {
+        if (address(tokenIn) == address(0)) tokenIn = wrappedNativeToken;
+        if (address(tokenOut) == address(0)) tokenOut = wrappedNativeToken;
+
+        // Quote Uniswap
         uint128 amountIn128 = uint128(amountIn);
-        (swapEstAmountOut, ) = quote(tokenIn, amountIn128, tokenOut);
+        (swapEstAmountOut, ) = this.quote(tokenIn, amountIn128, tokenOut);
         require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
 
         // Next, compute the minimum output amount.
-        if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
+        if (tokenIn == tokenOut) {
+            // eg native ETH > WETH, require 1:1
+            // Native token to wrapped native token, require 1:1
+            minAmountOut = amountIn;
+            assert(swapEstAmountOut == amountIn); // quote() guarantees this
+        } else if (isStablecoin[tokenIn] && isStablecoin[tokenOut]) {
             // Require USD stablecoins to be exchanged 1-to-1.
             uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
             uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
@@ -208,29 +259,38 @@ contract DaimoFlexSwapper is
             int256 diff = int256(minAmountOut) - int256(swapEstAmountOut);
             uint256 absDiff = uint256(diff < 0 ? -diff : diff);
             require(absDiff < minAmountOut / 25, "DFS: stable swap depegged");
-        } else if (
-            address(tokenIn) == address(0) && tokenOut == wrappedNativeToken
-        ) {
-            // Native token to wrapped native token, require 1:1
-            minAmountOut = amountIn;
-            assert(swapEstAmountOut == amountIn); // quote() guarantees this
         } else {
-            // Non-stablecoins: use the swap estimate with 1% slippage tolerance.
+            // Non-stablecoins: use swap estimate with 1% slippage tolerance.
             minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
+
+            // Sanity check with Chainlink data feed, if available.
+            try this.getChainlinkQuote(tokenIn, amountIn, tokenOut) returns (
+                uint256 feedEstAmountOut
+            ) {
+                // If present, Chainlink quote must be within 2% of Uniswap.
+                int256 diff = int256(swapEstAmountOut) -
+                    int256(feedEstAmountOut);
+                uint256 absDiff = uint256(diff < 0 ? -diff : diff);
+                require(
+                    absDiff < swapEstAmountOut / 50,
+                    "DFS: quote sanity check failed"
+                );
+            } catch {
+                // Consulting the Chainlink oracle will fail for long-tail coins
+                // without an up-to-date feed. Fall back to the Uniswap quote.
+            }
         }
     }
 
+    // ----- QUOTER FUNCTIONS -----
+
     /// Fetch a best-effort quote for a given token pair + exact input amount.
-    /// For both input and output, token = 0x0 refers to ETH or the native asset
-    /// (eg MATIC on Polygon). Uses Uniswap TWAP/TWAL.
+    /// Uses Uniswap TWAP/TWAL.
     function quote(
         IERC20 tokenIn,
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint256 amountOut, bytes memory swapPath) {
-        if (address(tokenIn) == address(0)) tokenIn = wrappedNativeToken;
-        if (address(tokenOut) == address(0)) tokenOut = wrappedNativeToken;
-
         // Same token = no swap.
         if (tokenIn == tokenOut) {
             amountOut = amountIn;
@@ -395,6 +455,76 @@ contract DaimoFlexSwapper is
             pool: pool,
             secondsAgo: secondsAgo
         });
+    }
+
+    /// Estimates a fair price based on the Chainlink oracle. Both tokenIn and
+    /// tokenOut must be ERC-20 tokens. Stablecoins (see isStablecoin) are
+    /// priced at $1. This function reverts if either token cannot be priced (no
+    /// Chainlink feed configured), or if the feed returns a stale/bad result,
+    /// or if there is an arithmetic overflow due to an extreme price output.
+    function getChainlinkQuote(
+        IERC20 tokenIn,
+        uint256 amountIn,
+        IERC20 tokenOut
+    ) public view returns (uint256 feedEstAmountOut) {
+        uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
+        uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
+
+        (uint256 priceIn, uint8 decPriceIn) = getChainlinkPrice(tokenIn);
+        (uint256 priceOut, uint8 decPriceOut) = getChainlinkPrice(tokenOut);
+
+        // Example:
+        // amountIn: 2.0 OP = (2e18, 18 decimals)
+        // priceIn: 1.4628 USD/OP = (146280, 5 decimals)
+        // priceOut: 3210.0 USD/ETH = (32100, 1 decimal)
+        // amountOut = amountIn * priceIn / priceOut = 0.0009114 ETH
+        //
+        // Corresponding integer calculation:
+        // aO = (aI * aPI * 10^dO * 10^dPO) / (aPO * 10^dI * 10^dPI)
+        //    = aI * aPI * 10^(d0 + dPO - dI - dPI) / aPO
+        //
+        //    = 2e18 * 146280 * 10^(18 + 1 - 18 - 5) / 32100
+        //    = 2e18 * 146280 / 10^4 / 32100
+        //    = 911401869158878
+        //    = 0.0009114 eth
+        int256 exp = int8(decOut) +
+            int8(decPriceOut) -
+            int8(decIn) -
+            int8(decPriceIn);
+        uint256 absExp = uint256(exp < 0 ? -exp : exp);
+        uint256 ret = amountIn * priceIn;
+        ret = exp < 0 ? ret / (10 ** absExp) : ret * (10 ** absExp);
+        ret = ret / priceOut;
+        return ret;
+    }
+
+    // Returns 0 if missing or stale. Returns (1, 0) if token is a stablecoin.
+    // Otherwise, returns Chainlink data feed price and decimals.
+    function getChainlinkPrice(
+        IERC20 token
+    ) public view returns (uint256 price, uint8 decimals) {
+        if (isStablecoin[IERC20(token)]) return (1, 0);
+
+        AggregatorV2V3Interface feed = feedRegistry[token];
+        require(address(feed) != address(0), "DFS: missing feed");
+
+        // Get the latest round data from the feed.
+        (
+            uint80 roundId,
+            int256 answer,
+            ,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        ) = feed.latestRoundData();
+
+        // Check that the quote is valid and not stale.
+        require(answer > 0, "DFS: CL price <= 0");
+        require(updatedAt >= block.timestamp - maxFeedRoundAge, "DFS: CL old");
+        require(answeredInRound >= roundId, "DFS: CL wrong round");
+        require(price < _MAX_UINT128, "DFS: CL price too large");
+
+        price = uint256(answer);
+        decimals = feed.decimals();
     }
 
     /// Exists to expose DaimoFlexSwapperExtraData in generated ABI.

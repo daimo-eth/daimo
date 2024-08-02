@@ -106,7 +106,7 @@ contract AccountCrossChainTest is Test {
         // Finally, test forwarding ETH
         vm.deal(address(acc), 1 ether);
 
-        uint256 prevETH = s.balance;
+        uint256 prevETH = s.balance; // address 0xfff.. has a bit of ETH on base
         acc.forward(IERC20(address(0)));
         assertEq(address(acc).balance, 0);
         assertEq(s.balance - prevETH, 1 ether);

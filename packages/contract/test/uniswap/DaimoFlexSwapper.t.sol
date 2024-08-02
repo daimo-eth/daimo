@@ -11,8 +11,8 @@ import "../dummy/DaimoDummyUSDC.sol";
 contract SwapperTest is Test {
     IERC20 public usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
     IERC20 public weth = IERC20(0x4200000000000000000000000000000000000006);
+    IERC20 public degen = IERC20(0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed);
     address payable public alice = payable(address(0x123));
-    address payable public tipper = payable(address(0x234));
     address payable public immutable swapRouter02 =
         payable(0x2626664c2603336E57B271c5C0b26F421741e481);
 
@@ -48,10 +48,11 @@ contract SwapperTest is Test {
             _oraclePeriod: 1 minutes,
             _oraclePoolFactory: IUniswapV3Factory(
                 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
-            )
+            ),
+            _feedTokens: new IERC20[](0),
+            _feedAggregators: new AggregatorV2V3Interface[](0),
+            _maxFeedRoundAge: 0
         });
-
-        assert(block.number == 14513720); // These tests are block number / chain config dependent
     }
 
     function testNoSwap() public view {
@@ -68,7 +69,6 @@ contract SwapperTest is Test {
     function testSwapERC20ToUSDC() public {
         // Now quote a true swap path (DEGEN -> USDC).
         // Input: 122 DEGEN
-        IERC20 degen = IERC20(0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed);
         uint128 amountIn = 122 * 1e18; // from UniswapQuotes.jsonl
         uint256 expectedAmountOut = 2124053;
 
@@ -116,7 +116,7 @@ contract SwapperTest is Test {
 
     function testSwapETHToUSDC() public {
         (uint256 quotedAmountOut, bytes memory swapPath) = swapper.quote({
-            tokenIn: IERC20(address(0)), // ETH
+            tokenIn: weth,
             amountIn: 1 ether,
             tokenOut: usdc
         });

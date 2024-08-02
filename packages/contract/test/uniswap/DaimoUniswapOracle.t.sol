@@ -27,6 +27,11 @@ contract DaimoUniswapOracleTest is Test {
         oracleFeeTiers[2] = 3000;
         oracleFeeTiers[3] = 10000;
 
+        IERC20[] memory feedTokens = new IERC20[](0);
+
+        AggregatorV2V3Interface[]
+            memory feedAggregators = new AggregatorV2V3Interface[](0);
+
         address swapperImpl = address(new DaimoFlexSwapper());
         swapper = DaimoFlexSwapper(address(new ERC1967Proxy(swapperImpl, "")));
 
@@ -40,7 +45,10 @@ contract DaimoUniswapOracleTest is Test {
             _oraclePeriod: 1 minutes,
             _oraclePoolFactory: IUniswapV3Factory(
                 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
-            )
+            ),
+            _feedTokens: feedTokens,
+            _feedAggregators: feedAggregators,
+            _maxFeedRoundAge: 1 hours
         });
 
         assert(block.number == 14513720); // These tests are block number / chain config dependent
