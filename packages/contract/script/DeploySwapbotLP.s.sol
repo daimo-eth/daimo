@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "forge-std/console2.sol";
 import "../src/DaimoSwapbotLP.sol";
 
-contract DeploySwapbotTipmaster is Script {
+contract DeploySwapbotLP is Script {
     function run(address owner) public {
         vm.startBroadcast();
 

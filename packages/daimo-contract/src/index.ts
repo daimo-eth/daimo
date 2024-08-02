@@ -25,9 +25,14 @@ export {
   daimoFastCctpAddress,
   entryPointABI,
   erc20ABI,
+  swapbotLpABI,
 } from "./generated";
+
+// TODO: don't hard code these
 export const daimoFlexSwapperAddress =
-  "0xB8F43975bC7221Bb3FF9E0B47eC79324F7c87eD0";
+  "0xB500c071ADcD7bdCC34770958dDB7328F0154869";
+export const daimoCctpBridgerAddress =
+  "0x9066407f4C4d0c189688cC56eCa8A4a733Febd8D";
 export const nameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
   abi: daimoNameRegistryABI,

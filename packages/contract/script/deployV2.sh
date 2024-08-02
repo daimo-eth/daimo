@@ -7,20 +7,23 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    "script/DeployFastCCTP.s.sol"
-    "script/DeployFlexSwapper.s.sol"
-    "script/DeployCCTPBridger.s.sol"
-    "script/DeployAccountFactoryV2.s.sol"
-    "script/DeployTestAccountV2.s.sol"
+    # "script/DeployFastCCTP.s.sol"
+    # "script/DeployFlexSwapper.s.sol"
+    # "script/DeployCCTPBridger.s.sol"
+    # "script/DeployAccountFactoryV2.s.sol"
+    # "script/DeployTestAccountV2.s.sol"
+
+    # SWAPBOT (ensure private key is swapbot EOA)
+    "script/DeploySwapbotLP.s.sol" 
 )
 CHAINS=(
     # MAINNETS
     # "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "verifyContract,https://avalanche-c-chain-rpc.publicnode.com"  # No Alchemy for Avalanche, Etherscan key is "verifyContract"
-    # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
+    "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # TESTNETS
     # "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"
@@ -37,6 +40,6 @@ for SCRIPT in "${SCRIPTS[@]}"; do
         echo "RPC_URL          : $RPC_URL"
         echo forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast
         echo ""
-        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --broadcast  || exit 1
+        forge script $SCRIPT --sig "run(address)" $SWAPBOT_EOA --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast  || exit 1
     done
 done

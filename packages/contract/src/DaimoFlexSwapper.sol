@@ -441,7 +441,7 @@ contract DaimoFlexSwapper is
         if (bestLiquidity == 0) return (address(0), 0, 0, 0);
     }
 
-    /// Gets TWAP/TWAL for a single Uniswap pool.
+    /// Fetches TWAP/TWAL for a single Uniswap pool.
     function consultOracle(
         address pool,
         uint32 secondsAgo
