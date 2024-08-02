@@ -598,7 +598,7 @@ export const en = {
       title: () => `My devices & backups`,
       thisDevice: () => `THIS DEVICE`,
       passkeys: {
-        title: () => `What is a Passkey Backup?`,
+        title: () => `What is a passkey backup?`,
         description: {
           firstPara: () =>
             `Passkeys are a convenient and phishing-resistant alternative to seed phrases`,
