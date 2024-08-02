@@ -164,7 +164,7 @@ async function fetchSync(
     suggestedActions: result.suggestedActions,
     profilePicture: result.profilePicture,
     inviteLinkStatus: result.inviteLinkStatus,
-    invitees: result.invitees,
+    numInvitees: result.invitees.length,
     notificationRequestStatuses: result.notificationRequestStatuses,
     numExchangeRates: (result.exchangeRates || []).length,
     landlineSessionKey: result.landlineSessionKey,
