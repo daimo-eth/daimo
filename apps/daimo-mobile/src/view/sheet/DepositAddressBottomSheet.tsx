@@ -49,7 +49,7 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
       <TextPara color={color.grayDark}>{i18.description(tokenSymbol)}</TextPara>
       <Spacer h={12} />
       <CheckLabel value={check} setValue={setCheck}>
-        {i18.checkChain.on()} <TextBold>{chainL2.name}</TextBold>{" "}
+        {i18.checkChain.on()} <TextBold>{chainL2.name}</TextBold>
         {i18.checkChain.notOther()}
       </CheckLabel>
       <Spacer h={16} />

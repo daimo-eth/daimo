@@ -3,9 +3,8 @@ import {
   PendingOp,
   ProposedSwap,
   UserOpHex,
-  assertNotNull,
+  assert,
   derKeytoContractFriendlyKey,
-  getNativeWETHByChain,
   isNativeETH,
   now,
   zUserOpHex,
@@ -342,22 +341,28 @@ export class DaimoOpSender {
 
     // Approve, then swap
     const { chainId } = this.opConfig;
-    const isETH = isNativeETH(swap.fromCoin, chainId);
-    const coinToApprove = isETH
-      ? assertNotNull(getNativeWETHByChain(chainId))
-      : swap.fromCoin;
+    const swapExecValue = hexToBigInt(swap.execValue);
     const executions: DaimoAccountCall[] = [
-      this.getTokenApproveCall(
-        swap.execRouterAddress,
-        BigInt(swap.fromAmount),
-        coinToApprove.token
-      ),
       {
         dest: swap.execRouterAddress,
-        value: hexToBigInt(swap.execValue),
+        value: swapExecValue,
         data: swap.execCallData,
       },
     ];
+
+    if (isNativeETH(swap.fromCoin, chainId)) {
+      // Native token: value should be the execValue
+      assert(swapExecValue === BigInt(swap.fromAmount), "execValue mismatch");
+    } else {
+      // ERC-20: approve() the swap contract
+      executions.unshift(
+        this.getTokenApproveCall(
+          swap.execRouterAddress,
+          BigInt(swap.fromAmount),
+          swap.fromCoin.token
+        )
+      );
+    }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 

@@ -726,7 +726,7 @@ export const es: LanguageDefinition = {
     description: (tokenSymbol: string) =>
       `Envíe ${tokenSymbol} a su dirección debajo. Cualquier otro token ERC-20 será convertido a USDC. Confirme que esté enviando:`,
     checkChain: {
-      on: () => `En `,
+      on: () => `En`,
       notOther: () => `, y no otra cadena`,
     },
     copied: () => `Copiado`,
