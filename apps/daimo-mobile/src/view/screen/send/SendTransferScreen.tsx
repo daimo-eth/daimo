@@ -29,6 +29,7 @@ import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { RoutePellet } from "./RouteDisplay";
 import { SendTransferButton } from "./SendTransferButton";
+import { FeatFlag } from "../../../common/featureFlag";
 import {
   ParamListSend,
   SendNavProp,
@@ -142,6 +143,7 @@ function SendScreenInner({
             onCancel={goBack}
             daimoChain={daimoChain}
             defaultHomeCoin={defaultHomeCoin}
+            account={account}
           />
         );
       else
@@ -169,11 +171,13 @@ function SendChooseAmount({
   daimoChain,
   onCancel,
   defaultHomeCoin,
+  account,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
   defaultHomeCoin: ForeignToken;
+  account: Account;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -207,6 +211,7 @@ function SendChooseAmount({
 
   // Token swapping is not supported on testnet
   const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
+  const showSendCoin = FeatFlag.sendAnyCoin(account);
 
   return (
     <View>
@@ -224,11 +229,13 @@ function SendChooseAmount({
       <Spacer h={16} />
       <View style={styles.detailsRow}>
         <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
-        <SendCoinButton
-          coin={coin}
-          setCoin={setCoin}
-          isFixed={recipient.name != null || isTestnet}
-        />
+        {showSendCoin && (
+          <SendCoinButton
+            coin={coin}
+            setCoin={setCoin}
+            isFixed={recipient.name != null || isTestnet}
+          />
+        )}
       </View>
       <Spacer h={16} />
       <View style={styles.buttonRow}>
@@ -369,6 +376,8 @@ function SendConfirm({
     nav.navigate("Home");
   };
 
+  const showSendCoin = FeatFlag.sendAnyCoin(account);
+
   return (
     <View>
       {infoBubble}
@@ -395,7 +404,7 @@ function SendConfirm({
         ) : (
           <Spacer h={40} />
         )}
-        <CoinPellet coin={coin} onClick={navToInput} />
+        {showSendCoin && <CoinPellet coin={coin} onClick={navToInput} />}
       </View>
       {route && <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />}
       <Spacer h={16} />

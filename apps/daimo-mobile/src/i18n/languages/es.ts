@@ -167,7 +167,7 @@ export const es: LanguageDefinition = {
     },
     requestState: {
       created: {
-        self: () => `Ha Solicitado`,
+        self: () => `Ha solicitado`,
         other: () => `solicitaste`,
       },
       request: () => `solicitud`,
@@ -409,9 +409,9 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Enviar Link`,
     info: ({ tokenSymbol }: { tokenSymbol: string }) => `Enviar ${tokenSymbol}`,
     help: {
-      title: () => `Como los Links de Pago funcionan`,
+      title: () => `Como los Links de Pago Funcionan`,
       learn: () => `Aprende cómo`,
-      subtitle: () => `Cualquiera con el link puede reclamarlo`,
+      subtitle: () => `cualquiera con el link puede reclamarlo`,
       description: {
         firstPara: () =>
           `Links de pago transportan dinero en un link, que puedas enviarlo a cualquier persona.`,
@@ -603,7 +603,7 @@ export const es: LanguageDefinition = {
       title: () => `Mis dispositivos y respaldos`,
       thisDevice: () => `ESTE DISPOSITIVO`,
       passkeys: {
-        title: () => `Qué es el respaldo Llave de acceso?`,
+        title: () => `Qué es el respaldo llave de acceso?`,
         description: {
           firstPara: () =>
             `Las llaves de acceso son una alternativa conveniente y anti-phising para frases semillas`,
