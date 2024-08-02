@@ -371,8 +371,7 @@ function OptionRow({
     if (isExternal) {
       return (
         <TextBody color={color.primary}>
-          {i18.go()}
-          <Octicons name="link-external" />
+          {i18.go()} <Octicons name="link-external" />
         </TextBody>
       );
     } else {
