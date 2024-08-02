@@ -720,7 +720,7 @@ export const en = {
     description: (tokenSymbol: string) =>
       `Send ${tokenSymbol} to your address below. Any other ERC-20 tokens will be converted to USDC. Confirm that you're sending:`,
     checkChain: {
-      on: () => `On `,
+      on: () => `On`,
       notOther: () => `, not any other chain`,
     },
     copied: () => `Copied`,
