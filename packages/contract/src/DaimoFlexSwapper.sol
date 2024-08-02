@@ -7,7 +7,7 @@ import "@uniswap/v3-periphery/contracts/libraries/OracleLibrary.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./interfaces/IDaimoSwapper.sol";
@@ -32,7 +32,11 @@ import "./interfaces/IDaimoSwapper.sol";
 /// Market makers can use this swapper by assing an arbitrary contract call.
 /// DaimoFlexSwapper sends input tokens, calls the contract, then validates that
 /// the (tokenOut) balance increased by the expected amount.
-contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
+contract DaimoFlexSwapper is
+    IDaimoSwapper,
+    Ownable2StepUpgradeable,
+    UUPSUpgradeable
+{
     using SafeERC20 for IERC20;
 
     /// Describes how to perform the swap to achieve the quoted price or better.
@@ -72,9 +76,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint256 swapAmountOut
     );
 
-    constructor() Ownable(msg.sender) {
-        // Implementation contract has no owner
-        renounceOwnership();
+    constructor() {
         _disableInitializers();
     }
 
@@ -92,7 +94,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
     ) public initializer {
-        _transferOwnership(_initialOwner);
+        __Ownable_init(_initialOwner);
 
         // All of the below are fixed at deployment time, editable via upgrade.
         wrappedNativeToken = _wrappedNativeToken;

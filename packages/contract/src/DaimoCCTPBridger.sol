@@ -3,7 +3,7 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "./interfaces/IDaimoBridger.sol";
@@ -19,7 +19,11 @@ struct CCTPDomain {
 
 /// Automatically bridges assets from foreign chains to home chain. Uses CCTP,
 /// so the only supported bridge token in USDC.
-contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
+contract DaimoCCTPBridger is
+    IDaimoBridger,
+    Ownable2StepUpgradeable,
+    UUPSUpgradeable
+{
     using SafeERC20 for IERC20;
 
     // CCTP TokenMessenger for this chain.
@@ -34,9 +38,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
     // FastCCTP nonce.
     uint256 public fastCCTPNonce;
 
-    constructor() Ownable(msg.sender) {
-        // Implementation contract has no owner
-        renounceOwnership();
+    constructor() {
         _disableInitializers();
     }
 
@@ -51,7 +53,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         uint32[] memory _cctpDomains,
         IERC20[] memory _cctpTokens
     ) public initializer {
-        _transferOwnership(_initialOwner);
+        __Ownable_init(_initialOwner);
 
         cctpMessenger = _cctpMessenger;
         fastCCTP = _fastCCTP;
