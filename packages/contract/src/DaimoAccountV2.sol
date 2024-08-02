@@ -411,7 +411,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// Account owner can edit their home coin. Used only on the home chain.
     function updateHomeCoin(IERC20 newHomeCoin) public onlySelf onlyActive {
-        require(newHomeCoin != homeCoin);
+        require(newHomeCoin != homeCoin, "DAv2: same coin");
         homeCoin = newHomeCoin;
         emit UpdateHomeCoin(homeCoin, newHomeCoin);
     }
