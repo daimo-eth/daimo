@@ -1,3 +1,4 @@
+import { FAQ } from "../../utils/parseFAQ";
 import { LanguageDefinition } from "./en";
 
 export const es: LanguageDefinition = {
@@ -275,6 +276,63 @@ export const es: LanguageDefinition = {
     },
     faq: {
       text1: () => "Preguntas frecuentes",
+      faqs: (): FAQ[] => [
+        {
+          question: "¿Cómo funcionan las cuentas Daimo?",
+          answerHtml:
+            "Las cuentas Daimo son cuentas de Ethereum.\n\n" +
+            "En el fondo, son un nuevo y mejorado tipo llamado " +
+            "cuenta de contrato ERC-4337. Cada dispositivo que agregas a tu cuenta " +
+            "almacena una clave secreta. Cuando envías dinero, tu teléfono primero te autentica " +
+            "con FaceID o similar, y luego firma criptográficamente la transacción usando esa clave.\n\n" +
+            "Daimo es no-custodial. Tus llaves, tus monedas.\n\n" +
+            "Daimo ofrece una seguridad más fuerte que las billeteras tradicionales. Las llaves viven en hardware dedicado hecho " +
+            "para almacenar secretos, como Secure Enclave en iPhone, y nunca dejan tu dispositivo.\n\n",
+        },
+        {
+          question: "¿Qué stablecoin usa Daimo?",
+          answerHtml:
+            "Daimo funciona con USDC, una stablecoin de alta calidad emitida por Circle.\n\n" +
+            "Las stablecoins son criptomonedas diseñadas para mantener un valor estable. " +
+            "Muchas están vinculadas al dólar, por lo que una moneda vale " +
+            "$1. Circle es un transmisor de dinero con licencia en EE. UU. asociado " +
+            "con Coinbase. USDC es uno de los equivalentes en dólares más grandes y líquidos en la cadena. " +
+            '<a target="_blank" href="https://bluechip.org/coins/usdc" >Más información en Bluechip.</a>\n\n',
+        },
+        {
+          question: "¿En qué blockchain funciona?",
+          answerHtml:
+            "Daimo utiliza Base, un rollup de Ethereum.\n\n" +
+            "Los rollups soportan transacciones casi instantáneas que cuestan " +
+            "unos pocos centavos cada una. En contraste, las transacciones en la cadena subyacente " +
+            "de Ethereum (capa 1 o L1) tardan aproximadamente 10 veces más y " +
+            "cuestan unos pocos dólares cada una. Los rollups logran esto al agrupar muchas " +
+            "transacciones en una sola transacción de L1. Heredan las fuertes " +
+            "garantías de Ethereum: al igual que L1, Base es confiable y segura, y funciona " +
+            'en todo el mundo. <a target="_blank" href="https://l2beat.com/">Más información en L2Beat.</a>\n\n',
+        },
+        {
+          question:
+            "¿Puedo enviar otras monedas como USDT o usar otras cadenas como Polygon?",
+          answerHtml:
+            "Todavía no. Planeamos soportar pagos en otras stablecoins " +
+            "y en otras cadenas pronto.\n\n",
+        },
+        {
+          question: "¿Quién puede ver mis transacciones Daimo?",
+          answerHtml:
+            "Actualmente, todas las transacciones de Ethereum son generalmente públicas, " +
+            "incluidas las transacciones de Daimo. Planeamos agregar pagos privados " +
+            "a medida que la infraestructura y el soporte para ellos maduren.",
+        },
+        {
+          question: "¿Daimo es de código abierto?",
+          answerHtml:
+            "Sí, Daimo es y siempre será de código abierto bajo GPLv3. Estamos aquí para colaborar. " +
+            "Queremos hacer que la autocustodia sea rápida, segura y fácil. " +
+            '<a target="_blank" href="https://github.com/daimo-eth/daimo">Ver más en nuestro Github.</a>\n',
+        },
+      ],
     },
   },
 };
