@@ -1,7 +1,6 @@
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
-import { i18n } from "../../i18n";
-const i18 = i18n.components.invitePreview;
+import { useI18N } from "../../i18n/context";
 
 export function InvitePreviewImg({ name }: { name: string }) {
   return (
@@ -35,6 +34,8 @@ export function InvitePreviewImg({ name }: { name: string }) {
 }
 
 function Content({ name }: { name: string }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.invitePreview;
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}

@@ -11,8 +11,7 @@ import { useEffect, useState } from "react";
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 
-import { i18n } from "../i18n";
-const i18 = i18n.components.callToAction;
+import { useI18N } from "../i18n/context";
 
 export function CallToAction({
   description,
@@ -21,6 +20,8 @@ export function CallToAction({
   description: string;
   linkStatus?: DaimoLinkStatus;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.callToAction;
   const [directDeepLink, setDirectDeepLink] = useState<string>("");
 
   const isInvite = !!linkStatus && getInviteStatus(linkStatus).isValid;

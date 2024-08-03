@@ -7,10 +7,11 @@ import { useEffect, useState } from "react";
 import { TextBold } from "./typography";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
-import { i18n } from "../i18n";
-const i18 = i18n.components.downloadLink;
+import { useI18N } from "../i18n/context";
 
 export function DownloadLink() {
+  const i18n = useI18N();
+  const i18 = i18n.components.downloadLink;
   return (
     <Link
       href={"/download"}
@@ -23,6 +24,8 @@ export function DownloadLink() {
 }
 
 export function DownloadLinkButton() {
+  const i18n = useI18N();
+  const i18 = i18n.components.downloadLink;
   return (
     <Link
       href={"/download"}

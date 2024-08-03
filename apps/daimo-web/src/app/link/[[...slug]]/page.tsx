@@ -20,8 +20,8 @@ import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../utils/rpc";
 
-import { i18n } from "../../../i18n";
-const i18 = i18n.link;
+import { headers } from "next/headers";
+import { getI18N } from "../../../i18n";
 
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";
@@ -38,6 +38,9 @@ type TitleDesc = {
   description: string;
   linkStatus?: DaimoLinkStatus;
 };
+
+const i18n = getI18N(headers().get("accept-language"));
+const i18 = i18n.link;
 
 const defaultMeta = metadata(
   i18.metadata.title(),

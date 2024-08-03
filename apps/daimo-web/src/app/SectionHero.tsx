@@ -8,10 +8,11 @@ import {
   DownloadLinkButtonMobileNav,
 } from "../components/DownloadLink";
 
-import { i18n } from "../i18n";
-const i18 = i18n.app.hero;
+import { useI18N } from "../i18n/context";
 
 export function SectionHero() {
+  const i18n = useI18N();
+  const i18 = i18n.app.hero;
   return (
     <section className="overflow-hidden md:pb-28 px-8 m-auto max-w-screen-xl bg-[#000000]/20 lg:bg-[#000]/0">
       <motion.div

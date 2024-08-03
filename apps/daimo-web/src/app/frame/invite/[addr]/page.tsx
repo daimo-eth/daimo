@@ -7,13 +7,15 @@ import { TextH1, TextLight } from "../../../../components/typography";
 import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../../utils/rpc";
 import { getFrameMetadata } from "../../frameUtils";
-import { i18n } from "../../../../i18n";
+import { useI18N } from "../../../../i18n/context";
 
 interface LinkProps {
   params: { addr: string };
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
+  const i18n = useI18N();
+
   // Load the user we're showing
   let eAcc: EAccount | null = null;
   try {
@@ -56,8 +58,15 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function Page({ params }: LinkProps) {
+  const i18n = useI18N();
+
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
+
+  let name = eAcc.name;
+  if (name == undefined) {
+    name = "undefined";
+  }
 
   const i18 = i18n.frame.invite.html;
 
@@ -65,7 +74,7 @@ export default async function Page({ params }: LinkProps) {
     <div className="p-4 max-w-md">
       <TextH1>{i18.title()}</TextH1>
       <div className="h-4" />
-      <TextLight>{i18.body(eAcc.name)}</TextLight>
+      <TextLight>{i18.body(name)}</TextLight>
     </div>
   );
 }

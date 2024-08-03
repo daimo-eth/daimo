@@ -11,7 +11,11 @@ import {
 } from "@daimo/common";
 
 import { rpc } from "./rpc";
-import { i18n } from "../i18n";
+
+import { headers } from "next/headers";
+import { getI18N } from "../i18n";
+
+const i18n = getI18N(headers().get("accept-language"));
 
 // Daimo deep link status (pending, fulfilled, cancelled, etc)
 // with a human-readable description.
@@ -231,7 +235,9 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
     default: {
       return {
         name: "Daimo",
-        description: i18n.utils.linkStatus.unhandeledLinkForType(resLinkType"Unhandled link status for type: " +),
+        description: i18n.utils.linkStatus.unhandeledLinkForType(
+          i18n.utils.linkStatus.unhandeledLinkForType(resLinkType)
+        ),
       };
     }
   }

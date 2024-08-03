@@ -1,10 +1,11 @@
 import { Spacer } from "../components/Spacer";
 import TestimonialAccent from "../components/TestimonialAccent";
 
-import { i18n } from "../i18n";
-const i18 = i18n.app.testimonials;
+import { useI18N } from "../i18n/context";
 
 export function SectionTestimonial() {
+  const i18n = useI18N();
+  const i18 = i18n.app.testimonials;
   return (
     <section className="m-auto max-w-screen-xl">
       <div className="bg-[#144B44] py-20 lg:py-32 lg:m-4 lg:rounded-2xl relative  overflow-hidden">

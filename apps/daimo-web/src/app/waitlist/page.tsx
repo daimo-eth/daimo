@@ -5,10 +5,11 @@ import React, { useState } from "react";
 import { PrimaryButton } from "../../components/buttons";
 import { rpc } from "../../utils/rpc";
 
-import { i18n } from "../../i18n";
-const i18 = i18n.waitlist;
+import { useI18N } from "../../i18n/context";
 
 export default function WaitlistPage() {
+  const i18n = useI18N();
+  const i18 = i18n.waitlist;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [socials, setSocials] = useState("");

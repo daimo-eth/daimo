@@ -19,7 +19,10 @@ import { envVarsWeb } from "../../env";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 import { rpc } from "../../utils/rpc";
 
-import { i18n } from "../../i18n";
+import { getI18N } from "../../i18n";
+import { headers } from "next/headers";
+
+const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.FrameLinkService;
 
 let envFrameLinkService: FrameLinkService | null = null;

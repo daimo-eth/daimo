@@ -1,7 +1,8 @@
 import { UserBubble } from "./UserBubble";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
-import { i18n } from "../../i18n";
+import { useI18N } from "../../i18n/context";
+const i18n = useI18N();
 const i18 = i18n.components.linkPreview;
 
 export function LinkPreviewImg({

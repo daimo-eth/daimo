@@ -1,4 +1,5 @@
 export const en = {
+  lang: "en",
   download: {
     downloadDaimo: () => "Download Daimo",
     iphoneOrIpad: () => "IPHONE OR IPAD",

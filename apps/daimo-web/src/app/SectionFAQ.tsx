@@ -6,8 +6,7 @@ import readmeMD from "../../../../README.md";
 import { Spacer } from "../components/Spacer";
 import { FAQ, parseFAQs } from "../utils/parseFAQ";
 
-import { i18n } from "../i18n";
-const i18 = i18n.app.faq;
+import { useI18N } from "../i18n/context";
 
 const faqStyle = `
   details > summary {
@@ -28,6 +27,9 @@ const faqStyle = `
 `;
 
 export function SectionFAQ() {
+  const i18n = useI18N();
+  const i18 = i18n.app.faq;
+
   const [faq, setFaq] = useState([] as FAQ[]);
   useEffect(() => setFaq(parseFAQs(readmeMD)), []);
 

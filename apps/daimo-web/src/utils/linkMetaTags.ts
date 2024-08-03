@@ -15,10 +15,13 @@ import {
   getFrameMetadata,
 } from "../app/frame/frameUtils";
 
-import { i18n } from "../i18n";
-const i18 = i18n.utils.metaTags;
+import { useI18N } from "../i18n/context";
+import { getI18N } from "../i18n";
+import { headers } from "next/headers";
 
 export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
+  const i18n = getI18N(headers().get("accept-language"));
+  const i18 = i18n.utils.metaTags;
   const { name, action, dollars } = desc;
 
   // Create title
@@ -51,6 +54,8 @@ export function getFrameForLinkStatus(
   desc: LinkStatusDesc,
   recheckLabel: string
 ): FrameMetadataType | undefined {
+  const i18n = useI18N();
+  const i18 = i18n.utils.metaTags;
   const { name, action, dollars, linkStatus } = desc;
 
   // If it's a request, make it frame with button to check status.

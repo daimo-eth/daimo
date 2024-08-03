@@ -6,12 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-
-import { i18n } from "../i18n";
-const i18 = i18n.app.whyDaimo;
-
-// moved this definition to i18n for easier transl
-const features = i18.features();
+import { useI18N } from "../i18n/context";
 
 export function SectionWhyDaimo() {
   return (
@@ -27,6 +22,12 @@ export function SectionWhyDaimo() {
 }
 
 function FeaturesDesktop() {
+  const i18n = useI18N();
+  const i18 = i18n.app.whyDaimo;
+
+  // moved this definition to i18n for easier transl
+  const features = i18.features();
+
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const goToNextTab = () => {
@@ -163,6 +164,12 @@ function FeaturesMobile() {
   const [activeIndex, setActiveIndex] = useState(0);
   const slideContainerRef = useRef<React.ElementRef<"div">>(null);
   const slideRefs = useRef<React.ElementRef<"div">[]>([]);
+
+  const i18n = useI18N();
+  const i18 = i18n.app.whyDaimo;
+
+  // moved this definition to i18n for easier transl
+  const features = i18.features();
 
   useEffect(() => {
     const observer = new window.IntersectionObserver(

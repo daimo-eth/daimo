@@ -4,10 +4,11 @@ import { getAddress } from "viem";
 import { PointOfSalePage } from "./PointOfSalePage";
 import { RpcHookProvider } from "../../utils/rpcHook";
 
-import { i18n } from "../../i18n";
-const i18 = i18n.pos;
+import { useI18N } from "../../i18n/context";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const i18n = useI18N();
+  const i18 = i18n.pos;
   return {
     title: i18.title(),
     description: i18.description(),

@@ -2,7 +2,9 @@ import { assert } from "@daimo/common";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
-import { i18n } from "../../i18n";
+import { getI18N } from "../../i18n";
+import { headers } from "next/headers";
+const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.farcasterClient;
 
 export class FarcasterCacheClient {

@@ -4,8 +4,7 @@ import sharp from "sharp";
 
 import { rpc } from "../../../utils/rpc";
 
-import { i18n } from "../../../i18n";
-const i18 = i18n.profile;
+import { useI18N } from "../../../i18n/context";
 
 type Context = {
   params: { addr: string };
@@ -22,6 +21,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(_: Request, { params }: Context) {
   const addr = params.addr[0];
+
+  const i18n = useI18N();
+  const i18 = i18n.profile;
 
   try {
     let result: Blob | undefined = undefined;

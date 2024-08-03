@@ -4,8 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getFrameForLinkStatus } from "../../../../utils/linkMetaTags";
 import { loadLinkStatusDesc } from "../../../../utils/linkStatus";
 import { getFrameHtmlResponse } from "../../frameUtils";
+import { getI18N } from "../../../../i18n";
+import { headers } from "next/headers";
 
-import { i18n } from "../../../../i18n";
+const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.linkStatus;
 
 export async function GET(req: NextRequest) {

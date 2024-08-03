@@ -3,10 +3,12 @@ import Image from "next/image";
 import { Spacer } from "../components/Spacer";
 import { TextH1 } from "../components/typography";
 
-import { i18n } from "../i18n";
-const i18 = i18n.app.team;
+import { useI18N } from "../i18n/context";
 
 export function SectionTeam() {
+  const i18n = useI18N();
+  const i18 = i18n.app.team;
+
   return (
     <section className="bg-white py-24" id="team">
       <center className="m-auto w-[32rem]">

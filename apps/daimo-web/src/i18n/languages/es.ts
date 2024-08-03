@@ -1,7 +1,282 @@
 import { LanguageDefinition } from "./en";
 
 export const es: LanguageDefinition = {
-  // Common text components
+  lang: "es",
+  download: {
+    downloadDaimo: () => "Descargar Daimo",
+    iphoneOrIpad: () => "IPHONE O IPAD",
+    android: () => "ANDROID",
+    orVisit: () => "O visita",
+    onYourPhone: () => "en tu teléfono",
+    mac: () => "MAC",
+  },
+
+  frame: {
+    invite: {
+      frameMetadata: {
+        label: () => `✳️ Obtén Daimo ✳️`,
+      },
+      metadata: {
+        title: () => `Marco de Invitación de Daimo`,
+        description: () =>
+          "Pagos rápidos, custodia propia, código abierto, invitaciones con un toque.",
+        openGraph: {
+          title: () => `Marco de Invitación de Daimo`,
+          description: () =>
+            "Pagos rápidos, custodia propia, código abierto, invitaciones con un toque.",
+        },
+      },
+      html: {
+        title: () => "✳️ Marco de Invitación de Daimo",
+        body: (name: string) =>
+          `Este es un marco de invitación personalizado de ${name} en Daimo. Publica en Farcaster para invitar a personas a unirse. Recibirán $10 USDC de inicio.`,
+      },
+    },
+
+    linkStatus: {
+      notDaimoLink: () => "No es un enlace de Daimo: ",
+      notFound: () => "No encontrado: ",
+      noFrame: () => "Sin marco para el enlace: ",
+    },
+
+    farcasterClient: {
+      wrongFid: () => "FID incorrecto",
+    },
+
+    FrameLinkService: {
+      requests: {
+        invalidRequest: () => "Solicitud de marco no válida",
+        unknownFrame: (pathname: string) => `Marco desconocido: ${pathname}`,
+      },
+
+      response: {
+        bonus: () => "BONO",
+        noBonus: () => "SIN BONO",
+        claimInvite: (authMsg: string) => `✳️ Reclamar Invitación · ${authMsg}`,
+        notAPowerUser: () => "No es un usuario avanzado",
+        fidToHigh: () => "FID demasiado alto",
+        notOnList: () => "No está en la lista",
+      },
+    },
+  },
+
+  l: {
+    defaultMetadata: {
+      title: () => "Daimo",
+      description: () => "Pagos en Ethereum",
+    },
+  },
+
+  link: {
+    metadata: {
+      title: () => "Daimo",
+      description: () => "Pagos en Ethereum",
+    },
+
+    actions: {
+      requesting: () => `está solicitando`,
+      sentYou: () => `te envió`,
+      requested: () => `solicitó`,
+      sent: () => `envió`,
+      cancelledSend: () => `canceló el envío`,
+      invitedYou: () => "te invitó a Daimo",
+      cancelledRequest: () => `canceló la solicitud`,
+
+      // for convenience
+    },
+
+    errors: {
+      unrecognizedLink: () => "Enlace no reconocido",
+      loadAccount: () => "No se pudo cargar la cuenta",
+      loadStatus: () => "No se pudo cargar el estado de la solicitud",
+      loadPayLink: () => "No se pudo cargar el enlace de pago",
+    },
+
+    responses: {
+      account: {
+        desc: () => "Obtén Daimo para enviar o recibir pagos",
+      },
+      request: {
+        desc1: () => "Pagar con Daimo",
+        desc2: (name: string) => `Pagado por ${name}`,
+      },
+      requestsv2: {
+        created: () => "Pagar con Daimo",
+        canceled: (name: string) => `Cancelado por ${name}`,
+        fulfilled: (name: string) => `Pagado por ${name}`,
+        default: (err: any) => `estado de solicitud de Daimo inesperado ${err}`,
+      },
+      notev2: {
+        confirmed: () => "Aceptar con Daimo",
+        claimed: {
+          missingReceiver: () => "(receptor faltante)",
+          desc: (claim: string) => `Aceptado por ${claim}`,
+        },
+        cancelled: (name: string) => `Cancelado por ${name}`,
+        default: (status: any) =>
+          `estado de nota de Daimo inesperado ${status}`,
+      },
+      invite: {
+        expired: () => "Invitación expirada",
+        acceptTheInviteBoth: (bonusDollarsInvitee: any) =>
+          `Acepta su invitación y te enviaremos a ambos $${bonusDollarsInvitee} USDC`,
+        acceptTheInvite: (bonusDollarsInvitee: any) =>
+          `Acepta su invitación y te enviaremos $${bonusDollarsInvitee} USDC`,
+        getDaimo: () => "Obtén Daimo para enviar o recibir pagos",
+      },
+    },
+  },
+
+  pos: {
+    title: () => "Punto de Venta de Daimo",
+    description: () => "Pago USDC con un solo toque.",
+  },
+
+  profile: {
+    errorNoImage: () => "No se encontró ninguna imagen",
+  },
+
+  waitlist: {
+    signUp: () => "Regístrate en Daimo",
+    name: () => "Nombre",
+    email: () => "Correo electrónico",
+    social: () => "Redes sociales (Twitter, Warpcat, etc)",
+    submit: () => "ENVIAR",
+    submitting: () => "ENVIANDO",
+    submitted: () =>
+      `¡Enviado! Nos pondremos en contacto por correo electrónico pronto.`,
+    isLimited: () =>
+      "Daimo está actualmente en lanzamiento limitado. Regístrate para obtener acceso temprano",
+  },
+
+  utils: {
+    metaTags: {
+      checkStatus: () => "Verificar Estado",
+      buttons: {
+        openInDaimo: () => "Abrir en Daimo",
+        payRequest: () => "Pagar Solicitud",
+      },
+    },
+    linkStatus: {
+      // some of these are duplicated in this.link so those we reused
+      unhandeledLink: (linkType: any) =>
+        `Tipo de enlace no manejado: ${linkType}`,
+      unhandeledLinkForType: (linkType: any) =>
+        `Estado de enlace no manejado para el tipo: ${linkType}`,
+    },
+
+    platform: {
+      ios: () => "Descargar en App Store",
+      mac: () => "Descargar en Mac App Store",
+      android: () => "Obtener en Google Play",
+      other: () => "Descargar en App Store o Google Play",
+    },
+  },
+
+  components: {
+    downloadLink: {
+      download: () => "Descargar",
+    },
+    connectWallet: {
+      withConnected: () => " CON BILLETERA CONECTADA",
+      withAnother: () => " CON OTRA BILLETERA",
+
+      misc: {
+        sending: () => "ENVIANDO",
+        viewInExplorer: () => "VER EN EXPLORADOR DE BLOQUES",
+        wrongNetwork: () => "RED EQUIVOCADA",
+        connectedTo: (network: string) => `CONECTADO A ${network}`,
+        alreadyHaveIt: () => "¿YA LO TIENES? ABRIR EN LA APLICACIÓN",
+      },
+
+      errors: {
+        notEnoughFunds: () => "No hay suficiente USDC en la billetera",
+        alreadyClaimed: () => "Ya reclamado",
+        alreadyFulfilledOrCancelled: () => "Solicitud ya cumplida o cancelada",
+        insufficientEth: () => "ETH insuficiente para el gas de la transacción",
+        unexpected: (err: any) =>
+          `estado de enlace de Daimo inesperado ${err} para la acción de la billetera`,
+      },
+    },
+    callToAction: {
+      alreadyHaveIt: () => "¿YA LO TIENES? ABRIR EN LA APLICACIÓN",
+    },
+    linkPreview: {
+      paidBy: (name: string) => `Pagado por ${name}`,
+    },
+    invitePreview: {
+      bonusForPowerUsers: () => "+$10 BONO PARA USUARIOS AVANZADOS",
+      JoinNameOn: (name: string) => `Únete a ${name} en`,
+    },
+  },
+
+  app: {
+    layout: {
+      metadata: {
+        description: () => "Aplicación de pagos con stablecoins",
+      },
+    },
+    whyDaimo: {
+      features: () => [
+        {
+          name: "Seguro",
+          title: "Tus claves, tus monedas.",
+          description: [
+            "Sin frase de recuperación.",
+            "Las claves se encuentran en hardware seguro en tu teléfono. Copias de seguridad seguras de contraseñas.",
+            "La libertad de la custodia propia, más fácil que nunca.",
+          ],
+          imageUrl: "/assets/why-daimo-secure.png",
+        },
+        {
+          name: "Global",
+          title: "Funciona en todas partes.",
+          description: [
+            "Paga y recibe stablecoins a nivel mundial.",
+            "Transferencias instantáneas las 24 horas, los 7 días de la semana a cualquiera de tus contactos o cualquier dirección de billetera.",
+            "Envía un enlace de solicitud, recibe pagos en la cadena.",
+          ],
+          imageUrl: "/assets/why-daimo-global.png",
+        },
+        {
+          name: "Multi-cadena",
+          title: '¿Qué es "bridging"?',
+          description: [
+            "Recibe cualquier moneda en cualquier cadena.",
+            "Evita puentes lentos y costosos.",
+            "Estamos trabajando en una forma muy limpia de hacer esto... próximamente.",
+          ],
+          comingSoon: true,
+          imageUrl: "/assets/why-daimo-multi-chain.png",
+        },
+      ],
+      texts: {
+        whyDaimo: () => "¿Por qué Daimo?",
+        text1: () => "Seguro, auditado y completamente de código abierto.",
+        text2: () => "La forma más segura y rápida de stablecoin.",
+        commingSoon: () => "PRÓXIMAMENTE",
+      },
+    },
+    testimonials: {
+      text1: () =>
+        "Hay aplicaciones que simplemente se sienten bien de usar, pero no puedes describir exactamente por qué. Daimo es una de ellas.",
+      text2: () => "Kristof Gazso",
+      text3: () => "Coautor de ERC-4337, fundador de ",
+      text4: () => "Pimlico",
+    },
+    team: {
+      meetTheTeam: () => "Conoce al equipo",
+    },
+    hero: {
+      text1: () => "Tu propio banco, en Ethereum.",
+      text2: () =>
+        "Almacena dinero utilizando hardware seguro en tu teléfono. Solo tuyo, como dinero en efectivo.",
+      text3: () => "Más información",
+    },
+    faq: {
+      text1: () => "Preguntas frecuentes",
+    },
+  },
 };
 
 function pluralize(n: number, noun: string) {

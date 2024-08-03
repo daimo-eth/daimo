@@ -31,8 +31,7 @@ import {
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
 
-import { i18n } from "../i18n";
-const i18 = i18n.components.connectWallet;
+import { useI18N } from "../i18n/context";
 
 export function ConnectWalletFlow({
   linkStatus,
@@ -43,6 +42,8 @@ export function ConnectWalletFlow({
   description: string;
   setSecondary: () => void;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
   const { address, isConnected } = useAccount();
   const [creationError, setCreationError] = useState<string>();
 
@@ -121,6 +122,8 @@ function WagmiButton({
   incrementStep?: () => void;
   setSecondary: () => void;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
   const { chain } = useNetwork();
   const { config, error } = usePrepareContractWrite(wagmiPrep);
   const { data, isLoading, isSuccess, write } = useContractWrite(config);
@@ -186,6 +189,8 @@ function WagmiButton({
 }
 
 function CustomConnectButton({ title }: { title: string }): JSX.Element {
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
   return (
     <ConnectButton.Custom>
       {({
@@ -271,6 +276,9 @@ async function linkStatusToAction(
   urlHash: string
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
+
+  const i18n = useI18N();
+  const i18 = i18n.components.connectWallet;
 
   switch (linkStatus.link.type) {
     case "request": {
