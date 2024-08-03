@@ -12,5 +12,3 @@ export function getI18N(lang: string | null): LanguageDefinition {
       return en;
   }
 }
-
-export const i18n = en;
