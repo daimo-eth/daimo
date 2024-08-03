@@ -223,9 +223,9 @@ export const es: LanguageDefinition = {
           name: "Seguro",
           title: "Tus claves, tus monedas.",
           description: [
-            "Sin frase de recuperación.",
-            "Las claves se encuentran en hardware seguro en tu teléfono. Copias de seguridad seguras de contraseñas.",
-            "La libertad de la custodia propia, más fácil que nunca.",
+            "Sin frase semilla.",
+            "Las claves se encuentran en hardware seguro en tu teléfono.",
+            "La libertad de la auto-custodia, más fácil que nunca.",
           ],
           imageUrl: "/assets/why-daimo-secure.png",
         },
@@ -234,7 +234,7 @@ export const es: LanguageDefinition = {
           title: "Funciona en todas partes.",
           description: [
             "Paga y recibe stablecoins a nivel mundial.",
-            "Transferencias instantáneas las 24 horas, los 7 días de la semana a cualquiera de tus contactos o cualquier dirección de billetera.",
+            "Transferencias instantáneas las 24 horas, los 7 días de la semana a cualquiera de tus contactos o a cualquier billetera.",
             "Envía un enlace de solicitud, recibe pagos en la cadena.",
           ],
           imageUrl: "/assets/why-daimo-global.png",
@@ -245,7 +245,7 @@ export const es: LanguageDefinition = {
           description: [
             "Recibe cualquier moneda en cualquier cadena.",
             "Evita puentes lentos y costosos.",
-            "Estamos trabajando en una forma muy limpia de hacer esto... próximamente.",
+            "Estamos trabajando en una forma de realizar esto... próximamente.",
           ],
           comingSoon: true,
           imageUrl: "/assets/why-daimo-multi-chain.png",
@@ -253,14 +253,14 @@ export const es: LanguageDefinition = {
       ],
       texts: {
         whyDaimo: () => "¿Por qué Daimo?",
-        text1: () => "Seguro, auditado y completamente de código abierto.",
-        text2: () => "La forma más segura y rápida de stablecoin.",
+        text1: () => "Seguro, auditado y el código es completamente abierto.",
+        text2: () => "La forma más segura y rápida de utilizar stablecoins.",
         commingSoon: () => "PRÓXIMAMENTE",
       },
     },
     testimonials: {
       text1: () =>
-        "Hay aplicaciones que simplemente se sienten bien de usar, pero no puedes describir exactamente por qué. Daimo es una de ellas.",
+        "Hay aplicaciones que simplemente se sienten bien usar, pero no puedes describir exactamente por qué. Daimo es una de ellas.",
       text2: () => "Kristof Gazso",
       text3: () => "Coautor de ERC-4337, fundador de ",
       text4: () => "Pimlico",
@@ -285,9 +285,9 @@ export const es: LanguageDefinition = {
             "cuenta de contrato ERC-4337. Cada dispositivo que agregas a tu cuenta " +
             "almacena una clave secreta. Cuando envías dinero, tu teléfono primero te autentica " +
             "con FaceID o similar, y luego firma criptográficamente la transacción usando esa clave.\n\n" +
-            "Daimo es no-custodial. Tus llaves, tus monedas.\n\n" +
+            "Daimo auto-custodial. Tus llaves, tus tokens.\n\n" +
             "Daimo ofrece una seguridad más fuerte que las billeteras tradicionales. Las llaves viven en hardware dedicado hecho " +
-            "para almacenar secretos, como Secure Enclave en iPhone, y nunca dejan tu dispositivo.\n\n",
+            "para almacenar secretos, como Secure Enclave en iPhone, y no se pueden extraer de tu dispositivo.\n\n",
         },
         {
           question: "¿Qué stablecoin usa Daimo?",
@@ -296,7 +296,7 @@ export const es: LanguageDefinition = {
             "Las stablecoins son criptomonedas diseñadas para mantener un valor estable. " +
             "Muchas están vinculadas al dólar, por lo que una moneda vale " +
             "$1. Circle es un transmisor de dinero con licencia en EE. UU. asociado " +
-            "con Coinbase. USDC es uno de los equivalentes en dólares más grandes y líquidos en la cadena. " +
+            "con Coinbase. USDC es uno de los equivalentes en dólares más grandes y líquidos en web3. " +
             '<a target="_blank" href="https://bluechip.org/coins/usdc" >Más información en Bluechip.</a>\n\n',
         },
         {
@@ -304,19 +304,19 @@ export const es: LanguageDefinition = {
           answerHtml:
             "Daimo utiliza Base, un rollup de Ethereum.\n\n" +
             "Los rollups soportan transacciones casi instantáneas que cuestan " +
-            "unos pocos centavos cada una. En contraste, las transacciones en la cadena subyacente " +
-            "de Ethereum (capa 1 o L1) tardan aproximadamente 10 veces más y " +
+            "unos pocos centavos cada una. En contraste, las transacciones en " +
+            "Ethereum (capa 1 o L1) tardan aproximadamente 10 veces más y " +
             "cuestan unos pocos dólares cada una. Los rollups logran esto al agrupar muchas " +
-            "transacciones en una sola transacción de L1. Heredan las fuertes " +
-            "garantías de Ethereum: al igual que L1, Base es confiable y segura, y funciona " +
+            "transacciones en una sola transacción en la L1. Heredan las " +
+            "características de Ethereum. Base al igual que L1, es confiable y segura, y funciona " +
             'en todo el mundo. <a target="_blank" href="https://l2beat.com/">Más información en L2Beat.</a>\n\n',
         },
         {
           question:
-            "¿Puedo enviar otras monedas como USDT o usar otras cadenas como Polygon?",
+            "¿Puedo enviar otras monedas como USDT o usar otras blockchains como Polygon?",
           answerHtml:
-            "Todavía no. Planeamos soportar pagos en otras stablecoins " +
-            "y en otras cadenas pronto.\n\n",
+            "Todavía no. Planeamos soportar pagos con otras stablecoins " +
+            "y en otras blockchains pronto.\n\n",
         },
         {
           question: "¿Quién puede ver mis transacciones Daimo?",
