@@ -7,8 +7,11 @@ import {
   DownloadLinkButton,
   DownloadLinkButtonMobileNav,
 } from "../components/DownloadLink";
+import { useI18N } from "../i18n/context";
 
 export function SectionHero() {
+  const i18n = useI18N();
+
   return (
     <section className="overflow-hidden md:pb-28 px-8 m-auto max-w-screen-xl bg-[#000000]/20 lg:bg-[#000]/0">
       <motion.div
@@ -23,11 +26,8 @@ export function SectionHero() {
           transition={{ duration: 0.5, delay: 0.3, ease: "easeInOut" }}
           className="flex-1 flex flex-col justify-center space-y-8 md:space-y-12"
         >
-          <HeroH1>Your own bank, on Ethereum.</HeroH1>
-          <HeroH2>
-            Store money using secure hardware on your phone. Yours alone, like
-            cash.
-          </HeroH2>
+          <HeroH1>{i18n.home.heroH1()}</HeroH1>
+          <HeroH2>{i18n.home.heroH2()}</HeroH2>
           <div className="hidden md:flex md:flex-row md:items-center md:space-x-[20px] lg:space-x-[36px] md:pt-8">
             <DownloadLinkButton />
             <Link
