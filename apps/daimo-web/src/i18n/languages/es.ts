@@ -24,11 +24,11 @@ export const es: LanguageDefinition = {
       metadata: {
         title: () => `Marco de Invitación de Daimo`,
         description: () =>
-          "Pagos rápidos, custodia propia, código abierto, invitaciones con un toque.",
+          "Pagos rápidos, custodia propia, código abierto, invitaciones con un click.",
         openGraph: {
           title: () => `Marco de Invitación de Daimo`,
           description: () =>
-            "Pagos rápidos, custodia propia, código abierto, invitaciones con un toque.",
+            "Pagos rápidos, custodia propia, código abierto, invitaciones con un click.",
         },
       },
       html: {
@@ -86,8 +86,6 @@ export const es: LanguageDefinition = {
       cancelledSend: () => `canceló el envío`,
       invitedYou: () => "te invitó a Daimo",
       cancelledRequest: () => `canceló la solicitud`,
-
-      // for convenience
     },
 
     errors: {
@@ -109,7 +107,7 @@ export const es: LanguageDefinition = {
         created: () => "Pagar con Daimo",
         canceled: (name: string) => `Cancelado por ${name}`,
         fulfilled: (name: string) => `Pagado por ${name}`,
-        default: (err: any) => `estado de solicitud de Daimo inesperado ${err}`,
+        default: (err: any) => `unexpected DaimoRequestState ${err}`,
       },
       notev2: {
         confirmed: () => "Aceptar con Daimo",
@@ -118,8 +116,7 @@ export const es: LanguageDefinition = {
           desc: (claim: string) => `Aceptado por ${claim}`,
         },
         cancelled: (name: string) => `Cancelado por ${name}`,
-        default: (status: any) =>
-          `estado de nota de Daimo inesperado ${status}`,
+        default: (status: any) => `unexpected DaimoNoteStatus ${status}`,
       },
       invite: {
         expired: () => "Invitación expirada",
@@ -134,18 +131,18 @@ export const es: LanguageDefinition = {
 
   pos: {
     title: () => "Punto de Venta de Daimo",
-    description: () => "Pago USDC con un solo toque.",
+    description: () => "Pago USDC con un solo click.",
   },
 
   profile: {
-    errorNoImage: () => "No se encontró ninguna imagen",
+    errorNoImage: () => "No se encontró imagen",
   },
 
   waitlist: {
     signUp: () => "Regístrate en Daimo",
     name: () => "Nombre",
     email: () => "Correo electrónico",
-    social: () => "Redes sociales (Twitter, Warpcat, etc)",
+    social: () => "Redes sociales (Twitter, Warpcast, etc)",
     submit: () => "ENVIAR",
     submitting: () => "ENVIANDO",
     submitted: () =>
@@ -164,10 +161,9 @@ export const es: LanguageDefinition = {
     },
     linkStatus: {
       // some of these are duplicated in this.link so those we reused
-      unhandeledLink: (linkType: any) =>
-        `Tipo de enlace no manejado: ${linkType}`,
+      unhandeledLink: (linkType: any) => `Unhandled link type: ${linkType}`,
       unhandeledLinkForType: (linkType: any) =>
-        `Estado de enlace no manejado para el tipo: ${linkType}`,
+        `Unhandled link status for type: ${linkType}`,
     },
 
     platform: {
@@ -200,7 +196,7 @@ export const es: LanguageDefinition = {
         alreadyFulfilledOrCancelled: () => "Solicitud ya cumplida o cancelada",
         insufficientEth: () => "ETH insuficiente para el gas de la transacción",
         unexpected: (err: any) =>
-          `estado de enlace de Daimo inesperado ${err} para la acción de la billetera`,
+          `unexpected DaimoLinkStatus ${err} for wallet action`,
       },
     },
     callToAction: {
