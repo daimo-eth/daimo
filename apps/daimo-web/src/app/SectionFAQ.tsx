@@ -33,6 +33,8 @@ export function SectionFAQ() {
   const [faq, setFaq] = useState([] as FAQ[]);
   useEffect(() => setFaq(parseFAQs(readmeMD)), []);
 
+  console.log(faq);
+
   return (
     <section className="bg-midnight-gradient pt-24" id="faq">
       <div className="mx-3 bg-white">
@@ -43,7 +45,7 @@ export function SectionFAQ() {
           </h1>
           <Spacer h={48} />
           <ul>
-            {faq.map((qna, i) => (
+            {i18.faqs().map((qna, i) => (
               <Question key={i} {...qna} />
             ))}
           </ul>
@@ -78,6 +80,7 @@ function Question({
           </span>
         </summary>
         <p
+          style={{ whiteSpace: "pre-line" }}
           className="text-[16px] md:text-[22px] text-[#777] leading-snug"
           dangerouslySetInnerHTML={{ __html: answerHtml }}
         />
