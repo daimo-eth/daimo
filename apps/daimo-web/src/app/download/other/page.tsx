@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
 import React from "react";
-import { i18n } from "../../../i18n/index";
 
 import { PrimaryButton } from "../../../components/buttons";
+import { i18n } from "../../../i18n/index";
 import { downloadMetadata } from "../../../utils/platform";
 
 const i18 = i18n.download;

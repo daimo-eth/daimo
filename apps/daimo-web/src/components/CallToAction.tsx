@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 
 import { AppOrWalletCTA } from "./AppOrWalletCTA";
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
-
 import { useI18N } from "../i18n/context";
 
 export function CallToAction({

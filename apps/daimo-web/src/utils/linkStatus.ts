@@ -9,10 +9,9 @@ import {
   getAccountName,
   parseDaimoLink,
 } from "@daimo/common";
+import { headers } from "next/headers";
 
 import { rpc } from "./rpc";
-
-import { headers } from "next/headers";
 import { getI18N } from "../i18n";
 
 const i18n = getI18N(headers().get("accept-language"));

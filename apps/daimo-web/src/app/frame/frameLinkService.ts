@@ -9,6 +9,7 @@ import {
   User,
   ValidatedFrameAction,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { getAddress } from "viem";
 
@@ -16,11 +17,9 @@ import { FarcasterCacheClient } from "./farcasterClient";
 import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
 import { FrameRequest, getFrameHtmlResponse } from "./frameUtils";
 import { envVarsWeb } from "../../env";
+import { getI18N } from "../../i18n";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 import { rpc } from "../../utils/rpc";
-
-import { getI18N } from "../../i18n";
-import { headers } from "next/headers";
 
 const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.FrameLinkService;

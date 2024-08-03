@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-
 import "@rainbow-me/rainbowkit/styles.css";
+import { headers } from "next/headers";
+
 import { neueMontreal } from "../fonts/font";
 import "./globals.css";
-import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
-
 import { getI18N } from "../i18n";
-import { headers } from "next/headers";
+import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 
 export function generateMetadata(): Metadata {
   const i18n = getI18N(headers().get("accept-language"));

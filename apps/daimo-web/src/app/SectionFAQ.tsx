@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { Spacer } from "../components/Spacer";
-
 import { useI18N } from "../i18n/context";
 
 const faqStyle = `

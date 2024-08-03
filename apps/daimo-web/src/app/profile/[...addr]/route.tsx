@@ -2,9 +2,8 @@ import { LRUCache } from "lru-cache";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
-import { rpc } from "../../../utils/rpc";
-
 import { useI18N } from "../../../i18n/context";
+import { rpc } from "../../../utils/rpc";
 
 type Context = {
   params: { addr: string };

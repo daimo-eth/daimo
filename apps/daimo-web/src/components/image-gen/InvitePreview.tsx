@@ -1,6 +1,5 @@
-import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
-
 import { useI18N } from "../../i18n/context";
+import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function InvitePreviewImg({ name }: { name: string }) {
   return (

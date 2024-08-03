@@ -1,21 +1,23 @@
 import { EAccount, assert } from "@daimo/common";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getAddress } from "viem";
 
 import { TextH1, TextLight } from "../../../../components/typography";
+import { getI18N } from "../../../../i18n";
+import { useI18N } from "../../../../i18n/context";
 import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../../utils/rpc";
 import { getFrameMetadata } from "../../frameUtils";
-import { useI18N } from "../../../../i18n/context";
 
 interface LinkProps {
   params: { addr: string };
 }
 
-export async function generateMetadata(props: LinkProps): Promise<Metadata> {
-  const i18n = useI18N();
+const i18n = getI18N(headers().get("accept-language"));
 
+export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   // Load the user we're showing
   let eAcc: EAccount | null = null;
   try {

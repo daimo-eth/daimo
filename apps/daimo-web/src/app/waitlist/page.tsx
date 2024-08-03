@@ -3,9 +3,8 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 import { PrimaryButton } from "../../components/buttons";
-import { rpc } from "../../utils/rpc";
-
 import { useI18N } from "../../i18n/context";
+import { rpc } from "../../utils/rpc";
 
 export default function WaitlistPage() {
   const i18n = useI18N();

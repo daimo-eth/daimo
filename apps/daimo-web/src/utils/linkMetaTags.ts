@@ -6,6 +6,7 @@ import {
   getAccountName,
 } from "@daimo/common";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { getAbsoluteUrl } from "./getAbsoluteUrl";
 import { LinkStatusDesc } from "./linkStatus";
@@ -14,10 +15,7 @@ import {
   FrameMetadataType,
   getFrameMetadata,
 } from "../app/frame/frameUtils";
-
-import { useI18N } from "../i18n/context";
 import { getI18N } from "../i18n";
-import { headers } from "next/headers";
 
 export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const i18n = getI18N(headers().get("accept-language"));
@@ -54,7 +52,7 @@ export function getFrameForLinkStatus(
   desc: LinkStatusDesc,
   recheckLabel: string
 ): FrameMetadataType | undefined {
-  const i18n = useI18N();
+  const i18n = getI18N(headers().get("accept-language"));
   const i18 = i18n.utils.metaTags;
   const { name, action, dollars, linkStatus } = desc;
 

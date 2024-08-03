@@ -2,7 +2,6 @@ import Image from "next/image";
 
 import { Spacer } from "../components/Spacer";
 import { TextH1 } from "../components/typography";
-
 import { useI18N } from "../i18n/context";
 
 export function SectionTeam() {

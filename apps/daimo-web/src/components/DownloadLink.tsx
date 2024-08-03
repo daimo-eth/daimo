@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { TextBold } from "./typography";
-import { detectPlatform, downloadMetadata } from "../utils/platform";
-
 import { useI18N } from "../i18n/context";
+import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 export function DownloadLink() {
   const i18n = useI18N();

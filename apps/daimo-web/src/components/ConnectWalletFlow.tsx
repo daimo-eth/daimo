@@ -18,6 +18,7 @@ import {
   notesV1AddressMap,
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { headers } from "next/headers";
 import { useMemo, useEffect, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
 import {
@@ -30,7 +31,7 @@ import {
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
-
+import { getI18N } from "../i18n";
 import { useI18N } from "../i18n/context";
 
 export function ConnectWalletFlow({
@@ -141,7 +142,7 @@ function WagmiButton({
     } else {
       return error.message;
     }
-  }, [error]);
+  }, [error, i18]);
 
   useEffect(() => {
     if (isSuccess && incrementStep) incrementStep();
@@ -277,7 +278,7 @@ async function linkStatusToAction(
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
 
-  const i18n = useI18N();
+  const i18n = getI18N(headers().get("accept-language"));
   const i18 = i18n.components.connectWallet;
 
   switch (linkStatus.link.type) {

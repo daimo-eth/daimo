@@ -6,6 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+
 import { useI18N } from "../i18n/context";
 
 export function SectionWhyDaimo() {

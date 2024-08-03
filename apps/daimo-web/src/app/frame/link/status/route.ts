@@ -1,11 +1,11 @@
 import { parseDaimoLink } from "@daimo/common";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { getI18N } from "../../../../i18n";
 import { getFrameForLinkStatus } from "../../../../utils/linkMetaTags";
 import { loadLinkStatusDesc } from "../../../../utils/linkStatus";
 import { getFrameHtmlResponse } from "../../frameUtils";
-import { getI18N } from "../../../../i18n";
-import { headers } from "next/headers";
 
 const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.linkStatus;

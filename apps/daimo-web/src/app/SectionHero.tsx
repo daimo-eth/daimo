@@ -7,7 +7,6 @@ import {
   DownloadLinkButton,
   DownloadLinkButtonMobileNav,
 } from "../components/DownloadLink";
-
 import { useI18N } from "../i18n/context";
 
 export function SectionHero() {

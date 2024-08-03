@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 import { ConnectWalletFlow } from "./ConnectWalletFlow";
-
 import { useI18N } from "../i18n/context";
 
 export function AppOrWalletCTA({

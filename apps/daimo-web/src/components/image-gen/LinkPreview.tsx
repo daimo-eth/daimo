@@ -1,9 +1,6 @@
 import { UserBubble } from "./UserBubble";
-import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
-
 import { useI18N } from "../../i18n/context";
-const i18n = useI18N();
-const i18 = i18n.components.linkPreview;
+import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function LinkPreviewImg({
   name,
@@ -132,6 +129,8 @@ function Footer({
   paidBy?: string;
   cancelled?: boolean;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.linkPreview;
   const hasStatus = paidBy || cancelled;
   return (
     <div

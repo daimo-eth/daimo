@@ -1,5 +1,5 @@
-import { FAQ } from "../../utils/parseFAQ";
 import { LanguageDefinition } from "./en";
+import { FAQ } from "../../utils/parseFAQ";
 
 export const es: LanguageDefinition = {
   lang: "es",

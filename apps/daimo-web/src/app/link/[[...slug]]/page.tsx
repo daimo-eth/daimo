@@ -13,15 +13,14 @@ import {
   parseDaimoLink,
 } from "@daimo/common";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
 import { Providers, chainsDaimoL2 } from "../../../components/Providers";
+import { getI18N } from "../../../i18n";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../utils/rpc";
-
-import { headers } from "next/headers";
-import { getI18N } from "../../../i18n";
 
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";

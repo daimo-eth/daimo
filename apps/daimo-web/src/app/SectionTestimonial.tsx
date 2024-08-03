@@ -1,6 +1,5 @@
 import { Spacer } from "../components/Spacer";
 import TestimonialAccent from "../components/TestimonialAccent";
-
 import { useI18N } from "../i18n/context";
 
 export function SectionTestimonial() {
