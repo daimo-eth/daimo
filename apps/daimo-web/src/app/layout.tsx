@@ -1,5 +1,3 @@
-"use client";
-
 import type { Metadata } from "next";
 import "@rainbow-me/rainbowkit/styles.css";
 import { headers } from "next/headers";
