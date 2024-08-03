@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import readmeMD from "../../../../README.md";
 import { Spacer } from "../components/Spacer";
-import { FAQ, parseFAQs } from "../utils/parseFAQ";
 
 import { useI18N } from "../i18n/context";
 
@@ -29,11 +27,6 @@ const faqStyle = `
 export function SectionFAQ() {
   const i18n = useI18N();
   const i18 = i18n.app.faq;
-
-  const [faq, setFaq] = useState([] as FAQ[]);
-  useEffect(() => setFaq(parseFAQs(readmeMD)), []);
-
-  console.log(faq);
 
   return (
     <section className="bg-midnight-gradient pt-24" id="faq">
