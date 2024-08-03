@@ -17,6 +17,9 @@ export const en = {
 
   frame: {
     invite: {
+      callback: {
+        welcomeClaimInvite: () => "Welcome · Claim Invite + $10 ✳️",
+      },
       frameMetadata: {
         label: () => `✳️ Get Daimo ✳️`,
       },

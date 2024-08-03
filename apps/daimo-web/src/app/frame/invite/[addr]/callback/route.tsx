@@ -3,6 +3,11 @@ import { getAddress } from "viem";
 
 import { InviteFrameLink } from "../../../frameLink";
 import { getFrameLinkServiceFromEnv } from "../../../frameLinkService";
+import { getI18N } from "../../../../../i18n";
+import { headers } from "next/headers";
+
+const i18n = getI18N(headers().get("accept-language"));
+const i18 = i18n.frame.invite.callback;
 
 export async function POST(
   req: NextRequest,
@@ -25,7 +30,7 @@ export async function POST(
       imgSuccess: "/assets/frame/InvFrameSuccess.png",
       imgFail: "/assets/frame/InvFrameFail.png",
       buttonInit: "",
-      buttonSuccess: "Welcome · Claim Invite + $10 ✳️",
+      buttonSuccess: i18.welcomeClaimInvite(),
     },
   };
 

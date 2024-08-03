@@ -18,6 +18,9 @@ export const es: LanguageDefinition = {
 
   frame: {
     invite: {
+      callback: {
+        welcomeClaimInvite: () => "Bienvenido · Reclamar Invitación + $10 ✳️",
+      },
       frameMetadata: {
         label: () => `✳️ Obtén Daimo ✳️`,
       },
