@@ -1,10 +1,10 @@
+import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 import { getAddress } from "viem";
 
+import { getI18N } from "../../../../../i18n";
 import { InviteFrameLink } from "../../../frameLink";
 import { getFrameLinkServiceFromEnv } from "../../../frameLinkService";
-import { getI18N } from "../../../../../i18n";
-import { headers } from "next/headers";
 
 const i18n = getI18N(headers().get("accept-language"));
 const i18 = i18n.frame.invite.callback;
