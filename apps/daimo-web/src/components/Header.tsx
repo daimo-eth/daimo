@@ -88,7 +88,7 @@ function MobileNav() {
                       <MobileNavLink href="https://github.com/daimo-eth/daimo">
                         Github
                       </MobileNavLink>
-                      <MobileNavLink href="/#faqs">
+                      <MobileNavLink href="/#faq">
                         {i18n.misc.faq()}
                       </MobileNavLink>
                     </div>
