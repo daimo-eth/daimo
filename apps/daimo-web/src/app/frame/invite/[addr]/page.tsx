@@ -6,7 +6,6 @@ import { getAddress } from "viem";
 
 import { TextH1, TextLight } from "../../../../components/typography";
 import { getI18N } from "../../../../i18n";
-import { useI18N } from "../../../../i18n/context";
 import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../../utils/rpc";
 import { getFrameMetadata } from "../../frameUtils";
@@ -60,8 +59,6 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function Page({ params }: LinkProps) {
-  const i18n = useI18N();
-
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
 

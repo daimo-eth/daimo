@@ -1,3 +1,5 @@
+"use client";
+
 import { useI18N } from "../../i18n/context";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DaimoLinkStatus,
   DaimoNoteStatus,
@@ -18,7 +20,6 @@ import {
   notesV1AddressMap,
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { headers } from "next/headers";
 import { useMemo, useEffect, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
 import {
@@ -31,8 +32,8 @@ import {
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
-import { getI18N } from "../i18n";
 import { useI18N } from "../i18n/context";
+import { LanguageDefinition } from "../i18n/languages/en";
 
 export function ConnectWalletFlow({
   linkStatus,
@@ -45,6 +46,7 @@ export function ConnectWalletFlow({
 }) {
   const i18n = useI18N();
   const i18 = i18n.components.connectWallet;
+
   const { address, isConnected } = useAccount();
   const [creationError, setCreationError] = useState<string>();
 
@@ -63,7 +65,12 @@ export function ConnectWalletFlow({
         // URL hash part is not readable server side.
         const hash = window.location.hash.slice(1);
 
-        const action = await linkStatusToAction(linkStatus, address, hash);
+        const action = await linkStatusToAction(
+          linkStatus,
+          address,
+          hash,
+          i18n
+        );
         console.log("action", action);
         setAction(action);
       } catch (e: any) {
@@ -274,11 +281,11 @@ async function getNoteSignature(
 async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
-  urlHash: string
+  urlHash: string,
+  i18n: LanguageDefinition
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
 
-  const i18n = getI18N(headers().get("accept-language"));
   const i18 = i18n.components.connectWallet;
 
   switch (linkStatus.link.type) {

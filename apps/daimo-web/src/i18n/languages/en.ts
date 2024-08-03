@@ -175,6 +175,11 @@ export const en = {
   },
 
   components: {
+    buttons: {
+      copiedRedirecting: () => "COPIED, REDIRECTING...",
+      copyInviteAnd: () => "COPY INVITE & ",
+      installDaimo: () => "INSTALL DAIMO",
+    },
     downloadLink: {
       download: () => "Download",
     },

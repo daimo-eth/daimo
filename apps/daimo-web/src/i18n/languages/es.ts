@@ -175,6 +175,11 @@ export const es: LanguageDefinition = {
   },
 
   components: {
+    buttons: {
+      copiedRedirecting: () => "COPIADO, REDIRECTING...",
+      copyInviteAnd: () => "COPIAR INVITACIÓN Y ",
+      installDaimo: () => "INSTALA DAIMO",
+    },
     downloadLink: {
       download: () => "Descargar",
     },

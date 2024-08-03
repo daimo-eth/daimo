@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useI18N } from "../i18n/context";
 import { detectPlatform, downloadMetadata } from "../utils/platform";
 
 export function PrimaryOpenInAppButton({
@@ -11,6 +12,9 @@ export function PrimaryOpenInAppButton({
   inviteDeepLink?: string;
   disabled?: boolean;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.components.buttons;
+
   const [justCopied, setJustCopied] = useState(false);
 
   const onClick = async () => {
@@ -35,8 +39,8 @@ export function PrimaryOpenInAppButton({
       buttonType={justCopied ? "success" : undefined}
     >
       {justCopied
-        ? "COPIED, REDIRECTING..."
-        : (inviteDeepLink ? "COPY INVITE & " : "") + "INSTALL DAIMO"}
+        ? i18.copiedRedirecting()
+        : (inviteDeepLink ? i18.copyInviteAnd() : "") + i18.installDaimo()}
     </PrimaryButton>
   );
 }
