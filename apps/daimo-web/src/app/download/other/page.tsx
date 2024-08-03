@@ -3,12 +3,13 @@ import Image from "next/image";
 import React from "react";
 
 import { PrimaryButton } from "../../../components/buttons";
-import { i18n } from "../../../i18n/index";
 import { downloadMetadata } from "../../../utils/platform";
-
-const i18 = i18n.download;
+import { useI18N } from "../../../i18n/context";
 
 export default function DownloadPage() {
+  const i18n = useI18N();
+  const i18 = i18n.download;
+
   return (
     <main className="max-w-2xl mx-auto px-4">
       <center>
