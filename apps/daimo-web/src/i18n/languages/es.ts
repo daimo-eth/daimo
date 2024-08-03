@@ -3,6 +3,10 @@ import { LanguageDefinition } from "./en";
 
 export const es: LanguageDefinition = {
   lang: "es",
+  misc: {
+    faq: () => "Ayuda",
+    blog: () => "Blog",
+  },
   download: {
     downloadDaimo: () => "Descargar Daimo",
     iphoneOrIpad: () => "IPHONE O IPAD",

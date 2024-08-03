@@ -2,6 +2,10 @@ import { FAQ } from "../../utils/parseFAQ";
 
 export const en = {
   lang: "en",
+  misc: {
+    faq: () => "FAQ",
+    blog: () => "Blog",
+  },
   download: {
     downloadDaimo: () => "Download Daimo",
     iphoneOrIpad: () => "IPHONE OR IPAD",
