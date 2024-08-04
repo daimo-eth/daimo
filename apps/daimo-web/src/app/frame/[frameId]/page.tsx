@@ -6,11 +6,15 @@ import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { inviteFrameLinks } from "../frameLink";
 import { getFrameLinkServiceFromEnv } from "../frameLinkService";
 import { getFrameMetadata } from "../frameUtils";
+import { useI18N } from "../../../i18n/context";
 
 interface LinkProps {
   params: { frameId: string };
 }
 
+// const i18n = getI18N(req.headers.get("accept-language"));
+
+// TODO: i18n
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   // Load the frame we're showing
   const service = getFrameLinkServiceFromEnv();
@@ -47,20 +51,22 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default function Page({ params }: LinkProps) {
+  const i18n = useI18N();
+  const i18 = i18n.frame.callback;
+
   const frameId = Number(params.frameId);
   const frame = inviteFrameLinks.find((l) => l.id === frameId);
   return (
     <div className="p-4 max-w-md">
-      <TextH1>✳️ Daimo Invite Frame</TextH1>
+      <TextH1>{i18.DaimoInviteFrame()}</TextH1>
       <div className="h-4" />
       <TextLight>
-        This is a Farcaster frame that invites people to Daimo. Want to post
-        your own, customized invite frame? Email us at{" "}
+        {i18.text()}
         <a href="mailto:founders@daimo.com">founders@daimo.com</a>.
       </TextLight>
       <div className="h-4" />
       <pre className="font-mono text-grayMid">
-        {frame == null && `Invite Frame ${frameId} not found`}
+        {frame == null && i18.inviteFrameNotFound(frameId)}
         {frame && JSON.stringify(frame, null, 2)}
       </pre>
     </div>

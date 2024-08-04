@@ -16,6 +16,14 @@ export const en = {
   },
 
   frame: {
+    callback: {
+      DaimoInviteFrame: () => "✳️ Daimo Invite Frame",
+      inviteFrameNotFound: (frameId: any) =>
+        `Invite Frame ${frameId} not found`,
+      text: () =>
+        "This is a Farcaster frame that invites people to Daimo." +
+        "Want to post your own, customized invite frame? Email us at ",
+    },
     invite: {
       callback: {
         welcomeClaimInvite: () => "Welcome · Claim Invite + $10 ✳️",

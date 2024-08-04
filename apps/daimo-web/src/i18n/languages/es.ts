@@ -17,6 +17,14 @@ export const es: LanguageDefinition = {
   },
 
   frame: {
+    callback: {
+      DaimoInviteFrame: () => "✳️ Marco de Invitación de Daimo",
+      inviteFrameNotFound: (frameId: any) =>
+        `Marco de invitación ${frameId} no encontrado`,
+      text: () =>
+        "Este es un marco de Farcaster que invita a las personas a Daimo." +
+        "¿Quieres publicar tu propio marco de invitación personalizado? Envíanos un correo electrónico a ",
+    },
     invite: {
       callback: {
         welcomeClaimInvite: () => "Bienvenido · Reclamar Invitación + $10 ✳️",
@@ -27,17 +35,17 @@ export const es: LanguageDefinition = {
       metadata: {
         title: () => `Marco de Invitación de Daimo`,
         description: () =>
-          "Pagos rápidos, custodia propia, código abierto, invitaciones con un click.",
+          "Pagos rápidos, custodia propia, código abierto, invitaciones con un solo clic.",
         openGraph: {
           title: () => `Marco de Invitación de Daimo`,
           description: () =>
-            "Pagos rápidos, custodia propia, código abierto, invitaciones con un click.",
+            "Pagos rápidos, custodia propia, código abierto, invitaciones con un solo clic.",
         },
       },
       html: {
         title: () => "✳️ Marco de Invitación de Daimo",
         body: (name: string) =>
-          `Este es un marco de invitación personalizado de ${name} en Daimo. Publica en Farcaster para invitar a personas a unirse. Recibirán $10 USDC de inicio.`,
+          `Este es un marco de invitación personalizado de ${name} en Daimo. Publícalo en Farcaster para invitar a las personas a unirse. Recibirán $10 USDC al comenzar.`,
       },
     },
 
