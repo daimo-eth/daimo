@@ -5,8 +5,8 @@ import { headers } from "next/headers";
 import { neueMontreal } from "../fonts/font";
 import "./globals.css";
 import { getI18N } from "../i18n";
-import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 import { I18NProvider } from "../i18n/context";
+import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
 
 export function generateMetadata(): Metadata {
   const i18n = getI18N(headers().get("accept-language"));

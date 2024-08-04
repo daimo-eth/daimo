@@ -3,8 +3,8 @@ import Image from "next/image";
 import React from "react";
 
 import { PrimaryButton } from "../../../components/buttons";
-import { downloadMetadata } from "../../../utils/platform";
 import { useI18N } from "../../../i18n/context";
+import { downloadMetadata } from "../../../utils/platform";
 
 export default function DownloadPage() {
   const i18n = useI18N();
