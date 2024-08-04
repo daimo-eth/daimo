@@ -1,14 +1,11 @@
 import { parseDaimoLink } from "@daimo/common";
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getI18N } from "../../../../i18n";
+import { getReqLang } from "../../../../i18n/server";
 import { getFrameForLinkStatus } from "../../../../utils/linkMetaTags";
 import { loadLinkStatusDesc } from "../../../../utils/linkStatus";
 import { getFrameHtmlResponse } from "../../frameUtils";
-
-const i18n = getI18N(headers().get("accept-language"));
-const i18 = i18n.frame.linkStatus;
 
 export async function GET(req: NextRequest) {
   return handle(req);
@@ -20,6 +17,10 @@ export async function POST(req: NextRequest) {
 
 async function handle(req: NextRequest) {
   const reqURL = new URL(req.url);
+
+  const i18n = getI18N(getReqLang());
+  const i18 = i18n.frame.linkStatus;
+
   const rawLink = reqURL.searchParams.get("link");
   console.log(`[FRAME] got link status request: ${rawLink}`);
 

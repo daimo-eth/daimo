@@ -9,7 +9,6 @@ import {
   User,
   ValidatedFrameAction,
 } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { getAddress } from "viem";
 
@@ -17,12 +16,8 @@ import { FarcasterCacheClient } from "./farcasterClient";
 import { InviteFrameLink, inviteFrameLinks } from "./frameLink";
 import { FrameRequest, getFrameHtmlResponse } from "./frameUtils";
 import { envVarsWeb } from "../../env";
-import { getI18N } from "../../i18n";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 import { rpc } from "../../utils/rpc";
-
-const i18n = getI18N(headers().get("accept-language"));
-const i18 = i18n.frame.FrameLinkService;
 
 let envFrameLinkService: FrameLinkService | null = null;
 
@@ -55,6 +50,8 @@ export class FrameLinkService {
   // Validate POST body info = Farcaster user who clicked the frame
   async validateFrameAction(req: NextRequest): Promise<ValidatedFrameAction> {
     const { neynarClient } = this;
+    const { fcClient } = this;
+    const i18 = fcClient.i18.FrameLinkService;
 
     const body: FrameRequest = await req.json();
     const { valid, action } = await neynarClient.validateFrameAction(
@@ -70,6 +67,8 @@ export class FrameLinkService {
   // Handle a frame button click
   async respond(req: NextRequest, frameId: number): Promise<NextResponse> {
     const action = await this.validateFrameAction(req);
+    const { fcClient } = this;
+    const i18 = fcClient.i18.FrameLinkService;
 
     // The frame being clicked on
     const frame = inviteFrameLinks.find((l) => l.id === frameId);
@@ -89,6 +88,7 @@ export class FrameLinkService {
     // The user who clicked
     const { fid } = action.interactor;
     const user = await fcClient.getUser(fid);
+    const i18 = fcClient.i18.FrameLinkService;
 
     // Should we give them a Daimo invite?
     const [bonus, authMsg] = await this.auth(user, frame);
@@ -115,6 +115,7 @@ export class FrameLinkService {
     user: User,
     frame: InviteFrameLink
   ): Promise<[boolean, string]> {
+    const i18 = this.fcClient.i18.FrameLinkService;
     const { auth } = frame;
     console.log(`[FRAME] authenticating ${JSON.stringify(user)}`);
 
