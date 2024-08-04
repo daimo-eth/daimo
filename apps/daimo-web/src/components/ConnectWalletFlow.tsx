@@ -77,7 +77,7 @@ export function ConnectWalletFlow({
         setCreationError(e.message);
       }
     })();
-  }, [linkStatus, address]);
+  }, [linkStatus, address, i18n]);
 
   const incrementStep = useMemo(() => {
     if (currentStep < (action?.length ?? 0) - 1)
