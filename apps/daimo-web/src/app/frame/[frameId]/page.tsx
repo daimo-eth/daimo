@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { TextH1, TextLight } from "../../../components/typography";
+import { getI18N } from "../../../i18n";
+import { useI18N } from "../../../i18n/context";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { inviteFrameLinks } from "../frameLink";
 import { getFrameLinkServiceFromEnv } from "../frameLinkService";
 import { getFrameMetadata } from "../frameUtils";
-import { useI18N } from "../../../i18n/context";
 
 interface LinkProps {
   params: { frameId: string };
 }
 
-// const i18n = getI18N(req.headers.get("accept-language"));
-
-// TODO: i18n
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
+  const i18n = getI18N(headers().get("accept-language"));
+  const i18 = i18n.frame.invite.metadata; // reuse from other
+
   // Load the frame we're showing
   const service = getFrameLinkServiceFromEnv();
   const frame = await service.loadFrame(Number(props.params.frameId));
@@ -35,11 +37,11 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   });
 
   const metadata: Metadata = {
-    title: "Daimo Invite Frame",
-    description: "Fast payments, self custody, open source, one-tap invites.",
+    title: i18.title(),
+    description: i18.description(),
     openGraph: {
-      title: "Daimo Invite Frame",
-      description: "Fast payments, self custody, one-tap invites.",
+      title: i18.openGraph.title(),
+      description: i18.openGraph.description(),
       images: [getAbsoluteUrl(frame.appearance.imgInit)],
     },
     other: {
