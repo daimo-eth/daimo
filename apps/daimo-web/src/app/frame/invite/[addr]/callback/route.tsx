@@ -10,7 +10,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { addr: string } }
 ): Promise<Response> {
-  const i18n = getI18N(getReqLang());
+  const i18n = getI18N(req.headers.get("accept-language"));
   const i18 = i18n.frame.invite.callback;
   const addr = getAddress(params.addr);
   const service = getFrameLinkServiceFromEnv();
