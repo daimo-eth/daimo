@@ -6,6 +6,7 @@ import { neueMontreal } from "../fonts/font";
 import "./globals.css";
 import { getI18N } from "../i18n";
 import { getAbsoluteUrl } from "../utils/getAbsoluteUrl";
+import { I18NProvider } from "../i18n/context";
 
 export function generateMetadata(): Metadata {
   const i18n = getI18N(headers().get("accept-language"));
@@ -41,7 +42,9 @@ export default function RootLayout({
 
   return (
     <html lang={i18n.lang} className={`${neueMontreal.variable} font-sans`}>
-      <body>{children}</body>
+      <body>
+        <I18NProvider lang={i18n.lang}>{children}</I18NProvider>
+      </body>
     </html>
   );
 }
