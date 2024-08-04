@@ -14,9 +14,9 @@ interface LinkProps {
   params: { addr: string };
 }
 
-const i18n = getI18N(headers().get("accept-language"));
-
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
+  const i18n = getI18N(headers().get("accept-language"));
+
   // Load the user we're showing
   let eAcc: EAccount | null = null;
   try {
@@ -59,6 +59,7 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function Page({ params }: LinkProps) {
+  const i18n = getI18N(headers().get("accept-language"));
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
 
