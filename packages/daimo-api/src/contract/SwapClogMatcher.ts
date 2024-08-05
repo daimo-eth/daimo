@@ -1,8 +1,10 @@
 import { debugJson, retryBackoff } from "@daimo/common";
-import { Pool } from "pg";
-import { Address, bytesToHex, getAddress } from "viem";
+import { zeroAddr } from "@daimo/contract";
+import { Kysely } from "kysely";
+import { Address, bytesToHex, getAddress, Hex, hexToBytes } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
+import { DB as ShovelDB } from "../codegen/dbShovel";
 import { TokenRegistry } from "../server/tokenRegistry";
 
 export class SwapClogMatcher {
@@ -20,39 +22,52 @@ export class SwapClogMatcher {
   // Given a set transaction hashes, load any transfers that are associated
   // with those transactions.
   async loadSwapTransfers(
-    pg: Pool,
+    kdb: Kysely<ShovelDB>,
     from: number,
     to: number,
     chainId: number,
-    transactionHashes: string[]
+    transactionHashes: Hex[]
   ) {
     const startTime = Date.now();
 
-    const txHashes = transactionHashes.map((tx) => `\\x${tx.substring(2)}`);
+    const txHashes = transactionHashes.map((tx) => Buffer.from(hexToBytes(tx)));
 
     const result = await retryBackoff(
       `swapClogMatcher-logs-query-${from}-${to}`,
-      async () => {
-        return pg.query(
-          `SELECT * FROM erc20_transfers WHERE tx_hash = ANY($1::bytea[]);`,
-          [txHashes]
-        );
-      }
+      () =>
+        kdb
+          .selectFrom("daimo_transfers")
+          .select([
+            "block_hash",
+            "block_num",
+            "tx_hash",
+            "tx_idx",
+            "sort_idx",
+            "token",
+            "f",
+            "t",
+            "amount",
+          ])
+          .where("tx_hash", "in", txHashes)
+          .execute()
     );
 
-    for (const row of result.rows) {
+    for (const row of result) {
       const log = {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: row.tx_idx,
-        logIndex: row.log_idx,
-        address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
+        logIndex: row.sort_idx,
+        address:
+          row.token == null
+            ? zeroAddr
+            : getAddress(bytesToHex(row.token, { size: 20 })),
         from: getAddress(bytesToHex(row.f, { size: 20 })),
         to: getAddress(bytesToHex(row.t, { size: 20 })),
-        value: BigInt(row.v),
+        value: BigInt(row.amount),
       };
-      const token = this.tokenReg.getToken(log.address, chainId, true); // include home coin
+      const token = this.tokenReg.getToken(log.address, chainId, true);
       if (token == null) continue;
 
       const foreignTransfer: ForeignTokenTransfer = {
@@ -67,7 +82,7 @@ export class SwapClogMatcher {
 
     const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[SWAP] loaded ${result.rows.length} bundled transfers in ${elapsedMs}ms`
+      `[SWAP] loaded ${result.length} bundled transfers in ${elapsedMs}ms`
     );
   }
 
