@@ -10,7 +10,6 @@ import {
   PublicClient,
   SendTransactionParameters,
   SendTransactionReturnType,
-  TransactionReceipt,
   Transport,
   WalletClient,
   WriteContractParameters,
