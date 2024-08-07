@@ -190,30 +190,14 @@ export class ViemClient {
     );
   }
 
-  private async waitForReceipt(hash: Hex, maxWaitMs: number = 10_000) {
+  private async waitForReceipt(hash: Hex, timeoutMs: number = 10_000) {
     let receiptStatus = "";
 
     try {
-      const receiptPromise = this.publicClient.waitForTransactionReceipt({
+      const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
+        timeout: timeoutMs,
       });
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                `Timed out after ${maxWaitMs}ms waiting for receipt ${hash}`
-              )
-            ),
-          maxWaitMs
-        )
-      );
-
-      // Wait at most maxWaitMs milliseconds for the receipt
-      const receipt = (await Promise.race([
-        receiptPromise,
-        timeoutPromise,
-      ])) as TransactionReceipt;
       console.log(`[VIEM] waitForReceipt ${hash}: ${JSON.stringify(receipt)}`);
 
       receiptStatus = receipt.status;
@@ -244,7 +228,7 @@ export class ViemClient {
   private async updateNonce() {
     const txCount = await this.publicClient.getTransactionCount({
       address: this.walletClient.account.address,
-      blockTag: "pending",
+      blockTag: "latest",
     });
     console.log(
       `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`
