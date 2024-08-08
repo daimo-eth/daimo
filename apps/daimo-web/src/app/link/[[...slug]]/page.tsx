@@ -20,6 +20,12 @@ import { Providers, chainsDaimoL2 } from "../../../components/Providers";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../utils/rpc";
 
+//
+// DEPRECATED
+// This page exists solely for backcompat for old /link/ deeplinks.
+// No need to translate to other languages.
+//
+
 // Opt out of caching for all data requests in the route segment
 export const dynamic = "force-dynamic";
 
