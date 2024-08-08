@@ -1,4 +1,5 @@
 import {
+  AccountChain,
   DaimoLink,
   DaimoLinkAccount,
   DaimoLinkInviteCode,
@@ -127,6 +128,7 @@ export interface SendNavProp {
     | DaimoLinkTag;
   recipient?: EAccountContact;
   money?: MoneyEntry;
+  chain?: AccountChain;
   coin?: ForeignToken;
   memo?: string;
   requestId?: `${bigint}`;

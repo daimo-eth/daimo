@@ -1,4 +1,5 @@
 import {
+  AccountChain,
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
@@ -6,6 +7,7 @@ import {
   ProposedSwap,
   assert,
   assertNotNull,
+  base,
   baseUSDC,
   daimoChainToId,
   dollarsToAmount,
@@ -24,7 +26,7 @@ import {
   View,
 } from "react-native";
 
-import { CoinPellet, SendCoinButton } from "./CoinDisplay";
+import { ChainAndCoinPellet, SendChainAndCoinButton } from "./CoinDisplay";
 import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { RoutePellet } from "./RouteDisplay";
@@ -74,6 +76,7 @@ function SendScreenInner({
   recipient,
   money,
   memo,
+  chain,
   coin,
   account,
 }: SendNavProp & { account: Account }) {
@@ -98,6 +101,7 @@ function SendScreenInner({
 
   const defaultHomeCoin = baseUSDC; // TODO: add homecoin in Account
   coin = coin ?? defaultHomeCoin;
+  chain = chain ?? base;
 
   const sendDisplay = (() => {
     if (link) {
@@ -118,6 +122,7 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
+              chain={chain}
               coin={coin}
               requestStatus={requestStatus as DaimoRequestV2Status}
             />
@@ -130,6 +135,7 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo}
               money={usdEntry(requestStatus.link.dollars)}
+              chain={chain}
               coin={coin}
             />
           );
@@ -147,7 +153,9 @@ function SendScreenInner({
           />
         );
       else
-        return <SendConfirm {...{ account, recipient, memo, money, coin }} />;
+        return (
+          <SendConfirm {...{ account, recipient, memo, money, chain, coin }} />
+        );
     } else throw new Error("unreachable");
   })();
 
@@ -187,13 +195,15 @@ function SendChooseAmount({
 
   // Select what coin (defaults to native home coin, e.g. daimo USDC)
   const [coin, setCoin] = useState<ForeignToken>(defaultHomeCoin);
+  // Select what chain (defaults to base). TODO: default to home chain
+  const [chain, setChain] = useState<AccountChain>(base);
 
   // Once done, update nav
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { money, memo, recipient, coin },
+      params: { money, memo, recipient, chain, coin },
     });
 
   // Warn if paying new account
@@ -230,7 +240,9 @@ function SendChooseAmount({
       <View style={styles.detailsRow}>
         <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
         {showSendCoin && (
-          <SendCoinButton
+          <SendChainAndCoinButton
+            chain={chain}
+            setChain={setChain}
             coin={coin}
             setCoin={setCoin}
             isFixed={recipient.name != null || isTestnet}
@@ -278,6 +290,7 @@ function SendConfirm({
   recipient,
   money,
   memo,
+  chain,
   coin,
   requestStatus,
 }: {
@@ -285,6 +298,7 @@ function SendConfirm({
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
+  chain: AccountChain;
   coin: ForeignToken;
   requestStatus?: DaimoRequestV2Status;
 }) {
@@ -404,7 +418,9 @@ function SendConfirm({
         ) : (
           <Spacer h={40} />
         )}
-        {showSendCoin && <CoinPellet coin={coin} onClick={navToInput} />}
+        {showSendCoin && (
+          <ChainAndCoinPellet chain={chain} coin={coin} onClick={navToInput} />
+        )}
       </View>
       {route && <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />}
       <Spacer h={16} />
