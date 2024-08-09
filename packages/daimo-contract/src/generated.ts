@@ -1813,12 +1813,6 @@ export const daimoFlexSwapperABI = [
         components: [
           { name: 'callDest', internalType: 'address', type: 'address' },
           { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          {
-            name: 'tipToExactAmountOut',
-            internalType: 'uint128',
-            type: 'uint128',
-          },
-          { name: 'tipPayer', internalType: 'address', type: 'address' },
         ],
       },
     ],
@@ -2031,7 +2025,7 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'swapToCoin',
     outputs: [
-      { name: 'totalAmountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'swapAmountOut', internalType: 'uint256', type: 'uint256' },
     ],
   },
   {
@@ -2181,12 +2175,6 @@ export const daimoFlexSwapperABI = [
       },
       {
         name: 'swapAmountOut',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
-      {
-        name: 'totalAmountOut',
         internalType: 'uint256',
         type: 'uint256',
         indexed: false,

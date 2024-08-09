@@ -41,18 +41,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         address callDest;
         /// Calldata to pass to the swap. Must be empty if callDest is zero.
         bytes callData;
-        /// Optional tip to bring output amount up to at least that much, or 0.
-        /// Payer must first approve() some amount of the output token. If the
-        /// approved amount is lower than the amount needed to bring the swap
-        /// output up to tipToExactAmountOut, then the swap will fail.
-        ///
-        /// This can be used to execute swaps at a precise, predefined rate.
-        /// DaimoFlexSwapper always enforces that the final output amount
-        /// (including any tip) meets the quote minimum.
-        uint128 tipToExactAmountOut;
-        /// Tip payer (or, in the case of a swap that produces more output than
-        /// tipToExactAmountOut, tip recipient).
-        address tipPayer;
     }
 
     uint256 private constant _MAX_UINT128 = type(uint128).max;
@@ -84,8 +72,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint256 amountIn,
         address tokenOut,
         uint256 estAmountOut,
-        uint256 swapAmountOut,
-        uint256 totalAmountOut
+        uint256 swapAmountOut
     );
 
     constructor() {
@@ -137,15 +124,14 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
 
     // ----- PUBLIC FUNCTIONS -----
 
-    /// Swap input to output token at a fair price, given a path and possibly a
-    /// tip amount to prevent high slippage from blocking any swap. Input token
-    /// 0x0 refers to the native token, eg ETH. Output token cannot be 0x0.
+    /// Swap input to output token at a fair price. Input token 0x0 refers to
+    /// the native token, eg ETH. Output token cannot be 0x0.
     function swapToCoin(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut,
         bytes calldata extraData
-    ) public payable returns (uint256 totalAmountOut) {
+    ) public payable returns (uint256 swapAmountOut) {
         // Input checks
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
@@ -175,16 +161,13 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         (bool success, ) = callDest.call{value: callValue}(callData);
         require(success, "DFS: swap failed");
 
-        uint256 swapAmountOut = tokenOut.balanceOf(address(this));
+        swapAmountOut = tokenOut.balanceOf(address(this));
         require(swapAmountOut > 0, "DFS: swap produced no output");
-        require(swapAmountOut < _MAX_UINT128, "DFS: excessive swap output");
-
-        // Receive tip or pay tip, if any
-        totalAmountOut = _handleTip(tokenOut, swapAmountOut, extra);
-        require(totalAmountOut >= minAmountOut, "DFS: insufficient output");
+        require(swapAmountOut < _MAX_UINT128, "DFS: excessive output");
+        require(swapAmountOut >= minAmountOut, "DFS: insufficient output");
 
         // Finally, send the total output amount to msg.sender
-        tokenOut.safeTransfer(msg.sender, totalAmountOut);
+        tokenOut.safeTransfer(msg.sender, swapAmountOut);
 
         emit SwapToCoin({
             account: msg.sender,
@@ -192,8 +175,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
             amountIn: amountIn,
             tokenOut: address(tokenOut),
             estAmountOut: swapEstAmountOut,
-            swapAmountOut: swapAmountOut,
-            totalAmountOut: totalAmountOut
+            swapAmountOut: swapAmountOut
         });
     }
 
@@ -232,34 +214,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         } else {
             // Non-stablecoins: use the swap esimate with 1% slippage tolerance.
             minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
-        }
-    }
-
-    function _handleTip(
-        IERC20 tokenOut,
-        uint256 swapAmountOut,
-        DaimoFlexSwapperExtraData memory extra
-    ) private returns (uint256 totalAmountOut) {
-        if (extra.tipToExactAmountOut > 0) {
-            totalAmountOut = extra.tipToExactAmountOut;
-
-            // Tip the difference
-            // Guaranteed not to overflow, both sides verified to fit in uint128
-            int256 shortfall = int256(totalAmountOut) - int256(swapAmountOut);
-            if (shortfall > 0) {
-                // Tip payer approves() some maximum tip beforehand. If
-                // insufficient, the swap fails.
-                tokenOut.safeTransferFrom({
-                    from: extra.tipPayer,
-                    to: address(this),
-                    value: uint256(shortfall)
-                });
-            } else if (shortfall < 0) {
-                tokenOut.safeTransfer(extra.tipPayer, uint256(-shortfall));
-            }
-        } else {
-            // No tip. Ensure that the amount received from the swap is enough.
-            totalAmountOut = swapAmountOut;
         }
     }
 

@@ -102,9 +102,7 @@ contract SwapperTest is Test {
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
                     callDest: swapRouter02,
-                    callData: swapCallData,
-                    tipToExactAmountOut: 0,
-                    tipPayer: address(0x0)
+                    callData: swapCallData
                 })
             )
         });
@@ -172,9 +170,7 @@ contract SwapperTest is Test {
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
                     callDest: swapRouter02,
-                    callData: swapCallData,
-                    tipToExactAmountOut: 0,
-                    tipPayer: address(0x0)
+                    callData: swapCallData
                 })
             )
         });
