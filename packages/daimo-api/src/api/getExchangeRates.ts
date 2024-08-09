@@ -50,14 +50,26 @@ async function fetchExchangeRates() {
   }
   const retObj = await res.json();
 
-  // Replace ARS with Blue Dollar rate if available
-  const blueDollarUrl = getEnvApi().ARS_EXCHANGE_RATE_URL;
-  console.log(`[API] fetching blue dollar ARS rate from ${blueDollarUrl}`);
-  const blueDollarRes = await fetchWithBackoff(new URL(blueDollarUrl));
-  if (blueDollarRes.ok) {
-    const blueDollarObj = await blueDollarRes.json();
-    if (blueDollarObj.lemoncash && blueDollarObj.lemoncash.ask > 0) {
-      retObj.rates["ARS"] = blueDollarObj.lemoncash.ask;
+  // Replace ARS and BOB with Blue Dollar rate if available
+  const LATIN_AMERICA_EXCHANGE_RATE_URL = "https://criptoya.com/api/";
+  const ars_url = LATIN_AMERICA_EXCHANGE_RATE_URL + "usdt/ars";
+  console.log(`[API] fetching blue dollar ARS rate from ${ars_url}`);
+  const arsRes = await fetchWithBackoff(new URL(ars_url));
+  if (arsRes.ok) {
+    const arsObj = await arsRes.json();
+    if (arsObj.binancep2p && arsObj.binancep2p.ask > 0) {
+      const midMarketRate = (arsObj.binancep2p.ask + arsObj.binancep2p.bid) / 2;
+      retObj.rates["ARS"] = midMarketRate;
+    }
+  }
+  const bob_url = LATIN_AMERICA_EXCHANGE_RATE_URL + "usdt/bob";
+  console.log(`[API] fetching blue dollar BOB rate from ${bob_url}`);
+  const bobRes = await fetchWithBackoff(new URL(bob_url));
+  if (bobRes.ok) {
+    const bobObj = await bobRes.json();
+    if (bobObj.binancep2p && bobObj.binancep2p.ask > 0) {
+      const midMarketRate = (bobObj.binancep2p.ask + bobObj.binancep2p.bid) / 2;
+      retObj.rates["BOB"] = midMarketRate;
     }
   }
 
