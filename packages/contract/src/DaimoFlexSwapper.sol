@@ -101,10 +101,10 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         oraclePeriod = _oraclePeriod;
         oraclePoolFactory = _oraclePoolFactory;
 
-        for (uint256 i = 0; i < _outputTokens.length; i++) {
+        for (uint256 i = 0; i < _outputTokens.length; ++i) {
             isOutputToken[_outputTokens[i]] = true;
         }
-        for (uint256 i = 0; i < _stablecoins.length; i++) {
+        for (uint256 i = 0; i < _stablecoins.length; ++i) {
             isStablecoin[_stablecoins[i]] = true;
         }
     }
@@ -272,7 +272,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint256 amountOut, bytes memory swapPath) {
-        for (uint256 i = 0; i < hopTokens.length; i++) {
+        for (uint256 i = 0; i < hopTokens.length; ++i) {
             IERC20 hopToken = hopTokens[i];
 
             if (hopToken == tokenIn) continue; // Covered by direct quote
@@ -322,7 +322,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         )
     {
         uint128 bestLiquidity = 0;
-        for (uint256 i = 0; i < oracleFeeTiers.length; i++) {
+        for (uint256 i = 0; i < oracleFeeTiers.length; ++i) {
             address pool = oraclePoolFactory.getPool({
                 tokenA: address(tokenA),
                 tokenB: address(tokenB),

@@ -213,7 +213,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     function executeBatch(
         Call[] calldata calls
     ) external onlyEntryPoint onlyActive {
-        for (uint256 i = 0; i < calls.length; i++) {
+        for (uint256 i = 0; i < calls.length; ++i) {
             _call(calls[i].dest, calls[i].value, calls[i].data);
         }
     }
@@ -333,7 +333,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         activeSigningKeys = new bytes32[2][](numActiveKeys);
         activeSigningKeySlots = new uint8[](numActiveKeys);
         uint activeKeyIdx = 0;
-        for (uint256 i = 0; i < 256; i++) {
+        for (uint256 i = 0; i < 256; ++i) {
             uint8 slot = uint8(i);
             if (keys[slot][0] != bytes32(0)) {
                 activeSigningKeys[activeKeyIdx] = keys[slot];

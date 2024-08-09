@@ -58,7 +58,7 @@ contract DaimoCCTPBridger is IDaimoBridger, Ownable2Step, UUPSUpgradeable {
         require(n == _cctpDomains.length, "DCCTPB: wrong cctpDomains length");
         require(n == _cctpTokens.length, "DCCTPB: wrong cctpTokens length");
 
-        for (uint256 i = 0; i < n; i++) {
+        for (uint256 i = 0; i < n; ++i) {
             _addDomain(_cctpChainIDs[i], _cctpDomains[i], _cctpTokens[i]);
         }
     }
