@@ -50,18 +50,29 @@ async function fetchExchangeRates() {
   }
   const retObj = await res.json();
 
-  // Replace ARS with Blue Dollar rate if available
-  const blueDollarUrl = getEnvApi().ARS_EXCHANGE_RATE_URL;
-  console.log(`[API] fetching blue dollar ARS rate from ${blueDollarUrl}`);
-  const blueDollarRes = await fetchWithBackoff(new URL(blueDollarUrl));
-  if (blueDollarRes.ok) {
-    const blueDollarObj = await blueDollarRes.json();
-    if (blueDollarObj.lemoncash && blueDollarObj.lemoncash.ask > 0) {
-      retObj.rates["ARS"] = blueDollarObj.lemoncash.ask;
-    }
-  }
+  // Replace ARS and BOB with Blue Dollar rate if available
+  const arsUSD = getLatamRate("usdt/ars");
+  const bobUSD = getLatamRate("usdt/bob");
+  if (arsUSD) retObj.rates["ARS"] = arsUSD;
+  if (bobUSD) retObj.rates["BOB"] = bobUSD;
 
   const retStr = JSON.stringify(retObj);
   console.log(`[API] got currency exchange rates: ${retStr}`);
   return retStr;
+}
+
+async function getLatamRate(pairPath: string) {
+  const LATIN_AMERICA_EXCHANGE_RATE_URL = "https://criptoya.com/api/";
+  const url = LATIN_AMERICA_EXCHANGE_RATE_URL + pairPath;
+  console.log(`[API] fetching blue dollar rate for ${pairPath} from ${url}`);
+  const res = await fetchWithBackoff(new URL(url));
+  if (!res.ok) {
+    console.log(`Failed to fetch Latam exchange rates: ${res}`);
+    return null;
+  }
+  const rateObj = await res.json();
+  if (rateObj.binancep2p && rateObj.binancep2p.ask > 0) {
+    const midMarketRate = (rateObj.binancep2p.ask + rateObj.binancep2p.bid) / 2;
+    return midMarketRate;
+  }
 }

@@ -19,8 +19,6 @@ const zEnv = {
   DAIMO_ALLOWED_API_KEYS: z.string().optional(),
   // Currency exchange rates API: openexchangerates.org
   EXCHANGE_RATES_URL: z.string().startsWith("https://"),
-  // Blue Dollar exchange rate API for ARS
-  ARS_EXCHANGE_RATE_URL: z.string().startsWith("https://"),
   // Anti-spam faucet API URL
   DAIMO_FAUCET_API_URL: z.string().optional().default(""),
   DAIMO_FAUCET_API_KEY: z.string().optional().default(""),
