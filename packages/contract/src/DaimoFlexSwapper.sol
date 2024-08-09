@@ -262,13 +262,7 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         uint128 amountIn,
         IERC20 tokenOut
     ) public view returns (uint128 amountOut, uint24 fee) {
-        int24 tick;
-        address swapPool;
-        (swapPool, tick, fee, amountOut) = getBestPoolTick(
-            tokenIn,
-            amountIn,
-            tokenOut
-        );
+        (, , fee, amountOut) = getBestPoolTick(tokenIn, amountIn, tokenOut);
     }
 
     /// 2-hop paths: [tokenIn -> hopToken -> tokenOut]
