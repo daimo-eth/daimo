@@ -375,7 +375,7 @@ export const en = {
   // MemoDisplay.tsx
   memoDisplay: {
     status: (status: string) => `memo ${status}`,
-    placeholder: () => `WHAT'S THIS FOR?`,
+    placeholder: () => `WHAT FOR?`,
   },
   // NoteAction.tsx
   noteAction: {
@@ -394,8 +394,8 @@ export const en = {
   },
   // RouteDisplay.tsx
   routeDisplay: {
-    theyWillReceive: (amount: string, tokenSymbol: string) =>
-      `They will receive ${amount} ${tokenSymbol}`,
+    theyWillReceive: (amount: string, tokenSymbol: string, chainName: string) =>
+      `They will receive ${amount} ${tokenSymbol} on ${chainName}`,
   },
   // SendNavScreen.tsx
   sendNav: {
@@ -446,6 +446,8 @@ export const en = {
   sendTransferScreen: {
     screenHeader: () => `Send to`,
     firstTime: (name: string) => `First time paying ${name}`,
+    memo: () => `Memo`,
+    sendAs: () => `Send as`,
   },
   contactDisplay: {
     requestedBy: () => `Requested by`,

@@ -378,7 +378,7 @@ export const es: LanguageDefinition = {
   // MemoDisplay.tsx
   memoDisplay: {
     status: (status: string) => `aviso ${status}`,
-    placeholder: () => `PARA QUÉ ES ESTO?`,
+    placeholder: () => `PARA QUÉ?`,
   },
   // NoteAction.tsx
   noteAction: {
@@ -397,8 +397,8 @@ export const es: LanguageDefinition = {
   },
   // RouteDisplay.tsx
   routeDisplay: {
-    theyWillReceive: (amount: string, tokenSymbol: string) =>
-      `Recibirán ${amount} ${tokenSymbol}`,
+    theyWillReceive: (amount: string, tokenSymbol: string, chainName: string) =>
+      `Recibirán ${amount} ${tokenSymbol} en ${chainName}`,
   },
   // SendNavScreen.tsx
   sendNav: {
@@ -448,6 +448,8 @@ export const es: LanguageDefinition = {
   sendTransferScreen: {
     screenHeader: () => `Enviar a`,
     firstTime: (name: string) => `Primera vez pagando ${name}`,
+    memo: () => `Nota`,
+    sendAs: () => `Enviar como`,
   },
   contactDisplay: {
     requestedBy: () => `Solicitado por`,

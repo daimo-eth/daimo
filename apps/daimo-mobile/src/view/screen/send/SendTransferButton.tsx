@@ -1,4 +1,5 @@
 import {
+  DAv2Chain,
   EAccount,
   ForeignToken,
   OpStatus,
@@ -40,6 +41,7 @@ export function SendTransferButton({
   recipient,
   dollars,
   toCoin,
+  toChain,
   memo,
   minTransferAmount = 0,
   route,
@@ -48,6 +50,7 @@ export function SendTransferButton({
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
+  toChain: DAv2Chain;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
@@ -89,11 +92,24 @@ export function SendTransferButton({
         chainGasConstants: account.chainGasConstants,
       };
 
-      // Swap and transfer if outbound coin is different than home coin.
-      if (isSwap) {
+      // TODO: handle case with swap and bridge
+      assert(toCoin.symbol === "USDC");
+
+      if (toChain.chainId !== account.homeChainId) {
+        console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
+        return opSender.sendUsdcToOtherChain(
+          recipient.addr,
+          toChain,
+          dollarsStr,
+          opMetadata,
+          memo
+        );
+      } else if (isSwap) {
+        // Swap and transfer if outbound coin is different than home coin.
         console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);
       }
+
       // Otherwise, just send home coin directly.
       return opSender.erc20transfer(
         recipient.addr,

@@ -1,4 +1,4 @@
-import { baseUSDC } from "@daimo/common";
+import { base, baseUSDC } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -209,6 +209,7 @@ function SendConfirm({
       // https://apidocs.bridge.xyz/docs/liquidation-address
       minTransferAmount={1.0}
       toCoin={baseUSDC} // TODO: get home coin bfrom account
+      toChain={base} // TODO: get home chain from account
     />
   );
 

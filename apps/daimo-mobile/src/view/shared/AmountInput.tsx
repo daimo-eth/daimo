@@ -34,7 +34,7 @@ export function AmountChooser({
   moneyEntry,
   onSetEntry,
   showAmountAvailable,
-  coin,
+  toCoin,
   autoFocus,
   disabled,
   innerRef,
@@ -43,7 +43,7 @@ export function AmountChooser({
   moneyEntry: MoneyEntry;
   onSetEntry: (entry: MoneyEntry) => void;
   showAmountAvailable: boolean;
-  coin?: ForeignToken;
+  toCoin?: ForeignToken;
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
@@ -78,7 +78,7 @@ export function AmountChooser({
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         {isNonUSD && (
           <Badge color={color.midnight}>
-            = ${moneyEntry.dollars.toFixed(2)} {coin?.symbol ?? "USDC"}
+            = ${moneyEntry.dollars.toFixed(2)} {toCoin?.symbol ?? "USDC"}
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
