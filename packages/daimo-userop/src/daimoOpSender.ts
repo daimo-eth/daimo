@@ -414,16 +414,6 @@ export class DaimoOpSender {
     const toToken = getBridgeCoin(toChain.chainId).token;
     const toAmount = parsedAmount;
     const nonce = generateRandom256BitInteger();
-    console.log("daimoFastCctpAddress", daimoFastCctpAddress);
-    console.log("cctpMessengerAddr", cctpMessengerAddr);
-    console.log("fromToken", fromToken);
-    console.log("fromAmount", fromAmount);
-    console.log("toChainId", toChainId);
-    console.log("toDomain", toDomain);
-    console.log("toAddr", toAddr);
-    console.log("toToken", toToken);
-    console.log("toAmount", toAmount);
-    console.log("nonce", nonce);
 
     console.log(
       `[OP] FastCCTP startTransfer to ${to} on chain ${toChain.name} for ${amount} USDC`
@@ -467,6 +457,7 @@ export class DaimoOpSender {
   }
 }
 
+// TODO: move these constants to daimo-contracts once audit is done
 export const daimoFastCctpAddress =
   "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B";
 
