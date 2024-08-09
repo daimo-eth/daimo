@@ -1,86 +1,126 @@
-import { ForeignToken, baseUSDC, supportedSendCoins } from "@daimo/common";
-import { View, StyleSheet, Text, Pressable } from "react-native";
+import {
+  DAv2Chain,
+  ForeignToken,
+  arbitrum,
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  baseUSDC,
+  getChainDisplayName,
+  optimism,
+  optimismSepolia,
+  optimismUSDC,
+  polygon,
+  polygonAmoy,
+} from "@daimo/common";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Pressable,
+  Image,
+  ImageSourcePropType,
+} from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
+import IconArbitrum from "../../../../assets/logos/arb-logo.png";
+import IconBase from "../../../../assets/logos/base-logo.png";
+import IconOptimism from "../../../../assets/logos/op-logo.png";
+import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
-import { DropdownPickButton } from "../../shared/DropdownPickButton";
 import { color, ss } from "../../shared/style";
-import { DaimoText } from "../../shared/text";
+
+type SendPair = {
+  chain: DAv2Chain;
+  coin: ForeignToken;
+};
+
+// Get the logo for the chain
+const getChainUri = (chain: DAv2Chain) => {
+  switch (chain) {
+    case base:
+    case baseSepolia:
+    default:
+      return IconBase;
+    case optimism:
+    case optimismSepolia:
+      return IconOptimism;
+    case polygon:
+    case polygonAmoy:
+      return IconPolygon;
+    case arbitrum:
+    case arbitrumSepolia:
+      return IconArbitrum;
+  }
+};
 
 export function SendCoinButton({
-  coin,
+  toCoin,
+  toChain,
   setCoin,
-  isFixed,
+  setChain,
 }: {
-  coin: ForeignToken;
+  toCoin: ForeignToken;
+  toChain: DAv2Chain;
   setCoin: (coin: ForeignToken) => void;
-  isFixed: boolean;
+  setChain: (chain: DAv2Chain) => void;
 }) {
   const account = useAccount();
 
   if (account == null) return null;
 
-  const onSetCoin = (entry: ForeignToken) => {
-    setCoin(entry);
+  const onSetPair = (entry: SendPair) => {
+    setCoin(entry.coin);
+    setChain(entry.chain);
   };
+
   const homeCoin = baseUSDC; // TODO: add home coin to account
+  const chainUri = getChainUri(toChain);
 
-  return (
-    <View
-      style={{
-        ...styles.coinButton,
-        backgroundColor: color.white,
-      }}
-    >
-      <View style={styles.coinPickerWrap}>
-        {!isFixed && (
-          <CoinPicker
-            homeCoin={homeCoin}
-            allCoins={[...supportedSendCoins.values()]}
-            onSetCoin={onSetCoin}
-          />
-        )}
-        <Text
-          style={{
-            ...ss.text.btnCaps,
-            color: isFixed ? color.grayMid : color.midnight,
-          }}
-        >
-          {coin.symbol}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-// Coin dropdown
-function CoinPicker({
-  homeCoin,
-  allCoins,
-  onSetCoin,
-}: {
-  homeCoin: ForeignToken;
-  allCoins: ForeignToken[];
-  onSetCoin: (coin: ForeignToken) => void;
-}) {
-  const choose = (val: ForeignToken) => {
-    if (val == null) return;
-    onSetCoin(val);
-  };
+  // TODO
+  const supportedSendPairs: SendPair[] = [
+    { chain: base, coin: baseUSDC },
+    { chain: optimism, coin: optimismUSDC },
+  ];
 
   return (
     <SelectDropdown
-      data={allCoins}
+      data={supportedSendPairs}
       defaultValue={homeCoin}
-      onSelect={choose}
+      onSelect={onSetPair}
       renderButton={() => (
-        <View style={{ display: "flex" }}>
-          <DropdownPickButton size={16} iconSize={12} />
+        <View
+          style={{
+            ...styles.coinButton,
+            backgroundColor: color.white,
+          }}
+        >
+          <View style={styles.coinPickerWrap}>
+            <SendPairImage coinUri={toCoin.logoURI} chainSource={chainUri} />
+            <View style={styles.textContainer}>
+              <Text
+                style={{
+                  ...ss.text.btnCaps,
+                  color: color.grayDark,
+                }}
+              >
+                {toCoin.symbol}
+              </Text>
+              <Text
+                style={{
+                  ...ss.text.btnCaps,
+                  color: color.grayMid,
+                }}
+              >
+                {getChainDisplayName(toChain, true, true)}
+              </Text>
+            </View>
+          </View>
         </View>
       )}
-      renderItem={(c) => (
+      renderItem={(sendPair) => (
         <View>
-          <CoinPickItem coin={c} />
+          <CoinPickItem coin={sendPair.coin} chain={sendPair.chain} />
         </View>
       )}
       dropdownStyle={styles.coinDropdown}
@@ -88,26 +128,80 @@ function CoinPicker({
   );
 }
 
-function CoinPickItem({ coin }: { coin: ForeignToken }) {
+function SendPairImage({
+  coinUri,
+  chainSource,
+}: {
+  coinUri: string | undefined;
+  chainSource: ImageSourcePropType;
+}) {
+  if (coinUri == null) return null;
+  return (
+    <View style={styles.sendPairContainer}>
+      <Image source={{ uri: coinUri }} style={styles.coinImage} />
+      <View style={styles.chainImageContainer}>
+        <Image source={chainSource} style={styles.chainImage} />
+      </View>
+    </View>
+  );
+}
+
+function CoinPickItem({
+  coin,
+  chain,
+}: {
+  coin: ForeignToken;
+  chain: DAv2Chain;
+}) {
+  const chainUri = getChainUri(chain);
   return (
     <View style={styles.coinPickItem}>
-      <DaimoText variant="dropdown">{coin.symbol}</DaimoText>
+      <SendPairImage coinUri={coin.logoURI} chainSource={chainUri} />
+      <View style={styles.textContainer}>
+        <Text
+          style={{
+            ...ss.text.btnCaps,
+            color: color.grayDark,
+          }}
+        >
+          {coin.symbol}
+        </Text>
+        <Text
+          style={{
+            ...ss.text.btnCaps,
+            color: color.grayMid,
+          }}
+        >
+          {getChainDisplayName(chain, false, true)}
+        </Text>
+      </View>
     </View>
   );
 }
 
 export function CoinPellet({
-  coin,
+  toCoin,
+  toChain,
   onClick,
 }: {
-  coin: ForeignToken;
+  toCoin: ForeignToken;
+  toChain: DAv2Chain;
   onClick: () => void;
 }) {
+  const chainUri = getChainUri(toChain);
   return (
     <View style={{ ...styles.coinButton }}>
       <Pressable onPress={onClick}>
         <View style={styles.coinPickerWrap}>
-          <Text style={{ ...ss.text.btnCaps }}>{coin.symbol}</Text>
+          <SendPairImage coinUri={toCoin.logoURI} chainSource={chainUri} />
+          <Text
+            style={{
+              ...ss.text.btnCaps,
+              color: color.grayMid,
+            }}
+          >
+            {toCoin.symbol} {getChainDisplayName(toChain, false, false)}
+          </Text>
         </View>
       </Pressable>
     </View>
@@ -116,6 +210,11 @@ export function CoinPellet({
 
 // Styles for dropdown
 const styles = StyleSheet.create({
+  textContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   coinPickerWrap: {
     height: 40,
     display: "flex",
@@ -125,10 +224,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   coinDropdown: {
-    width: 105,
+    width: 200,
     backgroundColor: color.white,
     borderRadius: 13,
     flexDirection: "column",
+    marginLeft: -46,
   },
   coinButton: {
     borderColor: color.grayLight,
@@ -145,9 +245,11 @@ const styles = StyleSheet.create({
   coinPickItem: {
     borderBottomWidth: 1,
     borderBottomColor: color.grayLight,
-    paddingHorizontal: 24,
-    paddingVertical: 13,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   sheetContainer: {
     // add horizontal space
@@ -157,5 +259,31 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  sendPairContainer: {
+    width: 24,
+    height: 24,
+    left: -2, // offset chain image
+    position: "relative",
+  },
+  coinImage: {
+    width: 24,
+    height: 24,
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
+  chainImageContainer: {
+    position: "absolute",
+    bottom: -4,
+    right: -6,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "white",
+    overflow: "hidden",
+  },
+  chainImage: {
+    width: 14,
+    height: 14,
   },
 });

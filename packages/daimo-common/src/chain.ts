@@ -1,5 +1,5 @@
 /**
- * All chains that support a Daimo account.
+ * All chains that DAv2 supports (e.g. send to any chain).
  *
  * Each chain must also support CCTP:
  * https://developers.circle.com/stablecoins/docs/supported-domains
@@ -32,115 +32,128 @@ import {
   ethereumUSDC,
 } from "./foreignToken";
 
-export type AccountChain = {
+export type DAv2Chain = {
   chainId: number;
   name: string;
+  shortName: string;
   cctpDomain: number;
   bridgeCoin: ForeignToken;
   nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
   isTestnet?: boolean;
 };
 
-export const ethereum: AccountChain = {
+export const ethereum: DAv2Chain = {
   chainId: 1,
-  name: "mainnet",
+  name: "ethereum",
+  shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumUSDC,
 };
 
-export const ethereumSepolia: AccountChain = {
+export const ethereumSepolia: DAv2Chain = {
   chainId: 11155111,
-  name: "sepolia",
+  name: "ethereumSepolia",
+  shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumSepoliaUSDC,
   isTestnet: true,
 };
 
-export const base: AccountChain = {
+export const base: DAv2Chain = {
   chainId: 8453,
   name: "base",
+  shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseUSDC,
   nativeWETH: baseWETH,
 };
 
-export const baseSepolia: AccountChain = {
+export const baseSepolia: DAv2Chain = {
   chainId: 84532,
   name: "baseSepolia",
+  shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseSepoliaUSDC,
   nativeWETH: baseSepoliaWETH,
   isTestnet: true,
 };
 
-export const arbitrum: AccountChain = {
+export const arbitrum: DAv2Chain = {
   chainId: 42161,
   name: "arbitrum",
+  shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumUSDC,
   nativeWETH: arbitrumWETH,
 };
 
-export const arbitrumSepolia: AccountChain = {
+export const arbitrumSepolia: DAv2Chain = {
   chainId: 421614,
   name: "arbitrumSepolia",
+  shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumSepoliaUSDC,
   nativeWETH: arbitrumSepoliaWETH,
   isTestnet: true,
 };
 
-export const optimism: AccountChain = {
+export const optimism: DAv2Chain = {
   chainId: 10,
   name: "optimism",
+  shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismUSDC,
   nativeWETH: optimismWETH,
 };
 
-export const optimismSepolia: AccountChain = {
+export const optimismSepolia: DAv2Chain = {
   chainId: 11155420,
   name: "optimismSepolia",
+  shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismSepoliaUSDC,
   nativeWETH: optimismSepoliaWETH,
   isTestnet: true,
 };
 
-export const polygon: AccountChain = {
+export const polygon: DAv2Chain = {
   chainId: 137,
   name: "polygon",
+  shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonUSDC,
   nativeWETH: polygonWETH,
 };
 
-export const polygonAmoy: AccountChain = {
+export const polygonAmoy: DAv2Chain = {
   chainId: 80002,
   name: "polygonAmoy",
+  shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonAmoyUSDC,
   isTestnet: true,
 };
 
-export const avalanche: AccountChain = {
+export const avalanche: DAv2Chain = {
   chainId: 43114,
   name: "avalanche",
+  shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheUSDC,
   nativeWETH: avalancheWETH,
 };
 
-export const avalancheFuji: AccountChain = {
+export const avalancheFuji: DAv2Chain = {
   chainId: 43113,
   name: "avalancheFuji",
+  shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheFujiUSDC,
   isTestnet: true,
 };
 
 /** Given a chain ID, return the chain. */
-export function getAccountChain(chainId: number): AccountChain {
+export function getDAv2Chain(chainId: number): DAv2Chain {
   switch (chainId) {
     case ethereum.chainId:
       return ethereum;
@@ -173,17 +186,17 @@ export function getAccountChain(chainId: number): AccountChain {
 
 /** Returnt the chain name for the given chainId. */
 export function getChainName(chainId: number): string {
-  return getAccountChain(chainId).name;
+  return getDAv2Chain(chainId).name;
 }
 
 /** Returns the CCTP domain for the given chainId. */
 export function getCctpDomain(chainId: number): number {
-  return getAccountChain(chainId).cctpDomain;
+  return getDAv2Chain(chainId).cctpDomain;
 }
 
 /** Returns the bridge coin address for the given chainId. */
 export function getBridgeCoin(chainId: number): ForeignToken {
-  return getAccountChain(chainId).bridgeCoin;
+  return getDAv2Chain(chainId).bridgeCoin;
 }
 
 /** Returns whether the chainId is a testnet. */
@@ -202,6 +215,19 @@ export function daimoChainToId(chain: DaimoChain): number {
     default:
       throw new Error(`Unknown chain ${chain}`);
   }
+}
+
+/** Gets the display name for the given chain. */
+export function getChainDisplayName(
+  chain: DAv2Chain,
+  short?: boolean,
+  noSepolia?: boolean
+): string {
+  const name = short ? chain.shortName : chain.name;
+  let displayName = name.charAt(0).toUpperCase() + name.slice(1);
+  if (noSepolia && chain.isTestnet)
+    displayName = displayName.replace("Sepolia", "");
+  return displayName;
 }
 
 /** Get native WETH token address using chainId. */

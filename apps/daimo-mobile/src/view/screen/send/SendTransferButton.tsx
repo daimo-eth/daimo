@@ -1,4 +1,5 @@
 import {
+  DAv2Chain,
   EAccount,
   ForeignToken,
   OpStatus,
@@ -40,6 +41,7 @@ export function SendTransferButton({
   recipient,
   dollars,
   toCoin,
+  toChain,
   memo,
   minTransferAmount = 0,
   route,
@@ -48,6 +50,7 @@ export function SendTransferButton({
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
+  toChain: DAv2Chain;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
