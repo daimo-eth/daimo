@@ -22,9 +22,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 contract SwapbotLP is Ownable2Step {
     using SafeERC20 for IERC20;
 
-    constructor(address _owner) {
-        transferOwnership(_owner);
-    }
+    constructor(address _owner) Ownable(_owner) {}
 
     /// Emitted when a swapbot action is run.
     event Run(

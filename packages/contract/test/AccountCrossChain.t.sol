@@ -98,15 +98,17 @@ contract AccountCrossChainTest is Test {
         baseUSDC.transfer(address(acc), 1e6);
 
         // Anyone can forward, not just the account owner
+        uint256 prevUSDC = baseUSDC.balanceOf(s);
         acc.forward(baseUSDC);
         assertEq(baseUSDC.balanceOf(address(acc)), 0);
-        assertEq(baseUSDC.balanceOf(s), 1e6);
+        assertEq(baseUSDC.balanceOf(s) - prevUSDC, 1e6);
 
         // Finally, test forwarding ETH
         vm.deal(address(acc), 1 ether);
 
+        uint256 prevETH = s.balance;
         acc.forward(IERC20(address(0)));
         assertEq(address(acc).balance, 0);
-        assertEq(s.balance, 1 ether);
+        assertEq(s.balance - prevETH, 1 ether);
     }
 }

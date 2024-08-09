@@ -152,6 +152,7 @@ contract SwapperTest is Test {
         vm.startPrank(alice);
 
         // ...1 wei less = not allowed
+        BadWeth wethMinus1 = new BadWeth(address(weth));
         vm.expectRevert(bytes("DFS: insufficient output"));
         swapper.swapToCoin{value: 1 ether}({
             tokenIn: IERC20(address(0)),
@@ -159,10 +160,8 @@ contract SwapperTest is Test {
             tokenOut: weth,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
-                    callDest: address(weth),
-                    callData: depositCalldata,
-                    tipToExactAmountOut: 1 ether - 1,
-                    tipPayer: tipper
+                    callDest: address(wethMinus1),
+                    callData: depositCalldata
                 })
             )
         });
@@ -175,9 +174,7 @@ contract SwapperTest is Test {
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
                     callDest: address(weth),
-                    callData: depositCalldata,
-                    tipToExactAmountOut: 0,
-                    tipPayer: address(0x0)
+                    callData: depositCalldata
                 })
             )
         });
@@ -196,9 +193,7 @@ contract SwapperTest is Test {
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
                     callDest: address(0x0),
-                    callData: "",
-                    tipToExactAmountOut: 1 ether - 1,
-                    tipPayer: tipper
+                    callData: ""
                 })
             )
         });
@@ -246,5 +241,23 @@ contract SwapperTest is Test {
         address recipient;
         uint256 amountIn;
         uint256 amountOutMinimum;
+    }
+}
+
+interface IWETH is IERC20 {
+    function deposit() external payable;
+}
+
+/// Like WETH, but deposit() shorts you by 1 wei.
+contract BadWeth is ERC20 {
+    address public immutable weth;
+
+    constructor(address _weth) ERC20("BadWeth", "BADWETH") {
+        weth = _weth;
+    }
+
+    function deposit() public payable {
+        IWETH(weth).deposit{value: msg.value - 1}();
+        IERC20(weth).transfer(msg.sender, msg.value - 1);
     }
 }

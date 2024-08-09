@@ -90,6 +90,7 @@ contract SwapbotLPTest is Test {
         });
 
         // Run the swap action
+        vm.prank(swapbotEOA);
         lp.run(abi.encode(action));
 
         // Check that the account received the correct amount of USDC

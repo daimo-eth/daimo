@@ -1,450 +1,4 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DaimoAccount
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const daimoAccountABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_entryPoint',
-        internalType: 'contract IEntryPoint',
-        type: 'address',
-      },
-      {
-        name: '_daimoVerifier',
-        internalType: 'contract DaimoVerifier',
-        type: 'address',
-      },
-    ],
-  },
-  { stateMutability: 'payable', type: 'receive' },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'slot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-    ],
-    name: 'addSigningKey',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'entryPoint',
-    outputs: [
-      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      {
-        name: 'calls',
-        internalType: 'struct DaimoAccount.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'executeBatch',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'getActiveSigningKeys',
-    outputs: [
-      {
-        name: 'activeSigningKeys',
-        internalType: 'bytes32[2][]',
-        type: 'bytes32[2][]',
-      },
-      {
-        name: 'activeSigningKeySlots',
-        internalType: 'uint8[]',
-        type: 'uint8[]',
-      },
-    ],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'slot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      {
-        name: 'initCalls',
-        internalType: 'struct DaimoAccount.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'initialize',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'message', internalType: 'bytes32', type: 'bytes32' },
-      { name: 'signature', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'isValidSignature',
-    outputs: [{ name: 'magicValue', internalType: 'bytes4', type: 'bytes4' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: '', internalType: 'uint8', type: 'uint8' },
-      { name: '', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'keys',
-    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'maxKeys',
-    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'numActiveKeys',
-    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'proxiableUUID',
-    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [{ name: 'slot', internalType: 'uint8', type: 'uint8' }],
-    name: 'removeSigningKey',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      {
-        name: 'sig',
-        internalType: 'struct Signature',
-        type: 'tuple',
-        components: [
-          { name: 'authenticatorData', internalType: 'bytes', type: 'bytes' },
-          { name: 'clientDataJSON', internalType: 'string', type: 'string' },
-          {
-            name: 'challengeLocation',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          {
-            name: 'responseTypeLocation',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'r', internalType: 'uint256', type: 'uint256' },
-          { name: 's', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'signatureStruct',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
-    stateMutability: 'payable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-      { name: 'data', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'upgradeToAndCall',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      {
-        name: 'userOp',
-        internalType: 'struct UserOperation',
-        type: 'tuple',
-        components: [
-          { name: 'sender', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-          { name: 'initCode', internalType: 'bytes', type: 'bytes' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          {
-            name: 'preVerificationGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
-          { name: 'signature', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'userOpHash', internalType: 'bytes32', type: 'bytes32' },
-      { name: 'missingAccountFunds', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'validateUserOp',
-    outputs: [
-      { name: 'validationData', internalType: 'uint256', type: 'uint256' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'verifier',
-    outputs: [
-      { name: '', internalType: 'contract DaimoVerifier', type: 'address' },
-    ],
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'entryPoint',
-        internalType: 'contract IEntryPoint',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'AccountInitialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
-      {
-        name: 'key',
-        internalType: 'bytes32[2]',
-        type: 'bytes32[2]',
-        indexed: false,
-      },
-    ],
-    name: 'SigningKeyAdded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
-      {
-        name: 'key',
-        internalType: 'bytes32[2]',
-        type: 'bytes32[2]',
-        indexed: false,
-      },
-    ],
-    name: 'SigningKeyRemoved',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DaimoAccountFactory
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const daimoAccountFactoryABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_entryPoint',
-        internalType: 'contract IEntryPoint',
-        type: 'address',
-      },
-      {
-        name: '_verifier',
-        internalType: 'contract DaimoVerifier',
-        type: 'address',
-      },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'accountImplementation',
-    outputs: [
-      { name: '', internalType: 'contract DaimoAccount', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'payable',
-    type: 'function',
-    inputs: [
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      {
-        name: 'initCalls',
-        internalType: 'struct DaimoAccount.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'salt', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'createAccount',
-    outputs: [
-      { name: 'ret', internalType: 'contract DaimoAccount', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'entryPoint',
-    outputs: [
-      { name: '', internalType: 'contract IEntryPoint', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
-      { name: 'key', internalType: 'bytes32[2]', type: 'bytes32[2]' },
-      {
-        name: 'initCalls',
-        internalType: 'struct DaimoAccount.Call[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'dest', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'salt', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getAddress',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'verifier',
-    outputs: [
-      { name: '', internalType: 'contract DaimoVerifier', type: 'address' },
-    ],
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoAccountFactoryV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -787,30 +341,24 @@ export const daimoAccountV2ABI = [
     inputs: [
       {
         name: 'userOp',
-        internalType: 'struct UserOperation',
+        internalType: 'struct PackedUserOperation',
         type: 'tuple',
         components: [
           { name: 'sender', internalType: 'address', type: 'address' },
           { name: 'nonce', internalType: 'uint256', type: 'uint256' },
           { name: 'initCode', internalType: 'bytes', type: 'bytes' },
           { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
+            name: 'accountGasLimits',
+            internalType: 'bytes32',
+            type: 'bytes32',
           },
           {
             name: 'preVerificationGas',
             internalType: 'uint256',
             type: 'uint256',
           },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
+          { name: 'gasFees', internalType: 'bytes32', type: 'bytes32' },
           { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
           { name: 'signature', internalType: 'bytes', type: 'bytes' },
         ],
@@ -951,7 +499,12 @@ export const daimoAccountV2ABI = [
     type: 'event',
     anonymous: false,
     inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
+      {
+        name: 'version',
+        internalType: 'uint64',
+        type: 'uint64',
+        indexed: false,
+      },
     ],
     name: 'Initialized',
   },
@@ -1027,6 +580,14 @@ export const daimoAccountV2ABI = [
     ],
     name: 'UpdateHomeCoin',
   },
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1035,6 +596,13 @@ export const daimoAccountV2ABI = [
 
 export const daimoCctpBridgerABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'UPGRADE_INTERFACE_VERSION',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
+  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1173,15 +741,6 @@ export const daimoCctpBridgerABI = [
     outputs: [],
   },
   {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
     stateMutability: 'payable',
     type: 'function',
     inputs: [
@@ -1196,38 +755,11 @@ export const daimoCctpBridgerABI = [
     anonymous: false,
     inputs: [
       {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
+        name: 'version',
+        internalType: 'uint64',
+        type: 'uint64',
         indexed: false,
       },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
     ],
     name: 'Initialized',
   },
@@ -1281,6 +813,43 @@ export const daimoCctpBridgerABI = [
       },
     ],
     name: 'Upgraded',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'implementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'ERC1967InvalidImplementation',
+  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
+  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+  { type: 'error', inputs: [], name: 'UUPSUnauthorizedCallContext' },
+  {
+    type: 'error',
+    inputs: [{ name: 'slot', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'UUPSUnsupportedProxiableUUID',
   },
 ] as const
 
@@ -1375,6 +944,22 @@ export const daimoEphemeralNotesABI = [
       },
     ],
     name: 'NoteRedeemed',
+  },
+  { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
+  {
+    type: 'error',
+    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
+    name: 'ECDSAInvalidSignatureLength',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'ECDSAInvalidSignatureS',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
   },
 ] as const
 
@@ -1487,6 +1072,22 @@ export const daimoEphemeralNotesV2ABI = [
       },
     ],
     name: 'NoteRedeemed',
+  },
+  { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
+  {
+    type: 'error',
+    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
+    name: 'ECDSAInvalidSignatureLength',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'ECDSAInvalidSignatureS',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
   },
 ] as const
 
@@ -1762,6 +1363,11 @@ export const daimoFastCctpABI = [
     ],
     name: 'Start',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
 ] as const
 
 export const daimoFastCctpAddress =
@@ -1778,6 +1384,13 @@ export const daimoFastCctpConfig = {
 
 export const daimoFlexSwapperABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'UPGRADE_INTERFACE_VERSION',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
+  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -2028,15 +1641,6 @@ export const daimoFlexSwapperABI = [
     outputs: [],
   },
   {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
     stateMutability: 'payable',
     type: 'function',
     inputs: [
@@ -2058,38 +1662,11 @@ export const daimoFlexSwapperABI = [
     anonymous: false,
     inputs: [
       {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
+        name: 'version',
+        internalType: 'uint64',
+        type: 'uint64',
         indexed: false,
       },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
     ],
     name: 'Initialized',
   },
@@ -2187,7 +1764,44 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'Upgraded',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'implementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'ERC1967InvalidImplementation',
+  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
+  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
   { type: 'error', inputs: [], name: 'T' },
+  { type: 'error', inputs: [], name: 'UUPSUnauthorizedCallContext' },
+  {
+    type: 'error',
+    inputs: [{ name: 'slot', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'UUPSUnsupportedProxiableUUID',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2196,6 +1810,13 @@ export const daimoFlexSwapperABI = [
 
 export const daimoNameRegistryABI = [
   { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'UPGRADE_INTERFACE_VERSION',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
+  },
   {
     stateMutability: 'nonpayable',
     type: 'function',
@@ -2282,15 +1903,6 @@ export const daimoNameRegistryABI = [
     outputs: [],
   },
   {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
     stateMutability: 'payable',
     type: 'function',
     inputs: [
@@ -2305,38 +1917,11 @@ export const daimoNameRegistryABI = [
     anonymous: false,
     inputs: [
       {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
+        name: 'version',
+        internalType: 'uint64',
+        type: 'uint64',
         indexed: false,
       },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
     ],
     name: 'Initialized',
   },
@@ -2381,6 +1966,38 @@ export const daimoNameRegistryABI = [
     ],
     name: 'Upgraded',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'implementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'ERC1967InvalidImplementation',
+  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
+  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  { type: 'error', inputs: [], name: 'UUPSUnauthorizedCallContext' },
+  {
+    type: 'error',
+    inputs: [{ name: 'slot', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'UUPSUnsupportedProxiableUUID',
+  },
 ] as const
 
 export const daimoNameRegistryAddress =
@@ -2405,39 +2022,6 @@ export const daimoNameRegistryProxyABI = [
     ],
   },
   { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
   {
     type: 'event',
     anonymous: false,
@@ -2451,6 +2035,20 @@ export const daimoNameRegistryProxyABI = [
     ],
     name: 'Upgraded',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'implementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'ERC1967InvalidImplementation',
+  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
+  { type: 'error', inputs: [], name: 'FailedCall' },
 ] as const
 
 export const daimoNameRegistryProxyAddress =
@@ -2521,15 +2119,6 @@ export const daimoPaymasterV2ABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [],
-    name: 'metaPaymaster',
-    outputs: [
-      { name: '', internalType: 'contract IMetaPaymaster', type: 'address' },
-    ],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
@@ -2544,6 +2133,11 @@ export const daimoPaymasterV2ABI = [
       },
       { name: 'context', internalType: 'bytes', type: 'bytes' },
       { name: 'actualGasCost', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'actualUserOpFeePerGas',
+        internalType: 'uint256',
+        type: 'uint256',
+      },
     ],
     name: 'postOp',
     outputs: [],
@@ -2568,19 +2162,6 @@ export const daimoPaymasterV2ABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [
-      {
-        name: '_metaPaymaster',
-        internalType: 'contract IMetaPaymaster',
-        type: 'address',
-      },
-    ],
-    name: 'setMetaPaymaster',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
@@ -2598,30 +2179,24 @@ export const daimoPaymasterV2ABI = [
     inputs: [
       {
         name: 'userOp',
-        internalType: 'struct UserOperation',
+        internalType: 'struct PackedUserOperation',
         type: 'tuple',
         components: [
           { name: 'sender', internalType: 'address', type: 'address' },
           { name: 'nonce', internalType: 'uint256', type: 'uint256' },
           { name: 'initCode', internalType: 'bytes', type: 'bytes' },
           { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
+            name: 'accountGasLimits',
+            internalType: 'bytes32',
+            type: 'bytes32',
           },
           {
             name: 'preVerificationGas',
             internalType: 'uint256',
             type: 'uint256',
           },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
+          { name: 'gasFees', internalType: 'bytes32', type: 'bytes32' },
           { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
           { name: 'signature', internalType: 'bytes', type: 'bytes' },
         ],
@@ -2699,6 +2274,16 @@ export const daimoPaymasterV2ABI = [
       },
     ],
     name: 'UserOperationSponsored',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
   },
 ] as const
 
@@ -2829,6 +2414,11 @@ export const daimoRequestABI = [
     ],
     name: 'RequestFulfilled',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
 ] as const
 
 export const daimoRequestAddress =
@@ -2838,223 +2428,6 @@ export const daimoRequestConfig = {
   address: daimoRequestAddress,
   abi: daimoRequestABI,
 } as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DaimoVerifier
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const daimoVerifierABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'implementation',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'initialOwner', internalType: 'address', type: 'address' },
-    ],
-    name: 'init',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'proxiableUUID',
-    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-    ],
-    name: 'upgradeTo',
-    outputs: [],
-  },
-  {
-    stateMutability: 'payable',
-    type: 'function',
-    inputs: [
-      { name: 'newImplementation', internalType: 'address', type: 'address' },
-      { name: 'data', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'upgradeToAndCall',
-    outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'message', internalType: 'bytes', type: 'bytes' },
-      { name: 'signature', internalType: 'bytes', type: 'bytes' },
-      { name: 'x', internalType: 'uint256', type: 'uint256' },
-      { name: 'y', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'verifySignature',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DaimoVerifierProxy
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const daimoVerifierProxyABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      { name: '_logic', internalType: 'address', type: 'address' },
-      { name: '_data', internalType: 'bytes', type: 'bytes' },
-    ],
-  },
-  { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
-] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DummyBridger
@@ -3170,6 +2543,20 @@ export const dummySwapperABI = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ERC165
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const erc165ABI = [
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC1967Proxy
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3178,44 +2565,11 @@ export const erc1967ProxyABI = [
     stateMutability: 'payable',
     type: 'constructor',
     inputs: [
-      { name: '_logic', internalType: 'address', type: 'address' },
+      { name: 'implementation', internalType: 'address', type: 'address' },
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
   },
   { stateMutability: 'payable', type: 'fallback' },
-  { stateMutability: 'payable', type: 'receive' },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
   {
     type: 'event',
     anonymous: false,
@@ -3229,118 +2583,45 @@ export const erc1967ProxyABI = [
     ],
     name: 'Upgraded',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'implementation', internalType: 'address', type: 'address' },
+    ],
+    name: 'ERC1967InvalidImplementation',
+  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
+  { type: 'error', inputs: [], name: 'FailedCall' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ERC1967Upgrade
+// ERC1967Utils
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const erc1967UpgradeABI = [
+export const erc1967UtilsABI = [
   {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
+    type: 'error',
+    inputs: [{ name: 'admin', internalType: 'address', type: 'address' }],
+    name: 'ERC1967InvalidAdmin',
   },
   {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
+    type: 'error',
+    inputs: [{ name: 'beacon', internalType: 'address', type: 'address' }],
+    name: 'ERC1967InvalidBeacon',
   },
   {
-    type: 'event',
-    anonymous: false,
+    type: 'error',
     inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
+      { name: 'implementation', internalType: 'address', type: 'address' },
     ],
-    name: 'Upgraded',
+    name: 'ERC1967InvalidImplementation',
   },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ERC1967UpgradeUpgradeable
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const erc1967UpgradeUpgradeableABI = [
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'newAdmin',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-    ],
-    name: 'AdminChanged',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'beacon',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'BeaconUpgraded',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'version', internalType: 'uint8', type: 'uint8', indexed: false },
-    ],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'implementation',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'Upgraded',
-  },
+  { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3348,14 +2629,6 @@ export const erc1967UpgradeUpgradeableABI = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const erc20ABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-    inputs: [
-      { name: 'name_', internalType: 'string', type: 'string' },
-      { name: 'symbol_', internalType: 'string', type: 'string' },
-    ],
-  },
   {
     stateMutability: 'view',
     type: 'function',
@@ -3371,7 +2644,7 @@ export const erc20ABI = [
     type: 'function',
     inputs: [
       { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'approve',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -3389,26 +2662,6 @@ export const erc20ABI = [
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'subtractedValue', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'decreaseAllowance',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'addedValue', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'increaseAllowance',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'view',
@@ -3436,7 +2689,7 @@ export const erc20ABI = [
     type: 'function',
     inputs: [
       { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'transfer',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -3447,7 +2700,7 @@ export const erc20ABI = [
     inputs: [
       { name: 'from', internalType: 'address', type: 'address' },
       { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -3492,6 +2745,44 @@ export const erc20ABI = [
     ],
     name: 'Transfer',
   },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'spender', internalType: 'address', type: 'address' },
+      { name: 'allowance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientAllowance',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'sender', internalType: 'address', type: 'address' },
+      { name: 'balance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientBalance',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidApprover',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'receiver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidReceiver',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSender',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'spender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSpender',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3500,24 +2791,6 @@ export const erc20ABI = [
 
 export const entryPointABI = [
   { stateMutability: 'payable', type: 'receive' },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'SIG_VALIDATION_FAILED',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [
-      { name: 'initCode', internalType: 'bytes', type: 'bytes' },
-      { name: 'sender', internalType: 'address', type: 'address' },
-      { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: '_validateSenderAndPaymaster',
-    outputs: [],
-  },
   {
     stateMutability: 'payable',
     type: 'function',
@@ -3535,6 +2808,16 @@ export const entryPointABI = [
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
   },
   {
+    stateMutability: 'nonpayable',
+    type: 'function',
+    inputs: [
+      { name: 'target', internalType: 'address', type: 'address' },
+      { name: 'data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'delegateAndRevert',
+    outputs: [],
+  },
+  {
     stateMutability: 'payable',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
@@ -3547,7 +2830,7 @@ export const entryPointABI = [
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'deposits',
     outputs: [
-      { name: 'deposit', internalType: 'uint112', type: 'uint112' },
+      { name: 'deposit', internalType: 'uint256', type: 'uint256' },
       { name: 'staked', internalType: 'bool', type: 'bool' },
       { name: 'stake', internalType: 'uint112', type: 'uint112' },
       { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
@@ -3565,7 +2848,7 @@ export const entryPointABI = [
         internalType: 'struct IStakeManager.DepositInfo',
         type: 'tuple',
         components: [
-          { name: 'deposit', internalType: 'uint112', type: 'uint112' },
+          { name: 'deposit', internalType: 'uint256', type: 'uint256' },
           { name: 'staked', internalType: 'bool', type: 'bool' },
           { name: 'stake', internalType: 'uint112', type: 'uint112' },
           { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
@@ -3597,30 +2880,24 @@ export const entryPointABI = [
     inputs: [
       {
         name: 'userOp',
-        internalType: 'struct UserOperation',
+        internalType: 'struct PackedUserOperation',
         type: 'tuple',
         components: [
           { name: 'sender', internalType: 'address', type: 'address' },
           { name: 'nonce', internalType: 'uint256', type: 'uint256' },
           { name: 'initCode', internalType: 'bytes', type: 'bytes' },
           { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
+            name: 'accountGasLimits',
+            internalType: 'bytes32',
+            type: 'bytes32',
           },
           {
             name: 'preVerificationGas',
             internalType: 'uint256',
             type: 'uint256',
           },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
+          { name: 'gasFees', internalType: 'bytes32', type: 'bytes32' },
           { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
           { name: 'signature', internalType: 'bytes', type: 'bytes' },
         ],
@@ -3640,7 +2917,7 @@ export const entryPointABI = [
         components: [
           {
             name: 'userOps',
-            internalType: 'struct UserOperation[]',
+            internalType: 'struct PackedUserOperation[]',
             type: 'tuple[]',
             components: [
               { name: 'sender', internalType: 'address', type: 'address' },
@@ -3648,30 +2925,16 @@ export const entryPointABI = [
               { name: 'initCode', internalType: 'bytes', type: 'bytes' },
               { name: 'callData', internalType: 'bytes', type: 'bytes' },
               {
-                name: 'callGasLimit',
-                internalType: 'uint256',
-                type: 'uint256',
-              },
-              {
-                name: 'verificationGasLimit',
-                internalType: 'uint256',
-                type: 'uint256',
+                name: 'accountGasLimits',
+                internalType: 'bytes32',
+                type: 'bytes32',
               },
               {
                 name: 'preVerificationGas',
                 internalType: 'uint256',
                 type: 'uint256',
               },
-              {
-                name: 'maxFeePerGas',
-                internalType: 'uint256',
-                type: 'uint256',
-              },
-              {
-                name: 'maxPriorityFeePerGas',
-                internalType: 'uint256',
-                type: 'uint256',
-              },
+              { name: 'gasFees', internalType: 'bytes32', type: 'bytes32' },
               {
                 name: 'paymasterAndData',
                 internalType: 'bytes',
@@ -3699,30 +2962,24 @@ export const entryPointABI = [
     inputs: [
       {
         name: 'ops',
-        internalType: 'struct UserOperation[]',
+        internalType: 'struct PackedUserOperation[]',
         type: 'tuple[]',
         components: [
           { name: 'sender', internalType: 'address', type: 'address' },
           { name: 'nonce', internalType: 'uint256', type: 'uint256' },
           { name: 'initCode', internalType: 'bytes', type: 'bytes' },
           { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
+            name: 'accountGasLimits',
+            internalType: 'bytes32',
+            type: 'bytes32',
           },
           {
             name: 'preVerificationGas',
             internalType: 'uint256',
             type: 'uint256',
           },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
+          { name: 'gasFees', internalType: 'bytes32', type: 'bytes32' },
           { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
           { name: 'signature', internalType: 'bytes', type: 'bytes' },
         ],
@@ -3757,12 +3014,22 @@ export const entryPointABI = [
               { name: 'sender', internalType: 'address', type: 'address' },
               { name: 'nonce', internalType: 'uint256', type: 'uint256' },
               {
+                name: 'verificationGasLimit',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
                 name: 'callGasLimit',
                 internalType: 'uint256',
                 type: 'uint256',
               },
               {
-                name: 'verificationGasLimit',
+                name: 'paymasterVerificationGasLimit',
+                internalType: 'uint256',
+                type: 'uint256',
+              },
+              {
+                name: 'paymasterPostOpGasLimit',
                 internalType: 'uint256',
                 type: 'uint256',
               },
@@ -3808,82 +3075,11 @@ export const entryPointABI = [
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
   },
   {
-    stateMutability: 'nonpayable',
+    stateMutability: 'view',
     type: 'function',
-    inputs: [
-      {
-        name: 'op',
-        internalType: 'struct UserOperation',
-        type: 'tuple',
-        components: [
-          { name: 'sender', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-          { name: 'initCode', internalType: 'bytes', type: 'bytes' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          {
-            name: 'preVerificationGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
-          { name: 'signature', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'target', internalType: 'address', type: 'address' },
-      { name: 'targetCallData', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'simulateHandleOp',
-    outputs: [],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      {
-        name: 'userOp',
-        internalType: 'struct UserOperation',
-        type: 'tuple',
-        components: [
-          { name: 'sender', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-          { name: 'initCode', internalType: 'bytes', type: 'bytes' },
-          { name: 'callData', internalType: 'bytes', type: 'bytes' },
-          { name: 'callGasLimit', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'verificationGasLimit',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          {
-            name: 'preVerificationGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'maxFeePerGas', internalType: 'uint256', type: 'uint256' },
-          {
-            name: 'maxPriorityFeePerGas',
-            internalType: 'uint256',
-            type: 'uint256',
-          },
-          { name: 'paymasterAndData', internalType: 'bytes', type: 'bytes' },
-          { name: 'signature', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'simulateValidation',
-    outputs: [],
+    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -3969,6 +3165,37 @@ export const entryPointABI = [
       },
     ],
     name: 'Deposited',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'nonce',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'revertReason',
+        internalType: 'bytes',
+        type: 'bytes',
+        indexed: false,
+      },
+    ],
+    name: 'PostOpRevertReason',
   },
   {
     type: 'event',
@@ -4118,6 +3345,31 @@ export const entryPointABI = [
         type: 'uint256',
         indexed: false,
       },
+    ],
+    name: 'UserOperationPrefundTooLow',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'userOpHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'nonce',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
       {
         name: 'revertReason',
         internalType: 'bytes',
@@ -4155,14 +3407,10 @@ export const entryPointABI = [
   {
     type: 'error',
     inputs: [
-      { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-      { name: 'paid', internalType: 'uint256', type: 'uint256' },
-      { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-      { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-      { name: 'targetSuccess', internalType: 'bool', type: 'bool' },
-      { name: 'targetResult', internalType: 'bytes', type: 'bytes' },
+      { name: 'success', internalType: 'bool', type: 'bool' },
+      { name: 'ret', internalType: 'bytes', type: 'bytes' },
     ],
-    name: 'ExecutionResult',
+    name: 'DelegateAndRevert',
   },
   {
     type: 'error',
@@ -4174,6 +3422,21 @@ export const entryPointABI = [
   },
   {
     type: 'error',
+    inputs: [
+      { name: 'opIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'reason', internalType: 'string', type: 'string' },
+      { name: 'inner', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'FailedOpWithRevert',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'returnData', internalType: 'bytes', type: 'bytes' }],
+    name: 'PostOpReverted',
+  },
+  { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
     name: 'SenderAddressResult',
   },
@@ -4181,119 +3444,6 @@ export const entryPointABI = [
     type: 'error',
     inputs: [{ name: 'aggregator', internalType: 'address', type: 'address' }],
     name: 'SignatureValidationFailed',
-  },
-  {
-    type: 'error',
-    inputs: [
-      {
-        name: 'returnInfo',
-        internalType: 'struct IEntryPoint.ReturnInfo',
-        type: 'tuple',
-        components: [
-          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
-          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
-          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'senderInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'factoryInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'paymasterInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'ValidationResult',
-  },
-  {
-    type: 'error',
-    inputs: [
-      {
-        name: 'returnInfo',
-        internalType: 'struct IEntryPoint.ReturnInfo',
-        type: 'tuple',
-        components: [
-          { name: 'preOpGas', internalType: 'uint256', type: 'uint256' },
-          { name: 'prefund', internalType: 'uint256', type: 'uint256' },
-          { name: 'sigFailed', internalType: 'bool', type: 'bool' },
-          { name: 'validAfter', internalType: 'uint48', type: 'uint48' },
-          { name: 'validUntil', internalType: 'uint48', type: 'uint48' },
-          { name: 'paymasterContext', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'senderInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'factoryInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'paymasterInfo',
-        internalType: 'struct IStakeManager.StakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'stake', internalType: 'uint256', type: 'uint256' },
-          { name: 'unstakeDelaySec', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'aggregatorInfo',
-        internalType: 'struct IEntryPoint.AggregatorStakeInfo',
-        type: 'tuple',
-        components: [
-          { name: 'aggregator', internalType: 'address', type: 'address' },
-          {
-            name: 'stakeInfo',
-            internalType: 'struct IStakeManager.StakeInfo',
-            type: 'tuple',
-            components: [
-              { name: 'stake', internalType: 'uint256', type: 'uint256' },
-              {
-                name: 'unstakeDelaySec',
-                internalType: 'uint256',
-                type: 'uint256',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    name: 'ValidationResultWithAggregation',
   },
 ] as const
 
@@ -4321,23 +3471,6 @@ export const ephemeralHandoffABI = [
     type: 'function',
     inputs: [],
     name: 'receiveTransferAndSelfDestruct',
-    outputs: [],
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IMetaPaymaster
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const iMetaPaymasterABI = [
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'target', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'fund',
     outputs: [],
   },
 ] as const
@@ -4537,6 +3670,21 @@ export const swapbotLpABI = [
     ],
     name: 'SwapAndTip',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4560,7 +3708,7 @@ export const testUsdcABI = [
     type: 'function',
     inputs: [
       { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'approve',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -4578,26 +3726,6 @@ export const testUsdcABI = [
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'subtractedValue', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'decreaseAllowance',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-  {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'spender', internalType: 'address', type: 'address' },
-      { name: 'addedValue', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'increaseAllowance',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
   },
   {
     stateMutability: 'view',
@@ -4625,7 +3753,7 @@ export const testUsdcABI = [
     type: 'function',
     inputs: [
       { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'transfer',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -4636,7 +3764,7 @@ export const testUsdcABI = [
     inputs: [
       { name: 'from', internalType: 'address', type: 'address' },
       { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
@@ -4680,5 +3808,43 @@ export const testUsdcABI = [
       },
     ],
     name: 'Transfer',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'spender', internalType: 'address', type: 'address' },
+      { name: 'allowance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientAllowance',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'sender', internalType: 'address', type: 'address' },
+      { name: 'balance', internalType: 'uint256', type: 'uint256' },
+      { name: 'needed', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'ERC20InsufficientBalance',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidApprover',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'receiver', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidReceiver',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'sender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSender',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'spender', internalType: 'address', type: 'address' }],
+    name: 'ERC20InvalidSpender',
   },
 ] as const

@@ -8,7 +8,7 @@ import "account-abstraction/core/EntryPoint.sol";
 import "../src/DaimoFastCCTP.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant HANDOFF_ADDR = 0x5b2e4FA28b15FB6B206fb9df067EB84101340Ed9;
+address constant HANDOFF_ADDR = 0x3D0C2298c15B6eCa984F34388823873E084A268b;
 
 contract FastCCTPTest is Test {
     DaimoFastCCTP public fc = new DaimoFastCCTP{salt: 0}();

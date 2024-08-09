@@ -8,7 +8,6 @@ import "account-abstraction/interfaces/IEntryPoint.sol";
 
 import "../src/DaimoAccountFactoryV2.sol";
 import "../src/DaimoAccountV2.sol";
-import "../src/DaimoTestUSDC.sol";
 import "./Utils.sol";
 
 contract AccountAdminTest is Test {
