@@ -41,7 +41,7 @@ export async function getExchangeRatesInner(extApiCache: ExternalApiCache) {
 }
 
 async function fetchExchangeRates() {
-  // Fetch JSON from EXCHANGE_RATES_URL using fetch()
+  // Fetch JSON from EXCHANGE_RATES_URL using fetch() for non-USD currencies
   const ratesUrl = getEnvApi().EXCHANGE_RATES_URL;
   console.log(`[API] fetching exchange rates from ${ratesUrl}`);
   const res = await fetchWithBackoff(new URL(ratesUrl));
@@ -49,6 +49,18 @@ async function fetchExchangeRates() {
     throw new Error(`Failed to fetch exchange rates: ${res.statusText}`);
   }
   const retObj = await res.json();
+
+  // Replace ARS with Blue Dollar rate if available
+  const blueDollarUrl = getEnvApi().ARS_EXCHANGE_RATE_URL;
+  console.log(`[API] fetching blue dollar ARS rate from ${blueDollarUrl}`);
+  const blueDollarRes = await fetchWithBackoff(new URL(blueDollarUrl));
+  if (blueDollarRes.ok) {
+    const blueDollarObj = await blueDollarRes.json();
+    if (blueDollarObj.lemoncash && blueDollarObj.lemoncash.ask > 0) {
+      retObj.rates["ARS"] = blueDollarObj.lemoncash.ask;
+    }
+  }
+
   const retStr = JSON.stringify(retObj);
   console.log(`[API] got currency exchange rates: ${retStr}`);
   return retStr;
