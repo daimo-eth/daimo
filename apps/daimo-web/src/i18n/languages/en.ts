@@ -146,6 +146,18 @@ export const en = {
       title: () => "Daimo Point-Of-Sale",
       description: () => "One-tap USDC checkout.",
     },
+    newOrder: () => "NEW ORDER",
+    total: (euros: string, dollars: string) => `Total: €${euros} ~ ${dollars}`,
+    placeOrder: () => "Place Order",
+    ordered: () => "✅ ordered",
+    error: (err: any) => `❌ ${err}`,
+    latestOrders: () => "LATEST ORDERS",
+    loading: () => "Loading...",
+    noOrdersYet: () => "No orders yet",
+    link: () => "link",
+    unpaid: () => "Unpaid",
+    paid: () => "Paid",
+    cancelled: () => "Cancelled",
   },
 
   profile: {

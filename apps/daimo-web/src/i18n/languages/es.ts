@@ -145,6 +145,19 @@ export const es: LanguageDefinition = {
       title: () => "Punto de Venta de Daimo",
       description: () => "Pago USDC con un solo click.",
     },
+
+    newOrder: () => "NEW ORDER",
+    total: (euros: string, dollars: string) => `Total: €${euros} ~ ${dollars}`,
+    placeOrder: () => "Place Order",
+    ordered: () => "✅ ordered",
+    error: (err: any) => `❌ ${err}`,
+    latestOrders: () => "LATEST ORDERS",
+    loading: () => "Loading...",
+    noOrdersYet: () => "No orders yet",
+    link: () => "link",
+    unpaid: () => "Unpaid",
+    paid: () => "Paid",
+    cancelled: () => "Cancelled",
   },
 
   profile: {
