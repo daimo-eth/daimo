@@ -43,7 +43,7 @@ contract AccountSendUseropTest is Test {
     );
 
     function testSimpleOp() public {
-        // Generated from private key in apps/swift-testing-playground/p256.playground/Contents.swift
+        // Generated from private key in packages/contract/script/createUserOpSignature.ts
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
@@ -57,16 +57,17 @@ contract AccountSendUseropTest is Test {
             expectedUserOpHash
         );
 
-        // (r, s) signature generated from public key, user op hash, and validUntil in
-        // apps/swift-testing-playground/p256.playground/Contents.swift
+        // (r, s) signature generated using (public key, user op hash, validUntil)
+        // as inputs. The signature is can be generated using the script in
+        // packages/contract/script/createUserOpSignature.ts
         bytes memory ownerSig = abi.encodePacked(
             validUntil,
             abi.encode(
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x651f58864a6cb90c859cf444474ffc81f612f0a5ae08169b77a2c8c68a3a814e,
-                    s: 0x2945611d9e7ecdcccf30ebe40192bb23e6f0036c3997315ffe612939d938f567
+                    r: 0x5bf1e1209bd79ce5a6ab4a01396000c78d64aea18474c29a18f7cffbfcb0cc13,
+                    s: 0x4f07814526fcd656b6c505bd9df4df7789830db58184307abed1eb4979991aef
                 })
             )
         );
@@ -150,8 +151,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x70acbff444e05edc2661627e4ac6ec3284c4e3f5f09439e9a6555a9696bddd7a,
-                    s: 0x67d0e43bfe9f6324c2652d75a07024f8ed278bf4689fadcfda30ae593ac8f447
+                    r: 0xad933d548ca93b155bd46c05651ca01d08582499b8efab90b3e4b2a206b4d43a,
+                    s: 0x216ce3f38de4757bc3d1249d42e6bb517d839de70fc82c9a1b304ebfc45713a9
                 })
             )
         );
