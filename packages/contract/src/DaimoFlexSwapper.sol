@@ -61,9 +61,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
     uint32 public oraclePeriod;
     /// Uniswap pool factory, for looking up pools by (tokenA, tokenB, feeTier).
     IUniswapV3Factory public oraclePoolFactory;
-    /// Uniswap router, default option for executing swaps.
-    /// See https://github.com/Uniswap/swap-router-contracts/blob/main/contracts/SwapRouter02.sol
-    address public swapRouter02;
 
     /// Emitted on each successful swap.
     event SwapToCoin(
@@ -89,7 +86,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         IERC20[] memory _hopTokens,
         IERC20[] memory _outputTokens,
         IERC20[] memory _stablecoins,
-        address _swapRouter02,
         uint24[] memory _oracleFeeTiers,
         uint32 _oraclePeriod,
         IUniswapV3Factory _oraclePoolFactory
@@ -101,7 +97,6 @@ contract DaimoFlexSwapper is IDaimoSwapper, Ownable2Step, UUPSUpgradeable {
         hopTokens = _hopTokens;
         outputTokens = _outputTokens;
         stablecoins = _stablecoins;
-        swapRouter02 = _swapRouter02;
         oracleFeeTiers = _oracleFeeTiers;
         oraclePeriod = _oraclePeriod;
         oraclePoolFactory = _oraclePoolFactory;

@@ -260,14 +260,13 @@ contract DaimoFastCCTP {
 contract EphemeralHandoff {
     address payable private immutable _creator;
     uint256 private immutable _fromAmount;
-    uint256 private immutable _toChainID;
     IERC20 private immutable _toToken;
 
     constructor(
         uint256 /* fromChainID */,
         address /* fromAddr */,
         uint256 fromAmount,
-        uint256 toChainID,
+        uint256 /* toChainID */,
         address /* toAddr */,
         IERC20 toToken,
         uint256 /* toAmount */,
@@ -275,7 +274,6 @@ contract EphemeralHandoff {
     ) {
         _creator = payable(msg.sender);
         _fromAmount = fromAmount;
-        _toChainID = toChainID;
         _toToken = toToken;
     }
 

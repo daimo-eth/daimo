@@ -1874,7 +1874,6 @@ export const daimoFlexSwapperABI = [
         internalType: 'contract IERC20[]',
         type: 'address[]',
       },
-      { name: '_swapRouter02', internalType: 'address', type: 'address' },
       { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
       { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
       {
@@ -2006,13 +2005,6 @@ export const daimoFlexSwapperABI = [
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'stablecoins',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'swapRouter02',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
   },
   {
     stateMutability: 'payable',
@@ -4317,7 +4309,7 @@ export const ephemeralHandoffABI = [
       { name: '', internalType: 'uint256', type: 'uint256' },
       { name: '', internalType: 'address', type: 'address' },
       { name: 'fromAmount', internalType: 'uint256', type: 'uint256' },
-      { name: 'toChainID', internalType: 'uint256', type: 'uint256' },
+      { name: '', internalType: 'uint256', type: 'uint256' },
       { name: '', internalType: 'address', type: 'address' },
       { name: 'toToken', internalType: 'contract IERC20', type: 'address' },
       { name: '', internalType: 'uint256', type: 'uint256' },

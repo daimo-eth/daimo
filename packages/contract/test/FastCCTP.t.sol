@@ -26,7 +26,7 @@ contract FastCCTPTest is Test {
     address immutable _lp = 0x2222222222222222222222222222222222222222;
     uint256 immutable _lpToTokenInitBalance = 1000;
 
-    address immutable _handoffAddr = 0x5DCb155b54b8999dBa4590b9cfce09805C48077F;
+    address immutable _handoffAddr = 0x48205283EB6bE6bf644f9dC7ED08b482847185Bb;
 
     function testStart() public {
         vm.chainId(_fromChainID);
@@ -142,7 +142,7 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
     ) external returns (uint64 _nonce) {
         assertEq(amount, 100);
         assertEq(destinationDomain, 6);
-        address expectedRecipient = 0x5DCb155b54b8999dBa4590b9cfce09805C48077F;
+        address expectedRecipient = 0x48205283EB6bE6bf644f9dC7ED08b482847185Bb;
         assertEq(mintRecipient, bytes32(uint256(uint160(expectedRecipient))));
         assertEq(burnToken, expectedBurnToken);
 
