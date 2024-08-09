@@ -5,7 +5,6 @@ import {
   OpStatus,
   ProposedSwap,
   assert,
-  base,
   canSendTo,
   dollarsToAmount,
   hasAccountName,
@@ -94,8 +93,9 @@ export function SendTransferButton({
       };
 
       // TODO: handle case with swap and bridge
-      // TODO: check against home chain instead of hardcoding base
-      if (toChain.chainId !== base.chainId) {
+      assert(toCoin.symbol === "USDC");
+
+      if (toChain.chainId !== account.homeChainId) {
         console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
         return opSender.sendUsdcToOtherChain(
           recipient.addr,
@@ -106,6 +106,7 @@ export function SendTransferButton({
         );
       } else if (isSwap) {
         // Swap and transfer if outbound coin is different than home coin.
+        console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);
       }
 
