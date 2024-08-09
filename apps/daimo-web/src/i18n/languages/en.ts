@@ -142,8 +142,10 @@ export const en = {
   },
 
   pos: {
-    title: () => "Daimo Point-Of-Sale",
-    description: () => "One-tap USDC checkout.",
+    metadata: {
+      title: () => "Daimo Point-Of-Sale",
+      description: () => "One-tap USDC checkout.",
+    },
   },
 
   profile: {

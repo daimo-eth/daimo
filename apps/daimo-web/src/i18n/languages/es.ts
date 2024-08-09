@@ -141,8 +141,10 @@ export const es: LanguageDefinition = {
   },
 
   pos: {
-    title: () => "Punto de Venta de Daimo",
-    description: () => "Pago USDC con un solo click.",
+    metadata: {
+      title: () => "Punto de Venta de Daimo",
+      description: () => "Pago USDC con un solo click.",
+    },
   },
 
   profile: {

@@ -8,7 +8,7 @@ import { RpcHookProvider } from "../../utils/rpcHook";
 
 export async function generateMetadata(): Promise<Metadata> {
   const i18n = getI18N(headers().get("accept-language"));
-  const i18 = i18n.pos;
+  const i18 = i18n.pos.metadata;
   return {
     title: i18.title(),
     description: i18.description(),
