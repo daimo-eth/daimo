@@ -1,9 +1,11 @@
 import {
+  AccountChain,
   EAccount,
   ForeignToken,
   OpStatus,
   ProposedSwap,
   assert,
+  base,
   canSendTo,
   dollarsToAmount,
   hasAccountName,
@@ -39,6 +41,7 @@ export function SendTransferButton({
   account,
   recipient,
   dollars,
+  toChain = base,
   toCoin,
   memo,
   minTransferAmount = 0,
@@ -47,6 +50,7 @@ export function SendTransferButton({
   account: Account;
   recipient: EAccountContact | BridgeBankAccountContact;
   dollars: number;
+  toChain?: AccountChain;
   toCoin: ForeignToken;
   memo?: string;
   minTransferAmount?: number;
@@ -82,25 +86,36 @@ export function SendTransferButton({
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
       console.log(
-        `[ACTION] sending $${dollarsStr} ${toCoin.symbol} to ${recipient.addr}`
+        `[ACTION] sending $${dollarsStr} ${toCoin.symbol} to ${recipient.addr} on ${toChain.name}`
       );
       const opMetadata = {
         nonce,
         chainGasConstants: account.chainGasConstants,
       };
 
-      // Swap and transfer if outbound coin is different than home coin.
-      if (isSwap) {
+      // TODO: handle case with swap and bridge
+      if (toChain.chainId !== base.chainId) {
+        console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
+        return opSender.sendUsdcToOtherChain(
+          recipient.addr,
+          toChain,
+          dollarsStr,
+          opMetadata,
+          memo
+        );
+      } else if (isSwap) {
+        // Swap and transfer if outbound coin is different than home coin.
         console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);
+      } else {
+        // Otherwise, just send home coin directly.
+        return opSender.erc20transfer(
+          recipient.addr,
+          dollarsStr,
+          opMetadata,
+          memo
+        );
       }
-      // Otherwise, just send home coin directly.
-      return opSender.erc20transfer(
-        recipient.addr,
-        dollarsStr,
-        opMetadata,
-        memo
-      );
     },
     pendingOp: { type: "transfer", ...pendingOpBase },
     // TODO: outbound swap, postSwapTransfer

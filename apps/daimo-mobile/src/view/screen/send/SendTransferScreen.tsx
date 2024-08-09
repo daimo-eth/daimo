@@ -353,6 +353,7 @@ function SendConfirm({
         memo={memoParts.join(" · ")}
         recipient={recipient}
         dollars={money.dollars}
+        toChain={chain}
         toCoin={coin}
         route={route}
       />
