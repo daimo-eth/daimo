@@ -29,6 +29,7 @@ const data: [string, string, string, number][] = [
   ["Canadian Dollar", "C$", "CAD", 2],
   ["Australian Dollar", "A$", "AUD", 2],
   ["Singapore Dollar", "S$", "SGD", 2],
+  ["Bolivian Boliviano", "$b", "BOB", 0],
 ];
 
 export const nonUsdCurrencies = data.map(
