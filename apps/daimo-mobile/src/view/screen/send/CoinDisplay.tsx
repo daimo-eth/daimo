@@ -194,7 +194,7 @@ export function CoinPellet({
 }) {
   const chainUri = getChainUri(toChain);
   return (
-    <View style={{ ...styles.coinButton }}>
+    <View style={{ ...styles.coinButton, backgroundColor: color.white }}>
       <Pressable onPress={onClick}>
         <View style={styles.coinPickerWrap}>
           <SendPairImage coinUri={toCoin.logoURI} chainSource={chainUri} />

@@ -63,7 +63,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   // Known Binance addresses on Base
   "0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A": AddrLabel.Binance,
   // FastCCTP address on all chains
-  "0x779934cD046a0Bc09dFDcd7C92B41Aff3A076838": AddrLabel.FastCCTP,
+  "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B": AddrLabel.FastCCTP, // TODO
 };
 
 // Validate that current addresses are correctly recorded.
