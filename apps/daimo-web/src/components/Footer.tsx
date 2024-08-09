@@ -1,5 +1,6 @@
 import { Logo } from "./icons/Logo";
 import { TextBold, LinkSemiBold } from "./typography";
+import { useI18N } from "../i18n/context";
 
 export function Footer() {
   return (
@@ -16,14 +17,15 @@ export function Footer() {
 }
 
 function FooterNav() {
+  const i18n = useI18N();
   return (
     <div>
       <nav className="flex gap-8 md:gap-16">
-        <LinkSemiBold href="/blog">Blog</LinkSemiBold>
+        <LinkSemiBold href="/blog">{i18n.misc.blog()}</LinkSemiBold>
         <LinkSemiBold href="https://github.com/daimo-eth/daimo" target="_blank">
           Github
         </LinkSemiBold>
-        <LinkSemiBold href="#faq">FAQ</LinkSemiBold>
+        <LinkSemiBold href="#faq">{i18n.misc.faq()}</LinkSemiBold>
       </nav>
     </div>
   );
