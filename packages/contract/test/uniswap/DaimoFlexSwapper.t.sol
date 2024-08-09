@@ -11,6 +11,8 @@ import "../dummy/DaimoDummyUSDC.sol";
 contract SwapperTest is Test {
     IERC20 public usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
     IERC20 public weth = IERC20(0x4200000000000000000000000000000000000006);
+    address payable public alice = payable(address(0x123));
+    address payable public tipper = payable(address(0x234));
     address payable public immutable swapRouter02 =
         payable(0x2626664c2603336E57B271c5C0b26F421741e481);
 
@@ -23,8 +25,9 @@ contract SwapperTest is Test {
         IERC20[] memory hopTokens = new IERC20[](1);
         hopTokens[0] = weth;
 
-        IERC20[] memory outputTokens = new IERC20[](1);
+        IERC20[] memory outputTokens = new IERC20[](2);
         outputTokens[0] = usdc;
+        outputTokens[1] = weth;
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
@@ -77,7 +80,6 @@ contract SwapperTest is Test {
         assertEq(quotedAmountOut, expectedAmountOut);
 
         // Swap degen to home coin (USDC).
-        address alice = address(0x123);
         vm.startPrank(alice);
         deal(address(weth), alice, 1e18);
         deal(address(degen), alice, amountIn);
@@ -122,7 +124,6 @@ contract SwapperTest is Test {
         assertEq(quotedAmountOut, expectedAmountOut);
 
         // Swap degen to home coin (USDC).
-        address alice = address(0x123);
         vm.deal(alice, 9999 ether);
 
         vm.startPrank(alice);
@@ -137,6 +138,70 @@ contract SwapperTest is Test {
         // Actual output: $2,993,949 USDC = 1.4% slippage.
         vm.expectRevert("DFS: insufficient output");
         _swapETHAsAlice(1000 ether, swapPath);
+
+        vm.stopPrank();
+    }
+
+    function testSwapETHToETH() public {
+        // Give Alice 1 native ETH
+        vm.deal(alice, 1 ether);
+        assertEq(alice.balance, 1 ether);
+
+        // Swap native ETH to WETH. This is allowed + no slippage allowed.
+        bytes memory depositCalldata = abi.encodeWithSignature("deposit()");
+        vm.startPrank(alice);
+
+        // ...1 wei less = not allowed
+        vm.expectRevert(bytes("DFS: insufficient output"));
+        swapper.swapToCoin{value: 1 ether}({
+            tokenIn: IERC20(address(0)),
+            amountIn: 1 ether,
+            tokenOut: weth,
+            extraData: abi.encode(
+                DaimoFlexSwapper.DaimoFlexSwapperExtraData({
+                    callDest: address(weth),
+                    callData: depositCalldata,
+                    tipToExactAmountOut: 1 ether - 1,
+                    tipPayer: tipper
+                })
+            )
+        });
+
+        // 1:1 ETH to WETH = allowed
+        uint256 amountOut = swapper.swapToCoin{value: 1 ether}({
+            tokenIn: IERC20(address(0)),
+            amountIn: 1 ether,
+            tokenOut: weth,
+            extraData: abi.encode(
+                DaimoFlexSwapper.DaimoFlexSwapperExtraData({
+                    callDest: address(weth),
+                    callData: depositCalldata,
+                    tipToExactAmountOut: 0,
+                    tipPayer: address(0x0)
+                })
+            )
+        });
+        assertEq(amountOut, 1 ether);
+        assertEq(alice.balance, 0);
+        assertEq(weth.balanceOf(alice), 1 ether);
+
+        // Next, try swapping WETH to WETH. Not allowed.
+        weth.approve(address(swapper), 1 ether);
+        assertEq(weth.allowance(alice, address(swapper)), 1 ether);
+        vm.expectRevert(bytes("DFS: input token = output token"));
+        swapper.swapToCoin({
+            tokenIn: weth,
+            amountIn: 1 ether,
+            tokenOut: weth,
+            extraData: abi.encode(
+                DaimoFlexSwapper.DaimoFlexSwapperExtraData({
+                    callDest: address(0x0),
+                    callData: "",
+                    tipToExactAmountOut: 1 ether - 1,
+                    tipPayer: tipper
+                })
+            )
+        });
 
         vm.stopPrank();
     }

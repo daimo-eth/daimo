@@ -133,7 +133,9 @@ contract DaimoFlexSwapper is
         IERC20 tokenOut,
         bytes calldata extraData
     ) public payable returns (uint256 swapAmountOut) {
-        // Input checks
+        // Input checks. Input token 0x0 = native token, output must be ERC-20.
+        require(tokenIn != tokenOut, "DFS: input token = output token");
+        require(address(tokenOut) != address(0), "DFS: output token = 0x0");
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
         DaimoFlexSwapperExtraData memory extra;
