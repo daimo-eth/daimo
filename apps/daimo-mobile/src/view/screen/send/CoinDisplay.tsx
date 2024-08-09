@@ -3,6 +3,7 @@ import {
   ForeignToken,
   arbitrum,
   arbitrumSepolia,
+  arbitrumUSDC,
   base,
   baseSepolia,
   baseUSDC,
@@ -12,14 +13,15 @@ import {
   optimismUSDC,
   polygon,
   polygonAmoy,
+  polygonUSDC,
 } from "@daimo/common";
 import {
-  View,
-  StyleSheet,
-  Text,
-  Pressable,
   Image,
   ImageSourcePropType,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
@@ -81,6 +83,8 @@ export function SendCoinButton({
   const supportedSendPairs: SendPair[] = [
     { chain: base, coin: baseUSDC },
     { chain: optimism, coin: optimismUSDC },
+    { chain: polygon, coin: polygonUSDC },
+    { chain: arbitrum, coin: arbitrumUSDC },
   ];
 
   return (
