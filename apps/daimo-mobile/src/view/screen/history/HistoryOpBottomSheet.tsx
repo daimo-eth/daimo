@@ -8,9 +8,9 @@ import {
   amountToDollars,
   getAccountName,
   getChainDisplayName,
-  getDAv2Chain,
   getDisplayFromTo,
   getSynthesizedMemo,
+  getDAv2Chain,
   tryOrNull,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";

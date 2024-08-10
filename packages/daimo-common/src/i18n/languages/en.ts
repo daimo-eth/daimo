@@ -54,7 +54,7 @@ function displayAddrLabel(type: AddrLabel): string {
     case AddrLabel.Binance:
       return `binance`;
     case AddrLabel.FastCCTP:
-      return `instant cross-chain`;
+      return `cross-chain`;
     default:
       return `unknown`;
   }
