@@ -175,7 +175,7 @@ function HelpModalUSDC() {
       <TextLight>{i18.helpModalUSDC.description()}</TextLight>
       <Spacer h={24} />
       <TextLight>
-        {i18.helpModalUSDC.learnMore()}
+        {i18.helpModalUSDC.learnMore()}{" "}
         <TextLink
           onPress={() => Linking.openURL("https://www.circle.com/en/usdc")}
         >

@@ -16,9 +16,11 @@ export async function getExchangeRates(extApiCache: ExternalApiCache) {
   if (promise == null) {
     promise = getExchangeRatesInner(extApiCache);
   }
-  const ret = await promise;
-  promise = null;
-  return ret;
+  try {
+    return await promise;
+  } finally {
+    promise = null;
+  }
 }
 
 export async function getExchangeRatesInner(extApiCache: ExternalApiCache) {

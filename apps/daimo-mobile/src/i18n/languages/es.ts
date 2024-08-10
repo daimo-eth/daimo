@@ -319,7 +319,7 @@ export const es: LanguageDefinition = {
       },
       everywhere: {
         title: () => `Funciona en todas partes`,
-        description: () => `Instantáneo, 24/7 envíos a cualquier contacto`,
+        description: () => `Instantáneo, 24/7 envíos`,
       },
       onEthereum: {
         title: () => `Se ejecuta en Ethereum`,
