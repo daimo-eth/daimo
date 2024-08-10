@@ -3,17 +3,16 @@ import {
   ForeignToken,
   arbitrum,
   arbitrumSepolia,
-  arbitrumUSDC,
   base,
   baseSepolia,
   baseUSDC,
   getChainDisplayName,
   optimism,
   optimismSepolia,
-  optimismUSDC,
   polygon,
   polygonAmoy,
-  polygonUSDC,
+  getSupportedSendPairs,
+  SendPair,
 } from "@daimo/common";
 import {
   Image,
@@ -32,12 +31,8 @@ import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
 import { color, ss } from "../../shared/style";
 
-type SendPair = {
-  chain: DAv2Chain;
-  coin: ForeignToken;
-};
-
 // Get the logo for the chain
+// TODO: move elsewhere
 const getChainUri = (chain: DAv2Chain) => {
   switch (chain) {
     case base:
@@ -78,14 +73,7 @@ export function SendCoinButton({
 
   const homeCoin = baseUSDC; // TODO: add home coin to account
   const chainUri = getChainUri(toChain);
-
-  // TODO
-  const supportedSendPairs: SendPair[] = [
-    { chain: base, coin: baseUSDC },
-    { chain: optimism, coin: optimismUSDC },
-    { chain: polygon, coin: polygonUSDC },
-    { chain: arbitrum, coin: arbitrumUSDC },
-  ];
+  const supportedSendPairs = getSupportedSendPairs(toChain.chainId);
 
   return (
     <SelectDropdown

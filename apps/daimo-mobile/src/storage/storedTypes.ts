@@ -39,12 +39,14 @@ interface StoredV16TransferClog {
     coin: StoredV16ForeignCoin;
     amount: BigIntStr;
     from: Address;
+    chainId?: number;
   };
 
   postSwapTransfer?: {
     coin: StoredV16ForeignCoin;
     amount: BigIntStr;
     to: Address;
+    chainId?: number;
   };
 }
 

@@ -7,10 +7,8 @@ import {
   assert,
   assertNotNull,
   baseUSDC,
-  daimoChainToId,
   dollarsToAmount,
   getAccountName,
-  isTestnetChain,
   now,
   DAv2Chain,
   getDAv2Chain,
@@ -225,9 +223,8 @@ function SendChooseAmount({
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
 
-  // Token swapping is not supported on testnet
-  const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
-  const isFixed = recipient.name != null || isTestnet;
+  // If sending to another DAv2, will be same chain, same coin
+  const sendCoinIsFixed = recipient.name != null;
 
   return (
     <View>
@@ -245,7 +242,9 @@ function SendChooseAmount({
       <Spacer h={16} />
       <View style={styles.detailsRow}>
         <View style={styles.detail}>
-          {!isFixed && <TextMeta color={color.gray3}>{i18.memo()}</TextMeta>}
+          {!sendCoinIsFixed && (
+            <TextMeta color={color.gray3}>{i18.memo()}</TextMeta>
+          )}
           <SendMemoButton
             memo={memo}
             memoStatus={memoStatus}
@@ -253,7 +252,7 @@ function SendChooseAmount({
           />
         </View>
 
-        {!isFixed && (
+        {!sendCoinIsFixed && (
           <View style={styles.detail}>
             <TextMeta color={color.gray3}>{i18.sendAs()}</TextMeta>
             <SendCoinButton

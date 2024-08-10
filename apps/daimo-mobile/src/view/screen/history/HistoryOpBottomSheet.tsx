@@ -8,10 +8,9 @@ import {
   amountToDollars,
   getAccountName,
   getChainDisplayName,
-  getDAv2Chain,
   getDisplayFromTo,
   getSynthesizedMemo,
-  tryOrNull,
+  getDAv2Chain,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -204,6 +203,28 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
         foreignChainName = getChainDisplayName(chain);
         chainName = foreignChainName.toUpperCase();
       }
+
+  // Display coin swap transfers accurately
+  const coinName = chainConfig.tokenSymbol;
+  let coinSubtitle = coinName;
+  if (op.type === "transfer") {
+    if (op.preSwapTransfer) {
+      coinSubtitle = `${op.preSwapTransfer.coin.symbol} -> ${coinName}`;
+    } else if (op.postSwapTransfer) {
+      coinSubtitle = `${coinName} -> ${op.postSwapTransfer.coin.symbol}`;
+    }
+  }
+
+  // Display cross-chain transfers accurately
+  const chainName = chainConfig.chainL2.name.toUpperCase();
+  let chainSubtitle = chainName;
+  if (op.type === "transfer") {
+    if (op.preSwapTransfer && op.preSwapTransfer.chainId) {
+      const otherChain = getDAv2Chain(op.preSwapTransfer.chainId);
+      chainSubtitle = `${otherChain.name.toUpperCase()} -> ${chainName}`;
+    } else if (op.postSwapTransfer && op.postSwapTransfer.chainId) {
+      const otherChain = getDAv2Chain(op.postSwapTransfer.chainId);
+      chainSubtitle = `${chainName} -> ${otherChain.name.toUpperCase()}`;
     }
   }
 
@@ -218,8 +239,8 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   // Generate subtitle = fees, chain, other details
   const col = color.grayMid;
   const subtitleElems = [
-    <React.Fragment key="coin">{coinName}</React.Fragment>,
-    <React.Fragment key="chain">{chainName}</React.Fragment>,
+    <React.Fragment key="coin">{coinSubtitle}</React.Fragment>,
+    <React.Fragment key="chain">{chainSubtitle}</React.Fragment>,
     <React.Fragment key="fees">
       <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
       <Spacer w={8} />

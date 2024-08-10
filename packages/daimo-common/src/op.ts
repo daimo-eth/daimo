@@ -37,18 +37,26 @@ export type PendingOp = {
   inviteCode?: string;
 };
 
-/** Original (non-home-coin) inbound transfer, for an inbound swap. */
+/**
+ * Original (non-home-coin) inbound transfer, for an inbound swap or inbound
+ * cross-chain transfer.
+ */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
+  chainId?: number;
 };
 
-/** Non-home-coin outbound transfer, for an outbound swap. */
+/**
+ * Non-home-coin outbound transfer, for an outbound swap or outbound
+ * cross-chain transfer.
+ */
 export type PostSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   to: Address;
+  chainId?: number;
 };
 
 /**
