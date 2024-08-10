@@ -190,29 +190,19 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  const coinName = chainConfig.tokenSymbol;
-  const chainName = chainConfig.chainL2.name.toUpperCase();
+  let coinName = chainConfig.tokenSymbol;
+  let chainName = chainConfig.chainL2.name.toUpperCase();
 
   // Special case: if this transfer is from or to a different coin
-  let coinSubtitle = coinName;
-  let chainSubtitle = chainName;
   let foreignChainName: string | undefined = undefined;
   if (op.type === "transfer") {
-    const otherCoin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
-    if (otherCoin) {
-      const otherChain = tryOrNull(() => getDAv2Chain(otherCoin.chainId));
-      if (op.preSwapTransfer?.coin) {
-        coinSubtitle = `${otherCoin.symbol} → ${coinName}`;
-        if (otherChain && otherChain.chainId !== chainConfig.chainL2.id) {
-          foreignChainName = getChainDisplayName(otherChain);
-          chainSubtitle = `${foreignChainName.toUpperCase()} → ${chainName}`;
-        }
-      } else if (op.postSwapTransfer?.coin) {
-        coinSubtitle = `${coinName} → ${otherCoin.symbol}`;
-        if (otherChain && otherChain.chainId !== chainConfig.chainL2.id) {
-          foreignChainName = getChainDisplayName(otherChain);
-          chainSubtitle = `${chainName} → ${foreignChainName.toUpperCase()}}`;
-        }
+    const coin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
+    if (coin != null) {
+      coinName = coin.symbol;
+      const chain = tryOrNull(() => getDAv2Chain(coin.chainId));
+      if (chain && chain.chainId !== chainConfig.chainL2.id) {
+        foreignChainName = getChainDisplayName(chain);
+        chainName = foreignChainName.toUpperCase();
       }
     }
   }
@@ -228,8 +218,8 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   // Generate subtitle = fees, chain, other details
   const col = color.grayMid;
   const subtitleElems = [
-    <React.Fragment key="coin">{coinSubtitle}</React.Fragment>,
-    <React.Fragment key="chain">{chainSubtitle}</React.Fragment>,
+    <React.Fragment key="coin">{coinName}</React.Fragment>,
+    <React.Fragment key="chain">{chainName}</React.Fragment>,
     <React.Fragment key="fees">
       <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
       <Spacer w={8} />
