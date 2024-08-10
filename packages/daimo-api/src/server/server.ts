@@ -128,6 +128,8 @@ async function main() {
     console.log(`[API] initializing indexers...`);
     await watcher.init();
     watcher.watch();
+
+    await s2.init();
     s2.watch();
 
     await Promise.all([

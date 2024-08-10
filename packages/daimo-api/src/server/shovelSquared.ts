@@ -11,6 +11,8 @@ import { chainConfig } from "../env";
 // future without affecting anything else: downstream reads daimo_transfers.
 export class ShovelSquared {
   ticking = false;
+  latest: number = 0;
+  private batchSize = 15000;
 
   private readonly pg: Pool;
   private readonly kdb: Kysely<ShovelDB>;
@@ -26,6 +28,20 @@ export class ShovelSquared {
     this.shovelSource = shovelSource;
   }
 
+  public async init() {
+    this.latest = await this.getShovelSquaredLatest();
+    const shovelLatest = await this.getShovelLatest();
+
+    // Backfill S^2 to latest shovel block.
+    for (
+      let from = this.latest + 1;
+      from <= shovelLatest;
+      from += this.batchSize
+    ) {
+      await this.load(from, shovelLatest);
+    }
+  }
+
   public async watch() {
     setInterval(() => this.tick(), 500);
   }
@@ -39,12 +55,15 @@ export class ShovelSquared {
       console.log(`[S^2] starting tick`);
       const startMs = performance.now();
       const shovelLatest = await this.getShovelLatest();
-      const s2Latest = await this.getShovelSquaredLatest();
 
       const batchSize = 100;
-      for (let from = s2Latest + 1; from <= shovelLatest; from += batchSize) {
+      for (
+        let from = this.latest + 1;
+        from <= shovelLatest;
+        from += batchSize
+      ) {
         const to = Math.min(from + batchSize - 1, shovelLatest);
-        this.load(from, to);
+        await this.load(from, to);
       }
 
       const elapsedMs = (performance.now() - startMs) | 0;
@@ -269,5 +288,6 @@ export class ShovelSquared {
       [chainID, to]
     );
     console.log(`[SHOVEL] s^2 done, updated chain_id ${chainID} to ${to}`);
+    this.latest = to;
   }
 }
