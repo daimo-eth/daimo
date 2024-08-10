@@ -11,6 +11,14 @@ export function tryOrNull<T>(fn: () => T): T | null {
   }
 }
 
+export function tryOr<T>(fn: () => T, defaultValue: T): T {
+  try {
+    return fn();
+  } catch {
+    return defaultValue;
+  }
+}
+
 // No-op, wrap any function call to return void.
 export function ignore(input: any): void {}
 

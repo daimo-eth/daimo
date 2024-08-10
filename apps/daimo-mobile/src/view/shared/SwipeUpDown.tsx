@@ -28,9 +28,9 @@ import { color } from "./style";
 import { ParamListBottomSheet, useNav } from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
-  HistoryOpScreen,
+  HistoryOpBottomSheet,
   SetBottomSheetDetailHeight,
-} from "../screen/history/HistoryOpScreen";
+} from "../screen/history/HistoryOpBottomSheet";
 
 const BottomSheetStackNavigator =
   createNativeStackNavigator<ParamListBottomSheet>();
@@ -152,7 +152,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
                 />
                 <BottomSheetStackNavigator.Screen
                   name="BottomSheetHistoryOp"
-                  component={HistoryOpScreen}
+                  component={HistoryOpBottomSheet}
                 />
               </BottomSheetStackNavigator.Group>
             </BottomSheetStackNavigator.Navigator>

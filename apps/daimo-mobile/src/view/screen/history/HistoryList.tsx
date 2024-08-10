@@ -22,7 +22,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getAddress } from "viem";
 
-import { SetBottomSheetDetailHeight } from "./HistoryOpScreen";
+import { SetBottomSheetDetailHeight } from "./HistoryOpBottomSheet";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";

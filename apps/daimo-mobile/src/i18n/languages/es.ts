@@ -64,6 +64,8 @@ export const es: LanguageDefinition = {
       description: {
         firstPara: (chainName: string) =>
           `Esta transacción fue resuelta en ${chainName}, un rollup de Ethereum.`,
+        firstPara2Chain: (chainA: string, chainB: string) =>
+          `Esta transacción fue resuelta en ${chainA} y ${chainB}.`,
         secondPara: () =>
           `Las Rollups heredan la seguridad de Ethereum, a un coste menor.`,
         thirdPara: () =>

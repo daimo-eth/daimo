@@ -2,13 +2,16 @@ import {
   DaimoLinkNoteV2,
   DaimoNoteState,
   DaimoNoteStatus,
-  TransferClog,
   OpStatus,
   PaymentLinkClog,
+  TransferClog,
   amountToDollars,
   getAccountName,
+  getChainDisplayName,
+  getDAv2Chain,
   getDisplayFromTo,
   getSynthesizedMemo,
+  tryOrNull,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -60,15 +63,12 @@ export const SetBottomSheetDetailHeight = createContext((height: number) => {});
 
 const i18 = i18n.historyOp;
 
-export function HistoryOpScreen(props: Props) {
-  const Inner = useWithAccount(HistoryOpScreenInner);
+export function HistoryOpBottomSheet(props: Props) {
+  const Inner = useWithAccount(HistoryOpInner);
   return <Inner {...props} />;
 }
 
-function HistoryOpScreenInner({
-  account,
-  route,
-}: Props & { account: Account }) {
+function HistoryOpInner({ account, route }: Props & { account: Account }) {
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   // Load the latest version of this op. If the user opens the detail screen
@@ -190,13 +190,28 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  const coinName = chainConfig.tokenSymbol;
-  const chainName = chainConfig.chainL2.name.toUpperCase();
+  let coinName = chainConfig.tokenSymbol;
+  let chainName = chainConfig.chainL2.name.toUpperCase();
+
+  // Special case: if this transfer is from or to a different coin
+  let foreignChainName: string | undefined = undefined;
+  if (op.type === "transfer") {
+    const coin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
+    if (coin != null) {
+      coinName = coin.symbol;
+      const chain = tryOrNull(() => getDAv2Chain(coin.chainId));
+      if (chain && chain.chainId !== chainConfig.chainL2.id) {
+        foreignChainName = getChainDisplayName(chain);
+        chainName = foreignChainName.toUpperCase();
+      }
+    }
+  }
 
   // Help button to explain fees, chain, etc
   const dispatcher = useContext(DispatcherContext);
   const onShowHelp = useCallback(
-    () => showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, coinName),
+    () =>
+      showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, foreignChainName),
     []
   );
 
@@ -277,18 +292,23 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
 function showHelpWhyNoFees(
   dispatcher: Dispatcher,
   chainName: string,
-  coinName: string
+  foreignChainName?: string
 ) {
+  const i1 = i18.whyNoFees;
   dispatcher.dispatch({
     name: "helpModal",
-    title: i18.whyNoFees.title(),
+    title: i1.title(),
     content: (
       <View style={ss.container.padH8}>
-        <TextPara>{i18.whyNoFees.description.firstPara(chainName)}</TextPara>
+        <TextPara>
+          {foreignChainName
+            ? i1.description.firstPara2Chain(chainName, foreignChainName)
+            : i1.description.firstPara(chainName)}
+        </TextPara>
         <Spacer h={24} />
-        <TextPara>{i18.whyNoFees.description.secondPara()}</TextPara>
+        <TextPara>{i1.description.secondPara()}</TextPara>
         <Spacer h={24} />
-        <TextPara>{i18.whyNoFees.description.thirdPara()}</TextPara>
+        <TextPara>{i1.description.thirdPara()}</TextPara>
       </View>
     ),
   });

@@ -21,6 +21,8 @@ import {
   baseSepoliaWETH,
   baseUSDC,
   baseWETH,
+  ethereumSepoliaUSDC,
+  ethereumUSDC,
   optimismSepoliaUSDC,
   optimismSepoliaWETH,
   optimismUSDC,
@@ -28,8 +30,6 @@ import {
   polygonAmoyUSDC,
   polygonUSDC,
   polygonWETH,
-  ethereumSepoliaUSDC,
-  ethereumUSDC,
 } from "./foreignToken";
 
 export type DAv2Chain = {
@@ -225,8 +225,9 @@ export function getChainDisplayName(
 ): string {
   const name = short ? chain.shortName : chain.name;
   let displayName = name.charAt(0).toUpperCase() + name.slice(1);
-  if (noSepolia && chain.isTestnet)
-    displayName = displayName.replace("Sepolia", "");
+  if (chain.isTestnet) {
+    displayName = displayName.replace("Sepolia", noSepolia ? "" : " Sepolia");
+  }
   return displayName;
 }
 

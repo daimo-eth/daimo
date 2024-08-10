@@ -62,6 +62,8 @@ export const en = {
       description: {
         firstPara: (chainName: string) =>
           `This transaction settled on ${chainName}, an Ethereum rollup.`,
+        firstPara2Chain: (chainA: string, chainB: string) =>
+          `This transaction settled on ${chainA} and ${chainB}.`,
         secondPara: () =>
           `Rollups inherit the strong security guarantees of Ethereum, at lower cost.`,
         thirdPara: () =>
