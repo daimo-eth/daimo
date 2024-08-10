@@ -36,15 +36,17 @@ export class ShovelSquared {
     this.ticking = true;
 
     try {
-      console.log(`[S^2] starting tick`);
       const startMs = performance.now();
       const shovelLatest = await this.getShovelLatest();
       const s2Latest = await this.getShovelSquaredLatest();
+      console.log(
+        `[S^2] tick started, shovelLatest ${shovelLatest}, s2Latest ${s2Latest}`
+      );
 
       const batchSize = 100;
       for (let from = s2Latest + 1; from <= shovelLatest; from += batchSize) {
         const to = Math.min(from + batchSize - 1, shovelLatest);
-        this.load(from, to);
+        await this.load(from, to);
       }
 
       const elapsedMs = (performance.now() - startMs) | 0;
@@ -191,6 +193,10 @@ export class ShovelSquared {
         	AND src_name='${trace}'
         	AND block_num BETWEEN $1 AND $2
           AND chain_id=$4
+          AND (
+            "from" IN (select addr from names)
+            OR "to" IN (select addr from names)
+          )
         UNION ALL
         SELECT
           chain_id,
@@ -209,6 +215,10 @@ export class ShovelSquared {
         	AND src_name='${event}'
           AND block_num BETWEEN $1 AND $2
           AND chain_id=$4
+          AND (
+            t IN (select addr from names)
+            OR f IN (select addr from names)
+          )
         ON CONFLICT DO NOTHING`,
       [from, to, blockTsOffset, chainID]
     );

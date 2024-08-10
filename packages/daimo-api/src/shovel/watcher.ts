@@ -37,7 +37,7 @@ export class Watcher {
 
   // Start from a block before the first Daimo tx on Base and Base Sepolia.
   private latest;
-  private batchSize = 1_000_000;
+  private batchSize = 10_000;
   private isIndexing = false;
 
   // The latest block thru which our DB index is up to date.
