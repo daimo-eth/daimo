@@ -29,7 +29,7 @@ export function RoutePellet({
     ? amountToDollars(route.toAmount, toCoin.decimals)
     : amountToDollars(fromAmount, fromCoin.decimals);
 
-  const chainName = getChainDisplayName(toChain, true);
+  const chainName = getChainDisplayName(toChain);
 
   return (
     <View style={styles.route}>

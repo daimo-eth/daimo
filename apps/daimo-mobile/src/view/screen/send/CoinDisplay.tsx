@@ -196,7 +196,9 @@ export function CoinPellet({
   return (
     <View style={{ ...styles.coinButton, backgroundColor: color.white }}>
       <Pressable onPress={onClick}>
-        <View style={styles.coinPickerWrap}>
+        <View
+          style={{ ...styles.coinPickerWrap, backgroundColor: color.white }}
+        >
           <SendPairImage coinUri={toCoin.logoURI} chainSource={chainUri} />
           <Text
             style={{
@@ -220,7 +222,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   coinPickerWrap: {
-    height: 40,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",

@@ -31,7 +31,6 @@ import { FulfillRequestButton } from "./FulfillRequestButton";
 import { MemoPellet, SendMemoButton } from "./MemoDisplay";
 import { RoutePellet } from "./RouteDisplay";
 import { SendTransferButton } from "./SendTransferButton";
-import { FeatFlag } from "../../../common/featureFlag";
 import {
   ParamListSend,
   SendNavProp,
@@ -228,8 +227,6 @@ function SendChooseAmount({
 
   // Token swapping is not supported on testnet
   const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
-  const showSendCoin = FeatFlag.sendAnyCoin(account);
-  // const showSendCoin = true;
   const isFixed = recipient.name != null || isTestnet;
 
   return (
@@ -248,9 +245,7 @@ function SendChooseAmount({
       <Spacer h={16} />
       <View style={styles.detailsRow}>
         <View style={styles.detail}>
-          {showSendCoin && !isFixed && (
-            <TextMeta color={color.gray3}>{i18.memo()}</TextMeta>
-          )}
+          {!isFixed && <TextMeta color={color.gray3}>{i18.memo()}</TextMeta>}
           <SendMemoButton
             memo={memo}
             memoStatus={memoStatus}
@@ -258,7 +253,7 @@ function SendChooseAmount({
           />
         </View>
 
-        {showSendCoin && !isFixed && (
+        {!isFixed && (
           <View style={styles.detail}>
             <TextMeta color={color.gray3}>{i18.sendAs()}</TextMeta>
             <SendCoinButton
@@ -412,8 +407,6 @@ function SendConfirm({
     nav.navigate("Home");
   };
 
-  const showSendCoin = FeatFlag.sendAnyCoin(account);
-
   return (
     <View>
       {infoBubble}
@@ -440,17 +433,17 @@ function SendConfirm({
         ) : (
           <Spacer h={40} />
         )}
-        {showSendCoin && (
-          <CoinPellet toCoin={toCoin} toChain={toChain} onClick={navToInput} />
-        )}
+        <CoinPellet toCoin={toCoin} toChain={toChain} onClick={navToInput} />
       </View>
-      <RoutePellet
-        route={route}
-        fromCoin={homeCoin}
-        fromAmount={numTokens}
-        toCoin={toCoin}
-        toChain={toChain}
-      />
+      {route && (
+        <RoutePellet
+          route={route}
+          fromCoin={homeCoin}
+          fromAmount={numTokens}
+          toCoin={toCoin}
+          toChain={toChain}
+        />
+      )}
       <Spacer h={16} />
       {button}
       {isRequest && (
