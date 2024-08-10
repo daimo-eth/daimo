@@ -17,7 +17,7 @@ export const currencyRateUSD: CurrencyExchangeRate = {
 const data: [string, string, string, number][] = [
   ["Euro", "€", "EUR", 2],
   ["Argentine Peso", "ARS", "ARS", 0],
-  ["Bolivian Boliviano", "$b", "BOB", 0],
+  ["Bolivian Boliviano", "$Bs", "BOB", 0],
   ["Turkish Lira", "₺", "TRY", 0],
   ["New Taiwan Dollar", "NT$", "TWD", 0],
   ["Ukrainian Hryvnia", "₴", "UAH", 0],
