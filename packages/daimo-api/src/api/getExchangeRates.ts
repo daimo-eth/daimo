@@ -51,10 +51,10 @@ async function fetchExchangeRates() {
   const retObj = await res.json();
 
   // Replace ARS and BOB with Blue Dollar rate if available
-  const arsUSD = getLatamRate("usdt/ars");
-  const bobUSD = getLatamRate("usdt/bob");
-  if (arsUSD) retObj.rates["ARS"] = arsUSD;
-  if (bobUSD) retObj.rates["BOB"] = bobUSD;
+  const arsUSD = await getLatamRate("usdt/ars");
+  const bobUSD = await getLatamRate("usdt/bob");
+  if (arsUSD != null) retObj.rates["ARS"] = arsUSD;
+  if (bobUSD != null) retObj.rates["BOB"] = bobUSD;
 
   const retStr = JSON.stringify(retObj);
   console.log(`[API] got currency exchange rates: ${retStr}`);
@@ -71,8 +71,10 @@ async function getLatamRate(pairPath: string) {
     return null;
   }
   const rateObj = await res.json();
-  if (rateObj.binancep2p && rateObj.binancep2p.ask > 0) {
-    const midMarketRate = (rateObj.binancep2p.ask + rateObj.binancep2p.bid) / 2;
-    return midMarketRate;
-  }
+  if (rateObj.binancep2p == null) return null;
+  const { ask, bid } = rateObj.binancep2p;
+  if (!(ask > 0 && bid > 0)) return null;
+
+  const midMarketRate = (ask + bid) / 2;
+  return midMarketRate;
 }
