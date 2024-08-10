@@ -17,10 +17,11 @@ export const currencyRateUSD: CurrencyExchangeRate = {
 const data: [string, string, string, number][] = [
   ["Euro", "€", "EUR", 2],
   ["Argentine Peso", "ARS", "ARS", 0],
+  ["Bolivian Boliviano", "$b", "BOB", 0],
+  ["Turkish Lira", "₺", "TRY", 0],
+  ["New Taiwan Dollar", "NT$", "TWD", 0],
   ["Ukrainian Hryvnia", "₴", "UAH", 0],
   ["Naira", "₦", "NGN", 0],
-  ["New Taiwan Dollar", "NT$", "TWD", 0],
-  ["Turkish Lira", "₺", "TRY", 0],
   ["Swiss Franc", "₣", "CHF", 2],
   ["Japanese Yen", "¥", "JPY", 0],
   ["Korean Won", "₩", "KRW", 0],
@@ -29,7 +30,6 @@ const data: [string, string, string, number][] = [
   ["Canadian Dollar", "C$", "CAD", 2],
   ["Australian Dollar", "A$", "AUD", 2],
   ["Singapore Dollar", "S$", "SGD", 2],
-  ["Bolivian Boliviano", "$b", "BOB", 0],
 ];
 
 export const nonUsdCurrencies = data.map(
