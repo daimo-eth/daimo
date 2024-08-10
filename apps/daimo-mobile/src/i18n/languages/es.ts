@@ -57,7 +57,7 @@ export const es: LanguageDefinition = {
       fulfilledRequest: () => `Petición satisfecha`,
       cancelledLink: () => `Link cancelado`,
       sent: () => `Enviado`,
-      received: () => `Recivida`,
+      received: () => `Recibida`,
     },
     whyNoFees: {
       title: () => `Sobre esta transferencia`,
