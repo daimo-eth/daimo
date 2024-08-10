@@ -43,7 +43,7 @@ async function healthCheckInner(
   let status = "healthy";
   if (indexer.lastGoodTickS < nowS - 10) {
     status = "watcher-not-ticking";
-  } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
+  } else if (indexer.indexLatest < indexer.rpcLatest - 5) {
     status = "watcher-behind-rpc";
   } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
     status = "node-mem-full";

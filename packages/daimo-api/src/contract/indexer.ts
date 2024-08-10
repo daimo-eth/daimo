@@ -8,7 +8,7 @@ export abstract class Indexer {
   public readonly name: string;
   protected lastProcessedBlock = 0;
 
-  protected readonly shovelSource: { event: string; trace: string };
+  public readonly shovelSource: { event: string; trace: string };
 
   constructor(name: string) {
     console.log(`[INDEXER] ${name} constructed`);

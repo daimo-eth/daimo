@@ -4,40 +4,83 @@ import { Kysely } from "kysely";
 import { Pool } from "pg";
 
 import { DB as ShovelDB } from "../codegen/dbShovel";
-import { Indexer } from "../contract/indexer";
 import { chainConfig } from "../env";
 
 // Shovels from shovel to daimo_transfers. Keeps only transfers that are to or
 // from a Daimo account. This can be replaced by a more direct route in the
 // future without affecting anything else: downstream reads daimo_transfers.
-export class ShovelSquared extends Indexer {
-  constructor() {
-    super(`SHOVEL^2`);
+export class ShovelSquared {
+  ticking = false;
+
+  private readonly pg: Pool;
+  private readonly kdb: Kysely<ShovelDB>;
+  private readonly shovelSource: { event: string; trace: string };
+
+  constructor(
+    pg: Pool,
+    kdb: Kysely<ShovelDB>,
+    shovelSource: { event: string; trace: string }
+  ) {
+    this.pg = pg;
+    this.kdb = kdb;
+    this.shovelSource = shovelSource;
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
-    // Skip if we're already done
-    const res = await kdb
-      .selectFrom("daimo_transfers")
-      .select(({ fn }) => [fn.max("block_num").as("max_block_num")])
-      .where("chain_id", "=", chainConfig.chainL2.id)
-      .executeTakeFirst();
-    const maxBlockNum = res == null ? 0 : Number(res.max_block_num);
-    if (maxBlockNum >= to) {
-      console.log(`[SHOVEL] s^2 already done: ${from}-${to}`);
-      return;
-    }
+  public async watch() {
+    setInterval(() => this.tick(), 500);
+  }
 
-    // The source shovel tables ShovelSquared shovels from are very large. Limit
-    // batch size to avoid query timeoutes.
-    const batchSize = 100;
-    for (let i = Math.max(maxBlockNum + 1, from); i <= to; i += batchSize) {
-      await this._loadInner(pg, i, Math.min(i + batchSize - 1, to));
+  public async tick() {
+    if (this.ticking) return;
+
+    this.ticking = true;
+
+    try {
+      console.log(`[S^2] starting tick`);
+      const startMs = performance.now();
+      const shovelLatest = await this.getShovelLatest();
+      const s2Latest = await this.getShovelSquaredLatest();
+
+      const batchSize = 100;
+      for (let from = s2Latest + 1; from <= shovelLatest; from += batchSize) {
+        const to = Math.min(from + batchSize - 1, shovelLatest);
+        this.load(from, to);
+      }
+
+      const elapsedMs = (performance.now() - startMs) | 0;
+      console.log(`[S^2] tick done in ${elapsedMs}ms`);
+    } catch (e) {
+      console.error(`[S^2] tick error`, e);
+    } finally {
+      this.ticking = false;
     }
   }
 
-  private async _loadInner(pg: Pool, from: number, to: number) {
+  async getShovelLatest(): Promise<number> {
+    const result = await retryBackoff(`shovel-latest-query`, () =>
+      this.pg.query(
+        `select min(num) as shovel_latest from shovel.latest
+        where src_name=$1 or src_name=$2`,
+        [this.shovelSource.event, this.shovelSource.trace]
+      )
+    );
+    return Number(result.rows[0].shovel_latest);
+  }
+
+  async getShovelSquaredLatest(): Promise<number> {
+    const result = await retryBackoff(`s^2-latest-query`, () =>
+      this.pg.query(
+        `select latest_block_num from daimo_index where chain_id=$1`,
+        [chainConfig.chainL2.id]
+      )
+    );
+    return Number(result.rows[0]?.latest_block_num || 0);
+  }
+
+  private async load(from: number, to: number) {
+    const { pg } = this;
     const { event, trace } = this.shovelSource;
+    console.log(`[S^2] loading ${from}-${to}`);
     const startMs = performance.now();
 
     // First, port over shovel blocks
@@ -172,7 +215,7 @@ export class ShovelSquared extends Indexer {
     elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[SHOVEL] s^2 add transfers: ${from}-${to} in ${elapsedMs}ms`);
 
-    // Finally, add userops
+    // Add userops
     await pg.query(
       `INSERT INTO daimo_ops (
         chain_id,
@@ -216,5 +259,15 @@ export class ShovelSquared extends Indexer {
     );
     elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[SHOVEL] s^2 add userops: ${from}-${to} in ${elapsedMs}ms`);
+
+    // Finally, update daimo_index
+    await pg.query(
+      `INSERT INTO daimo_index (chain_id, latest_block_num)
+      VALUES ($1, $2)
+      ON CONFLICT (chain_id) DO UPDATE
+      SET latest_block_num=GREATEST(daimo_index.latest_block_num, EXCLUDED.latest_block_num)`,
+      [chainID, to]
+    );
+    console.log(`[SHOVEL] s^2 done, updated chain_id ${chainID} to ${to}`);
   }
 }

@@ -40,8 +40,8 @@ export class Watcher {
   private batchSize = 1_000_000;
   private isIndexing = false;
 
-  // The latest block present in shovel DB, as of the most recent tick.
-  private shovelLatest = 0;
+  // The latest block thru which our DB index is up to date.
+  private indexLatest = 0;
   // The latest block as reported directly by the RPC (not shovel)
   private rpcLatest = 0;
   // The latest successful tick.
@@ -51,8 +51,8 @@ export class Watcher {
   // indexers[0] are indexed first concurrently, indexers[1] second, etc.
   private indexerLayers: Indexer[][] = [];
 
-  private readonly pg: Pool;
-  private readonly kdb: Kysely<ShovelDB>;
+  public readonly pg: Pool;
+  public readonly kdb: Kysely<ShovelDB>;
 
   constructor(private rpcClient: PublicClient, dbUrl?: string) {
     const { poolConfig, dbConfig } = getShovelDBConfig(dbUrl);
@@ -99,8 +99,8 @@ export class Watcher {
   }
 
   async init() {
-    this.shovelLatest = await this.getShovelLatest();
-    await this.catchUpTo(this.shovelLatest);
+    this.indexLatest = await this.getIndexLatest();
+    await this.catchUpTo(this.indexLatest);
   }
 
   // Watches shovel for new blocks, and indexes them.
@@ -122,21 +122,21 @@ export class Watcher {
 
       // Get tip block number
       const res = await Promise.all([
-        this.getShovelLatest(),
+        this.getIndexLatest(),
         this.rpcClient.getBlockNumber(),
       ]);
-      this.shovelLatest = res[0];
+      this.indexLatest = res[0];
       this.rpcLatest = Number(res[1]);
-      if (this.shovelLatest <= this.latest) {
+      if (this.indexLatest <= this.latest) {
         console.log(`[SHOVEL] skipping tick, no new blocks`);
         return;
       }
 
       // New block(s) available. Index them.
-      const { latest, shovelLatest, batchSize } = this;
-      const newLatest = await this.index(latest + 1, shovelLatest, batchSize);
+      const { latest, indexLatest, batchSize } = this;
+      const newLatest = await this.index(latest + 1, indexLatest, batchSize);
 
-      const tickSummary = JSON.stringify({ shovelLatest, latest, newLatest });
+      const tickSummary = JSON.stringify({ indexLatest, latest, newLatest });
       console.log(`[SHOVEL] tick success ${tickSummary}`);
       this.latest = newLatest;
       this.lastGoodTickS = now();
@@ -174,20 +174,27 @@ export class Watcher {
     return start + limit;
   }
 
-  async getShovelLatest(): Promise<number> {
-    const result = await retryBackoff(`shovel-latest-query`, () =>
-      this.pg.query(`select num from shovel.latest`)
+  async getIndexLatest(): Promise<number> {
+    const result = await retryBackoff(`s^2-latest-query`, () =>
+      this.pg.query(
+        `select least(
+          (select min(num) from shovel.latest),
+          (select latest_block_num from shovel.daimo_index where chain_id=$1)
+        ) as index_latest;
+        `,
+        [chainConfig.chainL2.id]
+      )
     );
-    return Number(result.rows[0].num);
+    return Number(result.rows[0].index_latest);
   }
 
   getStatus() {
-    const { lastGoodTickS, shovelLatest, rpcLatest } = this;
+    const { lastGoodTickS, indexLatest, rpcLatest } = this;
     const { idleCount, totalCount, waitingCount } = this.pg;
     return {
       lastGoodTickS,
       rpcLatest,
-      shovelLatest,
+      indexLatest,
       shovelDB: {
         idleCount,
         totalCount,

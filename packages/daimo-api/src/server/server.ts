@@ -114,12 +114,11 @@ async function main() {
 
   // Set up indexers
   const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
-  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
-  const shovelSquared = new ShovelSquared();
-  shovelWatcher.add(
+  const watcher = new Watcher(vc.publicClient, shovelDbUrl);
+  const s2 = new ShovelSquared(watcher.pg, watcher.kdb, keyReg.shovelSource);
+  watcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
-    [shovelSquared],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
@@ -127,8 +126,9 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    await shovelWatcher.init();
-    shovelWatcher.watch();
+    await watcher.init();
+    watcher.watch();
+    s2.watch();
 
     await Promise.all([
       paymaster.init(),
@@ -149,7 +149,7 @@ async function main() {
 
   console.log(`[API] serving...`);
   const router = createRouter(
-    shovelWatcher,
+    watcher,
     vc,
     db,
     bundlerClient,

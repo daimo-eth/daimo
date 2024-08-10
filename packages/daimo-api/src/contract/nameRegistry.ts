@@ -149,7 +149,6 @@ export class NameRegistry extends Indexer {
 
     // Ignore if already present
     if (this.accounts.find((a) => a.addr === reg.addr)) {
-      console.log(`[NAME-REG] skipping already-cached account ${reg.name}`);
       return;
     }
 
