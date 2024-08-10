@@ -533,6 +533,7 @@ export class DB {
         push_key: push.key,
         push_json: JSON.stringify(push.expoPush),
       })
+      .onConflict((b) => b.doNothing())
       .executeTakeFirst();
     return Number(res.numInsertedOrUpdatedRows || 0);
   }
