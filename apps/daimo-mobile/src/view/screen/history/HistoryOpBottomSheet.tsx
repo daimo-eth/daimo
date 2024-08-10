@@ -11,6 +11,7 @@ import {
   getDisplayFromTo,
   getSynthesizedMemo,
   getDAv2Chain,
+  tryOrNull,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -189,42 +190,30 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
-  let coinName = chainConfig.tokenSymbol;
-  let chainName = chainConfig.chainL2.name.toUpperCase();
+  const coinName = chainConfig.tokenSymbol;
+  const chainName = chainConfig.chainL2.name.toUpperCase();
 
   // Special case: if this transfer is from or to a different coin
+  let coinSubtitle = coinName;
+  let chainSubtitle = chainName;
   let foreignChainName: string | undefined = undefined;
   if (op.type === "transfer") {
-    const coin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
-    if (coin != null) {
-      coinName = coin.symbol;
-      const chain = tryOrNull(() => getDAv2Chain(coin.chainId));
-      if (chain && chain.chainId !== chainConfig.chainL2.id) {
-        foreignChainName = getChainDisplayName(chain);
-        chainName = foreignChainName.toUpperCase();
+    const otherCoin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
+    if (otherCoin) {
+      const otherChain = tryOrNull(() => getDAv2Chain(otherCoin.chainId));
+      if (op.preSwapTransfer?.coin) {
+        coinSubtitle = `${otherCoin.symbol} → ${coinName}`;
+        if (otherChain && otherChain.chainId !== chainConfig.chainL2.id) {
+          foreignChainName = getChainDisplayName(otherChain);
+          chainSubtitle = `${foreignChainName.toUpperCase()} → ${chainName}`;
+        }
+      } else if (op.postSwapTransfer?.coin) {
+        coinSubtitle = `${coinName} → ${otherCoin.symbol}`;
+        if (otherChain && otherChain.chainId !== chainConfig.chainL2.id) {
+          foreignChainName = getChainDisplayName(otherChain);
+          chainSubtitle = `${chainName} → ${foreignChainName.toUpperCase()}}`;
+        }
       }
-
-  // Display coin swap transfers accurately
-  const coinName = chainConfig.tokenSymbol;
-  let coinSubtitle = coinName;
-  if (op.type === "transfer") {
-    if (op.preSwapTransfer) {
-      coinSubtitle = `${op.preSwapTransfer.coin.symbol} -> ${coinName}`;
-    } else if (op.postSwapTransfer) {
-      coinSubtitle = `${coinName} -> ${op.postSwapTransfer.coin.symbol}`;
-    }
-  }
-
-  // Display cross-chain transfers accurately
-  const chainName = chainConfig.chainL2.name.toUpperCase();
-  let chainSubtitle = chainName;
-  if (op.type === "transfer") {
-    if (op.preSwapTransfer && op.preSwapTransfer.chainId) {
-      const otherChain = getDAv2Chain(op.preSwapTransfer.chainId);
-      chainSubtitle = `${otherChain.name.toUpperCase()} -> ${chainName}`;
-    } else if (op.postSwapTransfer && op.postSwapTransfer.chainId) {
-      const otherChain = getDAv2Chain(op.postSwapTransfer.chainId);
-      chainSubtitle = `${chainName} -> ${otherChain.name.toUpperCase()}`;
     }
   }
 

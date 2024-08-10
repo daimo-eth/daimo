@@ -56,7 +56,7 @@ function displayAddrLabel(type: AddrLabel): string {
     case AddrLabel.Binance:
       return `binance`;
     case AddrLabel.FastCCTP:
-      return `cross-chain instantáneo`;
+      return `cross-chain`;
     default:
       throw new Error(`Invalid AddrLabel: ${type}`);
   }

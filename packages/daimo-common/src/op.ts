@@ -45,7 +45,6 @@ export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   from: Address;
-  chainId?: number;
 };
 
 /**
@@ -56,7 +55,6 @@ export type PostSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
   to: Address;
-  chainId?: number;
 };
 
 /**
