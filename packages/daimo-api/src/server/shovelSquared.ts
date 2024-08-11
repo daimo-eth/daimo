@@ -24,6 +24,7 @@ export class ShovelSquared {
     this.pg = pg;
     this.kdb = kdb;
     this.shovelSource = shovelSource;
+    console.log(`[S^2] init, shovel source: ${JSON.stringify(shovelSource)}`);
   }
 
   public async watch() {
@@ -85,84 +86,11 @@ export class ShovelSquared {
     console.log(`[S^2] loading ${from}-${to}`);
     const startMs = performance.now();
 
-    // First, port over shovel blocks
+    // Insert remaining rows into daimo_transfers
     const chainID = chainConfig.chainL2.id;
     const daimoChain = daimoChainFromId(chainID);
     const blockTsOffset = guessTimestampFromNum(0, daimoChain);
-    await Promise.all([
-      retryBackoff(`shovel^2-blocks-eth-${from}-${to}`, async () =>
-        pg.query(
-          `INSERT INTO blocks (chain_id, block_num, block_hash, block_ts)
-          SELECT DISTINCT
-            chain_id,
-            block_num,
-            block_hash,
-            block_num * 2 + $3 as block_ts
-          FROM eth_transfers
-          WHERE ig_name='eth_transfers'
-          AND src_name='${trace}'
-          AND block_num BETWEEN $1 AND $2
-          AND chain_id=$4
-          ON CONFLICT DO NOTHING`,
-          [from, to, blockTsOffset, chainID]
-        )
-      ),
-      retryBackoff(`shovel^2-blocks-erc20-${from}-${to}`, async () =>
-        pg.query(
-          `INSERT INTO blocks (chain_id, block_num, block_hash, block_ts)
-          SELECT DISTINCT
-            chain_id,
-            block_num,
-            block_hash,
-            block_num * 2 + $3 as block_ts
-          FROM erc20_transfers
-          WHERE ig_name='erc20_transfers'
-          AND src_name='${event}'
-          AND block_num BETWEEN $1 AND $2
-          AND chain_id=$4
-          ON CONFLICT DO NOTHING`,
-          [from, to, blockTsOffset, chainID]
-        )
-      ),
-    ]);
-    let elapsedMs = (performance.now() - startMs) | 0;
-    console.log(`[SHOVEL] s^2 add blocks: ${from}-${to} in ${elapsedMs}ms`);
-
-    // Delete extraneous rows from [erc20,eth]_transfers
-    // This breaks SwapClogMatcher, which relies on the existence of transfers
-    // between (Uniswap pool, non-Daimo adddress).
-    //
-    // Disabling, replacing [erc20,eth]_transfers with daimo_transfers soon.
-    //
-    // await Promise.all([
-    //   retryBackoff(`shovel^2-del-eth-${from}-${to}`, async () =>
-    //     pg.query(
-    //       `DELETE FROM eth_transfers
-    //       WHERE ig_name='eth_transfers'
-    //       AND src_name='${trace}'
-    //       AND block_num BETWEEN $1 AND $2
-    //       AND "from" NOT IN (SELECT addr FROM names)
-    //       AND "to" NOT IN (SELECT addr FROM names)`,
-    //       [from, to]
-    //     )
-    //   ),
-    //   retryBackoff(`shovel^2-del-erc20-${from}-${to}`, async () =>
-    //     pg.query(
-    //       `DELETE FROM erc20_transfers
-    //       WHERE ig_name='erc20_transfers'
-    //       AND src_name='${event}'
-    //       AND block_num BETWEEN $1 AND $2
-    //       AND "f" NOT IN (SELECT addr FROM names)
-    //       AND "t" NOT IN (SELECT addr FROM names)`,
-    //       [from, to]
-    //     )
-    //   ),
-    // ]);
-    // elapsedMs = (performance.now() - startMs) | 0;
-    // console.log(`[SHOVEL] s^2 del transfers: ${from}-${to} in ${elapsedMs}ms`);
-
-    // Insert remaining rows into daimo_transfers
-    await pg.query(
+    const resT = await pg.query(
       `INSERT INTO daimo_transfers (
           chain_id,
           block_num,
@@ -222,11 +150,12 @@ export class ShovelSquared {
         ON CONFLICT DO NOTHING`,
       [from, to, blockTsOffset, chainID]
     );
-    elapsedMs = (performance.now() - startMs) | 0;
-    console.log(`[SHOVEL] s^2 add transfers: ${from}-${to} in ${elapsedMs}ms`);
+    const nT = resT.rowCount;
+    let elapsedMs = (performance.now() - startMs) | 0;
+    console.log(`[S^2] added ${nT} transfers: ${from}-${to} in ${elapsedMs}ms`);
 
     // Add userops
-    await pg.query(
+    const resOp = await pg.query(
       `INSERT INTO daimo_ops (
         chain_id,
         block_num,
@@ -267,8 +196,9 @@ export class ShovelSquared {
       ON CONFLICT DO NOTHING;`,
       [from, to, blockTsOffset, chainID]
     );
+    const nOp = resOp.rowCount;
     elapsedMs = (performance.now() - startMs) | 0;
-    console.log(`[SHOVEL] s^2 add userops: ${from}-${to} in ${elapsedMs}ms`);
+    console.log(`[S^2] added ${nOp} userops: ${from}-${to} in ${elapsedMs}ms`);
 
     // Finally, update daimo_index
     await pg.query(
@@ -278,6 +208,6 @@ export class ShovelSquared {
       SET latest_block_num=GREATEST(daimo_index.latest_block_num, EXCLUDED.latest_block_num)`,
       [chainID, to]
     );
-    console.log(`[SHOVEL] s^2 done, updated chain_id ${chainID} to ${to}`);
+    console.log(`[S^2] done, updated chain_id ${chainID} to ${to}`);
   }
 }
