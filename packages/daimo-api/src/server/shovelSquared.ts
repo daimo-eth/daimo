@@ -12,7 +12,7 @@ import { chainConfig } from "../env";
 export class ShovelSquared {
   ticking = false;
   latest: number = 0;
-  private batchSize = 15000;
+  private batchSize = 500;
 
   private readonly pg: Pool;
   private readonly kdb: Kysely<ShovelDB>;
