@@ -45,7 +45,12 @@ export class ShovelSquared {
       );
 
       const batchSize = 100;
-      for (let from = s2Latest + 1; from <= shovelLatest; from += batchSize) {
+
+      // Workaround: we've observed cases where shovel.latest shows block n
+      // available, but transfers from block n are still missing. Hence, retry
+      // recent blocks.
+      let from = s2Latest - 10;
+      for (; from <= shovelLatest; from += batchSize) {
         const to = Math.min(from + batchSize - 1, shovelLatest);
         await this.load(from, to);
       }
@@ -86,10 +91,35 @@ export class ShovelSquared {
     console.log(`[S^2] loading ${from}-${to}`);
     const startMs = performance.now();
 
-    // Insert remaining rows into daimo_transfers
+    // Insert blocks.
     const chainID = chainConfig.chainL2.id;
     const daimoChain = daimoChainFromId(chainID);
     const blockTsOffset = guessTimestampFromNum(0, daimoChain);
+    const res = await retryBackoff(
+      `shovel^2-blocks-erc20-${from}-${to}`,
+      async () =>
+        pg.query(
+          `INSERT INTO blocks (chain_id, block_num, block_hash, block_ts)
+          SELECT DISTINCT
+            chain_id,
+            block_num,
+            block_hash,
+            block_num * 2 + $3 as block_ts
+          FROM erc4337_user_op
+          WHERE ig_name='erc4337_user_op'
+            AND src_name='${event}'
+            AND block_num BETWEEN $1 AND $2
+            AND chain_id=$4
+            AND op_sender IN (select addr from names)
+          ON CONFLICT DO NOTHING`,
+          [from, to, blockTsOffset, chainID]
+        )
+    );
+    const nB = res.rowCount;
+    let elapsedMs = (performance.now() - startMs) | 0;
+    console.log(`[S^2] added ${nB} blocks: ${from}-${to} in ${elapsedMs}ms`);
+
+    // Insert remaining rows into daimo_transfers
     const resT = await pg.query(
       `INSERT INTO daimo_transfers (
           chain_id,
@@ -151,7 +181,7 @@ export class ShovelSquared {
       [from, to, blockTsOffset, chainID]
     );
     const nT = resT.rowCount;
-    let elapsedMs = (performance.now() - startMs) | 0;
+    elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[S^2] added ${nT} transfers: ${from}-${to} in ${elapsedMs}ms`);
 
     // Add userops
