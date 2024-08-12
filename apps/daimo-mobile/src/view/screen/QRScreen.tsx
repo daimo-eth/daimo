@@ -77,7 +77,14 @@ function QRDisplay() {
   const nav = useNav();
   if (account == null) return null;
 
-  const url = formatDaimoLink({ type: "account", account: account.name });
+  // Show our invite link, if we have one. Otherwise, just link to our account.
+  // Either way, if a user w/ app installed scans, they go to our account page.
+  const { inviteLinkStatus } = account;
+  const url = formatDaimoLink(
+    inviteLinkStatus?.isValid
+      ? inviteLinkStatus.link
+      : { type: "account", account: account.name }
+  );
 
   const subtitle = recentlyCopied
     ? i18.copiedAddress()
