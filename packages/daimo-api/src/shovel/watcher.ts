@@ -81,7 +81,7 @@ export class Watcher {
   async waitFor(blockNumber: number, tries: number): Promise<boolean> {
     const t0 = Date.now();
     let tS;
-    for (let i = 0; i < tries; i++) {
+    for (let i = 0; ; i++) {
       if (this.latest >= blockNumber) {
         tS = (Date.now() - t0) | 0;
         console.log(
@@ -89,6 +89,7 @@ export class Watcher {
         );
         return true;
       }
+      if (i >= tries) break;
       await new Promise((res) => setTimeout(res, 250));
     }
     tS = (Date.now() - t0) | 0;

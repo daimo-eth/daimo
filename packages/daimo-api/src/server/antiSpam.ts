@@ -1,3 +1,5 @@
+import { debugJson } from "@daimo/common";
+
 import { getEnvApi } from "../env";
 import { fetchWithBackoff } from "../network/fetchWithBackoff";
 
@@ -18,8 +20,8 @@ export class AntiSpam {
       reqInfo
     );
     const sendFaucet = !!resp?.sendFaucet;
-    const sendFaucetStr = sendFaucet ? "allow" : "DENY";
-    console.log(`[API] queried ${faucetUrl}: ${sendFaucetStr}`, reqInfo);
+    const sendStr = sendFaucet ? "allow" : "DENY";
+    console.log(`[API] queried ${faucetUrl}: ${sendStr} ${debugJson(reqInfo)}`);
 
     return sendFaucet;
   }

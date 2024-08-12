@@ -26,7 +26,7 @@ function getApiDBPoolConfigFromEnv(): PoolConfig {
 }
 
 export class DB {
-  private pool: Pool;
+  public readonly pool: Pool;
   public readonly kdb: Kysely<ApiDB>;
 
   constructor(poolConfig?: PoolConfig) {
