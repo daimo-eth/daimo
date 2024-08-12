@@ -260,9 +260,10 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         uint48 validUntil = uint48(bytes6(userOp.signature[0:6]));
         bytes calldata signature = userOp.signature[6:];
 
-        bytes memory messageToVerify = abi.encodePacked(validUntil, userOpHash);
+        // 38-byte challenge: [uint48 validUntil, bytes32 userOpHash]
+        bytes memory challenge = abi.encodePacked(validUntil, userOpHash);
 
-        if (_validateSignature(messageToVerify, signature)) {
+        if (_validateSignature(challenge, signature)) {
             ValidationData memory validData;
             validData.validUntil = validUntil;
             return _packValidationData(validData);
@@ -272,7 +273,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
     /// Validate any Daimo account signature, whether for a userop or 1271 sig.
     function _validateSignature(
-        bytes memory message,
+        bytes memory challenge,
         bytes calldata signatureBytes
     ) private view returns (bool) {
         Signature memory sig = abi.decode(signatureBytes, (Signature));
@@ -283,7 +284,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
 
         return
             WebAuthn.verifySignature({
-                challenge: message,
+                challenge: challenge,
                 authenticatorData: sig.authenticatorData,
                 requireUserVerification: false,
                 clientDataJSON: sig.clientDataJSON,
@@ -322,7 +323,9 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         onlyActiveAndHomeChain
         returns (bytes4 magicValue)
     {
-        if (_validateSignature(bytes.concat(message), signature)) {
+        // 52-byte challenge: [bytes20 address, bytes32 message]
+        bytes memory challenge = abi.encodePacked(address(this), message);
+        if (_validateSignature(challenge, signature)) {
             return IERC1271(this).isValidSignature.selector;
         }
         return 0xffffffff;

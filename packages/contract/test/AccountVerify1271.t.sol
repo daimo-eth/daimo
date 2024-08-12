@@ -13,7 +13,10 @@ import "./Utils.sol";
 contract AccountVerify1271Test is Test {
     EntryPoint public entryPoint;
     DaimoAccountFactoryV2 public factory;
-    DaimoAccountV2 public account;
+    DaimoAccountV2 public accA;
+    DaimoAccountV2 public accB;
+    bytes32 public messageHash =
+        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
 
     function setUp() public {
         entryPoint = new EntryPoint();
@@ -28,7 +31,7 @@ contract AccountVerify1271Test is Test {
 
         // Create a new Daimo account
         TestUSDC usdc = new TestUSDC();
-        account = factory.createAccount(
+        accA = factory.createAccount(
             8453, // home chain = Base Mainnet
             usdc,
             IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
@@ -37,58 +40,62 @@ contract AccountVerify1271Test is Test {
             key,
             0 // salt
         );
-        console.log("new account address:", address(account));
+        console.log("new account address:", address(accA));
+
+        // Create a second account, add same key
+        accB = factory.createAccount(
+            8453, // home chain = Base Mainnet
+            usdc,
+            IDaimoSwapper(address(0)), // inbound swap+bridge unsupported
+            IDaimoBridger(address(0)),
+            0,
+            key,
+            1 // salt
+        );
 
         console.log("entryPoint address:", address(entryPoint));
         console.log("factory address:", address(factory));
-        console.log("account address:", address(account));
+        console.log("accA address:", address(accA));
+        console.log("accB address:", address(accB));
     }
 
+    /// Basic verification: isValidSignature() distguishes valid/invalid.
     function testVerifySig() public view {
         // Non-malleable signature. s is <= n/2
         bytes memory sig = abi.encode(
             Utils.rawSignatureToSignature({
                 keySlot: 0,
-                challenge: abi.encodePacked(
-                    bytes32(
-                        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                    )
-                ),
-                r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
-                s: 0x2adcff2bd06fc3cdd03e21e5e4c197913e96e75cad0bc6e9c9c14607af4f3a37
+                challenge: abi.encodePacked(address(accA), messageHash),
+                r: 0x9f2895fbc4d2e804efa74d8eae3059cb90753716001e4dbcb09f42279868d332,
+                s: 0x0b61be680069f89717947cf596429c59968120bdb7f5d8abe29907fbf5d119c7
             })
         );
 
         // check a valid signature
-        bytes32 hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
-        bytes4 ret = account.isValidSignature(hashed, sig);
+        bytes4 ret = accA.isValidSignature(messageHash, sig);
         assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
 
         // check an invalid signature
-        hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec6;
-        ret = account.isValidSignature(hashed, sig);
+        bytes32 otherMessageHash = bytes32(uint256(messageHash) + 1);
+        ret = accA.isValidSignature(otherMessageHash, sig);
         assertEq(ret, bytes4(0xffffffff));
     }
 
+    /// Malleability: reject high-s signatures.
     function testSignatureMalleability() public view {
         // Malleable signature. s is > n/2
-        uint256 s = 0xd52300d32f903c332fc1de1a1b3e686e7e501350fa0bd79b29f884bb4d13eb1a;
+        uint256 s = 0x8143a23c473934de29cdf193bc198af1e36d6a4eff5d7be671535faed920530c;
         bytes memory sig = abi.encode(
             Utils.rawSignatureToSignature({
                 keySlot: 0,
-                challenge: abi.encodePacked(
-                    bytes32(
-                        0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                    )
-                ),
-                r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                challenge: abi.encodePacked(address(accA), messageHash),
+                r: 0xec408f2b9df11ad4dfdd4b26bb83c8092eb0eab0030f821c276567eb24060d40,
                 s: s
             })
         );
 
         // Malleable signature is NOT accepted
-        bytes32 hashed = 0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5;
-        bytes4 ret = account.isValidSignature(hashed, sig);
+        bytes4 ret = accA.isValidSignature(messageHash, sig);
         assertEq(ret, bytes4(0xffffffff));
 
         // Fix the signature by changing s
@@ -97,19 +104,63 @@ contract AccountVerify1271Test is Test {
         sig = abi.encode( // signature
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
-                    challenge: abi.encodePacked(
-                        bytes32(
-                            0x15fa6f8c855db1dccbb8a42eef3a7b83f11d29758e84aed37312527165d5eec5
-                        )
-                    ),
-                    r: 0x3f033e5c93d0310f33632295f64d526f7569c4cb30895f50d60de5fe9e0e6a9a,
+                    challenge: abi.encodePacked(address(accA), messageHash),
+                    r: 0xec408f2b9df11ad4dfdd4b26bb83c8092eb0eab0030f821c276567eb24060d40,
                     s: s
                 })
             );
         console.log("fixed sig s:", s);
 
         // Now it's accepted
-        ret = account.isValidSignature(hashed, sig);
+        ret = accA.isValidSignature(messageHash, sig);
         assertEq(ret, bytes4(0x1626ba7e)); // ERC1271_MAGICVALUE
+    }
+
+    /// Reuse: signature for Account A invalid for Account B with same key.
+    function testSignatureReuse() public view {
+        bytes memory sig = abi.encode(
+            Utils.rawSignatureToSignature({
+                keySlot: 0,
+                challenge: abi.encodePacked(address(accA), messageHash),
+                r: 0x9f2895fbc4d2e804efa74d8eae3059cb90753716001e4dbcb09f42279868d332,
+                s: 0x0b61be680069f89717947cf596429c59968120bdb7f5d8abe29907fbf5d119c7
+            })
+        );
+
+        // valid for account A
+        bytes4 ret = accA.isValidSignature(messageHash, sig);
+        assertEq(ret, bytes4(0x1626ba7e));
+
+        // not valid for account B with same key
+        ret = accB.isValidSignature(messageHash, sig);
+        assertEq(ret, bytes4(0xffffffff));
+
+        // simply changing the challenge also doesn't work
+        ret = accB.isValidSignature(
+            messageHash,
+            abi.encode(
+                Utils.rawSignatureToSignature({
+                    keySlot: 0,
+                    challenge: abi.encodePacked(address(accB), messageHash),
+                    r: 0x9f2895fbc4d2e804efa74d8eae3059cb90753716001e4dbcb09f42279868d332,
+                    s: 0x0b61be680069f89717947cf596429c59968120bdb7f5d8abe29907fbf5d119c7
+                })
+            )
+        );
+        assertEq(ret, bytes4(0xffffffff));
+
+        // new challenge, new signature valid for account B
+        ret = accB.isValidSignature(
+            messageHash,
+            abi.encode(
+                Utils.rawSignatureToSignature({
+                    keySlot: 0,
+                    challenge: abi.encodePacked(address(accB), messageHash),
+                    r: 0x55d3ecae828a0aa581b07d91a8f71f207c3d20d0005abdb6eb83090b1604c30a,
+                    s: 0x4a9d7475bbf2936c541d5c304bdfae7bff4cecd012f12916307b050a78e0ebba
+                })
+            )
+        );
+        assertEq(ret, bytes4(0x1626ba7e));
     }
 }

@@ -9,6 +9,7 @@ import { Buffer } from "buffer";
 import * as crypto from "crypto";
 import { createPrivateKey, createPublicKey } from "crypto";
 import * as readline from "readline";
+import { concatBytes } from "viem";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -20,6 +21,7 @@ function hexEncodedString(buffer: Buffer): string {
 }
 
 function fromHexEncodedString(hexString: string): Buffer | null {
+    if (hexString.startsWith("0x")) hexString = hexString.slice(2);
     const hexRegex = /^[0-9a-fA-F]+$/;
     if (!hexRegex.test(hexString) || hexString.length % 2 !== 0) {
         return null;
@@ -63,17 +65,41 @@ function promptUser(question: string): Promise<string> {
     });
 }
 
-async function getUserInput() {
-    const validUntil = await promptUser("Enter validUntil: ");
-    const userOpHash = await promptUser("Enter userOpHash: ");
+// Returns challenge to sign.
+async function getUserInput(): Promise<Buffer> {
+    let challenge: Uint8Array;
 
-    const validUntilHex = validUntil
-        ? parseInt(validUntil, 10).toString(16).padStart(12, "0")
-        : "000000000000";
-    const messageHex = validUntilHex + userOpHash;
+    const opSig = await promptUser("Enter 'op' for userop, 'sig' for 1271: ");
+    if (opSig === "op") {
+        const validUntil = await promptUser("Enter validUntil: ");
+        const userOpHash = await promptUser("Enter userOpHash: ");
+
+        const validUntilHex = validUntil
+            ? parseInt(validUntil, 10).toString(16).padStart(12, "0")
+            : "000000000000";
+        const validBuf = fromHexEncodedString(validUntilHex);
+        const opHashBuf = fromHexEncodedString(userOpHash);
+        assert(validBuf?.length === 6);
+        assert(opHashBuf?.length === 32);
+        challenge = concatBytes([validBuf, opHashBuf]);
+    } else if (opSig === "sig") {
+        const addr = await promptUser("Enter account addr: ");
+        const message = await promptUser("Enter bytes32 message: ");
+        const addrBuf = fromHexEncodedString(addr);
+        const msgBuf = fromHexEncodedString(message);
+        assert(addrBuf?.length === 20);
+        assert(msgBuf?.length === 32);
+        challenge = concatBytes([addrBuf, msgBuf]);
+    } else {
+        throw new Error("invalid input, expected op or sig");
+    }
 
     rl.close();
-    return messageHex;
+    return Buffer.from(challenge);
+}
+
+function assert(condition: boolean, msg?: string): asserts condition {
+    if (!condition) throw new Error(msg || "Assertion failed");
 }
 
 const pemKeyString = `-----BEGIN PRIVATE KEY-----
@@ -83,14 +109,9 @@ Cf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3
 -----END PRIVATE KEY-----`;
 
 (async () => {
-    const messageHex = await getUserInput();
-    const messageBuffer = fromHexEncodedString(messageHex);
-    if (!messageBuffer) {
-        console.error("Invalid messageHex");
-        return;
-    }
+    const challengeBuf = await getUserInput();
 
-    const challengeB64 = messageBuffer.toString("base64");
+    const challengeB64 = challengeBuf.toString("base64");
     const challengeB64URL = base64ToBase64url(challengeB64);
     const clientDataJSON = `{"type":"webauthn.get","challenge":"${challengeB64URL}","origin":"https://daimo.xyz"}`;
     console.log("clientDataJSON", clientDataJSON);

@@ -43,7 +43,7 @@ contract AccountSendUseropTest is Test {
     );
 
     function testSimpleOp() public {
-        // Generated from private key in packages/contract/script/createUserOpSignature.ts
+        // Generated from private key in packages/contract/script/createSignature.ts
         uint256[2] memory key1u = [
             0x65a2fa44daad46eab0278703edb6c4dcf5e30b8a9aec09fdc71a56f52aa392e4,
             0x4a7a9e4604aa36898209997288e902ac544a555e4b5e0a9efef2b59233f3f437
@@ -59,7 +59,7 @@ contract AccountSendUseropTest is Test {
 
         // (r, s) signature generated using (public key, user op hash, validUntil)
         // as inputs. The signature is can be generated using the script in
-        // packages/contract/script/createUserOpSignature.ts
+        // packages/contract/script/createSignature.ts
         bytes memory ownerSig = abi.encodePacked(
             validUntil,
             abi.encode(
