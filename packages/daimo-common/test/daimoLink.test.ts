@@ -1,12 +1,15 @@
 import assert from "node:assert";
 import test from "node:test";
 
+import { base, optimism } from "../src/chain";
 import {
   DaimoLink,
+  DaimoLinkRequest,
   formatDaimoLink,
   formatDaimoLinkDirect,
   parseDaimoLink,
 } from "../src/daimoLink";
+import { baseUSDC, baseUSDT, optimismUSDC } from "../src/foreignToken";
 
 const testCases: [string, DaimoLink | null][] = [
   [
@@ -27,21 +30,25 @@ const testCases: [string, DaimoLink | null][] = [
   ],
   ["https://daimo.com/l/account/0x0", { type: "account", account: "0x0" }],
   [
-    "https://daimo.com/l/request?to=dcposch&n=1.23&id=123",
+    "https://daimo.com/l/request?to=dcposch&n=1.23&id=123&c=8453&t=usdc",
     {
       type: "request",
       recipient: "dcposch",
       dollars: "1.23",
       requestId: "123",
+      toCoin: baseUSDC,
+      toChain: base,
     },
   ],
   [
-    "https://daimo.com/l/request?to=dcposch.eth&n=4.20&id=555",
+    "https://daimo.com/l/request?to=dcposch.eth&n=4.20&id=555&c=8453&t=usdc",
     {
       type: "request",
       recipient: "dcposch.eth",
       dollars: "4.20",
       requestId: "555",
+      toCoin: baseUSDC,
+      toChain: base,
     },
   ],
   [
@@ -97,13 +104,21 @@ const testCases: [string, DaimoLink | null][] = [
   ["https://daimo.com/l/account", null],
   ["https://daimo.com/l/request", null],
   ["https://daimo.com/l/request/", null],
-  ["https://daimo.com/l/request/0x0", null],
+  ["https://daimo.com/l/request?to=0x0", null],
   [
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1/123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.1.1&id=123",
     null,
   ],
   [
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93///1.1",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&c=1",
+    null,
+  ],
+  [
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&t=usdc",
+    null,
+  ],
+  [
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&c=1&t=matic",
     null,
   ],
   [
@@ -176,17 +191,68 @@ test("DaimoLink normalization", () => {
 
   // Ensure that amount is normalized
   const variants = [
-    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00001&id=123",
-    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.0&id=123",
-    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1&id=123",
-    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00001&id=123&c=8453&t=usdc",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.0&id=123&c=8453&t=usdc",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1&id=123&c=8453&t=usdc",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123&c=8453&t=usdc",
   ];
   const correct =
-    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123";
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123&c=8453&t=usdc";
 
   for (const variant of variants) {
     const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);
     assert.strictEqual(roundtrip, correct);
+  }
+});
+
+test("DaimoLinkRequest parsing", () => {
+  const linkTestCases: [string, DaimoLinkRequest | null][] = [
+    // No amount
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&id=123&c=8453&t=usdt",
+      {
+        type: "request",
+        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+        toChain: base,
+        toCoin: baseUSDT,
+        requestId: "123",
+      },
+    ],
+    // No request id
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=8453&t=usdt",
+      {
+        type: "request",
+        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+        toChain: base,
+        toCoin: baseUSDT,
+        dollars: "1.23",
+      },
+    ],
+    // Receive on Optimism
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=10&t=usdc",
+      {
+        type: "request",
+        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+        toChain: optimism,
+        toCoin: optimismUSDC,
+        dollars: "1.23",
+      },
+    ],
+    // Invalid chain
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=999999999999&t=usdc",
+      null,
+    ],
+    // Invalid coin
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=8453&t=wubbalubba",
+      null,
+    ],
+  ];
+  for (const [url, link] of linkTestCases) {
+    assert.deepStrictEqual(parseDaimoLink(url), link);
   }
 });
 

@@ -50,7 +50,7 @@ export type DaimoRequestStatus = {
   link: DaimoLinkRequest;
 
   recipient: EAccount;
-  requestId: `${bigint}`;
+  requestId?: `${bigint}`;
   fulfilledBy?: EAccount;
   isValidInvite?: boolean;
 };

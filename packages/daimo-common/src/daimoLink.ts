@@ -1,5 +1,7 @@
-import { Hex, getAddress, Address } from "viem";
+import { Address, Hex, getAddress } from "viem";
 
+import { DAv2Chain, getDAv2Chain } from "./chain";
+import { ForeignToken, getForeignCoinBySymbolAndChain } from "./foreignToken";
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
 // TODO: today, we use https://daimo.com/l/... deeplinks in both staging and prod.
@@ -39,10 +41,12 @@ export type DaimoLinkAccount = {
 /** Represents a request for $x to be paid to y address. */
 export type DaimoLinkRequest = {
   type: "request";
-  requestId: BigIntStr;
+  requestId?: BigIntStr;
   /** Requester eAccountStr */
   recipient: string;
-  dollars: DollarStr;
+  dollars?: DollarStr;
+  toCoin: ForeignToken;
+  toChain: DAv2Chain;
 };
 
 /** Represents a request for $x to be paid to y address. */
@@ -113,11 +117,21 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
       return `${linkBase}/account/${link.account}`;
     }
     case "request": {
-      const params = new URLSearchParams({
-        to: link.recipient,
-        n: link.dollars,
-        id: link.requestId.toString(),
-      });
+      const params = new URLSearchParams();
+
+      params.append("to", link.recipient);
+
+      if (link.dollars) {
+        params.append("n", link.dollars);
+      }
+
+      if (link.requestId) {
+        params.append("id", link.requestId.toString());
+      }
+
+      params.append("c", link.toChain.chainId.toString());
+      params.append("t", link.toCoin.symbol.toLowerCase());
+
       return `${linkBase}/request?${params.toString()}`;
     }
     case "requestv2": {
@@ -204,17 +218,47 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       const id = url.searchParams.get("id");
       const to = url.searchParams.get("to");
       const n = url.searchParams.get("n");
+      const c = url.searchParams.get("c");
+      const t = url.searchParams.get("t");
 
-      if (!id || !to || !n) return null;
+      if (!to || !c || !t) return null;
 
-      const dollarNum = parseFloat(zDollarStr.parse(n));
-      if (dollarNum <= 0) return null;
-      const dollars = dollarNum.toFixed(2) as DollarStr;
-      if (dollars === "0.00") return null;
+      let toChain: DAv2Chain | undefined;
+      try {
+        toChain = getDAv2Chain(parseInt(c, 10));
+      } catch (e) {
+        console.warn(`[LINK] ignoring invalid chain ${c}: ${e}`);
+        return null;
+      }
 
-      const requestId = `${BigInt(id)}` as BigIntStr;
+      let toCoin: ForeignToken | undefined;
+      try {
+        toCoin = getForeignCoinBySymbolAndChain(t, toChain.chainId);
+      } catch (e) {
+        console.warn(`[LINK] ignoring invalid coin ${t}: ${e}`);
+        return null;
+      }
 
-      return { type: "request", requestId, recipient: to, dollars };
+      const result: DaimoLinkRequest = {
+        type: "request",
+        recipient: to,
+        toCoin,
+        toChain,
+      };
+
+      if (n) {
+        const dollarNum = parseFloat(zDollarStr.parse(n));
+        if (dollarNum <= 0) return null;
+        const dollars = dollarNum.toFixed(2) as DollarStr;
+        if (dollars === "0.00") return null;
+        result.dollars = dollars;
+      }
+
+      if (id) {
+        result.requestId = `${BigInt(id)}` as BigIntStr;
+      }
+
+      return result;
     }
     case "r": {
       // new request links

@@ -1,4 +1,6 @@
 import {
+  DAv2Chain,
+  DaimoLinkRequest,
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
@@ -9,9 +11,8 @@ import {
   baseUSDC,
   dollarsToAmount,
   getAccountName,
-  now,
-  DAv2Chain,
   getDAv2Chain,
+  now,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -127,16 +128,29 @@ function SendScreenInner({
           );
         } else {
           // Backcompat with old request links
-          return (
-            <SendConfirm
-              account={account}
-              recipient={recipient}
-              memo={memo}
-              money={usdEntry(requestStatus.link.dollars)}
-              toCoin={toCoin}
-              toChain={toChain}
-            />
-          );
+          if (requestStatus.link.dollars == null) {
+            return (
+              <SendChooseAmount
+                recipient={recipient}
+                onCancel={goBack}
+                daimoChain={daimoChain}
+                defaultHomeCoin={(link as DaimoLinkRequest).toCoin ?? toCoin}
+                defaultHomeChain={(link as DaimoLinkRequest).toChain ?? toChain}
+                account={account}
+              />
+            );
+          } else {
+            return (
+              <SendConfirm
+                account={account}
+                recipient={recipient}
+                memo={memo}
+                money={usdEntry(requestStatus.link.dollars)}
+                toCoin={(link as DaimoLinkRequest).toCoin ?? toCoin}
+                toChain={(link as DaimoLinkRequest).toChain ?? toChain}
+              />
+            );
+          }
         }
       } else return <CenterSpinner />;
     } else if (recipient) {
