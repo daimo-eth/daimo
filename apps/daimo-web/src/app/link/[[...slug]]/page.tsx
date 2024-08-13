@@ -198,20 +198,28 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
       if (fulfilledBy === undefined) {
-        return {
+        const result: TitleDesc = {
           name: `${name}`,
-          action: `is requesting`,
-          dollars: `${res.link.dollars}`,
+          action: `is requesting payment`,
           description: "Pay with Daimo",
           linkStatus: res,
         };
+        if (res.link.dollars) {
+          result.action = `is requesting`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       } else {
-        return {
+        const result: TitleDesc = {
           name: `${name}`,
-          action: `requested`,
-          dollars: `${res.link.dollars}`,
+          action: `requested payment`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
+        if (res.link.dollars) {
+          result.action = `requested`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       }
     }
     case "requestv2": {

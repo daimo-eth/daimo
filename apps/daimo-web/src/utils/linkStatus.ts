@@ -100,19 +100,27 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
       if (fulfilledBy === undefined) {
-        return {
+        const result: LinkStatusDesc = {
           name: `${name}`,
-          action: `is requesting`,
-          dollars: `${res.link.dollars}`,
+          action: `is requesting payment`,
           description: "Pay with Daimo",
         };
+        if (res.link.dollars) {
+          result.action = `is requesting`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       } else {
-        return {
+        const result: LinkStatusDesc = {
           name: `${name}`,
-          action: `requested`,
-          dollars: `${res.link.dollars}`,
+          action: `requested payment`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
+        if (res.link.dollars) {
+          result.action = `requested`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       }
     }
     case "requestv2": {
