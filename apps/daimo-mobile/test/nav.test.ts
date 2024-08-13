@@ -1,4 +1,4 @@
-import { DaimoLink } from "@daimo/common";
+import { base, baseUSDC, DaimoLink } from "@daimo/common";
 
 import { Dispatcher } from "../src/action/dispatch";
 import { MainNav, handleDeepLink } from "../src/common/nav";
@@ -45,6 +45,8 @@ describe("nav", () => {
         recipient: "alice",
         dollars: "1.23",
         requestId: "456",
+        toCoin: baseUSDC,
+        toChain: base,
       },
     });
   });
