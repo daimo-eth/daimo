@@ -27,7 +27,7 @@ const testCases: [string, DaimoLink | null][] = [
   ],
   ["https://daimo.com/l/account/0x0", { type: "account", account: "0x0" }],
   [
-    "https://daimo.com/l/request/dcposch/1.23/123",
+    "https://daimo.com/l/request?to=dcposch&n=1.23&id=123",
     {
       type: "request",
       recipient: "dcposch",
@@ -36,7 +36,7 @@ const testCases: [string, DaimoLink | null][] = [
     },
   ],
   [
-    "https://daimo.com/l/request/dcposch.eth/4.20/555",
+    "https://daimo.com/l/request?to=dcposch.eth&n=4.20&id=555",
     {
       type: "request",
       recipient: "dcposch.eth",
@@ -176,13 +176,13 @@ test("DaimoLink normalization", () => {
 
   // Ensure that amount is normalized
   const variants = [
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00001&id=123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.0&id=123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1&id=123",
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123",
   ];
   const correct =
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00/123";
+    "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00&id=123";
 
   for (const variant of variants) {
     const roundtrip = formatDaimoLink(parseDaimoLink(variant)!);

@@ -113,13 +113,12 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
       return `${linkBase}/account/${link.account}`;
     }
     case "request": {
-      return [
-        linkBase,
-        "request",
-        link.recipient,
-        link.dollars,
-        link.requestId.toString(),
-      ].join("/");
+      const params = new URLSearchParams({
+        to: link.recipient,
+        n: link.dollars,
+        id: link.requestId.toString(),
+      });
+      return `${linkBase}/request?${params.toString()}`;
     }
     case "requestv2": {
       const base = [linkBase, "r", link.recipient, link.dollars, link.id].join(
@@ -202,15 +201,20 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       return { type: "account", account };
     }
     case "request": {
-      if (parts.length !== 4) return null;
-      const recipient = parts[1];
-      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
-      if (!(dollarNum > 0)) return null;
-      const dollars = dollarNum.toFixed(2) as DollarStr;
-      const requestId = `${BigInt(parts[3])}` as BigIntStr;
+      const id = url.searchParams.get("id");
+      const to = url.searchParams.get("to");
+      const n = url.searchParams.get("n");
 
+      if (!id || !to || !n) return null;
+
+      const dollarNum = parseFloat(zDollarStr.parse(n));
+      if (dollarNum <= 0) return null;
+      const dollars = dollarNum.toFixed(2) as DollarStr;
       if (dollars === "0.00") return null;
-      return { type: "request", requestId, recipient, dollars };
+
+      const requestId = `${BigInt(id)}` as BigIntStr;
+
+      return { type: "request", requestId, recipient: to, dollars };
     }
     case "r": {
       // new request links
