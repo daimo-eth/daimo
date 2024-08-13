@@ -134,8 +134,8 @@ function SendScreenInner({
                 recipient={recipient}
                 onCancel={goBack}
                 daimoChain={daimoChain}
-                defaultHomeCoin={(link as DaimoLinkRequest).toCoin ?? toCoin}
-                defaultHomeChain={(link as DaimoLinkRequest).toChain ?? toChain}
+                defaultHomeCoin={(link as DaimoLinkRequest).toCoin}
+                defaultHomeChain={(link as DaimoLinkRequest).toChain}
                 account={account}
               />
             );
@@ -146,8 +146,8 @@ function SendScreenInner({
                 recipient={recipient}
                 memo={memo}
                 money={usdEntry(requestStatus.link.dollars)}
-                toCoin={(link as DaimoLinkRequest).toCoin ?? toCoin}
-                toChain={(link as DaimoLinkRequest).toChain ?? toChain}
+                toCoin={(link as DaimoLinkRequest).toCoin}
+                toChain={(link as DaimoLinkRequest).toChain}
               />
             );
           }
