@@ -1,6 +1,6 @@
-import { LangDef } from "./en";
-import { FAQ } from "../../utils/parseFAQ";
+import { LangDef, FAQ } from "./en";
 
+// Spanish I18N
 export const es: LangDef = {
   lang: "es",
   meta: {
@@ -27,66 +27,6 @@ export const es: LangDef = {
     orVisit: () => "O visita",
     onYourPhone: () => "en tu teléfono",
     mac: () => "MAC",
-  },
-
-  frame: {
-    callback: {
-      DaimoInviteFrame: () => "✳️ Marco de Invitación de Daimo",
-      inviteFrameNotFound: (frameId: any) =>
-        `Marco de invitación ${frameId} no encontrado`,
-      text: () =>
-        "Este es un marco de Farcaster que invita a las personas a Daimo." +
-        "¿Quieres publicar tu propio marco de invitación personalizado? Envíanos un correo electrónico a ",
-    },
-    invite: {
-      callback: {
-        welcomeClaimInvite: () => "Bienvenido · Reclamar Invitación + $10 ✳️",
-      },
-      frameMetadata: {
-        label: () => `✳️ Obtén Daimo ✳️`,
-      },
-      metadata: {
-        title: () => `Marco de Invitación de Daimo`,
-        description: () =>
-          "Pagos rápidos, custodia propia, código abierto, invitaciones con un solo clic.",
-        openGraph: {
-          title: () => `Marco de Invitación de Daimo`,
-          description: () =>
-            "Pagos rápidos, custodia propia, código abierto, invitaciones con un solo clic.",
-        },
-      },
-      html: {
-        title: () => "✳️ Marco de Invitación de Daimo",
-        body: (name: string) =>
-          `Este es un marco de invitación personalizado de ${name} en Daimo. Publícalo en Farcaster para invitar a las personas a unirse. Recibirán $10 USDC al comenzar.`,
-      },
-    },
-
-    linkStatus: {
-      notDaimoLink: () => "No es un enlace de Daimo: ",
-      notFound: () => "No encontrado: ",
-      noFrame: () => "Sin marco para el enlace: ",
-    },
-
-    farcasterClient: {
-      wrongFid: () => "FID incorrecto",
-    },
-
-    frameLink: {
-      requests: {
-        invalidRequest: () => "Solicitud de marco no válida",
-        unknownFrame: (pathname: string) => `Marco desconocido: ${pathname}`,
-      },
-
-      response: {
-        bonus: () => "BONO",
-        noBonus: () => "SIN BONO",
-        claimInvite: (authMsg: string) => `✳️ Reclamar Invitación · ${authMsg}`,
-        notAPowerUser: () => "No es un usuario avanzado",
-        fidToHigh: () => "FID demasiado alto",
-        notOnList: () => "No está en la lista",
-      },
-    },
   },
 
   link: {
@@ -139,26 +79,6 @@ export const es: LangDef = {
         getDaimo: () => "Obtén Daimo para enviar o recibir pagos",
       },
     },
-  },
-
-  pos: {
-    metadata: {
-      title: () => "Punto de Venta de Daimo",
-      description: () => "Pago USDC con un solo click.",
-    },
-
-    newOrder: () => "NUEVA ORDEN",
-    total: (euros: string, dollars: string) => `Total: €${euros} ~ ${dollars}`,
-    placeOrder: () => "Poner Orden",
-    ordered: () => "✅ ordenado",
-    error: (err: any) => `❌ ${err}`,
-    latestOrders: () => "ÚLTIMAS ORDERS",
-    loading: () => "Cargando...",
-    noOrdersYet: () => "Ninguna orden aún",
-    link: () => "link",
-    unpaid: () => "No pagada",
-    paid: () => "Pagada",
-    cancelled: () => "Cancelada",
   },
 
   profile: {
@@ -230,7 +150,7 @@ export const es: LangDef = {
     },
     invitePreview: {
       bonusForPowerUsers: () => "+$10 BONO PARA USUARIOS AVANZADOS",
-      JoinNameOn: (name: string) => `Únete a ${name} en`,
+      joinNameOn: (name: string) => `Únete a ${name} en`,
     },
   },
 

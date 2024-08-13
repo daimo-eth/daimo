@@ -1,11 +1,9 @@
 import { EAccount, assert } from "@daimo/common";
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getAddress } from "viem";
 
 import { TextH1, TextLight } from "../../../../components/typography";
-import { getI18N } from "../../../../i18n";
 import { getAbsoluteUrl } from "../../../../utils/getAbsoluteUrl";
 import { rpc } from "../../../../utils/rpc";
 import { getFrameMetadata } from "../../frameUtils";
@@ -15,8 +13,6 @@ interface LinkProps {
 }
 
 export async function generateMetadata(props: LinkProps): Promise<Metadata> {
-  const i18n = getI18N(headers().get("accept-language"));
-
   // Load the user we're showing
   let eAcc: EAccount | null = null;
   try {
@@ -35,7 +31,7 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   const frameMetadata = getFrameMetadata({
     buttons: [
       {
-        label: i18n.frame.invite.frameMetadata.label(),
+        label: `✳️ Get Daimo ✳️`,
       },
     ],
     image: frameImg,
@@ -43,11 +39,11 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
   });
 
   const metadata: Metadata = {
-    title: i18n.frame.invite.metadata.title(),
-    description: i18n.frame.invite.metadata.description(),
+    title: "Daimo Invite Frame",
+    description: "Fast payments, self custody, open source, one-tap invites.",
     openGraph: {
-      title: i18n.frame.invite.metadata.openGraph.title(),
-      description: i18n.frame.invite.metadata.openGraph.description(),
+      title: "Daimo Invite Frame",
+      description: "Fast payments, self custody, one-tap invites.",
       images: [frameImg],
     },
     other: {
@@ -59,22 +55,17 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 }
 
 export default async function Page({ params }: LinkProps) {
-  const i18n = getI18N(headers().get("accept-language"));
   const addr = getAddress(params.addr);
   const eAcc = await rpc.getEthereumAccount.query({ addr });
 
-  let name = eAcc.name;
-  if (name == undefined) {
-    name = "undefined";
-  }
-
-  const i18 = i18n.frame.invite.html;
-
   return (
     <div className="p-4 max-w-md">
-      <TextH1>{i18.title()}</TextH1>
+      <TextH1>✳️ Daimo Invite Frame</TextH1>
       <div className="h-4" />
-      <TextLight>{i18.body(name)}</TextLight>
+      <TextLight>
+        This is a personalized frame invite from {eAcc.name} on Daimo. Post to
+        Farcaster to invite people to join. They&apos;ll get a starter $10 USDC.
+      </TextLight>
     </div>
   );
 }

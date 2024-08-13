@@ -20,7 +20,6 @@ import {
   TextH3Subtle,
 } from "../../components/typography";
 import { rpcHook } from "../../utils/rpcHook";
-import { useI18N } from "../../i18n/context";
 
 export interface POSItem {
   name: string;
@@ -97,37 +96,34 @@ function NewOrderForm({
     }, 1200);
   });
 
-  const i18n = useI18N();
-  const i18 = i18n.pos;
-
   return (
     <div className="flex flex-col items-stretch">
-      <TextH3Subtle>{i18.newOrder()}</TextH3Subtle>
+      <TextH3Subtle>NEW ORDER</TextH3Subtle>
       <Spacer h={16} />
       <div className="flex flex-wrap gap-2 justify-center">
         <InputNumber euros={euros} setEuros={setEuros} />
       </div>
       <Spacer h={16} />
-      <TextH1>{i18.total(euros.toFixed(2), dollars)}</TextH1>
+      <TextH1>
+        Total: €{euros.toFixed(2)} ~ ${dollars}
+      </TextH1>
       <Spacer h={16} />
       <button
         className="bg-grayLight rounded-lg p-4 flex flex-col items-center disabled:opacity-25"
         onClick={placeOrder}
         disabled={mut.isPending || mut.isSuccess || euros === 0}
       >
-        <TextH1>{i18.placeOrder()}</TextH1>
+        <TextH1>Place Order</TextH1>
       </button>
       <Spacer h={8} />
       <center>
         {mut.isIdle && <TextBold textColor="text-midnight">&nbsp;</TextBold>}
         {mut.isPending && <TextBold textColor="text-midnight">...</TextBold>}
         {mut.isSuccess && (
-          <TextBold textColor="text-midnight">{i18.ordered()}</TextBold>
+          <TextBold textColor="text-midnight">✅ ordered</TextBold>
         )}
         {mut.isError && (
-          <TextBold textColor="text-midnight">
-            {i18.error(mut.error.message)}
-          </TextBold>
+          <TextBold textColor="text-midnight">❌ {mut.error.message}</TextBold>
         )}
       </center>
     </div>
@@ -170,19 +166,16 @@ function RecentOrders({ orders }: { orders?: TagRedirectEvent[] }) {
     return d as DaimoRequestV2Status;
   });
 
-  const i18n = useI18N();
-  const i18 = i18n.pos;
-
   return (
     <div>
-      <TextH3Subtle>{i18.latestOrders()}</TextH3Subtle>
+      <TextH3Subtle>LATEST ORDERS</TextH3Subtle>
       <Spacer h={16} />
       {orders == null && (
-        <TextBold textColor="text-midnight">{i18.loading()}</TextBold>
+        <TextBold textColor="text-midnight">Loading...</TextBold>
       )}
       {isError && <TextError>{error.message}</TextError>}
       {orders?.length === 0 && (
-        <TextBold textColor="text-midnight">{i18.noOrdersYet()}</TextBold>
+        <TextBold textColor="text-midnight">No orders yet</TextBold>
       )}
       <div className="flex flex-col gap-4">
         {orders?.map((order, index) => (
@@ -218,11 +211,6 @@ function Order({
   const isFulfilled = stat?.status === DaimoRequestState.Fulfilled;
   const isCancelled = stat?.status === DaimoRequestState.Cancelled;
 
-  const i18n = useI18N();
-  const i18 = i18n.pos;
-
-  // Change timeAgoDefinition to maybe take a string instead of Locale for simplicity
-
   // Display whether order is paid
   const font = `font-semibold  text-xl`; // + (index === 0 ? `text-xl` : `text-md`);
   return (
@@ -235,9 +223,9 @@ function Order({
       </div>
       <div className="w-52">
         <p className={"text-sm font-semibold text-midnight"}>
-          {isOrdered && i18.unpaid()}
-          {isFulfilled && i18.paid()}
-          {isCancelled && i18.cancelled()}
+          {isOrdered && "Unpaid"}
+          {isFulfilled && "Paid"}
+          {isCancelled && "Cancelled"}
         </p>
         <p className={"overflow-hidden whitespace-nowrap text-ellipsis"}>
           {link.memo || ""}
@@ -253,7 +241,7 @@ function Order({
       </div>
       <div className="w-16 text-right">
         <a className="text-primary" href={order.link} target="_blank">
-          {i18.link()}
+          link
         </a>
       </div>
     </div>

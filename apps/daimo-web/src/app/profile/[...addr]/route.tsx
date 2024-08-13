@@ -2,7 +2,8 @@ import { LRUCache } from "lru-cache";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
-import { useI18N } from "../../../i18n/context";
+import { getI18N } from "../../../i18n";
+import { getReqLang } from "../../../i18n/server";
 import { rpc } from "../../../utils/rpc";
 
 type Context = {
@@ -21,7 +22,7 @@ export const dynamic = "force-dynamic";
 export async function GET(_: Request, { params }: Context) {
   const addr = params.addr[0];
 
-  const i18n = useI18N();
+  const i18n = getI18N(getReqLang());
   const i18 = i18n.profile;
 
   try {

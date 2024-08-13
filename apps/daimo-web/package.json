@@ -24,7 +24,6 @@
     "framer-motion": "^11.0.5",
     "lokijs": "^1.5.12",
     "lru-cache": "^10.2.0",
-    "marked": "^9.0.3",
     "next": "^13.5.4",
     "pino-pretty": "^10.2.3",
     "react": "18.2.0",
@@ -39,6 +38,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3001",
+    "test": "tsc --noEmit",
     "build": "next build",
     "start": "next start",
     "lint": "npx depcheck --ignores=@types/react,@types/react-dom,autoprefixer,tailwindcss,encoding,lokijs,pino-pretty && next lint",

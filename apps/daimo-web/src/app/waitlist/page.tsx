@@ -9,6 +9,7 @@ import { rpc } from "../../utils/rpc";
 export default function WaitlistPage() {
   const i18n = useI18N();
   const i18 = i18n.waitlist;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [socials, setSocials] = useState("");

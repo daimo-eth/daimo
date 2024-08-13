@@ -1,6 +1,5 @@
-"use client";
-
-import { useI18N } from "../../i18n/context";
+import { getI18N } from "../../i18n";
+import { getReqLang } from "../../i18n/server";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function InvitePreviewImg({ name }: { name: string }) {
@@ -35,7 +34,7 @@ export function InvitePreviewImg({ name }: { name: string }) {
 }
 
 function Content({ name }: { name: string }) {
-  const i18n = useI18N();
+  const i18n = getI18N(getReqLang());
   const i18 = i18n.components.invitePreview;
   return (
     <div
@@ -61,7 +60,7 @@ function Content({ name }: { name: string }) {
           gap: 8,
         }}
       >
-        {i18.JoinNameOn(name)} <span style={{ color: "#489e35" }}>Daimo.</span>
+        {i18.joinNameOn(name)} <span style={{ color: "#489e35" }}>Daimo.</span>
       </div>
     </div>
   );

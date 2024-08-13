@@ -4,10 +4,8 @@ import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
 import { chainsDaimoL2, Providers } from "../../../components/Providers";
-import { I18NProvider } from "../../../i18n/context";
+import { I18NProvider, useI18N } from "../../../i18n/context";
 import { LinkStatusDesc } from "../../../utils/linkStatus";
-import { getI18N } from "../../../i18n";
-import { getReqLang } from "../../../i18n/server";
 
 export default function LinkPage({
   lang,
@@ -34,11 +32,11 @@ function LinkPageInner({
   statusDesc: LinkStatusDesc | null;
   pfp: string | undefined;
 }) {
-  const i18n = getI18N(getReqLang());
+  const i18n = useI18N();
+
   const { name, action, dollars, description, linkStatus, memo } =
     statusDesc || {
-      title: i18n.l.defaultMetadata.title(),
-      description: i18n.l.defaultMetadata.description(),
+      description: i18n.meta.description(),
     };
 
   return (
@@ -56,7 +54,8 @@ function LinkPageInner({
                 className="flex h-[32px] w-[32px]"
                 style={{ position: "relative" }}
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={pfp}
                   alt={"Profile"}
                   width={32}

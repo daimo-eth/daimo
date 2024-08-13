@@ -1,17 +1,13 @@
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import { getAddress } from "viem";
 
 import { PointOfSalePage } from "./PointOfSalePage";
-import { getI18N } from "../../i18n";
 import { RpcHookProvider } from "../../utils/rpcHook";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const i18n = getI18N(headers().get("accept-language"));
-  const i18 = i18n.pos.metadata;
   return {
-    title: i18.title(),
-    description: i18.description(),
+    title: "Daimo Point-Of-Sale",
+    description: "One-tap USDC checkout.",
     icons: {
       icon: "/logo-web-favicon.png",
     },

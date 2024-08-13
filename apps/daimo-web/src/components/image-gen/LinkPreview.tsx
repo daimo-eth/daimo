@@ -1,7 +1,6 @@
-"use client";
-
 import { UserBubble } from "./UserBubble";
-import { useI18N } from "../../i18n/context";
+import { getI18N } from "../../i18n";
+import { getReqLang } from "../../i18n/server";
 import { getAbsoluteUrl } from "../../utils/getAbsoluteUrl";
 
 export function LinkPreviewImg({
@@ -131,7 +130,7 @@ function Footer({
   paidBy?: string;
   cancelled?: boolean;
 }) {
-  const i18n = useI18N();
+  const i18n = getI18N(getReqLang());
   const i18 = i18n.components.linkPreview;
   const hasStatus = paidBy || cancelled;
   return (

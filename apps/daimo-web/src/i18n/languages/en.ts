@@ -1,6 +1,4 @@
 // English I18N
-import { FAQ } from "../../utils/parseFAQ";
-
 export const en = {
   lang: "en",
 
@@ -28,66 +26,6 @@ export const en = {
     orVisit: () => "Or visit",
     onYourPhone: () => "on your phone",
     mac: () => "MAC",
-  },
-
-  frame: {
-    callback: {
-      DaimoInviteFrame: () => "✳️ Daimo Invite Frame",
-      inviteFrameNotFound: (frameId: any) =>
-        `Invite Frame ${frameId} not found`,
-      text: () =>
-        "This is a Farcaster frame that invites people to Daimo." +
-        "Want to post your own, customized invite frame? Email us at ",
-    },
-    invite: {
-      callback: {
-        welcomeClaimInvite: () => "Welcome · Claim Invite + $10 ✳️",
-      },
-      frameMetadata: {
-        label: () => `✳️ Get Daimo ✳️`,
-      },
-      metadata: {
-        title: () => `Daimo Invite Frame`,
-        description: () =>
-          "Fast payments, self custody, open source, one-tap invites.",
-        openGraph: {
-          title: () => `Daimo Invite Frame`,
-          description: () =>
-            "Fast payments, self custody, open source, one-tap invites.",
-        },
-      },
-      html: {
-        title: () => "✳️ Daimo Invite Frame",
-        body: (name: string) =>
-          `This is a personalized frame invite from ${name} on Daimo. Post to Farcaster to invite people to join. They'll get a starter $10 USDC.`,
-      },
-    },
-
-    linkStatus: {
-      notDaimoLink: () => "Not a Daimo link: ",
-      notFound: () => "Not found: ",
-      noFrame: () => "No frame for link: ",
-    },
-
-    farcasterClient: {
-      wrongFid: () => "Wrong fid",
-    },
-
-    frameLink: {
-      requests: {
-        invalidRequest: () => "Invalid frame request",
-        unknownFrame: (pathname: string) => `Unknown frame: ${pathname}`,
-      },
-
-      response: {
-        bonus: () => "BONUS",
-        noBonus: () => "NO BONUS",
-        claimInvite: (authMsg: string) => `✳️ Claim Invite · ${authMsg}`,
-        notAPowerUser: () => "Not a power user",
-        fidToHigh: () => "FID too high",
-        notOnList: () => "Not on list",
-      },
-    },
   },
 
   link: {
@@ -140,25 +78,6 @@ export const en = {
         getDaimo: () => "Get Daimo to send or receive payments",
       },
     },
-  },
-
-  pos: {
-    metadata: {
-      title: () => "Daimo Point-Of-Sale",
-      description: () => "One-tap USDC checkout.",
-    },
-    newOrder: () => "NEW ORDER",
-    total: (euros: string, dollars: string) => `Total: €${euros} ~ ${dollars}`,
-    placeOrder: () => "Place Order",
-    ordered: () => "✅ ordered",
-    error: (err: any) => `❌ ${err}`,
-    latestOrders: () => "LATEST ORDERS",
-    loading: () => "Loading...",
-    noOrdersYet: () => "No orders yet",
-    link: () => "link",
-    unpaid: () => "Unpaid",
-    paid: () => "Paid",
-    cancelled: () => "Cancelled",
   },
 
   profile: {
@@ -233,7 +152,7 @@ export const en = {
 
     invitePreview: {
       bonusForPowerUsers: () => "+$10 BONUS FOR POWER USERS",
-      JoinNameOn: (name: string) => `Join ${name} on`,
+      joinNameOn: (name: string) => `Join ${name} on`,
     },
   },
 
@@ -357,5 +276,10 @@ export const en = {
     },
   },
 };
+
+export interface FAQ {
+  question: string;
+  answerHtml: string;
+}
 
 export type LangDef = typeof en;

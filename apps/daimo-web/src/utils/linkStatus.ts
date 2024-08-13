@@ -9,12 +9,10 @@ import {
   getAccountName,
   parseDaimoLink,
 } from "@daimo/common";
-import { headers } from "next/headers";
 
 import { rpc } from "./rpc";
 import { getI18N } from "../i18n";
-
-const i18n = getI18N(headers().get("accept-language"));
+import { getReqLang } from "../i18n/server";
 
 // Daimo deep link status (pending, fulfilled, cancelled, etc)
 // with a human-readable description.
@@ -44,6 +42,8 @@ export async function loadLinkStatusDesc(
 }
 
 function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
+  const i18n = getI18N(getReqLang());
+
   const link = parseDaimoLink(url);
   if (link == null) {
     return {
@@ -101,6 +101,8 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
 }
 
 function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
+  const i18n = getI18N(getReqLang());
+
   // Handle link status
   const resLinkType = res.link.type;
   switch (resLinkType) {

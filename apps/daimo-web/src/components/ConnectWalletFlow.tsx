@@ -33,7 +33,7 @@ import {
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
 import { useI18N } from "../i18n/context";
-import { LanguageDefinition } from "../i18n/languages/en";
+import { LangDef } from "../i18n/languages/en";
 
 export function ConnectWalletFlow({
   linkStatus,
@@ -282,7 +282,7 @@ async function linkStatusToAction(
   linkStatus: DaimoLinkStatus,
   selfAddress: Address,
   urlHash: string,
-  i18n: LanguageDefinition
+  i18n: LangDef
 ): Promise<WagmiPrep[]> {
   const chainId = chainConfig.chainL2.id;
 
