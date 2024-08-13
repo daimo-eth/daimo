@@ -340,7 +340,7 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
 
   if (!to || !c || !t) return null;
 
-  let toChain: DAv2Chain | undefined;
+  let toChain: DAv2Chain;
   try {
     toChain = getDAv2Chain(parseInt(c, 10));
   } catch (e) {
@@ -348,7 +348,7 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
     return null;
   }
 
-  let toCoin: ForeignToken | undefined;
+  let toCoin: ForeignToken;
   try {
     toCoin = getForeignCoinBySymbolAndChain(t, toChain.chainId);
   } catch (e) {

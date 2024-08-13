@@ -127,7 +127,6 @@ function SendScreenInner({
             />
           );
         } else {
-          // Backcompat with old request links
           if (requestStatus.link.dollars == null) {
             return (
               <SendChooseAmount
