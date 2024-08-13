@@ -104,7 +104,6 @@ const testCases: [string, DaimoLink | null][] = [
   ["https://daimo.com/l/account", null],
   ["https://daimo.com/l/request", null],
   ["https://daimo.com/l/request/", null],
-  ["https://daimo.com/l/request?to=0x0", null],
   [
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.1.1&id=123",
     null,
@@ -119,14 +118,6 @@ const testCases: [string, DaimoLink | null][] = [
   ],
   [
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&c=1&t=matic",
-    null,
-  ],
-  [
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12/123",
-    null,
-  ],
-  [
-    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001/123",
     null,
   ],
   ["https://daimo.com/l/note/", null],
@@ -191,6 +182,10 @@ test("DaimoLink normalization", () => {
 
   // Ensure that amount is normalized
   const variants = [
+    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.00001/123",
+    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.0/123",
+    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
+    "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1/123",
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.00001&id=123&c=8453&t=usdc",
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.0&id=123&c=8453&t=usdc",
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1&id=123&c=8453&t=usdc",
@@ -205,7 +200,54 @@ test("DaimoLink normalization", () => {
   }
 });
 
-test("DaimoLinkRequest parsing", () => {
+test("Old DaimoLinkRequest parsing", () => {
+  const linkTestCases: [string, DaimoLinkRequest | null][] = [
+    [
+      "https://daimo.com/l/request/dcposch/1.23/123",
+      {
+        type: "request",
+        recipient: "dcposch",
+        dollars: "1.23",
+        requestId: "123",
+        toCoin: baseUSDC,
+        toChain: base,
+      },
+    ],
+    [
+      "https://daimo.com/l/request/dcposch.eth/4.20/555",
+      {
+        type: "request",
+        recipient: "dcposch.eth",
+        dollars: "4.20",
+        requestId: "555",
+        toCoin: baseUSDC,
+        toChain: base,
+      },
+    ],
+    ["https://daimo.com/l/request?to=0x0", null],
+    [
+      "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/1.1.1/123",
+      null,
+    ],
+    [
+      "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93///1.1",
+      null,
+    ],
+    [
+      "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/-1.12/123",
+      null,
+    ],
+    [
+      "https://daimo.com/l/request/0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93/0.001/123",
+      null,
+    ],
+  ];
+  for (const [url, link] of linkTestCases) {
+    assert.deepStrictEqual(parseDaimoLink(url), link);
+  }
+});
+
+test("New DaimoLinkRequest parsing", () => {
   const linkTestCases: [string, DaimoLinkRequest | null][] = [
     // No amount
     [
