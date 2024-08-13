@@ -1572,7 +1572,7 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'getChainlinkQuote',
     outputs: [
-      { name: 'feedEstAmountOut', internalType: 'uint256', type: 'uint256' },
+      { name: 'refAmountOut', internalType: 'uint256', type: 'uint256' },
     ],
   },
   {

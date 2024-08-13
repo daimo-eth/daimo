@@ -234,7 +234,7 @@ contract DaimoFlexSwapper is
 
         // Quote Uniswap
         uint128 amountIn128 = uint128(amountIn);
-        (swapEstAmountOut, ) = this.quote(tokenIn, amountIn128, tokenOut);
+        (swapEstAmountOut, ) = quote(tokenIn, amountIn128, tokenOut);
         require(swapEstAmountOut > 0, "DFS: no path found, amountOut 0");
 
         // Next, compute the minimum output amount.
@@ -263,21 +263,20 @@ contract DaimoFlexSwapper is
             // Non-stablecoins: use swap estimate with 1% slippage tolerance.
             minAmountOut = swapEstAmountOut - (swapEstAmountOut / 100);
 
-            // Sanity check with Chainlink data feed, if available.
-            try this.getChainlinkQuote(tokenIn, amountIn, tokenOut) returns (
-                uint256 feedEstAmountOut
-            ) {
-                // If present, Chainlink quote must be within 2% of Uniswap.
-                int256 diff = int256(swapEstAmountOut) -
-                    int256(feedEstAmountOut);
+            // Sanity check with reference price feed, if available.
+            uint256 refAmountOut = getChainlinkQuote(
+                tokenIn,
+                amountIn,
+                tokenOut
+            );
+            // If present, Chainlink quote must be within 2% of Uniswap.
+            if (refAmountOut > 0) {
+                int256 diff = int256(swapEstAmountOut) - int256(refAmountOut);
                 uint256 absDiff = uint256(diff < 0 ? -diff : diff);
                 require(
                     absDiff < swapEstAmountOut / 50,
                     "DFS: quote sanity check failed"
                 );
-            } catch {
-                // Consulting the Chainlink oracle will fail for long-tail coins
-                // without an up-to-date feed. Fall back to the Uniswap quote.
             }
         }
     }
@@ -459,19 +458,25 @@ contract DaimoFlexSwapper is
 
     /// Estimates a fair price based on the Chainlink oracle. Both tokenIn and
     /// tokenOut must be ERC-20 tokens. Stablecoins (see isStablecoin) are
-    /// priced at $1. This function reverts if either token cannot be priced (no
-    /// Chainlink feed configured), or if the feed returns a stale/bad result,
+    /// priced at $1. This function reverts if the feed returns a stale result,
     /// or if there is an arithmetic overflow due to an extreme price output.
+    /// @return refAmountOut Reference fair-value output amount, or 0 if the
+    ///                      given token pair cannot be priced.
     function getChainlinkQuote(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut
-    ) public view returns (uint256 feedEstAmountOut) {
+    ) public view returns (uint256 refAmountOut) {
         uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
         uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
 
-        (uint256 priceIn, uint8 decPriceIn) = getChainlinkPrice(tokenIn);
-        (uint256 priceOut, uint8 decPriceOut) = getChainlinkPrice(tokenOut);
+        (uint256 priceIn, uint8 decPriceIn) = this.getChainlinkPrice(tokenIn);
+        (uint256 priceOut, uint8 decPriceOut) = this.getChainlinkPrice(
+            tokenOut
+        );
+        if (priceIn == 0 || priceOut == 0) {
+            return 0;
+        }
 
         // Example:
         // amountIn: 2.0 OP = (2e18, 18 decimals)
@@ -498,15 +503,17 @@ contract DaimoFlexSwapper is
         return ret;
     }
 
-    // Returns 0 if missing or stale. Returns (1, 0) if token is a stablecoin.
-    // Otherwise, returns Chainlink data feed price and decimals.
+    /// Fetches a reference price for an asset, in USD. Stablecoins are priced
+    /// at $1.00, other ERC-20 tokens are priced using Chainlink.
+    /// @return price a price, or 0 if the token has no price feed configured.
+    /// @return decimals decimals for the price, eg (5, 3) = 0.005
     function getChainlinkPrice(
         IERC20 token
     ) public view returns (uint256 price, uint8 decimals) {
-        if (isStablecoin[IERC20(token)]) return (1, 0);
+        if (isStablecoin[token]) return (1, 0);
 
         AggregatorV2V3Interface feed = feedRegistry[token];
-        require(address(feed) != address(0), "DFS: missing feed");
+        if (address(feed) == address(0)) return (0, 0);
 
         // Get the latest round data from the feed.
         (

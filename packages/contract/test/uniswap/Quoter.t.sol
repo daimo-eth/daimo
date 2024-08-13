@@ -81,9 +81,13 @@ contract QuoterTest is Test {
         vm.expectRevert(bytes("DFS: swap produced no output"));
         swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
 
-        // No price = OK, attempt swap
-        vm.deal(address(this), 10 ether);
+        // Feed returning stale or missing price = block swap
         fakeFeedETHUSD.setPrice(0, 0);
+        vm.expectRevert(bytes("DFS: CL price <= 0"));
+        swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
+
+        // No price feed = OK, attempt swap
+        swapper.setFeedAggregator(weth, AggregatorV2V3Interface(address(0)));
         vm.expectRevert(bytes("DFS: swap produced no output"));
         swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
     }
@@ -103,10 +107,9 @@ contract QuoterTest is Test {
         swapper.swapToCoin(degen, 1 ether, usdc, emptySwapData());
 
         // No price = OK, attempt swap
-        vm.deal(address(this), 10 ether);
-        fakeFeedDEGENUSD.setPrice(0, 0);
+        swapper.setFeedAggregator(degen, AggregatorV2V3Interface(address(0)));
         vm.expectRevert(bytes("DFS: swap produced no output"));
-        swapper.swapToCoin(degen, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin(degen, 1e18, usdc, emptySwapData());
     }
 
     function testFlexSwapperQuote() public {
