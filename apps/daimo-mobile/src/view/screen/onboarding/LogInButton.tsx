@@ -1,5 +1,7 @@
 import {
   SlotType,
+  debugJson,
+  derKeytoContractFriendlyKey,
   findAccountUnusedSlot,
   mnemonicToPublicKey,
   tryOrNull,
@@ -73,10 +75,14 @@ export function LogInFromSeedButton({
 }) {
   // Figure out which slot the mnmemonic (seed phrase) key is in
   const parsedKey = tryOrNull(() => mnemonicToPublicKey(mnemonic));
-  const keySlot = account.accountKeys.find(
-    (k) => k.pubKey === parsedKey?.publicKeyDER
-  )?.slot;
-  console.log(`[ONBOARDING] mnemonic key slot: ${keySlot}`);
+  let keySlot: number | undefined;
+  if (parsedKey?.publicKeyDER != null) {
+    const { publicKeyDER } = parsedKey;
+    const pubKeyStr = debugJson(derKeytoContractFriendlyKey(publicKeyDER));
+    console.log(`[ONBOARDING] mnemonic pubkey: ${publicKeyDER} = ${pubKeyStr}`);
+    keySlot = account.accountKeys.find((k) => k.pubKey === publicKeyDER)?.slot;
+    console.log(`[ONBOARDING] mnemonic key slot: ${keySlot}`);
+  }
 
   // Create a signer--can sign signatures and userop for `account`
   const signer = useMemo(() => {
