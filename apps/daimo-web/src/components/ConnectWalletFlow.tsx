@@ -272,10 +272,16 @@ async function linkStatusToAction(
   switch (linkStatus.link.type) {
     case "request": {
       const { recipient } = linkStatus as DaimoRequestStatus;
+
+      // Only support payment links with a dollar amount
+      if (!linkStatus.link.dollars) {
+        throw new Error("Payment links must have a dollar amount");
+      }
       const parsedAmount = parseUnits(
         linkStatus.link.dollars,
         chainConfig.tokenDecimals
       );
+
       return [
         {
           address: chainConfig.tokenAddress,

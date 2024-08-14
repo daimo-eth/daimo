@@ -44,6 +44,8 @@ export const ethereumSepoliaUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const ethereumSepoliaTokens = [ethereumSepoliaUSDC];
+
 //
 // Eth Mainnet
 //
@@ -55,6 +57,8 @@ export const ethereumUSDC: ForeignToken = {
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
 };
+
+export const ethereumTokens = [ethereumUSDC];
 
 //
 // Base Sepolia
@@ -77,6 +81,8 @@ export const baseSepoliaUSDC: ForeignToken = {
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
 };
+
+export const baseSepoliaTokens = [baseSepoliaWETH, baseSepoliaUSDC];
 
 //
 // Base Mainnet
@@ -127,6 +133,8 @@ export const baseUSDT: ForeignToken = {
   logoURI: TokenLogo.USDT,
 };
 
+export const baseTokens = [baseWETH, baseUSDC, baseUSDbC, baseDAI, baseUSDT];
+
 //
 // Arbitrum Mainnet
 //
@@ -148,6 +156,8 @@ export const arbitrumWETH: ForeignToken = {
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
 };
+
+export const arbitrumTokens = [arbitrumUSDC, arbitrumWETH];
 
 //
 // Arbitrum Sepolia
@@ -171,6 +181,8 @@ export const arbitrumSepoliaWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const arbitrumSepoliaTokens = [arbitrumSepoliaUSDC, arbitrumSepoliaWETH];
+
 //
 // Optimism Mainnet
 //
@@ -192,6 +204,8 @@ export const optimismWETH: ForeignToken = {
   symbol: "WETH",
   logoURI: TokenLogo.ETH,
 };
+
+export const optimismTokens = [optimismUSDC, optimismWETH];
 
 //
 // Optimism Sepolia
@@ -215,6 +229,8 @@ export const optimismSepoliaWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const optimismSepoliaTokens = [optimismSepoliaUSDC, optimismSepoliaWETH];
+
 //
 // Polygon Mainnet
 //
@@ -237,6 +253,8 @@ export const polygonWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const polygonTokens = [polygonUSDC, polygonWETH];
+
 //
 // Polygon Amoy
 //
@@ -249,6 +267,8 @@ export const polygonAmoyUSDC: ForeignToken = {
   symbol: "USDC",
   logoURI: TokenLogo.USDC,
 };
+
+export const polygonAmoyTokens = [polygonAmoyUSDC];
 
 //
 // Avalanche C-chain Mainnet
@@ -272,6 +292,8 @@ export const avalancheWETH: ForeignToken = {
   logoURI: TokenLogo.ETH,
 };
 
+export const avalancheTokens = [avalancheUSDC, avalancheWETH];
+
 //
 // Avalanche Fuji
 //
@@ -285,6 +307,23 @@ export const avalancheFujiUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const avalancheFujiTokens = [avalancheFujiUSDC];
+
+const chainToForeignTokens = new Map<number, ForeignToken[]>([
+  [11155111, ethereumSepoliaTokens],
+  [1, ethereumTokens],
+  [84532, baseSepoliaTokens],
+  [8453, baseTokens],
+  [42161, arbitrumTokens],
+  [421614, arbitrumSepoliaTokens],
+  [10, optimismTokens],
+  [11155420, optimismSepoliaTokens],
+  [137, polygonTokens],
+  [80002, polygonAmoyTokens],
+  [43114, avalancheTokens],
+  [43113, avalancheFujiTokens],
+]);
+
 /* --------------------- Token Utils --------------------- */
 
 export function getForeignCoinDisplayAmount(
@@ -297,6 +336,31 @@ export function getForeignCoinDisplayAmount(
     return parseFloat(amountStr).toFixed(maxDecimals);
   }
   return amountStr;
+}
+
+export function getForeignCoinsByChain(chainId: number): ForeignToken[] {
+  if (!chainToForeignTokens.has(chainId)) {
+    throw new Error(`Invalid chainId: ${chainId}`);
+  }
+  return chainToForeignTokens.get(chainId) as ForeignToken[];
+}
+
+export function getForeignCoinBySymbolAndChain(
+  symbol: string,
+  chainId: number
+): ForeignToken {
+  const foreignCoins = getForeignCoinsByChain(chainId);
+  if (!foreignCoins) {
+    throw new Error(`Invalid chainId: ${chainId}`);
+  }
+
+  const coin = foreignCoins.find(
+    (coin) => coin.symbol.toLowerCase() === symbol.toLowerCase()
+  );
+  if (!coin) {
+    throw new Error(`Invalid coin symbol: ${symbol}`);
+  }
+  return coin;
 }
 
 const NON_DUST_TOKEN_WHITELIST = new Set([

@@ -160,7 +160,18 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         name: `${link.account}`,
         description: "Couldn't load account",
       };
-    } else if (link.type === "request" || link.type === "requestv2") {
+    } else if (link.type === "request") {
+      const result: TitleDesc = {
+        name: `${link.recipient}`,
+        action: `is requesting payment`,
+        description: "Couldn't load request status",
+      };
+      if (link.dollars) {
+        result.action = `is requesting`;
+        result.dollars = `${link.dollars}`;
+      }
+      return result;
+    } else if (link.type === "requestv2") {
       return {
         name: `${link.recipient}`,
         action: `is requesting`,
@@ -198,20 +209,28 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
       if (fulfilledBy === undefined) {
-        return {
+        const result: TitleDesc = {
           name: `${name}`,
-          action: `is requesting`,
-          dollars: `${res.link.dollars}`,
+          action: `is requesting payment`,
           description: "Pay with Daimo",
           linkStatus: res,
         };
+        if (res.link.dollars) {
+          result.action = `is requesting`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       } else {
-        return {
+        const result: TitleDesc = {
           name: `${name}`,
-          action: `requested`,
-          dollars: `${res.link.dollars}`,
+          action: `requested payment`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
+        if (res.link.dollars) {
+          result.action = `requested`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       }
     }
     case "requestv2": {

@@ -54,7 +54,18 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
         name: `${link.account}`,
         description: "Couldn't load account",
       };
-    case "request":
+    case "request": {
+      const result: LinkStatusDesc = {
+        name: `${link.recipient}`,
+        action: `is requesting payment`,
+        description: "Couldn't load request status",
+      };
+      if (link.dollars) {
+        result.action = `is requesting`;
+        result.dollars = `${Number(link.dollars).toFixed(2)}` as `${number}`;
+      }
+      return result;
+    }
     case "requestv2":
       return {
         name: `${link.recipient}`,
@@ -100,19 +111,27 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       const { recipient, fulfilledBy } = res as DaimoRequestStatus;
       const name = getAccountName(recipient);
       if (fulfilledBy === undefined) {
-        return {
+        const result: LinkStatusDesc = {
           name: `${name}`,
-          action: `is requesting`,
-          dollars: `${res.link.dollars}`,
+          action: `is requesting payment`,
           description: "Pay with Daimo",
         };
+        if (res.link.dollars) {
+          result.action = `is requesting`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       } else {
-        return {
+        const result: LinkStatusDesc = {
           name: `${name}`,
-          action: `requested`,
-          dollars: `${res.link.dollars}`,
+          action: `requested payment`,
           description: `Paid by ${getAccountName(fulfilledBy)}`,
         };
+        if (res.link.dollars) {
+          result.action = `requested`;
+          result.dollars = `${res.link.dollars}`;
+        }
+        return result;
       }
     }
     case "requestv2": {
