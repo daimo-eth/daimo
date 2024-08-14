@@ -17,9 +17,9 @@ export async function search(
   prefix = prefix.trim();
   if (prefix.startsWith("@")) prefix = prefix.slice(1);
 
-  // Show a santized, simplified view of what the user entered
+  // Show a sanitized, simplified view of what the user entered
   // This is important when eg entering an address > matches reverse ENS
-  // Othewise, you have no confirmation on send screen that it's the same addr.
+  // Otherwise, you have no confirmation on send screen that it's the same addr.
   // Also important when entering an ENS > get a *different* reverse ENS.
 
   let ret: EAccountSearchResult[];

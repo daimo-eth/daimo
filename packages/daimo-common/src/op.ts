@@ -64,7 +64,7 @@ export type PostSwapTransfer = {
  * There's a surprising amount of complexity to the state of a transfer.
  *
  * - Daimo transfers start out as a `PENDING` user op.
- *   The op goes thru a lifecycle of pending (bundler has accepted, but not
+ *   The op goes through a lifecycle of pending (bundler has accepted, but not
  *   yet onchain) to confirmed (bundle transaction onchain) to finalized
  *   (written to a finalized L1 block, and therefore guaranteed permanent).
  *

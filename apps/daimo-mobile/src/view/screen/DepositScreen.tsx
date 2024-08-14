@@ -150,7 +150,7 @@ function LandlineAccountList() {
 // An on-demand exchange is one that requires fetching a URL at the time of
 // user's interaction, rather than have it pre-fetched. These exchanges are
 // first fetched with a loading spinner, then the URL is opened.
-// Binance is the only on-demand exchange for now becuase generated links
+// Binance is the only on-demand exchange for now because generated links
 // expire quickly and 301 redirects don't work for opening universal links
 // in Binance app, so we can't include it in the recommendedExchanges API-side.
 function getOnDemandExchanges(

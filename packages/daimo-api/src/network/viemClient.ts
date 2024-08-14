@@ -113,7 +113,7 @@ export function getEOA(privateKey: string) {
 }
 
 /**
- * All access to the chain goes thru this client. A ViemClient lets you read L1,
+ * All access to the chain goes through this client. A ViemClient lets you read L1,
  * read L2, and post transactions to L2.
  */
 export class ViemClient {

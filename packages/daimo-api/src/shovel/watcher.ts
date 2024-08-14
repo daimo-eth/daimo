@@ -40,7 +40,7 @@ export class Watcher {
   private batchSize = 1000_000;
   private isIndexing = false;
 
-  // The latest block thru which our DB index is up to date.
+  // The latest block through which our DB index is up to date.
   private indexLatest = 0;
   // The latest block as reported directly by the RPC (not shovel)
   private rpcLatest = 0;

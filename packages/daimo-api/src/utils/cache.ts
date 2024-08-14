@@ -3,7 +3,7 @@ import { assert } from "@daimo/common";
 /**
  * Lazily executes `fn` and caches the result ensuring only one execution at a time.
  *
- * `cacheTime` is duration in ms after cached value is considred expired,
+ * `cacheTime` is duration in ms after cached value is considered expired,
  * and must be refreshed before it can be returned.
  *
  * `staleTime` is an optional duration that refreshes

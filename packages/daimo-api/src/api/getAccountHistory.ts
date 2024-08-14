@@ -285,7 +285,7 @@ function getSuggestedActions(
     });
   }
 
-  // Active account: has recieved transfer from another user in "recent"
+  // Active account: has received transfer from another user in "recent"
   // transfer logs. The recency condition means that it will be dismissed
   // automatically if transferLogs are empty (eg, user leaves app open for
   // a while).

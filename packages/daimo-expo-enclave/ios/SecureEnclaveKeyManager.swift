@@ -52,7 +52,7 @@ public class SecureEnclaveKeyManager : KeyManager {
         
         // Since the key is authed by the enclave and the keychain only stores an encrypted blob
         // representation, we do not auth userPresence for keychain reads. Additionally, it would
-        // be bad UX to prompt the user for presence/auth twice (seperately for keychain reads and
+        // be bad UX to prompt the user for presence/auth twice (separately for keychain reads and
         // on Secure Enclave signing).
         try self.store.storeKey(signingPrivkey, account: accountName, requireUserPresence: false)
     }
