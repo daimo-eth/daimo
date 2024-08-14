@@ -54,7 +54,18 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
         name: `${link.account}`,
         description: "Couldn't load account",
       };
-    case "request":
+    case "request": {
+      const result: LinkStatusDesc = {
+        name: `${link.recipient}`,
+        action: `is requesting payment`,
+        description: "Couldn't load request status",
+      };
+      if (link.dollars) {
+        result.action = `is requesting`;
+        result.dollars = `${Number(link.dollars).toFixed(2)}` as `${number}`;
+      }
+      return result;
+    }
     case "requestv2":
       return {
         name: `${link.recipient}`,

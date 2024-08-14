@@ -160,7 +160,18 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
         name: `${link.account}`,
         description: "Couldn't load account",
       };
-    } else if (link.type === "request" || link.type === "requestv2") {
+    } else if (link.type === "request") {
+      const result: TitleDesc = {
+        name: `${link.recipient}`,
+        action: `is requesting payment`,
+        description: "Couldn't load request status",
+      };
+      if (link.dollars) {
+        result.action = `is requesting`;
+        result.dollars = `${link.dollars}`;
+      }
+      return result;
+    } else if (link.type === "requestv2") {
       return {
         name: `${link.recipient}`,
         action: `is requesting`,
