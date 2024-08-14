@@ -606,7 +606,7 @@ export function createRouter(
       .mutation(async (opts) => {
         const { apiKey, tag, link, updateToken } = opts.input;
         authorize(apiKey);
-        return createTagRedirect(tag, link, updateToken, db);
+        return await createTagRedirect(tag, link, updateToken, db);
       }),
 
     updateTagRedirect: publicProcedure
@@ -615,14 +615,14 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
-        return setTagRedirect(tag, link, updateToken, db);
+        return await setTagRedirect(tag, link, updateToken, db);
       }),
 
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
         const { tag } = opts.input;
-        return getTagRedirectHist(tag, db);
+        return await getTagRedirectHist(tag, db);
       }),
 
     // @deprecated, remove by 2024 Q4

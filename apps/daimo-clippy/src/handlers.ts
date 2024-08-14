@@ -290,7 +290,7 @@ export async function getTag(kwargs: Map<string, string>): Promise<string> {
   console.log(`[SLACK-BOT] getting tag: ${tag}`);
   const res = await rpc.getTagHistory.query({ tag });
 
-  return `Successfully got tag: ${res}`;
+  return `Successfully got tag: ${getJSONblock(res)}`;
 }
 
 export async function createTag(kwargs: Map<string, string>) {
@@ -305,7 +305,7 @@ export async function createTag(kwargs: Map<string, string>) {
     updateToken: clippyTagUpdateToken,
   });
 
-  return `Successfully created tag: ${res}`;
+  return `Successfully created tag: ${getJSONblock(res)}`;
 }
 
 export async function updateTag(kwargs: Map<string, string>) {
@@ -313,13 +313,13 @@ export async function updateTag(kwargs: Map<string, string>) {
   const link = assertNotNull(kwargs.get("link"));
 
   console.log(`[SLACK-BOT] updating tag: ${tag}, link: ${link}`);
-  const res = await rpc.updateTagRedirect.mutate({
+  await rpc.updateTagRedirect.mutate({
     tag,
     link,
     updateToken: clippyTagUpdateToken,
   });
 
-  return `Successfully updated tag: ${res}`;
+  return `Successfully updated tag`;
 }
 
 async function viewInviteStatus(kwargs: Map<string, string>): Promise<string> {
