@@ -15,6 +15,8 @@ import { getJSONblock, parseKwargs, unfurlLink } from "./utils";
 
 const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
 
+const clippyTagUpdateToken = "clippy-tag-update-token";
+
 export async function handleCommand(text: string): Promise<string> {
   console.log(`[SLACK-BOT] Handling command ${text}`);
 
@@ -76,6 +78,14 @@ const commands: Record<string, Command> = {
   "get-swap-quote": {
     help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
     fn: getSwapQuote,
+  },
+  "create-tag": {
+    help: "Create a new tag. Associates https://daimo.com/l/t/<tag> with a link. Args: [tag, link]",
+    fn: createTag,
+  },
+  "update-tag": {
+    help: "Update a tag. Associates https://daimo.com/l/t/<tag> with a new link. Args: [tag, link]",
+    fn: updateTag,
   },
   health: {
     help: "Checks that the API is up",
@@ -268,6 +278,35 @@ export async function createInviteCode(
   return `Successfully created invite: ${res}\n\n ${getJSONblock(
     inviteStatus
   )}`;
+}
+
+export async function createTag(kwargs: Map<string, string>) {
+  const tag = assertNotNull(kwargs.get("tag"));
+  const link = assertNotNull(kwargs.get("link"));
+
+  console.log(`[SLACK-BOT] creating tag: ${tag}, link: ${link}`);
+  const res = await rpc.createTagRedirect.mutate({
+    apiKey,
+    tag,
+    link,
+    updateToken: clippyTagUpdateToken,
+  });
+
+  return `Successfully created tag: ${res}`;
+}
+
+export async function updateTag(kwargs: Map<string, string>) {
+  const tag = assertNotNull(kwargs.get("tag"));
+  const link = assertNotNull(kwargs.get("link"));
+
+  console.log(`[SLACK-BOT] updating tag: ${tag}, link: ${link}`);
+  const res = await rpc.updateTagRedirect.mutate({
+    tag,
+    link,
+    updateToken: clippyTagUpdateToken,
+  });
+
+  return `Successfully updated tag: ${res}`;
 }
 
 async function viewInviteStatus(kwargs: Map<string, string>): Promise<string> {

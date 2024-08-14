@@ -235,6 +235,22 @@ export class DB {
     }));
   }
 
+  async createTagRedirect(tag: string, link: string, updateToken: string) {
+    console.log(
+      `[DB] creating tag redirect with update token ${updateToken}: ${tag} -> ${link}`
+    );
+    const res = await this.pool.query(
+      `INSERT INTO tag_redirect (tag, link, update_token) VALUES ($1, $2, $3)`,
+      [tag, link, updateToken]
+    );
+    if (res.rowCount && res.rowCount > 0) {
+      await this.pool.query(
+        `INSERT INTO tag_redirect_history (tag, link, update_token) VALUES ($1, $2, $3)`,
+        [tag, link, updateToken]
+      );
+    }
+  }
+
   async saveTagRedirect(tag: string, link: string) {
     console.log(`[DB] inserting tag redirect: ${tag} -> ${link}`);
     const res = await this.pool.query(

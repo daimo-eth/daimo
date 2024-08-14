@@ -15,6 +15,15 @@ export async function getTagRedirectHist(tag: string, db: DB) {
   return db.loadTagRedirectHist(tag);
 }
 
+export async function createTagRedirect(
+  tag: string,
+  link: string,
+  updateToken: string,
+  db: DB
+) {
+  return db.createTagRedirect(tag, link, updateToken);
+}
+
 // Updates tag redirect URL, authenticatd by updateToken.
 export async function setTagRedirect(
   tag: string,
