@@ -79,6 +79,10 @@ const commands: Record<string, Command> = {
     help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
     fn: getSwapQuote,
   },
+  "get-tag": {
+    help: "Get the links previously associated with a tag. Args: [tag]",
+    fn: getTag,
+  },
   "create-tag": {
     help: "Create a new tag. Associates https://daimo.com/l/t/<tag> with a link. Args: [tag, link]",
     fn: createTag,
@@ -278,6 +282,15 @@ export async function createInviteCode(
   return `Successfully created invite: ${res}\n\n ${getJSONblock(
     inviteStatus
   )}`;
+}
+
+export async function getTag(kwargs: Map<string, string>): Promise<string> {
+  const tag = assertNotNull(kwargs.get("tag"));
+
+  console.log(`[SLACK-BOT] getting tag: ${tag}`);
+  const res = await rpc.getTagHistory.query({ tag });
+
+  return `Successfully got tag: ${res}`;
 }
 
 export async function createTag(kwargs: Map<string, string>) {

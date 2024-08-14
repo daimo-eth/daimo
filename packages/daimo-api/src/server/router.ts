@@ -618,7 +618,6 @@ export function createRouter(
         return setTagRedirect(tag, link, updateToken, db);
       }),
 
-    // @deprecated, remove by 2024 Q4
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
