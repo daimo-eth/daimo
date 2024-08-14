@@ -61,11 +61,11 @@ function getLinkDescCantLoadStatus(url: string): LinkStatusDesc {
     case "request": {
       const result: LinkStatusDesc = {
         name: `${link.recipient}`,
-        action: `is requesting payment`,
-        description: "Couldn't load request status",
+        action: i18n.link.actions.requestingPayment(),
+        description: i18n.link.errors.loadStatus(),
       };
       if (link.dollars) {
-        result.action = `is requesting`;
+        result.action = i18n.link.actions.requesting();
         result.dollars = `${Number(link.dollars).toFixed(2)}` as `${number}`;
       }
       return result;

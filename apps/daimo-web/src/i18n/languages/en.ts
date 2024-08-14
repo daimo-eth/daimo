@@ -31,8 +31,10 @@ export const en = {
   link: {
     actions: {
       requesting: () => `is requesting`,
+      requestingPayment: () => `is requesting payment`,
       sentYou: () => `sent you`,
       requested: () => `requested`,
+      requestedPayment: () => `requested payment`,
       sent: () => `sent`,
       cancelledSend: () => `cancelled send`,
       invitedYou: () => "invited you to Daimo",
