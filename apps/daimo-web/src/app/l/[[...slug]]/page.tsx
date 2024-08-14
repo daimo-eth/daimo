@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
+import { debugJson } from "@daimo/common";
 import { Metadata } from "next";
 
 import LinkPage from "./LinkPage";
 import { getUrl, LinkPageProps } from "./LinkPageProps";
 import { getI18N } from "../../../i18n";
 import { LangDef } from "../../../i18n/languages/en";
-import { getReqLang } from "../../../i18n/server";
+import { getReqHeaders, getReqLang } from "../../../i18n/server";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
 import { loadPFPUrl } from "../../../utils/getProfilePicture";
 import {
@@ -20,6 +21,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(
   props: LinkPageProps
 ): Promise<Metadata> {
+  console.log(`[LINK] req headers: ${debugJson(getReqHeaders())}`);
   const i18n = getI18N(getReqLang());
   const url = getUrl(props);
   const desc = await loadLinkStatusDesc(url);

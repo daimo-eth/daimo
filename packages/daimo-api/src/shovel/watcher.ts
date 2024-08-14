@@ -133,11 +133,11 @@ export class Watcher {
       }
 
       // New block(s) available. Index them.
-      const { latest, indexLatest, batchSize } = this;
+      const { rpcLatest, latest, indexLatest, batchSize } = this;
       const newLatest = await this.index(latest + 1, indexLatest, batchSize);
 
-      const tickSummary = JSON.stringify({ indexLatest, latest, newLatest });
-      console.log(`[SHOVEL] tick success ${tickSummary}`);
+      const dbg = JSON.stringify({ rpcLatest, indexLatest, latest, newLatest });
+      console.log(`[SHOVEL] tick success ${dbg}`);
       this.latest = newLatest;
       this.lastGoodTickS = now();
     } catch (e) {
