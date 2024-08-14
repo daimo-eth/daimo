@@ -120,7 +120,6 @@ export class ViemClient {
   // Lock to ensure sequential nonce for walletClient writes
   private lockNonce = new AwaitLock();
   private nextNonce = 0;
-  private pendingTxCount = 0;
   public account: Account;
 
   constructor(
@@ -189,34 +188,18 @@ export class ViemClient {
     );
   }
 
-  private async waitForReceipt(hash: Hex, timeoutMs: number = 10_000) {
-    let receiptStatus = "";
-
+  private async waitForReceipt(hash: Hex) {
     try {
       const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
-        timeout: timeoutMs,
       });
       console.log(`[VIEM] waitForReceipt ${hash}: ${JSON.stringify(receipt)}`);
-
-      receiptStatus = receipt.status;
-      if (receiptStatus !== "success") {
+      if (receipt.status !== "success") {
         this.onReceiptError(hash, JSON.stringify(receipt));
       }
     } catch (e) {
       console.error(`[VIEM] waitForReceipt ${hash} error: ${e}`);
       this.onReceiptError(hash, e);
-    } finally {
-      await this.lockNonce.acquireAsync();
-
-      if (receiptStatus === "success") {
-        this.nextNonce += 1;
-        this.pendingTxCount -= 1;
-      } else {
-        this.pendingTxCount -= 1;
-      }
-
-      this.lockNonce.release();
     }
   }
 
@@ -227,7 +210,7 @@ export class ViemClient {
   private async updateNonce() {
     const txCount = await this.publicClient.getTransactionCount({
       address: this.walletClient.account.address,
-      blockTag: "latest",
+      blockTag: "pending",
     });
     console.log(
       `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`
@@ -258,9 +241,7 @@ export class ViemClient {
         `[VIEM] tx ${localTxId} ${elapsedMs()}ms: got nonce ${this.nextNonce}`
       );
 
-      // Override nonce with nonce estimate. Optimistically assumes that
-      // all pending transactions will succeed.
-      args.nonce = this.nextNonce + this.pendingTxCount;
+      args.nonce = this.nextNonce; // Override nonce
       args.gas = 2_000_000n; // Saves estimateGas roundtrip
       args.chain = null; // Saves eth_chainId roundtrip, see https://github.com/wevm/viem/pull/474#discussion_r1190476819
 
@@ -268,7 +249,8 @@ export class ViemClient {
 
       console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: submitted: ${ret}`);
 
-      this.pendingTxCount += 1;
+      // Increment nonce for later
+      this.nextNonce += 1;
       return ret;
     } finally {
       this.lockNonce.release();
