@@ -1,6 +1,6 @@
 <img alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/3207b2bf-f93d-4c26-b56f-1545e4e7c182">
 
-### Daimo is a stablecoin personal bank
+### Daimo is a universal cash app
 
 Today, we run on USDC on Base. Cross-chain transfers and more coming soon.
 

@@ -209,7 +209,7 @@ export const en = {
       meetTheTeam: () => "Meet the team",
     },
     hero: {
-      text1: () => "Your own bank, on Ethereum.",
+      text1: () => "Universal USD, on Ethereum",
       text2: () =>
         "Store money using secure hardware on your phone. Yours alone, like cash.",
       text3: () => "Learn more",

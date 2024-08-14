@@ -207,7 +207,7 @@ export const es: LangDef = {
       meetTheTeam: () => "Conoce al equipo",
     },
     hero: {
-      text1: () => "Tu propio banco, en Ethereum.",
+      text1: () => "USD universal, en Ethereum.",
       text2: () =>
         "Almacena dinero utilizando hardware seguro en tu teléfono. Solo tuyo, como dinero en efectivo.",
       text3: () => "Más información",
