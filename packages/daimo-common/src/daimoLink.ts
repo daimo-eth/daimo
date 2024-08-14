@@ -1,4 +1,4 @@
-import { Address, Hex, getAddress } from "viem";
+import { Address, getAddress, Hex, isAddress } from "viem";
 
 import { base, DAv2Chain, getDAv2Chain } from "./chain";
 import {
@@ -331,6 +331,17 @@ function parseOldDaimoLinkRequest(parts: string[]): DaimoLinkRequest | null {
   return { type: "request", requestId, recipient, dollars, toCoin, toChain };
 }
 
+/**
+ * Only allow bare addresses or ENS names when creating a
+ * DaimoRequestLink. Daimo accounts are not supported to prevent
+ * users from sending funds to the wrong chain.
+ */
+function isValidRequestAccountName(account: string): boolean {
+  if (isAddress(account)) return true;
+  if (account.includes(".")) return true;
+  return false;
+}
+
 function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
   const id = url.searchParams.get("id");
   const to = url.searchParams.get("to");
@@ -339,6 +350,7 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
   const t = url.searchParams.get("t");
 
   if (!to || !c || !t) return null;
+  if (!isValidRequestAccountName(to)) return null;
 
   let toChain: DAv2Chain;
   try {

@@ -30,10 +30,10 @@ const testCases: [string, DaimoLink | null][] = [
   ],
   ["https://daimo.com/l/account/0x0", { type: "account", account: "0x0" }],
   [
-    "https://daimo.com/l/request?to=dcposch&n=1.23&id=123&c=8453&t=usdc",
+    "https://daimo.com/l/request?to=0x1111111111111111111111111111111111111111&n=1.23&id=123&c=8453&t=usdc",
     {
       type: "request",
-      recipient: "dcposch",
+      recipient: "0x1111111111111111111111111111111111111111",
       dollars: "1.23",
       requestId: "123",
       toCoin: baseUSDC,
@@ -106,6 +106,10 @@ const testCases: [string, DaimoLink | null][] = [
   ["https://daimo.com/l/request/", null],
   [
     "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.1.1&id=123",
+    null,
+  ],
+  [
+    "https://daimo.com/l/request?to=andrewliu&n=1.23&id=123&c=8453&t=usdc",
     null,
   ],
   [
