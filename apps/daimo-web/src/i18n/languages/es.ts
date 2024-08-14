@@ -32,8 +32,10 @@ export const es: LangDef = {
   link: {
     actions: {
       requesting: () => `está solicitando`,
+      requestingPayment: () => `está solicitando pago`,
       sentYou: () => `te envió`,
       requested: () => `solicitó`,
+      requestedPayment: () => `solicitó pago`,
       sent: () => `envió`,
       cancelledSend: () => `canceló el envío`,
       invitedYou: () => "te invitó a Daimo",
