@@ -139,7 +139,7 @@ export function useContactSearch(
     if (onlyNamedEAccs && !acc.name) continue;
 
     // HACK: ignore transfers to specially labelled addresses like "payment link"
-    // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
+    // TODO: label transfers by whether occurred as part of a send or a different transaction; ignore the latter
     // TODO: show note claimer as recipient.
     if (acc.label != null) continue;
 

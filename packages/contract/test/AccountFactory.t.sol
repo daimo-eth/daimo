@@ -33,7 +33,7 @@ contract AccountFactoryTest is Test {
         assertEq(acc.numActiveKeys(), uint8(1));
 
         // deploy again = just returns the existing address
-        // prefund still goes thru to the entrypoint contract
+        // prefund still goes through to the entrypoint contract
         assertEq(entryPoint.getDepositInfo(address(acc)).deposit, 0);
         DaimoAccount acc2 = factory.createAccount{value: 9}(0, key1, calls, 42);
         assertEq(address(acc), address(acc2));

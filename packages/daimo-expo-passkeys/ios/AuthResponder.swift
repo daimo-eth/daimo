@@ -5,7 +5,7 @@
 //  Created by Nalin Bhardwaj.
 //  Copyright © 2023 Daimo. All rights reserved.
 //
-//  AuthResponder is the delegate that recieves the result of a Passkey or 
+//  AuthResponder is the delegate that receives the result of a Passkey or 
 //  SecurityKey creation/sign request and passes it back to the callback 
 //  for processing.
 

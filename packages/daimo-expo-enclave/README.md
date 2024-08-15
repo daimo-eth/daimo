@@ -12,7 +12,7 @@ Depending on where the keys are stored and processed for signatures and other op
 
 1. Software only: Weakest, only a weak software abstraction to isolate access to the key data, can be broken by kernel attacks and such. Kinda similar in security level to normal iOS/macOS Keychain (encrypted) keys.
 2. TEE: Medium, secure "area" of processor/OS with a lot of shared surface with main OS. Generally runs its own software and communicates with "main" OS via some restricted interface. OS compromises should usually not break security, but kernel exploits might, and these are not resistant to side channel attacks and such. Kinda like a poor man's secure enclave.
-3. StrongBox: Strongest, entirely seperate chip with its own RAM, CPU etc., usually require at least firmware level attacks to break security. Equivalent to Apple's Secure Enclaves.
+3. StrongBox: Strongest, entirely separate chip with its own RAM, CPU etc., usually require at least firmware level attacks to break security. Equivalent to Apple's Secure Enclaves.
 
 In reality, this API is not exactly reflective of the ground truth as device manufacturers are liberal with their definition of each one and not particularly intellectually honest, but we ignore those concerns and trust what the API believes the security level is is reflective of the hardware ground truth.
 

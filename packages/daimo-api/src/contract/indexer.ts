@@ -36,11 +36,11 @@ export abstract class Indexer {
   ): void | Promise<void>;
 
   // Checks whether we just completed a stale query. True = don't process.
-  // Otherwise, returns false (coninue processing) and updates lastProcessedBlock.
+  // Otherwise, returns false (continue processing) and updates lastProcessedBlock.
   protected updateLastProcessedCheckStale(from: number, to: number) {
     if (this.lastProcessedBlock >= from) {
       console.warn(
-        `[${this.name}] SKIPPING ${from}-${to}, already processed thru ${this.lastProcessedBlock}`
+        `[${this.name}] SKIPPING ${from}-${to}, already processed through ${this.lastProcessedBlock}`
       );
       return true;
     }
