@@ -43,6 +43,7 @@ import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
 import { submitWaitlist } from "../api/submitWaitlist";
 import {
+  createTagRedirect,
   getTagRedirect,
   getTagRedirectHist,
   setTagRedirect,
@@ -586,7 +587,6 @@ export function createRouter(
         return profileCache.updateProfileLinks(addr, actionJSON, signature);
       }),
 
-    // @deprecated, remove by 2024 Q4
     getTagRedirect: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -594,22 +594,39 @@ export function createRouter(
         return getTagRedirect(tag, db);
       }),
 
-    // @deprecated, remove by 2024 Q4
+    createTagRedirect: publicProcedure
+      .input(
+        z.object({
+          apiKey: z.string(),
+          tag: z.string(),
+          link: z.string(),
+          updateToken: z.string(),
+        })
+      )
+      .mutation(async (opts) => {
+        const { apiKey, tag, link, updateToken } = opts.input;
+        authorize(apiKey);
+
+        const res = await createTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
+      }),
+
     updateTagRedirect: publicProcedure
       .input(
         z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
       )
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
-        return setTagRedirect(tag, link, updateToken, db);
+
+        const res = await setTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
       }),
 
-    // @deprecated, remove by 2024 Q4
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
         const { tag } = opts.input;
-        return getTagRedirectHist(tag, db);
+        return await getTagRedirectHist(tag, db);
       }),
 
     // @deprecated, remove by 2024 Q4
