@@ -14,8 +14,7 @@ import { rpc } from "./rpc";
 import { getJSONblock, parseKwargs, unfurlLink } from "./utils";
 
 const apiKey = assertNotNull(process.env.DAIMO_API_KEY);
-
-const clippyTagUpdateToken = "clippy-tag-update-token";
+const clippyTagUpdateToken = assertNotNull(process.env.CLIPPY_TAG_UPDATE_TOKEN);
 
 export async function handleCommand(text: string): Promise<string> {
   console.log(`[SLACK-BOT] Handling command ${text}`);
@@ -83,13 +82,9 @@ const commands: Record<string, Command> = {
     help: "Get the links previously associated with a tag. Args: [tag]",
     fn: getTag,
   },
-  "create-tag": {
-    help: "Create a new tag. Associates https://daimo.com/l/t/<tag> with a link. Args: [tag, link]",
-    fn: createTag,
-  },
-  "update-tag": {
-    help: "Update a tag. Associates https://daimo.com/l/t/<tag> with a new link. Args: [tag, link]",
-    fn: updateTag,
+  "set-tag": {
+    help: "Create or update a tag. Associates https://daimo.com/l/t/<tag> with a link. Args: [tag, link, updateLink]",
+    fn: setTag,
   },
   health: {
     help: "Checks that the API is up",
@@ -293,33 +288,50 @@ export async function getTag(kwargs: Map<string, string>): Promise<string> {
   return `Successfully got tag: ${getJSONblock(res)}`;
 }
 
-export async function createTag(kwargs: Map<string, string>) {
+export async function setTag(kwargs: Map<string, string>) {
   const tag = assertNotNull(kwargs.get("tag"));
-  const link = assertNotNull(kwargs.get("link"));
+  const link = kwargs.get("link");
+  const updateLink = kwargs.get("updateLink");
 
-  console.log(`[SLACK-BOT] creating tag: ${tag}, link: ${link}`);
-  const res = await rpc.createTagRedirect.mutate({
-    apiKey,
-    tag,
-    link,
-    updateToken: clippyTagUpdateToken,
-  });
+  if (!link && !updateLink) return "Must specify link or updateLink";
+  if (link && updateLink) return "Cannot specify both link and updateLink";
 
-  return `Successfully created tag: ${getJSONblock(res)}`;
-}
+  if (link) {
+    console.log(`[SLACK-BOT] creating tag: ${tag}, link: ${link}`);
+    const existingTag = await rpc.getTagRedirect.query({ tag });
+    if (existingTag) {
+      return `Tag ${tag} already exists. To update the tag, use the updateLink parameter instead of link`;
+    }
 
-export async function updateTag(kwargs: Map<string, string>) {
-  const tag = assertNotNull(kwargs.get("tag"));
-  const link = assertNotNull(kwargs.get("link"));
-
-  console.log(`[SLACK-BOT] updating tag: ${tag}, link: ${link}`);
-  await rpc.updateTagRedirect.mutate({
-    tag,
-    link,
-    updateToken: clippyTagUpdateToken,
-  });
-
-  return `Successfully updated tag`;
+    try {
+      const res = await rpc.createTagRedirect.mutate({
+        apiKey,
+        tag,
+        link,
+        updateToken: clippyTagUpdateToken,
+      });
+      return `Successfully created tag: ${getJSONblock(res)}`;
+    } catch (e) {
+      console.error(`[SLACK-BOT] Error setting tag: ${e}`);
+      return `Error setting tag: ${e}`;
+    }
+  } else {
+    console.log(`[SLACK-BOT] updating tag: ${tag}, updateLink: ${updateLink}`);
+    try {
+      const res = await rpc.updateTagRedirect.mutate({
+        tag,
+        link: updateLink!,
+        updateToken: clippyTagUpdateToken,
+      });
+      return `Successfully updated tag: ${getJSONblock(res)}`;
+    } catch (e: any) {
+      console.error(`[SLACK-BOT] Error updating tag: ${e}`);
+      if (e.message === "Tag does not exist") {
+        return `Tag ${tag} does not exist. To create a new tag, set the link parameter instead of updateLink`;
+      }
+      return `Error updating tag: ${e}`;
+    }
+  }
 }
 
 async function viewInviteStatus(kwargs: Map<string, string>): Promise<string> {

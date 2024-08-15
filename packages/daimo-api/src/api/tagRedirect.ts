@@ -21,7 +21,7 @@ export async function createTagRedirect(
   updateToken: string,
   db: DB
 ) {
-  return await db.createTagRedirect(tag, link, updateToken);
+  return await db.saveTagRedirect(tag, link, updateToken);
 }
 
 // Updates tag redirect URL, authenticatd by updateToken.
@@ -30,7 +30,7 @@ export async function setTagRedirect(
   link: string,
   updateToken: string,
   db: DB
-): Promise<void> {
+) {
   await verifyTagUpdateToken(tag, updateToken, db);
   return await db.saveTagRedirect(tag, link);
 }

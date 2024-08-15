@@ -235,35 +235,37 @@ export class DB {
     }));
   }
 
-  async createTagRedirect(tag: string, link: string, updateToken: string) {
-    console.log(
-      `[DB] creating tag redirect with update token ${updateToken}: ${tag} -> ${link}`
-    );
-    const res = await this.pool.query(
-      `INSERT INTO tag_redirect (tag, link, update_token) VALUES ($1, $2, $3)`,
-      [tag, link, updateToken]
-    );
-    if (res.rowCount && res.rowCount > 0) {
-      await this.pool.query(
-        `INSERT INTO tag_redirect_history (tag, link, update_token) VALUES ($1, $2, $3)`,
-        [tag, link, updateToken]
-      );
-    }
-  }
-
-  async saveTagRedirect(tag: string, link: string) {
+  async saveTagRedirect(
+    tag: string,
+    link: string,
+    updateToken?: string
+  ): Promise<TagRedirectRow> {
     console.log(`[DB] inserting tag redirect: ${tag} -> ${link}`);
-    const res = await this.pool.query(
-      `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
-       ON CONFLICT (tag) DO UPDATE SET link = $2`,
-      [tag, link]
-    );
-    if (res.rowCount && res.rowCount > 0) {
-      await this.pool.query(
-        `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
-        [tag, link]
-      );
+    const queryParams = [tag, link];
+    let query = `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
+                 ON CONFLICT (tag) DO UPDATE SET link = $2
+                 RETURNING *`;
+
+    if (updateToken !== undefined) {
+      query = `INSERT INTO tag_redirect (tag, link, update_token) VALUES ($1, $2, $3)
+               ON CONFLICT (tag) DO UPDATE SET link = $2, update_token = $3
+               RETURNING *`;
+      queryParams.push(updateToken);
     }
+
+    const res = await this.pool.query(query, queryParams);
+
+    if (res.rowCount && res.rowCount > 0) {
+      let historyQuery = `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`;
+
+      if (updateToken !== undefined) {
+        historyQuery = `INSERT INTO tag_redirect_history (tag, link, update_token) VALUES ($1, $2, $3)`;
+      }
+
+      await this.pool.query(historyQuery, queryParams);
+    }
+
+    return res.rows[0];
   }
 
   async saveOffchainAction(row: OffchainActionRow) {

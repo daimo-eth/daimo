@@ -606,7 +606,9 @@ export function createRouter(
       .mutation(async (opts) => {
         const { apiKey, tag, link, updateToken } = opts.input;
         authorize(apiKey);
-        return await createTagRedirect(tag, link, updateToken, db);
+
+        const res = await createTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
       }),
 
     updateTagRedirect: publicProcedure
@@ -615,7 +617,9 @@ export function createRouter(
       )
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
-        return await setTagRedirect(tag, link, updateToken, db);
+
+        const res = await setTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
       }),
 
     getTagHistory: publicProcedure
