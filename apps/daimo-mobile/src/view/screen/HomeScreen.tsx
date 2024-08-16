@@ -409,11 +409,11 @@ function useInitNavLinks() {
       if (url == null) return;
       if (handledInitialDeepLink) return;
       handledInitialDeepLink = true;
-      handleDeepLink(nav, dispatcher, url);
+      handleDeepLink(nav, dispatcher, url, account.homeChainId);
     });
 
     const sub = addEventListener("url", ({ url }) =>
-      handleDeepLink(nav, dispatcher, url)
+      handleDeepLink(nav, dispatcher, url, account.homeChainId)
     );
     return () => sub.remove();
   }, [accountMissing, nav]);

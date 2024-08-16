@@ -54,7 +54,7 @@ export function SuggestedActionBox({
     console.log(`[SUGGESTED] executing ${action.id}: ${action.title}`);
 
     if (action.url.startsWith("daimo")) {
-      handleDeepLink(nav, dispatcher, action.url); // daimo:// direct deeplinks
+      handleDeepLink(nav, dispatcher, action.url, account.homeChainId); // daimo:// direct deeplinks
     } else {
       Linking.openURL(action.url); // https://, mailto://, ...
     }

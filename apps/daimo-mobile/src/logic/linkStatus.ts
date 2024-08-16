@@ -18,6 +18,16 @@ export function useFetchLinkStatus(
   return rpcHook.getLinkStatus.useQuery({ url: url! }, { enabled: !!url });
 }
 
+export function fetchLinkStatus(
+  link: DaimoLink | undefined,
+  daimoChain: DaimoChain
+) {
+  const sanitizedLink = link && stripSeedFromNoteLink(link);
+  const url = sanitizedLink && formatDaimoLink(sanitizedLink);
+  const rpcFunc = getRpcFunc(daimoChain);
+  return rpcFunc.getLinkStatus.query({ url: url! });
+}
+
 export async function fetchInviteLinkStatus(
   daimoChain: DaimoChain,
   inviteLink: DaimoLink | undefined

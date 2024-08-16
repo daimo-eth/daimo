@@ -119,11 +119,11 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       if (fulfilledBy === undefined) {
         const result: LinkStatusDesc = {
           name: `${name}`,
-          action: i18n.link.actions.requesting(),
+          action: i18n.link.actions.requestingPayment(),
           description: i18n.link.responses.request.desc1(),
         };
         if (res.link.dollars) {
-          result.action = `is requesting`;
+          result.action = i18n.link.actions.requesting();
           result.dollars = `${res.link.dollars}`;
         }
         return result;
