@@ -30,7 +30,7 @@ describe("nav", () => {
 
   it("handles account links", () => {
     history.length = 0;
-    handleDeepLink(nav, dispatcher, "daimo://account/alice");
+    handleDeepLink(nav, dispatcher, "daimo://account/alice", 8453);
     assertNav("HomeTab", "Profile", {
       link: { type: "account", account: "alice" },
     });
@@ -38,7 +38,7 @@ describe("nav", () => {
 
   it("handles request links", () => {
     history.length = 0;
-    handleDeepLink(nav, dispatcher, "daimo://request/alice/1.23/456");
+    handleDeepLink(nav, dispatcher, "daimo://request/alice/1.23/456", 8453);
     assertNav("SendTab", "SendTransfer", {
       link: {
         type: "request",
@@ -56,7 +56,8 @@ describe("nav", () => {
     handleDeepLink(
       nav,
       dispatcher,
-      "daimo://note/alice/1.23/0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+      "daimo://note/alice/1.23/0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      8453
     );
     assertNav("HomeTab", "Note", {
       link: {

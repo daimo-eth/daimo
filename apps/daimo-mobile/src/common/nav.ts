@@ -15,7 +15,7 @@ import {
   parseDaimoLink,
   parseInviteCodeOrLink,
 } from "@daimo/common";
-import { DaimoChain } from "@daimo/contract";
+import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { URLListener, addEventListener } from "expo-linking";
@@ -34,7 +34,7 @@ import {
   getInitialDeepLink,
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
-import { fetchInviteLinkStatus } from "../logic/linkStatus";
+import { fetchInviteLinkStatus, fetchLinkStatus } from "../logic/linkStatus";
 import { MoneyEntry } from "../logic/moneyEntry";
 import { Account } from "../storage/account";
 
@@ -228,7 +228,8 @@ export async function handleOnboardingDeepLink(
 export function handleDeepLink(
   nav: MainNav,
   dispatcher: Dispatcher,
-  url: string
+  url: string,
+  homeChainId: number
 ) {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -238,10 +239,15 @@ export function handleDeepLink(
   }
 
   console.log(`[NAV] going to ${url}`);
-  goTo(nav, dispatcher, link);
+  goTo(nav, dispatcher, link, homeChainId);
 }
 
-async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
+async function goTo(
+  nav: MainNav,
+  dispatcher: Dispatcher,
+  link: DaimoLink,
+  homeChainId: number
+) {
   const { type } = link;
   switch (type) {
     case "settings": {
@@ -273,7 +279,12 @@ async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
       break;
     }
     case "tag": {
-      nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
+      // TODO: pass link status through so child pages don't need to fetch status again
+      const linkStatus = await fetchLinkStatus(
+        link,
+        daimoChainFromId(homeChainId)
+      );
+      goTo(nav, dispatcher, linkStatus.link, homeChainId);
       break;
     }
     case "invite": {
