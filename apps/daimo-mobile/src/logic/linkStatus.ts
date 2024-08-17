@@ -3,7 +3,6 @@ import {
   DaimoLinkStatus,
   formatDaimoLink,
   getInviteStatus,
-  LinkInviteStatus,
   stripSeedFromNoteLink,
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
