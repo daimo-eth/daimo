@@ -20,7 +20,7 @@ import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
 import { SwapClogMatcher } from "./SwapClogMatcher";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
@@ -62,14 +62,14 @@ export class HomeCoinIndexer extends Indexer {
     return { numTransfers: this.allTransfers.length };
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(
       `homeCoinIndexer-logs-query-${from}-${to}`,
       () =>
         kdb
-          .selectFrom("daimo_transfers")
+          .selectFrom("index.daimo_transfer")
           .select([
             "block_num",
             "block_hash",
@@ -81,7 +81,7 @@ export class HomeCoinIndexer extends Indexer {
             "t",
             "amount",
           ])
-          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .where((e) => e.between("block_num", "" + from, "" + to))
           .where("token", "=", hexToBuffer(chainConfig.tokenAddress))
           .orderBy("block_num", "asc")
@@ -96,8 +96,8 @@ export class HomeCoinIndexer extends Indexer {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-        transactionIndex: row.tx_idx,
-        logIndex: row.sort_idx / 2,
+        transactionIndex: Number(row.tx_idx),
+        logIndex: Number(row.sort_idx) / 2,
         address: getAddress(bytesToHex(assertNotNull(row.token), { size: 20 })),
         from: getAddress(bytesToHex(row.f, { size: 20 })),
         to: getAddress(bytesToHex(row.t, { size: 20 })),
@@ -125,7 +125,7 @@ export class HomeCoinIndexer extends Indexer {
     this.currentBalances.set(addr, currentBalance + delta);
   }
 
-  /** Get balance as of current shovel sync. */
+  /** Get current home coin balance. */
   getCurrentBalance(addr: Address) {
     return this.currentBalances.get(addr) || 0n;
   }

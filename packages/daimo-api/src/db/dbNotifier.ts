@@ -1,19 +1,17 @@
 import EventEmitter from "node:events";
 import { Client, ClientConfig } from "pg";
 
-import { chainConfig } from "../env";
-
-export const DB_EVENT_DAIMO_NEW_BLOCK =
-  chainConfig.daimoChain + "-daimo-new-block";
+export const DB_EVENT_NEW_BLOCK = "indexdb-new-block";
 
 const IGNORED_EVENTS = new Set(["newListener", "removeListener"]);
 
 /**
- * Connects to Postgres and emits LISTEN/NOTIFY events.
+ * Connects to IndexDB and emits LISTEN/NOTIFY events.
  */
-export class DBNotifications extends EventEmitter {
+export class DBNotifier extends EventEmitter {
+  /// Postgres client
   client: Client;
-  // Postgres notification channels that we are listening to.
+  /// Postgres notification channels that we are listening to.
   channels: Set<string>;
   isConnected = false;
 

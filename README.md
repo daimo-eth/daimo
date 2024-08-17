@@ -216,10 +216,10 @@ In the cloud, these tests are run on the master branch using the `maestro-ci` wo
 <details>
 <summary><strong>DB diagnostics</strong></summary>
 
-Shovel caught up?
+Indexer caught up?
 
 ```sql
-SELECT * FROM shovel.latest;
+SELECT * FROM index.daimo_index;
 ```
 
 Largest Postgres DB tables, disk usage:

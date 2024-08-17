@@ -4,7 +4,8 @@ import { Kysely } from "kysely";
 import { Address, bytesToHex, getAddress, Hex, hexToBytes } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
+import { chainConfig } from "../env";
 import { TokenRegistry } from "../server/tokenRegistry";
 
 export class SwapClogMatcher {
@@ -22,21 +23,23 @@ export class SwapClogMatcher {
   // Given a set transaction hashes, load any transfers that are associated
   // with those transactions.
   async loadSwapTransfers(
-    kdb: Kysely<ShovelDB>,
+    kdb: Kysely<IndexDB>,
     from: number,
     to: number,
     chainId: number,
-    transactionHashes: Hex[]
+    blockNums: Set<bigint>,
+    txHashes: Set<Hex>
   ) {
     const startTime = Date.now();
 
-    const txHashes = transactionHashes.map((tx) => Buffer.from(hexToBytes(tx)));
+    const blockList = [...blockNums].sort().map((bn) => bn.toString());
+    const txList = [...txHashes].map((tx) => Buffer.from(hexToBytes(tx)));
 
     const result = await retryBackoff(
       `swapClogMatcher-logs-query-${from}-${to}`,
       () =>
         kdb
-          .selectFrom("daimo_transfers")
+          .selectFrom("index.daimo_transfer")
           .select([
             "block_hash",
             "block_num",
@@ -48,7 +51,9 @@ export class SwapClogMatcher {
             "t",
             "amount",
           ])
-          .where("tx_hash", "in", txHashes)
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
+          .where("block_num", "in", blockList)
+          .where("tx_hash", "in", txList)
           .execute()
     );
 
@@ -57,8 +62,8 @@ export class SwapClogMatcher {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-        transactionIndex: row.tx_idx,
-        logIndex: row.sort_idx,
+        transactionIndex: Number(row.tx_idx),
+        logIndex: Number(row.sort_idx),
         address:
           row.token == null
             ? zeroAddr

@@ -11,10 +11,10 @@ dotenv.config();
 
 const zEnv = {
   NEXT_PUBLIC_DAIMO_CHAIN: z.enum(["base", "baseSepolia"]),
-  // App DB connection. Defaults to local Postgres.
+  // ApiDB connection. Defaults to local Postgres.
   PGURL: z.string().startsWith("postgres://").optional(),
-  // Shovel DB connection. Defaults to local Postgres.
-  SHOVEL_DATABASE_URL: z.string().startsWith("postgres://").optional(),
+  // IndexDB connection. Defaults to local Postgres.
+  INDEX_DATABASE_URL: z.string().startsWith("postgres://").optional(),
   // Authorized API keys for service clients to grant invites, etc.
   DAIMO_ALLOWED_API_KEYS: z.string().optional(),
   // Currency exchange rates API: openexchangerates.org

@@ -12,13 +12,13 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
+import { IndexWatcher } from "../db/indexWatcher";
 import { chainConfig } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { AntiSpam } from "../server/antiSpam";
 import { Telemetry } from "../server/telemetry";
 import { TrpcRequestContext } from "../server/trpc";
-import { Watcher } from "../shovel/watcher";
 
 export async function deployWallet(
   ctx: TrpcRequestContext,
@@ -26,7 +26,7 @@ export async function deployWallet(
   pubKeyHex: Hex,
   inviteLinkStatus: DaimoLinkStatus,
   deviceAttestationString: Hex,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
   inviteCodeTracker: InviteCodeTracker,

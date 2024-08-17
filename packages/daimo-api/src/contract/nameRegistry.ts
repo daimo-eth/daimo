@@ -26,7 +26,7 @@ import { normalize } from "viem/ens";
 
 import { Indexer } from "./indexer";
 import { ProfileCache } from "../api/profile";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -109,7 +109,7 @@ export class NameRegistry extends Indexer {
     return { numAccounts: this.accounts.length, numLogs: this.logs.length };
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
     const result = await retryBackoff(
       `nameRegistry-logs-query-${from}-${to}`,

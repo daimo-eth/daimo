@@ -1,36 +1,21 @@
 import { Kysely } from "kysely";
 import { Pool } from "pg";
 
-import { DB as ShovelDB } from "../codegen/dbShovel";
-import { chainConfig } from "../env";
+import { DB as IndexDB } from "../codegen/dbIndex";
 
 export abstract class Indexer {
   public readonly name: string;
   protected lastProcessedBlock = 0;
 
-  public readonly shovelSource: { event: string; trace: string };
-
   constructor(name: string) {
     console.log(`[INDEXER] ${name} constructed`);
     this.name = name;
-
-    const { id } = chainConfig.chainL2;
-    this.shovelSource = (function () {
-      switch (id) {
-        case 8453:
-          return { event: "base", trace: "baseTrace" };
-        case 84532:
-          return { event: "baseSepolia", trace: "baseSepoliaTrace" };
-        default:
-          throw new Error(`Unsupported chain ${id}`);
-      }
-    })();
   }
 
   // Loads a batch of blocks from the database.
   public abstract load(
     pg: Pool,
-    kdb: Kysely<ShovelDB>,
+    kdb: Kysely<IndexDB>,
     from: number,
     to: number
   ): void | Promise<void>;

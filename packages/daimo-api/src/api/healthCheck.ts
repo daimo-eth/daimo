@@ -1,8 +1,8 @@
 import { now } from "@daimo/common";
 
 import { DB } from "../db/db";
+import { IndexWatcher } from "../db/indexWatcher";
 import { getNodeMetrics } from "../server/node";
-import { Watcher } from "../shovel/watcher";
 
 // Get node inspector session, for debugging.
 const inspector = require("node:inspector/promises");
@@ -11,7 +11,7 @@ session.connect();
 
 export async function healthCheck(
   db: DB,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   startTimeS: number
 ) {
   return healthCheckInner(db, watcher, startTimeS, []);
@@ -19,7 +19,7 @@ export async function healthCheck(
 
 export async function healthDebug(
   db: DB,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   startTimeS: number,
   trpcReqsInFlight: string[]
 ) {
@@ -28,7 +28,7 @@ export async function healthDebug(
 
 async function healthCheckInner(
   db: DB,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   startTimeS: number,
   trpcReqsInFlight: string[],
   showDetailedDebug?: boolean
@@ -49,8 +49,8 @@ async function healthCheckInner(
     status = "node-mem-full";
   } else if (apiDB.waitingCount > 10) {
     status = "api-db-overloaded";
-  } else if (indexer.shovelDB.waitingCount > 10) {
-    status = "shovel-db-overloaded";
+  } else if (indexer.indexDB.waitingCount > 10) {
+    status = "index-db-overloaded";
   }
 
   let ret = {

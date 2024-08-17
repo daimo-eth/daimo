@@ -19,7 +19,7 @@ import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
@@ -60,14 +60,14 @@ export class ForeignCoinIndexer extends Indexer {
     super("FOREIGN-COIN");
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
     const startMs = performance.now();
 
     const result = await retryBackoff(
       `foreignCoinIndexer-logs-query-${from}-${to}`,
       async () =>
         kdb
-          .selectFrom("daimo_transfers")
+          .selectFrom("index.daimo_transfer")
           .select([
             "block_hash",
             "block_num",
@@ -79,7 +79,7 @@ export class ForeignCoinIndexer extends Indexer {
             "t",
             "amount",
           ])
-          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .where((eb) => eb.between("block_num", "" + from, "" + to))
           .orderBy("block_num", "asc")
           .orderBy("sort_idx", "asc")
@@ -93,8 +93,10 @@ export class ForeignCoinIndexer extends Indexer {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-        transactionIndex: row.tx_idx,
-        logIndex: row.sort_idx,
+        transactionIndex: Number(row.tx_idx),
+        // Mislabelled for backwards compatibility. We need to support both
+        // ERC-20 and native token transfers; the latter have no log index.
+        logIndex: Number(row.sort_idx),
         address:
           row.token == null
             ? zeroAddr // ETH / native token transfer

@@ -25,6 +25,7 @@ import { RequestIndexer } from "../contract/requestIndexer";
 import { SwapClogMatcher } from "../contract/SwapClogMatcher";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
+import { IndexWatcher } from "../db/indexWatcher";
 import { chainConfig, getEnvApi } from "../env";
 import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
@@ -32,7 +33,6 @@ import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { Watcher } from "../shovel/watcher";
 
 // Workaround viem bug
 (Error.prototype as any).walk = function () {
@@ -112,8 +112,8 @@ async function main() {
   );
 
   // Set up indexers
-  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
-  const watcher = new Watcher(vc.publicClient, shovelDbUrl);
+  const indexDBUrl = getEnvApi().INDEX_DATABASE_URL;
+  const watcher = new IndexWatcher(vc.publicClient, indexDBUrl);
   watcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
@@ -124,9 +124,9 @@ async function main() {
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
+    await watcher.migrateDB();
     await watcher.init();
     watcher.watch();
-    s2.watch();
 
     await Promise.all([
       paymaster.init(),

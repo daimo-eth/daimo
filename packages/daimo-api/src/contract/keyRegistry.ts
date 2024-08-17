@@ -9,7 +9,7 @@ import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 
 export interface KeyChange {
@@ -41,7 +41,7 @@ export class KeyRegistry extends Indexer {
     this.listeners.push(listener);
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
     const changes: KeyChange[] = [];
     changes.push(...(await this.loadKeyChange(pg, from, to, "added")));

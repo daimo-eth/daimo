@@ -19,7 +19,6 @@ import {
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
-import { observable } from "@trpc/server/observable";
 import { getAddress, hashMessage, hexToNumber } from "viem";
 import { z } from "zod";
 
@@ -31,10 +30,7 @@ import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
-import {
-  AccountHistoryResult,
-  getAccountHistory,
-} from "../api/getAccountHistory";
+import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
@@ -63,7 +59,7 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
-import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
+import { IndexWatcher } from "../db/indexWatcher";
 import { getEnvApi } from "../env";
 import { landlineDeposit } from "../landline/connector";
 import { runWithLogContext } from "../logging";
@@ -73,7 +69,6 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { Watcher } from "../shovel/watcher";
 import { verifyERC1271Signature } from "../utils/verifySignature";
 
 // Service authentication for, among other things, invite link creation
@@ -81,7 +76,7 @@ const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
 console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(
-  watcher: Watcher,
+  watcher: IndexWatcher,
   vc: ViemClient,
   db: DB,
   bundlerClient: BundlerClient,
@@ -769,85 +764,6 @@ export function createRouter(
           telemetry,
           inviteCodeTracker
         );
-      }),
-
-    onAccountUpdate: publicProcedure
-      .input(
-        z.object({
-          address: zAddress,
-          inviteCode: z.string().optional(),
-          sinceBlockNum: z.number(),
-          lang: z.string().optional(),
-        })
-      )
-      .subscription(async (opts) => {
-        const { address, inviteCode, lang } = opts.input;
-        // how often to send updates regardless of new transfers
-        // useful to update keys, exchange rates and others.
-        const refreshInterval = 10_000;
-
-        return observable<AccountHistoryResult>((emit) => {
-          let lastEmittedBlock = opts.input.sinceBlockNum;
-
-          const pushHistory = async (
-            blockNumber: number,
-            requireNewTransfers = false
-          ) => {
-            const history = await getAccountHistory(
-              opts.ctx,
-              address,
-              inviteCode,
-              blockNumber,
-              lang,
-              vc,
-              homeCoinIndexer,
-              foreignCoinIndexer,
-              profileCache,
-              noteIndexer,
-              reqIndexer,
-              inviteCodeTracker,
-              inviteGraph,
-              nameReg,
-              keyReg,
-              paymaster,
-              db,
-              extApiCache,
-              blockNumber
-            );
-
-            if (lastEmittedBlock >= history.lastBlock) {
-              return;
-            }
-
-            if (requireNewTransfers && history.transferLogs.length === 0) {
-              return;
-            }
-
-            emit.next(history);
-
-            lastEmittedBlock = history.lastBlock;
-          };
-
-          // on new block, push state only when new transfers are available
-          const onNewBlock = async (payload: string) => {
-            const { block_number } = JSON.parse(payload);
-            pushHistory(block_number, true);
-          };
-
-          // for interval updates push full history
-          const intervalTimer = setInterval(async () => {
-            const blockNumber = watcher.latestBlock().number;
-            pushHistory(blockNumber);
-          }, refreshInterval);
-
-          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
-
-          return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
-
-            clearInterval(intervalTimer);
-          };
-        });
       }),
   });
 }

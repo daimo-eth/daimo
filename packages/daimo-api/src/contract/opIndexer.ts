@@ -6,10 +6,11 @@ import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { Indexer } from "./indexer";
 import { SwapClogMatcher } from "./SwapClogMatcher";
-import { DB as ShovelDB } from "../codegen/dbShovel";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 
 export interface UserOp {
+  blockNumber: bigint;
   transactionHash: Hex;
   logIndex: number;
   nonce: bigint;
@@ -43,17 +44,17 @@ export class OpIndexer extends Indexer {
     this.callbacks.delete(userOp.hash);
   }
 
-  async load(pg: Pool, kdb: Kysely<ShovelDB>, from: number, to: number) {
+  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(
       `opIndexer-logs-query-${from}-${to}`,
       () =>
         kdb
-          .selectFrom("daimo_ops")
-          .select(["tx_hash", "log_idx", "op_nonce", "op_hash"])
+          .selectFrom("index.daimo_op")
+          .select(["block_num", "tx_hash", "log_idx", "op_nonce", "op_hash"])
           .where((eb) => eb.between("block_num", "" + from, "" + to))
-          .where("chain_id", "=", chainConfig.chainL2.id)
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .execute()
     );
     if (result.length === 0) return;
@@ -63,11 +64,13 @@ export class OpIndexer extends Indexer {
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const transactionHashes: Hex[] = [];
+    const blockNums = new Set<bigint>();
+    const txHashes = new Set<Hex>();
     result.forEach((row) => {
       const userOp: UserOp = {
+        blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(assertNotNull(row.tx_hash), { size: 32 }),
-        logIndex: assertNotNull(row.log_idx),
+        logIndex: Number(assertNotNull(row.log_idx)),
         nonce: BigInt(assertNotNull(row.op_nonce)),
         hash: bytesToHex(assertNotNull(row.op_hash), { size: 32 }),
       };
@@ -84,7 +87,8 @@ export class OpIndexer extends Indexer {
       if (!nonceMetadata) return;
 
       this.callback(userOp);
-      transactionHashes.push(userOp.transactionHash);
+      blockNums.add(userOp.blockNumber);
+      txHashes.add(userOp.transactionHash);
     });
 
     elapsedMs = (Date.now() - startTime) | 0;
@@ -95,7 +99,8 @@ export class OpIndexer extends Indexer {
       from,
       to,
       chainConfig.chainL2.id,
-      transactionHashes
+      blockNums,
+      txHashes
     );
   }
 
