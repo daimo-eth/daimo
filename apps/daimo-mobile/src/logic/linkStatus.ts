@@ -1,5 +1,6 @@
 import {
   DaimoLink,
+  DaimoLinkStatus,
   formatDaimoLink,
   getInviteStatus,
   stripSeedFromNoteLink,
@@ -18,14 +19,14 @@ export function useFetchLinkStatus(
   return rpcHook.getLinkStatus.useQuery({ url: url! }, { enabled: !!url });
 }
 
-export function fetchLinkStatus(
-  link: DaimoLink | undefined,
+export async function fetchLinkStatus(
+  link: DaimoLink,
   daimoChain: DaimoChain
-) {
-  const sanitizedLink = link && stripSeedFromNoteLink(link);
-  const url = sanitizedLink && formatDaimoLink(sanitizedLink);
+): Promise<DaimoLinkStatus> {
+  const sanitizedLink = stripSeedFromNoteLink(link);
+  const url = formatDaimoLink(sanitizedLink);
   const rpcFunc = getRpcFunc(daimoChain);
-  return rpcFunc.getLinkStatus.query({ url: url! });
+  return await rpcFunc.getLinkStatus.query({ url });
 }
 
 export async function fetchInviteLinkStatus(

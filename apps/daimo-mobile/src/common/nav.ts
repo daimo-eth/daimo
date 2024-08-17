@@ -280,11 +280,11 @@ async function goTo(
     }
     case "tag": {
       // TODO: pass link status through so child pages don't need to fetch status again
-      fetchLinkStatus(link, daimoChainFromId(homeChainId)).then(
-        (linkStatus) => {
-          goTo(nav, dispatcher, linkStatus.link, homeChainId);
-        }
+      const linkStatus = await fetchLinkStatus(
+        link,
+        daimoChainFromId(homeChainId)
       );
+      goTo(nav, dispatcher, linkStatus.link, homeChainId);
       break;
     }
     case "invite": {
