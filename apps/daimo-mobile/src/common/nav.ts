@@ -214,13 +214,22 @@ export async function handleOnboardingDeepLink(
   nav: OnboardingNav,
   str: string
 ) {
-  const inviteLink = parseInviteCodeOrLink(str);
   console.log(`[INTRO] paste invite link: '${str}'`);
+  const inviteLink = parseInviteCodeOrLink(str);
+  if (!inviteLink) {
+    console.log(`[INTRO] skipping unparseable invite link/code ${str}`);
+    nav.navigate("CreateNew");
+    return;
+  }
+  console.log(`[INTRO] parsed invite link: ${JSON.stringify(inviteLink)}`);
+
+  const linkStatus = await fetchInviteLinkStatus(dc, inviteLink);
   const isAndroid = Platform.OS === "android";
-  if (inviteLink && (await fetchInviteLinkStatus(dc, inviteLink))?.isValid) {
+  if (linkStatus?.isValid) {
     if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
     else nav.navigate("CreateChooseName", { inviteLink });
   } else {
+    console.log(`[INTRO] invite ${str} is no longer valid.`);
     nav.navigate("CreateNew");
   }
 }
