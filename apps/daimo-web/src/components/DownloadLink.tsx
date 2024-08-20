@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { TextBold } from "./typography";
 import { useI18N } from "../i18n/context";
-import { detectPlatform, downloadMetadata } from "../utils/platform";
+import { detectPlatform, getDownloadMetadata } from "../utils/platform";
 
 export function DownloadLink() {
   const i18n = useI18N();
@@ -43,6 +43,8 @@ export function DownloadLinkButton() {
 }
 
 export function DownloadLinkButtonMobileNav() {
+  const i18n = useI18N();
+  const downloadMetadata = getDownloadMetadata(i18n);
   const [title, setTitle] = useState(downloadMetadata["ios"].title);
 
   useEffect(() => {
