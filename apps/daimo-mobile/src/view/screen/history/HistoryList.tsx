@@ -121,7 +121,7 @@ export function HistoryListSwipe({
   let language = i18NLocale.languageCode;
 
   // if null, set to english
-  language ??= "en";
+  language ??= "default";
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
