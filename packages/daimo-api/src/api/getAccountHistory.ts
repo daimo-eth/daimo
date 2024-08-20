@@ -1,17 +1,16 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
-  AddrLabel,
   ChainGasConstants,
   CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoRequestV2Status,
-  TransferClog,
   EAccount,
   KeyData,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
   SuggestedAction,
+  TransferClog,
   appStoreLinks,
   assert,
   daimoDomainAddress,
@@ -28,7 +27,7 @@ import { ProfileCache } from "./profile";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
-import { NameRegistry, specialAddrLabels } from "../contract/nameRegistry";
+import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";

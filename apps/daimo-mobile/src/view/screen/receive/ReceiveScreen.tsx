@@ -30,6 +30,7 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { getFullMemo } from "../../../logic/memo";
 import { MoneyEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
@@ -106,7 +107,7 @@ function RequestScreenInner({
       account,
       money,
       fulfiller,
-      memo
+      getFullMemo(memo, money)
     );
     console.log(`[REQUEST] txHash ${txHash}`);
 
