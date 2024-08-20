@@ -225,6 +225,7 @@ export function createRouter(
         const { amountIn, fromToken, fromAccount, toToken, toAddr, chainId } =
           opts.input;
         return await getSwapQuote({
+          receivedAt: now(),
           amountInStr: amountIn,
           tokenIn: getAddress(fromToken),
           tokenOut: getAddress(toToken),

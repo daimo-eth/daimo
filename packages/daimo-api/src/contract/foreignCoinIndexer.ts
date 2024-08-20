@@ -6,6 +6,7 @@ import {
   SwapQueryResult,
   baseUSDC,
   debugJson,
+  guessTimestampFromNum,
   isAmountDust,
   retryBackoff,
 } from "@daimo/common";
@@ -138,6 +139,9 @@ export class ForeignCoinIndexer extends Indexer {
 
     if (delta < 0n) {
       // outbound transfer
+      console.log(
+        `[FOREIGN-COIN] outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+      );
       this.sendsByAddrTxHash.set(addrTxHashKey(addr, log.transactionHash), log);
 
       // Delete the first matching pending swap that is now swapped
@@ -203,13 +207,20 @@ export class ForeignCoinIndexer extends Indexer {
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
+
+      // TODO: retrieve correct home coin address
       const homeCoin = baseUSDC;
+      const receivedAt = guessTimestampFromNum(
+        log.blockNumber,
+        chainConfig.daimoChain
+      );
 
       return this.getProposedSwap(
+        receivedAt,
         log.foreignToken.token,
         log.value.toString() as `${bigint}`,
         fromAcc,
-        homeCoin.token, // TODO: retrieve correct home coin address
+        homeCoin.token,
         log.to
       );
     });
@@ -262,6 +273,7 @@ export class ForeignCoinIndexer extends Indexer {
 
   // Fetch a route using on-chain oracle.
   public async getProposedSwap(
+    receivedAt: number,
     fromToken: Address,
     fromAmount: BigIntStr,
     fromAcc: EAccount,
@@ -272,6 +284,7 @@ export class ForeignCoinIndexer extends Indexer {
     const chainId = chainConfig.chainL2.id;
 
     return await getSwapQuote({
+      receivedAt,
       amountInStr: fromAmount,
       tokenIn: fromToken,
       tokenOut: toToken,

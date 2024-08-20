@@ -214,6 +214,7 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
       `to ${toToken.symbol} (${toToken.address})`,
     ].join("\n");
   }
+
   const fromStr = `${amountIn} ${fromToken.symbol}`; // eg 1.23 DAI
   return [
     `From ${fromToken.symbol} (${fromToken.address})`,

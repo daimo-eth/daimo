@@ -23,21 +23,23 @@ const SINGLE_POOL_LENGTH_HEX = 88;
 // Given an exact amount input of tokenIn, retrieve the best-effort swap path
 // to get tokenOut.
 export async function getSwapQuote({
+  chainId,
+  receivedAt,
   amountInStr,
   tokenIn,
   tokenOut,
   fromAccount,
   toAddr,
-  chainId,
   vc,
   tokenReg,
 }: {
+  chainId: number;
+  receivedAt: number;
   amountInStr: BigIntStr;
   tokenIn: Address;
   tokenOut: Address;
   fromAccount: EAccount;
   toAddr: Address;
-  chainId: number;
   vc: ViemClient;
   tokenReg: TokenRegistry;
 }) {
@@ -48,6 +50,14 @@ export async function getSwapQuote({
   assert(amountIn > 0, "amountIn must be positive");
   assert(tokenIn !== tokenOut, "tokenIn == tokenOut");
 
+  // Only quote known tokens (that appear on CoinGecko etc) to avoid spam.
+  const fromCoin = tokenReg.getToken(tokenIn);
+  if (fromCoin == null) {
+    console.log(`[SWAP QUOTE] no quote, unknown token: ${tokenIn}`);
+    return null;
+  }
+
+  // Onchain Uniswap quoter.
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoUsdcSwapperABI,
     address: "0x2F7e2Eee89A3c6937A22607c7e9B2231825a5418",
@@ -56,6 +66,14 @@ export async function getSwapQuote({
   });
   const amountOut: bigint = swapQuote[0];
   const swapPath: Hex = swapQuote[1];
+
+  // No output = no quote.
+  if (amountOut === 0n) {
+    console.log(
+      `[SWAP QUOTE] no output for ${amountIn} ${fromCoin.symbol} ${tokenIn}: ${swapPath}`
+    );
+    return null;
+  }
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.
@@ -74,8 +92,6 @@ export async function getSwapQuote({
   const amountOutMinimum = amountOut - (maxSlippagePercent * amountOut) / 100n;
 
   // Special handling for fromCoin = native ETH
-  const fromCoin = tokenReg.getToken(tokenIn);
-  if (fromCoin == null) return null;
   const isFromETH = isNativeETH(fromCoin, chainId);
 
   let swapCallData;
@@ -138,7 +154,7 @@ export async function getSwapQuote({
     fromCoin,
     fromAmount: `${amountIn}` as BigIntStr,
     fromAcc: fromAccount,
-    receivedAt: t,
+    receivedAt,
     cacheUntil,
     execDeadline,
     toCoin: tokenOut,
