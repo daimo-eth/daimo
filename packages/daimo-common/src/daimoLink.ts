@@ -197,6 +197,22 @@ export function parseDaimoLink(link: string): DaimoLink | null {
   }
 }
 
+export function parseDaimoLinkType(link: string): string | null {
+  const prefixes = [
+    `${daimoLinkBase}/`,
+    `${daimoLinkBaseV2}/`, // New shorter link prefix
+    "daimo://",
+    "https://daimo.xyz/link/", // Backcompat with old domain
+  ];
+  const prefix = prefixes.find((p) => link.startsWith(p));
+  if (prefix == null) return null;
+  const url = new URL(link.replace(prefix, `https://domain.com/`));
+
+  const suffix = url.pathname.substring(1);
+  const parts = suffix.split("/");
+  return parts[0];
+}
+
 function parseDaimoLinkInner(link: string): DaimoLink | null {
   const prefixes = [
     `${daimoLinkBase}/`,
