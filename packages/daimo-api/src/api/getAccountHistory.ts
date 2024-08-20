@@ -285,28 +285,6 @@ function getSuggestedActions(
     });
   }
 
-  // Active account: has received transfer from another user in "recent"
-  // transfer logs. The recency condition means that it will be dismissed
-  // automatically if transferLogs are empty (eg, user leaves app open for
-  // a while).
-  const hasReceived = hist.transferLogs.some((log) => {
-    return (
-      log.type === "transfer" &&
-      log.to === eAcc.addr &&
-      specialAddrLabels[log.from] !== AddrLabel.Faucet
-    );
-  });
-
-  if (hasReceived) {
-    ret.push({
-      id: "2023-12-join-tg-6",
-      icon: "comment-discussion",
-      title: t.feedback.title(),
-      subtitle: t.feedback.subtitle(),
-      url: `https://t.me/+to2ghQJfgic0YjA9`,
-    });
-  }
-
   return ret;
 }
 
