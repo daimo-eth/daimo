@@ -204,20 +204,32 @@ function SendChooseAmount({
         </View>
       </View>
       <Spacer h={14} />
-      <PublicWarning />
+      <PublicWarning bankTransferOption={selectedTransferOption} />
     </View>
   );
 }
 
-function PublicWarning() {
+function PublicWarning({
+  bankTransferOption,
+}: {
+  bankTransferOption: BankTransferOptions;
+}) {
   return (
     <View style={{ flexDirection: "column" }}>
       <TextCenter>
-        <TextLight>{i18.warning.title()}</TextLight>
+        <TextLight>
+          {bankTransferOption === BankTransferOptions.Deposit
+            ? i18.warning.titleDeposit()
+            : i18.warning.titleWithdraw()}
+        </TextLight>
       </TextCenter>
       <Spacer h={4} />
       <TextCenter>
-        <TextLight>{i18.warning.minimum()}</TextLight>
+        <TextLight>
+          {bankTransferOption === BankTransferOptions.Deposit
+            ? i18.warning.minimumDeposit()
+            : i18.warning.minimumWithdraw()}
+        </TextLight>
       </TextCenter>
     </View>
   );

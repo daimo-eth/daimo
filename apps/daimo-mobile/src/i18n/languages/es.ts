@@ -538,8 +538,10 @@ export const es: LanguageDefinition = {
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
     warning: {
-      title: () => `Los retiros son públicos`,
-      minimum: () => `La cantidad mínima para retirar es 1 USDC`,
+      titleDeposit: () => `Los depósitos son públicos`,
+      titleWithdraw: () => `Los retiros son públicos`,
+      minimumDeposit: () => `La cantidad mínima para depositar es 1 USD`,
+      minimumWithdraw: () => `La cantidad mínima para retirar es 1 USDC`,
     },
   },
   // ProfileScreen.tsx

@@ -19,7 +19,7 @@ import {
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
-import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
+import LandlineLogo from "../../../assets/logos/landline-logo.png";
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
@@ -70,7 +70,8 @@ function DepositScreenInner({ account }: { account: Account }) {
 
 const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
   const landlineDomain = process.env.LANDLINE_DOMAIN;
-  return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+  const url = `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+  return url;
 };
 
 function LandlineList() {
@@ -101,8 +102,7 @@ function LandlineConnect() {
     <LandlineOptionRow
       cta={i18.landline.cta()}
       title={i18.landline.title()}
-      // TODO(andrew): Update with real landline logo
-      logo={IntroIconEverywhere}
+      logo={LandlineLogo}
       onClick={openLandline}
     />
   );
@@ -335,6 +335,7 @@ function LandlineOptionRow({
         ) : (
           <TextBody color={color.primary}>
             {i18.go()}
+            {"  "}
             <Octicons name="link-external" />
           </TextBody>
         )}

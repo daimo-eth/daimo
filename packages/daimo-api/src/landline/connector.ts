@@ -2,6 +2,10 @@ import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
 
+export interface LandlineSessionKey {
+  key: string;
+}
+
 export interface LandlineAccount {
   daimoAddress: Address;
   landlineAccountUuid: string;
@@ -23,7 +27,7 @@ export interface LandlineDepositResponse {
 
 export async function getLandlineSession(
   daimoAddress: Address
-): Promise<string> {
+): Promise<LandlineSessionKey> {
   // @ts-ignore
   const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate({
     daimoAddress,

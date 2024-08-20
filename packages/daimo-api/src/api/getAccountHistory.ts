@@ -21,6 +21,7 @@ import {
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
+import { FeatFlag } from "./featureFlag";
 import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
@@ -188,11 +189,9 @@ export async function getAccountHistory(
   let landlineSessionKey = "";
   let landlineAccounts: LandlineAccount[] = [];
 
-  const username = eAcc.name;
-  const isUserWhitelisted =
-    getEnvApi().LANDLINE_WHITELIST_USERNAMES.includes(username);
-  if (getEnvApi().LANDLINE_API_URL && isUserWhitelisted) {
-    landlineSessionKey = await getLandlineSession(address);
+  const showLandline = FeatFlag.landline(eAcc);
+  if (getEnvApi().LANDLINE_API_URL && showLandline) {
+    landlineSessionKey = (await getLandlineSession(address)).key;
     landlineAccounts = await getLandlineAccounts(address);
   }
 

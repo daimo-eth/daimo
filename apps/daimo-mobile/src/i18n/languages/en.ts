@@ -533,8 +533,10 @@ export const en = {
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
     warning: {
-      title: () => `Withdrawals are public`,
-      minimum: () => `Minimum withdrawal of 1 USDC`,
+      titleDeposit: () => `Deposits are public`,
+      titleWithdraw: () => `Withdrawals are public`,
+      minimumDeposit: () => `Minimum deposit of 1 USD`,
+      minimumWithdraw: () => `Minimum withdrawal of 1 USDC`,
     },
   },
   // ProfileScreen.tsx
