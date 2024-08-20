@@ -44,6 +44,7 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { getFullMemo } from "../../../logic/memo";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
@@ -368,17 +369,10 @@ function SendConfirm({
   if (isRequest) {
     button = <FulfillRequestButton {...{ account, requestStatus }} />;
   } else {
-    const memoParts = [] as string[];
-    if (money.currency.currency !== "USD") {
-      memoParts.push(`${money.currency.symbol}${money.localUnits}`);
-    }
-    if (memo != null) {
-      memoParts.push(memo);
-    }
     button = (
       <SendTransferButton
         account={account}
-        memo={memoParts.join(" · ")}
+        memo={getFullMemo(memo, money)}
         recipient={recipient}
         dollars={money.dollars}
         toCoin={toCoin}

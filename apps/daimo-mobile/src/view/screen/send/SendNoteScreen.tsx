@@ -20,6 +20,7 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
+import { getFullMemo } from "../../../logic/memo";
 import { zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcHook } from "../../../logic/trpc";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -173,7 +174,7 @@ export function SendNoteScreen({ route }: Props) {
         {amountChosen && memoChosen && (
           <NoteActionButton
             dollars={noteMoney.dollars}
-            memo={memo}
+            memo={getFullMemo(memo, noteMoney)}
             externalAction={externalAction}
           />
         )}
