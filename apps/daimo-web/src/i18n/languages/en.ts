@@ -26,6 +26,7 @@ export const en = {
     orVisit: () => "Or visit",
     onYourPhone: () => "on your phone",
     mac: () => "MAC",
+    OR: () => "OR",
     platforms: {
       ios: {
         title: () => "Download on App Store",
