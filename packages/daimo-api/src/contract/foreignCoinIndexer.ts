@@ -78,6 +78,8 @@ export class ForeignCoinIndexer extends Indexer {
           ])
           .where("chain_id", "=", chainConfig.chainL2.id)
           .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .orderBy("block_num", "asc")
+          .orderBy("sort_idx", "asc")
           .execute()
     );
 

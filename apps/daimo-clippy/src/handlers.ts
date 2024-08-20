@@ -31,8 +31,9 @@ export async function handleCommand(text: string): Promise<string> {
   if (args[2] === "help") return command.help;
 
   // Check all remaining args are kwargs.
-  if (args.slice(2).some((a) => !a.includes("=")))
+  if (args.slice(2).some((a) => !a.includes("="))) {
     return help(`Invalid args ${text}`, args[1]);
+  }
 
   try {
     return await command.fn(parseKwargs(args.slice(2)));
@@ -74,6 +75,10 @@ const commands: Record<string, Command> = {
     help: "Gets name, address and balance of a user. Args: [user = name or addr]",
     fn: getUser,
   },
+  "get-swaps": {
+    help: "Gets the swaps for a user. Args: [user = name or addr]",
+    fn: getSwaps,
+  },
   "get-swap-quote": {
     help: "Gets the best swap quote for fromToken to toToken. Args: [fromAmount=1.23, fromToken=DAI, toToken=USDC]",
     fn: getSwapQuote,
@@ -105,22 +110,8 @@ async function getUser(kwargs: Map<string, string>): Promise<string> {
   const user = kwargs.get("user");
   if (!user) throw new Error("Must specify user");
 
-  let address: Address;
-  let eAcc: EAccount;
-  if (isAddress(user)) {
-    address = getAddress(user);
-    eAcc = await rpc.getEthereumAccount.query({ addr: address });
-  } else {
-    const addr = await rpc.resolveName.query({ name: user });
-    if (addr == null) return `User '${user}' not found`;
-    eAcc = { addr, name: user };
-    address = addr;
-  }
-
-  if (eAcc.name == null) {
-    console.log(`Not a Daimo account: ${JSON.stringify(eAcc)}`);
-  }
-
+  const eAcc = await getDaimoUser(user);
+  const address = eAcc.addr;
   const hist = await rpc.getAccountHistory.query({ address, sinceBlockNum: 0 });
 
   return [
@@ -158,6 +149,30 @@ async function getTokenList(): Promise<TokenList> {
     );
   }
   return tokenListPromise;
+}
+
+async function getDaimoUser(name: string): Promise<EAccount> {
+  if (isAddress(name)) {
+    const addr = getAddress(name);
+    return await rpc.getEthereumAccount.query({ addr });
+  } else {
+    const addr = await rpc.resolveName.query({ name });
+    if (addr == null) throw new Error(`User '${name}' not found`);
+    return { addr, name };
+  }
+}
+
+// Get swaps for a user
+async function getSwaps(kwargs: Map<string, string>): Promise<string> {
+  const user = kwargs.get("user");
+  if (!user) throw new Error("Must specify user");
+  const eAcc = await getDaimoUser(user);
+  const hist = await rpc.getAccountHistory.query({
+    address: eAcc.addr,
+    sinceBlockNum: 0,
+  });
+
+  return `Successfully got swaps: ${JSON.stringify(hist.proposedSwaps)}`;
 }
 
 // Gets a swap quote from the onchain contract.
