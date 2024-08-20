@@ -179,6 +179,14 @@ export class DB {
 
           UNIQUE (address, push_key)
         );
+
+        --
+        -- Jumbo Indexer setup for tracking processed blocks
+        --
+        CREATE TABLE IF NOT EXISTS daimo_index (
+          chain_id BIGINT NOT NULL,
+          latest_block_num BIGINT NOT NULL, 
+        );
       `);
       success = true;
     } catch (e) {
