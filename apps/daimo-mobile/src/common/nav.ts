@@ -1,6 +1,5 @@
 import {
   DAv2Chain,
-  DaimoInviteCodeStatus,
   DaimoLink,
   DaimoLinkAccount,
   DaimoLinkInviteCode,
@@ -14,6 +13,7 @@ import {
   TransferClog,
   getEAccountStr,
   parseDaimoLink,
+  parseInviteCodeOrLink,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
@@ -34,7 +34,7 @@ import {
   getInitialDeepLink,
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
-import { fetchLinkStatus } from "../logic/linkStatus";
+import { fetchInviteLinkStatus, fetchLinkStatus } from "../logic/linkStatus";
 import { MoneyEntry } from "../logic/moneyEntry";
 import { Account } from "../storage/account";
 
@@ -215,43 +215,21 @@ export async function handleOnboardingDeepLink(
   str: string
 ) {
   console.log(`[INTRO] paste invite link: '${str}'`);
-
-  const link = parseDaimoLink(str);
-  if (link == null) {
-    console.log(`[INTRO] skipping unparseable link ${str}`);
+  const inviteLink = parseInviteCodeOrLink(str);
+  if (!inviteLink) {
+    console.log(`[INTRO] skipping unparseable invite link/code ${str}`);
     nav.navigate("CreateNew");
     return;
   }
-  if (link.type !== "invite" && link.type !== "tag") {
-    console.log(`[INTRO] skipping non-onboarding deep link ${str}`);
-    nav.navigate("CreateNew");
-    return;
-  }
+  console.log(`[INTRO] parsed invite link: ${JSON.stringify(inviteLink)}`);
 
-  const linkStatus = await fetchLinkStatus(link, dc);
-  if (linkStatus.link.type !== "invite") {
-    console.log(
-      `[INTRO] got link status of non-invite link ${str}. status: ${JSON.stringify(
-        linkStatus.link
-      )} is not an invite link`
-    );
-    nav.navigate("CreateNew");
-    return;
-  }
-
-  const inviteStatus = linkStatus as DaimoInviteCodeStatus;
+  const linkStatus = await fetchInviteLinkStatus(dc, inviteLink);
   const isAndroid = Platform.OS === "android";
-  if (inviteStatus.isValid) {
-    console.log(
-      `[INTRO] onboarding with invite code: ${inviteStatus.link.code}`
-    );
-    if (isAndroid)
-      nav.navigate("CreateSetupKey", { inviteLink: inviteStatus.link });
-    else nav.navigate("CreateChooseName", { inviteLink: inviteStatus.link });
+  if (linkStatus?.isValid) {
+    if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+    else nav.navigate("CreateChooseName", { inviteLink });
   } else {
-    console.log(
-      `[INTRO] invite code is no longer valid. code: ${inviteStatus.link.code}`
-    );
+    console.log(`[INTRO] invite ${str} is no longer valid.`);
     nav.navigate("CreateNew");
   }
 }
