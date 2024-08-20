@@ -118,11 +118,15 @@ export function HistoryListSwipe({
   // Full case: show a scrollable, lazy-loaded FlatList
   const stickyIndices = [] as number[];
   const rows: (transferClogRenderObject | HeaderObject)[] = [];
+  let language = i18NLocale.languageCode;
+
+  // if null, set to english
+  language ??= "en";
 
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
   for (const op of ops) {
-    const month = new Date(op.timestamp * 1000).toLocaleString("default", {
+    const month = new Date(op.timestamp * 1000).toLocaleString(language, {
       year: "numeric",
       month: "long",
     });
