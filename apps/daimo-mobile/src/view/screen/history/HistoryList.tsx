@@ -126,10 +126,15 @@ export function HistoryListSwipe({
   // Render a HeaderRow for each month, and make it sticky
   let lastMonth = "";
   for (const op of ops) {
-    const month = new Date(op.timestamp * 1000).toLocaleString(language, {
+    const preMonth = new Date(op.timestamp * 1000).toLocaleString(language, {
       year: "numeric",
       month: "long",
     });
+
+    // Make sure first letter to be uppercase
+    const firstLetter = preMonth.at(0)!.toUpperCase();
+    const month = firstLetter + preMonth.substring(1, preMonth.length);
+
     if (month !== lastMonth) {
       stickyIndices.push(rows.length);
       rows.push({
