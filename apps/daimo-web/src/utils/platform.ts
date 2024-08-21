@@ -13,30 +13,7 @@ export function detectPlatform(ua: string): PlatformType {
   return "other";
 }
 
-// necesary for some routes
-const downloadMetadata = {
-  ios: {
-    title: "Download on App Store",
-    url: appStoreLinks.ios,
-    image: "/badge-app-store.svg",
-  },
-  mac: {
-    title: "Download on Mac App Store",
-    url: appStoreLinks.ios,
-    image: "/badge-app-store.svg",
-  },
-  android: {
-    title: "Get it on Google Play",
-    url: appStoreLinks.android,
-    image: "/badge-play-store.svg",
-  },
-  other: {
-    title: "Download on App Store or Google Play",
-    url: getAbsoluteUrl(`/download/other`),
-  },
-};
-
-export function getDownloadMetadata(i18n: LangDef): typeof downloadMetadata {
+export function getDownloadMetadata(i18n: LangDef) {
   const i18 = i18n.download.platforms;
 
   return {

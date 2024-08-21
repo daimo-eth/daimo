@@ -51,7 +51,7 @@ export function DownloadLinkButtonMobileNav() {
     if (detectPlatform(navigator.userAgent) === "android") {
       setTitle(downloadMetadata["android"].title);
     }
-  }, []);
+  }, [downloadMetadata]);
 
   return (
     <Link

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { useI18N } from "../i18n/context";
-import { detectPlatform, downloadMetadata } from "../utils/platform";
+import { detectPlatform, getDownloadMetadata } from "../utils/platform";
 
 export function PrimaryOpenInAppButton({
   inviteDeepLink,
@@ -19,7 +19,7 @@ export function PrimaryOpenInAppButton({
 
   const onClick = async () => {
     const platform = detectPlatform(navigator.userAgent);
-    const { url } = downloadMetadata[platform];
+    const { url } = getDownloadMetadata(i18n)[platform];
 
     if (inviteDeepLink) {
       await navigator.clipboard.writeText(inviteDeepLink);
