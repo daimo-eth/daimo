@@ -26,6 +26,21 @@ export const en = {
     orVisit: () => "Or visit",
     onYourPhone: () => "on your phone",
     mac: () => "MAC",
+    OR: () => "OR",
+    platforms: {
+      ios: {
+        title: () => "Download on App Store",
+      },
+      mac: {
+        title: () => "Download on Mac App Store",
+      },
+      android: {
+        title: () => "Get it on Google Play",
+      },
+      other: {
+        title: () => "Download on App Store or Google Play",
+      },
+    },
   },
 
   link: {

@@ -27,6 +27,21 @@ export const es: LangDef = {
     orVisit: () => "O visita",
     onYourPhone: () => "en tu teléfono",
     mac: () => "MAC",
+    OR: () => "O",
+    platforms: {
+      ios: {
+        title: () => "Descárgalo en la App Store",
+      },
+      mac: {
+        title: () => "Descárgalo en la Mac App Store",
+      },
+      android: {
+        title: () => "Descárgalo en Google Play",
+      },
+      other: {
+        title: () => "Descárgalo en la App Store o Google Play",
+      },
+    },
   },
 
   link: {

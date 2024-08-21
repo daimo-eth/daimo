@@ -4,11 +4,12 @@ import React from "react";
 
 import { PrimaryButton } from "../../../components/buttons";
 import { useI18N } from "../../../i18n/context";
-import { downloadMetadata } from "../../../utils/platform";
+import { getDownloadMetadata } from "../../../utils/platform";
 
 export default function DownloadPage() {
   const i18n = useI18N();
   const i18 = i18n.download;
+  const downloadMetadata = getDownloadMetadata(i18n);
 
   return (
     <main className="max-w-2xl mx-auto px-4">
@@ -57,7 +58,7 @@ export default function DownloadPage() {
           </div>
           <div className="flex flex-row w-1/6 justify-center">
             <div className="h-[350px] flex flex-row items-center justify-center">
-              <p className="text-xl font-semibold text-grayMid">OR</p>
+              <p className="text-xl font-semibold text-grayMid">{i18.OR()}</p>
             </div>
           </div>
           <div className="flex flex-col w-5/12">
