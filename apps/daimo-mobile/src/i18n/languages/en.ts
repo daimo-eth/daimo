@@ -454,6 +454,15 @@ export const en = {
   contactDisplay: {
     requestedBy: () => `Requested by`,
   },
+  // LandlineDepositButton.tsx
+  landlineDepositButton: {
+    holdButton: () => "HOLD TO DEPOSIT",
+    depositStatus: {
+      creating: () => "Creating deposit",
+      success: () => "Deposit successful!",
+      failed: () => "Deposit failed",
+    },
+  },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
@@ -532,9 +541,15 @@ export const en = {
   },
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
+    title: {
+      deposit: () => `Deposit from`,
+      withdraw: () => `Withdraw to`,
+    },
     warning: {
-      title: () => `Withdrawals are public`,
-      minimum: () => `Minimum withdrawal of 1 USDC`,
+      titleDeposit: () => `Deposits are public`,
+      titleWithdraw: () => `Withdrawals are public`,
+      minimumDeposit: () => `Minimum deposit of 1 USD`,
+      minimumWithdraw: () => `Minimum withdrawal of 1 USDC`,
     },
   },
   // ProfileScreen.tsx

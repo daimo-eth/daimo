@@ -2,6 +2,7 @@ import {
   DaimoLinkInviteCode,
   DaimoLinkRequestV2,
   amountToDollars,
+  assert,
   assertNotNull,
   encodeRequestId,
   formatDaimoLink,
@@ -12,13 +13,14 @@ import {
   zEAccount,
   zHex,
   zInviteCodeStr,
+  zOffchainAction,
   zUserOpHex,
 } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
-import { getAddress, hexToNumber } from "viem";
+import { getAddress, hashMessage, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
@@ -63,6 +65,7 @@ import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
 import { getEnvApi } from "../env";
+import { landlineDeposit } from "../landline/connector";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
@@ -71,6 +74,7 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
+import { verifyERC1271Signature } from "../utils/verifySignature";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -682,6 +686,38 @@ export function createRouter(
       .mutation(async (opts) => {
         const { requestId, decliner } = opts.input;
         await reqIndexer.declineRequest(requestId, decliner);
+      }),
+
+    depositFromLandline: publicProcedure
+      .input(
+        z.object({
+          daimoAddress: zAddress,
+          actionJSON: z.string(),
+          signature: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const { daimoAddress, actionJSON, signature } = opts.input;
+
+        const isValidSignature = await verifyERC1271Signature(
+          vc,
+          daimoAddress,
+          hashMessage(actionJSON),
+          signature
+        );
+        assert(isValidSignature, "Invalid ERC-1271 signature");
+
+        const action = zOffchainAction.parse(JSON.parse(actionJSON));
+        assert(action.type === "landlineDeposit", "Invalid action type");
+
+        const response = await landlineDeposit(
+          daimoAddress,
+          action.landlineAccountUuid,
+          action.amount,
+          action.memo
+        );
+
+        return response;
       }),
 
     // @deprecated, remove by 2024 Q4

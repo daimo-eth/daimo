@@ -19,13 +19,17 @@ import {
 
 import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
-import IntroIconEverywhere from "../../../assets/onboarding/intro-icon-everywhere.png";
+import LandlineLogo from "../../../assets/logos/landline-logo.png";
 import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { i18NLocale, i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
-import { landlineAccountToContact } from "../../logic/daimoContacts";
+import {
+  DaimoContact,
+  getContactProfilePicture,
+  landlineAccountToContact,
+} from "../../logic/daimoContacts";
 import { useTime } from "../../logic/time";
 import { getRpcFunc } from "../../logic/trpc";
 import { Account } from "../../storage/account";
@@ -64,16 +68,10 @@ function DepositScreenInner({ account }: { account: Account }) {
   );
 }
 
-const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
-  const landlineDomain = process.env.LANDLINE_DOMAIN;
-  return `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
-};
-
 function LandlineList() {
   const account = useAccount();
   if (account == null) return null;
-  const showLandline =
-    !!account.landlineSessionKey && !!process.env.LANDLINE_DOMAIN;
+  const showLandline = !!account.landlineSessionURL;
   if (!showLandline) return null;
 
   const isLandlineConnected = account.landlineAccounts.length > 0;
@@ -86,10 +84,8 @@ function LandlineConnect() {
 
   const openLandline = useCallback(() => {
     if (!account) return;
-    Linking.openURL(
-      getLandlineURL(account.address, account.landlineSessionKey)
-    );
-  }, [account?.address, account?.landlineSessionKey]);
+    Linking.openURL(account.landlineSessionURL);
+  }, [account?.landlineSessionURL]);
 
   if (account == null) return null;
 
@@ -97,8 +93,7 @@ function LandlineConnect() {
     <LandlineOptionRow
       cta={i18.landline.cta()}
       title={i18.landline.title()}
-      // TODO(andrew): Update with real landline logo
-      logo={IntroIconEverywhere}
+      logo={LandlineLogo}
       onClick={openLandline}
     />
   );
@@ -108,8 +103,6 @@ function LandlineAccountList() {
   const account = useAccount();
   const nav = useNav();
   const nowS = useTime();
-  // TODO(andrew): Use bank logo
-  const defaultLogo = `${daimoDomainAddress}/assets/deposit/deposit-wallet.png`;
 
   if (account == null) return null;
 
@@ -127,17 +120,15 @@ function LandlineAccountList() {
     <>
       {landlineAccounts.map((acc, idx) => {
         const accCreatedAtS = new Date(acc.createdAt).getTime() / 1000;
+        const recipient = landlineAccountToContact(acc) as DaimoContact;
         return (
           <LandlineOptionRow
             key={`landline-account-${idx}`}
-            cta={`${acc.bankName} ****${acc.lastFour}`}
             title={i18.landline.optionRowTitle(
               timeAgo(accCreatedAtS, i18NLocale, nowS)
             )}
-            // The bank logo is fetched as a base64 string for a png
-            logo={
-              { uri: `data:image/png;base64,${acc.bankLogo}` } || defaultLogo
-            }
+            cta={`${acc.bankName} ****${acc.accountNumberLastFour}`}
+            logo={getContactProfilePicture(recipient) as ImageSourcePropType}
             isAccount
             onClick={() => goToSendTransfer(acc)}
           />
@@ -335,6 +326,7 @@ function LandlineOptionRow({
         ) : (
           <TextBody color={color.primary}>
             {i18.go()}
+            {"  "}
             <Octicons name="link-external" />
           </TextBody>
         )}

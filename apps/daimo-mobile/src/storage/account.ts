@@ -116,8 +116,8 @@ export type Account = {
   /** Payment links sent, but not yet claimed */
   sentPaymentLinks: DaimoLinkNoteV2[];
 
-  /** Session key used to authenticate to the Landline onramp/offramp app **/
-  landlineSessionKey: string;
+  /** Session URL used to authenticate to the Landline onramp/offramp app **/
+  landlineSessionURL: string;
   /** Bank accounts connected to the Landline onramp/offramp app **/
   landlineAccounts: LandlineAccount[];
 };
@@ -191,7 +191,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     exchangeRates: a.exchangeRates,
     sentPaymentLinks: a.sentPaymentLinks,
 
-    landlineSessionKey: a.landlineSessionKey,
+    landlineSessionURL: a.landlineSessionURL ?? "",
     landlineAccounts: a.landlineAccounts,
   };
 }
@@ -239,7 +239,7 @@ export function serializeAccount(account: Account | null): string {
     exchangeRates: account.exchangeRates,
     sentPaymentLinks: account.sentPaymentLinks,
 
-    landlineSessionKey: account.landlineSessionKey,
+    landlineSessionURL: account.landlineSessionURL,
     landlineAccounts: account.landlineAccounts,
   };
 
@@ -302,7 +302,7 @@ export function createEmptyAccount(
     exchangeRates: [],
     sentPaymentLinks: [],
 
-    landlineSessionKey: "",
+    landlineSessionURL: "",
     landlineAccounts: [],
   };
 }

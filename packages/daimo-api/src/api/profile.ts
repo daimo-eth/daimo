@@ -2,16 +2,16 @@ import {
   LinkedAccount,
   ProfileLink,
   ProfileLinkID,
-  assertEqual,
+  assert,
   daimoDomainAddress,
   zFarcasterLinkedAccount,
   zOffchainAction,
 } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
 import { Address, Hex, getAddress, hashMessage } from "viem";
 
 import { DB } from "../db/db";
 import { ViemClient } from "../network/viemClient";
+import { verifyERC1271Signature } from "../utils/verifySignature";
 
 export class ProfileCache {
   private links: ProfileLink[] = [];
@@ -32,19 +32,13 @@ export class ProfileCache {
 
   // API handler
   async updateProfileLinks(addr: Address, actionJSON: string, signature: Hex) {
-    // Verify ERC-1271-signed offchain action
-    const messageHash = hashMessage(actionJSON);
-    const verifySigResult = await this.vc.publicClient.readContract({
-      abi: daimoAccountABI,
-      address: addr,
-      functionName: "isValidSignature",
-      args: [messageHash, signature],
-    });
-    assertEqual(
-      verifySigResult,
-      "0x1626ba7e",
-      "ERC-1271 sig validation failed"
+    const isValidSignature = await verifyERC1271Signature(
+      this.vc,
+      addr,
+      hashMessage(actionJSON),
+      signature
     );
+    assert(isValidSignature, "Invalid ERC-1271 signature");
 
     // Validate and save to DB
     const action = zOffchainAction.parse(JSON.parse(actionJSON));

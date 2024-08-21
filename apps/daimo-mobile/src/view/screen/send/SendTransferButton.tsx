@@ -25,8 +25,8 @@ import {
 import { useExitToHome } from "../../../common/nav";
 import { i18n } from "../../../i18n";
 import {
-  BridgeBankAccountContact,
   EAccountContact,
+  LandlineBankAccountContact,
 } from "../../../logic/daimoContacts";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
@@ -47,7 +47,7 @@ export function SendTransferButton({
   route,
 }: {
   account: Account;
-  recipient: EAccountContact | BridgeBankAccountContact;
+  recipient: EAccountContact | LandlineBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
   toChain: DAv2Chain;

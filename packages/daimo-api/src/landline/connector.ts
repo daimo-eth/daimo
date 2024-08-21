@@ -1,22 +1,40 @@
 import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
+import { getEnvApi } from "../env";
+
+export interface LandlineSessionKey {
+  key: string;
+}
 
 export interface LandlineAccount {
   daimoAddress: Address;
+  landlineAccountUuid: string;
   bankName: string;
+  bankLogo: string | null;
   accountName: string;
-  lastFour: string;
+  accountNumberLastFour: string;
+  bankCurrency: string;
   liquidationAddress: Address;
-  chain: string;
-  destinationCurrency: string;
-  bankLogo?: string;
+  liquidationChain: string;
+  liquidationCurrency: string;
   createdAt: string;
+}
+
+export interface LandlineDepositResponse {
+  status: string;
+  error?: string;
+}
+
+export function getLandlineURL(daimoAddress: string, sessionKey: string) {
+  const landlineDomain = getEnvApi().LANDLINE_DOMAIN;
+  const url = `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+  return url;
 }
 
 export async function getLandlineSession(
   daimoAddress: Address
-): Promise<string> {
+): Promise<LandlineSessionKey> {
   // @ts-ignore
   const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate({
     daimoAddress,
@@ -33,4 +51,25 @@ export async function getLandlineAccounts(
       daimoAddress,
     });
   return landlineAccounts;
+}
+
+export async function landlineDeposit(
+  daimoAddress: Address,
+  landlineAccountUuid: string,
+  amount: string,
+  memo: string | undefined
+): Promise<LandlineDepositResponse> {
+  console.log("[LANDLINE] making deposit", {
+    daimoAddress,
+    landlineAccountUuid,
+    amount,
+    memo,
+  });
+  // @ts-ignore
+  return await landlineTrpc.deposit.mutate({
+    daimoAddress,
+    landlineAccountUuid,
+    amount,
+    memo,
+  });
 }

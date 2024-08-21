@@ -241,12 +241,14 @@ interface StoredV16ForeignCoin {
 
 export interface StoredV15LandlineAccount {
   daimoAddress: Address;
+  landlineAccountUuid: string;
   bankName: string;
+  bankLogo: string | null;
   accountName: string;
-  lastFour: string;
+  accountNumberLastFour: string;
+  bankCurrency: string;
   liquidationAddress: Address;
-  chain: string;
-  destinationCurrency: string;
-  bankLogo?: string;
+  liquidationChain: string;
+  liquidationCurrency: string;
   createdAt: string;
 }

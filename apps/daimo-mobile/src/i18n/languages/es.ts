@@ -456,6 +456,15 @@ export const es: LanguageDefinition = {
   contactDisplay: {
     requestedBy: () => `Solicitado por`,
   },
+  // LandlineDepositButton.tsx
+  landlineDepositButton: {
+    holdButton: () => "MANTENGA PARA DEPOSITAR",
+    depositStatus: {
+      creating: () => "Creando depósito",
+      success: () => "Depósito creado",
+      failed: () => "Depósito fallido",
+    },
+  },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
@@ -537,9 +546,15 @@ export const es: LanguageDefinition = {
   },
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
+    title: {
+      deposit: () => `Depositar desde`,
+      withdraw: () => `Retirar a`,
+    },
     warning: {
-      title: () => `Los retiros son públicos`,
-      minimum: () => `La cantidad mínima para retirar es 1 USDC`,
+      titleDeposit: () => `Los depósitos son públicos`,
+      titleWithdraw: () => `Los retiros son públicos`,
+      minimumDeposit: () => `La cantidad mínima para depositar es 1 USD`,
+      minimumWithdraw: () => `La cantidad mínima para retirar es 1 USDC`,
     },
   },
   // ProfileScreen.tsx
