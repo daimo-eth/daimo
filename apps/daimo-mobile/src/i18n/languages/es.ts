@@ -460,7 +460,7 @@ export const es: LanguageDefinition = {
   landlineDepositButton: {
     holdButton: () => "MANTENGA PARA DEPOSITAR",
     depositStatus: {
-      creating: () => "Creando depósito...",
+      creating: () => "Creando depósito",
       success: () => "Depósito creado",
       failed: () => "Depósito fallido",
     },
