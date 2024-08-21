@@ -454,6 +454,10 @@ export const en = {
   contactDisplay: {
     requestedBy: () => `Requested by`,
   },
+  // LandlineDepositButton.tsx
+  landlineDepositButton: {
+    holdButton: () => "HOLD TO DEPOSIT",
+  },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx
   deposit: {
@@ -532,6 +536,10 @@ export const en = {
   },
   // LandlineBankTransfer.tsx
   landlineBankTransfer: {
+    title: {
+      deposit: () => `Deposit from`,
+      withdraw: () => `Withdraw to`,
+    },
     warning: {
       titleDeposit: () => `Deposits are public`,
       titleWithdraw: () => `Withdrawals are public`,

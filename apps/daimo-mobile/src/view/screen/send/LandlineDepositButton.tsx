@@ -1,16 +1,18 @@
 import { assert } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
-import * as Haptics from "expo-haptics";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 
+import { useLandlineDeposit } from "../../../action/useLandlineDeposit";
 import { useExitToHome } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { LandlineBankAccountContact } from "../../../logic/daimoContacts";
-import { getRpcFunc } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { TextError } from "../../shared/text";
+import { color } from "../../shared/style";
+import { TextColor, TextError } from "../../shared/text";
+
+const i18 = i18n.landlineDepositButton;
 
 export function LandlineDepositButton({
   account,
@@ -26,14 +28,18 @@ export function LandlineDepositButton({
   minTransferAmount?: number;
 }) {
   console.log(`[SEND] rendering LandlineDepositButton ${dollars}`);
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
 
   // Get exact amount. No partial cents.
   assert(dollars >= 0);
   const maxDecimals = 2;
   const dollarsStr = dollars.toFixed(maxDecimals) as `${number}`;
+
+  const { status, message, exec } = useLandlineDeposit({
+    account,
+    recipient,
+    dollarsStr,
+    memo,
+  });
 
   const sendDisabledReason = (function () {
     if (account.lastBalance < Number(dollarsStr)) {
@@ -50,32 +56,14 @@ export function LandlineDepositButton({
   })();
   const disabled = sendDisabledReason != null || dollars === 0;
 
-  // TODO: authenticate this call
-  const handlePress = useCallback(async () => {
-    const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
-    const response = await rpcFunc.depositFromLandline.mutate({
-      daimoAddress: account.address,
-      landlineAccountUuid: recipient.landlineAccountUuid,
-      amount: dollarsStr,
-      memo,
-    });
-    if (response.status === "success") {
-      // Vibrate on success
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setStatus("success");
-    } else {
-      setStatus("error");
-    }
-  }, [account.address, dollarsStr, memo, recipient.landlineAccountUuid]);
-
   const button = (function () {
     switch (status) {
       case "idle":
       case "error":
         return (
           <LongPressBigButton
-            title="HOLD TO DEPOSIT"
-            onPress={disabled ? undefined : handlePress}
+            title={i18.holdButton()}
+            onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}
             duration={400}
@@ -90,12 +78,23 @@ export function LandlineDepositButton({
   })();
 
   const statusMessage = (function (): ReactNode {
-    if (sendDisabledReason === "Insufficient funds") {
-      return <TextError>Insufficient funds</TextError>;
-    } else if (sendDisabledReason != null) {
-      return <TextError>{sendDisabledReason}</TextError>;
-    } else {
-      return null;
+    switch (status) {
+      case "idle":
+        if (sendDisabledReason === "Insufficient funds") {
+          return <TextError>Insufficient funds</TextError>;
+        } else if (sendDisabledReason != null) {
+          return <TextError>{sendDisabledReason}</TextError>;
+        } else {
+          return null;
+        }
+      case "error":
+        return <TextError>{message}</TextError>;
+      case "loading":
+        return message;
+      case "success":
+        return <TextColor color={color.success}>{message}</TextColor>;
+      default:
+        return null;
     }
   })();
 

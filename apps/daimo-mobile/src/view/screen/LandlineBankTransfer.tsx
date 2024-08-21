@@ -296,8 +296,8 @@ function SendConfirm({
       <View style={{}}>
         <TextH3 style={ss.text.center}>
           {bankTransferOption === BankTransferOptions.Deposit
-            ? "Deposit to"
-            : "Withdraw from"}{" "}
+            ? i18.title.deposit()
+            : i18.title.withdraw()}{" "}
           {getContactName(recipient)}
         </TextH3>
       </View>
