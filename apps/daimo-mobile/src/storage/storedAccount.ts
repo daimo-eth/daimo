@@ -63,6 +63,6 @@ export interface StoredV16Account extends StoredModel {
   exchangeRates: StoredV15CurrencyExchangeRate[];
   sentPaymentLinks: StoredV15DaimoLinkNoteV2[];
 
-  landlineSessionKey: string;
+  landlineSessionURL: string;
   landlineAccounts: StoredV15LandlineAccount[];
 }

@@ -40,6 +40,7 @@ import {
   LandlineAccount,
   getLandlineAccounts,
   getLandlineSession,
+  getLandlineURL,
 } from "../landline/connector";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
@@ -73,7 +74,7 @@ export interface AccountHistoryResult {
 
   exchangeRates: CurrencyExchangeRate[];
 
-  landlineSessionKey: string;
+  landlineSessionURL: string;
   landlineAccounts: LandlineAccount[];
 }
 
@@ -186,12 +187,13 @@ export async function getAccountHistory(
   const exchangeRates = await getExchangeRates(extApiCache);
 
   // Get landline session key and accounts
-  let landlineSessionKey = "";
+  let landlineSessionURL = "";
   let landlineAccounts: LandlineAccount[] = [];
 
   const showLandline = FeatFlag.landline(eAcc);
   if (getEnvApi().LANDLINE_API_URL && showLandline) {
-    landlineSessionKey = (await getLandlineSession(address)).key;
+    const landlineSessionKey = (await getLandlineSession(address)).key;
+    landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
   }
 
@@ -219,7 +221,7 @@ export async function getAccountHistory(
     proposedSwaps: swaps,
     exchangeRates,
 
-    landlineSessionKey,
+    landlineSessionURL,
     landlineAccounts,
   };
 

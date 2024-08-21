@@ -1,6 +1,7 @@
 import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
+import { getEnvApi } from "../env";
 
 export interface LandlineSessionKey {
   key: string;
@@ -23,6 +24,12 @@ export interface LandlineAccount {
 export interface LandlineDepositResponse {
   status: string;
   error?: string;
+}
+
+export function getLandlineURL(daimoAddress: string, sessionKey: string) {
+  const landlineDomain = getEnvApi().LANDLINE_DOMAIN;
+  const url = `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
+  return url;
 }
 
 export async function getLandlineSession(

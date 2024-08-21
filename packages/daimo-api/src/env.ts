@@ -43,6 +43,7 @@ const zEnv = {
   // Monitoring: Sentry
   SENTRY_DSN: z.string().optional().default(""),
   // Landline integration
+  LANDLINE_DOMAIN: z.string().optional().default(""),
   LANDLINE_API_URL: z.string().optional().default(""),
   LANDLINE_API_KEY: z.string().optional().default(""),
   LANDLINE_WHITELIST_USERNAMES: z

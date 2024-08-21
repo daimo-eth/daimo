@@ -193,7 +193,9 @@
           "custody": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
           "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 27785Ad361898B526F37d87C4fAcFD757Ff0622F\nIssued At: 2024-05-28T18:40:44.066Z\nResources:\n- farcaster://fid/363",
           "signature": "0x44a46f585b913a92866829ff91ed1db07d29d9e1781522f917c1e01a47eae77d2f0c4302bf7020c6a7de0aa1b9e28495626a39549c61335e751b31cf63eee53e1c",
-          "verifications": ["0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"],
+          "verifications": [
+            "0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"
+          ],
           "username": "nibnalin.eth",
           "displayName": "✳️ nibnalin on daimo",
           "pfpUrl": "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ba1279-d655-464f-c851-ef7cbdb7d900/rectcrop3",
@@ -264,7 +266,9 @@
     }
   ],
   "suggestedActions": [],
-  "dismissedActionIDs": ["2023-12-join-tg-5"],
+  "dismissedActionIDs": [
+    "2023-12-join-tg-5"
+  ],
   "chainGasConstants": {
     "estimatedFee": 0,
     "paymasterAddress": "0xa9E1CCB08053e4f5daBb506718352389C1547462",
@@ -292,7 +296,10 @@
     }
   ],
   "inviteLinkStatus": {
-    "link": { "type": "invite", "code": "dc-aws" },
+    "link": {
+      "type": "invite",
+      "code": "dc-aws"
+    },
     "createdAt": 1715710022,
     "isValid": true,
     "usesLeft": 97,
@@ -337,7 +344,9 @@
           "custody": "0x75d610d712d14076D2760e481731A5C8f9e7212D",
           "message": "daimo.com wants you to sign in with your Ethereum account:\n0x75d610d712d14076D2760e481731A5C8f9e7212D\n\nFarcaster Connect\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 51abcB680aA05B72a968b5C9D25497ADBa991Ed9\nIssued At: 2024-02-27T05:53:06.668Z\nResources:\n- farcaster://fid/378",
           "signature": "0x6132a46627d780c30f5d8b79142aa10886af4a5d8a26b9773e4fe886af213b8a69e66f28a4369f55d73a5bc6b5c274ca889b5b0c3a850fcba27ffe2e0b41a0fa1c",
-          "verifications": ["0xbeec75a2025b34767cb60f0bea5c4c8be489ba6d"],
+          "verifications": [
+            "0xbeec75a2025b34767cb60f0bea5c4c8be489ba6d"
+          ],
           "username": "colin",
           "displayName": "Colin Armstrong",
           "pfpUrl": "https://lh3.googleusercontent.com/Bi85y1_3rVxhL-x8O4QSfSAL27fvgDNmjQ-RH05uuIIGI4i-LsS5TWBTStkYZgL2422kVvLoJ2O5FGWEijOGMQFTi_CvEdsotr6t5A",
@@ -559,7 +568,9 @@
             "custody": "0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e",
             "message": "daimo.com wants you to sign in with your Ethereum account:\n0x3aac11cA9B941eAeBC4ae56320D3fF5aBF8bb71e\n\nFarcaster Auth\n\nURI: https://daimo.com\nVersion: 1\nChain ID: 10\nNonce: 27785Ad361898B526F37d87C4fAcFD757Ff0622F\nIssued At: 2024-05-28T18:40:44.066Z\nResources:\n- farcaster://fid/363",
             "signature": "0x44a46f585b913a92866829ff91ed1db07d29d9e1781522f917c1e01a47eae77d2f0c4302bf7020c6a7de0aa1b9e28495626a39549c61335e751b31cf63eee53e1c",
-            "verifications": ["0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"],
+            "verifications": [
+              "0xf05b5f04b7a77ca549c0de06beaf257f40c66fdb"
+            ],
             "username": "nibnalin.eth",
             "displayName": "✳️ nibnalin on daimo",
             "pfpUrl": "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/99ba1279-d655-464f-c851-ef7cbdb7d900/rectcrop3",
@@ -707,6 +718,6 @@
       "seed": "REDACTED"
     }
   ],
-  "landlineSessionKey": "",
+  "landlineSessionURL": "",
   "landlineAccounts": []
 }

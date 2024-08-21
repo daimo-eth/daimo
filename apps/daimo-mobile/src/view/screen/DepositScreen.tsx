@@ -68,17 +68,10 @@ function DepositScreenInner({ account }: { account: Account }) {
   );
 }
 
-const getLandlineURL = (daimoAddress: string, sessionKey: string) => {
-  const landlineDomain = process.env.LANDLINE_DOMAIN;
-  const url = `${landlineDomain}?daimoAddress=${daimoAddress}&sessionKey=${sessionKey}`;
-  return url;
-};
-
 function LandlineList() {
   const account = useAccount();
   if (account == null) return null;
-  const showLandline =
-    !!account.landlineSessionKey && !!process.env.LANDLINE_DOMAIN;
+  const showLandline = !!account.landlineSessionURL;
   if (!showLandline) return null;
 
   const isLandlineConnected = account.landlineAccounts.length > 0;
@@ -91,10 +84,8 @@ function LandlineConnect() {
 
   const openLandline = useCallback(() => {
     if (!account) return;
-    Linking.openURL(
-      getLandlineURL(account.address, account.landlineSessionKey)
-    );
-  }, [account?.address, account?.landlineSessionKey]);
+    Linking.openURL(account.landlineSessionURL);
+  }, [account?.landlineSessionURL]);
 
   if (account == null) return null;
 

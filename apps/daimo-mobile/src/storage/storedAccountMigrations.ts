@@ -296,7 +296,7 @@ interface StoredV15Account extends StoredModel {
   exchangeRates: StoredV15CurrencyExchangeRate[];
   sentPaymentLinks: StoredV15DaimoLinkNoteV2[];
 
-  landlineSessionKey: string;
+  landlineSessionURL: string;
   landlineAccounts: StoredV15LandlineAccount[];
 }
 
@@ -343,7 +343,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 9) {
@@ -387,7 +387,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 10) {
@@ -431,7 +431,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 11) {
@@ -476,7 +476,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 12) {
@@ -520,7 +520,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 13) {
@@ -565,7 +565,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 14) {
@@ -610,7 +610,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: [],
       sentPaymentLinks: [],
 
-      landlineSessionKey: "",
+      landlineSessionURL: "",
       landlineAccounts: [],
     };
   } else if (model.storageVersion === 15) {
@@ -654,7 +654,7 @@ export function migrateOldAccount(model: StoredModel): Account {
       exchangeRates: a.exchangeRates || [],
       sentPaymentLinks: a.sentPaymentLinks || [],
 
-      landlineSessionKey: a.landlineSessionKey || "",
+      landlineSessionURL: a.landlineSessionURL || "",
       landlineAccounts: a.landlineAccounts || [],
     };
   } else {
