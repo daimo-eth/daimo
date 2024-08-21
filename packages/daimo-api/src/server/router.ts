@@ -696,7 +696,7 @@ export function createRouter(
         })
       )
       .mutation(async (opts) => {
-        // TODO: add authentication this endpoint
+        // TODO: add authentication to this endpoint
         const { daimoAddress, landlineAccountUuid, amount, memo } = opts.input;
 
         const response = await landlineDeposit(

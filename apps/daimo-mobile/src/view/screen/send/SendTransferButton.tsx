@@ -160,7 +160,7 @@ export function SendTransferButton({
       case "error":
         return (
           <LongPressBigButton
-            title="HOLD TO SEND"
+            title={i18.holdButton()}
             onPress={disabled ? undefined : exec}
             type="primary"
             disabled={disabled}

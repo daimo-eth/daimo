@@ -459,6 +459,11 @@ export const es: LanguageDefinition = {
   // LandlineDepositButton.tsx
   landlineDepositButton: {
     holdButton: () => "MANTENGA PARA DEPOSITAR",
+    depositStatus: {
+      creating: () => "Creando depósito...",
+      success: () => "Depósito creado",
+      failed: () => "Depósito fallido",
+    },
   },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx

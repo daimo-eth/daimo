@@ -457,6 +457,11 @@ export const en = {
   // LandlineDepositButton.tsx
   landlineDepositButton: {
     holdButton: () => "HOLD TO DEPOSIT",
+    depositStatus: {
+      creating: () => "Creating deposit",
+      success: () => "Deposit successful!",
+      failed: () => "Deposit failed",
+    },
   },
   // ------------ MISC SCREENS ------------
   // DepositScreen.tsx

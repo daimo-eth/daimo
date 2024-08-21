@@ -43,13 +43,13 @@ export function LandlineDepositButton({
 
   const sendDisabledReason = (function () {
     if (account.lastBalance < Number(dollarsStr)) {
-      return "Insufficient funds";
+      return i18n.sendTransferButton.disabledReason.insufficientFunds();
     } else if (account.address === recipient.addr) {
-      return "Can't send to yourself";
+      return i18n.sendTransferButton.disabledReason.self();
     } else if (Number(dollarsStr) === 0) {
-      return "Enter an amount";
+      return i18n.sendTransferButton.disabledReason.zero();
     } else if (Number(dollarsStr) < minTransferAmount) {
-      return `Minimum transfer amount is ${minTransferAmount} USDC`;
+      return i18n.sendTransferButton.disabledReason.min(minTransferAmount);
     } else {
       return undefined;
     }
