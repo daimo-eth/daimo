@@ -296,7 +296,7 @@ interface StoredV15Account extends StoredModel {
   exchangeRates: StoredV15CurrencyExchangeRate[];
   sentPaymentLinks: StoredV15DaimoLinkNoteV2[];
 
-  landlineSessionURL: string;
+  landlineSessionURL?: string;
   landlineAccounts: StoredV15LandlineAccount[];
 }
 

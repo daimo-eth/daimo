@@ -191,7 +191,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     exchangeRates: a.exchangeRates,
     sentPaymentLinks: a.sentPaymentLinks,
 
-    landlineSessionURL: a.landlineSessionURL,
+    landlineSessionURL: a.landlineSessionURL ?? "",
     landlineAccounts: a.landlineAccounts,
   };
 }
