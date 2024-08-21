@@ -189,37 +189,39 @@ export class DB {
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_transfers (
-          chain_id BIGINT NOT NULL,
-          block_num BIGINT NOT NULL,
+          chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
           block_hash BYTEA NOT NULL,
-          block_ts BIGINT NOT NULL,
-          tx_idx INT NOT NULL,
+          block_ts NUMERIC NOT NULL,
+          tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
-          sort_idx INT NOT NULL,
-          token BYTEA,
+
+          sort_idx NUMERIC NOT NULL,
+          token BYTEA NOT NULL, -- 0x0 for native token transfers
           f BYTEA NOT NULL,
           t BYTEA NOT NULL,
           amount NUMERIC NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_tx (
-          chain_id BIGINT NOT NULL,
-          block_num BIGINT NOT NULL,
+          chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
           block_hash BYTEA NOT NULL,
-          block_ts BIGINT NOT NULL,
+          block_ts NUMERIC NOT NULL,
           tx_idx INT NOT NULL,
           tx_hash BYTEA NOT NULL,
         )
 
         CREATE TABLE IF NOT EXISTS index.daimo_op (
-          chain_id BIGINT NOT NULL,
-          block_num BIGINT NOT NULL,
+          chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
           block_hash BYTEA NOT NULL,
-          block_ts BIGINT NOT NULL,
-          tx_idx INT NOT NULL,
+          block_ts NUMERIC NOT NULL,
+          tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
-          log_idx INT NOT NULL,
-          log_addr INT NOT NULL,
+          log_idx NUMERIC NOT NULL, 
+          log_addr BYTEA NOT NULL,
+          log_name TEXT NOT NULL,
 
           op_hash BYTEA NOT NULL,
           op_sender BYTEA NOT NULL,
@@ -231,15 +233,15 @@ export class DB {
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_request (
-          chain_id BIGINT NOT NULL,
-          block_num BIGINT NOT NULL,
+          chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
           block_hash BYTEA NOT NULL,
-          block_ts BIGINT NOT NULL,
-          tx_idx INT NOT NULL,
+          block_ts NUMERIC NOT NULL,
+          tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
-          log_idx INT NOT NULL, 
+          log_idx NUMERIC NOT NULL, 
           log_addr BYTEA NOT NULL,
-          event_name BYTEA NOT NULL
+          log_name TEXT NOT NULL,
 
           id NUMERIC NOT NULL,
           recipient BYTEA,
@@ -257,8 +259,9 @@ export class DB {
           block_ts NUMERIC NOT NULL,
           tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
+          log_idx NUMERIC NOT NULL, 
           log_addr BYTEA NOT NULL,
-          event_name BYTEA NOT NULL,
+          log_name TEXT NOT NULL,
 
           redeemer BYTEA,
           ephemeral_owner BYTEA NOT NULL,
@@ -267,29 +270,32 @@ export class DB {
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_name (
-          addr BYTEA NOT NULL,
-          block_hash BYTEA NOT NULL,
-          block_num NUMERIC NOT NULL,
-          block_ts NUMERIC NOT NULL,
           chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
+          block_hash BYTEA NOT NULL,
+          block_ts NUMERIC NOT NULL,
           tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
+          log_idx NUMERIC NOT NULL, 
           log_addr BYTEA NOT NULL,
-          log_idx NUMERIC NOT NULL,
-          name BYTEA NOT NULL
+          log_name TEXT NOT NULL,
+
+          addr BYTEA NOT NULL,
+          name BYTEA NOT NULL,
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_acct (
-          addr BYTEA NOT NULL,
-          block_hash BYTEA NOT NULL,
-          block_num NUMERIC NOT NULL,
-          block_ts NUMERIC NOT NULL,
           chain_id NUMERIC NOT NULL,
+          block_num NUMERIC NOT NULL,
+          block_hash BYTEA NOT NULL,
+          block_ts NUMERIC NOT NULL,
           tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
+          log_idx NUMERIC NOT NULL, 
           log_addr BYTEA NOT NULL,
-          log_idx NUMERIC NOT NULL,
+          log_name TEXT NOT NULL,
 
+          addr BYTEA NOT NULL,
           home_chain_id NUMERIC NOT NULL,
           home_coin BYTEA NOT NULL,
           swapper BYTEA NOT NULL,
@@ -300,17 +306,17 @@ export class DB {
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_acct_update (
-          addr BYTEA NOT NULL,
+          chain_id NUMERIC NOT NULL,
           block_num NUMERIC NOT NULL,
           block_hash BYTEA NOT NULL,
           block_ts NUMERIC NOT NULL,
-          chain_id NUMERIC NOT NULL,
           tx_idx NUMERIC NOT NULL,
           tx_hash BYTEA NOT NULL,
+          log_idx NUMERIC NOT NULL, 
           log_addr BYTEA NOT NULL,
-          log_idx NUMERIC NOT NULL,
-          event_name BYTEA NOT NULL,
+          log_name TEXT NOT NULL,
 
+          addr BYTEA NOT NULL,
           account BYTEA,
           key_slot SMALLINT,
           key BYTEA,
