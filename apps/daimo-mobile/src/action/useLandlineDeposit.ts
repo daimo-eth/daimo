@@ -1,4 +1,4 @@
-import { OffchainAction, now } from "@daimo/common";
+import { OffchainAction, now, zDollarStr } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
 import { useCallback } from "react";
@@ -38,7 +38,7 @@ export function useLandlineDeposit({
       type: "landlineDeposit",
       time: now(),
       landlineAccountUuid: recipient.landlineAccountUuid,
-      amount: dollarsStr,
+      amount: zDollarStr.parse(dollarsStr),
       memo: memo ?? "",
     };
     const actionJSON = JSON.stringify(action);
