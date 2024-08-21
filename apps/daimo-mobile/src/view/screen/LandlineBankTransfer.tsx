@@ -284,7 +284,7 @@ function SendConfirm({
         recipient={recipient}
         dollars={money.dollars}
         memo={memoParts.join(" · ")}
-        minTransferAmount={0.01}
+        minTransferAmount={1.0}
       />
     );
 

@@ -2,6 +2,7 @@ import {
   DaimoLinkInviteCode,
   DaimoLinkRequestV2,
   amountToDollars,
+  assert,
   assertNotNull,
   encodeRequestId,
   formatDaimoLink,
@@ -9,17 +10,17 @@ import {
   now,
   zAddress,
   zBigIntStr,
-  zDollarStr,
   zEAccount,
   zHex,
   zInviteCodeStr,
+  zOffchainAction,
   zUserOpHex,
 } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import * as Sentry from "@sentry/node";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
-import { getAddress, hexToNumber } from "viem";
+import { getAddress, hashMessage, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
@@ -73,6 +74,7 @@ import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { Watcher } from "../shovel/watcher";
+import { verifyERC1271Signature } from "../utils/verifySignature";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
@@ -690,20 +692,29 @@ export function createRouter(
       .input(
         z.object({
           daimoAddress: zAddress,
-          landlineAccountUuid: z.string(),
-          amount: zDollarStr,
-          memo: z.string().optional(),
+          actionJSON: z.string(),
+          signature: zHex,
         })
       )
       .mutation(async (opts) => {
-        // TODO: add authentication to this endpoint
-        const { daimoAddress, landlineAccountUuid, amount, memo } = opts.input;
+        const { daimoAddress, actionJSON, signature } = opts.input;
+
+        const isValidSignature = await verifyERC1271Signature(
+          vc,
+          daimoAddress,
+          hashMessage(actionJSON),
+          signature
+        );
+        assert(isValidSignature, "Invalid ERC-1271 signature");
+
+        const action = zOffchainAction.parse(JSON.parse(actionJSON));
+        assert(action.type === "landlineDeposit", "Invalid action type");
 
         const response = await landlineDeposit(
           daimoAddress,
-          landlineAccountUuid,
-          amount,
-          memo
+          action.landlineAccountUuid,
+          action.amount,
+          action.memo
         );
 
         return response;

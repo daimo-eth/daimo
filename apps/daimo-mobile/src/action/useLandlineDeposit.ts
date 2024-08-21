@@ -1,7 +1,10 @@
+import { OffchainAction, now } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
 import { useCallback } from "react";
+import { stringToBytes } from "viem";
 
+import { signAsync } from "./sign";
 import { ActHandle, useActStatus } from "../action/actStatus";
 import { i18n } from "../i18n";
 import { getRpcFunc } from "../logic/trpc";
@@ -25,16 +28,30 @@ export function useLandlineDeposit({
   const [as, setAS] = useActStatus("useLandlineDeposit");
 
   const exec = useCallback(async () => {
+    console.log(
+      `[LANDLINE] Creating deposit for ${account.name} to ${recipient.landlineAccountUuid} for $${dollarsStr}`
+    );
     setAS("loading", i18.depositStatus.creating());
+
+    // Make the user sign an offchain action to authenticate the deposit
+    const action: OffchainAction = {
+      type: "landlineDeposit",
+      time: now(),
+      landlineAccountUuid: recipient.landlineAccountUuid,
+      amount: dollarsStr,
+      memo: memo ?? "",
+    };
+    const actionJSON = JSON.stringify(action);
+    const messageBytes = stringToBytes(actionJSON);
+    const signature = await signAsync({ account, messageBytes });
+
     try {
-      // TODO: authenticate call to the deposit RPC function
       const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
       console.log("[LANDLINE] Making RPC call to depositFromLandline");
       const response = await rpcFunc.depositFromLandline.mutate({
         daimoAddress: account.address,
-        landlineAccountUuid: recipient.landlineAccountUuid,
-        amount: dollarsStr,
-        memo,
+        actionJSON,
+        signature,
       });
 
       if (response.status === "success") {

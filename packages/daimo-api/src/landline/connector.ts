@@ -59,6 +59,12 @@ export async function landlineDeposit(
   amount: string,
   memo: string | undefined
 ): Promise<LandlineDepositResponse> {
+  console.log("[LANDLINE] making deposit", {
+    daimoAddress,
+    landlineAccountUuid,
+    amount,
+    memo,
+  });
   // @ts-ignore
   return await landlineTrpc.deposit.mutate({
     daimoAddress,
