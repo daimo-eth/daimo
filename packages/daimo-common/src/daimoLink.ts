@@ -197,7 +197,15 @@ export function parseDaimoLink(link: string): DaimoLink | null {
   }
 }
 
-function parseDaimoLinkInner(link: string): DaimoLink | null {
+export function parseDaimoLinkType(link: string): string | null {
+  const parsedLink = parseDaimoLinkUrl(link);
+  if (parsedLink == null) return null;
+
+  const { parts } = parsedLink;
+  return parts[0];
+}
+
+function parseDaimoLinkUrl(link: string): { url: URL; parts: string[] } | null {
   const prefixes = [
     `${daimoLinkBase}/`,
     `${daimoLinkBaseV2}/`, // New shorter link prefix
@@ -211,6 +219,14 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
 
   const suffix = url.pathname.substring(1);
   const parts = suffix.split("/");
+
+  return { url, parts };
+}
+
+function parseDaimoLinkInner(link: string): DaimoLink | null {
+  const parsedLink = parseDaimoLinkUrl(link);
+  if (parsedLink == null) return null;
+  const { url, parts } = parsedLink;
 
   switch (parts[0]) {
     case "account": {

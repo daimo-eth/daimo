@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { debugJson } from "@daimo/common";
+import { debugJson, formatDaimoLink, parseDaimoLinkType } from "@daimo/common";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import LinkPage from "./LinkPage";
 import { getUrl, LinkPageProps } from "./LinkPageProps";
@@ -25,7 +26,13 @@ export async function generateMetadata(
   const i18n = getI18N(getReqLang());
   const url = getUrl(props);
   const desc = await loadLinkStatusDesc(url);
+
   if (desc == null) return defaultMeta(i18n);
+  if (parseDaimoLinkType(url) === "t" && desc?.linkStatus?.link) {
+    console.log(`[LINK] redirecting tag to ${desc.linkStatus.link}`);
+    redirect(formatDaimoLink(desc.linkStatus.link));
+  }
+
   return createMetadataForLinkStatus(desc);
 }
 
