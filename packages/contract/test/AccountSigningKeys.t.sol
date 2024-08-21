@@ -18,17 +18,9 @@ contract AccountSigningKeysTest is Test {
         factory = new DaimoAccountFactoryV2(entryPoint);
     }
 
-    event SigningKeyAdded(
-        IAccount indexed account,
-        uint8 keySlot,
-        bytes32[2] key
-    );
+    event SigningKeyAdded(uint8 keySlot, bytes32[2] key);
 
-    event SigningKeyRemoved(
-        IAccount indexed account,
-        uint8 keySlot,
-        bytes32[2] key
-    );
+    event SigningKeyRemoved(uint8 keySlot, bytes32[2] key);
 
     function testAddingAndRemovingKeys() public {
         // hardcoded from swift playground
@@ -65,7 +57,7 @@ contract AccountSigningKeysTest is Test {
         // add key2
         // use a high slot, higher than maxKeys, to ensure that works
         vm.expectEmit(true, true, true, false);
-        emit SigningKeyAdded(acc, 200, key2);
+        emit SigningKeyAdded(200, key2);
         acc.addSigningKey(200, key2);
         assertTrue(acc.numActiveKeys() == uint8(2));
 
@@ -76,7 +68,7 @@ contract AccountSigningKeysTest is Test {
 
         // remove key1
         vm.expectEmit(true, true, true, false);
-        emit SigningKeyRemoved(acc, 0, key1);
+        emit SigningKeyRemoved(0, key1);
         acc.removeSigningKey(0);
         assertTrue(acc.numActiveKeys() == uint8(1));
 

@@ -97,18 +97,10 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
     );
 
     /// Emitted on adding a new signing key (add device).
-    event SigningKeyAdded(
-        IAccount indexed account,
-        uint8 keySlot,
-        bytes32[2] key
-    );
+    event SigningKeyAdded(uint8 keySlot, bytes32[2] key);
 
     /// Emitted on removing a signing key (remove device).
-    event SigningKeyRemoved(
-        IAccount indexed account,
-        uint8 keySlot,
-        bytes32[2] key
-    );
+    event SigningKeyRemoved(uint8 keySlot, bytes32[2] key);
 
     /// Emitted on foreign chains (auto-swap as part of collect) and home chain
     /// (auto-swap to home coin).
@@ -373,7 +365,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         keys[slot] = key;
         numActiveKeys++;
 
-        emit SigningKeyAdded(this, slot, key);
+        emit SigningKeyAdded(slot, key);
     }
 
     /// Remove a signing key from the account.
@@ -388,7 +380,7 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         keys[slot] = [bytes32(0), bytes32(0)];
         numActiveKeys--;
 
-        emit SigningKeyRemoved(this, slot, currentKey);
+        emit SigningKeyRemoved(slot, currentKey);
     }
 
     /// Swap (if necessary) and bridge to home chain. Called on foreign chains.
