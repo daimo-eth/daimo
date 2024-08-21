@@ -158,7 +158,7 @@ export const es: LanguageDefinition = {
   // NotificationsScreen.tsx
   notifications: {
     screenHeader: () => `Notificaciones`,
-    noNotifications: () => `No notificaciones`,
+    noNotifications: () => `Ninguna notificación`,
   },
   // RequestNotificationRow.tsx
   requestNotification: {
