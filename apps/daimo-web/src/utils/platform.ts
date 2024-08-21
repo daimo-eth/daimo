@@ -14,7 +14,7 @@ export function detectPlatform(ua: string): PlatformType {
 }
 
 // necesary for some routes
-export const downloadMetadata = {
+const downloadMetadata = {
   ios: {
     title: "Download on App Store",
     url: appStoreLinks.ios,
