@@ -22,26 +22,6 @@ contract AccountSendUseropTest is Test {
         console.log("factory address:", address(factory));
     }
 
-    /***
-     * An event emitted after each successful request
-     * @param userOpHash - unique identifier for the request (hash its entire content, except signature).
-     * @param sender - the account that generates this request.
-     * @param paymaster - if non-null, the paymaster that pays for this request.
-     * @param nonce - the nonce value from the request.
-     * @param success - true if the sender transaction succeeded, false if reverted.
-     * @param actualGasCost - actual amount paid (by account or paymaster) for this userop.
-     * @param actualGasUsed - total gas used by this userop (including preVerification, creation, validation and execution).
-     */
-    event UserOperationEvent(
-        bytes32 indexed userOpHash,
-        address indexed sender,
-        address indexed paymaster,
-        uint256 nonce,
-        bool success,
-        uint256 actualGasCost,
-        uint256 actualGasUsed
-    );
-
     function testSimpleOp() public {
         // Generated from private key in packages/contract/script/createSignature.ts
         uint256[2] memory key1u = [
@@ -116,7 +96,7 @@ contract AccountSendUseropTest is Test {
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = op;
         vm.expectEmit(true, true, true, false);
-        emit UserOperationEvent(
+        emit IEntryPoint.UserOperationEvent(
             hash,
             address(acc),
             address(0),

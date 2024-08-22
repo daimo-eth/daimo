@@ -24,16 +24,6 @@ contract RequestTest is Test {
     address public constant ALICE = address(0x123);
     address public constant BOB = address(0x456);
 
-    event RequestCreated(
-        uint256 id,
-        address recipient,
-        address creator,
-        uint256 amount,
-        bytes metadata
-    );
-    event RequestCancelled(uint256 id, address canceller);
-    event RequestFulfilled(uint256 id, address fulfiller);
-
     function setUp() public {
         token = new TestDAI("TestDAI", "DAI");
         daimoRequest = new DaimoRequest(token);
@@ -42,7 +32,13 @@ contract RequestTest is Test {
     function _createRequestAlice(uint256 id, uint256 amount) internal {
         bytes memory metadata = abi.encodePacked("random");
         vm.expectEmit(false, false, false, false);
-        emit RequestCreated(id, ALICE, msg.sender, amount, metadata);
+        emit DaimoRequest.RequestCreated(
+            id,
+            ALICE,
+            msg.sender,
+            amount,
+            metadata
+        );
         daimoRequest.createRequest(id, ALICE, amount, metadata);
     }
 
@@ -50,7 +46,7 @@ contract RequestTest is Test {
         vm.startPrank(BOB, BOB);
         token.approve(address(daimoRequest), amount);
         vm.expectEmit(false, false, false, false);
-        emit RequestFulfilled(id, BOB);
+        emit DaimoRequest.RequestFulfilled(id, BOB);
         daimoRequest.fulfillRequest(id);
         vm.stopPrank();
     }
@@ -91,7 +87,7 @@ contract RequestTest is Test {
         // Alice cancels the request, emits event
         vm.expectEmit(false, false, false, false);
         vm.startPrank(ALICE, ALICE);
-        emit RequestCancelled(2, ALICE);
+        emit DaimoRequest.RequestCancelled(2, ALICE);
         daimoRequest.updateRequest(2, RequestStatus.Cancelled);
         vm.stopPrank();
 
@@ -117,7 +113,7 @@ contract RequestTest is Test {
         // Alice marks the request paid, emits event
         vm.expectEmit(false, false, false, false);
         vm.startPrank(ALICE, ALICE);
-        emit RequestFulfilled(2, ALICE);
+        emit DaimoRequest.RequestFulfilled(2, ALICE);
         daimoRequest.updateRequest(2, RequestStatus.Fulfilled);
         vm.stopPrank();
 
@@ -161,7 +157,7 @@ contract RequestTest is Test {
         // Alice marks the third request as paid independently, emits event
         vm.expectEmit(false, false, false, false);
         vm.startPrank(ALICE, ALICE);
-        emit RequestFulfilled(3, ALICE);
+        emit DaimoRequest.RequestFulfilled(3, ALICE);
         daimoRequest.updateRequest(3, RequestStatus.Fulfilled);
         vm.stopPrank();
 

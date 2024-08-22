@@ -575,12 +575,6 @@ export const daimoAccountV2ABI = [
     type: 'event',
     anonymous: false,
     inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
       { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
       {
         name: 'key',
@@ -595,12 +589,6 @@ export const daimoAccountV2ABI = [
     type: 'event',
     anonymous: false,
     inputs: [
-      {
-        name: 'account',
-        internalType: 'contract IAccount',
-        type: 'address',
-        indexed: true,
-      },
       { name: 'keySlot', internalType: 'uint8', type: 'uint8', indexed: false },
       {
         name: 'key',

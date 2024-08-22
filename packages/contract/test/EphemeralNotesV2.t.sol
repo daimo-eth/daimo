@@ -28,9 +28,6 @@ contract EphemeralNotesV2Test is Test {
     address constant ALICE = address(0x123);
     address constant BOB = address(0x456);
 
-    event NoteCreated(Note note);
-    event NoteRedeemed(Note note, address redeemer);
-
     function setUp() public {
         token = new TestDAI("TestDAI", "DAI");
         notes = new DaimoEphemeralNotesV2(token);
@@ -73,7 +70,7 @@ contract EphemeralNotesV2Test is Test {
             from: ALICE,
             amount: 500
         });
-        emit NoteCreated(expectedNote);
+        emit DaimoEphemeralNotesV2.NoteCreated(expectedNote);
         notes.createNote(ephemeralAddress, 500);
         vm.stopPrank();
     }
@@ -90,7 +87,7 @@ contract EphemeralNotesV2Test is Test {
             from: ALICE,
             amount: 500
         });
-        emit NoteRedeemed(expectedNote, BOB);
+        emit DaimoEphemeralNotesV2.NoteRedeemed(expectedNote, BOB);
         notes.claimNoteRecipient(
             ephemeralAddress,
             BOB,

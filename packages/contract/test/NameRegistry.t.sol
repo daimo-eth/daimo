@@ -42,8 +42,6 @@ contract NameRegistryTest is Test {
     DaimoNameRegistry public registry;
     address private immutable _initOwner = address(0x1010);
 
-    event Registered(bytes32 indexed name, address indexed addr);
-
     function setUp() public {
         implementation = address(new DaimoNameRegistry{salt: 0}());
         DaimoNameRegistryProxy proxy = new DaimoNameRegistryProxy{salt: 0}(
@@ -58,7 +56,7 @@ contract NameRegistryTest is Test {
         address addr = address(0x1234);
 
         vm.expectEmit(true, true, true, true);
-        emit Registered(name, addr);
+        emit DaimoNameRegistry.Registered(name, addr);
         registry.register(name, addr);
         assertEq(registry.resolveAddr(name), addr);
         assertEq(registry.resolveName(addr), name);
