@@ -4,7 +4,7 @@ import { base, baseSepolia, mainnet } from "viem/chains";
 import {
   daimoEphemeralNotesAddress,
   daimoEphemeralNotesV2Address,
-} from "./generated";
+} from "./codegen/contracts";
 
 export type DaimoChain = "base" | "baseSepolia";
 

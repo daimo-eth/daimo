@@ -6,6 +6,8 @@
   "main": "./dist/index.js",
   "scripts": {
     "codegen": "wagmi -v && wagmi generate",
+    "codegen:tokens": "tsx ./script/gen-tokens.ts",
+    "codegen:feeds": "tsx ./script/gen-feeds.ts",
     "build": "tsc"
   },
   "author": "",

@@ -40,8 +40,9 @@ contract DeployFlexSwapperScript is Script {
             IERC20[] memory hopTokens,
             IERC20[] memory outputTokens,
             IERC20[] memory stablecoins,
-            address uniswapRouter,
-            address oraclePoolFactory
+            address oraclePoolFactory,
+            IERC20[] memory feedTokens,
+            AggregatorV2V3Interface[] memory feedAggregators
         ) = _getAddrs(block.chainid);
 
         return
@@ -52,10 +53,12 @@ contract DeployFlexSwapperScript is Script {
                 hopTokens,
                 outputTokens,
                 stablecoins,
-                uniswapRouter,
                 oracleFeeTiers,
                 oraclePeriod,
-                oraclePoolFactory
+                oraclePoolFactory,
+                feedTokens,
+                feedAggregators,
+                maxFeedRoundAge
             );
     }
 

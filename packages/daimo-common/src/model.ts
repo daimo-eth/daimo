@@ -1,9 +1,9 @@
+import { ForeignToken } from "@daimo/contract/src/foreignToken";
 import { Address, Hex } from "viem";
 import { z } from "zod";
 
 import { DaimoLinkNote } from "./daimoLink";
 import { EAccount } from "./eAccount";
-import { ForeignToken } from "./foreignToken";
 
 export const zAddress = z
   .string()

@@ -5,39 +5,45 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
-import { ChainConfig, DaimoChain } from "@daimo/contract";
-import { zeroAddress } from "viem";
-
 import {
+  ChainConfig,
+  DaimoChain,
   ForeignToken,
+  TokenLogo,
   arbitrumSepoliaUSDC,
   arbitrumSepoliaWETH,
   arbitrumUSDC,
   arbitrumWETH,
   avalancheFujiUSDC,
+  avalancheFujiWAVAX,
   avalancheUSDC,
-  avalancheWETH,
+  avalancheWAVAX,
   baseSepoliaUSDC,
   baseSepoliaWETH,
   baseUSDC,
   baseWETH,
+  ethereumSepoliaUSDC,
+  ethereumSepoliaWETH,
+  ethereumUSDC,
+  ethereumWETH,
   optimismSepoliaUSDC,
   optimismSepoliaWETH,
   optimismUSDC,
   optimismWETH,
   polygonAmoyUSDC,
+  polygonAmoyWMATIC,
   polygonUSDC,
-  polygonWETH,
-  ethereumSepoliaUSDC,
-  ethereumUSDC,
-} from "./foreignToken";
+  polygonWMATIC,
+} from "@daimo/contract";
+import { zeroAddress } from "viem";
 
+/** An EVM chain supported by DaimoAccountV2. */
 export type AccountChain = {
   chainId: number;
   name: string;
   cctpDomain: number;
   bridgeCoin: ForeignToken;
-  nativeWETH?: ForeignToken; // TODO: nativeWETH or nativeToken?
+  wrappedNativeToken: ForeignToken;
   isTestnet?: boolean;
 };
 
@@ -46,6 +52,7 @@ export const ethereum: AccountChain = {
   name: "mainnet",
   cctpDomain: 0,
   bridgeCoin: ethereumUSDC,
+  wrappedNativeToken: ethereumWETH,
 };
 
 export const ethereumSepolia: AccountChain = {
@@ -53,6 +60,7 @@ export const ethereumSepolia: AccountChain = {
   name: "sepolia",
   cctpDomain: 0,
   bridgeCoin: ethereumSepoliaUSDC,
+  wrappedNativeToken: ethereumSepoliaWETH,
   isTestnet: true,
 };
 
@@ -61,7 +69,7 @@ export const base: AccountChain = {
   name: "base",
   cctpDomain: 6,
   bridgeCoin: baseUSDC,
-  nativeWETH: baseWETH,
+  wrappedNativeToken: baseWETH,
 };
 
 export const baseSepolia: AccountChain = {
@@ -69,7 +77,7 @@ export const baseSepolia: AccountChain = {
   name: "baseSepolia",
   cctpDomain: 6,
   bridgeCoin: baseSepoliaUSDC,
-  nativeWETH: baseSepoliaWETH,
+  wrappedNativeToken: baseSepoliaWETH,
   isTestnet: true,
 };
 
@@ -78,7 +86,7 @@ export const arbitrum: AccountChain = {
   name: "arbitrum",
   cctpDomain: 3,
   bridgeCoin: arbitrumUSDC,
-  nativeWETH: arbitrumWETH,
+  wrappedNativeToken: arbitrumWETH,
 };
 
 export const arbitrumSepolia: AccountChain = {
@@ -86,7 +94,7 @@ export const arbitrumSepolia: AccountChain = {
   name: "arbitrumSepolia",
   cctpDomain: 3,
   bridgeCoin: arbitrumSepoliaUSDC,
-  nativeWETH: arbitrumSepoliaWETH,
+  wrappedNativeToken: arbitrumSepoliaWETH,
   isTestnet: true,
 };
 
@@ -95,7 +103,7 @@ export const optimism: AccountChain = {
   name: "optimism",
   cctpDomain: 2,
   bridgeCoin: optimismUSDC,
-  nativeWETH: optimismWETH,
+  wrappedNativeToken: optimismWETH,
 };
 
 export const optimismSepolia: AccountChain = {
@@ -103,7 +111,7 @@ export const optimismSepolia: AccountChain = {
   name: "optimismSepolia",
   cctpDomain: 2,
   bridgeCoin: optimismSepoliaUSDC,
-  nativeWETH: optimismSepoliaWETH,
+  wrappedNativeToken: optimismSepoliaWETH,
   isTestnet: true,
 };
 
@@ -112,7 +120,7 @@ export const polygon: AccountChain = {
   name: "polygon",
   cctpDomain: 7,
   bridgeCoin: polygonUSDC,
-  nativeWETH: polygonWETH,
+  wrappedNativeToken: polygonWMATIC,
 };
 
 export const polygonAmoy: AccountChain = {
@@ -120,6 +128,7 @@ export const polygonAmoy: AccountChain = {
   name: "polygonAmoy",
   cctpDomain: 7,
   bridgeCoin: polygonAmoyUSDC,
+  wrappedNativeToken: polygonAmoyWMATIC,
   isTestnet: true,
 };
 
@@ -128,7 +137,7 @@ export const avalanche: AccountChain = {
   name: "avalanche",
   cctpDomain: 1,
   bridgeCoin: avalancheUSDC,
-  nativeWETH: avalancheWETH,
+  wrappedNativeToken: avalancheWAVAX,
 };
 
 export const avalancheFuji: AccountChain = {
@@ -136,42 +145,33 @@ export const avalancheFuji: AccountChain = {
   name: "avalancheFuji",
   cctpDomain: 1,
   bridgeCoin: avalancheFujiUSDC,
+  wrappedNativeToken: avalancheFujiWAVAX,
   isTestnet: true,
 };
 
+const chains = [
+  ethereum,
+  ethereumSepolia,
+  base,
+  baseSepolia,
+  arbitrum,
+  arbitrumSepolia,
+  optimism,
+  optimismSepolia,
+  polygon,
+  polygonAmoy,
+  avalanche,
+  avalancheFuji,
+];
+
 /** Given a chain ID, return the chain. */
 export function getAccountChain(chainId: number): AccountChain {
-  switch (chainId) {
-    case ethereum.chainId:
-      return ethereum;
-    case ethereumSepolia.chainId:
-      return ethereumSepolia;
-    case base.chainId:
-      return base;
-    case baseSepolia.chainId:
-      return baseSepolia;
-    case arbitrum.chainId:
-      return arbitrum;
-    case arbitrumSepolia.chainId:
-      return arbitrumSepolia;
-    case optimism.chainId:
-      return optimism;
-    case optimismSepolia.chainId:
-      return optimismSepolia;
-    case polygon.chainId:
-      return polygon;
-    case polygonAmoy.chainId:
-      return polygonAmoy;
-    case avalanche.chainId:
-      return avalanche;
-    case avalancheFuji.chainId:
-      return avalancheFuji;
-    default:
-      throw new Error(`Unknown chainId ${chainId}`);
-  }
+  const ret = chains.find((c) => c.chainId === chainId);
+  if (ret == null) throw new Error(`Unknown chainId ${chainId}`);
+  return ret;
 }
 
-/** Returnt the chain name for the given chainId. */
+/** Returns the chain name for the given chainId. */
 export function getChainName(chainId: number): string {
   return getAccountChain(chainId).name;
 }
@@ -188,8 +188,7 @@ export function getBridgeCoin(chainId: number): ForeignToken {
 
 /** Returns whether the chainId is a testnet. */
 export function isTestnetChain(chainId: number): boolean {
-  if (chainId === baseSepolia.chainId) return true;
-  return false;
+  return !!getAccountChain(chainId).isTestnet;
 }
 
 /** Returns chain id from DaimoChain */
@@ -237,8 +236,7 @@ export function getNativeETHForChain(
         decimals: 18,
         name: "Ethereum",
         symbol: "ETH",
-        logoURI:
-          "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+        logoURI: TokenLogo.ETH,
         chainId,
       };
     default:

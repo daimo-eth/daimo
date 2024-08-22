@@ -129,28 +129,6 @@ async function getUser(kwargs: Map<string, string>): Promise<string> {
   ].join("\n");
 }
 
-type TokenList = {
-  tokens: {
-    chainId: number;
-    address: Address;
-    name: string;
-    symbol: string;
-    decimals: number;
-    logoURI?: string;
-  }[];
-  version: any;
-};
-let tokenListPromise: Promise<TokenList> | null = null;
-
-async function getTokenList(): Promise<TokenList> {
-  if (tokenListPromise == null) {
-    tokenListPromise = fetch("https://tokens.coingecko.com/base/all.json").then(
-      (a) => a.json()
-    );
-  }
-  return tokenListPromise;
-}
-
 // Gets a swap quote from the onchain contract.
 async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
   const strN = kwargs.get("fromAmount");
@@ -159,7 +137,8 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
   if (!strN || !strFromToken || !strToToken)
     return "Must specify fromAmount, fromToken and toToken";
 
-  const { tokens } = await getTokenList();
+  const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
+  const tokens = await getTokensForChain(chainId);
   const fromToken = tokens.find(
     (t) => t.symbol === strFromToken || t.address === strFromToken.toLowerCase()
   );
@@ -171,7 +150,6 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
   if (toToken == null) return `Token '${strToToken}' not found`;
 
   const amountIn = dollarsToAmount(Number(strN), fromToken.decimals);
-  const chainId = chainConfig.daimoChain === "base" ? 8453 : 84532;
 
   const route = await rpc.getSwapQuote.query({
     amountIn: `${amountIn}`,

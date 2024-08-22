@@ -32,7 +32,7 @@ const deployments = Object.fromEntries(
 );
 
 export default defineConfig({
-  out: "src/generated.ts",
+  out: "src/codegen/contracts.ts",
   plugins: [
     foundry({
       project: "../contract",

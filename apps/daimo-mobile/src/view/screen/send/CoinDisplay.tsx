@@ -1,4 +1,10 @@
-import { ForeignToken, baseUSDC, supportedSendCoins } from "@daimo/common";
+import {
+  ForeignToken,
+  baseDAI,
+  baseUSDC,
+  baseUSDT,
+  baseWETH,
+} from "@daimo/common";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
@@ -6,6 +12,14 @@ import { useAccount } from "../../../logic/accountManager";
 import { DropdownPickButton } from "../../shared/DropdownPickButton";
 import { color, ss } from "../../shared/style";
 import { DaimoText } from "../../shared/text";
+
+// Any coin send (stablecoins + ETH).
+const supportedSendCoins = new Map<string, ForeignToken>([
+  [baseUSDC.token, baseUSDC],
+  [baseDAI.token, baseDAI],
+  [baseUSDT.token, baseUSDT],
+  [baseWETH.token, baseWETH],
+]);
 
 export function SendCoinButton({
   coin,

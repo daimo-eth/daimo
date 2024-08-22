@@ -22,5 +22,5 @@ export * from "./offchainAction";
 export * from "./env";
 export * from "./mnemonic/mnemonic";
 export * from "./debug";
-export * from "./foreignToken";
+export * from "@daimo/contract/src/foreignToken";
 export * from "./chain";

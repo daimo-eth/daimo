@@ -1,7 +1,25 @@
 import {
   daimoNameRegistryABI,
   daimoNameRegistryProxyAddress,
-} from "./generated";
+} from "./codegen/contracts";
+import codegenTokens from "./codegen/tokens.json";
+import { ForeignToken } from "./foreignToken";
+
+export * from "./foreignToken";
+
+// Export tokens for each supported chain
+const tokensByChainId = new Map<number, ForeignToken[]>();
+for (const token of codegenTokens as ForeignToken[]) {
+  const toks = tokensByChainId.get(token.chainId) || [];
+  tokensByChainId.set(token.chainId, toks);
+  toks.push(token);
+}
+
+export function getTokensForChain(chainId: number): ForeignToken[] {
+  const ret = tokensByChainId.get(chainId);
+  if (ret == null) throw new Error(`Unsupported chain ${chainId}`);
+  return ret;
+}
 
 export const zeroAddr = "0x0000000000000000000000000000000000000000";
 export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
@@ -26,7 +44,7 @@ export {
   entryPointABI,
   erc20ABI,
   swapbotLpABI,
-} from "./generated";
+} from "./codegen/contracts";
 
 // TODO: don't hard code these
 export const daimoFlexSwapperAddress =

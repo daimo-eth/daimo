@@ -4,11 +4,14 @@ import {
   ForeignToken,
   ProposedSwap,
   SwapQueryResult,
+  amountToDollars,
+  baseDAI,
   baseUSDC,
-  isAmountDust,
+  baseUSDbC,
+  baseWETH,
 } from "@daimo/common";
 import { Pool } from "pg";
-import { Address, Hex, bytesToHex, getAddress } from "viem";
+import { Address, Hex, bytesToHex, getAddress, zeroAddress } from "viem";
 
 import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
@@ -300,4 +303,21 @@ export class ForeignCoinIndexer extends Indexer {
       tokenReg: this.tokenReg,
     });
   }
+}
+
+const NON_DUST_TOKEN_WHITELIST = new Set([
+  zeroAddress, // native ETH
+  baseWETH.token,
+  baseUSDC.token,
+  baseUSDbC.token,
+  baseDAI.token,
+]);
+
+// It's dust if the amount is less than $1 and the token is not on the whitelist.
+function isAmountDust(usdcAmount: number | bigint, fromCoin: ForeignToken) {
+  if (NON_DUST_TOKEN_WHITELIST.has(fromCoin.token)) return false;
+
+  if (Number(amountToDollars(usdcAmount)) >= 1) return false;
+
+  return true;
 }
