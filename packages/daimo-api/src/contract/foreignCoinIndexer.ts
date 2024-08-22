@@ -48,6 +48,8 @@ export class ForeignCoinIndexer extends Indexer {
   private correspondingReceiveOfSend: Map<string, ForeignTokenTransfer> =
     new Map(); // inbound foreign token transfer corresponding the outbound swap send.
 
+  private inboxBalance: Map<string, bigint> = new Map(); // map `${addr}-${token}` to balance
+
   private listeners: ((transfers: ForeignTokenTransfer[]) => void)[] = [];
 
   constructor(
@@ -137,6 +139,18 @@ export class ForeignCoinIndexer extends Indexer {
     const addrName = this.nameReg.resolveDaimoNameForAddr(addr);
     if (addrName == null) return;
 
+    // Track balance
+    const key = `${addr}-${log.foreignToken.token}`;
+    const balance = this.inboxBalance.get(key) || 0n;
+    let newBal = balance + delta;
+    if (newBal < 0) {
+      console.warn(
+        `[FOREIGN-COIN] NEG BAL ${key} ${newBal} after ${debugJson(log)}`
+      );
+      newBal = 0n;
+    }
+    this.inboxBalance.set(key, newBal);
+
     if (delta < 0n) {
       // outbound transfer
       console.log(
@@ -152,12 +166,23 @@ export class ForeignCoinIndexer extends Indexer {
       );
 
       // Special case: we previously swapped ETH in bulk
-      // If there's an unmatched outbound, clear prior inbounds.
+      // If there's an unmatched outbound, replace all prior inbounds with a single one for the full balance.
       if (matchingPendingSwap == null) {
+        const balance = this.inboxBalance.get(key) || 0n;
         console.log(
-          `[FOREIGN-COIN] UNMATCHED outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+          `[FOREIGN-COIN] UNMATCHED outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, remaining balance ${balance}`
         );
-        this.pendingSwapsByAddr.set(addr, []);
+        const replacementSwap = [];
+        if (balance > 0n) {
+          replacementSwap.push({
+            ...log,
+            address: addr,
+            from: addr,
+            to: addr,
+            value: balance,
+          });
+        }
+        this.pendingSwapsByAddr.set(addr, replacementSwap);
         return;
       }
 

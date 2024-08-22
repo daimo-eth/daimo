@@ -76,8 +76,8 @@ export class TokenRegistry {
           foreignTokens.set(addr, {
             token: addr,
             decimals: token.decimals,
-            name: token.name,
-            symbol: token.symbol,
+            name: token.name.trim().replaceAll(/  */g, " "),
+            symbol: token.symbol.trim(),
             logoURI: largeLogo,
             chainId: token.chainId,
           });
