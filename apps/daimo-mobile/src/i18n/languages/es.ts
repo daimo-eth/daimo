@@ -249,7 +249,7 @@ export const es: LanguageDefinition = {
       `INICIAR SESIÓN CON ${keyType}`,
     type: {
       passkey: () => `LLAVE DE ACCESO`,
-      securityKey: () => `CLAVE DE SECURIDAD`,
+      securityKey: () => `CLAVE DE SEG.`,
     },
     fromSeed: {
       error: () => `La frase semilla no fue encontrada. Eliminada?`,
@@ -724,7 +724,7 @@ export const es: LanguageDefinition = {
     },
     addKey: {
       passkey: () => `LLAVE DE ACCESO`,
-      securityKey: () => `CLAVE DE SECURIDAD`,
+      securityKey: () => `CLAVE DE SEG.`,
       button: (slotType: string) => `RESPALDO CON ${slotType}`,
     },
     recommended: {

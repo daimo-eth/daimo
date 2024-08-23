@@ -20,7 +20,7 @@ export const es: LanguageDefinition = {
 
   // time.ts
   time: {
-    now: (long?: boolean) => `${long ? "justo ahora" : "ahora"}`,
+    now: () => `ahora`,
     minutesAgo: (minutes: number, long?: boolean) =>
       `${long ? "hace" : ""} ${minutes}m`,
     hoursAgo: (hours: number, long?: boolean) =>
