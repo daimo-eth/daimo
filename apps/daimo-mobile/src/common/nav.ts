@@ -217,21 +217,26 @@ export async function handleOnboardingDeepLink(
   str: string
 ) {
   console.log(`[INTRO] paste invite link: '${str}'`);
-  const inviteLink = parseInviteCodeOrLink(str);
-  if (!inviteLink) {
-    console.log(`[INTRO] skipping unparseable invite link/code ${str}`);
-    nav.navigate("CreateNew");
-    return;
-  }
-  console.log(`[INTRO] parsed invite link: ${JSON.stringify(inviteLink)}`);
+  try {
+    const inviteLink = parseInviteCodeOrLink(str);
+    if (!inviteLink) {
+      console.log(`[INTRO] skipping unparseable invite link/code ${str}`);
+      nav.navigate("CreateNew");
+      return;
+    }
+    console.log(`[INTRO] parsed invite link: ${JSON.stringify(inviteLink)}`);
 
-  const linkStatus = await fetchInviteLinkStatus(dc, inviteLink);
-  const isAndroid = Platform.OS === "android";
-  if (linkStatus?.isValid) {
-    if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
-    else nav.navigate("CreateChooseName", { inviteLink });
-  } else {
-    console.log(`[INTRO] invite ${str} is no longer valid.`);
+    const linkStatus = await fetchInviteLinkStatus(dc, inviteLink);
+    const isAndroid = Platform.OS === "android";
+    if (linkStatus?.isValid) {
+      if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+      else nav.navigate("CreateChooseName", { inviteLink });
+    } else {
+      console.log(`[INTRO] invite ${str} is no longer valid.`);
+      nav.navigate("CreateNew");
+    }
+  } catch (e) {
+    console.log(`[INTRO] error handling invite link: ${e}`);
     nav.navigate("CreateNew");
   }
 }
