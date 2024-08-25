@@ -5,9 +5,10 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
+import { zeroAddress } from "viem";
+
+import { ChainConfig, DaimoChain } from "./chainConfig";
 import {
-  ChainConfig,
-  DaimoChain,
   ForeignToken,
   TokenLogo,
   arbitrumSepoliaUSDC,
@@ -34,8 +35,7 @@ import {
   polygonAmoyWMATIC,
   polygonUSDC,
   polygonWMATIC,
-} from "@daimo/contract";
-import { zeroAddress } from "viem";
+} from "./foreignToken";
 
 /** An EVM chain supported by DaimoAccountV2. */
 export type AccountChain = {

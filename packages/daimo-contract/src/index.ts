@@ -44,6 +44,7 @@ export {
   entryPointABI,
   erc20ABI,
   swapbotLpABI,
+  aggregatorV2V3InterfaceABI,
 } from "./codegen/contracts";
 
 // TODO: don't hard code these
@@ -63,4 +64,5 @@ export * from "./legacyAccountV1";
 export * from "./external";
 
 // Supported chains and coins
+export * from "./chain";
 export * from "./chainConfig";

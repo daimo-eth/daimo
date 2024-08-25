@@ -23,4 +23,4 @@ export * from "./env";
 export * from "./mnemonic/mnemonic";
 export * from "./debug";
 export * from "@daimo/contract/src/foreignToken";
-export * from "./chain";
+export * from "@daimo/contract/src/chain";

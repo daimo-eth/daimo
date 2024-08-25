@@ -528,7 +528,7 @@ contract DaimoFlexSwapper is
         require(answer > 0, "DFS: CL price <= 0");
         require(updatedAt >= block.timestamp - maxFeedRoundAge, "DFS: CL old");
         require(answeredInRound >= roundId, "DFS: CL wrong round");
-        require(price < _MAX_UINT128, "DFS: CL price too large");
+        require(answer < int256(_MAX_UINT128), "DFS: CL price too large");
 
         price = uint256(answer);
         decimals = feed.decimals();

@@ -38,7 +38,12 @@ export default defineConfig({
       project: "../contract",
       deployments,
       forge: { build: false },
-      include: ["Daimo*.sol/*", "ERC*.sol/*", "EntryPoint.sol/*"],
+      include: [
+        "Daimo*.sol/*",
+        "ERC*.sol/*",
+        "EntryPoint.sol/*",
+        "AggregatorV2V3Interface.sol/*",
+      ],
     }),
   ],
 });
