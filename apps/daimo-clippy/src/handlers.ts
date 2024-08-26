@@ -126,6 +126,7 @@ async function getUser(kwargs: Map<string, string>): Promise<string> {
       .join(", ")}`,
     `# swaps     : ${hist.proposedSwaps.length}`,
     `# transfers : ${hist.transferLogs.length}`,
+    `# invitees : ${hist.invitees.length}`,
   ].join("\n");
 }
 
