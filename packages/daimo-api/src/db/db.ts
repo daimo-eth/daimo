@@ -185,11 +185,12 @@ export class DB {
         --
 
         CREATE TABLE IF NOT EXISTS index.blocks (
+          chain_id bigint NOT NULL,
           number bigint NOT NULL,
-          hash text NOT NULL,
-          parent_hash text NOT NULL,
+          hash bytea NOT NULL,
+          parent_hash bytea NOT NULL,
           timestamp bigint NOT NULL,
-          PRIMARY KEY (number, hash)
+          PRIMARY KEY (chain_id, number, hash)
         );
 
         CREATE TABLE IF NOT EXISTS index.daimo_index (
